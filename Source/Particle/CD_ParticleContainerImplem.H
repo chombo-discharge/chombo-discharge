@@ -976,7 +976,7 @@ ParticleContainer<P>::remap()
   // This is done in the following steps:
   //    1) Collect all particles from this rank onto thread-local variables
   //    2) Iterate through those particles and figure out where they end up up the AMR hierarchy (level, grid index, and ownership, i.e. the MPI rank)
-  //    3) Collect those particles onto a rank-only (no thread loacl) variable
+  //    3) Collect those particles onto a rank-only (no thread local) variable
   //    4) Assign particles _locally_, i.e. assign particles sent from this rank to this rank directly onto m_particles
   //    5) If using MPI, scatter the particles to the appropriate ranks.
   //    6) Assign particles locally from the particles that were scattered to this rank.

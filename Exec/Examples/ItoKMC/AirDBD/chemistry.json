@@ -64,7 +64,7 @@
 	"min E/N" : 1.0,                                           // Optional truncation of minimum E/N kept when resampling the table (occurs after scaling)
 	"max E/N" : 10000.0,                                       // Optional truncation of maximum E/N kept when resampling the table (happens after scaling)
 	"num points" : 1000,                                       // Optional number of points kept when resamplnig the table (defaults to 1000)
-	"spacing" : "exponential",                                 // Optional spcification of table representation. Defaults to 'exponential' but can also be 'linear'
+	"spacing" : "exponential",                                 // Optional specification of table representation. Defaults to 'exponential' but can also be 'linear'
 	"scale E/N" : 1.0,                                         // Optional scaling of the column containing E/N
 	"scale alpha/N" : 1.0                                      // Optional scaling
     },
@@ -79,7 +79,7 @@
 	"min E/N" : 1.0,                                          // Optional truncation of minimum E/N kept when resampling the table (occurs after scaling)
 	"max E/N" : 10000.0,                                      // Optional truncation of maximum E/N kept when resampling the table (happens after scaling)
 	"num points" : 1000,                                      // Optional number of points kept when resamplnig the table (defaults to 1000)
-	"spacing" : "exponential",                                // Optional spcification of table representation. Defaults to 'exponential' but can also be 'linear'
+	"spacing" : "exponential",                                // Optional specification of table representation. Defaults to 'exponential' but can also be 'linear'
 	"scale E/N" : 1.0,                                        // Optional scaling of the column containing E/N
 	"scale eta/N" : 1.0                                       // Optional scaling
     },
@@ -274,7 +274,7 @@
 	    "min E/N" : 1.0,					// Optional truncation of minimum E/N kept when resampling the table (occurs after scaling)
 	    "max E/N" : 1000.0,					// Optional truncation of maximum E/N kept when resampling the table (happens after scaling)
 	    "num points" : 1000,				// Optional number of points kept when resamplnig the table (defaults to 1000)
-	    "spacing" : "exponential",				// Optional spcification of table representation. Defaults to 'exponential' but can also be 'linear'
+	    "spacing" : "exponential",				// Optional specification of table representation. Defaults to 'exponential' but can also be 'linear'
 	    "scale E/N" : 1.0,					// Optional scaling of the column containing E/N
 	    "scale rate/N" : 1.0,				// Optional scaling of the column containing rate/E
 	    "include_dt_calc": true,				// Optional inclusion/exclusion in calculation of dt	    
@@ -293,7 +293,7 @@
 	    "min E/N" : 1.0,					// Optional truncation of minimum E/N kept when resampling the table (occurs after scaling)
 	    "max E/N" : 1000.0,					// Optional truncation of maximum E/N kept when resampling the table (happens after scaling)
 	    "num points" : 1000,				// Optional number of points kept when resamplnig the table (defaults to 1000)
-	    "spacing" : "exponential",				// Optional spcification of table representation. Defaults to 'exponential' but can also be 'linear'
+	    "spacing" : "exponential",				// Optional specification of table representation. Defaults to 'exponential' but can also be 'linear'
 	    "scale E/N" : 1.0,					// Optional scaling of the column containing E/N
 	    "scale rate/N" : 1.0,				// Optional scaling of the column containing rate/E
 	    "include_dt_calc": true,				// Optional inclusion/exclusion in calculation of dt	    
@@ -312,7 +312,7 @@
 	    "min E/N" : 1.0,				// Optional truncation of minimum E/N kept when resampling the table (occurs after scaling)
 	    "max E/N" : 1000.0,				// Optional truncation of maximum E/N kept when resampling the table (happens after scaling)
 	    "num points" : 1000,			// Optional number of points kept when resamplnig the table (defaults to 1000)
-	    "spacing" : "exponential",			// Optional spcification of table representation. Defaults to 'exponential' but can also be 'linear'
+	    "spacing" : "exponential",			// Optional specification of table representation. Defaults to 'exponential' but can also be 'linear'
 	    "scale E/N" : 1.0,				// Optional scaling of the column containing E/N
 	    "scale rate/N" : 1.0,			// Optional scaling of the column containing rate/E
 	    "include_dt_calc": false,			// Optional inclusion/exclusion in calculation of dt	    
@@ -331,7 +331,7 @@
 	    "min E/N" : 1.0,					// Optional truncation of minimum E/N kept when resampling the table (occurs after scaling)
 	    "max E/N" : 1000.0,					// Optional truncation of maximum E/N kept when resampling the table (happens after scaling)
 	    "num points" : 1000,				// Optional number of points kept when resamplnig the table (defaults to 1000)
-	    "spacing" : "exponential",				// Optional spcification of table representation. Defaults to 'exponential' but can also be 'linear'
+	    "spacing" : "exponential",				// Optional specification of table representation. Defaults to 'exponential' but can also be 'linear'
 	    "scale E/N" : 1.0,					// Optional scaling of the column containing E/N
 	    "scale rate/N" : 1.0,				// Optional scaling of the column containing rate/E
 	    "include_dt_calc": false,				// Optional inclusion/exclusion in calculation of dt	    	    

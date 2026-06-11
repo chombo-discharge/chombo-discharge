@@ -12,7 +12,7 @@
    @author Robert Marskar, Fanny Skirbekk
 */
 
-// Std includees
+// Std includes
 #include <iostream>
 #include <fstream>
 #include <memory>

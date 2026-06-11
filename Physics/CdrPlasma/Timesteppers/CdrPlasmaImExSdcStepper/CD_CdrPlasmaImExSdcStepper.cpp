@@ -1285,7 +1285,7 @@ CdrPlasmaImExSdcStepper::computeDt()
   else {
     Real new_dt;
 
-    // Step should not exceed m_newDt. Also, it shoul
+    // Step should not exceed m_newDt. Also, it should
     if (m_haveDtErr) {
       new_dt = m_newDt;
 

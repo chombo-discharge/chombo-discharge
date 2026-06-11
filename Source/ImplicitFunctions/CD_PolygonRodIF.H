@@ -20,7 +20,7 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Implicit function class describing a rod with a polygonal cross scetion. 
+  @brief Implicit function class describing a rod with a polygonal cross section. 
   @note  This is a 3D object only!
 */
 class PolygonRodIF : public BaseIF

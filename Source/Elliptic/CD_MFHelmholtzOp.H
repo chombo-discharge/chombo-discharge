@@ -512,7 +512,7 @@ public:
     @param[in]  a_phiCoar           Phi on coar level
     @param[in]  a_rhs               Right-hand side on this level
     @param[in]  a_homogeneousPhysBC Use homogeneous physical BCs or not
-    @param[in]  a_finerOp           Finer operatator
+    @param[in]  a_finerOp           Finer operator
   */
   void
   AMRResidual(LevelData<MFCellFAB>&             a_residual,
@@ -788,7 +788,7 @@ protected:
     @param[in]  a_phi               Phi on this level
     @param[in]  a_phiCoar           Phi on coar level
     @param[in]  a_homogeneousPhysBC Use homogeneous physical BCs or not
-    @param[in]  a_finerOp           Finer operatator
+    @param[in]  a_finerOp           Finer operator
     @details This involves ghost cell interpolation if there's a coarse level, and refluxing if there's a fine level.
     @param[in] a_Lphi Lphi
   */

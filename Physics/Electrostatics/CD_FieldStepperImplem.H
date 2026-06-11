@@ -244,7 +244,7 @@ namespace Physics {
         pout() << "FieldStepper<T>::advance" << endl;
       }
 
-      MayDay::Error("FieldStepper<T>::advance - callling this is an error. Please set Driver.max_steps = 0");
+      MayDay::Error("FieldStepper<T>::advance - calling this is an error. Please set Driver.max_steps = 0");
 
       return std::numeric_limits<Real>::max();
     }

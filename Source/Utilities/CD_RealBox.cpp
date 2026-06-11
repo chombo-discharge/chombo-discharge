@@ -81,7 +81,7 @@ RealBox::intersect(const RealBox& a_box) const
   const RealVect LO = a_box.getLo();
   const RealVect HI = a_box.getHi();
 
-  if (LO[0] < m_hi[0] && HI[0] > m_lo[0] //  Input x-edges either to left or righ
+  if (LO[0] < m_hi[0] && HI[0] > m_lo[0] //  Input x-edges either to left or right
       && LO[1] < m_hi[1] && HI[1] > m_lo[1]
 #if CH_SPACEDIM == 3
       && LO[2] < m_hi[2] && HI[2] > m_lo[2]

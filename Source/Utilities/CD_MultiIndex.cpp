@@ -163,7 +163,7 @@ MultiIndex::makeIndices()
   while (MultiIndex::norm(cur) <= m_order) {
     m_indices.emplace_back(cur);
 
-    // Now go to the next index in lexigraphical order
+    // Now go to the next index in lexicographical order
     if (norm(cur) < m_order) { // Can raise first index.
       cur[0]++;
     }

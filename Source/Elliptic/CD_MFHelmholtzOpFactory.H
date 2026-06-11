@@ -352,7 +352,7 @@ protected:
   ProblemDomain m_bottomDomain;
 
   /**
-    @brief Blocking factor for grid aggregration
+    @brief Blocking factor for grid aggregation
   */
   int m_mgBlockingFactor;
 

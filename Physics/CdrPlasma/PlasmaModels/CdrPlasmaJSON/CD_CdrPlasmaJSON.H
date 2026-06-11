@@ -1356,7 +1356,7 @@ namespace Physics {
       throwParserError(const std::string& a_error);
 
       /**
-         @brief Throw a parser wearning
+         @brief Throw a parser warning
         @param[in] a_warning Warning
       */
       static void

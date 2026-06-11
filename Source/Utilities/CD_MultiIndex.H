@@ -113,7 +113,7 @@ public:
   operator[](const int a_dir) const;
 
   /**
-    @brief Increment multi-index lexigraphically
+    @brief Increment multi-index lexicographically
   */
   void
   operator++();
@@ -176,7 +176,7 @@ protected:
   std::vector<IntVect> m_indices;
 
   /**
-    @brief Map for going from lexigraphically ordered multi-index to linear index
+    @brief Map for going from lexicographically ordered multi-index to linear index
   */
   std::map<IntVect, int> m_mapToLinearIndex;
 

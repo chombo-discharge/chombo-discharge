@@ -28,7 +28,7 @@
 
 /**
   @brief Signed distance function for a DCEL mesh. 
-  @details This class uses the EBGeometry submodule for creating signed distance functions from compelx geometries. The template parameters 
+  @details This class uses the EBGeometry submodule for creating signed distance functions from complex geometries. The template parameters 
   are the precision and the bounding volume type. To use this class, the user must first create the DCEL mesh and then create the BVH. 
 */
 template <class T, class BV, int K>

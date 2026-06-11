@@ -540,7 +540,7 @@ DischargeIO::readCheckParticlesFromHDF(HDF5Handle&        a_handle,
     }
   }
 
-  // free alllocated memory
+  // free allocated memory
   delete[] chunk;
   chunk = NULL;
 

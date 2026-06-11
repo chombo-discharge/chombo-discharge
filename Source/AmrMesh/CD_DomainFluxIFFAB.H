@@ -161,7 +161,7 @@ public:
     @param[in,out] Csrc Description
     Assumes the boxes are both in the same index space, and that
     box R is completely contained in both the src and destination
-    boxes.  This function equired by BoxLayoutData 
+    boxes.  This function required by BoxLayoutData 
   */
   void
   copy(const Box& Rfrom, const Interval& Cdest, const Box& Rto, const DomainFluxIFFAB& src, const Interval& Csrc);

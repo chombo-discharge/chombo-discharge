@@ -539,7 +539,7 @@ namespace Physics {
 #ifdef CH_USE_HDF5
       /**  
            @brief Write checkpoint data to file.
-           @details Overridden because semi-implicit scheme requires additioanl stuff in HDF5 files. 
+           @details Overridden because semi-implicit scheme requires additional stuff in HDF5 files. 
            @param[in,out] a_handle HDF5 fil
            @param[in]    a_lvl    Grid level
       */
@@ -550,7 +550,7 @@ namespace Physics {
 #ifdef CH_USE_HDF5
       /**
          @brief Read checkpoint data from file. Used for restarts. 
-         @details Overridden because semi-implicit scheme requires additioanl stuff in HDF5 files. 
+         @details Overridden because semi-implicit scheme requires additional stuff in HDF5 files. 
          @param[in,out] a_handle HDF5 file
          @param[in]    a_lvl    Grid level
       */

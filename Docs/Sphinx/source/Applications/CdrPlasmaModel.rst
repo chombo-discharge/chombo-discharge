@@ -410,7 +410,7 @@ A successful implementation of :ref:`Chap:CdrPlasmaPhysics` has the following:
   
 #. Implemented the core functionality that couple the solvers together. 
 
-``chombo-discharge`` automatically allocates the specified number of convection-diffusion-reaction and radiative transport solvers from the list of species the is intantiated.
+``chombo-discharge`` automatically allocates the specified number of convection-diffusion-reaction and radiative transport solvers from the list of species the is instantiated.
 For information on how to interface into the CDR solvers, see :ref:`Chap:CdrSpecies`.
 Likewise, see :ref:`Chap:RtSpecies` for how to interface into the RTE solvers.
 

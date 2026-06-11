@@ -76,7 +76,7 @@ protected:
   };
 
   /**
-    @brief If true, slopes are limited in the normal dircetion. 
+    @brief If true, slopes are limited in the normal direction. 
   */
   Limiter m_limiter;
 

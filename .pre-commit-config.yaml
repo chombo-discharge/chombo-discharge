@@ -15,7 +15,7 @@ repos:
       - id: reuse
 
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.1.0
+    rev: v2.2.6
     hooks:
       - id: codespell
         files: ^(Source|Docs|Exec|Physics|Geometries)/

@@ -479,7 +479,7 @@ namespace Physics {
       throwParserError(const std::string& a_error) const noexcept;
 
       /**
-	@brief Throw a parser wearning
+	@brief Throw a parser warning
         @param[in] a_warning Warning
       */
       virtual void

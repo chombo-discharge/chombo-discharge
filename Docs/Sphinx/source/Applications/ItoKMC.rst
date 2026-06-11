@@ -475,7 +475,7 @@ In principle, the molar fraction can have a positional dependency.
 .. warning::
 
    There's no internal renormalization of the molar fractions input by the user.
-   Internal inconsitencies will occur if the user supplies inputs molar fractions that sum to a number different than one.
+   Internal inconsistencies will occur if the user supplies inputs molar fractions that sum to a number different than one.
 
    Various checks will be enabled if the user compiles in debug-mode (see :ref:`Chap:Installation`), but these checks are not guaranteed to catch all cases.
 
@@ -694,7 +694,7 @@ An example JSON specification that uses a BOLSIG+ output file for parsing the da
 	  "min E/N" : 1.0,                                           // Optional truncation of minimum E/N kept when resampling the table (occurs after scaling)
 	  "max E/N" : 1000.0,                                        // Optional truncation of maximum E/N kept when resampling the table (happens after scaling)
 	  "num points" : 1000,                                       // Optional number of points kept when resamplnig the table (defaults to 1000)
-	  "spacing" : "exponential",                                 // Optional spcification of table representation. Defaults to 'exponential' but can also be 'linear'
+	  "spacing" : "exponential",                                 // Optional specification of table representation. Defaults to 'exponential' but can also be 'linear'
 	  "scale E/N" : 1.0,                                         // Optional scaling of the column containing E/N
 	  "scale alpha/N" : 1.0                                      // Optional scaling       
        }
@@ -2224,7 +2224,7 @@ For example, some care might be required when using the Townsend attachment coef
 
 .. warning::
 
-   The JSON interface *does not guard* against inconsitencies in the user-provided chemistry, and provision of inconsistent :math:`\eta/N` and attachment reaction rates are quite possible.
+   The JSON interface *does not guard* against inconsistencies in the user-provided chemistry, and provision of inconsistent :math:`\eta/N` and attachment reaction rates are quite possible.
 
 Tips and tricks
 ---------------
