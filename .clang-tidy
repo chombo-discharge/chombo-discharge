@@ -62,3 +62,4 @@ Checks: >
     '
 
 HeaderFilterRegex: '^(Source|Geometries|Physics|Exec)/'
+ExcludeHeaderFilterRegex: '.*/Submodules/.*'

@@ -87,13 +87,10 @@ jobs:
 
       - name: Run clang-tidy
         run: |
-          changed=$(git diff --name-only origin/${{ github.base_ref }} HEAD \
+          mapfile -t changed < <(git diff --name-only origin/${{ github.base_ref }} HEAD \
             | grep -E '^(Source|Exec|Physics|Geometries)/.*\.cpp$' || true)
-          if [ -z "$changed" ]; then
-            echo "No changed .cpp files - skipping"
-            exit 0
-          fi
-          echo "$changed" | xargs -P$(nproc) -n1 clang-tidy-cache clang-tidy -p $DISCHARGE_HOME
+          [ ${#changed[@]} -eq 0 ] && { echo "No changed .cpp files — skipping"; exit 0; }
+          printf '%s\n' "${changed[@]}" | xargs -n1 clang-tidy-cache clang-tidy -p .
 
   Cppcheck:
     if: github.event.pull_request.draft == false
