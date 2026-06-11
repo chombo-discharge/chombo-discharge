@@ -1038,8 +1038,10 @@ FieldSolver::parseDomainBc()
         }
       }
       else {
-        const std::string errorString = "FieldSolver::parseDomainBc -- unknown BC keyword '" + str + "' for " +
-                                        bcString;
+        std::string errorString = "FieldSolver::parseDomainBc -- unknown BC keyword '";
+        errorString += str;
+        errorString += "' for ";
+        errorString += bcString;
         MayDay::Error(errorString.c_str());
       }
 
