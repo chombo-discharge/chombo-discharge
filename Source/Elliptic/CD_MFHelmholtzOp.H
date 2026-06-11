@@ -580,8 +580,8 @@ public:
   */
   void
   AMROperatorNC(LevelData<MFCellFAB>&             a_Lphi,
+                const LevelData<MFCellFAB>&       a_phiFine,
                 const LevelData<MFCellFAB>&       a_phi,
-                const LevelData<MFCellFAB>&       a_phiCoar,
                 bool                              a_homogeneousPhysBC,
                 AMRLevelOp<LevelData<MFCellFAB>>* a_finerOp) override final;
 
