@@ -42,11 +42,19 @@ with open(out + '/compile_commands.json', 'w') as f:
 PYEOF
 }
 
+# Use clang-tidy-cache as a transparent wrapper when available.
+if command -v clang-tidy-cache &>/dev/null; then
+    CLANG_TIDY_BIN="clang-tidy-cache"
+else
+    CLANG_TIDY_BIN="clang-tidy"
+fi
+
 if [ $# -eq 0 ]; then
     WORK_DIR=$(mktemp -d)
     trap "rm -rf $WORK_DIR" EXIT
     make_clean_db "$WORK_DIR"
     run-clang-tidy -p "$WORK_DIR" -j"$JOBS" \
+        -clang-tidy-binary "$CLANG_TIDY_BIN" \
         'Source/|Exec/|Physics/|Geometries/'
     exit $?
 fi
@@ -59,4 +67,4 @@ fi
 WORK_DIR=$(mktemp -d)
 trap "rm -rf $WORK_DIR" EXIT
 make_clean_db "$WORK_DIR"
-echo "$cpp_files" | xargs -P"$JOBS" -n1 clang-tidy -p "$WORK_DIR"
+echo "$cpp_files" | xargs -P"$JOBS" -n1 "$CLANG_TIDY_BIN" -p "$WORK_DIR"

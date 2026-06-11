@@ -32,6 +32,18 @@ repos:
         files: ^(Source|Exec|Physics|Geometries)/.*\.cpp$
         pass_filenames: true
 
+      - id: cppcheck
+        name: Lightweight static analysis (cppcheck)
+        entry: cppcheck
+        language: system
+        files: ^(Source|Exec|Physics|Geometries)/.*\.cpp$
+        args:
+          - "--enable=warning,performance,portability"
+          - "--suppress=missingInclude"
+          - "--suppress=missingIncludeSystem"
+          - "--inline-suppr"
+          - "--error-exitcode=1"
+
       - id: format-input-files
         name: Format input files (.options and .inputs)
         entry: ./FormatInputFiles.sh

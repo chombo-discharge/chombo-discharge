@@ -67,6 +67,15 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install g++ gfortran csh libblas-dev liblapack-dev bear clang-tidy
+          pip install clang-tidy-cache
+
+      - name: Restore clang-tidy-cache
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/clang-tidy-cache
+          key: clang-tidy-cache-${{ hashFiles('.clang-tidy') }}-${{ github.sha }}
+          restore-keys: |
+            clang-tidy-cache-${{ hashFiles('.clang-tidy') }}-
 
       - name: Copy makefile
         run: |
@@ -84,7 +93,53 @@ jobs:
             echo "No changed .cpp files - skipping"
             exit 0
           fi
-          echo "$changed" | xargs -P$(nproc) -n1 clang-tidy -p $DISCHARGE_HOME
+          echo "$changed" | xargs -P$(nproc) -n1 clang-tidy-cache clang-tidy -p $DISCHARGE_HOME
+
+  Cppcheck:
+    if: github.event.pull_request.draft == false
+    needs: [Formatting, REUSE, Codespell]
+    name: Cppcheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      DISCHARGE_HOME: ${{github.workspace}}
+      CHOMBO_HOME: ${{github.workspace}}/Submodules/Chombo-3.3/lib
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: true
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install g++ gfortran csh libblas-dev liblapack-dev bear cppcheck
+
+      - name: Copy makefile
+        run: |
+          cp $DISCHARGE_HOME/Lib/Local/GitHub/Make.defs.linux-gcc $CHOMBO_HOME/mk/Make.defs.local
+
+      - name: Build with Bear
+        run: |
+          bear -- make -j2 DIM=2 discharge-lib
+
+      - name: Run cppcheck
+        run: |
+          changed=$(git diff --name-only origin/${{ github.base_ref }} HEAD \
+            | grep -E '^(Source|Exec|Physics|Geometries)/.*\.cpp$' || true)
+          if [ -z "$changed" ]; then
+            echo "No changed .cpp files — skipping"
+            exit 0
+          fi
+          mapfile -t filter_args < <(echo "$changed" | sed "s|^|--file-filter=$DISCHARGE_HOME/|")
+          cppcheck \
+            --project=compile_commands.json \
+            "${filter_args[@]}" \
+            --enable=warning,performance,portability \
+            --inline-suppr \
+            --suppress=missingIncludeSystem \
+            --error-exitcode=1
 
   Linux-GNU:
     if: github.event.pull_request.draft == false
@@ -368,7 +423,7 @@ jobs:
           rm -rf Sphinx/build
 
   CI-passed:
-    needs: [Linux-GNU, Linux-oneAPI, Build-documentation, REUSE, Codespell, Clang-tidy]
+    needs: [Linux-GNU, Linux-oneAPI, Build-documentation, REUSE, Codespell, Clang-tidy, Cppcheck]
     runs-on: ubuntu-latest
     steps:
       - name: Do nothing
