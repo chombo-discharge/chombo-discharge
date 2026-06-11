@@ -1456,15 +1456,15 @@ namespace Physics {
         @param[in] a_time Description
       */
       virtual void
-      integrateReactions(std::vector<Real>&               a_cdrDensities,
-                         std::vector<Real>&               a_photonProduction,
-                         const std::vector<RealVect>&     a_cdrGradients,
-                         const RealVect&                  a_E,
-                         const RealVect&                  a_pos,
-                         const Real                       a_dx,
-                         const Real                       a_dt,
-                         const Real                       a_time,
-                         const Real                       a_kappa) const;
+      integrateReactions(std::vector<Real>&           a_cdrDensities,
+                         std::vector<Real>&           a_photonProduction,
+                         const std::vector<RealVect>& a_cdrGradients,
+                         const RealVect&              a_E,
+                         const RealVect&              a_pos,
+                         const Real                   a_dx,
+                         const Real                   a_dt,
+                         const Real                   a_time,
+                         const Real                   a_kappa) const;
 
       /**
          @brief Routine for filling the source terms in the reactive problem.
@@ -1525,15 +1525,15 @@ namespace Physics {
          @param[in]    a_kappa            Volume fraction 
       */
       void
-      integrateReactionsImplicitEuler(std::vector<Real>&               a_cdrDensities,
-                                      std::vector<Real>&               a_photonProduction,
-                                      const std::vector<RealVect>&     a_cdrGradients,
-                                      const RealVect&                  a_E,
-                                      const RealVect&                  a_pos,
-                                      const Real                       a_dx,
-                                      const Real                       a_dt,
-                                      const Real                       a_time,
-                                      const Real                       a_kappa) const;
+      integrateReactionsImplicitEuler(std::vector<Real>&           a_cdrDensities,
+                                      std::vector<Real>&           a_photonProduction,
+                                      const std::vector<RealVect>& a_cdrGradients,
+                                      const RealVect&              a_E,
+                                      const RealVect&              a_pos,
+                                      const Real                   a_dx,
+                                      const Real                   a_dt,
+                                      const Real                   a_time,
+                                      const Real                   a_kappa) const;
 
       /**
          @brief Routine for integrating the reactive-only problem using a second order Runge-Kutta method. 

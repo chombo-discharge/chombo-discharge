@@ -432,7 +432,7 @@ CdrPlasmaImExSdcStepper::setupQmj(const int a_p)
     int              LDA  = nnodes;
     std::vector<int> IPIV(nnodes);
     int              LDB  = nnodes;
-    int INFO = 10;
+    int              INFO = 10;
     dgesv_(&N, &NRHS, V.data(), &LDA, IPIV.data(), cj.data(), &LDB, &INFO);
     if (INFO != 0) {
       MayDay::Abort("CdrPlasmaImExSdcStepper::setupQmj - could not compute weights");

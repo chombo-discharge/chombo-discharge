@@ -271,7 +271,10 @@ public:
     @param[in]    a_level             Grid level
   */
   virtual void
-  writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const std::string& a_outputRealm, int a_level) const noexcept;
+  writePlotData(LevelData<EBCellFAB>& a_output,
+                int&                  a_icomp,
+                const std::string&    a_outputRealm,
+                int                   a_level) const noexcept;
 
   /**
     @brief Write checkpoint data into HDF5 file. 

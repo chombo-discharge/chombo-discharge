@@ -110,15 +110,15 @@ Triangle::interpolate(const Vec3& a_point) const noexcept
       j = (d0 <= d1) ? 0 : 1;
     }
 
-    const std::array<Real, 3> dArr = {d0, d1, d2};
-    const Real                di   = dArr[i];
-    const Real                dj   = dArr[j];
+    const std::array<Real, 3> dArr  = {d0, d1, d2};
+    const Real                di    = dArr[i];
+    const Real                dj    = dArr[j];
     const Real                denom = di + dj;
 
     const Real wi = (denom > Real(0)) ? dj / denom : Real(0.5);
     const Real wj = (denom > Real(0)) ? di / denom : Real(0.5);
 
-    const std::array<Real, 3> mArr = {std::get<0>(m_metaData), std::get<1>(m_metaData), std::get<2>(m_metaData)};
+    const std::array<Real, 3> mArr  = {std::get<0>(m_metaData), std::get<1>(m_metaData), std::get<2>(m_metaData)};
     const Real                dataI = mArr[i];
     const Real                dataJ = mArr[j];
 

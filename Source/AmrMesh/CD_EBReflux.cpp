@@ -336,7 +336,6 @@ EBReflux::coarsenFluxesCF(LevelData<EBFluxFAB>&       a_coarFluxes,
 
     const Box& coarCellBox = dblCoar[din];
 
-
     for (int dir = 0; dir < SpaceDim; dir++) {
 
       EBFaceFAB&       coarFlux = a_coarFluxes[din][dir];

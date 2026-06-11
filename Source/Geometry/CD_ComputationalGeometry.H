@@ -144,10 +144,10 @@ public:
   virtual void
   buildGeometries(const ProblemDomain& a_finestDomain,
                   const RealVect&      a_probLo,
-                  const Real          a_finestDx,
-                  const int           a_nCellMax,
-                  const int           a_maxGhostEB,
-                  const int           a_maxCoarsen = -1);
+                  const Real           a_finestDx,
+                  const int            a_nCellMax,
+                  const int            a_maxGhostEB,
+                  const int            a_maxCoarsen = -1);
 
 protected:
   /**

@@ -505,7 +505,10 @@ public:
     @param[in] a_comp Comp
   */
   virtual void
-  writePlotData(LevelData<EBCellFAB>& a_output, int& a_comp, const std::string& a_outputRealm, int a_level) const noexcept;
+  writePlotData(LevelData<EBCellFAB>& a_output,
+                int&                  a_comp,
+                const std::string&    a_outputRealm,
+                int                   a_level) const noexcept;
 
   /**
     @brief Get number of particles in a specified particle container

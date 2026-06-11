@@ -397,9 +397,9 @@ DischargeIO::writeCheckParticlesToHDF(HDF5Handle&            a_handle,
 
   if (numLocalParticles > 0) {
     // allocate data buffer where to linearize the particle data
-    const size_t chunkSize  = objSize * _CHUNK;
-    char* const  chunkBase  = new char[chunkSize];
-    char*        chunk      = chunkBase;
+    const size_t chunkSize = objSize * _CHUNK;
+    char* const  chunkBase = new char[chunkSize];
+    char*        chunk     = chunkBase;
 
     if (chunkBase == nullptr) {
       MayDay::Error("WritePart::Error: new returned NULL pointer ");

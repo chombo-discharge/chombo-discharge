@@ -283,7 +283,7 @@ CellCentroidInterpolation::interpolate(LevelData<BaseIVFAB<Real>>& a_centroidDat
 
   const DisjointBoxLayout& dbl   = m_eblg.getDBL();
   const EBISLayout&        ebisl = m_eblg.getEBISL();
-  const DataIterator&      dit    = dbl.dataIterator();
+  const DataIterator&      dit   = dbl.dataIterator();
 
   const int nbox = dit.size();
 
@@ -310,7 +310,7 @@ CellCentroidInterpolation::interpolate(LevelData<EBCellFAB>&       a_centroidDat
 
   const DisjointBoxLayout& dbl   = m_eblg.getDBL();
   const EBISLayout&        ebisl = m_eblg.getEBISL();
-  const DataIterator&      dit    = dbl.dataIterator();
+  const DataIterator&      dit   = dbl.dataIterator();
 
   const int nbox = dit.size();
 
@@ -335,7 +335,7 @@ CellCentroidInterpolation::interpolate(LevelData<EBCellFAB>& a_data) const noexc
 
   const DisjointBoxLayout& dbl   = m_eblg.getDBL();
   const EBISLayout&        ebisl = m_eblg.getEBISL();
-  const DataIterator&      dit    = dbl.dataIterator();
+  const DataIterator&      dit   = dbl.dataIterator();
 
   const int nbox = dit.size();
 

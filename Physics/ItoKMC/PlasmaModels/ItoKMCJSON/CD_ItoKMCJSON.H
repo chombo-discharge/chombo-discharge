@@ -160,12 +160,12 @@ namespace Physics {
         @return Plot variables
       */
       virtual Vector<Real>
-      getPlotVariables(const RealVect&          a_E,
-                       const RealVect&          a_pos,
-                       const Vector<Real>&      a_phi,
-                       const Vector<RealVect>&  a_gradPhi,
-                       const Real               a_dx,
-                       const Real               a_kappa) const noexcept override;
+      getPlotVariables(const RealVect&         a_E,
+                       const RealVect&         a_pos,
+                       const Vector<Real>&     a_phi,
+                       const Vector<RealVect>& a_gradPhi,
+                       const Real              a_dx,
+                       const Real              a_kappa) const noexcept override;
 
       /**
 	@brief Get number of extra diagnostic plot variables.
@@ -199,7 +199,9 @@ namespace Physics {
 	@return Vector of non-negative diffusion coefficients for all plasma species.
       */
       virtual Vector<Real>
-      computeDiffusionCoefficients(const Real a_time, const RealVect& a_pos, const RealVect& a_E) const noexcept override;
+      computeDiffusionCoefficients(const Real      a_time,
+                                   const RealVect& a_pos,
+                                   const RealVect& a_E) const noexcept override;
 
       /**
 	@brief Resolve secondary emission at the EB.

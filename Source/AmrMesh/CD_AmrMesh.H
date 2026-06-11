@@ -1105,9 +1105,9 @@ public:
   template <class P>
   void
   transferIrregularParticles(
-    ParticleContainer<P>&         a_dstParticles,
-    ParticleContainer<P>&         a_srcParticles,
-    const phase::which_phase      a_phase,
+    ParticleContainer<P>&          a_dstParticles,
+    ParticleContainer<P>&          a_srcParticles,
+    const phase::which_phase       a_phase,
     const std::function<void(P&)>& a_transferModifier = [](P&) -> void {
       return;
     }) const noexcept;
@@ -1134,11 +1134,11 @@ public:
   template <class P>
   void
   intersectParticlesRaycastIF(
-    ParticleContainer<P>&         a_activeParticles,
-    ParticleContainer<P>&         a_ebParticles,
-    ParticleContainer<P>&         a_domainParticles,
-    const phase::which_phase      a_phase,
-    const Real                    a_tolerance,
+    ParticleContainer<P>&          a_activeParticles,
+    ParticleContainer<P>&          a_ebParticles,
+    ParticleContainer<P>&          a_domainParticles,
+    const phase::which_phase       a_phase,
+    const Real                     a_tolerance,
     const bool                     a_deleteParticles,
     const std::function<void(P&)>& a_nonDeletionModifier = [](P&) -> void {
       return;
@@ -1162,11 +1162,11 @@ public:
   template <class P>
   void
   intersectParticlesBisectIF(
-    ParticleContainer<P>&         a_activeParticles,
-    ParticleContainer<P>&         a_ebParticles,
-    ParticleContainer<P>&         a_domainParticles,
-    const phase::which_phase      a_phase,
-    const Real                    a_bisectionStep,
+    ParticleContainer<P>&          a_activeParticles,
+    ParticleContainer<P>&          a_ebParticles,
+    ParticleContainer<P>&          a_domainParticles,
+    const phase::which_phase       a_phase,
+    const Real                     a_bisectionStep,
     const bool                     a_deleteParticles,
     const std::function<void(P&)>& a_nonDeletionModifier = [](P&) -> void {
       return;

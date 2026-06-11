@@ -2540,10 +2540,10 @@ CdrPlasmaStepper::computeCdrDomainFluxes(Vector<LevelData<DomainFluxIFFAB>*>    
 }
 
 void
-CdrPlasmaStepper::computeExtrapolatedFluxes(Vector<EBAMRIVData*>&               a_extrapCdrFluxesEB,
-                                            const Vector<EBAMRCellData*>&      a_cdrDensities,
-                                            const Vector<EBAMRCellData*>&      a_cdrVelocities,
-                                            const phase::which_phase           a_phase)
+CdrPlasmaStepper::computeExtrapolatedFluxes(Vector<EBAMRIVData*>&         a_extrapCdrFluxesEB,
+                                            const Vector<EBAMRCellData*>& a_cdrDensities,
+                                            const Vector<EBAMRCellData*>& a_cdrVelocities,
+                                            const phase::which_phase      a_phase)
 {
   CH_TIME("CdrPlasmaStepper::computeExtrapolatedFluxes(Vector<EBAMRIVData*>, Vector<EBAMRCellData*>x2, phase)");
   if (m_verbosity > 5) {
@@ -2605,10 +2605,10 @@ CdrPlasmaStepper::computeExtrapolatedFluxes(Vector<EBAMRIVData*>&               
 }
 
 void
-CdrPlasmaStepper::computeExtrapolatedDomainFluxes(Vector<EBAMRIFData*>&               a_cdrDomainFluxes,
-                                                  const Vector<EBAMRCellData*>&      a_cdrDensities,
-                                                  const Vector<EBAMRCellData*>&      a_cdrVelocities,
-                                                  const phase::which_phase           a_phase)
+CdrPlasmaStepper::computeExtrapolatedDomainFluxes(Vector<EBAMRIFData*>&         a_cdrDomainFluxes,
+                                                  const Vector<EBAMRCellData*>& a_cdrDensities,
+                                                  const Vector<EBAMRCellData*>& a_cdrVelocities,
+                                                  const phase::which_phase      a_phase)
 {
   CH_TIME("CdrPlasmaStepper::computeExtrapolatedDomainFluxes(Vector<EBAMRIFData*>, Vector<EBAMRCellData>x2, phase)");
   if (m_verbosity > 5) {
@@ -2657,9 +2657,9 @@ CdrPlasmaStepper::computeExtrapolatedDomainFluxes(Vector<EBAMRIFData*>&         
 }
 
 void
-CdrPlasmaStepper::computeExtrapolatedVelocities(Vector<EBAMRIVData*>&               a_cdrVelocitiesEB,
-                                                const Vector<EBAMRCellData*>&      a_cdrVelocitiesCell,
-                                                const phase::which_phase           a_phase)
+CdrPlasmaStepper::computeExtrapolatedVelocities(Vector<EBAMRIVData*>&         a_cdrVelocitiesEB,
+                                                const Vector<EBAMRCellData*>& a_cdrVelocitiesCell,
+                                                const phase::which_phase      a_phase)
 {
   CH_TIME("CdrPlasmaStepper::computeExtrapolatedVelocities(Vector<EBAMRIVData*>, Vector<EBAMRCellData*>, phase)");
   if (m_verbosity > 5) {
