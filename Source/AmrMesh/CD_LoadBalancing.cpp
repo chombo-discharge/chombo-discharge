@@ -46,6 +46,7 @@ LoadBalancing::gatherBoxes(Vector<Box>& a_boxes)
   // Linearize a_boxes onto send_buffer
   for (int i = 0; i < a_boxes.size(); i++, send_buffer += send_size) {
     const Box& b = a_boxes[i];
+    // cppcheck-suppress unknownMacro
     D_TERM6(send_buffer[0] = b.smallEnd(0); send_buffer[1] = b.bigEnd(0);, send_buffer[2] = b.smallEnd(1);
             send_buffer[3] = b.bigEnd(1);
             , send_buffer[4] = b.smallEnd(2);

@@ -1322,9 +1322,6 @@ CdrPlasmaImExSdcStepper::computeDt()
 
   a_dt = dt;
 
-  // Copy the time code, it is needed for diagnostics
-  m_timeCode = m_timeCode;
-
 #if 0 // Debug
   if(procID() == 0){
     std::cout << "computeDt = " << a_dt << "\t m_newDt = " << m_newDt << endl; 
