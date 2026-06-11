@@ -84,7 +84,7 @@ PerlinSdf::reseed()
   }
 
   // Reseed the RNG
-  int seed = time(nullptr);
+  int seed = static_cast<int>(time(nullptr));
 
   // Haven't had trouble with this, but I'm putting this here for safety.
 #ifdef CH_MPI
@@ -122,27 +122,29 @@ PerlinSdf::noise(const double a_x, const double a_y, const double a_z) const
   const double w = fade(z);
 
   // Hash coordinates of 8 cube corners
-  const int A  = p[X] + Y;
-  const int AA = p[A] + Z;
-  const int AB = p[A + 1] + Z;
-  const int B  = p[X + 1] + Y;
-  const int BA = p[B] + Z;
-  const int BB = p[B + 1] + Z;
+  const int A  = static_cast<int>(p[X]) + Y;
+  const int AA = static_cast<int>(p[A]) + Z;
+  const int AB = static_cast<int>(p[A + 1]) + Z;
+  const int B  = static_cast<int>(p[X + 1]) + Y;
+  const int BA = static_cast<int>(p[B]) + Z;
+  const int BB = static_cast<int>(p[B + 1]) + Z;
 
   // Add blended results from 8 corners of cube
   return lerp(w,
               lerp(v,
                    lerp(u,
-                        grad(p[AA], x, y, z),      // AND ADD
-                        grad(p[BA], x - 1, y, z)), // BLENDED
+                        grad(static_cast<int>(p[AA]), x, y, z),      // AND ADD
+                        grad(static_cast<int>(p[BA]), x - 1, y, z)), // BLENDED
                    lerp(u,
-                        grad(p[AB], x, y - 1, z),       // RESULTS
-                        grad(p[BB], x - 1, y - 1, z))), // FROM  8
+                        grad(static_cast<int>(p[AB]), x, y - 1, z),       // RESULTS
+                        grad(static_cast<int>(p[BB]), x - 1, y - 1, z))), // FROM  8
               lerp(v,
                    lerp(u,
-                        grad(p[AA + 1], x, y, z - 1),      // CORNERS
-                        grad(p[BA + 1], x - 1, y, z - 1)), // OF CUBE
-                   lerp(u, grad(p[AB + 1], x, y - 1, z - 1), grad(p[BB + 1], x - 1, y - 1, z - 1))));
+                        grad(static_cast<int>(p[AA + 1]), x, y, z - 1),      // CORNERS
+                        grad(static_cast<int>(p[BA + 1]), x - 1, y, z - 1)), // OF CUBE
+                   lerp(u,
+                        grad(static_cast<int>(p[AB + 1]), x, y - 1, z - 1),
+                        grad(static_cast<int>(p[BB + 1]), x - 1, y - 1, z - 1))));
 }
 
 Real

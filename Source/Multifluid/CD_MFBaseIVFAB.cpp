@@ -22,7 +22,7 @@ MFBaseIVFAB::MFBaseIVFAB(const Vector<IntVectSet>& a_regions,
 {
   CH_TIME("MFBaseIVFAB::MFBaseIVFAB");
 
-  const int numPhases = a_regions.size();
+  const int numPhases = static_cast<int>(a_regions.size());
 
   CH_assert(a_phaseGraphs.size() == numPhases);
   CH_assert(a_nComp.size() == numPhases);
@@ -67,7 +67,7 @@ MFBaseIVFAB::getPhasePtr(int a_phase)
 int
 MFBaseIVFAB::numPhases()
 {
-  return m_phase.size();
+  return static_cast<int>(m_phase.size());
 }
 
 void
@@ -99,7 +99,7 @@ MFBaseIVFAB::preAllocatable()
 int
 MFBaseIVFAB::size(const Box& R, const Interval& comps) const
 {
-  int size = m_phase.size() * sizeof(int);
+  int size = static_cast<int>(m_phase.size() * sizeof(int));
   for (int i = 0; i < m_phase.size(); ++i) {
     size += m_phase[i]->size(R, comps);
   }
@@ -164,7 +164,7 @@ MFBaseIVFABFactory::create(const Box& a_box, int /*a_ignored_argument*/, const D
 {
   CH_TIME("MFBaseIVFABFactory::create");
 
-  const int numPhases = m_ebisl.size();
+  const int numPhases = static_cast<int>(m_ebisl.size());
 
   Vector<IntVectSet> ivs(numPhases);
   Vector<EBGraph>    ebgraph(numPhases);

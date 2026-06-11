@@ -1007,7 +1007,7 @@ McPhoto::drawPhotons(const Real a_source, const Real a_volume, const Real a_dt) 
     numPhysicalPhotons = Random::getPoisson<size_t>(mean);
   }
   else if (m_photoGenerationMethod == PhotonGeneration::Deterministic) {
-    numPhysicalPhotons = round(a_source * factor);
+    numPhysicalPhotons = static_cast<size_t>(round(a_source * factor));
   }
   else {
     MayDay::Error("mc::drawPhotons - unknown generation requested. Aborting...");
@@ -1055,7 +1055,7 @@ McPhoto::generateComputationalPhotons(ParticleContainer<Photon>& a_photons,
       auto regularKernel = [&](const IntVect& iv) -> void {
         if (ebisbox.isRegular(iv) && validCells(iv, 0)) {
 
-          const size_t num = numPhysPhotonsReg(iv, 0);
+          const size_t num = static_cast<size_t>(numPhysPhotonsReg(iv, 0));
 
           if (num > 0) {
             const std::vector<size_t> photonWeights = ParticleManagement::partitionParticleWeights(num,
@@ -1085,7 +1085,7 @@ McPhoto::generateComputationalPhotons(ParticleContainer<Photon>& a_photons,
 
         if (validCells(iv, 0)) {
 
-          const size_t num = numPhysPhotons(vof, 0);
+          const size_t num = static_cast<size_t>(numPhysPhotons(vof, 0));
 
           if (num > 0) {
             const std::vector<size_t> photonWeights = ParticleManagement::partitionParticleWeights(num,
@@ -1167,7 +1167,7 @@ McPhoto::dirtySamplePhotons(ParticleContainer<PointParticle>& a_photons,
       auto regularKernel = [&](const IntVect& iv) -> void {
         if (ebisbox.isRegular(iv) && validCells(iv, 0)) {
 
-          const size_t num = numPhysPhotonsReg(iv, 0);
+          const size_t num = static_cast<size_t>(numPhysPhotonsReg(iv, 0));
 
           if (num > 0) {
             const std::vector<size_t> photonWeights = ParticleManagement::partitionParticleWeights(num,
@@ -1198,7 +1198,7 @@ McPhoto::dirtySamplePhotons(ParticleContainer<PointParticle>& a_photons,
 
         if (validCells(iv, 0)) {
 
-          const size_t num = numPhysPhotons(vof, 0);
+          const size_t num = static_cast<size_t>(numPhysPhotons(vof, 0));
 
           if (num > 0) {
             const std::vector<size_t> photonWeights = ParticleManagement::partitionParticleWeights(num,
@@ -1764,7 +1764,7 @@ McPhoto::countPhotons(const AMRParticles<Photon>& a_photons) const
   int numPhotons = 0;
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    numPhotons += a_photons[lvl]->numValid();
+    numPhotons += static_cast<int>(a_photons[lvl]->numValid());
   }
 
   return numPhotons;

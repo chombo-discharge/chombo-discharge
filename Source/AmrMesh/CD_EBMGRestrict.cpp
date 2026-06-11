@@ -93,7 +93,7 @@ EBMGRestrict::define(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_eblgCoa
     for (vofit.reset(); vofit.ok(); ++vofit) {
       const VolIndex&        coarVoF     = vofit();
       const Vector<VolIndex> fineVoFs    = ebislCoFi.refine(coarVoF, m_refRat, din);
-      const int              numFineVoFs = fineVoFs.size();
+      const int              numFineVoFs = static_cast<int>(fineVoFs.size());
 
       VoFStencil& restrictSten = restrictStencils(coarVoF, 0);
 

@@ -787,8 +787,8 @@ EBGradient::getFiniteDifferenceStencil(VoFStencil&            a_stencil,
     const Vector<VolIndex> loVoFs = a_ebisBox.getVoFs(a_vof, dir, Side::Lo, 1);
     const Vector<VolIndex> hiVoFs = a_ebisBox.getVoFs(a_vof, dir, Side::Hi, 1);
 
-    const int numLoVoFs = loVoFs.size();
-    const int numHiVoFs = hiVoFs.size();
+    const int numLoVoFs = static_cast<int>(loVoFs.size());
+    const int numHiVoFs = static_cast<int>(hiVoFs.size());
 
     const bool useLoCell = (numLoVoFs > 0) && !(isLoCellIrregular && isLoCellCovered);
     const bool useHiCell = (numHiVoFs > 0) && !(isHiCellIrregular && isHiCellCovered);
@@ -893,7 +893,7 @@ EBGradient::getLeastSquaresStencil(VoFStencil&            a_stencilCoar,
 
   // See if we have enough cells to solve the system of equations. The "-1" is because we interpolate to the cell center/centroid, but we already know
   // phi at this point.
-  const int numEquations = fineVoFs.size() + coarVoFs.size();
+  const int numEquations = static_cast<int>(fineVoFs.size() + coarVoFs.size());
   const int numUnknowns  = LeastSquares::getTaylorExpansionSize(a_order) - 1;
 
   if (numEquations > numUnknowns) {
@@ -945,8 +945,8 @@ EBGradient::getLeastSquaresStencil(VoFStencil&            a_stencilCoar,
     std::sort(fineVofsTrimmedSize.begin(), fineVofsTrimmedSize.end(), comparatorFine);
     std::sort(coarVofsTrimmedSize.begin(), coarVofsTrimmedSize.end(), comparatorCoar);
 
-    const int curFineSize = fineVofsTrimmedSize.size();
-    const int curCoarSize = coarVofsTrimmedSize.size();
+    const int curFineSize = static_cast<int>(fineVofsTrimmedSize.size());
+    const int curCoarSize = static_cast<int>(coarVofsTrimmedSize.size());
 
     fineVofsTrimmedSize.resize(std::min(2 * numUnknowns, curFineSize));
     coarVofsTrimmedSize.resize(std::min(2 * numUnknowns, curCoarSize));

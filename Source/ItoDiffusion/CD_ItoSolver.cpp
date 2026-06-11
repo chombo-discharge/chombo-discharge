@@ -644,7 +644,7 @@ ItoSolver::generateParticlesFromDensity(ParticleContainer<ItoParticle>&         
           for (const auto& w : particleWeights) {
             const RealVect x = Random::randomPosition(lo, hi);
 
-            particles.add(ItoParticle(w, x));
+            particles.add(ItoParticle(static_cast<double>(w), x));
           }
         }
       };
@@ -671,7 +671,7 @@ ItoSolver::generateParticlesFromDensity(ParticleContainer<ItoParticle>&         
           for (const auto& w : particleWeights) {
             const RealVect x = Random::randomPosition(cellPos, lo, hi, bndryCentroid, normal, dx, kappa);
 
-            particles.add(ItoParticle(w, x));
+            particles.add(ItoParticle(static_cast<double>(w), x));
           }
         }
       };
@@ -707,7 +707,7 @@ ItoSolver::computeLoads(Vector<long int>& a_loads, const DisjointBoxLayout& a_db
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
-    a_loads[din.intCode()] = particles[a_level][din].numItems();
+    a_loads[din.intCode()] = static_cast<long>(particles[a_level][din].numItems());
   }
 
   ParallelOps::sum(a_loads);
@@ -1303,7 +1303,7 @@ ItoSolver::drawNewParticles(const LevelData<EBCellFAB>& a_particlesPerCell, cons
         for (const auto& w : weights) {
           const RealVect x = Random::randomPosition(pos, minLo, minHi, centr, norma, dx, kappa);
 
-          myParticles.add(ItoParticle(1.0 * w, x));
+          myParticles.add(ItoParticle(1.0 * static_cast<double>(w), x));
         }
       }
     };
@@ -1339,7 +1339,7 @@ ItoSolver::drawNewParticles(const LevelData<EBCellFAB>& a_particlesPerCell, cons
         for (const auto& w : weights) {
           const RealVect x = Random::randomPosition(pos, minLo, minHi, cent, norm, dx, kappa);
 
-          myParticles.add(ItoParticle(1.0 * w, x));
+          myParticles.add(ItoParticle(1.0 * static_cast<double>(w), x));
         }
       }
     };
@@ -3371,7 +3371,7 @@ ItoSolver::reinitializeParticles(List<ItoParticle>& a_particles,
   }
 
   if (numPhysicalParticles > 0) {
-    averageEnergy *= 1.0 / numPhysicalParticles;
+    averageEnergy *= 1.0 / static_cast<double>(numPhysicalParticles);
   }
 
   const std::vector<long long> weights = ParticleManagement::partitionParticleWeights(numPhysicalParticles,
@@ -3389,7 +3389,8 @@ ItoSolver::reinitializeParticles(List<ItoParticle>& a_particles,
 
   a_particles.clear();
 
-  for (double w : weights) {
+  for (const auto& wt : weights) {
+    const double   w = static_cast<double>(wt);
     const RealVect x = Random::randomPosition(cellPos, validLo, validHi, bndryCentroid, bndryNormal, dx, kappa);
 
     a_particles.add(ItoParticle(w, x, RealVect::Zero, 0.0, 0.0, averageEnergy));

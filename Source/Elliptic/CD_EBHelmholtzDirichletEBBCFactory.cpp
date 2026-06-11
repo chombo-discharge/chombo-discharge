@@ -135,7 +135,7 @@ EBHelmholtzDirichletEBBCFactory::create()
   bc->setDomainDropOrder(m_domainDropOrder);
   bc->setCoarseGridDropOrder(m_domainDropOrder);
   if (m_useConstant) {
-    bc->setValue(m_constantValue);
+    bc->setValue(static_cast<int>(m_constantValue));
   }
   else if (m_useFunction) {
     bc->setValue(m_functionValue);

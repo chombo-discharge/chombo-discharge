@@ -87,7 +87,7 @@ TimeStepper::getCheckpointLoads(const std::string& a_realm, int a_level) const
 
   Vector<long int> loads(boxArray.size(), 0L);
   for (int i = 0; i < boxArray.size(); i++) {
-    loads[i] = boxArray[i].numPts();
+    loads[i] = static_cast<long>(boxArray[i].numPts());
   }
 
   return loads;
@@ -129,7 +129,7 @@ TimeStepper::loadBalanceBoxes(Vector<Vector<int>>& a_procs,
     Vector<long int> boxLoads(a_boxes[lvl].size());
 
     for (int ibox = 0; ibox < a_boxes[lvl].size(); ibox++) {
-      boxLoads[ibox] = a_boxes[lvl][ibox].numPts();
+      boxLoads[ibox] = static_cast<long>(a_boxes[lvl][ibox].numPts());
     }
 
     LoadBalancing::makeBalance(a_procs[lvl], rankLoads, boxLoads, a_boxes[lvl]);

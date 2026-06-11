@@ -68,8 +68,8 @@ CdrPlasmaJSON::CdrPlasmaJSON()
   this->parseDielectricReactions();
   this->parseDomainReactions();
 
-  m_numCdrSpecies = m_cdrSpecies.size();
-  m_numRtSpecies  = m_rtSpecies.size();
+  m_numCdrSpecies = static_cast<int>(m_cdrSpecies.size());
+  m_numRtSpecies  = static_cast<int>(m_rtSpecies.size());
 }
 
 CdrPlasmaJSON::CdrPlasmaJSON(const int /*a_dummy*/)
@@ -138,7 +138,8 @@ CdrPlasmaJSON::parseIntegrator()
     m_reactionIntegrator = ReactionIntegrator::ExplicitRK4;
   }
   else {
-    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(std::string{"CdrPlasmaJSON::parseIntegrator -- I do not know the integrator '"}.append(str).append("'"));
+    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+      std::string{"CdrPlasmaJSON::parseIntegrator -- I do not know the integrator '"}.append(str).append("'"));
   }
 }
 
@@ -151,7 +152,8 @@ CdrPlasmaJSON::parseJSON()
   }
 
   if (!(ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::doesFileExist(m_jsonFile))) {
-    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(std::string{"CdrPlasmaJSON::parseJSON -- file '"}.append(m_jsonFile).append("' does not exist"));
+    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+      std::string{"CdrPlasmaJSON::parseJSON -- file '"}.append(m_jsonFile).append("' does not exist"));
   }
 
   // Parse the JSON file
@@ -234,7 +236,11 @@ CdrPlasmaJSON::sanityCheckSpecies() const
   std::sort(allSpecies.begin(), allSpecies.end());
   for (int i = 0; i < allSpecies.size() - 1; i++) {
     if (allSpecies[i] == allSpecies[i + 1]) {
-      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(std::string{baseError}.append(" -- species '").append(allSpecies[i]).append("' was defined more than once. Double-check your neutral, plasma, and photon species"));
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+        std::string{baseError}
+          .append(" -- species '")
+          .append(allSpecies[i])
+          .append("' was defined more than once. Double-check your neutral, plasma, and photon species"));
     }
   }
 }
@@ -287,7 +293,8 @@ CdrPlasmaJSON::parseReactionString(std::vector<std::string>& a_reactants,
 
   // Make sure that -> is in the reaction string.
   if (it == segments.end()) {
-    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(std::string{baseError}.append(" -- Reaction '").append(a_reaction).append("' does not contain '->"));
+    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+      std::string{baseError}.append(" -- Reaction '").append(a_reaction).append("' does not contain '->"));
   }
 
   // Left of "->" are reactants and right of "->" are products
@@ -534,7 +541,11 @@ CdrPlasmaJSON::initializeNeutralSpecies()
 
     // Throw an error if the file does not exist.
     if (!(ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::doesFileExist(filename))) {
-      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(std::string{baseError}.append(" and got tabulated gas law but file = '").append(filename).append("' was not found"));
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+        std::string{baseError}
+          .append(" and got tabulated gas law but file = '")
+          .append(filename)
+          .append("' was not found"));
     }
 
     // Let the data parser read the input.
@@ -603,12 +614,16 @@ CdrPlasmaJSON::initializeNeutralSpecies()
 
     // Names can not contain parenthesis either
     if (containsBracket(speciesName)) {
-      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(std::string{baseError}.append("but species '").append(speciesName).append("' can not contain brackets"));
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+        std::string{baseError}.append("but species '").append(speciesName).append("' can not contain brackets"));
     }
 
     // It's an error if a species was defined twice.
     if (isNeutralSpecies(speciesName)) {
-      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(std::string{baseError}.append(" -- Neutral species '").append(speciesName).append("' was defined more than once"));
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(std::string{baseError}
+                                                                             .append(" -- Neutral species '")
+                                                                             .append(speciesName)
+                                                                             .append("' was defined more than once"));
     }
 
     // Set the species density function.
@@ -618,7 +633,7 @@ CdrPlasmaJSON::initializeNeutralSpecies()
     };
 
     // Add the species. Make sure the maps are consist.
-    const int idx = m_neutralSpecies.size();
+    const int idx = static_cast<int>(m_neutralSpecies.size());
 
     // Create the neutral species (and the mapped background density).
     m_neutralSpecies.push_back(std::make_shared<NeutralSpeciesJSON>(speciesName, speciesFraction, speciesDensity));
@@ -677,13 +692,16 @@ CdrPlasmaJSON::initializePlasmaSpecies()
 
     // Names do not get to contain wildcards, brackets, or replicate former species names.
     if (containsWildcard(name)) {
-      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(std::string{baseError}.append("but species '").append(name).append("' can not contain the '@' letter"));
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+        std::string{baseError}.append("but species '").append(name).append("' can not contain the '@' letter"));
     }
     if (containsBracket(name)) {
-      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(std::string{baseError}.append("but species '").append(name).append("' can not contain brackets"));
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+        std::string{baseError}.append("but species '").append(name).append("' can not contain brackets"));
     }
     if (this->isPlasmaSpecies(name)) {
-      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(std::string{baseError}.append("but plasma species '").append(name).append("' was defined more than once"));
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+        std::string{baseError}.append("but plasma species '").append(name).append("' was defined more than once"));
     }
 
     // Get the initial data.
@@ -691,7 +709,7 @@ CdrPlasmaJSON::initializePlasmaSpecies()
     const List<PointParticle>& initParticles                       = this->parsePlasmaSpeciesInitialParticles(species);
 
     // Initialize the species.
-    const int transportIdx = m_cdrSpecies.size();
+    const int transportIdx = static_cast<int>(m_cdrSpecies.size());
 
     // Make the string-int map encodings.
     m_cdrSpeciesMap.emplace(name, transportIdx);
@@ -714,7 +732,11 @@ CdrPlasmaJSON::initializePlasmaSpecies()
           m_cdrMasses.emplace(transportIdx, Units::me);
         }
         else {
-          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(std::string{baseError}.append("and got field 'mass' but species mass '").append(str).append("' is not implemented (yet)"));
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+            std::string{baseError}
+              .append("and got field 'mass' but species mass '")
+              .append(str)
+              .append("' is not implemented (yet)"));
         }
       }
       else {
@@ -772,7 +794,7 @@ CdrPlasmaJSON::initializePlasmaSpecies()
         };
 
         const std::string energyName = name + " energy_density";
-        const int         energyIdx  = m_cdrSpecies.size();
+        const int         energyIdx  = static_cast<int>(m_cdrSpecies.size());
 
         m_cdrSpeciesMap.emplace(energyName, energyIdx);
         m_cdrSpeciesInverseMap.emplace(energyIdx, energyName);
@@ -983,7 +1005,11 @@ CdrPlasmaJSON::parsePlasmaSpeciesInitialData(const json& a_json) const
 
       // Throw a warning if the input file does not exist.
       if (!(ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::doesFileExist(filename))) {
-        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(std::string{baseError}.append(" and found 'height profile' in initial data but file = '").append(filename).append("' was not found"));
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+          std::string{baseError}
+            .append(" and found 'height profile' in initial data but file = '")
+            .append(filename)
+            .append("' was not found"));
       }
 
       // Compute the number of points for the table
@@ -1296,7 +1322,7 @@ CdrPlasmaJSON::initializePhotonSpecies()
     }
 
     // Initialize the species.
-    const int num = m_rtSpecies.size();
+    const int num = static_cast<int>(m_rtSpecies.size());
 
     // Make the string-int map encodings.
     m_rteSpeciesMap.emplace(name, num);
@@ -2344,7 +2370,7 @@ CdrPlasmaJSON::parseTemperatures()
 
         const int  xColumn   = S["E/N"].get<int>();
         const int  yColumn   = S["eV"].get<int>();
-        const int  numPoints = S["points"].get<Real>();
+        const int  numPoints = static_cast<int>(S["points"].get<Real>());
         const Real minEN     = S["min E/N"].get<Real>();
         const Real maxEN     = S["max E/N"].get<Real>();
 
@@ -2450,7 +2476,7 @@ CdrPlasmaJSON::parsePlasmaReactions()
 
       // This is the reaction index for the current index. The reaction we are currently
       // dealing with is put in m_plasmaReactions[reactionIdex].
-      const int reactionIndex = m_plasmaReactions.size();
+      const int reactionIndex = static_cast<int>(m_plasmaReactions.size());
 
       // Go through the right-hand side of the reaction and ignore any species that are bracketed.
       std::vector<std::string> trimmedProducts;
@@ -3426,7 +3452,7 @@ CdrPlasmaJSON::parsePhotoReactions()
     std::vector<std::string> products;
 
     // Index.
-    const int reactionIndex = m_photoReactions.size();
+    const int reactionIndex = static_cast<int>(m_photoReactions.size());
 
     // Parse the reaction string.
     this->parseReactionString(reactants, products, reaction);
@@ -3696,7 +3722,7 @@ CdrPlasmaJSON::parseElectrodeReactions()
 
           // This is the reaction index for the current index. The reaction we are currently
           // dealing with is put in m_electrodeReactions[reactionIndex].
-          const int reactionIndex = m_electrodeReactions.size();
+          const int reactionIndex = static_cast<int>(m_electrodeReactions.size());
 
           // Parse the scaling factor for the electrode surface reaction
           this->parseElectrodeReactionRate(reactionIndex, electrodeReaction);
@@ -3936,7 +3962,7 @@ CdrPlasmaJSON::parseDielectricReactions()
 
           // This is the reaction index for the current index. The reaction we are currently
           // dealing with is put in m_plasmaReactions[reactionIdex].
-          const int reactionIndex = m_dielectricReactions.size();
+          const int reactionIndex = static_cast<int>(m_dielectricReactions.size());
 
           // Parse the scaling factor for the dielectric surface reaction
           this->parseDielectricReactionRate(reactionIndex, dielectricReaction);
@@ -4144,7 +4170,7 @@ CdrPlasmaJSON::parseDomainReactions()
 
           // This is the reaction index for the current index. The reaction we are currently
           // dealing with is put in domainReactionsVec[reactionIndex]
-          const int reactionIndex = domainReactionsVec.size();
+          const int reactionIndex = static_cast<int>(domainReactionsVec.size());
 
           // Parse the scaling factor for the electrode surface reaction
           this->parseDomainReactionRate(reactionIndex, domainReaction, sides);

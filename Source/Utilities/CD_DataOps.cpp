@@ -441,7 +441,7 @@ DataOps::averageFaceToCell(LevelData<EBCellFAB>&       a_cellData,
               cellData(vof, comp) += fluxData[dir](face, comp);
             }
 
-            numFaces += faces.size();
+            numFaces += static_cast<int>(faces.size());
           }
         }
 

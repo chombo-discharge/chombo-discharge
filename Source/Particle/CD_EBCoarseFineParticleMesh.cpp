@@ -214,7 +214,7 @@ EBCoarseFineParticleMesh::defineStencils() noexcept
     auto buildStencils = [&](const VolIndex& coarVoF) -> void {
       const Real             kappaC      = ebisBoxCoar.volFrac(coarVoF);
       const Vector<VolIndex> fineVoFs    = ebislCoar.refine(coarVoF, m_refRat, din);
-      const int              numFineVoFs = fineVoFs.size();
+      const int              numFineVoFs = static_cast<int>(fineVoFs.size());
 
       VoFStencil& arithSten = arithmeticStencils(coarVoF, 0);
       VoFStencil& consSten  = conservativeStencils(coarVoF, 0);
@@ -366,7 +366,7 @@ EBCoarseFineParticleMesh::addFineGhostsToCoarse(LevelData<EBCellFAB>&       a_co
       const Vector<VolIndex> fineVofs = ebislCoFi.refine(coarVof, m_refRat, din);
 
       for (int comp = 0; comp < m_nComp; comp++) {
-        coFiData(coarVof, comp) *= 1. / fineVofs.size();
+        coFiData(coarVof, comp) *= 1. / static_cast<double>(fineVofs.size());
       }
     };
 

@@ -51,7 +51,7 @@ MFLevelGrid::~MFLevelGrid() = default;
 int
 MFLevelGrid::numPhases() const
 {
-  return m_eblg.size();
+  return static_cast<int>(m_eblg.size());
 }
 
 void

@@ -51,7 +51,7 @@ MultiIndex::getOrder() const
 int
 MultiIndex::getNumIndices() const
 {
-  return m_indices.size();
+  return static_cast<int>(m_indices.size());
 }
 
 int

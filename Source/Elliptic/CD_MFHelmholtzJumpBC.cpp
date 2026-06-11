@@ -354,7 +354,7 @@ MFHelmholtzJumpBC::buildAverageStencils()
           curStencil += gradStencils(vof, m_comp);
         }
 
-        const Real invNum = 1. / allVofs.size();
+        const Real invNum = 1. / static_cast<double>(allVofs.size());
 
         avgBco *= invNum;
         curWeight *= invNum;
@@ -647,7 +647,7 @@ MFHelmholtzJumpBC::matchBC(BaseIVFAB<Real>& a_jump,
       for (int i = 0; i < vofsPhase0.size(); i++) {
         jump += a_jump(vofsPhase0[i], m_comp);
       }
-      jump *= 1. / vofsPhase0.size();
+      jump *= 1. / static_cast<double>(vofsPhase0.size());
     }
 
     for (int i = 0; i < vofsPhase0.size(); i++) {

@@ -172,7 +172,7 @@ EBHelmholtzRobinDomainBC::getFaceFlux(const VolIndex&       a_vof,
           for (int i = 0; i < nearVofs.size(); i++) {
             nearPhi += a_phi(nearVofs[i], m_comp);
           }
-          nearPhi = nearPhi / nearVofs.size();
+          nearPhi = nearPhi / static_cast<double>(nearVofs.size());
 
           // Linear extrapolation to boundary from curVof
           curExtrap = 1.5 * a_phi(curVof, m_comp) - 0.5 * nearPhi;

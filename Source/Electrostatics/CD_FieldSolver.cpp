@@ -308,11 +308,11 @@ FieldSolver::computeEnergy(const MFAMRCellData& a_electricField)
     Real energy = 0.0;
 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      const Real               dx  = m_amr->getDx()[lvl];
-      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-      const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, a_phase)[lvl];
-      const DataIterator&      dit    = dbl.dataIterator();
-      const Real               dV     = std::pow(dx, SpaceDim);
+      const Real               dx    = m_amr->getDx()[lvl];
+      const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+      const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, a_phase)[lvl];
+      const DataIterator&      dit   = dbl.dataIterator();
+      const Real               dV    = std::pow(dx, SpaceDim);
 
       const int nbox = dit.size();
 #pragma omp parallel for schedule(runtime)
@@ -1789,7 +1789,7 @@ FieldSolver::computeLoads(const DisjointBoxLayout& a_dbl, const int /*a_level*/)
     const DataIndex& din     = dit[mybox];
     const int        intCode = din.intCode();
 
-    loads[intCode] = a_dbl[din].numPts();
+    loads[intCode] = static_cast<long long>(a_dbl[din].numPts());
   }
 
   ParallelOps::sum(loads);

@@ -49,7 +49,7 @@ Vector<RealVect>
 RealBox::getCorners() const
 {
 
-  Vector<RealVect> corners(pow(2, SpaceDim));
+  Vector<RealVect> corners(static_cast<unsigned int>(pow(2, SpaceDim)));
 
   const RealVect DD = m_hi - m_lo;
   const RealVect DX = RealVect(D_DECL(DD[0], 0.0, 0.0));

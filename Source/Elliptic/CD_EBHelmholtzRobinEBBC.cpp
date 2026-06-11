@@ -345,7 +345,7 @@ EBHelmholtzRobinEBBC::getInterpolationStencil(const VolIndex&              a_vof
   // M = Number of unknowns in Taylor expansion of order a_order.
   // K = Number of equations (displacements)
   const int M = LeastSquares::getTaylorExpansionSize(a_order);
-  const int K = displacements.size();
+  const int K = static_cast<int>(displacements.size());
 
   // If we have enough equations we can get an interpolation stencil.
   VoFStencil interpStencil;

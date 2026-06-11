@@ -32,7 +32,7 @@ DischargeIO::numberFmt(const long long n, char sep) noexcept
   string s = fmt.str();
   s.reserve(s.length() + s.length() / 3);
 
-  for (int i = 0, j = 3 - s.length() % 3; i < s.length(); ++i, ++j) {
+  for (int i = 0, j = 3 - static_cast<int>(s.length() % 3); i < s.length(); ++i, ++j) {
     if (i != 0 && j % 3 == 0) {
       s.insert(i++, 1, sep);
     }
@@ -67,7 +67,7 @@ DischargeIO::writeEBHDF5Header(HDF5Handle&                a_handleH5,
   CH_assert(a_handleH5.isOpen());
   CH_assert(a_numLevels >= 0);
 
-  const int numInputVars      = a_variableNames.size();
+  const int numInputVars      = static_cast<int>(a_variableNames.size());
   const int indexVolFrac      = numInputVars;
   const int indexBoundaryArea = indexVolFrac + 1;
   const int indexAreaFrac     = indexBoundaryArea + 1;

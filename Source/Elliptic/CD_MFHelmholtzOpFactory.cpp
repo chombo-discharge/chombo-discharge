@@ -87,7 +87,7 @@ MFHelmholtzOpFactory::MFHelmholtzOpFactory(const MFIS&             a_mfis,
 {
   CH_TIME("MFHelmholtzOpFactory::MFHelmholtzOpFactory()");
 
-  m_numAmrLevels = m_amrLevelGrids.size();
+  m_numAmrLevels = static_cast<int>(m_amrLevelGrids.size());
 
   // Asking multigrid to do the bottom solve at a refined AMR level is classified as bad input.
   if (ChomboDischarge::MFHelmholtzOpFactory::isFiner(m_bottomDomain, m_amrLevelGrids[0].getDomain())) {
@@ -276,7 +276,7 @@ MFHelmholtzOpFactory::defineMultigridLevels()
       bool hasCoarser = true;
 
       while (hasCoarser) {
-        const int            curMgLevels = m_mgLevelGrids[amrLevel].size();
+        const int            curMgLevels = static_cast<int>(m_mgLevelGrids[amrLevel].size());
         const MFLevelGrid&   mgMflgFine  = m_mgLevelGrids[amrLevel].back();
         const ProblemDomain& domainFine  = mgMflgFine.getDomain();
 
@@ -625,7 +625,7 @@ MFHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bo
   else { // Asking for a coarsening. No interp or flux reg object here.
     // TLDR: Go through the coarsened levels for the specified amr level and see if we find a coarsening at the
     //       specified depth.
-    const ProblemDomain coarDomain = coarsen(a_fineDomain, std::pow(mgRefRat, a_depth));
+    const ProblemDomain coarDomain = coarsen(a_fineDomain, static_cast<int>(std::pow(mgRefRat, a_depth)));
 
     // These are the things that live below the AMR level corresponding to a_fineDomain.
     const AmrLevelGrids& mgLevelGrids = m_mgLevelGrids[amrLevel];

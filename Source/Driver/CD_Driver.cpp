@@ -96,13 +96,13 @@ Driver::getNumberOfPlotVariables() const
     numPlotVars += 1;
   }
   if (m_plotRanks) {
-    numPlotVars += m_amr->getRealms().size();
+    numPlotVars += static_cast<int>(m_amr->getRealms().size());
   }
   if (m_plotLevelset) {
     numPlotVars = numPlotVars + 2;
   }
   if (m_plotLoads) {
-    numPlotVars += m_amr->getRealms().size();
+    numPlotVars += static_cast<int>(m_amr->getRealms().size());
   }
 
   return numPlotVars;
@@ -413,8 +413,8 @@ Driver::getCellsAndBoxes(long long&                       a_numLocalCells,
       const Box box      = dbl[din];
       const Box grownBox = grow(dbl[din], ghost);
 
-      numCellsNoGhosts += box.numPts();
-      numCellsWithGhosts += grownBox.numPts();
+      numCellsNoGhosts += static_cast<long long>(box.numPts());
+      numCellsWithGhosts += static_cast<long long>(grownBox.numPts());
       numBoxes += 1;
     }
 
@@ -467,7 +467,7 @@ Driver::gridReport()
   Vector<long long> validLevelCells;
 
   // Total number of grid points for a Cartesian grid covering entire finest domain. Used for "grid sparsity".
-  const long long uniformPoints = (domains[finestLevel].domainBox()).numPts();
+  const long long uniformPoints = static_cast<long long>((domains[finestLevel].domainBox()).numPts());
 
   // Some stuff
   const ProblemDomain coarsest_domain = m_amr->getDomains()[0];
@@ -498,7 +498,7 @@ Driver::gridReport()
   validLevelCells = totalLevelCells;
 
   for (int lvl = 0; lvl < finestLevel; lvl++) {
-    validLevelCells[lvl] -= llround(totalLevelCells[lvl + 1] / std::pow(refRat[lvl], SpaceDim));
+    validLevelCells[lvl] -= llround(static_cast<int>(totalLevelCells[lvl + 1]) / std::pow(refRat[lvl], SpaceDim));
 
     totalValidCells += validLevelCells[lvl];
   }
@@ -532,7 +532,8 @@ Driver::gridReport()
          << coarsestBox.size()[2] << endl
 #endif
          << "\tRefinement ratios........ = " << ref_rat << endl
-         << "\tGrid sparsity............ = " << 1.0 * totalCells / uniformPoints << endl
+         << "\tGrid sparsity............ = "
+         << 1.0 * static_cast<double>(totalCells) / static_cast<double>(uniformPoints) << endl
          << "\tFinest dx................ = " << dx[finestLevel] << endl
          << "\tTotal number boxes....... = " << DischargeIO::numberFmt(totalBoxes) << endl
          << "\tNumber of cells.......... = " << DischargeIO::numberFmt(totalCells) << endl
@@ -577,8 +578,10 @@ Driver::gridReport()
 
   overallMemoryUsage(localUnfreedMemory, localPeakMemory);
 
-  pout() << "\tUnfreed memory        = " << std::ceil(localUnfreedMemory / BytesPerMB) << " (MB)" << endl
-         << "\tPeak memory usage     = " << std::ceil(localPeakMemory / BytesPerMB) << " (MB)" << endl;
+  pout() << "\tUnfreed memory        = " << std::ceil(static_cast<double>(localUnfreedMemory) / BytesPerMB) << " (MB)"
+         << endl
+         << "\tPeak memory usage     = " << std::ceil(static_cast<double>(localPeakMemory) / BytesPerMB) << " (MB)"
+         << endl;
 #ifdef CH_MPI
 
   // If this is an MPI run we want to include the maximum consum memory in the report as well. We compute the
@@ -588,10 +591,14 @@ Driver::gridReport()
   const long long maxUnfreedMemory = ParallelOps::max(localUnfreedMemory);
   const long long maxPeakMemory    = ParallelOps::max(localPeakMemory);
 
-  pout() << "\tMin unfreed memory    = " << std::ceil(minUnfreedMemory / BytesPerMB) << " (MB)" << endl
-         << "\tMin peak memory       = " << std::ceil(minPeakMemory / BytesPerMB) << " (MB)" << endl
-         << "\tMax unfreed memory    = " << std::ceil(maxUnfreedMemory / BytesPerMB) << " (MB)" << endl
-         << "\tMax peak memory       = " << std::ceil(maxPeakMemory / BytesPerMB) << " (MB)" << endl;
+  pout() << "\tMin unfreed memory    = " << std::ceil(static_cast<double>(minUnfreedMemory) / BytesPerMB) << " (MB)"
+         << endl
+         << "\tMin peak memory       = " << std::ceil(static_cast<double>(minPeakMemory) / BytesPerMB) << " (MB)"
+         << endl
+         << "\tMax unfreed memory    = " << std::ceil(static_cast<double>(maxUnfreedMemory) / BytesPerMB) << " (MB)"
+         << endl
+         << "\tMax peak memory       = " << std::ceil(static_cast<double>(maxPeakMemory) / BytesPerMB) << " (MB)"
+         << endl;
 #endif
 #endif
   pout() << "=======================================================================" << endl;
@@ -1861,19 +1868,19 @@ Driver::stepReport(const Real a_startTime, const Real a_endTime, const int a_max
 
   //  overallMemoryUsage(unfreedMem, peakMem);
 
-  pout() << "                                -- Unfreed memory        : " << std::ceil(unfreedMem / bytesPerMB)
-         << "(MB)" << endl;
-  pout() << "                                -- Peak memory usage     : " << std::ceil(peakMem / bytesPerMB) << "(MB)"
-         << endl;
+  pout() << "                                -- Unfreed memory        : "
+         << std::ceil(static_cast<double>(unfreedMem) / bytesPerMB) << "(MB)" << endl;
+  pout() << "                                -- Peak memory usage     : "
+         << std::ceil(static_cast<double>(peakMem) / bytesPerMB) << "(MB)" << endl;
 
 #ifdef CH_MPI
   const long long maxUnfreedMem = ParallelOps::max(unfreedMem);
   const long long maxPeakMem    = ParallelOps::max(peakMem);
 
-  pout() << "                                -- Max unfreed memory    : " << std::ceil(maxUnfreedMem / bytesPerMB)
-         << "(MB)" << endl;
-  pout() << "                                -- Max peak memory usage : " << std::ceil(maxPeakMem / bytesPerMB)
-         << "(MB)" << endl;
+  pout() << "                                -- Max unfreed memory    : "
+         << std::ceil(static_cast<double>(maxUnfreedMem) / bytesPerMB) << "(MB)" << endl;
+  pout() << "                                -- Max peak memory usage : "
+         << std::ceil(static_cast<double>(maxPeakMem) / bytesPerMB) << "(MB)" << endl;
 #endif
 #endif
 }
@@ -2026,7 +2033,7 @@ Driver::writeComputationalLoads()
   // 0       X             Y
   // 1       XX            YY
 
-  const int nProc = numProc();
+  const int nProc = static_cast<int>(numProc());
 
   // Filename for output.
   char              suffix[32];
@@ -2529,7 +2536,7 @@ Driver::writeLoads(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_leve
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      scratch[din].setVal(loads[din.intCode()]);
+      scratch[din].setVal(static_cast<double>(loads[din.intCode()]));
     }
 
     const Interval srcInterv(0, 0);
@@ -2702,7 +2709,7 @@ Driver::writeCheckpointRealmLoads(HDF5Handle& a_handle, const int a_level)
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      scratch[din].setVal(loads[din.intCode()]);
+      scratch[din].setVal(static_cast<double>(loads[din.intCode()]));
     }
 
     // String identifier in HDF file.
@@ -2917,7 +2924,7 @@ Driver::readCheckpointRealmLoads(Vector<long int>&  a_loads,
   const std::string str = a_realm + "_loads";
 
 #ifdef CH_MPI
-  const int                 nBoxes   = a_loads.size();
+  const int                 nBoxes   = static_cast<int>(a_loads.size());
   const std::pair<int, int> beginEnd = ParallelOps::partition(nBoxes);
   for (int i = 0; i < nBoxes; i++) {
     a_loads[i] = 0L;

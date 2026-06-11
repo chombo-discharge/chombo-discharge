@@ -862,12 +862,12 @@ Realm::defineInnerCFMask(const int /*a_lmin*/)
               auto kernel = [&](const IntVect& iv) -> void {
                 const Box box = grow(Box(iv, iv), buffer) & domain;
 
-                int c = box.numPts();
+                int c = static_cast<int>(box.numPts());
 
                 for (int i = 0; i < neighborBoxes.size(); i++) {
                   const Box overlapBox = box & neighborBoxes[i];
 
-                  c -= overlapBox.numPts();
+                  c -= static_cast<int>(overlapBox.numPts());
                 }
 
                 mask(iv) = (c == 0) ? false : true;

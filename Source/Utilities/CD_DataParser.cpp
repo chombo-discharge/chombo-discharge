@@ -68,7 +68,7 @@ DataParser::simpleFileReadASCII(const std::string&       a_fileName,
         }
 
         // Read the data into the LookupTable1D IF we have enough data in the input file. Rows that do not have enough data WILL be ignored.
-        const int numColumnsOnThisLine = values.size();
+        const int numColumnsOnThisLine = static_cast<int>(values.size());
         if (a_xColumn < numColumnsOnThisLine && a_yColumn < numColumnsOnThisLine) {
           returnTable.addData(values[a_xColumn], values[a_yColumn]);
         }
@@ -134,7 +134,7 @@ DataParser::fractionalFileReadASCII(const std::string&       a_fileName,
 
         // Read the data into the LookupTable1D IF we have enough data in the input file. Rows that do not have enough
         // data WILL be ignored.
-        const int numColumnsOnThisLine = values.size();
+        const int numColumnsOnThisLine = static_cast<int>(values.size());
         if (a_xColumn < numColumnsOnThisLine && a_yColumn < numColumnsOnThisLine) {
           returnTable.addData(values[a_xColumn], values[a_yColumn]);
         }
@@ -191,7 +191,7 @@ DataParser::readPointParticlesASCII(const std::string& a_fileName,
         }
 
         // Read the data into the LookupTable1D IF we have enough data in the input file. Rows that do not have enough data WILL be ignored.
-        const int numColumnsOnThisLine = values.size();
+        const int numColumnsOnThisLine = static_cast<int>(values.size());
         if (numColumnsOnThisLine < SpaceDim + 1) {
           const std::string str = "DataParser::readPointParticlesASCII - row does not contain enough data";
 

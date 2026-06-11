@@ -23,7 +23,8 @@ NewIntersectionIF::NewIntersectionIF() : m_numFuncs(0)
   m_impFuncs.resize(0);
 }
 
-NewIntersectionIF::NewIntersectionIF(const Vector<BaseIF*>& a_impFuncs) : m_numFuncs(a_impFuncs.size())
+NewIntersectionIF::NewIntersectionIF(const Vector<BaseIF*>& a_impFuncs)
+  : m_numFuncs(static_cast<int>(a_impFuncs.size()))
 {
 
   m_impFuncs.resize(m_numFuncs);

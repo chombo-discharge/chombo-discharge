@@ -46,8 +46,8 @@ SphereArray::SphereArray(const Real      a_radius,
       for (size_t k = 0; k < a_numSpheres[2]; k++) {
 #endif
 
-        const Real x = a_loCenter[0] + i * (a_sphereGap[0] + 2 * a_radius);
-        const Real y = a_loCenter[1] + j * (a_sphereGap[1] + 2 * a_radius);
+        const Real x = a_loCenter[0] + static_cast<double>(i) * (a_sphereGap[0] + 2 * a_radius);
+        const Real y = a_loCenter[1] + static_cast<double>(j) * (a_sphereGap[1] + 2 * a_radius);
 #if CH_SPACEDIM == 2
         const Real z = a_zCoord;
 #else

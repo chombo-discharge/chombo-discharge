@@ -276,7 +276,7 @@ LaPackUtils::computePseudoInverse(std::vector<float>&       a_linAplus,
       maxS = std::max(maxS, s);
     }
     const float eps = std::numeric_limits<float>::epsilon();
-    const float tol = eps * std::max(a_M, a_N) * maxS;
+    const float tol = eps * static_cast<float>(std::max(a_M, a_N)) * maxS;
 
     // Need to storage the matrices in a form usable by LaPack, and then use dgemm to multiply them.
     auto* U               = new float[a_M * a_M];
@@ -291,7 +291,7 @@ LaPackUtils::computePseudoInverse(std::vector<float>&       a_linAplus,
     }
     for (int i = 0; i < linSigma.size(); i++) {
       if (std::abs(linSigma[i]) > tol) {
-        SigmaReciprocal[i] = 1. / linSigma[i];
+        SigmaReciprocal[i] = static_cast<float>(1.) / linSigma[i];
       }
       else {
         SigmaReciprocal[i] = 0.0;
@@ -363,8 +363,8 @@ LaPackUtils::linearizeColumnMajorMatrix(std::vector<double>&                    
                                         const std::vector<std::vector<double>>& a_A)
 {
   // Number of rows and columns
-  a_M = a_A[0].size(); // Number of rows of the actual matrix
-  a_N = a_A.size();    // Number of columns of the actual matrix
+  a_M = static_cast<int>(a_A[0].size()); // Number of rows of the actual matrix
+  a_N = static_cast<int>(a_A.size());    // Number of columns of the actual matrix
 
   // Linearize the input matrix.
   a_linA.resize(a_M * a_N);
@@ -383,8 +383,8 @@ LaPackUtils::linearizeRowMajorMatrix(std::vector<double>&                    a_l
                                      const std::vector<std::vector<double>>& a_A)
 {
   // Number of rows and columns
-  a_M = a_A.size();
-  a_N = a_A[0].size();
+  a_M = static_cast<int>(a_A.size());
+  a_N = static_cast<int>(a_A[0].size());
 
   // Linearize the input matrix
   a_linA.resize(a_M * a_N);

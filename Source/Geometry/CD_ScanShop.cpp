@@ -144,7 +144,7 @@ ScanShop::makeGrids(const ProblemDomain& a_domain,
   // Build the scan level first
   if (!m_hasScanLevel) {
     m_timer.startEvent("Build coarse");
-    for (int lvl = m_domains.size() - 1; lvl >= m_scanLevel; lvl--) {
+    for (int lvl = static_cast<int>(m_domains.size()) - 1; lvl >= m_scanLevel; lvl--) {
       ScanShop::buildCoarseLevel(lvl, a_maxGridSize); // Coarser levels built in the same way as the scan level
     }
     m_timer.stopEvent("Build coarse");

@@ -655,7 +655,7 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
               if (a_cellVel(vofLeft, transverseDir) < 0.0 && a_domain.contains(ivLeftUp)) {
                 const Vector<FaceIndex>& facesHi = ebisbox.getFaces(vofLeft, transverseDir, Side::Hi);
 
-                const int nFaces = facesHi.size();
+                const int nFaces = static_cast<int>(facesHi.size());
 
                 if (nFaces > 0) {
                   Real phiUp = 0.0;
@@ -671,7 +671,7 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
               else if (a_cellVel(vofLeft, transverseDir) > 0.0 && a_domain.contains(ivLeftDown)) {
                 const Vector<FaceIndex>& facesLo = ebisbox.getFaces(vofLeft, transverseDir, Side::Lo);
 
-                const int nFaces = facesLo.size();
+                const int nFaces = static_cast<int>(facesLo.size());
 
                 if (nFaces > 0) {
                   Real phiDown = 0.0;
@@ -689,7 +689,7 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
               if (a_cellVel(vofRigh, transverseDir) < 0.0 && a_domain.contains(ivRighUp)) {
                 const Vector<FaceIndex>& facesHi = ebisbox.getFaces(vofRigh, transverseDir, Side::Hi);
 
-                const int nFaces = facesHi.size();
+                const int nFaces = static_cast<int>(facesHi.size());
 
                 if (nFaces > 0) {
                   Real phiUp = 0.0;
@@ -704,7 +704,7 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
               else if (a_cellVel(vofRigh, transverseDir) > 0.0 && a_domain.contains(ivRighDown)) {
                 const Vector<FaceIndex>& facesLo = ebisbox.getFaces(vofRigh, transverseDir, Side::Lo);
 
-                const int nFaces = facesLo.size();
+                const int nFaces = static_cast<int>(facesLo.size());
 
                 if (nFaces > 0) {
                   Real phiDown = 0.0;

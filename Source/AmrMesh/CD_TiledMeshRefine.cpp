@@ -137,7 +137,7 @@ TiledMeshRefine::makeLevelTiles(TileSet&             a_tiles,
   // Gather tiles globally
 #ifdef CH_MPI
   CH_START(t2);
-  const int mySendCount  = a_tiles.size() * SpaceDim;
+  const int mySendCount  = static_cast<int>(a_tiles.size()) * SpaceDim;
   int*      mySendBuffer = new int[mySendCount];
 
   // Get the number of elements sent by each MPI rank and compute the offset array which is required by Allgatherv

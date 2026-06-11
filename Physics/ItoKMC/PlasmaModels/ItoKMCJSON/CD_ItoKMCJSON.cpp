@@ -323,7 +323,10 @@ ItoKMCJSON::initializeGasLaw()
   const std::string curLaw = this->trim(m_json["gas"]["law"]["id"].get<std::string>());
 
   if ((!m_json["gas"]["law"][curLaw].contains("type"))) {
-    this->throwParserError(std::string{baseError}.append(" but specified gas law '").append(curLaw).append("' is missing the 'type' specifier"));
+    this->throwParserError(std::string{baseError}
+                             .append(" but specified gas law '")
+                             .append(curLaw)
+                             .append("' is missing the 'type' specifier"));
   }
 
   const std::string type = this->trim(m_json["gas"]["law"][curLaw]["type"].get<std::string>());
@@ -386,13 +389,20 @@ ItoKMCJSON::initializeBackgroundSpecies()
       const std::string speciesName = species["id"].get<std::string>();
 
       if (this->containsWildcard(speciesName)) {
-        this->throwParserError(std::string{baseError}.append(" but species '").append(speciesName).append("' should not contain wildcard @"));
+        this->throwParserError(std::string{baseError}
+                                 .append(" but species '")
+                                 .append(speciesName)
+                                 .append("' should not contain wildcard @"));
       }
       if (this->containsBracket(speciesName)) {
-        this->throwParserError(std::string{baseError}.append(" but species '").append(speciesName).append("' should not contain brackets"));
+        this->throwParserError(
+          std::string{baseError}.append(" but species '").append(speciesName).append("' should not contain brackets"));
       }
       if (m_allSpecies.count(speciesName) != 0) {
-        this->throwParserError(std::string{baseError}.append(" but species '").append(speciesName).append("' was already defined elsewhere)"));
+        this->throwParserError(std::string{baseError}
+                                 .append(" but species '")
+                                 .append(speciesName)
+                                 .append("' was already defined elsewhere)"));
       }
 
       if (species.contains("plot")) {
@@ -418,7 +428,10 @@ ItoKMCJSON::initializeBackgroundSpecies()
         };
       }
       else if (molFracType == "table vs height") {
-        const std::string baseErrorID = std::string{baseError}.append("and got 'table vs height for species '").append(speciesName).append("'");
+        const std::string baseErrorID = std::string{baseError}
+                                          .append("and got 'table vs height for species '")
+                                          .append(speciesName)
+                                          .append("'");
 
         int    heightColumn   = 0;
         int    fractionColumn = 1;
@@ -455,7 +468,8 @@ ItoKMCJSON::initializeBackgroundSpecies()
         }
 
         if (!(this->doesFileExist(fileName))) {
-          this->throwParserError(std::string{baseErrorID}.append("but file '").append(fileName).append("' does not exist"));
+          this->throwParserError(
+            std::string{baseErrorID}.append("but file '").append(fileName).append("' does not exist"));
         }
 
         // Optional arguments
@@ -516,7 +530,8 @@ ItoKMCJSON::initializeBackgroundSpecies()
             spacing = LookupTable::Spacing::Exponential;
           }
           else {
-            this->throwParserError(std::string{baseErrorID}.append(" but spacing '").append(whichSpacing).append("' is not supported"));
+            this->throwParserError(
+              std::string{baseErrorID}.append(" but spacing '").append(whichSpacing).append("' is not supported"));
           }
         }
 
@@ -534,12 +549,15 @@ ItoKMCJSON::initializeBackgroundSpecies()
         }
       }
       else {
-        const std::string err = std::string{baseError}.append(" but got unsupported molar fraction type '").append(molFracType).append("'");
+        const std::string err = std::string{baseError}
+                                  .append(" but got unsupported molar fraction type '")
+                                  .append(molFracType)
+                                  .append("'");
 
         MayDay::Error(err.c_str());
       }
 
-      const int idx = m_backgroundSpecies.size();
+      const int idx = static_cast<int>(m_backgroundSpecies.size());
 
       m_backgroundSpecies.emplace_back(speciesName, molarFraction);
       m_backgroundSpeciesPlot.push_back(plotSpecies);
@@ -575,13 +593,18 @@ ItoKMCJSON::initializePlasmaSpecies()
     const std::string baseErrorID = std::string{baseError}.append(" for species '").append(speciesID).append("'");
 
     if (this->containsWildcard(speciesID)) {
-      this->throwParserError(std::string{baseErrorID}.append(" but species name '").append(speciesID).append("' should not contain wildcard @"));
+      this->throwParserError(std::string{baseErrorID}
+                               .append(" but species name '")
+                               .append(speciesID)
+                               .append("' should not contain wildcard @"));
     }
     if (this->containsBracket(speciesID)) {
-      this->throwParserError(std::string{baseError}.append(" but species '").append(speciesID).append("' should not contain brackets"));
+      this->throwParserError(
+        std::string{baseError}.append(" but species '").append(speciesID).append("' should not contain brackets"));
     }
     if (m_allSpecies.count(speciesID) != 0) {
-      this->throwParserError(std::string{baseErrorID}.append(" but species '").append(speciesID).append("' was already defined elsewhere"));
+      this->throwParserError(
+        std::string{baseErrorID}.append(" but species '").append(speciesID).append("' was already defined elsewhere"));
     }
 
     if (!(species.contains("Z"))) {
@@ -604,13 +627,13 @@ ItoKMCJSON::initializePlasmaSpecies()
 
     if (solver == "ito") {
       m_plasmaSpeciesTypes[speciesID] = SpeciesType::Ito;
-      m_itoSpeciesMap[speciesID]      = m_itoSpecies.size();
+      m_itoSpeciesMap[speciesID]      = static_cast<int>(m_itoSpecies.size());
 
       m_itoSpecies.push_back(RefCountedPtr<ItoSpecies>(new ItoSpecies(speciesID, Z, mobile, diffusive)));
     }
     else if (solver == "cdr") {
       m_plasmaSpeciesTypes[speciesID] = SpeciesType::CDR;
-      m_cdrSpeciesMap[speciesID]      = m_cdrSpecies.size();
+      m_cdrSpeciesMap[speciesID]      = static_cast<int>(m_cdrSpecies.size());
 
       m_cdrSpecies.push_back(RefCountedPtr<CdrSpecies>(new ItoKMCCDRSpecies(speciesID, Z, mobile, diffusive)));
     }
@@ -642,7 +665,8 @@ ItoKMCJSON::initializePlasmaSpecies()
         });
       }
       else {
-        this->throwParserError(std::string{baseErrorID}.append(" but diffusionType = '").append(diffusionType).append("' is not supported"));
+        this->throwParserError(
+          std::string{baseErrorID}.append(" but diffusionType = '").append(diffusionType).append("' is not supported"));
       }
     }
     else {
@@ -699,7 +723,10 @@ ItoKMCJSON::initializeTownsendCoefficient(const std::string& a_coeff)
     this->throwParserError(std::string{baseError}.append(" but field '").append(a_coeff).append("' is missing"));
   }
   if (!(m_json[a_coeff].contains("type"))) {
-    this->throwParserError(std::string{baseError}.append(" but field '").append(a_coeff).append("' does not contain the required field 'type'"));
+    this->throwParserError(std::string{baseError}
+                             .append(" but field '")
+                             .append(a_coeff)
+                             .append("' does not contain the required field 'type'"));
   }
 
   const std::string type = m_json[a_coeff]["type"].get<std::string>();
@@ -756,7 +783,8 @@ ItoKMCJSON::initializeTownsendCoefficient(const std::string& a_coeff)
     }
   }
   else {
-    this->throwParserError(std::string{baseError}.append(" but type specification '").append(type).append("' is not supported"));
+    this->throwParserError(
+      std::string{baseError}.append(" but type specification '").append(type).append("' is not supported"));
   }
 
   // Check if we should plot the coefficient
@@ -812,23 +840,27 @@ ItoKMCJSON::initializeParticlePlacement()
         m_downstreamSpecies = -1;
 
         if (!(m_json[field].contains("species"))) {
-          this->throwParserError(std::string{baseError}.append(" but field '").append("species").append("' is missing"));
+          this->throwParserError(
+            std::string{baseError}.append(" but field '").append("species").append("' is missing"));
         }
         else {
           const std::string species = m_json[field]["species"].get<std::string>();
 
           if (m_plasmaSpeciesTypes.count(species) == 0) {
-            this->throwParserError(std::string{baseError}.append(" but species '").append(species).append(" is not a plasma species"));
+            this->throwParserError(
+              std::string{baseError}.append(" but species '").append(species).append(" is not a plasma species"));
           }
           if (m_plasmaSpeciesTypes.at(species) != SpeciesType::Ito) {
-            this->throwParserError(std::string{baseError}.append(" but species '").append(species).append(" is not a particle species"));
+            this->throwParserError(
+              std::string{baseError}.append(" but species '").append(species).append(" is not a particle species"));
           }
 
           m_downstreamSpecies = m_plasmaIndexMap.at(species);
         }
       }
       else {
-        this->throwParserError(std::string{baseError}.append(" but method '").append(method).append("' is not supported"));
+        this->throwParserError(
+          std::string{baseError}.append(" but method '").append(method).append("' is not supported"));
       }
     }
   }
@@ -1120,7 +1152,7 @@ ItoKMCJSON::initializeParticles()
 
 #ifdef CH_MPI
           if (procID() == 0) {
-            initialParticles.add(PointParticle(position, 1.0 * weight));
+            initialParticles.add(PointParticle(position, 1.0 * static_cast<double>(weight)));
           }
 #else
           initialParticles.add(PointParticle(position, 1.0 * weight));
@@ -1163,7 +1195,7 @@ ItoKMCJSON::initializeParticles()
             ParticleManagement::drawBoxParticles(particles, numParticles, loCorner, hiCorner);
 
             for (ListIterator<PointParticle> lit(particles); lit.ok(); ++lit) {
-              lit().weight() = 1.0 * particleWeight;
+              lit().weight() = 1.0 * static_cast<double>(particleWeight);
             }
 
             initialParticles.catenate(particles);
@@ -1204,7 +1236,7 @@ ItoKMCJSON::initializeParticles()
             ParticleManagement::drawSphereParticles(particles, numParticles, center, radius);
 
             for (ListIterator<PointParticle> lit(particles); lit.ok(); ++lit) {
-              lit().weight() = 1.0 * particleWeight;
+              lit().weight() = 1.0 * static_cast<double>(particleWeight);
             }
 
             initialParticles.catenate(particles);
@@ -1245,7 +1277,7 @@ ItoKMCJSON::initializeParticles()
             ParticleManagement::drawGaussianParticles(particles, numParticles, center, radius);
 
             for (ListIterator<PointParticle> lit(particles); lit.ok(); ++lit) {
-              lit().weight() = 1.0 * particleWeight;
+              lit().weight() = 1.0 * static_cast<double>(particleWeight);
             }
 
             initialParticles.catenate(particles);
@@ -1260,7 +1292,8 @@ ItoKMCJSON::initializeParticles()
 
           const std::string f = this->trim(jsonEntry["file"].get<std::string>());
           if (!(this->doesFileExist(f))) {
-            const std::string parseError = std::string{baseError}.append(" but file '").append(f).append("' does not exist");
+            const std::string
+              parseError = std::string{baseError}.append(" but file '").append(f).append("' does not exist");
 
             this->throwParserError(parseError);
           }
@@ -1294,7 +1327,8 @@ ItoKMCJSON::initializeParticles()
 #endif
         }
         else {
-          this->throwParserError(std::string{baseError}.append(" but specification '").append(whichField).append("' is not supported"));
+          this->throwParserError(
+            std::string{baseError}.append(" but specification '").append(whichField).append("' is not supported"));
         }
       }
     }
@@ -1399,8 +1433,9 @@ ItoKMCJSON::initializeMobilities()
       return 0.0;
     };
 
-    const std::string speciesID   = species["id"].get<std::string>();
-    const std::string baseErrorID = std::string{baseError}.append(" and found mobile species '").append(speciesID).append("'");
+    const std::string speciesID = species["id"].get<std::string>();
+    const std::string
+      baseErrorID = std::string{baseError}.append(" and found mobile species '").append(speciesID).append("'");
 
     // Check if the species is mobile.
     const bool isMobile = species["mobile"].get<bool>();
@@ -1466,7 +1501,8 @@ ItoKMCJSON::initializeMobilities()
         };
       }
       else {
-        this->throwParserError(std::string{baseErrorID}.append(" but mobility specifier '").append(type).append("' is not supported"));
+        this->throwParserError(
+          std::string{baseErrorID}.append(" but mobility specifier '").append(type).append("' is not supported"));
       }
     }
 
@@ -1494,8 +1530,9 @@ ItoKMCJSON::initializeDiffusionCoefficients()
       return 0.0;
     };
 
-    const std::string speciesID   = species["id"].get<std::string>();
-    const std::string baseErrorID = std::string{baseError}.append(" and found diffusive species '").append(speciesID).append("'");
+    const std::string speciesID = species["id"].get<std::string>();
+    const std::string
+      baseErrorID = std::string{baseError}.append(" and found diffusive species '").append(speciesID).append("'");
 
     // Check if the species is diffusive
     const bool isDiffusive = species["diffusive"].get<bool>();
@@ -1561,7 +1598,8 @@ ItoKMCJSON::initializeDiffusionCoefficients()
         };
       }
       else {
-        this->throwParserError(std::string{baseErrorID}.append(" but mobility specifier '").append(type).append("' is not supported"));
+        this->throwParserError(
+          std::string{baseErrorID}.append(" but mobility specifier '").append(type).append("' is not supported"));
       }
     }
 
@@ -1590,7 +1628,10 @@ ItoKMCJSON::initializeTemperatures()
     };
 
     const std::string speciesID   = species["id"].get<std::string>();
-    const std::string baseErrorID = std::string{baseError}.append(" and found 'temperature' for species '").append(speciesID).append("'");
+    const std::string baseErrorID = std::string{baseError}
+                                      .append(" and found 'temperature' for species '")
+                                      .append(speciesID)
+                                      .append("'");
 
     if (species.contains("temperature")) {
       const nlohmann::json& temperatureJSON = species["temperature"];
@@ -1640,7 +1681,8 @@ ItoKMCJSON::initializeTemperatures()
         };
       }
       else {
-        this->throwParserError(std::string{baseErrorID}.append(" but temperature specifier '").append(type).append("' is not supported"));
+        this->throwParserError(
+          std::string{baseErrorID}.append(" but temperature specifier '").append(type).append("' is not supported"));
       }
     }
     else {
@@ -1679,13 +1721,18 @@ ItoKMCJSON::initializePhotonSpecies()
     };
 
     if (this->containsWildcard(speciesID)) {
-      this->throwParserError(std::string{baseErrorID}.append(" but species name '").append(speciesID).append("' should not contain wildcard @"));
+      this->throwParserError(std::string{baseErrorID}
+                               .append(" but species name '")
+                               .append(speciesID)
+                               .append("' should not contain wildcard @"));
     }
     if (this->containsBracket(speciesID)) {
-      this->throwParserError(std::string{baseError}.append(" but species '").append(speciesID).append("' should not contain brackets"));
+      this->throwParserError(
+        std::string{baseError}.append(" but species '").append(speciesID).append("' should not contain brackets"));
     }
     if (m_allSpecies.count(speciesID) != 0) {
-      this->throwParserError(std::string{baseErrorID}.append(" but species '").append(speciesID).append("' was already defined elsewhere"));
+      this->throwParserError(
+        std::string{baseErrorID}.append(" but species '").append(speciesID).append("' was already defined elsewhere"));
     }
 
     if (!(species.contains("kappa"))) {
@@ -1739,7 +1786,10 @@ ItoKMCJSON::initializePhotonSpecies()
         this->throwParserError(baseErrorID + " and got 'stochastic A' but can't have 'chi min' >= 'chi max'");
       }
       if (m_backgroundSpeciesMap.count(neutral) != 1) {
-        this->throwParserError(std::string{baseErrorID}.append(" and got 'stochastic A' but don't now species '").append(neutral).append("'"));
+        this->throwParserError(std::string{baseErrorID}
+                                 .append(" and got 'stochastic A' but don't now species '")
+                                 .append(neutral)
+                                 .append("'"));
       }
 
       std::uniform_real_distribution<Real> udist(f1, f2);
@@ -1783,7 +1833,10 @@ ItoKMCJSON::initializePhotonSpecies()
         this->throwParserError(baseErrorID + " and got 'stochastic B' but can't have 'chi min' >= 'chi max'");
       }
       if (m_backgroundSpeciesMap.count(neutral) != 1) {
-        this->throwParserError(std::string{baseErrorID}.append(" and got 'stochastic B' but don't now species '").append(neutral).append("'"));
+        this->throwParserError(std::string{baseErrorID}
+                                 .append(" and got 'stochastic B' but don't now species '")
+                                 .append(neutral)
+                                 .append("'"));
       }
 
       kappaFunction = [x1              = chiMin,
@@ -1803,15 +1856,16 @@ ItoKMCJSON::initializePhotonSpecies()
       };
     }
     else {
-      this->throwParserError(std::string{baseErrorID}.append(" but type specification '").append(type).append("' is not supported"));
+      this->throwParserError(
+        std::string{baseErrorID}.append(" but type specification '").append(type).append("' is not supported"));
     }
 
-    m_photonIndexMap[speciesID] = m_rtSpecies.size();
+    m_photonIndexMap[speciesID] = static_cast<int>(m_rtSpecies.size());
 
     m_rtSpecies.push_back(RefCountedPtr<RtSpecies>(new ItoKMCPhotonSpecies(speciesID, kappaFunction)));
   }
 
-  m_numPhotonSpecies = m_rtSpecies.size();
+  m_numPhotonSpecies = static_cast<int>(m_rtSpecies.size());
 }
 
 void
@@ -2283,7 +2337,8 @@ ItoKMCJSON::initializeFieldEmission()
       };
     }
     else {
-      this->throwParserError(std::string{baseError}.append(" but 'type' specifier = '").append(type).append("' is not supported"));
+      this->throwParserError(
+        std::string{baseError}.append(" but 'type' specifier = '").append(type).append("' is not supported"));
     }
   }
 }
@@ -2305,7 +2360,12 @@ ItoKMCJSON::sanctifyPlasmaReaction(const std::vector<std::string>& a_reactants,
     const bool isBackground = this->isBackgroundSpecies(r);
     const bool isPlasma     = this->isPlasmaSpecies(r);
     if (!isBackground && !isPlasma) {
-      this->throwParserError(std::string{baseError}.append(" but reactant '").append(r).append("' for reaction '").append(a_reaction).append(" should not appear on left hand side"));
+      this->throwParserError(std::string{baseError}
+                               .append(" but reactant '")
+                               .append(r)
+                               .append("' for reaction '")
+                               .append(a_reaction)
+                               .append(" should not appear on left hand side"));
     }
   }
 
@@ -2316,7 +2376,12 @@ ItoKMCJSON::sanctifyPlasmaReaction(const std::vector<std::string>& a_reactants,
     const bool isPhoton     = this->isPhotonSpecies(p);
 
     if (!isBackground && !isPlasma && !isPhoton) {
-      this->throwParserError(std::string{baseError}.append("but I do not know product species '").append(p).append("' for reaction '").append(a_reaction).append("'."));
+      this->throwParserError(std::string{baseError}
+                               .append("but I do not know product species '")
+                               .append(p)
+                               .append("' for reaction '")
+                               .append(a_reaction)
+                               .append("'."));
     }
   }
 
@@ -2390,7 +2455,8 @@ ItoKMCJSON::sanctifyPlasmaReaction(const std::vector<std::string>& a_reactants,
   }
 
   if (sumCharge != 0) {
-    this->throwParserWarning(std::string{baseError}.append(" but charge is not conserved for reaction '").append(a_reaction).append("'."));
+    this->throwParserWarning(
+      std::string{baseError}.append(" but charge is not conserved for reaction '").append(a_reaction).append("'."));
   }
 }
 
@@ -2413,11 +2479,21 @@ ItoKMCJSON::sanctifyPhotoReaction(const std::vector<std::string>& a_reactants,
     const bool isPhoton     = this->isPhotonSpecies(r);
 
     if (!isBackground && !isPlasma && !isPhoton) {
-      this->throwParserError(std::string{baseError}.append(" but reactant '").append(r).append("' for reaction '").append(a_reaction).append(" is not a background/plasma/photon species"));
+      this->throwParserError(std::string{baseError}
+                               .append(" but reactant '")
+                               .append(r)
+                               .append("' for reaction '")
+                               .append(a_reaction)
+                               .append(" is not a background/plasma/photon species"));
     }
 
     if (isPlasma) {
-      this->throwParserError(std::string{baseError}.append(" but reactant '").append(r).append("' for reaction '").append(a_reaction).append(" should not appear on left hand side"));
+      this->throwParserError(std::string{baseError}
+                               .append(" but reactant '")
+                               .append(r)
+                               .append("' for reaction '")
+                               .append(a_reaction)
+                               .append(" should not appear on left hand side"));
     }
   }
 
@@ -2428,11 +2504,21 @@ ItoKMCJSON::sanctifyPhotoReaction(const std::vector<std::string>& a_reactants,
     const bool isPhoton     = this->isPhotonSpecies(p);
 
     if (isPhoton) {
-      this->throwParserError(std::string{baseError}.append("but photon species '").append(p).append("' for reaction '").append(a_reaction).append("' is not allowed on the right-hand side."));
+      this->throwParserError(std::string{baseError}
+                               .append("but photon species '")
+                               .append(p)
+                               .append("' for reaction '")
+                               .append(a_reaction)
+                               .append("' is not allowed on the right-hand side."));
     }
 
     if (!isBackground && !isPlasma) {
-      this->throwParserError(std::string{baseError}.append("but I do not know product species '").append(p).append("' for reaction '").append(a_reaction).append("'."));
+      this->throwParserError(std::string{baseError}
+                               .append("but I do not know product species '")
+                               .append(p)
+                               .append("' for reaction '")
+                               .append(a_reaction)
+                               .append("'."));
     }
   }
 
@@ -2474,7 +2560,8 @@ ItoKMCJSON::sanctifyPhotoReaction(const std::vector<std::string>& a_reactants,
   }
 
   if (sumCharge != 0) {
-    this->throwParserWarning(std::string{baseError}.append(" but charge is not conserved for reaction '").append(a_reaction).append("'."));
+    this->throwParserWarning(
+      std::string{baseError}.append(" but charge is not conserved for reaction '").append(a_reaction).append("'."));
   }
 }
 
@@ -2508,7 +2595,8 @@ ItoKMCJSON::parseReactionString(std::vector<std::string>& a_reactants,
 
   // Make sure that -> is in the reaction string.
   if (it == segments.end()) {
-    this->throwParserError(std::string{baseError}.append(" -- Reaction '").append(a_reaction).append("' does not contain '->"));
+    this->throwParserError(
+      std::string{baseError}.append(" -- Reaction '").append(a_reaction).append("' does not contain '->"));
   }
 
   // Left of "->" are reactants and right of "->" are products
@@ -2625,7 +2713,7 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
   Real   propensityFactor = 1.0;
   for (const auto& rn : reactantNumbers) {
     for (size_t i = 2; i <= rn.second; i++) {
-      propensityFactor *= i;
+      propensityFactor *= static_cast<double>(i);
     }
 
     volumeFactor += rn.second;
@@ -2662,7 +2750,10 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
     const std::string species = a_reactionJSON["species"].get<std::string>();
 
     if (!(this->isPlasmaSpecies(species))) {
-      this->throwParserError(std::string{baseError}.append("and got 'alpha*v' but species '").append(species).append("' is not a plasma species"));
+      this->throwParserError(std::string{baseError}
+                               .append("and got 'alpha*v' but species '")
+                               .append(species)
+                               .append("' is not a plasma species"));
     }
 
     const int idx = m_plasmaIndexMap.at(species);
@@ -2682,7 +2773,10 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
     const std::string species = a_reactionJSON["species"].get<std::string>();
 
     if (!(this->isPlasmaSpecies(species))) {
-      this->throwParserError(std::string{baseError}.append("and got 'eta*v' but species '").append(species).append("' is not a plasma species"));
+      this->throwParserError(std::string{baseError}
+                               .append("and got 'eta*v' but species '")
+                               .append(species)
+                               .append("' is not a plasma species"));
     }
 
     const int idx = m_plasmaIndexMap.at(species);
@@ -2726,7 +2820,10 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
     const bool isPlasma     = this->isPlasmaSpecies(species);
 
     if (!isBackground && !isPlasma) {
-      this->throwParserError(std::string{baseError}.append(" but species '").append(species).append("' is not a background or plasma species"));
+      this->throwParserError(std::string{baseError}
+                               .append(" but species '")
+                               .append(species)
+                               .append("' is not a background or plasma species"));
     }
 
     FunctionEX speciesTemperature;
@@ -2840,7 +2937,8 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
     };
   }
   else {
-    this->throwParserError(std::string{baseError}.append(" but 'type' specifier '").append(type).append("' is not supported"));
+    this->throwParserError(
+      std::string{baseError}.append(" but 'type' specifier '").append(type).append("' is not supported"));
   }
 
   // Scale the reaction according to various input variables.
@@ -3065,7 +3163,8 @@ ItoKMCJSON::parsePlasmaReactionGradientCorrection(const nlohmann::json& a_reacti
     const std::string species = this->trim(a_reactionJSON["gradient correction"].get<std::string>());
 
     if (m_plasmaSpeciesTypes.count(species) == 0) {
-      this->throwParserError(std::string{baseError}.append(" but species '").append(species).append(" is not a plasma species"));
+      this->throwParserError(
+        std::string{baseError}.append(" but species '").append(species).append(" is not a plasma species"));
     }
 
     const SpeciesType type = m_plasmaSpeciesTypes.at(species);
@@ -3103,7 +3202,8 @@ ItoKMCJSON::parsePlasmaReactionGradientCorrection(const nlohmann::json& a_reacti
       ret = std::make_pair(true, species);
     }
     else {
-      this->throwParserError(std::string{baseError}.append(" but species '").append(species).append("' is not mobile and diffusive!"));
+      this->throwParserError(
+        std::string{baseError}.append(" but species '").append(species).append("' is not mobile and diffusive!"));
     }
   }
 
@@ -3179,7 +3279,8 @@ ItoKMCJSON::parseTableEByN(const nlohmann::json& a_tableEntry, const std::string
       spacing = LookupTable::Spacing::Exponential;
     }
     else {
-      this->throwParserError(std::string{preError}.append(" but spacing '").append(whichSpacing).append("' is not supported"));
+      this->throwParserError(
+        std::string{preError}.append(" but spacing '").append(whichSpacing).append("' is not supported"));
     }
   }
 
@@ -3198,7 +3299,8 @@ ItoKMCJSON::parseTableEByN(const nlohmann::json& a_tableEntry, const std::string
   if (a_tableEntry.contains("scale E/N")) {
     const Real scaling = a_tableEntry["scale E/N"].get<Real>();
     if (scaling <= 0.0) {
-      this->throwParserWarning(std::string{preError}.append(" but shouldn't have 'scale E/N' <= 0.0 for ").append(postError));
+      this->throwParserWarning(
+        std::string{preError}.append(" but shouldn't have 'scale E/N' <= 0.0 for ").append(postError));
     }
 
     tabulatedCoefficient.scale<0>(scaling);
@@ -3206,7 +3308,8 @@ ItoKMCJSON::parseTableEByN(const nlohmann::json& a_tableEntry, const std::string
   if (a_tableEntry.contains("scale " + a_dataID)) {
     const Real scaling = a_tableEntry["scale " + a_dataID].get<Real>();
     if (scaling <= 0.0) {
-      this->throwParserWarning(std::string{preError}.append(" but shouldn't have 'scale E/N' <= 0.0 for ").append(postError));
+      this->throwParserWarning(
+        std::string{preError}.append(" but shouldn't have 'scale E/N' <= 0.0 for ").append(postError));
     }
 
     tabulatedCoefficient.scale<1>(scaling);
@@ -3350,7 +3453,9 @@ ItoKMCJSON::computeMobilities(const Real /*a_time*/, const RealVect& a_pos, cons
 }
 
 Vector<Real>
-ItoKMCJSON::computeDiffusionCoefficients(const Real /*a_time*/, const RealVect& a_pos, const RealVect& a_E) const noexcept
+ItoKMCJSON::computeDiffusionCoefficients(const Real /*a_time*/,
+                                         const RealVect& a_pos,
+                                         const RealVect& a_E) const noexcept
 {
   CH_TIME("ItoKMCJSON::computeDiffusionCoefficients");
   if (m_verbose) {
@@ -3488,7 +3593,7 @@ ItoKMCJSON::secondaryEmissionEB(Vector<List<ItoParticle>>& a_secondaryParticles,
             const int Z = m_itoSpecies[p]->getChargeNumber();
 
             if ((Z < 0 && isCathode) || (Z > 0 && isAnode) || Z == 0) {
-              a_secondaryParticles[p].add(ItoParticle(1.0 * X[i], releasePosition));
+              a_secondaryParticles[p].add(ItoParticle(1.0 * static_cast<double>(X[i]), releasePosition));
             }
           }
         }
@@ -3523,7 +3628,7 @@ ItoKMCJSON::secondaryEmissionEB(Vector<List<ItoParticle>>& a_secondaryParticles,
             const int Z = m_itoSpecies[p]->getChargeNumber();
 
             if ((Z < 0 && isCathode) || (Z > 0 && isAnode) || Z == 0) {
-              a_secondaryParticles[p].add(ItoParticle(1.0 * X[i], releasePosition));
+              a_secondaryParticles[p].add(ItoParticle(1.0 * static_cast<double>(X[i]), releasePosition));
             }
           }
         }
@@ -3549,7 +3654,7 @@ ItoKMCJSON::secondaryEmissionEB(Vector<List<ItoParticle>>& a_secondaryParticles,
         if (numEmission > 0LL) {
           const RealVect x = a_cellCenter + a_cellCentroid * a_dx;
 
-          a_secondaryParticles[species].add(ItoParticle(1.0 * numEmission, x));
+          a_secondaryParticles[species].add(ItoParticle(1.0 * static_cast<double>(numEmission), x));
         }
       }
     }

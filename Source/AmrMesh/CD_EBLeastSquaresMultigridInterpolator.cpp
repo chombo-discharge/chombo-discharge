@@ -644,7 +644,7 @@ EBLeastSquaresMultigridInterpolator::getStencil(VoFStencil&            a_stencil
   VofUtils::includeCells(fineVofs, a_validFineCells);
   VofUtils::includeCells(coarVofs, a_validCoarCells);
 
-  const int numEquations = coarVofs.size() + fineVofs.size();
+  const int numEquations = static_cast<int>(coarVofs.size() + fineVofs.size());
   const int numUnknowns  = LeastSquares::getTaylorExpansionSize(a_order);
   CH_STOP(t1);
 
@@ -695,8 +695,8 @@ EBLeastSquaresMultigridInterpolator::getStencil(VoFStencil&            a_stencil
     std::sort(fineVofsTrimmedSize.begin(), fineVofsTrimmedSize.end(), comparatorFine);
     std::sort(coarVofsTrimmedSize.begin(), coarVofsTrimmedSize.end(), comparatorCoar);
 
-    const int curFineSize = fineVofsTrimmedSize.size();
-    const int curCoarSize = coarVofsTrimmedSize.size();
+    const int curFineSize = static_cast<int>(fineVofsTrimmedSize.size());
+    const int curCoarSize = static_cast<int>(coarVofsTrimmedSize.size());
 
     fineVofsTrimmedSize.resize(std::min(2 * numUnknowns, curFineSize));
     coarVofsTrimmedSize.resize(std::min(2 * numUnknowns, curCoarSize));

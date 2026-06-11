@@ -375,10 +375,10 @@ VofUtils::getQuadrant(const RealVect& a_normal, const VolIndex& a_vof, const EBI
   Box bx(iv, iv);
   for (int dir = 0; dir < SpaceDim; dir++) {
     if (a_normal[dir] < 0.0) {
-      bx.growLo(dir, a_radius);
+      bx.growLo(dir, static_cast<int>(a_radius));
     }
     else if (a_normal[dir] > 0.0) {
-      bx.growHi(dir, a_radius);
+      bx.growHi(dir, static_cast<int>(a_radius));
     }
     else {
       MayDay::Error(
@@ -402,11 +402,11 @@ VofUtils::getSymmetricQuadrant(const std::pair<int, Side::LoHiSide>& a_cardinal,
   Box bx(iv, iv);
   for (int dir = 0; dir < SpaceDim; dir++) {
     if (dir == a_cardinal.first) {
-      bx.growDir(dir, a_cardinal.second, a_radius);
+      bx.growDir(dir, a_cardinal.second, static_cast<int>(a_radius));
     }
     else {
-      bx.growLo(dir, a_radius);
-      bx.growHi(dir, a_radius);
+      bx.growLo(dir, static_cast<int>(a_radius));
+      bx.growHi(dir, static_cast<int>(a_radius));
     }
   }
 

@@ -170,7 +170,7 @@ RandomInterface::RandomInterface() noexcept
                                                  noiseOctaves1);
 
     // Find a seed to use for the RNG
-    int seed = reseed ? std::chrono::system_clock::now().time_since_epoch().count() : 0;
+    int seed = reseed ? static_cast<int>(std::chrono::system_clock::now().time_since_epoch().count()) : 0;
 #ifdef CH_MPI
     MPI_Bcast(&seed, 1, MPI_INT, 0, Chombo_MPI::comm);
 #endif
@@ -192,7 +192,7 @@ RandomInterface::RandomInterface() noexcept
                                                  noiseOctaves2);
 
     // Find a seed to use for the RNG
-    int seed = reseed ? std::chrono::system_clock::now().time_since_epoch().count() : 1;
+    int seed = reseed ? static_cast<int>(std::chrono::system_clock::now().time_since_epoch().count()) : 1;
 #ifdef CH_MPI
     MPI_Bcast(&seed, 1, MPI_INT, 0, Chombo_MPI::comm);
 #endif

@@ -74,7 +74,7 @@ EBHelmholtzOpFactory::EBHelmholtzOpFactory(const Location::Cell    a_dataLocatio
 
   // Define constructor arguments.
 
-  m_numAmrLevels = m_amrLevelGrids.size();
+  m_numAmrLevels = static_cast<int>(m_amrLevelGrids.size());
 
   // Asking multigrid to do the bottom solve at a refined AMR level is classified as bad input.
   if (ChomboDischarge::EBHelmholtzOpFactory::isFiner(m_bottomDomain, m_amrLevelGrids[0]->getDomain())) {
@@ -148,7 +148,7 @@ EBHelmholtzOpFactory::defineMultigridLevels()
       while (hasCoarser) {
 
         // Current number of multigrid levels and the multigrid level which we will coarsen. Again, note the inverse order here (first entry is finest level)
-        const int          curMgLevels = m_mgLevelGrids[amrLevel].size();
+        const int          curMgLevels = static_cast<int>(m_mgLevelGrids[amrLevel].size());
         const EBLevelGrid& mgEblgFine  = *m_mgLevelGrids[amrLevel].back();
 
         // BoxLayout and domains for coarsening.
@@ -482,7 +482,7 @@ EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bo
   else { // Asking for a coarsening. No interp or flux reg object here.
     // TLDR: Go through the coarsened levels for the specified amr level and see if we find a coarsening at the
     //       specified depth.
-    const ProblemDomain coarDomain = coarsen(a_fineDomain, std::pow(mgRefRat, a_depth));
+    const ProblemDomain coarDomain = coarsen(a_fineDomain, static_cast<int>(std::pow(mgRefRat, a_depth)));
 
     // These are the things that live below the AMR level corresponding to a_fineDomain.
     const AmrLevelGrids& mgLevelGrids = m_mgLevelGrids[amrLevel];
