@@ -101,7 +101,7 @@ public:
     @param[in] a_realm Realm
   */
   virtual void
-  setRealm(const std::string a_realm);
+  setRealm(const std::string& a_realm);
 
   /**
     @brief Set the radiative transfer species (RtSpecies)
@@ -115,7 +115,7 @@ public:
     @param[in] a_computationalGeometry Computational geometry
   */
   virtual void
-  setComputationalGeometry(const RefCountedPtr<ComputationalGeometry> a_computationalGeometry);
+  setComputationalGeometry(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry);
 
   /**
     @brief Get computational loads for a specific grid level
@@ -276,7 +276,7 @@ public:
     @param[in] a_source Source term (varies in space)
   */
   virtual void
-  setSource(const std::function<Real(const RealVect a_pos)> a_source);
+  setSource(const std::function<Real(const RealVect a_pos)>& a_source);
 
   /**
     @brief Write plot file
@@ -309,7 +309,7 @@ public:
   virtual void
   writePlotData(LevelData<EBCellFAB>& a_output,
                 int&                  a_comp,
-                const std::string     a_outputRealm,
+                const std::string&    a_outputRealm,
                 const int             a_level) const noexcept;
 
 #ifdef CH_USE_HDF5
@@ -529,7 +529,7 @@ protected:
   writeData(LevelData<EBCellFAB>& a_output,
             int&                  a_comp,
             const EBAMRCellData&  a_data,
-            const std::string     a_outputRealm,
+            const std::string&    a_outputRealm,
             const int             a_level,
             const bool            a_interpToCentroids,
             const bool            a_interpGhost) const noexcept;

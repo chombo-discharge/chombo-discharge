@@ -102,15 +102,15 @@ namespace Physics {
 	@return Per-cell tagging fields [normalised curvature, normalised alpha*dx].
       */
       virtual Vector<Real>
-      computeTagFields(const RealVect a_pos,
-                       const Real     a_time,
-                       const Real     a_dx,
-                       const RealVect a_E,
-                       const Real     a_minE,
-                       const Real     a_maxE,
-                       const RealVect a_gradE,
-                       const Real     a_minGradE,
-                       const Real     a_maxGradE) const noexcept override;
+      computeTagFields(const RealVect& a_pos,
+                       const Real      a_time,
+                       const Real      a_dx,
+                       const RealVect& a_E,
+                       const Real      a_minE,
+                       const Real      a_maxE,
+                       const RealVect& a_gradE,
+                       const Real      a_minGradE,
+                       const Real      a_maxGradE) const noexcept override;
 
       /**
 	@brief Determine if a particular cell should be coarsened.
@@ -123,12 +123,12 @@ namespace Physics {
 	@return True if the cell should be coarsened.
       */
       virtual bool
-      coarsenCell(const RealVect         a_pos,
-                  const Real             a_time,
-                  const Real             a_dx,
-                  const int              a_lvl,
-                  const Vector<Real>     a_tagFields,
-                  const Vector<RealVect> a_gradTagFields) const noexcept override;
+      coarsenCell(const RealVect&         a_pos,
+                  const Real              a_time,
+                  const Real              a_dx,
+                  const int               a_lvl,
+                  const Vector<Real>&     a_tagFields,
+                  const Vector<RealVect>& a_gradTagFields) const noexcept override;
 
       /**
 	@brief Determine if a particular cell should be refined.
@@ -141,12 +141,12 @@ namespace Physics {
 	@return True if the cell should be refined.
       */
       virtual bool
-      refineCell(const RealVect         a_pos,
-                 const Real             a_time,
-                 const Real             a_dx,
-                 const int              a_lvl,
-                 const Vector<Real>     a_tagFields,
-                 const Vector<RealVect> a_gradTagFields) const noexcept override;
+      refineCell(const RealVect&         a_pos,
+                 const Real              a_time,
+                 const Real              a_dx,
+                 const int               a_lvl,
+                 const Vector<Real>&     a_tagFields,
+                 const Vector<RealVect>& a_gradTagFields) const noexcept override;
     };
   } // namespace ItoKMC
 } // namespace Physics

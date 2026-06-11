@@ -45,7 +45,7 @@ public:
     @param[in] a_dx     Grid resolution.
     @details This sets the low corner as a_probLo + a_box.lowEnd()*a_dx
   */
-  RealBox(const Box a_box, const RealVect& a_origin, const Real a_dx);
+  RealBox(const Box& a_box, const RealVect& a_origin, const Real a_dx);
 
   /**
     @brief Destructor (does nothing)

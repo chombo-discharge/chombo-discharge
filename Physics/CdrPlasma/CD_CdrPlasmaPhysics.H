@@ -109,15 +109,15 @@ namespace Physics {
          @return Vector of plot variable values.
       */
       virtual Vector<Real>
-      getPlotVariables(const Vector<Real>     a_cdrDensities,
-                       const Vector<RealVect> a_cdrGradients,
-                       const Vector<Real>     a_rteDensities,
-                       const RealVect         a_E,
-                       const RealVect         a_position,
-                       const Real             a_dx,
-                       const Real             a_dt,
-                       const Real             a_time,
-                       const Real             a_kappa) const
+      getPlotVariables(const Vector<Real>&     a_cdrDensities,
+                       const Vector<RealVect>& a_cdrGradients,
+                       const Vector<Real>&     a_rteDensities,
+                       const RealVect&         a_E,
+                       const RealVect&         a_position,
+                       const Real              a_dx,
+                       const Real              a_dt,
+                       const Real              a_time,
+                       const Real              a_kappa) const
       {
         return Vector<Real>(this->getNumberOfPlotVariables(), 1.0);
       }
@@ -130,7 +130,7 @@ namespace Physics {
          @return Townsend ionization coefficient (1/m).
       */
       virtual Real
-      computeAlpha(const Real a_E, const RealVect a_position) const = 0;
+      computeAlpha(const Real a_E, const RealVect& a_position) const = 0;
 
       /**
          @brief Compute the Townsend attachment coefficient eta.
@@ -140,7 +140,7 @@ namespace Physics {
          @return Townsend attachment coefficient (1/m).
       */
       virtual Real
-      computeEta(const Real a_E, const RealVect a_position) const = 0;
+      computeEta(const Real a_E, const RealVect& a_position) const = 0;
 
       /**
          @brief Advance the reaction network over a time interval and return source terms.
@@ -160,17 +160,17 @@ namespace Physics {
          @param[in]  a_kappa        Volume fraction of the grid cell.
       */
       virtual void
-      advanceReactionNetwork(Vector<Real>&          a_cdrSources,
-                             Vector<Real>&          a_rteSources,
-                             const Vector<Real>     a_cdrDensities,
-                             const Vector<RealVect> a_cdrGradients,
-                             const Vector<Real>     a_rteDensities,
-                             const RealVect         a_E,
-                             const RealVect         a_pos,
-                             const Real             a_dx,
-                             const Real             a_dt,
-                             const Real             a_time,
-                             const Real             a_kappa) const = 0;
+      advanceReactionNetwork(Vector<Real>&           a_cdrSources,
+                             Vector<Real>&           a_rteSources,
+                             const Vector<Real>&     a_cdrDensities,
+                             const Vector<RealVect>& a_cdrGradients,
+                             const Vector<Real>&     a_rteDensities,
+                             const RealVect&         a_E,
+                             const RealVect&         a_pos,
+                             const Real              a_dx,
+                             const Real              a_dt,
+                             const Real              a_time,
+                             const Real              a_kappa) const = 0;
 
       /**
          @brief Compute drift velocities for all CDR species.
@@ -181,10 +181,10 @@ namespace Physics {
          @return Drift velocity vectors in the same order as m_cdrSpecies.
       */
       virtual Vector<RealVect>
-      computeCdrDriftVelocities(const Real         a_time,
-                                const RealVect     a_pos,
-                                const RealVect     a_E,
-                                const Vector<Real> a_cdrDensities) const = 0;
+      computeCdrDriftVelocities(const Real          a_time,
+                                const RealVect&     a_pos,
+                                const RealVect&     a_E,
+                                const Vector<Real>& a_cdrDensities) const = 0;
 
       /**
          @brief Compute diffusion coefficients for all CDR species.
@@ -195,10 +195,10 @@ namespace Physics {
          @return Scalar diffusion coefficients in the same order as m_cdrSpecies.
       */
       virtual Vector<Real>
-      computeCdrDiffusionCoefficients(const Real         a_time,
-                                      const RealVect     a_pos,
-                                      const RealVect     a_E,
-                                      const Vector<Real> a_cdrDensities) const = 0;
+      computeCdrDiffusionCoefficients(const Real          a_time,
+                                      const RealVect&     a_pos,
+                                      const RealVect&     a_E,
+                                      const Vector<Real>& a_cdrDensities) const = 0;
 
       /**
          @brief Compute CDR species fluxes on electrode-gas EB interfaces.
@@ -216,15 +216,15 @@ namespace Physics {
          @return Boundary fluxes in the same order as m_cdrSpecies.
       */
       virtual Vector<Real>
-      computeCdrElectrodeFluxes(const Real         a_time,
-                                const RealVect     a_pos,
-                                const RealVect     a_normal,
-                                const RealVect     a_E,
-                                const Vector<Real> a_cdrDensities,
-                                const Vector<Real> a_cdrVelocities,
-                                const Vector<Real> a_cdrGradients,
-                                const Vector<Real> a_rteFluxes,
-                                const Vector<Real> a_extrapCdrFluxes) const = 0;
+      computeCdrElectrodeFluxes(const Real          a_time,
+                                const RealVect&     a_pos,
+                                const RealVect&     a_normal,
+                                const RealVect&     a_E,
+                                const Vector<Real>& a_cdrDensities,
+                                const Vector<Real>& a_cdrVelocities,
+                                const Vector<Real>& a_cdrGradients,
+                                const Vector<Real>& a_rteFluxes,
+                                const Vector<Real>& a_extrapCdrFluxes) const = 0;
 
       /**
          @brief Compute CDR species fluxes on dielectric-gas EB interfaces.
@@ -242,15 +242,15 @@ namespace Physics {
          @return Boundary fluxes in the same order as m_cdrSpecies.
       */
       virtual Vector<Real>
-      computeCdrDielectricFluxes(const Real         a_time,
-                                 const RealVect     a_pos,
-                                 const RealVect     a_normal,
-                                 const RealVect     a_E,
-                                 const Vector<Real> a_cdrDensities,
-                                 const Vector<Real> a_cdrVelocities,
-                                 const Vector<Real> a_cdrGradients,
-                                 const Vector<Real> a_rteFluxes,
-                                 const Vector<Real> a_extrapCdrFluxes) const = 0;
+      computeCdrDielectricFluxes(const Real          a_time,
+                                 const RealVect&     a_pos,
+                                 const RealVect&     a_normal,
+                                 const RealVect&     a_E,
+                                 const Vector<Real>& a_cdrDensities,
+                                 const Vector<Real>& a_cdrVelocities,
+                                 const Vector<Real>& a_cdrGradients,
+                                 const Vector<Real>& a_rteFluxes,
+                                 const Vector<Real>& a_extrapCdrFluxes) const = 0;
 
       /**
          @brief Compute CDR species fluxes through computational domain boundaries.
@@ -269,15 +269,15 @@ namespace Physics {
       */
       virtual Vector<Real>
       computeCdrDomainFluxes(const Real           a_time,
-                             const RealVect       a_pos,
+                             const RealVect&      a_pos,
                              const int            a_dir,
                              const Side::LoHiSide a_side,
-                             const RealVect       a_E,
-                             const Vector<Real>   a_cdrDensities,
-                             const Vector<Real>   a_cdrVelocities,
-                             const Vector<Real>   a_cdrGradients,
-                             const Vector<Real>   a_rteFluxes,
-                             const Vector<Real>   a_extrapCdrFluxes) const = 0;
+                             const RealVect&      a_E,
+                             const Vector<Real>&  a_cdrDensities,
+                             const Vector<Real>&  a_cdrVelocities,
+                             const Vector<Real>&  a_cdrGradients,
+                             const Vector<Real>&  a_rteFluxes,
+                             const Vector<Real>&  a_extrapCdrFluxes) const = 0;
 
       /**
          @brief Return the initial surface charge density on dielectric surfaces.
@@ -286,7 +286,7 @@ namespace Physics {
          @return Initial surface charge density (C/m^2 in 3D, C/m in 2D).
       */
       virtual Real
-      initialSigma(const Real a_time, const RealVect a_pos) const = 0;
+      initialSigma(const Real a_time, const RealVect& a_pos) const = 0;
 
       /**
          @brief Return the list of CDR species.

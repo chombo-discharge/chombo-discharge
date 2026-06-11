@@ -131,7 +131,7 @@ namespace Physics {
       void
       writePlotData(LevelData<EBCellFAB>& a_output,
                     int&                  a_icomp,
-                    const std::string     a_outputRealm,
+                    const std::string&    a_outputRealm,
                     const int             a_level) const override;
 
       /**
@@ -194,7 +194,7 @@ namespace Physics {
         @return Return value
       */
       bool
-      loadBalanceThisRealm(const std::string a_realm) const override;
+      loadBalanceThisRealm(const std::string& a_realm) const override;
 
       /**
 	@brief Load balance grid boxes for a specified realm. 
@@ -212,7 +212,7 @@ namespace Physics {
       void
       loadBalanceBoxes(Vector<Vector<int>>&             a_procs,
                        Vector<Vector<Box>>&             a_boxes,
-                       const std::string                a_realm,
+                       const std::string&               a_realm,
                        const Vector<DisjointBoxLayout>& a_grids,
                        const int                        a_lmin,
                        const int                        a_finestLevel) override;

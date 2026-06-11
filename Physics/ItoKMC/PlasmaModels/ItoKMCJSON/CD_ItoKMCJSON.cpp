@@ -126,7 +126,7 @@ ItoKMCJSON::trim(const std::string& a_string) const noexcept
 }
 
 void
-ItoKMCJSON::throwParserError(const std::string a_error) const noexcept
+ItoKMCJSON::throwParserError(const std::string& a_error) const noexcept
 {
   CH_TIME("ItoKMCJSON::throwParserError");
   if (m_verbose) {
@@ -139,7 +139,7 @@ ItoKMCJSON::throwParserError(const std::string a_error) const noexcept
 }
 
 void
-ItoKMCJSON::throwParserWarning(const std::string a_warning) const noexcept
+ItoKMCJSON::throwParserWarning(const std::string& a_warning) const noexcept
 {
   CH_TIME("ItoKMCJSON::throwParserWarning");
   if (m_verbose) {
@@ -152,7 +152,7 @@ ItoKMCJSON::throwParserWarning(const std::string a_warning) const noexcept
 }
 
 bool
-ItoKMCJSON::doesFileExist(const std::string a_filename) const noexcept
+ItoKMCJSON::doesFileExist(const std::string& a_filename) const noexcept
 {
   CH_TIME("ItoKMCJSON::doesFileExist");
   if (m_verbose) {
@@ -165,7 +165,7 @@ ItoKMCJSON::doesFileExist(const std::string a_filename) const noexcept
 }
 
 bool
-ItoKMCJSON::containsWildcard(const std::string a_str) const noexcept
+ItoKMCJSON::containsWildcard(const std::string& a_str) const noexcept
 {
   CH_TIME("ItoKMCJSON::containsWildcard");
   if (m_verbose) {
@@ -209,7 +209,7 @@ ItoKMCJSON::isPhotonSpecies(const std::string& a_name) const noexcept
 }
 
 bool
-ItoKMCJSON::containsBracket(const std::string a_str) const noexcept
+ItoKMCJSON::containsBracket(const std::string& a_str) const noexcept
 {
   CH_TIME("ItoKMCJSON::containsBracket");
   if (m_verbose) {
@@ -232,13 +232,13 @@ ItoKMCJSON::containsBracket(const std::string a_str) const noexcept
 }
 
 bool
-ItoKMCJSON::isBracketed(const std::string a_str) const noexcept
+ItoKMCJSON::isBracketed(const std::string& a_str) const noexcept
 {
   return (a_str.front() == '(' && a_str.back() == ')');
 }
 
 void
-ItoKMCJSON::checkMolarFraction(const RealVect a_position) const noexcept
+ItoKMCJSON::checkMolarFraction(const RealVect& a_position) const noexcept
 {
   CH_TIME("ItoKMCJSON::checkMolarFraction");
   if (m_verbose) {
@@ -404,7 +404,7 @@ ItoKMCJSON::initializeBackgroundSpecies()
 
       const std::string molFracType = this->trim(species["molar fraction"]["type"].get<std::string>());
 
-      std::function<Real(const RealVect x)> molarFraction;
+      std::function<Real(const RealVect& x)> molarFraction;
 
       if (molFracType == "constant") {
         if (!(species["molar fraction"].contains("value"))) {
@@ -682,7 +682,7 @@ ItoKMCJSON::initializePlasmaSpecies()
 }
 
 void
-ItoKMCJSON::initializeTownsendCoefficient(const std::string a_coeff)
+ItoKMCJSON::initializeTownsendCoefficient(const std::string& a_coeff)
 {
   CH_TIME("ItoKMCJSON::initializeTownsendCoefficient");
   if (m_verbose) {
@@ -835,7 +835,7 @@ ItoKMCJSON::initializeParticlePlacement()
 }
 
 void
-ItoKMCJSON::initializeAutomaticTownsend(const std::string a_coeff)
+ItoKMCJSON::initializeAutomaticTownsend(const std::string& a_coeff)
 {
   CH_TIME("ItoKMCJSON::initializeAutomaticTownsend");
   if (m_verbose) {
@@ -1989,7 +1989,7 @@ ItoKMCJSON::initializePhotoReactions()
 }
 
 void
-ItoKMCJSON::initializeSurfaceEmission(const std::string a_surface)
+ItoKMCJSON::initializeSurfaceEmission(const std::string& a_surface)
 {
   CH_TIME("ItoKMCJSON::initializeSurfaceEmission");
   if (m_verbose) {
@@ -2586,8 +2586,8 @@ ItoKMCJSON::getReactionSpecies(std::list<size_t>&              a_backgroundReact
 }
 
 std::pair<std::function<
-            Real(const Real E, const Real V, const Real dx, const Real dt, const RealVect x, const Vector<Real>& phi)>,
-          std::function<Real(const Real E, const RealVect x)>>
+            Real(const Real E, const Real V, const Real dx, const Real dt, const RealVect& x, const Vector<Real>& phi)>,
+          std::function<Real(const Real E, const RealVect& x)>>
 ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
                                     const std::list<size_t>& a_backgroundReactants,
                                     const std::list<size_t>& a_plasmaReactants) const
@@ -3305,7 +3305,7 @@ ItoKMCJSON::parseReactionWildcards(const std::vector<std::string>& a_reactants,
 }
 
 Real
-ItoKMCJSON::getNeutralDensity(const RealVect a_pos) const noexcept
+ItoKMCJSON::getNeutralDensity(const RealVect& a_pos) const noexcept
 {
   CH_TIME("ItoKMCJSON::getNeutralDensity");
   if (m_verbose) {
@@ -3316,7 +3316,7 @@ ItoKMCJSON::getNeutralDensity(const RealVect a_pos) const noexcept
 }
 
 Real
-ItoKMCJSON::computeAlpha(const Real a_E, const RealVect a_pos) const noexcept
+ItoKMCJSON::computeAlpha(const Real a_E, const RealVect& a_pos) const noexcept
 {
   CH_TIME("ItoKMCJSON::computeAlpha");
   if (m_verbose) {
@@ -3327,7 +3327,7 @@ ItoKMCJSON::computeAlpha(const Real a_E, const RealVect a_pos) const noexcept
 }
 
 Real
-ItoKMCJSON::computeEta(const Real a_E, const RealVect a_pos) const noexcept
+ItoKMCJSON::computeEta(const Real a_E, const RealVect& a_pos) const noexcept
 {
   CH_TIME("ItoKMCJSON::computeEta");
   if (m_verbose) {
@@ -3338,7 +3338,7 @@ ItoKMCJSON::computeEta(const Real a_E, const RealVect a_pos) const noexcept
 }
 
 Vector<Real>
-ItoKMCJSON::computeMobilities(const Real /*a_time*/, const RealVect a_pos, const RealVect a_E) const noexcept
+ItoKMCJSON::computeMobilities(const Real /*a_time*/, const RealVect& a_pos, const RealVect& a_E) const noexcept
 {
   CH_TIME("ItoKMCJSON::computeMobilities");
   if (m_verbose) {
@@ -3356,7 +3356,7 @@ ItoKMCJSON::computeMobilities(const Real /*a_time*/, const RealVect a_pos, const
 }
 
 Vector<Real>
-ItoKMCJSON::computeDiffusionCoefficients(const Real /*a_time*/, const RealVect a_pos, const RealVect a_E) const noexcept
+ItoKMCJSON::computeDiffusionCoefficients(const Real /*a_time*/, const RealVect& a_pos, const RealVect& a_E) const noexcept
 {
   CH_TIME("ItoKMCJSON::computeDiffusionCoefficients");
   if (m_verbose) {
@@ -3657,8 +3657,8 @@ ItoKMCJSON::getPlotVariableNames() const noexcept
 }
 
 Vector<Real>
-ItoKMCJSON::getPlotVariables(const RealVect a_E,
-                             const RealVect a_pos,
+ItoKMCJSON::getPlotVariables(const RealVect& a_E,
+                             const RealVect& a_pos,
                              const Vector<Real>& /*a_phi*/,
                              const Vector<RealVect>& /*a_gradPhi*/,
                              const Real /*a_dx*/,

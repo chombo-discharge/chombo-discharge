@@ -94,14 +94,14 @@ public:
     @param[in] a_realm Realm name. 
   */
   virtual void
-  setRealm(const std::string a_realm) noexcept;
+  setRealm(const std::string& a_realm) noexcept;
 
   /**
     @brief Set the solver name
     @param[in] a_name Solver name
   */
   virtual void
-  setName(const std::string a_name) noexcept;
+  setName(const std::string& a_name) noexcept;
 
   /**
     @brief Get the realm where the solver is registered.
@@ -389,7 +389,7 @@ public:
   virtual void
   writePlotData(LevelData<EBCellFAB>& a_output,
                 int&                  a_comp,
-                const std::string     a_outputRealm,
+                const std::string&    a_outputRealm,
                 const int             a_level) const noexcept;
 
 protected:

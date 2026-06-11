@@ -87,7 +87,7 @@ namespace Physics {
       virtual void
       writePlotData(LevelData<EBCellFAB>& a_output,
                     int&                  a_icomp,
-                    const std::string     a_outputRealm,
+                    const std::string&    a_outputRealm,
                     const int             a_level) const noexcept override;
 
       /**
@@ -225,12 +225,12 @@ namespace Physics {
         @return Return value
       */
       virtual bool
-      coarsenCell(const RealVect         a_pos,
-                  const Real             a_time,
-                  const Real             a_dx,
-                  const int              a_lvl,
-                  const Vector<Real>     a_tagFields,
-                  const Vector<RealVect> a_gradTagFields) const noexcept = 0;
+      coarsenCell(const RealVect&         a_pos,
+                  const Real              a_time,
+                  const Real              a_dx,
+                  const int               a_lvl,
+                  const Vector<Real>&     a_tagFields,
+                  const Vector<RealVect>& a_gradTagFields) const noexcept = 0;
 
       /**
 	@brief Determine if a particular cell should be refined or not. 
@@ -243,12 +243,12 @@ namespace Physics {
         @return Return value
       */
       virtual bool
-      refineCell(const RealVect         a_pos,
-                 const Real             a_time,
-                 const Real             a_dx,
-                 const int              a_lvl,
-                 const Vector<Real>     a_tagFields,
-                 const Vector<RealVect> a_gradTagFields) const noexcept = 0;
+      refineCell(const RealVect&         a_pos,
+                 const Real              a_time,
+                 const Real              a_dx,
+                 const int               a_lvl,
+                 const Vector<Real>&     a_tagFields,
+                 const Vector<RealVect>& a_gradTagFields) const noexcept = 0;
     };
   } // namespace ItoKMC
 } // namespace Physics

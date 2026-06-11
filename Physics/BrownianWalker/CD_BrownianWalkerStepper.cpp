@@ -178,7 +178,7 @@ BrownianWalkerStepper::setVelocity()
 }
 
 bool
-BrownianWalkerStepper::loadBalanceThisRealm(const std::string a_realm) const
+BrownianWalkerStepper::loadBalanceThisRealm(const std::string& a_realm) const
 {
   CH_TIME("BrownianWalkerStepper::loadBalanceThisRealm");
   if (m_verbosity > 5) {
@@ -191,7 +191,7 @@ BrownianWalkerStepper::loadBalanceThisRealm(const std::string a_realm) const
 void
 BrownianWalkerStepper::loadBalanceBoxes(Vector<Vector<int>>&             a_procs,
                                         Vector<Vector<Box>>&             a_boxes,
-                                        const std::string                a_realm,
+                                        const std::string&               a_realm,
                                         const Vector<DisjointBoxLayout>& a_grids,
                                         const int                        a_lmin,
                                         const int                        a_finestLevel)
@@ -298,7 +298,7 @@ BrownianWalkerStepper::getPlotVariableNames() const
 void
 BrownianWalkerStepper::writePlotData(LevelData<EBCellFAB>& a_output,
                                      int&                  a_icomp,
-                                     const std::string     a_outputRealm,
+                                     const std::string&    a_outputRealm,
                                      const int             a_level) const
 {
   CH_TIME("BrownianWalkerStepper::writePlotData");
@@ -801,7 +801,7 @@ BrownianWalkerStepper::loadBalanceBoxesParticles(Vector<Vector<int>>&           
 }
 
 Vector<long int>
-BrownianWalkerStepper::getCheckpointLoads(const std::string a_realm, const int a_level) const
+BrownianWalkerStepper::getCheckpointLoads(const std::string& a_realm, const int a_level) const
 {
   CH_TIME("BrownianWalkerStepper::getCheckpointLoads(string, int)");
   if (m_verbosity > 5) {

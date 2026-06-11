@@ -109,7 +109,7 @@ namespace Physics {
         @return Return value
       */
       Real
-      initialData(const RealVect a_pos, const Real a_time) const override final;
+      initialData(const RealVect& a_pos, const Real a_time) const override final;
 
     protected:
       /**

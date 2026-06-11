@@ -77,7 +77,7 @@ RtSolver::advance(const Real a_dt, EBAMRCellData& a_phi, const bool a_zeroPhi)
 }
 
 void
-RtSolver::setRealm(const std::string a_realm)
+RtSolver::setRealm(const std::string& a_realm)
 {
   CH_TIME("RtSolver::setRealm");
   if (m_verbosity > 5) {
@@ -125,7 +125,7 @@ RtSolver::sanityCheck()
 }
 
 void
-RtSolver::setComputationalGeometry(const RefCountedPtr<ComputationalGeometry> a_computationalGeometry)
+RtSolver::setComputationalGeometry(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry)
 {
   CH_TIME("RtSolver::setComputationalGeometry");
   if (m_verbosity > 5) {
@@ -211,7 +211,7 @@ RtSolver::setSource(const EBAMRCellData& a_source)
 }
 
 void
-RtSolver::setSource(const std::function<Real(const RealVect a_pos)> a_source)
+RtSolver::setSource(const std::function<Real(const RealVect a_pos)>& a_source)
 {
   CH_TIME("RtSolver::setSource(function)");
   if (m_verbosity > 5) {
@@ -291,7 +291,7 @@ RtSolver::getPlotVariableNames() const
 void
 RtSolver::writePlotData(LevelData<EBCellFAB>& a_output,
                         int&                  a_comp,
-                        const std::string     a_outputRealm,
+                        const std::string&    a_outputRealm,
                         const int             a_level) const noexcept
 {
   CH_TIME("RtSolver::writePlotData");
@@ -314,7 +314,7 @@ void
 RtSolver::writeData(LevelData<EBCellFAB>& a_output,
                     int&                  a_comp,
                     const EBAMRCellData&  a_data,
-                    const std::string     a_outputRealm,
+                    const std::string&    a_outputRealm,
                     const int             a_level,
                     const bool            a_interpToCentroids,
                     const bool            a_interpGhost) const noexcept

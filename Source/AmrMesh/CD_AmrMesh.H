@@ -216,7 +216,7 @@ public:
   */
   template <typename T>
   void
-  allocate(Vector<RefCountedPtr<ParticleData<T>>>& a_particles, const std::string a_realm) const;
+  allocate(Vector<RefCountedPtr<ParticleData<T>>>& a_particles, const std::string& a_realm) const;
 
   /**
     @brief Template class for generic allocation of particle containers. 
@@ -225,7 +225,7 @@ public:
   */
   template <typename T>
   void
-  allocate(ParticleContainer<T>& a_container, const std::string a_realm) const;
+  allocate(ParticleContainer<T>& a_container, const std::string& a_realm) const;
 
   /**
     @brief Allocate pointer but not any memory blocks. 
@@ -254,7 +254,7 @@ public:
   */
   template <typename T>
   void
-  allocatePointer(EBAMRData<T>& a_data, const std::string a_realm) const;
+  allocatePointer(EBAMRData<T>& a_data, const std::string& a_realm) const;
 
   /**
     @brief Allocate pointer but not any memory.
@@ -265,7 +265,7 @@ public:
   */
   template <typename T>
   void
-  allocatePointer(EBAMRData<T>& a_data, const std::string a_realm, const int a_finestLevel) const;
+  allocatePointer(EBAMRData<T>& a_data, const std::string& a_realm, const int a_finestLevel) const;
 
   /**
     @brief Slice cell-centered data in order to fetch a subset of components
@@ -1108,7 +1108,7 @@ public:
     ParticleContainer<P>&         a_dstParticles,
     ParticleContainer<P>&         a_srcParticles,
     const phase::which_phase      a_phase,
-    const std::function<void(P&)> a_transferModifier = [](P&) -> void {
+    const std::function<void(P&)>& a_transferModifier = [](P&) -> void {
       return;
     }) const noexcept;
 
@@ -1139,8 +1139,8 @@ public:
     ParticleContainer<P>&         a_domainParticles,
     const phase::which_phase      a_phase,
     const Real                    a_tolerance,
-    const bool                    a_deleteParticles,
-    const std::function<void(P&)> a_nonDeletionModifier = [](P&) -> void {
+    const bool                     a_deleteParticles,
+    const std::function<void(P&)>& a_nonDeletionModifier = [](P&) -> void {
       return;
     }) const noexcept;
 
@@ -1167,8 +1167,8 @@ public:
     ParticleContainer<P>&         a_domainParticles,
     const phase::which_phase      a_phase,
     const Real                    a_bisectionStep,
-    const bool                    a_deleteParticles,
-    const std::function<void(P&)> a_nonDeletionModifier = [](P&) -> void {
+    const bool                     a_deleteParticles,
+    const std::function<void(P&)>& a_nonDeletionModifier = [](P&) -> void {
       return;
     }) const noexcept;
 
@@ -1841,7 +1841,7 @@ public:
     @param[in] a_realm Realm name.
   */
   const RefCountedPtr<PetscGrid>&
-  getPetscGrid(const std::string a_realm) const noexcept;
+  getPetscGrid(const std::string& a_realm) const noexcept;
 #endif
 
   /**

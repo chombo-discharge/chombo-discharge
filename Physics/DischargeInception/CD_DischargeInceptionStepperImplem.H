@@ -1073,7 +1073,7 @@ template <typename P, typename F, typename C>
 void
 DischargeInceptionStepper<P, F, C>::writePlotData(LevelData<EBCellFAB>& a_output,
                                                   int&                  a_icomp,
-                                                  const std::string     a_outputRealm,
+                                                  const std::string&    a_outputRealm,
                                                   const int             a_level) const
 {
   CH_TIME("DischargeInceptionStepper::writePlotData");
@@ -1116,7 +1116,7 @@ template <typename P, typename F, typename C>
 void
 DischargeInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>& a_output,
                                                             int&                  a_icomp,
-                                                            const std::string     a_outputRealm,
+                                                            const std::string&    a_outputRealm,
                                                             const int             a_level) const noexcept
 {
   CH_TIME("DischargeInceptionStepper::writePlotDataStationary");
@@ -1315,7 +1315,7 @@ template <typename P, typename F, typename C>
 void
 DischargeInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>& a_output,
                                                            int&                  a_icomp,
-                                                           const std::string     a_outputRealm,
+                                                           const std::string&    a_outputRealm,
                                                            const int             a_level) const noexcept
 {
   CH_TIME("DischargeInceptionStepper::writePlotDataTransient");
@@ -5112,7 +5112,7 @@ DischargeInceptionStepper<P, F, C>::particleOutsideGrid(const RealVect& a_pos,
 
 template <typename P, typename F, typename C>
 bool
-DischargeInceptionStepper<P, F, C>::particleInsideEB(const RealVect a_pos) const noexcept
+DischargeInceptionStepper<P, F, C>::particleInsideEB(const RealVect& a_pos) const noexcept
 {
 #ifndef NDEBUG
   CH_TIME("DischargeInceptionStepper::particleInsideEB");

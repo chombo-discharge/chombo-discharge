@@ -136,7 +136,7 @@ namespace Physics {
       virtual void
       writePlotData(LevelData<EBCellFAB>& a_output,
                     int&                  a_icomp,
-                    const std::string     a_outputRealm,
+                    const std::string&    a_outputRealm,
                     const int             a_level) const override final;
 
     protected:
@@ -203,12 +203,12 @@ namespace Physics {
                      const Vector<EBCellFAB*>& a_tracers,
                      const Vector<EBCellFAB*>& a_gradTracers,
                      const int                 a_lvl,
-                     const DataIndex           a_dit,
-                     const Box                 a_box,
+                     const DataIndex&          a_dit,
+                     const Box&                a_box,
                      const EBISBox&            a_ebisbox,
                      const Real                a_time,
                      const Real                a_dx,
-                     const RealVect            a_probLo);
+                     const RealVect&           a_probLo);
 
       /**
          @brief Flag cells for coarsening within a single grid patch.
@@ -228,12 +228,12 @@ namespace Physics {
                       const Vector<EBCellFAB*>& a_tracers,
                       const Vector<EBCellFAB*>& a_gradTracers,
                       const int                 a_lvl,
-                      const DataIndex           a_dit,
-                      const Box                 a_box,
+                      const DataIndex&          a_dit,
+                      const Box&                a_box,
                       const EBISBox&            a_ebisbox,
                       const Real                a_time,
                       const Real                a_dx,
-                      const RealVect            a_probLo);
+                      const RealVect&           a_probLo);
 
       /**
          @brief Decide whether a single cell should be coarsened. Must be implemented by subclasses.
@@ -246,12 +246,12 @@ namespace Physics {
          @return True if the cell should be coarsened.
       */
       virtual bool
-      coarsenCell(const RealVect         a_pos,
-                  const Real             a_time,
-                  const Real             a_dx,
-                  const int              a_lvl,
-                  const Vector<Real>     a_tracers,
-                  const Vector<RealVect> a_gradTracers) const = 0;
+      coarsenCell(const RealVect&         a_pos,
+                  const Real              a_time,
+                  const Real              a_dx,
+                  const int               a_lvl,
+                  const Vector<Real>&     a_tracers,
+                  const Vector<RealVect>& a_gradTracers) const = 0;
 
       /**
          @brief Decide whether a single cell should be refined. Must be implemented by subclasses.
@@ -264,12 +264,12 @@ namespace Physics {
          @return True if the cell should be refined.
       */
       virtual bool
-      refineCell(const RealVect         a_pos,
-                 const Real             a_time,
-                 const Real             a_dx,
-                 const int              a_lvl,
-                 const Vector<Real>     a_tracers,
-                 const Vector<RealVect> a_gradTracers) const = 0;
+      refineCell(const RealVect&         a_pos,
+                 const Real              a_time,
+                 const Real              a_dx,
+                 const int               a_lvl,
+                 const Vector<Real>&     a_tracers,
+                 const Vector<RealVect>& a_gradTracers) const = 0;
     };
   } // namespace CdrPlasma
 } // namespace Physics

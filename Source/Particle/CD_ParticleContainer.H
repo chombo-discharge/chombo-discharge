@@ -365,7 +365,7 @@ public:
     @return Cell particles
   */
   BinFab<P>&
-  getCellParticles(int a_level, DataIndex a_dit);
+  getCellParticles(int a_level, const DataIndex& a_dit);
 
   /**
     @brief Get cell particles, const version.
@@ -375,27 +375,27 @@ public:
     @return Cell particles
   */
   const BinFab<P>&
-  getCellParticles(int a_level, DataIndex a_dit) const;
+  getCellParticles(int a_level, const DataIndex& a_dit) const;
 
   /**
-    @brief Fill a cell-sorted particle data holder with all the particles in the grid patch. 
-    @param[out] a_cellParticles Particles in the input grid patch, sorted by cell. 
+    @brief Fill a cell-sorted particle data holder with all the particles in the grid patch.
+    @param[out] a_cellParticles Particles in the input grid patch, sorted by cell.
     @param[in]  a_dit   Grid index
-    @note This will define a_cellParticles over the DisjointBoxLayout grid box and fill it with the particles in the patch. 
+    @note This will define a_cellParticles over the DisjointBoxLayout grid box and fill it with the particles in the patch.
     @param[in] a_lvl Lvl
   */
   void
-  getCellParticles(BinFab<P>& a_cellParticles, int a_lvl, DataIndex a_dit) const;
+  getCellParticles(BinFab<P>& a_cellParticles, int a_lvl, const DataIndex& a_dit) const;
 
   /**
-    @brief Fill a cell-sorted particle data holder with all the particles in the grid patch. The original particles are destroyed. 
-    @param[out] a_cellParticles Particles in the input grid patch, sorted by cell. 
+    @brief Fill a cell-sorted particle data holder with all the particles in the grid patch. The original particles are destroyed.
+    @param[out] a_cellParticles Particles in the input grid patch, sorted by cell.
     @param[in]  a_dit   Grid index
-    @note This will define a_cellParticles over the DisjointBoxLayout grid box and fill it with the particles in the patch. 
+    @note This will define a_cellParticles over the DisjointBoxLayout grid box and fill it with the particles in the patch.
     @param[in] a_lvl Lvl
   */
   void
-  getCellParticlesDestructive(BinFab<P>& a_cellParticles, int a_lvl, DataIndex a_dit);
+  getCellParticlesDestructive(BinFab<P>& a_cellParticles, int a_lvl, const DataIndex& a_dit);
 
   /**
     @brief Sort particles by cell
@@ -514,7 +514,7 @@ public:
   */
   template <RealVect& (P::*particleVectorField)()>
   inline void
-  setValue(RealVect a_value);
+  setValue(const RealVect& a_value);
 
   /**
     @brief Get local number of particles

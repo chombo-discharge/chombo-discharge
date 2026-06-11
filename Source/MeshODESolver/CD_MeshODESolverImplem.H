@@ -473,7 +473,7 @@ MeshODESolver<N>::registerOperators() const noexcept
 
 template <size_t N>
 void
-MeshODESolver<N>::setRealm(const std::string a_realm) noexcept
+MeshODESolver<N>::setRealm(const std::string& a_realm) noexcept
 {
   CH_TIME("MeshODESolver::setRealm(std::string)");
   if (m_verbosity > 5) {
@@ -622,7 +622,7 @@ template <size_t N>
 void
 MeshODESolver<N>::writePlotData(LevelData<EBCellFAB>& a_output,
                                 int&                  a_icomp,
-                                const std::string     a_outputRealm,
+                                const std::string&    a_outputRealm,
                                 const int             a_level) const noexcept
 {
   CH_TIME("MeshODESolver::writePlotData");

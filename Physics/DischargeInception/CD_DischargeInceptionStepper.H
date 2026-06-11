@@ -229,7 +229,7 @@ namespace Physics {
       virtual void
       writePlotData(LevelData<EBCellFAB>& a_output,
                     int&                  a_icomp,
-                    const std::string     a_outputRealm,
+                    const std::string&    a_outputRealm,
                     const int             a_level) const override;
 
       /**
@@ -1236,7 +1236,7 @@ namespace Physics {
       virtual void
       writePlotDataStationary(LevelData<EBCellFAB>& a_output,
                               int&                  a_icomp,
-                              const std::string     a_outputRealm,
+                              const std::string&    a_outputRealm,
                               const int             a_level) const noexcept;
 
       /**
@@ -1249,7 +1249,7 @@ namespace Physics {
       virtual void
       writePlotDataTransient(LevelData<EBCellFAB>& a_output,
                              int&                  a_icomp,
-                             const std::string     a_outputRealm,
+                             const std::string&    a_outputRealm,
                              const int             a_level) const noexcept;
 
       /**
@@ -1268,7 +1268,7 @@ namespace Physics {
          @return true if particle inside electrode, false elsewise
       */
       inline bool
-      particleInsideEB(const RealVect a_pos) const noexcept;
+      particleInsideEB(const RealVect& a_pos) const noexcept;
 
       /**
          @brief Set the negative ion velocity. Note

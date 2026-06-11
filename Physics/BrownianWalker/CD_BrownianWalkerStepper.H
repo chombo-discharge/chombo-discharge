@@ -79,7 +79,7 @@ namespace Physics {
          @return True if a_realm matches m_realm and load balancing is enabled.
       */
       bool
-      loadBalanceThisRealm(const std::string a_realm) const override;
+      loadBalanceThisRealm(const std::string& a_realm) const override;
 
       /**
          @brief Return per-patch computational loads for checkpointing and plotting.
@@ -89,7 +89,7 @@ namespace Physics {
          @return Vector of particle counts, one entry per grid patch on a_level.
       */
       Vector<long int>
-      getCheckpointLoads(const std::string a_realm, const int a_level) const override;
+      getCheckpointLoads(const std::string& a_realm, const int a_level) const override;
 
       /**
          @brief Load balance grid patches for the specified realm.
@@ -105,7 +105,7 @@ namespace Physics {
       void
       loadBalanceBoxes(Vector<Vector<int>>&             a_procs,
                        Vector<Vector<Box>>&             a_boxes,
-                       const std::string                a_realm,
+                       const std::string&               a_realm,
                        const Vector<DisjointBoxLayout>& a_grids,
                        const int                        a_lmin,
                        const int                        a_finestLevel) override;
@@ -161,7 +161,7 @@ namespace Physics {
       void
       writePlotData(LevelData<EBCellFAB>& a_output,
                     int&                  a_icomp,
-                    const std::string     a_outputRealm,
+                    const std::string&    a_outputRealm,
                     const int             a_level) const override;
 
       /**

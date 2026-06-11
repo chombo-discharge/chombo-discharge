@@ -79,7 +79,7 @@ public:
     @param[in] a_realm Realm name
   */
   virtual void
-  setRealm(const std::string a_realm);
+  setRealm(const std::string& a_realm);
 
   /**
     @brief Parse class options

@@ -483,7 +483,7 @@ protected:
     @return Return value
   */
   virtual EddingtonSP1DomainBc::BcType
-  parseBcString(const std::string a_str) const;
+  parseBcString(const std::string& a_str) const;
 
   /**
     @brief Parse domain BC settings

@@ -3464,7 +3464,7 @@ AmrMesh::getRedistributionOp(const std::string& a_realm, const phase::which_phas
 
 #ifdef CH_USE_PETSC
 const RefCountedPtr<PetscGrid>&
-AmrMesh::getPetscGrid(const std::string a_realm) const noexcept
+AmrMesh::getPetscGrid(const std::string& a_realm) const noexcept
 {
   CH_TIME("AmrMesh::nonConservativeDivergence(AMR)");
   if (m_verbosity > 1) {

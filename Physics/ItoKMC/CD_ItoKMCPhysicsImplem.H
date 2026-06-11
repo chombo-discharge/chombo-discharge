@@ -331,7 +331,7 @@ ItoKMCPhysics::getNumPhotonSpecies() const
 }
 
 inline Real
-ItoKMCPhysics::initialSigma(const Real a_time, const RealVect a_pos) const
+ItoKMCPhysics::initialSigma(const Real a_time, const RealVect& a_pos) const
 {
   return 0.0;
 }

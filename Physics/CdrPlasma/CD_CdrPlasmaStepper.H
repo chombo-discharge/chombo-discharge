@@ -160,7 +160,7 @@ namespace Physics {
       virtual void
       writePlotData(LevelData<EBCellFAB>& a_output,
                     int&                  a_icomp,
-                    const std::string     a_outputRealm,
+                    const std::string&    a_outputRealm,
                     const int             a_level) const override;
 
       /**
@@ -406,10 +406,10 @@ namespace Physics {
         @return Return value
       */
       virtual bool
-      solvePoisson(MFAMRCellData&               a_potential,
-                   MFAMRCellData&               a_rho,
-                   const Vector<EBAMRCellData*> a_cdrDensities,
-                   const EBAMRIVData&           a_sigma);
+      solvePoisson(MFAMRCellData&                      a_potential,
+                   MFAMRCellData&                      a_rho,
+                   const Vector<EBAMRCellData*>&       a_cdrDensities,
+                   const EBAMRIVData&                  a_sigma);
 
       /**
          @brief Advance the reaction network. This will compute the electric field (on the appropriate phase) and call the other version.
@@ -895,10 +895,10 @@ namespace Physics {
          @param[in]  a_phase             Phase
       */
       virtual void
-      computeExtrapolatedFluxes(Vector<EBAMRIVData*>&        a_extrapCdrFluxesEB,
-                                const Vector<EBAMRCellData*> a_cdrDensities,
-                                const Vector<EBAMRCellData*> a_cdrVelocities,
-                                const phase::which_phase     a_phase);
+      computeExtrapolatedFluxes(Vector<EBAMRIVData*>&               a_extrapCdrFluxesEB,
+                                const Vector<EBAMRCellData*>&      a_cdrDensities,
+                                const Vector<EBAMRCellData*>&      a_cdrVelocities,
+                                const phase::which_phase           a_phase);
 
       /**
          @brief Extrapolate drift fluxes to domain faces. 
@@ -909,10 +909,10 @@ namespace Physics {
          @param[in]  a_phase           Phase
       */
       virtual void
-      computeExtrapolatedDomainFluxes(Vector<EBAMRIFData*>&        a_cdrDomainFluxes,
-                                      const Vector<EBAMRCellData*> a_cdrDensities,
-                                      const Vector<EBAMRCellData*> a_cdrVelocities,
-                                      const phase::which_phase     a_phase);
+      computeExtrapolatedDomainFluxes(Vector<EBAMRIFData*>&               a_cdrDomainFluxes,
+                                      const Vector<EBAMRCellData*>&      a_cdrDensities,
+                                      const Vector<EBAMRCellData*>&      a_cdrVelocities,
+                                      const phase::which_phase           a_phase);
 
       /**
          @brief Extrapolated cell-centered velocities to the EB. 
@@ -922,9 +922,9 @@ namespace Physics {
          @param[in]  a_phase             Phase
       */
       virtual void
-      computeExtrapolatedVelocities(Vector<EBAMRIVData*>&        a_cdrVelocitiesEB,
-                                    const Vector<EBAMRCellData*> a_cdrVelocitiesCell,
-                                    const phase::which_phase     a_phase);
+      computeExtrapolatedVelocities(Vector<EBAMRIVData*>&               a_cdrVelocitiesEB,
+                                    const Vector<EBAMRCellData*>&      a_cdrVelocitiesCell,
+                                    const phase::which_phase           a_phase);
 
       /**
          @brief Deallocate internal solver storages
@@ -1445,7 +1445,7 @@ namespace Physics {
         @param[in] a_comp Comp
       */
       virtual void
-      writeJ(LevelData<EBCellFAB>& a_output, int& a_icomp, const std::string a_outputRealm, const int a_level) const;
+      writeJ(LevelData<EBCellFAB>& a_output, int& a_icomp, const std::string& a_outputRealm, const int a_level) const;
 
       /**
          @brief Calculate the user-supplied plot variables
@@ -1468,7 +1468,7 @@ namespace Physics {
       writeData(LevelData<EBCellFAB>& a_output,
                 int&                  a_comp,
                 const EBAMRCellData&  a_data,
-                const std::string     a_outputRealm,
+                const std::string&    a_outputRealm,
                 const int             a_level,
                 const bool            a_interpToCentroids,
                 const bool            a_interpGhost) const noexcept;

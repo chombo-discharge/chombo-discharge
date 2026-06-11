@@ -192,7 +192,7 @@ namespace Physics {
       void
       writePlotData(LevelData<EBCellFAB>& a_output,
                     int&                  a_icomp,
-                    const std::string     a_realm,
+                    const std::string&    a_realm,
                     const int             a_level) const override;
 
       /**

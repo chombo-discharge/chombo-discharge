@@ -59,7 +59,7 @@ namespace Physics {
          @return Initial density value from the stored function.
       */
       Real
-      initialData(const RealVect a_pos, const Real a_time) const override
+      initialData(const RealVect& a_pos, const Real a_time) const override
       {
         return m_initialData(a_pos);
       }

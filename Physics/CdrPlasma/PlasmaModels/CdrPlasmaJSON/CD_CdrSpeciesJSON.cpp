@@ -46,7 +46,7 @@ CdrSpeciesJSON::define(const std::string&                  a_name,
 }
 
 Real
-CdrSpeciesJSON::initialData(const RealVect a_pos, const Real a_time) const
+CdrSpeciesJSON::initialData(const RealVect& a_pos, const Real a_time) const
 {
   CH_assert(m_isDefined);
 

@@ -77,13 +77,13 @@ CdrPlasmaStreamerTagger::parseRuntimeOptions()
 }
 
 Vector<Real>
-CdrPlasmaStreamerTagger::tracer(const RealVect a_pos,
+CdrPlasmaStreamerTagger::tracer(const RealVect& a_pos,
                                 const Real /*a_time*/,
                                 const Real /*a_dx*/,
-                                const RealVect a_electricField,
+                                const RealVect& a_electricField,
                                 const Real /*a_minElectricField*/,
-                                const Real a_maxElectricField,
-                                const RealVect /*a_gradElectricField*/,
+                                const Real      a_maxElectricField,
+                                const RealVect& /*a_gradElectricField*/,
                                 const Real /*a_minGradElectricField*/,
                                 const Real /*a_maxGradElectricField*/) const
 {
@@ -102,12 +102,12 @@ CdrPlasmaStreamerTagger::tracer(const RealVect a_pos,
 }
 
 bool
-CdrPlasmaStreamerTagger::coarsenCell(const RealVect /*a_pos*/,
+CdrPlasmaStreamerTagger::coarsenCell(const RealVect& /*a_pos*/,
                                      const Real /*a_time*/,
-                                     const Real             a_dx,
-                                     const int              a_lvl,
-                                     const Vector<Real>     a_tracers,
-                                     const Vector<RealVect> a_gradTracers) const
+                                     const Real              a_dx,
+                                     const int               a_lvl,
+                                     const Vector<Real>&     a_tracers,
+                                     const Vector<RealVect>& a_gradTracers) const
 {
   bool coarsen = false;
 
@@ -127,12 +127,12 @@ CdrPlasmaStreamerTagger::coarsenCell(const RealVect /*a_pos*/,
 }
 
 bool
-CdrPlasmaStreamerTagger::refineCell(const RealVect a_pos,
+CdrPlasmaStreamerTagger::refineCell(const RealVect&         a_pos,
                                     const Real /*a_time*/,
-                                    const Real             a_dx,
-                                    const int              a_lvl,
-                                    const Vector<Real>     a_tracers,
-                                    const Vector<RealVect> a_gradTracers) const
+                                    const Real              a_dx,
+                                    const int               a_lvl,
+                                    const Vector<Real>&     a_tracers,
+                                    const Vector<RealVect>& a_gradTracers) const
 {
   // TLDR: Refine if either criterion are met.
 

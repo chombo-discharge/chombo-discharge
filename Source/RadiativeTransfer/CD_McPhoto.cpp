@@ -1773,7 +1773,7 @@ McPhoto::countPhotons(const AMRParticles<Photon>& a_photons) const
 void
 McPhoto::writePlotData(LevelData<EBCellFAB>& a_output,
                        int&                  a_comp,
-                       const std::string     a_outputRealm,
+                       const std::string&    a_outputRealm,
                        const int             a_level) const noexcept
 {
   CH_TIMERS("McPhoto::writePlotData");

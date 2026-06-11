@@ -95,7 +95,7 @@ namespace Physics {
         @return Absorption coefficient
       */
       Real
-      getAbsorptionCoefficient(const RealVect a_pos) const override final;
+      getAbsorptionCoefficient(const RealVect& a_pos) const override final;
 
     protected:
       /**

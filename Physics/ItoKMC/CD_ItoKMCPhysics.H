@@ -111,7 +111,7 @@ namespace Physics {
 	@return Neutral density
       */
       virtual Real
-      getNeutralDensity(const RealVect a_pos) const noexcept = 0;
+      getNeutralDensity(const RealVect& a_pos) const noexcept = 0;
 
       /**
 	@brief Compute Townsend ionization coefficient
@@ -120,7 +120,7 @@ namespace Physics {
 	@return Should return the Townsend ionization coefficient. 
       */
       virtual Real
-      computeAlpha(const Real a_E, const RealVect a_x) const = 0;
+      computeAlpha(const Real a_E, const RealVect& a_x) const = 0;
 
       /**
 	@brief Compute Townsend attachment coefficient
@@ -129,7 +129,7 @@ namespace Physics {
 	@return Should return the Townsend attachment coefficient. 
       */
       virtual Real
-      computeEta(const Real a_E, const RealVect a_x) const = 0;
+      computeEta(const Real a_E, const RealVect& a_x) const = 0;
 
       /**
 	@brief Get all particle drift-diffusion species
@@ -177,8 +177,8 @@ namespace Physics {
         @return Plot variables
       */
       virtual Vector<Real>
-      getPlotVariables(const RealVect          a_E,
-                       const RealVect          a_pos,
+      getPlotVariables(const RealVect&          a_E,
+                       const RealVect&          a_pos,
                        const Vector<Real>&     a_phi,
                        const Vector<RealVect>& a_gradPhi,
                        const Real              a_dx,
@@ -246,7 +246,7 @@ namespace Physics {
         @return Return value
       */
       inline virtual Real
-      initialSigma(const Real a_time, const RealVect a_pos) const;
+      initialSigma(const Real a_time, const RealVect& a_pos) const;
 
       /**
 	@brief Compute the Ito solver mobilities.
@@ -256,7 +256,7 @@ namespace Physics {
 	@return Must return a vector of non-negative mobility coefficients for the plasma species
       */
       virtual Vector<Real>
-      computeMobilities(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept = 0;
+      computeMobilities(const Real a_time, const RealVect& a_pos, const RealVect& a_E) const noexcept = 0;
 
       /**
 	@brief Compute the Ito solver diffusion coefficients
@@ -266,7 +266,7 @@ namespace Physics {
 	@return Must return a vector of non-negative diffusion coefficients for the plasma species
       */
       virtual Vector<Real>
-      computeDiffusionCoefficients(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept = 0;
+      computeDiffusionCoefficients(const Real a_time, const RealVect& a_pos, const RealVect& a_E) const noexcept = 0;
 
       /**
 	@brief Resolve secondary emission at the EB.

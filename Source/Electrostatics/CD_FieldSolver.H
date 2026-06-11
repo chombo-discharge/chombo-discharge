@@ -319,7 +319,7 @@ public:
   virtual void
   writePlotData(LevelData<EBCellFAB>& a_output,
                 int&                  a_comp,
-                const std::string     a_outputRealm,
+                const std::string&    a_outputRealm,
                 const int             a_level,
                 const bool            a_forceNoInterp = false) const noexcept;
 
@@ -339,7 +339,7 @@ public:
                       int&                     a_comp,
                       const MFAMRCellData&     a_data,
                       const phase::which_phase a_phase,
-                      const std::string        a_outputRealm,
+                      const std::string&       a_outputRealm,
                       const int                a_level,
                       const bool               a_interp) const noexcept;
 
@@ -356,7 +356,7 @@ public:
   writeSurfaceData(LevelData<EBCellFAB>&             a_output,
                    int&                              a_comp,
                    const LevelData<BaseIVFAB<Real>>& a_data,
-                   const std::string                 a_outputRealm,
+                   const std::string&                a_outputRealm,
                    const int                         a_level) const noexcept;
 
   /**
@@ -831,7 +831,7 @@ protected:
     @return This returns the boundary condition type, either ElectrostaticDomainBc::Dirichlet or ElectrostaticDomainBc::Neumann
   */
   virtual ElectrostaticDomainBc::BcType
-  parseBcString(const std::string a_str) const;
+  parseBcString(const std::string& a_str) const;
 
   /**
     @brief Shortcut for making a boundary condition string. 

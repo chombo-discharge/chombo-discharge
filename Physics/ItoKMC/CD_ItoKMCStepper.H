@@ -189,7 +189,7 @@ namespace Physics {
       virtual void
       writePlotData(LevelData<EBCellFAB>& a_output,
                     int&                  a_icomp,
-                    const std::string     a_outputRealm,
+                    const std::string&    a_outputRealm,
                     const int             a_level) const noexcept override;
 
       /**
@@ -202,7 +202,7 @@ namespace Physics {
 	@return Returns computational loads for each box on grid level a_level. 
       */
       virtual Vector<long int>
-      getCheckpointLoads(const std::string a_realm, const int a_level) const override;
+      getCheckpointLoads(const std::string& a_realm, const int a_level) const override;
 
       /**
 	@brief Advancement method. Needs to be implemented by subclasses.
@@ -287,7 +287,7 @@ namespace Physics {
         @return Return value
       */
       virtual bool
-      loadBalanceThisRealm(const std::string a_realm) const override;
+      loadBalanceThisRealm(const std::string& a_realm) const override;
 
       /**
 	@brief Load balance grid boxes for a specified realm. 
@@ -305,7 +305,7 @@ namespace Physics {
       virtual void
       loadBalanceBoxes(Vector<Vector<int>>&             a_procs,
                        Vector<Vector<Box>>&             a_boxes,
-                       const std::string                a_realm,
+                       const std::string&               a_realm,
                        const Vector<DisjointBoxLayout>& a_grids,
                        const int                        a_lmin,
                        const int                        a_finestLevel) override;

@@ -73,7 +73,7 @@ namespace Physics {
 	@return Initial density at the given position and time.
       */
       virtual Real
-      initialData(const RealVect a_pos, const Real a_time) const override final
+      initialData(const RealVect& a_pos, const Real a_time) const override final
       {
         return m_initialData(a_pos, a_time);
       }

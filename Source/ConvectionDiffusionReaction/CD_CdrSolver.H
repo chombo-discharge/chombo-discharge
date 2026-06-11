@@ -264,7 +264,7 @@ public:
     @param[in] a_realm Realm identifier
   */
   virtual void
-  setRealm(const std::string a_realm);
+  setRealm(const std::string& a_realm);
 
   /**
     @brief Get the CDR species.
@@ -339,7 +339,7 @@ public:
     @details This sets the cell centered velocity to be a_velo in every grid cell. 
   */
   virtual void
-  setVelocity(const RealVect a_velocity);
+  setVelocity(const RealVect& a_velocity);
 
   /**
     @brief Set velocity using a polymorphic function. 
@@ -395,7 +395,7 @@ public:
     @note This fills m_source with the evaluation of a_source
   */
   virtual void
-  setSource(const std::function<Real(const RealVect a_position)> a_source);
+  setSource(const std::function<Real(const RealVect a_position)>& a_source);
 
   /**
     @brief Data-based version of setting the EB flux
@@ -447,7 +447,7 @@ public:
   virtual void
   writePlotData(LevelData<EBCellFAB>& a_output,
                 int&                  a_icomp,
-                const std::string     a_outputRealm,
+                const std::string&    a_outputRealm,
                 const int             a_level) const noexcept;
 
 #ifdef CH_USE_HDF5
@@ -1218,7 +1218,7 @@ protected:
   writeData(LevelData<EBCellFAB>& a_output,
             int&                  a_comp,
             const EBAMRCellData&  a_data,
-            const std::string     a_outputRealm,
+            const std::string&    a_outputRealm,
             const int             a_level,
             const bool            a_interpToCentroids,
             const bool            a_interpGhost) const noexcept;

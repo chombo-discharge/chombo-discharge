@@ -130,7 +130,7 @@ public:
     @brief Write the PETSc grid to an output HDF5 file
   */
   virtual void
-  dumpPetscGrid(const std::string a_filename) const noexcept;
+  dumpPetscGrid(const std::string& a_filename) const noexcept;
 
 protected:
   /**

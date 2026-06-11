@@ -45,7 +45,7 @@ RadiativeTransferSpecies::~RadiativeTransferSpecies()
 }
 
 Real
-RadiativeTransferSpecies::getAbsorptionCoefficient(const RealVect a_pos) const
+RadiativeTransferSpecies::getAbsorptionCoefficient(const RealVect& a_pos) const
 {
   return m_kappa(a_pos);
 }

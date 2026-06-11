@@ -23,7 +23,7 @@ RealBox::RealBox() : m_lo(RealVect::Zero), m_hi(RealVect::Zero)
 RealBox::RealBox(const RealVect& a_lo, const RealVect& a_hi) : m_lo(a_lo), m_hi(a_hi)
 {}
 
-RealBox::RealBox(const Box a_box, const RealVect& a_origin, const Real a_dx)
+RealBox::RealBox(const Box& a_box, const RealVect& a_origin, const Real a_dx)
 {
 
   const IntVect lo = a_box.smallEnd();

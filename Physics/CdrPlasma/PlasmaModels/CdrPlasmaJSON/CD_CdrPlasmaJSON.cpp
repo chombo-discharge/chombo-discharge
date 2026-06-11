@@ -2596,7 +2596,7 @@ CdrPlasmaJSON::parseReactionWildcards(const std::vector<std::string>& a_reactant
 void
 CdrPlasmaJSON::sanctifyPlasmaReaction(const std::vector<std::string>& a_reactants,
                                       const std::vector<std::string>& a_products,
-                                      const std::string               a_reaction) const
+                                      const std::string&              a_reaction) const
 {
   CH_TIME("CdrPlasmaJSON::sanctifyPlasmaReaction()");
   if (m_verbose) {
@@ -2643,7 +2643,7 @@ CdrPlasmaJSON::sanctifyPlasmaReaction(const std::vector<std::string>& a_reactant
 void
 CdrPlasmaJSON::sanctifyPhotoReaction(const std::vector<std::string>& a_reactants,
                                      const std::vector<std::string>& a_products,
-                                     const std::string               a_reaction) const
+                                     const std::string&              a_reaction) const
 {
   CH_TIME("CdrPlasmaJSON::sanctifyPhotoReaction");
   if (m_verbose) {
@@ -2715,7 +2715,7 @@ CdrPlasmaJSON::sanctifyPhotoReaction(const std::vector<std::string>& a_reactants
 void
 CdrPlasmaJSON::sanctifySurfaceReaction(const std::vector<std::string>& a_reactants,
                                        const std::vector<std::string>& a_products,
-                                       const std::string               a_reaction) const
+                                       const std::string&              a_reaction) const
 {
   CH_TIME("CdrPlasmaJSON::sanctifySurfaceReaction");
   if (m_verbose) {
@@ -3266,7 +3266,7 @@ CdrPlasmaJSON::parsePlasmaReactionPlot(const int a_reactionIndex, const json& a_
 }
 
 void
-CdrPlasmaJSON::parsePlasmaReactionDescription(const int a_reactionIndex, const json& a_R, const std::string a_wildcard)
+CdrPlasmaJSON::parsePlasmaReactionDescription(const int a_reactionIndex, const json& a_R, const std::string& a_wildcard)
 {
   CH_TIME("CdrPlasmaJSON::parsePlasmaReactionDescription");
   if (m_verbose) {
@@ -4446,14 +4446,14 @@ CdrPlasmaJSON::getPlotVariableNames() const
 }
 
 Vector<Real>
-CdrPlasmaJSON::getPlotVariables(const Vector<Real>     a_cdrDensities,
-                                const Vector<RealVect> a_cdrGradients,
-                                const Vector<Real>      /*a_rteDensities*/,
-                                const RealVect         a_E,
-                                const RealVect         a_pos,
+CdrPlasmaJSON::getPlotVariables(const Vector<Real>&     a_cdrDensities,
+                                const Vector<RealVect>& a_cdrGradients,
+                                const Vector<Real>&     /*a_rteDensities*/,
+                                const RealVect&         a_E,
+                                const RealVect&         a_pos,
                                 const Real              /*a_dx*/,
                                 const Real              /*a_dt*/,
-                                const Real             a_time,
+                                const Real              a_time,
                                 const Real              /*a_kappa*/) const
 {
   if (m_verbose) {
@@ -4672,9 +4672,9 @@ CdrPlasmaJSON::computePlasmaSpeciesMobilities(const RealVect&          a_positio
 }
 
 std::vector<Real>
-CdrPlasmaJSON::computePlasmaSpeciesDiffusion(const RealVect          a_pos,
-                                             const RealVect          a_E,
-                                             const std::vector<Real> a_cdrDensities) const
+CdrPlasmaJSON::computePlasmaSpeciesDiffusion(const RealVect&          a_pos,
+                                             const RealVect&          a_E,
+                                             const std::vector<Real>& a_cdrDensities) const
 {
   if (m_verbose) {
     pout() << "CdrPlasmaJSON::computePlasmaSpeciesDiffusion" << endl;
@@ -5022,7 +5022,7 @@ CdrPlasmaJSON::computePlasmaReactionRate(const int&                   a_reaction
 }
 
 Real
-CdrPlasmaJSON::computeAlpha(const Real a_E, const RealVect a_position) const
+CdrPlasmaJSON::computeAlpha(const Real a_E, const RealVect& a_position) const
 {
   Real alpha = 0.0;
 
@@ -5052,7 +5052,7 @@ CdrPlasmaJSON::computeAlpha(const Real a_E, const RealVect a_position) const
 }
 
 Real
-CdrPlasmaJSON::computeEta(const Real a_E, const RealVect a_position) const
+CdrPlasmaJSON::computeEta(const Real a_E, const RealVect& a_position) const
 {
   Real eta = 0.0;
 
@@ -5087,17 +5087,17 @@ CdrPlasmaJSON::computeEta(const Real a_E, const RealVect a_position) const
 }
 
 void
-CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
-                                      Vector<Real>&          a_rteSources,
-                                      const Vector<Real>     a_cdrDensities,
-                                      const Vector<RealVect> a_cdrGradients,
-                                      const Vector<Real>     a_rteDensities,
-                                      const RealVect         a_E,
-                                      const RealVect         a_pos,
-                                      const Real             a_dx,
-                                      const Real             a_dt,
-                                      const Real             a_time,
-                                      const Real             a_kappa) const
+CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&           a_cdrSources,
+                                      Vector<Real>&           a_rteSources,
+                                      const Vector<Real>&     a_cdrDensities,
+                                      const Vector<RealVect>& a_cdrGradients,
+                                      const Vector<Real>&     a_rteDensities,
+                                      const RealVect&         a_E,
+                                      const RealVect&         a_pos,
+                                      const Real              a_dx,
+                                      const Real              a_dt,
+                                      const Real              a_time,
+                                      const Real              a_kappa) const
 {
   if (m_verbose) {
     pout() << "CdrPlasmaJSON::advanceReactionNetwork" << endl;
@@ -5174,9 +5174,9 @@ CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
 
 Vector<RealVect>
 CdrPlasmaJSON::computeCdrDriftVelocities(const Real          /*a_time*/,
-                                         const RealVect     a_position,
-                                         const RealVect     a_E,
-                                         const Vector<Real> a_cdrDensities) const
+                                         const RealVect&     a_position,
+                                         const RealVect&     a_E,
+                                         const Vector<Real>& a_cdrDensities) const
 {
   CH_TIME("CdrPlasmaJSON::computeCdrDriftVelocities");  
   if (m_verbose) {
@@ -5221,9 +5221,9 @@ CdrPlasmaJSON::computeCdrDriftVelocities(const Real          /*a_time*/,
 
 Vector<Real>
 CdrPlasmaJSON::computeCdrDiffusionCoefficients(const Real          /*a_time*/,
-                                               const RealVect     a_position,
-                                               const RealVect     a_E,
-                                               const Vector<Real> a_cdrDensities) const
+                                               const RealVect&     a_position,
+                                               const RealVect&     a_E,
+                                               const Vector<Real>& a_cdrDensities) const
 {
   CH_TIME("CdrPlasmaJSON::computeCdrDiffusionCoefficients");    
   if (m_verbose) {
@@ -5240,14 +5240,14 @@ CdrPlasmaJSON::computeCdrDiffusionCoefficients(const Real          /*a_time*/,
 
 Vector<Real>
 CdrPlasmaJSON::computeCdrElectrodeFluxes(const Real          /*a_time*/,
-                                         const RealVect     a_pos,
-                                         const RealVect     a_normal,
-                                         const RealVect     a_E,
-                                         const Vector<Real> a_cdrDensities,
-                                         const Vector<Real>  /*a_cdrVelocities*/,
-                                         const Vector<Real>  /*a_cdrGradients*/,
-                                         const Vector<Real> a_rteFluxes,
-                                         const Vector<Real> a_extrapCdrFluxes) const
+                                         const RealVect&     a_pos,
+                                         const RealVect&     a_normal,
+                                         const RealVect&     a_E,
+                                         const Vector<Real>& a_cdrDensities,
+                                         const Vector<Real>& /*a_cdrVelocities*/,
+                                         const Vector<Real>& /*a_cdrGradients*/,
+                                         const Vector<Real>& a_rteFluxes,
+                                         const Vector<Real>& a_extrapCdrFluxes) const
 {
   CH_TIME("CdrPlasmaJSON::computeCdrElectrodeFluxes");      
   if (m_verbose) {
@@ -5385,14 +5385,14 @@ CdrPlasmaJSON::computeCdrElectrodeFluxes(const Real          /*a_time*/,
 
 Vector<Real>
 CdrPlasmaJSON::computeCdrDielectricFluxes(const Real          /*a_time*/,
-                                          const RealVect     a_pos,
-                                          const RealVect     a_normal,
-                                          const RealVect     a_E,
-                                          const Vector<Real> a_cdrDensities,
-                                          const Vector<Real>  /*a_cdrVelocities*/,
-                                          const Vector<Real>  /*a_cdrGradients*/,
-                                          const Vector<Real> a_rteFluxes,
-                                          const Vector<Real> a_extrapCdrFluxes) const
+                                          const RealVect&     a_pos,
+                                          const RealVect&     a_normal,
+                                          const RealVect&     a_E,
+                                          const Vector<Real>& a_cdrDensities,
+                                          const Vector<Real>& /*a_cdrVelocities*/,
+                                          const Vector<Real>& /*a_cdrGradients*/,
+                                          const Vector<Real>& a_rteFluxes,
+                                          const Vector<Real>& a_extrapCdrFluxes) const
 {
   if (m_verbose) {
     pout() << "CdrPlasmaJSON::computeCdrDielectricFluxes" << endl;
@@ -5527,15 +5527,15 @@ CdrPlasmaJSON::computeCdrDielectricFluxes(const Real          /*a_time*/,
 
 Vector<Real>
 CdrPlasmaJSON::computeCdrDomainFluxes(const Real            /*a_time*/,
-                                      const RealVect       a_pos,
+                                      const RealVect&      a_pos,
                                       const int            a_dir,
                                       const Side::LoHiSide a_side,
-                                      const RealVect       a_E,
-                                      const Vector<Real>    /*a_cdrDensities*/,
-                                      const Vector<Real>    /*a_cdrVelocities*/,
-                                      const Vector<Real>    /*a_cdrGradients*/,
-                                      const Vector<Real>   a_rteFluxes,
-                                      const Vector<Real>   a_extrapCdrFluxes) const
+                                      const RealVect&      a_E,
+                                      const Vector<Real>&   /*a_cdrDensities*/,
+                                      const Vector<Real>&   /*a_cdrVelocities*/,
+                                      const Vector<Real>&   /*a_cdrGradients*/,
+                                      const Vector<Real>&  a_rteFluxes,
+                                      const Vector<Real>&  a_extrapCdrFluxes) const
 {
   if (m_verbose) {
     pout() << "CdrPlasmaJSON::computeCdrDomainFluxes" << endl;
@@ -5646,7 +5646,7 @@ CdrPlasmaJSON::computeCdrDomainFluxes(const Real            /*a_time*/,
 }
 
 Real
-CdrPlasmaJSON::initialSigma(const Real a_time, const RealVect a_pos) const
+CdrPlasmaJSON::initialSigma(const Real a_time, const RealVect& a_pos) const
 {
   return m_initialSigma(a_pos, a_time);
 }
@@ -5654,10 +5654,10 @@ CdrPlasmaJSON::initialSigma(const Real a_time, const RealVect a_pos) const
 void
 CdrPlasmaJSON::addPhotoIonization(std::vector<Real>&       a_cdrSources,
                                   const std::vector<Real>& a_rteDensities,
-                                  const RealVect           a_position,
+                                  const RealVect&          a_position,
                                   const Real               a_E,
                                   const Real               a_dt,
-                                  const Real                /*a_dx*/) const 
+                                  const Real               /*a_dx*/) const
 {
   // Add photo-ionization.
   for (int i = 0; i < m_photoReactions.size(); i++) {
@@ -5705,11 +5705,11 @@ CdrPlasmaJSON::addPhotoIonization(std::vector<Real>&       a_cdrSources,
 }
 
 void
-CdrPlasmaJSON::integrateReactions(std::vector<Real>&          a_cdrDensities,
-                                  std::vector<Real>&          a_photonProduction,
-                                  const std::vector<RealVect> a_cdrGradients,
-                                  const RealVect              a_E,
-                                  const RealVect              a_pos,
+CdrPlasmaJSON::integrateReactions(std::vector<Real>&               a_cdrDensities,
+                                  std::vector<Real>&               a_photonProduction,
+                                  const std::vector<RealVect>&     a_cdrGradients,
+                                  const RealVect&                  a_E,
+                                  const RealVect&                  a_pos,
                                   const Real                  a_dx,
                                   const Real                  a_dt,
                                   const Real                  a_time,

@@ -508,7 +508,7 @@ PetscGrid::putPetscInChombo(MFAMRCellData& a_y, const Vec& a_x) const noexcept
 }
 
 void
-PetscGrid::dumpPetscGrid(const std::string a_filename) const noexcept
+PetscGrid::dumpPetscGrid(const std::string& a_filename) const noexcept
 {
   CH_TIME("PetscGrid::dumpPetscGrid");
   if (m_verbose) {

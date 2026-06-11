@@ -78,15 +78,15 @@ namespace Physics {
         @param[in] a_dx Description
       */
       virtual Vector<Real>
-      tracer(const RealVect a_pos,
-             const Real     a_time,
-             const Real     a_dx,
-             const RealVect a_electricField,
-             const Real     a_minElectricField,
-             const Real     a_maxElectricField,
-             const RealVect a_gradElectricField,
-             const Real     a_minGradElectricField,
-             const Real     a_maxGradElectricField) const override;
+      tracer(const RealVect& a_pos,
+             const Real      a_time,
+             const Real      a_dx,
+             const RealVect& a_electricField,
+             const Real      a_minElectricField,
+             const Real      a_maxElectricField,
+             const RealVect& a_gradElectricField,
+             const Real      a_minGradElectricField,
+             const Real      a_maxGradElectricField) const override;
 
       /**
 	@brief Cell-coarsening method.
@@ -99,12 +99,12 @@ namespace Physics {
 	@return Return true if the cell should be coarsened and false otherwise. 
       */
       virtual bool
-      coarsenCell(const RealVect         a_pos,
-                  const Real             a_time,
-                  const Real             a_dx,
-                  const int              a_lvl,
-                  const Vector<Real>     a_tracers,
-                  const Vector<RealVect> a_gradTracers) const override;
+      coarsenCell(const RealVect&         a_pos,
+                  const Real              a_time,
+                  const Real              a_dx,
+                  const int               a_lvl,
+                  const Vector<Real>&     a_tracers,
+                  const Vector<RealVect>& a_gradTracers) const override;
 
       /**
 	@brief Cell-refinement method.
@@ -117,12 +117,12 @@ namespace Physics {
 	@return True if the cell should be refined and false otherwise. 
       */
       virtual bool
-      refineCell(const RealVect         a_pos,
-                 const Real             a_time,
-                 const Real             a_dx,
-                 const int              a_lvl,
-                 const Vector<Real>     a_tracers,
-                 const Vector<RealVect> a_gradTracers) const override;
+      refineCell(const RealVect&         a_pos,
+                 const Real              a_time,
+                 const Real              a_dx,
+                 const int               a_lvl,
+                 const Vector<Real>&     a_tracers,
+                 const Vector<RealVect>& a_gradTracers) const override;
 
     protected:
       /**

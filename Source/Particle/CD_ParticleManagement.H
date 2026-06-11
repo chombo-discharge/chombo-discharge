@@ -168,10 +168,10 @@ namespace ParticleManagement {
   */
   template <typename P, typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
   static inline void
-  drawSphereParticles(List<P>&       a_particles,
-                      const T        a_numParticles,
-                      const RealVect a_center,
-                      const Real     a_radius) noexcept;
+  drawSphereParticles(List<P>&        a_particles,
+                      const T         a_numParticles,
+                      const RealVect& a_center,
+                      const Real      a_radius) noexcept;
 
   /**
     @brief Draw particles in a box
@@ -184,10 +184,10 @@ namespace ParticleManagement {
   */
   template <typename P, typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
   static inline void
-  drawBoxParticles(List<P>&       a_particles,
-                   const T        a_numParticles,
-                   const RealVect a_loCorner,
-                   const RealVect a_hiCorner) noexcept;
+  drawBoxParticles(List<P>&        a_particles,
+                   const T         a_numParticles,
+                   const RealVect& a_loCorner,
+                   const RealVect& a_hiCorner) noexcept;
 
   /**
     @brief Draw particles from a Gaussian distribution
@@ -200,10 +200,10 @@ namespace ParticleManagement {
   */
   template <typename P, typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
   static inline void
-  drawGaussianParticles(List<P>&       a_particles,
-                        const T        a_numParticles,
-                        const RealVect a_center,
-                        const Real     a_radius) noexcept;
+  drawGaussianParticles(List<P>&        a_particles,
+                        const T         a_numParticles,
+                        const RealVect& a_center,
+                        const Real      a_radius) noexcept;
 
 } // namespace ParticleManagement
 

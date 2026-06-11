@@ -53,7 +53,7 @@ public:
     @return Absorption coefficient
   */
   virtual Real
-  getAbsorptionCoefficient(const RealVect a_pos) const = 0;
+  getAbsorptionCoefficient(const RealVect& a_pos) const = 0;
 
   /**
     @brief Get scattering coefficient (i.e. the inverse scattering length) at physical coordinates. 
@@ -62,7 +62,7 @@ public:
     @return Scattering coefficient
   */
   virtual Real
-  getScatteringCoefficient(const RealVect a_pos) const;
+  getScatteringCoefficient(const RealVect& a_pos) const;
 
 protected:
   /**

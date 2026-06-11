@@ -50,7 +50,7 @@ template <ItoSolver::WhichContainer C>
 void
 ItoSolver::addParticles(ListBox<ItoParticle>& a_inputParticles,
                         const int             a_lvl,
-                        const DataIndex       a_dit,
+                        const DataIndex&      a_dit,
                         const bool            a_destructive)
 {
   CH_TIME("ItoSolver::addParticles");

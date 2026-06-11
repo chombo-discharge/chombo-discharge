@@ -155,7 +155,7 @@ CdrPlasmaTagger::getPlotVariableNames() const
 void
 CdrPlasmaTagger::writePlotData(LevelData<EBCellFAB>& a_output,
                                int&                  a_icomp,
-                               const std::string     a_outputRealm,
+                               const std::string&    a_outputRealm,
                                const int             a_level) const
 {
   CH_TIME("CdrPlasmaTagger::writePlotData");
@@ -270,12 +270,12 @@ CdrPlasmaTagger::refineCellsBox(DenseIntVectSet&          a_refinedCells,
                                 const Vector<EBCellFAB*>& a_tracers,
                                 const Vector<EBCellFAB*>& a_gradTracers,
                                 const int                 a_lvl,
-                                const DataIndex           a_dit,
-                                const Box                 a_box,
+                                const DataIndex&          a_dit,
+                                const Box&                a_box,
                                 const EBISBox&            a_ebisbox,
                                 const Real                a_time,
                                 const Real                a_dx,
-                                const RealVect            a_probLo)
+                                const RealVect&           a_probLo)
 {
   CH_TIME("CdrPlasmaTagger::refineCellsBox(...)");
   if (m_verbosity > 5) {
@@ -353,12 +353,12 @@ CdrPlasmaTagger::coarsenCellsBox(DenseIntVectSet&          a_coarsenedCells,
                                  const Vector<EBCellFAB*>& a_tracers,
                                  const Vector<EBCellFAB*>& a_gradTracers,
                                  const int                 a_lvl,
-                                 const DataIndex           a_dit,
-                                 const Box                 a_box,
+                                 const DataIndex&          a_dit,
+                                 const Box&                a_box,
                                  const EBISBox&            a_ebisbox,
                                  const Real                a_time,
                                  const Real                a_dx,
-                                 const RealVect            a_probLo)
+                                 const RealVect&           a_probLo)
 {
   CH_TIME("CdrPlasmaTagger::coarsenCellsBox(...)");
   if (m_verbosity > 5) {

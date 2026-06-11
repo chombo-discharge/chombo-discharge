@@ -156,15 +156,15 @@ namespace Physics {
         @param[in] a_position Position
       */
       virtual Vector<Real>
-      getPlotVariables(const Vector<Real>     a_cdrDensities,
-                       const Vector<RealVect> a_cdrGradients,
-                       const Vector<Real>     a_rteDensities,
-                       const RealVect         a_E,
-                       const RealVect         a_position,
-                       const Real             a_dx,
-                       const Real             a_dt,
-                       const Real             a_time,
-                       const Real             a_kappa) const override;
+      getPlotVariables(const Vector<Real>&     a_cdrDensities,
+                       const Vector<RealVect>& a_cdrGradients,
+                       const Vector<Real>&     a_rteDensities,
+                       const RealVect&         a_E,
+                       const RealVect&         a_position,
+                       const Real              a_dx,
+                       const Real              a_dt,
+                       const Real              a_time,
+                       const Real              a_kappa) const override;
 
       /**
          @brief Compute alpha. Should return Townsend ionization coefficient. 
@@ -174,7 +174,7 @@ namespace Physics {
         @param[in] a_position Position
       */
       virtual Real
-      computeAlpha(const Real E, const RealVect a_position) const override;
+      computeAlpha(const Real E, const RealVect& a_position) const override;
 
       /**
          @brief Compute eta. Should return Townsend attachment coefficient. 
@@ -184,7 +184,7 @@ namespace Physics {
         @return Computed eta
       */
       virtual Real
-      computeEta(const Real a_E, const RealVect a_position) const override;
+      computeEta(const Real a_E, const RealVect& a_position) const override;
 
       /**
          @brief Routine intended for advancing a reaction network over a time a_dt. 
@@ -203,17 +203,17 @@ namespace Physics {
          @param[in]  a_kappa         Grid cell unit volume. 
       */
       virtual void
-      advanceReactionNetwork(Vector<Real>&          a_cdrSources,
-                             Vector<Real>&          a_rteSources,
-                             const Vector<Real>     a_cdrDensities,
-                             const Vector<RealVect> a_cdrGradients,
-                             const Vector<Real>     a_rteDensities,
-                             const RealVect         a_E,
-                             const RealVect         a_pos,
-                             const Real             a_dx,
-                             const Real             a_dt,
-                             const Real             a_time,
-                             const Real             a_kappa) const override;
+      advanceReactionNetwork(Vector<Real>&           a_cdrSources,
+                             Vector<Real>&           a_rteSources,
+                             const Vector<Real>&     a_cdrDensities,
+                             const Vector<RealVect>& a_cdrGradients,
+                             const Vector<Real>&     a_rteDensities,
+                             const RealVect&         a_E,
+                             const RealVect&         a_pos,
+                             const Real              a_dx,
+                             const Real              a_dt,
+                             const Real              a_time,
+                             const Real              a_kappa) const override;
 
       /**
          @brief Compute velocities for the CDR equations
@@ -224,10 +224,10 @@ namespace Physics {
          @return Returns the drift velocities for each CDR species. The vector ordering is the same as m_cdrSpecies. 
       */
       virtual Vector<RealVect>
-      computeCdrDriftVelocities(const Real         a_time,
-                                const RealVect     a_pos,
-                                const RealVect     a_E,
-                                const Vector<Real> a_cdrDensities) const override;
+      computeCdrDriftVelocities(const Real          a_time,
+                                const RealVect&     a_pos,
+                                const RealVect&     a_E,
+                                const Vector<Real>& a_cdrDensities) const override;
 
       /**
          @brief Compute diffusion coefficients for the CDR equations. 
@@ -238,10 +238,10 @@ namespace Physics {
          @return Returns the diffusion coefficients for each CDR species. The vector ordering is the same as m_cdrSpecies. 
       */
       virtual Vector<Real>
-      computeCdrDiffusionCoefficients(const Real         a_time,
-                                      const RealVect     a_pos,
-                                      const RealVect     a_E,
-                                      const Vector<Real> a_cdrDensities) const override;
+      computeCdrDiffusionCoefficients(const Real          a_time,
+                                      const RealVect&     a_pos,
+                                      const RealVect&     a_E,
+                                      const Vector<Real>& a_cdrDensities) const override;
 
       /**
          @brief Compute CDR fluxes on electrode-gas interfaces. This is used as a boundary condition in the CDR equations. 
@@ -257,15 +257,15 @@ namespace Physics {
          @return Returns the flux on an electrode interface cell. The vector ordering must be the same as m_cdrSpecies. 
       */
       virtual Vector<Real>
-      computeCdrElectrodeFluxes(const Real         a_time,
-                                const RealVect     a_pos,
-                                const RealVect     a_normal,
-                                const RealVect     a_E,
-                                const Vector<Real> a_cdrDensities,
-                                const Vector<Real> a_cdrVelocities,
-                                const Vector<Real> a_cdrGradients,
-                                const Vector<Real> a_rteFluxes,
-                                const Vector<Real> a_extrapCdrFluxes) const override;
+      computeCdrElectrodeFluxes(const Real          a_time,
+                                const RealVect&     a_pos,
+                                const RealVect&     a_normal,
+                                const RealVect&     a_E,
+                                const Vector<Real>& a_cdrDensities,
+                                const Vector<Real>& a_cdrVelocities,
+                                const Vector<Real>& a_cdrGradients,
+                                const Vector<Real>& a_rteFluxes,
+                                const Vector<Real>& a_extrapCdrFluxes) const override;
 
       /**
          @brief Compute CDR fluxes on dielectric-gas interfaces. This is used as a boundary condition in the CDR equations. 
@@ -281,15 +281,15 @@ namespace Physics {
          @return Returns the flux on a dielectric interface cell. The vector ordering must be the same as m_cdrSpecies. 
       */
       virtual Vector<Real>
-      computeCdrDielectricFluxes(const Real         a_time,
-                                 const RealVect     a_pos,
-                                 const RealVect     a_normal,
-                                 const RealVect     a_E,
-                                 const Vector<Real> a_cdrDensities,
-                                 const Vector<Real> a_cdrVelocities,
-                                 const Vector<Real> a_cdrGradients,
-                                 const Vector<Real> a_rteFluxes,
-                                 const Vector<Real> a_extrapCdrFluxes) const override;
+      computeCdrDielectricFluxes(const Real          a_time,
+                                 const RealVect&     a_pos,
+                                 const RealVect&     a_normal,
+                                 const RealVect&     a_E,
+                                 const Vector<Real>& a_cdrDensities,
+                                 const Vector<Real>& a_cdrVelocities,
+                                 const Vector<Real>& a_cdrGradients,
+                                 const Vector<Real>& a_rteFluxes,
+                                 const Vector<Real>& a_extrapCdrFluxes) const override;
 
       /**
          @brief Compute CDR fluxes through domain sides. This is used as a boundary condition in the CDR equations.
@@ -307,15 +307,15 @@ namespace Physics {
       */
       virtual Vector<Real>
       computeCdrDomainFluxes(const Real           a_time,
-                             const RealVect       a_pos,
+                             const RealVect&      a_pos,
                              const int            a_dir,
                              const Side::LoHiSide a_side,
-                             const RealVect       a_E,
-                             const Vector<Real>   a_cdrDensities,
-                             const Vector<Real>   a_cdrVelocities,
-                             const Vector<Real>   a_cdrGradients,
-                             const Vector<Real>   a_rteFluxes,
-                             const Vector<Real>   a_extrapCdrFluxes) const override;
+                             const RealVect&      a_E,
+                             const Vector<Real>&  a_cdrDensities,
+                             const Vector<Real>&  a_cdrVelocities,
+                             const Vector<Real>&  a_cdrGradients,
+                             const Vector<Real>&  a_rteFluxes,
+                             const Vector<Real>&  a_extrapCdrFluxes) const override;
 
       /**
          @brief Set the initial surface charge
@@ -324,7 +324,7 @@ namespace Physics {
         @return Return value
       */
       virtual Real
-      initialSigma(const Real a_time, const RealVect a_pos) const override;
+      initialSigma(const Real a_time, const RealVect& a_pos) const override;
 
     protected:
       /**
@@ -1042,7 +1042,7 @@ namespace Physics {
       virtual void
       sanctifyPlasmaReaction(const std::vector<std::string>& a_reactants,
                              const std::vector<std::string>& a_products,
-                             const std::string               a_reaction) const;
+                             const std::string&              a_reaction) const;
 
       /**
          @brief Get the int-encoding corresponding to species involved in some reaction. 
@@ -1096,9 +1096,9 @@ namespace Physics {
         @param[in] a_wildcard Description
       */
       virtual void
-      parsePlasmaReactionDescription(const int         a_reactionIndex,
-                                     const json&       a_reactionJSON,
-                                     const std::string a_wildcard);
+      parsePlasmaReactionDescription(const int          a_reactionIndex,
+                                     const json&        a_reactionJSON,
+                                     const std::string& a_wildcard);
 
       /**
          @brief Parse plasma reaction energy correction. 
@@ -1155,7 +1155,7 @@ namespace Physics {
       virtual void
       sanctifyPhotoReaction(const std::vector<std::string>& a_reactants,
                             const std::vector<std::string>& a_products,
-                            const std::string               a_reaction) const;
+                            const std::string&              a_reaction) const;
 
       /**
          @brief Parse secondary emission on electrodes
@@ -1257,7 +1257,7 @@ namespace Physics {
       virtual void
       sanctifySurfaceReaction(const std::vector<std::string>& a_reactants,
                               const std::vector<std::string>& a_products,
-                              const std::string               a_reaction) const;
+                              const std::string&              a_reaction) const;
 
       /**
          @brief Compute the various plasma species temperatures.
@@ -1306,9 +1306,9 @@ namespace Physics {
          @return Returns the diffusion coefficients for each CDR species. The vector ordering is the same as m_cdrSpecies. 
       */
       virtual std::vector<Real>
-      computePlasmaSpeciesDiffusion(const RealVect          a_position,
-                                    const RealVect          a_E,
-                                    const std::vector<Real> a_cdrDensities) const;
+      computePlasmaSpeciesDiffusion(const RealVect&          a_position,
+                                    const RealVect&          a_E,
+                                    const std::vector<Real>& a_cdrDensities) const;
 
       /**
          @brief Compute the reaction rate for a plasma reaction.
@@ -1438,7 +1438,7 @@ namespace Physics {
       virtual void
       addPhotoIonization(std::vector<Real>&       a_cdrSources,
                          const std::vector<Real>& a_rteDensities,
-                         const RealVect           a_position,
+                         const RealVect&          a_position,
                          const Real               a_E,
                          const Real               a_dt,
                          const Real               a_dx) const;
@@ -1456,15 +1456,15 @@ namespace Physics {
         @param[in] a_time Description
       */
       virtual void
-      integrateReactions(std::vector<Real>&          a_cdrDensities,
-                         std::vector<Real>&          a_photonProduction,
-                         const std::vector<RealVect> a_cdrGradients,
-                         const RealVect              a_E,
-                         const RealVect              a_pos,
-                         const Real                  a_dx,
-                         const Real                  a_dt,
-                         const Real                  a_time,
-                         const Real                  a_kappa) const;
+      integrateReactions(std::vector<Real>&               a_cdrDensities,
+                         std::vector<Real>&               a_photonProduction,
+                         const std::vector<RealVect>&     a_cdrGradients,
+                         const RealVect&                  a_E,
+                         const RealVect&                  a_pos,
+                         const Real                       a_dx,
+                         const Real                       a_dt,
+                         const Real                       a_time,
+                         const Real                       a_kappa) const;
 
       /**
          @brief Routine for filling the source terms in the reactive problem.
@@ -1525,15 +1525,15 @@ namespace Physics {
          @param[in]    a_kappa            Volume fraction 
       */
       void
-      integrateReactionsImplicitEuler(std::vector<Real>&          a_cdrDensities,
-                                      std::vector<Real>&          a_photonProduction,
-                                      const std::vector<RealVect> a_cdrGradients,
-                                      const RealVect              a_E,
-                                      const RealVect              a_pos,
-                                      const Real                  a_dx,
-                                      const Real                  a_dt,
-                                      const Real                  a_time,
-                                      const Real                  a_kappa) const;
+      integrateReactionsImplicitEuler(std::vector<Real>&               a_cdrDensities,
+                                      std::vector<Real>&               a_photonProduction,
+                                      const std::vector<RealVect>&     a_cdrGradients,
+                                      const RealVect&                  a_E,
+                                      const RealVect&                  a_pos,
+                                      const Real                       a_dx,
+                                      const Real                       a_dt,
+                                      const Real                       a_time,
+                                      const Real                       a_kappa) const;
 
       /**
          @brief Routine for integrating the reactive-only problem using a second order Runge-Kutta method. 

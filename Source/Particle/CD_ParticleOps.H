@@ -225,7 +225,7 @@ public:
   */
   template <typename P, RealVect& (P::*particleVectorField)()>
   static inline void
-  setValue(ParticleContainer<P>& a_particles, const RealVect a_value) noexcept;
+  setValue(ParticleContainer<P>& a_particles, const RealVect& a_value) noexcept;
 
 #ifdef CH_MPI
   /**

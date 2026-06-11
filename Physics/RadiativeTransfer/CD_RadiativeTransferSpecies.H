@@ -43,7 +43,7 @@ namespace Physics {
 	@return Absorption coefficient (inverse absorption length) at a_pos.
       */
       virtual Real
-      getAbsorptionCoefficient(const RealVect a_pos) const override;
+      getAbsorptionCoefficient(const RealVect& a_pos) const override;
 
     protected:
       /**

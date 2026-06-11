@@ -173,7 +173,7 @@ SurfaceODESolver<N>::setAmr(const RefCountedPtr<AmrMesh>& a_amr) noexcept
 
 template <int N>
 void
-SurfaceODESolver<N>::setRealm(const std::string a_realm) noexcept
+SurfaceODESolver<N>::setRealm(const std::string& a_realm) noexcept
 {
   CH_TIME("SurfaceODESolver::setRealm");
   if (m_verbosity > 5) {
@@ -185,7 +185,7 @@ SurfaceODESolver<N>::setRealm(const std::string a_realm) noexcept
 
 template <int N>
 void
-SurfaceODESolver<N>::setName(const std::string a_name) noexcept
+SurfaceODESolver<N>::setName(const std::string& a_name) noexcept
 {
   CH_TIME("SurfaceODESolver::setName");
   if (m_verbosity > 5) {
@@ -819,7 +819,7 @@ template <int N>
 void
 SurfaceODESolver<N>::writePlotData(LevelData<EBCellFAB>& a_output,
                                    int&                  a_comp,
-                                   const std::string     a_outputRealm,
+                                   const std::string&    a_outputRealm,
                                    const int             a_level) const noexcept
 {
   CH_TIME("SurfaceODESolver::writePlotData");

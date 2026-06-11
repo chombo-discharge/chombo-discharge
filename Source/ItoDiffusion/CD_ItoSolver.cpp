@@ -77,7 +77,7 @@ ItoSolver::getRealm() const
 }
 
 void
-ItoSolver::setRealm(const std::string a_realm)
+ItoSolver::setRealm(const std::string& a_realm)
 {
   CH_TIME("ItoSolver::setRealm");
 
@@ -838,9 +838,9 @@ ItoSolver::transferCoveredParticles(ParticleContainer<ItoParticle>& a_particlesF
 }
 
 void
-ItoSolver::intersectParticles(const EBIntersection                    a_ebIntersection,
-                              const bool                              a_deleteParticles,
-                              const std::function<void(ItoParticle&)> a_nonDeletionModifier)
+ItoSolver::intersectParticles(const EBIntersection                     a_ebIntersection,
+                              const bool                               a_deleteParticles,
+                              const std::function<void(ItoParticle&)>& a_nonDeletionModifier)
 {
   CH_TIME("ItoSolver::intersectParticles(EBIntersection, bool)");
   if (m_verbosity > 5) {
@@ -856,12 +856,12 @@ ItoSolver::intersectParticles(const EBIntersection                    a_ebInters
 }
 
 void
-ItoSolver::intersectParticles(const WhichContainer                    a_particles,
-                              const WhichContainer                    a_ebParticles,
-                              const WhichContainer                    a_domainParticles,
-                              const EBIntersection                    a_ebIntersection,
-                              const bool                              a_deleteParticles,
-                              const std::function<void(ItoParticle&)> a_nonDeletionModifier)
+ItoSolver::intersectParticles(const WhichContainer                     a_particles,
+                              const WhichContainer                     a_ebParticles,
+                              const WhichContainer                     a_domainParticles,
+                              const EBIntersection                     a_ebIntersection,
+                              const bool                               a_deleteParticles,
+                              const std::function<void(ItoParticle&)>& a_nonDeletionModifier)
 {
   CH_TIME("ItoSolver::intersectParticles(WhichContainerx3, EBIntersection, bool)");
   if (m_verbosity > 5) {
@@ -881,12 +881,12 @@ ItoSolver::intersectParticles(const WhichContainer                    a_particle
 }
 
 void
-ItoSolver::intersectParticles(ParticleContainer<ItoParticle>&         a_particles,
-                              ParticleContainer<ItoParticle>&         a_ebParticles,
-                              ParticleContainer<ItoParticle>&         a_domainParticles,
-                              const EBIntersection                    a_ebIntersection,
-                              const bool                              a_deleteParticles,
-                              const std::function<void(ItoParticle&)> a_nonDeletionModifier)
+ItoSolver::intersectParticles(ParticleContainer<ItoParticle>&          a_particles,
+                              ParticleContainer<ItoParticle>&          a_ebParticles,
+                              ParticleContainer<ItoParticle>&          a_domainParticles,
+                              const EBIntersection                     a_ebIntersection,
+                              const bool                               a_deleteParticles,
+                              const std::function<void(ItoParticle&)>& a_nonDeletionModifier)
 {
   CH_TIME("ItoSolver::intersectParticles(ParticleContainerx3, EBIntersection, bool)");
   if (m_verbosity > 5) {
@@ -1445,7 +1445,7 @@ ItoSolver::getPlotVariableNames() const
 void
 ItoSolver::writePlotData(LevelData<EBCellFAB>& a_output,
                          int&                  a_comp,
-                         const std::string     a_outputRealm,
+                         const std::string&    a_outputRealm,
                          const int             a_level) const noexcept
 {
   CH_TIMERS("ItoSolver::writePlotData");
@@ -1567,7 +1567,7 @@ void
 ItoSolver::writeData(LevelData<EBCellFAB>& a_output,
                      int&                  a_comp,
                      const EBAMRCellData&  a_data,
-                     const std::string     a_outputRealm,
+                     const std::string&    a_outputRealm,
                      const int             a_level,
                      const bool            a_interpToCentroids,
                      const bool            a_interpGhost) const noexcept
@@ -2105,7 +2105,7 @@ ItoSolver::setDiffusionFunction(const Real a_diffusionCoefficient)
 }
 
 void
-ItoSolver::setVelocityFunction(const RealVect a_velocity)
+ItoSolver::setVelocityFunction(const RealVect& a_velocity)
 {
   CH_TIME("ItoSolver::setVelocityFunction");
   if (m_verbosity > 5) {
@@ -2379,7 +2379,7 @@ ItoSolver::updateMobilities()
 }
 
 void
-ItoSolver::updateMobilities(const int a_level, const DataIndex a_dit)
+ItoSolver::updateMobilities(const int a_level, const DataIndex& a_dit)
 {
   CH_TIME("ItoSolver::updateMobilities(int, DataIndex)");
   if (m_verbosity > 5) {
@@ -2480,7 +2480,7 @@ ItoSolver::updateDiffusion()
 }
 
 void
-ItoSolver::updateDiffusion(const int a_level, const DataIndex a_dit)
+ItoSolver::updateDiffusion(const int a_level, const DataIndex& a_dit)
 {
   CH_TIME("ItoSolver::updateDiffusion(lvl, dit)");
   if (m_verbosity > 5) {
@@ -3055,7 +3055,7 @@ ItoSolver::makeSuperparticles(const WhichContainer a_container, const int a_part
 }
 
 void
-ItoSolver::makeSuperparticles(const WhichContainer a_container, const Vector<int> a_particlesPerCell)
+ItoSolver::makeSuperparticles(const WhichContainer a_container, const Vector<int>& a_particlesPerCell)
 {
   CH_TIME("ItoSolver::makeSuperparticles(WhichContainer, Vector<int>)");
   if (m_verbosity > 5) {
@@ -3105,7 +3105,7 @@ void
 ItoSolver::makeSuperparticles(const WhichContainer a_container,
                               const int            a_particlesPerCell,
                               const int            a_level,
-                              const DataIndex      a_dit)
+                              const DataIndex&     a_dit)
 {
   CH_TIME("ItoSolver::makeSuperparticles(WhichContainer, int, int, DataIndex)");
   if (m_verbosity > 5) {

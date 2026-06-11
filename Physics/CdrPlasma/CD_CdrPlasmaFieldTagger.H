@@ -105,15 +105,15 @@ namespace Physics {
          @return Vector of tracer field values at this cell. Length must equal m_numTracers.
       */
       virtual Vector<Real>
-      tracer(const RealVect a_pos,
-             const Real     a_time,
-             const Real     a_dx,
-             const RealVect a_electricField,
-             const Real     a_minElectricField,
-             const Real     a_maxElectricField,
-             const RealVect a_gradElectricField,
-             const Real     a_minGradElectricField,
-             const Real     a_maxGradElectricField) const = 0;
+      tracer(const RealVect& a_pos,
+             const Real      a_time,
+             const Real      a_dx,
+             const RealVect& a_electricField,
+             const Real      a_minElectricField,
+             const Real      a_maxElectricField,
+             const RealVect& a_gradElectricField,
+             const Real      a_minGradElectricField,
+             const Real      a_maxGradElectricField) const = 0;
 
       /**
          @brief Decide whether a cell should be coarsened based on tracer fields.
@@ -126,12 +126,12 @@ namespace Physics {
          @return True if the cell should be coarsened.
       */
       virtual bool
-      coarsenCell(const RealVect         a_pos,
-                  const Real             a_time,
-                  const Real             a_dx,
-                  const int              a_lvl,
-                  const Vector<Real>     a_tracers,
-                  const Vector<RealVect> a_gradTracers) const override = 0;
+      coarsenCell(const RealVect&         a_pos,
+                  const Real              a_time,
+                  const Real              a_dx,
+                  const int               a_lvl,
+                  const Vector<Real>&     a_tracers,
+                  const Vector<RealVect>& a_gradTracers) const override = 0;
 
       /**
          @brief Decide whether a cell should be refined based on tracer fields.
@@ -144,12 +144,12 @@ namespace Physics {
          @return True if the cell should be refined.
       */
       virtual bool
-      refineCell(const RealVect         a_pos,
-                 const Real             a_time,
-                 const Real             a_dx,
-                 const int              a_lvl,
-                 const Vector<Real>     a_tracers,
-                 const Vector<RealVect> a_gradTracers) const override = 0;
+      refineCell(const RealVect&         a_pos,
+                 const Real              a_time,
+                 const Real              a_dx,
+                 const int               a_lvl,
+                 const Vector<Real>&     a_tracers,
+                 const Vector<RealVect>& a_gradTracers) const override = 0;
     };
   } // namespace CdrPlasma
 } // namespace Physics

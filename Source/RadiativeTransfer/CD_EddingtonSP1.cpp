@@ -156,7 +156,7 @@ EddingtonSP1::makeBcString(const int a_dir, const Side::LoHiSide a_side) const
 }
 
 EddingtonSP1DomainBc::BcType
-EddingtonSP1::parseBcString(const std::string a_str) const
+EddingtonSP1::parseBcString(const std::string& a_str) const
 {
   CH_TIME("EddingtonSP1::parseBcString");
   if (m_verbosity > 5) {

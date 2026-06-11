@@ -56,7 +56,7 @@ public:
     @return Return value
   */
   virtual Real
-  initialData(const RealVect a_pos, const Real a_time) const = 0;
+  initialData(const RealVect& a_pos, const Real a_time) const = 0;
 
   /**
     @brief Return name

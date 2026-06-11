@@ -62,7 +62,7 @@ GeometryStepper::readCheckpointData(HDF5Handle& a_handle, const int a_lvl)
 void
 GeometryStepper::writePlotData(LevelData<EBCellFAB>& a_output,
                                int&                  a_icomp,
-                               const std::string     a_outputRealm,
+                               const std::string&    a_outputRealm,
                                const int             a_level) const
 {}
 

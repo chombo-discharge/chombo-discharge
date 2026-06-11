@@ -495,7 +495,7 @@ ParticleOps::setValue(ParticleContainer<P>& a_particles, const Real a_value) noe
 
 template <typename P, RealVect& (P::*particleVectorField)()>
 inline void
-ParticleOps::setValue(ParticleContainer<P>& a_particles, const RealVect a_value) noexcept
+ParticleOps::setValue(ParticleContainer<P>& a_particles, const RealVect& a_value) noexcept
 {
   CH_TIME("ParticleOps::setValue(ParticleContainer<P>, RealVect");
 

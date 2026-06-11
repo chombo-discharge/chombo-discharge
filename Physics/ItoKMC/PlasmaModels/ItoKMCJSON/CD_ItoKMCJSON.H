@@ -41,7 +41,7 @@ namespace Physics {
 	@param[in] a_position Physical coordinates
 	@param[in] a_time     Time
       */
-      using FunctionXt = std::function<Real(const RealVect a_position, const Real a_time)>;
+      using FunctionXt = std::function<Real(const RealVect& a_position, const Real a_time)>;
 
       /**
 	@brief Function for encapsulating operations f = f(E,N). 
@@ -58,14 +58,14 @@ namespace Physics {
 	@param[in] a_position Physical coordinates
 	@return Returns f(x)
       */
-      using FunctionX = std::function<Real(const RealVect a_position)>;
+      using FunctionX = std::function<Real(const RealVect& a_position)>;
 
       /**
 	@brief Function for encapsulating a function f = f(E, x) where E is the electric field at physical coordinates x.
 	@param[in] E Electric field magnitude in SI units. 
 	@param[in] x Physical coordinates
       */
-      using FunctionEX = std::function<Real(const Real E, const RealVect x)>;
+      using FunctionEX = std::function<Real(const Real E, const RealVect& x)>;
 
       /**
 	@brief Function for encapsulating a function f = f(E, V, x) where E is the electric field at physical coordinates x, and
@@ -78,7 +78,7 @@ namespace Physics {
 	@param[in] phi List of plasma species densities
       */
       using FunctionEVXTP = std::function<
-        Real(const Real E, const Real V, const Real dx, const Real dt, const RealVect x, const Vector<Real>& phi)>;
+        Real(const Real E, const Real V, const Real dx, const Real dt, const RealVect& x, const Vector<Real>& phi)>;
 
       /**
 	@brief Function alias for f = f(dx, phi) where dx is the grid resolution and phi is the plasma species densities.
@@ -122,7 +122,7 @@ namespace Physics {
 	@return Neutral density
       */
       virtual Real
-      getNeutralDensity(const RealVect a_pos) const noexcept override;
+      getNeutralDensity(const RealVect& a_pos) const noexcept override;
 
       /**
 	@brief Compute Townsend ionization coefficient.
@@ -131,7 +131,7 @@ namespace Physics {
 	@return Townsend ionization coefficient @f$ \alpha @f$ in m^-1.
       */
       virtual Real
-      computeAlpha(const Real a_E, const RealVect a_pos) const noexcept override;
+      computeAlpha(const Real a_E, const RealVect& a_pos) const noexcept override;
 
       /**
 	@brief Compute Townsend attachment coefficient.
@@ -140,7 +140,7 @@ namespace Physics {
 	@return Townsend attachment coefficient @f$ \eta @f$ in m^-1.
       */
       virtual Real
-      computeEta(const Real a_E, const RealVect a_pos) const noexcept override;
+      computeEta(const Real a_E, const RealVect& a_pos) const noexcept override;
 
       /**
 	@brief Get plot variable names.
@@ -160,12 +160,12 @@ namespace Physics {
         @return Plot variables
       */
       virtual Vector<Real>
-      getPlotVariables(const RealVect          a_E,
-                       const RealVect          a_pos,
-                       const Vector<Real>&     a_phi,
-                       const Vector<RealVect>& a_gradPhi,
-                       const Real              a_dx,
-                       const Real              a_kappa) const noexcept override;
+      getPlotVariables(const RealVect&          a_E,
+                       const RealVect&          a_pos,
+                       const Vector<Real>&      a_phi,
+                       const Vector<RealVect>&  a_gradPhi,
+                       const Real               a_dx,
+                       const Real               a_kappa) const noexcept override;
 
       /**
 	@brief Get number of extra diagnostic plot variables.
@@ -189,7 +189,7 @@ namespace Physics {
 	@return Vector of non-negative mobility coefficients for all plasma species.
       */
       virtual Vector<Real>
-      computeMobilities(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept override;
+      computeMobilities(const Real a_time, const RealVect& a_pos, const RealVect& a_E) const noexcept override;
 
       /**
 	@brief Compute the Ito solver diffusion coefficients.
@@ -199,7 +199,7 @@ namespace Physics {
 	@return Vector of non-negative diffusion coefficients for all plasma species.
       */
       virtual Vector<Real>
-      computeDiffusionCoefficients(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept override;
+      computeDiffusionCoefficients(const Real a_time, const RealVect& a_pos, const RealVect& a_E) const noexcept override;
 
       /**
 	@brief Resolve secondary emission at the EB.
@@ -474,14 +474,14 @@ namespace Physics {
 	@param[in] a_error Error code.
       */
       virtual void
-      throwParserError(const std::string a_error) const noexcept;
+      throwParserError(const std::string& a_error) const noexcept;
 
       /**
 	@brief Throw a parser wearning
         @param[in] a_warning Warning
       */
       virtual void
-      throwParserWarning(const std::string a_warning) const noexcept;
+      throwParserWarning(const std::string& a_warning) const noexcept;
 
       /**
 	@brief Check if a file exists
@@ -489,7 +489,7 @@ namespace Physics {
         @return Return value
       */
       virtual bool
-      doesFileExist(const std::string a_filename) const noexcept;
+      doesFileExist(const std::string& a_filename) const noexcept;
 
       /**
 	@brief Return true if species is a background species
@@ -521,7 +521,7 @@ namespace Physics {
         @return Return value
       */
       virtual bool
-      containsWildcard(const std::string a_str) const noexcept;
+      containsWildcard(const std::string& a_str) const noexcept;
 
       /**
 	@brief Check if a string contains standard brackets
@@ -529,7 +529,7 @@ namespace Physics {
         @return Return value
       */
       virtual bool
-      containsBracket(const std::string a_str) const noexcept;
+      containsBracket(const std::string& a_str) const noexcept;
 
       /**
 	@brief Check if a string contains starts with '(' and ends with ')'
@@ -537,14 +537,14 @@ namespace Physics {
         @return True if bracketed, false otherwise
       */
       virtual bool
-      isBracketed(const std::string a_str) const noexcept;
+      isBracketed(const std::string& a_str) const noexcept;
 
       /**
 	@brief Check that molar fraction is one. Throws a warning if it isn't.
 	@param[in] a_position Physical coordinates
       */
       virtual void
-      checkMolarFraction(const RealVect a_position) const noexcept;
+      checkMolarFraction(const RealVect& a_position) const noexcept;
 
       /**
 	@brief Check that a plasma reaction makes sense. I.e. that all species are properly defined and that it conserves charge.
@@ -585,14 +585,14 @@ namespace Physics {
 	@param[in] a_coeff Which coefficient. Must be "alpha" or "eta"
       */
       virtual void
-      initializeTownsendCoefficient(const std::string a_coeff);
+      initializeTownsendCoefficient(const std::string& a_coeff);
 
       /**
 	@brief Initialize automatic Townsend coefficient (ionizatino or attachment) from the reaction rates.
 	@param[in] a_coeff Which coefficient. Must be "alpha" or "eta"
       */
       virtual void
-      initializeAutomaticTownsend(const std::string a_coeff);
+      initializeAutomaticTownsend(const std::string& a_coeff);
 
       /**
 	@brief Simple function for previewing a rate/coefficient defined as a function f = f(E,x)
@@ -667,7 +667,7 @@ namespace Physics {
 	@param[in] a_surface Surface type
       */
       virtual void
-      initializeSurfaceEmission(const std::string a_surface);
+      initializeSurfaceEmission(const std::string& a_surface);
 
       /**
 	@brief Initialize field emission reactions

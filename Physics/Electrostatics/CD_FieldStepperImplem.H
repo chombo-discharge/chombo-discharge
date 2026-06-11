@@ -313,7 +313,7 @@ namespace Physics {
     void
     FieldStepper<T>::writePlotData(LevelData<EBCellFAB>& a_output,
                                    int&                  a_icomp,
-                                   const std::string     a_outputRealm,
+                                   const std::string&    a_outputRealm,
                                    const int             a_level) const
     {
       CH_TIME("FieldStepper::writePlotData");
@@ -388,7 +388,7 @@ namespace Physics {
 
     template <class T>
     bool
-    FieldStepper<T>::loadBalanceThisRealm(const std::string a_realm) const
+    FieldStepper<T>::loadBalanceThisRealm(const std::string& a_realm) const
     {
       CH_TIME("FieldStepper::loadBalanceThisRealm");
       if (m_verbosity > 5) {
@@ -402,7 +402,7 @@ namespace Physics {
     void
     FieldStepper<T>::loadBalanceBoxes(Vector<Vector<int>>&             a_procs,
                                       Vector<Vector<Box>>&             a_boxes,
-                                      const std::string                a_realm,
+                                      const std::string&               a_realm,
                                       const Vector<DisjointBoxLayout>& a_grids,
                                       const int                        a_lmin,
                                       const int                        a_finestLevel)

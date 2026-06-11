@@ -59,7 +59,7 @@ public:
     @param[in] a_amr      Handle to AmrMesh.
     @param[in] a_compGeom Computational geometry. 
   */
-  TracerParticleSolver(const RefCountedPtr<AmrMesh>& a_amr, const RefCountedPtr<ComputationalGeometry> a_compGeom);
+  TracerParticleSolver(const RefCountedPtr<AmrMesh>& a_amr, const RefCountedPtr<ComputationalGeometry>& a_compGeom);
 
   /**
     @brief Disallowed assignment operator. 
@@ -248,7 +248,7 @@ public:
   virtual void
   writePlotData(LevelData<EBCellFAB>& a_output,
                 int&                  a_comp,
-                const std::string     a_outputRealm,
+                const std::string&    a_outputRealm,
                 const int             a_level) const noexcept;
 
 #ifdef CH_USE_HDF5

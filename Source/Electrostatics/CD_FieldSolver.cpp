@@ -720,7 +720,7 @@ FieldSolver::makeBcString(const int a_dir, const Side::LoHiSide a_side) const
 }
 
 ElectrostaticDomainBc::BcType
-FieldSolver::parseBcString(const std::string a_str) const
+FieldSolver::parseBcString(const std::string& a_str) const
 {
   CH_TIME("FieldSolver::parseBcString(std::string)");
   if (m_verbosity > 5) {
@@ -1353,7 +1353,7 @@ FieldSolver::postCheckpoint()
 void
 FieldSolver::writePlotData(LevelData<EBCellFAB>& a_output,
                            int&                  a_comp,
-                           const std::string     a_outputRealm,
+                           const std::string&    a_outputRealm,
                            const int             a_level,
                            const bool            a_forceNoInterp) const noexcept
 {
@@ -1397,7 +1397,7 @@ FieldSolver::writeMultifluidData(LevelData<EBCellFAB>&    a_output,
                                  int&                     a_comp,
                                  const MFAMRCellData&     a_data,
                                  const phase::which_phase a_phase,
-                                 const std::string        a_outputRealm,
+                                 const std::string&       a_outputRealm,
                                  const int                a_level,
                                  const bool               a_interp) const noexcept
 
@@ -1651,7 +1651,7 @@ void
 FieldSolver::writeSurfaceData(LevelData<EBCellFAB>&             a_output,
                               int&                              a_comp,
                               const LevelData<BaseIVFAB<Real>>& a_data,
-                              const std::string                 a_outputRealm,
+                              const std::string&                a_outputRealm,
                               const int                         a_level) const noexcept
 {
   CH_TIME("FieldSolver::writeSurfaceData");

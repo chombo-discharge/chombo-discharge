@@ -54,7 +54,7 @@ RtLayout<T>::getRealm() const
 
 template <class T>
 void
-RtLayout<T>::setRealm(const std::string a_realm)
+RtLayout<T>::setRealm(const std::string& a_realm)
 {
   m_realm = a_realm;
 

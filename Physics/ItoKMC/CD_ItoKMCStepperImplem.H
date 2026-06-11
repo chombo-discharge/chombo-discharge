@@ -990,7 +990,7 @@ template <typename I, typename C, typename R, typename F>
 void
 ItoKMCStepper<I, C, R, F>::writePlotData(LevelData<EBCellFAB>& a_output,
                                          int&                  a_icomp,
-                                         const std::string     a_outputRealm,
+                                         const std::string&    a_outputRealm,
                                          const int             a_level) const noexcept
 {
   CH_TIME("ItoKMCStepper::writePlotData");
@@ -5524,7 +5524,7 @@ ItoKMCStepper<I, C, R, F>::getLoadBalanceSolvers() const noexcept
 
 template <typename I, typename C, typename R, typename F>
 bool
-ItoKMCStepper<I, C, R, F>::loadBalanceThisRealm(const std::string a_realm) const
+ItoKMCStepper<I, C, R, F>::loadBalanceThisRealm(const std::string& a_realm) const
 {
   CH_TIME("TimeStepper::loadBalanceThisRealm");
   if (m_verbosity > 5) {
@@ -5547,7 +5547,7 @@ template <typename I, typename C, typename R, typename F>
 void
 ItoKMCStepper<I, C, R, F>::loadBalanceBoxes(Vector<Vector<int>>&             a_procs,
                                             Vector<Vector<Box>>&             a_boxes,
-                                            const std::string                a_realm,
+                                            const std::string&               a_realm,
                                             const Vector<DisjointBoxLayout>& a_grids,
                                             const int                        a_lmin,
                                             const int                        a_finestLevel)
@@ -5768,7 +5768,7 @@ ItoKMCStepper<I, C, R, F>::loadBalanceFluidRealm(Vector<Vector<int>>&           
 
 template <typename I, typename C, typename R, typename F>
 Vector<long int>
-ItoKMCStepper<I, C, R, F>::getCheckpointLoads(const std::string a_realm, const int a_level) const
+ItoKMCStepper<I, C, R, F>::getCheckpointLoads(const std::string& a_realm, const int a_level) const
 {
   CH_TIME("ItoKMCStepper::getCheckpointLoads(...)");
   if (m_verbosity > 5) {

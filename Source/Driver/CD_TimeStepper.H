@@ -190,7 +190,7 @@ public:
     @param[in]    a_level       Grid level
   */
   virtual void
-  writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, std::string a_outputRealm, int a_level) const = 0;
+  writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const std::string& a_outputRealm, int a_level) const = 0;
 
   /**
     @brief An option for calling special functions prior to plotting data. 
@@ -221,7 +221,7 @@ public:
     
   */
   virtual Vector<long int>
-  getCheckpointLoads(std::string a_realm, int a_level) const;
+  getCheckpointLoads(const std::string& a_realm, int a_level) const;
 
   /**
     @brief Compute a time step to be used by Driver.
@@ -305,7 +305,7 @@ public:
     @return True if the realm should be load-balanced during regrids.
   */
   virtual bool
-  loadBalanceThisRealm(std::string a_realm) const;
+  loadBalanceThisRealm(const std::string& a_realm) const;
 
   /**
     @brief Load balance grid boxes for a specified realm. 
@@ -323,7 +323,7 @@ public:
   virtual void
   loadBalanceBoxes(Vector<Vector<int>>&             a_procs,
                    Vector<Vector<Box>>&             a_boxes,
-                   std::string                      a_realm,
+                   const std::string&               a_realm,
                    const Vector<DisjointBoxLayout>& a_grids,
                    int                              a_lmin,
                    int                              a_finestLevel);

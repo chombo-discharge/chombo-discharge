@@ -84,7 +84,7 @@ public:
     @return Returns permittivity for physical coordinates a_pos. 
   */
   virtual Real
-  getPermittivity(const RealVect a_pos) const;
+  getPermittivity(const RealVect& a_pos) const;
 
 protected:
   /**

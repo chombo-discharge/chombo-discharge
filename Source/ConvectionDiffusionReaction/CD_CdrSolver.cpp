@@ -131,7 +131,7 @@ CdrSolver::getRealm() const
 }
 
 void
-CdrSolver::setRealm(const std::string a_realm)
+CdrSolver::setRealm(const std::string& a_realm)
 {
   CH_TIME("CdrSolver::setRealm(std::string)");
   if (m_verbosity > 5) {
@@ -1667,7 +1667,7 @@ CdrSolver::setSource(const Real a_source)
 }
 
 void
-CdrSolver::setSource(const std::function<Real(const RealVect a_position)> a_source)
+CdrSolver::setSource(const std::function<Real(const RealVect a_position)>& a_source)
 {
   CH_TIME("CdrSolver::setSource(std::function<Real(const RealVect a_position)>)");
   if (m_verbosity > 5) {
@@ -1710,7 +1710,7 @@ CdrSolver::setVelocity(const EBAMRCellData& a_velo)
 }
 
 void
-CdrSolver::setVelocity(const RealVect a_velo)
+CdrSolver::setVelocity(const RealVect& a_velo)
 {
   CH_TIME("CdrSolver::setVelocity(RealVect)");
   if (m_verbosity > 5) {
@@ -1817,7 +1817,7 @@ CdrSolver::writePlotFile()
 void
 CdrSolver::writePlotData(LevelData<EBCellFAB>& a_output,
                          int&                  a_icomp,
-                         const std::string     a_outputRealm,
+                         const std::string&    a_outputRealm,
                          const int             a_level) const noexcept
 {
   CH_TIME("CdrSolver::writePlotData");
@@ -1890,7 +1890,7 @@ void
 CdrSolver::writeData(LevelData<EBCellFAB>& a_output,
                      int&                  a_comp,
                      const EBAMRCellData&  a_data,
-                     const std::string     a_outputRealm,
+                     const std::string&    a_outputRealm,
                      const int             a_level,
                      const bool            a_interpToCentroids,
                      const bool            a_interpGhost) const noexcept

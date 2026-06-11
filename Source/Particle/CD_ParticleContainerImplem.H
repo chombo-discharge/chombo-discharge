@@ -403,7 +403,7 @@ ParticleContainer<P>::getCellParticles(const int a_level) const
 
 template <class P>
 void
-ParticleContainer<P>::getCellParticles(BinFab<P>& cellParticles, const int a_lvl, const DataIndex a_dit) const
+ParticleContainer<P>::getCellParticles(BinFab<P>& cellParticles, const int a_lvl, const DataIndex& a_dit) const
 {
   CH_TIME("ParticleContainer::getCellParticles(BinFab)");
 
@@ -419,7 +419,7 @@ ParticleContainer<P>::getCellParticles(BinFab<P>& cellParticles, const int a_lvl
 
 template <class P>
 void
-ParticleContainer<P>::getCellParticlesDestructive(BinFab<P>& cellParticles, const int a_lvl, const DataIndex a_dit)
+ParticleContainer<P>::getCellParticlesDestructive(BinFab<P>& cellParticles, const int a_lvl, const DataIndex& a_dit)
 {
   CH_TIME("ParticleContainer::getCellParticlesDestructive");
 
@@ -435,7 +435,7 @@ ParticleContainer<P>::getCellParticlesDestructive(BinFab<P>& cellParticles, cons
 
 template <class P>
 BinFab<P>&
-ParticleContainer<P>::getCellParticles(const int a_level, const DataIndex a_dit)
+ParticleContainer<P>::getCellParticles(const int a_level, const DataIndex& a_dit)
 {
   CH_TIME("ParticleContainer::getCellParticles(int, DataIndex)");
 
@@ -450,7 +450,7 @@ ParticleContainer<P>::getCellParticles(const int a_level, const DataIndex a_dit)
 
 template <class P>
 const BinFab<P>&
-ParticleContainer<P>::getCellParticles(const int a_level, const DataIndex a_dit) const
+ParticleContainer<P>::getCellParticles(const int a_level, const DataIndex& a_dit) const
 {
   CH_TIME("ParticleContainer::getCellParticles(int, DataIndex)");
 
@@ -1407,7 +1407,7 @@ ParticleContainer<P>::setValue(const Real a_value)
 template <class P>
 template <RealVect& (P::*particleVectorField)()>
 void
-ParticleContainer<P>::setValue(const RealVect a_value)
+ParticleContainer<P>::setValue(const RealVect& a_value)
 {
   CH_TIME("ParticleContainer::setValue");
 

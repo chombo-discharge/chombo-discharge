@@ -80,7 +80,7 @@ Dielectric::getImplicitFunction() const
 }
 
 Real
-Dielectric::getPermittivity(const RealVect a_pos) const
+Dielectric::getPermittivity(const RealVect& a_pos) const
 {
   CH_TIME("Dielectric::getPermittivity(RealVect)");
 

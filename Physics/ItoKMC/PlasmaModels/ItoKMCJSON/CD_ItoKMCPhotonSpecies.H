@@ -55,7 +55,7 @@ namespace Physics {
 	@return Absorption coefficient (inverse absorption length) at a_pos.
       */
       Real
-      getAbsorptionCoefficient(const RealVect a_pos) const final
+      getAbsorptionCoefficient(const RealVect& a_pos) const final
       {
         return m_kappa(a_pos);
       }

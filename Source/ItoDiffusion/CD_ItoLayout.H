@@ -72,7 +72,7 @@ public:
     @param[in] a_realm Realm name. 
   */
   virtual void
-  setRealm(const std::string a_realm);
+  setRealm(const std::string& a_realm);
 
   /**
     @brief Define function. 
@@ -238,7 +238,7 @@ public:
     @param[in] a_ppc            Target particle-per-cell (ppc) per level
   */
   virtual void
-  makeSuperparticles(const ItoSolver::WhichContainer a_whichContainer, const Vector<int> a_ppc);
+  makeSuperparticles(const ItoSolver::WhichContainer a_whichContainer, const Vector<int>& a_ppc);
 
   /**
     @brief Compute smallest possible time step. 

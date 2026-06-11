@@ -114,7 +114,7 @@ public:
     @param[in] a_realm Realm name. 
   */
   virtual void
-  setRealm(std::string a_realm);
+  setRealm(const std::string& a_realm);
 
   /**
     @brief Parse class options
@@ -421,9 +421,9 @@ public:
   */
   virtual void
   intersectParticles(
-    EBIntersection                    a_ebIntersection,
-    bool                              a_deleteParticles,
-    std::function<void(ItoParticle&)> a_nonDeletionModifier = [](ItoParticle&) -> void {
+    const EBIntersection                     a_ebIntersection,
+    const bool                               a_deleteParticles,
+    const std::function<void(ItoParticle&)>& a_nonDeletionModifier = [](ItoParticle&) -> void {
       return;
     });
 
@@ -441,12 +441,12 @@ public:
   */
   virtual void
   intersectParticles(
-    WhichContainer                    a_particles,
-    WhichContainer                    a_ebParticles,
-    WhichContainer                    a_domainParticles,
-    EBIntersection                    a_ebIntersection,
-    bool                              a_deleteParticles,
-    std::function<void(ItoParticle&)> a_nonDeletionModifier = [](ItoParticle&) -> void {
+    const WhichContainer                     a_particles,
+    const WhichContainer                     a_ebParticles,
+    const WhichContainer                     a_domainParticles,
+    const EBIntersection                     a_ebIntersection,
+    const bool                               a_deleteParticles,
+    const std::function<void(ItoParticle&)>& a_nonDeletionModifier = [](ItoParticle&) -> void {
       return;
     });
 
@@ -463,12 +463,12 @@ public:
   */
   virtual void
   intersectParticles(
-    ParticleContainer<ItoParticle>&   a_particles,
-    ParticleContainer<ItoParticle>&   a_ebParticles,
-    ParticleContainer<ItoParticle>&   a_domainParticles,
-    EBIntersection                    a_ebIntersection,
-    bool                              a_deleteParticles,
-    std::function<void(ItoParticle&)> a_nonDeletionModifier = [](ItoParticle&) -> void {
+    ParticleContainer<ItoParticle>&          a_particles,
+    ParticleContainer<ItoParticle>&          a_ebParticles,
+    ParticleContainer<ItoParticle>&          a_domainParticles,
+    const EBIntersection                     a_ebIntersection,
+    const bool                               a_deleteParticles,
+    const std::function<void(ItoParticle&)>& a_nonDeletionModifier = [](ItoParticle&) -> void {
       return;
     });
 
@@ -504,7 +504,7 @@ public:
     @param[in] a_comp Comp
   */
   virtual void
-  writePlotData(LevelData<EBCellFAB>& a_output, int& a_comp, std::string a_outputRealm, int a_level) const noexcept;
+  writePlotData(LevelData<EBCellFAB>& a_output, int& a_comp, const std::string& a_outputRealm, int a_level) const noexcept;
 
   /**
     @brief Get number of particles in a specified particle container
@@ -608,7 +608,7 @@ public:
   */
   template <ItoSolver::WhichContainer C = WhichContainer::Bulk>
   void
-  addParticles(ListBox<ItoParticle>& a_inputParticles, int a_lvl, DataIndex a_dit, bool a_destructive);
+  addParticles(ListBox<ItoParticle>& a_inputParticles, int a_lvl, const DataIndex& a_dit, bool a_destructive);
 
   /**
     @brief Check if solver is mobile
@@ -708,7 +708,7 @@ public:
     @param[in] a_velocity Velocity
   */
   virtual void
-  setVelocityFunction(RealVect a_velocity);
+  setVelocityFunction(const RealVect& a_velocity);
 
   /**
     @brief Sets mobility coefficient for all particles.
@@ -798,7 +798,7 @@ public:
     @param[in] a_particlesPerCell Target number of particles per cell. Vector indicates grid levels. 
   */
   virtual void
-  makeSuperparticles(WhichContainer a_container, Vector<int> a_particlesPerCell);
+  makeSuperparticles(WhichContainer a_container, const Vector<int>& a_particlesPerCell);
 
   /**
     @brief Make superparticles for a particle container -- this is used for a specified grid level. 
@@ -817,7 +817,7 @@ public:
     @param[in] a_dit              Grid index
   */
   virtual void
-  makeSuperparticles(WhichContainer a_container, int a_particlesPerCell, int a_level, DataIndex a_dit);
+  makeSuperparticles(WhichContainer a_container, int a_particlesPerCell, int a_level, const DataIndex& a_dit);
 
   /**
     @brief General superparticle merging with underlying algorithm through m_particleMerger
@@ -1508,7 +1508,7 @@ protected:
     @param[in] a_dit   Grid index
   */
   virtual void
-  updateMobilities(int a_level, DataIndex a_dit);
+  updateMobilities(int a_level, const DataIndex& a_dit);
 
   /**
     @brief Interpolate the diffusion field to the particle positions. 
@@ -1526,7 +1526,7 @@ protected:
     @param[in] a_dit   Grid index    
   */
   virtual void
-  updateDiffusion(int a_level, DataIndex a_dit);
+  updateDiffusion(int a_level, const DataIndex& a_dit);
 
   /**
     @brief Write data to output. Convenience function. 
@@ -1542,7 +1542,7 @@ protected:
   writeData(LevelData<EBCellFAB>& a_output,
             int&                  a_comp,
             const EBAMRCellData&  a_data,
-            std::string           a_outputRealm,
+            const std::string&    a_outputRealm,
             int                   a_level,
             bool                  a_interpToCentroids,
             bool                  a_interpGhost) const noexcept;

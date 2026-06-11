@@ -142,8 +142,8 @@ public:
     into boxes as well as the maximum number of coarsenings. The computed domain is (a_probLo, a_probLo + a_box*a_dx)
   */
   virtual void
-  buildGeometries(const ProblemDomain a_finestDomain,
-                  const RealVect      a_probLo,
+  buildGeometries(const ProblemDomain& a_finestDomain,
+                  const RealVect&      a_probLo,
                   const Real          a_finestDx,
                   const int           a_nCellMax,
                   const int           a_maxGhostEB,

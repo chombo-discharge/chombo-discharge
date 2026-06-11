@@ -358,10 +358,10 @@ CdrPlasmaStepper::solvePoisson()
 }
 
 bool
-CdrPlasmaStepper::solvePoisson(MFAMRCellData&               a_potential,
-                               MFAMRCellData&               a_rho,
-                               const Vector<EBAMRCellData*> a_cdrDensities,
-                               const EBAMRIVData&           a_sigma)
+CdrPlasmaStepper::solvePoisson(MFAMRCellData&                a_potential,
+                               MFAMRCellData&                a_rho,
+                               const Vector<EBAMRCellData*>& a_cdrDensities,
+                               const EBAMRIVData&            a_sigma)
 {
   CH_TIME("CdrPlasmaStepper::solvePoisson(MFAMRCellData, MFAMRCellData, Vector<EBAMRCellData*>, EBAMRIVData)");
   if (m_verbosity > 5) {
@@ -2540,10 +2540,10 @@ CdrPlasmaStepper::computeCdrDomainFluxes(Vector<LevelData<DomainFluxIFFAB>*>    
 }
 
 void
-CdrPlasmaStepper::computeExtrapolatedFluxes(Vector<EBAMRIVData*>&        a_extrapCdrFluxesEB,
-                                            const Vector<EBAMRCellData*> a_cdrDensities,
-                                            const Vector<EBAMRCellData*> a_cdrVelocities,
-                                            const phase::which_phase     a_phase)
+CdrPlasmaStepper::computeExtrapolatedFluxes(Vector<EBAMRIVData*>&               a_extrapCdrFluxesEB,
+                                            const Vector<EBAMRCellData*>&      a_cdrDensities,
+                                            const Vector<EBAMRCellData*>&      a_cdrVelocities,
+                                            const phase::which_phase           a_phase)
 {
   CH_TIME("CdrPlasmaStepper::computeExtrapolatedFluxes(Vector<EBAMRIVData*>, Vector<EBAMRCellData*>x2, phase)");
   if (m_verbosity > 5) {
@@ -2605,10 +2605,10 @@ CdrPlasmaStepper::computeExtrapolatedFluxes(Vector<EBAMRIVData*>&        a_extra
 }
 
 void
-CdrPlasmaStepper::computeExtrapolatedDomainFluxes(Vector<EBAMRIFData*>&        a_cdrDomainFluxes,
-                                                  const Vector<EBAMRCellData*> a_cdrDensities,
-                                                  const Vector<EBAMRCellData*> a_cdrVelocities,
-                                                  const phase::which_phase     a_phase)
+CdrPlasmaStepper::computeExtrapolatedDomainFluxes(Vector<EBAMRIFData*>&               a_cdrDomainFluxes,
+                                                  const Vector<EBAMRCellData*>&      a_cdrDensities,
+                                                  const Vector<EBAMRCellData*>&      a_cdrVelocities,
+                                                  const phase::which_phase           a_phase)
 {
   CH_TIME("CdrPlasmaStepper::computeExtrapolatedDomainFluxes(Vector<EBAMRIFData*>, Vector<EBAMRCellData>x2, phase)");
   if (m_verbosity > 5) {
@@ -2657,9 +2657,9 @@ CdrPlasmaStepper::computeExtrapolatedDomainFluxes(Vector<EBAMRIFData*>&        a
 }
 
 void
-CdrPlasmaStepper::computeExtrapolatedVelocities(Vector<EBAMRIVData*>&        a_cdrVelocitiesEB,
-                                                const Vector<EBAMRCellData*> a_cdrVelocitiesCell,
-                                                const phase::which_phase     a_phase)
+CdrPlasmaStepper::computeExtrapolatedVelocities(Vector<EBAMRIVData*>&               a_cdrVelocitiesEB,
+                                                const Vector<EBAMRCellData*>&      a_cdrVelocitiesCell,
+                                                const phase::which_phase           a_phase)
 {
   CH_TIME("CdrPlasmaStepper::computeExtrapolatedVelocities(Vector<EBAMRIVData*>, Vector<EBAMRCellData*>, phase)");
   if (m_verbosity > 5) {
@@ -4413,7 +4413,7 @@ CdrPlasmaStepper::getPlotVariableNames() const
 void
 CdrPlasmaStepper::writePlotData(LevelData<EBCellFAB>& a_output,
                                 int&                  a_icomp,
-                                const std::string     a_outputRealm,
+                                const std::string&    a_outputRealm,
                                 const int             a_level) const
 {
   CH_TIME("CdrPlasmaStepper::writePlotData");
@@ -4453,7 +4453,7 @@ void
 CdrPlasmaStepper::writeData(LevelData<EBCellFAB>& a_output,
                             int&                  a_comp,
                             const EBAMRCellData&  a_data,
-                            const std::string     a_outputRealm,
+                            const std::string&    a_outputRealm,
                             const int             a_level,
                             const bool            a_interpToCentroids,
                             const bool            a_interpGhost) const noexcept
@@ -4514,7 +4514,7 @@ CdrPlasmaStepper::writeData(LevelData<EBCellFAB>& a_output,
 void
 CdrPlasmaStepper::writeJ(LevelData<EBCellFAB>& a_output,
                          int&                  a_icomp,
-                         const std::string     a_outputRealm,
+                         const std::string&    a_outputRealm,
                          const int             a_level) const
 {
   CH_TIMERS("CdrPlasmaStepper::writeJ");

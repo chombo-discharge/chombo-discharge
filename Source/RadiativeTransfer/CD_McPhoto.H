@@ -360,7 +360,7 @@ public:
   virtual void
   writePlotData(LevelData<EBCellFAB>& a_output,
                 int&                  a_comp,
-                const std::string     a_outputRealm,
+                const std::string&    a_outputRealm,
                 const int             a_level) const noexcept override;
 
 #ifdef CH_USE_HDF5

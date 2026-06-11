@@ -33,7 +33,7 @@ RteSpeciesJSON::define(const std::string& a_name, const RteSpeciesJSON::KappaFun
 }
 
 Real
-RteSpeciesJSON::getAbsorptionCoefficient(const RealVect a_pos) const
+RteSpeciesJSON::getAbsorptionCoefficient(const RealVect& a_pos) const
 {
   return m_absorptionFunction(a_pos);
 }

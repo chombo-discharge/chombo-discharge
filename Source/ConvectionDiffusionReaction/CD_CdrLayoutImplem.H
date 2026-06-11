@@ -77,7 +77,7 @@ CdrLayout<T>::getRealm() const
 
 template <class T>
 void
-CdrLayout<T>::setRealm(const std::string a_realm)
+CdrLayout<T>::setRealm(const std::string& a_realm)
 {
   CH_TIME("CdrLayout<T>::setRealm()");
   if (m_verbosity > 6) {

@@ -42,8 +42,8 @@ inline TracerParticleSolver<P>::TracerParticleSolver()
 }
 
 template <typename P>
-inline TracerParticleSolver<P>::TracerParticleSolver(const RefCountedPtr<AmrMesh>&              a_amr,
-                                                     const RefCountedPtr<ComputationalGeometry> a_compGeom)
+inline TracerParticleSolver<P>::TracerParticleSolver(const RefCountedPtr<AmrMesh>&               a_amr,
+                                                     const RefCountedPtr<ComputationalGeometry>& a_compGeom)
   : TracerParticleSolver<P>()
 {
   CH_TIME("TracerParticleSolver::TracerParticleSolver(RefCountedPtr<AmrMesh>, RefCountedPtr<ComputationalGeometry>)");
@@ -510,7 +510,7 @@ template <typename P>
 inline void
 TracerParticleSolver<P>::writePlotData(LevelData<EBCellFAB>& a_output,
                                        int&                  a_comp,
-                                       const std::string     a_outputRealm,
+                                       const std::string&    a_outputRealm,
                                        const int             a_level) const noexcept
 {
   CH_TIME("TracerParticleSolver::writePlotData");
