@@ -1224,7 +1224,12 @@ CdrSolver::initialDataDistribution()
   EBAMRCellData scratch;
   m_amr->allocate(scratch, m_realm, m_phase, m_nComp);
 
-  DataOps::setValue(scratch, initFunc, m_amr->getProbLo(), m_amr->getDx(), m_comp);
+  DataOps::setValue(scratch,
+                    initFunc,
+                    m_amr->getProbLo(),
+                    m_amr->getDx(),
+                    m_comp,
+                    m_amr->getMultiCutVofIterator(m_realm, m_phase));
   DataOps::incr(m_phi, scratch, 1.0);
   DataOps::setCoveredValue(m_phi, 0, 0.0);
 
@@ -1591,9 +1596,19 @@ CdrSolver::setDiffusionCoefficient(const std::function<Real(const RealVect a_pos
     pout() << m_name + "::setDiffusionCoefficient(std::function<Real(const RealVect a_position)>)" << endl;
   }
 
-  DataOps::setValue(m_cellCenteredDiffusionCoefficient, a_diffCo, m_amr->getProbLo(), m_amr->getDx(), m_comp);
+  DataOps::setValue(m_cellCenteredDiffusionCoefficient,
+                    a_diffCo,
+                    m_amr->getProbLo(),
+                    m_amr->getDx(),
+                    m_comp,
+                    m_amr->getMultiCutVofIterator(m_realm, m_phase));
   DataOps::setValue(m_faceCenteredDiffusionCoefficient, a_diffCo, m_amr->getProbLo(), m_amr->getDx(), m_comp);
-  DataOps::setValue(m_ebCenteredDiffusionCoefficient, a_diffCo, m_amr->getProbLo(), m_amr->getDx(), m_comp);
+  DataOps::setValue(m_ebCenteredDiffusionCoefficient,
+                    a_diffCo,
+                    m_amr->getProbLo(),
+                    m_amr->getDx(),
+                    m_comp,
+                    m_amr->getVofIterator(m_realm, m_phase));
 }
 
 void
@@ -1674,7 +1689,12 @@ CdrSolver::setSource(const std::function<Real(const RealVect a_position)>& a_sou
     pout() << m_name + "::setSource(std::function<Real(const RealVect a_position)>)" << endl;
   }
 
-  DataOps::setValue(m_source, a_source, m_amr->getProbLo(), m_amr->getDx(), m_comp);
+  DataOps::setValue(m_source,
+                    a_source,
+                    m_amr->getProbLo(),
+                    m_amr->getDx(),
+                    m_comp,
+                    m_amr->getMultiCutVofIterator(m_realm, m_phase));
 
   m_amr->conservativeAverage(m_source, m_realm, m_phase);
   m_amr->interpGhost(m_source, m_realm, m_phase);
@@ -1735,7 +1755,11 @@ CdrSolver::setVelocity(const std::function<RealVect(const RealVect a_pos)>& a_ve
     pout() << m_name + "::setVelocity(std::function<RealVect(const RealVect a_pos)>)" << endl;
   }
 
-  DataOps::setValue(m_cellVelocity, a_velo, m_amr->getProbLo(), m_amr->getDx());
+  DataOps::setValue(m_cellVelocity,
+                    a_velo,
+                    m_amr->getProbLo(),
+                    m_amr->getDx(),
+                    m_amr->getMultiCutVofIterator(m_realm, m_phase));
 }
 
 void
@@ -1848,13 +1872,15 @@ CdrSolver::writePlotData(LevelData<EBCellFAB>& a_output,
   if (m_plotDiffusionCoefficient && m_isDiffusive) {
     DataOps::averageFaceToCell(*scratch[a_level],
                                *m_faceCenteredDiffusionCoefficient[a_level],
-                               m_amr->getDomains()[a_level]);
+                               m_amr->getDomains()[a_level],
+                               *m_amr->getVofIterator(m_realm, m_phase)[a_level]);
 
     // Do the previous because we need the ghost cells too.
     if (a_level > 0) {
       DataOps::averageFaceToCell(*scratch[a_level - 1],
                                  *m_faceCenteredDiffusionCoefficient[a_level - 1],
-                                 m_amr->getDomains()[a_level - 1]);
+                                 m_amr->getDomains()[a_level - 1],
+                                 *m_amr->getVofIterator(m_realm, m_phase)[a_level - 1]);
     }
 
     this->writeData(a_output, a_icomp, scratch, a_outputRealm, a_level, false, true);
@@ -2466,7 +2492,7 @@ CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_pow)
     EBAMRCellData zero;
     m_amr->allocate(zero, m_realm, m_phase, m_nComp);
     DataOps::setValue(zero, 0.0);
-    DataOps::divideFallback(a_weightedUpwindPhi, scratch, zero);
+    DataOps::divideFallback(a_weightedUpwindPhi, scratch, zero, m_amr->getMultiCutVofIterator(m_realm, m_phase));
 
     m_amr->conservativeAverage(a_weightedUpwindPhi, m_realm, m_phase);
     m_amr->interpGhost(a_weightedUpwindPhi, m_realm, m_phase);

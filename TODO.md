@@ -2,7 +2,7 @@
 
 ## Status — update at the start/end of each session
 
-**Branch:** `dataops` | **Last updated:** 2026-06-12 | **No code written yet.**
+**Branch:** `dataops` | **Last updated:** 2026-06-12 | **5-sites complete.**
 
 ### Planning — complete (do not re-litigate these decisions)
 
@@ -12,14 +12,21 @@
 - [x] Checkpoint 4 — BoxLoops internal reorganization design finalized
 - [x] Checkpoint 5 — Call site inventory compiled
 
-### Implementation — not started
+### Implementation — in progress
 
-- [ ] **2-code** — Write `PhaseRealm` / `Realm` / `AmrMesh` changes (6 files; see §2 task list)
-- [ ] **3+4-code** — Write `DataOps` signature + implementation changes (see §3+4 task list)
-- [ ] **5-sites** — Update all call sites in Checkpoint 5 (check off each site as updated)
+- [x] **2-code** — Write `PhaseRealm` / `Realm` / `AmrMesh` changes (6 files; see §2 task list)
+- [x] **3+4-code** — Write `DataOps` signature + implementation changes (see §3+4 task list)
+- [x] **5-sites** — Update all call sites in Checkpoint 5 (all VoFIter-needing calls updated; MF variants and FaceIterator-based functions intentionally unchanged)
 - [ ] **6-cleanup** — Pre-merge cleanup (do last)
 
-**Resume here:** `2-code` — start with `Source/AmrMesh/CD_PhaseRealm.H`.
+**Resume here:** `6-cleanup` — pre-merge cleanup checklist.
+
+### Key design decisions (for future reference)
+
+- `averageCellToFace` and `averageCellVelocityToFaceVelocity` use `FaceIterator` internally (not `VoFIterator`). These functions were NOT given VoFIter parameters. Call sites for these functions need no updates.
+- MF variants (`dotProduct(MFAMRCellData)`, `kappaScale(MFAMRCellData)`, `setValue(MFAMRCellData, function)`) are intentionally deferred — they require a phase-keyed iterator vector not yet available in this design.
+- `setInvalidValue` is kept local — the overlap box is computed dynamically at call time.
+- `filterSmooth` is kept local — uses a grown IVS that is stride-dependent and cannot be pre-built.
 
 > **Keep this current.** When finishing a session, update "Resume here" and the last-updated
 > date so the next session (on any machine) can orient instantly.

@@ -613,7 +613,7 @@ EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData
 
     // If we're doing a stationary solve, we must scale the source term by kappa (unless it's otherwise been done).
     if (m_kappaScale) {
-      DataOps::kappaScale(scaledSource);
+      DataOps::kappaScale(scaledSource, m_amr->getVofIterator(m_realm, m_phase));
     }
 
     // Aliasing, because Chombo is not too smart.
@@ -714,7 +714,7 @@ EddingtonSP1::advanceEuler(EBAMRCellData&       a_phi,
 
   DataOps::incr(scratch, a_source, a_dt);
   if (m_kappaScale) {
-    DataOps::kappaScale(scratch);
+    DataOps::kappaScale(scratch, m_amr->getVofIterator(m_realm, m_phase));
   }
 
   Vector<LevelData<EBCellFAB>*> newPhi;

@@ -508,7 +508,12 @@ FieldSolver::setSigma(const std::function<Real(const RealVect)>& a_sigma)
     pout() << "FieldSolver::setSigma(std::function<Real(const RealVect)>))" << endl;
   }
 
-  DataOps::setValue(m_sigma, a_sigma, m_amr->getProbLo(), m_amr->getDx(), m_comp);
+  DataOps::setValue(m_sigma,
+                    a_sigma,
+                    m_amr->getProbLo(),
+                    m_amr->getDx(),
+                    m_comp,
+                    m_amr->getVofIterator(m_realm, phase::gas));
 
   m_amr->arithmeticAverage(m_sigma, m_realm, phase::gas);
 }

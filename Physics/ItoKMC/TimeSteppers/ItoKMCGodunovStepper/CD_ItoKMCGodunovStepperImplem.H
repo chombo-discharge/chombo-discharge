@@ -1757,7 +1757,7 @@ ItoKMCGodunovStepper<I, C, R, F>::stepEulerMaruyamaCDR(const Real a_dt) noexcept
       DataOps::incr(phi, this->m_cdrDivD[index], a_dt);
     }
 
-    DataOps::floor(phi, 0.0);
+    DataOps::floor(phi, 0.0, this->m_amr->getVofIterator(this->m_fluidRealm, this->m_plasmaPhase));
   }
 
   this->coarsenCDRSolvers();

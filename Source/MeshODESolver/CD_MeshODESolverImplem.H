@@ -181,7 +181,12 @@ MeshODESolver<N>::setPhi(const std::function<Real(const RealVect& a_pos)>& a_phi
     pout() << m_name + "::setPhi(std::function, size_t)" << endl;
   }
 
-  DataOps::setValue(m_phi, a_phiFunc, m_amr->getProbLo(), m_amr->getDx(), a_comp);
+  DataOps::setValue(m_phi,
+                    a_phiFunc,
+                    m_amr->getProbLo(),
+                    m_amr->getDx(),
+                    a_comp,
+                    m_amr->getMultiCutVofIterator(m_realm, m_phase));
 }
 
 template <size_t N>
@@ -266,7 +271,12 @@ MeshODESolver<N>::setRHS(const std::function<Real(const RealVect& a_pos)>& a_src
     pout() << m_name + "::setRHS(std::function, size_t)" << endl;
   }
 
-  DataOps::setValue(m_rhs, a_srcFunc, m_amr->getProbLo(), m_amr->getDx(), a_comp);
+  DataOps::setValue(m_rhs,
+                    a_srcFunc,
+                    m_amr->getProbLo(),
+                    m_amr->getDx(),
+                    a_comp,
+                    m_amr->getMultiCutVofIterator(m_realm, m_phase));
 }
 
 template <size_t N>

@@ -122,6 +122,7 @@ PhaseRealm::preRegrid()
   m_eblgCoFi.resize(0);
   m_eblgFiCo.resize(0);
   m_vofIter.resize(0);
+  m_multiCutVofIter.resize(0);
   m_coarAve.resize(0);
   m_multigridInterpolator.resize(0);
   m_ebFineInterp.resize(0);
@@ -427,10 +428,12 @@ PhaseRealm::defineVofIterator(const int a_lmin)
   }
 
   m_vofIter.resize(1 + m_finestLevel);
+  m_multiCutVofIter.resize(1 + m_finestLevel);
 
   for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++) {
 
-    m_vofIter[lvl] = RefCountedPtr<LayoutData<VoFIterator>>(new LayoutData<VoFIterator>(m_grids[lvl]));
+    m_vofIter[lvl]         = RefCountedPtr<LayoutData<VoFIterator>>(new LayoutData<VoFIterator>(m_grids[lvl]));
+    m_multiCutVofIter[lvl] = RefCountedPtr<LayoutData<VoFIterator>>(new LayoutData<VoFIterator>(m_grids[lvl]));
 
     const DisjointBoxLayout& dbl = m_grids[lvl];
     const DataIterator&      dit = dbl.dataIterator();
@@ -440,14 +443,17 @@ PhaseRealm::defineVofIterator(const int a_lmin)
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      VoFIterator& vofit = (*m_vofIter[lvl])[din];
+      VoFIterator& vofit         = (*m_vofIter[lvl])[din];
+      VoFIterator& multiCutVofit = (*m_multiCutVofIter[lvl])[din];
 
-      const Box&        cellBox = m_grids[lvl].get(din);
-      const EBISBox&    ebisbox = m_ebisl[lvl][din];
-      const EBGraph&    ebgraph = ebisbox.getEBGraph();
-      const IntVectSet& irreg   = ebisbox.getIrregIVS(cellBox);
+      const Box&        cellBox  = m_grids[lvl].get(din);
+      const EBISBox&    ebisbox  = m_ebisl[lvl][din];
+      const EBGraph&    ebgraph  = ebisbox.getEBGraph();
+      const IntVectSet& irreg    = ebisbox.getIrregIVS(cellBox);
+      const IntVectSet& multiCut = ebisbox.getMultiCells(cellBox);
 
       vofit.define(irreg, ebgraph);
+      multiCutVofit.define(multiCut, ebgraph);
     }
   }
 }
@@ -886,6 +892,12 @@ Vector<RefCountedPtr<LayoutData<VoFIterator>>>&
 PhaseRealm::getVofIterator() const
 {
   return m_vofIter;
+}
+
+Vector<RefCountedPtr<LayoutData<VoFIterator>>>&
+PhaseRealm::getMultiCutVofIterator() const
+{
+  return m_multiCutVofIter;
 }
 
 const Vector<RefCountedPtr<EBGradient>>&

@@ -70,7 +70,7 @@ CdrPlasmaFieldTagger::computeElectricField(EBAMRCellData& a_electricField, EBAMR
   m_timeStepper->computeElectricField(a_electricField, m_phase);
 
   // Compute |E| onto scratch
-  DataOps::vectorLength(m_scratch, a_electricField);
+  DataOps::vectorLength(m_scratch, a_electricField, m_amr->getMultiCutVofIterator(m_realm, m_phase));
 
   // Now compute grad(|E|).
   m_amr->computeGradient(a_gradElectricField, m_scratch, m_realm, phase::gas);
@@ -111,8 +111,14 @@ CdrPlasmaFieldTagger::computeTracers() const
 
   // Get the maximum and minimum value of the electric field and its gradient. This is the
   // norm so we are getting the max of |E| and the max of |grad(|E|)|.
-  DataOps::getMaxMinNorm(maxElectricField, minElectricField, m_electricField);
-  DataOps::getMaxMinNorm(maxGradElectricField, minGradElectricField, m_gradElectricField);
+  DataOps::getMaxMinNorm(maxElectricField,
+                         minElectricField,
+                         m_electricField,
+                         m_amr->getMultiCutVofIterator(m_realm, m_phase));
+  DataOps::getMaxMinNorm(maxGradElectricField,
+                         minGradElectricField,
+                         m_gradElectricField,
+                         m_amr->getMultiCutVofIterator(m_realm, m_phase));
 
   // Go through each AMR level and compute the tracer fields.
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {

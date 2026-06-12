@@ -367,21 +367,23 @@ DataOps::averageCellToFace(LevelData<EBFluxFAB>&       a_faceData,
 }
 
 void
-DataOps::averageFaceToCell(EBAMRCellData&               a_cellData,
-                           const EBAMRFluxData&         a_faceData,
-                           const Vector<ProblemDomain>& a_domains)
+DataOps::averageFaceToCell(EBAMRCellData&                                        a_cellData,
+                           const EBAMRFluxData&                                  a_faceData,
+                           const Vector<ProblemDomain>&                          a_domains,
+                           const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter)
 {
   CH_TIME("DataOps::averageFaceToCell(EBAMRCellData, EBAMRFluxData, Vector<ProblemDomain>)");
 
   for (int lvl = 0; lvl < a_faceData.size(); lvl++) {
-    DataOps::averageFaceToCell(*a_cellData[lvl], *a_faceData[lvl], a_domains[lvl]);
+    DataOps::averageFaceToCell(*a_cellData[lvl], *a_faceData[lvl], a_domains[lvl], *a_vofIter[lvl]);
   }
 }
 
 void
 DataOps::averageFaceToCell(LevelData<EBCellFAB>&       a_cellData,
                            const LevelData<EBFluxFAB>& a_fluxData,
-                           const ProblemDomain& /*a_domain*/)
+                           const ProblemDomain& /*a_domain*/,
+                           LayoutData<VoFIterator>& a_vofIter)
 {
   CH_TIME("DataOps::averageFaceToCell(LD<EBCellFAB>, LD<EBCellFAB>, ProblemDomain)");
 
@@ -400,12 +402,10 @@ DataOps::averageFaceToCell(LevelData<EBCellFAB>&       a_cellData,
     EBCellFAB&       cellData = a_cellData[din];
     const EBFluxFAB& fluxData = a_fluxData[din];
     const EBISBox&   ebisbox  = cellData.getEBISBox();
-    const EBGraph&   ebgraph  = ebisbox.getEBGraph();
 
     // Regions for the kernels.
-    const Box&        cellBox = a_cellData.disjointBoxLayout()[din];
-    const IntVectSet& ivs     = ebisbox.getIrregIVS(cellBox);
-    VoFIterator       vofit(ivs, ebgraph);
+    const Box&   cellBox = a_cellData.disjointBoxLayout()[din];
+    VoFIterator& vofit   = a_vofIter[din];
 
     // Component loop.
     for (int comp = 0; comp < numComp; comp++) {
@@ -478,17 +478,21 @@ DataOps::axby(LevelData<EBCellFAB>&       a_lhs,
 }
 
 void
-DataOps::compute(EBAMRCellData& a_data, const std::function<Real(const Real a_cellValue)>& a_func) noexcept
+DataOps::compute(EBAMRCellData&                                        a_data,
+                 const std::function<Real(const Real a_cellValue)>&    a_func,
+                 const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter) noexcept
 {
   CH_TIME("DataOps::compute(EBAMRCellData, std::function)");
 
   for (int lvl = 0; lvl < a_data.size(); lvl++) {
-    DataOps::compute(*a_data[lvl], a_func);
+    DataOps::compute(*a_data[lvl], a_func, *a_vofIter[lvl]);
   }
 }
 
 void
-DataOps::compute(LevelData<EBCellFAB>& a_data, const std::function<Real(const Real a_cellValue)>& a_func) noexcept
+DataOps::compute(LevelData<EBCellFAB>&                              a_data,
+                 const std::function<Real(const Real a_cellValue)>& a_func,
+                 LayoutData<VoFIterator>&                           a_vofIter) noexcept
 {
   CH_TIME("DataOps::compute(LevelData<EBCellFAB>, std::function)");
 
@@ -510,11 +514,8 @@ DataOps::compute(LevelData<EBCellFAB>& a_data, const std::function<Real(const Re
     FArrayBox& tmpReg = tmp.getFArrayBox();
 
     // Kernel regions
-    const Box&        box     = a_data.disjointBoxLayout().get(din);
-    const EBISBox&    ebisbox = data.getEBISBox();
-    const EBGraph&    ebgraph = ebisbox.getEBGraph();
-    const IntVectSet& ivs     = ebisbox.getIrregIVS(box);
-    VoFIterator       vofit(ivs, ebgraph);
+    const Box&   box   = a_data.disjointBoxLayout().get(din);
+    VoFIterator& vofit = a_vofIter[din];
 
     for (int comp = 0; comp < nComp; comp++) {
       auto regularKernel = [&](const IntVect& iv) -> void {
@@ -574,7 +575,10 @@ DataOps::dotProduct(LevelData<MFCellFAB>&       a_result,
 }
 
 void
-DataOps::dotProduct(EBAMRCellData& a_result, const EBAMRCellData& a_data1, const EBAMRCellData& a_data2)
+DataOps::dotProduct(EBAMRCellData&                                        a_result,
+                    const EBAMRCellData&                                  a_data1,
+                    const EBAMRCellData&                                  a_data2,
+                    const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter)
 {
   CH_TIME("DataOps::dotProduct(EBAMRCellData)");
 
@@ -582,14 +586,15 @@ DataOps::dotProduct(EBAMRCellData& a_result, const EBAMRCellData& a_data1, const
   CH_assert(a_result[0]->nComp() == 1);
 
   for (int lvl = 0; lvl < a_result.size(); lvl++) {
-    DataOps::dotProduct(*a_result[lvl], *a_data1[lvl], *a_data2[lvl]);
+    DataOps::dotProduct(*a_result[lvl], *a_data1[lvl], *a_data2[lvl], *a_vofIter[lvl]);
   }
 }
 
 void
 DataOps::dotProduct(LevelData<EBCellFAB>&       a_result,
                     const LevelData<EBCellFAB>& a_data1,
-                    const LevelData<EBCellFAB>& a_data2)
+                    const LevelData<EBCellFAB>& a_data2,
+                    LayoutData<VoFIterator>&    a_vofIter)
 {
   CH_TIME("DataOps::dotProduct(LD<EBCellFAB>)");
 
@@ -609,12 +614,16 @@ DataOps::dotProduct(LevelData<EBCellFAB>&       a_result,
     const EBCellFAB& data2  = a_data2[din];
     const Box&       box    = a_result.disjointBoxLayout().get(din);
 
-    DataOps::dotProduct(result, data1, data2, box);
+    DataOps::dotProduct(result, data1, data2, box, a_vofIter[din]);
   }
 }
 
 void
-DataOps::dotProduct(EBCellFAB& a_result, const EBCellFAB& a_data1, const EBCellFAB& a_data2, const Box& a_box)
+DataOps::dotProduct(EBCellFAB&       a_result,
+                    const EBCellFAB& a_data1,
+                    const EBCellFAB& a_data2,
+                    const Box&       a_box,
+                    VoFIterator&     a_vofIter)
 {
   CH_TIME("DataOps::dotProduct(EBCellFAB)");
 
@@ -629,11 +638,7 @@ DataOps::dotProduct(EBCellFAB& a_result, const EBCellFAB& a_data1, const EBCellF
   const BaseFab<Real>& data1Reg  = a_data1.getSingleValuedFAB();
   const BaseFab<Real>& data2Reg  = a_data2.getSingleValuedFAB();
 
-  // Kernel region.
-  const EBISBox&    ebisbox = a_result.getEBISBox();
-  const EBGraph&    ebgraph = ebisbox.getEBGraph();
-  const IntVectSet& ivs     = ebisbox.getIrregIVS(a_box);
-  VoFIterator       vofit(ivs, ebgraph);
+  VoFIterator& vofit = a_vofIter;
 
   // Regular dot product kernel.
   auto regularKernel = [&](const IntVect& iv) -> void {
@@ -1231,19 +1236,23 @@ DataOps::divideByScalar(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>&
 }
 
 void
-DataOps::divideFallback(EBAMRCellData& a_numerator, const EBAMRCellData& a_denominator, const EBAMRCellData& a_fallback)
+DataOps::divideFallback(EBAMRCellData&                                        a_numerator,
+                        const EBAMRCellData&                                  a_denominator,
+                        const EBAMRCellData&                                  a_fallback,
+                        const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter)
 {
   CH_TIME("DataOps::divideFallback(EBAMRCellData)");
 
   for (int lvl = 0; lvl < a_numerator.size(); lvl++) {
-    DataOps::divideFallback(*a_numerator[lvl], *a_denominator[lvl], *a_fallback[lvl]);
+    DataOps::divideFallback(*a_numerator[lvl], *a_denominator[lvl], *a_fallback[lvl], *a_vofIter[lvl]);
   }
 }
 
 void
 DataOps::divideFallback(LevelData<EBCellFAB>&       a_numerator,
                         const LevelData<EBCellFAB>& a_denominator,
-                        const LevelData<EBCellFAB>& a_fallback)
+                        const LevelData<EBCellFAB>& a_fallback,
+                        LayoutData<VoFIterator>&    a_vofIter)
 {
   CH_TIME("DataOps::LD<EBCellFAB>)");
 
@@ -1268,11 +1277,8 @@ DataOps::divideFallback(LevelData<EBCellFAB>&       a_numerator,
     const BaseFab<Real>& regFallback    = fallback.getSingleValuedFAB();
 
     // Kernel regions
-    const Box        cellBox  = a_numerator.disjointBoxLayout()[din];
-    const EBISBox&   ebisBox  = numerator.getEBISBox();
-    const EBGraph&   ebGraph  = ebisBox.getEBGraph();
-    const IntVectSet irregIVS = ebisBox.getIrregIVS(cellBox);
-    VoFIterator      vofit(irregIVS, ebGraph);
+    const Box    cellBox = a_numerator.disjointBoxLayout()[din];
+    VoFIterator& vofit   = a_vofIter[din];
 
     // I need to clone the input data because the regular kernel will screw with it, breaking our cut-cell kernels.
     EBCellFAB cloneNumerator;
@@ -1311,19 +1317,23 @@ DataOps::divideFallback(LevelData<EBCellFAB>&       a_numerator,
 }
 
 void
-DataOps::divideFallback(EBAMRCellData& a_numerator, const EBAMRCellData& a_denominator, const Real a_fallback)
+DataOps::divideFallback(EBAMRCellData&                                        a_numerator,
+                        const EBAMRCellData&                                  a_denominator,
+                        const Real                                            a_fallback,
+                        const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter)
 {
   CH_TIME("DataOps::divideFallback(EBAMRCellData)");
 
   for (int lvl = 0; lvl < a_numerator.size(); lvl++) {
-    DataOps::divideFallback(*a_numerator[lvl], *a_denominator[lvl], a_fallback);
+    DataOps::divideFallback(*a_numerator[lvl], *a_denominator[lvl], a_fallback, *a_vofIter[lvl]);
   }
 }
 
 void
 DataOps::divideFallback(LevelData<EBCellFAB>&       a_numerator,
                         const LevelData<EBCellFAB>& a_denominator,
-                        const Real                  a_fallback)
+                        const Real                  a_fallback,
+                        LayoutData<VoFIterator>&    a_vofIter)
 {
   CH_TIME("DataOps::divdeFallback");
 
@@ -1345,11 +1355,8 @@ DataOps::divideFallback(LevelData<EBCellFAB>&       a_numerator,
     const BaseFab<Real>& regDenominator = denominator.getSingleValuedFAB();
 
     // Kernel regions
-    const Box        cellBox  = a_numerator.disjointBoxLayout()[din];
-    const EBISBox&   ebisBox  = numerator.getEBISBox();
-    const EBGraph&   ebGraph  = ebisBox.getEBGraph();
-    const IntVectSet irregIVS = ebisBox.getIrregIVS(cellBox);
-    VoFIterator      vofit(irregIVS, ebGraph);
+    const Box    cellBox = a_numerator.disjointBoxLayout()[din];
+    VoFIterator& vofit   = a_vofIter[din];
 
     // I need to clone the input data because the regular kernel will screw with it.
     EBCellFAB cloneNumerator;
@@ -1388,17 +1395,19 @@ DataOps::divideFallback(LevelData<EBCellFAB>&       a_numerator,
 }
 
 void
-DataOps::floor(EBAMRCellData& a_lhs, const Real a_value)
+DataOps::floor(EBAMRCellData&                                        a_lhs,
+               const Real                                            a_value,
+               const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter)
 {
   CH_TIME("DataOps::floor(EBAMRCellData)");
 
   for (int lvl = 0; lvl < a_lhs.size(); lvl++) {
-    DataOps::floor(*a_lhs[lvl], a_value);
+    DataOps::floor(*a_lhs[lvl], a_value, *a_vofIter[lvl]);
   }
 }
 
 void
-DataOps::floor(LevelData<EBCellFAB>& a_lhs, const Real a_value)
+DataOps::floor(LevelData<EBCellFAB>& a_lhs, const Real a_value, LayoutData<VoFIterator>& a_vofIter)
 {
   CH_TIME("DataOps::floor(LD<EBCelLFAB>)");
 
@@ -1410,17 +1419,14 @@ DataOps::floor(LevelData<EBCellFAB>& a_lhs, const Real a_value)
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
-    EBCellFAB&     lhs     = a_lhs[din];
-    const Box      box     = lhs.getRegion(); // Note:: All cells are floored (ghosts also)
-    const EBISBox& ebisbox = lhs.getEBISBox();
-    const EBGraph& ebgraph = ebisbox.getEBGraph();
-    const int      numComp = a_lhs.nComp();
+    EBCellFAB& lhs     = a_lhs[din];
+    const Box  box     = lhs.getRegion(); // Note: all cells are floored (ghosts also)
+    const int  numComp = a_lhs.nComp();
 
     // Hook to single-valued data.
     BaseFab<Real>& lhs_reg = lhs.getSingleValuedFAB();
 
-    // Irregular kernel region
-    VoFIterator vofit(ebisbox.getIrregIVS(box), ebgraph);
+    VoFIterator& vofit = a_vofIter[din];
 
     // Components loop -- we do all components.
     for (int comp = 0; comp < numComp; comp++) {
@@ -1443,17 +1449,17 @@ DataOps::floor(LevelData<EBCellFAB>& a_lhs, const Real a_value)
 }
 
 void
-DataOps::floor(EBAMRIVData& a_lhs, const Real a_value)
+DataOps::floor(EBAMRIVData& a_lhs, const Real a_value, const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter)
 {
   CH_TIME("DataOps::floor(EBAMRIVData)");
 
   for (int lvl = 0; lvl < a_lhs.size(); lvl++) {
-    DataOps::floor(*a_lhs[lvl], a_value);
+    DataOps::floor(*a_lhs[lvl], a_value, *a_vofIter[lvl]);
   }
 }
 
 void
-DataOps::floor(LevelData<BaseIVFAB<Real>>& a_lhs, const Real a_value)
+DataOps::floor(LevelData<BaseIVFAB<Real>>& a_lhs, const Real a_value, LayoutData<VoFIterator>& a_vofIter)
 {
   CH_TIME("DataOps::floor(LD<BaseIVFAB<Real> >)");
 
@@ -1466,37 +1472,31 @@ DataOps::floor(LevelData<BaseIVFAB<Real>>& a_lhs, const Real a_value)
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
-    BaseIVFAB<Real>& lhs = a_lhs[din];
+    BaseIVFAB<Real>& lhs   = a_lhs[din];
+    VoFIterator&     vofit = a_vofIter[din];
 
-    // Irregular kernel region.
-    VoFIterator vofit(lhs.getIVS(), lhs.getEBGraph());
-
-    // Do all components.
     for (int comp = 0; comp < numComp; comp++) {
-
-      // Irregular kernel.
       auto irregularKernel = [&](const VolIndex& vof) -> void {
         lhs(vof, comp) = std::max(a_value, lhs(vof, comp));
       };
 
-      // Run kernel
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
 }
 
 void
-DataOps::roof(EBAMRCellData& a_lhs, const Real a_value)
+DataOps::roof(EBAMRCellData& a_lhs, const Real a_value, const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter)
 {
   CH_TIME("DataOps::roof(EBAMRCellData)");
 
   for (int lvl = 0; lvl < a_lhs.size(); lvl++) {
-    DataOps::roof(*a_lhs[lvl], a_value);
+    DataOps::roof(*a_lhs[lvl], a_value, *a_vofIter[lvl]);
   }
 }
 
 void
-DataOps::roof(LevelData<EBCellFAB>& a_lhs, const Real a_value)
+DataOps::roof(LevelData<EBCellFAB>& a_lhs, const Real a_value, LayoutData<VoFIterator>& a_vofIter)
 {
   CH_TIME("DataOps::roof(LD<EBCelLFAB>)");
 
@@ -1508,17 +1508,14 @@ DataOps::roof(LevelData<EBCellFAB>& a_lhs, const Real a_value)
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
-    EBCellFAB&     lhs     = a_lhs[din];
-    const Box      box     = lhs.getRegion(); // Note:: All cells are roofed (ghosts also)
-    const EBISBox& ebisbox = lhs.getEBISBox();
-    const EBGraph& ebgraph = ebisbox.getEBGraph();
-    const int      numComp = a_lhs.nComp();
+    EBCellFAB& lhs     = a_lhs[din];
+    const Box  box     = lhs.getRegion(); // Note: all cells are roofed (ghosts also)
+    const int  numComp = a_lhs.nComp();
 
     // Hook to single-valued data.
     BaseFab<Real>& lhs_reg = lhs.getSingleValuedFAB();
 
-    // Irregular kernel region
-    VoFIterator vofit(ebisbox.getIrregIVS(box), ebgraph);
+    VoFIterator& vofit = a_vofIter[din];
 
     // Components loop -- we do all components.
     for (int comp = 0; comp < numComp; comp++) {
@@ -1541,17 +1538,17 @@ DataOps::roof(LevelData<EBCellFAB>& a_lhs, const Real a_value)
 }
 
 void
-DataOps::roof(EBAMRIVData& a_lhs, const Real a_value)
+DataOps::roof(EBAMRIVData& a_lhs, const Real a_value, const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter)
 {
   CH_TIME("DataOps::roof(EBAMRIVData)");
 
   for (int lvl = 0; lvl < a_lhs.size(); lvl++) {
-    DataOps::roof(*a_lhs[lvl], a_value);
+    DataOps::roof(*a_lhs[lvl], a_value, *a_vofIter[lvl]);
   }
 }
 
 void
-DataOps::roof(LevelData<BaseIVFAB<Real>>& a_lhs, const Real a_value)
+DataOps::roof(LevelData<BaseIVFAB<Real>>& a_lhs, const Real a_value, LayoutData<VoFIterator>& a_vofIter)
 {
   CH_TIME("DataOps::roof(LD<BaseIVFAB<Real> >)");
 
@@ -1564,37 +1561,37 @@ DataOps::roof(LevelData<BaseIVFAB<Real>>& a_lhs, const Real a_value)
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
-    BaseIVFAB<Real>& lhs = a_lhs[din];
+    BaseIVFAB<Real>& lhs   = a_lhs[din];
+    VoFIterator&     vofit = a_vofIter[din];
 
-    // Irregular kernel region.
-    VoFIterator vofit(lhs.getIVS(), lhs.getEBGraph());
-
-    // Do all components.
     for (int comp = 0; comp < numComp; comp++) {
-
-      // Irregular kernel.
       auto irregularKernel = [&](const VolIndex& vof) -> void {
         lhs(vof, comp) = std::min(a_value, lhs(vof, comp));
       };
 
-      // Run kernel
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
 }
 
 void
-DataOps::max(EBAMRCellData& a_data, const EBAMRCellData& a_data1, const EBAMRCellData& a_data2)
+DataOps::max(EBAMRCellData&                                        a_data,
+             const EBAMRCellData&                                  a_data1,
+             const EBAMRCellData&                                  a_data2,
+             const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter)
 {
   CH_TIME("DataOps::max(EBAMRCellData x3)");
 
   for (int lvl = 0; lvl < a_data.size(); lvl++) {
-    DataOps::max(*a_data[lvl], *a_data1[lvl], *a_data2[lvl]);
+    DataOps::max(*a_data[lvl], *a_data1[lvl], *a_data2[lvl], *a_vofIter[lvl]);
   }
 }
 
 void
-DataOps::max(LevelData<EBCellFAB>& a_data, const LevelData<EBCellFAB>& a_data1, const LevelData<EBCellFAB>& a_data2)
+DataOps::max(LevelData<EBCellFAB>&       a_data,
+             const LevelData<EBCellFAB>& a_data1,
+             const LevelData<EBCellFAB>& a_data2,
+             LayoutData<VoFIterator>&    a_vofIter)
 {
   CH_TIME("DataOps::max(LD<EBCellFAB> x3)");
 
@@ -1632,11 +1629,8 @@ DataOps::max(LevelData<EBCellFAB>& a_data, const LevelData<EBCellFAB>& a_data1, 
     };
 
     // Regions for the kernels.
-    const Box&        cellBox = dbl[din];
-    const EBISBox&    ebisbox = data.getEBISBox();
-    const EBGraph&    ebgraph = ebisbox.getEBGraph();
-    const IntVectSet& ivs     = ebisbox.getIrregIVS(cellBox);
-    VoFIterator       vofit(ivs, ebgraph);
+    const Box&   cellBox = dbl[din];
+    VoFIterator& vofit   = a_vofIter[din];
 
     // Run kernels
     BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
@@ -1645,7 +1639,11 @@ DataOps::max(LevelData<EBCellFAB>& a_data, const LevelData<EBCellFAB>& a_data1, 
 }
 
 void
-DataOps::getMaxMin(Real& a_max, Real& a_min, EBAMRCellData& a_data, const int a_comp)
+DataOps::getMaxMin(Real&                                                 a_max,
+                   Real&                                                 a_min,
+                   EBAMRCellData&                                        a_data,
+                   const int                                             a_comp,
+                   const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter)
 {
   CH_TIME("DataOps::getMaxMin(EBAMRCellData)");
 
@@ -1656,7 +1654,7 @@ DataOps::getMaxMin(Real& a_max, Real& a_min, EBAMRCellData& a_data, const int a_
     Real lvlMax = -std::numeric_limits<Real>::max();
     Real lvlMin = +std::numeric_limits<Real>::max();
 
-    DataOps::getMaxMin(lvlMax, lvlMin, *a_data[lvl], a_comp);
+    DataOps::getMaxMin(lvlMax, lvlMin, *a_data[lvl], a_comp, *a_vofIter[lvl]);
 
     a_max = std::max(a_max, lvlMax);
     a_min = std::min(a_min, lvlMin);
@@ -1664,7 +1662,11 @@ DataOps::getMaxMin(Real& a_max, Real& a_min, EBAMRCellData& a_data, const int a_
 }
 
 void
-DataOps::getMaxMin(Real& a_max, Real& a_min, LevelData<EBCellFAB>& a_data, const int a_comp)
+DataOps::getMaxMin(Real&                    a_max,
+                   Real&                    a_min,
+                   LevelData<EBCellFAB>&    a_data,
+                   const int                a_comp,
+                   LayoutData<VoFIterator>& a_vofIter)
 {
   CH_TIME("DataOps::getMaxMin(LD<EBCellFAB>)");
 
@@ -1683,7 +1685,6 @@ DataOps::getMaxMin(Real& a_max, Real& a_min, LevelData<EBCellFAB>& a_data, const
     const DataIndex& din = dit[mybox];
 
     const EBCellFAB& data    = a_data[din];
-    const EBISBox&   ebisbox = data.getEBISBox();
     const FArrayBox& dataReg = data.getFArrayBox();
 
     auto regularKernel = [&](const IntVect& iv) -> void {
@@ -1696,10 +1697,8 @@ DataOps::getMaxMin(Real& a_max, Real& a_min, LevelData<EBCellFAB>& a_data, const
       a_min = std::min(a_min, data(vof, a_comp));
     };
 
-    const Box      cellBox = dbl[din];
-    const EBGraph& ebgraph = ebisbox.getEBGraph();
-
-    VoFIterator vofit(ebisbox.getIrregIVS(cellBox), ebgraph);
+    const Box&   cellBox = dbl[din];
+    VoFIterator& vofit   = a_vofIter[din];
 
     BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
     BoxLoops::loop(vofit, irregularKernel);
@@ -1791,7 +1790,10 @@ DataOps::getMaxMin(Vector<Real>& a_max, Vector<Real>& a_min, Vector<EBAMRCellDat
 }
 
 void
-DataOps::getMaxMinNorm(Real& a_max, Real& a_min, EBAMRCellData& a_data)
+DataOps::getMaxMinNorm(Real&                                                 a_max,
+                       Real&                                                 a_min,
+                       EBAMRCellData&                                        a_data,
+                       const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter)
 {
   CH_TIME("DataOps::getMaxMinNorm(EBAMRCellData)");
 
@@ -1802,7 +1804,7 @@ DataOps::getMaxMinNorm(Real& a_max, Real& a_min, EBAMRCellData& a_data)
     Real lvlMax;
     Real lvlMin;
 
-    DataOps::getMaxMinNorm(lvlMax, lvlMin, *a_data[lvl]);
+    DataOps::getMaxMinNorm(lvlMax, lvlMin, *a_data[lvl], *a_vofIter[lvl]);
 
     a_max = std::max(a_max, lvlMax);
     a_min = std::min(a_min, lvlMin);
@@ -1810,7 +1812,7 @@ DataOps::getMaxMinNorm(Real& a_max, Real& a_min, EBAMRCellData& a_data)
 }
 
 void
-DataOps::getMaxMinNorm(Real& a_max, Real& a_min, LevelData<EBCellFAB>& a_data)
+DataOps::getMaxMinNorm(Real& a_max, Real& a_min, LevelData<EBCellFAB>& a_data, LayoutData<VoFIterator>& a_vofIter)
 {
   CH_TIME("DataOps::LD<EBCelLFAB>");
 
@@ -1830,7 +1832,6 @@ DataOps::getMaxMinNorm(Real& a_max, Real& a_min, LevelData<EBCellFAB>& a_data)
     const Box&       box     = a_data.disjointBoxLayout().get(din);
     const EBCellFAB& data    = a_data[din];
     const EBISBox&   ebisbox = data.getEBISBox();
-    const EBGraph&   ebgraph = ebisbox.getEBGraph();
 
     // Use a mask for ignoring covered data (which can be bogus).
     EBCellFAB coveredMask(ebisbox, box, 1);
@@ -1841,8 +1842,7 @@ DataOps::getMaxMinNorm(Real& a_max, Real& a_min, LevelData<EBCellFAB>& a_data)
     const BaseFab<Real>& mask    = coveredMask.getSingleValuedFAB();
     const BaseFab<Real>& dataReg = data.getSingleValuedFAB();
 
-    // Irregular kernel region.
-    VoFIterator vofit(ebisbox.getIrregIVS(box), ebgraph);
+    VoFIterator& vofit = a_vofIter[din];
 
     // Regular kernel. This computes the max/min values from sqrt(x1*x1 + x2*x2 + x3*x3 + ...).
     auto regularKernel = [&](const IntVect& iv) -> void {
@@ -1881,7 +1881,10 @@ DataOps::getMaxMinNorm(Real& a_max, Real& a_min, LevelData<EBCellFAB>& a_data)
 }
 
 void
-DataOps::getMaxMinNorm(Real& a_max, Real& a_min, EBAMRIVData& a_data)
+DataOps::getMaxMinNorm(Real&                                                 a_max,
+                       Real&                                                 a_min,
+                       EBAMRIVData&                                          a_data,
+                       const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter)
 {
   CH_TIME("DataOps::getMaxMinNorm(EBAMRIVData)");
 
@@ -1892,7 +1895,7 @@ DataOps::getMaxMinNorm(Real& a_max, Real& a_min, EBAMRIVData& a_data)
     Real lvlMax;
     Real lvlMin;
 
-    DataOps::getMaxMinNorm(lvlMax, lvlMin, *a_data[lvl]);
+    DataOps::getMaxMinNorm(lvlMax, lvlMin, *a_data[lvl], *a_vofIter[lvl]);
 
     a_max = std::max(a_max, lvlMax);
     a_min = std::min(a_min, lvlMin);
@@ -1900,7 +1903,7 @@ DataOps::getMaxMinNorm(Real& a_max, Real& a_min, EBAMRIVData& a_data)
 }
 
 void
-DataOps::getMaxMinNorm(Real& a_max, Real& a_min, LevelData<BaseIVFAB<Real>>& a_data)
+DataOps::getMaxMinNorm(Real& a_max, Real& a_min, LevelData<BaseIVFAB<Real>>& a_data, LayoutData<VoFIterator>& a_vofIter)
 {
   CH_TIME("DataOps::getMaxMinNorm(LD<BaseIVFAB>)");
 
@@ -1916,10 +1919,8 @@ DataOps::getMaxMinNorm(Real& a_max, Real& a_min, LevelData<BaseIVFAB<Real>>& a_d
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
-    const BaseIVFAB<Real>& data = a_data[din];
-
-    // Iteration space
-    VoFIterator vofit(data.getIVS(), data.getEBGraph());
+    const BaseIVFAB<Real>& data  = a_data[din];
+    VoFIterator&           vofit = a_vofIter[din];
 
     auto kernel = [&](const VolIndex& vof) -> void {
       Real cur = 0.0;
@@ -2008,7 +2009,7 @@ DataOps::invert(LevelData<EBFluxFAB>& a_data)
 }
 
 void
-DataOps::kappaSum(Real& a_mass, const LevelData<EBCellFAB>& a_lhs, const int a_comp)
+DataOps::kappaSum(Real& a_mass, const LevelData<EBCellFAB>& a_lhs, const int a_comp, LayoutData<VoFIterator>& a_vofIter)
 {
   CH_TIME("DataOps::kappaSum");
 
@@ -2030,7 +2031,6 @@ DataOps::kappaSum(Real& a_mass, const LevelData<EBCellFAB>& a_lhs, const int a_c
 
     const Box      cellbox = dbl[din];
     const EBISBox& ebisbox = lhs.getEBISBox();
-    const EBGraph& ebgraph = ebisbox.getEBGraph();
 
     auto regularKernel = [&](const IntVect& iv) -> void {
       if (ebisbox.isRegular(iv)) {
@@ -2042,7 +2042,7 @@ DataOps::kappaSum(Real& a_mass, const LevelData<EBCellFAB>& a_lhs, const int a_c
       a_mass += ebisbox.volFrac(vof) * lhs(vof, a_comp);
     };
 
-    VoFIterator vofit(ebisbox.getIrregIVS(cellbox), ebgraph);
+    VoFIterator& vofit = a_vofIter[din];
 
     BoxLoops::loop<D_DECL(1, 1, 1)>(cellbox, regularKernel);
     BoxLoops::loop(vofit, irregularKernel);
@@ -2052,17 +2052,17 @@ DataOps::kappaSum(Real& a_mass, const LevelData<EBCellFAB>& a_lhs, const int a_c
 }
 
 void
-DataOps::kappaScale(EBAMRCellData& a_data) noexcept
+DataOps::kappaScale(EBAMRCellData& a_data, const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter) noexcept
 {
   CH_TIME("DataOps::kappaScale(EBAMRCellData");
 
   for (int lvl = 0; lvl < a_data.size(); lvl++) {
-    DataOps::kappaScale(*a_data[lvl]);
+    DataOps::kappaScale(*a_data[lvl], *a_vofIter[lvl]);
   }
 }
 
 void
-DataOps::kappaScale(LevelData<EBCellFAB>& a_data) noexcept
+DataOps::kappaScale(LevelData<EBCellFAB>& a_data, LayoutData<VoFIterator>& a_vofIter) noexcept
 {
   CH_TIME("DataOps::kappaScale(LD<EBCellFAB>)");
 
@@ -2078,9 +2078,8 @@ DataOps::kappaScale(LevelData<EBCellFAB>& a_data) noexcept
 
     const Box      cellBox = dbl[din];
     const EBISBox& ebisbox = data.getEBISBox();
-    const EBGraph& ebgraph = ebisbox.getEBGraph();
 
-    VoFIterator vofit(ebisbox.getIrregIVS(cellBox), ebgraph);
+    VoFIterator& vofit = a_vofIter[din];
 
     for (int comp = 0; comp < a_data.nComp(); comp++) {
 
@@ -2324,7 +2323,7 @@ DataOps::multiplyScalar(LevelData<BaseIVFAB<Real>>& a_lhs, const LevelData<BaseI
 }
 
 Real
-DataOps::norm(const LevelData<EBCellFAB>& a_data, const int a_p, const int a_comp)
+DataOps::norm(const LevelData<EBCellFAB>& a_data, const int a_p, const int a_comp, LayoutData<VoFIterator>& a_vofIter)
 {
   CH_TIME("DataOps::norm");
 
@@ -2344,9 +2343,8 @@ DataOps::norm(const LevelData<EBCellFAB>& a_data, const int a_p, const int a_com
 
     const Box      cellBox = dbl[din];
     const EBISBox& ebisbox = data.getEBISBox();
-    const EBGraph& ebgraph = ebisbox.getEBGraph();
 
-    VoFIterator vofit(ebisbox.getIrregIVS(cellBox), ebgraph);
+    VoFIterator& vofit = a_vofIter[din];
 
     if (a_p == 0) {
       auto regularKernel = [&](const IntVect& iv) -> void {
@@ -2793,16 +2791,17 @@ DataOps::setValue(LevelData<MFCellFAB>&                      a_lhs,
 }
 
 void
-DataOps::setValue(EBAMRCellData&                             a_lhs,
-                  const std::function<Real(const RealVect)>& a_function,
-                  const RealVect&                            a_probLo,
-                  const Vector<Real>&                        a_dx,
-                  const int                                  a_comp)
+DataOps::setValue(EBAMRCellData&                                        a_lhs,
+                  const std::function<Real(const RealVect)>&            a_function,
+                  const RealVect&                                       a_probLo,
+                  const Vector<Real>&                                   a_dx,
+                  const int                                             a_comp,
+                  const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter)
 {
   CH_TIME("DataOps::setValue(EBAMRCellData, std::function)");
 
   for (int lvl = 0; lvl < a_lhs.size(); lvl++) {
-    DataOps::setValue(*a_lhs[lvl], a_function, a_probLo, a_dx[lvl], a_comp);
+    DataOps::setValue(*a_lhs[lvl], a_function, a_probLo, a_dx[lvl], a_comp, *a_vofIter[lvl]);
   }
 }
 
@@ -2811,7 +2810,8 @@ DataOps::setValue(LevelData<EBCellFAB>&                      a_lhs,
                   const std::function<Real(const RealVect)>& a_function,
                   const RealVect                             a_probLo,
                   const Real                                 a_dx,
-                  const int                                  a_comp)
+                  const int                                  a_comp,
+                  LayoutData<VoFIterator>&                   a_vofIter)
 {
   CH_TIME("DataOps::setValue(LD<EBCellFAB>, std::function)");
 
@@ -2827,11 +2827,8 @@ DataOps::setValue(LevelData<EBCellFAB>&                      a_lhs,
     BaseFab<Real>& lhsFAB = lhs.getSingleValuedFAB();
 
     // Kernel regions.
-    const Box         box     = lhs.box();
-    const EBISBox&    ebisbox = lhs.getEBISBox();
-    const EBGraph&    ebgraph = ebisbox.getEBGraph();
-    const IntVectSet& irreg   = ebisbox.getIrregIVS(box);
-    VoFIterator       vofit(irreg, ebgraph);
+    const Box    box   = lhs.box();
+    VoFIterator& vofit = a_vofIter[din];
 
     // Regular cells
     auto regularKernel = [&](const IntVect& iv) -> void {
@@ -2918,16 +2915,17 @@ DataOps::setValue(LevelData<EBFluxFAB>&                      a_lhs,
 }
 
 void
-DataOps::setValue(EBAMRIVData&                               a_lhs,
-                  const std::function<Real(const RealVect)>& a_function,
-                  const RealVect&                            a_probLo,
-                  const Vector<Real>&                        a_dx,
-                  const int                                  a_comp)
+DataOps::setValue(EBAMRIVData&                                          a_lhs,
+                  const std::function<Real(const RealVect)>&            a_function,
+                  const RealVect&                                       a_probLo,
+                  const Vector<Real>&                                   a_dx,
+                  const int                                             a_comp,
+                  const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter)
 {
   CH_TIME("DataOps::setValue(EBAMRIVData, std::function)");
 
   for (int lvl = 0; lvl < a_lhs.size(); lvl++) {
-    DataOps::setValue(*a_lhs[lvl], a_function, a_probLo, a_dx[lvl], a_comp);
+    DataOps::setValue(*a_lhs[lvl], a_function, a_probLo, a_dx[lvl], a_comp, *a_vofIter[lvl]);
   }
 }
 
@@ -2936,11 +2934,11 @@ DataOps::setValue(LevelData<BaseIVFAB<Real>>&                a_lhs,
                   const std::function<Real(const RealVect)>& a_function,
                   const RealVect                             a_probLo,
                   const Real                                 a_dx,
-                  const int                                  a_comp)
+                  const int                                  a_comp,
+                  LayoutData<VoFIterator>&                   a_vofIter)
 {
   CH_TIME("DataOps::setValue(LD<BaseIVFAB>, std::function)");
 
-  // As we don't specify where the function should be evaluated, this routine sets a_lhs to be evaluated at the cell center.
   const DataIterator& dit = a_lhs.dataIterator();
 
   const int nbox = dit.size();
@@ -2949,14 +2947,9 @@ DataOps::setValue(LevelData<BaseIVFAB<Real>>&                a_lhs,
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
-    BaseIVFAB<Real>& lhs = a_lhs[din];
+    BaseIVFAB<Real>& lhs   = a_lhs[din];
+    VoFIterator&     vofit = a_vofIter[din];
 
-    // Kernel region.
-    const EBGraph&    ebgraph = lhs.getEBGraph();
-    const IntVectSet& irreg   = lhs.getIVS();
-    VoFIterator       vofit(irreg, ebgraph);
-
-    // Irregular kernel.
     auto kernel = [&](const VolIndex& vof) {
       const IntVect  iv  = vof.gridIndex();
       const RealVect pos = a_probLo + (0.5 * RealVect::Unit + RealVect(iv)) * a_dx;
@@ -2969,15 +2962,16 @@ DataOps::setValue(LevelData<BaseIVFAB<Real>>&                a_lhs,
 }
 
 void
-DataOps::setValue(EBAMRCellData&                                 a_lhs,
-                  const std::function<RealVect(const RealVect)>& a_function,
-                  const RealVect&                                a_probLo,
-                  const Vector<Real>&                            a_dx)
+DataOps::setValue(EBAMRCellData&                                        a_lhs,
+                  const std::function<RealVect(const RealVect)>&        a_function,
+                  const RealVect&                                       a_probLo,
+                  const Vector<Real>&                                   a_dx,
+                  const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter)
 {
   CH_TIME("DataOps::setValue(EBAMRCellData, std::function<RealVect>)");
 
   for (int lvl = 0; lvl < a_lhs.size(); lvl++) {
-    DataOps::setValue(*a_lhs[lvl], a_function, a_probLo, a_dx[lvl]);
+    DataOps::setValue(*a_lhs[lvl], a_function, a_probLo, a_dx[lvl], *a_vofIter[lvl]);
   }
 }
 
@@ -2985,7 +2979,8 @@ void
 DataOps::setValue(LevelData<EBCellFAB>&                          a_lhs,
                   const std::function<RealVect(const RealVect)>& a_function,
                   const RealVect                                 a_probLo,
-                  const Real                                     a_dx)
+                  const Real                                     a_dx,
+                  LayoutData<VoFIterator>&                       a_vofIter)
 {
   CH_TIME("DataOps::setValue(LD<EBCellFAB>, std::function<RealVect>)");
 
@@ -3003,11 +2998,8 @@ DataOps::setValue(LevelData<EBCellFAB>&                          a_lhs,
     BaseFab<Real>& lhsFAB = lhs.getSingleValuedFAB();
 
     // Kernel regions.
-    const Box         box     = lhs.box();
-    const EBISBox&    ebisbox = lhs.getEBISBox();
-    const EBGraph&    ebgraph = ebisbox.getEBGraph();
-    const IntVectSet& irreg   = ebisbox.getIrregIVS(box);
-    VoFIterator       vofit(irreg, ebgraph);
+    const Box    box   = lhs.box();
+    VoFIterator& vofit = a_vofIter[din];
 
     // Regular kernel.
     auto regularKernel = [&](const IntVect& iv) -> void {
@@ -3398,17 +3390,21 @@ DataOps::squareRoot(LevelData<MFCellFAB>& a_lhs)
 }
 
 void
-DataOps::vectorLength(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs)
+DataOps::vectorLength(EBAMRCellData&                                        a_lhs,
+                      const EBAMRCellData&                                  a_rhs,
+                      const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter)
 {
   CH_TIME("DataOps::vectorLength(EBAMRCellData)");
 
   for (int lvl = 0; lvl < a_lhs.size(); lvl++) {
-    DataOps::vectorLength(*a_lhs[lvl], *a_rhs[lvl]);
+    DataOps::vectorLength(*a_lhs[lvl], *a_rhs[lvl], *a_vofIter[lvl]);
   }
 }
 
 void
-DataOps::vectorLength(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs)
+DataOps::vectorLength(LevelData<EBCellFAB>&       a_lhs,
+                      const LevelData<EBCellFAB>& a_rhs,
+                      LayoutData<VoFIterator>&    a_vofIter)
 {
   CH_TIME("DataOps::vectorLength(LD<EBCellFAB>");
 
@@ -3427,12 +3423,12 @@ DataOps::vectorLength(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a
     const Box&       box = a_lhs.disjointBoxLayout().get(din);
     const EBCellFAB& rhs = a_rhs[din];
 
-    DataOps::vectorLength(lhs, rhs, box);
+    DataOps::vectorLength(lhs, rhs, box, a_vofIter[din]);
   }
 }
 
 void
-DataOps::vectorLength(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& a_box)
+DataOps::vectorLength(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& a_box, VoFIterator& a_vofIter)
 {
   CH_TIME("DataOps::vectorLength(EBCellFAB)");
 
@@ -3448,8 +3444,7 @@ DataOps::vectorLength(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& a_box
   coveredMask.setVal(1.0);
   coveredMask.setCoveredCellVal(-1.0, 0);
 
-  // Kernel regions
-  VoFIterator vofit(ebisbox.getIrregIVS(a_box), ebisbox.getEBGraph());
+  VoFIterator& vofit = a_vofIter;
 
   // Hooks to single-valued data.
   BaseFab<Real>&       lhsReg = a_lhs.getSingleValuedFAB();
@@ -3485,17 +3480,21 @@ DataOps::vectorLength(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& a_box
 }
 
 void
-DataOps::vectorLength2(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs)
+DataOps::vectorLength2(EBAMRCellData&                                        a_lhs,
+                       const EBAMRCellData&                                  a_rhs,
+                       const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter)
 {
   CH_TIME("DataOps::vectorLength2(EBAMRCellData)");
 
   for (int lvl = 0; lvl < a_lhs.size(); lvl++) {
-    DataOps::vectorLength2(*a_lhs[lvl], *a_rhs[lvl]);
+    DataOps::vectorLength2(*a_lhs[lvl], *a_rhs[lvl], *a_vofIter[lvl]);
   }
 }
 
 void
-DataOps::vectorLength2(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs)
+DataOps::vectorLength2(LevelData<EBCellFAB>&       a_lhs,
+                       const LevelData<EBCellFAB>& a_rhs,
+                       LayoutData<VoFIterator>&    a_vofIter)
 {
   CH_TIME("DataOps::vectorLength2(LD<EBCellFAB>)");
 
@@ -3515,12 +3514,12 @@ DataOps::vectorLength2(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& 
     const Box&       box = dbl[din];
     const EBCellFAB& rhs = a_rhs[din];
 
-    DataOps::vectorLength2(lhs, rhs, box);
+    DataOps::vectorLength2(lhs, rhs, box, a_vofIter[din]);
   }
 }
 
 void
-DataOps::vectorLength2(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& a_box)
+DataOps::vectorLength2(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& a_box, VoFIterator& a_vofIter)
 {
   CH_TIME("DataOps::vectorLength2(EBCellFAB)");
 
@@ -3536,8 +3535,7 @@ DataOps::vectorLength2(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& a_bo
   coveredMask.setVal(1.0);
   coveredMask.setCoveredCellVal(-1.0, 0);
 
-  // Kernel regions
-  VoFIterator vofit(ebisbox.getIrregIVS(a_box), ebisbox.getEBGraph());
+  VoFIterator& vofit = a_vofIter;
 
   // Hooks to single-valued data.
   BaseFab<Real>&       lhsReg = a_lhs.getSingleValuedFAB();

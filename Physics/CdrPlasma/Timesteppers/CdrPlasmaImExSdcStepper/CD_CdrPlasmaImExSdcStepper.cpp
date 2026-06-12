@@ -933,7 +933,7 @@ CdrPlasmaImExSdcStepper::integrateAdvection(const Real /*a_dt*/, const int a_m, 
 
       DataOps::copy(phi_m1, phi_m);
       DataOps::incr(phi_m1, scratch, -m_dtm[a_m]);
-      DataOps::floor(phi_m1, 0.0);
+      DataOps::floor(phi_m1, 0.0, m_amr->getVofIterator(m_realm, m_cdr->getPhase()));
       m_amr->conservativeAverage(phi_m1, m_realm, m_cdr->getPhase());
       m_amr->interpGhost(phi_m1, m_realm, m_cdr->getPhase());
     }
@@ -999,7 +999,7 @@ CdrPlasmaImExSdcStepper::integrateDiffusion(const Real /*a_dt*/, const int a_m, 
       }
       m_amr->conservativeAverage(phi_m1, m_realm, m_cdr->getPhase());
       m_amr->interpGhost(phi_m1, m_realm, m_cdr->getPhase());
-      DataOps::floor(phi_m1, 0.0);
+      DataOps::floor(phi_m1, 0.0, m_amr->getVofIterator(m_realm, m_cdr->getPhase()));
 
       // Update the operator slope
       EBAMRCellData& FD_m1k = storage->getFD()[a_m + 1];
@@ -1142,8 +1142,8 @@ CdrPlasmaImExSdcStepper::finalizeErrors()
       // Compute norms. Only coarsest level
       Real      Lerr, Lphi;
       const int lvl = 0;
-      Lerr          = DataOps::norm(*error[lvl], m_errorNorm);
-      Lphi          = DataOps::norm(*phi_p[lvl], m_errorNorm);
+      Lerr          = DataOps::norm(*error[lvl], m_errorNorm, 0, *m_amr->getVofIterator(m_realm, m_phase)[lvl]);
+      Lphi          = DataOps::norm(*phi_p[lvl], m_errorNorm, 0, *m_amr->getVofIterator(m_realm, m_phase)[lvl]);
 
       if (Lphi > 0.0) {
         m_cdrError[idx] = Lerr / Lphi;
@@ -1541,7 +1541,7 @@ CdrPlasmaImExSdcStepper::computeCdrEbStates()
   CdrPlasmaImExSdcStepper::extrapolateToEb(eb_states, m_cdr->getPhase(), cdr_states);
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it) {
     const int idx = solver_it.index();
-    DataOps::floor(*eb_states[idx], 0.0);
+    DataOps::floor(*eb_states[idx], 0.0, m_amr->getVofIterator(m_realm, m_cdr->getPhase()));
   }
 
   // We should already have the cell-centered gradients, extrapolate them to the EB and project the flux.
@@ -1578,7 +1578,7 @@ CdrPlasmaImExSdcStepper::computeCdrEbStates(const Vector<EBAMRCellData*>& a_phis
   CdrPlasmaImExSdcStepper::extrapolateToEb(eb_states, m_cdr->getPhase(), a_phis);
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it) {
     const int idx = solver_it.index();
-    DataOps::floor(*eb_states[idx], 0.0);
+    DataOps::floor(*eb_states[idx], 0.0, m_amr->getVofIterator(m_realm, m_cdr->getPhase()));
   }
 
   // We should already have the cell-centered gradients, extrapolate them to the EB and project the flux.

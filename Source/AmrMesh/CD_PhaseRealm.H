@@ -263,6 +263,13 @@ public:
   getVofIterator() const;
 
   /**
+    @brief Return vof iterator for iterating over multiply-cut cells only (cells with more than one VoF)
+    @return m_multiCutVofIter (which is, in fact, mutable)
+  */
+  Vector<RefCountedPtr<LayoutData<VoFIterator>>>&
+  getMultiCutVofIterator() const;
+
+  /**
     @brief Get objects for interpolation from cell centers to centroids. 
     @return Cell centroid interpolation
   */
@@ -498,10 +505,15 @@ protected:
   */
   EBAMRFAB m_levelset;
 
-  /** 
-    @brief Cut-cell iterator
+  /**
+    @brief Cut-cell iterator (all irregular cells)
   */
   mutable Vector<RefCountedPtr<LayoutData<VoFIterator>>> m_vofIter;
+
+  /**
+    @brief Cut-cell iterator restricted to multiply-cut cells (cells with more than one VoF)
+  */
+  mutable Vector<RefCountedPtr<LayoutData<VoFIterator>>> m_multiCutVofIter;
 
   /**
     @brief Coarsening operator

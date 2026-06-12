@@ -1500,7 +1500,7 @@ EBHelmholtzOp::diagonalScale(LevelData<EBCellFAB>& a_rhs, bool a_kappaWeighted)
 
   // Scale by volume fraction if asked.
   if (a_kappaWeighted) {
-    DataOps::kappaScale(a_rhs);
+    DataOps::kappaScale(a_rhs, m_vofIterIrreg);
   }
 
   // Scale by a-coefficient and alpha, too.

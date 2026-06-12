@@ -1322,8 +1322,8 @@ ItoKMCStepper<I, C, R, F>::getMaxMinRelativeItoDensity(Real&        a_maxDensity
 
       m_amr->copyData(tmp, solverIt()->getPhi(), dstInterv, srcInterv);
 
-      DataOps::divideFallback(tmp, m_neutralDensity, 0.0);
-      DataOps::getMaxMin(curMax, curMin, tmp, 0);
+      DataOps::divideFallback(tmp, m_neutralDensity, 0.0, m_amr->getMultiCutVofIterator(m_fluidRealm, m_plasmaPhase));
+      DataOps::getMaxMin(curMax, curMin, tmp, 0, m_amr->getMultiCutVofIterator(m_fluidRealm, m_plasmaPhase));
 
       if (curMax > a_maxDensity) {
         a_maxDensity = curMax;
@@ -1369,8 +1369,8 @@ ItoKMCStepper<I, C, R, F>::getMaxMinRelativeCDRDensity(Real&        a_maxDensity
 
       m_amr->copyData(tmp, solverIt()->getPhi(), dstInterv, srcInterv);
 
-      DataOps::divideFallback(tmp, m_neutralDensity, 0.0);
-      DataOps::getMaxMin(curMax, curMin, tmp, 0);
+      DataOps::divideFallback(tmp, m_neutralDensity, 0.0, m_amr->getMultiCutVofIterator(m_fluidRealm, m_plasmaPhase));
+      DataOps::getMaxMin(curMax, curMin, tmp, 0, m_amr->getMultiCutVofIterator(m_fluidRealm, m_plasmaPhase));
 
       if (curMax > a_maxDensity) {
         a_maxDensity = curMax;
@@ -1833,15 +1833,15 @@ ItoKMCStepper<I, C, R, F>::computeMaxReducedElectricField(const phase::which_pha
   EBAMRCellData tmp;
   m_amr->allocate(tmp, m_fluidRealm, a_phase, 1);
 
-  DataOps::vectorLength(tmp, cellCenteredE);
+  DataOps::vectorLength(tmp, cellCenteredE, m_amr->getMultiCutVofIterator(m_fluidRealm, a_phase));
   m_amr->interpToCentroids(tmp, m_fluidRealm, m_plasmaPhase);
 
-  DataOps::divideFallback(tmp, m_neutralDensity, 0.0);
+  DataOps::divideFallback(tmp, m_neutralDensity, 0.0, m_amr->getMultiCutVofIterator(m_fluidRealm, m_plasmaPhase));
 
   Real max = 0.0;
   Real min = 0.0;
 
-  DataOps::getMaxMin(max, min, tmp, 0);
+  DataOps::getMaxMin(max, min, tmp, 0, m_amr->getMultiCutVofIterator(m_fluidRealm, m_plasmaPhase));
 
   return max * 1E21;
 }
@@ -2087,14 +2087,17 @@ ItoKMCStepper<I, C, R, F>::computeRelaxationTime() noexcept
   this->computeConductivityCell(conductivity);
 
   DataOps::setValue(relaxTime, Units::eps0);
-  DataOps::divideFallback(relaxTime, conductivity, std::numeric_limits<Real>::max());
+  DataOps::divideFallback(relaxTime,
+                          conductivity,
+                          std::numeric_limits<Real>::max(),
+                          m_amr->getMultiCutVofIterator(m_fluidRealm, m_plasmaPhase));
 
   m_amr->conservativeAverage(relaxTime, m_fluidRealm, m_plasmaPhase);
 
   Real min = std::numeric_limits<Real>::max();
   Real max = -std::numeric_limits<Real>::max();
 
-  DataOps::getMaxMinNorm(max, min, relaxTime);
+  DataOps::getMaxMinNorm(max, min, relaxTime, m_amr->getMultiCutVofIterator(m_fluidRealm, m_plasmaPhase));
 
   return min;
 }
@@ -5207,7 +5210,7 @@ ItoKMCStepper<I, C, R, F>::resolveSecondaryEmissionEB(Vector<ParticleContainer<I
     m_amr->interpGhostPwl(phi, m_fluidRealm, m_plasmaPhase);
 
     // Really don't want negative densities.
-    DataOps::floor(phi, 0.0);
+    DataOps::floor(phi, 0.0, m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase));
   }
 
   // Conservatively coarsen the surface charge density.
@@ -5226,7 +5229,7 @@ ItoKMCStepper<I, C, R, F>::computePhysicsDt() noexcept
   Real maxDt = std::numeric_limits<Real>::max();
   Real minDt = std::numeric_limits<Real>::max();
 
-  DataOps::getMaxMin(maxDt, minDt, m_kmcDt, 0);
+  DataOps::getMaxMin(maxDt, minDt, m_kmcDt, 0, m_amr->getMultiCutVofIterator(m_fluidRealm, m_plasmaPhase));
 
   m_physicsDt = minDt;
 }

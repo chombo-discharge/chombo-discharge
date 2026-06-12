@@ -1210,6 +1210,12 @@ Realm::getVofIterator(const phase::which_phase a_phase) const
   return m_realms[a_phase]->getVofIterator();
 }
 
+Vector<RefCountedPtr<LayoutData<VoFIterator>>>&
+Realm::getMultiCutVofIterator(const phase::which_phase a_phase) const
+{
+  return m_realms[a_phase]->getMultiCutVofIterator();
+}
+
 const Vector<RefCountedPtr<EBNonConservativeDivergence>>&
 Realm::getNonConservativeDivergence(const phase::which_phase a_phase) const
 {

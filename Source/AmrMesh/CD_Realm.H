@@ -280,6 +280,14 @@ public:
   getVofIterator(const phase::which_phase a_phase) const;
 
   /**
+    @brief Get VoFIterators restricted to multiply-cut cells for a particular phase
+    @param[in] a_phase Phase
+    @return Multi-cut vof iterator
+  */
+  Vector<RefCountedPtr<LayoutData<VoFIterator>>>&
+  getMultiCutVofIterator(const phase::which_phase a_phase) const;
+
+  /**
     @brief Get objects for computing "non-conservative divergences"
     @param[in] a_phase Phase
     @return Non conservative divergence

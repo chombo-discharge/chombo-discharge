@@ -100,9 +100,9 @@ main(int argc, char* argv[])
       DataOps::incr(finePhi, coarPhi, -1.0);
 
       // Computes max, L1, and L2 norms.
-      const Real Linf = DataOps::norm(*finePhi[0], amr->getDomains()[0], 0, true);
-      const Real L1   = DataOps::norm(*finePhi[0], amr->getDomains()[0], 1, true);
-      const Real L2   = DataOps::norm(*finePhi[0], amr->getDomains()[0], 2, true);
+      const Real Linf = DataOps::norm(*finePhi[0], 0, 0, *amr->getVofIterator("primal", phase::gas)[0]);
+      const Real L1   = DataOps::norm(*finePhi[0], 1, 0, *amr->getVofIterator("primal", phase::gas)[0]);
+      const Real L2   = DataOps::norm(*finePhi[0], 2, 0, *amr->getVofIterator("primal", phase::gas)[0]);
 
       norms.emplace_back(std::array<Real, 3>{Linf, L1, L2});
     }

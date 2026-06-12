@@ -13,6 +13,9 @@
 #ifndef CD_DATAOPS_H
 #define CD_DATAOPS_H
 
+// Chombo includes
+#include <VoFIterator.H>
+
 // Our includes
 #include <CD_Average.H>
 #include <CD_EBAMRData.H>
@@ -132,22 +135,28 @@ public:
     @param[out] a_cellData Cell data.
     @param[in]  a_faceData Face data.
     @param[in]  a_domains  AMR domains.
+    @param[in]  a_vofIter  Pre-built VoF iterators (all cut-cells) for each level.
     @note Only valid cells are filled (not ghost cells)
   */
   static void
-  averageFaceToCell(EBAMRCellData& a_cellData, const EBAMRFluxData& a_faceData, const Vector<ProblemDomain>& a_domains);
+  averageFaceToCell(EBAMRCellData&                                        a_cellData,
+                    const EBAMRFluxData&                                  a_faceData,
+                    const Vector<ProblemDomain>&                          a_domains,
+                    const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter);
 
   /**
     @brief Average all components of face centered data to cell centers.
     @param[out] a_cellData Cell data.
     @param[in]  a_fluxData Face data.
     @param[in]  a_domain   Problem domain.
+    @param[in]  a_vofIter  Pre-built VoF iterator (all cut-cells).
     @note Only valid cells are filled (not ghost cells)
   */
   static void
   averageFaceToCell(LevelData<EBCellFAB>&       a_cellData,
                     const LevelData<EBFluxFAB>& a_fluxData,
-                    const ProblemDomain&        a_domain);
+                    const ProblemDomain&        a_domain,
+                    LayoutData<VoFIterator>&    a_vofIter);
 
   /**
     @brief Compute lhs = a * x + b * y
@@ -165,22 +174,28 @@ public:
        const Real                  a_b) noexcept;
 
   /**
-    @brief Compute a new value given the old cell value. 
+    @brief Compute a new value given the old cell value.
     @details Useful for quickly calculating a cell value as e.g. exp(x) where the original data was only x
-    @param[in,out] a_data Input data
-    @param[in]    a_func Function for transforming the data
+    @param[in,out] a_data    Input data
+    @param[in]    a_func    Function for transforming the data
+    @param[in]    a_vofIter Pre-built VoF iterators (multiply-cut cells) for each level.
   */
   static void
-  compute(EBAMRCellData& a_data, const std::function<Real(const Real a_cellValue)>& a_func) noexcept;
+  compute(EBAMRCellData&                                        a_data,
+          const std::function<Real(const Real a_cellValue)>&    a_func,
+          const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter) noexcept;
 
   /**
-    @brief Compute a new value given the old cell value. 
+    @brief Compute a new value given the old cell value.
     @details Useful for quickly calculating a cell value as e.g. exp(x) where the original data was only x
-    @param[in,out] a_data Input data
-    @param[in]    a_func Function for transforming the data
+    @param[in,out] a_data    Input data
+    @param[in]    a_func    Function for transforming the data
+    @param[in]    a_vofIter Pre-built VoF iterator (multiply-cut cells).
   */
   static void
-  compute(LevelData<EBCellFAB>& a_data, const std::function<Real(const Real a_cellValue)>& a_func) noexcept;
+  compute(LevelData<EBCellFAB>&                              a_data,
+          const std::function<Real(const Real a_cellValue)>& a_func,
+          LayoutData<VoFIterator>&                           a_vofIter) noexcept;
 
   /**
     @brief Compote the cell-wise dot product between two data holders. 
@@ -204,35 +219,48 @@ public:
   dotProduct(LevelData<MFCellFAB>& a_result, const LevelData<MFCellFAB>& a_data1, const LevelData<MFCellFAB>& a_data2);
 
   /**
-    @brief Compote the cell-wise dot product between two data holders. 
-    @param[out] a_result Result. Holds the dot product in each cell.
-    @param[in]  a_data1 First data holder.
-    @param[in]  a_data2 Other data holder.
+    @brief Compute the cell-wise dot product between two data holders.
+    @param[out] a_result  Result. Holds the dot product in each cell.
+    @param[in]  a_data1   First data holder.
+    @param[in]  a_data2   Other data holder.
+    @param[in]  a_vofIter Pre-built VoF iterators (multiply-cut cells) for each level.
     @note The input data data1 and data2 must have the same number of input components. Summation is done over all components (does not have to be SpaceDim).
   */
   static void
-  dotProduct(EBAMRCellData& a_result, const EBAMRCellData& a_data1, const EBAMRCellData& a_data2);
+  dotProduct(EBAMRCellData&                                        a_result,
+             const EBAMRCellData&                                  a_data1,
+             const EBAMRCellData&                                  a_data2,
+             const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter);
 
   /**
-    @brief Compote the cell-wise dot product between two data holders. 
-    @param[out] a_result Result. Holds the dot product in each cell.
-    @param[in]  a_data1 First data holder.
-    @param[in]  a_data2 Other data holder.
+    @brief Compute the cell-wise dot product between two data holders.
+    @param[out] a_result  Result. Holds the dot product in each cell.
+    @param[in]  a_data1   First data holder.
+    @param[in]  a_data2   Other data holder.
+    @param[in]  a_vofIter Pre-built VoF iterator (multiply-cut cells).
     @note The input data data1 and data2 must have the same number of input components. Summation is done over all components (does not have to be SpaceDim).
   */
   static void
-  dotProduct(LevelData<EBCellFAB>& a_result, const LevelData<EBCellFAB>& a_data1, const LevelData<EBCellFAB>& a_data2);
+  dotProduct(LevelData<EBCellFAB>&       a_result,
+             const LevelData<EBCellFAB>& a_data1,
+             const LevelData<EBCellFAB>& a_data2,
+             LayoutData<VoFIterator>&    a_vofIter);
 
   /**
-    @brief Compote the cell-wise dot product between two data holders. 
-    @param[out] a_result Result. Holds the dot product in each cell.
-    @param[in]  a_data1 First data holder.
-    @param[in]  a_data2 Other data holder.
+    @brief Compute the cell-wise dot product between two data holders.
+    @param[out] a_result  Result. Holds the dot product in each cell.
+    @param[in]  a_data1   First data holder.
+    @param[in]  a_data2   Other data holder.
+    @param[in]  a_box     Cell box.
+    @param[in]  a_vofIter Pre-built VoF iterator (multiply-cut cells) for this patch.
     @note The input data data1 and data2 must have the same number of input components. Summation is done over all components (does not have to be SpaceDim).
-    @param[in] a_box Description
   */
   static void
-  dotProduct(EBCellFAB& a_result, const EBCellFAB& a_data1, const EBCellFAB& a_data2, const Box& a_box);
+  dotProduct(EBCellFAB&       a_result,
+             const EBCellFAB& a_data1,
+             const EBCellFAB& a_data2,
+             const Box&       a_box,
+             VoFIterator&     a_vofIter);
 
   /**
     @brief Apply a convolved filter phi = alpha * phi_i + 0.5*(1-alpha) * [phi_(i+s) + phi_(i-s)] in each direction. 
@@ -471,80 +499,116 @@ public:
   divideByScalar(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs);
 
   /**
-    @brief Divide data. If the denominator is zero, set the value to a fallback option
+    @brief Divide data. If the denominator is zero, set the value to a fallback option.
     @param[in,out] a_numerator   Dividend
     @param[in]    a_denominator Divisor
     @param[in]    a_fallback    Fallback value in case denominator is zero.
+    @param[in]    a_vofIter     Pre-built VoF iterators (multiply-cut cells) for each level.
   */
   static void
-  divideFallback(EBAMRCellData& a_numerator, const EBAMRCellData& a_denominator, const Real a_fallback);
+  divideFallback(EBAMRCellData&                                        a_numerator,
+                 const EBAMRCellData&                                  a_denominator,
+                 const Real                                            a_fallback,
+                 const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter);
 
   /**
-    @brief Divide data. If the denominator is zero, set the value to a fallback option
+    @brief Divide data. If the denominator is zero, set the value to a fallback option.
     @param[in,out] a_numerator   Dividend
     @param[in]    a_denominator Divisor
     @param[in]    a_fallback    Fallback value in case denominator is zero.
-    @note Does all components. 
-  */
-  static void
-  divideFallback(LevelData<EBCellFAB>& a_numerator, const LevelData<EBCellFAB>& a_denominator, const Real a_fallback);
-
-  /**
-    @brief Divide data. If the denominator is zero, set the value to a fallback option
-    @param[in,out] a_numerator   Dividend
-    @param[in]    a_denominator Divisor
-    @param[in]    a_fallback    Fallback data
-  */
-  static void
-  divideFallback(EBAMRCellData& a_numerator, const EBAMRCellData& a_denominator, const EBAMRCellData& a_fallback);
-
-  /**
-    @brief Divide data. If the denominator is zero, set the value to a fallback option
-    @param[in,out] a_numerator   Dividend
-    @param[in]    a_denominator Divisor
-    @param[in]    a_fallback    Fallback data
-    @note Does all components. 
+    @param[in]    a_vofIter     Pre-built VoF iterator (multiply-cut cells).
+    @note Does all components.
   */
   static void
   divideFallback(LevelData<EBCellFAB>&       a_numerator,
                  const LevelData<EBCellFAB>& a_denominator,
-                 const LevelData<EBCellFAB>& a_fallback);
+                 const Real                  a_fallback,
+                 LayoutData<VoFIterator>&    a_vofIter);
 
   /**
-    @brief Floor values in data holder. This sets all values below a_value to a_value
-    @param[in,out] a_lhs Data to be floored.
-    @param[in]    a_value Floor value
-    @note Also floors ghost cells. 
+    @brief Divide data. If the denominator is zero, set the value to a fallback option.
+    @param[in,out] a_numerator   Dividend
+    @param[in]    a_denominator Divisor
+    @param[in]    a_fallback    Fallback data
+    @param[in]    a_vofIter     Pre-built VoF iterators (multiply-cut cells) for each level.
   */
   static void
-  floor(EBAMRCellData& a_lhs, const Real a_value);
+  divideFallback(EBAMRCellData&                                        a_numerator,
+                 const EBAMRCellData&                                  a_denominator,
+                 const EBAMRCellData&                                  a_fallback,
+                 const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter);
 
   /**
-    @brief Floor values in data holder. This sets all values below a_value to a_value
-    @param[in,out] a_lhs Data to be floored.
-    @param[in]    a_value Floor value
-    @note Also floors ghost cells. 
+    @brief Divide data. If the denominator is zero, set the value to a fallback option.
+    @param[in,out] a_numerator   Dividend
+    @param[in]    a_denominator Divisor
+    @param[in]    a_fallback    Fallback data
+    @param[in]    a_vofIter     Pre-built VoF iterator (multiply-cut cells).
+    @note Does all components.
   */
   static void
-  floor(LevelData<EBCellFAB>& a_lhs, const Real a_value);
+  divideFallback(LevelData<EBCellFAB>&       a_numerator,
+                 const LevelData<EBCellFAB>& a_denominator,
+                 const LevelData<EBCellFAB>& a_fallback,
+                 LayoutData<VoFIterator>&    a_vofIter);
 
   /**
-    @brief Floor values in data holder. This sets all values below a_value to a_value
-    @param[in,out] a_lhs Data to be floored.
-    @param[in]    a_value Floor value
-    @note Also floors ghost cells. 
+    @brief Floor values in data holder. This sets all values below a_value to a_value.
+    @param[in,out] a_lhs     Data to be floored.
+    @param[in]    a_value   Floor value.
+    @param[in]    a_vofIter Pre-built VoF iterators (all cut-cells, including ghost region) for each level.
+    @note Also floors ghost cells.
   */
   static void
-  floor(EBAMRIVData& a_lhs, const Real a_value);
+  floor(EBAMRCellData& a_lhs, const Real a_value, const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter);
 
   /**
-    @brief Floor values in data holder. This sets all values below a_value to a_value
-    @param[in,out] a_lhs Data to be floored.
-    @param[in]    a_value Floor value
-    @note Also floors ghost cells. 
+    @brief Floor values in data holder. This sets all values below a_value to a_value.
+    @param[in,out] a_lhs     Data to be floored.
+    @param[in]    a_value   Floor value.
+    @param[in]    a_vofIter Pre-built VoF iterator (all cut-cells, including ghost region).
+    @note Also floors ghost cells.
   */
   static void
-  floor(LevelData<BaseIVFAB<Real>>& a_lhs, const Real a_value);
+  floor(LevelData<EBCellFAB>& a_lhs, const Real a_value, LayoutData<VoFIterator>& a_vofIter);
+
+  /**
+    @brief Floor values in data holder. This sets all values below a_value to a_value.
+    @param[in,out] a_lhs     Data to be floored.
+    @param[in]    a_value   Floor value.
+    @param[in]    a_vofIter Pre-built VoF iterators (all cut-cells) for each level.
+  */
+  static void
+  floor(EBAMRIVData& a_lhs, const Real a_value, const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter);
+
+  /**
+    @brief Floor values in data holder. This sets all values below a_value to a_value.
+    @param[in,out] a_lhs     Data to be floored.
+    @param[in]    a_value   Floor value.
+    @param[in]    a_vofIter Pre-built VoF iterator (all cut-cells).
+  */
+  static void
+  floor(LevelData<BaseIVFAB<Real>>& a_lhs, const Real a_value, LayoutData<VoFIterator>& a_vofIter);
+
+  /**
+    @brief Roof values in data holder. This sets all values above a_value to a_value.
+    @param[in,out] a_lhs     Data to be roofed.
+    @param[in]    a_value   Roof value.
+    @param[in]    a_vofIter Pre-built VoF iterators (all cut-cells, including ghost region) for each level.
+    @note Also roofs ghost cells.
+  */
+  static void
+  roof(EBAMRCellData& a_lhs, const Real a_value, const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter);
+
+  /**
+    @brief Roof values in data holder. This sets all values above a_value to a_value.
+    @param[in,out] a_lhs     Data to be roofed.
+    @param[in]    a_value   Roof value.
+    @param[in]    a_vofIter Pre-built VoF iterator (all cut-cells, including ghost region).
+    @note Also roofs ghost cells.
+  */
+  static void
+  roof(LevelData<EBCellFAB>& a_lhs, const Real a_value, LayoutData<VoFIterator>& a_vofIter);
 
   /**
     @brief Roof values in data holder. This sets all values above a_value to a_value
@@ -553,73 +617,73 @@ public:
     @note Also roofs ghost cells. 
   */
   static void
-  roof(EBAMRCellData& a_lhs, const Real a_value);
+  roof(EBAMRIVData& a_lhs, const Real a_value, const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter);
 
   /**
-    @brief Roof values in data holder. This sets all values above a_value to a_value
-    @param[in,out] a_lhs Data to be roofed.
-    @param[in]    a_value Roof value
-    @note Also roofs ghost cells. 
+    @brief Roof values in data holder. This sets all values above a_value to a_value.
+    @param[in,out] a_lhs     Data to be roofed.
+    @param[in]    a_value   Roof value.
+    @param[in]    a_vofIter Pre-built VoF iterator (all cut-cells).
   */
   static void
-  roof(LevelData<EBCellFAB>& a_lhs, const Real a_value);
+  roof(LevelData<BaseIVFAB<Real>>& a_lhs, const Real a_value, LayoutData<VoFIterator>& a_vofIter);
 
   /**
-    @brief Roof values in data holder. This sets all values above a_value to a_value
-    @param[in,out] a_lhs Data to be roofed.
-    @param[in]    a_value Roof value
-    @note Also roofs ghost cells. 
+    @brief Make a_data = max(a_data1, a_data2).
+    @param[out] a_data    Output data. Will be max(a_data1, a_data2) in every cell.
+    @param[in]  a_data1   Input data holder.
+    @param[in]  a_data2   Input data holder.
+    @param[in]  a_vofIter Pre-built VoF iterators (multiply-cut cells) for each level.
   */
   static void
-  roof(EBAMRIVData& a_lhs, const Real a_value);
+  max(EBAMRCellData&                                        a_data,
+      const EBAMRCellData&                                  a_data1,
+      const EBAMRCellData&                                  a_data2,
+      const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter);
 
   /**
-    @brief Roof values in data holder. This sets all values above a_value to a_value
-    @param[in,out] a_lhs Data to be roofed.
-    @param[in]    a_value Roof value
-    @note Also roofs ghost cells. 
+    @brief Make a_data = max(a_data1, a_data2).
+    @param[out] a_data    Output data. Will be max(a_data1, a_data2) in every cell.
+    @param[in]  a_data1   Input data holder.
+    @param[in]  a_data2   Input data holder.
+    @param[in]  a_vofIter Pre-built VoF iterator (multiply-cut cells).
   */
   static void
-  roof(LevelData<BaseIVFAB<Real>>& a_lhs, const Real a_value);
+  max(LevelData<EBCellFAB>&       a_data,
+      const LevelData<EBCellFAB>& a_data1,
+      const LevelData<EBCellFAB>& a_data2,
+      LayoutData<VoFIterator>&    a_vofIter);
 
   /**
-    @brief Make a_data = max(a_data1, a_data2)
-    @param[out] a_data  Output data. Will be max(a_data1, a_data2) in every cell
-    @param[in]  a_data1 Input data holder
-    @param[in]  a_data2 Input data holder
+    @brief Get maximum and minimum value of specified component.
+    @param[out] max       Maximum value.
+    @param[out] min       Minimum value.
+    @param[in]  a_data    Cell-centered data.
+    @param[in]  a_comp    Component.
+    @param[in]  a_vofIter Pre-built VoF iterators (multiply-cut cells) for each level.
+    @note This does the calculation over all levels, including grids that is covered by other grids.
   */
   static void
-  max(EBAMRCellData& a_data, const EBAMRCellData& a_data1, const EBAMRCellData& a_data2);
+  getMaxMin(Real&                                                 max,
+            Real&                                                 min,
+            EBAMRCellData&                                        a_data,
+            const int                                             a_comp,
+            const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter);
 
   /**
-    @brief Make a_data = max(a_data1, a_data2)
-    @param[out] a_data  Output data. Will be max(a_data1, a_data2) in every cell
-    @param[in]  a_data1 Input data holder
-    @param[in]  a_data2 Input data holder
+    @brief Get maximum and minimum value of specified component.
+    @param[out] a_max     Maximum value.
+    @param[out] a_min     Minimum value.
+    @param[in]  a_data    Cell-centered data.
+    @param[in]  a_comp    Component.
+    @param[in]  a_vofIter Pre-built VoF iterator (multiply-cut cells).
   */
   static void
-  max(LevelData<EBCellFAB>& a_data, const LevelData<EBCellFAB>& a_data1, const LevelData<EBCellFAB>& a_data2);
-
-  /**
-    @brief Get maximum and minimum value of specified component
-    @param[in]  a_data Cell-centered data
-    @param[in]  a_comp Component
-    @note This does the calculation over all levels, including grids that is covered by other grids. 
-    @param[in] max Max
-    @param[in] min Min
-  */
-  static void
-  getMaxMin(Real& max, Real& min, EBAMRCellData& a_data, const int a_comp);
-
-  /**
-    @brief Get maximum and minimum value of specified component
-    @param[out] a_max  Maximum value
-    @param[out] a_min  Minimum value
-    @param[in]  a_data Cell-centered data
-    @param[in]  a_comp Component
-  */
-  static void
-  getMaxMin(Real& a_max, Real& a_min, LevelData<EBCellFAB>& a_data, const int a_comp);
+  getMaxMin(Real&                    a_max,
+            Real&                    a_min,
+            LevelData<EBCellFAB>&    a_data,
+            const int                a_comp,
+            LayoutData<VoFIterator>& a_vofIter);
 
   /**
     @brief Get maximum and minimum value of specified component
@@ -654,41 +718,51 @@ public:
 
   /**
     @brief Get maximum and minimum value of normed data.
-    @param[out] a_max  Maximum value
-    @param[out] a_min  Minimum value
-    @note This does the calculation over all levels, including grids that is covered by other grids. 
-    @param[in] data Data
+    @param[out] a_max     Maximum value.
+    @param[out] a_min     Minimum value.
+    @param[in]  data      Data.
+    @param[in]  a_vofIter Pre-built VoF iterators (multiply-cut cells) for each level.
+    @note This does the calculation over all levels, including grids that is covered by other grids.
   */
   static void
-  getMaxMinNorm(Real& a_max, Real& a_min, EBAMRCellData& data);
+  getMaxMinNorm(Real&                                                 a_max,
+                Real&                                                 a_min,
+                EBAMRCellData&                                        data,
+                const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter);
 
   /**
     @brief Get maximum and minimum value of normed data.
-    @param[out] a_max  Maximum value
-    @param[out] a_min  Minimum value
-    @param[in] data Data
+    @param[out] a_max     Maximum value.
+    @param[out] a_min     Minimum value.
+    @param[in]  data      Data.
+    @param[in]  a_vofIter Pre-built VoF iterator (multiply-cut cells).
   */
   static void
-  getMaxMinNorm(Real& a_max, Real& a_min, LevelData<EBCellFAB>& data);
+  getMaxMinNorm(Real& a_max, Real& a_min, LevelData<EBCellFAB>& data, LayoutData<VoFIterator>& a_vofIter);
 
   /**
     @brief Get maximum and minimum value of normed data.
-    @param[out] a_max  Maximum value
-    @param[out] a_min  Minimum value
-    @note This does the calculation over all levels, including grids that is covered by other grids. 
-    @param[in] data Data
+    @param[out] a_max     Maximum value.
+    @param[out] a_min     Minimum value.
+    @param[in]  a_data    Data.
+    @param[in]  a_vofIter Pre-built VoF iterators (all cut-cells) for each level.
+    @note This does the calculation over all levels, including grids that are covered by other grids.
   */
   static void
-  getMaxMinNorm(Real& a_max, Real& a_min, EBAMRIVData& data);
+  getMaxMinNorm(Real&                                                 a_max,
+                Real&                                                 a_min,
+                EBAMRIVData&                                          a_data,
+                const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter);
 
   /**
     @brief Get maximum and minimum value of normed data.
-    @param[out] a_max  Maximum value
-    @param[out] a_min  Minimum value
-    @param[in] data Data
+    @param[out] a_max     Maximum value.
+    @param[out] a_min     Minimum value.
+    @param[in]  a_data    Data.
+    @param[in]  a_vofIter Pre-built VoF iterator (all cut-cells).
   */
   static void
-  getMaxMinNorm(Real& a_max, Real& a_min, LevelData<BaseIVFAB<Real>>& data);
+  getMaxMinNorm(Real& a_max, Real& a_min, LevelData<BaseIVFAB<Real>>& a_data, LayoutData<VoFIterator>& a_vofIter);
 
   /**
     @brief Invert data
@@ -715,27 +789,30 @@ public:
   invert(EBFluxFAB& a_data);
 
   /**
-    @brief Compute the kappa-weighted sum of the input data. Assumes one component
-    @param[out] a_mass Total mass, computed as kappa * lhs
-    @param[in]  a_lhs  Cell data
-    @param[in]  a_comp Component
+    @brief Compute the kappa-weighted sum of the input data. Assumes one component.
+    @param[out] a_mass    Total mass, computed as kappa * lhs.
+    @param[in]  a_lhs     Cell data.
+    @param[in]  a_comp    Component.
+    @param[in]  a_vofIter Pre-built VoF iterator (all cut-cells).
   */
   static void
-  kappaSum(Real& a_mass, const LevelData<EBCellFAB>& a_lhs, const int a_comp = 0);
+  kappaSum(Real& a_mass, const LevelData<EBCellFAB>& a_lhs, const int a_comp, LayoutData<VoFIterator>& a_vofIter);
 
   /**
-    @brief Scale data by volume fraction
-    @param[in,out] a_data Data to be scaled. On output we have a_data = kappa * a_data
+    @brief Scale data by volume fraction.
+    @param[in,out] a_data    Data to be scaled. On output we have a_data = kappa * a_data.
+    @param[in]     a_vofIter Pre-built VoF iterators (all cut-cells) for each level.
   */
   static void
-  kappaScale(EBAMRCellData& a_data) noexcept;
+  kappaScale(EBAMRCellData& a_data, const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter) noexcept;
 
   /**
-    @brief Scale data by volume fraction
-    @param[in,out] a_data Data to be scaled. On output we have a_data = kappa * a_data
+    @brief Scale data by volume fraction.
+    @param[in,out] a_data    Data to be scaled. On output we have a_data = kappa * a_data.
+    @param[in]     a_vofIter Pre-built VoF iterator (all cut-cells).
   */
   static void
-  kappaScale(LevelData<EBCellFAB>& a_data) noexcept;
+  kappaScale(LevelData<EBCellFAB>& a_data, LayoutData<VoFIterator>& a_vofIter) noexcept;
 
   /**
     @brief Scale data by volume fraction
@@ -850,15 +927,16 @@ public:
   multiplyScalar(LevelData<BaseIVFAB<Real>>& a_lhs, const LevelData<BaseIVFAB<Real>>& a_rhs);
 
   /**
-    @brief Compute specified norm of data. 
-    @param[in]  a_data   Data to compute the norm of
-    @param[in]  a_p      Norm factor, e.g. a_p = 2 => squared norm. 0 => inf norm
-    @param[in]  a_comp   Component
-    @note Does not do kappa-weighting; if user needs
-    @return Return value
+    @brief Compute specified norm of data.
+    @param[in]  a_data    Data to compute the norm of.
+    @param[in]  a_p       Norm factor, e.g. a_p = 2 => squared norm. 0 => inf norm.
+    @param[in]  a_comp    Component.
+    @param[in]  a_vofIter Pre-built VoF iterator (all cut-cells).
+    @note Does not do kappa-weighting.
+    @return Return value.
   */
   static Real
-  norm(const LevelData<EBCellFAB>& a_data, const int a_p, const int a_comp = 0);
+  norm(const LevelData<EBCellFAB>& a_data, const int a_p, const int a_comp, LayoutData<VoFIterator>& a_vofIter);
 
   /**
     @brief General addition operator for adding together data. The user can choose which components to add. 
@@ -1079,35 +1157,37 @@ public:
 
   /**
     @brief Polymorphic set value function. Takes a spatially varying function and sets the value in the specified component from that function.
-    @param[out] a_lhs      Data to set
-    @param[in]  a_function Function to use for setting the value. 
-    @param[in]  a_probLo   Lower-left corner of physical domain. 
-    @param[in]  a_dx       Grid resolutions
-    @param[in]  a_comp     Component to set
-    @note Uses a VofIterator everywhere to this might be slow!
+    @param[out] a_lhs      Data to set.
+    @param[in]  a_function Function to use for setting the value.
+    @param[in]  a_probLo   Lower-left corner of physical domain.
+    @param[in]  a_dx       Grid resolutions.
+    @param[in]  a_comp     Component to set.
+    @param[in]  a_vofIter  Pre-built VoF iterators (multiply-cut cells) for each level.
   */
   static void
-  setValue(EBAMRCellData&                             a_lhs,
-           const std::function<Real(const RealVect)>& a_function,
-           const RealVect&                            a_probLo,
-           const Vector<Real>&                        a_dx,
-           const int                                  a_comp);
+  setValue(EBAMRCellData&                                        a_lhs,
+           const std::function<Real(const RealVect)>&            a_function,
+           const RealVect&                                       a_probLo,
+           const Vector<Real>&                                   a_dx,
+           const int                                             a_comp,
+           const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter);
 
   /**
     @brief Polymorphic set value function. Takes a spatially varying function and sets the value in the specified component from that function.
-    @param[out] a_lhs      Data to set
-    @param[in]  a_function Function to use for setting the value. 
-    @param[in]  a_probLo   Lower-left corner of physical domain. 
-    @param[in]  a_dx       Grid resolutions
-    @param[in]  a_comp     Component to set
-    @note Uses a VofIterator everywhere to this might be slow!
+    @param[out] a_lhs      Data to set.
+    @param[in]  a_function Function to use for setting the value.
+    @param[in]  a_probLo   Lower-left corner of physical domain.
+    @param[in]  a_dx       Grid resolutions.
+    @param[in]  a_comp     Component to set.
+    @param[in]  a_vofIter  Pre-built VoF iterator (multiply-cut cells).
   */
   static void
   setValue(LevelData<EBCellFAB>&                      a_lhs,
            const std::function<Real(const RealVect)>& a_function,
            const RealVect                             a_probLo,
            const Real                                 a_dx,
-           const int                                  a_comp);
+           const int                                  a_comp,
+           LayoutData<VoFIterator>&                   a_vofIter);
 
   /**
     @brief Polymorphic set value function. Takes a spatially varying function and sets the value in the specified component from that function.
@@ -1143,63 +1223,67 @@ public:
 
   /**
     @brief Polymorphic set value function. Takes a spatially varying function and sets the value in the specified component from that function.
-    @param[out] a_lhs      Data to set
-    @param[in]  a_function Function to use for setting the value. 
-    @param[in]  a_probLo   Lower-left corner of physical domain. 
-    @param[in]  a_dx       Grid resolutions
-    @param[in]  a_comp     Component to set
-    @note Uses a VofIterator everywhere to this might be slow!
+    @param[out] a_lhs      Data to set.
+    @param[in]  a_function Function to use for setting the value.
+    @param[in]  a_probLo   Lower-left corner of physical domain.
+    @param[in]  a_dx       Grid resolutions.
+    @param[in]  a_comp     Component to set.
+    @param[in]  a_vofIter  Pre-built VoF iterators (all cut-cells) for each level.
   */
   static void
-  setValue(EBAMRIVData&                               a_lhs,
-           const std::function<Real(const RealVect)>& a_function,
-           const RealVect&                            a_probLo,
-           const Vector<Real>&                        a_dx,
-           const int                                  a_comp);
+  setValue(EBAMRIVData&                                          a_lhs,
+           const std::function<Real(const RealVect)>&            a_function,
+           const RealVect&                                       a_probLo,
+           const Vector<Real>&                                   a_dx,
+           const int                                             a_comp,
+           const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter);
 
   /**
     @brief Polymorphic set value function. Takes a spatially varying function and sets the value in the specified component from that function.
-    @param[out] a_lhs      Data to set
-    @param[in]  a_function Function to use for setting the value. 
-    @param[in]  a_probLo   Lower-left corner of physical domain. 
-    @param[in]  a_dx       Grid resolutions
-    @param[in]  a_comp     Component to set
-    @note Uses a VofIterator everywhere to this might be slow!
+    @param[out] a_lhs      Data to set.
+    @param[in]  a_function Function to use for setting the value.
+    @param[in]  a_probLo   Lower-left corner of physical domain.
+    @param[in]  a_dx       Grid resolution.
+    @param[in]  a_comp     Component to set.
+    @param[in]  a_vofIter  Pre-built VoF iterator (all cut-cells).
   */
   static void
   setValue(LevelData<BaseIVFAB<Real>>&                a_lhs,
            const std::function<Real(const RealVect)>& a_function,
            const RealVect                             a_probLo,
            const Real                                 a_dx,
-           const int                                  a_comp);
+           const int                                  a_comp,
+           LayoutData<VoFIterator>&                   a_vofIter);
 
   /**
     @brief Polymorphic set value function. Assumes that a_lhs has SpaceDim components and sets all those components from the input function.
-    @param[out] a_lhs      Data to set
-    @param[in]  a_function Function to use for setting the value. 
-    @param[in]  a_probLo   Lower-left corner of physical domain. 
-    @param[in]  a_dx       Grid resolutions
-    @note Uses a VofIterator everywhere to this might be slow!
+    @param[out] a_lhs      Data to set.
+    @param[in]  a_function Function to use for setting the value.
+    @param[in]  a_probLo   Lower-left corner of physical domain.
+    @param[in]  a_dx       Grid resolutions.
+    @param[in]  a_vofIter  Pre-built VoF iterators (multiply-cut cells) for each level.
   */
   static void
-  setValue(EBAMRCellData&                                 a_lhs,
-           const std::function<RealVect(const RealVect)>& a_function,
-           const RealVect&                                a_probLo,
-           const Vector<Real>&                            a_dx);
+  setValue(EBAMRCellData&                                        a_lhs,
+           const std::function<RealVect(const RealVect)>&        a_function,
+           const RealVect&                                       a_probLo,
+           const Vector<Real>&                                   a_dx,
+           const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter);
 
   /**
     @brief Polymorphic set value function. Assumes that a_lhs has SpaceDim components and sets all those components from the input function.
-    @param[out] a_lhs      Data to set
-    @param[in]  a_function Function to use for setting the value. 
-    @param[in]  a_probLo   Lower-left corner of physical domain. 
-    @param[in]  a_dx       Grid resolutions
-    @note Uses a VofIterator everywhere to this might be slow!
+    @param[out] a_lhs      Data to set.
+    @param[in]  a_function Function to use for setting the value.
+    @param[in]  a_probLo   Lower-left corner of physical domain.
+    @param[in]  a_dx       Grid resolutions.
+    @param[in]  a_vofIter  Pre-built VoF iterator (multiply-cut cells).
   */
   static void
   setValue(LevelData<EBCellFAB>&                          a_lhs,
            const std::function<RealVect(const RealVect)>& a_function,
            const RealVect                                 a_probLo,
-           const Real                                     a_dx);
+           const Real                                     a_dx,
+           LayoutData<VoFIterator>&                       a_vofIter);
 
   /**
     @brief Set value in data
@@ -1369,60 +1453,70 @@ public:
   squareRoot(LevelData<MFCellFAB>& a_lhs);
 
   /**
-    @brief Compute the vector length of a data holder. Sets a_lhs = |a_rhs| where a_rhs contains SpaceDim components. 
-    @param[out] a_lhs Vector length
-    @param[in]  a_rhs Input vector
-    @note a_lhs must have one component and a_rhs must have SpaceDim components. 
+    @brief Compute the vector length of a data holder. Sets a_lhs = |a_rhs| where a_rhs contains SpaceDim components.
+    @param[out] a_lhs     Vector length.
+    @param[in]  a_rhs     Input vector.
+    @param[in]  a_vofIter Pre-built VoF iterators (multiply-cut cells) for each level.
+    @note a_lhs must have one component and a_rhs must have SpaceDim components.
   */
   static void
-  vectorLength(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs);
+  vectorLength(EBAMRCellData&                                        a_lhs,
+               const EBAMRCellData&                                  a_rhs,
+               const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter);
 
   /**
-    @brief Compute the vector length of a data holder. Sets a_lhs = |a_rhs| where a_rhs contains SpaceDim components. 
-    @param[out] a_lhs Vector length
-    @param[in]  a_rhs Input vector
-    @note a_lhs must have one component and a_rhs must have SpaceDim components. 
+    @brief Compute the vector length of a data holder. Sets a_lhs = |a_rhs| where a_rhs contains SpaceDim components.
+    @param[out] a_lhs     Vector length.
+    @param[in]  a_rhs     Input vector.
+    @param[in]  a_vofIter Pre-built VoF iterator (multiply-cut cells).
+    @note a_lhs must have one component and a_rhs must have SpaceDim components.
   */
   static void
-  vectorLength(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs);
+  vectorLength(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, LayoutData<VoFIterator>& a_vofIter);
 
   /**
-    @brief Compute the vector length of a data holder. Sets a_lhs = |a_rhs| where a_rhs contains SpaceDim components. 
-    @param[out] a_lhs Vector length.
-    @param[in]  a_rhs Input vector.
-    @note a_lhs must have one component and a_rhs must have SpaceDim components. 
-    @param[in] box Box
+    @brief Compute the vector length of a data holder. Sets a_lhs = |a_rhs| where a_rhs contains SpaceDim components.
+    @param[out] a_lhs     Vector length.
+    @param[in]  a_rhs     Input vector.
+    @param[in]  box       Cell box.
+    @param[in]  a_vofIter Pre-built VoF iterator (multiply-cut cells) for this patch.
+    @note a_lhs must have one component and a_rhs must have SpaceDim components.
   */
   static void
-  vectorLength(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& box);
+  vectorLength(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& box, VoFIterator& a_vofIter);
 
   /**
-    @brief Compute the squared vector length of a data holder. Sets a_lhs = |a_rhs|^2 where a_rhs contains SpaceDim components. 
-    @param[out] a_lhs Vector length
-    @param[in]  a_rhs Input vector
-    @note a_lhs must have one component and a_rhs must have SpaceDim components. 
+    @brief Compute the squared vector length of a data holder. Sets a_lhs = |a_rhs|^2 where a_rhs contains SpaceDim components.
+    @param[out] a_lhs     Vector length.
+    @param[in]  a_rhs     Input vector.
+    @param[in]  a_vofIter Pre-built VoF iterators (multiply-cut cells) for each level.
+    @note a_lhs must have one component and a_rhs must have SpaceDim components.
   */
   static void
-  vectorLength2(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs);
+  vectorLength2(EBAMRCellData&                                        a_lhs,
+                const EBAMRCellData&                                  a_rhs,
+                const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter);
 
   /**
-    @brief Compute the squared vector length of a data holder. Sets a_lhs = |a_rhs|^2 where a_rhs contains SpaceDim components. 
-    @param[out] a_lhs Vector length
-    @param[in]  a_rhs Input vector
-    @note a_lhs must have one component and a_rhs must have SpaceDim components. 
+    @brief Compute the squared vector length of a data holder. Sets a_lhs = |a_rhs|^2 where a_rhs contains SpaceDim components.
+    @param[out] a_lhs     Vector length.
+    @param[in]  a_rhs     Input vector.
+    @param[in]  a_vofIter Pre-built VoF iterator (multiply-cut cells).
+    @note a_lhs must have one component and a_rhs must have SpaceDim components.
   */
   static void
-  vectorLength2(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs);
+  vectorLength2(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, LayoutData<VoFIterator>& a_vofIter);
 
   /**
-    @brief Compute the squared vector length of a data holder. Sets a_lhs = |a_rhs|^2 where a_rhs contains SpaceDim components. 
-    @param[out] a_lhs Vector length
-    @param[in]  a_rhs Input vector
-    @note a_lhs must have one component and a_rhs must have SpaceDim components. 
-    @param[in] box Description
+    @brief Compute the squared vector length of a data holder. Sets a_lhs = |a_rhs|^2 where a_rhs contains SpaceDim components.
+    @param[out] a_lhs     Vector length.
+    @param[in]  a_rhs     Input vector.
+    @param[in]  box       Cell box.
+    @param[in]  a_vofIter Pre-built VoF iterator (multiply-cut cells) for this patch.
+    @note a_lhs must have one component and a_rhs must have SpaceDim components.
   */
   static void
-  vectorLength2(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& box);
+  vectorLength2(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& box, VoFIterator& a_vofIter);
 
   /**
     @brief Compute the tightest possible valid box around a cut-cell volume

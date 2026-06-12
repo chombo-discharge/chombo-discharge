@@ -3228,6 +3228,23 @@ AmrMesh::getVofIterator(const std::string& a_realm, const phase::which_phase a_p
   return m_realms[a_realm]->getVofIterator(a_phase);
 }
 
+Vector<RefCountedPtr<LayoutData<VoFIterator>>>&
+AmrMesh::getMultiCutVofIterator(const std::string& a_realm, const phase::which_phase a_phase) const
+{
+  CH_TIME("AmrMesh::getMultiCutVofIterator(string, phase::which_phase)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getMultiCutVofIterator(string, phase::which_phase)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getMultiCutVofIterator(string, phase::which_phase) - could not find realm '" +
+                            a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getMultiCutVofIterator(a_phase);
+}
+
 const AMRMask&
 AmrMesh::getMask(const std::string& a_mask, const int a_buffer, const std::string& a_realm) const
 {

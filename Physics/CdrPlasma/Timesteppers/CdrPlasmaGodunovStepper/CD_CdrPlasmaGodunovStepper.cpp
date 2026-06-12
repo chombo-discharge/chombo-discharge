@@ -897,7 +897,7 @@ CdrPlasmaGodunovStepper::extrapolateCdrToEB()
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
     const int idx = solverIt.index();
 
-    DataOps::floor(*cdrDensitiesEB[idx], 0.0);
+    DataOps::floor(*cdrDensitiesEB[idx], 0.0, m_amr->getVofIterator(m_realm, m_cdr->getPhase()));
   }
 
   // We should already have the cell-centered gradients, extrapolate them to the EB and project the flux.
@@ -1329,7 +1329,7 @@ CdrPlasmaGodunovStepper::advanceTransportSemiImplicit(const Real a_dt)
   m_timer->startEvent("Compute conductivity");
   this->computeCellConductivity(m_conductivityFactorCell);
   DataOps::scale(m_conductivityFactorCell, a_dt / Units::eps0);
-  DataOps::floor(m_conductivityFactorCell, 0.0);
+  DataOps::floor(m_conductivityFactorCell, 0.0, m_amr->getVofIterator(m_realm, m_phase));
 
   m_amr->arithmeticAverage(m_conductivityFactorCell, m_realm, m_phase);
   m_amr->interpGhostPwl(m_conductivityFactorCell, m_realm, m_phase);
@@ -1416,7 +1416,7 @@ CdrPlasmaGodunovStepper::advanceCdrReactions(const Real a_dt)
       if (m_debug) {
         const Real massBefore = solver->computeMass();
 
-        DataOps::floor(phi, 0.0);
+        DataOps::floor(phi, 0.0, m_amr->getVofIterator(m_realm, m_phase));
 
         const Real massAfter   = solver->computeMass();
         const Real relMassDiff = (massAfter - massBefore) / massBefore;
@@ -1425,7 +1425,7 @@ CdrPlasmaGodunovStepper::advanceCdrReactions(const Real a_dt)
                << " mass = " << relMassDiff << endl;
       }
       else {
-        DataOps::floor(phi, 0.0);
+        DataOps::floor(phi, 0.0, m_amr->getVofIterator(m_realm, m_phase));
       }
     }
   }
@@ -1672,7 +1672,7 @@ CdrPlasmaGodunovStepper::floorMass(EBAMRCellData&                  a_data,
     // Compute the mass before flooring it.
     const Real massBefore = a_solver->computeMass(a_data);
 
-    DataOps::floor(a_data, 0.0);
+    DataOps::floor(a_data, 0.0, m_amr->getVofIterator(m_realm, m_phase));
 
     // Compute the mass and relative mass increase after flooring.
     const Real massAfter   = a_solver->computeMass(a_data);
@@ -1682,7 +1682,7 @@ CdrPlasmaGodunovStepper::floorMass(EBAMRCellData&                  a_data,
     pout() << a_message + " - injecting relative " << a_solver->getName() << " mass = " << relMassDiff << endl;
   }
   else {
-    DataOps::floor(a_data, 0.0);
+    DataOps::floor(a_data, 0.0, m_amr->getVofIterator(m_realm, m_phase));
   }
 }
 
