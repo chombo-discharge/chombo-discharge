@@ -641,3 +641,825 @@ all-cut VoFIterator from `AmrMesh::getVofIterator` must be passed in.
 | `filterSmooth(LD<EBCellFAB>, Real, int, bool)` | Builds `IrregIVS` grown by `a_stride - 1`; the iteration space is stride-dependent and cannot be stored in AmrMesh without knowing the stride at regrid time |
 | All `MFCellFAB` variants | Build per-phase VoFIterators inside a phase loop; refactoring requires passing a phase-indexed vector of iterators — deferred |
 | `setInvalidValue` (the `VoFIterator(IntVectSet(overlapBox), ...)` pattern) | Built from a dynamically-computed overlap box; cannot be pre-built |
+
+---
+
+## Checkpoint 5 — Call sites of DataOps functions
+
+All external call sites of `DataOps::` across `Source/`, `Physics/`, `Exec/`, and
+`Geometries/` (excluding `CD_DataOps.H`, `CD_DataOps.cpp`, `CD_DataOpsImplem.H`).
+
+Call sites are grouped by function. Each function header notes the change category from
+Checkpoints 3 and 4:
+
+- **No change** — signature unchanged; call site requires no update.
+- **Multi-cut VoFIter** — caller must pass `AmrMesh::getMultiCutVofIterator(realm, phase)`.
+- **Full-cut VoFIter** — caller must pass `AmrMesh::getVofIterator(realm, phase)`.
+- **Keep local** — `DataOps` retains on-the-fly VoFIterator construction; no call-site change.
+
+Check off each site after verifying or updating the call.
+
+---
+
+### `DataOps::averageCellToFace` — Full-cut VoFIter (EB-specific irregular kernel)
+
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:251
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:1666
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:2961
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:2972
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:5265
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:3453
+- [ ] Physics/ItoKMC/TimeSteppers/ItoKMCGodunovStepper/CD_ItoKMCGodunovStepperImplem.H:1202
+- [ ] Source/AmrMesh/CD_AmrMesh.cpp:1404
+- [ ] Source/Electrostatics/CD_FieldSolverGMG.cpp:540
+- [ ] Source/Electrostatics/CD_FieldSolverGMG.cpp:558
+
+---
+
+### `DataOps::averageCellVelocityToFaceVelocity` — Full-cut VoFIter (EB-specific irregular kernel)
+
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:384
+
+---
+
+### `DataOps::averageFaceToCell` — Full-cut VoFIter (calls `ebisbox.getFaces`)
+
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:2854
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:1849
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:1855
+
+---
+
+### `DataOps::axby` — No change (delegates to `EBCellFAB::axby`)
+
+- [ ] Source/Elliptic/CD_EBHelmholtzOp.cpp:649
+
+---
+
+### `DataOps::compute` — Multi-cut VoFIter (geometry-independent transform)
+
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:3143
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:3144
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:3158
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:3159
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:3210
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:3215
+
+---
+
+### `DataOps::computeMinValidBox` — No change (pure box/particle geometry, no VoFIterator)
+
+- [ ] Physics/ItoKMC/CD_ItoKMCPhysicsImplem.H:701
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:4483
+- [ ] Physics/ItoKMC/PlasmaModels/ItoKMCJSON/CD_ItoKMCJSON.cpp:3553
+- [ ] Source/AmrMesh/CD_CellInfo.cpp:42
+- [ ] Source/ItoDiffusion/CD_ItoSolver.cpp:665
+- [ ] Source/ItoDiffusion/CD_ItoSolver.cpp:1331
+- [ ] Source/RadiativeTransfer/CD_McPhoto.cpp:1104
+- [ ] Source/RadiativeTransfer/CD_McPhoto.cpp:1217
+
+---
+
+### `DataOps::copy` — No change (delegates to `localCopyTo`)
+
+- [ ] Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp:383
+- [ ] Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp:424
+- [ ] Physics/AdvectionDiffusion/CD_AdvectionDiffusionTagger.cpp:76
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:484
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:2644
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:2836
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:2845
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:4596
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStepper.cpp:405
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStepper.cpp:406
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStepper.cpp:599
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStepper.cpp:850
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStepper.cpp:1272
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:535
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:549
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:670
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:685
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:839
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:842
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:857
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:861
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:888
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:934
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:941
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:950
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:954
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:984
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:991
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:1070
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:1084
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:1091
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:2028
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:2038
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:2058
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:2068
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:265
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:275
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:276
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:289
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:299
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:300
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:322
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:1724
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:1751
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:3140
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:3141
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:3209
+- [ ] Physics/DischargeInception/CD_DischargeInceptionTagger.cpp:182
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:1996
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:2066
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:3892
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:3902
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:5262
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:5272
+- [ ] Physics/ItoKMC/TimeSteppers/ItoKMCBackgroundEvaluator/CD_ItoKMCBackgroundEvaluatorImplem.H:242
+- [ ] Physics/ItoKMC/TimeSteppers/ItoKMCBackgroundEvaluator/CD_ItoKMCBackgroundEvaluatorImplem.H:243
+- [ ] Physics/ItoKMC/TimeSteppers/ItoKMCBackgroundEvaluator/CD_ItoKMCBackgroundEvaluatorImplem.H:252
+- [ ] Physics/ItoKMC/TimeSteppers/ItoKMCBackgroundEvaluator/CD_ItoKMCBackgroundEvaluatorImplem.H:336
+- [ ] Physics/ItoKMC/TimeSteppers/ItoKMCGodunovStepper/CD_ItoKMCGodunovStepperImplem.H:579
+- [ ] Physics/ItoKMC/TimeSteppers/ItoKMCGodunovStepper/CD_ItoKMCGodunovStepperImplem.H:580
+- [ ] Physics/ItoKMC/TimeSteppers/ItoKMCGodunovStepper/CD_ItoKMCGodunovStepperImplem.H:1155
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrCTU.cpp:200
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrMultigrid.cpp:203
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrMultigrid.cpp:232
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrMultigrid.cpp:238
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrMultigrid.cpp:289
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrMultigrid.cpp:302
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrMultigrid.cpp:331
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrMultigrid.cpp:337
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:235
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:260
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:2475
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:2727
+- [ ] Source/Electrostatics/CD_FieldSolver.cpp:197
+- [ ] Source/Electrostatics/CD_FieldSolverGMG.cpp:289
+- [ ] Source/Electrostatics/CD_FieldSolverGMG.cpp:304
+- [ ] Source/Electrostatics/CD_FieldSolverGMG.cpp:361
+- [ ] Source/RadiativeTransfer/CD_EddingtonSP1.cpp:609
+- [ ] Source/RadiativeTransfer/CD_EddingtonSP1.cpp:697
+- [ ] Source/RadiativeTransfer/CD_EddingtonSP1.cpp:1148
+- [ ] Source/SurfaceODESolver/CD_SurfaceODESolverImplem.H:402
+- [ ] Source/SurfaceODESolver/CD_SurfaceODESolverImplem.H:464
+- [ ] Source/SurfaceODESolver/CD_SurfaceODESolverImplem.H:597
+- [ ] Source/TracerParticles/CD_TracerParticleSolverImplem.H:302
+
+---
+
+### `DataOps::divideByScalar` — No change (delegates to `divide`, which uses `EBCellFAB::divide`)
+
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:205
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:4256
+- [ ] Source/RadiativeTransfer/CD_EddingtonSP1.cpp:1153
+
+---
+
+### `DataOps::divideFallback` — Multi-cut VoFIter (geometry-independent; clone pattern)
+
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:1325
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:1372
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:1839
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:2090
+- [ ] Physics/ItoKMC/TimeSteppers/ItoKMCBackgroundEvaluator/CD_ItoKMCBackgroundEvaluatorImplem.H:254
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:2469
+- [ ] Source/ItoDiffusion/CD_ItoSolver.cpp:1557
+- [ ] Source/ItoDiffusion/CD_ItoSolver.cpp:1758
+- [ ] Source/ItoDiffusion/CD_ItoSolver.cpp:1789
+- [ ] Source/ItoDiffusion/CD_ItoSolver.cpp:1821
+
+---
+
+### `DataOps::dotProduct` — Multi-cut VoFIter (geometry-independent sum of products)
+
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:4211
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:1156
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:1165
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:1339
+- [ ] Source/Electrostatics/CD_FieldSolver.cpp:301
+
+---
+
+### `DataOps::filterSmooth` — Keep local (stride-dependent grown IVS; cannot pre-build)
+
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStepper.cpp:610
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStepper.cpp:619
+- [ ] Physics/ItoKMC/TimeSteppers/ItoKMCGodunovStepper/CD_ItoKMCGodunovStepperImplem.H:1173
+- [ ] Physics/ItoKMC/TimeSteppers/ItoKMCGodunovStepper/CD_ItoKMCGodunovStepperImplem.H:1312
+
+---
+
+### `DataOps::floor` (EBCellFAB variant) — Full-cut VoFIter (operates over full ghost region)
+
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:266
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:2588
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStepper.cpp:900
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStepper.cpp:1332
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStepper.cpp:1419
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStepper.cpp:1428
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStepper.cpp:1675
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStepper.cpp:1685
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:936
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:1002
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:1544
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:1581
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:1699
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:1763
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:5210
+- [ ] Physics/ItoKMC/TimeSteppers/ItoKMCGodunovStepper/CD_ItoKMCGodunovStepperImplem.H:1760
+
+---
+
+### `DataOps::getMaxMin` — Multi-cut VoFIter (no `isRegular` guard; BoxLoops covers VoF 0)
+
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:3226
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:337
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:1657
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:1658
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:2373
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:2374
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:1326
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:1373
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:1844
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:5229
+- [ ] Physics/ItoKMC/TimeSteppers/ItoKMCBackgroundEvaluator/CD_ItoKMCBackgroundEvaluatorImplem.H:261
+- [ ] Physics/ItoKMC/TimeSteppers/ItoKMCBackgroundEvaluator/CD_ItoKMCBackgroundEvaluatorImplem.H:271
+- [ ] Physics/ItoKMC/TimeSteppers/ItoKMCBackgroundEvaluator/CD_ItoKMCBackgroundEvaluatorImplem.H:272
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:2960
+
+---
+
+### `DataOps::getMaxMinNorm` — Multi-cut VoFIter (covered-cell mask; regular loop handles cut-cells)
+
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaFieldTagger.cpp:114
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaFieldTagger.cpp:115
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:3013
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:4262
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:2488
+- [ ] Physics/ItoKMC/CD_ItoKMCFieldTaggerImplem.H:114
+- [ ] Physics/ItoKMC/CD_ItoKMCFieldTaggerImplem.H:115
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:2097
+
+---
+
+### `DataOps::incr` — No change (delegates to `EBCellFAB::plus` / self-contained `BaseIVFAB`)
+
+- [ ] Exec/Convergence/AdvectionDiffusion/C1/main.cpp:100
+- [ ] Exec/Convergence/AdvectionDiffusion/C2/main.cpp:72
+- [ ] Exec/Convergence/CdrPlasma/C1/main.cpp:140
+- [ ] Exec/Convergence/Electrostatics/C1/main.cpp:103
+- [ ] Exec/Convergence/Electrostatics/C2/main.cpp:108
+- [ ] Exec/Convergence/Electrostatics/C3/main.cpp:107
+- [ ] Exec/Convergence/RadiativeTransfer/C1/main.cpp:100
+- [ ] Exec/Convergence/RadiativeTransfer/C2/main.cpp:74
+- [ ] Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp:384
+- [ ] Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp:388
+- [ ] Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp:389
+- [ ] Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp:432
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:149
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:209
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:263
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:335
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:336
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:2592
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:2838
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:2860
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:3955
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:4043
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:4130
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStepper.cpp:852
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStepper.cpp:1139
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStepper.cpp:1226
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStepper.cpp:1235
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStepper.cpp:1241
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStepper.cpp:1242
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStepper.cpp:1250
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStepper.cpp:1286
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStepper.cpp:1291
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStepper.cpp:1295
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStepper.cpp:1296
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStepper.cpp:1317
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStepper.cpp:1357
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStepper.cpp:1368
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStepper.cpp:1412
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:496
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:517
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:840
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:850
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:862
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:873
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:877
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:889
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:894
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:899
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:935
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:955
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:987
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:1007
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:1008
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:1062
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:1072
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:1113
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:1120
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:1140
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:1169
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:1820
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:314
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:315
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:330
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:1140
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:1141
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:1146
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:1147
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:1154
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:1155
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:1163
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:1164
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:1588
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:1589
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:1595
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:1596
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:1708
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:1725
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:1729
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:1730
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:5287
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:5288
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:1919
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:1930
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:1980
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:1998
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:3968
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:5157
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:5166
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:5189
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:5204
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:5665
+- [ ] Physics/ItoKMC/TimeSteppers/ItoKMCBackgroundEvaluator/CD_ItoKMCBackgroundEvaluatorImplem.H:253
+- [ ] Physics/ItoKMC/TimeSteppers/ItoKMCGodunovStepper/CD_ItoKMCGodunovStepperImplem.H:1138
+- [ ] Physics/ItoKMC/TimeSteppers/ItoKMCGodunovStepper/CD_ItoKMCGodunovStepperImplem.H:1158
+- [ ] Physics/ItoKMC/TimeSteppers/ItoKMCGodunovStepper/CD_ItoKMCGodunovStepperImplem.H:1211
+- [ ] Physics/ItoKMC/TimeSteppers/ItoKMCGodunovStepper/CD_ItoKMCGodunovStepperImplem.H:1254
+- [ ] Physics/ItoKMC/TimeSteppers/ItoKMCGodunovStepper/CD_ItoKMCGodunovStepperImplem.H:1259
+- [ ] Physics/ItoKMC/TimeSteppers/ItoKMCGodunovStepper/CD_ItoKMCGodunovStepperImplem.H:1295
+- [ ] Physics/ItoKMC/TimeSteppers/ItoKMCGodunovStepper/CD_ItoKMCGodunovStepperImplem.H:1351
+- [ ] Physics/ItoKMC/TimeSteppers/ItoKMCGodunovStepper/CD_ItoKMCGodunovStepperImplem.H:1352
+- [ ] Physics/ItoKMC/TimeSteppers/ItoKMCGodunovStepper/CD_ItoKMCGodunovStepperImplem.H:1666
+- [ ] Physics/ItoKMC/TimeSteppers/ItoKMCGodunovStepper/CD_ItoKMCGodunovStepperImplem.H:1668
+- [ ] Physics/ItoKMC/TimeSteppers/ItoKMCGodunovStepper/CD_ItoKMCGodunovStepperImplem.H:1752
+- [ ] Physics/ItoKMC/TimeSteppers/ItoKMCGodunovStepper/CD_ItoKMCGodunovStepperImplem.H:1757
+- [ ] Physics/MeshODE/CD_MeshODEStepperImplem.H:425
+- [ ] Physics/MeshODE/CD_MeshODEStepperImplem.H:446
+- [ ] Physics/MeshODE/CD_MeshODEStepperImplem.H:449
+- [ ] Physics/MeshODE/CD_MeshODEStepperImplem.H:450
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrGodunov.cpp:249
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrMultigrid.cpp:205
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrMultigrid.cpp:293
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrMultigrid.cpp:307
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:1228
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:1884
+- [ ] Source/Electrostatics/CD_FieldSolver.cpp:1674
+- [ ] Source/Elliptic/CD_EBHelmholtzOp.cpp:637
+- [ ] Source/Elliptic/CD_MFHelmholtzOp.cpp:355
+- [ ] Source/RadiativeTransfer/CD_EddingtonSP1.cpp:715
+- [ ] Source/RadiativeTransfer/CD_McPhoto.cpp:111
+- [ ] Source/SurfaceODESolver/CD_SurfaceODESolverImplem.H:731
+- [ ] Source/SurfaceODESolver/CD_SurfaceODESolverImplem.H:761
+- [ ] Source/SurfaceODESolver/CD_SurfaceODESolverImplem.H:841
+- [ ] Source/SurfaceODESolver/CD_SurfaceODESolverImplem.H:856
+
+---
+
+### `DataOps::kappaScale` — Full-cut VoFIter (only irregular kernel; uses `volFrac`)
+
+- [ ] Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp:420
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:1747
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrMultigrid.cpp:204
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrMultigrid.cpp:290
+- [ ] Source/Electrostatics/CD_FieldSolverGMG.cpp:295
+- [ ] Source/Elliptic/CD_EBHelmholtzOp.cpp:1503
+- [ ] Source/RadiativeTransfer/CD_EddingtonSP1.cpp:616
+- [ ] Source/RadiativeTransfer/CD_EddingtonSP1.cpp:717
+
+---
+
+### `DataOps::kappaSum` — Full-cut VoFIter (regular kernel guards `isRegular`; volFrac in irregular)
+
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:4219
+
+---
+
+### `DataOps::multiply` — No change (delegates to `EBCellFAB::operator*=`)
+
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:206
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:3146
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:3147
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:3211
+- [ ] Physics/ItoKMC/TimeSteppers/ItoKMCGodunovStepper/CD_ItoKMCGodunovStepperImplem.H:1156
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:2952
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:2970
+
+---
+
+### `DataOps::multiplyScalar` — No change (delegates to `EBCellFAB::mult`)
+
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:2593
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:2645
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:2837
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:2857
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:5189
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:1997
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:2067
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:2879
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:2728
+
+---
+
+### `DataOps::norm` — Full-cut VoFIter (regular kernel guards `isRegular`)
+
+- [ ] Exec/Convergence/AdvectionDiffusion/C1/main.cpp:103
+- [ ] Exec/Convergence/AdvectionDiffusion/C1/main.cpp:104
+- [ ] Exec/Convergence/AdvectionDiffusion/C1/main.cpp:105
+- [ ] Exec/Convergence/AdvectionDiffusion/C2/main.cpp:76
+- [ ] Exec/Convergence/AdvectionDiffusion/C2/main.cpp:77
+- [ ] Exec/Convergence/AdvectionDiffusion/C2/main.cpp:78
+- [ ] Exec/Convergence/CdrPlasma/C1/main.cpp:143
+- [ ] Exec/Convergence/CdrPlasma/C1/main.cpp:144
+- [ ] Exec/Convergence/CdrPlasma/C1/main.cpp:145
+- [ ] Exec/Convergence/Electrostatics/C1/main.cpp:106
+- [ ] Exec/Convergence/Electrostatics/C1/main.cpp:107
+- [ ] Exec/Convergence/Electrostatics/C1/main.cpp:108
+- [ ] Exec/Convergence/Electrostatics/C2/main.cpp:111
+- [ ] Exec/Convergence/Electrostatics/C2/main.cpp:112
+- [ ] Exec/Convergence/Electrostatics/C2/main.cpp:113
+- [ ] Exec/Convergence/Electrostatics/C3/main.cpp:110
+- [ ] Exec/Convergence/Electrostatics/C3/main.cpp:111
+- [ ] Exec/Convergence/Electrostatics/C3/main.cpp:112
+- [ ] Exec/Convergence/RadiativeTransfer/C1/main.cpp:103
+- [ ] Exec/Convergence/RadiativeTransfer/C1/main.cpp:104
+- [ ] Exec/Convergence/RadiativeTransfer/C1/main.cpp:105
+- [ ] Exec/Convergence/RadiativeTransfer/C2/main.cpp:77
+- [ ] Exec/Convergence/RadiativeTransfer/C2/main.cpp:78
+- [ ] Exec/Convergence/RadiativeTransfer/C2/main.cpp:79
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:1145
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:1146
+
+---
+
+### `DataOps::plus` — No change (delegates to `EBCellFAB::plus`)
+
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:5985
+
+---
+
+### `DataOps::scale` — No change (delegates to `EBCellFAB::mult`)
+
+- [ ] Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp:421
+- [ ] Physics/AdvectionDiffusion/CD_AdvectionDiffusionTagger.cpp:92
+- [ ] Physics/BrownianWalker/CD_BrownianWalkerStepper.cpp:392
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:154
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:215
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:2865
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStepper.cpp:1331
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:863
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:1009
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:1057
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:1748
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:2640
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:2824
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:5145
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:1934
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:2002
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:2818
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:2849
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:5984
+- [ ] Physics/ItoKMC/TimeSteppers/ItoKMCGodunovStepper/CD_ItoKMCGodunovStepperImplem.H:1163
+- [ ] Physics/ItoKMC/TimeSteppers/ItoKMCGodunovStepper/CD_ItoKMCGodunovStepperImplem.H:1673
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrMultigrid.cpp:562
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:1843
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:1872
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:2953
+- [ ] Source/Electrostatics/CD_FieldSolver.cpp:198
+- [ ] Source/Electrostatics/CD_FieldSolverGMG.cpp:290
+- [ ] Source/Electrostatics/CD_FieldSolverGMG.cpp:305
+- [ ] Source/Electrostatics/CD_FieldSolverGMG.cpp:362
+- [ ] Source/Electrostatics/CD_FieldSolverGMG.cpp:885
+- [ ] Source/Electrostatics/CD_FieldSolverGMG.cpp:913
+- [ ] Source/Electrostatics/CD_FieldSolverGMG.cpp:944
+- [ ] Source/Electrostatics/CD_FieldSolverGMG.cpp:979
+- [ ] Source/Elliptic/CD_EBHelmholtzOp.cpp:657
+- [ ] Source/Elliptic/CD_MFHelmholtzOp.cpp:363
+- [ ] Source/Elliptic/CD_MFHelmholtzOpFactory.cpp:133
+- [ ] Source/RadiativeTransfer/CD_EddingtonSP1.cpp:610
+- [ ] Source/RadiativeTransfer/CD_EddingtonSP1.cpp:1062
+- [ ] Source/RadiativeTransfer/CD_EddingtonSP1.cpp:1154
+
+---
+
+### `DataOps::setCoveredValue` — No change (loops via `isCovered` test, no VoFIterator)
+
+- [ ] Physics/AdvectionDiffusion/CD_AdvectionDiffusionTagger.cpp:82
+- [ ] Physics/BrownianWalker/CD_BrownianWalkerStepper.cpp:177
+- [ ] Physics/BrownianWalker/CD_BrownianWalkerStepper.cpp:641
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:161
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:4505
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaTagger.cpp:179
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:5421
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:1093
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:4788
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:4789
+- [ ] Physics/ItoKMC/CD_ItoKMCTaggerImplem.H:179
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:1229
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:1938
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:3102
+- [ ] Source/Driver/CD_Driver.cpp:2678
+- [ ] Source/ItoDiffusion/CD_ItoSolver.cpp:1611
+- [ ] Source/MeshODESolver/CD_MeshODESolverImplem.H:692
+- [ ] Source/RadiativeTransfer/CD_EddingtonSP1.cpp:653
+- [ ] Source/RadiativeTransfer/CD_EddingtonSP1.cpp:664
+- [ ] Source/RadiativeTransfer/CD_RtSolver.cpp:370
+- [ ] Source/TracerParticles/CD_TracerParticleSolverImplem.H:582
+
+---
+
+### `DataOps::setInvalidValue` — Keep local (overlap box computed dynamically at call time)
+
+- [ ] Physics/BrownianWalker/CD_BrownianWalkerStepper.cpp:640
+
+---
+
+### `DataOps::setValue` — Mixed: `(LD, Real)` overloads need no change; `(LD, function, ...)` overloads need multi-cut VoFIter
+
+- [ ] Physics/BrownianWalker/CD_BrownianWalkerStepper.cpp:170
+- [ ] Physics/BrownianWalker/CD_BrownianWalkerStepper.cpp:171
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:135
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:188
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:242
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:243
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:262
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:395
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:402
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:1655
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:2591
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:2602
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:2654
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:2766
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:2808
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:3943
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:4031
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:4118
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:4255
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStepper.cpp:598
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStepper.cpp:652
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStepper.cpp:653
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStepper.cpp:654
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStepper.cpp:655
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStepper.cpp:1127
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStepper.cpp:1273
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStepper.cpp:1347
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:494
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:515
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:712
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:982
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:1006
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:1016
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:1060
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:1112
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:1119
+- [ ] Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp:1813
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:194
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:195
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:206
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:207
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:208
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:209
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:210
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:211
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:222
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:223
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:224
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:225
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:226
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:313
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:1139
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:1145
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:1153
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:1162
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:1172
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:1177
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:1349
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:1354
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:1587
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:1594
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:2204
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:2513
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:2514
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:3069
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:3070
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:3072
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:3073
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:3202
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:3896
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:3897
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:4119
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:4120
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:5262
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:5263
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:5286
+- [ ] Physics/DischargeInception/CD_DischargeInceptionTagger.cpp:80
+- [ ] Physics/Electrostatics/CD_FieldStepperImplem.H:229
+- [ ] Physics/Electrostatics/CD_FieldStepperImplem.H:230
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:649
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:1125
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:1774
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:1905
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:1965
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:2089
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:2952
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:2953
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:3442
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:3497
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:3617
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:3722
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:3905
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:3906
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:4826
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:4893
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:5199
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:5275
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:5276
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:5622
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:5623
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:5829
+- [ ] Physics/ItoKMC/TimeSteppers/ItoKMCBackgroundEvaluator/CD_ItoKMCBackgroundEvaluatorImplem.H:200
+- [ ] Physics/ItoKMC/TimeSteppers/ItoKMCBackgroundEvaluator/CD_ItoKMCBackgroundEvaluatorImplem.H:201
+- [ ] Physics/ItoKMC/TimeSteppers/ItoKMCGodunovStepper/CD_ItoKMCGodunovStepperImplem.H:1120
+- [ ] Physics/ItoKMC/TimeSteppers/ItoKMCGodunovStepper/CD_ItoKMCGodunovStepperImplem.H:1132
+- [ ] Physics/ItoKMC/TimeSteppers/ItoKMCGodunovStepper/CD_ItoKMCGodunovStepperImplem.H:1143
+- [ ] Physics/ItoKMC/TimeSteppers/ItoKMCGodunovStepper/CD_ItoKMCGodunovStepperImplem.H:1193
+- [ ] Physics/ItoKMC/TimeSteppers/ItoKMCGodunovStepper/CD_ItoKMCGodunovStepperImplem.H:1194
+- [ ] Physics/ItoKMC/TimeSteppers/ItoKMCGodunovStepper/CD_ItoKMCGodunovStepperImplem.H:1242
+- [ ] Physics/ItoKMC/TimeSteppers/ItoKMCGodunovStepper/CD_ItoKMCGodunovStepperImplem.H:1280
+- [ ] Physics/ItoKMC/TimeSteppers/ItoKMCGodunovStepper/CD_ItoKMCGodunovStepperImplem.H:1281
+- [ ] Physics/ItoKMC/TimeSteppers/ItoKMCGodunovStepper/CD_ItoKMCGodunovStepperImplem.H:1648
+- [ ] Physics/ItoKMC/TimeSteppers/ItoKMCGodunovStepper/CD_ItoKMCGodunovStepperImplem.H:1746
+- [ ] Physics/TracerParticle/CD_TracerParticleStepperImplem.H:370
+- [ ] Physics/TracerParticle/CD_TracerParticleStepperImplem.H:421
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrCTU.cpp:195
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrGodunov.cpp:236
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrMultigrid.cpp:181
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrMultigrid.cpp:261
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrMultigrid.cpp:355
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrMultigrid.cpp:356
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrMultigrid.cpp:405
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrMultigrid.cpp:515
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrMultigrid.cpp:516
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrMultigrid.cpp:550
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrMultigrid.cpp:588
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrMultigrid.cpp:634
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrMultigrid.cpp:675
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:230
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:255
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:280
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:281
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:290
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:291
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:292
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:308
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:309
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:310
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:325
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:326
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:327
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:328
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:329
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:378
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:427
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:688
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:1196
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:1227
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:1260
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:1468
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:1577
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:1578
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:1579
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:1594
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:1595
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:1596
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:1620
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:1663
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:1677
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:1722
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:1738
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:1782
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:1883
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:2332
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:2468
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:2716
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:2974
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:3127
+- [ ] Source/Driver/CD_Driver.cpp:2124
+- [ ] Source/Driver/CD_Driver.cpp:2304
+- [ ] Source/Driver/CD_Driver.cpp:2404
+- [ ] Source/Driver/CD_Driver.cpp:2453
+- [ ] Source/Driver/CD_Driver.cpp:2656
+- [ ] Source/Driver/CD_Driver.cpp:2883
+- [ ] Source/Electrostatics/CD_FieldSolver.cpp:152
+- [ ] Source/Electrostatics/CD_FieldSolver.cpp:153
+- [ ] Source/Electrostatics/CD_FieldSolver.cpp:154
+- [ ] Source/Electrostatics/CD_FieldSolver.cpp:155
+- [ ] Source/Electrostatics/CD_FieldSolver.cpp:156
+- [ ] Source/Electrostatics/CD_FieldSolver.cpp:385
+- [ ] Source/Electrostatics/CD_FieldSolver.cpp:386
+- [ ] Source/Electrostatics/CD_FieldSolver.cpp:387
+- [ ] Source/Electrostatics/CD_FieldSolver.cpp:388
+- [ ] Source/Electrostatics/CD_FieldSolver.cpp:470
+- [ ] Source/Electrostatics/CD_FieldSolver.cpp:484
+- [ ] Source/Electrostatics/CD_FieldSolver.cpp:498
+- [ ] Source/Electrostatics/CD_FieldSolver.cpp:511
+- [ ] Source/Electrostatics/CD_FieldSolver.cpp:1063
+- [ ] Source/Electrostatics/CD_FieldSolver.cpp:1064
+- [ ] Source/Electrostatics/CD_FieldSolver.cpp:1065
+- [ ] Source/Electrostatics/CD_FieldSolver.cpp:1673
+- [ ] Source/Electrostatics/CD_FieldSolverGMG.cpp:286
+- [ ] Source/Electrostatics/CD_FieldSolverGMG.cpp:815
+- [ ] Source/Electrostatics/CD_FieldSolverGMG.cpp:816
+- [ ] Source/Elliptic/CD_EBHelmholtzOp.cpp:740
+- [ ] Source/Elliptic/CD_MFHelmholtzOp.cpp:371
+- [ ] Source/Elliptic/CD_MFHelmholtzOpFactory.cpp:173
+- [ ] Source/Elliptic/CD_MFHelmholtzOpFactory.cpp:176
+- [ ] Source/Elliptic/CD_MFHelmholtzOpFactory.cpp:346
+- [ ] Source/ItoDiffusion/CD_ItoSolver.cpp:1123
+- [ ] Source/ItoDiffusion/CD_ItoSolver.cpp:1664
+- [ ] Source/ItoDiffusion/CD_ItoSolver.cpp:1904
+- [ ] Source/ItoDiffusion/CD_ItoSolver.cpp:2104
+- [ ] Source/ItoDiffusion/CD_ItoSolver.cpp:2116
+- [ ] Source/MeshODESolver/CD_MeshODESolverImplem.H:184
+- [ ] Source/MeshODESolver/CD_MeshODESolverImplem.H:269
+- [ ] Source/MeshODESolver/CD_MeshODESolverImplem.H:540
+- [ ] Source/Particle/CD_EBAMRParticleMeshImplem.H:87
+- [ ] Source/Particle/CD_EBAMRParticleMeshImplem.H:151
+- [ ] Source/Particle/CD_EBAMRParticleMeshImplem.H:252
+- [ ] Source/Particle/CD_EBAMRParticleMeshImplem.H:338
+- [ ] Source/RadiativeTransfer/CD_EddingtonSP1.cpp:503
+- [ ] Source/RadiativeTransfer/CD_EddingtonSP1.cpp:504
+- [ ] Source/RadiativeTransfer/CD_EddingtonSP1.cpp:505
+- [ ] Source/RadiativeTransfer/CD_EddingtonSP1.cpp:696
+- [ ] Source/RadiativeTransfer/CD_EddingtonSP1.cpp:1034
+- [ ] Source/RadiativeTransfer/CD_EddingtonSP1.cpp:1035
+- [ ] Source/RadiativeTransfer/CD_McPhoto.cpp:65
+- [ ] Source/RadiativeTransfer/CD_McPhoto.cpp:717
+- [ ] Source/RadiativeTransfer/CD_McPhoto.cpp:728
+- [ ] Source/RadiativeTransfer/CD_McPhoto.cpp:908
+- [ ] Source/RadiativeTransfer/CD_McPhoto.cpp:1310
+- [ ] Source/RadiativeTransfer/CD_RtSolver.cpp:223
+- [ ] Source/RadiativeTransfer/CD_RtSolver.cpp:234
+- [ ] Source/RadiativeTransfer/CD_RtSolver.cpp:248
+- [ ] Source/SurfaceODESolver/CD_SurfaceODESolverImplem.H:376
+- [ ] Source/SurfaceODESolver/CD_SurfaceODESolverImplem.H:389
+- [ ] Source/SurfaceODESolver/CD_SurfaceODESolverImplem.H:438
+- [ ] Source/SurfaceODESolver/CD_SurfaceODESolverImplem.H:451
+- [ ] Source/SurfaceODESolver/CD_SurfaceODESolverImplem.H:730
+- [ ] Source/SurfaceODESolver/CD_SurfaceODESolverImplem.H:760
+- [ ] Source/SurfaceODESolver/CD_SurfaceODESolverImplem.H:840
+- [ ] Source/SurfaceODESolver/CD_SurfaceODESolverImplem.H:855
+- [ ] Source/TracerParticles/CD_TracerParticleSolverImplem.H:370
+- [ ] Source/TracerParticles/CD_TracerParticleSolverImplem.H:424
+
+---
+
+### `DataOps::sgn` — No change (simple sign function, no VoFIterator)
+
+- [ ] (no external call sites found)
+
+---
+
+### `DataOps::squareRoot` — Keep local (MFCellFAB variant; per-phase VoFIterator loop deferred)
+
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:1157
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:1166
+- [ ] Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H:1340
+- [ ] Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp:2954
+
+---
+
+### `DataOps::vectorLength` — Multi-cut VoFIter (geometry-independent length formula)
+
+- [ ] Physics/AdvectionDiffusion/CD_AdvectionDiffusionTagger.cpp:81
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaFieldTagger.cpp:73
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:185
+- [ ] Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp:204
+- [ ] Physics/ItoKMC/CD_ItoKMCFieldTaggerImplem.H:83
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:1836
+- [ ] Physics/ItoKMC/TimeSteppers/ItoKMCBackgroundEvaluator/CD_ItoKMCBackgroundEvaluatorImplem.H:249
+- [ ] Physics/ItoKMC/TimeSteppers/ItoKMCBackgroundEvaluator/CD_ItoKMCBackgroundEvaluatorImplem.H:250
+- [ ] Source/ItoDiffusion/CD_ItoSolver.cpp:2220
+
+---
+
+### `DataOps::volumeScale` — Full-cut VoFIter (uses `volFrac`; geometry-specific irregular kernel)
+
+- [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:3964
+- [ ] Source/TracerParticles/CD_TracerParticleSolverImplem.H:375
