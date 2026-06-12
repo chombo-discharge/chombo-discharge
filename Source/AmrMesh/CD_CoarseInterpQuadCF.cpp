@@ -309,9 +309,9 @@ CoarseInterpQuadCF::computeSecondDeriv(const FArrayBox& a_coarPhi,
 }
 
 Real
-CoarseInterpQuadCF::computeMixedDeriv(const FArrayBox& /*a_coarPhi*/,
-                                      const IntVect& a_ivCoar,
-                                      const int /*a_coarVar*/) const noexcept
+CoarseInterpQuadCF::computeMixedDeriv([[maybe_unused]] const FArrayBox& a_coarPhi,
+                                      const IntVect&                    a_ivCoar,
+                                      [[maybe_unused]] int              a_coarVar) const noexcept
 {
   CH_TIME("CoarseInterpQuadCF::computeMixedDeriv");
 

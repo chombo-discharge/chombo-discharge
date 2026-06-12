@@ -53,12 +53,12 @@ LinearStencil::getLinearInterpStencil(VoFStencil&          a_stencil,
 }
 
 bool
-LinearStencil::computeInterpStencil1D(VoFStencil&     a_stencil,
-                                      const RealVect& a_pos,
-                                      const VolIndex& a_vof,
-                                      const ProblemDomain& /*a_domain*/,
-                                      const EBISBox& a_ebisbox,
-                                      const int      a_interpDir)
+LinearStencil::computeInterpStencil1D(VoFStencil&                           a_stencil,
+                                      const RealVect&                       a_pos,
+                                      const VolIndex&                       a_vof,
+                                      [[maybe_unused]] const ProblemDomain& a_domain,
+                                      const EBISBox&                        a_ebisbox,
+                                      const int                             a_interpDir)
 {
   CH_TIME("LinearStencil::computeInterpStencil1D");
 
@@ -135,12 +135,12 @@ LinearStencil::computeInterpStencil1D(VoFStencil&     a_stencil,
 }
 
 bool
-LinearStencil::computeInterpStencil2D(VoFStencil&          a_stencil,
-                                      const RealVect&      a_pos,
-                                      const VolIndex&      a_vof,
-                                      const ProblemDomain& a_domain,
-                                      const EBISBox&       a_ebisbox,
-                                      const int /*a_noInterpDir*/)
+LinearStencil::computeInterpStencil2D(VoFStencil&                a_stencil,
+                                      const RealVect&            a_pos,
+                                      const VolIndex&            a_vof,
+                                      const ProblemDomain&       a_domain,
+                                      const EBISBox&             a_ebisbox,
+                                      [[maybe_unused]] const int a_noInterpDir)
 {
   CH_TIME("LinearStencil::computeInterpStencil2D");
   CH_assert(SpaceDim == 2 || SpaceDim == 3);
