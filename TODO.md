@@ -1463,3 +1463,52 @@ Check off each site after verifying or updating the call.
 
 - [ ] Physics/ItoKMC/CD_ItoKMCStepperImplem.H:3964
 - [ ] Source/TracerParticles/CD_TracerParticleSolverImplem.H:375
+
+---
+
+## Checkpoint 6 — Pre-merge cleanup
+
+Work through these steps in order before opening the PR. Each item is a gate: do not proceed
+to the next until the current one is green.
+
+### 6.1 — Fix broken literalincludes
+
+For every file listed in Checkpoint 1, open the corresponding RST file and verify that the
+`:lines:` / `:emphasize-lines:` range still selects the intended code block. Update any range
+that has shifted due to the reorganization.
+
+- [ ] Run `pre-commit run check-literalincludes --all-files` and confirm zero failures.
+- [ ] Run `doxygen Docs/doxygen.conf` and confirm zero warnings (or run
+  `pre-commit run doxygen-check --all-files`).
+
+### 6.2 — Generate benchmark references on `main` and run the test suite
+
+Benchmark reference files must be produced from an unmodified `main` build so that any
+regression is attributable solely to this PR.
+
+- [ ] Check out `main`, build, and run each regression test listed in `Exec/Tests/` to
+  produce reference output (HDF5 plot files or convergence tables).
+- [ ] Check out this branch, build with identical flags, and run the same tests.
+- [ ] Diff the outputs. Confirm that no benchmark values change beyond floating-point
+  round-off (identical grid, same flags ⇒ bit-identical output is the target).
+- [ ] Confirm that the CI compilation jobs (`Linux-GNU`, `Linux-oneAPI`) pass.
+
+### 6.3 — Pre-commit hooks
+
+- [ ] Run `pre-commit run --all-files` and fix every failure before continuing.
+  Key hooks to watch: `clang-format`, `reuse`, `codespell`, `format-input-files`.
+- [ ] If `clang-tidy` is enabled locally, run it and resolve any new warnings introduced by
+  this PR (existing suppressions are acceptable; new ones must be justified).
+
+### 6.4 — New-file audit
+
+At this point, enumerate **every file that exists on this branch but not on `main`** (use
+`git diff --name-only --diff-filter=A main`) and ask the user, file by file, whether each
+new file should be:
+
+- **Kept** — it is a genuine deliverable and should be merged.
+- **Deleted** — it is scaffolding, scratch work, or a planning artefact (e.g. `TODO.md`)
+  that must not appear in the merged history.
+
+Delete the unwanted files, stage the deletion, and amend or add a new commit before the
+final push. Do **not** merge until every new file has been explicitly classified.
