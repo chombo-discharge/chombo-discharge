@@ -55,6 +55,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
 
+    strategy:
+      fail-fast: false
+      matrix:
+        dim: [2, 3]
+
     env:
       DISCHARGE_HOME: ${{github.workspace}}
       CHOMBO_HOME: ${{github.workspace}}/Submodules/Chombo-3.3/lib
@@ -75,7 +80,7 @@ jobs:
 
       - name: Build with Bear
         run: |
-          bear -- make -j2 DIM=2 discharge-lib
+          bear -- make -j2 DIM=${{ matrix.dim }} discharge-lib
 
       - name: Run clang-tidy
         run: |
