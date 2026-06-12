@@ -17,9 +17,10 @@
 - [x] **2-code** — Write `PhaseRealm` / `Realm` / `AmrMesh` changes (6 files; see §2 task list)
 - [x] **3+4-code** — Write `DataOps` signature + implementation changes (see §3+4 task list)
 - [x] **5-sites** — Update all call sites in Checkpoint 5 (all VoFIter-needing calls updated; MF variants and FaceIterator-based functions intentionally unchanged)
+- [ ] **7-face-iters** — Audit and pre-build remaining locally-constructed iterators in DataOps.cpp (see §7 below)
 - [ ] **6-cleanup** — Pre-merge cleanup (do last)
 
-**Resume here:** `6-cleanup` — pre-merge cleanup checklist.
+**Resume here:** `7-face-iters` — audit locally-constructed iterators (see §7 task list).
 
 ### Key design decisions (for future reference)
 
@@ -27,6 +28,53 @@
 - MF variants (`dotProduct(MFAMRCellData)`, `kappaScale(MFAMRCellData)`, `setValue(MFAMRCellData, function)`) are intentionally deferred — they require a phase-keyed iterator vector not yet available in this design.
 - `setInvalidValue` is kept local — the overlap box is computed dynamically at call time.
 - `filterSmooth` is kept local — uses a grown IVS that is stride-dependent and cannot be pre-built.
+
+---
+
+## Checkpoint 7 — Remaining locally-constructed iterators in DataOps.cpp
+
+20 total iterator constructions remain in DataOps.cpp across 16 overloads. Each entry lists the
+DataOps.cpp line, the function, iterator type, the IVS source, and the FaceStop/action.
+
+### FaceIterators (9 constructions)
+
+| Line | Function | IVS | FaceStop | Notes |
+|------|----------|-----|----------|-------|
+| 87  | `averageCellVelocityToFaceVelocity(LD<EBFluxFAB>)` | `getIrregIVS(cellBox)` | `SurroundingNoBoundary` | `cellBox` grown by `a_tanGhosts` — **intentionally grown** to fill ghost faces |
+| 137 | `averageCellVelocityToFaceVelocity(LD<EBFluxFAB>)` | `IntVectSet(insideBox)` | `AllBoundaryOnly` | domain-boundary fix-up; `insideBox` is a single-cell slice — **different face type** |
+| 250 | `averageCellToFace(LD<EBFluxFAB>)` | `getIrregIVS(cellBox)` | `SurroundingNoBoundary` | `cellBox` grown by `a_tanGhosts` in tangential directions — **intentionally grown** |
+| 349 | `averageCellToFace(LD<EBFluxFAB>)` | `IntVectSet(computeBox)` | `AllBoundaryOnly` | domain-boundary fix-up — **different face type** |
+| 1033 | `incr(LD<DomainFluxIFFAB>)` | `curLHS.getIVS()` | `SurroundingWithBoundary` | IVS intrinsic to `DomainFluxIFFAB`; always domain-boundary faces — **different face type** |
+| 1766 | `getMaxMin(LD<EBFluxFAB>)` | `getIrregIVS(cellBox)` | `SurroundingWithBoundary` | `cellBox = dbl[din]` — **valid box** ✓ |
+| 1980 | `invert(LD<EBFluxFAB>)` | `getIrregIVS(box)` | `SurroundingWithBoundary` | `box = dbl.get(din)` — **valid box** ✓ |
+| 2895 | `setValue(LD<EBFluxFAB>, function<Real>)` | `getIrregIVS(box)` | `SurroundingWithBoundary` | `box = lhs.getCellRegion()` — potentially **ghosted** (depends on allocation) |
+| 3305 | `squareRoot(LD<EBFluxFAB>)` | `getIrregIVS(box)` | `SurroundingWithBoundary` | `box = dbl.get(din)` — **valid box** ✓ |
+
+### VoFIterators (11 constructions)
+
+| Line | Function | IVS | Notes |
+|------|----------|-----|-------|
+| 721  | `filterSmooth(LD<EBCellFAB>)` | `getIrregIVS(cellBox)` grown by `a_stride` | **kept local** — stride-dependent grown IVS |
+| 983  | `incr(LD<EBCellFAB>, LD<BaseIVFAB<Real>>)` | `rhs.getIVS()` | IVS from IV data — intrinsic to data type |
+| 1079 | `incr(LD<EBCellFAB>, LD<BaseIVFAB<Real>>)` | `lhs.getIVS()` | IVS from IV data |
+| 1121 | `incr(LD<BaseIVFAB<Real>>, LD<EBCellFAB>)` | `lhs.getIVS()` | IVS from IV data |
+| 2127 | `kappaScale(LD<MFCellFAB>)` | `getIrregIVS(cellBox)` | **MF variant** — deferred |
+| 2235 | `multiply(LD<BaseIVFAB<Real>>)` | `lhs.getIVS()` | IVS from IV data |
+| 2313 | `multiplyScalar(LD<BaseIVFAB<Real>>)` | `lhs.getIVS()` | IVS from IV data |
+| 2534 | `scale(LD<BaseIVFAB<Real>>)` | `lhs.getIVS()` | IVS from IV data |
+| 2696 | `setInvalidValue(EBAMRCellData)` | `IntVectSet(overlapBox)` | overlap box computed at call time — **kept local** |
+| 2768 | `setValue(LD<MFCellFAB>, function<Real>)` | `getIrregIVS(box)` | **MF variant** — deferred |
+| 3371 | `squareRoot(LD<MFCellFAB>)` | `getMultiCells(box)` | **MF variant**, uses multi-cells not all irregular — deferred |
+
+### 7-face-iters task list
+
+- [ ] Decide: can `getMaxMin(LD<EBFluxFAB>)`, `invert(LD<EBFluxFAB>)`, `squareRoot(LD<EBFluxFAB>)` share a pre-built face iterator type?
+- [ ] Audit `setValue(LD<EBFluxFAB>, function)` ghost issue: `box = lhs.getCellRegion()` may include ghosts; determine if this is intentional or a bug.
+- [ ] `averageCellToFace` / `averageCellVelocityToFaceVelocity`: grown-box iterators are intentional; document and close.
+- [ ] Domain-boundary FaceIterators (lines 137, 349, 1033): entirely different face type; document and close.
+- [ ] `filterSmooth`, `setInvalidValue`: already documented as kept local; close.
+- [ ] MF variants (lines 2127, 2768, 3371): already documented as deferred; close.
+- [ ] `BaseIVFAB` VoFIterators (lines 983, 1079, 1121, 2235, 2313, 2534): IVS is intrinsic to the IV data; cannot pre-build externally; close.
 
 > **Keep this current.** When finishing a session, update "Resume here" and the last-updated
 > date so the next session (on any machine) can orient instantly.
