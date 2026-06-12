@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_EBLeastSquaresMultigridInterpolator.cpp
   @brief  Implementation of CD_EBLeastSquaresMultigridInterpolator.H
   @author Robert Marskar
@@ -299,7 +300,7 @@ EBLeastSquaresMultigridInterpolator::coarseFineInterpH(EBCellFAB&       a_phi,
         if (!ghostBox.isEmpty()) {
           BaseFab<Real>& phiReg = a_phi.getSingleValuedFAB();
 
-          // C++ kernel for homogeneous interpolation along a line, assumning that coarse-grid
+          // C++ kernel for homogeneous interpolation along a line, assuming that coarse-grid
           // data is zero.
           auto interpHomo = [&](const IntVect& iv) -> void {
             phiReg(iv, ivar) = c1 * phiReg(iv - shift, ivar) + c2 * phiReg(iv - 2 * shift, ivar);
@@ -466,7 +467,6 @@ EBLeastSquaresMultigridInterpolator::defineStencilsEBCF() noexcept
   const EBISLayout& ebislCoar = m_eblgCoFi.getEBISL();
 
   const int nboxFine = ditFine.size();
-  const int nboxCoar = ditCoar.size();
 
   CH_START(t1);
   m_fineStencils.define(dblFine);
@@ -644,7 +644,7 @@ EBLeastSquaresMultigridInterpolator::getStencil(VoFStencil&            a_stencil
   VofUtils::includeCells(fineVofs, a_validFineCells);
   VofUtils::includeCells(coarVofs, a_validCoarCells);
 
-  const int numEquations = coarVofs.size() + fineVofs.size();
+  const int numEquations = static_cast<int>(coarVofs.size() + fineVofs.size());
   const int numUnknowns  = LeastSquares::getTaylorExpansionSize(a_order);
   CH_STOP(t1);
 
@@ -695,8 +695,8 @@ EBLeastSquaresMultigridInterpolator::getStencil(VoFStencil&            a_stencil
     std::sort(fineVofsTrimmedSize.begin(), fineVofsTrimmedSize.end(), comparatorFine);
     std::sort(coarVofsTrimmedSize.begin(), coarVofsTrimmedSize.end(), comparatorCoar);
 
-    const int curFineSize = fineVofsTrimmedSize.size();
-    const int curCoarSize = coarVofsTrimmedSize.size();
+    const int curFineSize = static_cast<int>(fineVofsTrimmedSize.size());
+    const int curCoarSize = static_cast<int>(coarVofsTrimmedSize.size());
 
     fineVofsTrimmedSize.resize(std::min(2 * numUnknowns, curFineSize));
     coarVofsTrimmedSize.resize(std::min(2 * numUnknowns, curCoarSize));
@@ -822,18 +822,15 @@ EBLeastSquaresMultigridInterpolator::regularCoarseFineInterp(LevelData<EBCellFAB
   const Real L1 = (xi - x0) * (xi - x2) / ((x1 - x0) * (x1 - x2));
   const Real L2 = (xi - x0) * (xi - x1) / ((x2 - x0) * (x2 - x1));
 
-  const DisjointBoxLayout& dblFine    = m_eblgFine.getDBL();
-  const ProblemDomain&     domainCoar = m_eblgCoFi.getDomain();
-  const DataIterator&      ditFine    = dblFine.dataIterator();
-  const int                nboxFine   = ditFine.size();
+  const DisjointBoxLayout& dblFine  = m_eblgFine.getDBL();
+  const DataIterator&      ditFine  = dblFine.dataIterator();
+  const int                nboxFine = ditFine.size();
 
   // We are interpolating the first layer of ghost cells to O(h^3). To do this, we must first do an interpolation on the
   // coarse grid, and then cubic interpolation on the fine grid.
 #pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nboxFine; mybox++) {
     const DataIndex& din = ditFine[mybox];
-
-    const Box fineBox = dblFine[din];
 
     FArrayBox&       finePhi = a_finePhi[din].getFArrayBox();
     const FArrayBox& coarPhi = a_coarPhi[din].getFArrayBox();

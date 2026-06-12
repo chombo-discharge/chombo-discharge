@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_RadiativeTransferStepperImplem.H
   @brief  Implementation of CD_RadiativeTransferStepper.H
   @author Robert Marskar
@@ -207,7 +208,7 @@ template <typename T>
 void
 RadiativeTransferStepper<T>::writePlotData(LevelData<EBCellFAB>& a_output,
                                            int&                  a_icomp,
-                                           const std::string     a_outputRealm,
+                                           const std::string&    a_outputRealm,
                                            const int             a_level) const
 {
   CH_TIME("RadiativeTransferStepper::writePlotData");

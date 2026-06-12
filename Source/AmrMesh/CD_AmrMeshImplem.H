@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_AmrMeshImplem.H
   @brief  Implementation of CD_AmrMesh.H
   @author Robert Marskar
 */
 
-#ifndef CD_AmrMeshImplem_H
-#define CD_AmrMeshImplem_H
+#ifndef CD_AMRMESHIMPLEM_H
+#define CD_AMRMESHIMPLEM_H
 
 // Our includes
 #include <CD_AmrMesh.H>
@@ -234,7 +235,7 @@ AmrMesh::alias(Vector<T*>& a_alias, const EBAMRData<S>& a_data) const
 
 template <typename T>
 void
-AmrMesh::allocate(Vector<RefCountedPtr<ParticleData<T>>>& a_particles, const std::string a_realm) const
+AmrMesh::allocate(Vector<RefCountedPtr<ParticleData<T>>>& a_particles, const std::string& a_realm) const
 {
   CH_TIME("AmrMesh::allocate(Vector<RefCountedPtr<ParticleData<T> > >, string)");
   if (m_verbosity > 5) {
@@ -268,7 +269,7 @@ AmrMesh::allocate(Vector<RefCountedPtr<ParticleData<T>>>& a_particles, const std
 
 template <typename T>
 void
-AmrMesh::allocate(ParticleContainer<T>& a_container, const std::string a_realm) const
+AmrMesh::allocate(ParticleContainer<T>& a_container, const std::string& a_realm) const
 {
   CH_TIME("AmrMesh::allocate(ParticleContainer<T>, int, string)");
   if (m_verbosity > 5) {
@@ -331,7 +332,7 @@ AmrMesh::allocatePointer(Vector<RefCountedPtr<T>>& a_data, const int a_finestLev
 
 template <typename T>
 void
-AmrMesh::allocatePointer(EBAMRData<T>& a_data, const std::string a_realm) const
+AmrMesh::allocatePointer(EBAMRData<T>& a_data, const std::string& a_realm) const
 {
   CH_TIME("AmrMesh::allocatePointer(EBAMRData<T>, std::string)");
   if (m_verbosity > 5) {
@@ -345,7 +346,7 @@ AmrMesh::allocatePointer(EBAMRData<T>& a_data, const std::string a_realm) const
 
 template <typename T>
 void
-AmrMesh::allocatePointer(EBAMRData<T>& a_data, const std::string a_realm, const int a_finestLevel) const
+AmrMesh::allocatePointer(EBAMRData<T>& a_data, const std::string& a_realm, const int a_finestLevel) const
 {
   CH_TIME("AmrMesh::allocatePointer(EBAMRData<T>, std::string, int)");
   if (m_verbosity > 5) {
@@ -569,7 +570,7 @@ AmrMesh::removeCoveredParticlesDiscrete(ParticleContainer<P>&     a_particles,
 
             bool insideAtLeastOneVoF = false;
 
-            // For each VoF, compute the projection of the particle position onth the EB face. Beacuse the EB normal points outwards, we have a positive
+            // For each VoF, compute the projection of the particle position onth the EB face. Because the EB normal points outwards, we have a positive
             // value if the particle lies in the valid region.
             const std::vector<VolIndex> vofs = ebisBox.getVoFs(iv).stdVector();
             for (const auto& vof : vofs) {
@@ -796,7 +797,7 @@ AmrMesh::transferCoveredParticlesDiscrete(ParticleContainer<P>&     a_particlesF
 
             bool insideAtLeastOneVoF = false;
 
-            // For each VoF, compute the projection of the particle position onth the EB face. Beacuse the EB normal points outwards, we have a positive
+            // For each VoF, compute the projection of the particle position onth the EB face. Because the EB normal points outwards, we have a positive
             // value if the particle lies in the valid region.
             const std::vector<VolIndex> vofs = ebisBox.getVoFs(iv).stdVector();
             for (const auto& vof : vofs) {
@@ -894,10 +895,10 @@ AmrMesh::transferCoveredParticlesVoxels(ParticleContainer<P>&     a_particlesFro
 
 template <class P>
 void
-AmrMesh::transferIrregularParticles(ParticleContainer<P>&         a_dstParticles,
-                                    ParticleContainer<P>&         a_srcParticles,
-                                    const phase::which_phase      a_phase,
-                                    const std::function<void(P&)> a_transferModifier) const noexcept
+AmrMesh::transferIrregularParticles(ParticleContainer<P>&          a_dstParticles,
+                                    ParticleContainer<P>&          a_srcParticles,
+                                    const phase::which_phase       a_phase,
+                                    const std::function<void(P&)>& a_transferModifier) const noexcept
 {
   CH_TIME("AmrMesh::transferIrregularParticles");
   if (m_verbosity > 5) {
@@ -978,13 +979,13 @@ AmrMesh::transferIrregularParticles(ParticleContainer<P>&         a_dstParticles
 
 template <class P>
 void
-AmrMesh::intersectParticlesRaycastIF(ParticleContainer<P>&         a_activeParticles,
-                                     ParticleContainer<P>&         a_ebParticles,
-                                     ParticleContainer<P>&         a_domainParticles,
-                                     const phase::which_phase      a_phase,
-                                     const Real                    a_tolerance,
-                                     const bool                    a_deleteParticles,
-                                     const std::function<void(P&)> a_nonDeletionModifier) const noexcept
+AmrMesh::intersectParticlesRaycastIF(ParticleContainer<P>&          a_activeParticles,
+                                     ParticleContainer<P>&          a_ebParticles,
+                                     ParticleContainer<P>&          a_domainParticles,
+                                     const phase::which_phase       a_phase,
+                                     const Real                     a_tolerance,
+                                     const bool                     a_deleteParticles,
+                                     const std::function<void(P&)>& a_nonDeletionModifier) const noexcept
 {
   CH_TIME("AmrMesh::intersectParticlesRaycastIF");
   if (m_verbosity > 5) {
@@ -1150,13 +1151,13 @@ AmrMesh::intersectParticlesRaycastIF(ParticleContainer<P>&         a_activeParti
 
 template <class P>
 void
-AmrMesh::intersectParticlesBisectIF(ParticleContainer<P>&         a_activeParticles,
-                                    ParticleContainer<P>&         a_ebParticles,
-                                    ParticleContainer<P>&         a_domainParticles,
-                                    const phase::which_phase      a_phase,
-                                    const Real                    a_bisectionStep,
-                                    const bool                    a_deleteParticles,
-                                    const std::function<void(P&)> a_nonDeletionModifier) const noexcept
+AmrMesh::intersectParticlesBisectIF(ParticleContainer<P>&          a_activeParticles,
+                                    ParticleContainer<P>&          a_ebParticles,
+                                    ParticleContainer<P>&          a_domainParticles,
+                                    const phase::which_phase       a_phase,
+                                    const Real                     a_bisectionStep,
+                                    const bool                     a_deleteParticles,
+                                    const std::function<void(P&)>& a_nonDeletionModifier) const noexcept
 {
   CH_TIME("AmrMesh::intersectParticlesBisectIF");
   if (m_verbosity > 5) {

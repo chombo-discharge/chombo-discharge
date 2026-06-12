@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_RtSpecies.cpp
   @brief  Implementation of CD_RtSpecies.H
   @author Robert Marskar
@@ -13,14 +14,12 @@
 #include <CD_RtSpecies.H>
 #include <CD_NamespaceHeader.H>
 
-RtSpecies::RtSpecies()
+RtSpecies::RtSpecies() : m_name("DefaultRtSpecies")
 {
   // Default settings
-  m_name = "DefaultRtSpecies";
 }
 
-RtSpecies::~RtSpecies()
-{}
+RtSpecies::~RtSpecies() = default;
 
 std::string
 RtSpecies::getName() const
@@ -29,7 +28,7 @@ RtSpecies::getName() const
 }
 
 Real
-RtSpecies::getScatteringCoefficient(const RealVect a_pos) const
+RtSpecies::getScatteringCoefficient(const RealVect& /*a_pos*/) const
 {
   return 0.0;
 }

@@ -1,20 +1,23 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_RandomImplem.H
   @brief  Implementation of CD_Random.H
   @author Robert Marskar
 */
 
-#ifndef CD_RandomImplem_H
-#define CD_RandomImplem_H
+#ifndef CD_RANDOMIMPLEM_H
+#define CD_RANDOMIMPLEM_H
 
 // Std includes
 #include <chrono>
+#ifdef _OPENMP
 #include <omp.h>
+#endif
 
 // Chombo includes
 #include <SPMD.H>
@@ -86,7 +89,7 @@ Random::setSeed(const int a_seed)
 inline void
 Random::setRandomSeed()
 {
-  int seed = std::chrono::system_clock::now().time_since_epoch().count();
+  auto seed = static_cast<int>(std::chrono::system_clock::now().time_since_epoch().count());
 
   // Special hook for MPI -- master rank broadcasts the seed and everyone increments by their processor ID.
 #ifdef CH_MPI
@@ -228,13 +231,13 @@ Random::getDiscrete(T& a_distribution)
 }
 
 inline RealVect
-Random::randomPosition(const RealVect a_cellPos,
-                       const RealVect a_lo,
-                       const RealVect a_hi,
-                       const RealVect a_bndryCentroid,
-                       const RealVect a_bndryNormal,
-                       const Real     a_dx,
-                       const Real     a_kappa) noexcept
+Random::randomPosition(const RealVect& a_cellPos,
+                       const RealVect& a_lo,
+                       const RealVect& a_hi,
+                       const RealVect& a_bndryCentroid,
+                       const RealVect& a_bndryNormal,
+                       const Real      a_dx,
+                       const Real      a_kappa) noexcept
 {
 
   RealVect pos;
@@ -253,10 +256,10 @@ Random::randomPosition(const RealVect a_cellPos,
 }
 
 inline RealVect
-Random::randomPosition(const RealVect a_lo,
-                       const RealVect a_hi,
-                       const RealVect a_bndryCentroid,
-                       const RealVect a_bndryNormal) noexcept
+Random::randomPosition(const RealVect& a_lo,
+                       const RealVect& a_hi,
+                       const RealVect& a_bndryCentroid,
+                       const RealVect& a_bndryNormal) noexcept
 {
   constexpr int maxIter = 100;
 
@@ -278,7 +281,7 @@ Random::randomPosition(const RealVect a_lo,
 }
 
 inline RealVect
-Random::randomPosition(const RealVect a_lo, const RealVect a_hi) noexcept
+Random::randomPosition(const RealVect& a_lo, const RealVect& a_hi) noexcept
 {
 
   RealVect pos = RealVect::Zero;

@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_DischargeIO.cpp
   @brief  Implementation of DischargeIO.H
   @author Robert Marskar
@@ -31,15 +32,17 @@ DischargeIO::numberFmt(const long long n, char sep) noexcept
   string s = fmt.str();
   s.reserve(s.length() + s.length() / 3);
 
-  for (int i = 0, j = 3 - s.length() % 3; i < s.length(); ++i, ++j)
-    if (i != 0 && j % 3 == 0)
+  for (int i = 0, j = 3 - static_cast<int>(s.length() % 3); i < s.length(); ++i, ++j) {
+    if (i != 0 && j % 3 == 0) {
       s.insert(i++, 1, sep);
+    }
+  }
 
   return s;
 }
 
 Vector<std::string>
-DischargeIO::numberFmt(const Vector<long long> a_numbers, char a_sep) noexcept
+DischargeIO::numberFmt(const Vector<long long>& a_numbers, char a_sep) noexcept
 {
   CH_TIME("DischargeIO::numberFmt(Vector<long long>, char)");
 
@@ -64,7 +67,7 @@ DischargeIO::writeEBHDF5Header(HDF5Handle&                a_handleH5,
   CH_assert(a_handleH5.isOpen());
   CH_assert(a_numLevels >= 0);
 
-  const int numInputVars      = a_variableNames.size();
+  const int numInputVars      = static_cast<int>(a_variableNames.size());
   const int indexVolFrac      = numInputVars;
   const int indexBoundaryArea = indexVolFrac + 1;
   const int indexAreaFrac     = indexBoundaryArea + 1;
@@ -143,7 +146,7 @@ DischargeIO::writeEBHDF5Header(HDF5Handle&                a_handleH5,
 void
 DischargeIO::writeEBHDF5Level(HDF5Handle&                 a_handleH5,
                               const LevelData<EBCellFAB>& a_outputData,
-                              const ProblemDomain         a_domain,
+                              const ProblemDomain&        a_domain,
                               const Real                  a_dx,
                               const Real                  a_dt,
                               const Real                  a_time,
@@ -362,11 +365,11 @@ DischargeIO::writeEBHDF5(const std::string&                   a_filename,
                          const Vector<DisjointBoxLayout>&     a_grids,
                          const Vector<LevelData<EBCellFAB>*>& a_data,
                          const Vector<ProblemDomain>&         a_domains,
-                         const Vector<Real>                   a_dx,
-                         const Vector<int>                    a_refinementRatios,
+                         const Vector<Real>&                  a_dx,
+                         const Vector<int>&                   a_refinementRatios,
                          const Real                           a_dt,
                          const Real                           a_time,
-                         const RealVect                       a_probLo,
+                         const RealVect&                      a_probLo,
                          const int                            a_numLevels,
                          const int                            a_numGhost) noexcept
 {
@@ -379,21 +382,11 @@ DischargeIO::writeEBHDF5(const std::string&                   a_filename,
   CH_assert(a_data.size() >= a_numLevels);
   CH_assert(a_refinementRatios.size() >= a_numLevels - 1);
 
-  // Indices for where we store the Chombo stuff. This is for storing the volume fraction, EB boundary area,
-  // face area fractions etc. These things are written AFTER the user input variables.
-  const int numInputVars      = a_data[0]->nComp();
-  const int indexVolFrac      = numInputVars;
-  const int indexBoundaryArea = indexVolFrac + 1;
-  const int indexAreaFrac     = indexBoundaryArea + 1;
-  const int indexNormal       = indexAreaFrac + 2 * SpaceDim;
-  const int indexDist         = indexNormal + SpaceDim;
-  const int numCompTotal      = indexDist + 1;
-
   // Write header.
 #ifdef CH_MPI
   MPI_Barrier(Chombo_MPI::comm);
 #endif
-  HDF5Handle handle(a_filename.c_str(), HDF5Handle::CREATE);
+  HDF5Handle handle(a_filename, HDF5Handle::CREATE);
 
   // write header data
   DischargeIO::writeEBHDF5Header(handle, a_numLevels, a_probLo, a_variableNames);

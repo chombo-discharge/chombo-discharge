@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2022 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_ParticleManagementImplem.H
   @brief  Implementation of CD_ParticleManagement.H
   @author Robert Marskar
 */
 
-#ifndef CD_ParticleManagementImplem_H
-#define CD_ParticleManagementImplem_H
+#ifndef CD_PARTICLEMANAGEMENTIMPLEM_H
+#define CD_PARTICLEMANAGEMENTIMPLEM_H
 
 // Std includes
 #include <utility>
@@ -433,10 +434,10 @@ namespace ParticleManagement {
 
   template <typename P, typename T, typename>
   inline void
-  drawSphereParticles(List<P>&       a_particles,
-                      const T        a_numParticles,
-                      const RealVect a_center,
-                      const Real     a_radius) noexcept
+  drawSphereParticles(List<P>&        a_particles,
+                      const T         a_numParticles,
+                      const RealVect& a_center,
+                      const Real      a_radius) noexcept
   {
     CH_TIME("ParticleManagement::drawSphereParticles");
 
@@ -465,10 +466,10 @@ namespace ParticleManagement {
 
   template <typename P, typename T, typename>
   inline void
-  drawBoxParticles(List<P>&       a_particles,
-                   const T        a_numParticles,
-                   const RealVect a_loCorner,
-                   const RealVect a_hiCorner) noexcept
+  drawBoxParticles(List<P>&        a_particles,
+                   const T         a_numParticles,
+                   const RealVect& a_loCorner,
+                   const RealVect& a_hiCorner) noexcept
   {
     CH_TIME("ParticleManagement::drawBoxParticles");
 
@@ -485,10 +486,10 @@ namespace ParticleManagement {
 
   template <typename P, typename T, typename>
   inline void
-  drawGaussianParticles(List<P>&       a_particles,
-                        const T        a_numParticles,
-                        const RealVect a_center,
-                        const Real     a_radius) noexcept
+  drawGaussianParticles(List<P>&        a_particles,
+                        const T         a_numParticles,
+                        const RealVect& a_center,
+                        const Real      a_radius) noexcept
   {
     CH_TIME("ParticleManagement::drawGaussianParticles");
 

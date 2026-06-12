@@ -1,12 +1,13 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_CdrPlasmaGodunovStepper.cpp
-  @brief  Implementation of CD_CdrPlasmaGodunovStepper.H
-  @author Robert Marskar
+/**
+   @file   CD_CdrPlasmaGodunovStepper.cpp
+   @brief  Implementation of CD_CdrPlasmaGodunovStepper.H
+   @author Robert Marskar
 */
 
 // Std includes
@@ -25,20 +26,21 @@
 
 using namespace Physics::CdrPlasma;
 
+/// @cond DOXYGEN_SKIP
 typedef CdrPlasmaGodunovStepper::CdrStorage   CdrStorage;
 typedef CdrPlasmaGodunovStepper::FieldStorage FieldStorage;
 typedef CdrPlasmaGodunovStepper::RtStorage    RtStorage;
 typedef CdrPlasmaGodunovStepper::SigmaStorage SigmaStorage;
+/// @endcond
 
 CdrPlasmaGodunovStepper::CdrPlasmaGodunovStepper(RefCountedPtr<CdrPlasmaPhysics>& a_physics)
+  : m_extrapAdvect(true), m_regridSlopes(true)
 {
   CH_TIME("CdrPlasmaGodunovStepper::CdrPlasmaGodunovStepper()");
 
   // Default settings
-  m_className    = "CdrPlasmaGodunovStepper";
-  m_physics      = a_physics;
-  m_extrapAdvect = true;
-  m_regridSlopes = true;
+  m_className = "CdrPlasmaGodunovStepper";
+  m_physics   = a_physics;
 }
 
 CdrPlasmaGodunovStepper::~CdrPlasmaGodunovStepper()
@@ -220,7 +222,6 @@ CdrPlasmaGodunovStepper::parseFloor()
 
   ParmParse pp(m_className.c_str());
 
-  std::string str;
   pp.get("floor_cdr", m_floor);
 }
 
@@ -572,7 +573,9 @@ CdrPlasmaGodunovStepper::postCheckpointSetup()
 }
 
 void
-CdrPlasmaGodunovStepper::regridInternals(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel)
+CdrPlasmaGodunovStepper::regridInternals(const int /*a_lmin*/,
+                                         const int /*a_oldFinestLevel*/,
+                                         const int /*a_newFinestLevel*/)
 {
   CH_TIME("CdrPlasmaGodunovStepper::regridInternals(int, int, int)");
   if (m_verbosity > 5) {
@@ -701,30 +704,30 @@ CdrPlasmaGodunovStepper::deallocateInternals()
 
   // TLDR: This routine simply deallocates the transient memory used by CdrPlasmaGodunovStepper.
 
-  // Run through CDR solvers and deallocate the transient memory assocaited with them.
+  // Run through CDR solvers and deallocate the transient memory associated with them.
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
     const int idx = solverIt.index();
 
     m_cdrScratch[idx]->deallocateStorage();
-    m_cdrScratch[idx] = RefCountedPtr<CdrStorage>(0);
+    m_cdrScratch[idx] = RefCountedPtr<CdrStorage>(nullptr);
   }
 
-  // Run through RTE solvers and deallocate the transient memory assocaited with them.
+  // Run through RTE solvers and deallocate the transient memory associated with them.
   for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
     const int idx = solverIt.index();
 
     m_rteScratch[idx]->deallocateStorage();
-    m_rteScratch[idx] = RefCountedPtr<RtStorage>(0);
+    m_rteScratch[idx] = RefCountedPtr<RtStorage>(nullptr);
   }
 
   m_cdrScratch.resize(0);
   m_rteScratch.resize(0);
 
   m_fieldScratch->deallocateStorage();
-  m_fieldScratch = RefCountedPtr<FieldStorage>(0);
+  m_fieldScratch = RefCountedPtr<FieldStorage>(nullptr);
 
   m_sigmaScratch->deallocateStorage();
-  m_sigmaScratch = RefCountedPtr<SigmaStorage>(0);
+  m_sigmaScratch = RefCountedPtr<SigmaStorage>(nullptr);
 
   // Deallocate storage for the semi-implicit solve.
   m_amr->deallocate(m_semiImplicitRho);
@@ -743,30 +746,30 @@ CdrPlasmaGodunovStepper::deallocateScratch()
 
   // TLDR: This routine simply deallocates the transient memory used by CdrPlasmaGodunovStepper.
 
-  // Run through CDR solvers and deallocate the transient memory assocaited with them.
+  // Run through CDR solvers and deallocate the transient memory associated with them.
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
     const int idx = solverIt.index();
 
     m_cdrScratch[idx]->deallocateStorage();
-    m_cdrScratch[idx] = RefCountedPtr<CdrStorage>(0);
+    m_cdrScratch[idx] = RefCountedPtr<CdrStorage>(nullptr);
   }
 
-  // Run through RTE solvers and deallocate the transient memory assocaited with them.
+  // Run through RTE solvers and deallocate the transient memory associated with them.
   for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
     const int idx = solverIt.index();
 
     m_rteScratch[idx]->deallocateStorage();
-    m_rteScratch[idx] = RefCountedPtr<RtStorage>(0);
+    m_rteScratch[idx] = RefCountedPtr<RtStorage>(nullptr);
   }
 
   m_cdrScratch.resize(0);
   m_rteScratch.resize(0);
 
   m_fieldScratch->deallocateStorage();
-  m_fieldScratch = RefCountedPtr<FieldStorage>(0);
+  m_fieldScratch = RefCountedPtr<FieldStorage>(nullptr);
 
   m_sigmaScratch->deallocateStorage();
-  m_sigmaScratch = RefCountedPtr<SigmaStorage>(0);
+  m_sigmaScratch = RefCountedPtr<SigmaStorage>(nullptr);
 }
 
 void
@@ -823,7 +826,7 @@ CdrPlasmaGodunovStepper::computeCdrGradients()
 }
 
 void
-CdrPlasmaGodunovStepper::extrapolateWithSourceTerm(const Real a_dt)
+CdrPlasmaGodunovStepper::extrapolateWithSourceTerm(const Real /*a_dt*/)
 {
   CH_TIME("CdrPlasmaGodunovStepper::extrapolateWithSourceTerm(Real)");
   if (m_verbosity > 5) {
@@ -859,7 +862,7 @@ CdrPlasmaGodunovStepper::extrapolateCdrToEB()
     pout() << "CdrPlasmaGodunovStepper::extrapolateCdrToEB()" << endl;
   }
 
-  // TLDR: This routine is reponsible for computing the cell-centered states and gradients at the EB. This is necessary because
+  // TLDR: This routine is responsible for computing the cell-centered states and gradients at the EB. This is necessary because
   //       the boundary condition routines require these things to be known at the EB. This is the routine that computes them. We
   //       will later fetch these quantities and pass them into our boundary condition routines.
 
@@ -993,7 +996,7 @@ CdrPlasmaGodunovStepper::extrapolateCdrToDomain()
     pout() << "CdrPlasmaGodunovStepper::extrapolateCdrToDomain()" << endl;
   }
 
-  // TLDR: This routine is reponsible for computing the cell-centered states and gradients at domainfaces. This is necessary because
+  // TLDR: This routine is responsible for computing the cell-centered states and gradients at domainfaces. This is necessary because
   //       the boundary condition routines require these things to be known. This is the routine that computes them. We
   //       will later fetch these quantities and pass them into our boundary condition routines.
 
@@ -1176,7 +1179,7 @@ CdrPlasmaGodunovStepper::advanceTransportExplicitField(const Real a_dt)
     pout() << "CdrPlasmaGodunovStepper::advanceTransportExplicitField(Real)" << endl;
   }
 
-  // TLDR: This advances the CDR equations using an Euler rule. The right-hand side of the CDR equations can be explictly discretized, or
+  // TLDR: This advances the CDR equations using an Euler rule. The right-hand side of the CDR equations can be explicitly discretized, or
   //       with implicit diffusion. If we use implicit diffusion we first advance the advective problem to the end state and use that as
   //       an initial condition in the diffusion equation.
 
@@ -1460,7 +1463,7 @@ CdrPlasmaGodunovStepper::computeCdrDriftVelocities(const Real a_time)
 }
 
 void
-CdrPlasmaGodunovStepper::computeCdrDiffusionCoefficients(const Real a_time)
+CdrPlasmaGodunovStepper::computeCdrDiffusionCoefficients(const Real /*a_time*/)
 {
   CH_TIME("CdrPlasmaGodunovStepper::computeCdrDiffusionCoefficients(Real)");
   if (m_verbosity > 5) {
@@ -1545,8 +1548,8 @@ CdrPlasmaGodunovStepper::computeDt()
     }
 
     // Turn off implicit diffusion for all species.
-    for (int i = 0; i < m_useImplicitDiffusion.size(); i++) {
-      m_useImplicitDiffusion[i] = false;
+    for (auto&& i : m_useImplicitDiffusion) {
+      i = false;
     }
   }
   else if (m_diffusionAlgorithm == DiffusionAlgorithm::Implicit) {
@@ -1556,8 +1559,8 @@ CdrPlasmaGodunovStepper::computeDt()
     dt = m_cfl * m_dtCFL;
 
     // Turn on implicit diffusion for all species.
-    for (int i = 0; i < m_useImplicitDiffusion.size(); i++) {
-      m_useImplicitDiffusion[i] = true;
+    for (auto&& i : m_useImplicitDiffusion) {
+      i = true;
     }
   }
   else if (m_diffusionAlgorithm == DiffusionAlgorithm::Automatic) {
@@ -1656,7 +1659,7 @@ CdrPlasmaGodunovStepper::computeDt()
 
 void
 CdrPlasmaGodunovStepper::floorMass(EBAMRCellData&                  a_data,
-                                   const std::string               a_message,
+                                   const std::string&              a_message,
                                    const RefCountedPtr<CdrSolver>& a_solver) const
 {
   CH_TIME("CdrPlasmaGodunovStepper::floorMass(EBAMRCellData, std::string, RefCountedPtr<CdrSolver>)");

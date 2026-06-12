@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2023 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_EBAMRSurfaceDeposition.cpp
   @brief  Implementation of CD_EBAMRSurfaceDeposition.H
   @author Robert Marskar
@@ -20,12 +21,9 @@
 #include <CD_EBAMRSurfaceDeposition.H>
 #include <CD_NamespaceHeader.H>
 
-EBAMRSurfaceDeposition::EBAMRSurfaceDeposition() noexcept
+EBAMRSurfaceDeposition::EBAMRSurfaceDeposition() noexcept : m_debug(false), m_verbose(false)
 {
   CH_TIME("EBAMRSurfaceDeposition::EBAMRSurfaceDeposition(weak)");
-
-  m_debug   = false;
-  m_verbose = false;
 }
 
 EBAMRSurfaceDeposition::EBAMRSurfaceDeposition(const Vector<RefCountedPtr<EBLevelGrid>>& a_ebGrids,
@@ -281,8 +279,6 @@ EBAMRSurfaceDeposition::defineDepositionStencils() noexcept
     pout() << "EBAMRSurfaceDeposition::defineDepositionStencils" << endl;
   }
 
-  constexpr int nComp = 1;
-
   CH_START(t1);
   m_depositionStencils.resize(1 + m_finestLevel);
 
@@ -324,9 +320,7 @@ EBAMRSurfaceDeposition::defineDepositionStencils() noexcept
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      const Box      box     = dbl[din];
       const EBISBox& ebisBox = ebisl[din];
-      const EBGraph& ebGraph = ebisBox.getEBGraph();
 
       BaseIVFAB<VoFStencil>& stencils = (*m_depositionStencils[lvl])[din];
 
@@ -335,8 +329,8 @@ EBAMRSurfaceDeposition::defineDepositionStencils() noexcept
       const EBGraph&    ebgraph = stencils.getEBGraph();
 
       for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit) {
-        const VolIndex curVoF = vofit();
-        const IntVect  curIV  = curVoF.gridIndex();
+        const VolIndex& curVoF = vofit();
+        const IntVect   curIV  = curVoF.gridIndex();
 
         VoFStencil& stencil = stencils(curVoF, 0);
         stencil.clear();

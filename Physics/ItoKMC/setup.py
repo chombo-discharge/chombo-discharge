@@ -36,7 +36,7 @@ else:
 
     app_main.write_template(args)    # Write main file
     app_options.write_template(args) # Write options file
-    app_inc.copy_dependencies(args)  # Copy depencies
+    app_inc.copy_dependencies(args)  # Copy dependencies
 
     # # Copy the makefile
     os.system('cp ./python/GNUmakefile ' + args.base_dir + "/" + args.app_name + "/GNUmakefile")        

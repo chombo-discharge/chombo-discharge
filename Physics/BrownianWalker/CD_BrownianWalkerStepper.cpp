@@ -1,12 +1,13 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_BrownianWalkerStepper.cpp
-  @brief  Implementation of CD_BrownianWalkerStepper.H
-  @author Robert Marskar
+/**
+   @file   CD_BrownianWalkerStepper.cpp
+   @brief  Implementation of CD_BrownianWalkerStepper.H
+   @author Robert Marskar
 */
 
 // Chombo includes
@@ -23,13 +24,11 @@
 
 using namespace Physics::BrownianWalker;
 
-BrownianWalkerStepper::BrownianWalkerStepper()
+BrownianWalkerStepper::BrownianWalkerStepper() : m_phase(phase::gas)
 {
   CH_TIME("BrownianWalkerStepper::BrownianWalkerStepper");
 
   ParmParse pp("BrownianWalker");
-
-  m_phase = phase::gas;
 
   std::string str;
   pp.get("realm", m_realm);
@@ -161,7 +160,7 @@ BrownianWalkerStepper::setVelocity()
   EBAMRCellData& vel = m_solver->getVelocityFunction();
 
   // Nifty lambda describing the advective field
-  auto veloFunc = [omega = this->m_omega](const RealVect pos) -> RealVect {
+  auto veloFunc = [omega = this->m_omega](const RealVect& pos) -> RealVect {
     const Real r     = pos.vectorLength();
     const Real theta = atan2(pos[1], pos[0]);
 
@@ -179,7 +178,7 @@ BrownianWalkerStepper::setVelocity()
 }
 
 bool
-BrownianWalkerStepper::loadBalanceThisRealm(const std::string a_realm) const
+BrownianWalkerStepper::loadBalanceThisRealm(const std::string& a_realm) const
 {
   CH_TIME("BrownianWalkerStepper::loadBalanceThisRealm");
   if (m_verbosity > 5) {
@@ -192,7 +191,7 @@ BrownianWalkerStepper::loadBalanceThisRealm(const std::string a_realm) const
 void
 BrownianWalkerStepper::loadBalanceBoxes(Vector<Vector<int>>&             a_procs,
                                         Vector<Vector<Box>>&             a_boxes,
-                                        const std::string                a_realm,
+                                        const std::string&               a_realm,
                                         const Vector<DisjointBoxLayout>& a_grids,
                                         const int                        a_lmin,
                                         const int                        a_finestLevel)
@@ -299,7 +298,7 @@ BrownianWalkerStepper::getPlotVariableNames() const
 void
 BrownianWalkerStepper::writePlotData(LevelData<EBCellFAB>& a_output,
                                      int&                  a_icomp,
-                                     const std::string     a_outputRealm,
+                                     const std::string&    a_outputRealm,
                                      const int             a_level) const
 {
   CH_TIME("BrownianWalkerStepper::writePlotData");
@@ -581,7 +580,7 @@ BrownianWalkerStepper::makeSuperParticles()
 void
 BrownianWalkerStepper::loadBalanceBoxesMesh(Vector<Vector<int>>&             a_procs,
                                             Vector<Vector<Box>>&             a_boxes,
-                                            const std::string                a_realm,
+                                            const std::string&               a_realm,
                                             const Vector<DisjointBoxLayout>& a_grids,
                                             const int                        a_lmin,
                                             const int                        a_finestLevel)
@@ -601,8 +600,7 @@ BrownianWalkerStepper::loadBalanceBoxesMesh(Vector<Vector<int>>&             a_p
   //       Once we've put that data on the new mesh, we can simply compute the sum of all mesh data in each grid patch. That sum is equal to the number of particles
   //       in the patch, which we can use for load balancing.
 
-  constexpr int comp  = 0;
-  constexpr int nComp = 1;
+  constexpr int comp = 0;
 
   // Make some storage for the number of particles per cell on the new grids.
   EBAMRCellData newParticlesPerCell;
@@ -718,7 +716,7 @@ BrownianWalkerStepper::loadBalanceBoxesMesh(Vector<Vector<int>>&             a_p
 void
 BrownianWalkerStepper::loadBalanceBoxesParticles(Vector<Vector<int>>&             a_procs,
                                                  Vector<Vector<Box>>&             a_boxes,
-                                                 const std::string                a_realm,
+                                                 const std::string&               a_realm,
                                                  const Vector<DisjointBoxLayout>& a_grids,
                                                  const int                        a_lmin,
                                                  const int                        a_finestLevel)
@@ -803,7 +801,7 @@ BrownianWalkerStepper::loadBalanceBoxesParticles(Vector<Vector<int>>&           
 }
 
 Vector<long int>
-BrownianWalkerStepper::getCheckpointLoads(const std::string a_realm, const int a_level) const
+BrownianWalkerStepper::getCheckpointLoads(const std::string& a_realm, const int a_level) const
 {
   CH_TIME("BrownianWalkerStepper::getCheckpointLoads(string, int)");
   if (m_verbosity > 5) {

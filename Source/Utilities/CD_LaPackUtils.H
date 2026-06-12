@@ -1,17 +1,18 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_LaPackUtils.H
   @brief  Interface to some LaPack routines. 
   @note   The routines in this file are double precision only. 
   @author Robert Marskar
 */
 
-#ifndef CD_LaPackUtils_H
-#define CD_LaPackUtils_H
+#ifndef CD_LAPACKUTILS_H
+#define CD_LAPACKUTILS_H
 
 // Std includes
 #include <vector>
@@ -19,10 +20,7 @@
 // Our includes
 #include <CD_NamespaceHeader.H>
 
-/*!
-  @brief This is an interface to LAPACK for solving least squares problems using singular-value decomposition
-  @note Double precision version. 
-*/
+/// @cond DOXYGEN_SKIP
 extern "C" void
 dgelss_(int*    a_M,
         int*    a_N,
@@ -38,10 +36,6 @@ dgelss_(int*    a_M,
         int*    a_LWORK,
         int*    a_INFO);
 
-/*!
-  @brief Interface to LaPack for computing the singular value decomposition of a matrix. 
-  @note This is the double-precision version. 
-*/
 extern "C" void
 dgesdd_(char*   a_JOBZ,
         int*    a_M,
@@ -58,10 +52,6 @@ dgesdd_(char*   a_JOBZ,
         int*    a_IWORK,
         int*    a_INFO);
 
-/*!
-  @brief Interface to LaPack for computing the singular value decomposition of a matrix. 
-  @note This is the single-precision version. 
-*/
 extern "C" void
 sgesdd_(char*  a_JOBZ,
         int*   a_M,
@@ -78,9 +68,6 @@ sgesdd_(char*  a_JOBZ,
         int*   a_IWORK,
         int*   a_INFO);
 
-/*!
-  @brief Interface to LaPack for matrix multiplication
-*/
 extern "C" void
 dgemm_(char*   a_TRANSA,
        char*   a_TRANSB,
@@ -96,10 +83,6 @@ dgemm_(char*   a_TRANSA,
        double* a_C,
        int*    a_LDC);
 
-/*!
-  @brief Interface to LaPack for matrix multiplication
-  @note Single-precision version.
-*/
 extern "C" void
 sgemm_(char*  a_TRANSA,
        char*  a_TRANSB,
@@ -115,28 +98,27 @@ sgemm_(char*  a_TRANSA,
        float* a_C,
        int*   a_LDC);
 
-/*!
-  @brief Interface to LaPack for computing solution to Ax=b
-*/
 extern "C" void
 dgesv_(int* N, int* NRHS, double* A, int* LDA, int* IPIV, double* B, int* LDB, int* INFO);
+/// @endcond
 
-/*!
+/**
   @brief Namespace containing various useful linear algebra routines using LaPACK. 
 */
 namespace LaPackUtils {
 
-  /*!
+  /**
     @brief Get the index in the linearized matrix of size MxN
     @param[in] irow The row number
     @param[in] jcol The column number
     @param[in] M Number of rows
     @param[in] N Number columns
+    @return Return value
   */
   int
   linearIndex(const int irow, const int jcol, const int M, const int N);
 
-  /*!
+  /**
     @brief Compute the singular value decomposition of a matrix. 
     @param[out] a_linU \f$U\f$-matrix. Linearized in column major Fortran order. 
     @param[out] a_linSigma \f$\Sigma\f$-matrix. Linearized in column major Fortran order. 
@@ -149,6 +131,7 @@ namespace LaPackUtils {
     A = U\Sigma V^\intercal.
     \f]
     The input and output matrices are assumed to be stored column-major so that a_A[0] is the first column of \f$A\f$. 
+    @return Computed s v d
   */
   bool
   computeSVD(std::vector<double>&       a_linU,
@@ -158,7 +141,7 @@ namespace LaPackUtils {
              const int&                 a_M,
              const int&                 a_N);
 
-  /*!
+  /**
     @brief Compute the singular value decomposition of a matrix. 
     @param[out] a_linU \f$U\f$-matrix. Linearized in column major Fortran order. 
     @param[out] a_linSigma \f$\Sigma\f$-matrix. Linearized in column major Fortran order. 
@@ -171,6 +154,7 @@ namespace LaPackUtils {
     A = U\Sigma V^\intercal.
     \f]
     The input and output matrices are assumed to be stored column-major so that a_A[0] is the first column of \f$A\f$. 
+    @return Computed s v d
   */
   bool
   computeSVD(std::vector<float>&       a_linU,
@@ -180,12 +164,13 @@ namespace LaPackUtils {
              const int&                a_M,
              const int&                a_N);
 
-  /*!
+  /**
     @brief Compute the pseudoinverse of matrix through singular value decomposition
     @param[out] a_linAplus Pseudoinverse in column major Fortran order. 
     @param[in]  a_linA Input matrix in column major Fortran order
     @param[in]  a_M Number of rows in A
-    @param[in]  a_N Number of colums in A
+    @param[in]  a_N Number of columns in A
+    @return Computed pseudo inverse
   */
   bool
   computePseudoInverse(std::vector<double>&       a_linAplus,
@@ -193,12 +178,13 @@ namespace LaPackUtils {
                        const int&                 a_M,
                        const int&                 a_N);
 
-  /*!
+  /**
     @brief Compute the pseudoinverse of matrix through singular value decomposition
     @param[out] a_linAplus Pseudoinverse in column major Fortran order. 
     @param[in]  a_linA Input matrix in column major Fortran order
     @param[in]  a_M Number of rows in A
-    @param[in]  a_N Number of colums in A
+    @param[in]  a_N Number of columns in A
+    @return Computed pseudo inverse
   */
   bool
   computePseudoInverse(std::vector<float>&       a_linAplus,
@@ -206,8 +192,8 @@ namespace LaPackUtils {
                        const int&                a_M,
                        const int&                a_N);
 
-  /*!
-    @brief Linearize a matrix to column major Fortran form by assuming row or major colum format of the input matrix. 
+  /**
+    @brief Linearize a matrix to column major Fortran form by assuming row or major column format of the input matrix. 
     @param[out] a_linA Linearized matrix
     @param[out] a_M Number of rows
     @param[out] a_N Number of columns
@@ -222,7 +208,7 @@ namespace LaPackUtils {
                   const std::vector<std::vector<double>>& a_A,
                   const char&                             a_format);
 
-  /*!
+  /**
     @brief Linearize a matrix to column major Fortran form by column major format of the input matrix. 
     @param[out] a_linA Linearized matrix
     @param[out] a_M Number of rows
@@ -235,7 +221,7 @@ namespace LaPackUtils {
                              int&                                    a_N,
                              const std::vector<std::vector<double>>& a_A);
 
-  /*!
+  /**
     @brief Linearize a matrix to column major Fortran form by row major format of the input matrix. 
     @param[out] a_linA Linearized matrix
     @param[out] a_M Number of rows
@@ -245,8 +231,8 @@ namespace LaPackUtils {
   void
   linearizeRowMajorMatrix(std::vector<double>& a_linA, int& a_M, int& a_N, const std::vector<std::vector<double>>& a_A);
 
-  /*!
-    @brief Delinearize a linearized matrix from column major Fortran to row or major colum matrix format.
+  /**
+    @brief Delinearize a linearized matrix from column major Fortran to row or major column matrix format.
     @param[out] a_A Output matrix
     @param[in]  a_M Number of rows
     @param[in]  a_N Number of columns
@@ -261,7 +247,7 @@ namespace LaPackUtils {
                     const std::vector<double>&        a_linA,
                     const char&                       a_format);
 
-  /*!
+  /**
     @brief Delinearize a linearized matrix from column major Fortran to column major form
     @param[out] a_A Output matrix
     @param[in]  a_M Number of rows
@@ -274,7 +260,7 @@ namespace LaPackUtils {
                                const int&                        a_N,
                                const std::vector<double>&        a_linA);
 
-  /*!
+  /**
     @brief Delinearize a linearized matrix from column major Fortran to row major form
     @param[out] a_A Output matrix
     @param[in]  a_M Number of rows

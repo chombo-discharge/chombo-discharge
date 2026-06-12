@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_MFHelmholtzElectrostaticEBBCImplem.H
   @brief  Implementation of CD_MFHelmholtzElectrostaticEBBC.H
   @author Robert Marskar
 */
 
-#ifndef CD_MFHelmholtzElectrostaticEBBCImplem_H
-#define CD_MFHelmholtzElectrostaticEBBCImplem_H
+#ifndef CD_MFHELMHOLTZELECTROSTATICEBBCIMPLEM_H
+#define CD_MFHELMHOLTZELECTROSTATICEBBCIMPLEM_H
 
 // Std includes
 #include <limits>
@@ -20,7 +21,8 @@
 #include <CD_NamespaceHeader.H>
 
 Real
-MFHelmholtzElectrostaticEBBC::getElectrodePotential(const RealVect& a_pos) const
+MFHelmholtzElectrostaticEBBC::getElectrodePotential(
+  const RealVect& a_pos) const // NOLINT(readability-convert-member-functions-to-static)
 {
   CH_TIME("MFHelmholtzElectrostaticEBBC::getElectrodePotential(RealVect)");
 

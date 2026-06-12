@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_MechanicalShaft.cpp
   @brief  Implementation of CD_MechanicalShaft.H
   @author Robert Marskar
@@ -31,8 +32,10 @@
 #include <CD_RoundedCylinderIF.H>
 #include <CD_NamespaceHeader.H>
 
+/// @cond DOXYGEN_SKIP
 using Vec3    = EBGeometry::Vec3T<Real>;
 using ImpFunc = EBGeometry::ImplicitFunction<Real>;
+/// @endcond
 
 MechanicalShaft::MechanicalShaft() noexcept
 {
@@ -170,7 +173,7 @@ MechanicalShaft::defineDielectric() noexcept
 
   ParmParse pp("MechanicalShaft");
 
-  std::string shape       = "";
+  std::string shape;
   std::string orientation = "+z";
 
   Real eps       = -1.0;

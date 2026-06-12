@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_EBAMRParticleMesh.cpp
   @brief  Implementation of CD_EBAMRParticleMesh.H
   @author Robert Marskar
@@ -17,11 +18,9 @@
 #include <CD_EBAMRParticleMesh.H>
 #include <CD_NamespaceHeader.H>
 
-EBAMRParticleMesh::EBAMRParticleMesh()
+EBAMRParticleMesh::EBAMRParticleMesh() : m_isDefined(false)
 {
   CH_TIME("EBAMRParticleMesh::EBAMRParticleMesh()");
-
-  m_isDefined = false;
 }
 
 EBAMRParticleMesh::EBAMRParticleMesh(const Vector<RefCountedPtr<EBLevelGrid>>& a_eblgs,
@@ -231,8 +230,7 @@ EBAMRParticleMesh::defineOuterHaloMasks()
       const DisjointBoxLayout& grids     = m_eblgs[lvl]->getDBL();
       const DisjointBoxLayout& gridsFine = m_eblgs[lvl + 1]->getDBL();
 
-      const ProblemDomain& domain     = m_eblgs[lvl]->getDomain();
-      const ProblemDomain& domainFine = m_eblgs[lvl + 1]->getDomain();
+      const ProblemDomain& domain = m_eblgs[lvl]->getDomain();
 
       // Create the coarsened fine grid.
       DisjointBoxLayout gridsCoFi;
@@ -380,14 +378,12 @@ EBAMRParticleMesh::defineTransitionMasks()
       const DisjointBoxLayout& gridsFine = eblgFine.getDBL();
       const DisjointBoxLayout& gridsFiCo = eblgFiCo.getDBL();
 
-      const ProblemDomain& domainCoar = eblgCoar.getDomain();
       const ProblemDomain& domainFine = eblgFine.getDomain();
 
       const DataIterator& ditCoar = gridsCoar.dataIterator();
       const DataIterator& ditFine = gridsFine.dataIterator();
       const DataIterator& ditFiCo = gridsFiCo.dataIterator();
 
-      const int numBoxesCoar = ditCoar.size();
       const int numBoxesFine = ditFine.size();
       const int numBoxesFiCo = ditFiCo.size();
 

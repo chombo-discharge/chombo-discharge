@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2023 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_OpenMP.H
   @brief  Declaration of various useful OpenMP-related utilities
   @author Robert Marskar
 */
 
-#ifndef CD_OpenMP_H
-#define CD_OpenMP_H
+#ifndef CD_OPENMP_H
+#define CD_OPENMP_H
 
 // Chombo includes
 #include <IntVectSet.H>

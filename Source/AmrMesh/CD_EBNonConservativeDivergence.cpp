@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2025 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_EBNonConservativeDivergence.cpp
   @brief  Implementation of CD_EBNonConservativeDiverge.cpp
   @author Robert Marskar
@@ -18,11 +19,9 @@
 #include <CD_VofUtils.H>
 #include <CD_NamespaceHeader.H>
 
-EBNonConservativeDivergence::EBNonConservativeDivergence() noexcept
+EBNonConservativeDivergence::EBNonConservativeDivergence() noexcept : m_isDefined(false)
 {
   CH_TIME("EBNonConservativeDivergence::EBNonConservativeDivergence(weak)");
-
-  m_isDefined = false;
 }
 
 EBNonConservativeDivergence::EBNonConservativeDivergence(const EBLevelGrid& a_eblg, const int a_radius) noexcept
@@ -52,10 +51,9 @@ EBNonConservativeDivergence::define(const EBLevelGrid& a_eblg, const int a_radiu
 
   m_eblg = a_eblg;
 
-  const DisjointBoxLayout& dbl    = m_eblg.getDBL();
-  const EBISLayout&        ebisl  = m_eblg.getEBISL();
-  const ProblemDomain&     domain = m_eblg.getDomain();
-  const DataIterator&      dit    = dbl.dataIterator();
+  const DisjointBoxLayout& dbl   = m_eblg.getDBL();
+  const EBISLayout&        ebisl = m_eblg.getEBISL();
+  const DataIterator&      dit   = dbl.dataIterator();
 
   m_vofIterator.define(dbl);
   m_stencils.define(dbl);

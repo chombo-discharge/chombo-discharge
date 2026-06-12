@@ -1,12 +1,13 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_CdrPlasmaTagger.cpp
-  @brief  Implementation of CD_CdrPlasmaTagger.H
-  @author Robert marskar
+/**
+   @file   CD_CdrPlasmaTagger.cpp
+   @brief  Implementation of CD_CdrPlasmaTagger.H
+   @author Robert Marskar
 */
 
 // Chombo includes
@@ -154,7 +155,7 @@ CdrPlasmaTagger::getPlotVariableNames() const
 void
 CdrPlasmaTagger::writePlotData(LevelData<EBCellFAB>& a_output,
                                int&                  a_icomp,
-                               const std::string     a_outputRealm,
+                               const std::string&    a_outputRealm,
                                const int             a_level) const
 {
   CH_TIME("CdrPlasmaTagger::writePlotData");
@@ -172,7 +173,7 @@ CdrPlasmaTagger::writePlotData(LevelData<EBCellFAB>& a_output,
 
     const EBAMRCellData& tagField = m_tracers[i];
 
-    // Copy data to the ouput data holder. Covered data is bogus.
+    // Copy data to the output data holder. Covered data is bogus.
     m_amr->copyData(a_output, *tagField[a_level], a_level, a_outputRealm, tagField.getRealm(), dstInterv, srcInterv);
 
     DataOps::setCoveredValue(a_output, a_icomp, 0.0);
@@ -269,12 +270,12 @@ CdrPlasmaTagger::refineCellsBox(DenseIntVectSet&          a_refinedCells,
                                 const Vector<EBCellFAB*>& a_tracers,
                                 const Vector<EBCellFAB*>& a_gradTracers,
                                 const int                 a_lvl,
-                                const DataIndex           a_dit,
-                                const Box                 a_box,
+                                const DataIndex&          a_dit,
+                                const Box&                a_box,
                                 const EBISBox&            a_ebisbox,
                                 const Real                a_time,
                                 const Real                a_dx,
-                                const RealVect            a_probLo)
+                                const RealVect&           a_probLo)
 {
   CH_TIME("CdrPlasmaTagger::refineCellsBox(...)");
   if (m_verbosity > 5) {
@@ -352,12 +353,12 @@ CdrPlasmaTagger::coarsenCellsBox(DenseIntVectSet&          a_coarsenedCells,
                                  const Vector<EBCellFAB*>& a_tracers,
                                  const Vector<EBCellFAB*>& a_gradTracers,
                                  const int                 a_lvl,
-                                 const DataIndex           a_dit,
-                                 const Box                 a_box,
+                                 const DataIndex&          a_dit,
+                                 const Box&                a_box,
                                  const EBISBox&            a_ebisbox,
                                  const Real                a_time,
                                  const Real                a_dx,
-                                 const RealVect            a_probLo)
+                                 const RealVect&           a_probLo)
 {
   CH_TIME("CdrPlasmaTagger::coarsenCellsBox(...)");
   if (m_verbosity > 5) {
@@ -413,12 +414,13 @@ CdrPlasmaTagger::coarsenCellsBox(DenseIntVectSet&          a_coarsenedCells,
     if (!isPointInside) {
       a_coarsenedCells |= vof.gridIndex();
     }
-    else
+    else {
       // Reconstruct the tracer fields and gradients again.
       for (int i = 0; i < m_numTracers; i++) {
         tr[i] = (*a_tracers[i])(vof, 0);
         gt[i] = RealVect(D_DECL((*a_gradTracers[i])(vof, 0), (*a_gradTracers[i])(vof, 1), (*a_gradTracers[i])(vof, 2)));
       }
+    }
 
     // Call the per-cell refinement method.
     const bool coarsen = this->coarsenCell(pos, a_time, a_dx, a_lvl, tr, gt);

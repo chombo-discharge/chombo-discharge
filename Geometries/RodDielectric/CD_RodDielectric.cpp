@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_RodDielectric.cpp
   @brief  Implementation of CD_RodDielectric.H
   @author Robert Marskar
@@ -38,14 +39,15 @@ RodDielectric::RodDielectric()
   ppRod.get("on", useRod);
   ppIns.get("on", useIns);
 
-  if (useRod)
+  if (useRod) {
     this->defineElectrode();
-  if (useIns)
+  }
+  if (useIns) {
     this->defineInsulator();
+  }
 }
 
-RodDielectric::~RodDielectric()
-{}
+RodDielectric::~RodDielectric() = default;
 
 void
 RodDielectric::defineElectrode()
@@ -82,16 +84,16 @@ RodDielectric::defineInsulator()
 
   RefCountedPtr<BaseIF> bif;
   if (str == "plane") {
-    bif = this->getPlane();
+    bif = ChomboDischarge::RodDielectric::getPlane();
   }
   else if (str == "box") {
-    bif = this->getBox();
+    bif = ChomboDischarge::RodDielectric::getBox();
   }
   else if (str == "perlin_box") {
-    bif = this->getPerlinBox();
+    bif = ChomboDischarge::RodDielectric::getPerlinBox();
   }
   else if (str == "sphere") {
-    bif = this->getSphere();
+    bif = ChomboDischarge::RodDielectric::getSphere();
   }
   else {
     MayDay::Abort("RodDielectric.:defineInsulator - unsupported shape");

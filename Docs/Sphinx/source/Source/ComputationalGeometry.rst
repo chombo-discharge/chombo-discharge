@@ -21,7 +21,7 @@ Making a non-empty ``ComputationalGeometry`` class requires that you inherit fro
 .. literalinclude:: ../../../../Source/Geometry/CD_ComputationalGeometry.H
    :language: c++
    :caption: List of all data member of the ``ComputationalGeometry`` base class. Highlighted members must be instantiated by the user in order to create a new geometry.
-   :lines: 158-196
+   :lines: 163-201
    :emphasize-lines: 4, 24, 29	   
    :dedent: 2
 
@@ -75,7 +75,7 @@ The constructor for the electrode class is given in :numref:`List:Electrode`.
 .. _List:Electrode:
 .. literalinclude:: ../../../../Source/Geometry/CD_Electrode.H
    :caption: Constructor for the the ``Electrode`` object.
-   :lines: 40
+   :lines: 34-41
    :language: c++
    :dedent: 2
 
@@ -101,7 +101,7 @@ The constructors for this class are
 .. literalinclude:: ../../../../Source/Geometry/CD_Dielectric.H
    :caption: Constructors for the the ``Dielectric`` object.
    :language: c++
-   :lines: 36-50
+   :lines: 37-51
    :dedent: 2
 
 where the ``a_baseIF`` argument is the level-set function and the second argument sets a the permittivity.
@@ -120,7 +120,7 @@ It is possible to retrieve the implicit functions for the electrodes and dielect
 .. literalinclude:: ../../../../Source/Geometry/CD_ComputationalGeometry.H
    :caption: Member functions for retrieving the defined electrodes and dielectrics. 
    :language: c++
-   :lines: 48-60
+   :lines: 49-61
    :dedent: 2
 
 Obtaining the implicit functions for each part can be useful when determining which object is closest to some physical location :math:`\mathbf{x}`.
@@ -132,7 +132,7 @@ Retrieving compound implicit functions
 When generating the geometry we compute the implicit functions for each *phase*, the gas-phase, the dielectric-phase, and the electrodes.
 We outlined this process in :eq:`ElectrodeRegion` and :eq:`DielectricRegion`.
 
-To retrive the implicit function corresponding to a particular phase, use
+To retrieve the implicit function corresponding to a particular phase, use
 
 .. code-block:: c++
 

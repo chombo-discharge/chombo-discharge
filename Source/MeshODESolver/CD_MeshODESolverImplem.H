@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2022 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_MeshODESolverImplem.H
   @brief  Implementation of CD_MeshODESolver.H
   @author Robert Marskar
 */
 
-#ifndef CD_MeshODESolverImplem_H
-#define CD_MeshODESolverImplem_H
+#ifndef CD_MESHODESOLVERIMPLEM_H
+#define CD_MESHODESOLVERIMPLEM_H
 
 // Chombo includes
 #include <CH_Timer.H>
@@ -25,15 +26,9 @@
 
 template <size_t N>
 MeshODESolver<N>::MeshODESolver()
+  : m_verbosity(-1), m_name("MeshODESolver"), m_className("MeshODESolver"), m_realm(Realm::Primal), m_phase(phase::gas)
 {
   CH_TIME("MeshODESolver::MeshODESolver()");
-
-  // Default settings.
-  m_verbosity = -1;
-  m_name      = "MeshODESolver";
-  m_className = "MeshODESolver";
-  m_phase     = phase::gas;
-  m_realm     = Realm::Primal;
 
   this->parseOptions();
 }
@@ -230,7 +225,7 @@ MeshODESolver<N>::setPhi(const std::function<std::array<Real, N>(const RealVect&
 
         // Put right-hand side in mesh data. This is set to zero if the cell is covered by a finer grid cell.
         for (size_t i = 0; i < N; i++) {
-          phiFAB(iv, i) = y[i];
+          phiFAB(iv, static_cast<int>(i)) = y[i];
         }
       };
 
@@ -326,7 +321,7 @@ MeshODESolver<N>::computeRHS(EBAMRCellData& a_rhs, const RHSFunction& a_rhsFunct
 
           // Make y from the mesh data.
           for (size_t i = 0; i < N; i++) {
-            y[i] = phiFAB(iv, i);
+            y[i] = phiFAB(iv, static_cast<int>(i));
           }
 
           // Compute the right-hand side.
@@ -335,7 +330,7 @@ MeshODESolver<N>::computeRHS(EBAMRCellData& a_rhs, const RHSFunction& a_rhsFunct
 
         // Put right-hand side in mesh data. This is set to zero if the cell is covered by a finer grid cell.
         for (size_t i = 0; i < N; i++) {
-          rhsFAB(iv, i) = f[i];
+          rhsFAB(iv, static_cast<int>(i)) = f[i];
         }
       };
 
@@ -389,7 +384,7 @@ MeshODESolver<N>::allocate() noexcept
 
 template <size_t N>
 void
-MeshODESolver<N>::preRegrid(const int a_lbase, const int a_oldFinestLevel) noexcept
+MeshODESolver<N>::preRegrid(const int /*a_lbase*/, const int /*a_oldFinestLevel*/) noexcept
 {
   CH_TIME("MeshODESolver::preRegrid(int, int)");
   if (m_verbosity > 5) {
@@ -478,7 +473,7 @@ MeshODESolver<N>::registerOperators() const noexcept
 
 template <size_t N>
 void
-MeshODESolver<N>::setRealm(const std::string a_realm) noexcept
+MeshODESolver<N>::setRealm(const std::string& a_realm) noexcept
 {
   CH_TIME("MeshODESolver::setRealm(std::string)");
   if (m_verbosity > 5) {
@@ -587,11 +582,11 @@ MeshODESolver<N>::getNumberOfPlotVariables() const noexcept
   int numPlotVars = 0;
 
   if (m_plotPhi) {
-    numPlotVars += int(N);
+    numPlotVars += static_cast<int>(N);
   }
 
   if (m_plotRHS) {
-    numPlotVars += int(N);
+    numPlotVars += static_cast<int>(N);
   }
 
   return numPlotVars;
@@ -627,7 +622,7 @@ template <size_t N>
 void
 MeshODESolver<N>::writePlotData(LevelData<EBCellFAB>& a_output,
                                 int&                  a_icomp,
-                                const std::string     a_outputRealm,
+                                const std::string&    a_outputRealm,
                                 const int             a_level) const noexcept
 {
   CH_TIME("MeshODESolver::writePlotData");
@@ -728,12 +723,17 @@ MeshODESolver<N>::readCheckpointLevel(HDF5Handle& a_handle, const int a_level) n
     pout() << m_name + "::writeCheckpointLevel(HDF5Handle, int)" << endl;
   }
 
-  read<EBCellFAB>(a_handle, *m_phi[a_level], m_name, m_amr->getGrids(m_realm)[a_level], Interval(0, N - 1), false);
+  read<EBCellFAB>(a_handle,
+                  *m_phi[a_level],
+                  m_name,
+                  m_amr->getGrids(m_realm)[a_level],
+                  Interval(0, static_cast<int>(N) - 1),
+                  false);
   read<EBCellFAB>(a_handle,
                   *m_rhs[a_level],
                   m_name + "_src",
                   m_amr->getGrids(m_realm)[a_level],
-                  Interval(0, N - 1),
+                  Interval(0, static_cast<int>(N) - 1),
                   false);
 }
 #endif

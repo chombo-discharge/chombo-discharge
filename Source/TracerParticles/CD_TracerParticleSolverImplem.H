@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2022 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_TracerParticleSolverImplem.H
   @brief  Implementation of CD_TracerParticleSolver.H
   @author Robert Marskar
 */
 
-#ifndef CD_TracerParticleSolverImplem_H
-#define CD_TracerParticleSolverImplem_H
+#ifndef CD_TRACERPARTICLESOLVERIMPLEM_H
+#define CD_TRACERPARTICLESOLVERIMPLEM_H
 
 // Chombo includes
 #include <ParmParse.H>
@@ -41,8 +42,8 @@ inline TracerParticleSolver<P>::TracerParticleSolver()
 }
 
 template <typename P>
-inline TracerParticleSolver<P>::TracerParticleSolver(const RefCountedPtr<AmrMesh>&              a_amr,
-                                                     const RefCountedPtr<ComputationalGeometry> a_compGeom)
+inline TracerParticleSolver<P>::TracerParticleSolver(const RefCountedPtr<AmrMesh>&               a_amr,
+                                                     const RefCountedPtr<ComputationalGeometry>& a_compGeom)
   : TracerParticleSolver<P>()
 {
   CH_TIME("TracerParticleSolver::TracerParticleSolver(RefCountedPtr<AmrMesh>, RefCountedPtr<ComputationalGeometry>)");
@@ -509,7 +510,7 @@ template <typename P>
 inline void
 TracerParticleSolver<P>::writePlotData(LevelData<EBCellFAB>& a_output,
                                        int&                  a_comp,
-                                       const std::string     a_outputRealm,
+                                       const std::string&    a_outputRealm,
                                        const int             a_level) const noexcept
 {
   CH_TIME("TracerParticleSolver::writePlotData");

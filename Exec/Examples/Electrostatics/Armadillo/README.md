@@ -3,7 +3,7 @@
 This example solves the Poisson equation for the electric field for a single electrode in the shape of an armadillo.
 It was set up from $DISCHARGE_HOME/Physics/Electrostatics using
 
-> ./setup.py -base_dir=Exec/Examples/Electrostatics -app_name=Armadillo -geometry=Tesselation
+> ./setup.py -base_dir=Exec/Examples/Electrostatics -app_name=Armadillo -geometry=Tessellation
 
 The file armadillo.ply was supplied externally.
 

@@ -1,11 +1,10 @@
-/* chombo-discharge
- * Copyright © 2022 NTNU.
- * Copyright © 2022 Fanny Skirbekk. 
- * Copyright © 2023 Robert Marskar
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_NeedleIF.cpp
   @brief  Implementation of CD_NeedleIF.H
   @author Fanny Skirbekk
@@ -18,7 +17,9 @@
 #include <CD_EBGeometryIF.H>
 #include <CD_NamespaceHeader.H>
 
+/// @cond DOXYGEN_SKIP
 using Vec3 = EBGeometry::Vec3T<Real>;
+/// @endcond
 
 NeedleIF::NeedleIF(const Real& a_length,
                    const Real& a_radius,
@@ -32,7 +33,6 @@ NeedleIF::NeedleIF(const Real& a_length,
 
   // a_angle is entire opening angle, dividing by two to get half of the opening angle
   const Real bodyRadius = a_radius - a_tipRadius;
-  const Real tipLength  = bodyRadius / std::tan((0.5 * a_angle) * Units::pi / 180.0);
 
   // The center of the needle tip is set to origo in order for the rotation to work more easily
   const Vec3 bodyBackPosition(0.0, 0.0, 0.0);
@@ -55,11 +55,9 @@ NeedleIF::NeedleIF(const Real& a_length,
 }
 
 NeedleIF::NeedleIF(const NeedleIF& a_inputIF)
+  : m_implicitFunction(a_inputIF.m_implicitFunction), m_tipRadius(a_inputIF.m_tipRadius)
 {
   CH_TIME("NeedleIF::NeedleIF(copy constructor)");
-
-  this->m_implicitFunction = a_inputIF.m_implicitFunction;
-  this->m_tipRadius        = a_inputIF.m_tipRadius;
 }
 
 Real

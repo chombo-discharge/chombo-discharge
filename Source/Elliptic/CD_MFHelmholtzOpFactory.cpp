@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_MFHelmholtzOpFactory.cpp
   @brief  Implementation of CD_MFHelmholtzOpFactory.H
   @author Robert Marskar
@@ -55,51 +56,41 @@ MFHelmholtzOpFactory::MFHelmholtzOpFactory(const MFIS&             a_mfis,
                                            const int&              a_preCondSmooth,
                                            const int&              a_blockingFactor,
                                            const AmrLevelGrids&    a_deeperLevelGrids)
+  : m_mfis(a_mfis),
+    m_dataLocation(a_dataLocation),
+    m_smoother(a_smoother),
+    m_numPreCondSmooth(a_preCondSmooth),
+    m_ghostPhi(a_ghostPhi),
+    m_ghostRhs(a_ghostRhs),
+    m_alpha(a_alpha),
+    m_beta(a_beta),
+    m_relaxFactor(a_relaxFactor),
+    m_probLo(a_probLo),
+    m_amrLevelGrids(a_amrLevelGrids),
+    m_validCells(a_validCells),
+    m_amrInterpolators(a_amrInterpolators),
+    m_amrFluxRegisters(a_amrFluxRegisters),
+    m_amrCoarseners(a_amrCoarseners),
+    m_amrRefRatios(a_amrRefRatios),
+    m_amrResolutions(a_amrResolutions),
+    m_amrAcoef(a_amrAcoef),
+    m_amrBcoef(a_amrBcoef),
+    m_amrBcoefIrreg(a_amrBcoefIrreg),
+    m_domainBcFactory(a_domainBcFactory),
+    m_ebBcFactory(a_ebBcFactory),
+    m_jumpBcFactory(a_jumpBcFactory),
+    m_bottomDomain(a_bottomDomain),
+    m_mgBlockingFactor(a_blockingFactor),
+    m_jumpOrder(a_jumpOrder),
+    m_jumpWeight(a_jumpWeight),
+    m_deeperLevelGrids(a_deeperLevelGrids)
 {
   CH_TIME("MFHelmholtzOpFactory::MFHelmholtzOpFactory()");
 
-  m_mfis         = a_mfis;
-  m_dataLocation = a_dataLocation;
-
-  m_alpha  = a_alpha;
-  m_beta   = a_beta;
-  m_probLo = a_probLo;
-
-  m_amrLevelGrids    = a_amrLevelGrids;
-  m_validCells       = a_validCells;
-  m_amrInterpolators = a_amrInterpolators;
-  m_amrFluxRegisters = a_amrFluxRegisters;
-  m_amrCoarseners    = a_amrCoarseners;
-  m_amrRefRatios     = a_amrRefRatios;
-  m_amrResolutions   = a_amrResolutions;
-
-  m_amrAcoef      = a_amrAcoef;
-  m_amrBcoef      = a_amrBcoef;
-  m_amrBcoefIrreg = a_amrBcoefIrreg;
-
-  m_domainBcFactory = a_domainBcFactory;
-  m_ebBcFactory     = a_ebBcFactory;
-  m_jumpBcFactory   = a_jumpBcFactory;
-
-  m_ghostPhi = a_ghostPhi;
-  m_ghostRhs = a_ghostRhs;
-
-  m_smoother     = a_smoother;
-  m_relaxFactor  = a_relaxFactor;
-  m_bottomDomain = a_bottomDomain;
-
-  m_jumpOrder        = a_jumpOrder;
-  m_jumpWeight       = a_jumpWeight;
-  m_numPreCondSmooth = a_preCondSmooth;
-
-  m_mgBlockingFactor = a_blockingFactor;
-
-  m_deeperLevelGrids = a_deeperLevelGrids;
-
-  m_numAmrLevels = m_amrLevelGrids.size();
+  m_numAmrLevels = static_cast<int>(m_amrLevelGrids.size());
 
   // Asking multigrid to do the bottom solve at a refined AMR level is classified as bad input.
-  if (this->isFiner(m_bottomDomain, m_amrLevelGrids[0].getDomain())) {
+  if (ChomboDischarge::MFHelmholtzOpFactory::isFiner(m_bottomDomain, m_amrLevelGrids[0].getDomain())) {
     MayDay::Abort("MFHelmholtzOpFactory -- bottomsolver domain can't be larger than the base AMR domain!");
   }
 
@@ -253,7 +244,7 @@ MFHelmholtzOpFactory::defineMultigridLevels()
 
     // We can have a multigrid level either if the refinement factor to the coarse level is larger than two, or we are at the bottom
     // of the AMR hierarchy.
-    if (amrLevel == 0 && this->isCoarser(m_bottomDomain, m_amrLevelGrids[amrLevel].getDomain())) {
+    if (amrLevel == 0 && isCoarser(m_bottomDomain, m_amrLevelGrids[amrLevel].getDomain())) {
       m_hasMgLevels[amrLevel] = true;
     }
 
@@ -285,7 +276,7 @@ MFHelmholtzOpFactory::defineMultigridLevels()
       bool hasCoarser = true;
 
       while (hasCoarser) {
-        const int            curMgLevels = m_mgLevelGrids[amrLevel].size();
+        const int            curMgLevels = static_cast<int>(m_mgLevelGrids[amrLevel].size());
         const MFLevelGrid&   mgMflgFine  = m_mgLevelGrids[amrLevel].back();
         const ProblemDomain& domainFine  = mgMflgFine.getDomain();
 
@@ -306,7 +297,7 @@ MFHelmholtzOpFactory::defineMultigridLevels()
         // Do not coarsen further if we end up with a domain smaller than m_bottomDomain. In this case
         // we will terminate the coarsening and let AMRMultiGrid do the bottom solve.
         if (hasCoarser) {
-          if (this->isCoarser(mgMflgCoar.getDomain(), m_bottomDomain)) {
+          if (isCoarser(mgMflgCoar.getDomain(), m_bottomDomain)) {
             hasCoarser = false;
           }
           else {
@@ -418,15 +409,15 @@ MFHelmholtzOpFactory::coarsenCoefficientsMG()
         const LevelData<MFFluxFAB>&   fineBcoef      = *mgBco[mgLevel];
         const LevelData<MFBaseIVFAB>& fineBcoefIrreg = *mgBcoIrreg[mgLevel];
 
-        this->coarsenCoefficients(coarAcoef,
-                                  coarBcoef,
-                                  coarBcoefIrreg,
-                                  fineAcoef,
-                                  fineBcoef,
-                                  fineBcoefIrreg,
-                                  mflgCoar,
-                                  mflgFine,
-                                  mgRefRat);
+        ChomboDischarge::MFHelmholtzOpFactory::coarsenCoefficients(coarAcoef,
+                                                                   coarBcoef,
+                                                                   coarBcoefIrreg,
+                                                                   fineAcoef,
+                                                                   fineBcoef,
+                                                                   fineBcoefIrreg,
+                                                                   mflgCoar,
+                                                                   mflgFine,
+                                                                   mgRefRat);
       }
     }
   }
@@ -527,7 +518,7 @@ MFHelmholtzOpFactory::getCoarserLayout(MFLevelGrid&       a_coarMflg,
   const DisjointBoxLayout& fineDbl    = a_fineMflg.getGrids();
   DisjointBoxLayout        coarDbl;
 
-  ProblemDomain test = fineDomain;
+  const ProblemDomain& test = fineDomain;
   if (refine(coarsen(test, a_refRat), a_refRat) == fineDomain) {
     const Box domainBox = fineDomain.domainBox();
 
@@ -570,7 +561,7 @@ MFHelmholtzOpFactory::getCoarserLayout(MFLevelGrid&       a_coarMflg,
 }
 
 MFHelmholtzOp*
-MFHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bool a_homogeneousOnly)
+MFHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bool /*a_homogeneousOnly*/)
 {
   CH_TIME("EBHelmholtzOpFactory::MGnewOp(ProblemDomain, int, bool)");
 
@@ -607,7 +598,7 @@ MFHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bo
   RefCountedPtr<LevelData<MFFluxFAB>>       Bcoef;
   RefCountedPtr<LevelData<MFBaseIVFAB>>     BcoefIrreg;
   RefCountedPtr<LevelData<BaseIVFAB<Real>>> jump;
-  RefCountedPtr<LevelData<BaseFab<bool>>>   validCells(NULL);
+  RefCountedPtr<LevelData<BaseFab<bool>>>   validCells(nullptr);
 
   bool foundMgLevel = false;
 
@@ -634,7 +625,7 @@ MFHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bo
   else { // Asking for a coarsening. No interp or flux reg object here.
     // TLDR: Go through the coarsened levels for the specified amr level and see if we find a coarsening at the
     //       specified depth.
-    const ProblemDomain coarDomain = coarsen(a_fineDomain, std::pow(mgRefRat, a_depth));
+    const ProblemDomain coarDomain = coarsen(a_fineDomain, static_cast<int>(std::pow(mgRefRat, a_depth)));
 
     // These are the things that live below the AMR level corresponding to a_fineDomain.
     const AmrLevelGrids& mgLevelGrids = m_mgLevelGrids[amrLevel];
@@ -763,39 +754,39 @@ MFHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain)
     CH_assert(gotCoarse);
   }
 
-  MFHelmholtzOp* op = new MFHelmholtzOp(m_dataLocation,
-                                        mflgFine,
-                                        mflg,
-                                        mflgCoFi,
-                                        mflgCoar,
-                                        mflgCoarMG,
-                                        m_amrInterpolators[amrLevel],
-                                        m_amrFluxRegisters[amrLevel],
-                                        m_amrCoarseners[amrLevel],
-                                        m_validCells[amrLevel],
-                                        m_domainBcFactory,
-                                        m_ebBcFactory,
-                                        m_jumpBcFactory,
-                                        m_probLo,
-                                        dx,
-                                        refToFine,
-                                        refToCoar,
-                                        hasFine,
-                                        hasCoar,
-                                        hasMGObjects,
-                                        false, // Not an MG operator.
-                                        m_alpha,
-                                        m_beta,
-                                        m_amrAcoef[amrLevel],
-                                        m_amrBcoef[amrLevel],
-                                        m_amrBcoefIrreg[amrLevel],
-                                        m_ghostPhi,
-                                        m_ghostRhs,
-                                        m_jumpOrder,
-                                        m_jumpWeight,
-                                        m_numPreCondSmooth,
-                                        m_smoother,
-                                        m_relaxFactor);
+  auto* op = new MFHelmholtzOp(m_dataLocation,
+                               mflgFine,
+                               mflg,
+                               mflgCoFi,
+                               mflgCoar,
+                               mflgCoarMG,
+                               m_amrInterpolators[amrLevel],
+                               m_amrFluxRegisters[amrLevel],
+                               m_amrCoarseners[amrLevel],
+                               m_validCells[amrLevel],
+                               m_domainBcFactory,
+                               m_ebBcFactory,
+                               m_jumpBcFactory,
+                               m_probLo,
+                               dx,
+                               refToFine,
+                               refToCoar,
+                               hasFine,
+                               hasCoar,
+                               hasMGObjects,
+                               false, // Not an MG operator.
+                               m_alpha,
+                               m_beta,
+                               m_amrAcoef[amrLevel],
+                               m_amrBcoef[amrLevel],
+                               m_amrBcoefIrreg[amrLevel],
+                               m_ghostPhi,
+                               m_ghostRhs,
+                               m_jumpOrder,
+                               m_jumpWeight,
+                               m_numPreCondSmooth,
+                               m_smoother,
+                               m_relaxFactor);
 
   // Give the operator access by reference to the jump data.
   op->setJump(m_amrJump[amrLevel]);
@@ -804,7 +795,7 @@ MFHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain)
 }
 
 bool
-MFHelmholtzOpFactory::isCoarser(const ProblemDomain& A, const ProblemDomain& B) const
+MFHelmholtzOpFactory::isCoarser(const ProblemDomain& A, const ProblemDomain& B)
 {
   CH_TIME("MFHelmholtzOpFactory::isCoarser(ProblemDomain, ProblemDomain)");
 
@@ -812,7 +803,7 @@ MFHelmholtzOpFactory::isCoarser(const ProblemDomain& A, const ProblemDomain& B) 
 }
 
 bool
-MFHelmholtzOpFactory::isFiner(const ProblemDomain& A, const ProblemDomain& B) const
+MFHelmholtzOpFactory::isFiner(const ProblemDomain& A, const ProblemDomain& B)
 {
   CH_TIME("MFHelmholtzOpFactory::isFiner(ProblemDomain, ProblemDomain)");
 
@@ -824,13 +815,11 @@ MFHelmholtzOpFactory::refToFiner(const ProblemDomain& a_domain) const
 {
   CH_TIME("MFHelmholtzOpFactory::refToFiner(ProblemDomain)");
 
-  int  ref   = -1;
-  bool found = false;
+  int ref = -1;
 
   for (int ilev = 0; ilev < m_amrLevelGrids.size(); ilev++) {
     if (m_amrLevelGrids[ilev].getDomain() == a_domain) {
-      found = true;
-      ref   = m_amrRefRatios[ilev];
+      ref = m_amrRefRatios[ilev];
     }
   }
 

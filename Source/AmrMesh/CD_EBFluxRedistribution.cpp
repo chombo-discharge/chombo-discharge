@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2023 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_EBFluxRedistribution.cpp
   @brief  Implementation of CD_EBFluxRedistribution.cpp
   @author Robert Marskar
@@ -22,11 +23,9 @@
 #include <CD_EBAddOp.H>
 #include <CD_NamespaceHeader.H>
 
-EBFluxRedistribution::EBFluxRedistribution() noexcept
+EBFluxRedistribution::EBFluxRedistribution() noexcept : m_isDefined(false)
 {
   CH_TIME("EBFluxRedistribution::EBFluxRedistribution(weak)");
-
-  m_isDefined = false;
 }
 
 EBFluxRedistribution::EBFluxRedistribution(const EBLevelGrid& a_eblgCoar,
@@ -63,7 +62,7 @@ EBFluxRedistribution::define(const EBLevelGrid& a_eblgCoar,
                              const EBLevelGrid& a_eblgFine,
                              const int          a_refToCoar,
                              const int          a_refToFine,
-                             const bool         a_redistributeOutside) noexcept
+                             const bool /*a_redistributeOutside*/) noexcept
 {
   CH_TIME("EBFluxRedistribution::define");
 
@@ -100,7 +99,7 @@ EBFluxRedistribution::define(const EBLevelGrid& a_eblgCoar,
     m_hasFine   = true;
 
     // Gods how I hate filling EBISLayouts. But in this case we need it because if the user has asked for
-    // a larger refinement ratio than we have ghost cells, we need to explicity fetch the necessary geometric
+    // a larger refinement ratio than we have ghost cells, we need to explicitly fetch the necessary geometric
     // data in a larger radius than what is available in the input arguments.
     if (m_refToFine > a_eblgRefined.getGhost()) {
       DisjointBoxLayout dblRefined;
@@ -349,8 +348,6 @@ EBFluxRedistribution::defineValidCells(LevelData<BaseFab<bool>>& a_validCells) c
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      const Box cellBox = dbl[din];
-
       BaseFab<bool>&   validCells = a_validCells[din];
       const FArrayBox& mask       = data[din];
 
@@ -488,11 +485,10 @@ EBFluxRedistribution::redistributeCoar(LevelData<EBCellFAB>&             a_phiCo
   CH_assert(a_phiCoar.nComp() > a_variables.end());
   CH_assert(a_deltaM.nComp() > a_variables.end());
 
-  const DisjointBoxLayout& dblCoar    = m_eblgCoarsened.getDBL();
-  const DataIterator&      ditCoar    = dblCoar.dataIterator();
-  const EBISLayout&        ebislCoar  = m_eblgCoarsened.getEBISL();
-  const ProblemDomain&     domainCoar = m_eblgCoarsened.getDomain();
-  const int                nbox       = ditCoar.size();
+  const DisjointBoxLayout& dblCoar   = m_eblgCoarsened.getDBL();
+  const DataIterator&      ditCoar   = dblCoar.dataIterator();
+  const EBISLayout&        ebislCoar = m_eblgCoarsened.getEBISL();
+  const int                nbox      = ditCoar.size();
 
   LevelData<EBCellFAB> coarBuffer(dblCoar, 1, m_redistRadius * IntVect::Unit, EBCellFactory(ebislCoar));
 
@@ -547,11 +543,10 @@ EBFluxRedistribution::redistributeLevel(LevelData<EBCellFAB>&             a_phi,
   CH_assert(a_phi.nComp() > a_variables.end());
   CH_assert(a_deltaM.nComp() > a_variables.end());
 
-  const DisjointBoxLayout& dbl    = m_eblg.getDBL();
-  const DataIterator&      dit    = dbl.dataIterator();
-  const EBISLayout&        ebisl  = m_eblg.getEBISL();
-  const ProblemDomain&     domain = m_eblg.getDomain();
-  const int                nbox   = dit.size();
+  const DisjointBoxLayout& dbl   = m_eblg.getDBL();
+  const DataIterator&      dit   = dbl.dataIterator();
+  const EBISLayout&        ebisl = m_eblg.getEBISL();
+  const int                nbox  = dit.size();
 
   LevelData<EBCellFAB> levelBuffer(dbl, 1, m_redistRadius * IntVect::Unit, EBCellFactory(ebisl));
 

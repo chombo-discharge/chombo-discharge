@@ -1,6 +1,7 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 /*
@@ -18,12 +19,9 @@
 #include <CD_EBHelmholtzRobinDomainBC.H>
 #include <CD_NamespaceHeader.H>
 
-EBHelmholtzRobinDomainBC::EBHelmholtzRobinDomainBC()
+EBHelmholtzRobinDomainBC::EBHelmholtzRobinDomainBC() : m_useConstant(false), m_useFunction(false)
 {
   CH_TIME("EBHelmholtzRobinDomainBC::EBHelmholtzRobinDomainBC()");
-
-  m_useConstant = false;
-  m_useFunction = false;
 }
 
 EBHelmholtzRobinDomainBC::~EBHelmholtzRobinDomainBC()
@@ -126,7 +124,7 @@ EBHelmholtzRobinDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
   BoxLoops::loop<D_DECL(1, 1, 1)>(a_faceFlux.box(), kernel);
 
   // Multiplies by B-coefficient.
-  this->multiplyByBcoef(a_faceFlux, a_Bcoef, a_dir, a_side);
+  ChomboDischarge::EBHelmholtzRobinDomainBC::multiplyByBcoef(a_faceFlux, a_Bcoef, a_dir, a_side);
 }
 
 Real
@@ -174,7 +172,7 @@ EBHelmholtzRobinDomainBC::getFaceFlux(const VolIndex&       a_vof,
           for (int i = 0; i < nearVofs.size(); i++) {
             nearPhi += a_phi(nearVofs[i], m_comp);
           }
-          nearPhi = nearPhi / nearVofs.size();
+          nearPhi = nearPhi / static_cast<double>(nearVofs.size());
 
           // Linear extrapolation to boundary from curVof
           curExtrap = 1.5 * a_phi(curVof, m_comp) - 0.5 * nearPhi;
@@ -204,10 +202,6 @@ EBHelmholtzRobinDomainBC::getFaceFlux(const VolIndex&       a_vof,
         C = a_useHomogeneous ? 0 : this->m_functionC(pos);
       }
       else {
-        A = 0.0;
-        B = 0.0;
-        C = 0.0;
-
         MayDay::Error("EBHelmholtzRobinDomainBC::getFaceFlux (VolIndex version) - logic bust");
       }
 

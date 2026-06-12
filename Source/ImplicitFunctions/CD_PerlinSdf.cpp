@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_PerlinSdf.cpp
   @brief  Implementation of CD_PerlinSdf.H
   @author Robert Marskar
@@ -15,11 +16,11 @@
 
 constexpr int PerlinSdf::m_permutationTable[256];
 
-PerlinSdf::PerlinSdf(const Real     a_noiseAmp,
-                     const RealVect a_noiseFreq,
-                     const Real     a_persistence,
-                     const int      a_octaves,
-                     const bool     a_reseed)
+PerlinSdf::PerlinSdf(const Real      a_noiseAmp,
+                     const RealVect& a_noiseFreq,
+                     const Real      a_persistence,
+                     const int       a_octaves,
+                     const bool      a_reseed)
 {
 
   CH_assert(a_octaves >= 1);
@@ -42,12 +43,11 @@ PerlinSdf::PerlinSdf(const Real     a_noiseAmp,
 }
 
 PerlinSdf::PerlinSdf(const PerlinSdf& a_inputIF)
+  : m_noiseFreq(a_inputIF.m_noiseFreq),
+    m_noiseAmp(a_inputIF.m_noiseAmp),
+    m_persistence(a_inputIF.m_persistence),
+    m_octaves(a_inputIF.m_octaves)
 {
-
-  m_noiseAmp    = a_inputIF.m_noiseAmp;
-  m_noiseFreq   = a_inputIF.m_noiseFreq;
-  m_persistence = a_inputIF.m_persistence;
-  m_octaves     = a_inputIF.m_octaves;
 
   for (int i = 0; i < 256; i++) {
     p[i]       = a_inputIF.p[i];
@@ -55,8 +55,7 @@ PerlinSdf::PerlinSdf(const PerlinSdf& a_inputIF)
   }
 }
 
-PerlinSdf::~PerlinSdf()
-{}
+PerlinSdf::~PerlinSdf() = default;
 
 Real
 PerlinSdf::value(const RealVect& a_pos) const
@@ -85,7 +84,7 @@ PerlinSdf::reseed()
   }
 
   // Reseed the RNG
-  int seed = time(nullptr);
+  int seed = static_cast<int>(time(nullptr));
 
   // Haven't had trouble with this, but I'm putting this here for safety.
 #ifdef CH_MPI
@@ -123,27 +122,29 @@ PerlinSdf::noise(const double a_x, const double a_y, const double a_z) const
   const double w = fade(z);
 
   // Hash coordinates of 8 cube corners
-  const int A  = p[X] + Y;
-  const int AA = p[A] + Z;
-  const int AB = p[A + 1] + Z;
-  const int B  = p[X + 1] + Y;
-  const int BA = p[B] + Z;
-  const int BB = p[B + 1] + Z;
+  const int A  = static_cast<int>(p[X]) + Y;
+  const int AA = static_cast<int>(p[A]) + Z;
+  const int AB = static_cast<int>(p[A + 1]) + Z;
+  const int B  = static_cast<int>(p[X + 1]) + Y;
+  const int BA = static_cast<int>(p[B]) + Z;
+  const int BB = static_cast<int>(p[B + 1]) + Z;
 
   // Add blended results from 8 corners of cube
   return lerp(w,
               lerp(v,
                    lerp(u,
-                        grad(p[AA], x, y, z),      // AND ADD
-                        grad(p[BA], x - 1, y, z)), // BLENDED
+                        grad(static_cast<int>(p[AA]), x, y, z),      // AND ADD
+                        grad(static_cast<int>(p[BA]), x - 1, y, z)), // BLENDED
                    lerp(u,
-                        grad(p[AB], x, y - 1, z),       // RESULTS
-                        grad(p[BB], x - 1, y - 1, z))), // FROM  8
+                        grad(static_cast<int>(p[AB]), x, y - 1, z),       // RESULTS
+                        grad(static_cast<int>(p[BB]), x - 1, y - 1, z))), // FROM  8
               lerp(v,
                    lerp(u,
-                        grad(p[AA + 1], x, y, z - 1),      // CORNERS
-                        grad(p[BA + 1], x - 1, y, z - 1)), // OF CUBE
-                   lerp(u, grad(p[AB + 1], x, y - 1, z - 1), grad(p[BB + 1], x - 1, y - 1, z - 1))));
+                        grad(static_cast<int>(p[AA + 1]), x, y, z - 1),      // CORNERS
+                        grad(static_cast<int>(p[BA + 1]), x - 1, y, z - 1)), // OF CUBE
+                   lerp(u,
+                        grad(static_cast<int>(p[AB + 1]), x, y - 1, z - 1),
+                        grad(static_cast<int>(p[BB + 1]), x - 1, y - 1, z - 1))));
 }
 
 Real
@@ -188,23 +189,32 @@ PerlinSdf::octaveNoise(const RealVect& a_pos) const
 }
 
 Real
-PerlinSdf::lerp(const Real t, const Real a, const Real b) const
+PerlinSdf::lerp(const Real t, const Real a, const Real b)
 {
   return a + t * (b - a);
 }
 
 Real
-PerlinSdf::fade(const Real t) const
+PerlinSdf::fade(const Real t)
 {
   return t * t * t * (t * (t * 6 - 15) + 10);
 }
 
 Real
-PerlinSdf::grad(const int hash, const double x, const double y, const double z) const
+PerlinSdf::grad(const int hash, const double x, const double y, const double /*z*/)
 {
   const int    h = hash & 15;
   const double u = h < 8 ? x : y;
-  const double v = h < 4 ? y : h == 12 || h == 14 ? x : y;
+  double       v;
+  if (h < 4) {
+    v = y;
+  }
+  else if (h == 12 || h == 14) {
+    v = x;
+  }
+  else {
+    v = y;
+  }
   return ((h & 1) == 0 ? u : -u) + ((h & 2) == 0 ? v : -v);
 }
 

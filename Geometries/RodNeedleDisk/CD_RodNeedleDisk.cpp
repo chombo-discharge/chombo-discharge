@@ -1,11 +1,10 @@
-/* chombo-discharge
- * Copyright © 2022 NTNU.
- * Copyright © 2022 Fanny Skirbekk. 
- * Copyright © 2023 SINTEF Energy Research
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_RodNeedleDisk.cpp
   @brief  Implementation of CD_RodNeedleDisk.H
   @author Fanny Skirbekk
@@ -24,8 +23,10 @@
 #include <CD_RoundedCylinderIF.H>
 #include <CD_NamespaceHeader.H>
 
+/// @cond DOXYGEN_SKIP
 using Vec3    = EBGeometry::Vec3T<Real>;
 using ImpFunc = EBGeometry::ImplicitFunction<Real>;
+/// @endcond
 
 RodNeedleDisk::RodNeedleDisk() noexcept
 {
@@ -107,7 +108,6 @@ RodNeedleDisk::defineRodNeedle() noexcept
   if (useNeedle) {
     // a_angle is entire opening angle, dividing by two to get half of the opening angle
     const Real bodyRadius       = needleRadius - needleTipRadius;
-    const Real tipLength        = bodyRadius / std::tan((0.5 * needleAngle) * Units::pi / 180.0);
     const Real transitionRadius = 0.25 * needleTipRadius;
 
     // The center of the needle tip is set to origo in order for the rotation to work more easily
@@ -156,7 +156,7 @@ RodNeedleDisk::defineRodNeedle() noexcept
   }
 
   // Combine the rod and the needle using a CSG union. Then orient and translate them into the user-specified position.
-  if (implicitFunctions.size() > 0) {
+  if (!implicitFunctions.empty()) {
     auto rodNeedleUnion = EBGeometry::SmoothUnion<Real>(implicitFunctions, rodNeedleSmooth);
 
     // Rotate into user-specified orientation.

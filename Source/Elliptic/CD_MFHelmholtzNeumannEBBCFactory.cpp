@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_MFHelmholtzNeumannEBBCFactory.cpp
   @brief  Implementation of CD_MFHelmholtzNeumannEBBCFactory.H
   @author Robert Marskar
@@ -17,12 +18,9 @@
 #include <CD_MFHelmholtzNeumannEBBC.H>
 #include <CD_NamespaceHeader.H>
 
-MFHelmholtzNeumannEBBCFactory::MFHelmholtzNeumannEBBCFactory()
+MFHelmholtzNeumannEBBCFactory::MFHelmholtzNeumannEBBCFactory() : m_useConstant(false), m_useFunction(false)
 {
   CH_TIME("MFHelmholtzNeumannEBBCFactory::MFHelmholtzNeumannEBBCFactory()");
-
-  m_useConstant = false;
-  m_useFunction = false;
 }
 
 MFHelmholtzNeumannEBBCFactory::MFHelmholtzNeumannEBBCFactory(const Real a_DphiDn)
@@ -97,7 +95,7 @@ MFHelmholtzNeumannEBBCFactory::create(const int a_iphase, const RefCountedPtr<MF
 
   CH_assert(m_useFunction || m_useConstant);
 
-  auto bc = new MFHelmholtzNeumannEBBC(a_iphase, a_jumpBC);
+  auto* bc = new MFHelmholtzNeumannEBBC(a_iphase, a_jumpBC);
 
   if (m_multByBco) {
     if (m_useConstant) {

@@ -1,12 +1,13 @@
-/* chombo-discharge
- * Copyright © 2022 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2022-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_CdrPlasmaPhotoReactionJSON.cpp
-  @brief  Implementation of CD_CdrPlasmaPhotoReactionJSON.H
-  @author Robert Marskar
+/**
+   @file   CD_CdrPlasmaPhotoReactionJSON.cpp
+   @brief  Implementation of CD_CdrPlasmaPhotoReactionJSON.H
+   @author Robert Marskar
 */
 
 // Our includes
@@ -15,21 +16,19 @@
 
 using namespace Physics::CdrPlasma;
 
-CdrPlasmaPhotoReactionJSON::CdrPlasmaPhotoReactionJSON(const std::list<int> a_plasmaReactants,
-                                                       const std::list<int> a_neutralReactants,
-                                                       const std::list<int> a_photonReactants,
-                                                       const std::list<int> a_plasmaProducts,
-                                                       const std::list<int> a_neutralProducts)
-{
-  m_plasmaReactants  = a_plasmaReactants;
-  m_neutralReactants = a_neutralReactants;
-  m_photonReactants  = a_photonReactants;
-  m_plasmaProducts   = a_plasmaProducts;
-  m_neutralProducts  = a_neutralProducts;
-}
-
-CdrPlasmaPhotoReactionJSON::~CdrPlasmaPhotoReactionJSON()
+CdrPlasmaPhotoReactionJSON::CdrPlasmaPhotoReactionJSON(const std::list<int>& a_plasmaReactants,
+                                                       const std::list<int>& a_neutralReactants,
+                                                       const std::list<int>& a_photonReactants,
+                                                       const std::list<int>& a_plasmaProducts,
+                                                       const std::list<int>& a_neutralProducts)
+  : m_plasmaReactants(a_plasmaReactants),
+    m_neutralReactants(a_neutralReactants),
+    m_photonReactants(a_photonReactants),
+    m_plasmaProducts(a_plasmaProducts),
+    m_neutralProducts(a_neutralProducts)
 {}
+
+CdrPlasmaPhotoReactionJSON::~CdrPlasmaPhotoReactionJSON() = default;
 
 const std::list<int>&
 CdrPlasmaPhotoReactionJSON::getPlasmaReactants() const

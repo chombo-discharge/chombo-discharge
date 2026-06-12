@@ -1,6 +1,7 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 /*
@@ -15,14 +16,9 @@
 #include <CD_NamespaceHeader.H>
 
 EBHelmholtzRobinEBBCFactory::EBHelmholtzRobinEBBCFactory()
+  : m_useConstant(false), m_useFunction(false), m_order(-1), m_weight(-1), m_domainDropOrder(-1)
 {
   CH_TIME("EBHelmholtzRobinEBBCFactory::EBHelmholtzRobinEBBCFactory()");
-
-  m_order           = -1;
-  m_weight          = -1;
-  m_domainDropOrder = -1;
-  m_useConstant     = false;
-  m_useFunction     = false;
 }
 
 EBHelmholtzRobinEBBCFactory::EBHelmholtzRobinEBBCFactory(const int  a_order,
@@ -126,7 +122,7 @@ EBHelmholtzRobinEBBCFactory::create()
   CH_assert(m_order > 0);
   CH_assert(m_weight >= 0);
 
-  EBHelmholtzRobinEBBC* bc = new EBHelmholtzRobinEBBC();
+  auto* bc = new EBHelmholtzRobinEBBC();
 
   bc->setOrder(m_order);
   bc->setWeight(m_weight);

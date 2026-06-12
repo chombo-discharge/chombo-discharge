@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_WireWire.cpp
   @brief  Implementation of CD_WireWire.H
   @author Robert Marskar
@@ -14,8 +15,10 @@
 #include <CD_EBGeometryIF.H>
 #include <CD_NamespaceHeader.H>
 
+/// @cond DOXYGEN_SKIP
 using Vec3    = EBGeometry::Vec3T<Real>;
 using ImpFunc = EBGeometry::ImplicitFunction<Real>;
+/// @endcond
 
 WireWire::WireWire()
 {
@@ -52,14 +55,14 @@ WireWire::WireWire()
   }
 
   // Create electrodes
-  for (int i = 0; i < electrodes.size(); i++) {
-    const auto baseif = RefCountedPtr<BaseIF>(new EBGeometryIF<Real>(electrodes[i].first, true));
-    m_electrodes.push_back(Electrode(baseif, true, electrodes[i].second));
+  for (auto& electrode : electrodes) {
+    const auto baseif = RefCountedPtr<BaseIF>(new EBGeometryIF<Real>(electrode.first, true));
+    m_electrodes.push_back(Electrode(baseif, true, electrode.second));
   }
 
   // Create the insulation object
   std::shared_ptr<ImpFunc> insulation;
-  if (dielectrics.size() > 0 && insulationPermittivity > 0.0) {
+  if (!dielectrics.empty() && insulationPermittivity > 0.0) {
     if (smoothLen > 0.0) {
       insulation = EBGeometry::SmoothUnion<Real>(dielectrics, smoothLen);
     }

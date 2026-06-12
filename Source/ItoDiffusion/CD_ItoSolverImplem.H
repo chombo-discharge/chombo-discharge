@@ -1,17 +1,18 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_ItoSolverImplem.H
   @brief  Implementation of CD_ItoSolver.H
   @author Robert Marskar
   @date   April 2020
 */
 
-#ifndef CD_ItoSolverImplem_H
-#define CD_ItoSolverImplem_H
+#ifndef CD_ITOSOLVERIMPLEM_H
+#define CD_ITOSOLVERIMPLEM_H
 
 // Std includes
 #include <chrono>
@@ -49,7 +50,7 @@ template <ItoSolver::WhichContainer C>
 void
 ItoSolver::addParticles(ListBox<ItoParticle>& a_inputParticles,
                         const int             a_lvl,
-                        const DataIndex       a_dit,
+                        const DataIndex&      a_dit,
                         const bool            a_destructive)
 {
   CH_TIME("ItoSolver::addParticles");

@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file    CD_MushroomIF.cpp
   @brief   Implementation of CD_MushroomIF.H
   @author  Robert Marskar
@@ -20,13 +21,14 @@
 #include <CD_RoundedCylinderIF.H>
 #include <CD_NamespaceHeader.H>
 
-MushroomIF::MushroomIF(const RealVect a_center,
-                       const Real     a_R,
-                       const Real     a_r,
-                       const Real     a_L,
-                       const Real     a_d,
-                       const Real     a_curv,
-                       const bool     a_fluidInside)
+MushroomIF::MushroomIF(const RealVect& a_center,
+                       const Real      a_R,
+                       const Real      a_r,
+                       const Real      a_L,
+                       const Real      a_d,
+                       const Real      a_curv,
+                       const bool      a_fluidInside)
+  : m_fluidInside(a_fluidInside)
 {
   const RealVect up = BASISREALV(SpaceDim - 1);
 
@@ -39,21 +41,17 @@ MushroomIF::MushroomIF(const RealVect a_center,
   parts.push_back(stem);
   parts.push_back(head);
 
-  m_baseIF      = RefCountedPtr<BaseIF>(new SmoothIntersection(parts, a_curv));
-  m_fluidInside = a_fluidInside;
+  m_baseIF = RefCountedPtr<BaseIF>(new SmoothIntersection(parts, a_curv));
 
   delete parts[0];
   delete parts[1];
 }
 
 MushroomIF::MushroomIF(const MushroomIF& a_inputIF)
-{
-  m_baseIF      = a_inputIF.m_baseIF;
-  m_fluidInside = a_inputIF.m_fluidInside;
-}
-
-MushroomIF::~MushroomIF()
+  : m_baseIF(a_inputIF.m_baseIF), m_fluidInside(a_inputIF.m_fluidInside)
 {}
+
+MushroomIF::~MushroomIF() = default;
 
 Real
 MushroomIF::value(const RealVect& a_pos) const

@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_ProfilePlaneIF.cpp
   @brief  Implementation of CD_ProfilePlaneIF.H
   @author Robert Marskar
@@ -26,16 +27,16 @@
 #include <CD_RoundedBoxIF.H>
 #include <CD_NamespaceHeader.H>
 
-ProfilePlaneIF::ProfilePlaneIF(const RealVect a_point,
-                               const Real     a_width,
-                               const BaseIF*  a_impFunc,
-                               const int      a_num_left,
-                               const int      a_num_right,
-                               const Real     a_ccDist,
-                               const Real     a_xShift,
-                               const Real     a_yShift,
-                               const Real     a_curv,
-                               const bool     a_fluidInside)
+ProfilePlaneIF::ProfilePlaneIF(const RealVect& a_point,
+                               const Real      a_width,
+                               const BaseIF*   a_impFunc,
+                               const int       a_num_left,
+                               const int       a_num_right,
+                               const Real      a_ccDist,
+                               const Real      a_xShift,
+                               const Real      a_yShift,
+                               const Real      a_curv,
+                               const bool      a_fluidInside)
 {
   if (SpaceDim == 3) {
     MayDay::Error("ProfilePlaneIF(...) - only 2D is currently supported");
@@ -52,12 +53,12 @@ ProfilePlaneIF::ProfilePlaneIF(const RealVect a_point,
   Vector<BaseIF*> parts;
   const RealVect  lo  = point - 0.5 * a_width * xhat - 1.E3 * yhat;
   const RealVect  hi  = point + 0.5 * a_width * xhat;
-  BaseIF*         box = (BaseIF*)(new RoundedBoxIF(lo, hi, a_curv, false)); // Construct base box with fluid outside.
+  auto*           box = (BaseIF*)(new RoundedBoxIF(lo, hi, a_curv, false)); // Construct base box with fluid outside.
   parts.push_back(box);
 
   // Left profile holes
   for (int ileft = 0; ileft < a_num_left; ileft++) {
-    TransformIF* transIF = new TransformIF(*a_impFunc);
+    auto* transIF = new TransformIF(*a_impFunc);
 
     const RealVect shift = -(ileft + 0.5) * a_ccDist * xhat + a_xShift * xhat + a_yShift * yhat;
     transIF->translate(shift);
@@ -67,7 +68,7 @@ ProfilePlaneIF::ProfilePlaneIF(const RealVect a_point,
 
   // Right profile holes
   for (int iright = 0; iright < a_num_right; iright++) {
-    TransformIF* transIF = new TransformIF(*a_impFunc);
+    auto* transIF = new TransformIF(*a_impFunc);
 
     const RealVect shift = (iright + 0.5) * a_ccDist * xhat + a_xShift * xhat + a_yShift * yhat;
     transIF->translate(shift);
@@ -79,13 +80,10 @@ ProfilePlaneIF::ProfilePlaneIF(const RealVect a_point,
 }
 
 ProfilePlaneIF::ProfilePlaneIF(const ProfilePlaneIF& a_inputIF)
-{
-  m_fluidInside = a_inputIF.m_fluidInside;
-  m_baseif      = a_inputIF.m_baseif;
-}
-
-ProfilePlaneIF::~ProfilePlaneIF()
+  : m_baseif(a_inputIF.m_baseif), m_fluidInside(a_inputIF.m_fluidInside)
 {}
+
+ProfilePlaneIF::~ProfilePlaneIF() = default;
 
 Real
 ProfilePlaneIF::value(const RealVect& a_pos) const

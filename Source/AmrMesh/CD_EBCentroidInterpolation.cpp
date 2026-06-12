@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2025 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_EBCentroidInterpolation.cpp
   @brief  Implementation of CD_EBCentroidInterpolation.H
   @author Robert Marskar
@@ -20,12 +21,9 @@
 #include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
-EBCentroidInterpolation::EBCentroidInterpolation() noexcept
+EBCentroidInterpolation::EBCentroidInterpolation() noexcept : m_isDefined(false), m_dx(-1.0)
 {
   CH_TIME("EBCentroidInterpolation:EBCentroidInterpolation(weak)");
-
-  m_dx        = -1.0;
-  m_isDefined = false;
 }
 
 EBCentroidInterpolation::EBCentroidInterpolation(const EBLevelGrid& a_eblg,
@@ -177,10 +175,10 @@ EBCentroidInterpolation::getLinearStencil(VoFStencil&          a_stencil,
 }
 
 bool
-EBCentroidInterpolation::getTaylorExtrapolationStencil(VoFStencil&          a_stencil,
-                                                       const VolIndex&      a_vof,
-                                                       const EBISBox&       a_ebisBox,
-                                                       const ProblemDomain& a_domain) const noexcept
+EBCentroidInterpolation::getTaylorExtrapolationStencil(VoFStencil&     a_stencil,
+                                                       const VolIndex& a_vof,
+                                                       const EBISBox&  a_ebisBox,
+                                                       const ProblemDomain& /*a_domain*/) const noexcept
 {
   CH_TIME("EBCentroidInterpolation::getTaylorExtrapolationStencil");
 
@@ -197,10 +195,10 @@ EBCentroidInterpolation::getTaylorExtrapolationStencil(VoFStencil&          a_st
 }
 
 bool
-EBCentroidInterpolation::getLeastSquaresStencil(VoFStencil&          a_stencil,
-                                                const VolIndex&      a_vof,
-                                                const EBISBox&       a_ebisBox,
-                                                const ProblemDomain& a_domain) const noexcept
+EBCentroidInterpolation::getLeastSquaresStencil(VoFStencil&     a_stencil,
+                                                const VolIndex& a_vof,
+                                                const EBISBox&  a_ebisBox,
+                                                const ProblemDomain& /*a_domain*/) const noexcept
 {
   CH_TIME("EBCentroidInterpolation::getLeastSquaresStencil");
 
@@ -225,10 +223,10 @@ EBCentroidInterpolation::getLeastSquaresStencil(VoFStencil&          a_stencil,
 }
 
 bool
-EBCentroidInterpolation::getPiecewiseLinearStencil(VoFStencil&          a_stencil,
-                                                   const VolIndex&      a_vof,
-                                                   const EBISBox&       a_ebisBox,
-                                                   const ProblemDomain& a_domain) const noexcept
+EBCentroidInterpolation::getPiecewiseLinearStencil(VoFStencil&     a_stencil,
+                                                   const VolIndex& a_vof,
+                                                   const EBISBox&  a_ebisBox,
+                                                   const ProblemDomain& /*a_domain*/) const noexcept
 {
   CH_TIME("EBCentroidInterpolation::getPiecewiseLinearStencil");
 
@@ -284,11 +282,8 @@ EBCentroidInterpolation::interpolate(LevelData<BaseIVFAB<Real>>& a_centroidData,
   CH_assert(a_cellData.disjointBoxLayout() == m_eblg.getDBL());
   CH_assert(a_centroidData.nComp() == a_cellData.nComp());
 
-  const DisjointBoxLayout& dbl       = m_eblg.getDBL();
-  const ProblemDomain&     domain    = m_eblg.getDomain();
-  const EBISLayout&        ebisl     = m_eblg.getEBISL();
-  const Box&               domainBox = domain.domainBox();
-  const DataIterator&      dit       = dbl.dataIterator();
+  const DisjointBoxLayout& dbl = m_eblg.getDBL();
+  const DataIterator&      dit = dbl.dataIterator();
 
   const int nbox = dit.size();
 
@@ -318,14 +313,13 @@ EBCentroidInterpolation::interpolate(BaseIVFAB<Real>& a_centroidData,
   const Box&               domainBox = domain.domainBox();
 
   const EBISBox&               ebisBox  = ebisl[a_din];
-  const Box&                   cellBox  = dbl[a_din];
   const BaseIVFAB<VoFStencil>& stencils = m_interpStencils[a_din];
 
   const int nComp = a_cellData.nComp();
 
   for (int comp = 0; comp < nComp; comp++) {
 
-    // This is the kernel that is used when the interpolation is expressable as a stencil.
+    // This is the kernel that is used when the interpolation is expressible as a stencil.
     auto stencilKernel = [&](const VolIndex& vof) -> void {
       a_centroidData(vof, comp) = 0.0;
 
@@ -384,17 +378,17 @@ EBCentroidInterpolation::interpolate(BaseIVFAB<Real>& a_centroidData,
         // Limit the slopes.
         switch (m_interpolationType) {
         case Type::MinMod: {
-          slope = this->MinMod(dwl, dwr);
+          slope = MinMod(dwl, dwr);
 
           break;
         }
         case Type::MonotonizedCentral: {
-          slope = this->MonotonizedCentral(dwl, dwr);
+          slope = MonotonizedCentral(dwl, dwr);
 
           break;
         }
         case Type::Superbee: {
-          slope = this->Superbee(dwl, dwr);
+          slope = Superbee(dwl, dwr);
 
           break;
         }
@@ -437,7 +431,7 @@ EBCentroidInterpolation::interpolate(BaseIVFAB<Real>& a_centroidData,
 }
 
 Real
-EBCentroidInterpolation::MinMod(const Real& a_dwl, const Real& a_dwr) const noexcept
+EBCentroidInterpolation::MinMod(const Real& a_dwl, const Real& a_dwr) noexcept
 {
   Real slope = 0.0;
 
@@ -449,7 +443,7 @@ EBCentroidInterpolation::MinMod(const Real& a_dwl, const Real& a_dwr) const noex
 }
 
 Real
-EBCentroidInterpolation::MonotonizedCentral(const Real& a_dwl, const Real& a_dwr) const noexcept
+EBCentroidInterpolation::MonotonizedCentral(const Real& a_dwl, const Real& a_dwr) noexcept
 {
   Real slope = 0.0;
 
@@ -464,13 +458,13 @@ EBCentroidInterpolation::MonotonizedCentral(const Real& a_dwl, const Real& a_dwr
 }
 
 Real
-EBCentroidInterpolation::Superbee(const Real& a_dwl, const Real& a_dwr) const noexcept
+EBCentroidInterpolation::Superbee(const Real& a_dwl, const Real& a_dwr) noexcept
 {
   Real slope = 0.0;
 
   if (a_dwl * a_dwr > 0.0) {
-    const Real s1 = this->MinMod(a_dwl, 2 * a_dwr);
-    const Real s2 = this->MinMod(a_dwr, 2 * a_dwl);
+    const Real s1 = MinMod(a_dwl, 2 * a_dwr);
+    const Real s2 = MinMod(a_dwr, 2 * a_dwl);
 
     if (s1 * s2 > 0.0) {
       slope = std::abs(s1) > std::abs(s2) ? s1 : s2;

@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_DataOps.cpp
   @brief  Implementation of CD_DataOps.H
   @author Robert Marskar
@@ -380,7 +381,7 @@ DataOps::averageFaceToCell(EBAMRCellData&               a_cellData,
 void
 DataOps::averageFaceToCell(LevelData<EBCellFAB>&       a_cellData,
                            const LevelData<EBFluxFAB>& a_fluxData,
-                           const ProblemDomain&        a_domain)
+                           const ProblemDomain& /*a_domain*/)
 {
   CH_TIME("DataOps::averageFaceToCell(LD<EBCellFAB>, LD<EBCellFAB>, ProblemDomain)");
 
@@ -440,7 +441,7 @@ DataOps::averageFaceToCell(LevelData<EBCellFAB>&       a_cellData,
               cellData(vof, comp) += fluxData[dir](face, comp);
             }
 
-            numFaces += faces.size();
+            numFaces += static_cast<int>(faces.size());
           }
         }
 
@@ -786,10 +787,6 @@ DataOps::filterSmooth(LevelData<EBCellFAB>& a_data,
 #else
       MayDay::Error("DataOps::filterSmooth -- dimensionality logic bust");
 #endif
-
-      auto irregularKernel = [&](const VolIndex& vof) -> void {
-        data(vof, icomp) = clone(vof, icomp);
-      };
 
       BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       //      BoxLoops::loop(vofit, irregularKernel);
@@ -2538,7 +2535,7 @@ DataOps::scale(LevelData<BaseIVFAB<Real>>& a_lhs, const Real& a_scale)
 
     VoFIterator vofit(lhs.getIVS(), lhs.getEBGraph());
 
-    auto kernel = [&](const VolIndex& vof) -> void {
+    auto kernel = [&](const VolIndex& /*vof*/) -> void {
       for (int comp = 0; comp < a_lhs.nComp(); comp++) {
         lhs(vofit(), comp) *= a_scale;
       }
@@ -2731,7 +2728,7 @@ DataOps::setInvalidValue(EBAMRCellData& a_lhs, const Vector<int>& a_refRat, cons
 void
 DataOps::setValue(MFAMRCellData&                             a_lhs,
                   const std::function<Real(const RealVect)>& a_function,
-                  const RealVect                             a_probLo,
+                  const RealVect&                            a_probLo,
                   const Vector<Real>&                        a_dx,
                   const int                                  a_comp)
 {
@@ -2751,8 +2748,7 @@ DataOps::setValue(LevelData<MFCellFAB>&                      a_lhs,
 {
   CH_TIME("DataOps::setValue(LD<MFCellFAB>, std::function)");
 
-  const DisjointBoxLayout& dbl = a_lhs.disjointBoxLayout();
-  const DataIterator&      dit = a_lhs.dataIterator();
+  const DataIterator& dit = a_lhs.dataIterator();
 
   const int nbox = dit.size();
 
@@ -2799,7 +2795,7 @@ DataOps::setValue(LevelData<MFCellFAB>&                      a_lhs,
 void
 DataOps::setValue(EBAMRCellData&                             a_lhs,
                   const std::function<Real(const RealVect)>& a_function,
-                  const RealVect                             a_probLo,
+                  const RealVect&                            a_probLo,
                   const Vector<Real>&                        a_dx,
                   const int                                  a_comp)
 {
@@ -2819,8 +2815,7 @@ DataOps::setValue(LevelData<EBCellFAB>&                      a_lhs,
 {
   CH_TIME("DataOps::setValue(LD<EBCellFAB>, std::function)");
 
-  const DisjointBoxLayout& dbl = a_lhs.disjointBoxLayout();
-  const DataIterator&      dit = a_lhs.dataIterator();
+  const DataIterator& dit = a_lhs.dataIterator();
 
   const int nbox = dit.size();
 
@@ -2862,7 +2857,7 @@ DataOps::setValue(LevelData<EBCellFAB>&                      a_lhs,
 void
 DataOps::setValue(EBAMRFluxData&                             a_lhs,
                   const std::function<Real(const RealVect)>& a_function,
-                  const RealVect                             a_probLo,
+                  const RealVect&                            a_probLo,
                   const Vector<Real>&                        a_dx,
                   const int                                  a_comp)
 {
@@ -2882,8 +2877,7 @@ DataOps::setValue(LevelData<EBFluxFAB>&                      a_lhs,
 {
   CH_TIME("DataOps::setValue(LD<EBFluxFAB>, std::function)");
 
-  const DisjointBoxLayout& dbl = a_lhs.disjointBoxLayout();
-  const DataIterator&      dit = a_lhs.dataIterator();
+  const DataIterator& dit = a_lhs.dataIterator();
 
   const int nbox = dit.size();
 
@@ -2926,7 +2920,7 @@ DataOps::setValue(LevelData<EBFluxFAB>&                      a_lhs,
 void
 DataOps::setValue(EBAMRIVData&                               a_lhs,
                   const std::function<Real(const RealVect)>& a_function,
-                  const RealVect                             a_probLo,
+                  const RealVect&                            a_probLo,
                   const Vector<Real>&                        a_dx,
                   const int                                  a_comp)
 {
@@ -2947,8 +2941,7 @@ DataOps::setValue(LevelData<BaseIVFAB<Real>>&                a_lhs,
   CH_TIME("DataOps::setValue(LD<BaseIVFAB>, std::function)");
 
   // As we don't specify where the function should be evaluated, this routine sets a_lhs to be evaluated at the cell center.
-  const DisjointBoxLayout& dbl = a_lhs.disjointBoxLayout();
-  const DataIterator&      dit = a_lhs.dataIterator();
+  const DataIterator& dit = a_lhs.dataIterator();
 
   const int nbox = dit.size();
 
@@ -2978,7 +2971,7 @@ DataOps::setValue(LevelData<BaseIVFAB<Real>>&                a_lhs,
 void
 DataOps::setValue(EBAMRCellData&                                 a_lhs,
                   const std::function<RealVect(const RealVect)>& a_function,
-                  const RealVect                                 a_probLo,
+                  const RealVect&                                a_probLo,
                   const Vector<Real>&                            a_dx)
 {
   CH_TIME("DataOps::setValue(EBAMRCellData, std::function<RealVect>)");
@@ -2998,8 +2991,7 @@ DataOps::setValue(LevelData<EBCellFAB>&                          a_lhs,
 
   CH_assert(a_lhs.nComp() == SpaceDim);
 
-  const DisjointBoxLayout& dbl = a_lhs.disjointBoxLayout();
-  const DataIterator&      dit = a_lhs.dataIterator();
+  const DataIterator& dit = a_lhs.dataIterator();
 
   const int nbox = dit.size();
 
@@ -3365,8 +3357,7 @@ DataOps::squareRoot(LevelData<MFCellFAB>& a_lhs)
 {
   CH_TIME("DataOps::squareRoot(LD<MFCellFAB>)");
 
-  const DisjointBoxLayout& dbl = a_lhs.disjointBoxLayout();
-  const DataIterator&      dit = a_lhs.dataIterator();
+  const DataIterator& dit = a_lhs.dataIterator();
 
   const int nbox = dit.size();
 
@@ -3578,7 +3569,7 @@ DataOps::vectorLength2(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& a_bo
 }
 
 void
-DataOps::computeMinValidBox(RealVect& a_lo, RealVect& a_hi, const RealVect a_normal, const RealVect a_centroid)
+DataOps::computeMinValidBox(RealVect& a_lo, RealVect& a_hi, const RealVect& a_normal, const RealVect& a_centroid)
 {
   CH_TIME("DataOps::computeMinValidBox");
 
@@ -3645,7 +3636,7 @@ DataOps::computeMinValidBox(RealVect& a_lo, RealVect& a_hi, const RealVect a_nor
 }
 
 bool
-DataOps::allCornersInsideEb(const Vector<RealVect>& a_corners, const RealVect a_normal, const RealVect a_centroid)
+DataOps::allCornersInsideEb(const Vector<RealVect>& a_corners, const RealVect& a_normal, const RealVect& a_centroid)
 {
   CH_TIME("DataOps::allCornersInsideEb");
 

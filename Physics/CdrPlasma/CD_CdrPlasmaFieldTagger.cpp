@@ -1,12 +1,13 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_CdrPlasmaFieldTagger.cpp
-  @brief  Implementation of CD_CdrPlasmaFieldTagger.H
-  @author Robert Marskar
+/**
+   @file   CD_CdrPlasmaFieldTagger.cpp
+   @brief  Implementation of CD_CdrPlasmaFieldTagger.H
+   @author Robert Marskar
 */
 
 // Chombo includes
@@ -29,8 +30,7 @@ CdrPlasmaFieldTagger::CdrPlasmaFieldTagger()
   m_name = "CdrPlasmaFieldTagger";
 }
 
-CdrPlasmaFieldTagger::~CdrPlasmaFieldTagger()
-{}
+CdrPlasmaFieldTagger::~CdrPlasmaFieldTagger() = default;
 
 void
 CdrPlasmaFieldTagger::allocateStorage() const
@@ -109,7 +109,7 @@ CdrPlasmaFieldTagger::computeTracers() const
   Real maxGradElectricField = -std::numeric_limits<Real>::max();
   Real minGradElectricField = std::numeric_limits<Real>::max();
 
-  // Get the maximum and minium value of the electric field and its gradient. This is the
+  // Get the maximum and minimum value of the electric field and its gradient. This is the
   // norm so we are getting the max of |E| and the max of |grad(|E|)|.
   DataOps::getMaxMinNorm(maxElectricField, minElectricField, m_electricField);
   DataOps::getMaxMinNorm(maxGradElectricField, minGradElectricField, m_gradElectricField);

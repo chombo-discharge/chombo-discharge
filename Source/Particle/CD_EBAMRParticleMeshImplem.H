@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_EBAMRParticleMeshImplem.H
   @brief  Implementation of CD_EBAMRParticleMesh.H
   @author Robert Marskar
 */
 
-#ifndef CD_EBAMRParticleMeshImplem_H
-#define CD_EBAMRParticleMeshImplem_H
+#ifndef CD_EBAMRPARTICLEMESHIMPLEM_H
+#define CD_EBAMRPARTICLEMESHIMPLEM_H
 
 // Chombo includes
 #include <CH_Timer.H>
@@ -254,7 +255,7 @@ EBAMRParticleMesh::depositHaloNGP(EBAMRCellData&              a_meshData,
   constexpr int coarseMaskWidth = 1;
 
   // Doing the nasty here...
-  ParticleContainer<P>& particles = const_cast<ParticleContainer<P>&>(a_particles);
+  auto& particles = const_cast<ParticleContainer<P>&>(a_particles);
 
   particles.transferMaskParticles(m_outerHaloMasks.at(coarseMaskWidth));
 
@@ -339,7 +340,7 @@ EBAMRParticleMesh::depositTransition(EBAMRCellData&              a_meshData,
   // This piece of code transfers the particles that lie on the coarse-side interface to a different particle container than
   // a_particles. We can not use ParticleContainer::transferMaskParticles because the mask is defined on the refined coarse
   // level. So we do this transfer directly.
-  ParticleContainer<P>& particles = const_cast<ParticleContainer<P>&>(a_particles);
+  auto& particles = const_cast<ParticleContainer<P>&>(a_particles);
 
   this->transferMaskParticlesTransition(particles, a_depositionType);
 

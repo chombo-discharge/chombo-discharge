@@ -1,20 +1,21 @@
-/*! chombo-discharge
- * Copyright © 2022 SINTEF Energy Research.
- * Copyright © 2022 NTNU.
- * Copyright © 2022 Fanny Skirbekk
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2022-2026 SINTEF Energy Research
+ * SPDX-FileCopyrightText: 2022-2026 NTNU
+ * SPDX-FileCopyrightText: 2022-2026 Fanny Skirbekk
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_DischargeInceptionStepperImplem.H
-  @brief  Implementation of CD_DischargeInceptionStepper.H
-  @author Robert Marskar (SINTEF)
-  @author Rasmus Hoholm (SINTEF)
-  @author Fanny Skirbekk (NTNU)
+/**
+   @file   CD_DischargeInceptionStepperImplem.H
+   @brief  Implementation of CD_DischargeInceptionStepper.H
+   @author Robert Marskar (SINTEF)
+   @author Rasmus Hoholm (SINTEF)
+   @author Fanny Skirbekk (NTNU)
 */
 
-#ifndef CD_DischargeInceptionStepperImplem_H
-#define CD_DischargeInceptionStepperImplem_H
+#ifndef CD_DISCHARGEINCEPTIONSTEPPERIMPLEM_H
+#define CD_DISCHARGEINCEPTIONSTEPPERIMPLEM_H
 
 // Std includes
 #include <iostream>
@@ -1072,7 +1073,7 @@ template <typename P, typename F, typename C>
 void
 DischargeInceptionStepper<P, F, C>::writePlotData(LevelData<EBCellFAB>& a_output,
                                                   int&                  a_icomp,
-                                                  const std::string     a_outputRealm,
+                                                  const std::string&    a_outputRealm,
                                                   const int             a_level) const
 {
   CH_TIME("DischargeInceptionStepper::writePlotData");
@@ -1115,7 +1116,7 @@ template <typename P, typename F, typename C>
 void
 DischargeInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>& a_output,
                                                             int&                  a_icomp,
-                                                            const std::string     a_outputRealm,
+                                                            const std::string&    a_outputRealm,
                                                             const int             a_level) const noexcept
 {
   CH_TIME("DischargeInceptionStepper::writePlotDataStationary");
@@ -1314,7 +1315,7 @@ template <typename P, typename F, typename C>
 void
 DischargeInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>& a_output,
                                                            int&                  a_icomp,
-                                                           const std::string     a_outputRealm,
+                                                           const std::string&    a_outputRealm,
                                                            const int             a_level) const noexcept
 {
   CH_TIME("DischargeInceptionStepper::writePlotDataTransient");
@@ -2674,7 +2675,7 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltag
           const Real     tol       = 1E-10;
           const Real     gradAlpha = tol + (p.template vect<2>()).vectorLength();
 
-          // Select a step size equal to the avalance length, but never exceed the physical and grid hardcaps
+          // Select a step size equal to the avalanche length, but never exceed the physical and grid hardcaps
           Real deltaX;
           deltaX = std::min(m_alphaDx / (tol + std::abs(alphaEff)), m_gradAlphaDx * std::abs(alphaEff / gradAlpha));
           deltaX = std::max(deltaX, m_minGridDx * dx);
@@ -2858,7 +2859,7 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_
           const Real     tol       = 1E-10;
           const Real     gradAlpha = tol + (p.template vect<2>()).vectorLength();
 
-          // Select a step size equal to the avalance length, but never exceed the physical and grid hardcaps
+          // Select a step size equal to the avalanche length, but never exceed the physical and grid hardcaps
           Real deltaX;
           deltaX = std::min(m_alphaDx / (tol + std::abs(alphaEff)), m_gradAlphaDx * std::abs(alphaEff / gradAlpha));
           deltaX = std::max(deltaX, m_minGridDx * dx);
@@ -3533,7 +3534,7 @@ DischargeInceptionStepper<P, F, C>::computeRdot(const Real& a_voltage) const noe
 
   Real Rdot = 0.0;
 
-  // TLDR: We are computing the integral of dne/dt * (1-eta/alpha) over the critical volume and integral(j/e * dS) over the "critical surface"
+  // TLDR: We are computing the integral of done/dt * (1-eta/alpha) over the critical volume and integral(j/e * dS) over the "critical surface"
   const RealVect probLo = m_amr->getProbLo();
 
   // Compute the electric field at the input voltage
@@ -5111,7 +5112,7 @@ DischargeInceptionStepper<P, F, C>::particleOutsideGrid(const RealVect& a_pos,
 
 template <typename P, typename F, typename C>
 bool
-DischargeInceptionStepper<P, F, C>::particleInsideEB(const RealVect a_pos) const noexcept
+DischargeInceptionStepper<P, F, C>::particleInsideEB(const RealVect& a_pos) const noexcept
 {
 #ifndef NDEBUG
   CH_TIME("DischargeInceptionStepper::particleInsideEB");
@@ -5402,7 +5403,7 @@ DischargeInceptionStepper<P, F, C>::writeData(LevelData<EBCellFAB>& a_output,
 
   CH_START(t2);
   m_amr->copyData(scratch, *a_data[a_level], a_level, m_realm, m_realm);
-  CH_START(t2);
+  CH_STOP(t2);
 
   // Interpolate ghost cells
   CH_START(t3);

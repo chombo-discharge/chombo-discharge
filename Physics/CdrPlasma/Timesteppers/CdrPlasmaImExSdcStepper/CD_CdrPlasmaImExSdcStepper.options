@@ -1,5 +1,5 @@
 # ====================================================================================================
-# IMEX_SDC CLASS OPTIONS
+# CdrPlasmaImExSdcStepper class options
 #
 # This class uses semi-implicit spectral deferred corrections. Diffusion is handled implicitly,
 # and advection-reaction is handled explicitly.

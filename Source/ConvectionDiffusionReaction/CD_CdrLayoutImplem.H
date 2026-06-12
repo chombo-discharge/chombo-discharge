@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_CdrLayoutImplem.H
   @brief  Implementation of CD_CdrLayout.H
   @author Robert Marskar
 */
 
-#ifndef CD_CdrLayoutImplem_H
-#define CD_CdrLayoutImplem_H
+#ifndef CD_CDRLAYOUTIMPLEM_H
+#define CD_CDRLAYOUTIMPLEM_H
 
 // Our includes
 #include <CD_CdrLayout.H>
@@ -76,7 +77,7 @@ CdrLayout<T>::getRealm() const
 
 template <class T>
 void
-CdrLayout<T>::setRealm(const std::string a_realm)
+CdrLayout<T>::setRealm(const std::string& a_realm)
 {
   CH_TIME("CdrLayout<T>::setRealm()");
   if (m_verbosity > 6) {
@@ -547,7 +548,7 @@ CdrFactory<T, S>::newLayout(const Vector<RefCountedPtr<CdrSpecies>>& a_species) 
 {
   CH_TIME("CdrFactory<T, S>::newLayout(Vector<RefCountedPtr<CdrSpecies> >)");
 
-  // Instatiate the return CdrLayout object first.
+  // Instantiate the return CdrLayout object first.
   auto cdr = RefCountedPtr<CdrLayout<T>>(new CdrLayout<T>(a_species));
 
   // Cast solvers and instantiate them

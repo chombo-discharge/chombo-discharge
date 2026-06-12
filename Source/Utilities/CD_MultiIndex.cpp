@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_MultiIndex.cpp
   @brief  Implementation of CD_MultiIndex.H
   @author Robert Marskar
@@ -50,7 +51,7 @@ MultiIndex::getOrder() const
 int
 MultiIndex::getNumIndices() const
 {
-  return m_indices.size();
+  return static_cast<int>(m_indices.size());
 }
 
 int
@@ -124,7 +125,7 @@ MultiIndex::norm() const
 }
 
 int
-MultiIndex::norm(const IntVect a_iv) const
+MultiIndex::norm(const IntVect a_iv)
 {
   int retval = 0;
   for (int dir = 0; dir < SpaceDim; dir++) {
@@ -162,7 +163,7 @@ MultiIndex::makeIndices()
   while (MultiIndex::norm(cur) <= m_order) {
     m_indices.emplace_back(cur);
 
-    // Now go to the next index in lexigraphical order
+    // Now go to the next index in lexicographical order
     if (norm(cur) < m_order) { // Can raise first index.
       cur[0]++;
     }

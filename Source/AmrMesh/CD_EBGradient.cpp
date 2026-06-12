@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_EBGradient.cpp
   @brief  Implementation of CD_EBGradient.H
   @author Robert Marskar
@@ -151,7 +152,6 @@ EBGradient::computeLevelGradient(LevelData<EBCellFAB>& a_gradient, const LevelDa
     EBCellFAB&       grad    = a_gradient[din];
     const EBCellFAB& phi     = a_phi[din];
     const EBISBox&   ebisBox = ebisl[din];
-    const Box        cellBox = dbl[din];
 
     if (!ebisBox.isAllCovered()) {
 
@@ -164,23 +164,6 @@ EBGradient::computeLevelGradient(LevelData<EBCellFAB>& a_gradient, const LevelDa
       auto regularKernel = [&](const IntVect& iv) -> void {
         for (int dir = 0; dir < SpaceDim; dir++) {
           gradFAB(iv, dir) = idx * (phiFAB(iv + BASISV(dir), m_comp) - phiFAB(iv - BASISV(dir), m_comp));
-        }
-      };
-
-      // Irregular kernel -- this is the kernel used in the cut-cells. It simply applies the finite difference based stencil.
-      auto irregularKernel = [&, this](const VolIndex& vof) -> void {
-        for (int dir = 0; dir < SpaceDim; dir++) {
-          grad(vof, dir) = 0.0;
-        }
-
-        // Apply stencil. Note that the stencil "variable" is the gradient component (i.e., direction)
-        auto& sten = m_levelStencils[din](vof, m_comp);
-        for (int i = 0; i < sten.size(); i++) {
-          const VolIndex& ivof    = sten.vof(i);
-          const Real&     iweight = sten.weight(i);
-          const Real&     ivar    = sten.variable(i);
-
-          grad(vof, ivar) += iweight * phi(ivof, m_comp);
         }
       };
 
@@ -506,7 +489,7 @@ EBGradient::defineMasks(LevelData<FArrayBox>& a_coarMaskCF, LevelData<FArrayBox>
     a_coarMaskInvalid[din].setVal(zero);
   }
 
-  // Ned to copy from the buffer masks to this mask.
+  // Need to copy from the buffer masks to this mask.
   Copier copierCF;
   Copier copierInvalid;
 
@@ -585,9 +568,6 @@ EBGradient::defineIteratorsEBCF(const LevelData<FArrayBox>& a_coarMaskCF,
 
   const EBISLayout& ebisl     = m_eblg.getEBISL();
   const EBISLayout& ebislFine = m_eblgFine.getEBISL();
-
-  const ProblemDomain& domain     = m_eblg.getDomain();
-  const ProblemDomain& domainFine = m_eblgFine.getDomain();
 
   const DataIterator& dit  = dbl.dataIterator();
   const int           nbox = dit.size();
@@ -693,16 +673,13 @@ EBGradient::defineStencilsEBCF(const LevelData<FArrayBox>& a_coarMaskInvalid) no
     const Box grownBox     = grow(cellBox, 1) & domain;
     const Box grownBoxFine = refine(grownBox, m_refRat);
 
-    const EBISBox& ebisBox     = ebisl[din];
-    const EBISBox& ebisBoxFine = ebislFine[din];
+    const EBISBox& ebisBox = ebisl[din];
 
     const FArrayBox& coarMaskInvalid = a_coarMaskInvalid[din];
 
     VoFIterator&           ebcfIterator = m_ebcfIterator[din];
     BaseIVFAB<VoFStencil>& coarStencils = m_ebcfStencilsCoar[din];
     BaseIVFAB<VoFStencil>& fineStencils = m_ebcfStencilsFine[din];
-
-    const BaseIVFAB<VoFStencil>& levelStencils = m_levelStencils[din];
 
     // Make the invalid region mask into a DenseIntVectSet because that's what LeastSquares wants.
     DenseIntVectSet validRegionCoar(grownBox, true);
@@ -810,8 +787,8 @@ EBGradient::getFiniteDifferenceStencil(VoFStencil&            a_stencil,
     const Vector<VolIndex> loVoFs = a_ebisBox.getVoFs(a_vof, dir, Side::Lo, 1);
     const Vector<VolIndex> hiVoFs = a_ebisBox.getVoFs(a_vof, dir, Side::Hi, 1);
 
-    const int numLoVoFs = loVoFs.size();
-    const int numHiVoFs = hiVoFs.size();
+    const int numLoVoFs = static_cast<int>(loVoFs.size());
+    const int numHiVoFs = static_cast<int>(hiVoFs.size());
 
     const bool useLoCell = (numLoVoFs > 0) && !(isLoCellIrregular && isLoCellCovered);
     const bool useHiCell = (numHiVoFs > 0) && !(isHiCellIrregular && isHiCellCovered);
@@ -916,7 +893,7 @@ EBGradient::getLeastSquaresStencil(VoFStencil&            a_stencilCoar,
 
   // See if we have enough cells to solve the system of equations. The "-1" is because we interpolate to the cell center/centroid, but we already know
   // phi at this point.
-  const int numEquations = fineVoFs.size() + coarVoFs.size();
+  const int numEquations = static_cast<int>(fineVoFs.size() + coarVoFs.size());
   const int numUnknowns  = LeastSquares::getTaylorExpansionSize(a_order) - 1;
 
   if (numEquations > numUnknowns) {
@@ -968,8 +945,8 @@ EBGradient::getLeastSquaresStencil(VoFStencil&            a_stencilCoar,
     std::sort(fineVofsTrimmedSize.begin(), fineVofsTrimmedSize.end(), comparatorFine);
     std::sort(coarVofsTrimmedSize.begin(), coarVofsTrimmedSize.end(), comparatorCoar);
 
-    const int curFineSize = fineVofsTrimmedSize.size();
-    const int curCoarSize = coarVofsTrimmedSize.size();
+    const int curFineSize = static_cast<int>(fineVofsTrimmedSize.size());
+    const int curCoarSize = static_cast<int>(coarVofsTrimmedSize.size());
 
     fineVofsTrimmedSize.resize(std::min(2 * numUnknowns, curFineSize));
     coarVofsTrimmedSize.resize(std::min(2 * numUnknowns, curCoarSize));
@@ -1097,8 +1074,8 @@ EBGradient::makeAggStencils() noexcept
   CH_STOP(t1);
 
   CH_START(t2);
-  for (int dir = 0; dir < SpaceDim; dir++) {
-    m_aggLevelStencils[dir].define(dbl);
+  for (auto& m_aggLevelStencil : m_aggLevelStencils) {
+    m_aggLevelStencil.define(dbl);
   }
   CH_STOP(t2);
 

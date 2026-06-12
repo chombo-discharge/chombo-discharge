@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2022 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_EBMGProlong.cpp
   @brief  Implementation of CD_EBMGProlong.H
   @author Robert Marskar
@@ -19,18 +20,15 @@
 #include <CD_EBMGProlong.H>
 #include <CD_NamespaceHeader.H>
 
-EBMGProlong::EBMGProlong() noexcept
+EBMGProlong::EBMGProlong() noexcept : m_isDefined(false)
 {
   CH_TIME("EBMGProlong::EBMGProlong(default)");
-
-  m_isDefined = false;
 }
 
 EBMGProlong::EBMGProlong(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_eblgCoar, const int& a_refRat) noexcept
+  : m_isDefined(false)
 {
   CH_TIME("EBMGProlong::EBMGProlong(full)");
-
-  m_isDefined = false;
 
   this->define(a_eblgFine, a_eblgCoar, a_refRat);
 }

@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_EBHelmholtzLarsenDomainBC.cpp
   @brief  Implementation of CD_EBHelmholtzLarsenDomainBC.H
   @author Robert Marskar
@@ -20,14 +21,10 @@
 EBHelmholtzLarsenDomainBC::EBHelmholtzLarsenDomainBC(const RefCountedPtr<RtSpecies>& a_species,
                                                      const Real                      a_r1,
                                                      const Real                      a_r2,
-                                                     const SourceFunction            a_source)
+                                                     const SourceFunction&           a_source)
+  : m_species(a_species), m_r1(a_r1), m_r2(a_r2), m_source(a_source)
 {
   CH_TIME("EBHelmholtzLarsenDomainBC::EBHelmholtzLarsenDomainBC");
-
-  m_species = a_species;
-  m_r1      = a_r1;
-  m_r2      = a_r2;
-  m_source  = a_source;
 
   this->setRobinFunctions();
 }
@@ -35,16 +32,11 @@ EBHelmholtzLarsenDomainBC::EBHelmholtzLarsenDomainBC(const RefCountedPtr<RtSpeci
 EBHelmholtzLarsenDomainBC::EBHelmholtzLarsenDomainBC(const RefCountedPtr<RtSpecies>& a_species,
                                                      const Real                      a_r1,
                                                      const Real                      a_r2)
+  : m_species(a_species), m_r1(a_r1), m_r2(a_r2), m_source([](const RealVect& /*a_position*/) {
+      return 0.0;
+    })
 {
   CH_TIME("EBHelmholtzLarsenDomainBC::EBHelmholtzLarsenDomainBC");
-
-  m_species = a_species;
-  m_r1      = a_r1;
-  m_r2      = a_r2;
-
-  m_source = [](const RealVect& a_position) {
-    return 0.0;
-  };
 
   this->setRobinFunctions();
 }

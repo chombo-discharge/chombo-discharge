@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_ItoKMCStepperImplem.H
   @brief  Implementation of CD_ItoKMCStepper.H
   @author Robert Marskar
 */
 
-#ifndef CD_ItoKMCStepperImplem_H
-#define CD_ItoKMCStepperImplem_H
+#ifndef CD_ITOKMCSTEPPERIMPLEM_H
+#define CD_ITOKMCSTEPPERIMPLEM_H
 
 // Std includes
 #include <limits>
@@ -989,7 +990,7 @@ template <typename I, typename C, typename R, typename F>
 void
 ItoKMCStepper<I, C, R, F>::writePlotData(LevelData<EBCellFAB>& a_output,
                                          int&                  a_icomp,
-                                         const std::string     a_outputRealm,
+                                         const std::string&    a_outputRealm,
                                          const int             a_level) const noexcept
 {
   CH_TIME("ItoKMCStepper::writePlotData");
@@ -1626,7 +1627,7 @@ ItoKMCStepper<I, C, R, F>::preRegrid(const int a_lmin, const int a_oldFinestLeve
     }
   }
 
-  // Release some unecessary storage.
+  // Release some unnecessary storage.
   m_fluidScratch1.clear();
   m_fluidScratchD.clear();
   m_fluidScratchEB.clear();
@@ -5523,7 +5524,7 @@ ItoKMCStepper<I, C, R, F>::getLoadBalanceSolvers() const noexcept
 
 template <typename I, typename C, typename R, typename F>
 bool
-ItoKMCStepper<I, C, R, F>::loadBalanceThisRealm(const std::string a_realm) const
+ItoKMCStepper<I, C, R, F>::loadBalanceThisRealm(const std::string& a_realm) const
 {
   CH_TIME("TimeStepper::loadBalanceThisRealm");
   if (m_verbosity > 5) {
@@ -5546,7 +5547,7 @@ template <typename I, typename C, typename R, typename F>
 void
 ItoKMCStepper<I, C, R, F>::loadBalanceBoxes(Vector<Vector<int>>&             a_procs,
                                             Vector<Vector<Box>>&             a_boxes,
-                                            const std::string                a_realm,
+                                            const std::string&               a_realm,
                                             const Vector<DisjointBoxLayout>& a_grids,
                                             const int                        a_lmin,
                                             const int                        a_finestLevel)
@@ -5767,7 +5768,7 @@ ItoKMCStepper<I, C, R, F>::loadBalanceFluidRealm(Vector<Vector<int>>&           
 
 template <typename I, typename C, typename R, typename F>
 Vector<long int>
-ItoKMCStepper<I, C, R, F>::getCheckpointLoads(const std::string a_realm, const int a_level) const
+ItoKMCStepper<I, C, R, F>::getCheckpointLoads(const std::string& a_realm, const int a_level) const
 {
   CH_TIME("ItoKMCStepper::getCheckpointLoads(...)");
   if (m_verbosity > 5) {

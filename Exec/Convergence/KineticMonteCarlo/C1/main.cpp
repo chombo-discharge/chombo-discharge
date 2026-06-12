@@ -1,3 +1,15 @@
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+/**
+  @file   main.cpp
+  @brief  Convergence test for the KMC solver.
+  @author Robert Marskar
+*/
+
 #include <CD_Driver.H>
 #include <CD_KMCSolver.H>
 #include <CD_KMCSingleStateReaction.H>
@@ -19,7 +31,7 @@ main(int argc, char* argv[])
 #endif
 
   // Read input file.
-  ParmParse pp(argc - 2, argv + 2, NULL, argv[1]);
+  ParmParse pp(argc - 2, argv + 2, nullptr, argv[1]);
 
   // State that we advance.
   KMCState state(1);
@@ -87,7 +99,7 @@ main(int argc, char* argv[])
   Vector<Real> algMean(numSteps.size(), 0.0);
   Vector<Real> algVar(numSteps.size(), 0.0);
 
-  for (int istep = numSteps.size() - 1; istep >= 0; istep--) {
+  for (int istep = static_cast<int>(numSteps.size()) - 1; istep >= 0; istep--) {
     Vector<Real> algSoln;
 
     for (int irun = 0; irun < numRuns; irun++) {
@@ -145,7 +157,7 @@ main(int argc, char* argv[])
           kmcSolver.advanceHybrid(state, nextDt, KMCLeapPropagator::PRC);
         }
         else {
-          const std::string err = "Don't know the algoritm '" + alg + "'";
+          const std::string err = "Don't know the algorithm '" + alg + "'";
 
           MayDay::Error(err.c_str());
         }

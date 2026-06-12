@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2024 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_RandomInterface.cpp
   @brief  Implementation of CD_RandomInterface.H
   @author Robert Marskar
@@ -22,19 +23,17 @@
 #include <CD_BoundedNoisePlane.H>
 #include <CD_NamespaceHeader.H>
 
-RandomInterface::ClampedNoisePlane::ClampedNoisePlane(const Vec3 a_point,
-                                                      const Vec3 a_normal,
-                                                      const Vec3 a_clampLo,
-                                                      const Vec3 a_clampHi,
-                                                      const Vec3 a_clampDx,
-                                                      const Vec3 a_noiseFrequency,
-                                                      const Real a_noiseAmplitude,
-                                                      const Real a_noisePersistence,
-                                                      const int  a_noiseOctaves) noexcept
+RandomInterface::ClampedNoisePlane::ClampedNoisePlane(const Vec3& a_point,
+                                                      const Vec3& a_normal,
+                                                      const Vec3& a_clampLo,
+                                                      const Vec3& a_clampHi,
+                                                      const Vec3& a_clampDx,
+                                                      const Vec3& a_noiseFrequency,
+                                                      const Real  a_noiseAmplitude,
+                                                      const Real  a_noisePersistence,
+                                                      const int   a_noiseOctaves) noexcept
+  : m_point(a_point), m_normal(a_normal), m_clampDx(a_clampDx)
 {
-  m_point   = a_point;
-  m_normal  = a_normal;
-  m_clampDx = a_clampDx;
 
   for (int dir = 0; dir < SpaceDim; dir++) {
     m_clampLo[dir] = std::min(a_clampLo[dir], a_clampHi[dir]);
@@ -58,9 +57,9 @@ RandomInterface::ClampedNoisePlane::shuffle(URNG& a_rng) noexcept
 Real
 RandomInterface::ClampedNoisePlane::signedDistance(const Vec3& a_point) const noexcept
 {
-  const Vec3 x0 = m_point;
-  const Vec3 x1 = a_point;
-  const Vec3 xp = x1 - dot((x1 - x0), m_normal) * m_normal;
+  const Vec3  x0 = m_point;
+  const Vec3& x1 = a_point;
+  const Vec3  xp = x1 - dot((x1 - x0), m_normal) * m_normal;
 
   // Clamping function.
   Real clamp = 1.0;
@@ -80,7 +79,7 @@ RandomInterface::RandomInterface() noexcept
 {
   ParmParse pp("RandomInterface");
 
-  auto getVec = [&](const std::string id) -> Vec3 {
+  auto getVec = [&](const std::string& id) -> Vec3 {
     Vector<Real> v;
     pp.getarr(id.c_str(), v, 0, SpaceDim);
 #if CH_SPACEDIM == 2
@@ -171,7 +170,7 @@ RandomInterface::RandomInterface() noexcept
                                                  noiseOctaves1);
 
     // Find a seed to use for the RNG
-    int seed = reseed ? std::chrono::system_clock::now().time_since_epoch().count() : 0;
+    int seed = reseed ? static_cast<int>(std::chrono::system_clock::now().time_since_epoch().count()) : 0;
 #ifdef CH_MPI
     MPI_Bcast(&seed, 1, MPI_INT, 0, Chombo_MPI::comm);
 #endif
@@ -193,7 +192,7 @@ RandomInterface::RandomInterface() noexcept
                                                  noiseOctaves2);
 
     // Find a seed to use for the RNG
-    int seed = reseed ? std::chrono::system_clock::now().time_since_epoch().count() : 1;
+    int seed = reseed ? static_cast<int>(std::chrono::system_clock::now().time_since_epoch().count()) : 1;
 #ifdef CH_MPI
     MPI_Bcast(&seed, 1, MPI_INT, 0, Chombo_MPI::comm);
 #endif

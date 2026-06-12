@@ -1,5 +1,5 @@
 # ====================================================================================================
-# FIELD_STEPPER CLASS OPTIONS
+# FieldStepper class options
 # ====================================================================================================
 FieldStepper.verbosity        = -1        ## Verbosity
 FieldStepper.realm            = primal    ## Realm where solver lives.

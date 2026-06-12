@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_EBAMRParticleMesh.H
   @brief  Declaration of a class for handling particle-mesh operations with AMR.
   @author Robert Marskar
 */
 
-#ifndef CD_EBAMRParticleMesh_H
-#define CD_EBAMRParticleMesh_H
+#ifndef CD_EBAMRPARTICLEMESH_H
+#define CD_EBAMRPARTICLEMESH_H
 
 // Chombo includes
 #include <RefCountedPtr.H>
@@ -26,7 +27,7 @@
 #include <CD_ParticleContainer.H>
 #include <CD_NamespaceHeader.H>
 
-/*!
+/**
   @brief Class for handling particle-mesh operations with AMR. 
   @details This class contains templated functions for depositing particles with AMR. When depositing, the user must specify the deposition type (e.g., CIC) as
   well as how to handle coarse-fine boundary conditions and cut-cell deposition. Because of the many degrees of freedom in depositing particles with AMR (and EB), 
@@ -51,12 +52,12 @@
 class EBAMRParticleMesh
 {
 public:
-  /*!
+  /**
     @brief Default constructor. Leaves object in undefined state and thus requires the user to call define.
   */
   EBAMRParticleMesh();
 
-  /*!
+  /**
     @brief Full constructor. Calls the define function
     @param[in] a_eblgs            Grids
     @param[in] a_refRat           Refinement factory between levels
@@ -64,6 +65,7 @@ public:
     @πaram[in] a_probLo           Lower-left corner of physical domain.
     @param[in] a_ghost            Ghost cells in data holders.
     @param[in] a_finestLevel      Finest grid level
+    @param[in] a_probLo Description
   */
   EBAMRParticleMesh(const Vector<RefCountedPtr<EBLevelGrid>>& a_eblgs,
                     const Vector<int>&                        a_refRat,
@@ -72,12 +74,12 @@ public:
                     const int&                                a_ghost,
                     const int                                 a_finestLevel);
 
-  /*!
+  /**
     @brief Destructor (does nothing)
   */
   virtual ~EBAMRParticleMesh();
 
-  /*!
+  /**
     @brief Define function
     @param[in] a_eblgs            Grids
     @param[in] a_refRat           Refinement factory between levels
@@ -85,6 +87,7 @@ public:
     @πaram[in] a_probLo           Lower-left corner of physical domain.
     @param[in] a_ghost            Ghost cells in data holders.
     @param[in] a_finestLevel      Finest grid level
+    @param[in] a_probLo Description
   */
   void
   define(const Vector<RefCountedPtr<EBLevelGrid>>& a_eblgs,
@@ -94,16 +97,17 @@ public:
          const int&                                a_ghost,
          const int                                 a_finestLevel);
 
-  /*!
+  /**
     @brief Class for deposition of particles of a type P to the mesh. This is the main function that users should call. 
     @details P is the particle type, Ret is the returned value of the particle member function, and must be a Real or a
     RealVect. MemFunc is a pointer to a member function of P. E.g., deposit<P, const RealVect&, &P::position>.
-    @param[out] a_meshData             Mesh data. Must have exactly one compnent. 
+    @param[out] a_meshData             Mesh data. Must have exactly one component. 
     @πaram[in]  a_particles            Particle container. Must be in "usable state" for deposition.
     @param[in]  a_depositionType       Specification of deposition kernel (e.g., CIC)
     @param[in]  a_coarseFineDeposition Specification of handling of coarse-fine boundaries.
     @param[in]  a_forceIrregNGP        Force NGP deposition in irregular cells or not. 
     @note When using certain types of coarseFineDeposition methods -- the user may need to fill the mask particles before calling this routine. 
+    @param[in] a_particles Description
   */
   template <class P, class Ret, Ret (P::*MemberFunc)() const>
   void
@@ -113,98 +117,99 @@ public:
           const CoarseFineDeposition  a_coarseFineDeposition,
           const bool                  a_forceIrregNGP = false);
 
-  /*!
+  /**
     @brief Interpolate a scalar field onto the particle position.
     @details P is the particle type, Ret is the returned value of the particle member function, and must be a Real or a
     RealVect. MemFunc is a pointer to a member function of P. E.g., interpolate<P, RealVect&, &P::position>.    
-    @param[inout] a_particles     Particles to be interpolated. 
-    @param[in]    a_meshData      Mesh data
+    @param[in,out] a_particles     Particles to be interpolated. 
+    @param[in]    a_meshScalarField Mesh scalar field data
     @param[in]    a_interpType    Interpolation type. 
     @param[in]    a_forceIrregNGP Force NGP interpolation in cut-cells. 
   */
   template <class P, class Ret, Ret (P::*MemberFunc)()>
   void
   interpolate(ParticleContainer<P>& a_particles,
-              const EBAMRCellData&  a_meshData,
+              const EBAMRCellData&  a_meshScalarField,
               const DepositionType  a_interpType,
               const bool            a_forceIrregNGP = false) const;
 
-  /*!
+  /**
     @brief Get buffers for handling deposition over refinement boundaries.
     @return The buffer for handling mass transfer between level lvl and level lvl+1 lives on lvl+1. 
   */
   Vector<RefCountedPtr<EBCoarseFineParticleMesh>>&
   getEBCoarseFineParticleMesh() const;
 
-  /*!
+  /**
     @brief Get EBParticleMesh deposition/interpolation object for specified grid patch.
     @details This routine is used for when users want to interpolate on a per-patch basis. This is useful when the user has written his interpolation
     functions on a per-patch basis. I fail to see any other reason where this routine is useful. 
     @param[in] a_lvl Grid level
     @param[in] a_dit Grid index
+    @return E b particle mesh
   */
   const EBParticleMesh&
   getEBParticleMesh(const int a_lvl, const DataIndex& a_dit) const;
 
 protected:
-  /*!
+  /**
     @brief Is defined or not
   */
   bool m_isDefined;
 
-  /*!
+  /**
     @brief Verbose or not
   */
   bool m_verbose;
 
-  /*!
+  /**
     @brief Lower-left corner of physical domain
   */
   RealVect m_probLo;
 
-  /*!
+  /**
     @brief Number of ghost cells
   */
   int m_ghost;
 
-  /*!
+  /**
     @brief Finest AMR level
   */
   int m_finestLevel;
 
-  /*!
+  /**
     @brief Grids on each level
   */
   Vector<RefCountedPtr<EBLevelGrid>> m_eblgs;
 
-  /*!
+  /**
     @brief Refinement ratios between levels
   */
   Vector<int> m_refRat;
 
-  /*!
+  /**
     @brief Grid resolutions.
   */
   Vector<Real> m_dx;
 
-  /*!
+  /**
     @brief Regular particle-mesh object on each grid level
   */
   Vector<RefCountedPtr<LayoutData<EBParticleMesh>>> m_ebParticleMesh;
 
-  /*!
+  /**
     @brief Special particle-mesh objects for depositing on the coarsened fine grid. 
     @details These are deposition/interpolation objects defined on the refined coarse grid. They are used when we need
     to deposit coarse-grid particles on the fine grid. 
   */
   Vector<RefCountedPtr<LayoutData<EBParticleMesh>>> m_ebParticleMeshFiCo;
 
-  /*!
+  /**
     @brief Valid grid cells. 
   */
   Vector<RefCountedPtr<LevelData<BaseFab<bool>>>> m_validCells;
 
-  /*!
+  /**
     @brief Outer halo masks with various widths.
     @details These masks are true on the coarse side on the refinement boundary.
     @note We have purposefully undefined the mask in patches where the mask is always false. This means
@@ -212,7 +217,7 @@ protected:
   */
   std::map<int, Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>> m_outerHaloMasks;
 
-  /*!
+  /**
     @brief Transition masks with various widths.
     @details These masks are true in the fine-grid ghost cells on the coarse-side of the refinement boundary.
     @note We have purposefully undefined the mask in patches where the mask is always false. This means
@@ -220,60 +225,61 @@ protected:
   */
   std::map<int, Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>> m_transitionMasks;
 
-  /*!
+  /**
     @brief Buffers for handling arithmetic for mass moving from coarse to fine level and vice versa. 
     @note The buffer for handling mass transfer between level lvl and level lvl+1 lives on lvl+1. 
   */
   mutable Vector<RefCountedPtr<EBCoarseFineParticleMesh>> m_coarseFinePM;
 
-  /*!
+  /**
     @brief Copier for moving data from valid+ghost to valid on each AMR level.
     @note After depositing on a level, this is used in order to add data from the ghost cells to the valid region. 
   */
   mutable Vector<Copier> m_levelCopiers;
 
-  /*!
+  /**
     @brief Define level copiers
     @note This defines the Copiers we need to move data from valid+ghost to valid on each level.
   */
   void
   defineLevelMotion();
 
-  /*!
+  /**
     @brief Define coarse-fine data motion operators
     @details This defines the necessary constructors for 
   */
   void
   defineCoarseFineMotion();
 
-  /*!
+  /**
     @brief Define EBParticleMesh objects
   */
   void
   defineEBParticleMesh();
 
-  /*!
+  /**
     @brief Define the outer halo masks
   */
   void
   defineOuterHaloMasks();
 
-  /*!
+  /**
     @brief Define the coarse-fine transition masks
   */
   void
   defineTransitionMasks();
 
-  /*!
+  /**
     @brief Get transition mask width
     @details Used when depositing with a transition zone.
     @param[in] a_depositionType Deposition type
     @param[in] a_refRat Refinement ratio between levels
+    @return Transition mask width
   */
   int
   getTransitionMaskWidth(const DepositionType a_depositionType, const int a_refRat) const;
 
-  /*!
+  /**
     @brief Deposit particles on the mesh, interpolating the coarse-grid invalid mass to the fine grid.     
     @param[out] a_meshData       Mesh data. 
     @param[in]  a_particles      Particle container. Must be in "usable state" for deposition.
@@ -287,7 +293,7 @@ protected:
                 const DepositionType        a_depositionType,
                 const bool                  a_forceIrregNGP = false);
 
-  /*!
+  /**
     @brief Deposit particles on the mesh, keeping the original particle width everywhere and depositing directly
     into every level.
     @param[out] a_meshData       Mesh data. 
@@ -302,7 +308,7 @@ protected:
               const DepositionType        a_depositionType,
               const bool                  a_forceIrregNGP = false);
 
-  /*!
+  /**
     @brief Deposit particles on the mesh, using an NGP scheme for coarse-grid particles on the refinement boundary. 
     @param[out] a_meshData       Mesh data. 
     @param[in]  a_particles      Particle container. Must be in "usable state" for deposition.
@@ -316,7 +322,7 @@ protected:
                  const DepositionType        a_depositionType,
                  const bool                  a_forceIrregNGP = false);
 
-  /*!
+  /**
     @brief Deposit particles on the mesh.
     @details In this version the particles abutting the refinement boundary from the coarse side are
     deposited with the fine-grid resolution. 
@@ -332,9 +338,9 @@ protected:
                     const DepositionType        a_depositionType,
                     const bool                  a_forceIrregNGP = false);
 
-  /*!
+  /**
     @brief Support function for transferring particles that lie in the transition zone around a refinement boundary
-    @param[inout] a_particles Input particles
+    @param[in,out] a_particles Input particles
     @param[in] a_depositionType Deposition type.
   */
   template <class P>

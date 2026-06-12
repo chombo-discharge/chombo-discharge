@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_MFHelmholtzEBBC.cpp
   @brief  Implementation of CD_MFHelmholtzEBBC.H
   @author Robert Marskar
@@ -82,7 +83,7 @@ MFHelmholtzEBBC::defineMultiPhase()
     weights.define(ivs, ebgraph, m_nComp);
     stencils.define(ivs, ebgraph, m_nComp);
 
-    // Safety hook becase jumpBC might not have defined the data holders if we're not doing multiphase.
+    // Safety hook because jumpBC might not have defined the data holders if we're not doing multiphase.
     if (m_jumpBC->isMultiPhase()) {
       VoFIterator& multiPhaseVofs = m_jumpBC->getMultiPhaseVofs(m_phase, din);
 
@@ -106,7 +107,7 @@ MFHelmholtzEBBC::defineMultiPhase()
 }
 
 void
-MFHelmholtzEBBC::applyEBFlux(VoFIterator&           a_vofit,
+MFHelmholtzEBBC::applyEBFlux(VoFIterator& /*a_vofit*/,
                              EBCellFAB&             a_Lphi,
                              const EBCellFAB&       a_phi,
                              const BaseIVFAB<Real>& a_Bcoef,
@@ -126,13 +127,13 @@ MFHelmholtzEBBC::applyEBFlux(VoFIterator&           a_vofit,
 }
 
 void
-MFHelmholtzEBBC::applyEBFluxMultiPhase(VoFIterator&           a_multiPhaseVofs,
-                                       EBCellFAB&             a_Lphi,
-                                       const EBCellFAB&       a_phi,
+MFHelmholtzEBBC::applyEBFluxMultiPhase(VoFIterator& a_multiPhaseVofs,
+                                       EBCellFAB&   a_Lphi,
+                                       const EBCellFAB& /*a_phi*/,
                                        const BaseIVFAB<Real>& a_Bcoef,
                                        const DataIndex&       a_dit,
                                        const Real&            a_beta,
-                                       const bool&            a_homogeneousPhysBC) const
+                                       const bool& /*a_homogeneousPhysBC*/) const
 {
   CH_TIME("MFHelmholtzEBBC::applyEBFluxMultiPhase(VoFtIerator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");
 
@@ -147,8 +148,6 @@ MFHelmholtzEBBC::applyEBFluxMultiPhase(VoFIterator&           a_multiPhaseVofs,
   };
 
   BoxLoops::loop(a_multiPhaseVofs, kernel);
-
-  return;
 }
 
 bool

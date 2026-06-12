@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_LeastSquaresImplem.cpp
+/**
+  @file   CD_LeastSquaresImplem.H
   @brief  Implementation of CD_LeastSquares.H
   @author Robert Marskar
 */
 
-#ifndef CD_LeastSquaresImplem_H
-#define CD_LeastSquaresImplem_H
+#ifndef CD_LEASTSQUARESIMPLEM_H
+#define CD_LEASTSQUARESIMPLEM_H
 
 // Our includes
 #include <CD_LaPackUtils.H>
@@ -139,7 +140,7 @@ LeastSquares::computeDualLevelStencils(const IntVectSet&       a_derivs,
     // pseudoinverse. We put the result of [w * A^+ * w] into a stencil.
     //
     // Note that columns can be eliminated through knownTerms, in which case we remove unknowns (i.e., rows) from the system.
-    // This will also correspond to a modification of the right-hand side, but the required modifications are not accesible
+    // This will also correspond to a modification of the right-hand side, but the required modifications are not accessible
     // in this routine, and so the user will have to make sense of them.
 
     int       i = 0;                // Exists just because we fill memory linearly.

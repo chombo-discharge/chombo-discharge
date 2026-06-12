@@ -1,11 +1,12 @@
-/* chombo-discharge
- * Copyright © 2025 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_Initialize.cpp
-  @brief  Implementation of CD_Initialize.cpp
+  @brief  Implementation of CD_Initialize.H
   @author Robert Marskar
 */
 
@@ -48,7 +49,7 @@ initialize(int argc, char* argv[])
   int provided;
   MPI_Init_thread(&argc, &argv, MPI_THREAD_FUNNELED, &provided);
   if (provided < MPI_THREAD_FUNNELED) {
-    std::cerr << "Warning: MPI thread support level insufficient for MPI+OpenMP" << std::endl;
+    std::cerr << "Warning: MPI thread support level insufficient for MPI+OpenMP" << endl;
   }
 #else
   // MPI only
@@ -135,7 +136,7 @@ initialize(int argc, char* argv[])
     pout() << "  PETSc:  FALSE\n";
 #endif
     pout() << "==========================================================================================" << endl;
-    pout() << std::endl;
+    pout() << endl;
   }
 
 #if defined(CH_USE_PETSC)

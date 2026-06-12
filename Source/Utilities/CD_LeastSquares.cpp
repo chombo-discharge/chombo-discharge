@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_LeastSquares.cpp
   @brief  Implementation of CD_LeastSquares.H
   @author Robert Marskar
@@ -43,7 +44,7 @@ LeastSquares::getInterpolationStencil(const CellLocation a_cellPos,
                                                                         a_dx);
 
   const int M = LeastSquares::getTaylorExpansionSize(a_order);
-  const int K = displacements.size();
+  const int K = static_cast<int>(displacements.size());
 
   VoFStencil ret;
   if (K > M) { // Have enough equations to compute.
@@ -62,7 +63,7 @@ LeastSquares::getGradSten(const VolIndex&    a_vof,
                           const int          a_radius,
                           const int          a_p,
                           const int          a_order,
-                          const IntVectSet   a_knownTerms)
+                          const IntVectSet&  a_knownTerms)
 {
 
   VoFStencil gradSten;
@@ -101,7 +102,7 @@ LeastSquares::getGradSten(const FaceIndex&   a_face,
                           const int          a_radius,
                           const int          a_p,
                           const int          a_order,
-                          const IntVectSet   a_knownTerms)
+                          const IntVectSet&  a_knownTerms)
 {
   VoFStencil gradSten;
 
@@ -124,12 +125,15 @@ LeastSquares::getGradSten(const FaceIndex&   a_face,
                                                         true);
 
     std::set<VolIndex> setVofs;
-    for (const auto& v : loVofs.stdVector())
+    for (const auto& v : loVofs.stdVector()) {
       setVofs.emplace(v);
-    for (const auto& v : hiVofs.stdVector())
+    }
+    for (const auto& v : hiVofs.stdVector()) {
       setVofs.emplace(v);
-    for (const auto& v : setVofs)
+    }
+    for (const auto& v : setVofs) {
       allVofs.push_back(v);
+    }
 
     // Can be smaller than order if you've eliminated some equations.
     const int numUnknowns = LeastSquares::getTaylorExpansionSize(a_order) - a_knownTerms.numPts();
@@ -318,7 +322,7 @@ LeastSquares::computeGradSten(const Vector<VolIndex>& a_allVofs,
                               const Vector<RealVect>& a_displacements,
                               const int               a_p,
                               const int               a_order,
-                              const IntVectSet        a_knownTerms)
+                              const IntVectSet&       a_knownTerms)
 {
   Vector<Real> weights = LeastSquares::makeDiagWeights(a_displacements, a_p);
 
@@ -330,7 +334,7 @@ LeastSquares::computeGradSten(const Vector<VolIndex>& a_allVofs,
                               const Vector<RealVect>& a_displacements,
                               const Vector<Real>&     a_weights,
                               const int               a_order,
-                              const IntVectSet        a_knownTerms)
+                              const IntVectSet&       a_knownTerms)
 {
 
   // TLDR: This routine
@@ -507,7 +511,7 @@ LeastSquares::computeSingleLevelStencils(const IntVectSet&       a_derivs,
 
     // This is because some unknowns (rows) can be been eliminated.
     const int M = LeastSquares::getTaylorExpansionSize(a_order) - a_knownTerms.numPts();
-    const int K = a_displacements.size();
+    const int K = static_cast<int>(a_displacements.size());
 
     const IntVectSet isect = a_derivs & a_knownTerms;
 
@@ -536,7 +540,7 @@ LeastSquares::computeSingleLevelStencils(const IntVectSet&       a_derivs,
     // pseudoinverse. We put the result of [w * A^+ * w] into a stencil.
     //
     // Note that columns can be eliminated through knownTerms, in which case we remove unknowns (i.e., rows) from the system.
-    // This will also correspond to a modification of the right-hand side, but the required modifications are not accesible
+    // This will also correspond to a modification of the right-hand side, but the required modifications are not accessible
     // in this routine, and so the user will have to make sense of them.
 
     int          i = 0;                // Exists just because we fill memory linearly.

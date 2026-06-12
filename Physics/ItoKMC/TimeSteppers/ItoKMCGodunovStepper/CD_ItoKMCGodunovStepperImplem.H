@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_ItoKMCGodunovStepperImplem.H
   @brief  Implementation of CD_ItoKMCGodunovStepper.H
   @author Robert Marskar
 */
 
-#ifndef CD_ItoKMCGodunovStepperImplem_H
-#define CD_ItoKMCGodunovStepperImplem_H
+#ifndef CD_ITOKMCGODUNOVSTEPPERIMPLEM_H
+#define CD_ITOKMCGODUNOVSTEPPERIMPLEM_H
 
 // Chombo includes
 #include <ParmParse.H>
@@ -578,7 +579,7 @@ ItoKMCGodunovStepper<I, C, R, F>::preRegrid(const int a_lmin, const int a_oldFin
   DataOps::copy(m_scratchSemiImplicitRhoCDR, m_semiImplicitRhoCDR);
   DataOps::copy(m_scratchSemiImplicitConductivityCDR, m_semiImplicitConductivityCDR);
 
-  // Release unecessary storage.
+  // Release unnecessary storage.
   for (int i = 0; i < numCdrSpecies; i++) {
     m_cdrDivD[i].clear();
   }
@@ -616,7 +617,7 @@ ItoKMCGodunovStepper<I, C, R, F>::regrid(const int a_lmin,
   (this->m_ito)->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   if (this->m_timeStep == 0) {
     // Necessary because first time step is not semi-implicit, so it will use the densities from the
-    // Ito and CDr solvers. Howver,  ItoSolver does not re-deposit the particles during regrid, so we
+    // Ito and CDr solvers. However,  ItoSolver does not re-deposit the particles during regrid, so we
     // enforce it here.
     (this->m_ito)->depositParticles();
   }
@@ -1934,8 +1935,7 @@ ItoKMCGodunovStepper<I, C, R, F>::plotParticles() const noexcept
                                ItoParticle::s_realVariables,
                                ItoParticle::s_vectVariables,
                                this->m_amr->getProbLo(),
-                               this->m_time,
-                               this->m_timeStep);
+                               this->m_time);
     }
   }
 }

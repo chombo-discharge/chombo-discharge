@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_EBCoarseFineParticleMesh.cpp
   @brief  Implementation of CD_EBCoarseFineParticleMesh.H
   @author Robert Marskar
@@ -26,22 +27,18 @@
 constexpr int EBCoarseFineParticleMesh::m_comp;
 constexpr int EBCoarseFineParticleMesh::m_nComp;
 
-EBCoarseFineParticleMesh::EBCoarseFineParticleMesh() noexcept
+EBCoarseFineParticleMesh::EBCoarseFineParticleMesh() noexcept : m_isDefined(false), m_verbose(false)
 {
   CH_TIME("EBCoarseFineParticleMesh::EBCoarseFineParticleMesh");
-
-  m_isDefined = false;
-  m_verbose   = false;
 }
 
 EBCoarseFineParticleMesh::EBCoarseFineParticleMesh(const EBLevelGrid& a_eblgCoar,
                                                    const EBLevelGrid& a_eblgFine,
                                                    const int          a_refRat,
                                                    const IntVect      a_ghost) noexcept
+  : m_verbose(false)
 {
   CH_TIME("EBCoarseFineParticleMesh::EBCoarseFineParticleMesh");
-
-  m_verbose = false;
 
   this->define(a_eblgCoar, a_eblgFine, a_refRat, a_ghost);
 }
@@ -217,7 +214,7 @@ EBCoarseFineParticleMesh::defineStencils() noexcept
     auto buildStencils = [&](const VolIndex& coarVoF) -> void {
       const Real             kappaC      = ebisBoxCoar.volFrac(coarVoF);
       const Vector<VolIndex> fineVoFs    = ebislCoar.refine(coarVoF, m_refRat, din);
-      const int              numFineVoFs = fineVoFs.size();
+      const int              numFineVoFs = static_cast<int>(fineVoFs.size());
 
       VoFStencil& arithSten = arithmeticStencils(coarVoF, 0);
       VoFStencil& consSten  = conservativeStencils(coarVoF, 0);
@@ -293,7 +290,6 @@ EBCoarseFineParticleMesh::addFineGhostsToCoarse(LevelData<EBCellFAB>&       a_co
   const DataIterator& ditCoFi = dblCoFi.dataIterator();
 
   const int nboxFine = ditFine.size();
-  const int nboxCoFi = ditCoFi.size();
 
   const Real factor = 1. / pow(m_refRat, SpaceDim);
 
@@ -370,7 +366,7 @@ EBCoarseFineParticleMesh::addFineGhostsToCoarse(LevelData<EBCellFAB>&       a_co
       const Vector<VolIndex> fineVofs = ebislCoFi.refine(coarVof, m_refRat, din);
 
       for (int comp = 0; comp < m_nComp; comp++) {
-        coFiData(coarVof, comp) *= 1. / fineVofs.size();
+        coFiData(coarVof, comp) *= 1. / static_cast<double>(fineVofs.size());
       }
     };
 
@@ -396,6 +392,7 @@ EBCoarseFineParticleMesh::getEblgFiCo() const
   return m_eblgFiCo;
 }
 
+/// @cond DOXYGEN_SKIP
 template <>
 LevelData<EBCellFAB>&
 EBCoarseFineParticleMesh::getBufferFiCo<1>() const noexcept
@@ -419,6 +416,7 @@ EBCoarseFineParticleMesh::getBufferFiCo<SpaceDim>() const noexcept
 
   return m_bufferFiCoRealVect;
 }
+/// @endcond
 
 void
 EBCoarseFineParticleMesh::addFiCoDataToFine(LevelData<EBCellFAB>&       a_fineData,

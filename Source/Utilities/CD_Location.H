@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_Location.H
   @brief  Declaration of cell positions.
   @author Robert Marskar
 */
 
-#ifndef CD_Location_H
-#define CD_Location_H
+#ifndef CD_LOCATION_H
+#define CD_LOCATION_H
 
 // Chombo includes
 #include <EBISBox.H>
@@ -18,12 +19,12 @@
 // Our includes
 #include <CD_NamespaceHeader.H>
 
-/*!
+/**
   @brief Namespace for encapsulating various data centerings. 
 */
 namespace Location {
 
-  /*!
+  /**
     @brief Enum for distinguishing between cell locations
   */
   enum class Cell
@@ -33,7 +34,7 @@ namespace Location {
     Boundary
   };
 
-  /*!
+  /**
     @brief Enum for distinguishing between face locations
   */
   enum class Face
@@ -43,7 +44,7 @@ namespace Location {
     Boundary
   };
 
-  /*!
+  /**
     @brief Compute the position (ignoring the "origin) of a Vof. 
     @param[in] a_location  Position within the grid cell (e.g. center, centroid, boundary).
     @param[in] a_vof       VolIndex to compute the position of
@@ -52,9 +53,9 @@ namespace Location {
     @return Position of a face, ignoring the "origin" of the coordinate system since this is only used together with LeastSquares::displacement(...)
   */
   inline RealVect
-  position(const Location::Cell a_location, const VolIndex& a_vof, const EBISBox& a_ebisbox, const Real& a_dx);
+  position(Location::Cell a_location, const VolIndex& a_vof, const EBISBox& a_ebisbox, const Real& a_dx);
 
-  /*!
+  /**
     @brief Compute the position (ignoring the "origin) of a FaceIndex
     @param[in] a_location  Position within the grid cell (e.g. face center, face centroid)
     @param[in] a_face      Face
@@ -63,7 +64,7 @@ namespace Location {
     @return Position of a face, ignoring the "origin" of the coordinate system since this is only used together with LeastSquares::displacement(...)
   */
   inline RealVect
-  position(const Location::Face a_location, const FaceIndex& a_face, const EBISBox& a_ebisbox, const Real& a_dx);
+  position(Location::Face a_location, const FaceIndex& a_face, const EBISBox& a_ebisbox, const Real& a_dx);
 } // namespace Location
 
 #include <CD_NamespaceFooter.H>

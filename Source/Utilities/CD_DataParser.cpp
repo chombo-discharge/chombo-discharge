@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_DataParser.cpp
   @brief  Implementation of CD_DataParser.H
   @author Robert Marskar
@@ -23,10 +24,10 @@
 #include <CD_NamespaceHeader.H>
 
 LookupTable1D<Real, 1>
-DataParser::simpleFileReadASCII(const std::string       a_fileName,
-                                const int               a_xColumn,
-                                const int               a_yColumn,
-                                const std::vector<char> a_ignoreChars)
+DataParser::simpleFileReadASCII(const std::string&       a_fileName,
+                                const int                a_xColumn,
+                                const int                a_yColumn,
+                                const std::vector<char>& a_ignoreChars)
 {
   CH_TIME("DataParser::simpleFileReadASCII");
 
@@ -67,7 +68,7 @@ DataParser::simpleFileReadASCII(const std::string       a_fileName,
         }
 
         // Read the data into the LookupTable1D IF we have enough data in the input file. Rows that do not have enough data WILL be ignored.
-        const int numColumnsOnThisLine = values.size();
+        const int numColumnsOnThisLine = static_cast<int>(values.size());
         if (a_xColumn < numColumnsOnThisLine && a_yColumn < numColumnsOnThisLine) {
           returnTable.addData(values[a_xColumn], values[a_yColumn]);
         }
@@ -79,12 +80,12 @@ DataParser::simpleFileReadASCII(const std::string       a_fileName,
 }
 
 LookupTable1D<Real, 1>
-DataParser::fractionalFileReadASCII(const std::string       a_fileName,
-                                    const std::string       a_startRead,
-                                    const std::string       a_stopRead,
-                                    const int               a_xColumn,
-                                    const int               a_yColumn,
-                                    const std::vector<char> a_ignoreChars)
+DataParser::fractionalFileReadASCII(const std::string&       a_fileName,
+                                    const std::string&       a_startRead,
+                                    const std::string&       a_stopRead,
+                                    const int                a_xColumn,
+                                    const int                a_yColumn,
+                                    const std::vector<char>& a_ignoreChars)
 {
   CH_TIME("DataParser::fractionalFileReadASCII");
 
@@ -133,7 +134,7 @@ DataParser::fractionalFileReadASCII(const std::string       a_fileName,
 
         // Read the data into the LookupTable1D IF we have enough data in the input file. Rows that do not have enough
         // data WILL be ignored.
-        const int numColumnsOnThisLine = values.size();
+        const int numColumnsOnThisLine = static_cast<int>(values.size());
         if (a_xColumn < numColumnsOnThisLine && a_yColumn < numColumnsOnThisLine) {
           returnTable.addData(values[a_xColumn], values[a_yColumn]);
         }
@@ -145,12 +146,12 @@ DataParser::fractionalFileReadASCII(const std::string       a_fileName,
 }
 
 List<PointParticle>
-DataParser::readPointParticlesASCII(const std::string       a_fileName,
-                                    const unsigned int      a_xColumn,
-                                    const unsigned int      a_yColumn,
-                                    const unsigned int      a_zColumn,
-                                    const unsigned int      a_wColumn,
-                                    const std::vector<char> a_ignoreChars)
+DataParser::readPointParticlesASCII(const std::string& a_fileName,
+                                    const unsigned int a_xColumn,
+                                    const unsigned int a_yColumn,
+                                    const unsigned int /*a_zColumn*/,
+                                    const unsigned int       a_wColumn,
+                                    const std::vector<char>& a_ignoreChars)
 {
   CH_TIME("DataParser::readPointParticlesASCII");
 
@@ -190,7 +191,7 @@ DataParser::readPointParticlesASCII(const std::string       a_fileName,
         }
 
         // Read the data into the LookupTable1D IF we have enough data in the input file. Rows that do not have enough data WILL be ignored.
-        const int numColumnsOnThisLine = values.size();
+        const int numColumnsOnThisLine = static_cast<int>(values.size());
         if (numColumnsOnThisLine < SpaceDim + 1) {
           const std::string str = "DataParser::readPointParticlesASCII - row does not contain enough data";
 
@@ -217,7 +218,7 @@ DataParser::readPointParticlesASCII(const std::string       a_fileName,
 }
 
 std::vector<std::shared_ptr<Triangle>>
-DataParser::readTriangles(const std::string a_filename, const std::string a_vertexDataIdentifier)
+DataParser::readTriangles(const std::string& a_filename, const std::string& a_vertexDataIdentifier)
 {
   CH_TIME("DataParser::readTriangles");
 

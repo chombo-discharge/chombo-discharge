@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_RealBox.cpp
   @brief  Implementation of CD_RealBox.H
   @author Robert Marskar
@@ -16,19 +17,13 @@
 #include <CD_RealBox.H>
 #include <CD_NamespaceHeader.H>
 
-RealBox::RealBox()
-{
-  m_lo = RealVect::Zero;
-  m_hi = RealVect::Zero;
-}
+RealBox::RealBox() : m_lo(RealVect::Zero), m_hi(RealVect::Zero)
+{}
 
-RealBox::RealBox(const RealVect a_lo, const RealVect a_hi)
-{
-  m_lo = a_lo;
-  m_hi = a_hi;
-}
+RealBox::RealBox(const RealVect& a_lo, const RealVect& a_hi) : m_lo(a_lo), m_hi(a_hi)
+{}
 
-RealBox::RealBox(const Box a_box, const RealVect a_origin, const Real a_dx)
+RealBox::RealBox(const Box& a_box, const RealVect& a_origin, const Real a_dx)
 {
 
   const IntVect lo = a_box.smallEnd();
@@ -37,9 +32,6 @@ RealBox::RealBox(const Box a_box, const RealVect a_origin, const Real a_dx)
   m_lo = a_origin + a_dx * RealVect(lo);
   m_hi = a_origin + a_dx * RealVect(hi);
 }
-
-RealBox::~RealBox()
-{}
 
 RealVect
 RealBox::getLo() const
@@ -57,7 +49,7 @@ Vector<RealVect>
 RealBox::getCorners() const
 {
 
-  Vector<RealVect> corners(pow(2, SpaceDim));
+  Vector<RealVect> corners(static_cast<unsigned int>(pow(2, SpaceDim)));
 
   const RealVect DD = m_hi - m_lo;
   const RealVect DX = RealVect(D_DECL(DD[0], 0.0, 0.0));
@@ -89,7 +81,7 @@ RealBox::intersect(const RealBox& a_box) const
   const RealVect LO = a_box.getLo();
   const RealVect HI = a_box.getHi();
 
-  if (LO[0] < m_hi[0] && HI[0] > m_lo[0] //  Input x-edges either to left or righ
+  if (LO[0] < m_hi[0] && HI[0] > m_lo[0] //  Input x-edges either to left or right
       && LO[1] < m_hi[1] && HI[1] > m_lo[1]
 #if CH_SPACEDIM == 3
       && LO[2] < m_hi[2] && HI[2] > m_lo[2]
@@ -113,7 +105,7 @@ RealBox::intersect(const RealBox& a_box) const
 }
 
 bool
-RealBox::isPointInside(const RealVect a_point) const
+RealBox::isPointInside(const RealVect& a_point) const
 {
 
   bool ret = false;

@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2024 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_DischargeIOImplem.H
   @brief  Implementation of CD_DischargeIO.H
   @author Robert Marskar
 */
 
-#ifndef CD_DischargeIOImplem_H
-#define CD_DischargeIOImplem_H
+#ifndef CD_DISCHARGEIOIMPLEM_H
+#define CD_DISCHARGEIOIMPLEM_H
 
 // Std includes
 #ifdef CH_USE_HDF5
@@ -31,8 +32,7 @@ DischargeIO::writeH5Part(const std::string                               a_filen
                          const std::vector<std::string>                  a_realVars,
                          const std::vector<std::string>                  a_vectVars,
                          const RealVect                                  a_shift,
-                         const Real                                      a_time,
-                         const int                                       a_timeStep) noexcept
+                         const Real                                      a_time) noexcept
 {
 #ifdef CH_USE_HDF5
   CH_TIME("DischargeIO::writeH5Part");
@@ -112,17 +112,10 @@ DischargeIO::writeH5Part(const std::string                               a_filen
 #endif
 
   // Define the top group necessary for the H5Part file format
-  const std::string groupName = "Step#" + std::to_string(a_timeStep);
-  hid_t             grp       = H5Gcreate2(fileID, groupName.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  hid_t grp = H5Gcreate2(fileID, "Step#0", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-  // Write the Timestep (integer, required by H5Part) and time (double) attributes
-  hid_t scal = H5Screate(H5S_SCALAR);
-
-  long long timestep = static_cast<long long>(a_timeStep);
-  hid_t     tsAttr   = H5Acreate(grp, "Timestep", H5T_NATIVE_LLONG, scal, H5P_DEFAULT, H5P_DEFAULT);
-  H5Awrite(tsAttr, H5T_NATIVE_LLONG, &timestep);
-  H5Aclose(tsAttr);
-
+  // Write the time attribute
+  hid_t scal     = H5Screate(H5S_SCALAR);
   hid_t timeAttr = H5Acreate(grp, "time", H5T_NATIVE_DOUBLE, scal, H5P_DEFAULT, H5P_DEFAULT);
   H5Awrite(timeAttr, H5T_NATIVE_DOUBLE, &a_time);
   H5Aclose(timeAttr);
@@ -245,7 +238,7 @@ DischargeIO::writeH5Part(const std::string                               a_filen
       }
     }
 
-    // Write and clsoe dataset
+    // Write and close dataset
     H5Dwrite(dataset, H5Dget_type(dataset), memSpaceID, fileSpaceID, H5P_DEFAULT, &ds[0]);
     H5Dclose(dataset);
   }
@@ -342,7 +335,7 @@ DischargeIO::writeCheckParticlesToHDF(HDF5Handle&            a_handle,
                              MPI_SUM,
                              Chombo_MPI::comm);
   if (result != MPI_SUCCESS) {
-    MayDay::Error("MPI communcation error in ParticleIO");
+    MayDay::Error("MPI communication error in ParticleIO");
   }
 
 #else
@@ -381,7 +374,7 @@ DischargeIO::writeCheckParticlesToHDF(HDF5Handle&            a_handle,
   hsize_t dataSize = totNumParticles * numComps;
 
   // a single dataspace
-  hid_t dataspace = H5Screate_simple(1, &dataSize, NULL);
+  hid_t dataspace = H5Screate_simple(1, &dataSize, nullptr);
 
   // create data type
   hid_t H5T_type = H5T_NATIVE_DOUBLE;
@@ -405,9 +398,10 @@ DischargeIO::writeCheckParticlesToHDF(HDF5Handle&            a_handle,
   if (numLocalParticles > 0) {
     // allocate data buffer where to linearize the particle data
     const size_t chunkSize = objSize * _CHUNK;
-    char*        chunk     = new char[chunkSize];
+    char* const  chunkBase = new char[chunkSize];
+    char*        chunk     = chunkBase;
 
-    if (chunk == NULL) {
+    if (chunkBase == nullptr) {
       MayDay::Error("WritePart::Error: new returned NULL pointer ");
     }
 
@@ -438,11 +432,12 @@ DischargeIO::writeCheckParticlesToHDF(HDF5Handle&            a_handle,
         chunk -= (nResidual * objSize);
         writeDataChunk(offset, dataspace, dataset, H5T_type, nResidual * objSize / sizeof(Real), chunk);
       }
+
+      chunk = chunkBase;
     }
 
     // free buffer
-    delete[] chunk;
-    chunk = NULL;
+    delete[] chunkBase;
   }
 
   // done
@@ -514,7 +509,7 @@ DischargeIO::readCheckParticlesFromHDF(HDF5Handle&        a_handle,
 
   hid_t dataspace = H5Dget_space(dataset);
 
-  // read in data relative to this proc in small chuncks
+  // read in data relative to this proc in small chunks
   const size_t chunkSize = objSize * _CHUNK;
 
   // allocate data buffer to read in linearized particle data chunks
@@ -545,7 +540,7 @@ DischargeIO::readCheckParticlesFromHDF(HDF5Handle&        a_handle,
     }
   }
 
-  // free alllocated memory
+  // free allocated memory
   delete[] chunk;
   chunk = NULL;
 

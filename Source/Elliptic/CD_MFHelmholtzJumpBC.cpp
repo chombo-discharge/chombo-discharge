@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_MFHelmholtzJumpBC.cpp
   @brief  Implementation of CD_MFHelmholtzJumpBC.H
   @author Robert Marskar
@@ -147,7 +148,7 @@ MFHelmholtzJumpBC::defineStencils()
   CH_assert(m_weight >= 0);
 
   // TLDR: This routine computes the stencils for approximating dphi/dn on each side of the boundary. If we have multi-valued cells we use an average formulation. These
-  //       stencils can later be used to compute the bounadry value on the interface.
+  //       stencils can later be used to compute the boundary value on the interface.
 
   // MFHelmholtzJumpBC internals should never be called unless it's a multiphase problem.
   if (m_multiPhase) {
@@ -167,8 +168,6 @@ MFHelmholtzJumpBC::defineStencils()
 #pragma omp parallel for schedule(runtime)
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
-
-      const Box box = dbl[din];
 
       m_gradPhiStencils[din].define(m_mflg, din);
       m_gradPhiWeights[din].define(m_mflg, din);
@@ -190,7 +189,6 @@ MFHelmholtzJumpBC::defineStencils()
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-        const Box         box     = dbl[din];
         const EBISBox&    ebisbox = ebisl[din];
         const EBGraph&    ebgraph = ebisbox.getEBGraph();
         const IntVectSet& ivs     = m_ivs[din];
@@ -281,7 +279,7 @@ MFHelmholtzJumpBC::defineStencils()
             // const std::string vofErr  = " on vof = ";
             // const std::string impErr  = " (this may cause multigrid divergence)";
 
-            // std::cout << baseErr << m_mflg.getDomain() << vofErr << vof << impErr << std::endl;
+            // std::cout << baseErr << m_mflg.getDomain() << vofErr << vof << impErr << endl;
 
             bndryWeights(vof, m_comp) = 0.0;
             gradStencils(vof, m_comp).clear();
@@ -321,7 +319,6 @@ MFHelmholtzJumpBC::buildAverageStencils()
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      const Box         box     = dbl[din];
       const EBISBox&    ebisbox = ebisl[din];
       const IntVectSet& ivs     = m_ivs[din];
 
@@ -357,7 +354,7 @@ MFHelmholtzJumpBC::buildAverageStencils()
           curStencil += gradStencils(vof, m_comp);
         }
 
-        const Real invNum = 1. / allVofs.size();
+        const Real invNum = 1. / static_cast<double>(allVofs.size());
 
         avgBco *= invNum;
         curWeight *= invNum;
@@ -619,17 +616,10 @@ MFHelmholtzJumpBC::matchBC(BaseIVFAB<Real>& a_jump,
   const EBCellFAB& phiPhase0 = a_phi.getPhase(firstPhase);
   const EBCellFAB& phiPhase1 = a_phi.getPhase(secondPhase);
 
-  const EBISBox& ebisBoxPhase0 = phiPhase0.getEBISBox();
-  const EBISBox& ebisBoxPhase1 = phiPhase1.getEBISBox();
-
   BaseIVFAB<Real>& bndryPhiPhase0 = m_boundaryPhi[a_dit].getIVFAB(firstPhase);
   BaseIVFAB<Real>& bndryPhiPhase1 = m_boundaryPhi[a_dit].getIVFAB(secondPhase);
 
-  const BaseIVFAB<VoFStencil>& avgStencilsPhase0 = m_avgStencils[a_dit].getIVFAB(firstPhase);
-  const BaseIVFAB<VoFStencil>& avgStencilsPhase1 = m_avgStencils[a_dit].getIVFAB(secondPhase);
-
   const BaseIVFAB<Real>& denomFactorPhase0 = m_denom[a_dit].getIVFAB(firstPhase);
-  const BaseIVFAB<Real>& denomFactorPhase1 = m_denom[a_dit].getIVFAB(secondPhase);
 
   const BaseIVFAB<Vector<VolIndex>>& avgVoFsPhase0 = m_avgVoFs[a_dit].getIVFAB(firstPhase);
   const BaseIVFAB<Vector<VolIndex>>& avgVoFsPhase1 = m_avgVoFs[a_dit].getIVFAB(secondPhase);
@@ -657,7 +647,7 @@ MFHelmholtzJumpBC::matchBC(BaseIVFAB<Real>& a_jump,
       for (int i = 0; i < vofsPhase0.size(); i++) {
         jump += a_jump(vofsPhase0[i], m_comp);
       }
-      jump *= 1. / vofsPhase0.size();
+      jump *= 1. / static_cast<double>(vofsPhase0.size());
     }
 
     for (int i = 0; i < vofsPhase0.size(); i++) {

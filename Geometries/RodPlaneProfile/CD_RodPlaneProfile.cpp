@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_RodPlaneProfile.cpp
   @brief  Implementation of CD_RodPlaneProfile.H
   @author Robert Marskar
@@ -30,17 +31,16 @@
 
 RodPlaneProfile::RodPlaneProfile()
 {
-  if (SpaceDim == 3)
+  if (SpaceDim == 3) {
     MayDay::Abort("RodPlaneProfile::RodPlaneProfile - this is currently for 2D only");
+  }
   std::string  str;
   Vector<Real> vec(SpaceDim);
 
-  bool        rod_live, has_rod, has_plane;
-  Real        eps, rod_rad, xshift, curv, dist, yshift, width;
-  int         numl, numr;
-  RealVect    center1, center2, point, normal;
-  std::string profile;
-
+  bool      rod_live, has_rod, has_plane;
+  Real      eps, rod_rad, xshift, curv, dist, yshift, width;
+  int       numl, numr;
+  RealVect  center1, center2, point, normal;
   ParmParse pp("RodPlaneProfile");
 
   pp.get("turn_on_rod", has_rod);
@@ -96,8 +96,7 @@ RodPlaneProfile::RodPlaneProfile()
   this->setGasPermittivity(1.0);
 }
 
-RodPlaneProfile::~RodPlaneProfile()
-{}
+RodPlaneProfile::~RodPlaneProfile() = default;
 
 BaseIF*
 RodPlaneProfile::getBaseIF()
@@ -106,10 +105,10 @@ RodPlaneProfile::getBaseIF()
 
   switch (m_profile) {
   case profile::circle:
-    ret = this->getBaseIFCircle();
+    ret = ChomboDischarge::RodPlaneProfile::getBaseIFCircle();
     break;
   case profile::square:
-    ret = this->getBaseIFSquare();
+    ret = ChomboDischarge::RodPlaneProfile::getBaseIFSquare();
     break;
   default:
     MayDay::Abort("RodPlaneProfile::getBaseIF - logic bust, unknown profile requested");

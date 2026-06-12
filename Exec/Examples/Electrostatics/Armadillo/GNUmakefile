@@ -10,7 +10,7 @@ export DIM=3
 $(ebaseobject): dependencies
 .DEFAULT_GOAL=$(ebase)
 
-# Build dependencies if they do not exis. 
+# Build dependencies if they do not exist. 
 dependencies: 
 	$(MAKE) --directory=$(DISCHARGE_HOME) discharge-lib
 	$(MAKE) --directory=$(DISCHARGE_HOME) electrostatics

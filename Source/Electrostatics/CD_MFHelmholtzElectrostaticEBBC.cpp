@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_MFHelmholtzElectrostaticEBBC.cpp
   @brief  Implementation of CD_MFHelmholtzElectrostaticEBBC.H
   @author Robert Marskar
@@ -18,17 +19,12 @@
 MFHelmholtzElectrostaticEBBC::MFHelmholtzElectrostaticEBBC(const int                               a_phase,
                                                            const ElectrostaticEbBc&                a_electrostaticBCs,
                                                            const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC)
-  : MFHelmholtzEBBC(a_phase, a_jumpBC)
+  : MFHelmholtzEBBC(a_phase, a_jumpBC), m_order(-1), m_weight(-1), m_electrostaticBCs(a_electrostaticBCs)
 {
   CH_TIME("MFHelmholtzElectrostaticEBBC::MFHelmholtzElectrostaticEBBC");
 
-  m_order  = -1;
-  m_weight = -1;
-
   this->setDomainDropOrder(-1);
   this->setCoarseGridDropOrder(false);
-
-  m_electrostaticBCs = a_electrostaticBCs;
 }
 
 MFHelmholtzElectrostaticEBBC::~MFHelmholtzElectrostaticEBBC()
@@ -188,12 +184,6 @@ MFHelmholtzElectrostaticEBBC::defineSinglePhase()
       }
       else {
         // Dead cell. No flux
-        const std::string baseErr = "MFHelmholtzElectrostaticEBBC::defineSinglePhase - dead cell on domain = ";
-        const std::string vofErr  = " on vof = ";
-        const std::string impErr  = " (this may cause multigrid divergence)";
-
-        //        std::cout << baseErr << m_eblg.getDomain() << vofErr << vof << impErr << std::endl;
-
         weights(vof, m_comp) = 0.0;
         stencils(vof, m_comp).clear();
       }
@@ -204,9 +194,9 @@ MFHelmholtzElectrostaticEBBC::defineSinglePhase()
 }
 
 void
-MFHelmholtzElectrostaticEBBC::applyEBFluxSinglePhase(VoFIterator&           a_singlePhaseVofs,
-                                                     EBCellFAB&             a_Lphi,
-                                                     const EBCellFAB&       a_phi,
+MFHelmholtzElectrostaticEBBC::applyEBFluxSinglePhase(VoFIterator& a_singlePhaseVofs,
+                                                     EBCellFAB&   a_Lphi,
+                                                     const EBCellFAB& /*a_phi*/,
                                                      const BaseIVFAB<Real>& a_Bcoef,
                                                      const DataIndex&       a_dit,
                                                      const Real&            a_beta,
@@ -221,7 +211,7 @@ MFHelmholtzElectrostaticEBBC::applyEBFluxSinglePhase(VoFIterator&           a_si
   // This is a safeguard against a corner case where we fail to correctly represent the interface region and also have
   // no electrodes. In this case we simply bypass the flux calculation. Note that this normally happens when the user
   // only has dielectrics AND some of the dielectric cells become incorrectly represented at the coarser multigrid levels.
-  const bool hasElectrode = m_electrostaticBCs.getBcs().size() > 0;
+  const bool hasElectrode = !m_electrostaticBCs.getBcs().empty();
 
   // Do single phase cells
   if (!a_homogeneousPhysBC && hasElectrode) {
@@ -235,8 +225,6 @@ MFHelmholtzElectrostaticEBBC::applyEBFluxSinglePhase(VoFIterator&           a_si
 
     BoxLoops::loop(a_singlePhaseVofs, kernel);
   }
-
-  return;
 }
 
 #include <CD_NamespaceFooter.H>

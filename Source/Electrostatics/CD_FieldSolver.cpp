@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*! 
+/** 
   @file   CD_FieldSolver.cpp
   @brief  Implementation of CD_FieldSolver.H
   @author Robert Marskar
@@ -31,22 +32,17 @@ constexpr int FieldSolver::m_comp;
 constexpr int FieldSolver::m_nComp;
 
 FieldSolver::FieldSolver()
+  : m_realm(Realm::Primal), m_className("FieldSolver"), m_isVoltageSet(false), m_regridSlopes(true), m_verbosity(-1)
 {
   CH_TIME("FieldSolver::FieldSolver()");
 
   // Default settings.
-  m_className    = "FieldSolver";
-  m_realm        = Realm::Primal;
-  m_isVoltageSet = false;
-  m_regridSlopes = true;
-  m_verbosity    = -1;
 
   this->setDataLocation(Location::Cell::Center);
   this->setDefaultDomainBcFunctions();
 }
 
-FieldSolver::~FieldSolver()
-{}
+FieldSolver::~FieldSolver() = default;
 
 void
 FieldSolver::setDataLocation(const Location::Cell a_dataLocation)
@@ -114,9 +110,9 @@ FieldSolver::solve(MFAMRCellData& a_potential, const bool a_zeroPhi)
 }
 
 void
-FieldSolver::setSolverPermittivities(const MFAMRCellData& a_permittivityCell,
-                                     const MFAMRFluxData& a_permittivityFace,
-                                     const MFAMRIVData&   a_permittivityEB)
+FieldSolver::setSolverPermittivities(const MFAMRCellData& /*a_permittivityCell*/,
+                                     const MFAMRFluxData& /*a_permittivityFace*/,
+                                     const MFAMRIVData& /*a_permittivityEB*/)
 {
   CH_TIME("FieldSolver::setSolverPermittivities");
   if (m_verbosity > 5) {
@@ -164,7 +160,7 @@ FieldSolver::allocate()
 }
 
 void
-FieldSolver::preRegrid(const int a_lbase, const int a_oldFinestLevel)
+FieldSolver::preRegrid(const int /*a_lbase*/, const int /*a_oldFinestLevel*/)
 {
   CH_TIME("FieldSolver::preRegrid(int, int)");
   if (m_verbosity > 5) {
@@ -312,12 +308,11 @@ FieldSolver::computeEnergy(const MFAMRCellData& a_electricField)
     Real energy = 0.0;
 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      const Real               dx     = m_amr->getDx()[lvl];
-      const RealVect           probLo = m_amr->getProbLo();
-      const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
-      const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, a_phase)[lvl];
-      const DataIterator&      dit    = dbl.dataIterator();
-      const Real               dV     = std::pow(dx, SpaceDim);
+      const Real               dx    = m_amr->getDx()[lvl];
+      const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+      const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, a_phase)[lvl];
+      const DataIterator&      dit   = dbl.dataIterator();
+      const Real               dV    = std::pow(dx, SpaceDim);
 
       const int nbox = dit.size();
 #pragma omp parallel for schedule(runtime)
@@ -394,7 +389,7 @@ FieldSolver::computeCapacitance()
 
   // Do a backup of the voltage.
   auto voltageBackup = m_voltage;
-  auto voltageOne    = [](const Real a_time) -> Real {
+  auto voltageOne    = [](const Real /*a_time*/) -> Real {
     return 1.0;
   };
 
@@ -555,7 +550,7 @@ FieldSolver::setVoltage(std::function<Real(const Real a_time)> a_voltage)
     pout() << "FieldSolver::setVoltage(std::function<Real(const Real a_time)>)" << endl;
   }
 
-  m_voltage      = a_voltage;
+  m_voltage      = std::move(a_voltage);
   m_isVoltageSet = true;
 }
 
@@ -595,7 +590,7 @@ FieldSolver::setTime(const int a_timeStep, const Real a_time, const Real a_dt)
 }
 
 void
-FieldSolver::setRealm(const std::string a_realm)
+FieldSolver::setRealm(const std::string& a_realm)
 {
   CH_TIME("FieldSolver::setRealm(std::string)");
   if (m_verbosity > 5) {
@@ -725,7 +720,7 @@ FieldSolver::makeBcString(const int a_dir, const Side::LoHiSide a_side) const
 }
 
 ElectrostaticDomainBc::BcType
-FieldSolver::parseBcString(const std::string a_str) const
+FieldSolver::parseBcString(const std::string& a_str) const
 {
   CH_TIME("FieldSolver::parseBcString(std::string)");
   if (m_verbosity > 5) {
@@ -756,7 +751,7 @@ FieldSolver::setDefaultDomainBcFunctions()
   }
 
   // Default space/time dependency of domain BCs.
-  auto defaultDomainBcFunction = [](const RealVect a_position, const Real a_time) -> Real {
+  auto defaultDomainBcFunction = [](const RealVect& /*a_position*/, const Real /*a_time*/) -> Real {
     return 1.0;
   };
 
@@ -791,7 +786,8 @@ FieldSolver::setDefaultEbBcFunctions()
     const Real frac = elec.getFraction();
 
     ElectrostaticEbBc::BcFunction curFunc =
-      [&, &time = this->m_time, &voltage = this->m_voltage, val, frac](const RealVect a_position, const Real a_time) {
+      [&, &time = this->m_time, &voltage = this->m_voltage, val, frac](const RealVect& /*a_position*/,
+                                                                       const Real /*a_time*/) {
         return voltage(time) * val * frac;
       };
 
@@ -826,7 +822,7 @@ FieldSolver::parseDomainBc()
   //       anywhere in space and time on a domain edge (face). The FieldSolver class supports Dirichlet and Neumann, and the below code simply
   //       creates those functions and associates them with an edge.
   //
-  //       For flexibility we want to be able to specify the potential directy without invoking m_voltage, while at the same time we want to offer
+  //       For flexibility we want to be able to specify the potential directly without invoking m_voltage, while at the same time we want to offer
   //       the simplistic method of setting a domain side to be "grounded", "live", or otherwise given by some fraction of m_voltage.
   //       We thus make a distinction between "dirichlet" and "dirichlet_custom". The difference between these is that for "dirichlet_custom" the contents
   //       of m_domainBcFunctions are used as boundary conditions. For "dirichlet 0.5" the contents of m_domainBcFunctions are multiplied by 0.5*m_voltage.
@@ -878,15 +874,15 @@ FieldSolver::parseDomainBc()
 
         switch (bcType) {
         case ElectrostaticDomainBc::BcType::Dirichlet: {
-          curFunc = [table, &voltage = this->m_voltage, &time = this->m_time, val, tangDir](const RealVect a_pos,
-                                                                                            const Real     a_time) {
+          curFunc = [table, &voltage = this->m_voltage, &time = this->m_time, val, tangDir](const RealVect& a_pos,
+                                                                                            const Real /*a_time*/) {
             return table->interpolate<0>(a_pos[tangDir]) * voltage(time) * val;
           };
 
           break;
         }
         case ElectrostaticDomainBc::BcType::Neumann: {
-          curFunc = [table, val, tangDir](const RealVect a_pos, const Real a_time) {
+          curFunc = [table, val, tangDir](const RealVect& a_pos, const Real /*a_time*/) {
             return table->interpolate<0>(a_pos[tangDir]) * val;
           };
 
@@ -962,12 +958,13 @@ FieldSolver::parseDomainBc()
 
         switch (bcType) {
         case ElectrostaticDomainBc::BcType::Dirichlet: {
-          curFunc = [table, &voltage = this->m_voltage, &time = this->m_time, val, dir](const RealVect a_pos,
-                                                                                        const Real     a_time) {
+          curFunc = [table, &voltage = this->m_voltage, &time = this->m_time, val, dir](const RealVect& a_pos,
+                                                                                        const Real /*a_time*/) {
             Real r2 = 0.0;
             for (int d = 0; d < SpaceDim; d++) {
-              if (d != dir)
+              if (d != dir) {
                 r2 += a_pos[d] * a_pos[d];
+              }
             }
             return table->interpolate<1>(std::sqrt(r2)) * voltage(time) * val;
           };
@@ -975,11 +972,12 @@ FieldSolver::parseDomainBc()
           break;
         }
         case ElectrostaticDomainBc::BcType::Neumann: {
-          curFunc = [table, val, dir](const RealVect a_pos, const Real a_time) {
+          curFunc = [table, val, dir](const RealVect& a_pos, const Real /*a_time*/) {
             Real r2 = 0.0;
             for (int d = 0; d < SpaceDim; d++) {
-              if (d != dir)
+              if (d != dir) {
                 r2 += a_pos[d] * a_pos[d];
+              }
             }
             return table->interpolate<1>(std::sqrt(r2)) * val;
           };
@@ -998,7 +996,7 @@ FieldSolver::parseDomainBc()
           MayDay::Error("FieldSolver::parseDomainBc -- dirichlet/neumann_custom takes exactly 1 argument");
         }
 
-        curFunc = [&bcFunc, &time = this->m_time](const RealVect a_pos, const Real a_time) {
+        curFunc = [&bcFunc, &time = this->m_time](const RealVect& a_pos, const Real /*a_time*/) {
           return bcFunc(a_pos, time);
         };
 
@@ -1018,15 +1016,15 @@ FieldSolver::parseDomainBc()
 
         switch (bcType) {
         case ElectrostaticDomainBc::BcType::Dirichlet: {
-          curFunc = [&bcFunc, &voltage = this->m_voltage, &time = this->m_time, val](const RealVect a_pos,
-                                                                                     const Real     a_time) {
+          curFunc = [&bcFunc, &voltage = this->m_voltage, &time = this->m_time, val](const RealVect& a_pos,
+                                                                                     const Real /*a_time*/) {
             return bcFunc(a_pos, time) * voltage(time) * val;
           };
 
           break;
         }
         case ElectrostaticDomainBc::BcType::Neumann: {
-          curFunc = [&bcFunc, &time = this->m_time, val](const RealVect a_pos, const Real a_time) {
+          curFunc = [&bcFunc, &time = this->m_time, val](const RealVect& a_pos, const Real /*a_time*/) {
             return bcFunc(a_pos, time) * val;
           };
 
@@ -1040,8 +1038,10 @@ FieldSolver::parseDomainBc()
         }
       }
       else {
-        const std::string errorString = "FieldSolver::parseDomainBc -- unknown BC keyword '" + str + "' for " +
-                                        bcString;
+        std::string errorString = "FieldSolver::parseDomainBc -- unknown BC keyword '";
+        errorString += str;
+        errorString += "' for ";
+        errorString += bcString;
         MayDay::Error(errorString.c_str());
       }
 
@@ -1187,10 +1187,10 @@ FieldSolver::setFacePermittivities(EBFluxFAB&      a_relPerm,
 
 void
 FieldSolver::setEbPermittivities(BaseIVFAB<Real>& a_relPerm,
-                                 const Box&       a_cellBox,
-                                 const EBISBox&   a_ebisbox,
-                                 const RealVect&  a_probLo,
-                                 const Real&      a_dx)
+                                 const Box& /*a_cellBox*/,
+                                 const EBISBox& a_ebisbox,
+                                 const RealVect& /*a_probLo*/,
+                                 const Real& a_dx)
 {
   CH_TIME("FieldSolver::setEbPermittivities(BaseIVFAB<Real>, Box, EBISBox, RealVect, Real)");
   if (m_verbosity > 10) {
@@ -1355,7 +1355,7 @@ FieldSolver::postCheckpoint()
 void
 FieldSolver::writePlotData(LevelData<EBCellFAB>& a_output,
                            int&                  a_comp,
-                           const std::string     a_outputRealm,
+                           const std::string&    a_outputRealm,
                            const int             a_level,
                            const bool            a_forceNoInterp) const noexcept
 {
@@ -1399,7 +1399,7 @@ FieldSolver::writeMultifluidData(LevelData<EBCellFAB>&    a_output,
                                  int&                     a_comp,
                                  const MFAMRCellData&     a_data,
                                  const phase::which_phase a_phase,
-                                 const std::string        a_outputRealm,
+                                 const std::string&       a_outputRealm,
                                  const int                a_level,
                                  const bool               a_interp) const noexcept
 
@@ -1574,7 +1574,6 @@ FieldSolver::writeMultifluidData(LevelData<EBCellFAB>&    a_output,
         auto kernel = [&](const IntVect& iv) -> void {
           const bool coveredGas = ebisBoxGas.isCovered(iv);
           const bool irregGas   = ebisBoxGas.isIrregular(iv);
-          const bool regularGas = ebisBoxGas.isRegular(iv);
 
           const bool coveredSolid = ebisBoxSolid.isCovered(iv);
           const bool irregSolid   = ebisBoxSolid.isIrregular(iv);
@@ -1654,7 +1653,7 @@ void
 FieldSolver::writeSurfaceData(LevelData<EBCellFAB>&             a_output,
                               int&                              a_comp,
                               const LevelData<BaseIVFAB<Real>>& a_data,
-                              const std::string                 a_outputRealm,
+                              const std::string&                a_outputRealm,
                               const int                         a_level) const noexcept
 {
   CH_TIME("FieldSolver::writeSurfaceData");
@@ -1771,7 +1770,7 @@ FieldSolver::getPlotVariableNames() const
 }
 
 Vector<long long>
-FieldSolver::computeLoads(const DisjointBoxLayout& a_dbl, const int a_level)
+FieldSolver::computeLoads(const DisjointBoxLayout& a_dbl, const int /*a_level*/)
 {
   CH_TIME("FieldSolver::computeLoads(DisjointBoxLayout, int)");
   if (m_verbosity > 5) {
@@ -1790,7 +1789,7 @@ FieldSolver::computeLoads(const DisjointBoxLayout& a_dbl, const int a_level)
     const DataIndex& din     = dit[mybox];
     const int        intCode = din.intCode();
 
-    loads[intCode] = a_dbl[din].numPts();
+    loads[intCode] = static_cast<long long>(a_dbl[din].numPts());
   }
 
   ParallelOps::sum(loads);
@@ -1987,3 +1986,4 @@ FieldSolver::fillCoveredPotential(MFAMRCellData& a_phi) const noexcept
 }
 
 #include <CD_NamespaceFooter.H>
+#include <utility>

@@ -1,12 +1,13 @@
-/* chombo-discharge
- * Copyright © 2022 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2022-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_DischargeInceptionTagger.cpp
-  @brief  Implementation of CD_DischargeInceptionTagger.H
-  @author Robert Marskar
+/**
+   @file   CD_DischargeInceptionTagger.cpp
+   @brief  Implementation of CD_DischargeInceptionTagger.H
+   @author Robert Marskar
 */
 
 // Chombo includes
@@ -26,18 +27,13 @@ DischargeInceptionTagger::DischargeInceptionTagger(
   const EBAMRCellData* const                                 a_electricField,
   const std::function<Real(const Real E, const RealVect x)>& a_alphaEff,
   const phase::which_phase                                   a_phase)
+  : m_amr(a_amrMesh), m_electricField(a_electricField), m_alphaEff(a_alphaEff), m_phase(a_phase), m_plot(true)
 {
   CH_TIME("DischargeInceptionTagger::DischargeInceptionTagger()");
 
   m_verbosity = -1;
   m_buffer    = 0;
   m_name      = "DischargeInceptionTagger";
-
-  m_amr           = a_amrMesh;
-  m_electricField = a_electricField;
-  m_alphaEff      = a_alphaEff;
-  m_phase         = a_phase;
-  m_plot          = true;
 }
 
 DischargeInceptionTagger::~DischargeInceptionTagger()

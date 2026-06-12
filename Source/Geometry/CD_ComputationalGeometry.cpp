@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_ComputationalGeometry.cpp
   @brief  Implementation of CD_ComputationalGeometry.H
   @author Robert Marskar
@@ -26,18 +27,16 @@
 #include <CD_MemoryReport.H>
 #include <CD_NamespaceHeader.H>
 
-ComputationalGeometry::ComputationalGeometry()
+ComputationalGeometry::ComputationalGeometry() : m_eps0(1.0), m_useScanShop(false)
 {
   CH_TIME("ComputationalGeometry::ComputationalGeometry()");
 
   // Default parameters.
-  m_eps0 = 1.0;
 
   m_electrodes.resize(0);
   m_dielectrics.resize(0);
 
-  m_useScanShop = false;
-  m_scanDomain  = ProblemDomain();
+  m_scanDomain = ProblemDomain();
 
   m_multifluidIndexSpace = RefCountedPtr<MultiFluidIndexSpace>(new MultiFluidIndexSpace());
 }
@@ -48,7 +47,7 @@ ComputationalGeometry::~ComputationalGeometry()
 }
 
 void
-ComputationalGeometry::useScanShop(const ProblemDomain a_beginDomain)
+ComputationalGeometry::useScanShop(const ProblemDomain& a_beginDomain)
 {
   CH_TIME("ComputationalGeometry::useScanShop(ProblemDomain)");
 
@@ -149,12 +148,12 @@ ComputationalGeometry::setGasPermittivity(const Real a_eps0)
 }
 
 void
-ComputationalGeometry::buildGeometries(const ProblemDomain a_finestDomain,
-                                       const RealVect      a_probLo,
-                                       const Real          a_finestDx,
-                                       const int           a_nCellMax,
-                                       const int           a_maxGhostEB,
-                                       const int           a_maxCoarsen)
+ComputationalGeometry::buildGeometries(const ProblemDomain& a_finestDomain,
+                                       const RealVect&      a_probLo,
+                                       const Real           a_finestDx,
+                                       const int            a_nCellMax,
+                                       const int            a_maxGhostEB,
+                                       const int            a_maxCoarsen)
 {
   CH_TIME("ComputationalGeometry::buildGeometries(ProblemDomain, RealVect, Real, int, int, int)");
 
@@ -189,10 +188,10 @@ ComputationalGeometry::buildGeometries(const ProblemDomain a_finestDomain,
 }
 
 void
-ComputationalGeometry::buildGasGeometry(GeometryService*&   a_geoserver,
-                                        const ProblemDomain a_finestDomain,
-                                        const RealVect      a_probLo,
-                                        const Real          a_finestDx)
+ComputationalGeometry::buildGasGeometry(GeometryService*&    a_geoserver,
+                                        const ProblemDomain& a_finestDomain,
+                                        const RealVect&      a_probLo,
+                                        const Real           a_finestDx)
 {
   CH_TIME("ComputationalGeometry::buildGasGeometry(GeometryService, ProblemDomain, RealVect, Real)");
 
@@ -210,14 +209,14 @@ ComputationalGeometry::buildGasGeometry(GeometryService*&   a_geoserver,
 
   // Build the EBIS geometry. Use either ScanShop or Chombo here.
   if (m_useScanShop) {
-    ScanShop* scanShop = new ScanShop(*m_implicitFunctionGas,
-                                      0,
-                                      a_finestDx,
-                                      a_probLo,
-                                      a_finestDomain,
-                                      m_scanDomain,
-                                      m_maxGhostEB,
-                                      s_thresh);
+    auto* scanShop = new ScanShop(*m_implicitFunctionGas,
+                                  0,
+                                  a_finestDx,
+                                  a_probLo,
+                                  a_finestDomain,
+                                  m_scanDomain,
+                                  m_maxGhostEB,
+                                  s_thresh);
 
     scanShop->setProfileFileName("ScanShopReportGasPhase.dat");
 
@@ -230,10 +229,10 @@ ComputationalGeometry::buildGasGeometry(GeometryService*&   a_geoserver,
 }
 
 void
-ComputationalGeometry::buildSolidGeometry(GeometryService*&   a_geoserver,
-                                          const ProblemDomain a_finestDomain,
-                                          const RealVect      a_probLo,
-                                          const Real          a_finestDx)
+ComputationalGeometry::buildSolidGeometry(GeometryService*&    a_geoserver,
+                                          const ProblemDomain& a_finestDomain,
+                                          const RealVect&      a_probLo,
+                                          const Real           a_finestDx)
 {
   CH_TIME("ComputationalGeometry::buildSolidGeometry(GeometryService, ProblemDomain, RealVect, Real)");
 
@@ -275,14 +274,14 @@ ComputationalGeometry::buildSolidGeometry(GeometryService*&   a_geoserver,
 
     // Build the EBIS geometry. Use either ScanShop or Chombo here.
     if (m_useScanShop) {
-      ScanShop* scanShop = new ScanShop(*m_implicitFunctionSolid,
-                                        0,
-                                        a_finestDx,
-                                        a_probLo,
-                                        a_finestDomain,
-                                        m_scanDomain,
-                                        m_maxGhostEB,
-                                        s_thresh);
+      auto* scanShop = new ScanShop(*m_implicitFunctionSolid,
+                                    0,
+                                    a_finestDx,
+                                    a_probLo,
+                                    a_finestDomain,
+                                    m_scanDomain,
+                                    m_maxGhostEB,
+                                    s_thresh);
 
       scanShop->setProfileFileName("ScanShopReportSolidPhase.dat");
 

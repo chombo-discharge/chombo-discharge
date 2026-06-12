@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2022 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_EBCoarseToFineInterp.cpp
   @brief  Implementation of EBCoarseToFineInterp.H
   @author Robert Marskar
@@ -22,11 +23,9 @@
 #include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
-EBCoarseToFineInterp::EBCoarseToFineInterp() noexcept
+EBCoarseToFineInterp::EBCoarseToFineInterp() noexcept : m_isDefined(false)
 {
   CH_TIME("EBCoarseToFineInterp::EBCoarseToFineInterp(weak)");
-
-  m_isDefined = false;
 }
 
 EBCoarseToFineInterp::EBCoarseToFineInterp(const EBLevelGrid& a_eblgFine,
@@ -39,8 +38,7 @@ EBCoarseToFineInterp::EBCoarseToFineInterp(const EBLevelGrid& a_eblgFine,
   this->define(a_eblgFine, a_eblgCoFi, a_eblgCoar, a_refRat);
 }
 
-EBCoarseToFineInterp::~EBCoarseToFineInterp() noexcept
-{}
+EBCoarseToFineInterp::~EBCoarseToFineInterp() noexcept = default;
 
 void
 EBCoarseToFineInterp::define(const EBLevelGrid& a_eblgFine,
@@ -307,13 +305,8 @@ EBCoarseToFineInterp::interpolatePWC(EBCellFAB&       a_fineData,
   const EBISLayout& ebislFine = m_eblgFine.getEBISL();
   const EBISLayout& ebislCoar = m_eblgCoFi.getEBISL();
 
-  const EBISBox& ebisBoxFine = ebislFine[a_dit];
-  const EBISBox& ebisBoxCoar = ebislCoar[a_dit];
-
   const Box coarBox = dblCoar[a_dit];
   const Box refiBox = Box(IntVect::Zero, (m_refRat - 1) * IntVect::Unit);
-
-  const Real volFactor = std::pow(m_refRat, SpaceDim);
 
   FArrayBox&       fineDataReg = a_fineData.getFArrayBox();
   const FArrayBox& coarDataReg = a_coarData.getFArrayBox();
@@ -367,11 +360,7 @@ EBCoarseToFineInterp::interpolateConservativePWC(EBCellFAB&       a_fineData,
   const EBISLayout& ebislFine = m_eblgFine.getEBISL();
   const EBISLayout& ebislCoar = m_eblgCoFi.getEBISL();
 
-  const EBISBox& ebisBoxFine = ebislFine[a_dit];
-  const EBISBox& ebisBoxCoar = ebislCoar[a_dit];
-
   const Box fineBox = dblFine[a_dit];
-  const Box coarBox = dblCoar[a_dit];
 
   const BaseIVFAB<Real>& volumeFactor = m_volumeWeights[a_dit];
 
@@ -428,10 +417,8 @@ EBCoarseToFineInterp::interpolateConservativeSlope(EBCellFAB&          a_fineDat
   const EBISLayout& ebislFine = m_eblgFine.getEBISL();
   const EBISLayout& ebislCoar = m_eblgCoFi.getEBISL();
 
-  const ProblemDomain& domainFine = m_eblgFine.getDomain();
   const ProblemDomain& domainCoar = m_eblgCoar.getDomain();
 
-  const EBISBox& ebisBoxFine = ebislFine[a_dit];
   const EBISBox& ebisBoxCoar = ebislCoar[a_dit];
 
   const Box coarBox = dblCoar[a_dit];
@@ -710,7 +697,7 @@ EBCoarseToFineInterp::checkConservation(const EBCellFAB& a_fineData,
       delta / std::abs(std::max(sumCoar, sumFine)) > 1.E-10) {
 
     const std::string baseErr = "EBCoarseToFineInterp::checkConservation(EBCellFAB) - did not conserve = ";
-    std::cout << baseErr << sumFine << "\t" << sumCoar << std::endl;
+    std::cout << baseErr << sumFine << "\t" << sumCoar << endl;
   }
 }
 
@@ -753,7 +740,7 @@ EBCoarseToFineInterp::checkConservation(const BaseIVFAB<Real>& a_fineData,
       delta / std::abs(std::max(sumCoar, sumFine)) > 1.E-10) {
 
     const std::string baseErr = "EBCoarseToFineInterp::checkConservation(BaseIVFAB) - did not conserve = ";
-    std::cout << baseErr << sumFine << "\t" << sumCoar << std::endl;
+    std::cout << baseErr << sumFine << "\t" << sumCoar << endl;
   }
 }
 

@@ -1,12 +1,13 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_CdrPlasmaStepper.cpp
-  @brief  Implementation of CD_CdrPlasmaStepper.H
-  @author Robert Marskar
+/**
+   @file   CD_CdrPlasmaStepper.cpp
+   @brief  Implementation of CD_CdrPlasmaStepper.H
+   @author Robert Marskar
 */
 
 // Chombo includes
@@ -27,15 +28,13 @@
 using namespace Physics::CdrPlasma;
 
 CdrPlasmaStepper::CdrPlasmaStepper()
+  : m_realm(Realm::Primal), m_className("CdrPlasmaStepper"), m_phase(phase::gas), m_solverVerbosity(-1)
 {
   CH_TIME("CdrPlasmaStepper::CdrPlasmaStepper()");
 
   // Default settings
-  m_className       = "CdrPlasmaStepper";
-  m_verbosity       = -1;
-  m_solverVerbosity = -1;
-  m_phase           = phase::gas;
-  m_realm           = Realm::Primal;
+
+  m_verbosity = -1;
 }
 
 CdrPlasmaStepper::CdrPlasmaStepper(RefCountedPtr<CdrPlasmaPhysics>& a_physics) : CdrPlasmaStepper()
@@ -359,10 +358,10 @@ CdrPlasmaStepper::solvePoisson()
 }
 
 bool
-CdrPlasmaStepper::solvePoisson(MFAMRCellData&               a_potential,
-                               MFAMRCellData&               a_rho,
-                               const Vector<EBAMRCellData*> a_cdrDensities,
-                               const EBAMRIVData&           a_sigma)
+CdrPlasmaStepper::solvePoisson(MFAMRCellData&                a_potential,
+                               MFAMRCellData&                a_rho,
+                               const Vector<EBAMRCellData*>& a_cdrDensities,
+                               const EBAMRIVData&            a_sigma)
 {
   CH_TIME("CdrPlasmaStepper::solvePoisson(MFAMRCellData, MFAMRCellData, Vector<EBAMRCellData*>, EBAMRIVData)");
   if (m_verbosity > 5) {
@@ -986,7 +985,7 @@ CdrPlasmaStepper::advanceReactionNetworkIrregInterp(Vector<EBCellFAB*>&       a_
                                                     Vector<EBCellFAB*>&       a_rteSources,
                                                     const Vector<EBCellFAB*>& a_cdrDensities,
                                                     const Vector<EBCellFAB*>& a_cdrGradients,
-                                                    const Vector<EBCellFAB*>& a_cdrVelocities,
+                                                    const Vector<EBCellFAB*>& /*a_cdrVelocities*/,
                                                     const Vector<EBCellFAB*>& a_rteDensities,
                                                     const EBCellFAB&          a_E,
                                                     const Real&               a_time,
@@ -1034,10 +1033,8 @@ CdrPlasmaStepper::advanceReactionNetworkIrregInterp(Vector<EBCellFAB*>&       a_
 
   // Irregular grid kernel.
   auto irregularKernel = [&](const VolIndex& vof) -> void {
-    const Real     kappa  = ebisbox.volFrac(vof);
-    const RealVect pos    = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, a_dx);
-    const RealVect normal = ebisbox.normal(vof);
-
+    const Real     kappa = ebisbox.volFrac(vof);
+    const RealVect pos   = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, a_dx);
     // Electric field
     const RealVect E = RealVect(D_DECL(a_E(vof, 0), a_E(vof, 1), a_E(vof, 2)));
 
@@ -1100,15 +1097,15 @@ CdrPlasmaStepper::advanceReactionNetworkIrregUpwind(Vector<EBCellFAB*>&       a_
                                                     Vector<EBCellFAB*>&       a_rteSources,
                                                     const Vector<EBCellFAB*>& a_cdrDensities,
                                                     const Vector<EBCellFAB*>& a_cdrGradients,
-                                                    const Vector<EBCellFAB*>& a_cdrVelocities,
+                                                    const Vector<EBCellFAB*>& /*a_cdrVelocities*/,
                                                     const Vector<EBCellFAB*>& a_rteDensities,
                                                     const EBCellFAB&          a_E,
                                                     const Real&               a_time,
                                                     const Real&               a_dt,
                                                     const Real&               a_dx,
-                                                    const Box&                a_cellBox,
-                                                    const int                 a_lvl,
-                                                    const DataIndex&          a_dit)
+                                                    const Box& /*a_cellBox*/,
+                                                    const int        a_lvl,
+                                                    const DataIndex& a_dit)
 {
   CH_TIME("CdrPlasmaStepper::advanceReactionNetworkIrregUpwind(Vector<EBCellFAB*>x6, ...)");
   if (m_verbosity > 5) {
@@ -1235,7 +1232,7 @@ CdrPlasmaStepper::computeCdrDiffusion()
     pout() << "CdrPlasmaStepper::computeCdrDiffusion()" << endl;
   }
 
-  // Allcoate storage for the electric field.
+  // Allocate storage for the electric field.
   EBAMRCellData electricFieldCell;
   EBAMRIVData   electricFieldEB;
 
@@ -1295,7 +1292,7 @@ CdrPlasmaStepper::computeCdrDiffusion(const EBAMRCellData& a_electricFieldCell, 
     m_amr->interpToEB(*cdrDensitiesExtrap[idx], *cdrDensities[idx], m_realm, m_cdr->getPhase());
   }
 
-  // 2b. Compute the diffusion coefficeints on the EB.
+  // 2b. Compute the diffusion coefficients on the EB.
   this->computeCdrDiffusionEb(cdrDcoEB, cdrDensitiesExtrap, a_electricFieldEB, m_time);
 
   // 2c. Release the extra storage allocate in 2a.
@@ -1693,7 +1690,7 @@ CdrPlasmaStepper::computeCdrDiffusionEb(Vector<EBAMRIVData*>&       a_cdrDcoEB,
 
   CH_assert(a_electricFieldEB[0]->nComp() == SpaceDim);
 
-  // Numer of CDR species.
+  // Number of CDR species.
   const int numCdrSpecies = m_physics->getNumCdrSpecies();
 
   CH_assert(a_cdrDcoEB.size() == numCdrSpecies);
@@ -2543,10 +2540,10 @@ CdrPlasmaStepper::computeCdrDomainFluxes(Vector<LevelData<DomainFluxIFFAB>*>    
 }
 
 void
-CdrPlasmaStepper::computeExtrapolatedFluxes(Vector<EBAMRIVData*>&        a_extrapCdrFluxesEB,
-                                            const Vector<EBAMRCellData*> a_cdrDensities,
-                                            const Vector<EBAMRCellData*> a_cdrVelocities,
-                                            const phase::which_phase     a_phase)
+CdrPlasmaStepper::computeExtrapolatedFluxes(Vector<EBAMRIVData*>&         a_extrapCdrFluxesEB,
+                                            const Vector<EBAMRCellData*>& a_cdrDensities,
+                                            const Vector<EBAMRCellData*>& a_cdrVelocities,
+                                            const phase::which_phase      a_phase)
 {
   CH_TIME("CdrPlasmaStepper::computeExtrapolatedFluxes(Vector<EBAMRIVData*>, Vector<EBAMRCellData*>x2, phase)");
   if (m_verbosity > 5) {
@@ -2608,10 +2605,10 @@ CdrPlasmaStepper::computeExtrapolatedFluxes(Vector<EBAMRIVData*>&        a_extra
 }
 
 void
-CdrPlasmaStepper::computeExtrapolatedDomainFluxes(Vector<EBAMRIFData*>&        a_cdrDomainFluxes,
-                                                  const Vector<EBAMRCellData*> a_cdrDensities,
-                                                  const Vector<EBAMRCellData*> a_cdrVelocities,
-                                                  const phase::which_phase     a_phase)
+CdrPlasmaStepper::computeExtrapolatedDomainFluxes(Vector<EBAMRIFData*>&         a_cdrDomainFluxes,
+                                                  const Vector<EBAMRCellData*>& a_cdrDensities,
+                                                  const Vector<EBAMRCellData*>& a_cdrVelocities,
+                                                  const phase::which_phase      a_phase)
 {
   CH_TIME("CdrPlasmaStepper::computeExtrapolatedDomainFluxes(Vector<EBAMRIFData*>, Vector<EBAMRCellData>x2, phase)");
   if (m_verbosity > 5) {
@@ -2660,9 +2657,9 @@ CdrPlasmaStepper::computeExtrapolatedDomainFluxes(Vector<EBAMRIFData*>&        a
 }
 
 void
-CdrPlasmaStepper::computeExtrapolatedVelocities(Vector<EBAMRIVData*>&        a_cdrVelocitiesEB,
-                                                const Vector<EBAMRCellData*> a_cdrVelocitiesCell,
-                                                const phase::which_phase     a_phase)
+CdrPlasmaStepper::computeExtrapolatedVelocities(Vector<EBAMRIVData*>&         a_cdrVelocitiesEB,
+                                                const Vector<EBAMRCellData*>& a_cdrVelocitiesCell,
+                                                const phase::which_phase      a_phase)
 {
   CH_TIME("CdrPlasmaStepper::computeExtrapolatedVelocities(Vector<EBAMRIVData*>, Vector<EBAMRCellData*>, phase)");
   if (m_verbosity > 5) {
@@ -2676,7 +2673,7 @@ CdrPlasmaStepper::computeExtrapolatedVelocities(Vector<EBAMRIVData*>&        a_c
   CH_assert(a_cdrVelocitiesEB.size() == numCdrSolvers);
   CH_assert(a_cdrVelocitiesCell.size() == numCdrSolvers);
 
-  // Allocate some scratch data -- it is used for extrapolating the vell-centered data to the EB.
+  // Allocate some scratch data -- it is used for extrapolating the well-centered data to the EB.
   EBAMRIVData scratch;
   m_amr->allocate(scratch, m_realm, a_phase, SpaceDim);
 
@@ -2790,7 +2787,7 @@ CdrPlasmaStepper::preRegrid(const int a_lmin, const int a_oldFinestLevel)
 }
 
 void
-CdrPlasmaStepper::preRegridInternals(const int a_lbase, const int a_oldFinestLevel)
+CdrPlasmaStepper::preRegridInternals(const int /*a_lbase*/, const int /*a_oldFinestLevel*/)
 {
   CH_TIME("CdrPlasmaStepper::preRegridInternals(int, int)");
   if (m_verbosity > 5) {
@@ -2924,9 +2921,9 @@ CdrPlasmaStepper::computeElectricField(EBAMRCellData&           a_E,
 }
 
 void
-CdrPlasmaStepper::computeElectricField(EBAMRFluxData&           a_electricFieldFace,
-                                       const phase::which_phase a_phase,
-                                       const EBAMRCellData&     a_electricFieldCell) const
+CdrPlasmaStepper::computeElectricField(EBAMRFluxData& a_electricFieldFace,
+                                       const phase::which_phase /*a_phase*/,
+                                       const EBAMRCellData& a_electricFieldCell) const
 {
   CH_TIME("CdrPlasmaStepper::computeElectricField(EBAMRFluxData, phase, EBAMRCellData)");
   if (m_verbosity > 5) {
@@ -2943,10 +2940,8 @@ CdrPlasmaStepper::computeElectricField(EBAMRFluxData&           a_electricFieldF
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
 
     // Patch distribution and EB information on this level.
-    const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
-    const DataIterator&      dit    = dbl.dataIterator();
-    const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, a_phase)[lvl];
-    const ProblemDomain&     domain = m_amr->getDomains()[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
 
     // Patch loop
     const int nbox = dit.size();
@@ -2954,11 +2949,6 @@ CdrPlasmaStepper::computeElectricField(EBAMRFluxData&           a_electricFieldF
 #pragma omp parallel for schedule(runtime)
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
-
-      const EBCellFAB& electricFieldCell = (*a_electricFieldCell[lvl])[din];
-      const EBISBox&   ebisbox           = ebisl[din];
-      const EBGraph&   ebgraph           = ebisbox.getEBGraph();
-      const Box&       cellBox           = dbl.get(din);
 
       // Do faces in all directions.
       for (int dir = 0; dir < SpaceDim; dir++) {
@@ -3407,7 +3397,7 @@ CdrPlasmaStepper::projectFlux(LevelData<BaseIVFAB<Real>>&       a_projectedFlux,
   CH_assert(a_projectedFlux.nComp() == 1);
   CH_assert(a_flux.nComp() == SpaceDim);
 
-  // Get the grid infromation on this level.
+  // Get the grid information on this level.
   const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[a_lvl];
   const DataIterator&      dit   = dbl.dataIterator();
   const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_cdr->getPhase())[a_lvl];
@@ -3623,7 +3613,7 @@ CdrPlasmaStepper::setVoltage(std::function<Real(const Real a_time)> a_voltage)
     pout() << "CdrPlasmaStepper::setVoltage(std::function<Real(Real)>)" << endl;
   }
 
-  m_voltage = a_voltage;
+  m_voltage = std::move(a_voltage);
 }
 
 void
@@ -4423,7 +4413,7 @@ CdrPlasmaStepper::getPlotVariableNames() const
 void
 CdrPlasmaStepper::writePlotData(LevelData<EBCellFAB>& a_output,
                                 int&                  a_icomp,
-                                const std::string     a_outputRealm,
+                                const std::string&    a_outputRealm,
                                 const int             a_level) const
 {
   CH_TIME("CdrPlasmaStepper::writePlotData");
@@ -4463,7 +4453,7 @@ void
 CdrPlasmaStepper::writeData(LevelData<EBCellFAB>& a_output,
                             int&                  a_comp,
                             const EBAMRCellData&  a_data,
-                            const std::string     a_outputRealm,
+                            const std::string&    a_outputRealm,
                             const int             a_level,
                             const bool            a_interpToCentroids,
                             const bool            a_interpGhost) const noexcept
@@ -4524,7 +4514,7 @@ CdrPlasmaStepper::writeData(LevelData<EBCellFAB>& a_output,
 void
 CdrPlasmaStepper::writeJ(LevelData<EBCellFAB>& a_output,
                          int&                  a_icomp,
-                         const std::string     a_outputRealm,
+                         const std::string&    a_outputRealm,
                          const int             a_level) const
 {
   CH_TIMERS("CdrPlasmaStepper::writeJ");
@@ -4815,3 +4805,4 @@ CdrPlasmaStepper::printStepReport()
 }
 
 #include <CD_NamespaceFooter.H>
+#include <utility>

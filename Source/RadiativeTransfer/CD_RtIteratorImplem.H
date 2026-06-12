@@ -1,23 +1,25 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_RtIteratorImplem.H
   @brief  Implementation of RtIterator.H
   @author Robert Marskar
 */
 
-#ifndef CD_RtIteratorImplem_H
-#define CD_RtIteratorImplem_H
+#ifndef CD_RTITERATORIMPLEM_H
+#define CD_RTITERATORIMPLEM_H
 
 // Our includes
 #include <CD_RtIterator.H>
 #include <CD_NamespaceHeader.H>
 
-/*!
+/**
   @brief Iterator class for RtLayout
+  @param[in,out] a_layout Description
 */
 template <class T>
 RtIterator<T>::RtIterator(RtLayout<T>& a_layout)

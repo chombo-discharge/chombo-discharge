@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2024 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_LevelTiles.H
   @brief  Declaration of LevelTiles
   @author Robert Marskar
 */
 
-#ifndef CD_LevelTiles_H
-#define CD_LevelTiles_H
+#ifndef CD_LEVELTILES_H
+#define CD_LEVELTILES_H
 
 // Std includes
 #include <vector>
@@ -24,7 +25,7 @@
 // Our includes
 #include <CD_NamespaceHeader.H>
 
-/*!
+/**
   @brief Class for storing the AMR hierarchy as a collection of tiles. 
   @details This class only makes sense in terms of a grid which uses constant-size grid, which is a restriction we happily accept when using particles. This class
   decomposes the AMR hierarchy into such tiles, each tile being the cells spanned by the blockingFactor^SpaceDim grid patch. 
@@ -32,15 +33,20 @@
 class LevelTiles
 {
 public:
+  /** @brief alias type alias. */
   using BoxIDs = std::pair<unsigned int, unsigned int>;
 
-  /*!
-    @brief For lexicographically comparing tiles
-    @param[in] a First tile
-    @param[in] b First tile
+  /**
+    @brief For lexicographically comparing tiles.
   */
   struct TileComparator
   {
+    /**
+      @brief Comparator operator.
+      @param[in] a First tile
+      @param[in] b Second tile
+      @return True if a > b lexicographically
+    */
     bool
     operator()(const IntVect& a, const IntVect& b) const
     {
@@ -58,46 +64,46 @@ public:
     }
   };
 
-  /*!
+  /**
     @brief Weak constructor. Must subsequently call the define function
   */
   LevelTiles() noexcept;
 
-  /*!
-    @brief Full constructor - puts object in usable state. 
-    @param[in] a_dbl Grids
-    @param[in] a_blockingFactor Grid size. 
+  /**
+    @brief Full constructor - puts object in usable state.
+    @param[in] a_dbl            Grids
+    @param[in] a_blockingFactor Grid size.
   */
-  LevelTiles(const DisjointBoxLayout& a_grids, const int a_blockingFactor) noexcept;
+  LevelTiles(const DisjointBoxLayout& a_dbl, const int a_blockingFactor) noexcept;
 
-  /*!
+  /**
     @brief Destructor (does nothing)
   */
   virtual ~LevelTiles() noexcept;
 
-  /*!
-    @brief Define function. Puts object in usable state. 
-    @param[in] a_dbl Grids
-    @param[in] a_blockingFactor Grid size. 
+  /**
+    @brief Define function. Puts object in usable state.
+    @param[in] a_dbl            Grids
+    @param[in] a_blockingFactor Grid size.
   */
   virtual void
-  define(const DisjointBoxLayout& a_grids, const int a_blockingFactor) noexcept;
+  define(const DisjointBoxLayout& a_dbl, const int a_blockingFactor) noexcept;
 
-  /*!
+  /**
     @brief Get the tiles own by this rank
     @return m_myTiles
   */
   virtual const std::map<IntVect, unsigned int, TileComparator>&
   getMyTiles() const noexcept;
 
-  /*!
+  /**
     @brief Get the tiles own by this rank
     @return m_otherTiles
   */
   virtual const std::map<IntVect, BoxIDs, TileComparator>&
   getOtherTiles() const noexcept;
 
-  /*!
+  /**
     @brief Get the tiles own by this rank
     @return m_myGridIndices
   */
@@ -105,22 +111,22 @@ public:
   getMyGrids() const noexcept;
 
 protected:
-  /*!
+  /**
     @brief Is defined or not
   */
   bool m_isDefined;
 
-  /*!
+  /**
     @brief "Tiles" owned by this rank
   */
   std::map<IntVect, unsigned int, TileComparator> m_myTiles;
 
-  /*!
+  /**
     @brief Grids owned by other ranks. 
   */
   std::map<IntVect, BoxIDs, TileComparator> m_otherTiles;
 
-  /*!
+  /**
     @brief Mapping of grid index to DataIndex
   */
   std::map<unsigned int, DataIndex> m_myGrids;

@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_ParticleContainerImplem.H
   @brief  Implementation of CD_ParticleContainer.H
   @author Robert Marskar
 */
 
-#ifndef CD_ParticleContainerImplem_H
-#define CD_ParticleContainerImplem_H
+#ifndef CD_PARTICLECONTAINERIMPLEM_H
+#define CD_PARTICLECONTAINERIMPLEM_H
 
 // Std includes
 #include <bitset>
@@ -31,14 +32,7 @@
 #include <CD_NamespaceHeader.H>
 
 template <class P>
-ParticleContainer<P>::ParticleContainer()
-{
-  m_isDefined         = false;
-  m_isOrganizedByCell = false;
-  m_profile           = false;
-  m_debug             = false;
-  m_verbose           = false;
-}
+ParticleContainer<P>::ParticleContainer() = default;
 
 template <class P>
 ParticleContainer<P>::ParticleContainer(const Vector<DisjointBoxLayout>&         a_grids,
@@ -83,7 +77,7 @@ ParticleContainer<P>::define(const Vector<DisjointBoxLayout>&         a_grids,
                              const RealVect&                          a_probLo,
                              const int                                a_blockingFactor,
                              const int                                a_finestLevel,
-                             const std::string                        a_realm)
+                             const std::string&                       a_realm)
 {
   CH_TIME("ParticleContainer::~ParticleContainer");
 
@@ -120,7 +114,7 @@ ParticleContainer<P>::define(const Vector<DisjointBoxLayout>&         a_grids,
 
 template <class P>
 void
-ParticleContainer<P>::setupGrownGrids(const int a_base, const int a_finestLevel)
+ParticleContainer<P>::setupGrownGrids(const int /*a_base*/, const int a_finestLevel)
 {
   CH_TIME("ParticleContainer::setupGrownGrids");
   if (m_verbose) {
@@ -236,7 +230,7 @@ ParticleContainer<P>::getFinestLevel() const
 }
 
 template <class P>
-const std::string
+std::string
 ParticleContainer<P>::getRealm() const
 {
   CH_assert(m_isDefined);
@@ -252,14 +246,14 @@ ParticleContainer<P>::getGrids() const
 }
 
 template <class P>
-const RealVect
+RealVect
 ParticleContainer<P>::getProbLo() const noexcept
 {
   return m_probLo;
 }
 
 template <class P>
-const Vector<RealVect>
+Vector<RealVect>
 ParticleContainer<P>::getDx() const noexcept
 {
   return m_dx;
@@ -409,7 +403,7 @@ ParticleContainer<P>::getCellParticles(const int a_level) const
 
 template <class P>
 void
-ParticleContainer<P>::getCellParticles(BinFab<P>& cellParticles, const int a_lvl, const DataIndex a_dit) const
+ParticleContainer<P>::getCellParticles(BinFab<P>& cellParticles, const int a_lvl, const DataIndex& a_dit) const
 {
   CH_TIME("ParticleContainer::getCellParticles(BinFab)");
 
@@ -425,7 +419,7 @@ ParticleContainer<P>::getCellParticles(BinFab<P>& cellParticles, const int a_lvl
 
 template <class P>
 void
-ParticleContainer<P>::getCellParticlesDestructive(BinFab<P>& cellParticles, const int a_lvl, const DataIndex a_dit)
+ParticleContainer<P>::getCellParticlesDestructive(BinFab<P>& cellParticles, const int a_lvl, const DataIndex& a_dit)
 {
   CH_TIME("ParticleContainer::getCellParticlesDestructive");
 
@@ -441,7 +435,7 @@ ParticleContainer<P>::getCellParticlesDestructive(BinFab<P>& cellParticles, cons
 
 template <class P>
 BinFab<P>&
-ParticleContainer<P>::getCellParticles(const int a_level, const DataIndex a_dit)
+ParticleContainer<P>::getCellParticles(const int a_level, const DataIndex& a_dit)
 {
   CH_TIME("ParticleContainer::getCellParticles(int, DataIndex)");
 
@@ -456,7 +450,7 @@ ParticleContainer<P>::getCellParticles(const int a_level, const DataIndex a_dit)
 
 template <class P>
 const BinFab<P>&
-ParticleContainer<P>::getCellParticles(const int a_level, const DataIndex a_dit) const
+ParticleContainer<P>::getCellParticles(const int a_level, const DataIndex& a_dit) const
 {
   CH_TIME("ParticleContainer::getCellParticles(int, DataIndex)");
 
@@ -680,7 +674,7 @@ ParticleContainer<P>::addParticlesDestructive(List<P>& a_particles)
 
 template <class P>
 void
-ParticleContainer<P>::addParticles(const BinFab<P>& a_particles, const int a_lvl, const DataIndex a_dit)
+ParticleContainer<P>::addParticles(const BinFab<P>& a_particles, const int a_lvl, const DataIndex& a_dit)
 {
   CH_TIME("ParticleContainer::addParticles(BinFab)");
   if (m_verbose) {
@@ -710,7 +704,7 @@ ParticleContainer<P>::addParticles(const BinFab<P>& a_particles, const int a_lvl
 
 template <class P>
 void
-ParticleContainer<P>::addParticlesDestructive(BinFab<P>& a_particles, const int a_lvl, const DataIndex a_dit)
+ParticleContainer<P>::addParticlesDestructive(BinFab<P>& a_particles, const int a_lvl, const DataIndex& a_dit)
 {
   CH_TIME("ParticleContainer::addParticlesDestructive(BinFab)");
   if (m_verbose) {
@@ -776,7 +770,7 @@ ParticleContainer<P>::addParticles(const ParticleContainer<P>& a_otherContainer)
   }
   else {
     // If we're adding particles across realms we need to collect the input particles onto lists that get remapped
-    // into m_particles. A full explanation of how this works is given in the remap routin.
+    // into m_particles. A full explanation of how this works is given in the remap routine.
 
     const uint32_t numRanks = numProc();
     const uint32_t myRank   = procID();
@@ -863,7 +857,7 @@ ParticleContainer<P>::addParticlesDestructive(ParticleContainer<P>& a_otherConta
   }
   else {
     // If we're adding particles across realms we need to collect the input particles onto lists that get remapped
-    // into m_particles. A full explanation of how this works is given in the remap routin.
+    // into m_particles. A full explanation of how this works is given in the remap routine.
 
     const uint32_t numRanks = numProc();
     const uint32_t myRank   = procID();
@@ -982,7 +976,7 @@ ParticleContainer<P>::remap()
   // This is done in the following steps:
   //    1) Collect all particles from this rank onto thread-local variables
   //    2) Iterate through those particles and figure out where they end up up the AMR hierarchy (level, grid index, and ownership, i.e. the MPI rank)
-  //    3) Collect those particles onto a rank-only (no thread loacl) variable
+  //    3) Collect those particles onto a rank-only (no thread local) variable
   //    4) Assign particles _locally_, i.e. assign particles sent from this rank to this rank directly onto m_particles
   //    5) If using MPI, scatter the particles to the appropriate ranks.
   //    6) Assign particles locally from the particles that were scattered to this rank.
@@ -993,7 +987,7 @@ ParticleContainer<P>::remap()
   using LevelAndIndex = std::pair<uint32_t, uint32_t>;
 
   // These are the particles that get sent to each MPI rank. The pair contains the grid level and grid index.
-  // Each MPI rank (and OpenMP thread) goes through it's particles and checks if they've falled off the grid. If they have,
+  // Each MPI rank (and OpenMP thread) goes through it's particles and checks if they've fallen off the grid. If they have,
   // then the particles are moved onto appropriate lists that will get sent to each rank.
   std::vector<ParticleMap<List<P>>> particlesToSend(numRanks);
 
@@ -1216,7 +1210,7 @@ ParticleContainer<P>::assignLocalParticles(ParticleMap<List<P>>& a_mappedParticl
 
 template <class P>
 void
-ParticleContainer<P>::preRegrid(const int a_lmin)
+ParticleContainer<P>::preRegrid(const int /*a_lmin*/)
 {
   CH_TIME("ParticleContainer::preRegrid");
   if (m_verbose) {
@@ -1271,7 +1265,7 @@ ParticleContainer<P>::resetParticleIDs() noexcept
 
   int32_t counter = 0;
 
-  const int32_t myRank = static_cast<uint32_t>(procID());
+  const auto myRank = static_cast<uint32_t>(procID());
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl = m_grids[lvl];
@@ -1339,7 +1333,7 @@ ParticleContainer<P>::regrid(const Vector<DisjointBoxLayout>&         a_grids,
   using LevelAndIndex = std::pair<uint32_t, uint32_t>;
 
   // These are the particles that get sent to each MPI rank. The pair contains the grid level and grid index.
-  // Each MPI rank (and OpenMP thread) goes through it's particles and checks if they've falled off the grid. If they have,
+  // Each MPI rank (and OpenMP thread) goes through it's particles and checks if they've fallen off the grid. If they have,
   // then the particles are moved onto appropriate lists that will get sent to each rank.
   std::vector<ParticleMap<List<P>>> particlesToSend(numRanks);
 
@@ -1413,7 +1407,7 @@ ParticleContainer<P>::setValue(const Real a_value)
 template <class P>
 template <RealVect& (P::*particleVectorField)()>
 void
-ParticleContainer<P>::setValue(const RealVect a_value)
+ParticleContainer<P>::setValue(const RealVect& a_value)
 {
   CH_TIME("ParticleContainer::setValue");
 
@@ -1620,7 +1614,7 @@ ParticleContainer<P>::copyMaskParticles(const int a_level, const LevelData<BaseF
         const IntVect  iv = ParticleOps::getParticleCellIndex(x, m_probLo, dx);
 
         if (!(maskBox.contains(iv))) {
-          std::cout << a_level << "\t" << iv << "\t" << x << "\t" << maskBox << std::endl;
+          std::cout << a_level << "\t" << iv << "\t" << x << "\t" << maskBox << endl;
 
           MayDay::Error("ParticleContainer::copyMaskParticles -- logic bust. Particle has fallen off grid");
         }
@@ -1686,7 +1680,7 @@ ParticleContainer<P>::transferMaskParticles(const int a_level, const LevelData<B
         const IntVect  iv = ParticleOps::getParticleCellIndex(x, m_probLo, dx);
 
         if (!(maskBox.contains(iv))) {
-          //        std::cout << a_level << "\t" << iv << "\t" << x << std::endl;
+          //        std::cout << a_level << "\t" << iv << "\t" << x << endl;
 
           MayDay::Warning("ParticleContainer::transferMaskParticles -- logic bust. Particle has fallen off grid");
 

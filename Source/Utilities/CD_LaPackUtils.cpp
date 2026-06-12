@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_LaPackUtils.cpp
   @brief  Implementation of CD_LaPackUtils.H
   @author Robert Marskar
@@ -20,7 +21,7 @@
 #include <CD_NamespaceHeader.H>
 
 int
-LaPackUtils::linearIndex(const int irow, const int jcol, const int M, const int N)
+LaPackUtils::linearIndex(const int irow, const int jcol, const int M, const int /*N*/)
 {
   return irow + jcol * M;
 }
@@ -35,7 +36,7 @@ LaPackUtils::computeSVD(std::vector<double>&       a_linU,
 {
 
   // linA must be stored as a double array in order to interface into LaPack
-  double* A = new double[a_M * a_N];
+  auto* A = new double[a_M * a_N];
   for (int i = 0; i < a_linA.size(); i++) {
     A[i] = a_linA[i];
   }
@@ -54,10 +55,10 @@ LaPackUtils::computeSVD(std::vector<double>&       a_linU,
   int  LWORK = 4 * mn * mn + 6 * mn + mx;
   int* IWORK = new int[8 * std::min(M, N)];
 
-  double* S    = new double[std::min(M, N)];
-  double* U    = new double[M * M];
-  double* VT   = new double[N * N];
-  double* WORK = new double[std::max(1, LWORK)];
+  auto* S    = new double[std::min(M, N)];
+  auto* U    = new double[M * M];
+  auto* VT   = new double[N * N];
+  auto* WORK = new double[std::max(1, LWORK)];
 
   // Do the SVD decomposition
   dgesdd_(&JOBZ, &M, &N, A, &LDA, S, U, &LDU, VT, &LDVT, WORK, &LWORK, IWORK, &INFO);
@@ -102,7 +103,7 @@ LaPackUtils::computeSVD(std::vector<float>&       a_linU,
 {
 
   // linA must be stored as a float array in order to interface into LaPack
-  float* A = new float[a_M * a_N];
+  auto* A = new float[a_M * a_N];
   for (int i = 0; i < a_linA.size(); i++) {
     A[i] = a_linA[i];
   }
@@ -121,10 +122,10 @@ LaPackUtils::computeSVD(std::vector<float>&       a_linU,
   int  LWORK = 4 * mn * mn + 6 * mn + mx;
   int* IWORK = new int[8 * std::min(M, N)];
 
-  float* S    = new float[std::min(M, N)];
-  float* U    = new float[M * M];
-  float* VT   = new float[N * N];
-  float* WORK = new float[std::max(1, LWORK)];
+  auto* S    = new float[std::min(M, N)];
+  auto* U    = new float[M * M];
+  auto* VT   = new float[N * N];
+  auto* WORK = new float[std::max(1, LWORK)];
 
   // Do the SVD decomposition
   sgesdd_(&JOBZ, &M, &N, A, &LDA, S, U, &LDU, VT, &LDVT, WORK, &LWORK, IWORK, &INFO);
@@ -179,10 +180,10 @@ LaPackUtils::computePseudoInverse(std::vector<double>&       a_linAplus,
     const double eps = std::numeric_limits<double>::epsilon();
     const double tol = eps * std::max(a_M, a_N) * maxS;
 
-    // Need to storage the matrices in a form useable by LaPack, and then use dgemm to multiply them.
-    double* U               = new double[a_M * a_M];
-    double* SigmaReciprocal = new double[a_M * a_N];
-    double* VT              = new double[a_N * a_N];
+    // Need to storage the matrices in a form usable by LaPack, and then use dgemm to multiply them.
+    auto* U               = new double[a_M * a_M];
+    auto* SigmaReciprocal = new double[a_M * a_N];
+    auto* VT              = new double[a_N * a_N];
 
     for (int i = 0; i < linU.size(); i++) {
       U[i] = linU[i];
@@ -206,7 +207,7 @@ LaPackUtils::computePseudoInverse(std::vector<double>&       a_linAplus,
     //
     // We want to compute V*Transpose(SigmaReciprocal) onto C, which is N*M big.
     //
-    double* C = new double[a_N * a_M];
+    auto* C = new double[a_N * a_M];
     {
       char   TRANSA = 'T';
       char   TRANSB = 'T';
@@ -226,7 +227,7 @@ LaPackUtils::computePseudoInverse(std::vector<double>&       a_linAplus,
     //
     // op(A) => M*M
     // op(B) => N*M
-    double* Aplus = new double[a_N * a_M];
+    auto* Aplus = new double[a_N * a_M];
     {
       char   TRANSA = 'N';
       char   TRANSB = 'T';
@@ -275,12 +276,12 @@ LaPackUtils::computePseudoInverse(std::vector<float>&       a_linAplus,
       maxS = std::max(maxS, s);
     }
     const float eps = std::numeric_limits<float>::epsilon();
-    const float tol = eps * std::max(a_M, a_N) * maxS;
+    const float tol = eps * static_cast<float>(std::max(a_M, a_N)) * maxS;
 
-    // Need to storage the matrices in a form useable by LaPack, and then use dgemm to multiply them.
-    float* U               = new float[a_M * a_M];
-    float* SigmaReciprocal = new float[a_M * a_N];
-    float* VT              = new float[a_N * a_N];
+    // Need to storage the matrices in a form usable by LaPack, and then use dgemm to multiply them.
+    auto* U               = new float[a_M * a_M];
+    auto* SigmaReciprocal = new float[a_M * a_N];
+    auto* VT              = new float[a_N * a_N];
 
     for (int i = 0; i < linU.size(); i++) {
       U[i] = linU[i];
@@ -290,7 +291,7 @@ LaPackUtils::computePseudoInverse(std::vector<float>&       a_linAplus,
     }
     for (int i = 0; i < linSigma.size(); i++) {
       if (std::abs(linSigma[i]) > tol) {
-        SigmaReciprocal[i] = 1. / linSigma[i];
+        SigmaReciprocal[i] = static_cast<float>(1.) / linSigma[i];
       }
       else {
         SigmaReciprocal[i] = 0.0;
@@ -304,7 +305,7 @@ LaPackUtils::computePseudoInverse(std::vector<float>&       a_linAplus,
     //
     // We want to compute V*Transpose(SigmaReciprocal) onto C, which is N*M big.
     //
-    float* C = new float[a_N * a_M];
+    auto* C = new float[a_N * a_M];
     {
       char  TRANSA = 'T';
       char  TRANSB = 'T';
@@ -324,7 +325,7 @@ LaPackUtils::computePseudoInverse(std::vector<float>&       a_linAplus,
     //
     // op(A) => M*M
     // op(B) => N*M
-    float* Aplus = new float[a_N * a_M];
+    auto* Aplus = new float[a_N * a_M];
     {
       char  TRANSA = 'N';
       char  TRANSB = 'T';
@@ -362,8 +363,8 @@ LaPackUtils::linearizeColumnMajorMatrix(std::vector<double>&                    
                                         const std::vector<std::vector<double>>& a_A)
 {
   // Number of rows and columns
-  a_M = a_A[0].size(); // Number of rows of the actual matrix
-  a_N = a_A.size();    // Number of columns of the actual matrix
+  a_M = static_cast<int>(a_A[0].size()); // Number of rows of the actual matrix
+  a_N = static_cast<int>(a_A.size());    // Number of columns of the actual matrix
 
   // Linearize the input matrix.
   a_linA.resize(a_M * a_N);
@@ -382,8 +383,8 @@ LaPackUtils::linearizeRowMajorMatrix(std::vector<double>&                    a_l
                                      const std::vector<std::vector<double>>& a_A)
 {
   // Number of rows and columns
-  a_M = a_A.size();
-  a_N = a_A[0].size();
+  a_M = static_cast<int>(a_A.size());
+  a_N = static_cast<int>(a_A[0].size());
 
   // Linearize the input matrix
   a_linA.resize(a_M * a_N);

@@ -1,6 +1,7 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 /*
@@ -9,8 +10,8 @@
   @author Robert Marskar
 */
 
-#ifndef CD_EBHelmholtzEBBCFactory_H
-#define CD_EBHelmholtzEBBCFactory_H
+#ifndef CD_EBHELMHOLTZEBBCFACTORY_H
+#define CD_EBHELMHOLTZEBBCFACTORY_H
 
 // Chombo includes
 #include <EBLevelGrid.H>
@@ -19,36 +20,37 @@
 #include <CD_EBHelmholtzEBBC.H>
 #include <CD_NamespaceHeader.H>
 
-/*!
+/**
   @brief Factory class for making EBHelmholtzEBBCs. 
 */
 class EBHelmholtzEBBCFactory
 {
 public:
-  /*!
+  /**
     @brief Constructor. 
   */
   EBHelmholtzEBBCFactory();
 
-  /*!
+  /**
     @brief Destructor
   */
   virtual ~EBHelmholtzEBBCFactory();
 
-  /*!
+  /**
     @brief Disallowed -- don't see why you would need it.
   */
   EBHelmholtzEBBCFactory(const EBHelmholtzEBBCFactory& a_other) = delete;
 
-  /*!
+  /**
     @brief Disallowed - don't see why you would need it.
   */
   EBHelmholtzEBBCFactory&
   operator=(const EBHelmholtzEBBCFactory& a_other) = delete;
 
-  /*!
+  /**
     @brief Factory method which returns new BC object. 
     @note  Defines are done in EBHelmholtzOp so no need to worry about that here. 
+    @return Return value
   */
   virtual RefCountedPtr<EBHelmholtzEBBC>
   create() = 0;

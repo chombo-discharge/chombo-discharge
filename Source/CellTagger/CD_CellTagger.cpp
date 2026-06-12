@@ -1,12 +1,13 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_CellTagger.cpp
   @brief  Implementation of CD_CellTagger.H
-  @author Robert marskar
+  @author Robert Marskar
 */
 
 // Std includes
@@ -19,14 +20,11 @@
 #include <CD_CellTagger.H>
 #include <CD_NamespaceHeader.H>
 
-CellTagger::CellTagger()
+CellTagger::CellTagger() : m_name("CellTagger"), m_verbosity(-1), m_buffer(0)
 {
   CH_TIME("CellTagger::CellTagger()");
 
   // Defaeult settings
-  m_verbosity = -1;
-  m_buffer    = 0;
-  m_name      = "CellTagger";
 }
 
 CellTagger::~CellTagger()
@@ -75,10 +73,10 @@ CellTagger::getPlotVariableNames() const
 }
 
 void
-CellTagger::writePlotData(LevelData<EBCellFAB>& a_output,
-                          int&                  a_icomp,
-                          const std::string     a_outputRealm,
-                          const int             a_level) const
+CellTagger::writePlotData(LevelData<EBCellFAB>& /*a_output*/,
+                          int& /*a_icomp*/,
+                          const std::string& /*a_outputRealm*/,
+                          const int /*a_level*/) const
 {
   CH_TIME("CellTagger::writePlotData)");
   if (m_verbosity > 5) {
@@ -249,7 +247,7 @@ CellTagger::parseVerbosity()
 }
 
 bool
-CellTagger::insideTagBox(const RealVect a_pos) const
+CellTagger::insideTagBox(const RealVect& a_pos) const
 {
   CH_TIME("CellTagger::insideTagBox(RealVect)");
   if (m_verbosity > 5) {
@@ -272,7 +270,7 @@ CellTagger::insideTagBox(const RealVect a_pos) const
 }
 
 int
-CellTagger::getManualRefinementLevel(const RealVect a_pos) const
+CellTagger::getManualRefinementLevel(const RealVect& a_pos) const
 {
   CH_TIME("CellTagger::getManualRefinementLevel(RealVect)");
   if (m_verbosity > 5) {
@@ -281,9 +279,9 @@ CellTagger::getManualRefinementLevel(const RealVect a_pos) const
 
   int refToThisLevel = -1;
 
-  for (int i = 0; i < m_refBoxes.size(); i++) {
-    const RealBox& refBox = m_refBoxes[i].first;
-    const int&     refLvl = m_refBoxes[i].second;
+  for (const auto& m_refBoxe : m_refBoxes) {
+    const RealBox& refBox = m_refBoxe.first;
+    const int&     refLvl = m_refBoxe.second;
 
     const RealVect lo = refBox.getLo();
     const RealVect hi = refBox.getHi();

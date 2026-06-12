@@ -1,10 +1,11 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   PerlinRodSdf.cpp
+/**
+  @file   CD_PerlinRodSdf.cpp
   @brief  Implementation of CD_PerlinRodSdf.H
   @author Robert Marskar
 */
@@ -34,7 +35,7 @@ PerlinRodSdf::PerlinRodSdf(const Real&     a_rad,
   const RealVect center2 = a_center2 - axis * a_rad / axis.vectorLength();
 
   // Cylinder and graded noise sphere
-  BaseIF*       cyl = static_cast<BaseIF*>(new CylinderSdf(a_center1, center2, a_rad, a_inside));
+  auto*         cyl = static_cast<BaseIF*>(new CylinderSdf(a_center1, center2, a_rad, a_inside));
   const BaseIF* sph = static_cast<BaseIF*>(new GradedPerlinSphereSdf(a_rad + a_noiseAmp,
                                                                      center2,
                                                                      a_inside,
@@ -46,8 +47,8 @@ PerlinRodSdf::PerlinRodSdf(const Real&     a_rad,
 
   // Rotate sph so that it aligns with center2 - a_center1
 #if CH_SPACEDIM == 2
-  const Real   theta = atan2(axis[0], axis[1]);
-  TransformIF* trans = new TransformIF(*sph);
+  const Real theta = atan2(axis[0], axis[1]);
+  auto*      trans = new TransformIF(*sph);
   trans->rotate(theta, center2);
 #elif CH_SPACEDIM == 3 // By default, the sphere noise points along the negative SpaceDim  direction. Rotate
   // that vector to center2-center1
@@ -67,13 +68,9 @@ PerlinRodSdf::PerlinRodSdf(const Real&     a_rad,
   delete trans;
 }
 
-PerlinRodSdf::PerlinRodSdf(const PerlinRodSdf& a_inputIF) : PerlinSphereSdf(a_inputIF)
-{
-  m_baseif = a_inputIF.m_baseif;
-}
+PerlinRodSdf::PerlinRodSdf(const PerlinRodSdf& a_inputIF) = default;
 
-PerlinRodSdf::~PerlinRodSdf()
-{}
+PerlinRodSdf::~PerlinRodSdf() = default;
 
 Real
 PerlinRodSdf::value(const RealVect& a_pos) const

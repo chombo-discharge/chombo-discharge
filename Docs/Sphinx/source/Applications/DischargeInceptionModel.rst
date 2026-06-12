@@ -63,7 +63,7 @@ The discharge inception model is implemented in :file:`$DISCHARGE_HOME/Physics/D
 
 .. literalinclude:: ../../../../Physics/DischargeInception/CD_DischargeInceptionStepper.H
    :language: c++
-   :lines: 72-79
+   :lines: 73-93
    :dedent: 4
 	   
 The template template parameters indicate which types of solvers to used within the compound algorithm.
@@ -215,8 +215,8 @@ The relevant user API for setting the above variables are listed below.
 
 .. literalinclude:: ../../../../Physics/DischargeInception/CD_DischargeInceptionStepper.H
    :language: c++
-   :lines: 291-386
-   :dedent: 4
+   :lines: 310-407
+   :dedent: 6
 
 .. tip::
 
@@ -385,7 +385,7 @@ then we can estimate the inception voltage for a starting electron at position :
 Minimum inception voltage
 _________________________
 
-The minium inception voltage is the minimum voltage required for starting a critical avalanche (or Townsend process) for an arbitrary starting electron.
+The minimum inception voltage is the minimum voltage required for starting a critical avalanche (or Townsend process) for an arbitrary starting electron.
 For any position :math:`\mathbf{x}`, then
 
 .. math::

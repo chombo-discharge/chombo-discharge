@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_CdrCTU.cpp
   @brief  Implementation of CD_CdrCTU.H
   @author Robert Marskar
@@ -19,15 +20,13 @@
 #include <CD_ParallelOps.H>
 #include <CD_NamespaceHeader.H>
 
-CdrCTU::CdrCTU()
+CdrCTU::CdrCTU() : m_limiter(Limiter::MonotonizedCentral), m_useCTU(true)
 {
   CH_TIME("CdrCTU::CdrCTU()");
 
   // Class and object name
   m_className = "CdrCTU";
   m_name      = "CdrCTU";
-  m_limiter   = Limiter::MonotonizedCentral;
-  m_useCTU    = true;
 }
 
 CdrCTU::~CdrCTU()
@@ -247,8 +246,8 @@ CdrCTU::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
                             const EBCellFAB&     a_cellPhi,
                             const Box&           a_cellBox,
                             const ProblemDomain& a_domain,
-                            const int            a_level,
-                            const DataIndex&     a_dit)
+                            const int /*a_level*/,
+                            const DataIndex& /*a_dit*/)
 {
   CH_TIME("CdrCTU::computeNormalSlopes(EBCellFAB, EBCellFAB, Box, ProblemDomain, int, DataIndex)");
   if (m_verbosity > 5) {
@@ -316,7 +315,7 @@ CdrCTU::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
         const Real dwr = phiReg(iv + shift, m_comp) - phiReg(iv, m_comp);
 
         if (dwl * dwr > 0.0) {
-          slopesReg(iv, dir) = this->minmod(dwl, dwr);
+          slopesReg(iv, dir) = ChomboDischarge::CdrCTU::minmod(dwl, dwr);
         }
         else {
           slopesReg(iv, dir) = 0.0;
@@ -334,7 +333,7 @@ CdrCTU::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
         const Real dwr = phiReg(iv + shift, m_comp) - phiReg(iv, m_comp);
 
         if (dwl * dwr > 0.0) {
-          slopesReg(iv, dir) = this->superbee(dwl, dwr);
+          slopesReg(iv, dir) = superbee(dwl, dwr);
         }
         else {
           slopesReg(iv, dir) = 0.0;
@@ -349,7 +348,7 @@ CdrCTU::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
         const Real dwr = phiReg(iv + shift, m_comp) - phiReg(iv, m_comp);
 
         if (dwl * dwr > 0.0) {
-          slopesReg(iv, dir) = this->monotonizedCentral(dwl, dwr);
+          slopesReg(iv, dir) = ChomboDischarge::CdrCTU::monotonizedCentral(dwl, dwr);
         }
         else {
           slopesReg(iv, dir) = 0.0;
@@ -428,17 +427,17 @@ CdrCTU::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
         break;
       }
       case Limiter::MinMod: {
-        a_normalSlopes(vof, dir) = this->minmod(dwl, dwr);
+        a_normalSlopes(vof, dir) = ChomboDischarge::CdrCTU::minmod(dwl, dwr);
 
         break;
       }
       case Limiter::Superbee: {
-        a_normalSlopes(vof, dir) = this->superbee(dwl, dwr);
+        a_normalSlopes(vof, dir) = superbee(dwl, dwr);
 
         break;
       }
       case Limiter::MonotonizedCentral: {
-        a_normalSlopes(vof, dir) = this->monotonizedCentral(dwl, dwr);
+        a_normalSlopes(vof, dir) = ChomboDischarge::CdrCTU::monotonizedCentral(dwl, dwr);
 
         break;
       }
@@ -465,8 +464,8 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
                const ProblemDomain& a_domain,
                const Box&           a_cellBox,
                const int&           a_level,
-               const DataIndex&     a_dit,
-               const Real&          a_dt)
+               const DataIndex& /*a_dit*/,
+               const Real& a_dt)
 {
   CH_TIME("CdrCTU::upwind(EBFluxFAB, EBCellFABx3, EBFluxFAB, ProblemDomain, Box, int, DataIndex, Real)");
   if (m_verbosity > 5) {
@@ -512,7 +511,7 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
     interiorFaces.grow(dir, -1);
     interiorFaces.surroundingNodes(dir);
 
-    // Bounary faces on lo/high side.
+    // Boundary faces on lo/high side.
     Box bndryFacesLo = adjCellLo(domainBox, dir, -1);
     Box bndryFacesHi = adjCellHi(domainBox, dir, -1);
 
@@ -656,7 +655,7 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
               if (a_cellVel(vofLeft, transverseDir) < 0.0 && a_domain.contains(ivLeftUp)) {
                 const Vector<FaceIndex>& facesHi = ebisbox.getFaces(vofLeft, transverseDir, Side::Hi);
 
-                const int nFaces = facesHi.size();
+                const int nFaces = static_cast<int>(facesHi.size());
 
                 if (nFaces > 0) {
                   Real phiUp = 0.0;
@@ -672,7 +671,7 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
               else if (a_cellVel(vofLeft, transverseDir) > 0.0 && a_domain.contains(ivLeftDown)) {
                 const Vector<FaceIndex>& facesLo = ebisbox.getFaces(vofLeft, transverseDir, Side::Lo);
 
-                const int nFaces = facesLo.size();
+                const int nFaces = static_cast<int>(facesLo.size());
 
                 if (nFaces > 0) {
                   Real phiDown = 0.0;
@@ -690,7 +689,7 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
               if (a_cellVel(vofRigh, transverseDir) < 0.0 && a_domain.contains(ivRighUp)) {
                 const Vector<FaceIndex>& facesHi = ebisbox.getFaces(vofRigh, transverseDir, Side::Hi);
 
-                const int nFaces = facesHi.size();
+                const int nFaces = static_cast<int>(facesHi.size());
 
                 if (nFaces > 0) {
                   Real phiUp = 0.0;
@@ -705,7 +704,7 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
               else if (a_cellVel(vofRigh, transverseDir) > 0.0 && a_domain.contains(ivRighDown)) {
                 const Vector<FaceIndex>& facesLo = ebisbox.getFaces(vofRigh, transverseDir, Side::Lo);
 
-                const int nFaces = facesLo.size();
+                const int nFaces = static_cast<int>(facesLo.size());
 
                 if (nFaces > 0) {
                   Real phiDown = 0.0;
@@ -759,7 +758,7 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
 }
 
 Real
-CdrCTU::minmod(const Real& dwl, const Real& dwr) const noexcept
+CdrCTU::minmod(const Real& dwl, const Real& dwr) noexcept
 {
   Real slope = 0.0;
 
@@ -771,13 +770,13 @@ CdrCTU::minmod(const Real& dwl, const Real& dwr) const noexcept
 }
 
 Real
-CdrCTU::superbee(const Real& dwl, const Real& dwr) const noexcept
+CdrCTU::superbee(const Real& dwl, const Real& dwr) noexcept
 {
   Real slope = 0.0;
 
   if (dwl * dwr > 0.0) {
-    const Real s1 = this->minmod(dwl, 2 * dwr);
-    const Real s2 = this->minmod(dwr, 2 * dwl);
+    const Real s1 = ChomboDischarge::CdrCTU::minmod(dwl, 2 * dwr);
+    const Real s2 = ChomboDischarge::CdrCTU::minmod(dwr, 2 * dwl);
 
     if (s1 * s2 > 0.0) {
       slope = std::abs(s1) > std::abs(s2) ? s1 : s2;
@@ -788,7 +787,7 @@ CdrCTU::superbee(const Real& dwl, const Real& dwr) const noexcept
 }
 
 Real
-CdrCTU::monotonizedCentral(const Real& dwl, const Real& dwr) const noexcept
+CdrCTU::monotonizedCentral(const Real& dwl, const Real& dwr) noexcept
 {
   Real slope = 0.0;
 

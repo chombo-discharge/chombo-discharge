@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_MFInterfaceFAB.H
   @brief  Declaration of a class that allocates irregular data holders over the interface between two phases
   @author Robert Marskar
 */
 
-#ifndef CD_MFInterfaceFAB_H
-#define CD_MFInterfaceFAB_H
+#ifndef CD_MFINTERFACEFAB_H
+#define CD_MFINTERFACEFAB_H
 
 // Chombo includes
 #include <BoxLayoutData.H>
@@ -22,31 +23,31 @@
 #include <CD_MFLevelGrid.H>
 #include <CD_NamespaceHeader.H>
 
-/*!
-  @brief Class for holding BaseIVFAB<T> on the interface between two phases. 
+/**
+  @brief Class for holding BaseIVFAB<T> on the interface between two phases.
 */
 template <class T>
 class MFInterfaceFAB
 {
 public:
-  /*!
+  /**
     @brief Constructor. Must subsequently call define
   */
   MFInterfaceFAB();
 
-  /*!
-    @brief Full constructor. 
+  /**
+    @brief Full constructor.
     @param[in] a_mflg Level grids
     @param[in] a_dit  Data index for this FBA
   */
   MFInterfaceFAB(const MFLevelGrid& a_mflg, const DataIndex& a_dit);
 
-  /*!
+  /**
     @brief Destructor
   */
   virtual ~MFInterfaceFAB();
 
-  /*!
+  /**
     @brief Define function
     @param[in] a_mflg Level grids
     @param[in] a_dit  Data index for this FBA
@@ -54,53 +55,58 @@ public:
   virtual void
   define(const MFLevelGrid& a_mflg, const DataIndex& a_dit);
 
-  /*!
+  /**
     @brief Get defining region
     @return Returns the cells that are irregular on both phases
   */
   virtual const IntVectSet&
   getIVS() const;
 
-  /*!
+  /**
     @brief Get BaseIVFAB for specified phase
     @param[in] a_phase Phase
+    @return Reference to the BaseIVFAB for the given phase.
   */
   virtual BaseIVFAB<T>&
   getIVFAB(const int a_phase);
 
-  /*!
+  /**
     @brief Get BaseIVFAB for specified phase
     @param[in] a_phase Phase
+    @return Const reference to the BaseIVFAB for the given phase.
   */
   virtual const BaseIVFAB<T>&
   getIVFAB(const int a_phase) const;
 
-  /*!
-    @brief Get BaseIVFAB for specified phase
+  /**
+    @brief Get BaseIVFAB pointer for specified phase
     @param[in] a_phase Phase
+    @return Pointer to the BaseIVFAB for the given phase.
   */
   virtual BaseIVFAB<T>*
   getPhasePtr(int a_phase);
 
-  /*!
+  /**
     @brief Get number of phases
+    @return Number of phases.
   */
   virtual int
   numPhases() const;
 
-  /*!
-    @brief Set value on both fabs. 
+  /**
+    @brief Set value on both fabs.
+    @param[in] a_value Value to set.
   */
   virtual void
   setVal(const T& a_value);
 
 protected:
-  /*!
+  /**
     @brief Pointers to storage on both phases
   */
   Vector<BaseIVFAB<T>*> m_phase;
 
-  /*!
+  /**
     @brief Defining region
   */
   IntVectSet m_ivs;

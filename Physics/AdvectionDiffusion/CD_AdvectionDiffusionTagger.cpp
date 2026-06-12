@@ -1,12 +1,13 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_AdvectionDiffusionTagger.cpp
-  @brief  Implementation of CD_AdvectionDiffusionTagger.H
-  @author Robert Marskar
+/**
+   @file   CD_AdvectionDiffusionTagger.cpp
+   @brief  Implementation of CD_AdvectionDiffusionTagger.H
+   @author Robert Marskar
 */
 
 // Chombo includes
@@ -21,14 +22,12 @@
 using namespace Physics::AdvectionDiffusion;
 
 AdvectionDiffusionTagger::AdvectionDiffusionTagger(RefCountedPtr<CdrSolver>& a_solver, RefCountedPtr<AmrMesh>& a_amr)
+  : m_realm(a_solver->getRealm()), m_solver(a_solver), m_amr(a_amr)
 {
   CH_TIME("AdvectionDiffusionTagger::AdvectionDiffusionTagger");
 
-  m_solver    = a_solver;
-  m_amr       = a_amr;
   m_name      = "AdvectionDiffusion";
   m_verbosity = -1;
-  m_realm     = a_solver->getRealm();
 }
 
 AdvectionDiffusionTagger::~AdvectionDiffusionTagger()
@@ -56,7 +55,7 @@ AdvectionDiffusionTagger::parseOptions()
 }
 
 bool
-AdvectionDiffusionTagger::tagCells(EBAMRTags& a_tags)
+AdvectionDiffusionTagger::tagCells(EBAMRTags& a_tags) // NOLINT(readability-convert-member-functions-to-static)
 {
   CH_TIME("AdvectionDiffusionTagger::tagCells");
 

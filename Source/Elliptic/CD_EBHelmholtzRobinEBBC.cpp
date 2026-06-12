@@ -1,6 +1,7 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 /*
@@ -20,15 +21,9 @@
 #include <CD_NamespaceHeader.H>
 
 EBHelmholtzRobinEBBC::EBHelmholtzRobinEBBC()
+  : m_useConstant(false), m_useFunction(false), m_order(-1), m_weight(-1), m_domainDropOrder(-1)
 {
   CH_TIME("EBHelmholtzRobinEBBC::EBHelmholtzRobinEBBC()");
-
-  m_order           = -1;
-  m_weight          = -1;
-  m_domainDropOrder = -1;
-
-  m_useConstant = false;
-  m_useFunction = false;
 }
 
 EBHelmholtzRobinEBBC::EBHelmholtzRobinEBBC(const int  a_order,
@@ -239,7 +234,7 @@ EBHelmholtzRobinEBBC::define()
         // const std::string vofErr  = " on vof = ";
         // const std::string impErr  = " (this may cause multigrid divergence)";
 
-        // std::cout << baseErr << m_eblg.getDomain() << vofErr << vof << impErr << std::endl;
+        // std::cout << baseErr << m_eblg.getDomain() << vofErr << vof << impErr << endl;
 
         fluxStencil.clear();
       }
@@ -251,9 +246,9 @@ EBHelmholtzRobinEBBC::define()
 }
 
 void
-EBHelmholtzRobinEBBC::applyEBFlux(VoFIterator&           a_vofit,
-                                  EBCellFAB&             a_Lphi,
-                                  const EBCellFAB&       a_phi,
+EBHelmholtzRobinEBBC::applyEBFlux(VoFIterator& a_vofit,
+                                  EBCellFAB&   a_Lphi,
+                                  const EBCellFAB& /*a_phi*/,
                                   const BaseIVFAB<Real>& a_Bcoef,
                                   const DataIndex&       a_dit,
                                   const Real&            a_beta,
@@ -350,7 +345,7 @@ EBHelmholtzRobinEBBC::getInterpolationStencil(const VolIndex&              a_vof
   // M = Number of unknowns in Taylor expansion of order a_order.
   // K = Number of equations (displacements)
   const int M = LeastSquares::getTaylorExpansionSize(a_order);
-  const int K = displacements.size();
+  const int K = static_cast<int>(displacements.size());
 
   // If we have enough equations we can get an interpolation stencil.
   VoFStencil interpStencil;

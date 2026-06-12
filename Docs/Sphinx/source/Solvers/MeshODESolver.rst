@@ -14,7 +14,7 @@ The class is templated as
 
 .. literalinclude:: ../../../../Source/MeshODESolver/CD_MeshODESolver.H
    :language: c++
-   :lines: 22-27
+   :lines: 23-28
    :dedent: 0
 
 where ``N`` indicates the number of variables stored on the mesh.
@@ -24,7 +24,7 @@ To instantiate the solver, use the full constructor with reference to :ref:`Chap
 
 .. literalinclude:: ../../../../Source/MeshODESolver/CD_MeshODESolver.H
    :language: c++
-   :lines: 40-45
+   :lines: 41-46
    :dedent: 2
 
 .. tip::
@@ -42,7 +42,7 @@ To set :math:`\vec{\phi}`, one can fetch the :math:`N` mesh components from
 
 .. literalinclude:: ../../../../Source/MeshODESolver/CD_MeshODESolver.H
    :language: c++
-   :lines: 136-141
+   :lines: 137-143
    :dedent: 2
 
 This will return the data holder that holds the cell centered data :math:`\vec{\phi}` which the user can iterate through.
@@ -55,7 +55,7 @@ One can set :math:`\vec{\phi}(\mathbf{x}) = \vec{f}\left(\mathbf{x}\right)` thro
 
 .. literalinclude:: ../../../../Source/MeshODESolver/CD_MeshODESolver.H
    :language: c++
-   :lines: 98-111
+   :lines: 99-112
    :dedent: 2
 
 These differ only in that the first function sets a specific component, whereas the second version sets all :math:`N` components. 
@@ -70,7 +70,7 @@ For a general method of setting the source term one can fetch :math:`\vec{S}` th
 
 .. literalinclude:: ../../../../Source/MeshODESolver/CD_MeshODESolver.H
    :language: c++
-   :lines: 148-152
+   :lines: 151-156
    :dedent: 2
 
 This returns a reference to :math:`\vec{S}` which the user can iterate through and set the value in each cell.
@@ -83,7 +83,7 @@ The source term can also be set on a component-by-component basis using
 
 .. literalinclude:: ../../../../Source/MeshODESolver/CD_MeshODESolver.H
    :language: c++
-   :lines: 113-119
+   :lines: 114-120
    :dedent: 2
 
 As a function of :math:`\vec{\phi}`
@@ -93,7 +93,7 @@ In order to compute the source term :math:`\vec{S}` as a function of :math:`\vec
 
 .. literalinclude:: ../../../../Source/MeshODESolver/CD_MeshODESolver.H
    :language: c++
-   :lines: 30-33, 120-126
+   :lines: 31-34,121-127
    :dedent: 2
 
 which computes the source term :math:`\vec{S}` as a function
@@ -121,7 +121,7 @@ When regridding the ``MeshODESolver<N>``, one must first ensure that the mesh da
 
 .. literalinclude:: ../../../../Source/MeshODESolver/CD_MeshODESolver.H
    :language: c++
-   :lines: 160-167
+   :lines: 165-172
    :dedent: 2
 
 This must be done *before* :ref:`Chap:AmrMesh` creates the new grids.
@@ -130,7 +130,7 @@ After :ref:`Chap:AmrMesh` has generated the new grids, :math:`\vec{\phi}` can be
 
 .. literalinclude:: ../../../../Source/MeshODESolver/CD_MeshODESolver.H
    :language: c++
-   :lines: 169-177
+   :lines: 174-182
    :dedent: 2
 
 Users can also choose to turn on/off slope limiters when putting the solution on the new mesh.

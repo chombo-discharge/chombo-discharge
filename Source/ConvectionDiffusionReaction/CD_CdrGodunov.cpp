@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_CdrGodunov.cpp
   @brief  Implementation of CD_CdrGodunov.H
   @author Robert Marskar
@@ -20,7 +21,7 @@
 #include <CD_ParallelOps.H>
 #include <CD_NamespaceHeader.H>
 
-CdrGodunov::CdrGodunov() : CdrMultigrid()
+CdrGodunov::CdrGodunov()
 {
   CH_TIME("CdrGodunov::CdrGodunov()");
 
@@ -274,8 +275,8 @@ CdrGodunov::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellP
       // These are settings for EBAdvectPatchIntegrator -- it's not a very pretty design but the object has settings
       // that permits it to run advection code (through setDoingVel(0)).
       ebAdvectPatch.setVelocities(cellVel, faceVel);
-      ebAdvectPatch.setDoingVel(0);
-      ebAdvectPatch.setCurComp(m_comp);
+      EBAdvectPatchIntegrator::setDoingVel(0);
+      EBAdvectPatchIntegrator::setCurComp(m_comp);
       ebAdvectPatch.setEBPhysIBC(ExtrapAdvectBCFactory());
 
       // Extrapolate to face-centers. The face-centered states are Godunov-style extrapolated in time to a_extrapDt.

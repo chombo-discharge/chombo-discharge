@@ -1,10 +1,11 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_PerlinSphereSdf.H
+/**
+  @file   CD_PerlinSphereSdf.cpp
   @brief  Implementation of CD_PerlinSphereSdf.H
   @author Robert Marskar
 */
@@ -21,25 +22,19 @@ PerlinSphereSdf::PerlinSphereSdf(const Real&     a_rad,
                                  const Real&     a_persistence,
                                  const int&      a_octaves,
                                  const bool&     a_reseed)
+  : m_rad(a_rad - a_noiseAmp), m_center(a_center), m_inside(a_inside)
 {
 
   //
-  m_rad      = a_rad - a_noiseAmp;
-  m_center   = a_center;
-  m_inside   = a_inside;
+
   m_perlinIF = RefCountedPtr<BaseIF>(new PerlinSdf(a_noiseAmp, a_noiseFreq, a_persistence, a_octaves, a_reseed));
 }
 
 PerlinSphereSdf::PerlinSphereSdf(const PerlinSphereSdf& a_inputIF)
-{
-  m_rad      = a_inputIF.m_rad;
-  m_center   = a_inputIF.m_center;
-  m_inside   = a_inputIF.m_inside;
-  m_perlinIF = a_inputIF.m_perlinIF;
-}
-
-PerlinSphereSdf::~PerlinSphereSdf()
+  : m_rad(a_inputIF.m_rad), m_center(a_inputIF.m_center), m_inside(a_inputIF.m_inside), m_perlinIF(a_inputIF.m_perlinIF)
 {}
+
+PerlinSphereSdf::~PerlinSphereSdf() = default;
 
 Real
 PerlinSphereSdf::value(const RealVect& a_pos) const

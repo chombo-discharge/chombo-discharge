@@ -1,6 +1,7 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 /*
@@ -50,7 +51,7 @@ void
 EBHelmholtzDomainBC::multiplyByBcoef(BaseFab<Real>&       a_flux,
                                      const BaseFab<Real>& a_bco,
                                      const int            a_dir,
-                                     const Side::LoHiSide a_side) const
+                                     const Side::LoHiSide a_side)
 {
   CH_TIME("EBHelmholtzDomainBC::multiplyByBcoef");
 

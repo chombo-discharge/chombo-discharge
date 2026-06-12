@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2022 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_EBMGRestrict.cpp
   @brief  Implementation of CD_EBMGRestrict.H
   @author Robert Marskar
@@ -19,18 +20,15 @@
 #include <CD_EBMGRestrict.H>
 #include <CD_NamespaceHeader.H>
 
-EBMGRestrict::EBMGRestrict() noexcept
+EBMGRestrict::EBMGRestrict() noexcept : m_isDefined(false)
 {
   CH_TIME("EBMGRestrict::EBMGRestrict(default)");
-
-  m_isDefined = false;
 }
 
 EBMGRestrict::EBMGRestrict(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_eblgCoar, const int& a_refRat) noexcept
+  : m_isDefined(false)
 {
   CH_TIME("EBMGRestrict::EBMGRestrict(full)");
-
-  m_isDefined = false;
 
   this->define(a_eblgFine, a_eblgCoar, a_refRat);
 }
@@ -95,7 +93,7 @@ EBMGRestrict::define(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_eblgCoa
     for (vofit.reset(); vofit.ok(); ++vofit) {
       const VolIndex&        coarVoF     = vofit();
       const Vector<VolIndex> fineVoFs    = ebislCoFi.refine(coarVoF, m_refRat, din);
-      const int              numFineVoFs = fineVoFs.size();
+      const int              numFineVoFs = static_cast<int>(fineVoFs.size());
 
       VoFStencil& restrictSten = restrictStencils(coarVoF, 0);
 

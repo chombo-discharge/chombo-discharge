@@ -431,6 +431,6 @@ for test in config.sections():
                                             if compare_code != 0:
                                                 print("\t FILES '" + regFile +  "' AND '" + benFile + "' DO NOT MATCH - REGRESSION TEST FAILED")
                                             else:
-                                                print("\t Benchmark test succeded for files " + regFile +  " and " + str(benFile))
+                                                print("\t Benchmark test succeeded for files " + regFile +  " and " + str(benFile))
 
 exit(ret_code)

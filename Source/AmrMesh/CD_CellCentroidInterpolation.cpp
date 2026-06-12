@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2025 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_CellCentroidInterpolation.cpp
   @brief  Implementation of CD_CellCentroidInterpolation.H
   @author Robert Marskar
@@ -20,12 +21,9 @@
 #include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
-CellCentroidInterpolation::CellCentroidInterpolation() noexcept
+CellCentroidInterpolation::CellCentroidInterpolation() noexcept : m_isDefined(false), m_dx(-1.0)
 {
   CH_TIME("CellCentroidInterpolation:CellCentroidInterpolation(weak)");
-
-  m_dx        = -1.0;
-  m_isDefined = false;
 }
 
 CellCentroidInterpolation::CellCentroidInterpolation(const EBLevelGrid& a_eblg,
@@ -176,10 +174,10 @@ CellCentroidInterpolation::getLinearStencil(VoFStencil&          a_stencil,
 }
 
 bool
-CellCentroidInterpolation::getTaylorExtrapolationStencil(VoFStencil&          a_stencil,
-                                                         const VolIndex&      a_vof,
-                                                         const EBISBox&       a_ebisBox,
-                                                         const ProblemDomain& a_domain) const noexcept
+CellCentroidInterpolation::getTaylorExtrapolationStencil(VoFStencil&     a_stencil,
+                                                         const VolIndex& a_vof,
+                                                         const EBISBox&  a_ebisBox,
+                                                         const ProblemDomain& /*a_domain*/) const noexcept
 {
   CH_TIME("CellCentroidInterpolation::getTaylorExtrapolationStencil");
 
@@ -196,10 +194,10 @@ CellCentroidInterpolation::getTaylorExtrapolationStencil(VoFStencil&          a_
 }
 
 bool
-CellCentroidInterpolation::getLeastSquaresStencil(VoFStencil&          a_stencil,
-                                                  const VolIndex&      a_vof,
-                                                  const EBISBox&       a_ebisBox,
-                                                  const ProblemDomain& a_domain) const noexcept
+CellCentroidInterpolation::getLeastSquaresStencil(VoFStencil&     a_stencil,
+                                                  const VolIndex& a_vof,
+                                                  const EBISBox&  a_ebisBox,
+                                                  const ProblemDomain& /*a_domain*/) const noexcept
 {
   CH_TIME("CellCentroidInterpolation::getLeastSquaresStencil");
 
@@ -224,10 +222,10 @@ CellCentroidInterpolation::getLeastSquaresStencil(VoFStencil&          a_stencil
 }
 
 bool
-CellCentroidInterpolation::getPiecewiseLinearStencil(VoFStencil&          a_stencil,
-                                                     const VolIndex&      a_vof,
-                                                     const EBISBox&       a_ebisBox,
-                                                     const ProblemDomain& a_domain) const noexcept
+CellCentroidInterpolation::getPiecewiseLinearStencil(VoFStencil&     a_stencil,
+                                                     const VolIndex& a_vof,
+                                                     const EBISBox&  a_ebisBox,
+                                                     const ProblemDomain& /*a_domain*/) const noexcept
 {
   CH_TIME("CellCentroidInterpolation::getPiecewiseLinearStencil");
 
@@ -283,11 +281,9 @@ CellCentroidInterpolation::interpolate(LevelData<BaseIVFAB<Real>>& a_centroidDat
   CH_assert(a_cellData.disjointBoxLayout() == m_eblg.getDBL());
   CH_assert(a_centroidData.nComp() == a_cellData.nComp());
 
-  const DisjointBoxLayout& dbl       = m_eblg.getDBL();
-  const ProblemDomain&     domain    = m_eblg.getDomain();
-  const EBISLayout&        ebisl     = m_eblg.getEBISL();
-  const Box&               domainBox = domain.domainBox();
-  const DataIterator&      dit       = dbl.dataIterator();
+  const DisjointBoxLayout& dbl   = m_eblg.getDBL();
+  const EBISLayout&        ebisl = m_eblg.getEBISL();
+  const DataIterator&      dit   = dbl.dataIterator();
 
   const int nbox = dit.size();
 
@@ -312,11 +308,9 @@ CellCentroidInterpolation::interpolate(LevelData<EBCellFAB>&       a_centroidDat
   CH_assert(a_cellData.disjointBoxLayout() == m_eblg.getDBL());
   CH_assert(a_centroidData.nComp() == a_cellData.nComp());
 
-  const DisjointBoxLayout& dbl       = m_eblg.getDBL();
-  const ProblemDomain&     domain    = m_eblg.getDomain();
-  const EBISLayout&        ebisl     = m_eblg.getEBISL();
-  const Box&               domainBox = domain.domainBox();
-  const DataIterator&      dit       = dbl.dataIterator();
+  const DisjointBoxLayout& dbl   = m_eblg.getDBL();
+  const EBISLayout&        ebisl = m_eblg.getEBISL();
+  const DataIterator&      dit   = dbl.dataIterator();
 
   const int nbox = dit.size();
 
@@ -339,11 +333,9 @@ CellCentroidInterpolation::interpolate(LevelData<EBCellFAB>& a_data) const noexc
   CH_assert(a_data.isDefined());
   CH_assert(a_data.disjointBoxLayout() == m_eblg.getDBL());
 
-  const DisjointBoxLayout& dbl       = m_eblg.getDBL();
-  const ProblemDomain&     domain    = m_eblg.getDomain();
-  const EBISLayout&        ebisl     = m_eblg.getEBISL();
-  const Box&               domainBox = domain.domainBox();
-  const DataIterator&      dit       = dbl.dataIterator();
+  const DisjointBoxLayout& dbl   = m_eblg.getDBL();
+  const EBISLayout&        ebisl = m_eblg.getEBISL();
+  const DataIterator&      dit   = dbl.dataIterator();
 
   const int nbox = dit.size();
 

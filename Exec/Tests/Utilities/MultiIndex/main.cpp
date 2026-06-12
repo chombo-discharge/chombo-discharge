@@ -14,7 +14,7 @@ main(int argc, char* argv[])
 
   if (procID() == 0) {
     for (MultiIndex mi(a_order); mi.ok(); ++mi) {
-      std::cout << mi.getCurrentIndex() << "\t" << mi.factorial() << std::endl;
+      std::cout << mi.getCurrentIndex() << "\t" << mi.factorial() << endl;
     }
   }
 

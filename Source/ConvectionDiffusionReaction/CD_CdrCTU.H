@@ -1,51 +1,52 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_CdrCTU.H
   @brief  Declaration of a class which implements CdrMultigrid using MUSCL for advection. 
   @author Robert Marskar
 */
 
-#ifndef CD_CdrCTU_H
-#define CD_CdrCTU_H
+#ifndef CD_CDRCTU_H
+#define CD_CDRCTU_H
 
 // Our includes
 #include <CD_CdrMultigrid.H>
 #include <CD_CdrGodunov.H>
 #include <CD_NamespaceHeader.H>
 
-/*!
+/**
   @brief Class that uses a slope limited method for advection, in combination with corner transport upwind (CTU). 
 */
 class CdrCTU : public CdrMultigrid
 {
 public:
-  /*!
+  /**
     @brief Default constructor. 
   */
   CdrCTU();
 
-  /*!
+  /**
     @brief Destructor (does nothing)
   */
   virtual ~CdrCTU();
 
-  /*!
+  /**
     @brief Parse class options to put object in usable state. 
   */
   virtual void
   parseOptions() override;
 
-  /*!
+  /**
     @brief Parse runtime options
   */
   virtual void
   parseRuntimeOptions() override;
 
-  /*!
+  /**
     @brief MUSCL advection to faces
     @param[out] a_facePhi  Phi on face centers
     @param[in]  a_cellPhi  Phi on cell centers
@@ -54,15 +55,16 @@ public:
   virtual void
   advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellPhi, const Real a_dt) override;
 
-  /*!
-    @brief Compute the largest possible advective time step (for explicit methods)
-    @details This computes dt = dx/max(|vx|,|vy|,|vz|), minimized over all grid levels and patches. 
+  /**
+    @brief Compute the largest possible advective time step (for explicit methods).
+    @details This computes dt = dx/max(|vx|,|vy|,|vz|), minimized over all grid levels and patches.
+    @return Maximum stable advection time step.
   */
   virtual Real
   computeAdvectionDt() override;
 
 protected:
-  /*!
+  /**
     @brief Supported limiters
   */
   enum class Limiter
@@ -73,17 +75,17 @@ protected:
     MonotonizedCentral,
   };
 
-  /*!
-    @brief If true, slopes are limited in the normal dircetion. 
+  /**
+    @brief If true, slopes are limited in the normal direction. 
   */
   Limiter m_limiter;
 
-  /*!
+  /**
     @brief If true, the discretization uses CTU. Otherwise it's DCU (donor cell upwind)
   */
   bool m_useCTU;
 
-  /*!
+  /**
     @brief Compute slopes. 
     @param[out] a_normalSlopes Cell slopes. Must have SpaceDim components (for slopes in each direction). 
     @param[in]  a_cellPhi      Cell-centered states
@@ -100,7 +102,7 @@ protected:
                       const int            a_level,
                       const DataIndex&     a_dit);
 
-  /*!
+  /**
     @brief Upwind/Riemann solve. This extrapolates the cell-centered data to the inside face centers and selects the upwind side.
     @details This uses the Colella CTU method where we extrapolate with the corner cells as well. a_normalSlopes holds
     the slopes normal to the face direction, and the transverse slopes are added inside this method. This routine also
@@ -128,35 +130,38 @@ protected:
          const DataIndex&     a_dit,
          const Real&          a_dt);
 
-  /*!
+  /**
     @brief Parse slope limiting on/off
   */
   virtual void
   parseSlopeLimiter();
 
-  /*!
-    @brief minmod slope function. 
-    @param[in] dwl Left slope
-    @param[in] dwr Right slope
+  /**
+    @brief minmod slope function.
+    @param[in] dwl Left slope.
+    @param[in] dwr Right slope.
+    @return Limited slope.
   */
-  Real
-  minmod(const Real& dwl, const Real& dwr) const noexcept;
+  static Real
+  minmod(const Real& dwl, const Real& dwr) noexcept;
 
-  /*!
-    @brief Superbee slope limiter. 
-    @param[in] dwl Left slope
-    @param[in] dwr Right slope
+  /**
+    @brief Superbee slope limiter.
+    @param[in] dwl Left slope.
+    @param[in] dwr Right slope.
+    @return Limited slope.
   */
-  Real
-  superbee(const Real& dwl, const Real& dwr) const noexcept;
+  static Real
+  superbee(const Real& dwl, const Real& dwr) noexcept;
 
-  /*!
+  /**
     @brief Monotonized central difference slope limiter.
-    @param[in] dwl Left slope
-    @param[in] dwr Right slope
+    @param[in] dwl Left slope.
+    @param[in] dwr Right slope.
+    @return Limited slope.
   */
-  Real
-  monotonizedCentral(const Real& dwl, const Real& dwr) const noexcept;
+  static Real
+  monotonizedCentral(const Real& dwl, const Real& dwr) noexcept;
 };
 
 #include <CD_NamespaceFooter.H>

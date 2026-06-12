@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_GradedPerlinSphereSdf.cpp
   @brief  Implementation of CD_GradedPerlinSphereSdf.H
   @author Robert Marskar
 */
 
 // Std includes
-#include <math.h>
+#include <cmath>
 
 // Our include
 #include <CD_GradedPerlinSphereSdf.H>
@@ -27,11 +28,9 @@ GradedPerlinSphereSdf::GradedPerlinSphereSdf(const Real&     a_rad,
   : PerlinSphereSdf(a_rad, a_center, a_inside, a_noiseAmp, a_noiseFreq, a_persistence, a_octaves, a_reseed)
 {}
 
-GradedPerlinSphereSdf::GradedPerlinSphereSdf(const GradedPerlinSphereSdf& a_inputIF) : PerlinSphereSdf(a_inputIF)
-{}
+GradedPerlinSphereSdf::GradedPerlinSphereSdf(const GradedPerlinSphereSdf& a_inputIF) = default;
 
-GradedPerlinSphereSdf::~GradedPerlinSphereSdf()
-{}
+GradedPerlinSphereSdf::~GradedPerlinSphereSdf() = default;
 
 Real
 GradedPerlinSphereSdf::value(const RealVect& a_pos) const

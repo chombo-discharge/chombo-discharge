@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_MFHelmholtzElectrostaticEBBCFactory.cpp
   @brief  Implementation of CD_MFHelmholtzElectrostaticEBBCFactory.H
   @author Robert Marskar
@@ -78,7 +79,7 @@ MFHelmholtzElectrostaticEBBCFactory::create(const int a_iphase, const RefCounted
   CH_assert(m_order > 0);
   CH_assert(m_weight >= 0);
 
-  auto bc = new MFHelmholtzElectrostaticEBBC(a_iphase, m_electrostaticBCs, a_jumpBC);
+  auto* bc = new MFHelmholtzElectrostaticEBBC(a_iphase, m_electrostaticBCs, a_jumpBC);
 
   bc->setOrder(m_order);
   bc->setWeight(m_weight);

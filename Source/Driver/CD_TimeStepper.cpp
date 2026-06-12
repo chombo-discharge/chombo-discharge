@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_TimeStepper.cpp
   @brief  Implementation of CD_TimeStepper.H
   @author Robert Marskar
@@ -17,8 +18,7 @@
 TimeStepper::TimeStepper() : m_keepGoing(true)
 {}
 
-TimeStepper::~TimeStepper()
-{}
+TimeStepper::~TimeStepper() = default;
 
 void
 TimeStepper::setAmr(const RefCountedPtr<AmrMesh>& a_amr)
@@ -75,7 +75,7 @@ TimeStepper::parseRuntimeOptions()
 }
 
 Vector<long int>
-TimeStepper::getCheckpointLoads(const std::string a_realm, const int a_level) const
+TimeStepper::getCheckpointLoads(const std::string& a_realm, int a_level) const
 {
   CH_TIME("TimeStepper::getCheckpointLoads(string, int)");
   if (m_verbosity > 5) {
@@ -87,14 +87,14 @@ TimeStepper::getCheckpointLoads(const std::string a_realm, const int a_level) co
 
   Vector<long int> loads(boxArray.size(), 0L);
   for (int i = 0; i < boxArray.size(); i++) {
-    loads[i] = boxArray[i].numPts();
+    loads[i] = static_cast<long>(boxArray[i].numPts());
   }
 
   return loads;
 }
 
 bool
-TimeStepper::loadBalanceThisRealm(const std::string a_realm) const
+TimeStepper::loadBalanceThisRealm(const std::string& /*a_realm*/) const
 {
   CH_TIME("TimeStepper::loadBalanceThisRealm(string)");
   if (m_verbosity > 5) {
@@ -105,12 +105,12 @@ TimeStepper::loadBalanceThisRealm(const std::string a_realm) const
 }
 
 void
-TimeStepper::loadBalanceBoxes(Vector<Vector<int>>&             a_procs,
-                              Vector<Vector<Box>>&             a_boxes,
-                              const std::string                a_realm,
+TimeStepper::loadBalanceBoxes(Vector<Vector<int>>& a_procs,
+                              Vector<Vector<Box>>& a_boxes,
+                              const std::string& /*a_realm*/,
                               const Vector<DisjointBoxLayout>& a_grids,
-                              const int                        a_lmin,
-                              const int                        a_finestLevel)
+                              int /*a_lmin*/,
+                              int a_finestLevel)
 {
   CH_TIME("TimeStepper::loadBalanceBoxes");
   if (m_verbosity > 5) {
@@ -129,7 +129,7 @@ TimeStepper::loadBalanceBoxes(Vector<Vector<int>>&             a_procs,
     Vector<long int> boxLoads(a_boxes[lvl].size());
 
     for (int ibox = 0; ibox < a_boxes[lvl].size(); ibox++) {
-      boxLoads[ibox] = a_boxes[lvl][ibox].numPts();
+      boxLoads[ibox] = static_cast<long>(a_boxes[lvl][ibox].numPts());
     }
 
     LoadBalancing::makeBalance(a_procs[lvl], rankLoads, boxLoads, a_boxes[lvl]);
@@ -157,3 +157,4 @@ TimeStepper::postPlot()
 {}
 
 #include <CD_NamespaceFooter.H>
+#include <utility>

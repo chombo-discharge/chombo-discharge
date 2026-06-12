@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_VofUtils.cpp
   @brief  Implementation of CD_VofUtils.H
   @author Robert Marskar
@@ -66,11 +67,11 @@ VofUtils::getVofsInQuadrant(const VolIndex&    a_startVof,
 }
 
 Vector<VolIndex>
-VofUtils::restrictVofsToQuadrant(const Vector<VolIndex>& a_vofs,
-                                 const VolIndex&         a_startVof,
-                                 const EBISBox&          a_ebisbox,
-                                 const RealVect&         a_normal,
-                                 const int               a_radius)
+VofUtils::restrictVofsToQuadrant(const Vector<VolIndex>& /*a_vofs*/,
+                                 const VolIndex& a_startVof,
+                                 const EBISBox&  a_ebisbox,
+                                 const RealVect& a_normal,
+                                 const int       a_radius)
 {
   Vector<VolIndex> vofs;
 
@@ -332,11 +333,9 @@ VofUtils::onlyUnique(Vector<VolIndex>& a_vofs)
 }
 
 bool
-VofUtils::isQuadrantWellDefined(const RealVect a_normal)
+VofUtils::isQuadrantWellDefined(const RealVect& a_normal)
 {
   bool ret = true;
-
-  const RealVect v = a_normal; ///a_normal.vectorLength(); // Idiot guard.
 
   for (int dir = 0; dir < SpaceDim; dir++) {
     if (std::abs(a_normal[dir]) == 1.0 || std::abs(a_normal[dir]) == 0.0) {
@@ -348,7 +347,7 @@ VofUtils::isQuadrantWellDefined(const RealVect a_normal)
 }
 
 std::pair<int, Side::LoHiSide>
-VofUtils::getCardinalDirection(const RealVect a_normal)
+VofUtils::getCardinalDirection(const RealVect& a_normal)
 {
   std::pair<int, Side::LoHiSide> ret;
 
@@ -376,10 +375,10 @@ VofUtils::getQuadrant(const RealVect& a_normal, const VolIndex& a_vof, const EBI
   Box bx(iv, iv);
   for (int dir = 0; dir < SpaceDim; dir++) {
     if (a_normal[dir] < 0.0) {
-      bx.growLo(dir, a_radius);
+      bx.growLo(dir, static_cast<int>(a_radius));
     }
     else if (a_normal[dir] > 0.0) {
-      bx.growHi(dir, a_radius);
+      bx.growHi(dir, static_cast<int>(a_radius));
     }
     else {
       MayDay::Error(
@@ -403,11 +402,11 @@ VofUtils::getSymmetricQuadrant(const std::pair<int, Side::LoHiSide>& a_cardinal,
   Box bx(iv, iv);
   for (int dir = 0; dir < SpaceDim; dir++) {
     if (dir == a_cardinal.first) {
-      bx.growDir(dir, a_cardinal.second, a_radius);
+      bx.growDir(dir, a_cardinal.second, static_cast<int>(a_radius));
     }
     else {
-      bx.growLo(dir, a_radius);
-      bx.growHi(dir, a_radius);
+      bx.growLo(dir, static_cast<int>(a_radius));
+      bx.growHi(dir, static_cast<int>(a_radius));
     }
   }
 
@@ -503,8 +502,9 @@ VofUtils::getVofsInMonotonePath(Vector<VolIndex>& a_vofList,
     // Add if not already added
     bool haveStartVof = false;
     for (int ivof = 0; ivof < a_vofList.size(); ivof++) {
-      if (a_vofList[ivof] == a_startVof)
+      if (a_vofList[ivof] == a_startVof) {
         haveStartVof = true;
+      }
     }
 
     if (!haveStartVof) {

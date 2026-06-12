@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_RoughSphere.cpp
   @brief  Implementation of CD_RoughSphere.H
   @author Robert Marskar
@@ -58,12 +59,15 @@ RoughSphere::RoughSphere()
     RefCountedPtr<BaseIF> sph = RefCountedPtr<BaseIF>(
       new PerlinSphereSdf(r, c, false, amp, f, persist, octaves, reseed));
 
-    if (whichMaterial == "electrode")
+    if (whichMaterial == "electrode") {
       m_electrodes.push_back(Electrode(sph, live));
-    else if (whichMaterial == "dielectric")
+    }
+    else if (whichMaterial == "dielectric") {
       m_dielectrics.push_back(Dielectric(sph, eps));
-    else
+    }
+    else {
       MayDay::Abort("RoughSphere::RoughSphere - unknown material requested");
+    }
   }
 }
 

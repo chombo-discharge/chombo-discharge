@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file    CD_LoadBalancingImplem.H
   @details Implementation of CD_LoadBalancing.H
   @author  Robert Marskar
 */
 
-#ifndef CD_LoadBalanceImplem_H
-#define CD_LoadBalanceImplem_H
+#ifndef CD_LOADBALANCEIMPLEM_H
+#define CD_LOADBALANCEIMPLEM_H
 
 // Std includes
 #include <algorithm>
@@ -56,10 +57,10 @@ LoadBalancing::makeBalance(Vector<int>&       a_ranks,
     boxLoads.push_back(1.0 * a_boxLoads[i]);
   }
 
-  // Minimum number of grid subsets is the number of boxe, and the maximum number of grid subsets
+  // Minimum number of grid subsets is the number of boxes, and the maximum number of grid subsets
   // is the number of ranks.
-  const int numBoxes   = a_boxes.size();
-  const int numRanks   = numProc();
+  const int numBoxes   = static_cast<int>(a_boxes.size());
+  const int numRanks   = static_cast<int>(numProc());
   const int numSubsets = std::min(numBoxes, numRanks);
 
   a_ranks.resize(numBoxes);
@@ -294,7 +295,7 @@ LoadBalancing::shuffleSort(Vector<Box>& a_boxes, Vector<T>& a_loads)
   auto vec = packPairs(a_boxes, a_loads);
 
   // Set up RNG
-  int seed = std::chrono::system_clock::now().time_since_epoch().count();
+  auto seed = static_cast<int>(std::chrono::system_clock::now().time_since_epoch().count());
 #ifdef CH_MPI // Broadcast
   MPI_Bcast(&seed, 1, MPI_INT, 0, Chombo_MPI::comm);
 #endif
@@ -318,7 +319,7 @@ LoadBalancing::sortSFC(Vector<Box>&                                             
 
   using Bundle = std::tuple<Box, T, uint64_t>;
 
-  const int n = a_boxes.size();
+  const int n = static_cast<int>(a_boxes.size());
   if (n == 0 || n != a_loads.size()) {
     return;
   }
@@ -363,7 +364,7 @@ LoadBalancing::mortonIndex(const std::array<uint32_t, DIM> a_coords) noexcept
 
   // If this fails then we can't compute a Morton code using a 64-bit integer. We must either scale back the boxes
   // by their blocking factors, or switch to 128/256 bit integers.
-  const int maxDim = std::pow(2, 21);
+  const int maxDim = 1 << 21;
 
   for (int dir = 0; dir < SpaceDim; dir++) {
     if (a_coords[dir] > maxDim) {
@@ -373,7 +374,7 @@ LoadBalancing::mortonIndex(const std::array<uint32_t, DIM> a_coords) noexcept
 
   for (int bit = 20; bit >= 0; --bit) {
     for (int dir = CH_SPACEDIM - 1; dir >= 0; --dir) {
-      const uint64_t b = (static_cast<uint64_t>(static_cast<uint32_t>(a_coords[dir])) >> bit) & 1ull;
+      const uint64_t b = (static_cast<uint64_t>(static_cast<uint32_t>(a_coords[dir])) >> bit) & 1ULL;
 
       code = (code << 1) | b;
     }
@@ -396,7 +397,7 @@ LoadBalancing::hilbertIndex(const std::array<uint32_t, DIM>& a_coords)
     x[i] = a_coords[i];
   }
 
-  const uint32_t M = 1u << (nbits - 1);
+  const uint32_t M = 1U << (nbits - 1);
 
   for (uint32_t Q = M; Q > 1; Q >>= 1) {
     const uint32_t P = Q - 1;
@@ -433,7 +434,7 @@ LoadBalancing::hilbertIndex(const std::array<uint32_t, DIM>& a_coords)
 
   for (int b = nbits - 1; b >= 0; --b) {
     for (int i = 0; i < DIM; ++i) {
-      idx = (idx << 1) | ((x[i] >> b) & 1u);
+      idx = (idx << 1) | ((x[i] >> b) & 1U);
     }
   }
 
