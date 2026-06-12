@@ -1,5 +1,31 @@
 # DataOps Reorganization — Checkpoint List
 
+## Status — update at the start/end of each session
+
+**Branch:** `dataops` | **Last updated:** 2026-06-12 | **No code written yet.**
+
+### Planning — complete (do not re-litigate these decisions)
+
+- [x] Checkpoint 1 — Literalinclude inventory compiled (reference list; act on it in Checkpoint 6.1)
+- [x] Checkpoint 2 — AmrMesh/PhaseRealm extension design finalized
+- [x] Checkpoint 3 — DataOps signature change design finalized
+- [x] Checkpoint 4 — BoxLoops internal reorganization design finalized
+- [x] Checkpoint 5 — Call site inventory compiled
+
+### Implementation — not started
+
+- [ ] **2-code** — Write `PhaseRealm` / `Realm` / `AmrMesh` changes (6 files; see §2 task list)
+- [ ] **3+4-code** — Write `DataOps` signature + implementation changes (see §3+4 task list)
+- [ ] **5-sites** — Update all call sites in Checkpoint 5 (check off each site as updated)
+- [ ] **6-cleanup** — Pre-merge cleanup (do last)
+
+**Resume here:** `2-code` — start with `Source/AmrMesh/CD_PhaseRealm.H`.
+
+> **Keep this current.** When finishing a session, update "Resume here" and the last-updated
+> date so the next session (on any machine) can orient instantly.
+
+---
+
 ## Checkpoint 1 — Literalincludes with line subsets
 
 Files referenced via `.. literalinclude::` **with** `:lines:` or `:emphasize-lines:` in the
@@ -420,6 +446,17 @@ The new `getMultiCutVofIterator` must follow the same chain:
 | `Source/AmrMesh/CD_AmrMesh.H` | Add `getMultiCutVofIterator(realm, phase)` declaration |
 | `Source/AmrMesh/CD_AmrMesh.cpp` | Implement; delegate to `Realm` (same pattern as `getVofIterator`) |
 
+### 2-code task list
+
+Check off each file once the code change is written, reviewed, and compiles cleanly.
+
+- [ ] `Source/AmrMesh/CD_PhaseRealm.H` — add `m_multiCutVofIter` member + `getMultiCutVofIterator()` declaration
+- [ ] `Source/AmrMesh/CD_PhaseRealm.cpp` — populate in `regridOperators` (`getMultiCells`); clear in `preRegrid`
+- [ ] `Source/AmrMesh/CD_Realm.H` — add `getMultiCutVofIterator(phase)` declaration
+- [ ] `Source/AmrMesh/CD_Realm.cpp` — implement one-liner delegation to `PhaseRealm`
+- [ ] `Source/AmrMesh/CD_AmrMesh.H` — add `getMultiCutVofIterator(realm, phase)` declaration
+- [ ] `Source/AmrMesh/CD_AmrMesh.cpp` — implement delegation to `Realm`
+
 ---
 
 ## Checkpoint 3 — DataOps signature changes
@@ -641,6 +678,39 @@ all-cut VoFIterator from `AmrMesh::getVofIterator` must be passed in.
 | `filterSmooth(LD<EBCellFAB>, Real, int, bool)` | Builds `IrregIVS` grown by `a_stride - 1`; the iteration space is stride-dependent and cannot be stored in AmrMesh without knowing the stride at regrid time |
 | All `MFCellFAB` variants | Build per-phase VoFIterators inside a phase loop; refactoring requires passing a phase-indexed vector of iterators — deferred |
 | `setInvalidValue` (the `VoFIterator(IntVectSet(overlapBox), ...)` pattern) | Built from a dynamically-computed overlap box; cannot be pre-built |
+
+### 3+4-code task list
+
+One checkbox per function that changes signature and/or internal loop. Check off once both
+`CD_DataOps.H` (declaration) and `CD_DataOps.cpp` (implementation) are updated and compile.
+Functions marked **no change** and **keep local** are omitted — they need no edits.
+
+**Full cut-cell VoFIterator** — add `const Vector<RefCountedPtr<LayoutData<VoFIterator>>>&` parameter:
+
+- [ ] `averageCellToFace` — H + cpp
+- [ ] `averageCellVelocityToFaceVelocity` — H + cpp
+- [ ] `averageFaceToCell` — H + cpp
+- [ ] `floor(EBAMRCellData / LevelData<EBCellFAB>, Real)` — H + cpp (full-cut; ghost-region caveat)
+- [ ] `roof(EBAMRCellData / LevelData<EBCellFAB>, Real)` — H + cpp (full-cut; ghost-region caveat)
+- [ ] `kappaScale(LevelData<EBCellFAB>)` — H + cpp
+- [ ] `kappaSum` — H + cpp
+- [ ] `norm` — H + cpp
+- [ ] `volumeScale` — H + cpp
+
+**Multi-cut VoFIterator** — add `const Vector<RefCountedPtr<LayoutData<VoFIterator>>>&` parameter
+(pass `AmrMesh::getMultiCutVofIterator` at call sites):
+
+- [ ] `compute` — H + cpp
+- [ ] `divideFallback` — H + cpp
+- [ ] `dotProduct` — H + cpp
+- [ ] `getMaxMin(LevelData<EBCellFAB>, int)` — H + cpp
+- [ ] `getMaxMinNorm(LevelData<EBCellFAB>)` — H + cpp
+- [ ] `max` — H + cpp
+- [ ] `setInvalidValue(EBAMRCellData, Vector<int>, Real)` — H + cpp
+- [ ] `setValue(LevelData<EBCellFAB>, function<Real(RealVect)>, ...)` — H + cpp
+- [ ] `setValue(LevelData<EBCellFAB>, function<RealVect(RealVect)>, ...)` — H + cpp
+- [ ] `vectorLength(EBCellFAB, EBCellFAB, Box)` — H + cpp
+- [ ] `vectorLength2(EBCellFAB, EBCellFAB, Box)` — H + cpp
 
 ---
 
