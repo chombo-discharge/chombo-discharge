@@ -120,16 +120,15 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ac5c81e0e55d792beb55d82e55335044a" id="r_ac5c81e0e55d792beb55d82e55335044a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCylinderSdf.html#ac5c81e0e55d792beb55d82e55335044a">value</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_point</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
 <tr class="memdesc:ac5c81e0e55d792beb55d82e55335044a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Test whether inside or not.  <br /></td></tr>
 <tr class="separator:ac5c81e0e55d792beb55d82e55335044a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1831ea0056371198336cdf258c8a603a" id="r_a1831ea0056371198336cdf258c8a603a"><td class="memItemLeft" align="right" valign="top"><a id="a1831ea0056371198336cdf258c8a603a" name="a1831ea0056371198336cdf258c8a603a"></a>
-<a class="el" href="classTracerParticleSolver.html">virtual</a> BaseIF *&#160;</td><td class="memItemRight" valign="bottom"><b>newImplicitFunction</b> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:a1831ea0056371198336cdf258c8a603a"><td class="mdescLeft">&#160;</td><td class="mdescRight">IF factory method. <br /></td></tr>
+<tr class="memitem:a1831ea0056371198336cdf258c8a603a" id="r_a1831ea0056371198336cdf258c8a603a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> BaseIF *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCylinderSdf.html#a1831ea0056371198336cdf258c8a603a">newImplicitFunction</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:a1831ea0056371198336cdf258c8a603a"><td class="mdescLeft">&#160;</td><td class="mdescRight">IF factory method.  <br /></td></tr>
 <tr class="separator:a1831ea0056371198336cdf258c8a603a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
 <tr class="memitem:ab6618b5a9e773da347710a8a9a5d1645" id="r_ab6618b5a9e773da347710a8a9a5d1645"><td class="memItemLeft" align="right" valign="top"><a id="ab6618b5a9e773da347710a8a9a5d1645" name="ab6618b5a9e773da347710a8a9a5d1645"></a>
 <a class="el" href="classTracerParticleSolver.html">RealVect</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_endPoint1</b></td></tr>
-<tr class="memdesc:ab6618b5a9e773da347710a8a9a5d1645"><td class="mdescLeft">&#160;</td><td class="mdescRight">One end poitn. <br /></td></tr>
+<tr class="memdesc:ab6618b5a9e773da347710a8a9a5d1645"><td class="mdescLeft">&#160;</td><td class="mdescRight">One end point. <br /></td></tr>
 <tr class="separator:ab6618b5a9e773da347710a8a9a5d1645"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af5d18632ba7f133e2f033e9195874614" id="r_af5d18632ba7f133e2f033e9195874614"><td class="memItemLeft" align="right" valign="top"><a id="af5d18632ba7f133e2f033e9195874614" name="af5d18632ba7f133e2f033e9195874614"></a>
 <a class="el" href="classTracerParticleSolver.html">RealVect</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_endPoint2</b></td></tr>
@@ -207,7 +206,7 @@ Protected Attributes</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_center1</td><td><a class="el" href="classCylinder.html" title="This is a class that defines a cylinder geometry.">Cylinder</a> center </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_center2</td><td><a class="el" href="classCylinder.html" title="This is a class that defines a cylinder geometry.">Cylinder</a> center </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_radius</td><td><a class="el" href="classCylinder.html" title="This is a class that defines a cylinder geometry.">Cylinder</a> radius </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_inside</td><td>Domain on inside or outside </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_fluidInside</td><td>Fluid inside </td></tr>
   </table>
   </dd>
 </dl>
@@ -241,6 +240,34 @@ Protected Attributes</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="a1831ea0056371198336cdf258c8a603a" name="a1831ea0056371198336cdf258c8a603a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1831ea0056371198336cdf258c8a603a">&#9670;&#160;</a></span>newImplicitFunction()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">BaseIF * CylinderSdf::newImplicitFunction </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>IF factory method. </p>
+<dl class="section return"><dt>Returns</dt><dd>New copy of this implicit function </dd></dl>
+
+</div>
+</div>
 <a id="ac5c81e0e55d792beb55d82e55335044a" name="ac5c81e0e55d792beb55d82e55335044a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ac5c81e0e55d792beb55d82e55335044a">&#9670;&#160;</a></span>value()</h2>
 
@@ -272,6 +299,7 @@ Protected Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Function value at the given point </dd></dl>
 
 </div>
 </div>

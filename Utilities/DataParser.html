@@ -170,7 +170,7 @@ See <a class="reference internal" href="LookupTable.html#chap-lookuptableregular
 </li>
 <li><p>Read particle data, where the particle data is in a <span class="math notranslate nohighlight">\((x,y,z,w)\)</span> file format, where <span class="math notranslate nohighlight">\(w\)</span> is the particle weight.</p>
 <p>The function signatures for reading this type of data are:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm">  @brief Simple file parser which reads a file and puts the data into two columns (a lookup table). </span>
 <span class="cm">  @details This will read ASCII row/column data into a LookupTable1D (which is a simple x-y data structure). The user can specify which columns</span>
 <span class="cm">  to use as the x and y coordinates in the LookupTable1D. If the user ask for a column that does not exist in the input file, the data will not be read</span>
@@ -180,14 +180,15 @@ See <a class="reference internal" href="LookupTable.html#chap-lookuptableregular
 <span class="cm">  @param[in] a_yColumn     Which column to use as the y-column. </span>
 <span class="cm">  @param[in] a_ignoreChars Characters indicating comments in the file. Lines starting with these characters are ignored. </span>
 <span class="cm">  @note xColumn = 0 is the FIRST column, xColumn=1 is the SECOND column and so on. </span>
+<span class="cm">  @return Return value</span>
 <span class="cm">*/</span>
 <span class="n">LookupTable1D</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="o">&gt;</span>
-<span class="n">simpleFileReadASCII</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w">       </span><span class="n">a_fileName</span><span class="p">,</span>
-<span class="w">                    </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">               </span><span class="n">a_xColumn</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
-<span class="w">                    </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">               </span><span class="n">a_yColumn</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
-<span class="w">                    </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">char</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_ignoreChars</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="sc">&#39;#&#39;</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;/&#39;</span><span class="p">});</span>
+<span class="n">simpleFileReadASCII</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w">       </span><span class="n">a_fileName</span><span class="p">,</span>
+<span class="w">                    </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                </span><span class="n">a_xColumn</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">                    </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                </span><span class="n">a_yColumn</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">                    </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">char</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_ignoreChars</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="sc">&#39;#&#39;</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;/&#39;</span><span class="p">});</span>
 
-<span class="cm">/*!</span>
+<span class="cm">/**</span>
 <span class="cm">  @brief Simple ASCII file parser which reads a file and puts the data into two columns (a lookup table)</span>
 <span class="cm">  @details This version can read a partial file. It will ignore all lines until the a_startRead string is</span>
 <span class="cm">  encountered. After that, it will read files as usual, skipping lines that begin with comments. Empty lines</span>
@@ -199,16 +200,17 @@ See <a class="reference internal" href="LookupTable.html#chap-lookuptableregular
 <span class="cm">  @param[in] a_xColumn     Which column to use as the x-column. </span>
 <span class="cm">  @param[in] a_yColumn     Which column to use as the y-column. </span>
 <span class="cm">  @param[in] a_ignoreChars Characters indicating comments in the file. Lines starting with these characters are ignored. </span>
+<span class="cm">  @return Return value</span>
 <span class="cm">*/</span>
 <span class="n">LookupTable1D</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="o">&gt;</span>
-<span class="n">fractionalFileReadASCII</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w">       </span><span class="n">a_fileName</span><span class="p">,</span>
-<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w">       </span><span class="n">a_startRead</span><span class="p">,</span>
-<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w">       </span><span class="n">a_stopRead</span><span class="p">,</span>
-<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">               </span><span class="n">a_xColumn</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
-<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">               </span><span class="n">a_yColumn</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
-<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">char</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_ignoreChars</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="sc">&#39;#&#39;</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;/&#39;</span><span class="p">});</span>
+<span class="n">fractionalFileReadASCII</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w">       </span><span class="n">a_fileName</span><span class="p">,</span>
+<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w">       </span><span class="n">a_startRead</span><span class="p">,</span>
+<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w">       </span><span class="n">a_stopRead</span><span class="p">,</span>
+<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                </span><span class="n">a_xColumn</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                </span><span class="n">a_yColumn</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">char</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_ignoreChars</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="sc">&#39;#&#39;</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;/&#39;</span><span class="p">});</span>
 
-<span class="cm">/*!</span>
+<span class="cm">/**</span>
 <span class="cm">  @brief Simple file parser which will read particles (position/weight) from an ASCII file. </span>
 <span class="cm">  @details Particles should be arranged as rows, e.g. in the form</span>
 <span class="cm">  x   y   z   w</span>
@@ -219,14 +221,15 @@ See <a class="reference internal" href="LookupTable.html#chap-lookuptableregular
 <span class="cm">  @param[in] a_zColumn     Column containing the z-coordinate</span>
 <span class="cm">  @param[in] a_wColumn     Column containing the particle weight</span>
 <span class="cm">  @param[in] a_ignoreChars Characters indicating comments in the file. Lines starting with these characters are ignored. </span>
+<span class="cm">  @return Return value</span>
 <span class="cm">*/</span>
 <span class="n">List</span><span class="o">&lt;</span><span class="n">PointParticle</span><span class="o">&gt;</span>
-<span class="n">readPointParticlesASCII</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w">       </span><span class="n">a_fileName</span><span class="p">,</span>
-<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w">      </span><span class="n">a_xColumn</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
-<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w">      </span><span class="n">a_yColumn</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
-<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w">      </span><span class="n">a_zColumn</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
-<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w">      </span><span class="n">a_wColumn</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
-<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">char</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_ignoreChars</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="sc">&#39;#&#39;</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;/&#39;</span><span class="p">});</span>
+<span class="n">readPointParticlesASCII</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w">       </span><span class="n">a_fileName</span><span class="p">,</span>
+<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w">       </span><span class="n">a_xColumn</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w">       </span><span class="n">a_yColumn</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w">       </span><span class="n">a_zColumn</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
+<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w">       </span><span class="n">a_wColumn</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">char</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_ignoreChars</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="sc">&#39;#&#39;</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;/&#39;</span><span class="p">});</span>
 </pre></div>
 </div>
 </li>
@@ -238,7 +241,7 @@ is read as the vertex metadata; if the identifier is not found, a warning is iss
 metadata defaults to zero.
 Non-triangular facets are skipped with a warning.</p>
 <p>The function signature is:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm">  @brief Read a PLY or VTK triangle mesh file and return a list of Triangle objects.</span>
 <span class="cm">  @details Reads vertex positions and face connectivity from the file. If a_vertexDataIdentifier</span>
 <span class="cm">  matches a named per-vertex scalar property in the file (a PLY vertex property or a VTK</span>
@@ -255,7 +258,7 @@ Non-triangular facets are skipped with a warning.</p>
 <span class="cm">  @return Vector of fully initialised Triangle objects, sorted in file order.</span>
 <span class="cm">*/</span>
 <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Triangle</span><span class="o">&gt;&gt;</span>
-<span class="n">readTriangles</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_filename</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_vertexDataIdentifier</span><span class="p">);</span>
+<span class="n">readTriangles</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_filename</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_vertexDataIdentifier</span><span class="p">);</span>
 </pre></div>
 </div>
 <div class="admonition note">

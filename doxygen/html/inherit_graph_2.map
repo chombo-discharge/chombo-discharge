@@ -30,7 +30,7 @@
 <area shape="poly" id="edge16_Node000000_Node000014" title=" " alt="" coords="86,657,163,657,163,662,86,662"/>
 <area shape="rect" id="Node000015" href="$classPerlinSphereSdf.html" title="Noisy sphere geometry (with Perlin noise)." alt="" coords="155,696,280,721"/>
 <area shape="poly" id="edge17_Node000000_Node000015" title=" " alt="" coords="86,671,121,681,167,693,166,699,119,686,84,676"/>
-<area shape="rect" id="Node000018" href="$classPolygonRodIF.html" title="Implicit function class describing a rod with a polygonal cross scetion." alt="" coords="162,745,273,771"/>
+<area shape="rect" id="Node000018" href="$classPolygonRodIF.html" title="Implicit function class describing a rod with a polygonal cross section." alt="" coords="162,745,273,771"/>
 <area shape="poly" id="edge20_Node000000_Node000018" title=" " alt="" coords="61,681,88,708,121,732,163,747,161,752,119,736,85,712,58,685"/>
 <area shape="rect" id="Node000019" href="$classProfileCylinderIF.html" title="Implicit function which takes the form of a cylinder with a surface profiles (grooves)." alt="" coords="153,795,282,820"/>
 <area shape="poly" id="edge21_Node000000_Node000019" title=" " alt="" coords="52,683,78,734,98,760,121,781,154,796,151,801,119,786,94,763,74,737,47,686"/>

@@ -410,7 +410,7 @@ A successful implementation of :ref:`Chap:CdrPlasmaPhysics` has the following:
   
 #. Implemented the core functionality that couple the solvers together. 
 
-``chombo-discharge`` automatically allocates the specified number of convection-diffusion-reaction and radiative transport solvers from the list of species the is intantiated.
+``chombo-discharge`` automatically allocates the specified number of convection-diffusion-reaction and radiative transport solvers from the list of species the is instantiated.
 For information on how to interface into the CDR solvers, see :ref:`Chap:CdrSpecies`.
 Likewise, see :ref:`Chap:RtSpecies` for how to interface into the RTE solvers.
 
@@ -422,10 +422,17 @@ Complete API
 
 The full API for the ``CdrPlasmaPhysics`` class is given below:
 
+.. raw:: html
+
+   <details>
+   <summary><a>Show/hide full 0D interface</a></summary>
+
 .. literalinclude:: ../../../../Physics/CdrPlasma/CD_CdrPlasmaPhysics.H
-   :language: c++
-   :dedent: 4
-   :lines: 28-264
+   :language: c++   
+
+.. raw:: html
+
+   </details><br>   
 
 .. _Chap:CdrPlasmaJSON:
 
@@ -577,7 +584,7 @@ For example, specification of tropospheric conditions can be included by
 Tabulated
 _________
 
-To specify temperature, density, and pressure as function of altitude, set ``law`` to ``table`` and incldue the following fields:
+To specify temperature, density, and pressure as function of altitude, set ``law`` to ``table`` and include the following fields:
 
 * ``file`` For specifying which file we read the data from.
 * ``height`` For specifying the column where the height is stored (in meters).

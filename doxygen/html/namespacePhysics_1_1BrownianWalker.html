@@ -86,23 +86,24 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>Namespace for encapsulating physics code for describing Brownian walkers.  
+<p>Namespace for encapsulating Brownian walker physics.  
 <a href="namespacePhysics_1_1BrownianWalker.html#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerSpecies.html">BrownianWalkerSpecies</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Species which is advected/diffused in Brownian walker code.  <a href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerSpecies.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Concrete <a class="el" href="classItoSpecies.html" title="Class that acts as user interface for parsing initial data and mobility/diffusion kernels into ItoSol...">ItoSpecies</a> for the Brownian walker physics module.  <a href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerSpecies.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html">BrownianWalkerStepper</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Implementation of <a class="el" href="classTimeStepper.html" title="Base class for advancing equations.">TimeStepper</a> which advances an <a class="el" href="classItoSolver.html" title="Base class for Ito diffusion particle models.">ItoSolver</a>.  <a href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classTimeStepper.html" title="Base class for advancing equations.">TimeStepper</a> implementation for advancing Brownian walker particles.  <a href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerTagger.html">BrownianWalkerTagger</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Implementation of <a class="el" href="classCellTagger.html" title="Base class for tagging cells across an AMR hierarchy.">CellTagger</a> for tagging cells for Brownian walker physics.  <a href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerTagger.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classCellTagger.html" title="Base class for tagging cells across an AMR hierarchy.">CellTagger</a> implementation for the Brownian walker physics module.  <a href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerTagger.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Namespace for encapsulating physics code for describing Brownian walkers. </p>
+<div class="textblock"><p>Namespace for encapsulating Brownian walker physics. </p>
+<p>This namespace contains a particle-based physics module in which particles undergo stochastic Brownian motion and deterministic advection on an adaptive mesh. It includes a species definition, a time stepper, and a cell tagger. </p>
 </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

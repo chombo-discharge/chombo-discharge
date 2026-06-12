@@ -1,6 +1,6 @@
 <map id="Physics::CdrPlasma::CdrPlasmaGodunovStepper" name="Physics::CdrPlasma::CdrPlasmaGodunovStepper">
-<area shape="rect" id="Node000001" title="Class for evolving plasma equations using a split step Godunov method." alt="" coords="5,167,213,207"/>
-<area shape="rect" id="Node000002" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html" title="Abstract class for evolving the minimal plasma model in time." alt="" coords="34,79,185,119"/>
+<area shape="rect" id="Node000001" title="CdrPlasmaStepper subclass that advances plasma equations using a split&#45;step Godunov method." alt="" coords="5,167,213,207"/>
+<area shape="rect" id="Node000002" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html" title="Abstract base class for advancing the coupled CDR plasma equations in time." alt="" coords="34,79,185,119"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="112,133,112,166,107,166,107,133"/>
 <area shape="rect" id="Node000003" href="$classTimeStepper.html" title="Base class for advancing equations." alt="" coords="57,5,162,31"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="112,44,112,79,107,79,107,44"/>

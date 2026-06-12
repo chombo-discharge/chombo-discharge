@@ -235,11 +235,24 @@ This mode can also be used to evaluate the inception probability for a given vol
 <section id="implementation">
 <h3>Implementation<a class="headerlink" href="#implementation" title="Permalink to this heading"></a></h3>
 <p>The discharge inception model is implemented in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/DischargeInception</span></code> as</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
-<span class="cm">  @brief Class for streamer inception integral evaluations. </span>
-<span class="cm">  @details P is the tracer particle type</span>
-<span class="cm">  F is the field solver type. </span>
-<span class="cm">  C is the convection-diffusion-reaction solver type. </span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
+<span class="cm">   @brief TimeStepper for evaluating the streamer inception criterion in static or transient electric fields.</span>
+<span class="cm">   @details This class solves for the streamer inception voltage (stationary mode) or the</span>
+<span class="cm">   time-dependent inception probability (transient mode) by tracing the paths of seed electrons</span>
+<span class="cm">   through the electric field and integrating the effective ionization coefficient along those paths.</span>
+
+<span class="cm">   The class is templated on three solver types:</span>
+<span class="cm">   - @p P: Tracer particle type (default TracerParticle&lt;2,3&gt;). Each particle carries the inception</span>
+<span class="cm">   integral K and additional per-particle state.</span>
+<span class="cm">   - @p F: Field solver type (default FieldSolverGMG). Solves the Poisson equation for the electric</span>
+<span class="cm">   potential, decomposed into homogeneous (V=1 on live electrodes, no charges) and inhomogeneous</span>
+<span class="cm">   (V=0 on all electrodes, space/surface charges) contributions that are superimposed at run time.</span>
+<span class="cm">   - @p C: CDR solver type (default CdrCTU). Advances the negative ion density in transient mode.</span>
+
+<span class="cm">   In stationary mode the class sweeps over a user-supplied voltage range, computes the inception</span>
+<span class="cm">   integral K for each seed position and voltage, and derives the inception voltage map and the</span>
+<span class="cm">   critical volume/area. In transient mode the voltage follows a user-supplied curve and the</span>
+<span class="cm">   inception probability is accumulated over time together with ion transport.</span>
 <span class="cm">*/</span>
 <span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">P</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">TracerParticle</span><span class="o">&lt;</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">F</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FieldSolverGMG</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">C</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CdrCTU</span><span class="o">&gt;</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">DischargeInceptionStepper</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">TimeStepper</span>
@@ -348,102 +361,104 @@ Numerically, this is calculated using the trapezoidal rule.</p>
 <p>The input data to the discharge inception model is done by passing in C++-functions to the class.
 These functions are mainly in the forms of an <code class="docutils literal notranslate"><span class="pre">std::function</span></code>, so the user can pass in function pointers or lambdas for configuring the behavior of the model.
 The relevant user API for setting the above variables are listed below.</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="w">  </span><span class="cm">/*!</span>
-<span class="cm">    @brief Set the voltage curve (used for transient mode)</span>
-<span class="cm">    @param[in] a_voltageCurve Voltage curve</span>
-<span class="cm">  */</span>
-<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
-<span class="w">  </span><span class="nf">setVoltageCurve</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_time</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_voltageCurve</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
+<span class="cm">   @brief Set the voltage curve (used for transient mode)</span>
+<span class="cm">   @param[in] a_voltageCurve Voltage curve</span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">setVoltageCurve</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_time</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_voltageCurve</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="w">  </span><span class="cm">/*!</span>
-<span class="cm">    @brief Set space charge distribution</span>
-<span class="cm">    @param[in] a_rho Space charge distribution</span>
-<span class="cm">  */</span>
-<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
-<span class="w">  </span><span class="nf">setRho</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_rho</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="cm">/**</span>
+<span class="cm">   @brief Set space charge distribution</span>
+<span class="cm">   @param[in] a_rho Space charge distribution</span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">setRho</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_rho</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="w">  </span><span class="cm">/*!</span>
-<span class="cm">    @brief Set surface charge distribution</span>
-<span class="cm">    @param[in] a_sigma Surface charge distribution</span>
-<span class="cm">  */</span>
-<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
-<span class="w">  </span><span class="nf">setSigma</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_sigma</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="cm">/**</span>
+<span class="cm">   @brief Set surface charge distribution</span>
+<span class="cm">   @param[in] a_sigma Surface charge distribution</span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">setSigma</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_sigma</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="w">  </span><span class="cm">/*!</span>
-<span class="cm">    @brief Set the negative ion density</span>
-<span class="cm">    @param[in] a_density Negative ion density</span>
-<span class="cm">  */</span>
-<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
-<span class="w">  </span><span class="nf">setIonDensity</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_density</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="cm">/**</span>
+<span class="cm">   @brief Set the negative ion density</span>
+<span class="cm">   @param[in] a_density Negative ion density</span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">setIonDensity</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_density</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="w">  </span><span class="cm">/*!</span>
-<span class="cm">    @brief Set the negative ion mobility (field-dependent)</span>
-<span class="cm">    @param[in] a_mobility Negative ion  mobility</span>
-<span class="cm">  */</span>
-<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
-<span class="w">  </span><span class="nf">setIonMobility</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">E</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_mobility</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="cm">/**</span>
+<span class="cm">   @brief Set the negative ion mobility (field-dependent)</span>
+<span class="cm">   @param[in] a_mobility Negative ion  mobility</span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">setIonMobility</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">E</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_mobility</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="w">  </span><span class="cm">/*!</span>
-<span class="cm">    @brief Set the negative ion diffusion coefficient (field-dependent)</span>
-<span class="cm">    @param[in] a_diffCo Negative ion diffusion coefficient</span>
-<span class="cm">  */</span>
-<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
-<span class="w">  </span><span class="nf">setIonDiffusion</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">E</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_diffCo</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="cm">/**</span>
+<span class="cm">   @brief Set the negative ion diffusion coefficient (field-dependent)</span>
+<span class="cm">   @param[in] a_diffCo Negative ion diffusion coefficient</span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">setIonDiffusion</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">E</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_diffCo</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="w">  </span><span class="cm">/*!</span>
-<span class="cm">    @brief Set the ionization coefficient.</span>
-<span class="cm">    @param[in] a_alpha Townsend ionization coefficient. E is the field in SI units. </span>
-<span class="cm">  */</span>
-<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
-<span class="w">  </span><span class="nf">setAlpha</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_alpha</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="cm">/**</span>
+<span class="cm">   @brief Set the ionization coefficient.</span>
+<span class="cm">   @param[in] a_alpha Townsend ionization coefficient. E is the field in SI units. </span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">setAlpha</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_alpha</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="w">  </span><span class="cm">/*!</span>
-<span class="cm">    @brief Set the attachment coefficient.</span>
-<span class="cm">    @param[in] a_eta Townsend attachment coefficient. E is the field in SI units. </span>
-<span class="cm">  */</span>
-<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
-<span class="w">  </span><span class="nf">setEta</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_eta</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="cm">/**</span>
+<span class="cm">   @brief Set the attachment coefficient.</span>
+<span class="cm">   @param[in] a_eta Townsend attachment coefficient. E is the field in SI units. </span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">setEta</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_eta</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="w">  </span><span class="cm">/*!</span>
-<span class="cm">    @brief Get ionization coefficient</span>
-<span class="cm">  */</span>
-<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="o">&gt;&amp;</span>
-<span class="w">  </span><span class="n">getAlpha</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="cm">/**</span>
+<span class="cm">   @brief Get ionization coefficient</span>
+<span class="cm">  @return Alpha</span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="o">&gt;&amp;</span>
+<span class="n">getAlpha</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="w">  </span><span class="cm">/*!</span>
-<span class="cm">    @brief Get attachment coefficient</span>
-<span class="cm">  */</span>
-<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="o">&gt;&amp;</span>
-<span class="w">  </span><span class="n">getEta</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="cm">/**</span>
+<span class="cm">   @brief Get attachment coefficient</span>
+<span class="cm">  @return Eta</span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="o">&gt;&amp;</span>
+<span class="n">getEta</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="w">  </span><span class="cm">/*!</span>
-<span class="cm">    @brief Set the background ionization rate (e.g. from cosmic radiation etc). </span>
-<span class="cm">    @param[in] a_backgroundRate Background ionization rate (units of 1/m^3 s). </span>
-<span class="cm">  */</span>
-<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
-<span class="w">  </span><span class="nf">setBackgroundRate</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_backgroundRate</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="cm">/**</span>
+<span class="cm">   @brief Set the background ionization rate (e.g. from cosmic radiation etc). </span>
+<span class="cm">   @param[in] a_backgroundRate Background ionization rate (units of 1/m^3 s). </span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">setBackgroundRate</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_backgroundRate</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="w">  </span><span class="cm">/*!</span>
-<span class="cm">    @brief Set the detachment rate for negative ions.</span>
-<span class="cm">    @details The total detachment rate is dn_e/dt = k*n_ion; this sets the constant k. </span>
-<span class="cm">    @param[in] a_detachmentRate Detachment rate (in units of 1/s). </span>
-<span class="cm">  */</span>
-<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
-<span class="w">  </span><span class="nf">setDetachmentRate</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_detachmentRate</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="cm">/**</span>
+<span class="cm">   @brief Set the detachment rate for negative ions.</span>
+<span class="cm">   @details The total detachment rate is dn_e/dt = k*n_ion; this sets the constant k. </span>
+<span class="cm">   @param[in] a_detachmentRate Detachment rate (in units of 1/s). </span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">setDetachmentRate</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_detachmentRate</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="w">  </span><span class="cm">/*!</span>
-<span class="cm">    @brief Set the field emission current</span>
-<span class="cm">    @param[in] a_fieldEmission Field emission current density. </span>
-<span class="cm">  */</span>
-<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
-<span class="w">  </span><span class="nf">setFieldEmission</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_currentDensity</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="cm">/**</span>
+<span class="cm">   @brief Set the field emission current</span>
+<span class="cm">  @param[in] a_currentDensity Current density</span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">setFieldEmission</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_currentDensity</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="w">  </span><span class="cm">/*!</span>
-<span class="cm">    @brief Set the secondary emission coefficient</span>
-<span class="cm">    @param[in] a_coeff Secondary emission coefficient. </span>
-<span class="cm">  */</span>
-<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
-<span class="w">  </span><span class="nf">setSecondaryEmission</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_coeff</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="cm">/**</span>
+<span class="cm">   @brief Set the secondary emission coefficient</span>
+<span class="cm">   @param[in] a_coeff Secondary emission coefficient. </span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">setSecondaryEmission</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_coeff</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
 <div class="admonition tip">
@@ -560,7 +575,7 @@ T_b &amp;= T\left(\mathbf{x}; U_b\right) \ge 1,\end{split}\]</div>
 </section>
 <section id="minimum-inception-voltage">
 <h4>Minimum inception voltage<a class="headerlink" href="#minimum-inception-voltage" title="Permalink to this heading"></a></h4>
-<p>The minium inception voltage is the minimum voltage required for starting a critical avalanche (or Townsend process) for an arbitrary starting electron.
+<p>The minimum inception voltage is the minimum voltage required for starting a critical avalanche (or Townsend process) for an arbitrary starting electron.
 For any position <span class="math notranslate nohighlight">\(\mathbf{x}\)</span>, then</p>
 <div class="math notranslate nohighlight">
 \[U_{\text{inc}}\left(\mathbf{x}\right) = \min\left[U_{\text{inc, streamer}}\left(\mathbf{x}\right), U_{\text{inc, Townsend}}\left(\mathbf{x}\right)\right]\]</div>

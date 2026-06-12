@@ -120,9 +120,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a8a8fec768a812d169b4e9c74e09e6cd1" id="r_a8a8fec768a812d169b4e9c74e09e6cd1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classNeedleIF.html#a8a8fec768a812d169b4e9c74e09e6cd1">value</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_point</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
 <tr class="memdesc:a8a8fec768a812d169b4e9c74e09e6cd1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Value function. Returns distance to object.  <br /></td></tr>
 <tr class="separator:a8a8fec768a812d169b4e9c74e09e6cd1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aac41c3759e92841b7b343524ce93aedd" id="r_aac41c3759e92841b7b343524ce93aedd"><td class="memItemLeft" align="right" valign="top"><a id="aac41c3759e92841b7b343524ce93aedd" name="aac41c3759e92841b7b343524ce93aedd"></a>
-<a class="el" href="classTracerParticleSolver.html">virtual</a> BaseIF *&#160;</td><td class="memItemRight" valign="bottom"><b>newImplicitFunction</b> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
-<tr class="memdesc:aac41c3759e92841b7b343524ce93aedd"><td class="mdescLeft">&#160;</td><td class="mdescRight">IF factory method. <br /></td></tr>
+<tr class="memitem:aac41c3759e92841b7b343524ce93aedd" id="r_aac41c3759e92841b7b343524ce93aedd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> BaseIF *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classNeedleIF.html#aac41c3759e92841b7b343524ce93aedd">newImplicitFunction</a> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
+<tr class="memdesc:aac41c3759e92841b7b343524ce93aedd"><td class="mdescLeft">&#160;</td><td class="mdescRight">IF factory method.  <br /></td></tr>
 <tr class="separator:aac41c3759e92841b7b343524ce93aedd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
@@ -190,7 +189,7 @@ Protected Attributes</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_radius</td><td>Needle radius </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_tipRadius</td><td>Smoothing radius for tip and transition </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_angle</td><td>Needle tip (cone) opening angle </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">flipInside</td><td>Flip inside to outside </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_flipInside</td><td>Flip inside </td></tr>
   </table>
   </dd>
 </dl>
@@ -224,6 +223,34 @@ Protected Attributes</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="aac41c3759e92841b7b343524ce93aedd" name="aac41c3759e92841b7b343524ce93aedd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aac41c3759e92841b7b343524ce93aedd">&#9670;&#160;</a></span>newImplicitFunction()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">BaseIF * NeedleIF::newImplicitFunction </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>IF factory method. </p>
+<dl class="section return"><dt>Returns</dt><dd>New copy of this implicit function </dd></dl>
+
+</div>
+</div>
 <a id="a8a8fec768a812d169b4e9c74e09e6cd1" name="a8a8fec768a812d169b4e9c74e09e6cd1"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a8a8fec768a812d169b4e9c74e09e6cd1">&#9670;&#160;</a></span>value()</h2>
 
@@ -255,6 +282,7 @@ Protected Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Function value at the given point </dd></dl>
 
 </div>
 </div>

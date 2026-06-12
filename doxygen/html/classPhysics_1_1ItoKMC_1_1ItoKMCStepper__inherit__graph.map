@@ -1,5 +1,5 @@
 <map id="Physics::ItoKMC::ItoKMCStepper&lt; I, C, R, F &gt;" name="Physics::ItoKMC::ItoKMCStepper&lt; I, C, R, F &gt;">
-<area shape="rect" id="Node000001" title="Base time stepper class that advances the Ito&#45;KMC&#45;Poisson system of equations. If you want a differen..." alt="" coords="160,59,391,99"/>
+<area shape="rect" id="Node000001" title="Abstract TimeStepper for the Ito&#45;KMC&#45;Poisson system of equations." alt="" coords="160,59,391,99"/>
 <area shape="rect" id="Node000003" href="$classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html" title=" " alt="" coords="1111,5,1350,60"/>
 <area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="404,59,414,58,605,43,796,35,1111,29,1111,35,796,40,606,49,415,63,405,64"/>
 <area shape="rect" id="Node000004" href="$classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html" title="Implementation of ItoKMCStepper that uses a semi&#45;implicit split&#45;step formalism for advancing the Ito&#45;..." alt="" coords="627,59,865,99"/>

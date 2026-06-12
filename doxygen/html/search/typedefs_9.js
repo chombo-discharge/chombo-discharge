@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['node_0',['Node',['../classSignedDistanceBVH.html#a8acfa25dfc21c7d4b367f2d2c935728a',1,'SignedDistanceBVH']]],
-  ['numberdensityfunction_1',['NumberDensityFunction',['../classPhysics_1_1CdrPlasma_1_1NeutralSpeciesJSON.html#a5e3410a2f161a7caa164982b88165643',1,'Physics::CdrPlasma::NeutralSpeciesJSON']]]
+  ['mesh_0',['Mesh',['../classSignedDistanceDCEL.html#ac3ba4cb079ccd274977cf3ee9ff80e69',1,'SignedDistanceDCEL']]],
+  ['mfis_1',['MFIS',['../classMFHelmholtzOpFactory.html#aca2f1a4102e812018ae4dd25db9938f1',1,'MFHelmholtzOpFactory']]],
+  ['molarfraction_2',['MolarFraction',['../classPhysics_1_1ItoKMC_1_1ItoKMCBackgroundSpecies.html#ae6b85c38b93061f5f3f5d5280b4855c3',1,'Physics::ItoKMC::ItoKMCBackgroundSpecies']]]
 ];

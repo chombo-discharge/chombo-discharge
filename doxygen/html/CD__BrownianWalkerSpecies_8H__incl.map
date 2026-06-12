@@ -1,5 +1,5 @@
 <map id="Physics/BrownianWalker/CD_BrownianWalkerSpecies.H" name="Physics/BrownianWalker/CD_BrownianWalkerSpecies.H">
-<area shape="rect" id="Node000001" title="Declaration of a Brownian walker species for the ItoSolver." alt="" coords="71,5,292,45"/>
+<area shape="rect" id="Node000001" title="Declaration of the Physics::BrownianWalker::BrownianWalkerSpecies class." alt="" coords="71,5,292,45"/>
 <area shape="rect" id="Node000002" title=" " alt="" coords="5,93,77,119"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="149,48,75,89,73,84,147,43"/>
 <area shape="rect" id="Node000003" href="$CD__ItoSpecies_8H.html" title="Declaration of an ItoSpecies class that passes in names and initial data to ItoSolvers." alt="" coords="183,93,313,119"/>

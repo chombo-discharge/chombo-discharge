@@ -173,7 +173,7 @@ Protected Attributes</h2></td></tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+<span class="mlabels"><span class="mlabel">default</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -244,7 +244,7 @@ Protected Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p>File-reading constructor. Reads a PLY or VTK mesh file and builds the BVH. </p>
-<p>Calls <a class="el" href="namespaceDataParser.html#a2ce7cf079c7e2504887f6300a347f898" title="Read a PLY or VTK triangle mesh file and return a list of Triangle objects.">DataParser::readTriangles()</a> to parse the file and populate <a class="el" href="classTriangle.html" title="Class that represents a single triangle together with associated metadata on the vertices (one float ...">Triangle</a> vertex positions and metadata, then calls <a class="el" href="classTriangleCollection.html#a8bd7b91a436f88d9ad3166cb506bec4d" title="Build the BVH tree from a set of triangles.">define()</a> to build the BVH. Equivalent to constructing with the default constructor and then calling define(DataParser::readTriangles(a_filename,
+<p>Calls <a class="el" href="namespaceDataParser.html#afeaf9cd26072d14a5a9bcf4d35c80125" title="Read a PLY or VTK triangle mesh file and return a list of Triangle objects.">DataParser::readTriangles()</a> to parse the file and populate <a class="el" href="classTriangle.html" title="Class that represents a single triangle together with associated metadata on the vertices (one float ...">Triangle</a> vertex positions and metadata, then calls <a class="el" href="classTriangleCollection.html#a8bd7b91a436f88d9ad3166cb506bec4d" title="Build the BVH tree from a set of triangles.">define()</a> to build the BVH. Equivalent to constructing with the default constructor and then calling define(DataParser::readTriangles(a_filename,
 a_vertexDataIdentifier)). Issues a fatal error for unsupported file types and a warning if the vertex data identifier is not found in the file (vertex data defaults to zero in that case). </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_filename</td><td>Path to the input mesh file (.ply or .vtk). </td></tr>

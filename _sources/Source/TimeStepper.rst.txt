@@ -61,7 +61,7 @@ To provide an example, the code snippet below shows the implementation of this r
 .. literalinclude:: ../../../../Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp
    :caption: Implementation of the ``setupSolvers`` routine for a simple advection-diffusion problem.
    :language: c++
-   :lines: 137-163
+   :lines: 136-162
 
 .. _Chap:RegisterOperators:
 
@@ -90,7 +90,7 @@ An example of this is given in :numref:`List:AdvectionDiffusionStepperRegister`,
 .. literalinclude:: ../../../../Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp
    :caption: Implementation of the ``registerOperators`` routine for a simple advection-diffusion problem.
    :language: c++
-   :lines: 176-186
+   :lines: 175-185
 
 allocate
 --------
@@ -103,10 +103,10 @@ Again using :ref:`Chap:AdvectionDiffusionModel` as an example,
 .. literalinclude:: ../../../../Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp
    :caption: Implementation of the ``allocate`` routine for a simple advection-diffusion problem.
    :language: c++
-   :lines: 188-197
+   :lines: 187-196
 
 In the above snippet, ``TimeStepper`` only calls the solver allocation function (solvers generally know how to allocate their own internal data).
-For more complex problems this routine will probably allocate additonal data that only lives within ``TimeStepper`` (and not the solvers). 
+For more complex problems this routine will probably allocate additional data that only lives within ``TimeStepper`` (and not the solvers). 
 
 initialData
 -----------
@@ -120,7 +120,7 @@ A simpler example is again given by :ref:`Chap:AdvectionDiffusionModel`:
 .. literalinclude:: ../../../../Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp
    :caption: Implementation of the ``initialData`` routine for a simple advection-diffusion problem.
    :language: c++
-   :lines: 199-226
+   :lines: 198-218
 
 The above code defers the initialization of the density in the advection-diffusion-reaction solver to the actual solver implementation.
 Here, one could equally well have fetched the density directly from the solver and set it to something else by simply iterating through the grid cells (or setting it through other means).
@@ -165,7 +165,7 @@ Below we include the implementation of this routine for the :ref:`Chap:Advection
 .. literalinclude:: ../../../../Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp
    :caption: Implementation of the ``getNumberOfPlotVariables`` routine for a simple advection-diffusion problem.
    :language: c++
-   :lines: 280-290
+   :lines: 265-275
 
 getPlotVariableNames
 --------------------
@@ -178,7 +178,7 @@ Below we include the implementation of this routine for the :ref:`Chap:Advection
 .. literalinclude:: ../../../../Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp
    :caption: Implementation of the ``getPlotVariableNames`` routine for a simple advection-diffusion problem.
    :language: c++
-   :lines: 292-301
+   :lines: 277-286
 
 .. tip::
 
@@ -193,7 +193,7 @@ The function signature is
 
 .. literalinclude:: ../../../../Source/Driver/CD_TimeStepper.H
    :language: c++
-   :lines: 160-171
+   :lines: 186-194
    :dedent: 2
 	   
 In this function, ``a_output`` is pre-allocated block of memory that ``TimeStepper`` will write its components to (beginning at ``a_icomp``).
@@ -205,7 +205,7 @@ An example is given below for the :ref:`Chap:AdvectionDiffusionModel`:
 .. literalinclude:: ../../../../Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp
    :caption: Implementation of the ``writePlotData`` routine for a simple advection-diffusion problem.
    :language: c++
-   :lines: 303-318
+   :lines: 288-303
 
 writeCheckpointData
 -------------------
@@ -217,7 +217,7 @@ The function signature is
 
 .. literalinclude:: ../../../../Source/Driver/CD_TimeStepper.H
    :language: c++
-   :lines: 125-133
+   :lines: 149-157
    :dedent: 2
 
 Usually, the solvers know themselves what data to put in the checkpoint files and these routines are then pretty simple.
@@ -227,7 +227,7 @@ Below, we again include an example for the :ref:`Chap:AdvectionDiffusionModel`:
 .. literalinclude:: ../../../../Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp
    :caption: Implementation of the ``writeCheckpointData`` routine for a simple advection-diffusion problem.
    :language: c++
-   :lines: 229-238
+   :lines: 221-230
 
 When implementing the function, it is important to add any data that is required when restarting the simulation.
 It is also beneficial to *not* add data that is not required since this will just lead to larger files.
@@ -246,7 +246,7 @@ The data is read on a level-by-level basis, with a function signature
 
 .. literalinclude:: ../../../../Source/Driver/CD_TimeStepper.H
    :language: c++
-   :lines: 137-144
+   :lines: 161-168
    :dedent: 2
 
 Solvers will normally already know what data to read into their data members.
@@ -256,7 +256,7 @@ E.g., the example for the :ref:`Chap:AdvectionDiffusionModel` is
 .. literalinclude:: ../../../../Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp
    :caption: Implementation of the ``readCheckpointData`` routine for a simple advection-diffusion problem.
    :language: c++
-   :lines: 242-251
+   :lines: 234-243
 
 Advance routines
 ================
@@ -270,7 +270,7 @@ We have chosen to call this a trial time step because
 #. :ref:`Chap:Driver` might choose to use a smaller time step in order to write plot files at specific times.
 #. When calling the actual advance method (see below), it is possible to return a different time step than the one computed through ``computeDt``.
 
-The calculation of a time step can be quite involved, depending on the application being imlemented.
+The calculation of a time step can be quite involved, depending on the application being implemented.
 Moreover, many ``TimeStepper`` implementations will provide hooks for swapping algorithms, and in this case the time step might be limited differently.
 For the :ref:`Chap:AdvectionDiffusionModel` the implementation is as follows:
 
@@ -278,7 +278,7 @@ For the :ref:`Chap:AdvectionDiffusionModel` the implementation is as follows:
 .. literalinclude:: ../../../../Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp
    :caption: Implementation of the ``computeDt`` routine for a simple advection-diffusion problem.
    :language: c++
-   :lines: 320-365
+   :lines: 305-350
 
 In the code above, ``TimeStepper`` supports both fully explicit advection-diffusion advances as well as split-step advances with implicit diffusion.
 Depending on how the user chooses to run the code, the time step is therefore computed differently.
@@ -292,7 +292,7 @@ The function signature is
 
 .. literalinclude:: ../../../../Source/Driver/CD_TimeStepper.H
    :language: c++
-   :lines: 211-218
+   :lines: 234-241
    :dedent: 2
 
 As mentioned in the documentation for this method, the function takes a trial time step ``a_dt`` which is the physical time step.
@@ -306,7 +306,7 @@ For simpler problems this routine is relatively straightforward to implement, ho
 .. literalinclude:: ../../../../Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp
    :caption: Implementation of the ``advance`` routine for a simple advection-diffusion problem.
    :language: c++
-   :lines: 367-376, 380-407, 456-459, 468-469
+   :lines: 352-454
 
 In the above code we have included the part of the ``advance`` routine that executes Heun's method for advancing the scalar.
 This code also includes allocation of temporaries for computing the coefficients, storage for the intermediate state, and enforcement of boundary conditions, all of which include AMR.
@@ -324,7 +324,7 @@ The implementation for :ref:`Chap:AdvectionDiffusionModel` is
 .. literalinclude:: ../../../../Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp
    :caption: Implementation of the ``synchronizeSolverTimes`` routine for a simple advection-diffusion problem.
    :language: c++
-   :lines: 471-484
+   :lines: 456-469
 
 printStepReport
 ---------------
@@ -347,7 +347,7 @@ The function signature is
 
 .. literalinclude:: ../../../../Source/Driver/CD_TimeStepper.H
    :language: c++
-   :lines: 270-276
+   :lines: 294-301
    :dedent: 2
 
 Regrid routines
@@ -355,7 +355,7 @@ Regrid routines
 
 The regrid routines in ``TimeStepper`` must, in combination, be able to transfer the simulation between old and new grids.
 For an explanation to how regridding occurs in ``chombo-discharge``, see :ref:`Chap:DriverRegridding`.
-In particular, when regrids occur the old grids are eventually destroyed so it is necessary to cache the old-grid simulation states so that we have something to interpolate from whan transfer the state to the new grids. 
+In particular, when regrids occur the old grids are eventually destroyed so it is necessary to cache the old-grid simulation states so that we have something to interpolate from when transferring the state to the new grids. 
 
 preRegrid
 ---------
@@ -368,7 +368,7 @@ Solvers usually know how to do this, and in some cases this function can be dece
 .. literalinclude:: ../../../../Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp
    :caption: Implementation of the ``preRegrid`` routine for a simple advection-diffusion problem.
    :language: c++
-   :lines: 486-495
+   :lines: 471-480
 
 Other implementations of ``TimeStepper`` may have substantially more complicated ``preRegrid`` routines.
 
@@ -383,7 +383,7 @@ Solvers are usually implemented with their own regrid routine, and if the only t
 .. literalinclude:: ../../../../Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp
    :caption: Implementation of the ``regrid`` routine for a simple advection-diffusion problem.
    :language: c++
-   :lines: 497-516
+   :lines: 482-501
 
 
 For other ``TimeStepper`` implementations this routine can become much more complex.
@@ -418,7 +418,7 @@ The function signature for this function is
 
 .. literalinclude:: ../../../../Source/Driver/CD_TimeStepper.H
    :language: c++
-   :lines: 278-283
+   :lines: 303-309
    :dedent: 2
 
 This function must return true if the input :ref:`Chap:Realm` (``a_realm``) should be load balanced.
@@ -430,7 +430,7 @@ If ``loadBalanceThisRealm`` returns true, the following function is responsible 
 
 .. literalinclude:: ../../../../Source/Driver/CD_TimeStepper.H
    :language: c++
-   :lines: 285-304
+   :lines: 311-330
    :dedent: 2
 
 This is called if ``loadBalanceThisRealm`` evaluates to true, and in this case the ``TimeStepper`` should compute a new set of rank ownership for the input grid boxes.
@@ -438,11 +438,10 @@ Observe that ``loadBalanceBoxes`` occurs for the entire AMR hierarchy, where the
 The default implementation of this function ensures that when we load balance a level, we account for the accumulated load on coarser levels (see :ref:`TimeStepperloadBalanceBoxes`).
 
 .. _TimeStepperloadBalanceBoxes:
-.. literalinclude:: ../../../../Source/Driver/CD_TimeStepper.H
+.. literalinclude:: ../../../../Source/Driver/CD_TimeStepper.cpp
    :caption: Default implementation of ``loadBalanceBoxes``.
    :language: c++
-   :lines: 278-283
-   :dedent: 2
+   :lines: 107-137
 
 In the above, we use the ``Loads`` class to hold the computational load for each rank, and on each level we compute the load for each patch to be equal to the number of grid cells in the patch.
 This is later load balanced in ``LoadBalancing::makeBalance``, which is a routine that ensures that when we assign boxes on some grid level :math:`l`, we account for loads already assigned on coarser grid levels.

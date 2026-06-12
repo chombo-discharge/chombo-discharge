@@ -177,7 +177,7 @@ The refinement flags themselves are owned by <a class="reference internal" href=
 <p>A part of the current C++ header file for <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code> is included below, where we highlight the functions that must be implemented in order to create a new refinement method.</p>
 <div class="literal-block-wrapper docutils container" id="id1">
 <span id="celltaggerpurefunctions"></span><div class="code-block-caption"><span class="caption-number">Listing 22 </span><span class="caption-text">Header file for <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code>.</span><a class="headerlink" href="#id1" title="Permalink to this code"></a></div>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm">  @brief Regrid function for cell tagger (in case it uses transient storage to do things)</span>
 <span class="cm">  @details This function exists because implementations may require data to be allocated on a mesh. This function is</span>
 <span class="cm">  called by Driver to make sure data is reallocated when it needs to. </span>
@@ -185,23 +185,24 @@ The refinement flags themselves are owned by <a class="reference internal" href=
 <span class="hll"><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 </span><span class="hll"><span class="nf">regrid</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 </span>
-<span class="cm">/*!</span>
+<span class="cm">/**</span>
 <span class="cm">  @brief Parse class options.</span>
 <span class="cm">  @note This function is called by Driver. </span>
 <span class="cm">*/</span>
 <span class="hll"><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 </span><span class="hll"><span class="nf">parseOptions</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 </span>
-<span class="cm">/*!</span>
+<span class="cm">/**</span>
 <span class="cm">  @brief Tag cells</span>
-<span class="cm">  @param[inout] a_tags Tags on grid levels</span>
+<span class="cm">  @param[in,out] a_tags Tags on grid levels</span>
 <span class="cm">  @details EBAMRTags is a data-type Vector&lt;RefCountedPtr&lt;LayoutData&lt;DenseIntVectSet&gt; &gt; &gt;. The vector indicates the grid level, the LayoutData indicates data ownership (in</span>
-<span class="cm">  much the same way as LevelData. The DenseIntVectSet is essentially an IntVectSet restricted to the patch (i.e. one cannot add IntVects that are outside the patch). </span>
-<span class="cm">  This function cells for refinement or coarsening. The user&#39;s responsibility is to add (or remove) tags from a_tags. </span>
-<span class="hll"><span class="cm">*/</span>
-</span><span class="hll"><span class="k">virtual</span><span class="w"> </span><span class="kt">bool</span>
-</span><span class="nf">tagCells</span><span class="p">(</span><span class="n">EBAMRTags</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_tags</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-</pre></div>
+<span class="cm">  much the same way as LevelData. The DenseIntVectSet is essentially an IntVectSet restricted to the patch (i.e. one cannot add IntVects that are outside the patch).</span>
+<span class="cm">  This function cells for refinement or coarsening. The user&#39;s responsibility is to add (or remove) tags from a_tags.</span>
+<span class="cm">  @return Returns true if tags changed.</span>
+<span class="cm">*/</span>
+<span class="hll"><span class="k">virtual</span><span class="w"> </span><span class="kt">bool</span>
+</span><span class="hll"><span class="nf">tagCells</span><span class="p">(</span><span class="n">EBAMRTags</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_tags</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+</span></pre></div>
 </div>
 </div>
 <section id="implementing-a-new-celltagger">
@@ -231,28 +232,29 @@ Note that it is also useful to overwrite the function <code class="docutils lite
 <h3>Plot data<a class="headerlink" href="#plot-data" title="Permalink to this heading"></a></h3>
 <p>It is also possible to have <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code> write data to plot files, and the interface for this is identical to the plot file interface in <a class="reference internal" href="TimeStepper.html#chap-timestepper"><span class="std std-ref">TimeStepper</span></a>.
 The three functions below must then be implemented:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="w">  </span><span class="cm">/*!</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="w">  </span><span class="cm">/**</span>
 <span class="cm">    @brief Get number of plot variables that will be written to file (by Driver).</span>
 <span class="cm">    @return Returns number of plot variables that Driver will write to plot files. </span>
 <span class="cm">  */</span>
 <span class="hll"><span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">int</span>
 </span><span class="hll"><span class="w">  </span><span class="nf">getNumberOfPlotVariables</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 </span>
-<span class="w">  </span><span class="cm">/*!</span>
-<span class="cm">    @brief Get plot variable names. </span>
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">    @brief Get plot variable names.</span>
+<span class="cm">    @return Names of plot variables that will be written to file.</span>
 <span class="cm">  */</span>
 <span class="hll"><span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span>
 </span><span class="hll"><span class="w">  </span><span class="n">getPlotVariableNames</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 </span>
-<span class="w">  </span><span class="cm">/*!</span>
+<span class="w">  </span><span class="cm">/**</span>
 <span class="cm">    @brief Write plot data.</span>
-<span class="cm">    @param[inout] a_output Output data holder</span>
-<span class="cm">    @param[inout] a_icomp Starting variable in a_output where we begin appending data.</span>
+<span class="cm">    @param[in,out] a_output Output data holder</span>
+<span class="cm">    @param[in,out] a_icomp Starting variable in a_output where we begin appending data.</span>
 <span class="cm">    @param[in] a_outputRealm Realm where a_output belongs</span>
 <span class="cm">    @param[in] a_level Grid level</span>
 <span class="cm">  */</span>
 <span class="hll"><span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
-</span><span class="hll"><span class="w">  </span><span class="nf">writePlotData</span><span class="p">(</span><span class="n">LevelData</span><span class="o">&lt;</span><span class="n">EBCellFAB</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_output</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_icomp</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_outputRealm</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_level</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+</span><span class="hll"><span class="w">  </span><span class="n">writePlotData</span><span class="p">(</span><span class="n">LevelData</span><span class="o">&lt;</span><span class="n">EBCellFAB</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_output</span><span class="p">,</span>
 </span></pre></div>
 </div>
 <p>The interpretation of these functions is exactly the same as for <a class="reference internal" href="TimeStepper.html#chap-timestepper"><span class="std std-ref">TimeStepper</span></a>, and we refer to the <a class="reference internal" href="TimeStepper.html#chap-timestepper"><span class="std std-ref">TimeStepper</span></a> documentation for a detailed explanation.</p>
@@ -277,7 +279,7 @@ If the user specifies <code class="docutils literal notranslate"><span class="pr
 # ====================================================================================================
 CellTagger.buffer     = 0    ## Grow tagged cells
 
-CellTagger.num_tag_boxes     = 0              ## Number of allowed tag boxes (0 = tags allowe everywhere)
+CellTagger.num_tag_boxes     = 0              ## Number of allowed tag boxes (0 = tags allowed everywhere)
 CellTagger.tag_box1_lo       = 0.0 0.0 0.0    ## Only allow tags that fall between
 CellTagger.tag_box1_hi       = 0.0 0.0 0.0    ## these two corners
 

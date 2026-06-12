@@ -86,7 +86,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>Class for computing the required Taylor terms for doing the orthogonal extrapolation to the ghost cell position. This is used in conjuction with EBLeastSquaresMultigridInterpolator.H, and should be understood in that context only.  
+<p>Class for computing the required Taylor terms for doing the orthogonal extrapolation to the ghost cell position. This is used in conjunction with EBLeastSquaresMultigridInterpolator.H, and should be understood in that context only.  
  <a href="classCoarseInterpQuadCF.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="CD__CoarseInterpQuadCF_8H_source.html">CD_CoarseInterpQuadCF.H</a>&gt;</code></p>
@@ -101,24 +101,39 @@ Public Member Functions</h2></td></tr>
 <a class="el" href="classTracerParticleSolver.html">virtual</a>&#160;</td><td class="memItemRight" valign="bottom"><b>~CoarseInterpQuadCF</b> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:aef8a037716b9c54282c694a56bd5bf5b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. <br /></td></tr>
 <tr class="separator:aef8a037716b9c54282c694a56bd5bf5b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abf35af817722f9dc88c17c8a669003b4" id="r_abf35af817722f9dc88c17c8a669003b4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCoarseInterpQuadCF.html#abf35af817722f9dc88c17c8a669003b4">define</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">DisjointBoxLayout</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_dblFine</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_domainCoar</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">DataIndex</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_dit</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Box</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_fineGhostCells</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_refRat</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_ignoreDir</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:abf35af817722f9dc88c17c8a669003b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define function. Puts object in usable state.  <br /></td></tr>
-<tr class="separator:abf35af817722f9dc88c17c8a669003b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1c239449c45456fe117623f9b675e9e9" id="r_a1c239449c45456fe117623f9b675e9e9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCoarseInterpQuadCF.html#a1c239449c45456fe117623f9b675e9e9">computeFirstDeriv</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">FArrayBox</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_coarPhi</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_ivCoar</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_dir</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_coarVar</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:a1c239449c45456fe117623f9b675e9e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute first-derivative Taylor term in direction a_dir.  <br /></td></tr>
-<tr class="separator:a1c239449c45456fe117623f9b675e9e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa61563d92be147a48a117335458f73ab" id="r_aa61563d92be147a48a117335458f73ab"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCoarseInterpQuadCF.html#aa61563d92be147a48a117335458f73ab">computeSecondDeriv</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">FArrayBox</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_coarPhi</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_ivCoar</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_dir</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_coarVar</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:aa61563d92be147a48a117335458f73ab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute second-derivative Taylor term in direction a_dir.  <br /></td></tr>
-<tr class="separator:aa61563d92be147a48a117335458f73ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1e672d5407e97aefbe057e6b22955d92" id="r_a1e672d5407e97aefbe057e6b22955d92"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCoarseInterpQuadCF.html#a1e672d5407e97aefbe057e6b22955d92">computeMixedDeriv</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">FArrayBox</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_coarPhi</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_ivCoar</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_coarVar</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:a1e672d5407e97aefbe057e6b22955d92"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute mixed-derivative Taylor term in directions orthogonal m_ignoreDir.  <br /></td></tr>
-<tr class="separator:a1e672d5407e97aefbe057e6b22955d92"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa3f0391701de779a497f6846f9d5c851" id="r_aa3f0391701de779a497f6846f9d5c851"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">DerivStencil</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCoarseInterpQuadCF.html#aa3f0391701de779a497f6846f9d5c851">getFirstDerivStencil</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_ivCoar</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_dir</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:aa3f0391701de779a497f6846f9d5c851"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the first derivative stencil for the input coarse vof.  <br /></td></tr>
-<tr class="separator:aa3f0391701de779a497f6846f9d5c851"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a64f21a10d9fa1ea5984cd42f5dff46a5" id="r_a64f21a10d9fa1ea5984cd42f5dff46a5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">DerivStencil</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCoarseInterpQuadCF.html#a64f21a10d9fa1ea5984cd42f5dff46a5">getSecondDerivStencil</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_ivCoar</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_dir</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:a64f21a10d9fa1ea5984cd42f5dff46a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the second derivative stencil for the input coarse vof.  <br /></td></tr>
-<tr class="separator:a64f21a10d9fa1ea5984cd42f5dff46a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a337e4f3d29562b6a38467f85518c0351" id="r_a337e4f3d29562b6a38467f85518c0351"><td class="memItemLeft" align="right" valign="top"><a id="a337e4f3d29562b6a38467f85518c0351" name="a337e4f3d29562b6a38467f85518c0351"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>CoarseInterpQuadCF</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classCoarseInterpQuadCF.html">CoarseInterpQuadCF</a> &amp;)=<a class="el" href="classTracerParticleSolver.html">delete</a></td></tr>
+<tr class="memdesc:a337e4f3d29562b6a38467f85518c0351"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy constructor — deleted. <br /></td></tr>
+<tr class="separator:a337e4f3d29562b6a38467f85518c0351"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a30cdf508782844e3fa2c13a01ba78e07" id="r_a30cdf508782844e3fa2c13a01ba78e07"><td class="memItemLeft" align="right" valign="top"><a id="a30cdf508782844e3fa2c13a01ba78e07" name="a30cdf508782844e3fa2c13a01ba78e07"></a>
+<a class="el" href="classCoarseInterpQuadCF.html">CoarseInterpQuadCF</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classCoarseInterpQuadCF.html">CoarseInterpQuadCF</a> &amp;)=<a class="el" href="classTracerParticleSolver.html">delete</a></td></tr>
+<tr class="memdesc:a30cdf508782844e3fa2c13a01ba78e07"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy assignment — deleted. <br /></td></tr>
+<tr class="separator:a30cdf508782844e3fa2c13a01ba78e07"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5bd818d8f028abb2b587b9c3b8db0b33" id="r_a5bd818d8f028abb2b587b9c3b8db0b33"><td class="memItemLeft" align="right" valign="top"><a id="a5bd818d8f028abb2b587b9c3b8db0b33" name="a5bd818d8f028abb2b587b9c3b8db0b33"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>CoarseInterpQuadCF</b> (<a class="el" href="classCoarseInterpQuadCF.html">CoarseInterpQuadCF</a> &amp;&amp;)=<a class="el" href="classTracerParticleSolver.html">default</a></td></tr>
+<tr class="memdesc:a5bd818d8f028abb2b587b9c3b8db0b33"><td class="mdescLeft">&#160;</td><td class="mdescRight">Move constructor. <br /></td></tr>
+<tr class="separator:a5bd818d8f028abb2b587b9c3b8db0b33"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9f645376e4fdb01e598953d1f4ca52c9" id="r_a9f645376e4fdb01e598953d1f4ca52c9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classCoarseInterpQuadCF.html">CoarseInterpQuadCF</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCoarseInterpQuadCF.html#a9f645376e4fdb01e598953d1f4ca52c9">operator=</a> (<a class="el" href="classCoarseInterpQuadCF.html">CoarseInterpQuadCF</a> &amp;&amp;) <a class="el" href="classTracerParticleSolver.html">noexcept</a>=<a class="el" href="classTracerParticleSolver.html">default</a></td></tr>
+<tr class="memdesc:a9f645376e4fdb01e598953d1f4ca52c9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Move assignment.  <br /></td></tr>
+<tr class="separator:a9f645376e4fdb01e598953d1f4ca52c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7310fe46025888ca0415d3c78ce59584" id="r_a7310fe46025888ca0415d3c78ce59584"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCoarseInterpQuadCF.html#a7310fe46025888ca0415d3c78ce59584">define</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">DisjointBoxLayout</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_dblFine</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_domainCoar</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">DataIndex</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_dit</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Box</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_fineGhostCells</a>, <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_refRat</a>, <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_ignoreDir</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a7310fe46025888ca0415d3c78ce59584"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define function. Puts object in usable state.  <br /></td></tr>
+<tr class="separator:a7310fe46025888ca0415d3c78ce59584"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7c7a21cda335eaff7f5b95eebf23caf8" id="r_a7c7a21cda335eaff7f5b95eebf23caf8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCoarseInterpQuadCF.html#a7c7a21cda335eaff7f5b95eebf23caf8">computeFirstDeriv</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">FArrayBox</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_coarPhi</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_ivCoar</a>, <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_dir</a>, <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_coarVar</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a7c7a21cda335eaff7f5b95eebf23caf8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute first-derivative Taylor term in direction a_dir.  <br /></td></tr>
+<tr class="separator:a7c7a21cda335eaff7f5b95eebf23caf8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a24c2a8f9eb6d5bf3703b25ba072f8377" id="r_a24c2a8f9eb6d5bf3703b25ba072f8377"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCoarseInterpQuadCF.html#a24c2a8f9eb6d5bf3703b25ba072f8377">computeSecondDeriv</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">FArrayBox</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_coarPhi</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_ivCoar</a>, <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_dir</a>, <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_coarVar</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a24c2a8f9eb6d5bf3703b25ba072f8377"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute second-derivative Taylor term in direction a_dir.  <br /></td></tr>
+<tr class="separator:a24c2a8f9eb6d5bf3703b25ba072f8377"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae07a87fe23155a2ed4943851061af6e4" id="r_ae07a87fe23155a2ed4943851061af6e4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCoarseInterpQuadCF.html#ae07a87fe23155a2ed4943851061af6e4">computeMixedDeriv</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">FArrayBox</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_coarPhi</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_ivCoar</a>, <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_coarVar</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:ae07a87fe23155a2ed4943851061af6e4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute mixed-derivative Taylor term in directions orthogonal m_ignoreDir.  <br /></td></tr>
+<tr class="separator:ae07a87fe23155a2ed4943851061af6e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad26e27a350e3ed9deea19c92f86a0f29" id="r_ad26e27a350e3ed9deea19c92f86a0f29"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">DerivStencil</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCoarseInterpQuadCF.html#ad26e27a350e3ed9deea19c92f86a0f29">getFirstDerivStencil</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_ivCoar</a>, <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_dir</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:ad26e27a350e3ed9deea19c92f86a0f29"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the first derivative stencil for the input coarse vof.  <br /></td></tr>
+<tr class="separator:ad26e27a350e3ed9deea19c92f86a0f29"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7b48bd5bc2d39acf68b41d31334dd542" id="r_a7b48bd5bc2d39acf68b41d31334dd542"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">DerivStencil</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCoarseInterpQuadCF.html#a7b48bd5bc2d39acf68b41d31334dd542">getSecondDerivStencil</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_ivCoar</a>, <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_dir</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a7b48bd5bc2d39acf68b41d31334dd542"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the second derivative stencil for the input coarse vof.  <br /></td></tr>
+<tr class="separator:a7b48bd5bc2d39acf68b41d31334dd542"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a43c6635f3ee8873a0d2873b6477c12f1" id="r_a43c6635f3ee8873a0d2873b6477c12f1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">DerivStencil</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCoarseInterpQuadCF.html#a43c6635f3ee8873a0d2873b6477c12f1">getMixedDerivStencil</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_ivCoar</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:a43c6635f3ee8873a0d2873b6477c12f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the second derivative stencil for the input coarse vof.  <br /></td></tr>
 <tr class="separator:a43c6635f3ee8873a0d2873b6477c12f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -212,11 +227,11 @@ Protected Attributes</h2></td></tr>
 <tr class="separator:a4b7ee7c75b8124c484095cebc83eb587"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Class for computing the required Taylor terms for doing the orthogonal extrapolation to the ghost cell position. This is used in conjuction with EBLeastSquaresMultigridInterpolator.H, and should be understood in that context only. </p>
+<div class="textblock"><p>Class for computing the required Taylor terms for doing the orthogonal extrapolation to the ghost cell position. This is used in conjunction with EBLeastSquaresMultigridInterpolator.H, and should be understood in that context only. </p>
 <p>This should be defined over the fine grid. It will store stencils for computing the various required terms in the Taylor series, and the user can call various functions for getting those terms. For the record, all stencils in this object assumes that dx = 1, so the user have to normalize against his/her grid resolutions later. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="a1c239449c45456fe117623f9b675e9e9" name="a1c239449c45456fe117623f9b675e9e9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1c239449c45456fe117623f9b675e9e9">&#9670;&#160;</a></span>computeFirstDeriv()</h2>
+<a id="a7c7a21cda335eaff7f5b95eebf23caf8" name="a7c7a21cda335eaff7f5b95eebf23caf8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7c7a21cda335eaff7f5b95eebf23caf8">&#9670;&#160;</a></span>computeFirstDeriv()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -239,13 +254,13 @@ Protected Attributes</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
           <td class="paramname"><em>a_dir</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
           <td class="paramname"><em>a_coarVar</em>&#160;</td>
         </tr>
         <tr>
@@ -271,11 +286,12 @@ Protected Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Computed first deriv </dd></dl>
 
 </div>
 </div>
-<a id="a1e672d5407e97aefbe057e6b22955d92" name="a1e672d5407e97aefbe057e6b22955d92"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1e672d5407e97aefbe057e6b22955d92">&#9670;&#160;</a></span>computeMixedDeriv()</h2>
+<a id="ae07a87fe23155a2ed4943851061af6e4" name="ae07a87fe23155a2ed4943851061af6e4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae07a87fe23155a2ed4943851061af6e4">&#9670;&#160;</a></span>computeMixedDeriv()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -298,7 +314,7 @@ Protected Attributes</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
           <td class="paramname"><em>a_coarVar</em>&#160;</td>
         </tr>
         <tr>
@@ -323,11 +339,12 @@ Protected Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Computed mixed deriv </dd></dl>
 
 </div>
 </div>
-<a id="aa61563d92be147a48a117335458f73ab" name="aa61563d92be147a48a117335458f73ab"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa61563d92be147a48a117335458f73ab">&#9670;&#160;</a></span>computeSecondDeriv()</h2>
+<a id="a24c2a8f9eb6d5bf3703b25ba072f8377" name="a24c2a8f9eb6d5bf3703b25ba072f8377"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a24c2a8f9eb6d5bf3703b25ba072f8377">&#9670;&#160;</a></span>computeSecondDeriv()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -350,13 +367,13 @@ Protected Attributes</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
           <td class="paramname"><em>a_dir</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
           <td class="paramname"><em>a_coarVar</em>&#160;</td>
         </tr>
         <tr>
@@ -382,11 +399,12 @@ Protected Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Computed second deriv </dd></dl>
 
 </div>
 </div>
-<a id="abf35af817722f9dc88c17c8a669003b4" name="abf35af817722f9dc88c17c8a669003b4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abf35af817722f9dc88c17c8a669003b4">&#9670;&#160;</a></span>define()</h2>
+<a id="a7310fe46025888ca0415d3c78ce59584" name="a7310fe46025888ca0415d3c78ce59584"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7310fe46025888ca0415d3c78ce59584">&#9670;&#160;</a></span>define()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -421,13 +439,13 @@ Protected Attributes</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
           <td class="paramname"><em>a_refRat</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
           <td class="paramname"><em>a_ignoreDir</em>&#160;</td>
         </tr>
         <tr>
@@ -514,8 +532,8 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="aa3f0391701de779a497f6846f9d5c851" name="aa3f0391701de779a497f6846f9d5c851"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa3f0391701de779a497f6846f9d5c851">&#9670;&#160;</a></span>getFirstDerivStencil()</h2>
+<a id="ad26e27a350e3ed9deea19c92f86a0f29" name="ad26e27a350e3ed9deea19c92f86a0f29"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad26e27a350e3ed9deea19c92f86a0f29">&#9670;&#160;</a></span>getFirstDerivStencil()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -532,7 +550,7 @@ Protected Attributes</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
           <td class="paramname"><em>a_dir</em>&#160;</td>
         </tr>
         <tr>
@@ -556,6 +574,7 @@ Protected Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>First deriv stencil </dd></dl>
 
 </div>
 </div>
@@ -591,11 +610,12 @@ Protected Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Mixed deriv stencil </dd></dl>
 
 </div>
 </div>
-<a id="a64f21a10d9fa1ea5984cd42f5dff46a5" name="a64f21a10d9fa1ea5984cd42f5dff46a5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a64f21a10d9fa1ea5984cd42f5dff46a5">&#9670;&#160;</a></span>getSecondDerivStencil()</h2>
+<a id="a7b48bd5bc2d39acf68b41d31334dd542" name="a7b48bd5bc2d39acf68b41d31334dd542"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7b48bd5bc2d39acf68b41d31334dd542">&#9670;&#160;</a></span>getSecondDerivStencil()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -612,7 +632,7 @@ Protected Attributes</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
           <td class="paramname"><em>a_dir</em>&#160;</td>
         </tr>
         <tr>
@@ -638,6 +658,36 @@ Protected Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Second deriv stencil </dd></dl>
+
+</div>
+</div>
+<a id="a9f645376e4fdb01e598953d1f4ca52c9" name="a9f645376e4fdb01e598953d1f4ca52c9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9f645376e4fdb01e598953d1f4ca52c9">&#9670;&#160;</a></span>operator=()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classCoarseInterpQuadCF.html">CoarseInterpQuadCF</a> &amp; CoarseInterpQuadCF::operator= </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classCoarseInterpQuadCF.html">CoarseInterpQuadCF</a> &amp;&amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">default</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Move assignment. </p>
+<dl class="section return"><dt>Returns</dt><dd>Reference to this object. </dd></dl>
 
 </div>
 </div>

@@ -88,48 +88,62 @@ $(document).ready(function() { init_codefold(0); });
   <div class="headertitle"><div class="title">CD_RodDielectric.H</div></div>
 </div><!--header-->
 <div class="contents">
-<a href="CD__RodDielectric_8H.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* chombo-discharge</span></div>
-<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright © 2021 SINTEF Energy Research.</span></div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.</span></div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> */</span></div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span> </div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#ifndef CD_RodDielectric_H</span></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#define CD_RodDielectric_H</span></div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment">// Our includes</span></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#include &lt;<a class="code" href="CD__ComputationalGeometry_8H.html">CD_ComputationalGeometry.H</a>&gt;</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &lt;CD_NamespaceHeader.H&gt;</span></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
-<div class="foldopen" id="foldopen00022" data-start="{" data-end="};">
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno"><a class="line" href="classRodDielectric.html">   22</a></span><span class="keyword">class </span><a class="code hl_class" href="classRodDielectric.html">RodDielectric</a> : <span class="keyword">public</span> <a class="code hl_class" href="classComputationalGeometry.html">ComputationalGeometry</a></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>{</div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="keyword">public</span>:</div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>  <a class="code hl_class" href="classRodDielectric.html">RodDielectric</a>();</div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>  <a class="code hl_class" href="classRodDielectric.html">~RodDielectric</a>();</div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="keyword">protected</span>:</div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>  <span class="keywordtype">void</span></div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>  defineElectrode();</div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>  <span class="keywordtype">void</span></div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>  defineInsulator();</div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>  RefCountedPtr&lt;BaseIF&gt;</div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>  getBox();</div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>  RefCountedPtr&lt;BaseIF&gt;</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>  getPlane();</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>  RefCountedPtr&lt;BaseIF&gt;</div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>  getSphere();</div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>  RefCountedPtr&lt;BaseIF&gt;</div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>  getPerlinBox();</div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>};</div>
+<a href="CD__RodDielectric_8H.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * SPDX-License-Identifier: GPL-3.0-or-later</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span> </div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#ifndef CD_RODDIELECTRIC_H</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#define CD_RODDIELECTRIC_H</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment">// Our includes</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &lt;<a class="code" href="CD__ComputationalGeometry_8H.html">CD_ComputationalGeometry.H</a>&gt;</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#include &lt;CD_NamespaceHeader.H&gt;</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
+<div class="foldopen" id="foldopen00023" data-start="{" data-end="};">
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno"><a class="line" href="classRodDielectric.html">   23</a></span><span class="keyword">class </span><a class="code hl_class" href="classRodDielectric.html">RodDielectric</a> : <span class="keyword">public</span> <a class="code hl_class" href="classComputationalGeometry.html">ComputationalGeometry</a></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>{</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>  <a class="code hl_function" href="classRodDielectric.html#a65e7968272a3f8e23cfd06560d203e1a">RodDielectric</a>();</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="classRodDielectric.html#a46a6c100942be9e402bffab1289ac828">   34</a></span>  <a class="code hl_function" href="classRodDielectric.html#a46a6c100942be9e402bffab1289ac828">~RodDielectric</a>();</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="keyword">protected</span>:</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>  <span class="keywordtype">void</span></div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>  <a class="code hl_function" href="classRodDielectric.html#adee57e301deb6dece64cd975bea52423">defineElectrode</a>();</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>  <span class="keywordtype">void</span></div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>  <a class="code hl_function" href="classRodDielectric.html#ab2b275f455be89956ee2456c7b24398b">defineInsulator</a>();</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>  <span class="keyword">static</span> RefCountedPtr&lt;BaseIF&gt;</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>  <a class="code hl_function" href="classRodDielectric.html#aa2b840d3cdcfd2b094a27a8cda646a5a">getBox</a>();</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>  <span class="keyword">static</span> RefCountedPtr&lt;BaseIF&gt;</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>  <a class="code hl_function" href="classRodDielectric.html#a4b1692aa5505072fcb53a62a41f63a7a">getPlane</a>();</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span> </div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>  <span class="keyword">static</span> RefCountedPtr&lt;BaseIF&gt;</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>  <a class="code hl_function" href="classRodDielectric.html#af872f3fcbe592cb559d3e06a6f12ca09">getSphere</a>();</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span> </div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>  <span class="keyword">static</span> RefCountedPtr&lt;BaseIF&gt;</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>  <a class="code hl_function" href="classRodDielectric.html#a8807f53fa2148eaf533d367dd61d0ee7">getPerlinBox</a>();</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>};</div>
 </div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span> </div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span><span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span> </div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aCD__ComputationalGeometry_8H_html"><div class="ttname"><a href="CD__ComputationalGeometry_8H.html">CD_ComputationalGeometry.H</a></div><div class="ttdoc">Declaration of base class for defining geometries.</div></div>
-<div class="ttc" id="aclassComputationalGeometry_html"><div class="ttname"><a href="classComputationalGeometry.html">ComputationalGeometry</a></div><div class="ttdoc">Abstract base class for geometries.</div><div class="ttdef"><b>Definition</b> CD_ComputationalGeometry.H:36</div></div>
-<div class="ttc" id="aclassRodDielectric_html"><div class="ttname"><a href="classRodDielectric.html">RodDielectric</a></div><div class="ttdoc">Class that defines an electrode rod and a dielectric (some shapes supported)</div><div class="ttdef"><b>Definition</b> CD_RodDielectric.H:23</div></div>
+<div class="ttc" id="aclassComputationalGeometry_html"><div class="ttname"><a href="classComputationalGeometry.html">ComputationalGeometry</a></div><div class="ttdoc">Abstract base class for geometries.</div><div class="ttdef"><b>Definition</b> CD_ComputationalGeometry.H:37</div></div>
+<div class="ttc" id="aclassRodDielectric_html"><div class="ttname"><a href="classRodDielectric.html">RodDielectric</a></div><div class="ttdoc">Class that defines an electrode rod and a dielectric (some shapes supported).</div><div class="ttdef"><b>Definition</b> CD_RodDielectric.H:24</div></div>
+<div class="ttc" id="aclassRodDielectric_html_a46a6c100942be9e402bffab1289ac828"><div class="ttname"><a href="classRodDielectric.html#a46a6c100942be9e402bffab1289ac828">RodDielectric::~RodDielectric</a></div><div class="ttdeci">~RodDielectric()</div><div class="ttdoc">Destructor.</div></div>
+<div class="ttc" id="aclassRodDielectric_html_a4b1692aa5505072fcb53a62a41f63a7a"><div class="ttname"><a href="classRodDielectric.html#a4b1692aa5505072fcb53a62a41f63a7a">RodDielectric::getPlane</a></div><div class="ttdeci">static RefCountedPtr&lt; BaseIF &gt; getPlane()</div><div class="ttdoc">Get a plane implicit function.</div><div class="ttdef"><b>Definition</b> CD_RodDielectric.cpp:124</div></div>
+<div class="ttc" id="aclassRodDielectric_html_a65e7968272a3f8e23cfd06560d203e1a"><div class="ttname"><a href="classRodDielectric.html#a65e7968272a3f8e23cfd06560d203e1a">RodDielectric::RodDielectric</a></div><div class="ttdeci">RodDielectric()</div><div class="ttdoc">Constructor. Defines the geometry.</div><div class="ttdef"><b>Definition</b> CD_RodDielectric.cpp:26</div></div>
+<div class="ttc" id="aclassRodDielectric_html_a8807f53fa2148eaf533d367dd61d0ee7"><div class="ttname"><a href="classRodDielectric.html#a8807f53fa2148eaf533d367dd61d0ee7">RodDielectric::getPerlinBox</a></div><div class="ttdeci">static RefCountedPtr&lt; BaseIF &gt; getPerlinBox()</div><div class="ttdoc">Get a Perlin-noise-perturbed box implicit function.</div><div class="ttdef"><b>Definition</b> CD_RodDielectric.cpp:156</div></div>
+<div class="ttc" id="aclassRodDielectric_html_aa2b840d3cdcfd2b094a27a8cda646a5a"><div class="ttname"><a href="classRodDielectric.html#aa2b840d3cdcfd2b094a27a8cda646a5a">RodDielectric::getBox</a></div><div class="ttdeci">static RefCountedPtr&lt; BaseIF &gt; getBox()</div><div class="ttdoc">Get an axis-aligned box implicit function.</div><div class="ttdef"><b>Definition</b> CD_RodDielectric.cpp:106</div></div>
+<div class="ttc" id="aclassRodDielectric_html_ab2b275f455be89956ee2456c7b24398b"><div class="ttname"><a href="classRodDielectric.html#ab2b275f455be89956ee2456c7b24398b">RodDielectric::defineInsulator</a></div><div class="ttdeci">void defineInsulator()</div><div class="ttdoc">Define the insulator geometry.</div><div class="ttdef"><b>Definition</b> CD_RodDielectric.cpp:75</div></div>
+<div class="ttc" id="aclassRodDielectric_html_adee57e301deb6dece64cd975bea52423"><div class="ttname"><a href="classRodDielectric.html#adee57e301deb6dece64cd975bea52423">RodDielectric::defineElectrode</a></div><div class="ttdeci">void defineElectrode()</div><div class="ttdoc">Define the electrode geometry.</div><div class="ttdef"><b>Definition</b> CD_RodDielectric.cpp:53</div></div>
+<div class="ttc" id="aclassRodDielectric_html_af872f3fcbe592cb559d3e06a6f12ca09"><div class="ttname"><a href="classRodDielectric.html#af872f3fcbe592cb559d3e06a6f12ca09">RodDielectric::getSphere</a></div><div class="ttdeci">static RefCountedPtr&lt; BaseIF &gt; getSphere()</div><div class="ttdoc">Get a sphere implicit function.</div><div class="ttdef"><b>Definition</b> CD_RodDielectric.cpp:140</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

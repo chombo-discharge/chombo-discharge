@@ -110,7 +110,7 @@ Public Member Functions</h2></td></tr>
 &#160;</td><td class="memItemRight" valign="bottom"><b>ItoIterator</b> ()=<a class="el" href="classTracerParticleSolver.html">delete</a></td></tr>
 <tr class="memdesc:ad03c4941ebe7eae0bfa93d43a5a4e87e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed constructor &ndash; use the full constructor. <br /></td></tr>
 <tr class="separator:ad03c4941ebe7eae0bfa93d43a5a4e87e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0fd6ade37290c69267d3193c41a8ad69" id="r_a0fd6ade37290c69267d3193c41a8ad69"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoIterator.html#a0fd6ade37290c69267d3193c41a8ad69">ItoIterator</a> (<a class="el" href="classItoLayout.html">ItoLayout</a>&lt; T &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_layout</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classItoIterator.html#afb0a904899fd33c81278a80cd71cddf3">SpeciesIteration</a> <a class="el" href="classTracerParticleSolver.html">a_mode</a>=SpeciesIteration::All)</td></tr>
+<tr class="memitem:a0fd6ade37290c69267d3193c41a8ad69" id="r_a0fd6ade37290c69267d3193c41a8ad69"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoIterator.html#a0fd6ade37290c69267d3193c41a8ad69">ItoIterator</a> (<a class="el" href="classItoLayout.html">ItoLayout</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_layout</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classItoIterator.html#afb0a904899fd33c81278a80cd71cddf3">SpeciesIteration</a> <a class="el" href="classTracerParticleSolver.html">a_mode</a>=SpeciesIteration::All)</td></tr>
 <tr class="memdesc:a0fd6ade37290c69267d3193c41a8ad69"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor. Allows iteration through all solvers in the layout and restriction to a specific subset of solvers.  <br /></td></tr>
 <tr class="separator:a0fd6ade37290c69267d3193c41a8ad69"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a42e44cf74f5d155929285e7ba36c555c" id="r_a42e44cf74f5d155929285e7ba36c555c"><td class="memItemLeft" align="right" valign="top"><a id="a42e44cf74f5d155929285e7ba36c555c" name="a42e44cf74f5d155929285e7ba36c555c"></a>
@@ -134,13 +134,11 @@ Public Member Functions</h2></td></tr>
 <a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>operator++</b> ()</td></tr>
 <tr class="memdesc:a0c8abe7947e894689e63d7f501e42824"><td class="mdescLeft">&#160;</td><td class="mdescRight">Increment. This is different for different iteration modes. <br /></td></tr>
 <tr class="separator:a0c8abe7947e894689e63d7f501e42824"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2e6d2f502e737f9d302a95d3e21baf81" id="r_a2e6d2f502e737f9d302a95d3e21baf81"><td class="memItemLeft" align="right" valign="top"><a id="a2e6d2f502e737f9d302a95d3e21baf81" name="a2e6d2f502e737f9d302a95d3e21baf81"></a>
-<a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; T &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator()</b> ()</td></tr>
-<tr class="memdesc:a2e6d2f502e737f9d302a95d3e21baf81"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get current solver. <br /></td></tr>
+<tr class="memitem:a2e6d2f502e737f9d302a95d3e21baf81" id="r_a2e6d2f502e737f9d302a95d3e21baf81"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoIterator.html#a2e6d2f502e737f9d302a95d3e21baf81">operator()</a> ()</td></tr>
+<tr class="memdesc:a2e6d2f502e737f9d302a95d3e21baf81"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get current solver.  <br /></td></tr>
 <tr class="separator:a2e6d2f502e737f9d302a95d3e21baf81"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7b3db8ac7ec499439a2130aa3f4a7bbd" id="r_a7b3db8ac7ec499439a2130aa3f4a7bbd"><td class="memItemLeft" align="right" valign="top"><a id="a7b3db8ac7ec499439a2130aa3f4a7bbd" name="a7b3db8ac7ec499439a2130aa3f4a7bbd"></a>
-<a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classItoSpecies.html">ItoSpecies</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getSpecies</b> ()</td></tr>
-<tr class="memdesc:a7b3db8ac7ec499439a2130aa3f4a7bbd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get current species. <br /></td></tr>
+<tr class="memitem:a7b3db8ac7ec499439a2130aa3f4a7bbd" id="r_a7b3db8ac7ec499439a2130aa3f4a7bbd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classItoSpecies.html">ItoSpecies</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoIterator.html#a7b3db8ac7ec499439a2130aa3f4a7bbd">getSpecies</a> ()</td></tr>
+<tr class="memdesc:a7b3db8ac7ec499439a2130aa3f4a7bbd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get current species.  <br /></td></tr>
 <tr class="separator:a7b3db8ac7ec499439a2130aa3f4a7bbd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
@@ -162,7 +160,7 @@ Protected Attributes</h2></td></tr>
 <tr class="memdesc:a9307e3efcdd085fab30fc38b466ad59c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Defined or not. <br /></td></tr>
 <tr class="separator:a9307e3efcdd085fab30fc38b466ad59c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a960ee69f18c3f6fa1237b7e4d7acb8ed" id="r_a960ee69f18c3f6fa1237b7e4d7acb8ed"><td class="memItemLeft" align="right" valign="top"><a id="a960ee69f18c3f6fa1237b7e4d7acb8ed" name="a960ee69f18c3f6fa1237b7e4d7acb8ed"></a>
-<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; T &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_solvers</b></td></tr>
+<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_solvers</b></td></tr>
 <tr class="memdesc:a960ee69f18c3f6fa1237b7e4d7acb8ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Solvers. <br /></td></tr>
 <tr class="separator:a960ee69f18c3f6fa1237b7e4d7acb8ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a85d9627771f7246463439493e77e132b" id="r_a85d9627771f7246463439493e77e132b"><td class="memItemLeft" align="right" valign="top"><a id="a85d9627771f7246463439493e77e132b" name="a85d9627771f7246463439493e77e132b"></a>
@@ -171,7 +169,7 @@ Protected Attributes</h2></td></tr>
 <tr class="separator:a85d9627771f7246463439493e77e132b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> T&gt;<br />
+<div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">T</a>&gt;<br />
 class ItoIterator&lt; T &gt;</div><p>"Iterator" class for going through solvers in an <a class="el" href="classItoLayout.html" title="Class for holding a set of ItoSolvers.">ItoLayout</a>. </p>
 <p>This class does not have any fundamental usefulness &ndash; it simply cuts down on typing if one wants to iterate over a full set or a subset of solvers in an <a class="el" href="classItoLayout.html" title="Class for holding a set of ItoSolvers.">ItoLayout</a>. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
@@ -181,12 +179,12 @@ class ItoIterator&lt; T &gt;</div><p>"Iterator" class for going through solvers 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> T &gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">T</a> &gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classItoIterator.html">ItoIterator</a>&lt; T &gt;<a class="el" href="classItoIterator.html">::ItoIterator</a> </td>
+          <td class="memname"><a class="el" href="classItoIterator.html">ItoIterator</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt;<a class="el" href="classItoIterator.html">::ItoIterator</a> </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classItoLayout.html">ItoLayout</a>&lt; T &gt; &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classItoLayout.html">ItoLayout</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_layout</em>, </td>
         </tr>
         <tr>
@@ -207,7 +205,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> T &gt;
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_layout</td><td>The layout to iterate through </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_iterationMode</td><td>Iteration mode, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">e.g</a>. all solvers, only charged species etc. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_mode</td><td>Mode </td></tr>
   </table>
   </dd>
 </dl>
@@ -221,13 +219,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> T &gt;
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> T &gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">T</a> &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classItoIterator.html">ItoIterator</a>&lt; T &gt;::getNumberOfSolvers </td>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classItoIterator.html">ItoIterator</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt;::getNumberOfSolvers </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -245,19 +243,49 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> T &gt;
 
 </div>
 </div>
+<a id="a7b3db8ac7ec499439a2130aa3f4a7bbd" name="a7b3db8ac7ec499439a2130aa3f4a7bbd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7b3db8ac7ec499439a2130aa3f4a7bbd">&#9670;&#160;</a></span>getSpecies()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">T</a> &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classItoSpecies.html">ItoSpecies</a> &gt; &amp; <a class="el" href="classItoIterator.html">ItoIterator</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt;::getSpecies </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get current species. </p>
+<dl class="section return"><dt>Returns</dt><dd>Species </dd></dl>
+
+</div>
+</div>
 <a id="a6a55c12f34f03954b764b3f19750a02e" name="a6a55c12f34f03954b764b3f19750a02e"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a6a55c12f34f03954b764b3f19750a02e">&#9670;&#160;</a></span>index()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> T &gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">T</a> &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classItoIterator.html">ItoIterator</a>&lt; T &gt;::index </td>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classItoIterator.html">ItoIterator</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt;::index </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -281,13 +309,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> T &gt;
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> T &gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">T</a> &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classItoIterator.html">ItoIterator</a>&lt; T &gt;::ok </td>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classItoIterator.html">ItoIterator</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt;::ok </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -302,6 +330,36 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> T &gt;
 
 <p>Ok or not. </p>
 <dl class="section return"><dt>Returns</dt><dd>Returns true if there is a next solver and false otherwise. </dd></dl>
+
+</div>
+</div>
+<a id="a2e6d2f502e737f9d302a95d3e21baf81" name="a2e6d2f502e737f9d302a95d3e21baf81"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2e6d2f502e737f9d302a95d3e21baf81">&#9670;&#160;</a></span>operator()()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">T</a> &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt; &amp; <a class="el" href="classItoIterator.html">ItoIterator</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt;<a class="el" href="classTracerParticleSolver.html">::operator</a>() </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get current solver. </p>
+<dl class="section return"><dt>Returns</dt><dd>Return value </dd></dl>
 
 </div>
 </div>

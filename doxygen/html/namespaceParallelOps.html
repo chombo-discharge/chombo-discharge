@@ -91,9 +91,9 @@ Functions</h2></td></tr>
 <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>barrier</b> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:aed6a3c22b5ec18db26ece6fecf1ebf54"><td class="mdescLeft">&#160;</td><td class="mdescRight">MPI barrier. <br /></td></tr>
 <tr class="separator:aed6a3c22b5ec18db26ece6fecf1ebf54"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afebdfde90df1a5ce16df98e383b732aa" id="r_afebdfde90df1a5ce16df98e383b732aa"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt; <a class="el" href="classTracerParticleSolver.html">int</a>, <a class="el" href="classTracerParticleSolver.html">int</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#afebdfde90df1a5ce16df98e383b732aa">partition</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_N</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:afebdfde90df1a5ce16df98e383b732aa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Partition the input number such that each MPI rank gets an equal chunk. We assume that N is the length of some container whose indexing starts at 0.  <br /></td></tr>
-<tr class="separator:afebdfde90df1a5ce16df98e383b732aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad88e3c8d09c0494b6256130ca40c7fe5" id="r_ad88e3c8d09c0494b6256130ca40c7fe5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt; <a class="el" href="classTracerParticleSolver.html">int</a>, <a class="el" href="classTracerParticleSolver.html">int</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#ad88e3c8d09c0494b6256130ca40c7fe5">partition</a> (<a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_N</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:ad88e3c8d09c0494b6256130ca40c7fe5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Partition the input number such that each MPI rank gets an equal chunk. We assume that N is the length of some container whose indexing starts at 0.  <br /></td></tr>
+<tr class="separator:ad88e3c8d09c0494b6256130ca40c7fe5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac16673e77130f572bc01154b59829fd2" id="r_ac16673e77130f572bc01154b59829fd2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#ac16673e77130f572bc01154b59829fd2">min</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_input</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:ac16673e77130f572bc01154b59829fd2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the minimum of the input, reduced over MPI ranks (in the Chombo communicator)  <br /></td></tr>
 <tr class="separator:ac16673e77130f572bc01154b59829fd2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -198,6 +198,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Return value </dd></dl>
 
 </div>
 </div>
@@ -232,6 +233,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Return value </dd></dl>
 
 </div>
 </div>
@@ -266,6 +268,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Return value </dd></dl>
 
 </div>
 </div>
@@ -300,6 +303,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Global maximum </dd></dl>
 
 </div>
 </div>
@@ -334,6 +338,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Global maximum </dd></dl>
 
 </div>
 </div>
@@ -368,6 +373,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Global maximum </dd></dl>
 
 </div>
 </div>
@@ -406,7 +412,14 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Get the maximum value and the position corresponding to the maximum value of a_val. </p>
-<p>This returns the value a_val and position a_pos such that they correspond to the input variables for the processer which held the largest value a_val. </p>
+<p>This returns the value a_val and position a_pos such that they correspond to the input variables for the processor which held the largest value a_val. </p><dl class="section return"><dt>Returns</dt><dd>Global maximum </dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_val</td><td>Description </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_pos</td><td>Description </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -441,6 +454,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Return value </dd></dl>
 
 </div>
 </div>
@@ -475,6 +489,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Global minimum </dd></dl>
 
 </div>
 </div>
@@ -509,6 +524,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Global minimum </dd></dl>
 
 </div>
 </div>
@@ -543,6 +559,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Global minimum </dd></dl>
 
 </div>
 </div>
@@ -581,7 +598,14 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Get the minimum value and the position corresponding to the minimum value of a_val. </p>
-<p>This returns the value a_val and position a_pos such that they correspond to the input variables for the processer which held the smallest value a_val. </p>
+<p>This returns the value a_val and position a_pos such that they correspond to the input variables for the processor which held the smallest value a_val. </p><dl class="section return"><dt>Returns</dt><dd>Global minimum </dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_val</td><td>Description </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_pos</td><td>Description </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -616,11 +640,12 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Return value </dd></dl>
 
 </div>
 </div>
-<a id="afebdfde90df1a5ce16df98e383b732aa" name="afebdfde90df1a5ce16df98e383b732aa"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afebdfde90df1a5ce16df98e383b732aa">&#9670;&#160;</a></span>partition()</h2>
+<a id="ad88e3c8d09c0494b6256130ca40c7fe5" name="ad88e3c8d09c0494b6256130ca40c7fe5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad88e3c8d09c0494b6256130ca40c7fe5">&#9670;&#160;</a></span>partition()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -631,7 +656,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt; <a class="el" href="classTracerParticleSolver.html">int</a>, <a class="el" href="classTracerParticleSolver.html">int</a> &gt; ParallelOps::partition </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
           <td class="paramname"><em>a_N</em></td><td>)</td>
           <td></td>
         </tr>
@@ -650,6 +675,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Return value </dd></dl>
 
 </div>
 </div>
@@ -684,6 +710,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Return value </dd></dl>
 
 </div>
 </div>
@@ -718,6 +745,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Global sum </dd></dl>
 
 </div>
 </div>
@@ -752,6 +780,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Global sum </dd></dl>
 
 </div>
 </div>
@@ -786,6 +815,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Global sum </dd></dl>
 
 </div>
 </div>
@@ -820,6 +850,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Global sum </dd></dl>
 
 </div>
 </div>
@@ -854,6 +885,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Global sum </dd></dl>
 
 </div>
 </div>

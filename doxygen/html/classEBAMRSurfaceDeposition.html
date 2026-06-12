@@ -89,18 +89,6 @@ $(function() {
  <a href="classEBAMRSurfaceDeposition.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="CD__EBAMRSurfaceDeposition_8H_source.html">CD_EBAMRSurfaceDeposition.H</a>&gt;</code></p>
-<div class="dynheader">
-Collaboration diagram for EBAMRSurfaceDeposition:</div>
-<div class="dyncontent">
-<div class="center"><img src="classEBAMRSurfaceDeposition__coll__graph.png" border="0" usemap="#aEBAMRSurfaceDeposition_coll__map" alt="Collaboration graph"/></div>
-<map name="aEBAMRSurfaceDeposition_coll__map" id="aEBAMRSurfaceDeposition_coll__map">
-<area shape="rect" title="class for handling surface deposition of particles with EB and AMR." alt="" coords="5,225,193,251"/>
-<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="7,93,191,133"/>
-<area shape="poly" title=" " alt="" coords="102,147,102,225,97,225,97,147"/>
-<area shape="rect" href="classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="30,5,169,31"/>
-<area shape="poly" title=" " alt="" coords="102,44,102,93,97,93,97,44"/>
-</map>
-<center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
@@ -119,7 +107,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:aa58649d909e05dd7ce9b52b7f4d0026d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define function. Puts objects in usable state.  <br /></td></tr>
 <tr class="separator:aa58649d909e05dd7ce9b52b7f4d0026d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3c0de2e620484866102b0a4ed3a59247" id="r_a3c0de2e620484866102b0a4ed3a59247"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">Ret</a> , <a class="el" href="classTracerParticleSolver.html">Ret</a>(P::*)() <a class="el" href="classTracerParticleSolver.html">const</a> MemberFunc&gt; </td></tr>
-<tr class="memitem:a3c0de2e620484866102b0a4ed3a59247"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classEBAMRSurfaceDeposition.html#a3c0de2e620484866102b0a4ed3a59247">deposit</a> (<a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_meshData</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_particles</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a3c0de2e620484866102b0a4ed3a59247"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classEBAMRSurfaceDeposition.html#a3c0de2e620484866102b0a4ed3a59247">deposit</a> (<a class="el" href="classTracerParticleSolver.html">EBAMRIVData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_meshData</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_particles</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:a3c0de2e620484866102b0a4ed3a59247"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposition function which deposites the particles on the surface.  <br /></td></tr>
 <tr class="separator:a3c0de2e620484866102b0a4ed3a59247"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -206,15 +194,15 @@ Protected Attributes</h2></td></tr>
 <tr class="memitem:a9864594509a62a34f60fa434e1af9725" id="r_a9864594509a62a34f60fa434e1af9725"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LayoutData</a>&lt; <a class="el" href="classTracerParticleSolver.html">BaseIVFAB</a>&lt; <a class="el" href="classTracerParticleSolver.html">VoFStencil</a> &gt; &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRSurfaceDeposition.html#a9864594509a62a34f60fa434e1af9725">m_fineToCoarseStencils</a></td></tr>
 <tr class="memdesc:a9864594509a62a34f60fa434e1af9725"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stencils for conservatively coarsening fine-grid data (in ghost cells) to the coarse grid.  <br /></td></tr>
 <tr class="separator:a9864594509a62a34f60fa434e1af9725"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adae39b2fb0496ed244f7ebe3e3a88007" id="r_adae39b2fb0496ed244f7ebe3e3a88007"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classEBAMRData.html">EBAMRIVData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRSurfaceDeposition.html#adae39b2fb0496ed244f7ebe3e3a88007">m_data</a></td></tr>
+<tr class="memitem:adae39b2fb0496ed244f7ebe3e3a88007" id="r_adae39b2fb0496ed244f7ebe3e3a88007"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">EBAMRIVData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRSurfaceDeposition.html#adae39b2fb0496ed244f7ebe3e3a88007">m_data</a></td></tr>
 <tr class="memdesc:adae39b2fb0496ed244f7ebe3e3a88007"><td class="mdescLeft">&#160;</td><td class="mdescRight">Data on each level.  <br /></td></tr>
 <tr class="separator:adae39b2fb0496ed244f7ebe3e3a88007"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aded3c9758c6df1a1d840dbf5839a5b75" id="r_aded3c9758c6df1a1d840dbf5839a5b75"><td class="memItemLeft" align="right" valign="top"><a id="aded3c9758c6df1a1d840dbf5839a5b75" name="aded3c9758c6df1a1d840dbf5839a5b75"></a>
-<a class="el" href="classEBAMRData.html">EBAMRIVData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_refinedCoarData</b></td></tr>
+<a class="el" href="classTracerParticleSolver.html">EBAMRIVData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_refinedCoarData</b></td></tr>
 <tr class="memdesc:aded3c9758c6df1a1d840dbf5839a5b75"><td class="mdescLeft">&#160;</td><td class="mdescRight">Data defined on a refinement of the coarse grid. <br /></td></tr>
 <tr class="separator:aded3c9758c6df1a1d840dbf5839a5b75"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a22257248be665897fd9c2e1339e267a1" id="r_a22257248be665897fd9c2e1339e267a1"><td class="memItemLeft" align="right" valign="top"><a id="a22257248be665897fd9c2e1339e267a1" name="a22257248be665897fd9c2e1339e267a1"></a>
-<a class="el" href="classEBAMRData.html">EBAMRIVData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_coarsenedFineData</b></td></tr>
+<a class="el" href="classTracerParticleSolver.html">EBAMRIVData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_coarsenedFineData</b></td></tr>
 <tr class="memdesc:a22257248be665897fd9c2e1339e267a1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsening of the fine-grid data. <br /></td></tr>
 <tr class="separator:a22257248be665897fd9c2e1339e267a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1d6c5b28ee3f5b63ce7fdf30bfdd993a" id="r_a1d6c5b28ee3f5b63ce7fdf30bfdd993a"><td class="memItemLeft" align="right" valign="top"><a id="a1d6c5b28ee3f5b63ce7fdf30bfdd993a" name="a1d6c5b28ee3f5b63ce7fdf30bfdd993a"></a>
@@ -316,6 +304,7 @@ Protected Attributes</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Grid resolutions. @πaram[in] a_probLo Lower-left corner of physical domain. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_finestLevel</td><td>Finest grid level. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_radius</td><td>Deposition radius </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Description </td></tr>
   </table>
   </dd>
 </dl>
@@ -375,12 +364,7 @@ Protected Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Add the invalid coarse data (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">i.e</a>., underneath the fine grid) to the fine level. </p>
-<p>This does conservative interpolation to the fine grid. This all takes place on our buffer storage. </p><dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_meshData</td><td>EB surface data </td></tr>
-  </table>
-  </dd>
-</dl>
+<p>This does conservative interpolation to the fine grid. This all takes place on our buffer storage. </p>
 
 </div>
 </div>
@@ -464,6 +448,7 @@ Protected Attributes</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Grid resolutions. @πaram[in] a_probLo Lower-left corner of physical domain. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_finestLevel</td><td>Finest grid level. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_radius</td><td>Deposition radius </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Description </td></tr>
   </table>
   </dd>
 </dl>
@@ -484,7 +469,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
         <tr>
           <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> EBAMRSurfaceDeposition::deposit </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">EBAMRIVData</a> &amp;&#160;</td>
           <td class="paramname"><em>a_meshData</em>, </td>
         </tr>
         <tr>
@@ -579,7 +564,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classEBAMRData.html">EBAMRIVData</a> EBAMRSurfaceDeposition::m_data</td>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">EBAMRIVData</a> EBAMRSurfaceDeposition::m_data</td>
         </tr>
       </table>
   </td>

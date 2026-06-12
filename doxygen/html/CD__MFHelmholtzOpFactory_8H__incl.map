@@ -114,7 +114,7 @@
 <area shape="poly" id="edge89_Node000032_Node000049" title=" " alt="" coords="2894,109,2707,111,2474,118,2357,126,2249,136,2157,151,2089,169,2063,182,2040,198,2001,232,1998,228,2036,194,2061,177,2087,164,2156,145,2248,131,2356,120,2473,113,2707,105,2894,104"/>
 <area shape="rect" id="Node000060" href="$CD__EBHelmholtzOp_8H.html" title="Declaration of Helmholtz multigrid operators." alt="" coords="2967,167,3131,192"/>
 <area shape="poly" id="edge100_Node000032_Node000060" title=" " alt="" coords="2991,117,3030,155,3026,159,2987,121"/>
-<area shape="rect" id="Node000078" href="$CD__MFHelmholtzDomainBCFactory_8H_source.html" title=" " alt="" coords="2762,240,3025,265"/>
+<area shape="rect" id="Node000078" href="$CD__MFHelmholtzDomainBCFactory_8H.html" title="Declaration of a factory class for making boundary condition objects for MFHelmholtzOp." alt="" coords="2762,240,3025,265"/>
 <area shape="poly" id="edge117_Node000032_Node000078" title=" " alt="" coords="2973,120,2909,229,2905,227,2968,118"/>
 <area shape="poly" id="edge121_Node000032_Node000079" title=" " alt="" coords="2894,118,2343,169,2343,163,2894,112"/>
 <area shape="poly" id="edge126_Node000032_Node000080" title=" " alt="" coords="2894,115,2044,169,2040,170,2039,164,2044,164,2893,110"/>
@@ -123,7 +123,7 @@
 <area shape="poly" id="edge63_Node000035_Node000009" title=" " alt="" coords="4223,268,4191,299,4143,341,4083,382,4050,400,4015,415,2693,470,2693,464,4014,409,4047,395,4080,378,4139,336,4187,295,4219,264"/>
 <area shape="poly" id="edge64_Node000035_Node000010" title=" " alt="" coords="4253,263,4273,278,4291,297,4302,318,4302,329,4297,340,4276,366,4254,383,4231,394,4207,401,4154,406,4090,415,4000,428,3881,439,3594,456,3299,467,3065,472,3064,467,3299,462,3594,451,3881,434,3999,423,4089,409,4153,401,4206,395,4229,389,4251,379,4272,362,4292,337,4297,328,4297,319,4287,300,4269,282,4250,268"/>
 <area shape="poly" id="edge57_Node000035_Node000033" title=" " alt="" coords="4210,268,3977,383,3974,378,4207,263"/>
-<area shape="rect" id="Node000036" href="$CD__EBMultigridInterpolator_8H.html" title="Declaration of a class that can interpolate more ghost cells near the coarse&#45;fine boundary near the E..." alt="" coords="3309,313,3521,339"/>
+<area shape="rect" id="Node000036" href="$CD__EBMultigridInterpolator_8H.html" title="Parent base class for multigrid interpolation." alt="" coords="3309,313,3521,339"/>
 <area shape="poly" id="edge58_Node000035_Node000036" title=" " alt="" coords="4124,267,4112,268,3535,316,3534,311,4112,263,4124,262"/>
 <area shape="poly" id="edge61_Node000036_Node000009" title=" " alt="" coords="3377,341,3248,377,3083,415,2876,446,2694,465,2693,460,2876,441,3082,409,3246,372,3376,336"/>
 <area shape="poly" id="edge62_Node000036_Node000010" title=" " alt="" coords="3416,339,3406,377,3396,397,3380,414,3357,427,3325,438,3244,454,3152,465,3065,471,3064,465,3152,460,3243,449,3324,433,3355,422,3377,410,3391,394,3401,375,3411,338"/>

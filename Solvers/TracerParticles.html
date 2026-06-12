@@ -172,7 +172,7 @@ Such particles are useful, for example, for numerical integration along field li
 <section id="tracerparticlesolver">
 <span id="chap-tracerparticlesolver"></span><h2>TracerParticleSolver<a class="headerlink" href="#tracerparticlesolver" title="Permalink to this heading"></a></h2>
 <p>The tracer particle solver is templated as</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm">  @brief Base class for a tracer particle solver. This solver can advance particles in a pre-defined velocity field.</span>
 <span class="cm">  @details The user can set the velocity field through public member functions. This class is templated so the user can </span>
 <span class="cm">  switch tracer particle implementations.</span>
@@ -206,7 +206,7 @@ However, we also define a plug-and-play particle class that meets these requirem
 <section id="tracerparticle">
 <span id="chap-tracerparticle"></span><h2>TracerParticle<a class="headerlink" href="#tracerparticle" title="Permalink to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">TracerParticle</span></code> type inherits from <a class="reference internal" href="../Source/Particles.html#chap-genericparticle"><span class="std std-ref">GenericParticle</span></a> particle class and is templated as</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm">  @brief A tracer particle class. This is templated for holding extra storage (useful for kernels). </span>
 <span class="cm">  @details The template parameters M and N determine extra storage allocated to the particle. M determines</span>
 <span class="cm">  the number of allocated scalars (Reals) and N determines the number of allocated vectors (RealVects). These</span>
@@ -218,28 +218,28 @@ However, we also define a plug-and-play particle class that meets these requirem
 </div>
 <p>The class also defines two more members; the weight and a particle velocity.
 These are accessible as</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm">  @brief Get the particle &quot;weight&quot;</span>
 <span class="cm">  @return m_weight</span>
 <span class="cm">*/</span>
 <span class="kr">inline</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span>
 <span class="nf">weight</span><span class="p">();</span>
 
-<span class="cm">/*!</span>
+<span class="cm">/**</span>
 <span class="cm">  @brief Get the particle &quot;weight&quot;</span>
 <span class="cm">  @return m_weight</span>
 <span class="cm">*/</span>
 <span class="kr">inline</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span>
 <span class="nf">weight</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 
-<span class="cm">/*!</span>
+<span class="cm">/**</span>
 <span class="cm">  @brief Get the particle velocity. </span>
 <span class="cm">  @return m_velocity</span>
 <span class="cm">*/</span>
 <span class="kr">inline</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span>
 <span class="nf">velocity</span><span class="p">();</span>
 
-<span class="cm">/*!</span>
+<span class="cm">/**</span>
 <span class="cm">  @brief Get the particle velocity.</span>
 <span class="cm">  @return m_velocity</span>
 <span class="cm">*/</span>
@@ -253,26 +253,26 @@ These data fields can be used by applications for, e.g., storing integration var
 <section id="initialization">
 <h2>Initialization<a class="headerlink" href="#initialization" title="Permalink to this heading"></a></h2>
 <p>To initialize the solver, one can use the full constructor</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
-<span class="cm">  @brief Full contructor</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
+<span class="cm">  @brief Full constructor</span>
 <span class="cm">  @param[in] a_amr      Handle to AmrMesh.</span>
 <span class="cm">  @param[in] a_compGeom Computational geometry. </span>
 <span class="cm">*/</span>
-<span class="n">TracerParticleSolver</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">AmrMesh</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_amr</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">ComputationalGeometry</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_compGeom</span><span class="p">);</span>
+<span class="n">TracerParticleSolver</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">AmrMesh</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_amr</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">ComputationalGeometry</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_compGeom</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
 <section id="getting-the-particles">
 <h2>Getting the particles<a class="headerlink" href="#getting-the-particles" title="Permalink to this heading"></a></h2>
 <p>To obtain the solver particles, simply call</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm">  @brief Get all particles.</span>
 <span class="cm">  @return m_particles</span>
 <span class="cm">*/</span>
 <span class="k">virtual</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span>
 <span class="n">getParticles</span><span class="p">();</span>
 
-<span class="cm">/*!</span>
+<span class="cm">/**</span>
 <span class="cm">  @brief Get all particles. Const version. </span>
 <span class="cm">  @return m_particles</span>
 <span class="cm">*/</span>
@@ -285,7 +285,7 @@ These data fields can be used by applications for, e.g., storing integration var
 <section id="setting-mathbf-v">
 <h2>Setting <span class="math notranslate nohighlight">\(\mathbf{v}\)</span><a class="headerlink" href="#setting-mathbf-v" title="Permalink to this heading"></a></h2>
 <p>To set the velocity field on the mesh, use</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm">  @brief Set the tracer particle velocity field.</span>
 <span class="cm">  @param[in] a_velocityField Velocity field.</span>
 <span class="cm">*/</span>
@@ -298,7 +298,7 @@ These data fields can be used by applications for, e.g., storing integration var
 <section id="interpolating-velocities">
 <h2>Interpolating velocities<a class="headerlink" href="#interpolating-velocities" title="Permalink to this heading"></a></h2>
 <p>To compute <span class="math notranslate nohighlight">\(\mathbf{V} = \mathbf{v}\left(\mathbf{X}\right)\)</span> for all particles that reside in the solver, use</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm">  @brief Interpolate particles velocities.</span>
 <span class="cm">*/</span>
 <span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
@@ -307,8 +307,9 @@ These data fields can be used by applications for, e.g., storing integration var
 </div>
 <p>This will interpolate the velocities to the particle positions using the user-defined interpolation method (see <a class="reference internal" href="#chap-tracerinputoptions"><span class="std std-ref">Input options</span></a>).</p>
 <p>If desirable, one can also interpolate a scalar field defined on the mesh onto the particle weight by calling</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
-<span class="cm">  @brief Interpolate a scalar field onto the particle weight</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
+<span class="cm">  @brief Interpolate a scalar field onto the particle weight.</span>
+<span class="cm">  @param[in] a_scalar Scalar field to interpolate from.</span>
 <span class="cm">*/</span>
 <span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="nf">interpolateWeight</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_scalar</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
@@ -320,7 +321,7 @@ See <a class="reference internal" href="../Source/Particles.html#chap-particleme
 <section id="deposit-particles">
 <h2>Deposit particles<a class="headerlink" href="#deposit-particles" title="Permalink to this heading"></a></h2>
 <p>To deposit the particles, call</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm">  @brief Deposit particle weight on mesh. </span>
 <span class="cm">  @param[out] a_phi Deposited weight. </span>
 <span class="cm">*/</span>

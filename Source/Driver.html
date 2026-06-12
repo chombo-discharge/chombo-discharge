@@ -163,7 +163,7 @@ The primary purpose of the <code class="docutils literal notranslate"><span clas
 <li><p>Coordinate HDF5 I/O operations.</p></li>
 </ol>
 <p>The constructor for this class is</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm">  @brief Full constructor. </span>
 <span class="cm">  @param[in] a_computationalGeometry Computational geometry. </span>
 <span class="cm">  @param[in] a_timeStepper           The time stepper</span>
@@ -329,7 +329,7 @@ Below, we include the current template options file for the <code class="docutil
 </span><span class="n">Driver</span><span class="o">.</span><span class="n">output_directory</span>             <span class="o">=</span> <span class="o">./</span>                  <span class="c1">## Output directory.</span>
 <span class="n">Driver</span><span class="o">.</span><span class="n">output_names</span>                 <span class="o">=</span> <span class="n">simulation</span>          <span class="c1">## Simulation output names.</span>
 <span class="hll"><span class="n">Driver</span><span class="o">.</span><span class="n">max_plot_depth</span>               <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>                  <span class="c1">## Restrict maximum plot depth (-1 =&gt; finest simulation level).</span>
-</span><span class="hll"><span class="n">Driver</span><span class="o">.</span><span class="n">max_chk_depth</span>                <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>                  <span class="c1">## Restrict chechkpoint depth (-1 =&gt; finest simulation level).</span>
+</span><span class="hll"><span class="n">Driver</span><span class="o">.</span><span class="n">max_chk_depth</span>                <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>                  <span class="c1">## Restrict checkpoint depth (-1 =&gt; finest simulation level).</span>
 </span><span class="hll"><span class="n">Driver</span><span class="o">.</span><span class="n">num_plot_ghost</span>               <span class="o">=</span> <span class="mi">1</span>                   <span class="c1">## Number of ghost cells to include in plots.</span>
 </span><span class="hll"><span class="n">Driver</span><span class="o">.</span><span class="n">plt_vars</span>                     <span class="o">=</span> <span class="n">levelset</span>            <span class="c1">## &#39;tags&#39;, &#39;mpi_rank&#39;, &#39;levelset&#39;, &#39;loads&#39;.</span>
 </span><span class="n">Driver</span><span class="o">.</span><span class="n">restart</span>                      <span class="o">=</span> <span class="mi">0</span>                   <span class="c1">## Restart step (less or equal to 0 implies fresh simulation).</span>

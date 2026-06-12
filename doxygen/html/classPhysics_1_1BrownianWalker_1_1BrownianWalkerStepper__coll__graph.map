@@ -1,9 +1,5 @@
 <map id="Physics::BrownianWalker::BrownianWalkerStepper" name="Physics::BrownianWalker::BrownianWalkerStepper">
-<area shape="rect" id="Node000001" title="Implementation of TimeStepper which advances an ItoSolver." alt="" coords="20,181,205,221"/>
-<area shape="rect" id="Node000002" href="$classTimeStepper.html" title="Base class for advancing equations." alt="" coords="5,93,111,119"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="74,129,104,180,99,183,69,132"/>
-<area shape="rect" id="Node000003" href="$classEBAMRData.html" title=" " alt="" coords="135,93,331,119"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="208,129,139,183,135,179,205,125"/>
-<area shape="rect" id="Node000004" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="163,5,302,31"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="235,45,235,93,230,93,230,45"/>
+<area shape="rect" id="Node000001" title="TimeStepper implementation for advancing Brownian walker particles." alt="" coords="5,79,191,119"/>
+<area shape="rect" id="Node000002" href="$classTimeStepper.html" title="Base class for advancing equations." alt="" coords="45,5,151,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="101,44,101,79,95,79,95,44"/>
 </map>

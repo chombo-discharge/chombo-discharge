@@ -1,5 +1,5 @@
 <map id="Source/ImplicitFunctions/CD_PerlinSphereSdf.H" name="Source/ImplicitFunctions/CD_PerlinSphereSdf.H">
-<area shape="rect" id="Node000001" title="Implementation of CD_PerlinSphereSdf.H." alt="" coords="221,5,402,45"/>
+<area shape="rect" id="Node000001" title="Declaration of noisy sphere." alt="" coords="221,5,402,45"/>
 <area shape="rect" id="Node000002" title=" " alt="" coords="5,167,84,192"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="250,48,197,68,143,96,101,126,67,158,64,154,98,122,141,91,195,64,248,43"/>
 <area shape="rect" id="Node000003" title=" " alt="" coords="399,93,490,119"/>

@@ -144,7 +144,7 @@ This graph shows which files directly or indirectly include this file:</div>
 <area shape="rect" href="CD__TracerParticle_8H.html" title="Declaration of a tracer particle class." alt="" coords="229,93,393,133"/>
 <area shape="poly" title=" " alt="" coords="305,59,306,93,300,93,299,59"/>
 <area shape="poly" title=" " alt="" coords="317,80,316,46,321,46,322,80"/>
-<area shape="rect" href="CD__DischargeInceptionStepper_8H.html" title="TimeStepper class for evaluating the streamer inception criterion." alt="" coords="56,269,296,309"/>
+<area shape="rect" href="CD__DischargeInceptionStepper_8H.html" title="Declaration of the Physics::DischargeInception::DischargeInceptionStepper TimeStepper." alt="" coords="56,269,296,309"/>
 <area shape="poly" title=" " alt="" coords="290,146,193,271,189,268,286,143"/>
 <area shape="rect" href="CD__TracerParticleSolver_8H.html" title="Declaration of a solver class that advances tracer particles." alt="" coords="337,181,530,221"/>
 <area shape="poly" title=" " alt="" coords="350,139,408,179,405,183,347,143"/>
@@ -152,7 +152,7 @@ This graph shows which files directly or indirectly include this file:</div>
 <area shape="poly" title=" " alt="" coords="161,323,151,358,146,356,155,321"/>
 <area shape="poly" title=" " alt="" coords="166,344,175,309,181,310,171,345"/>
 <area shape="poly" title=" " alt="" coords="365,228,233,272,232,267,363,223"/>
-<area shape="rect" href="CD__TracerParticleStepper_8H.html" title="Declaration of a TimeStepper implementation for advancing a tracer particle solver." alt="" coords="332,269,535,309"/>
+<area shape="rect" href="CD__TracerParticleStepper_8H.html" title="Declaration of the Physics::TracerParticle::TracerParticleStepper TimeStepper." alt="" coords="332,269,535,309"/>
 <area shape="poly" title=" " alt="" coords="436,235,436,269,431,269,431,235"/>
 <area shape="rect" href="CD__TracerParticleSolverImplem_8H.html" title="Implementation of CD_TracerParticleSolver.H." alt="" coords="559,269,803,309"/>
 <area shape="poly" title=" " alt="" coords="494,224,620,267,619,272,492,229"/>
@@ -215,11 +215,12 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> M, <a
 <p>Particle printing function. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">ostr</td><td>Output stream </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_particle</td><td>Particle to output </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">ostr</td><td>Output stream. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">p</td><td>Particle to output. </td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Reference to the output stream. </dd></dl>
 
 </div>
 </div>

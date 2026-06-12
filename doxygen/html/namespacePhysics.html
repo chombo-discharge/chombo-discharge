@@ -82,25 +82,25 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>Name containing various physics models for running chombo-discharge code.  
+<p>Namespace containing physics models for use with chombo-discharge.  
 <a href="namespacePhysics.html#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:namespacePhysics_1_1AdvectionDiffusion" id="r_namespacePhysics_1_1AdvectionDiffusion"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacePhysics_1_1AdvectionDiffusion.html">AdvectionDiffusion</a></td></tr>
-<tr class="memdesc:namespacePhysics_1_1AdvectionDiffusion"><td class="mdescLeft">&#160;</td><td class="mdescRight">Namespace for encapsulating <a class="el" href="namespacePhysics_1_1AdvectionDiffusion.html" title="Namespace for encapsulating AdvectionDiffusion physics code.">AdvectionDiffusion</a> physics code. <br /></td></tr>
+<tr class="memdesc:namespacePhysics_1_1AdvectionDiffusion"><td class="mdescLeft">&#160;</td><td class="mdescRight">Namespace for encapsulating advection-diffusion physics. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:namespacePhysics_1_1BrownianWalker" id="r_namespacePhysics_1_1BrownianWalker"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacePhysics_1_1BrownianWalker.html">BrownianWalker</a></td></tr>
-<tr class="memdesc:namespacePhysics_1_1BrownianWalker"><td class="mdescLeft">&#160;</td><td class="mdescRight">Namespace for encapsulating physics code for describing Brownian walkers. <br /></td></tr>
+<tr class="memdesc:namespacePhysics_1_1BrownianWalker"><td class="mdescLeft">&#160;</td><td class="mdescRight">Namespace for encapsulating Brownian walker physics. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:namespacePhysics_1_1CdrPlasma" id="r_namespacePhysics_1_1CdrPlasma"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacePhysics_1_1CdrPlasma.html">CdrPlasma</a></td></tr>
-<tr class="memdesc:namespacePhysics_1_1CdrPlasma"><td class="mdescLeft">&#160;</td><td class="mdescRight">Namespace for encapsulating CDR plasma code. <br /></td></tr>
+<tr class="memdesc:namespacePhysics_1_1CdrPlasma"><td class="mdescLeft">&#160;</td><td class="mdescRight">Namespace for encapsulating CDR plasma physics. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:namespacePhysics_1_1Electrostatics" id="r_namespacePhysics_1_1Electrostatics"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacePhysics_1_1Electrostatics.html">Electrostatics</a></td></tr>
 <tr class="memdesc:namespacePhysics_1_1Electrostatics"><td class="mdescLeft">&#160;</td><td class="mdescRight">Namespace for encapsulating physics code for electrostatic problems. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:namespacePhysics_1_1Geometry" id="r_namespacePhysics_1_1Geometry"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacePhysics_1_1Geometry.html">Geometry</a></td></tr>
-<tr class="memdesc:namespacePhysics_1_1Geometry"><td class="mdescLeft">&#160;</td><td class="mdescRight">Namespace for encapsulating the <a class="el" href="namespacePhysics_1_1Geometry.html" title="Namespace for encapsulating the Geometry module – i.e. functionality for just plotting various geomet...">Geometry</a> module &ndash; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">i.e</a>. functionality for just plotting various geometries. <br /></td></tr>
+<tr class="memdesc:namespacePhysics_1_1Geometry"><td class="mdescLeft">&#160;</td><td class="mdescRight">Namespace for encapsulating the <a class="el" href="namespacePhysics_1_1Geometry.html" title="Namespace for encapsulating the Geometry module — functionality for visualising geometries without an...">Geometry</a> module — functionality for visualising geometries without any physics. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:namespacePhysics_1_1RadiativeTransfer" id="r_namespacePhysics_1_1RadiativeTransfer"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacePhysics_1_1RadiativeTransfer.html">RadiativeTransfer</a></td></tr>
 <tr class="memdesc:namespacePhysics_1_1RadiativeTransfer"><td class="mdescLeft">&#160;</td><td class="mdescRight">Namespace for encapsulating the radiative transfer physics module. <br /></td></tr>
@@ -110,7 +110,8 @@ Namespaces</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Name containing various physics models for running chombo-discharge code. </p>
+<div class="textblock"><p>Namespace containing physics models for use with chombo-discharge. </p>
+<p>This namespace collects self-contained physics modules built on top of the core chombo-discharge solvers and infrastructure. Each sub-module defines a complete problem specification including species, time steppers, and cell taggers. </p>
 </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

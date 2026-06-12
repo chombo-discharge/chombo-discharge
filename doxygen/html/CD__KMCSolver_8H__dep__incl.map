@@ -1,6 +1,6 @@
 <map id="Source/KineticMonteCarlo/CD_KMCSolver.H" name="Source/KineticMonteCarlo/CD_KMCSolver.H">
 <area shape="rect" id="Node000001" title="Class for running Kinetic Monte Carlo functionality." alt="" coords="729,5,920,45"/>
-<area shape="rect" id="Node000002" href="$CD__ItoKMCPhysics_8H.html" title="Main file for describing Ito&#45;based plasma physics." alt="" coords="443,101,705,126"/>
+<area shape="rect" id="Node000002" href="$CD__ItoKMCPhysics_8H.html" title="Declaration of the Physics::ItoKMC::ItoKMCPhysics abstract base class." alt="" coords="443,101,705,126"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="757,52,608,103,607,98,756,47"/>
 <area shape="rect" id="Node000019" href="$CD__KMCSolverImplem_8H.html" title="Implementation of CD_KMCSolver.H." alt="" coords="729,93,920,133"/>
 <area shape="poly" id="edge26_Node000001_Node000019" title=" " alt="" coords="819,59,820,93,814,93,813,59"/>
@@ -8,9 +8,9 @@
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="504,131,206,191,205,186,503,126"/>
 <area shape="rect" id="Node000004" href="$CD__ItoKMCPhysicsImplem_8H.html" title="Implementation of CD_ItoKMCPhysics.H." alt="" coords="310,181,558,221"/>
 <area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="538,135,459,183,456,179,536,130"/>
-<area shape="rect" id="Node000005" href="$CD__ItoKMCStepper_8H.html" title="Declaration of an abstract class for integrating the Ito&#45;KMC&#45;Poisson equations." alt="" coords="583,189,845,214"/>
+<area shape="rect" id="Node000005" href="$CD__ItoKMCStepper_8H.html" title="Declaration of the Physics::ItoKMC::ItoKMCStepper abstract TimeStepper." alt="" coords="583,189,845,214"/>
 <area shape="poly" id="edge5_Node000002_Node000005" title=" " alt="" coords="606,131,696,186,694,191,603,136"/>
-<area shape="rect" id="Node000007" href="$CD__ItoKMCTagger_8H.html" title="Parent tagger class for ItoKMC." alt="" coords="836,284,1091,309"/>
+<area shape="rect" id="Node000007" href="$CD__ItoKMCTagger_8H.html" title="Declaration of the Physics::ItoKMC::ItoKMCTagger abstract CellTagger." alt="" coords="836,284,1091,309"/>
 <area shape="poly" id="edge23_Node000002_Node000007" title=" " alt="" coords="657,126,772,150,823,164,859,179,892,203,921,232,958,282,954,285,917,236,889,207,857,184,821,169,771,155,656,131"/>
 <area shape="rect" id="Node000017" href="$CD__ItoKMCJSON_8H.html" title="Declaration of a ItoKMC plasma model which reads reactions from a JSON file." alt="" coords="1061,181,1289,221"/>
 <area shape="poly" id="edge24_Node000002_Node000017" title=" " alt="" coords="668,125,1061,181,1061,186,667,131"/>
@@ -21,20 +21,20 @@
 <area shape="rect" id="Node000013" href="$CD__ItoKMCGodunovStepper_8H.html" title="Declaration of a class which uses a semi&#45;implicit Godunov method for Ito plasma equations." alt="" coords="322,269,538,324"/>
 <area shape="poly" id="edge17_Node000005_Node000013" title=" " alt="" coords="667,221,511,272,509,267,665,216"/>
 <area shape="poly" id="edge7_Node000006_Node000005" title=" " alt="" coords="702,263,714,213,719,215,708,264"/>
-<area shape="rect" id="Node000008" href="$CD__ItoKMCFieldTagger_8H.html" title="Declaration of an abstract field&#45;only tagging class for ito plasmas." alt="" coords="587,379,817,419"/>
+<area shape="rect" id="Node000008" href="$CD__ItoKMCFieldTagger_8H.html" title="Declaration of the Physics::ItoKMC::ItoKMCFieldTagger abstract CellTagger." alt="" coords="587,379,817,419"/>
 <area shape="poly" id="edge9_Node000007_Node000008" title=" " alt="" coords="921,317,752,382,750,377,919,312"/>
 <area shape="rect" id="Node000012" href="$CD__ItoKMCTaggerImplem_8H.html" title="Implementation of CD_ItoKMCTagger.H." alt="" coords="842,379,1085,419"/>
 <area shape="poly" id="edge15_Node000007_Node000012" title=" " alt="" coords="958,323,959,379,953,379,953,323"/>
 <area shape="rect" id="Node000009" href="$CD__ItoKMCFieldTaggerImplem_8H.html" title="Implementation of CD_ItoKMCFieldTagger.H." alt="" coords="587,482,817,522"/>
 <area shape="poly" id="edge10_Node000008_Node000009" title=" " alt="" coords="696,433,697,482,692,482,691,433"/>
-<area shape="rect" id="Node000010" href="$CD__ItoKMCStreamerTagger_8H.html" title="Implementation ItoKMCTagger which tags on alpha and curvature of field." alt="" coords="361,475,563,529"/>
+<area shape="rect" id="Node000010" href="$CD__ItoKMCStreamerTagger_8H.html" title="Declaration of the Physics::ItoKMC::ItoKMCStreamerTagger CellTagger." alt="" coords="361,475,563,529"/>
 <area shape="poly" id="edge12_Node000008_Node000010" title=" " alt="" coords="646,427,526,477,524,472,644,422"/>
 <area shape="poly" id="edge11_Node000009_Node000008" title=" " alt="" coords="708,469,707,420,712,419,713,469"/>
-<area shape="rect" id="Node000011" href="$CD__ItoKMCStreamerTaggerImplem_8H.html" title="Implementation CD_ItoKMCStreamerTagger.H." alt="" coords="341,577,583,632"/>
+<area shape="rect" id="Node000011" href="$CD__ItoKMCStreamerTaggerImplem_8H.html" title="Implementation of CD_ItoKMCStreamerTagger.H." alt="" coords="341,577,583,632"/>
 <area shape="poly" id="edge13_Node000010_Node000011" title=" " alt="" coords="456,543,457,577,451,577,451,543"/>
 <area shape="poly" id="edge14_Node000011_Node000010" title=" " alt="" coords="468,564,467,530,473,530,473,564"/>
 <area shape="poly" id="edge16_Node000012_Node000007" title=" " alt="" coords="969,366,967,310,972,309,974,365"/>
-<area shape="rect" id="Node000014" href="$CD__ItoKMCBackgroundEvaluator_8H.html" title="File containing a subclass of ItoKMCGodunovStepper." alt="" coords="31,372,282,427"/>
+<area shape="rect" id="Node000014" href="$CD__ItoKMCBackgroundEvaluator_8H.html" title="Declaration of the Physics::ItoKMC::ItoKMCBackgroundEvaluator TimeStepper." alt="" coords="31,372,282,427"/>
 <area shape="poly" id="edge18_Node000013_Node000014" title=" " alt="" coords="347,331,229,374,227,369,345,326"/>
 <area shape="rect" id="Node000016" href="$CD__ItoKMCGodunovStepperImplem_8H.html" title="Implementation of CD_ItoKMCGodunovStepper.H." alt="" coords="306,372,554,427"/>
 <area shape="poly" id="edge21_Node000013_Node000016" title=" " alt="" coords="424,338,425,372,419,372,419,338"/>

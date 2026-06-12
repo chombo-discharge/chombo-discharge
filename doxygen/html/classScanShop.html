@@ -118,51 +118,65 @@ Public Member Functions</h2></td></tr>
 &#160;</td><td class="memItemRight" valign="bottom"><b>ScanShop</b> ()=<a class="el" href="classTracerParticleSolver.html">delete</a></td></tr>
 <tr class="memdesc:acbb51cf0dbbb601f9c29d0be2c4a92c9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed default constructor. <br /></td></tr>
 <tr class="separator:acbb51cf0dbbb601f9c29d0be2c4a92c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9c8f55ff1c0c47fac3045fc20d131509" id="r_a9c8f55ff1c0c47fac3045fc20d131509"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanShop.html#a9c8f55ff1c0c47fac3045fc20d131509">ScanShop</a> (<a class="el" href="classTracerParticleSolver.html">const</a> BaseIF &amp;<a class="el" href="classTracerParticleSolver.html">a_geometry</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_verbosity</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_finestDx</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> <a class="el" href="classTracerParticleSolver.html">a_probLo</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> <a class="el" href="classTracerParticleSolver.html">a_finestDomain</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> <a class="el" href="classTracerParticleSolver.html">a_scanLevel</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_ebGhost</a>=4, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_thrshdVoF</a>=1.0e-16)</td></tr>
-<tr class="memdesc:a9c8f55ff1c0c47fac3045fc20d131509"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <br /></td></tr>
-<tr class="separator:a9c8f55ff1c0c47fac3045fc20d131509"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a68515a5ae0ffe2fd6531da31ea24736e" id="r_a68515a5ae0ffe2fd6531da31ea24736e"><td class="memItemLeft" align="right" valign="top"><a id="a68515a5ae0ffe2fd6531da31ea24736e" name="a68515a5ae0ffe2fd6531da31ea24736e"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>~ScanShop</b> ()</td></tr>
-<tr class="memdesc:a68515a5ae0ffe2fd6531da31ea24736e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor (does nothing) <br /></td></tr>
-<tr class="separator:a68515a5ae0ffe2fd6531da31ea24736e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa139dd254eb9e467a6731061b27dd331" id="r_aa139dd254eb9e467a6731061b27dd331"><td class="memItemLeft" align="right" valign="top"><a id="aa139dd254eb9e467a6731061b27dd331" name="aa139dd254eb9e467a6731061b27dd331"></a>
-<a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>setProfileFileName</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> <a class="el" href="classTracerParticleSolver.html">a_fileName</a>)</td></tr>
-<tr class="memdesc:aa139dd254eb9e467a6731061b27dd331"><td class="mdescLeft">&#160;</td><td class="mdescRight">If doing profiling, set the output name. <br /></td></tr>
-<tr class="separator:aa139dd254eb9e467a6731061b27dd331"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa6dda98e9568fc924bfcb39537f53005" id="r_aa6dda98e9568fc924bfcb39537f53005"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanShop.html#aa6dda98e9568fc924bfcb39537f53005">ScanShop</a> (<a class="el" href="classTracerParticleSolver.html">const</a> BaseIF &amp;<a class="el" href="classTracerParticleSolver.html">a_localGeom</a>, <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_verbosity</a>, <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_dx</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_probLo</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_finestDomain</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_scanLevel</a>, <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_ebGhost</a>=4, <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_thrshdVoF</a>=1.0e-16)</td></tr>
+<tr class="memdesc:aa6dda98e9568fc924bfcb39537f53005"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <br /></td></tr>
+<tr class="separator:aa6dda98e9568fc924bfcb39537f53005"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a949cbd0975b9b0264491e337e767080e" id="r_a949cbd0975b9b0264491e337e767080e"><td class="memItemLeft" align="right" valign="top"><a id="a949cbd0975b9b0264491e337e767080e" name="a949cbd0975b9b0264491e337e767080e"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>~ScanShop</b> () <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
+<tr class="memdesc:a949cbd0975b9b0264491e337e767080e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor (does nothing) <br /></td></tr>
+<tr class="separator:a949cbd0975b9b0264491e337e767080e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2cf0ed3ea7bcbd8cb738242b1b1044db" id="r_a2cf0ed3ea7bcbd8cb738242b1b1044db"><td class="memItemLeft" align="right" valign="top"><a id="a2cf0ed3ea7bcbd8cb738242b1b1044db" name="a2cf0ed3ea7bcbd8cb738242b1b1044db"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>ScanShop</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classScanShop.html">ScanShop</a> &amp;)=<a class="el" href="classTracerParticleSolver.html">delete</a></td></tr>
+<tr class="memdesc:a2cf0ed3ea7bcbd8cb738242b1b1044db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallow copy construction. <br /></td></tr>
+<tr class="separator:a2cf0ed3ea7bcbd8cb738242b1b1044db"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae8a9b9448a713a8bf51f30673a1783e6" id="r_ae8a9b9448a713a8bf51f30673a1783e6"><td class="memItemLeft" align="right" valign="top"><a id="ae8a9b9448a713a8bf51f30673a1783e6" name="ae8a9b9448a713a8bf51f30673a1783e6"></a>
+<a class="el" href="classScanShop.html">ScanShop</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classScanShop.html">ScanShop</a> &amp;)=<a class="el" href="classTracerParticleSolver.html">delete</a></td></tr>
+<tr class="memdesc:ae8a9b9448a713a8bf51f30673a1783e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallow copy assignment. <br /></td></tr>
+<tr class="separator:ae8a9b9448a713a8bf51f30673a1783e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac44f2025dc2e84c64385c46f4be39cf3" id="r_ac44f2025dc2e84c64385c46f4be39cf3"><td class="memItemLeft" align="right" valign="top"><a id="ac44f2025dc2e84c64385c46f4be39cf3" name="ac44f2025dc2e84c64385c46f4be39cf3"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>ScanShop</b> (<a class="el" href="classScanShop.html">ScanShop</a> &amp;&amp;)=<a class="el" href="classTracerParticleSolver.html">delete</a></td></tr>
+<tr class="memdesc:ac44f2025dc2e84c64385c46f4be39cf3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallow move construction. <br /></td></tr>
+<tr class="separator:ac44f2025dc2e84c64385c46f4be39cf3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abaaa2626ca8b1bf7b4c5aea9b785380d" id="r_abaaa2626ca8b1bf7b4c5aea9b785380d"><td class="memItemLeft" align="right" valign="top"><a id="abaaa2626ca8b1bf7b4c5aea9b785380d" name="abaaa2626ca8b1bf7b4c5aea9b785380d"></a>
+<a class="el" href="classScanShop.html">ScanShop</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (<a class="el" href="classScanShop.html">ScanShop</a> &amp;&amp;)=<a class="el" href="classTracerParticleSolver.html">delete</a></td></tr>
+<tr class="memdesc:abaaa2626ca8b1bf7b4c5aea9b785380d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallow move assignment. <br /></td></tr>
+<tr class="separator:abaaa2626ca8b1bf7b4c5aea9b785380d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a17bccccac7df085dc959e5fb49f6056f" id="r_a17bccccac7df085dc959e5fb49f6056f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanShop.html#a17bccccac7df085dc959e5fb49f6056f">setProfileFileName</a> (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> <a class="el" href="classTracerParticleSolver.html">a_fileName</a>)</td></tr>
+<tr class="memdesc:a17bccccac7df085dc959e5fb49f6056f"><td class="mdescLeft">&#160;</td><td class="mdescRight">If doing profiling, set the output name.  <br /></td></tr>
+<tr class="separator:a17bccccac7df085dc959e5fb49f6056f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6ef4b6482859e790898e511169a5efb5" id="r_a6ef4b6482859e790898e511169a5efb5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanShop.html#a6ef4b6482859e790898e511169a5efb5">makeGrids</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_domain</a>, <a class="el" href="classTracerParticleSolver.html">DisjointBoxLayout</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_grids</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_maxGridSize</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_maxIrregGridSize</a>) <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
 <tr class="memdesc:a6ef4b6482859e790898e511169a5efb5"><td class="mdescLeft">&#160;</td><td class="mdescRight">This grid generation method is called by EBISLevel when using distributed data.  <br /></td></tr>
 <tr class="separator:a6ef4b6482859e790898e511169a5efb5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aca450902b95974a067656ff79cb70fa0" id="r_aca450902b95974a067656ff79cb70fa0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">GeometryService::InOut</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanShop.html#aca450902b95974a067656ff79cb70fa0">InsideOutside</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Box</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_region</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_domain</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_probLo</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_dx</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">DataIndex</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_dit</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
 <tr class="memdesc:aca450902b95974a067656ff79cb70fa0"><td class="mdescLeft">&#160;</td><td class="mdescRight">This method is called by EBSILevel when using distributed data.  <br /></td></tr>
 <tr class="separator:aca450902b95974a067656ff79cb70fa0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af63e53b1cb0c8a96ce99e78f415f5bc3" id="r_af63e53b1cb0c8a96ce99e78f415f5bc3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanShop.html#af63e53b1cb0c8a96ce99e78f415f5bc3">fillGraph</a> (<a class="el" href="classTracerParticleSolver.html">BaseFab</a>&lt; <a class="el" href="classTracerParticleSolver.html">int</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_regIrregCovered</a>, <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">IrregNode</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_nodes</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Box</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_validRegion</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Box</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_ghostRegion</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_domain</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_probLo</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_dx</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">DataIndex</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_di</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
+<tr class="memitem:af63e53b1cb0c8a96ce99e78f415f5bc3" id="r_af63e53b1cb0c8a96ce99e78f415f5bc3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanShop.html#af63e53b1cb0c8a96ce99e78f415f5bc3">fillGraph</a> (<a class="el" href="classTracerParticleSolver.html">BaseFab</a>&lt; <a class="el" href="classTracerParticleSolver.html">int</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_regIrregCovered</a>, <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">IrregNode</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_nodes</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Box</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_validRegion</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Box</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_ghostRegion</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_domain</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_probLo</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_dx</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">DataIndex</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_di</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
 <tr class="memdesc:af63e53b1cb0c8a96ce99e78f415f5bc3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Override of GeometryShop's fillGraph.  <br /></td></tr>
 <tr class="separator:af63e53b1cb0c8a96ce99e78f415f5bc3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
-<tr class="memitem:a05a3298bb8102e6609d0a3675f255733" id="r_a05a3298bb8102e6609d0a3675f255733"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanShop.html#a05a3298bb8102e6609d0a3675f255733">makeDomains</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_dx</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> <a class="el" href="classTracerParticleSolver.html">a_probLo</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> <a class="el" href="classTracerParticleSolver.html">a_finestDomain</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> <a class="el" href="classTracerParticleSolver.html">a_scanLevel</a>)</td></tr>
-<tr class="memdesc:a05a3298bb8102e6609d0a3675f255733"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create the problem domain and resolutions.  <br /></td></tr>
-<tr class="separator:a05a3298bb8102e6609d0a3675f255733"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a35101765cb376fc195e1209bdba52731" id="r_a35101765cb376fc195e1209bdba52731"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanShop.html#a35101765cb376fc195e1209bdba52731">buildFinerLevels</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_coarserLevel</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_maxGridSize</a>)</td></tr>
-<tr class="memdesc:a35101765cb376fc195e1209bdba52731"><td class="mdescLeft">&#160;</td><td class="mdescRight">Refine levels recursively down to the finest level.  <br /></td></tr>
-<tr class="separator:a35101765cb376fc195e1209bdba52731"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a34513da90fc79035cca7f14347e464ef" id="r_a34513da90fc79035cca7f14347e464ef"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanShop.html#a34513da90fc79035cca7f14347e464ef">buildCoarseLevel</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_finerLevel</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_maxGridSize</a>)</td></tr>
-<tr class="memdesc:a34513da90fc79035cca7f14347e464ef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the "coarse level" where we initiate the recursion process.  <br /></td></tr>
-<tr class="separator:a34513da90fc79035cca7f14347e464ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad93c283717794d093988ec563f108fe9" id="r_ad93c283717794d093988ec563f108fe9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanShop.html#ad93c283717794d093988ec563f108fe9">isRegular</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Box</a> <a class="el" href="classTracerParticleSolver.html">a_box</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> <a class="el" href="classTracerParticleSolver.html">a_probLo</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_dx</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:ad93c283717794d093988ec563f108fe9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if every point in input box is regular.  <br /></td></tr>
-<tr class="separator:ad93c283717794d093988ec563f108fe9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0d4a931eb400af2a1bf53fe0df8b3344" id="r_a0d4a931eb400af2a1bf53fe0df8b3344"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanShop.html#a0d4a931eb400af2a1bf53fe0df8b3344">isCovered</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Box</a> <a class="el" href="classTracerParticleSolver.html">a_box</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> <a class="el" href="classTracerParticleSolver.html">a_probLo</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_dx</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:a0d4a931eb400af2a1bf53fe0df8b3344"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if every point in box is covered.  <br /></td></tr>
-<tr class="separator:a0d4a931eb400af2a1bf53fe0df8b3344"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a560028473bf705e826c5a7750fb7c14c" id="r_a560028473bf705e826c5a7750fb7c14c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanShop.html#a560028473bf705e826c5a7750fb7c14c">makeDomains</a> (<a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_dx</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_probLo</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_finestDomain</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_scanLevel</a>)</td></tr>
+<tr class="memdesc:a560028473bf705e826c5a7750fb7c14c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create the problem domain and resolutions.  <br /></td></tr>
+<tr class="separator:a560028473bf705e826c5a7750fb7c14c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a42b9c50edbe4a6e684731ad82e93122a" id="r_a42b9c50edbe4a6e684731ad82e93122a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanShop.html#a42b9c50edbe4a6e684731ad82e93122a">buildFinerLevels</a> (<a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_coarserLevel</a>, <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_maxGridSize</a>)</td></tr>
+<tr class="memdesc:a42b9c50edbe4a6e684731ad82e93122a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Refine levels recursively down to the finest level.  <br /></td></tr>
+<tr class="separator:a42b9c50edbe4a6e684731ad82e93122a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a912623ff8876423afcdb1a6b9469ffe6" id="r_a912623ff8876423afcdb1a6b9469ffe6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanShop.html#a912623ff8876423afcdb1a6b9469ffe6">buildCoarseLevel</a> (<a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_level</a>, <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_maxGridSize</a>)</td></tr>
+<tr class="memdesc:a912623ff8876423afcdb1a6b9469ffe6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the "coarse level" where we initiate the recursion process.  <br /></td></tr>
+<tr class="separator:a912623ff8876423afcdb1a6b9469ffe6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a87214e505921afbc4c86e0745273bc47" id="r_a87214e505921afbc4c86e0745273bc47"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanShop.html#a87214e505921afbc4c86e0745273bc47">isRegular</a> (<a class="el" href="classTracerParticleSolver.html">Box</a> <a class="el" href="classTracerParticleSolver.html">a_box</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_probLo</a>, <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_dx</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:a87214e505921afbc4c86e0745273bc47"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if every point in input box is regular.  <br /></td></tr>
+<tr class="separator:a87214e505921afbc4c86e0745273bc47"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aca25c8e604a4d62e4c96ac4b2449b16e" id="r_aca25c8e604a4d62e4c96ac4b2449b16e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanShop.html#aca25c8e604a4d62e4c96ac4b2449b16e">isCovered</a> (<a class="el" href="classTracerParticleSolver.html">Box</a> <a class="el" href="classTracerParticleSolver.html">a_box</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_probLo</a>, <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_dx</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:aca25c8e604a4d62e4c96ac4b2449b16e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if every point in box is covered.  <br /></td></tr>
+<tr class="separator:aca25c8e604a4d62e4c96ac4b2449b16e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab0d4d504c8e42a10f7fe376974de5ade" id="r_ab0d4d504c8e42a10f7fe376974de5ade"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt; <a class="el" href="classTracerParticleSolver.html">Box</a>, <a class="el" href="classTracerParticleSolver.html">int</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanShop.html#ab0d4d504c8e42a10f7fe376974de5ade">getSortedBoxesAndTypes</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Box</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_boxes</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">int</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_types</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
 <tr class="memdesc:ab0d4d504c8e42a10f7fe376974de5ade"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sort boxes lexicographically.  <br /></td></tr>
 <tr class="separator:ab0d4d504c8e42a10f7fe376974de5ade"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac8b243dad5b516452e041143adf07c5c" id="r_ac8b243dad5b516452e041143adf07c5c"><td class="memItemLeft" align="right" valign="top"><a id="ac8b243dad5b516452e041143adf07c5c" name="ac8b243dad5b516452e041143adf07c5c"></a>
-<a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>defineLevel</b> (<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Box</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">coveredBoxes</a>, <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Box</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">regularBoxes</a>, <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Box</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">cutCellBoxes</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_level</a>)</td></tr>
-<tr class="memdesc:ac8b243dad5b516452e041143adf07c5c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the "box map" on a specified level. <br /></td></tr>
-<tr class="separator:ac8b243dad5b516452e041143adf07c5c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a85282632e1b5a6ba9878559cd5df983d" id="r_a85282632e1b5a6ba9878559cd5df983d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanShop.html#a85282632e1b5a6ba9878559cd5df983d">defineLevel</a> (<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Box</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">coveredBoxes</a>, <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Box</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">regularBoxes</a>, <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Box</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">cutCellBoxes</a>, <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_level</a>)</td></tr>
+<tr class="memdesc:a85282632e1b5a6ba9878559cd5df983d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the "box map" on a specified level.  <br /></td></tr>
+<tr class="separator:a85282632e1b5a6ba9878559cd5df983d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -196,7 +210,7 @@ Protected Attributes</h2></td></tr>
 <tr class="separator:ab5e92cd69a021c67d5bb51ecd6aab59d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac5663eb69ea0fad13c534d145573d67d" id="r_ac5663eb69ea0fad13c534d145573d67d"><td class="memItemLeft" align="right" valign="top"><a id="ac5663eb69ea0fad13c534d145573d67d" name="ac5663eb69ea0fad13c534d145573d67d"></a>
 <a class="el" href="classTracerParticleSolver.html">const</a> BaseIF *&#160;</td><td class="memItemRight" valign="bottom"><b>m_baseIF</b></td></tr>
-<tr class="memdesc:ac5663eb69ea0fad13c534d145573d67d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Implicit function used to generate geometrys. <br /></td></tr>
+<tr class="memdesc:ac5663eb69ea0fad13c534d145573d67d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Implicit function used to generate geometries. <br /></td></tr>
 <tr class="separator:ac5663eb69ea0fad13c534d145573d67d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adde87ed2bca8917edd2a0fac10b08e77" id="r_adde87ed2bca8917edd2a0fac10b08e77"><td class="memItemLeft" align="right" valign="top"><a id="adde87ed2bca8917edd2a0fac10b08e77" name="adde87ed2bca8917edd2a0fac10b08e77"></a>
 <a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_hasScanLevel</b></td></tr>
@@ -226,8 +240,8 @@ Protected Attributes</h2></td></tr>
 <div class="textblock"><p>Derived version of GeometryShop that load balances based on the cut cells themselves. </p>
 <p>The internals of this class are basically the same as GeometryShop, with the exception that this class will generate an internal map of the computational domain on each level. This map is used to load balance the EB generation, most often leading to orders of magnitude speedup compared to Chombo's approach. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a9c8f55ff1c0c47fac3045fc20d131509" name="a9c8f55ff1c0c47fac3045fc20d131509"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9c8f55ff1c0c47fac3045fc20d131509">&#9670;&#160;</a></span>ScanShop()</h2>
+<a id="aa6dda98e9568fc924bfcb39537f53005" name="aa6dda98e9568fc924bfcb39537f53005"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa6dda98e9568fc924bfcb39537f53005">&#9670;&#160;</a></span>ScanShop()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -241,43 +255,43 @@ Protected Attributes</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
           <td class="paramname"><em>a_verbosity</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td>
           <td class="paramname"><em>a_dx</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;&#160;</td>
           <td class="paramname"><em>a_probLo</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;&#160;</td>
           <td class="paramname"><em>a_finestDomain</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;&#160;</td>
           <td class="paramname"><em>a_scanLevel</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
           <td class="paramname"><em>a_ebGhost</em> = <code>4</code>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td>
           <td class="paramname"><em>a_thrshdVoF</em> = <code>1.0e-16</code>&#160;</td>
         </tr>
         <tr>
@@ -289,27 +303,25 @@ Protected Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Constructor. </p>
-<p><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">CD_ScanShop.cpp</a>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_geometry</td><td>The implicit function for the geometry </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_localGeom</td><td>The implicit function for the geometry </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_verbosity</td><td>Verbosity </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_finestDx</td><td>Resolution on the finest level </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Resolution on the finest level </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Physical coordinates of the lower-left corner of simulation domain </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_finestDomain</td><td>Finest grid level </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_scanLevel</td><td>Scan level, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">i.e</a>. on which level to initiate the load balancing sequence. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_ebGhost</td><td>Number of EB ghost cells </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_thsdhVoF</td><td>Threshold for GeometryShop</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_thrshdVoF</td><td>Threshold for GeometryShop </td></tr>
   </table>
   </dd>
 </dl>
-<p>Implementation of <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">CD_ScanShop.H</a> </p><dl class="section author"><dt>Author</dt><dd>Robert Marskar </dd></dl>
 
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a34513da90fc79035cca7f14347e464ef" name="a34513da90fc79035cca7f14347e464ef"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a34513da90fc79035cca7f14347e464ef">&#9670;&#160;</a></span>buildCoarseLevel()</h2>
+<a id="a912623ff8876423afcdb1a6b9469ffe6" name="a912623ff8876423afcdb1a6b9469ffe6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a912623ff8876423afcdb1a6b9469ffe6">&#9670;&#160;</a></span>buildCoarseLevel()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -320,13 +332,13 @@ Protected Attributes</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> ScanShop::buildCoarseLevel </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
-          <td class="paramname"><em>a_finerLevel</em>, </td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramname"><em>a_level</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
           <td class="paramname"><em>a_maxGridSize</em>&#160;</td>
         </tr>
         <tr>
@@ -345,7 +357,7 @@ Protected Attributes</h2></td></tr>
 <p>Build the "coarse level" where we initiate the recursion process. </p>
 <p>This level must be defined in order to recurse towards deeper levels. Which is why this is ALWAYS called exact ONCE before buildFinerLevels builds the finer levels. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarserLevel</td><td>Coarser level </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Level index for the coarse level </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_maxGridSize</td><td>Maximum patch size </td></tr>
   </table>
   </dd>
@@ -353,8 +365,8 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a35101765cb376fc195e1209bdba52731" name="a35101765cb376fc195e1209bdba52731"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a35101765cb376fc195e1209bdba52731">&#9670;&#160;</a></span>buildFinerLevels()</h2>
+<a id="a42b9c50edbe4a6e684731ad82e93122a" name="a42b9c50edbe4a6e684731ad82e93122a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a42b9c50edbe4a6e684731ad82e93122a">&#9670;&#160;</a></span>buildFinerLevels()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -365,13 +377,13 @@ Protected Attributes</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> ScanShop::buildFinerLevels </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
           <td class="paramname"><em>a_coarserLevel</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
           <td class="paramname"><em>a_maxGridSize</em>&#160;</td>
         </tr>
         <tr>
@@ -392,6 +404,65 @@ Protected Attributes</h2></td></tr>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_coarserLevel</td><td>Coarser level </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_maxGridSize</td><td>Maximum patch size </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a85282632e1b5a6ba9878559cd5df983d" name="a85282632e1b5a6ba9878559cd5df983d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a85282632e1b5a6ba9878559cd5df983d">&#9670;&#160;</a></span>defineLevel()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> ScanShop::defineLevel </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Box</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>coveredBoxes</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Box</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>regularBoxes</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Box</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>cutCellBoxes</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramname"><em>a_level</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Define the "box map" on a specified level. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">coveredBoxes</td><td>Description </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">regularBoxes</td><td>Description </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">cutCellBoxes</td><td>Description </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Description </td></tr>
   </table>
   </dd>
 </dl>
@@ -463,7 +534,7 @@ Protected Attributes</h2></td></tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel">override</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -520,7 +591,14 @@ Protected Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Sort boxes lexicographically. </p>
-<p>A strange but true thing that is necessary because DisjointBoxlayout sorts the boxes under the hood </p>
+<p>A strange but true thing that is necessary because DisjointBoxlayout sorts the boxes under the hood </p><dl class="section return"><dt>Returns</dt><dd>Sorted boxes and types </dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_boxes</td><td>Description </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_types</td><td>Description </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -587,11 +665,12 @@ Protected Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Return value </dd></dl>
 
 </div>
 </div>
-<a id="a0d4a931eb400af2a1bf53fe0df8b3344" name="a0d4a931eb400af2a1bf53fe0df8b3344"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0d4a931eb400af2a1bf53fe0df8b3344">&#9670;&#160;</a></span>isCovered()</h2>
+<a id="aca25c8e604a4d62e4c96ac4b2449b16e" name="aca25c8e604a4d62e4c96ac4b2449b16e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aca25c8e604a4d62e4c96ac4b2449b16e">&#9670;&#160;</a></span>isCovered()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -602,19 +681,19 @@ Protected Attributes</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="classTracerParticleSolver.html">bool</a> ScanShop::isCovered </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Box</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">Box</a>&#160;</td>
           <td class="paramname"><em>a_box</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;&#160;</td>
           <td class="paramname"><em>a_probLo</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td>
           <td class="paramname"><em>a_dx</em>&#160;</td>
         </tr>
         <tr>
@@ -639,11 +718,12 @@ Protected Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>True if covered, false otherwise </dd></dl>
 
 </div>
 </div>
-<a id="ad93c283717794d093988ec563f108fe9" name="ad93c283717794d093988ec563f108fe9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad93c283717794d093988ec563f108fe9">&#9670;&#160;</a></span>isRegular()</h2>
+<a id="a87214e505921afbc4c86e0745273bc47" name="a87214e505921afbc4c86e0745273bc47"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a87214e505921afbc4c86e0745273bc47">&#9670;&#160;</a></span>isRegular()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -654,19 +734,19 @@ Protected Attributes</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="classTracerParticleSolver.html">bool</a> ScanShop::isRegular </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Box</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">Box</a>&#160;</td>
           <td class="paramname"><em>a_box</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;&#160;</td>
           <td class="paramname"><em>a_probLo</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td>
           <td class="paramname"><em>a_dx</em>&#160;</td>
         </tr>
         <tr>
@@ -693,11 +773,12 @@ Protected Attributes</h2></td></tr>
   </dd>
 </dl>
 <p>Implementation of <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">CD_ScanShop.H</a> </p><dl class="section author"><dt>Author</dt><dd>Robert Marskar </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>True if regular, false otherwise </dd></dl>
 
 </div>
 </div>
-<a id="a05a3298bb8102e6609d0a3675f255733" name="a05a3298bb8102e6609d0a3675f255733"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a05a3298bb8102e6609d0a3675f255733">&#9670;&#160;</a></span>makeDomains()</h2>
+<a id="a560028473bf705e826c5a7750fb7c14c" name="a560028473bf705e826c5a7750fb7c14c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a560028473bf705e826c5a7750fb7c14c">&#9670;&#160;</a></span>makeDomains()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -708,25 +789,25 @@ Protected Attributes</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> ScanShop::makeDomains </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td>
           <td class="paramname"><em>a_dx</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;&#160;</td>
           <td class="paramname"><em>a_probLo</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;&#160;</td>
           <td class="paramname"><em>a_finestDomain</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;&#160;</td>
           <td class="paramname"><em>a_scanLevel</em>&#160;</td>
         </tr>
         <tr>
@@ -748,7 +829,7 @@ Protected Attributes</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Grid resolution </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Lower-left corner of computational domain </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_finestDomain</td><td>Finest AMR domain </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_scanLevel</td><td>Domain where we initiate the load balanced recusion process. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_scanLevel</td><td>Domain where we initiate the load balanced recursion process. </td></tr>
   </table>
   </dd>
 </dl>
@@ -815,6 +896,32 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
+<a id="a17bccccac7df085dc959e5fb49f6056f" name="a17bccccac7df085dc959e5fb49f6056f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a17bccccac7df085dc959e5fb49f6056f">&#9670;&#160;</a></span>setProfileFileName()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> ScanShop::setProfileFileName </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a>&#160;</td>
+          <td class="paramname"><em>a_fileName</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>If doing profiling, set the output name. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_fileName</td><td>File name for profiling output </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <h2 class="groupheader">Member Data Documentation</h2>
 <a id="a1d9d31c82a36b3e0c5ac5af5ffa69968" name="a1d9d31c82a36b3e0c5ac5af5ffa69968"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a1d9d31c82a36b3e0c5ac5af5ffa69968">&#9670;&#160;</a></span>m_boxMap</h2>
@@ -843,7 +950,7 @@ Protected Attributes</h2></td></tr>
 </div>
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>Source/Geometry/<a class="el" href="CD__ScanShop_8H_source.html">CD_ScanShop.H</a></li>
-<li>Source/Geometry/<b>CD_ScanShop.cpp</b></li>
+<li>Source/Geometry/<a class="el" href="CD__ScanShop_8cpp.html">CD_ScanShop.cpp</a></li>
 <li>Source/Geometry/<a class="el" href="CD__ScanShopImplem_8H_source.html">CD_ScanShopImplem.H</a></li>
 </ul>
 </div><!-- contents -->

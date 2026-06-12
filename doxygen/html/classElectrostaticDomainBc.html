@@ -131,9 +131,9 @@ Public Member Functions</h2></td></tr>
 <a class="el" href="classTracerParticleSolver.html">virtual</a>&#160;</td><td class="memItemRight" valign="bottom"><b>~ElectrostaticDomainBc</b> ()</td></tr>
 <tr class="memdesc:a0eb18a475043955bb41596ff545033bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. This. <br /></td></tr>
 <tr class="separator:a0eb18a475043955bb41596ff545033bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae3e86052bbc20b23743d9617134281e6" id="r_ae3e86052bbc20b23743d9617134281e6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElectrostaticDomainBc.html#ae3e86052bbc20b23743d9617134281e6">setBc</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classElectrostaticDomainBc.html#a969add9e24746f806ca9c1448013e45a">DomainSide</a> <a class="el" href="classTracerParticleSolver.html">a_wall</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classElectrostaticDomainBc.html#a803cc8ad3f065f17090aa193798cc473">Bc</a> <a class="el" href="classTracerParticleSolver.html">a_bc</a>)</td></tr>
-<tr class="memdesc:ae3e86052bbc20b23743d9617134281e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the boundary condition on a domain side. You must set both the type, and the associated function.  <br /></td></tr>
-<tr class="separator:ae3e86052bbc20b23743d9617134281e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abf472091851315a490a39ea527e0b3d8" id="r_abf472091851315a490a39ea527e0b3d8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElectrostaticDomainBc.html#abf472091851315a490a39ea527e0b3d8">setBc</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classElectrostaticDomainBc.html#a969add9e24746f806ca9c1448013e45a">DomainSide</a> <a class="el" href="classTracerParticleSolver.html">a_domainSide</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classElectrostaticDomainBc.html#a803cc8ad3f065f17090aa193798cc473">Bc</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_bc</a>)</td></tr>
+<tr class="memdesc:abf472091851315a490a39ea527e0b3d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the boundary condition on a domain side. You must set both the type, and the associated function.  <br /></td></tr>
+<tr class="separator:abf472091851315a490a39ea527e0b3d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a79bff96aacbca70739ef4cf6ba08875d" id="r_a79bff96aacbca70739ef4cf6ba08875d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classElectrostaticDomainBc.html#a803cc8ad3f065f17090aa193798cc473">Bc</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElectrostaticDomainBc.html#a79bff96aacbca70739ef4cf6ba08875d">getBc</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classElectrostaticDomainBc.html#a969add9e24746f806ca9c1448013e45a">DomainSide</a> <a class="el" href="classTracerParticleSolver.html">a_domainSide</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
 <tr class="memdesc:a79bff96aacbca70739ef4cf6ba08875d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the boundary condition for a domain side.  <br /></td></tr>
 <tr class="separator:a79bff96aacbca70739ef4cf6ba08875d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -266,6 +266,7 @@ Protected Attributes</h2></td></tr>
   </dd>
 </dl>
 <dl class="section note"><dt>Note</dt><dd>If the boundary condition for the associated side and direction has not been previously set, this routine will cause a run-time error. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Bc </dd></dl>
 
 </div>
 </div>
@@ -334,11 +335,12 @@ Protected Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Return value </dd></dl>
 
 </div>
 </div>
-<a id="ae3e86052bbc20b23743d9617134281e6" name="ae3e86052bbc20b23743d9617134281e6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae3e86052bbc20b23743d9617134281e6">&#9670;&#160;</a></span>setBc()</h2>
+<a id="abf472091851315a490a39ea527e0b3d8" name="abf472091851315a490a39ea527e0b3d8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abf472091851315a490a39ea527e0b3d8">&#9670;&#160;</a></span>setBc()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -347,12 +349,12 @@ Protected Attributes</h2></td></tr>
           <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> ElectrostaticDomainBc::setBc </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classElectrostaticDomainBc.html#a969add9e24746f806ca9c1448013e45a">DomainSide</a>&#160;</td>
-          <td class="paramname"><em>a_wall</em>, </td>
+          <td class="paramname"><em>a_domainSide</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classElectrostaticDomainBc.html#a803cc8ad3f065f17090aa193798cc473">Bc</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classElectrostaticDomainBc.html#a803cc8ad3f065f17090aa193798cc473">Bc</a> &amp;&#160;</td>
           <td class="paramname"><em>a_bc</em>&#160;</td>
         </tr>
         <tr>

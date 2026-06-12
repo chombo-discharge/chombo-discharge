@@ -80,6 +80,7 @@ $(function() {
 <a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pro-methods">Protected Member Functions</a> &#124;
+<a href="#pro-static-methods">Static Protected Member Functions</a> &#124;
 <a href="#pro-attribs">Protected Attributes</a> &#124;
 <a href="classEBGhostCellInterpolator-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">EBGhostCellInterpolator Class Reference</div></div>
@@ -141,15 +142,18 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:a98f101b122329e7c474a24c2dc025439" id="r_a98f101b122329e7c474a24c2dc025439"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGhostCellInterpolator.html#a98f101b122329e7c474a24c2dc025439">interpolateIrregular</a> (<a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_phiFine</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_phiCoar</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">DataIndex</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_dit</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_fineVar</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_coarVar</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEBGhostCellInterpolator.html#aea2afb631dec4374819351a62a36fb9b">Type</a> <a class="el" href="classTracerParticleSolver.html">a_interpType</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:a98f101b122329e7c474a24c2dc025439"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ghost cell interpolation near the EB, correcting slopes that broke in interpolateRegular.  <br /></td></tr>
 <tr class="separator:a98f101b122329e7c474a24c2dc025439"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a630b6bb2e321b58b186a112e46171433" id="r_a630b6bb2e321b58b186a112e46171433"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGhostCellInterpolator.html#a630b6bb2e321b58b186a112e46171433">minmod</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;<a class="el" href="classTracerParticleSolver.html">dwl</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;<a class="el" href="classTracerParticleSolver.html">dwr</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:a630b6bb2e321b58b186a112e46171433"><td class="mdescLeft">&#160;</td><td class="mdescRight">minmod slope function.  <br /></td></tr>
-<tr class="separator:a630b6bb2e321b58b186a112e46171433"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1bf48233e1f7a79e22e2d32695271589" id="r_a1bf48233e1f7a79e22e2d32695271589"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGhostCellInterpolator.html#a1bf48233e1f7a79e22e2d32695271589">superbee</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;<a class="el" href="classTracerParticleSolver.html">dwl</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;<a class="el" href="classTracerParticleSolver.html">dwr</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:a1bf48233e1f7a79e22e2d32695271589"><td class="mdescLeft">&#160;</td><td class="mdescRight">Superbee slope limiter.  <br /></td></tr>
-<tr class="separator:a1bf48233e1f7a79e22e2d32695271589"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac225d1ed480fa58cbec028a3ec36b338" id="r_ac225d1ed480fa58cbec028a3ec36b338"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGhostCellInterpolator.html#ac225d1ed480fa58cbec028a3ec36b338">monotonizedCentral</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;<a class="el" href="classTracerParticleSolver.html">dwl</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;<a class="el" href="classTracerParticleSolver.html">dwr</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:ac225d1ed480fa58cbec028a3ec36b338"><td class="mdescLeft">&#160;</td><td class="mdescRight">Monotonized central difference slope limiter.  <br /></td></tr>
-<tr class="separator:ac225d1ed480fa58cbec028a3ec36b338"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-static-methods" name="pro-static-methods"></a>
+Static Protected Member Functions</h2></td></tr>
+<tr class="memitem:a76121c870085d06bde6cc7fed1c06451" id="r_a76121c870085d06bde6cc7fed1c06451"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">static</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGhostCellInterpolator.html#a76121c870085d06bde6cc7fed1c06451">minmod</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;<a class="el" href="classTracerParticleSolver.html">dwl</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;<a class="el" href="classTracerParticleSolver.html">dwr</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a76121c870085d06bde6cc7fed1c06451"><td class="mdescLeft">&#160;</td><td class="mdescRight">minmod slope function.  <br /></td></tr>
+<tr class="separator:a76121c870085d06bde6cc7fed1c06451"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aff25f6b2244d28e74240c22f4642c284" id="r_aff25f6b2244d28e74240c22f4642c284"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">static</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGhostCellInterpolator.html#aff25f6b2244d28e74240c22f4642c284">superbee</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;<a class="el" href="classTracerParticleSolver.html">dwl</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;<a class="el" href="classTracerParticleSolver.html">dwr</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:aff25f6b2244d28e74240c22f4642c284"><td class="mdescLeft">&#160;</td><td class="mdescRight">Superbee slope limiter.  <br /></td></tr>
+<tr class="separator:aff25f6b2244d28e74240c22f4642c284"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a48747a738e22cbf47b75f0edbc97632d" id="r_a48747a738e22cbf47b75f0edbc97632d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">static</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGhostCellInterpolator.html#a48747a738e22cbf47b75f0edbc97632d">monotonizedCentral</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;<a class="el" href="classTracerParticleSolver.html">dwl</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;<a class="el" href="classTracerParticleSolver.html">dwr</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a48747a738e22cbf47b75f0edbc97632d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Monotonized central difference slope limiter.  <br /></td></tr>
+<tr class="separator:a48747a738e22cbf47b75f0edbc97632d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -272,7 +276,6 @@ Protected Attributes</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgFine</td><td>Fine grids </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgCoFi</td><td>Coarsened fine grids </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgCoar</td><td>Coarse grids </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_dataLocation</td><td>Interpration of data centering. Either on the cell center or the cell centroid. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_ghostVector</td><td>(Minimum) number of ghost cells in input/output data. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_refRat</td><td>Refinement ratio between coarse and fine grids. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_ghostCF</td><td>Width of the ghost region to be filled. Only relevant near the EBCF. </td></tr>
@@ -347,7 +350,6 @@ Protected Attributes</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgFine</td><td>Fine grids </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgCoFi</td><td>Coarsened fine grids </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgCoar</td><td>Coarse grids </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_dataLocation</td><td>Interpration of data centering. Either on the cell center or the cell centroid. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_ghostVector</td><td>(Minimum) number of ghost cells in input/output data. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_refRat</td><td>Refinement ratio between coarse and fine grids. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_ghostCF</td><td>Width of the ghost region to be filled. Only relevant near the EBCF. </td></tr>
@@ -409,7 +411,7 @@ Protected Attributes</h2></td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_phiFine</td><td>Fine phi </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_phiCoar</td><td>Coarse phi </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_variables</td><td>Variables to interpolate </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_type</td><td>Interpolation type </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_interpType</td><td>Interp type </td></tr>
   </table>
   </dd>
 </dl>
@@ -482,7 +484,7 @@ Protected Attributes</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dit</td><td>Grid index on the fine grid </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_fineVar</td><td>Fine-grid variable </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_coarVar</td><td>Coarse-grid variable </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_interType</td><td>Slope type </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_interpType</td><td>Interp type </td></tr>
   </table>
   </dd>
 </dl>
@@ -555,15 +557,15 @@ Protected Attributes</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dit</td><td>Grid index on the fine grid </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_fineVar</td><td>Fine-grid variable </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_coarVar</td><td>Coarse-grid variable </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_interType</td><td>Slope type </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_interpType</td><td>Interp type </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="a630b6bb2e321b58b186a112e46171433" name="a630b6bb2e321b58b186a112e46171433"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a630b6bb2e321b58b186a112e46171433">&#9670;&#160;</a></span>minmod()</h2>
+<a id="a76121c870085d06bde6cc7fed1c06451" name="a76121c870085d06bde6cc7fed1c06451"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a76121c870085d06bde6cc7fed1c06451">&#9670;&#160;</a></span>minmod()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -586,12 +588,12 @@ Protected Attributes</h2></td></tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td> const</td>
+          <td></td><td></td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">protected</span><span class="mlabel">noexcept</span></span>  </td>
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span><span class="mlabel">protected</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -604,11 +606,12 @@ Protected Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Return value </dd></dl>
 
 </div>
 </div>
-<a id="ac225d1ed480fa58cbec028a3ec36b338" name="ac225d1ed480fa58cbec028a3ec36b338"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac225d1ed480fa58cbec028a3ec36b338">&#9670;&#160;</a></span>monotonizedCentral()</h2>
+<a id="a48747a738e22cbf47b75f0edbc97632d" name="a48747a738e22cbf47b75f0edbc97632d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a48747a738e22cbf47b75f0edbc97632d">&#9670;&#160;</a></span>monotonizedCentral()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -631,12 +634,12 @@ Protected Attributes</h2></td></tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td> const</td>
+          <td></td><td></td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">protected</span><span class="mlabel">noexcept</span></span>  </td>
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span><span class="mlabel">protected</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -649,11 +652,12 @@ Protected Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Return value </dd></dl>
 
 </div>
 </div>
-<a id="a1bf48233e1f7a79e22e2d32695271589" name="a1bf48233e1f7a79e22e2d32695271589"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1bf48233e1f7a79e22e2d32695271589">&#9670;&#160;</a></span>superbee()</h2>
+<a id="aff25f6b2244d28e74240c22f4642c284" name="aff25f6b2244d28e74240c22f4642c284"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aff25f6b2244d28e74240c22f4642c284">&#9670;&#160;</a></span>superbee()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -676,12 +680,12 @@ Protected Attributes</h2></td></tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td> const</td>
+          <td></td><td></td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">protected</span><span class="mlabel">noexcept</span></span>  </td>
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">protected</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -694,6 +698,7 @@ Protected Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Return value </dd></dl>
 
 </div>
 </div>

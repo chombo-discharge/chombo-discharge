@@ -191,7 +191,7 @@ Usage of <code class="docutils literal notranslate"><span class="pre">LookupTabl
 <section id="inserting-data">
 <h2>Inserting data<a class="headerlink" href="#inserting-data" title="Permalink to this heading"></a></h2>
 <p>To add data to the table, use the member function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm">  @brief Add entry. </span>
 <span class="cm">  @param[in] x Entry to add. For example addData(1,1,1,1). Number of elements in x must be N+1</span>
 <span class="cm">*/</span>
@@ -220,7 +220,7 @@ While users will insert rows one by one; <code class="docutils literal notransla
 <section id="scaling">
 <h3>Scaling<a class="headerlink" href="#scaling" title="Permalink to this heading"></a></h3>
 <p>To scale data in a particular column, use</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm">  @brief Utility function which scales one of the columns (either dependent or independent variable)</span>
 <span class="cm">  @param[in] a_scale Scaling factor</span>
 <span class="cm">*/</span>
@@ -234,7 +234,7 @@ While users will insert rows one by one; <code class="docutils literal notransla
 <section id="column-swapping">
 <h3>Column swapping<a class="headerlink" href="#column-swapping" title="Permalink to this heading"></a></h3>
 <p>To swap columns in the table, use</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm">  @brief Utility function for swapping columns. </span>
 <span class="cm">  @details This is done on the raw data -- if the user wants to swap columns in the resampled/structured data</span>
 <span class="cm">  then he needs to call this function first and then resample the table.</span>
@@ -242,7 +242,7 @@ While users will insert rows one by one; <code class="docutils literal notransla
 <span class="cm">  @param[in] a_columnTwo Column to swap.</span>
 <span class="cm">*/</span>
 <span class="kr">inline</span><span class="w"> </span><span class="kt">void</span>
-<span class="nf">swap</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">a_columnOne</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">a_columnTwo</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="nf">swap</span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">a_columnOne</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">a_columnTwo</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>For example, if the input data looked like</p>
@@ -264,15 +264,16 @@ Usually, one must later re-regularize the table, especially if the independent v
 <section id="range-truncation">
 <h3>Range truncation<a class="headerlink" href="#range-truncation" title="Permalink to this heading"></a></h3>
 <p>One can restrict the data range of the table by calling</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm">  @brief Utility function for truncating raw data along one of the variables (either dependent or independent).</span>
 <span class="cm">  @details This will discard (from the raw data) all data that fall outside the input interval. This is done on the raw data -- the user will</span>
 <span class="cm">  need to call prepareTable if the result should propagate into the resampled/structured data.</span>
 <span class="cm">  @param[in] a_min Minimum value represented.</span>
 <span class="cm">  @param[in] a_max Maximum value represented.</span>
+<span class="cm">  @param[in] a_column Description</span>
 <span class="cm">*/</span>
 <span class="kr">inline</span><span class="w"> </span><span class="kt">void</span>
-<span class="nf">truncate</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_min</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_max</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">a_column</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="nf">truncate</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_min</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_max</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">a_column</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">a_min</span></code> and <code class="docutils literal notranslate"><span class="pre">a_max</span></code> are the permissible ranges for data in the input column (<code class="docutils literal notranslate"><span class="pre">a_column</span></code>).
@@ -290,7 +291,7 @@ The user must specify:</p>
 <li><p>How to space the grid points.</p></li>
 </ol>
 <p>A <code class="docutils literal notranslate"><span class="pre">LookupTable1D</span></code> is regularized through</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm">  @brief Turn the raw data into uniform data for fast lookup.</span>
 <span class="cm">  @param[in] a_independentVariable The independent variable (i.e., column in the input data).</span>
 <span class="cm">  @param[in] a_numPoints Number of points in the input table. </span>
@@ -327,17 +328,19 @@ Two different spacings are supported: <code class="docutils literal notranslate"
 <p>To interpolate data from the table, one can fetch either a specific value in a row, or the entire row.
 In any case, the values that are returned are linearly interpolated between grid points (in the independent variable).
 The function signatures are</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm">  @brief Interpolation function for specific dependent variable K</span>
 <span class="cm">  @param[in] a_x Independent variable x</span>
+<span class="cm">  @return Return value</span>
 <span class="cm">*/</span>
 <span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">K</span><span class="o">&gt;</span>
 <span class="kr">inline</span><span class="w"> </span><span class="n">T</span>
 <span class="n">interpolate</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_x</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 
-<span class="cm">/*!</span>
+<span class="cm">/**</span>
 <span class="cm">  @brief Interpolate whole table.</span>
-<span class="cm">  @param[in] a_x Independent variable x</span>
+<span class="cm">  @return Return value</span>
+<span class="cm">  @param[in] x X</span>
 <span class="cm">*/</span>
 <span class="kr">inline</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="o">&gt;</span>
 <span class="n">interpolate</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
@@ -371,14 +374,14 @@ I.e., when calling the <code class="docutils literal notranslate"><span class="p
 <li><p>Extrapolate from the endpoint.</p></li>
 </ul>
 <p>To set the range strategy one can use</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm">  @brief Set the out-of-range strategy on the low end</span>
 <span class="cm">  @param[in] a_strategy Out-of-range strategy on low end</span>
 <span class="cm">*/</span>
 <span class="kr">inline</span><span class="w"> </span><span class="kt">void</span>
 <span class="nf">setRangeStrategyLo</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">LookupTable</span><span class="o">::</span><span class="n">OutOfRangeStrategy</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_strategy</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="cm">/*!</span>
+<span class="cm">/**</span>
 <span class="cm">  @brief Set the out-of-range strategy on the high end</span>
 <span class="cm">  @param[in] a_strategy Out-of-range strategy on the high end</span>
 <span class="cm">*/</span>
@@ -396,28 +399,28 @@ I.e., when calling the <code class="docutils literal notranslate"><span class="p
 <section id="viewing-tables">
 <h2>Viewing tables<a class="headerlink" href="#viewing-tables" title="Permalink to this heading"></a></h2>
 <p>For debugging purposes, <code class="docutils literal notranslate"><span class="pre">LookupTable1D</span></code> can write the internal data to an output stream or a file through various member functions:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm">  @brief Dump raw table data to file</span>
 <span class="cm">  @param[in] a_file File name</span>
 <span class="cm">*/</span>
 <span class="kr">inline</span><span class="w"> </span><span class="kt">void</span>
 <span class="nf">writeRawData</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_file</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="cm">/*!</span>
+<span class="cm">/**</span>
 <span class="cm">  @brief Dump structured table data to file</span>
 <span class="cm">  @param[in] a_file File name</span>
 <span class="cm">*/</span>
 <span class="kr">inline</span><span class="w"> </span><span class="kt">void</span>
 <span class="nf">writeStructuredData</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_file</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="cm">/*!</span>
+<span class="cm">/**</span>
 <span class="cm">  @brief Dump raw table data to output stream.</span>
 <span class="cm">  @param[in] a_ostream Output stream</span>
 <span class="cm">*/</span>
 <span class="kr">inline</span><span class="w"> </span><span class="kt">void</span>
 <span class="nf">outputRawData</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_ostream</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="cm">/*!</span>
+<span class="cm">/**</span>
 <span class="cm">  @brief Dump structured table data to file.</span>
 <span class="cm">  @param[in] a_ostream Output stream</span>
 <span class="cm">*/</span>

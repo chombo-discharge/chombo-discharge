@@ -87,7 +87,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>Implementation of <a class="el" href="classCellTagger.html" title="Base class for tagging cells across an AMR hierarchy.">CellTagger</a> that tags cells based on field evaluations or the Townsend coefficient.  
+<p>Declaration of the CdrPlasmaStreamerTagger class for AMR cell tagging based on streamer criteria.  
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &lt;<a class="el" href="CD__CdrPlasmaFieldTagger_8H_source.html">CD_CdrPlasmaFieldTagger.H</a>&gt;</code><br />
 <code>#include &lt;CD_NamespaceHeader.H&gt;</code><br />
@@ -97,14 +97,14 @@ Include dependency graph for CD_CdrPlasmaStreamerTagger.H:</div>
 <div class="dyncontent">
 <div class="center"><img src="CD__CdrPlasmaStreamerTagger_8H__incl.png" border="0" usemap="#aPhysics_2CdrPlasma_2CellTaggers_2CdrPlasmaStreamerTagger_2CD__CdrPlasmaStreamerTagger_8H" alt=""/></div>
 <map name="aPhysics_2CdrPlasma_2CellTaggers_2CdrPlasmaStreamerTagger_2CD__CdrPlasmaStreamerTagger_8H" id="aPhysics_2CdrPlasma_2CellTaggers_2CdrPlasmaStreamerTagger_2CD__CdrPlasmaStreamerTagger_8H">
-<area shape="rect" title="Implementation of CellTagger that tags cells based on field evaluations or the Townsend coefficient." alt="" coords="2435,5,2674,60"/>
-<area shape="rect" href="CD__CdrPlasmaFieldTagger_8H.html" title="Cell tagger class for Physics/CdrPlasma." alt="" coords="2452,108,2657,133"/>
+<area shape="rect" title="Declaration of the CdrPlasmaStreamerTagger class for AMR cell tagging based on streamer criteria." alt="" coords="2435,5,2674,60"/>
+<area shape="rect" href="CD__CdrPlasmaFieldTagger_8H.html" title="Declaration of the Physics::CdrPlasma::CdrPlasmaFieldTagger class." alt="" coords="2452,108,2657,133"/>
 <area shape="poly" title=" " alt="" coords="2557,60,2557,94,2552,94,2552,60"/>
 <area shape="rect" href="CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="2097,768,2282,793"/>
 <area shape="poly" title=" " alt="" coords="2435,36,2042,39,1795,46,1543,58,1308,78,1205,91,1114,106,1038,124,981,145,945,168,936,180,933,193,933,488,938,518,950,537,969,551,993,561,1047,581,1075,596,1099,620,1115,648,1121,674,1129,697,1137,708,1149,718,1189,727,1274,736,1534,752,2083,773,2083,779,1533,757,1274,741,1188,732,1147,722,1133,711,1125,700,1116,676,1110,650,1095,623,1071,601,1045,585,991,566,966,555,946,541,933,519,928,489,928,192,932,178,942,164,979,140,1037,119,1113,101,1204,86,1308,73,1542,53,1794,41,2042,34,2435,30"/>
 <area shape="rect" href="CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="3775,768,3953,793"/>
 <area shape="poly" title=" " alt="" coords="2674,32,3334,37,3785,46,4256,59,4701,79,4900,91,5076,106,5222,123,5334,143,5406,165,5425,178,5432,192,5432,563,5427,575,5412,587,5362,612,5290,637,5206,661,5040,702,4939,723,4854,735,4742,745,4471,762,3967,780,3967,774,4470,757,4741,740,4853,729,4938,717,5039,696,5204,656,5288,632,5360,607,5409,583,5422,572,5427,561,5427,193,5421,182,5403,170,5333,148,5221,129,5075,112,4900,97,4701,84,4255,64,3785,51,3334,43,2674,37"/>
-<area shape="rect" href="CD__CdrPlasmaTagger_8H.html" title="Declearation of an abstract class for tagging cells in a Physics/CdrPlasma context." alt="" coords="2467,181,2642,207"/>
+<area shape="rect" href="CD__CdrPlasmaTagger_8H.html" title="Declaration of the Physics::CdrPlasma::CdrPlasmaTagger abstract class." alt="" coords="2467,181,2642,207"/>
 <area shape="poly" title=" " alt="" coords="2557,134,2557,168,2552,168,2552,134"/>
 <area shape="poly" title=" " alt="" coords="2452,129,2074,146,1585,176,1354,196,1162,218,1088,229,1031,242,995,255,987,261,984,267,984,415,990,455,1005,483,1030,501,1061,515,1138,536,1180,550,1221,571,1292,618,1346,656,1403,688,1481,717,1531,729,1597,739,1760,755,2083,773,2083,778,1759,760,1597,744,1530,734,1479,723,1401,693,1343,661,1289,622,1219,576,1178,555,1136,541,1059,520,1027,506,1001,486,985,457,979,416,979,265,983,257,993,250,1029,237,1087,224,1161,212,1354,190,1585,171,2074,141,2451,123"/>
 <area shape="poly" title=" " alt="" coords="2658,120,3215,127,3595,136,3992,149,4366,167,4681,192,4804,207,4899,223,4959,243,4975,253,4981,265,4981,636,4974,669,4956,692,4928,708,4893,723,4839,735,4747,746,4490,763,4203,774,3967,780,3967,775,4203,769,4490,758,4747,741,4838,730,4891,717,4925,703,4952,688,4970,667,4976,635,4976,267,4971,257,4957,247,4897,229,4804,212,4681,197,4366,172,3991,154,3595,141,3215,133,2658,125"/>
@@ -112,7 +112,7 @@ Include dependency graph for CD_CdrPlasmaStreamerTagger.H:</div>
 <area shape="poly" title=" " alt="" coords="2549,208,2520,256,2483,329,2455,390,2450,388,2478,326,2515,253,2545,206"/>
 <area shape="poly" title=" " alt="" coords="2467,202,2107,219,1629,250,1401,269,1211,291,1081,316,1046,328,1037,334,1035,340,1035,415,1039,422,1054,435,1107,473,1271,574,1441,670,1532,718,1577,729,1637,739,1784,755,2083,773,2083,778,1784,760,1636,744,1576,734,1530,722,1439,675,1268,578,1104,477,1051,439,1035,426,1029,416,1029,339,1033,331,1043,324,1080,310,1210,286,1401,264,1628,245,2106,214,2467,196"/>
 <area shape="poly" title=" " alt="" coords="2642,193,3180,201,3554,209,3946,223,4318,241,4631,266,4754,280,4848,297,4908,316,4925,327,4931,339,4931,636,4925,668,4907,691,4882,707,4849,723,4798,735,4711,746,4467,763,4193,774,3967,780,3967,775,4193,769,4467,758,4710,741,4797,730,4847,717,4879,702,4904,687,4920,666,4925,635,4925,340,4921,330,4906,321,4847,302,4753,286,4631,271,4318,246,3946,228,3554,215,3180,206,2642,199"/>
-<area shape="rect" href="CD__CdrPlasmaStepper_8H.html" title="Declaration of a CdrPlasmaStepper, an abstract class for evolving cdr plasma equations in time." alt="" coords="2529,255,2711,280"/>
+<area shape="rect" href="CD__CdrPlasmaStepper_8H.html" title="Declaration of Physics::CdrPlasma::CdrPlasmaStepper, the abstract base class for CDR plasma time step..." alt="" coords="2529,255,2711,280"/>
 <area shape="poly" title=" " alt="" coords="2567,205,2602,243,2598,246,2564,209"/>
 <area shape="rect" href="CD__ComputationalGeometry_8H.html" title="Declaration of base class for defining geometries." alt="" coords="1677,621,1899,647"/>
 <area shape="poly" title=" " alt="" coords="2414,429,2216,503,2008,569,1841,620,1840,615,2007,564,2214,497,2412,424"/>
@@ -237,7 +237,7 @@ Include dependency graph for CD_CdrPlasmaStreamerTagger.H:</div>
 <area shape="poly" title=" " alt="" coords="2711,267,3187,272,3856,284,4468,301,4676,312,4741,319,4777,325,4816,339,4849,354,4862,364,4872,376,4878,392,4880,413,4880,636,4875,667,4861,689,4839,706,4809,722,4761,736,4678,747,4446,764,4185,774,3967,780,3967,775,4185,769,4446,758,4678,742,4760,730,4807,718,4836,702,4857,686,4870,665,4875,635,4875,413,4873,394,4867,379,4858,367,4846,358,4814,344,4775,331,4741,324,4675,318,4468,306,3856,289,3187,278,2711,272"/>
 <area shape="poly" title=" " alt="" coords="2711,274,2873,297,2972,318,3079,345,3190,381,3300,425,3405,480,3502,546,3530,568,3552,592,3559,604,3562,618,3560,633,3553,648,3526,675,3493,693,3490,688,3523,671,3549,645,3555,631,3557,618,3554,606,3548,595,3526,572,3498,550,3402,485,3297,430,3188,386,3078,350,2971,323,2872,303,2710,279"/>
 <area shape="poly" title=" " alt="" coords="2641,278,2670,299,2698,326,2714,354,2721,380,2729,403,2748,425,2781,440,2831,454,2943,474,2942,479,2830,459,2779,445,2745,429,2724,405,2716,381,2709,356,2694,330,2666,303,2638,283"/>
-<area shape="rect" href="CD__CdrPlasmaPhysics_8H.html" title="Declaration of basic physics coupling functions for Physics/CdrPlasma." alt="" coords="904,621,1085,647"/>
+<area shape="rect" href="CD__CdrPlasmaPhysics_8H.html" title="Declaration of the Physics::CdrPlasma::CdrPlasmaPhysics interface class." alt="" coords="904,621,1085,647"/>
 <area shape="poly" title=" " alt="" coords="2529,272,2239,275,1862,285,1517,302,1393,315,1349,322,1321,330,1289,349,1250,379,1162,459,1078,546,1016,613,1012,609,1074,542,1159,455,1247,375,1286,344,1319,326,1348,317,1392,310,1516,297,1862,279,2239,270,2529,267"/>
 <area shape="rect" href="CD__CdrLayout_8H.html" title="Declaration of a class that holds a set of CdrSolvers (to cut down on typing)." alt="" coords="2556,328,2684,353"/>
 <area shape="poly" title=" " alt="" coords="2623,280,2623,314,2617,314,2617,280"/>
@@ -328,8 +328,8 @@ This graph shows which files directly or indirectly include this file:</div>
 <div class="dyncontent">
 <div class="center"><img src="CD__CdrPlasmaStreamerTagger_8H__dep__incl.png" border="0" usemap="#aPhysics_2CdrPlasma_2CellTaggers_2CdrPlasmaStreamerTagger_2CD__CdrPlasmaStreamerTagger_8Hdep" alt=""/></div>
 <map name="aPhysics_2CdrPlasma_2CellTaggers_2CdrPlasmaStreamerTagger_2CD__CdrPlasmaStreamerTagger_8Hdep" id="aPhysics_2CdrPlasma_2CellTaggers_2CdrPlasmaStreamerTagger_2CD__CdrPlasmaStreamerTagger_8Hdep">
-<area shape="rect" title="Implementation of CellTagger that tags cells based on field evaluations or the Townsend coefficient." alt="" coords="11,5,250,60"/>
-<area shape="rect" href="CD__CdrPlasmaStreamerTagger_8cpp.html" title="Implementation CD_CdrPlasmaStreamerTagger.H." alt="" coords="5,108,256,163"/>
+<area shape="rect" title="Declaration of the CdrPlasmaStreamerTagger class for AMR cell tagging based on streamer criteria." alt="" coords="11,5,250,60"/>
+<area shape="rect" href="CD__CdrPlasmaStreamerTagger_8cpp.html" title="Implementation of CD_CdrPlasmaStreamerTagger.H." alt="" coords="5,108,256,163"/>
 <area shape="poly" title=" " alt="" coords="133,74,133,108,128,108,128,74"/>
 </map>
 </div>
@@ -339,20 +339,20 @@ This graph shows which files directly or indirectly include this file:</div>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStreamerTagger.html">Physics::CdrPlasma::CdrPlasmaStreamerTagger</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Class which implements <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaFieldTagger.html" title="Lightweight tagging class which flags cells for refinement/coarsening using the electric field only.">CdrPlasmaFieldTagger</a> and refines cells based on the criterion alpha*dx &gt; threshold or on the curvature of the electric field.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStreamerTagger.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Concrete <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaFieldTagger.html" title="Intermediate CdrPlasmaTagger subclass that computes tracer fields from the electric field only.">CdrPlasmaFieldTagger</a> that tags cells based on streamer inception criteria.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStreamerTagger.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:namespacePhysics" id="r_namespacePhysics"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacePhysics.html">Physics</a></td></tr>
-<tr class="memdesc:namespacePhysics"><td class="mdescLeft">&#160;</td><td class="mdescRight">Name containing various physics models for running chombo-discharge code. <br /></td></tr>
+<tr class="memdesc:namespacePhysics"><td class="mdescLeft">&#160;</td><td class="mdescRight">Namespace containing physics models for use with chombo-discharge. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:namespacePhysics_1_1CdrPlasma" id="r_namespacePhysics_1_1CdrPlasma"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacePhysics_1_1CdrPlasma.html">Physics::CdrPlasma</a></td></tr>
-<tr class="memdesc:namespacePhysics_1_1CdrPlasma"><td class="mdescLeft">&#160;</td><td class="mdescRight">Namespace for encapsulating CDR plasma code. <br /></td></tr>
+<tr class="memdesc:namespacePhysics_1_1CdrPlasma"><td class="mdescLeft">&#160;</td><td class="mdescRight">Namespace for encapsulating CDR plasma physics. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Implementation of <a class="el" href="classCellTagger.html" title="Base class for tagging cells across an AMR hierarchy.">CellTagger</a> that tags cells based on field evaluations or the Townsend coefficient. </p>
+<div class="textblock"><p>Declaration of the CdrPlasmaStreamerTagger class for AMR cell tagging based on streamer criteria. </p>
 <dl class="section author"><dt>Author</dt><dd>Robert Marskar </dd></dl>
 </div></div><!-- contents -->
 <!-- start footer part -->

@@ -125,30 +125,19 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a944fef2f990d97c5262048872770c437" id="r_a944fef2f990d97c5262048872770c437"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseFineParticleMesh.html#a944fef2f990d97c5262048872770c437">addInvalidCoarseToFine</a> (<a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_fineData</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_coarData</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:a944fef2f990d97c5262048872770c437"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function which piecewise interpolates the data underneath the fine grid and adds it to the fine grid.  <br /></td></tr>
 <tr class="separator:a944fef2f990d97c5262048872770c437"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aab7101521c28e5b7bc01a8a0d7b65985" id="r_aab7101521c28e5b7bc01a8a0d7b65985"><td class="memItemLeft" align="right" valign="top"><a id="aab7101521c28e5b7bc01a8a0d7b65985" name="aab7101521c28e5b7bc01a8a0d7b65985"></a>
-<a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>exchangeAndAddFiCoData</b> (<a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_fiCoData</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:aab7101521c28e5b7bc01a8a0d7b65985"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function which performs an exchange+add operation on the refined coarse data. <br /></td></tr>
+<tr class="memitem:aab7101521c28e5b7bc01a8a0d7b65985" id="r_aab7101521c28e5b7bc01a8a0d7b65985"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseFineParticleMesh.html#aab7101521c28e5b7bc01a8a0d7b65985">exchangeAndAddFiCoData</a> (<a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_fiCoData</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:aab7101521c28e5b7bc01a8a0d7b65985"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function which performs an exchange+add operation on the refined coarse data.  <br /></td></tr>
 <tr class="separator:aab7101521c28e5b7bc01a8a0d7b65985"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7d0a508fb112f92fcf0da434ac23a0fd" id="r_a7d0a508fb112f92fcf0da434ac23a0fd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseFineParticleMesh.html#a7d0a508fb112f92fcf0da434ac23a0fd">restrictAndAddFiCoDataToCoar</a> (<a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_coarData</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_fiCoData</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEBCoarseFineParticleMesh.html#ac28322de791a075d85bc98414056a268">EBCoarseFineParticleMesh::Average</a> <a class="el" href="classTracerParticleSolver.html">a_average</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:a7d0a508fb112f92fcf0da434ac23a0fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsen the data on the refined coarse grid to the coarse grid. The grids must be defined over the same layout.  <br /></td></tr>
 <tr class="separator:a7d0a508fb112f92fcf0da434ac23a0fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af6454aafec98aaf102858f3d7f9c2af9" id="r_af6454aafec98aaf102858f3d7f9c2af9"><td class="memItemLeft" align="right" valign="top"><a id="af6454aafec98aaf102858f3d7f9c2af9" name="af6454aafec98aaf102858f3d7f9c2af9"></a>
-<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBLevelGrid</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getEblgFiCo</b> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:af6454aafec98aaf102858f3d7f9c2af9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the refined version of the coarse eblevelgrid. <br /></td></tr>
+<tr class="memitem:af6454aafec98aaf102858f3d7f9c2af9" id="r_af6454aafec98aaf102858f3d7f9c2af9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBLevelGrid</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseFineParticleMesh.html#af6454aafec98aaf102858f3d7f9c2af9">getEblgFiCo</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:af6454aafec98aaf102858f3d7f9c2af9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the refined version of the coarse eblevelgrid.  <br /></td></tr>
 <tr class="separator:af6454aafec98aaf102858f3d7f9c2af9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adced6795096224a7297dca938acf1355" id="r_adced6795096224a7297dca938acf1355"><td class="memTemplParams" colspan="2"><a id="adced6795096224a7297dca938acf1355" name="adced6795096224a7297dca938acf1355"></a>
-template&lt;<a class="el" href="classTracerParticleSolver.html">int</a> NCOMP&gt; </td></tr>
-<tr class="memitem:adced6795096224a7297dca938acf1355"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;&#160;</td><td class="memTemplItemRight" valign="bottom"><b>getBufferFiCo</b> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:adced6795096224a7297dca938acf1355"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get buffer storage on the refined coarse level. <br /></td></tr>
+<tr class="memitem:adced6795096224a7297dca938acf1355" id="r_adced6795096224a7297dca938acf1355"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="classTracerParticleSolver.html">int</a> NCOMP&gt; </td></tr>
+<tr class="memitem:adced6795096224a7297dca938acf1355"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classEBCoarseFineParticleMesh.html#adced6795096224a7297dca938acf1355">getBufferFiCo</a> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:adced6795096224a7297dca938acf1355"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get buffer storage on the refined coarse level.  <br /></td></tr>
 <tr class="separator:adced6795096224a7297dca938acf1355"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a78d8fb028eff4c30000fa95b610cf7cb" id="r_a78d8fb028eff4c30000fa95b610cf7cb"><td class="memItemLeft" align="right" valign="top"><a id="a78d8fb028eff4c30000fa95b610cf7cb" name="a78d8fb028eff4c30000fa95b610cf7cb"></a>
-template&lt;&gt; </td></tr>
-<tr class="memitem:a78d8fb028eff4c30000fa95b610cf7cb"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;&#160;</td><td class="memTemplItemRight" valign="bottom"><b>getBufferFiCo</b> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="separator:a78d8fb028eff4c30000fa95b610cf7cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a78d8fb028eff4c30000fa95b610cf7cb" id="r_a78d8fb028eff4c30000fa95b610cf7cb"><td class="memItemLeft" align="right" valign="top"><a id="a78d8fb028eff4c30000fa95b610cf7cb" name="a78d8fb028eff4c30000fa95b610cf7cb"></a>
-template&lt;&gt; </td></tr>
-<tr class="memitem:a78d8fb028eff4c30000fa95b610cf7cb"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;&#160;</td><td class="memTemplItemRight" valign="bottom"><b>getBufferFiCo</b> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="separator:a78d8fb028eff4c30000fa95b610cf7cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
@@ -621,6 +610,90 @@ Static Protected Attributes</h2></td></tr>
 
 </div>
 </div>
+<a id="aab7101521c28e5b7bc01a8a0d7b65985" name="aab7101521c28e5b7bc01a8a0d7b65985"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aab7101521c28e5b7bc01a8a0d7b65985">&#9670;&#160;</a></span>exchangeAndAddFiCoData()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> EBCoarseFineParticleMesh::exchangeAndAddFiCoData </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_fiCoData</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Function which performs an exchange+add operation on the refined coarse data. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_fiCoData</td><td>Description </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="adced6795096224a7297dca938acf1355" name="adced6795096224a7297dca938acf1355"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adced6795096224a7297dca938acf1355">&#9670;&#160;</a></span>getBufferFiCo()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="classTracerParticleSolver.html">int</a> NCOMP&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp; EBCoarseFineParticleMesh::getBufferFiCo </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get buffer storage on the refined coarse level. </p>
+<dl class="section return"><dt>Returns</dt><dd>Buffer fi co </dd></dl>
+
+</div>
+</div>
+<a id="af6454aafec98aaf102858f3d7f9c2af9" name="af6454aafec98aaf102858f3d7f9c2af9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af6454aafec98aaf102858f3d7f9c2af9">&#9670;&#160;</a></span>getEblgFiCo()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBLevelGrid</a> &amp; EBCoarseFineParticleMesh::getEblgFiCo </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the refined version of the coarse eblevelgrid. </p>
+<dl class="section return"><dt>Returns</dt><dd>Eblg fi co </dd></dl>
+
+</div>
+</div>
 <a id="a7d0a508fb112f92fcf0da434ac23a0fd" name="a7d0a508fb112f92fcf0da434ac23a0fd"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7d0a508fb112f92fcf0da434ac23a0fd">&#9670;&#160;</a></span>restrictAndAddFiCoDataToCoar()</h2>
 
@@ -665,8 +738,8 @@ Static Protected Attributes</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_coarData</td><td>Coarse-grid data </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_fineData</td><td>Data on the refined coarse grid </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_average</td><td>Averaging method. Either arithmetic or conservative. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_fiCoData</td><td>Fi co data </td></tr>
   </table>
   </dd>
 </dl>

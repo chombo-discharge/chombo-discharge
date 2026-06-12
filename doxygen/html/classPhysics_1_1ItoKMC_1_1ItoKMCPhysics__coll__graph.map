@@ -1,5 +1,5 @@
 <map id="Physics::ItoKMC::ItoKMCPhysics" name="Physics::ItoKMC::ItoKMCPhysics">
-<area shape="rect" id="Node000001" title="Base class for interaction between Kinetic Monte Carlo and Ito&#45;based plasma solvers." alt="" coords="421,55,652,80"/>
+<area shape="rect" id="Node000001" title="Abstract base class coupling Kinetic Monte Carlo chemistry to Ito/CDR plasma solvers." alt="" coords="421,55,652,80"/>
 <area shape="rect" id="Node000002" href="$classKMCSolver.html" title="Class for running Kinetic Monte&#45;Carlo simulations." alt="" coords="25,5,216,31"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="230,26,398,45,452,52,451,57,397,50,229,31"/>
 <area shape="rect" id="Node000003" href="$classKMCDualState.html" title="Declaration of a &quot;dual state&quot; for advancing with the Kinetic Monte Carlo module." alt="" coords="43,55,198,80"/>

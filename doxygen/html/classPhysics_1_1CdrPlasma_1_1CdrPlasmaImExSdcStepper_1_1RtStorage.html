@@ -87,73 +87,243 @@ $(function() {
   <div class="headertitle"><div class="title">Physics::CdrPlasma::CdrPlasmaImExSdcStepper::RtStorage Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="dynheader">
-Collaboration diagram for Physics::CdrPlasma::CdrPlasmaImExSdcStepper::RtStorage:</div>
-<div class="dyncontent">
-<div class="center"><img src="classPhysics_1_1CdrPlasma_1_1CdrPlasmaImExSdcStepper_1_1RtStorage__coll__graph.png" border="0" usemap="#aPhysics_1_1CdrPlasma_1_1CdrPlasmaImExSdcStepper_1_1RtStorage_coll__map" alt="Collaboration graph"/></div>
-<map name="aPhysics_1_1CdrPlasma_1_1CdrPlasmaImExSdcStepper_1_1RtStorage_coll__map" id="aPhysics_1_1CdrPlasma_1_1CdrPlasmaImExSdcStepper_1_1RtStorage_coll__map">
-<area shape="rect" title=" " alt="" coords="215,196,421,251"/>
-<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="5,101,201,126"/>
-<area shape="poly" title=" " alt="" coords="140,130,267,194,265,198,137,135"/>
-<area shape="rect" href="classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="249,5,387,31"/>
-<area shape="poly" title=" " alt="" coords="266,37,212,57,124,103,121,98,210,52,265,32"/>
-<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="226,93,410,133"/>
-<area shape="poly" title=" " alt="" coords="321,44,321,93,315,93,315,44"/>
-<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="434,101,679,126"/>
-<area shape="poly" title=" " alt="" coords="401,26,445,36,487,52,522,75,548,98,544,102,518,79,485,57,443,42,400,31"/>
-<area shape="poly" title=" " alt="" coords="321,147,321,196,315,196,315,147"/>
-<area shape="poly" title=" " alt="" coords="520,134,377,198,375,194,517,129"/>
-</map>
-<center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
+
+<p>Per-RTE-solver scratch storage for the IMEX-SDC time stepper.  
+ <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaImExSdcStepper_1_1RtStorage.html#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="CD__CdrPlasmaImExSdcStorage_8H_source.html">CD_CdrPlasmaImExSdcStorage.H</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ae6aa14801d6198dd6fd89452a9c98a4b" id="r_ae6aa14801d6198dd6fd89452a9c98a4b"><td class="memItemLeft" align="right" valign="top"><a id="ae6aa14801d6198dd6fd89452a9c98a4b" name="ae6aa14801d6198dd6fd89452a9c98a4b"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>RtStorage</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classAmrMesh.html">AmrMesh</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_amr</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> <a class="el" href="classTracerParticleSolver.html">a_realm</a>, <a class="el" href="classTracerParticleSolver.html">const</a> phase::which_phase <a class="el" href="classTracerParticleSolver.html">a_phase</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_ncomp</a>)</td></tr>
-<tr class="separator:ae6aa14801d6198dd6fd89452a9c98a4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a86b6e246fc957913c8401c7c65ae2d6b" id="r_a86b6e246fc957913c8401c7c65ae2d6b"><td class="memItemLeft" align="right" valign="top"><a id="a86b6e246fc957913c8401c7c65ae2d6b" name="a86b6e246fc957913c8401c7c65ae2d6b"></a>
-<a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>allocateStorage</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_p</a>)</td></tr>
+<tr class="memitem:adfce7db280fd424a05884c461cf42233" id="r_adfce7db280fd424a05884c461cf42233"><td class="memItemLeft" align="right" valign="top"><a id="adfce7db280fd424a05884c461cf42233" name="adfce7db280fd424a05884c461cf42233"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>RtStorage</b> ()</td></tr>
+<tr class="memdesc:adfce7db280fd424a05884c461cf42233"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor. Leaves all members uninitialised; call <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaImExSdcStepper_1_1RtStorage.html#a86b6e246fc957913c8401c7c65ae2d6b" title="Allocate RTE scratch storage for p+1 SDC nodes.">allocateStorage()</a> after construction. <br /></td></tr>
+<tr class="separator:adfce7db280fd424a05884c461cf42233"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adbc0c8a2ee60a1a9a7663997adffd474" id="r_adbc0c8a2ee60a1a9a7663997adffd474"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaImExSdcStepper_1_1RtStorage.html#adbc0c8a2ee60a1a9a7663997adffd474">RtStorage</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classAmrMesh.html">AmrMesh</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_amr</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_realm</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> <a class="el" href="classTracerParticleSolver.html">a_phase</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_ncomp</a>)</td></tr>
+<tr class="memdesc:adbc0c8a2ee60a1a9a7663997adffd474"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor.  <br /></td></tr>
+<tr class="separator:adbc0c8a2ee60a1a9a7663997adffd474"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab6aaf77df11ab931d5bfb8f3e52815a6" id="r_ab6aaf77df11ab931d5bfb8f3e52815a6"><td class="memItemLeft" align="right" valign="top"><a id="ab6aaf77df11ab931d5bfb8f3e52815a6" name="ab6aaf77df11ab931d5bfb8f3e52815a6"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>~RtStorage</b> ()</td></tr>
+<tr class="memdesc:ab6aaf77df11ab931d5bfb8f3e52815a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. <br /></td></tr>
+<tr class="separator:ab6aaf77df11ab931d5bfb8f3e52815a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a86b6e246fc957913c8401c7c65ae2d6b" id="r_a86b6e246fc957913c8401c7c65ae2d6b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaImExSdcStepper_1_1RtStorage.html#a86b6e246fc957913c8401c7c65ae2d6b">allocateStorage</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_p</a>)</td></tr>
+<tr class="memdesc:a86b6e246fc957913c8401c7c65ae2d6b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocate RTE scratch storage for p+1 SDC nodes.  <br /></td></tr>
 <tr class="separator:a86b6e246fc957913c8401c7c65ae2d6b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a13cf4220cf785e6afa65b80be1e858b6" id="r_a13cf4220cf785e6afa65b80be1e858b6"><td class="memItemLeft" align="right" valign="top"><a id="a13cf4220cf785e6afa65b80be1e858b6" name="a13cf4220cf785e6afa65b80be1e858b6"></a>
 <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>deallocateStorage</b> ()</td></tr>
+<tr class="memdesc:a13cf4220cf785e6afa65b80be1e858b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deallocate all RTE scratch storage. <br /></td></tr>
 <tr class="separator:a13cf4220cf785e6afa65b80be1e858b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4d061c0c40a2363111659fc59bb909e1" id="r_a4d061c0c40a2363111659fc59bb909e1"><td class="memItemLeft" align="right" valign="top"><a id="a4d061c0c40a2363111659fc59bb909e1" name="a4d061c0c40a2363111659fc59bb909e1"></a>
-<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getPrevious</b> ()</td></tr>
+<tr class="memitem:a4d061c0c40a2363111659fc59bb909e1" id="r_a4d061c0c40a2363111659fc59bb909e1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaImExSdcStepper_1_1RtStorage.html#a4d061c0c40a2363111659fc59bb909e1">getPrevious</a> ()</td></tr>
+<tr class="memdesc:a4d061c0c40a2363111659fc59bb909e1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the cell-centered photon density at the previous time step.  <br /></td></tr>
 <tr class="separator:a4d061c0c40a2363111659fc59bb909e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aead84662ef9ebe9c09985dc410c83ade" id="r_aead84662ef9ebe9c09985dc410c83ade"><td class="memItemLeft" align="right" valign="top"><a id="aead84662ef9ebe9c09985dc410c83ade" name="aead84662ef9ebe9c09985dc410c83ade"></a>
-<a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getEbFlux</b> ()</td></tr>
+<tr class="memitem:aead84662ef9ebe9c09985dc410c83ade" id="r_aead84662ef9ebe9c09985dc410c83ade"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">EBAMRIVData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaImExSdcStepper_1_1RtStorage.html#aead84662ef9ebe9c09985dc410c83ade">getEbFlux</a> ()</td></tr>
+<tr class="memdesc:aead84662ef9ebe9c09985dc410c83ade"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the EB-centered isotropic photon flux scratch array.  <br /></td></tr>
 <tr class="separator:aead84662ef9ebe9c09985dc410c83ade"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5e59b35e23a4a3dc5769d3c89c9b8396" id="r_a5e59b35e23a4a3dc5769d3c89c9b8396"><td class="memItemLeft" align="right" valign="top"><a id="a5e59b35e23a4a3dc5769d3c89c9b8396" name="a5e59b35e23a4a3dc5769d3c89c9b8396"></a>
-<a class="el" href="classEBAMRData.html">EBAMRIFData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getDomainFlux</b> ()</td></tr>
+<tr class="memitem:a5e59b35e23a4a3dc5769d3c89c9b8396" id="r_a5e59b35e23a4a3dc5769d3c89c9b8396"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">EBAMRIFData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaImExSdcStepper_1_1RtStorage.html#a5e59b35e23a4a3dc5769d3c89c9b8396">getDomainFlux</a> ()</td></tr>
+<tr class="memdesc:a5e59b35e23a4a3dc5769d3c89c9b8396"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the domain-face-centered isotropic photon flux scratch array.  <br /></td></tr>
 <tr class="separator:a5e59b35e23a4a3dc5769d3c89c9b8396"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
 <tr class="memitem:a20e9e162ac73502e15ca79d92df81b1e" id="r_a20e9e162ac73502e15ca79d92df81b1e"><td class="memItemLeft" align="right" valign="top"><a id="a20e9e162ac73502e15ca79d92df81b1e" name="a20e9e162ac73502e15ca79d92df81b1e"></a>
 <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_realm</b></td></tr>
+<tr class="memdesc:a20e9e162ac73502e15ca79d92df81b1e"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> on which storage is allocated. <br /></td></tr>
 <tr class="separator:a20e9e162ac73502e15ca79d92df81b1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a94bf7dce6f33fdf721609a6b0701c3e6" id="r_a94bf7dce6f33fdf721609a6b0701c3e6"><td class="memItemLeft" align="right" valign="top"><a id="a94bf7dce6f33fdf721609a6b0701c3e6" name="a94bf7dce6f33fdf721609a6b0701c3e6"></a>
 <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classAmrMesh.html">AmrMesh</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_amr</b></td></tr>
+<tr class="memdesc:a94bf7dce6f33fdf721609a6b0701c3e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">AMR mesh used for allocation. <br /></td></tr>
 <tr class="separator:a94bf7dce6f33fdf721609a6b0701c3e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa1c54d2ec91e12413fa167c4255f7314" id="r_aa1c54d2ec91e12413fa167c4255f7314"><td class="memItemLeft" align="right" valign="top"><a id="aa1c54d2ec91e12413fa167c4255f7314" name="aa1c54d2ec91e12413fa167c4255f7314"></a>
-phase::which_phase&#160;</td><td class="memItemRight" valign="bottom"><b>m_phase</b></td></tr>
+<a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_phase</b></td></tr>
+<tr class="memdesc:aa1c54d2ec91e12413fa167c4255f7314"><td class="mdescLeft">&#160;</td><td class="mdescRight">Phase on which storage is allocated. <br /></td></tr>
 <tr class="separator:aa1c54d2ec91e12413fa167c4255f7314"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0b4df06626001f97722e9ad80573be5d" id="r_a0b4df06626001f97722e9ad80573be5d"><td class="memItemLeft" align="right" valign="top"><a id="a0b4df06626001f97722e9ad80573be5d" name="a0b4df06626001f97722e9ad80573be5d"></a>
 <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_ncomp</b></td></tr>
+<tr class="memdesc:a0b4df06626001f97722e9ad80573be5d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of scalar components (1 for RTE species). <br /></td></tr>
 <tr class="separator:a0b4df06626001f97722e9ad80573be5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a37c0a572824be62a07b64d61d46f8d44" id="r_a37c0a572824be62a07b64d61d46f8d44"><td class="memItemLeft" align="right" valign="top"><a id="a37c0a572824be62a07b64d61d46f8d44" name="a37c0a572824be62a07b64d61d46f8d44"></a>
 <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_p</b></td></tr>
+<tr class="memdesc:a37c0a572824be62a07b64d61d46f8d44"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of SDC subintervals. <br /></td></tr>
 <tr class="separator:a37c0a572824be62a07b64d61d46f8d44"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af3a0e6e71c252437be9f863bb4da18fb" id="r_af3a0e6e71c252437be9f863bb4da18fb"><td class="memItemLeft" align="right" valign="top"><a id="af3a0e6e71c252437be9f863bb4da18fb" name="af3a0e6e71c252437be9f863bb4da18fb"></a>
-<a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_previous</b></td></tr>
+<a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_previous</b></td></tr>
+<tr class="memdesc:af3a0e6e71c252437be9f863bb4da18fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cell-centered photon density at the previous time step (used to restore state on rejection). <br /></td></tr>
 <tr class="separator:af3a0e6e71c252437be9f863bb4da18fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a995e4bae5566646e46f9899ee01a266c" id="r_a995e4bae5566646e46f9899ee01a266c"><td class="memItemLeft" align="right" valign="top"><a id="a995e4bae5566646e46f9899ee01a266c" name="a995e4bae5566646e46f9899ee01a266c"></a>
-<a class="el" href="classEBAMRData.html">EBAMRIVData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_scratchIV</b></td></tr>
+<a class="el" href="classTracerParticleSolver.html">EBAMRIVData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_scratchIV</b></td></tr>
+<tr class="memdesc:a995e4bae5566646e46f9899ee01a266c"><td class="mdescLeft">&#160;</td><td class="mdescRight">EB-centered scratch array for the isotropic photon density boundary condition. <br /></td></tr>
 <tr class="separator:a995e4bae5566646e46f9899ee01a266c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a25752525697816519fec695440dc316e" id="r_a25752525697816519fec695440dc316e"><td class="memItemLeft" align="right" valign="top"><a id="a25752525697816519fec695440dc316e" name="a25752525697816519fec695440dc316e"></a>
-<a class="el" href="classEBAMRData.html">EBAMRIFData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_scratchIF</b></td></tr>
+<a class="el" href="classTracerParticleSolver.html">EBAMRIFData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_scratchIF</b></td></tr>
+<tr class="memdesc:a25752525697816519fec695440dc316e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Domain-face-centered scratch array for the isotropic photon density boundary condition. <br /></td></tr>
 <tr class="separator:a25752525697816519fec695440dc316e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Per-RTE-solver scratch storage for the IMEX-SDC time stepper. </p>
+<p>Holds the photon density at the previous time step plus EB and domain face flux arrays used to impose boundary conditions during the RTE advance. </p>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="adbc0c8a2ee60a1a9a7663997adffd474" name="adbc0c8a2ee60a1a9a7663997adffd474"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adbc0c8a2ee60a1a9a7663997adffd474">&#9670;&#160;</a></span>RtStorage()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">CdrPlasmaImExSdcStepper::RtStorage::RtStorage </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classAmrMesh.html">AmrMesh</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_amr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_realm</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a>&#160;</td>
+          <td class="paramname"><em>a_phase</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramname"><em>a_ncomp</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Full constructor. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_amr</td><td>AMR mesh used to allocate data. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> on which storage is allocated. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase on which storage is allocated. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ncomp</td><td>Number of components (1 for scalar RTE species). </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="a86b6e246fc957913c8401c7c65ae2d6b" name="a86b6e246fc957913c8401c7c65ae2d6b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a86b6e246fc957913c8401c7c65ae2d6b">&#9670;&#160;</a></span>allocateStorage()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> CdrPlasmaImExSdcStepper::RtStorage::allocateStorage </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramname"><em>a_p</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Allocate RTE scratch storage for p+1 SDC nodes. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_p</td><td>Number of SDC subintervals. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a5e59b35e23a4a3dc5769d3c89c9b8396" name="a5e59b35e23a4a3dc5769d3c89c9b8396"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5e59b35e23a4a3dc5769d3c89c9b8396">&#9670;&#160;</a></span>getDomainFlux()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">EBAMRIFData</a> &amp; Physics::CdrPlasma::CdrPlasmaImExSdcStepper::RtStorage::getDomainFlux </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Return the domain-face-centered isotropic photon flux scratch array. </p>
+<dl class="section return"><dt>Returns</dt><dd>Reference to m_scratchIF. </dd></dl>
+
+</div>
+</div>
+<a id="aead84662ef9ebe9c09985dc410c83ade" name="aead84662ef9ebe9c09985dc410c83ade"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aead84662ef9ebe9c09985dc410c83ade">&#9670;&#160;</a></span>getEbFlux()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">EBAMRIVData</a> &amp; Physics::CdrPlasma::CdrPlasmaImExSdcStepper::RtStorage::getEbFlux </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Return the EB-centered isotropic photon flux scratch array. </p>
+<dl class="section return"><dt>Returns</dt><dd>Reference to m_scratchIV. </dd></dl>
+
+</div>
+</div>
+<a id="a4d061c0c40a2363111659fc59bb909e1" name="a4d061c0c40a2363111659fc59bb909e1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4d061c0c40a2363111659fc59bb909e1">&#9670;&#160;</a></span>getPrevious()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp; Physics::CdrPlasma::CdrPlasmaImExSdcStepper::RtStorage::getPrevious </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Return the cell-centered photon density at the previous time step. </p>
+<dl class="section return"><dt>Returns</dt><dd>Reference to m_previous. </dd></dl>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/<a class="el" href="CD__CdrPlasmaImExSdcStorage_8H_source.html">CD_CdrPlasmaImExSdcStorage.H</a></li>
 <li>Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/<a class="el" href="CD__CdrPlasmaImExSdcStorage_8cpp.html">CD_CdrPlasmaImExSdcStorage.cpp</a></li>

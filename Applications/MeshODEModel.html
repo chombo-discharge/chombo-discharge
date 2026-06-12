@@ -155,8 +155,15 @@
 <p>The <code class="docutils literal notranslate"><span class="pre">MeshODEStepper</span></code> module is designed to illustrate the usage of a <a class="reference internal" href="../Solvers/MeshODESolver.html#chap-meshodesolver"><span class="std std-ref">Mesh ODE solver</span></a>.
 This model has no functionality for cell-refinement based on the solutions, so refinement is limited to the geometric refinement methods supplied by <a class="reference internal" href="../Source/Driver.html#chap-driver"><span class="std std-ref">Driver</span></a>.</p>
 <p>The main class implements <a class="reference internal" href="../Source/TimeStepper.html#chap-timestepper"><span class="std std-ref">TimeStepper</span></a> and is templated as follows:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
-<span class="cm">  @brief Implementation of TimeStepper for solving an ODE on a mesh. N is the number of variables. </span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
+<span class="cm">  @brief TimeStepper for advancing a system of N coupled ODEs on an AMR mesh.</span>
+<span class="cm">  @details At each time step the right-hand side @f$ \mathbf{f}(\mathbf{y}, t) @f$ is evaluated</span>
+<span class="cm">  point-wise on the mesh and the ODE @f$ \dot{\mathbf{y}} = \mathbf{f}(\mathbf{y},t) @f$ is</span>
+<span class="cm">  integrated with the chosen algorithm (Euler, RK2, or RK4). The template parameter @p N sets</span>
+<span class="cm">  the number of solution components stored per cell.</span>
+
+<span class="cm">  The RHS function and initial data function must be set by the derived application before</span>
+<span class="cm">  Driver calls setupSolvers().</span>
 <span class="cm">*/</span>
 <span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MeshODEStepper</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">TimeStepper</span>

@@ -1,6 +1,6 @@
 <map id="Geometries/RandomInterface/CD_RandomInterface.H" name="Geometries/RandomInterface/CD_RandomInterface.H">
 <area shape="rect" id="Node000001" title="Random interface geometry." alt="" coords="889,5,1104,45"/>
-<area shape="rect" id="Node000002" href="$CD__EBGeometryIF_8H.html" title="Binding of EBGeometry signed distance functions to Chombo objcts." alt="" coords="362,93,516,119"/>
+<area shape="rect" id="Node000002" href="$CD__EBGeometryIF_8H.html" title="Binding of EBGeometry signed distance functions to Chombo objects." alt="" coords="362,93,516,119"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="889,44,530,95,530,89,888,39"/>
 <area shape="rect" id="Node000007" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="705,240,890,265"/>
 <area shape="poly" id="edge43_Node000001_Node000007" title=" " alt="" coords="962,48,927,69,889,96,852,130,821,168,808,197,802,227,797,226,803,196,817,165,848,126,886,92,925,64,959,43"/>

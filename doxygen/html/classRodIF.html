@@ -120,15 +120,15 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aba5b1a2679655ff081ab1a2f3b3105dc" id="r_aba5b1a2679655ff081ab1a2f3b3105dc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRodIF.html#aba5b1a2679655ff081ab1a2f3b3105dc">value</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_point</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
 <tr class="memdesc:aba5b1a2679655ff081ab1a2f3b3105dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Value function. Returns distance to objcet.  <br /></td></tr>
 <tr class="separator:aba5b1a2679655ff081ab1a2f3b3105dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a07e9639d513449d821ea3c93d26afbac" id="r_a07e9639d513449d821ea3c93d26afbac"><td class="memItemLeft" align="right" valign="top"><a id="a07e9639d513449d821ea3c93d26afbac" name="a07e9639d513449d821ea3c93d26afbac"></a>
-<a class="el" href="classTracerParticleSolver.html">virtual</a> BaseIF *&#160;</td><td class="memItemRight" valign="bottom"><b>newImplicitFunction</b> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:a07e9639d513449d821ea3c93d26afbac"><td class="mdescLeft">&#160;</td><td class="mdescRight">IF factory method. <br /></td></tr>
+<tr class="memitem:a07e9639d513449d821ea3c93d26afbac" id="r_a07e9639d513449d821ea3c93d26afbac"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> BaseIF *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRodIF.html#a07e9639d513449d821ea3c93d26afbac">newImplicitFunction</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:a07e9639d513449d821ea3c93d26afbac"><td class="mdescLeft">&#160;</td><td class="mdescRight">IF factory method.  <br /></td></tr>
 <tr class="separator:a07e9639d513449d821ea3c93d26afbac"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
 <tr class="memitem:a3340a1c369636a1db1d6039e3a18ac30" id="r_a3340a1c369636a1db1d6039e3a18ac30"><td class="memItemLeft" align="right" valign="top"><a id="a3340a1c369636a1db1d6039e3a18ac30" name="a3340a1c369636a1db1d6039e3a18ac30"></a>
 <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; BaseIF &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_baseif</b></td></tr>
+<tr class="memdesc:a3340a1c369636a1db1d6039e3a18ac30"><td class="mdescLeft">&#160;</td><td class="mdescRight">Baseif. <br /></td></tr>
 <tr class="separator:a3340a1c369636a1db1d6039e3a18ac30"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -212,6 +212,34 @@ Protected Attributes</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="a07e9639d513449d821ea3c93d26afbac" name="a07e9639d513449d821ea3c93d26afbac"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a07e9639d513449d821ea3c93d26afbac">&#9670;&#160;</a></span>newImplicitFunction()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">BaseIF * RodIF::newImplicitFunction </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>IF factory method. </p>
+<dl class="section return"><dt>Returns</dt><dd>New copy of this implicit function </dd></dl>
+
+</div>
+</div>
 <a id="aba5b1a2679655ff081ab1a2f3b3105dc" name="aba5b1a2679655ff081ab1a2f3b3105dc"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aba5b1a2679655ff081ab1a2f3b3105dc">&#9670;&#160;</a></span>value()</h2>
 
@@ -243,6 +271,7 @@ Protected Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Function value at the given point </dd></dl>
 
 </div>
 </div>

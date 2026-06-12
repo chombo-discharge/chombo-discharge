@@ -1,6 +1,6 @@
 <map id="Geometries/GECReferenceCell/CD_GECReferenceCell.cpp" name="Geometries/GECReferenceCell/CD_GECReferenceCell.cpp">
 <area shape="rect" id="Node000001" title="Implementation of CD_GECReferenceCell.H." alt="" coords="823,5,1043,45"/>
-<area shape="rect" id="Node000002" href="$CD__EBGeometryIF_8H.html" title="Binding of EBGeometry signed distance functions to Chombo objcts." alt="" coords="475,167,629,192"/>
+<area shape="rect" id="Node000002" href="$CD__EBGeometryIF_8H.html" title="Binding of EBGeometry signed distance functions to Chombo objects." alt="" coords="475,167,629,192"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="887,48,594,164,592,159,885,43"/>
 <area shape="rect" id="Node000007" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="546,313,731,339"/>
 <area shape="poly" id="edge46_Node000001_Node000007" title=" " alt="" coords="823,36,613,56,490,73,365,94,247,121,143,155,99,174,62,195,33,217,13,241,8,253,13,264,37,276,83,287,221,303,384,314,532,320,532,325,384,319,220,309,82,292,35,281,9,267,3,253,8,239,30,213,59,190,97,169,141,150,245,116,364,89,489,67,613,51,823,31"/>

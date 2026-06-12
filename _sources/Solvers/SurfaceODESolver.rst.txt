@@ -17,7 +17,7 @@ The surface charge solver is implemented as
 
 .. literalinclude:: ../../../../Source/SurfaceODESolver/CD_SurfaceODESolver.H
    :language: c++
-   :lines: 22-27
+   :lines: 23-28
    :dedent: 0
 
 where :math:`N` indicates the number of variables stored in each cut cell.
@@ -30,7 +30,7 @@ To instantiate the solver, use one of the following constructors:
 
 .. literalinclude:: ../../../../Source/SurfaceODESolver/CD_SurfaceODESolver.H
    :language: c++
-   :lines: 30-43
+   :lines: 33-44
    :dedent: 2
 
 The solver also requires a reference to :ref:`Chap:AmrMesh`, and the computational geometry such that a full instantiation example is
@@ -52,7 +52,7 @@ To set :math:`\vec{\phi}` on the mesh, one can fetch the underlying data by call
 
 .. literalinclude:: ../../../../Source/SurfaceODESolver/CD_SurfaceODESolver.H
    :language: c++
-   :lines: 210-215
+   :lines: 213-218
    :dedent: 2
 
 This returns a reference to the underlying data which is defined on all cut-cells.
@@ -65,7 +65,7 @@ To set the data directly, ``SurfaceODESolver<N>`` defines functions
 
 .. literalinclude:: ../../../../Source/SurfaceODESolver/CD_SurfaceODESolver.H
    :language: c++
-   :lines: 188-200
+   :lines: 191-203
    :dedent: 2
 
 Setting :math:`\vec{F}`
@@ -75,7 +75,7 @@ In order to set the right-hand side of the equation, functions exist that are en
 
 .. literalinclude:: ../../../../Source/SurfaceODESolver/CD_SurfaceODESolver.H
    :language: c++
-   :lines: 224-251
+   :lines: 227-254
    :dedent: 2
 
 Resetting cells
@@ -88,7 +88,7 @@ The function signatures are
 
 .. literalinclude:: ../../../../Source/SurfaceODESolver/CD_SurfaceODESolver.H
    :language: c++
-   :lines: 298-334
+   :lines: 301-337
    :dedent: 2
 
 Note that one can always call ``SurfaceODESolver<N>::getPhi()`` to iterate over other types of cell subsets and set the values from there.
@@ -100,7 +100,7 @@ When regridding the ``SurfaceODESolver<N>``, one must first call call
 
 .. literalinclude:: ../../../../Source/SurfaceODESolver/CD_SurfaceODESolver.H
    :language: c++
-   :lines: 278-286
+   :lines: 281-289
    :dedent: 2
 
 This must be done *before* :ref:`Chap:AmrMesh` creates the new grids, and will store :math:`\vec{\phi}` on the old mesh.
@@ -108,7 +108,7 @@ After :ref:`Chap:AmrMesh` has generated the new grids, :math:`\vec{\phi}` can be
 
 .. literalinclude:: ../../../../Source/SurfaceODESolver/CD_SurfaceODESolver.H
    :language: c++
-   :lines: 288-296
+   :lines: 291-299
    :dedent: 2
 
 Note that when interpolating to the new grids one can choose to initialize data in the new cells using the value in the underlying coarse cells, i.e.

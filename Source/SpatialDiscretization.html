@@ -226,7 +226,7 @@ Right: Coarsened grid where one grid cell is multi-valued.</span><a class="heade
 <span id="chap-geometryrepresentation"></span><h2>Geometry representation<a class="headerlink" href="#geometry-representation" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> uses (approximations to) signed distance functions (SDFs) for describing geometries.
 Signed distance fields are functions <span class="math notranslate nohighlight">\(f: \mathbb{R}^3\rightarrow \mathbb{R}\)</span> that describe the distance from the object.
-These functions are also <em>implicit functions</em>, i.e., <span class="math notranslate nohighlight">\(f\left(\mathbf{x}\right)=0\)</span> describes the surface of the object, <span class="math notranslate nohighlight">\(f\left(\mathbf{x}\right) &gt; 0\)</span> decribes a point inside the object and <span class="math notranslate nohighlight">\(f\left(\mathbf{x}\right) &lt; 0\)</span> describes a point outside the object.</p>
+These functions are also <em>implicit functions</em>, i.e., <span class="math notranslate nohighlight">\(f\left(\mathbf{x}\right)=0\)</span> describes the surface of the object, <span class="math notranslate nohighlight">\(f\left(\mathbf{x}\right) &gt; 0\)</span> describes a point inside the object and <span class="math notranslate nohighlight">\(f\left(\mathbf{x}\right) &lt; 0\)</span> describes a point outside the object.</p>
 <p>Many EB applications only use the implicit function formulation, but <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> requires (an approximation to) the signed distance field for the following reasons:
 There are two reasons for this:</p>
 <ol class="arabic simple">
@@ -239,7 +239,7 @@ There are two reasons for this:</p>
 d_1\left(\mathbf{x}\right) &amp;= R - \left|\mathbf{x}\right|, \\
 d_2\left(\mathbf{x}\right) &amp;= R^2 - \mathbf{x}\cdot\mathbf{x}.
 \end{align}</div><p>Here, only <span class="math notranslate nohighlight">\(d_1\left(\mathbf{x}\right)\)</span> is a signed distance function.</p>
-<p>In <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>, SDFs can be generated through analytic expressions, constructive solid geometry, or by supplying polygon tesselation.
+<p>In <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>, SDFs can be generated through analytic expressions, constructive solid geometry, or by supplying polygon tessellation.
 NURBS geometries are not supported.
 Fundamentally, all geometric objects are described using <code class="docutils literal notranslate"><span class="pre">BaseIF</span></code> objects from <code class="docutils literal notranslate"><span class="pre">Chombo</span></code>, see <a class="reference internal" href="ChomboBasics.html#chap-baseif"><span class="std std-ref">BaseIF</span></a>.</p>
 <section id="constructive-solid-geometry-csg">
@@ -255,7 +255,7 @@ However, the union typically approximates the signed distance field quite well n
 <section id="ebgeometry">
 <span id="chap-ebgeometry"></span><h3>EBGeometry<a class="headerlink" href="#ebgeometry" title="Permalink to this heading"></a></h3>
 <p>While functions like <span class="math notranslate nohighlight">\(R - \left|\mathbf{x}\right|\)</span> are quick to compute, a polygon surface may consist of hundreds of thousands of primitives (e.g., triangles).
-Generating signed distance function from polygon tesselations is quite involved as it requires computing the signed distance to the closest feature, which can be a planar polygon (e.g., a triangle), edge, or a vertex.
+Generating signed distance function from polygon tessellations is quite involved as it requires computing the signed distance to the closest feature, which can be a planar polygon (e.g., a triangle), edge, or a vertex.
 <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> supports such functions through the <a class="reference external" href="https://github.com/rmrsk/EBGeometry">EBGeometry</a> package.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
@@ -269,7 +269,7 @@ Additional details are provided in the <a class="reference external" href="https
 <figure class="align-center" id="id9">
 <a class="reference internal image-reference" href="../_images/Armadillo.png"><img alt="../_images/Armadillo.png" src="../_images/Armadillo.png" style="width: 50%;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 5 </span><span class="caption-text">Example of an SDF reconstruction and cut-cell grid from a surface tesselation in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.</span><a class="headerlink" href="#id9" title="Permalink to this image"></a></p>
+<p><span class="caption-number">Fig. 5 </span><span class="caption-text">Example of an SDF reconstruction and cut-cell grid from a surface tessellation in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.</span><a class="headerlink" href="#id9" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
 </section>

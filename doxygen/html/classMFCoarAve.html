@@ -93,7 +93,7 @@ $(function() {
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a17b88ab11df6403b14ef0a79c2293869" id="r_a17b88ab11df6403b14ef0a79c2293869"><td class="memItemLeft" align="right" valign="top"><a id="a17b88ab11df6403b14ef0a79c2293869" name="a17b88ab11df6403b14ef0a79c2293869"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>MFCoarAve</b> ()</td></tr>
-<tr class="memdesc:a17b88ab11df6403b14ef0a79c2293869"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor. Must subsequently call defined. <br /></td></tr>
+<tr class="memdesc:a17b88ab11df6403b14ef0a79c2293869"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor. Must subsequently call define. <br /></td></tr>
 <tr class="separator:a17b88ab11df6403b14ef0a79c2293869"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a506b4c0db5a240b12972ecf4dca4afe2" id="r_a506b4c0db5a240b12972ecf4dca4afe2"><td class="memItemLeft" align="right" valign="top"><a id="a506b4c0db5a240b12972ecf4dca4afe2" name="a506b4c0db5a240b12972ecf4dca4afe2"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>~MFCoarAve</b> ()</td></tr>
@@ -113,7 +113,7 @@ Public Member Functions</h2></td></tr>
 Protected Attributes</h2></td></tr>
 <tr class="memitem:aa50aa0e123f53b54521a497be15a7eb7" id="r_aa50aa0e123f53b54521a497be15a7eb7"><td class="memItemLeft" align="right" valign="top"><a id="aa50aa0e123f53b54521a497be15a7eb7" name="aa50aa0e123f53b54521a497be15a7eb7"></a>
 <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classEBCoarAve.html">EBCoarAve</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_aveOps</b></td></tr>
-<tr class="memdesc:aa50aa0e123f53b54521a497be15a7eb7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolation for each phase. <br /></td></tr>
+<tr class="memdesc:aa50aa0e123f53b54521a497be15a7eb7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Averaging operators for each phase. <br /></td></tr>
 <tr class="separator:aa50aa0e123f53b54521a497be15a7eb7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -138,7 +138,7 @@ Protected Attributes</h2></td></tr>
 <p>Full constructor. Calls define. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">aveOps</td><td>Averaging operators on each phase. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_aveOps</td><td>Averaging operators on each phase. </td></tr>
   </table>
   </dd>
 </dl>
@@ -165,7 +165,7 @@ Protected Attributes</h2></td></tr>
 <p>Define function. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">aveOps</td><td>Averaging operators on each phase. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_aveOps</td><td>Averaging operators on each phase. </td></tr>
   </table>
   </dd>
 </dl>
@@ -195,6 +195,7 @@ Protected Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Const reference to the averaging operator for the given phase. </dd></dl>
 
 </div>
 </div>

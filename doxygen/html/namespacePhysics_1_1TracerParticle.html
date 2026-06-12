@@ -93,26 +93,89 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html">TracerParticleStepper</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Implementation of <a class="el" href="classTimeStepper.html" title="Base class for advancing equations.">TimeStepper</a> for advancing tracer particles in a fixed velocity field.  <a href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classTimeStepper.html" title="Base class for advancing equations.">TimeStepper</a> for advancing tracer particles in a prescribed velocity field on an AMR mesh.  <a href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
 Enumerations</h2></td></tr>
-<tr class="memitem:ac2a5a1830da1965ed221ccd080d8ee06" id="r_ac2a5a1830da1965ed221ccd080d8ee06"><td class="memItemLeft" align="right" valign="top"><a id="ac2a5a1830da1965ed221ccd080d8ee06" name="ac2a5a1830da1965ed221ccd080d8ee06"></a>enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacePhysics_1_1TracerParticle.html#ac2a5a1830da1965ed221ccd080d8ee06">IntegrationAlgorithm</a> { <b>Euler</b>
-, <b>RK2</b>
-, <b>RK4</b>
+<tr class="memitem:ac2a5a1830da1965ed221ccd080d8ee06" id="r_ac2a5a1830da1965ed221ccd080d8ee06"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacePhysics_1_1TracerParticle.html#ac2a5a1830da1965ed221ccd080d8ee06">IntegrationAlgorithm</a> { <a class="el" href="namespacePhysics_1_1TracerParticle.html#ac2a5a1830da1965ed221ccd080d8ee06a0a7532036415f2491bf5f952220827b8">Euler</a>
+, <a class="el" href="namespacePhysics_1_1TracerParticle.html#ac2a5a1830da1965ed221ccd080d8ee06a993199f8fe9c7a359c71015d682dcccf">RK2</a>
+, <a class="el" href="namespacePhysics_1_1TracerParticle.html#ac2a5a1830da1965ed221ccd080d8ee06af81fe250c66aad887e2086f79364f2a8">RK4</a>
  }</td></tr>
-<tr class="memdesc:ac2a5a1830da1965ed221ccd080d8ee06"><td class="mdescLeft">&#160;</td><td class="mdescRight">Various supported integration algorithms. <br /></td></tr>
+<tr class="memdesc:ac2a5a1830da1965ed221ccd080d8ee06"><td class="mdescLeft">&#160;</td><td class="mdescRight">Integration algorithms available for advancing tracer particles.  <a href="namespacePhysics_1_1TracerParticle.html#ac2a5a1830da1965ed221ccd080d8ee06">More...</a><br /></td></tr>
 <tr class="separator:ac2a5a1830da1965ed221ccd080d8ee06"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afc18cec3b9d8a0edb81f7948276a4bc1" id="r_afc18cec3b9d8a0edb81f7948276a4bc1"><td class="memItemLeft" align="right" valign="top"><a id="afc18cec3b9d8a0edb81f7948276a4bc1" name="afc18cec3b9d8a0edb81f7948276a4bc1"></a>enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacePhysics_1_1TracerParticle.html#afc18cec3b9d8a0edb81f7948276a4bc1">VelocityField</a> { <b>Diagonal</b>
-, <b>Rotational</b>
+<tr class="memitem:afc18cec3b9d8a0edb81f7948276a4bc1" id="r_afc18cec3b9d8a0edb81f7948276a4bc1"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacePhysics_1_1TracerParticle.html#afc18cec3b9d8a0edb81f7948276a4bc1">VelocityField</a> { <a class="el" href="namespacePhysics_1_1TracerParticle.html#afc18cec3b9d8a0edb81f7948276a4bc1a9ac677ee4eec25d9e59707a661d2c5e1">Diagonal</a>
+, <a class="el" href="namespacePhysics_1_1TracerParticle.html#afc18cec3b9d8a0edb81f7948276a4bc1a8f13aa03900af2409eab43c15035c30e">Rotational</a>
  }</td></tr>
-<tr class="memdesc:afc18cec3b9d8a0edb81f7948276a4bc1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enum for handling various velocity fields. <br /></td></tr>
+<tr class="memdesc:afc18cec3b9d8a0edb81f7948276a4bc1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Predefined velocity fields available for testing.  <a href="namespacePhysics_1_1TracerParticle.html#afc18cec3b9d8a0edb81f7948276a4bc1">More...</a><br /></td></tr>
 <tr class="separator:afc18cec3b9d8a0edb81f7948276a4bc1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Namespace for encapsulating physics code for tracer particles. </p>
-</div></div><!-- contents -->
+</div><h2 class="groupheader">Enumeration Type Documentation</h2>
+<a id="ac2a5a1830da1965ed221ccd080d8ee06" name="ac2a5a1830da1965ed221ccd080d8ee06"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac2a5a1830da1965ed221ccd080d8ee06">&#9670;&#160;</a></span>IntegrationAlgorithm</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">enum</a> <a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="namespacePhysics_1_1TracerParticle.html#ac2a5a1830da1965ed221ccd080d8ee06">Physics::TracerParticle::IntegrationAlgorithm</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Integration algorithms available for advancing tracer particles. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ac2a5a1830da1965ed221ccd080d8ee06a0a7532036415f2491bf5f952220827b8" name="ac2a5a1830da1965ed221ccd080d8ee06a0a7532036415f2491bf5f952220827b8"></a>Euler&#160;</td><td class="fielddoc"><p>Explicit forward Euler (first order). </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ac2a5a1830da1965ed221ccd080d8ee06a993199f8fe9c7a359c71015d682dcccf" name="ac2a5a1830da1965ed221ccd080d8ee06a993199f8fe9c7a359c71015d682dcccf"></a>RK2&#160;</td><td class="fielddoc"><p>Explicit second-order Runge-Kutta (Heun's method). </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ac2a5a1830da1965ed221ccd080d8ee06af81fe250c66aad887e2086f79364f2a8" name="ac2a5a1830da1965ed221ccd080d8ee06af81fe250c66aad887e2086f79364f2a8"></a>RK4&#160;</td><td class="fielddoc"><p>Explicit classical fourth-order Runge-Kutta. </p>
+</td></tr>
+</table>
+
+</div>
+</div>
+<a id="afc18cec3b9d8a0edb81f7948276a4bc1" name="afc18cec3b9d8a0edb81f7948276a4bc1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afc18cec3b9d8a0edb81f7948276a4bc1">&#9670;&#160;</a></span>VelocityField</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">enum</a> <a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="namespacePhysics_1_1TracerParticle.html#afc18cec3b9d8a0edb81f7948276a4bc1">Physics::TracerParticle::VelocityField</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Predefined velocity fields available for testing. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="afc18cec3b9d8a0edb81f7948276a4bc1a9ac677ee4eec25d9e59707a661d2c5e1" name="afc18cec3b9d8a0edb81f7948276a4bc1a9ac677ee4eec25d9e59707a661d2c5e1"></a>Diagonal&#160;</td><td class="fielddoc"><p>Uniform diagonal translation velocity. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="afc18cec3b9d8a0edb81f7948276a4bc1a8f13aa03900af2409eab43c15035c30e" name="afc18cec3b9d8a0edb81f7948276a4bc1a8f13aa03900af2409eab43c15035c30e"></a>Rotational&#160;</td><td class="fielddoc"><p>Solid-body rotation velocity field. </p>
+</td></tr>
+</table>
+
+</div>
+</div>
+</div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8

@@ -124,13 +124,11 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a22bec5586b95b39dbca7e53fc55b5da5" id="r_a22bec5586b95b39dbca7e53fc55b5da5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classMFHelmholtzJumpBC.html">MFHelmholtzJumpBC</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzJumpBCFactory.html#a22bec5586b95b39dbca7e53fc55b5da5">create</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a> <a class="el" href="classTracerParticleSolver.html">a_dataLocation</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_mflg</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFHelmholtzJumpBCFactory.html#a6850045e2e7821d844989ef19ce9cf05">BcoefPtr</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_Bcoef</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFHelmholtzJumpBCFactory.html#a1f72c525b90818d18360fd3a19fd3827">AmrMask</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_validCells</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_dx</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_order</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_weight</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_radius</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_ghostCF</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> <a class="el" href="classTracerParticleSolver.html">a_ghostPhi</a>)</td></tr>
 <tr class="memdesc:a22bec5586b95b39dbca7e53fc55b5da5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Factory method for creating <a class="el" href="classMFHelmholtzJumpBC.html" title="Class for computing &quot;jump interface&quot; boundary conditions for multifluid code.">MFHelmholtzJumpBC</a> objects.  <br /></td></tr>
 <tr class="separator:a22bec5586b95b39dbca7e53fc55b5da5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab5615c25221efb81f32b78e598089e03" id="r_ab5615c25221efb81f32b78e598089e03"><td class="memItemLeft" align="right" valign="top"><a id="ab5615c25221efb81f32b78e598089e03" name="ab5615c25221efb81f32b78e598089e03"></a>
-<a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>setDomainDropOrder</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_domainSize</a>)</td></tr>
-<tr class="memdesc:ab5615c25221efb81f32b78e598089e03"><td class="mdescLeft">&#160;</td><td class="mdescRight">Drop BC order if domain size is equal or below this. <br /></td></tr>
+<tr class="memitem:ab5615c25221efb81f32b78e598089e03" id="r_ab5615c25221efb81f32b78e598089e03"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzJumpBCFactory.html#ab5615c25221efb81f32b78e598089e03">setDomainDropOrder</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_domainSize</a>)</td></tr>
+<tr class="memdesc:ab5615c25221efb81f32b78e598089e03"><td class="mdescLeft">&#160;</td><td class="mdescRight">Drop BC order if domain size is equal or below this.  <br /></td></tr>
 <tr class="separator:ab5615c25221efb81f32b78e598089e03"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0cb98bf1c887dc19b4011af84c919865" id="r_a0cb98bf1c887dc19b4011af84c919865"><td class="memItemLeft" align="right" valign="top"><a id="a0cb98bf1c887dc19b4011af84c919865" name="a0cb98bf1c887dc19b4011af84c919865"></a>
-<a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>setCoarseGridDropOrder</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classTracerParticleSolver.html">a_dropOrder</a>)</td></tr>
-<tr class="memdesc:a0cb98bf1c887dc19b4011af84c919865"><td class="mdescLeft">&#160;</td><td class="mdescRight">Drop to a first-order approximation if the cut-cell is a coarsened cell. <br /></td></tr>
+<tr class="memitem:a0cb98bf1c887dc19b4011af84c919865" id="r_a0cb98bf1c887dc19b4011af84c919865"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzJumpBCFactory.html#a0cb98bf1c887dc19b4011af84c919865">setCoarseGridDropOrder</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classTracerParticleSolver.html">a_dropOrder</a>)</td></tr>
+<tr class="memdesc:a0cb98bf1c887dc19b4011af84c919865"><td class="mdescLeft">&#160;</td><td class="mdescRight">Drop to a first-order approximation if the cut-cell is a coarsened cell.  <br /></td></tr>
 <tr class="separator:a0cb98bf1c887dc19b4011af84c919865"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
@@ -245,8 +243,77 @@ Protected Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Return value </dd></dl>
 
 <p>Reimplemented in <a class="el" href="classMFHelmholtzSaturationChargeJumpBCFactory.html#a04292526c0a1863371e03d8db8d78dc2">MFHelmholtzSaturationChargeJumpBCFactory</a>.</p>
+
+</div>
+</div>
+<a id="a0cb98bf1c887dc19b4011af84c919865" name="a0cb98bf1c887dc19b4011af84c919865"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0cb98bf1c887dc19b4011af84c919865">&#9670;&#160;</a></span>setCoarseGridDropOrder()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> MFHelmholtzJumpBCFactory::setCoarseGridDropOrder </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td>
+          <td class="paramname"><em>a_dropOrder</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Drop to a first-order approximation if the cut-cell is a coarsened cell. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dropOrder</td><td>Description </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ab5615c25221efb81f32b78e598089e03" name="ab5615c25221efb81f32b78e598089e03"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab5615c25221efb81f32b78e598089e03">&#9670;&#160;</a></span>setDomainDropOrder()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> MFHelmholtzJumpBCFactory::setDomainDropOrder </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramname"><em>a_domainSize</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Drop BC order if domain size is equal or below this. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_domainSize</td><td>Description </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

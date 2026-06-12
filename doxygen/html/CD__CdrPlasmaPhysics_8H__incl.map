@@ -1,5 +1,5 @@
 <map id="Physics/CdrPlasma/CD_CdrPlasmaPhysics.H" name="Physics/CdrPlasma/CD_CdrPlasmaPhysics.H">
-<area shape="rect" id="Node000001" title="Declaration of basic physics coupling functions for Physics/CdrPlasma." alt="" coords="797,5,965,45"/>
+<area shape="rect" id="Node000001" title="Declaration of the Physics::CdrPlasma::CdrPlasmaPhysics interface class." alt="" coords="797,5,965,45"/>
 <area shape="rect" id="Node000002" title=" " alt="" coords="257,313,350,339"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="797,29,695,37,636,46,575,59,512,77,451,101,394,131,342,169,329,182,320,197,308,233,304,268,304,299,299,300,298,268,303,231,315,195,325,179,338,165,391,126,449,96,511,72,573,54,636,41,695,32,797,24"/>
 <area shape="rect" id="Node000003" title=" " alt="" coords="1594,93,1723,119"/>

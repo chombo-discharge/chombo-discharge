@@ -89,7 +89,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>Encapsulation of radiative transfer species for usage with <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html" title="Class which implements CdrPlasmaPhysics and parses plasma chemistry from a JSON input file.">CdrPlasmaJSON</a>.  
+<p>Encapsulation of radiative transfer species for usage with <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html" title="CdrPlasmaPhysics implementation that reads plasma chemistry from a JSON input file.">CdrPlasmaJSON</a>.  
  <a href="classPhysics_1_1CdrPlasma_1_1RteSpeciesJSON.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="CD__RteSpeciesJSON_8H_source.html">CD_RteSpeciesJSON.H</a>&gt;</code></p>
@@ -148,9 +148,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a0561487ad3c3ef46c55c10037a06134f" id="r_a0561487ad3c3ef46c55c10037a06134f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1RteSpeciesJSON.html#a0561487ad3c3ef46c55c10037a06134f">define</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_name</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classPhysics_1_1CdrPlasma_1_1RteSpeciesJSON.html#aa58fecafe9b48a9ad406b371375cd792">KappaFunction</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_kappaFunction</a>)</td></tr>
 <tr class="memdesc:a0561487ad3c3ef46c55c10037a06134f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define function.  <br /></td></tr>
 <tr class="separator:a0561487ad3c3ef46c55c10037a06134f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a81cb4f00d6366ada7c3e6f745c425585" id="r_a81cb4f00d6366ada7c3e6f745c425585"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1RteSpeciesJSON.html#a81cb4f00d6366ada7c3e6f745c425585">getAbsorptionCoefficient</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> <a class="el" href="classTracerParticleSolver.html">a_pos</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">override</a> <a class="el" href="classTracerParticleSolver.html">final</a></td></tr>
-<tr class="memdesc:a81cb4f00d6366ada7c3e6f745c425585"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initial data function.  <br /></td></tr>
-<tr class="separator:a81cb4f00d6366ada7c3e6f745c425585"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad4175fdf4ef26255ae83a734a3524327" id="r_ad4175fdf4ef26255ae83a734a3524327"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1RteSpeciesJSON.html#ad4175fdf4ef26255ae83a734a3524327">getAbsorptionCoefficient</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_pos</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">override</a> <a class="el" href="classTracerParticleSolver.html">final</a></td></tr>
+<tr class="memdesc:ad4175fdf4ef26255ae83a734a3524327"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initial data function.  <br /></td></tr>
+<tr class="separator:ad4175fdf4ef26255ae83a734a3524327"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classRtSpecies"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classRtSpecies')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classRtSpecies.html">RtSpecies</a></td></tr>
 <tr class="memitem:ab7457bcfbaf1d3cdc61ef0e19f358ab9 inherit pub_methods_classRtSpecies" id="r_ab7457bcfbaf1d3cdc61ef0e19f358ab9"><td class="memItemLeft" align="right" valign="top">
 &#160;</td><td class="memItemRight" valign="bottom"><b>RtSpecies</b> ()</td></tr>
@@ -160,13 +160,12 @@ Public Member Functions</h2></td></tr>
 <a class="el" href="classTracerParticleSolver.html">virtual</a>&#160;</td><td class="memItemRight" valign="bottom"><b>~RtSpecies</b> ()</td></tr>
 <tr class="memdesc:ac234fd57ec852876dab836223a626255 inherit pub_methods_classRtSpecies"><td class="mdescLeft">&#160;</td><td class="mdescRight">Weak constructor. Sets absorption length and scattering coefficients to one. <br /></td></tr>
 <tr class="separator:ac234fd57ec852876dab836223a626255 inherit pub_methods_classRtSpecies"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4b31640213033a77fc8334757f163d56 inherit pub_methods_classRtSpecies" id="r_a4b31640213033a77fc8334757f163d56"><td class="memItemLeft" align="right" valign="top">
-<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a>&#160;</td><td class="memItemRight" valign="bottom"><b>getName</b> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:a4b31640213033a77fc8334757f163d56 inherit pub_methods_classRtSpecies"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get species name. <br /></td></tr>
+<tr class="memitem:a4b31640213033a77fc8334757f163d56 inherit pub_methods_classRtSpecies" id="r_a4b31640213033a77fc8334757f163d56"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSpecies.html#a4b31640213033a77fc8334757f163d56">getName</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:a4b31640213033a77fc8334757f163d56 inherit pub_methods_classRtSpecies"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get species name.  <br /></td></tr>
 <tr class="separator:a4b31640213033a77fc8334757f163d56 inherit pub_methods_classRtSpecies"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abad73e614aab36d2557b739a34e3c169 inherit pub_methods_classRtSpecies" id="r_abad73e614aab36d2557b739a34e3c169"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSpecies.html#abad73e614aab36d2557b739a34e3c169">getScatteringCoefficient</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> <a class="el" href="classTracerParticleSolver.html">a_pos</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:abad73e614aab36d2557b739a34e3c169 inherit pub_methods_classRtSpecies"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get scattering coefficient (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">i.e</a>. the inverse scattering length) at physical coordinates.  <br /></td></tr>
-<tr class="separator:abad73e614aab36d2557b739a34e3c169 inherit pub_methods_classRtSpecies"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a652b73497d9001227f32880bddf99e55 inherit pub_methods_classRtSpecies" id="r_a652b73497d9001227f32880bddf99e55"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSpecies.html#a652b73497d9001227f32880bddf99e55">getScatteringCoefficient</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_pos</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:a652b73497d9001227f32880bddf99e55 inherit pub_methods_classRtSpecies"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get scattering coefficient (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">i.e</a>. the inverse scattering length) at physical coordinates.  <br /></td></tr>
+<tr class="separator:a652b73497d9001227f32880bddf99e55 inherit pub_methods_classRtSpecies"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -185,7 +184,7 @@ Protected Attributes</h2></td></tr>
 <tr class="separator:a76c8ad0f2cbefa0ea38f37db5f31063a inherit pro_attribs_classRtSpecies"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Encapsulation of radiative transfer species for usage with <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html" title="Class which implements CdrPlasmaPhysics and parses plasma chemistry from a JSON input file.">CdrPlasmaJSON</a>. </p>
+<div class="textblock"><p>Encapsulation of radiative transfer species for usage with <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html" title="CdrPlasmaPhysics implementation that reads plasma chemistry from a JSON input file.">CdrPlasmaJSON</a>. </p>
 </div><h2 class="groupheader">Member Typedef Documentation</h2>
 <a id="aa58fecafe9b48a9ad406b371375cd792" name="aa58fecafe9b48a9ad406b371375cd792"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aa58fecafe9b48a9ad406b371375cd792">&#9670;&#160;</a></span>KappaFunction</h2>
@@ -348,8 +347,8 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a81cb4f00d6366ada7c3e6f745c425585" name="a81cb4f00d6366ada7c3e6f745c425585"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a81cb4f00d6366ada7c3e6f745c425585">&#9670;&#160;</a></span>getAbsorptionCoefficient()</h2>
+<a id="ad4175fdf4ef26255ae83a734a3524327" name="ad4175fdf4ef26255ae83a734a3524327"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad4175fdf4ef26255ae83a734a3524327">&#9670;&#160;</a></span>getAbsorptionCoefficient()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -360,7 +359,7 @@ Protected Attributes</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="classTracerParticleSolver.html">Real</a> RteSpeciesJSON::getAbsorptionCoefficient </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;&#160;</td>
           <td class="paramname"><em>a_pos</em></td><td>)</td>
           <td> const</td>
         </tr>
@@ -376,12 +375,12 @@ Protected Attributes</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_pos</td><td>Physical coordinates </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_time</td><td>Time </td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Absorption coefficient </dd></dl>
 
-<p>Implements <a class="el" href="classRtSpecies.html#a3d62dfd621fac6336eaff75d9e3ab98a">RtSpecies</a>.</p>
+<p>Implements <a class="el" href="classRtSpecies.html#ac04e0659dd216aa5d9e3bc32ee112b98">RtSpecies</a>.</p>
 
 </div>
 </div>

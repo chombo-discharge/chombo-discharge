@@ -90,9 +90,9 @@ Functions</h2></td></tr>
 <tr class="memitem:a554dcb29bb180400d8d3f7a9c4db57a5" id="r_a554dcb29bb180400d8d3f7a9c4db57a5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">RealVect</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacePolyUtils.html#a554dcb29bb180400d8d3f7a9c4db57a5">brentRootFinder</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; BaseIF &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_impFunc</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_point1</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_point2</a>)</td></tr>
 <tr class="memdesc:a554dcb29bb180400d8d3f7a9c4db57a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the root of a function between two points. This is a 1D problem along the line.  <br /></td></tr>
 <tr class="separator:a554dcb29bb180400d8d3f7a9c4db57a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4245e68ba4a9cd1f9c2f470658ae0ac0" id="r_a4245e68ba4a9cd1f9c2f470658ae0ac0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacePolyUtils.html#a4245e68ba4a9cd1f9c2f470658ae0ac0">brentSolve</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_point1</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_point2</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">x</a>)&gt; <a class="el" href="classTracerParticleSolver.html">a_func</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:a4245e68ba4a9cd1f9c2f470658ae0ac0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the root of a function between two points. This is a 1D problem.  <br /></td></tr>
-<tr class="separator:a4245e68ba4a9cd1f9c2f470658ae0ac0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a54737623b93191fb61fc6962e181f912" id="r_a54737623b93191fb61fc6962e181f912"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacePolyUtils.html#a54737623b93191fb61fc6962e181f912">brentSolve</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_point1</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_point2</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">x</a>)&gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_func</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a54737623b93191fb61fc6962e181f912"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the root of a function between two points. This is a 1D problem.  <br /></td></tr>
+<tr class="separator:a54737623b93191fb61fc6962e181f912"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Agglomeration class for various useful polynomial routines. </p>
@@ -139,11 +139,12 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section note"><dt>Note</dt><dd>The root MUST be bracketed, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">i.e</a>. f(x1)*f(x2) &lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">0.0</a>. Anything else is an error. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Return value </dd></dl>
 
 </div>
 </div>
-<a id="a4245e68ba4a9cd1f9c2f470658ae0ac0" name="a4245e68ba4a9cd1f9c2f470658ae0ac0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4245e68ba4a9cd1f9c2f470658ae0ac0">&#9670;&#160;</a></span>brentSolve()</h2>
+<a id="a54737623b93191fb61fc6962e181f912" name="a54737623b93191fb61fc6962e181f912"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a54737623b93191fb61fc6962e181f912">&#9670;&#160;</a></span>brentSolve()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -166,7 +167,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">x</a>)&gt;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">x</a>)&gt; &amp;&#160;</td>
           <td class="paramname"><em>a_func</em>&#160;</td>
         </tr>
         <tr>
@@ -183,14 +184,15 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Compute the root of a function between two points. This is a 1D problem. </p>
+<dl class="section return"><dt>Returns</dt><dd>Returns the root (if it could be found). Returns std::numeric_limits&lt;Real&gt;::max() otherwise. </dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_lo</td><td>Lower initial guess. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_hi</td><td>Higher initial guess. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_point1</td><td>Point1 </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_point2</td><td>Point2 </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_func</td><td>Func </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Returns the root (if it could be found). Returns std::numeric_limits&lt;Real&gt;::max() otherwise. </dd></dl>
 
 </div>
 </div>

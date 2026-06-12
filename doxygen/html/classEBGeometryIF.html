@@ -115,7 +115,7 @@ Public Member Functions</h2></td></tr>
 &#160;</td><td class="memItemRight" valign="bottom"><b>EBGeometryIF</b> ()</td></tr>
 <tr class="memdesc:a6b871eafdbc6aa90e4e0922b29edc23d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor. Sets shape to nullptr. <br /></td></tr>
 <tr class="separator:a6b871eafdbc6aa90e4e0922b29edc23d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a210462a5ba16c663fa8759a133fffe34" id="r_a210462a5ba16c663fa8759a133fffe34"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGeometryIF.html#a210462a5ba16c663fa8759a133fffe34">EBGeometryIF</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::shared_ptr</a>&lt; EBGeometry::ImplicitFunction&lt; T &gt; &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_sdf</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classTracerParticleSolver.html">a_flipInside</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_zCoord</a>=0.0)</td></tr>
+<tr class="memitem:a210462a5ba16c663fa8759a133fffe34" id="r_a210462a5ba16c663fa8759a133fffe34"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGeometryIF.html#a210462a5ba16c663fa8759a133fffe34">EBGeometryIF</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::shared_ptr</a>&lt; EBGeometry::ImplicitFunction&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt; &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_sdf</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classTracerParticleSolver.html">a_flipInside</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_zCoord</a>=0.0)</td></tr>
 <tr class="memdesc:a210462a5ba16c663fa8759a133fffe34"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor.  <br /></td></tr>
 <tr class="separator:a210462a5ba16c663fa8759a133fffe34"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1c24e562fb932033d76e10db03263398" id="r_a1c24e562fb932033d76e10db03263398"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGeometryIF.html#a1c24e562fb932033d76e10db03263398">EBGeometryIF</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEBGeometryIF.html">EBGeometryIF</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_inputIF</a>)</td></tr>
@@ -128,15 +128,14 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aa6b4fec5d4d1c753dfb4c441a3fc8643" id="r_aa6b4fec5d4d1c753dfb4c441a3fc8643"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGeometryIF.html#aa6b4fec5d4d1c753dfb4c441a3fc8643">value</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_point</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
 <tr class="memdesc:aa6b4fec5d4d1c753dfb4c441a3fc8643"><td class="mdescLeft">&#160;</td><td class="mdescRight">Value function. Returns distance to object.  <br /></td></tr>
 <tr class="separator:aa6b4fec5d4d1c753dfb4c441a3fc8643"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6ccc89aeab23871fa611845c26b0506b" id="r_a6ccc89aeab23871fa611845c26b0506b"><td class="memItemLeft" align="right" valign="top"><a id="a6ccc89aeab23871fa611845c26b0506b" name="a6ccc89aeab23871fa611845c26b0506b"></a>
-<a class="el" href="classTracerParticleSolver.html">virtual</a> BaseIF *&#160;</td><td class="memItemRight" valign="bottom"><b>newImplicitFunction</b> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
-<tr class="memdesc:a6ccc89aeab23871fa611845c26b0506b"><td class="mdescLeft">&#160;</td><td class="mdescRight">IF factory method. <br /></td></tr>
+<tr class="memitem:a6ccc89aeab23871fa611845c26b0506b" id="r_a6ccc89aeab23871fa611845c26b0506b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> BaseIF *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGeometryIF.html#a6ccc89aeab23871fa611845c26b0506b">newImplicitFunction</a> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
+<tr class="memdesc:a6ccc89aeab23871fa611845c26b0506b"><td class="mdescLeft">&#160;</td><td class="mdescRight">IF factory method.  <br /></td></tr>
 <tr class="separator:a6ccc89aeab23871fa611845c26b0506b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
 <tr class="memitem:a020df2ebd7e50904444afdfc1dcf7d05" id="r_a020df2ebd7e50904444afdfc1dcf7d05"><td class="memItemLeft" align="right" valign="top"><a id="a020df2ebd7e50904444afdfc1dcf7d05" name="a020df2ebd7e50904444afdfc1dcf7d05"></a>
-<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::shared_ptr</a>&lt; <a class="el" href="classTracerParticleSolver.html">const</a> EBGeometry::ImplicitFunction&lt; T &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_sdf</b></td></tr>
+<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::shared_ptr</a>&lt; <a class="el" href="classTracerParticleSolver.html">const</a> EBGeometry::ImplicitFunction&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_sdf</b></td></tr>
 <tr class="memdesc:a020df2ebd7e50904444afdfc1dcf7d05"><td class="mdescLeft">&#160;</td><td class="mdescRight">Signed distance function. <br /></td></tr>
 <tr class="separator:a020df2ebd7e50904444afdfc1dcf7d05"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afb799c8aa4b8ed4f447e76ca4f05dc7f" id="r_afb799c8aa4b8ed4f447e76ca4f05dc7f"><td class="memItemLeft" align="right" valign="top"><a id="afb799c8aa4b8ed4f447e76ca4f05dc7f" name="afb799c8aa4b8ed4f447e76ca4f05dc7f"></a>
@@ -149,7 +148,7 @@ Protected Attributes</h2></td></tr>
 <tr class="separator:aa396aa2ffee6ca26127135902750da00"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> T = Real&gt;<br />
+<div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">T</a> = Real&gt;<br />
 class EBGeometryIF&lt; T &gt;</div><p>Shallow binding of EBGeometry signed distance functions to Chombo. </p>
 <p>Since EBGeometry is inherently 3D and chombo-discharge is both 2D and 3D, the object will be sliced through a specified z-coordinate doing 2D simulations. </p><dl class="section note"><dt>Note</dt><dd>T is the precision used in EBGeometry. </dd></dl>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
@@ -159,12 +158,12 @@ class EBGeometryIF&lt; T &gt;</div><p>Shallow binding of EBGeometry signed dista
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> T &gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">T</a> &gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classEBGeometryIF.html">EBGeometryIF</a>&lt; T &gt;<a class="el" href="classEBGeometryIF.html">::EBGeometryIF</a> </td>
+          <td class="memname"><a class="el" href="classEBGeometryIF.html">EBGeometryIF</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt;<a class="el" href="classEBGeometryIF.html">::EBGeometryIF</a> </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::shared_ptr</a>&lt; EBGeometry::ImplicitFunction&lt; T &gt; &gt; &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::shared_ptr</a>&lt; EBGeometry::ImplicitFunction&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt; &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_sdf</em>, </td>
         </tr>
         <tr>
@@ -190,9 +189,9 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> T &
 <p>Full constructor. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_impFunc</td><td>EBGeometry implicit function </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_flipInside</td><td>Hook for making inside -&gt; outside. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_zCoord</td><td>z-coordinate through which the object is sliced. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_sdf</td><td>Sdf </td></tr>
   </table>
   </dd>
 </dl>
@@ -205,12 +204,12 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> T &
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> T &gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">T</a> &gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classEBGeometryIF.html">EBGeometryIF</a>&lt; T &gt;<a class="el" href="classEBGeometryIF.html">::EBGeometryIF</a> </td>
+          <td class="memname"><a class="el" href="classEBGeometryIF.html">EBGeometryIF</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt;<a class="el" href="classEBGeometryIF.html">::EBGeometryIF</a> </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEBGeometryIF.html">EBGeometryIF</a>&lt; T &gt; &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEBGeometryIF.html">EBGeometryIF</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_inputIF</em></td><td>)</td>
           <td></td>
         </tr>
@@ -228,19 +227,49 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> T &
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="a6ccc89aeab23871fa611845c26b0506b" name="a6ccc89aeab23871fa611845c26b0506b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6ccc89aeab23871fa611845c26b0506b">&#9670;&#160;</a></span>newImplicitFunction()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">T</a> &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">BaseIF * <a class="el" href="classEBGeometryIF.html">EBGeometryIF</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt;::newImplicitFunction </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>IF factory method. </p>
+<dl class="section return"><dt>Returns</dt><dd>New copy of this implicit function </dd></dl>
+
+</div>
+</div>
 <a id="aa6b4fec5d4d1c753dfb4c441a3fc8643" name="aa6b4fec5d4d1c753dfb4c441a3fc8643"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aa6b4fec5d4d1c753dfb4c441a3fc8643">&#9670;&#160;</a></span>value()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> T &gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">T</a> &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classEBGeometryIF.html">EBGeometryIF</a>&lt; T &gt;::value </td>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classEBGeometryIF.html">EBGeometryIF</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt;::value </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;&#160;</td>
           <td class="paramname"><em>a_point</em></td><td>)</td>
@@ -261,6 +290,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> T &
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Function value at the given point </dd></dl>
 
 </div>
 </div>

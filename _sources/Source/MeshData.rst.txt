@@ -3,7 +3,7 @@
 Mesh data
 =========
 
-Mesh data structures of the type discussed in :ref:`Chap:SpatialDiscretization` are derived from a class ``EBAMRData<T>`` which holds a ``T`` in every grid patch across the AMR hiearchy.
+Mesh data structures of the type discussed in :ref:`Chap:SpatialDiscretization` are derived from a class ``EBAMRData<T>`` which holds a ``T`` in every grid patch across the AMR hierarchy.
 A requirement on the datatype ``T`` is that it must be linearizable so that it can be communicated across MPI ranks. 
 Internally, the data is stored as a ``Vector<RefCountedPtr<LevelData<T>>>``.
 Here, the ``Vector`` holds data on each AMR level; the data is allocated with a smart pointer called ``RefCountedPtr`` which points to a ``LevelData`` template structure, see :ref:`Chap:Basics`.
@@ -44,7 +44,7 @@ These are outlined below:
 For example, ``EBAMRCellData`` is a ``Vector<RefCountedPtr<LevelData<EBCellFAB> > >``, describing cell-centered data across the entire AMR hierarchy.
 There are many more data structures in place, but the above data structures are the most commonly used ones.
 Here, ``EBAMRFluxData`` is precisely like ``EBAMRCellData``, except that the data is stored on *cell faces* rather than cell centers.
-Likewise, ``EBAMRIVData`` is a data holder that holds data on each EB centroid (or boundary centroid) across the entire AMR hierachy.
+Likewise, ``EBAMRIVData`` is a data holder that holds data on each EB centroid (or boundary centroid) across the entire AMR hierarchy.
 In the same way, ``EBAMRIFData`` holds data on each face of all cut-cells in the hierarchy. 
 
 Allocating mesh data
@@ -198,7 +198,7 @@ These functions are available for both cell-centered data, cut-cell data, and fa
 Multiply signatures for this functionality exists, see the code-block below.
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 697-704, 729-737, 764-776
+   :lines: 701-708,733-741,768-780
    :language: c++
    :dedent: 2
 	    
@@ -219,14 +219,14 @@ This process adheres to the following rules:
 The signatures for updating the ghost cells are:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 1172-1179
+   :lines: 1175-1182
    :language: c++
    :dedent: 2
 
 As one alternative, one can update ghost cells on a single grid level:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 1181-1194
+   :lines: 1184-1197
    :language: c++
    :dedent: 2
 
@@ -248,7 +248,7 @@ If one needs data on a grid level where no data already exists, it is possible t
 The interpolation function that fill fine-grid data from a coarse grid has the following signature:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 1263-1282
+   :lines: 1264-1283
    :language: c++
    :dedent: 2
 
@@ -303,7 +303,7 @@ Once this neighborhood of cells is obtained, we compute the gradient using the p
 To compute gradients of a scalar, one can simply call ``AmrMesh::computeGradient(...)`` functions:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 444-457
+   :lines: 447-460
    :language: c++
    :dedent: 2		    
 
@@ -323,7 +323,7 @@ This version requires that the source and destination data holders are defined o
 A more general version is supplied by :ref:`Chap:AmrMesh`, and has the following structure:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 97-115
+   :lines: 98-116
    :language: c++
    :dedent: 2
 

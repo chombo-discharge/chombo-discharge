@@ -14,7 +14,7 @@
 <area shape="poly" id="edge41_Node000001_Node000022" title=" " alt="" coords="849,27,1191,46,1404,65,1618,91,1671,96,1719,97,1802,97,1841,102,1879,112,1918,133,1961,165,1972,178,1980,194,1988,225,1983,227,1975,196,1967,181,1957,169,1916,137,1877,117,1840,107,1802,102,1719,102,1671,101,1617,96,1403,70,1190,52,848,33"/>
 <area shape="rect" id="Node000024" href="$CD__NeedleIF_8H.html" title="Declaration of needle electrode (cylinder with one pointy end and one flat end)" alt="" coords="1183,240,1302,265"/>
 <area shape="poly" id="edge45_Node000001_Node000024" title=" " alt="" coords="789,43,1206,232,1204,237,787,48"/>
-<area shape="rect" id="Node000025" href="$CD__EBGeometryIF_8H.html" title="Binding of EBGeometry signed distance functions to Chombo objcts." alt="" coords="669,167,824,192"/>
+<area shape="rect" id="Node000025" href="$CD__EBGeometryIF_8H.html" title="Binding of EBGeometry signed distance functions to Chombo objects." alt="" coords="669,167,824,192"/>
 <area shape="poly" id="edge50_Node000001_Node000025" title=" " alt="" coords="749,46,749,153,744,153,744,46"/>
 <area shape="rect" id="Node000029" href="$CD__RoundedCylinderIF_8H.html" title="Declaration of a cylindrical implicit function with rounded edges." alt="" coords="285,240,467,265"/>
 <area shape="poly" id="edge61_Node000001_Node000029" title=" " alt="" coords="645,38,565,58,525,74,488,95,465,117,453,139,442,164,425,193,396,231,392,228,420,191,437,162,448,137,461,114,485,91,522,69,563,52,644,33"/>

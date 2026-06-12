@@ -89,7 +89,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>Implementation of <a class="el" href="classTimeStepper.html" title="Base class for advancing equations.">TimeStepper</a> for solving an ODE on a mesh. N is the number of variables.  
+<p><a class="el" href="classTimeStepper.html" title="Base class for advancing equations.">TimeStepper</a> for advancing a system of N coupled ODEs on an AMR mesh.  
  <a href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="CD__MeshODEStepper_8H_source.html">CD_MeshODEStepper.H</a>&gt;</code></p>
@@ -98,7 +98,7 @@ Inheritance diagram for Physics::MeshODE::MeshODEStepper&lt; N &gt;:</div>
 <div class="dyncontent">
 <div class="center"><img src="classPhysics_1_1MeshODE_1_1MeshODEStepper__inherit__graph.png" border="0" usemap="#aPhysics_1_1MeshODE_1_1MeshODEStepper_3_01N_01_4_inherit__map" alt="Inheritance graph"/></div>
 <map name="aPhysics_1_1MeshODE_1_1MeshODEStepper_3_01N_01_4_inherit__map" id="aPhysics_1_1MeshODE_1_1MeshODEStepper_3_01N_01_4_inherit__map">
-<area shape="rect" title="Implementation of TimeStepper for solving an ODE on a mesh. N is the number of variables." alt="" coords="5,79,308,104"/>
+<area shape="rect" title="TimeStepper for advancing a system of N coupled ODEs on an AMR mesh." alt="" coords="5,79,308,104"/>
 <area shape="rect" href="classTimeStepper.html" title="Base class for advancing equations." alt="" coords="104,5,209,31"/>
 <area shape="poly" title=" " alt="" coords="159,44,159,79,154,79,154,44"/>
 </map>
@@ -108,7 +108,7 @@ Collaboration diagram for Physics::MeshODE::MeshODEStepper&lt; N &gt;:</div>
 <div class="dyncontent">
 <div class="center"><img src="classPhysics_1_1MeshODE_1_1MeshODEStepper__coll__graph.png" border="0" usemap="#aPhysics_1_1MeshODE_1_1MeshODEStepper_3_01N_01_4_coll__map" alt="Collaboration graph"/></div>
 <map name="aPhysics_1_1MeshODE_1_1MeshODEStepper_3_01N_01_4_coll__map" id="aPhysics_1_1MeshODE_1_1MeshODEStepper_3_01N_01_4_coll__map">
-<area shape="rect" title="Implementation of TimeStepper for solving an ODE on a mesh. N is the number of variables." alt="" coords="5,79,308,104"/>
+<area shape="rect" title="TimeStepper for advancing a system of N coupled ODEs on an AMR mesh." alt="" coords="5,79,308,104"/>
 <area shape="rect" href="classTimeStepper.html" title="Base class for advancing equations." alt="" coords="104,5,209,31"/>
 <area shape="poly" title=" " alt="" coords="159,44,159,79,154,79,154,44"/>
 </map>
@@ -174,11 +174,11 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a5c9071713e98648756d6404643536f9a" id="r_a5c9071713e98648756d6404643536f9a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a5c9071713e98648756d6404643536f9a">getPlotVariableNames</a> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
 <tr class="memdesc:a5c9071713e98648756d6404643536f9a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get plot variable names.  <br /></td></tr>
 <tr class="separator:a5c9071713e98648756d6404643536f9a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a336f5b490f0e11fec2035e96b4039c74" id="r_a336f5b490f0e11fec2035e96b4039c74"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a336f5b490f0e11fec2035e96b4039c74">writePlotData</a> (<a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_output</a>, <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_icomp</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> <a class="el" href="classTracerParticleSolver.html">a_outputRealm</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_level</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
-<tr class="memdesc:a336f5b490f0e11fec2035e96b4039c74"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data to output holder.  <br /></td></tr>
-<tr class="separator:a336f5b490f0e11fec2035e96b4039c74"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac34eab2b65b419b2f96bf4c851aa032d" id="r_ac34eab2b65b419b2f96bf4c851aa032d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#ac34eab2b65b419b2f96bf4c851aa032d">writePlotData</a> (<a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_output</a>, <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_icomp</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_outputRealm</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_level</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
+<tr class="memdesc:ac34eab2b65b419b2f96bf4c851aa032d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data to output holder.  <br /></td></tr>
+<tr class="separator:ac34eab2b65b419b2f96bf4c851aa032d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af2f37a14647f5c455bba6ff096124eee" id="r_af2f37a14647f5c455bba6ff096124eee"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#af2f37a14647f5c455bba6ff096124eee">computeDt</a> () <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
-<tr class="memdesc:af2f37a14647f5c455bba6ff096124eee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute a time step to be used by <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a>.  <br /></td></tr>
+<tr class="memdesc:af2f37a14647f5c455bba6ff096124eee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute a time step.  <br /></td></tr>
 <tr class="separator:af2f37a14647f5c455bba6ff096124eee"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1a06df878801cf23189547818a26daa3" id="r_a1a06df878801cf23189547818a26daa3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a1a06df878801cf23189547818a26daa3">advance</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_dt</a>) <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
 <tr class="memdesc:a1a06df878801cf23189547818a26daa3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advancement method. Swaps between various kernels.  <br /></td></tr>
@@ -207,6 +207,21 @@ Public Member Functions</h2></td></tr>
 <a class="el" href="classTracerParticleSolver.html">virtual</a>&#160;</td><td class="memItemRight" valign="bottom"><b>~TimeStepper</b> ()</td></tr>
 <tr class="memdesc:a2d80eb58c811581ef79a0b3749fb5825 inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default destructor (does nothing) <br /></td></tr>
 <tr class="separator:a2d80eb58c811581ef79a0b3749fb5825 inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a48cbba74e3ff157cd5aa28e14089c363 inherit pub_methods_classTimeStepper" id="r_a48cbba74e3ff157cd5aa28e14089c363"><td class="memItemLeft" align="right" valign="top">
+&#160;</td><td class="memItemRight" valign="bottom"><b>TimeStepper</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTimeStepper.html">TimeStepper</a> &amp;)=<a class="el" href="classTracerParticleSolver.html">delete</a></td></tr>
+<tr class="memdesc:a48cbba74e3ff157cd5aa28e14089c363 inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallow copy construction. <br /></td></tr>
+<tr class="separator:a48cbba74e3ff157cd5aa28e14089c363 inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a51e57863b92479bde54b800c33215e97 inherit pub_methods_classTimeStepper" id="r_a51e57863b92479bde54b800c33215e97"><td class="memItemLeft" align="right" valign="top">
+<a class="el" href="classTimeStepper.html">TimeStepper</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTimeStepper.html">TimeStepper</a> &amp;)=<a class="el" href="classTracerParticleSolver.html">delete</a></td></tr>
+<tr class="memdesc:a51e57863b92479bde54b800c33215e97 inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallow copy assignment. <br /></td></tr>
+<tr class="separator:a51e57863b92479bde54b800c33215e97 inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a438db473d7ae7d4a0eb8a62d7eab5e7e inherit pub_methods_classTimeStepper" id="r_a438db473d7ae7d4a0eb8a62d7eab5e7e"><td class="memItemLeft" align="right" valign="top">
+&#160;</td><td class="memItemRight" valign="bottom"><b>TimeStepper</b> (<a class="el" href="classTimeStepper.html">TimeStepper</a> &amp;&amp;)=<a class="el" href="classTracerParticleSolver.html">default</a></td></tr>
+<tr class="memdesc:a438db473d7ae7d4a0eb8a62d7eab5e7e inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allow move construction. <br /></td></tr>
+<tr class="separator:a438db473d7ae7d4a0eb8a62d7eab5e7e inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4e1eebd499c502ae435ee336395f12cf inherit pub_methods_classTimeStepper" id="r_a4e1eebd499c502ae435ee336395f12cf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTimeStepper.html">TimeStepper</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#a4e1eebd499c502ae435ee336395f12cf">operator=</a> (<a class="el" href="classTimeStepper.html">TimeStepper</a> &amp;&amp;)=<a class="el" href="classTracerParticleSolver.html">default</a></td></tr>
+<tr class="memdesc:a4e1eebd499c502ae435ee336395f12cf inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allow move assignment.  <br /></td></tr>
+<tr class="separator:a4e1eebd499c502ae435ee336395f12cf inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aefcab8753df3fa6bee6ea9fa5231de47 inherit pub_methods_classTimeStepper" id="r_aefcab8753df3fa6bee6ea9fa5231de47"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#aefcab8753df3fa6bee6ea9fa5231de47">setAmr</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classAmrMesh.html">AmrMesh</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_amr</a>)</td></tr>
 <tr class="memdesc:aefcab8753df3fa6bee6ea9fa5231de47 inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set <a class="el" href="classAmrMesh.html" title="Class for handling spatial operations.">AmrMesh</a>.  <br /></td></tr>
 <tr class="separator:aefcab8753df3fa6bee6ea9fa5231de47 inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -219,21 +234,21 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aef658c5bd734a8f14f4db9400d2b2045 inherit pub_methods_classTimeStepper" id="r_aef658c5bd734a8f14f4db9400d2b2045"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#aef658c5bd734a8f14f4db9400d2b2045">postPlot</a> ()</td></tr>
 <tr class="memdesc:aef658c5bd734a8f14f4db9400d2b2045 inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">An option for calling special functions prior to plotting data. Called by <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a> in the IMMEDIATELY after writing the plot file.  <br /></td></tr>
 <tr class="separator:aef658c5bd734a8f14f4db9400d2b2045 inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a078de2c883b297d696f2e3d40bc270be inherit pub_methods_classTimeStepper" id="r_a078de2c883b297d696f2e3d40bc270be"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">int</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#a078de2c883b297d696f2e3d40bc270be">getCheckpointLoads</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> <a class="el" href="classTracerParticleSolver.html">a_realm</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_level</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:a078de2c883b297d696f2e3d40bc270be inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get computational loads to be checkpointed.  <br /></td></tr>
-<tr class="separator:a078de2c883b297d696f2e3d40bc270be inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a86094bdcb5a99b01c60fbc3429d0d846 inherit pub_methods_classTimeStepper" id="r_a86094bdcb5a99b01c60fbc3429d0d846"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">int</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#a86094bdcb5a99b01c60fbc3429d0d846">getCheckpointLoads</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_realm</a>, <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_level</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:a86094bdcb5a99b01c60fbc3429d0d846 inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get computational loads to be checkpointed.  <br /></td></tr>
+<tr class="separator:a86094bdcb5a99b01c60fbc3429d0d846 inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aba1d6a5006558bc0e0029a89e88e9899 inherit pub_methods_classTimeStepper" id="r_aba1d6a5006558bc0e0029a89e88e9899"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#aba1d6a5006558bc0e0029a89e88e9899">needToRegrid</a> ()</td></tr>
-<tr class="memdesc:aba1d6a5006558bc0e0029a89e88e9899 inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fuction which can have <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a> do regrids at arbitrary points in the simulation.  <br /></td></tr>
+<tr class="memdesc:aba1d6a5006558bc0e0029a89e88e9899 inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function which can have <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a> do regrids at arbitrary points in the simulation.  <br /></td></tr>
 <tr class="separator:aba1d6a5006558bc0e0029a89e88e9899 inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a56fb3c2953b664594ecf0f303c7645d3 inherit pub_methods_classTimeStepper" id="r_a56fb3c2953b664594ecf0f303c7645d3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#a56fb3c2953b664594ecf0f303c7645d3">keepGoing</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
 <tr class="memdesc:a56fb3c2953b664594ecf0f303c7645d3 inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Query whether the time stepper wants to continue stepping.  <br /></td></tr>
 <tr class="separator:a56fb3c2953b664594ecf0f303c7645d3 inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a975558fbeeb797d24c27f904666fefe7 inherit pub_methods_classTimeStepper" id="r_a975558fbeeb797d24c27f904666fefe7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#a975558fbeeb797d24c27f904666fefe7">loadBalanceThisRealm</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> <a class="el" href="classTracerParticleSolver.html">a_realm</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:a975558fbeeb797d24c27f904666fefe7 inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load balancing query for a specified realm. If this returns true for a_realm, load balancing routines will be called during regrids.  <br /></td></tr>
-<tr class="separator:a975558fbeeb797d24c27f904666fefe7 inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a77d9120fc07c2d552fda78e30562fcbe inherit pub_methods_classTimeStepper" id="r_a77d9120fc07c2d552fda78e30562fcbe"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#a77d9120fc07c2d552fda78e30562fcbe">loadBalanceBoxes</a> (<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">int</a> &gt; &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_procs</a>, <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Box</a> &gt; &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_boxes</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> <a class="el" href="classTracerParticleSolver.html">a_realm</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">DisjointBoxLayout</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_grids</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_lmin</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_finestLevel</a>)</td></tr>
-<tr class="memdesc:a77d9120fc07c2d552fda78e30562fcbe inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load balance grid boxes for a specified realm.  <br /></td></tr>
-<tr class="separator:a77d9120fc07c2d552fda78e30562fcbe inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4e4adb87e49889bae84ff140f3e783bd inherit pub_methods_classTimeStepper" id="r_a4e4adb87e49889bae84ff140f3e783bd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#a4e4adb87e49889bae84ff140f3e783bd">loadBalanceThisRealm</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_realm</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:a4e4adb87e49889bae84ff140f3e783bd inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load balancing query for a specified realm. If this returns true for a_realm, load balancing routines will be called during regrids.  <br /></td></tr>
+<tr class="separator:a4e4adb87e49889bae84ff140f3e783bd inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a71a18458809d602d8fb5b5ad5427539e inherit pub_methods_classTimeStepper" id="r_a71a18458809d602d8fb5b5ad5427539e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#a71a18458809d602d8fb5b5ad5427539e">loadBalanceBoxes</a> (<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">int</a> &gt; &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_procs</a>, <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Box</a> &gt; &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_boxes</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_realm</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">DisjointBoxLayout</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_grids</a>, <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_lmin</a>, <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_finestLevel</a>)</td></tr>
+<tr class="memdesc:a71a18458809d602d8fb5b5ad5427539e inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load balance grid boxes for a specified realm.  <br /></td></tr>
+<tr class="separator:a71a18458809d602d8fb5b5ad5427539e inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
@@ -274,20 +289,20 @@ Protected Attributes</h2></td></tr>
 <tr class="memdesc:a79538d89fb345f413d5b37788bd3e4a6"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> where solver and m_velocity lives. <br /></td></tr>
 <tr class="separator:a79538d89fb345f413d5b37788bd3e4a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a66ca9862e8b3fa698affd15e3ea299d5" id="r_a66ca9862e8b3fa698affd15e3ea299d5"><td class="memItemLeft" align="right" valign="top"><a id="a66ca9862e8b3fa698affd15e3ea299d5" name="a66ca9862e8b3fa698affd15e3ea299d5"></a>
-phase::which_phase&#160;</td><td class="memItemRight" valign="bottom"><b>m_phase</b></td></tr>
+<a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_phase</b></td></tr>
 <tr class="memdesc:a66ca9862e8b3fa698affd15e3ea299d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Phase (gas/solid) where the solver lives. <br /></td></tr>
 <tr class="separator:a66ca9862e8b3fa698affd15e3ea299d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a10b75b5fad233152d8068e858ad514d0" id="r_a10b75b5fad233152d8068e858ad514d0"><td class="memItemLeft" align="right" valign="top"><a id="a10b75b5fad233152d8068e858ad514d0" name="a10b75b5fad233152d8068e858ad514d0"></a>
 <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; <a class="el" href="classTracerParticleSolver.html">N</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_solver</b></td></tr>
-<tr class="memdesc:a10b75b5fad233152d8068e858ad514d0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tracer particle solvers. <br /></td></tr>
+<tr class="memdesc:a10b75b5fad233152d8068e858ad514d0"><td class="mdescLeft">&#160;</td><td class="mdescRight">MeshODE solver holding the solution on the AMR hierarchy. <br /></td></tr>
 <tr class="separator:a10b75b5fad233152d8068e858ad514d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a40cf820ba7ba073e112323f77b2b4147" id="r_a40cf820ba7ba073e112323f77b2b4147"><td class="memItemLeft" align="right" valign="top"><a id="a40cf820ba7ba073e112323f77b2b4147" name="a40cf820ba7ba073e112323f77b2b4147"></a>
 <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::array</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>, <a class="el" href="classTracerParticleSolver.html">N</a> &gt;(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::array</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>, <a class="el" href="classTracerParticleSolver.html">N</a> &gt; <a class="el" href="classTracerParticleSolver.html">y</a>, <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">t</a>)&gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_rhsFunction</b></td></tr>
-<tr class="memdesc:a40cf820ba7ba073e112323f77b2b4147"><td class="mdescLeft">&#160;</td><td class="mdescRight">Encapsulation of f = f(y,t) <br /></td></tr>
+<tr class="memdesc:a40cf820ba7ba073e112323f77b2b4147"><td class="mdescLeft">&#160;</td><td class="mdescRight">Right-hand side function \( \mathbf{f}(\mathbf{y}, t) \) evaluated point-wise on the mesh. <br /></td></tr>
 <tr class="separator:a40cf820ba7ba073e112323f77b2b4147"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6347bd6ded59ab7a4702b376590283a3" id="r_a6347bd6ded59ab7a4702b376590283a3"><td class="memItemLeft" align="right" valign="top"><a id="a6347bd6ded59ab7a4702b376590283a3" name="a6347bd6ded59ab7a4702b376590283a3"></a>
 <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::array</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>, <a class="el" href="classTracerParticleSolver.html">N</a> &gt;(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_position</a>)&gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_initialData</b></td></tr>
-<tr class="memdesc:a6347bd6ded59ab7a4702b376590283a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initial data function. <br /></td></tr>
+<tr class="memdesc:a6347bd6ded59ab7a4702b376590283a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Callable that returns the initial state \( \mathbf{y}_0(\mathbf{x}) \) at a given position. <br /></td></tr>
 <tr class="separator:a6347bd6ded59ab7a4702b376590283a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_attribs_classTimeStepper"><td colspan="2" onclick="javascript:toggleInherit('pro_attribs_classTimeStepper')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="classTimeStepper.html">TimeStepper</a></td></tr>
 <tr class="memitem:a3b59b74dcaad022a7e1382865ac82d44 inherit pro_attribs_classTimeStepper" id="r_a3b59b74dcaad022a7e1382865ac82d44"><td class="memItemLeft" align="right" valign="top">
@@ -320,7 +335,9 @@ phase::which_phase&#160;</td><td class="memItemRight" valign="bottom"><b>m_phase
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt;<br />
-class Physics::MeshODE::MeshODEStepper&lt; N &gt;</div><p>Implementation of <a class="el" href="classTimeStepper.html" title="Base class for advancing equations.">TimeStepper</a> for solving an ODE on a mesh. N is the number of variables. </p>
+class Physics::MeshODE::MeshODEStepper&lt; N &gt;</div><p><a class="el" href="classTimeStepper.html" title="Base class for advancing equations.">TimeStepper</a> for advancing a system of N coupled ODEs on an AMR mesh. </p>
+<p>At each time step the right-hand side \( \mathbf{f}(\mathbf{y}, t) \) is evaluated point-wise on the mesh and the ODE \( \dot{\mathbf{y}} = \mathbf{f}(\mathbf{y},t) \) is integrated with the chosen algorithm (Euler, RK2, or RK4). The template parameter <code>N</code> sets the number of solution components stored per cell.</p>
+<p>The RHS function and initial data function must be set by the derived application before <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a> calls <a class="el" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a9ea6843dec7daa349cb6c6b75d06f14f" title="Instantiate the ODE solver.">setupSolvers()</a>. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a1a06df878801cf23189547818a26daa3" name="a1a06df878801cf23189547818a26daa3"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a1a06df878801cf23189547818a26daa3">&#9670;&#160;</a></span>advance()</h2>
@@ -357,7 +374,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt;
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns the time step that was used (equal to a_dt in this case). </dd></dl>
 
-<p>Implements <a class="el" href="classTimeStepper.html#ab52d52be7a9fcae0dcd7901bd9b4fd08">TimeStepper</a>.</p>
+<p>Implements <a class="el" href="classTimeStepper.html#a6d82290e504dd10820cb3e315ed8183c">TimeStepper</a>.</p>
 
 </div>
 </div>
@@ -525,7 +542,8 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt;
 </table>
 </div><div class="memdoc">
 
-<p>Compute a time step to be used by <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a>. </p>
+<p>Compute a time step. </p>
+<dl class="section return"><dt>Returns</dt><dd>The fixed time step m_dt read from input options. </dd></dl>
 
 <p>Implements <a class="el" href="classTimeStepper.html#a3b7cf2a18ad3aa6abf1f79098651cc02">TimeStepper</a>.</p>
 
@@ -589,6 +607,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt;
 </div><div class="memdoc">
 
 <p>Get plot variable names. </p>
+<dl class="section return"><dt>Returns</dt><dd>Vector of variable name strings contributed by this <a class="el" href="classTimeStepper.html" title="Base class for advancing equations.">TimeStepper</a>. </dd></dl>
 
 <p>Implements <a class="el" href="classTimeStepper.html#a6700e35c58582eee7b875c4a75808f53">TimeStepper</a>.</p>
 
@@ -795,7 +814,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt;
   </dd>
 </dl>
 
-<p>Implements <a class="el" href="classTimeStepper.html#a5332298b62730f2d120137a241fef332">TimeStepper</a>.</p>
+<p>Implements <a class="el" href="classTimeStepper.html#a033714dec74fcd419b30b9120ed40d60">TimeStepper</a>.</p>
 
 </div>
 </div>
@@ -946,7 +965,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt;
   </dd>
 </dl>
 
-<p>Implements <a class="el" href="classTimeStepper.html#a653b195c640ac95a01197b70b9e0e260">TimeStepper</a>.</p>
+<p>Implements <a class="el" href="classTimeStepper.html#a14bac32b1a9237cac27ff0efa0c6922b">TimeStepper</a>.</p>
 
 </div>
 </div>
@@ -1026,19 +1045,19 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt;
 <p>Synchronize solver times and time steps. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_step</td><td>Time step </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_time</td><td>Time (in seconds) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_step</td><td>Current time step number. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_time</td><td>Current simulation time in seconds. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time step that was used. </td></tr>
   </table>
   </dd>
 </dl>
 
-<p>Implements <a class="el" href="classTimeStepper.html#a1b3e2640412b7fe4ab176ad1029834ac">TimeStepper</a>.</p>
+<p>Implements <a class="el" href="classTimeStepper.html#a94aa8013ce2a2ef0b426763e248c6840">TimeStepper</a>.</p>
 
 </div>
 </div>
-<a id="a336f5b490f0e11fec2035e96b4039c74" name="a336f5b490f0e11fec2035e96b4039c74"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a336f5b490f0e11fec2035e96b4039c74">&#9670;&#160;</a></span>writePlotData()</h2>
+<a id="ac34eab2b65b419b2f96bf4c851aa032d" name="ac34eab2b65b419b2f96bf4c851aa032d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac34eab2b65b419b2f96bf4c851aa032d">&#9670;&#160;</a></span>writePlotData()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1063,7 +1082,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt;
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;&#160;</td>
           <td class="paramname"><em>a_outputRealm</em>, </td>
         </tr>
         <tr>
@@ -1089,13 +1108,14 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt;
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_output</td><td>Output data holder. </td></tr>
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_icomp</td><td>Starting component in a_output to begin at. @πparam[in] a_outputRealm <a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> where a_output belongs </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_icomp</td><td>Starting component in a_output; incremented on exit. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_outputRealm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> where a_output lives. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level. </td></tr>
   </table>
   </dd>
 </dl>
 
-<p>Implements <a class="el" href="classTimeStepper.html#a22859f521ede9fac08fe05a06f929193">TimeStepper</a>.</p>
+<p>Implements <a class="el" href="classTimeStepper.html#a25e6e41b52aa1bd6d0a64818996185df">TimeStepper</a>.</p>
 
 </div>
 </div>

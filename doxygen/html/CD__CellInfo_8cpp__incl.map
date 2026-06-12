@@ -14,7 +14,7 @@
 <area shape="poly" id="edge64_Node000002_Node000005" title=" " alt="" coords="2658,99,2742,120,2791,136,2840,157,2889,183,2934,215,2974,253,3006,298,3009,319,2999,338,2981,355,2959,368,2956,364,2977,351,2995,335,3004,318,3001,300,2970,256,2931,219,2886,187,2838,162,2789,141,2741,125,2657,104"/>
 <area shape="rect" id="Node000006" href="$CD__EBAMRData_8H.html" title="Class for holding data across EBAMR hierarchies." alt="" coords="907,225,1047,251"/>
 <area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="2539,100,1910,155,1061,232,1061,226,1910,149,2539,95"/>
-<area shape="rect" id="Node000026" href="$CD__Decorations_8H_source.html" title=" " alt="" coords="2713,299,2853,324"/>
+<area shape="rect" id="Node000026" href="$CD__Decorations_8H.html" title="Declaration of various decoration macros." alt="" coords="2713,299,2853,324"/>
 <area shape="poly" id="edge37_Node000002_Node000026" title=" " alt="" coords="2610,103,2767,286,2763,290,2606,106"/>
 <area shape="rect" id="Node000027" href="$CD__MFInterfaceFAB_8H.html" title="Declaration of a class that allocates irregular data holders over the interface between two phases." alt="" coords="2224,152,2388,177"/>
 <area shape="poly" id="edge40_Node000002_Node000027" title=" " alt="" coords="2552,107,2367,151,2366,146,2551,101"/>

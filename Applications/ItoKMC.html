@@ -359,19 +359,20 @@ This interface consists of the following main functionalities:</p>
 Because the interface is fairly extensive, <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> also supplies a JSON-based implementation called <code class="docutils literal notranslate"><span class="pre">ItoKMCJSON</span></code> (see <a class="reference internal" href="#chap-itokmcjson"><span class="std std-ref">JSON interface</span></a>) for defining these things through file input.
 The difference between <code class="docutils literal notranslate"><span class="pre">ItoKMCPhysics</span></code> and its implementation <code class="docutils literal notranslate"><span class="pre">ItoKMCJSON</span></code> is that the JSON-based implementation class only implements a subset of potential features supported by <code class="docutils literal notranslate"><span class="pre">ItoKMCPhysics</span></code>.</p>
 <details>
-<summary><a>Show/hide full 0D interface</a></summary><div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/* chombo-discharge</span>
-<span class="cm"> * Copyright © 2021 SINTEF Energy Research.</span>
-<span class="cm"> * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.</span>
+<summary><a>Show/hide full 0D interface</a></summary><div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*</span>
+<span class="cm"> * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research</span>
+<span class="cm"> *</span>
+<span class="cm"> * SPDX-License-Identifier: GPL-3.0-or-later</span>
 <span class="cm"> */</span>
 
-<span class="cm">/*!</span>
+<span class="cm">/**</span>
 <span class="cm">  @file   CD_ItoKMCPhysics.H</span>
-<span class="cm">  @brief  Main file for describing Ito-based plasma physics</span>
+<span class="cm">  @brief  Declaration of the Physics::ItoKMC::ItoKMCPhysics abstract base class</span>
 <span class="cm">  @author Robert Marskar</span>
 <span class="cm">*/</span>
 
-<span class="cp">#ifndef CD_ItoKMCPhysics_H</span>
-<span class="cp">#define CD_ItoKMCPhysics_H</span>
+<span class="cp">#ifndef CD_ITOKMCPHYSICS_H</span>
+<span class="cp">#define CD_ITOKMCPHYSICS_H</span>
 
 <span class="c1">// Std includes</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;memory&gt;</span>
@@ -399,131 +400,134 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="k">namespace</span><span class="w"> </span><span class="nn">Physics</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="k">namespace</span><span class="w"> </span><span class="nn">ItoKMC</span><span class="w"> </span><span class="p">{</span>
 
-<span class="w">    </span><span class="cm">/*!</span>
-<span class="cm">      @brief Numerical representation of the KMC state. Can be floating-point or integer type</span>
+<span class="w">    </span><span class="cm">/**</span>
+<span class="cm">      @brief Floating-point type used to represent particle counts in the KMC state.</span>
 <span class="cm">    */</span>
 <span class="w">    </span><span class="k">using</span><span class="w"> </span><span class="n">FPR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Real</span><span class="p">;</span>
 
-<span class="w">    </span><span class="cm">/*!</span>
-<span class="cm">      @brief KMC state used in the Kinetic Monte Carlo advancement</span>
+<span class="w">    </span><span class="cm">/**</span>
+<span class="cm">      @brief KMC state (dual-state representation) used in the Kinetic Monte Carlo advancement.</span>
 <span class="cm">    */</span>
 <span class="w">    </span><span class="k">using</span><span class="w"> </span><span class="n">KMCState</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">KMCDualState</span><span class="o">&lt;</span><span class="n">FPR</span><span class="o">&gt;</span><span class="p">;</span>
 
-<span class="w">    </span><span class="cm">/*!</span>
-<span class="cm">      @brief KMC reaction used in the Kinetic Monte Carlo advancement</span>
+<span class="w">    </span><span class="cm">/**</span>
+<span class="cm">      @brief KMC reaction type used in the Kinetic Monte Carlo advancement.</span>
 <span class="cm">    */</span>
 <span class="w">    </span><span class="k">using</span><span class="w"> </span><span class="n">KMCReaction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">KMCDualStateReaction</span><span class="o">&lt;</span><span class="n">KMCState</span><span class="p">,</span><span class="w"> </span><span class="n">FPR</span><span class="o">&gt;</span><span class="p">;</span>
 
-<span class="w">    </span><span class="cm">/*!</span>
-<span class="cm">      @brief KMC solverl type used in the Kinetic Monte carlo advancement</span>
+<span class="w">    </span><span class="cm">/**</span>
+<span class="cm">      @brief KMC solver type used in the Kinetic Monte Carlo advancement.</span>
 <span class="cm">    */</span>
 <span class="w">    </span><span class="k">using</span><span class="w"> </span><span class="n">KMCSolverType</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">KMCSolver</span><span class="o">&lt;</span><span class="n">KMCReaction</span><span class="p">,</span><span class="w"> </span><span class="n">KMCState</span><span class="p">,</span><span class="w"> </span><span class="n">FPR</span><span class="o">&gt;</span><span class="p">;</span>
 
-<span class="w">    </span><span class="cm">/*!</span>
+<span class="w">    </span><span class="cm">/**</span>
 <span class="cm">      @brief Basic function for diffusing a particle</span>
 <span class="cm">    */</span>
 <span class="w">    </span><span class="k">using</span><span class="w"> </span><span class="n">DiffusionFunction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">ItoParticle</span><span class="o">&amp;</span><span class="w"> </span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_dt</span><span class="p">)</span><span class="o">&gt;</span><span class="p">;</span>
 
-<span class="w">    </span><span class="cm">/*!</span>
-<span class="cm">      @brief Map to species type</span>
-<span class="cm">      @details This is just for distinguishing between species that are treated with an Ito or CDR formalism</span>
+<span class="w">    </span><span class="cm">/**</span>
+<span class="cm">      @brief Tag for distinguishing species solved with an Ito diffusion or CDR fluid formalism.</span>
 <span class="cm">    */</span>
 <span class="w">    </span><span class="k">enum</span><span class="w"> </span><span class="nc">SpeciesType</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="n">Ito</span><span class="p">,</span>
-<span class="w">      </span><span class="n">CDR</span>
+<span class="w">      </span><span class="n">Ito</span><span class="p">,</span><span class="w"> </span><span class="c1">///&lt; Ito stochastic drift-diffusion solver.</span>
+<span class="w">      </span><span class="n">CDR</span><span class="w">  </span><span class="c1">///&lt; Convection-diffusion-reaction (fluid) solver.</span>
 <span class="w">    </span><span class="p">};</span>
 
-<span class="w">    </span><span class="cm">/*!</span>
-<span class="cm">      @brief Base class for interaction between Kinetic Monte Carlo and Ito-based plasma solvers. </span>
-<span class="cm">      @details When using this class, the user should populate m_kmcReactions with the appropriate reactions AND implement routines</span>
-<span class="cm">      for computing the mobility/diffusion coefficeints. </span>
+<span class="w">    </span><span class="cm">/**</span>
+<span class="cm">      @brief Abstract base class coupling Kinetic Monte Carlo chemistry to Ito/CDR plasma solvers.</span>
+<span class="cm">      @details Subclasses must implement `updateReactionRates()`, `computeMobilities()`,</span>
+<span class="cm">      `computeDiffusionCoefficients()`, `secondaryEmissionEB()`, `computeAlpha()`, `computeEta()`,</span>
+<span class="cm">      and `getNeutralDensity()`. The reaction network is specified by populating `m_kmcReactions` and</span>
+<span class="cm">      (optionally) `m_photoReactions` and `m_surfaceReactions` in the subclass constructor.</span>
 <span class="cm">    */</span>
 <span class="w">    </span><span class="k">class</span><span class="w"> </span><span class="nc">ItoKMCPhysics</span>
 <span class="w">    </span><span class="p">{</span>
 <span class="w">    </span><span class="k">public</span><span class="o">:</span>
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Constructor. Does nothing.</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="n">ItoKMCPhysics</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Destructor. Does nothing. </span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="k">virtual</span><span class="w"> </span><span class="o">~</span><span class="n">ItoKMCPhysics</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Define the KMC solver and state</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span>
 <span class="w">      </span><span class="nf">defineKMC</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Kill the KMC solver</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span>
 <span class="w">      </span><span class="nf">killKMC</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Get the neutral density at a position in space</span>
 <span class="cm">	@param[in] a_pos Physical position</span>
 <span class="cm">	@return Neutral density</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="k">virtual</span><span class="w"> </span><span class="n">Real</span>
-<span class="w">      </span><span class="nf">getNeutralDensity</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_pos</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">      </span><span class="nf">getNeutralDensity</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_pos</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Compute Townsend ionization coefficient</span>
 <span class="cm">	@param[in] a_E Electric field magnitude</span>
 <span class="cm">	@param[in] a_x Physical coordinate</span>
 <span class="cm">	@return Should return the Townsend ionization coefficient. </span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="k">virtual</span><span class="w"> </span><span class="n">Real</span>
-<span class="w">      </span><span class="nf">computeAlpha</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_x</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">      </span><span class="nf">computeAlpha</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_x</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Compute Townsend attachment coefficient</span>
 <span class="cm">	@param[in] a_E Electric field magnitude</span>
 <span class="cm">	@param[in] a_x Physical coordinate</span>
 <span class="cm">	@return Should return the Townsend attachment coefficient. </span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="k">virtual</span><span class="w"> </span><span class="n">Real</span>
-<span class="w">      </span><span class="nf">computeEta</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_x</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">      </span><span class="nf">computeEta</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_x</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Get all particle drift-diffusion species</span>
 <span class="cm">	@return m_itoSpecies</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">ItoSpecies</span><span class="o">&gt;&gt;&amp;</span>
 <span class="w">      </span><span class="n">getItoSpecies</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Get all fluid drift-diffusion species</span>
 <span class="cm">	@return m_cdrSpecies</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">CdrSpecies</span><span class="o">&gt;&gt;&amp;</span>
 <span class="w">      </span><span class="n">getCdrSpecies</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Get all photon species</span>
 <span class="cm">	@return m_rtSpecies</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">RtSpecies</span><span class="o">&gt;&gt;&amp;</span>
 <span class="w">      </span><span class="n">getRtSpecies</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
-<span class="cm">        @brief Get diffusion functions</span>
+<span class="w">      </span><span class="cm">/**</span>
+<span class="cm">        @brief Get diffusion functions for all Ito species.</span>
+<span class="cm">        @return Vector of per-species diffusion displacement functors.</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">DiffusionFunction</span><span class="o">&gt;&amp;</span>
 <span class="w">      </span><span class="n">getItoDiffusionFunctions</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
-<span class="cm">	@brief Get number of plot variables</span>
+<span class="w">      </span><span class="cm">/**</span>
+<span class="cm">	@brief Get plot variable names.</span>
+<span class="cm">	@return Vector of variable name strings for extra diagnostic quantities.</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="k">virtual</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span>
 <span class="w">      </span><span class="n">getPlotVariableNames</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Get plot variables</span>
 <span class="cm">	@param[in] a_E       Electric field</span>
 <span class="cm">	@param[in] a_pos     Physical position</span>
@@ -531,72 +535,81 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="cm">	@param[in] a_gradPhi Density gradients for plasma species. </span>
 <span class="cm">	@param[in] a_dx      Grid resolution</span>
 <span class="cm">	@param[in] a_kappa   Cut-cell volume fraction</span>
+<span class="cm">        @return Plot variables</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="k">virtual</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span>
-<span class="w">      </span><span class="n">getPlotVariables</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">          </span><span class="n">a_E</span><span class="p">,</span>
-<span class="w">                       </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">          </span><span class="n">a_pos</span><span class="p">,</span>
+<span class="w">      </span><span class="n">getPlotVariables</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">         </span><span class="n">a_E</span><span class="p">,</span>
+<span class="w">                       </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">         </span><span class="n">a_pos</span><span class="p">,</span>
 <span class="w">                       </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">     </span><span class="n">a_phi</span><span class="p">,</span>
 <span class="w">                       </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_gradPhi</span><span class="p">,</span>
 <span class="w">                       </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">              </span><span class="n">a_dx</span><span class="p">,</span>
 <span class="w">                       </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">              </span><span class="n">a_kappa</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
-<span class="cm">	@brief Get number of plot variables</span>
+<span class="w">      </span><span class="cm">/**</span>
+<span class="cm">	@brief Get number of extra plot variables contributed by this physics model.</span>
+<span class="cm">	@return Number of diagnostic plot variables.</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="k">virtual</span><span class="w"> </span><span class="kt">int</span>
 <span class="w">      </span><span class="nf">getNumberOfPlotVariables</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Return number of Ito solvers.</span>
+<span class="cm">        @return Num ito species</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="kt">int</span>
 <span class="w">      </span><span class="nf">getNumItoSpecies</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Return number of CDR solvers.</span>
+<span class="cm">        @return Num cdr species</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="kt">int</span>
 <span class="w">      </span><span class="nf">getNumCdrSpecies</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Return total number of plasma species.</span>
+<span class="cm">        @return Num plasma species</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="kt">int</span>
 <span class="w">      </span><span class="nf">getNumPlasmaSpecies</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Return number of RTE solvers.</span>
+<span class="cm">        @return Num photon species</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="kt">int</span>
 <span class="w">      </span><span class="nf">getNumPhotonSpecies</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
-<span class="cm">	@brief Return true/false if physics model needs species gradients.</span>
+<span class="w">      </span><span class="cm">/**</span>
+<span class="cm">	@brief Return true if the physics model requires species density gradients.</span>
+<span class="cm">	@return True if density gradients must be computed and passed to updateReactionRates().</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="k">virtual</span><span class="w"> </span><span class="kt">bool</span>
 <span class="w">      </span><span class="nf">needGradients</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
-<span class="cm">	@brief Get the internal mapping between plasma species and Ito solvers</span>
+<span class="w">      </span><span class="cm">/**</span>
+<span class="cm">	@brief Get the internal mapping from plasma-species index to solver type and solver index.</span>
+<span class="cm">	@return Map from plasma species index to (SpeciesType, solver index) pair.</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="n">SpeciesType</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;&gt;&amp;</span>
 <span class="w">      </span><span class="n">getSpeciesMap</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Parse run-time options</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="w">      </span><span class="nf">parseRuntimeOptions</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Set initial surface charge. Default is 0, override if you want.</span>
 <span class="cm">	@param[in] a_time Simulation time</span>
 <span class="cm">	@param[in] a_pos  Physical coordinate</span>
+<span class="cm">        @return Return value</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="k">virtual</span><span class="w"> </span><span class="n">Real</span>
-<span class="w">      </span><span class="nf">initialSigma</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_pos</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<span class="w">      </span><span class="nf">initialSigma</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_pos</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Compute the Ito solver mobilities.</span>
 <span class="cm">	@param[in] a_time Time</span>
 <span class="cm">	@param[in] a_pos  Position</span>
@@ -604,9 +617,9 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="cm">	@return Must return a vector of non-negative mobility coefficients for the plasma species</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="k">virtual</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span>
-<span class="w">      </span><span class="n">computeMobilities</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_pos</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_E</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">      </span><span class="n">computeMobilities</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_pos</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_E</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Compute the Ito solver diffusion coefficients</span>
 <span class="cm">	@param[in] a_time Time</span>
 <span class="cm">	@param[in] a_pos  Position</span>
@@ -614,9 +627,9 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="cm">	@return Must return a vector of non-negative diffusion coefficients for the plasma species</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="k">virtual</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span>
-<span class="w">      </span><span class="n">computeDiffusionCoefficients</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_pos</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_E</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">      </span><span class="n">computeDiffusionCoefficients</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_pos</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_E</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Resolve secondary emission at the EB.</span>
 <span class="cm">	@details Routine is here to handle charge injection, secondary emission etc.</span>
 <span class="cm">	@param[out] a_secondaryParticles Outgoing plasma species particles.</span>
@@ -625,9 +638,6 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="cm">	@param[in]  a_primaryParticles   Particles that left the computational domain through the EB.</span>
 <span class="cm">	@param[in]  a_cdrFluxesExtrap    Extrapolated CDR fluxes.</span>
 <span class="cm">	@param[in]  a_primaryPhotons     Photons that left the computational domain through the EB.</span>
-<span class="cm">	@param[in]  a_newNumParticles    Total number of particles in the cut-cell AFTER the transport step.</span>
-<span class="cm">	@param[in]  a_oldNumParticles    Total number of particles in the cut-cell BEFORE the transport step.</span>
-<span class="cm">	@param[in]  a_electricField      Electric field.                  </span>
 <span class="cm">	@param[in]  a_physicalCellCenter Physical position of the cell center. </span>
 <span class="cm">	@param[in]  a_cellCentroid       Cell centroid relative to the cell center (not multiplied by dx).</span>
 <span class="cm">	@param[in]  a_bndryCentroid      EB face centroid relative to the cell center (not multiplied by dx).</span>
@@ -637,6 +647,7 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="cm">	@param[in]  a_dt                 Time step.</span>
 <span class="cm">	@param[in]  a_isDielectric       Dielectric or electrode. </span>
 <span class="cm">	@param[in]  a_matIndex           Material index (taken from computationalGeometry).</span>
+<span class="cm">        @param[in] a_E E</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="w">      </span><span class="nf">secondaryEmissionEB</span><span class="p">(</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;&gt;&amp;</span><span class="w">       </span><span class="n">a_secondaryParticles</span><span class="p">,</span>
@@ -656,9 +667,9 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w">                       </span><span class="n">a_isDielectric</span><span class="p">,</span>
 <span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                        </span><span class="n">a_matIndex</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Advance the reaction network using the KMC algorithm.</span>
-<span class="cm">	@param[inout] a_numParticles  Number of physical particles</span>
+<span class="cm">	@param[in,out] a_numParticles  Number of physical particles</span>
 <span class="cm">	@param[out]   a_numNewPhotons Number of new physical photons to generate (of each type)</span>
 <span class="cm">	@param[out]   a_physicsDt     Reasonable KMC time step computed at end of integration with eps = 1</span>
 <span class="cm">	@param[in]    a_phi           Plasma species densities. </span>
@@ -681,22 +692,22 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">              </span><span class="n">a_dx</span><span class="p">,</span>
 <span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">              </span><span class="n">a_kappa</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Reconcile the number of particles.</span>
 <span class="cm">	@details This will add/remove particles and potentially also adjust the particle weights.</span>
-<span class="cm">	@param[inout] a_particles Computational particles</span>
+<span class="cm">	@param[in,out] a_particles Computational particles</span>
 <span class="cm">	@param[in]    a_newNumParticles New number of particles (i.e., after the KMC advance)</span>
 <span class="cm">	@param[in]    a_oldNumParticles Previous number of particles (i.e., before the KMC advance)</span>
 <span class="cm">	@param[in]    a_electricField   Electric field in cell</span>
 <span class="cm">	@param[in]    a_cellPos         Cell center position</span>
 <span class="cm">	@param[in]    a_centroidPos     Cell centroid position</span>
-<span class="cm">	@param[in]    a_loCorner        Low corner of minimum box enclosing the cut-cell</span>
-<span class="cm">	@param[in]    a_hiCorner        High corner of minimum box enclosing the cut-cell</span>
 <span class="cm">	@param[in]    a_bndryCentroid   Cut-cell boundary centroid</span>
 <span class="cm">	@param[in]    a_bndryNormal     Cut-cell normal (pointing into the domain)</span>
 <span class="cm">	@param[in]    a_dx              Grid resolution</span>
 <span class="cm">	@param[in]    a_kappa           Cut-cell volume fraction. </span>
 <span class="cm">	@note Public because this is called by ItoKMCStepper</span>
+<span class="cm">        @param[in] a_lo Lo</span>
+<span class="cm">        @param[in] a_hi Hi</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span>
 <span class="w">      </span><span class="nf">reconcileParticles</span><span class="p">(</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;*&gt;&amp;</span><span class="w"> </span><span class="n">a_particles</span><span class="p">,</span>
@@ -712,20 +723,20 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">                  </span><span class="n">a_dx</span><span class="p">,</span>
 <span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">                  </span><span class="n">a_kappa</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Generate new photons. </span>
 <span class="cm">	@details This will add photons</span>
 <span class="cm">	@param[in] a_newPhotons      New photons</span>
 <span class="cm">	@param[in] a_numNewPhotons   Number of physical photons to be generated. </span>
 <span class="cm">	@param[in] a_cellPos         Cell center position</span>
 <span class="cm">	@param[in] a_centroidPos     Cell centroid position</span>
-<span class="cm">	@param[in] a_loCorner        Low corner of minimum box enclosing the cut-cell</span>
-<span class="cm">	@param[in] a_hiCorner        High corner of minimum box enclosing the cut-cell</span>
 <span class="cm">	@param[in] a_bndryCentroid   Cut-cell boundary centroid</span>
 <span class="cm">	@param[in] a_bndryNormal     Cut-cell normal (pointing into the domain)</span>
 <span class="cm">	@param[in] a_dx              Grid resolution</span>
 <span class="cm">	@param[in] a_kappa           Cut-cell volume fraction. </span>
 <span class="cm">	@note Public because this is called by ItoKMCStepper</span>
+<span class="cm">        @param[in] a_lo Lo</span>
+<span class="cm">        @param[in] a_hi Hi</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span>
 <span class="w">      </span><span class="nf">reconcilePhotons</span><span class="p">(</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Photon</span><span class="o">&gt;*&gt;&amp;</span><span class="w"> </span><span class="n">a_newPhotons</span><span class="p">,</span>
@@ -739,12 +750,12 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="w">                       </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">             </span><span class="n">a_dx</span><span class="p">,</span>
 <span class="w">                       </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">             </span><span class="n">a_kappa</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Reconcile photoionization reactions.</span>
-<span class="cm">	@param[inout] a_itoPrticles       Particle products placed in Ito solvers. </span>
-<span class="cm">	@param[inout] a_cdrParticles      Particle products placed in CDR solvers. </span>
+<span class="cm">	@param[in,out] a_cdrParticles      Particle products placed in CDR solvers. </span>
 <span class="cm">	@param[in]    a_absorbedPhotons Photons absorbed on the mesh. </span>
 <span class="cm">	@details This runs through the photo-reactions and associates photo-ionization products. </span>
+<span class="cm">        @param[in] a_itoParticles Ito particles</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span>
 <span class="w">      </span><span class="nf">reconcilePhotoionization</span><span class="p">(</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;*&gt;&amp;</span><span class="w">   </span><span class="n">a_itoParticles</span><span class="p">,</span>
@@ -752,106 +763,104 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="w">                               </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Photon</span><span class="o">&gt;*&gt;&amp;</span><span class="w">  </span><span class="n">a_absorbedPhotons</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
 <span class="w">    </span><span class="k">protected</span><span class="o">:</span>
-<span class="w">      </span><span class="cm">/*!</span>
-<span class="cm">	@brief Enum for switching between KMC algorithms</span>
-<span class="cm">	@details &#39;SSA&#39; is the Gillespie algorithm, &#39;Tau&#39; is tau-leaping and &#39;Hybrid&#39; is the Cao et. al. algorithm. </span>
+<span class="w">      </span><span class="cm">/**</span>
+<span class="cm">	@brief KMC time-stepping algorithms available for advancing the reaction network.</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="k">enum</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">Algorithm</span>
 <span class="w">      </span><span class="p">{</span>
-<span class="w">        </span><span class="n">SSA</span><span class="p">,</span>
-<span class="w">        </span><span class="n">ExplicitEuler</span><span class="p">,</span>
-<span class="w">        </span><span class="n">Midpoint</span><span class="p">,</span>
-<span class="w">        </span><span class="n">PRC</span><span class="p">,</span>
-<span class="w">        </span><span class="n">ImplicitEuler</span><span class="p">,</span>
-<span class="w">        </span><span class="n">HybridExplicitEuler</span><span class="p">,</span>
-<span class="w">        </span><span class="n">HybridMidpoint</span><span class="p">,</span>
-<span class="w">        </span><span class="n">HybridPRC</span><span class="p">,</span>
-<span class="w">        </span><span class="n">HybridImplicitEuler</span>
+<span class="w">        </span><span class="n">SSA</span><span class="p">,</span><span class="w">                 </span><span class="c1">///&lt; Gillespie&#39;s Stochastic Simulation Algorithm (exact).</span>
+<span class="w">        </span><span class="n">ExplicitEuler</span><span class="p">,</span><span class="w">       </span><span class="c1">///&lt; Explicit tau-leaping with Euler steps.</span>
+<span class="w">        </span><span class="n">Midpoint</span><span class="p">,</span><span class="w">            </span><span class="c1">///&lt; Explicit tau-leaping with midpoint (second-order) steps.</span>
+<span class="w">        </span><span class="n">PRC</span><span class="p">,</span><span class="w">                 </span><span class="c1">///&lt; Partially-rejected corrections tau-leaping.</span>
+<span class="w">        </span><span class="n">ImplicitEuler</span><span class="p">,</span><span class="w">       </span><span class="c1">///&lt; Implicit tau-leaping with Euler steps.</span>
+<span class="w">        </span><span class="n">HybridExplicitEuler</span><span class="p">,</span><span class="w"> </span><span class="c1">///&lt; Hybrid SSA / explicit Euler (Cao et al.).</span>
+<span class="w">        </span><span class="n">HybridMidpoint</span><span class="p">,</span><span class="w">      </span><span class="c1">///&lt; Hybrid SSA / midpoint (Cao et al.).</span>
+<span class="w">        </span><span class="n">HybridPRC</span><span class="p">,</span><span class="w">           </span><span class="c1">///&lt; Hybrid SSA / PRC (Cao et al.).</span>
+<span class="w">        </span><span class="n">HybridImplicitEuler</span><span class="w">  </span><span class="c1">///&lt; Hybrid SSA / implicit Euler (Cao et al.).</span>
 <span class="w">      </span><span class="p">};</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
-<span class="cm">	@brief Enum for switching between various particle placement algorithms</span>
+<span class="w">      </span><span class="cm">/**</span>
+<span class="cm">	@brief Strategies for placing secondary particles created during the KMC advance.</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="k">enum</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">ParticlePlacement</span>
 <span class="w">      </span><span class="p">{</span>
-<span class="w">        </span><span class="n">Random</span><span class="p">,</span>
-<span class="w">        </span><span class="n">Centroid</span><span class="p">,</span>
-<span class="w">        </span><span class="n">Downstream</span>
+<span class="w">        </span><span class="n">Random</span><span class="p">,</span><span class="w">    </span><span class="c1">///&lt; Place particles at a uniformly random position within the cell.</span>
+<span class="w">        </span><span class="n">Centroid</span><span class="p">,</span><span class="w">  </span><span class="c1">///&lt; Place particles at the cell centroid.</span>
+<span class="w">        </span><span class="n">Downstream</span><span class="w"> </span><span class="c1">///&lt; Place particles in the downstream region relative to the primary particle drift.</span>
 <span class="w">      </span><span class="p">};</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Algorithm to use for KMC advance</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="n">Algorithm</span><span class="w"> </span><span class="n">m_algorithm</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Particle placement algorithm</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="n">ParticlePlacement</span><span class="w"> </span><span class="n">m_particlePlacement</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Map for associating a plasma species with an Ito solver or CDR solver.</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="n">std</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="n">SpeciesType</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">m_speciesMap</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Class name. Used for options parsing</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">m_className</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Turn on/off debugging</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="kt">bool</span><span class="w"> </span><span class="n">m_debug</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Is defined or not</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="kt">bool</span><span class="w"> </span><span class="n">m_isDefined</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief If true, increment onto existing particles rather than creating new ones</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="kt">bool</span><span class="w"> </span><span class="n">m_incrementNewParticles</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Is the KMC solver defined or not.</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="k">static</span><span class="w"> </span><span class="k">thread_local</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">m_hasKMCSolver</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Kinetic Monte Carlo solver used in advanceReactionNetwork.</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="k">static</span><span class="w"> </span><span class="k">thread_local</span><span class="w"> </span><span class="n">KMCSolverType</span><span class="w"> </span><span class="n">m_kmcSolver</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief KMC state used in advanceReactionNetwork.</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="k">static</span><span class="w"> </span><span class="k">thread_local</span><span class="w"> </span><span class="n">KMCState</span><span class="w"> </span><span class="n">m_kmcState</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
-<span class="cm">	@brief KMC reactions used in advanceReactionNetowkr</span>
-<span class="cm">	@note This is set up via setupKMC in order toi ensure OpenMP thread safety when calling advanceReactionNetwork. The vector</span>
-<span class="cm">	is later depopulated in killKMC().</span>
+<span class="w">      </span><span class="cm">/**</span>
+<span class="cm">	@brief Thread-local copies of KMC reactions used in advanceReactionNetwork.</span>
+<span class="cm">	@details Set up via defineKMC() to ensure OpenMP thread safety; depopulated by killKMC().</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="k">static</span><span class="w"> </span><span class="k">thread_local</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="n">KMCReaction</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">m_kmcReactionsThreadLocal</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief List of reactions for the KMC solver</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">KMCReaction</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_kmcReactions</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief List of photoionization reactions</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">ItoKMCPhotoReaction</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_photoReactions</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">        @brief List of reactions that are a part of the time step limitation. </span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_reactiveDtFactors</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Random number generators for photoionization pathways. </span>
 <span class="cm">	@details The first index is the photon index, i.e. entry in m_photonSpecies. The second index in the</span>
 <span class="cm">	map is an RNG generator for selecting photo-reactions, and a map which associates the returned</span>
@@ -859,120 +868,120 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="cm">      */</span>
 <span class="w">      </span><span class="n">std</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">discrete_distribution</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;&gt;&gt;</span><span class="w"> </span><span class="n">m_photoPathways</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Surface reactions.</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="n">ItoKMCSurfaceReactionSet</span><span class="w"> </span><span class="n">m_surfaceReactions</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">        @brief Diffusion functions for the various Ito species</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">DiffusionFunction</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_itoDiffusionFunctions</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief List of solver-tracked particle drift-diffusion species. </span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">ItoSpecies</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">m_itoSpecies</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief List of solver-tracked fluid drift-diffusion species. </span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">CdrSpecies</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">m_cdrSpecies</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief List of solver-tracked photon species. </span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">RtSpecies</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">m_rtSpecies</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief An internal integer describing which species is the &quot;ionizing&quot; species.</span>
 <span class="cm">	@details This is used by the particle reconciliation routine when only placing secondary particles</span>
 <span class="cm">	in the downstream region of the primary particles. </span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="kt">int</span><span class="w"> </span><span class="n">m_downstreamSpecies</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Maximum new number of particles generated by the chemistry advance</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="kt">int</span><span class="w"> </span><span class="n">m_maxNewParticles</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Maximum new number of photons generated by the chemistry advance</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="kt">int</span><span class="w"> </span><span class="n">m_maxNewPhotons</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Solver setting for the Cao et. al algorithm. </span>
 <span class="cm">	@details Determines critical reactions. A reaction is critical if it is m_Ncrit firings away from depleting a reactant. </span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="kt">int</span><span class="w"> </span><span class="n">m_Ncrit</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Solver setting for the Cao et. al algorithm. </span>
 <span class="cm">	@details Maximum number of SSA steps to run when switching into SSA-based advancement for non-critical reactions. </span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="kt">int</span><span class="w"> </span><span class="n">m_NSSA</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Maximum number of iterations for implicit KMC-leaping algorithms</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="kt">int</span><span class="w"> </span><span class="n">m_maxIter</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Solver setting for the Cao et. al. algorithm. </span>
 <span class="cm">	@details Equal to the maximum permitted change in the relative propensity for non-critical reactions</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="n">Real</span><span class="w"> </span><span class="n">m_SSAlim</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Solver setting for the Cao et. al. algorithm. </span>
 <span class="cm">	@details Equal to the maximum permitted change in the relative propensity for non-critical reactions</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="n">Real</span><span class="w"> </span><span class="n">m_eps</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Exit tolerance for implicit KMC-leaping algorithms</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="n">Real</span><span class="w"> </span><span class="n">m_exitTol</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Define method -- defines all the internal machinery</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span>
 <span class="w">      </span><span class="nf">define</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Build internal representation of how we distinguish the Ito and CDR solvers</span>
 <span class="cm">	@note This should ALWAYS be called after initializing the species since ItoKMCStepper will rely on it. </span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span>
 <span class="w">      </span><span class="nf">defineSpeciesMap</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Define pathways for photo-reactions</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span>
 <span class="w">      </span><span class="nf">definePhotoPathways</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Parse the maximum number of particles generated per cell</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span>
 <span class="w">      </span><span class="nf">parsePPC</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Parse the maximum number of particles generated per cell</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span>
 <span class="w">      </span><span class="nf">parseDebug</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Parse reaction algorithm</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span>
 <span class="w">      </span><span class="nf">parseAlgorithm</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Update reaction rates</span>
 <span class="cm">	@param[out] a_kmcReactions Reaction rates to be set. </span>
 <span class="cm">	@param[in] a_E       Electric field</span>
@@ -994,16 +1003,16 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">                                       </span><span class="n">a_dx</span><span class="p">,</span>
 <span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">                                       </span><span class="n">a_kappa</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Remove particles from the input list.</span>
 <span class="cm">	@details This will remove weight from the input particles if we can. Otherwise we remove full particles. </span>
-<span class="cm">	@param[inout] a_particles   List of (super-)particles to remove from. </span>
+<span class="cm">	@param[in,out] a_particles   List of (super-)particles to remove from. </span>
 <span class="cm">	@param[in]    a_numToRemove Number of physical particles to remove from the input list</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span>
 <span class="w">      </span><span class="nf">removeParticles</span><span class="p">(</span><span class="n">List</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_particles</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">a_numToRemove</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">	@brief Compute the upstream position in a grid cell. Returns false if an upstream position was undefinable.</span>
 <span class="cm">	@details This routine will compute the position of the &quot;most upstream&quot; particle in the input list.</span>
 <span class="cm">	For all particles we assume that they advect in the direction of Z*E, where Z is the charge number.</span>
@@ -1017,6 +1026,7 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="cm">	@param[in] a_electricField Electric field vector</span>
 <span class="cm">	@param[in] a_cellPos Physical location of the cell center</span>
 <span class="cm">	@param[in] a_dx Grid resolution</span>
+<span class="cm">        @return Computed upstream position</span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="kt">bool</span>
 <span class="w">      </span><span class="nf">computeUpstreamPosition</span><span class="p">(</span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">                </span><span class="n">a_pos</span><span class="p">,</span>
@@ -1028,7 +1038,7 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="w">                              </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">          </span><span class="n">a_cellPos</span><span class="p">,</span>
 <span class="w">                              </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w">              </span><span class="n">a_dx</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">        @brief No diffusion function for a particle</span>
 <span class="cm">        @param[in] a_particle Particle to diffuse</span>
 <span class="cm">        @param[in] a_dt Time step</span>
@@ -1037,7 +1047,7 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="n">RealVect</span>
 <span class="w">      </span><span class="nf">noDiffusion</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">ItoParticle</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_particle</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">        @brief Isotropic diffusion function for a particle</span>
 <span class="cm">        @param[in] a_particle Particle to diffuse</span>
 <span class="cm">        @param[in] a_dt Time step</span>
@@ -1046,7 +1056,7 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="n">RealVect</span>
 <span class="w">      </span><span class="nf">isotropicDiffusion</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">ItoParticle</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_particle</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/*!</span>
+<span class="w">      </span><span class="cm">/**</span>
 <span class="cm">        @brief Quasi-isotropic diffusion function for a particle which does not permit backward diffusion.</span>
 <span class="cm">        @param[in] a_particle Particle to diffuse</span>
 <span class="cm">        @param[in] a_dt Time step</span>
@@ -1300,7 +1310,7 @@ In principle, the molar fraction can have a positional dependency.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>There’s no internal renormalization of the molar fractions input by the user.
-Internal inconsitencies will occur if the user supplies inputs molar fractions that sum to a number different than one.</p>
+Internal inconsistencies will occur if the user supplies inputs molar fractions that sum to a number different than one.</p>
 <p>Various checks will be enabled if the user compiles in debug-mode (see <a class="reference internal" href="../Base/Installation.html#chap-installation"><span class="std std-ref">Installation</span></a>), but these checks are not guaranteed to catch all cases.</p>
 </div>
 <section id="constant">
@@ -1484,10 +1494,10 @@ This is an optional argument that defaults to <code class="docutils literal notr
 </span><span class="hll"><span class="w">       </span><span class="nt">&quot;header&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;E/N (Td)\tTownsend ioniz. coef. alpha/N (m2)&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Optional argument. Contains line immediately preceding the data to be read.</span>
 </span><span class="hll"><span class="w">       </span><span class="nt">&quot;E/N column&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">                                          </span><span class="c1">// Optional specification of column containing E/N (defaults to 0)</span>
 </span><span class="hll"><span class="w">       </span><span class="nt">&quot;alpha/N column&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">                                      </span><span class="c1">// Optional specification of column containing alpha/N (defaults to 1)</span>
-</span><span class="hll"><span class="w">       </span><span class="nt">&quot;min E/N&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w">                                           </span><span class="c1">// Optional truncation of minium E/N kept when resampling the table (occurs after scaling)</span>
+</span><span class="hll"><span class="w">       </span><span class="nt">&quot;min E/N&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w">                                           </span><span class="c1">// Optional truncation of minimum E/N kept when resampling the table (occurs after scaling)</span>
 </span><span class="hll"><span class="w">       </span><span class="nt">&quot;max E/N&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mf">1000.0</span><span class="p">,</span><span class="w">                                        </span><span class="c1">// Optional truncation of maximum E/N kept when resampling the table (happens after scaling)</span>
 </span><span class="hll"><span class="w">       </span><span class="nt">&quot;num points&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">1000</span><span class="p">,</span><span class="w">                                       </span><span class="c1">// Optional number of points kept when resamplnig the table (defaults to 1000)</span>
-</span><span class="hll"><span class="w">       </span><span class="nt">&quot;spacing&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;exponential&quot;</span><span class="p">,</span><span class="w">                                 </span><span class="c1">// Optional spcification of table representation. Defaults to &#39;exponential&#39; but can also be &#39;linear&#39;</span>
+</span><span class="hll"><span class="w">       </span><span class="nt">&quot;spacing&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;exponential&quot;</span><span class="p">,</span><span class="w">                                 </span><span class="c1">// Optional specification of table representation. Defaults to &#39;exponential&#39; but can also be &#39;linear&#39;</span>
 </span><span class="hll"><span class="w">       </span><span class="nt">&quot;scale E/N&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w">                                         </span><span class="c1">// Optional scaling of the column containing E/N</span>
 </span><span class="hll"><span class="w">       </span><span class="nt">&quot;scale alpha/N&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="w">                                      </span><span class="c1">// Optional scaling</span>
 </span><span class="w">    </span><span class="p">}</span>
@@ -1654,9 +1664,9 @@ This is an optional argument that defaults to <code class="docutils literal notr
 <span class="w">       </span><span class="nt">&quot;diffusive&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">                             </span><span class="c1">// Not diffusive</span>
 <span class="hll"><span class="w">       </span><span class="nt">&quot;mobility&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 </span><span class="hll"><span class="w">          </span><span class="nt">&quot;type&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;table vs E/N&quot;</span><span class="p">,</span><span class="w">                      </span><span class="c1">// Specification of tabulated mobility lookup method</span>
-</span><span class="hll"><span class="w">          </span><span class="nt">&quot;file&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;bolsig_air.dat&quot;</span><span class="p">,</span><span class="w">                    </span><span class="c1">// File containg the mobility data</span>
+</span><span class="hll"><span class="w">          </span><span class="nt">&quot;file&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;bolsig_air.dat&quot;</span><span class="p">,</span><span class="w">                    </span><span class="c1">// File containing the mobility data</span>
 </span><span class="hll"><span class="w">          </span><span class="nt">&quot;dump&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;debug_mobility.dat&quot;</span><span class="p">,</span><span class="w">                </span><span class="c1">// Optional argument for dumping table to disk (useful for debugging)</span>
-</span><span class="hll"><span class="w">          </span><span class="nt">&quot;header&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;E/N (Td)\tMobility *N (1/m/V/s)&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Line immediately preceding the colum data</span>
+</span><span class="hll"><span class="w">          </span><span class="nt">&quot;header&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;E/N (Td)\tMobility *N (1/m/V/s)&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Line immediately preceding the column data</span>
 </span><span class="hll"><span class="w">          </span><span class="nt">&quot;E/N column&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">                             </span><span class="c1">// Column containing E/N</span>
 </span><span class="hll"><span class="w">          </span><span class="nt">&quot;mu*N column&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">                            </span><span class="c1">// Column containing mu*N</span>
 </span><span class="hll"><span class="w">          </span><span class="nt">&quot;min E/N&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">                                </span><span class="c1">// Minimum E/N kept when resampling table</span>
@@ -1678,7 +1688,7 @@ This is an optional argument that defaults to <code class="docutils literal notr
 <section id="parallel-diffusion">
 <h5>Parallel diffusion<a class="headerlink" href="#parallel-diffusion" title="Permalink to this heading"></a></h5>
 <p><code class="docutils literal notranslate"><span class="pre">ItoKMCJSON</span></code> can limit diffusion against the electric field (or strictly speaking, the particle drift direction).
-The species specification permits a flag <code class="docutils literal notranslate"><span class="pre">diffusion</span> <span class="pre">model</span></code> that defauls to isotropic diffusion.
+The species specification permits a flag <code class="docutils literal notranslate"><span class="pre">diffusion</span> <span class="pre">model</span></code> that defaults to isotropic diffusion.
 However, it is possible to set this to other types of diffusion models.
 Currently, the available options are</p>
 <ol class="arabic simple">
@@ -2058,7 +2068,7 @@ These are defined by an array of entries in a <code class="docutils literal notr
 <span class="w">         </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Y&quot;</span><span class="p">,</span><span class="w">              </span><span class="c1">// Photon species id. Must be unique</span>
 <span class="w">         </span><span class="nt">&quot;kappa&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">              </span><span class="c1">// Specification of absorption coefficient.</span>
 <span class="w">             </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;constant&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Specify constant absorption coefficient</span>
-<span class="w">             </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1E4</span><span class="w">        </span><span class="c1">// Value of the absorption coefficeint</span>
+<span class="w">             </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1E4</span><span class="w">        </span><span class="c1">// Value of the absorption coefficient</span>
 <span class="w">         </span><span class="p">}</span>
 <span class="w">     </span><span class="p">}</span>
 <span class="w"> </span><span class="p">]</span>
@@ -2071,14 +2081,14 @@ These are defined by an array of entries in a <code class="docutils literal notr
 <span class="w">         </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Y1&quot;</span><span class="p">,</span><span class="w">             </span><span class="c1">// Photon species id. Must be unique</span>
 <span class="w">         </span><span class="nt">&quot;kappa&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">              </span><span class="c1">// Specification of absorption coefficient.</span>
 <span class="w">             </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;constant&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Specify constant absorption coefficient</span>
-<span class="w">             </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1E4</span><span class="w">        </span><span class="c1">// Value of the absorption coefficeint</span>
+<span class="w">             </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1E4</span><span class="w">        </span><span class="c1">// Value of the absorption coefficient</span>
 <span class="w">         </span><span class="p">}</span>
 <span class="w">     </span><span class="p">},</span>
 <span class="w">     </span><span class="p">{</span>
 <span class="w">         </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Y2&quot;</span><span class="p">,</span><span class="w">             </span><span class="c1">// Photon species id. Must be unique</span>
 <span class="w">         </span><span class="nt">&quot;kappa&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">              </span><span class="c1">// Specification of absorption coefficient.</span>
 <span class="w">             </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;constant&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Specify constant absorption coefficient</span>
-<span class="w">             </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1E4</span><span class="w">        </span><span class="c1">// Value of the absorption coefficeint</span>
+<span class="w">             </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1E4</span><span class="w">        </span><span class="c1">// Value of the absorption coefficient</span>
 <span class="w">         </span><span class="p">}</span>
 <span class="w">     </span><span class="p">}</span>
 <span class="w"> </span><span class="p">]</span>
@@ -2201,7 +2211,7 @@ Each species must be separated by whitespace and a addition operator.
 For example, the specification <code class="docutils literal notranslate"><span class="pre">A</span> <span class="pre">+</span> <span class="pre">B</span> <span class="pre">+</span> <span class="pre">C</span></code> will be interpreted as a reaction <span class="math notranslate nohighlight">\(\text{A} + \text{B} + \text{C}\)</span> but the specification <code class="docutils literal notranslate"><span class="pre">A+B</span> <span class="pre">+</span> <span class="pre">C</span></code> will be interpreted as a reaction between one species <code class="docutils literal notranslate"><span class="pre">A+B</span></code> and another species <code class="docutils literal notranslate"><span class="pre">C</span></code> .</p>
 <p>Internally, both the left- and right-hand sides are checked against background and plasma species.
 The program will perform a run-time exit if the species are not defined in these lists.
-Note that the right-hand side can additonal contain photon species.</p>
+Note that the right-hand side can additional contain photon species.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p>Products not not defined as a species can be enclosed by parenthesis <code class="docutils literal notranslate"><span class="pre">(</span></code> and <code class="docutils literal notranslate"><span class="pre">)</span></code>.</p>
@@ -2400,7 +2410,7 @@ An example file is e.g.</p>
 1000 1.0
 </pre></div>
 </div>
-<p>This data is then internally convered to a uniformly spaced lookup table (see <a class="reference internal" href="../Utilities/LookupTable.html#chap-lookuptable"><span class="std std-ref">LookupTable1D</span></a>).</p>
+<p>This data is then internally converted to a uniformly spaced lookup table (see <a class="reference internal" href="../Utilities/LookupTable.html#chap-lookuptable"><span class="std std-ref">LookupTable1D</span></a>).</p>
 </section>
 <section id="efficiency-vs-e">
 <h5>Efficiency vs E<a class="headerlink" href="#efficiency-vs-e" title="Permalink to this heading"></a></h5>
@@ -2449,10 +2459,10 @@ This will modify the rate as</p>
 <p>The reaction rate can be modified by a factor <span class="math notranslate nohighlight">\(k_r/\left[k_r + k_p + k_q\right]\)</span>.
 The intention behind this scaling is that reaction <span class="math notranslate nohighlight">\(r\)</span> occurs only if it is not predissociated (by rate <span class="math notranslate nohighlight">\(k_p\)</span>) or quenched (by rate <span class="math notranslate nohighlight">\(k_q\)</span>).
 Such processes can occur, for example, in excited molecules.
-This will modifiy the rate constant as</p>
+This will modify the rate constant as</p>
 <div class="math notranslate nohighlight">
 \[k \rightarrow k\frac{k_r}{k_r + k_p + k_q},\]</div>
-<p>where the user will specifiy <span class="math notranslate nohighlight">\(k_r\)</span>, <span class="math notranslate nohighlight">\(k_p\)</span>, and <span class="math notranslate nohighlight">\(k_q/N\)</span>.
+<p>where the user will specify <span class="math notranslate nohighlight">\(k_r\)</span>, <span class="math notranslate nohighlight">\(k_p\)</span>, and <span class="math notranslate nohighlight">\(k_q/N\)</span>.
 The JSON specification must contain <code class="docutils literal notranslate"><span class="pre">quenching</span> <span class="pre">rates</span></code>, for example:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;plasma reactions&quot;</span><span class="p">:</span>
 <span class="p">[</span>
@@ -2793,7 +2803,7 @@ This is particularly the case for three-body reactions with BOLSIG+ that may req
 For example, some care might be required when using the Townsend attachment coefficient for air when the reaction <span class="math notranslate nohighlight">\(\textrm{e} + \textrm{O}_2 + \textrm{O}_2\rightarrow \textrm{O}_2^- + \textrm{O}_2\)</span> is included because the rate constant might require proper scaling after running the Boltzmann solver, but this scaling is invisible to the BOLSIG+’s calculation of the attachment coefficient <span class="math notranslate nohighlight">\(\eta/N\)</span>.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>The JSON interface <em>does not guard</em> against inconsitencies in the user-provided chemistry, and provision of inconsistent <span class="math notranslate nohighlight">\(\eta/N\)</span> and attachment reaction rates are quite possible.</p>
+<p>The JSON interface <em>does not guard</em> against inconsistencies in the user-provided chemistry, and provision of inconsistent <span class="math notranslate nohighlight">\(\eta/N\)</span> and attachment reaction rates are quite possible.</p>
 </div>
 </section>
 </section>

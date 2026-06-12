@@ -18,9 +18,9 @@
 <area shape="poly" id="edge90_Node000001_Node000017" title=" " alt="" coords="2192,32,1941,41,1637,54,1376,73,1291,84,1266,90,1253,96,1234,112,1215,122,1201,131,1196,139,1202,153,1224,177,1333,263,1362,277,1405,290,1506,309,1505,314,1403,295,1360,282,1331,268,1220,181,1197,156,1191,139,1197,127,1212,118,1231,107,1251,91,1264,85,1290,79,1376,67,1637,49,1941,35,2192,27"/>
 <area shape="rect" id="Node000018" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="2117,313,2296,339"/>
 <area shape="poly" id="edge91_Node000001_Node000018" title=" " alt="" coords="2193,41,2013,68,1908,87,1803,110,1703,137,1614,168,1544,203,1518,222,1500,241,1495,253,1499,263,1528,278,1583,290,1746,307,1936,317,2104,321,2103,326,1936,322,1745,312,1582,295,1526,283,1495,267,1489,253,1495,239,1515,218,1542,198,1612,163,1701,132,1802,104,1907,82,2012,63,2192,36"/>
-<area shape="rect" id="Node000024" href="$CD__EBGeometryIF_8H.html" title="Binding of EBGeometry signed distance functions to Chombo objcts." alt="" coords="1763,167,1917,192"/>
+<area shape="rect" id="Node000024" href="$CD__EBGeometryIF_8H.html" title="Binding of EBGeometry signed distance functions to Chombo objects." alt="" coords="1763,167,1917,192"/>
 <area shape="poly" id="edge85_Node000001_Node000024" title=" " alt="" coords="2242,48,1888,165,1887,160,2240,43"/>
-<area shape="rect" id="Node000029" href="$CD__PerlinSphereSdf_8H.html" title="Implementation of CD_PerlinSphereSdf.H." alt="" coords="3138,167,3302,192"/>
+<area shape="rect" id="Node000029" href="$CD__PerlinSphereSdf_8H.html" title="Declaration of noisy sphere." alt="" coords="3138,167,3302,192"/>
 <area shape="poly" id="edge52_Node000001_Node000029" title=" " alt="" coords="2402,32,2625,53,2756,70,2886,91,3042,125,3170,160,3168,165,3040,131,2885,96,2755,75,2625,59,2402,37"/>
 <area shape="rect" id="Node000032" href="$CD__BoxSdf_8H.html" title="Declare an interface for defining an axis&#45;aligned box." alt="" coords="2244,240,2351,265"/>
 <area shape="poly" id="edge62_Node000001_Node000032" title=" " alt="" coords="2300,45,2300,226,2295,226,2295,45"/>

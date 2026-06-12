@@ -1,5 +1,7 @@
 var searchData=
 [
-  ['mesh_0',['Mesh',['../classSignedDistanceDCEL.html#ac3ba4cb079ccd274977cf3ee9ff80e69',1,'SignedDistanceDCEL']]],
-  ['molarfraction_1',['MolarFraction',['../classPhysics_1_1ItoKMC_1_1ItoKMCBackgroundSpecies.html#ae6b85c38b93061f5f3f5d5280b4855c3',1,'Physics::ItoKMC::ItoKMCBackgroundSpecies']]]
+  ['kappafunction_0',['KappaFunction',['../classPhysics_1_1CdrPlasma_1_1RteSpeciesJSON.html#aa58fecafe9b48a9ad406b371375cd792',1,'Physics::CdrPlasma::RteSpeciesJSON']]],
+  ['kmcreaction_1',['KMCReaction',['../CD__ItoKMCPhysics_8H.html#ad61b790100426fb082d6276c5c66a811',1,'Physics::ItoKMC']]],
+  ['kmcsolvertype_2',['KMCSolverType',['../CD__ItoKMCPhysics_8H.html#a3125af9aa2e74060b4fd0751a02c4a46',1,'Physics::ItoKMC']]],
+  ['kmcstate_3',['KMCState',['../CD__ItoKMCPhysics_8H.html#a0ebb7009dfa1768b8abe941660e8a9a9',1,'Physics::ItoKMC']]]
 ];

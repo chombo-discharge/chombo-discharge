@@ -134,9 +134,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aaa926ea201ffcbca8890d7bff5b665e7" id="r_aaa926ea201ffcbca8890d7bff5b665e7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzDirichletEBBCFactory.html#aaa926ea201ffcbca8890d7bff5b665e7">setValue</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_value</a>)</td></tr>
 <tr class="memdesc:aaa926ea201ffcbca8890d7bff5b665e7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the value on the EB.  <br /></td></tr>
 <tr class="separator:aaa926ea201ffcbca8890d7bff5b665e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af100d3dcc4ebd815d46c70c33e52a6dc" id="r_af100d3dcc4ebd815d46c70c33e52a6dc"><td class="memItemLeft" align="right" valign="top"><a id="af100d3dcc4ebd815d46c70c33e52a6dc" name="af100d3dcc4ebd815d46c70c33e52a6dc"></a>
-<a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>setDomainDropOrder</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_domainSize</a>)</td></tr>
-<tr class="memdesc:af100d3dcc4ebd815d46c70c33e52a6dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Drop BC order if domain size is equal or below this. <br /></td></tr>
+<tr class="memitem:af100d3dcc4ebd815d46c70c33e52a6dc" id="r_af100d3dcc4ebd815d46c70c33e52a6dc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzDirichletEBBCFactory.html#af100d3dcc4ebd815d46c70c33e52a6dc">setDomainDropOrder</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_domainSize</a>)</td></tr>
+<tr class="memdesc:af100d3dcc4ebd815d46c70c33e52a6dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Drop BC order if domain size is equal or below this.  <br /></td></tr>
 <tr class="separator:af100d3dcc4ebd815d46c70c33e52a6dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aecff2bf2f8e1354cf066f9ff82eedc6a" id="r_aecff2bf2f8e1354cf066f9ff82eedc6a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzDirichletEBBCFactory.html#aecff2bf2f8e1354cf066f9ff82eedc6a">setCoarseGridDropOrder</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classTracerParticleSolver.html">a_dropOrder</a>)</td></tr>
 <tr class="memdesc:aecff2bf2f8e1354cf066f9ff82eedc6a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Signal that it should drop the stencil order if the cell is a coarsened cell.  <br /></td></tr>
@@ -285,6 +284,7 @@ Protected Attributes</h2></td></tr>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_order</td><td>Approximation order </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_value</td><td>Spatially varying value on EBs </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_weight</td><td>Description </td></tr>
   </table>
   </dd>
 </dl>
@@ -316,6 +316,7 @@ Protected Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Factory method. </p>
+<dl class="section return"><dt>Returns</dt><dd>Return value </dd></dl>
 
 <p>Implements <a class="el" href="classEBHelmholtzEBBCFactory.html#a438792f0baeb6ca629c73d3a72623708">EBHelmholtzEBBCFactory</a>.</p>
 
@@ -349,6 +350,40 @@ Protected Attributes</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dropOrder</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="af100d3dcc4ebd815d46c70c33e52a6dc" name="af100d3dcc4ebd815d46c70c33e52a6dc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af100d3dcc4ebd815d46c70c33e52a6dc">&#9670;&#160;</a></span>setDomainDropOrder()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> EBHelmholtzDirichletEBBCFactory::setDomainDropOrder </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramname"><em>a_domainSize</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Drop BC order if domain size is equal or below this. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_domainSize</td><td>Description </td></tr>
   </table>
   </dd>
 </dl>

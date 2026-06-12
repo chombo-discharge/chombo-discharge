@@ -2,7 +2,7 @@
 <area shape="rect" id="Node000001" title="Declaration of a wrapper class for holding multifluid EBMultigridInterpolators." alt="" coords="334,5,530,45"/>
 <area shape="rect" id="Node000002" title=" " alt="" coords="181,93,232,119"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="379,48,246,94,245,89,377,43"/>
-<area shape="rect" id="Node000003" href="$CD__EBMultigridInterpolator_8H.html" title="Declaration of a class that can interpolate more ghost cells near the coarse&#45;fine boundary near the E..." alt="" coords="255,93,467,119"/>
+<area shape="rect" id="Node000003" href="$CD__EBMultigridInterpolator_8H.html" title="Parent base class for multigrid interpolation." alt="" coords="255,93,467,119"/>
 <area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="417,47,383,85,379,81,413,44"/>
 <area shape="rect" id="Node000007" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="411,167,597,192"/>
 <area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="450,44,481,92,493,123,501,153,496,154,488,125,476,95,445,47"/>

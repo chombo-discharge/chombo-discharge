@@ -88,7 +88,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>Declaration of a <a class="el" href="classTimeStepper.html" title="Base class for advancing equations.">TimeStepper</a> implementation for advancing an ODE on a mesh.  
+<p>Declaration of the <a class="el" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html" title="TimeStepper for advancing a system of N coupled ODEs on an AMR mesh.">Physics::MeshODE::MeshODEStepper</a> <a class="el" href="classTimeStepper.html" title="Base class for advancing equations.">TimeStepper</a>.  
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &lt;array&gt;</code><br />
 <code>#include &lt;<a class="el" href="CD__TimeStepper_8H_source.html">CD_TimeStepper.H</a>&gt;</code><br />
@@ -101,7 +101,7 @@ Include dependency graph for CD_MeshODEStepper.H:</div>
 <div class="dyncontent">
 <div class="center"><img src="CD__MeshODEStepper_8H__incl.png" border="0" usemap="#aPhysics_2MeshODE_2CD__MeshODEStepper_8H" alt=""/></div>
 <map name="aPhysics_2MeshODE_2CD__MeshODEStepper_8H" id="aPhysics_2MeshODE_2CD__MeshODEStepper_8H">
-<area shape="rect" title="Declaration of a TimeStepper implementation for advancing an ODE on a mesh." alt="" coords="2720,5,2881,45"/>
+<area shape="rect" title="Declaration of the Physics::MeshODE::MeshODEStepper TimeStepper." alt="" coords="2720,5,2881,45"/>
 <area shape="rect" title=" " alt="" coords="4859,240,4915,265"/>
 <area shape="poly" title=" " alt="" coords="2882,29,3198,50,3681,90,3962,118,4255,152,4551,192,4841,237,4846,238,4845,244,4840,243,4550,197,4254,157,3961,123,3681,95,3197,55,2881,34"/>
 <area shape="rect" href="CD__TimeStepper_8H.html" title="Declaration of main (abstract) time stepper class." alt="" coords="933,167,1077,192"/>
@@ -294,28 +294,61 @@ Include dependency graph for CD_MeshODEStepper.H:</div>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html">Physics::MeshODE::MeshODEStepper&lt; N &gt;</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Implementation of <a class="el" href="classTimeStepper.html" title="Base class for advancing equations.">TimeStepper</a> for solving an ODE on a mesh. N is the number of variables.  <a href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classTimeStepper.html" title="Base class for advancing equations.">TimeStepper</a> for advancing a system of N coupled ODEs on an AMR mesh.  <a href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:namespacePhysics" id="r_namespacePhysics"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacePhysics.html">Physics</a></td></tr>
-<tr class="memdesc:namespacePhysics"><td class="mdescLeft">&#160;</td><td class="mdescRight">Name containing various physics models for running chombo-discharge code. <br /></td></tr>
+<tr class="memdesc:namespacePhysics"><td class="mdescLeft">&#160;</td><td class="mdescRight">Namespace containing physics models for use with chombo-discharge. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
 Enumerations</h2></td></tr>
-<tr class="memitem:adac03bf60cd4495dd29e049e71164dff" id="r_adac03bf60cd4495dd29e049e71164dff"><td class="memItemLeft" align="right" valign="top"><a id="adac03bf60cd4495dd29e049e71164dff" name="adac03bf60cd4495dd29e049e71164dff"></a>enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="CD__MeshODEStepper_8H.html#adac03bf60cd4495dd29e049e71164dff">Physics::MeshODE::IntegrationAlgorithm</a> { <b>Euler</b>
-, <b>RK2</b>
-, <b>RK4</b>
+<tr class="memitem:adac03bf60cd4495dd29e049e71164dff" id="r_adac03bf60cd4495dd29e049e71164dff"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="CD__MeshODEStepper_8H.html#adac03bf60cd4495dd29e049e71164dff">Physics::MeshODE::IntegrationAlgorithm</a> { <a class="el" href="CD__MeshODEStepper_8H.html#adac03bf60cd4495dd29e049e71164dffa0a7532036415f2491bf5f952220827b8">Euler</a>
+, <a class="el" href="CD__MeshODEStepper_8H.html#adac03bf60cd4495dd29e049e71164dffa993199f8fe9c7a359c71015d682dcccf">RK2</a>
+, <a class="el" href="CD__MeshODEStepper_8H.html#adac03bf60cd4495dd29e049e71164dffaf81fe250c66aad887e2086f79364f2a8">RK4</a>
  }</td></tr>
-<tr class="memdesc:adac03bf60cd4495dd29e049e71164dff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Various supported integration algorithms. <br /></td></tr>
+<tr class="memdesc:adac03bf60cd4495dd29e049e71164dff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Time integration algorithms available for advancing the ODE.  <a href="CD__MeshODEStepper_8H.html#adac03bf60cd4495dd29e049e71164dff">More...</a><br /></td></tr>
 <tr class="separator:adac03bf60cd4495dd29e049e71164dff"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Declaration of a <a class="el" href="classTimeStepper.html" title="Base class for advancing equations.">TimeStepper</a> implementation for advancing an ODE on a mesh. </p>
+<div class="textblock"><p>Declaration of the <a class="el" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html" title="TimeStepper for advancing a system of N coupled ODEs on an AMR mesh.">Physics::MeshODE::MeshODEStepper</a> <a class="el" href="classTimeStepper.html" title="Base class for advancing equations.">TimeStepper</a>. </p>
 <dl class="section author"><dt>Author</dt><dd>Robert Marskar </dd></dl>
-</div></div><!-- contents -->
+</div><h2 class="groupheader">Enumeration Type Documentation</h2>
+<a id="adac03bf60cd4495dd29e049e71164dff" name="adac03bf60cd4495dd29e049e71164dff"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adac03bf60cd4495dd29e049e71164dff">&#9670;&#160;</a></span>IntegrationAlgorithm</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">enum</a> <a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="CD__MeshODEStepper_8H.html#adac03bf60cd4495dd29e049e71164dff">Physics::MeshODE::IntegrationAlgorithm</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Time integration algorithms available for advancing the ODE. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="adac03bf60cd4495dd29e049e71164dffa0a7532036415f2491bf5f952220827b8" name="adac03bf60cd4495dd29e049e71164dffa0a7532036415f2491bf5f952220827b8"></a>Euler&#160;</td><td class="fielddoc"><p>Explicit forward Euler (first order). </p>
+</td></tr>
+<tr><td class="fieldname"><a id="adac03bf60cd4495dd29e049e71164dffa993199f8fe9c7a359c71015d682dcccf" name="adac03bf60cd4495dd29e049e71164dffa993199f8fe9c7a359c71015d682dcccf"></a>RK2&#160;</td><td class="fielddoc"><p>Explicit second-order Runge-Kutta (Heun's method). </p>
+</td></tr>
+<tr><td class="fieldname"><a id="adac03bf60cd4495dd29e049e71164dffaf81fe250c66aad887e2086f79364f2a8" name="adac03bf60cd4495dd29e049e71164dffaf81fe250c66aad887e2086f79364f2a8"></a>RK4&#160;</td><td class="fielddoc"><p>Explicit classical fourth-order Runge-Kutta. </p>
+</td></tr>
+</table>
+
+</div>
+</div>
+</div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8

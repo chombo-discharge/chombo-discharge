@@ -89,7 +89,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>Implementation of <a class="el" href="classTimeStepper.html" title="Base class for advancing equations.">TimeStepper</a> for solving for a single radiative transfer species. This supports both Monte Carlo photons and Helmholtz approximations through the common <a class="el" href="classRtSolver.html" title="Abstract RTE solver class for doing various kinds of radiative transfer equations....">RtSolver</a> interface.  
+<p><a class="el" href="classTimeStepper.html" title="Base class for advancing equations.">TimeStepper</a> for advancing a single radiative transfer species on an AMR mesh.  
  <a href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="CD__RadiativeTransferStepper_8H_source.html">CD_RadiativeTransferStepper.H</a>&gt;</code></p>
@@ -98,7 +98,7 @@ Inheritance diagram for Physics::RadiativeTransfer::RadiativeTransferStepper&lt;
 <div class="dyncontent">
 <div class="center"><img src="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper__inherit__graph.png" border="0" usemap="#aPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper_3_01T_01_4_inherit__map" alt="Inheritance graph"/></div>
 <map name="aPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper_3_01T_01_4_inherit__map" id="aPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper_3_01T_01_4_inherit__map">
-<area shape="rect" title="Implementation of TimeStepper for solving for a single radiative transfer species...." alt="" coords="5,79,237,119"/>
+<area shape="rect" title="TimeStepper for advancing a single radiative transfer species on an AMR mesh." alt="" coords="5,79,237,119"/>
 <area shape="rect" href="classTimeStepper.html" title="Base class for advancing equations." alt="" coords="69,5,174,31"/>
 <area shape="poly" title=" " alt="" coords="124,44,124,79,119,79,119,44"/>
 </map>
@@ -108,7 +108,7 @@ Collaboration diagram for Physics::RadiativeTransfer::RadiativeTransferStepper&l
 <div class="dyncontent">
 <div class="center"><img src="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper__coll__graph.png" border="0" usemap="#aPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper_3_01T_01_4_coll__map" alt="Collaboration graph"/></div>
 <map name="aPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper_3_01T_01_4_coll__map" id="aPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper_3_01T_01_4_coll__map">
-<area shape="rect" title="Implementation of TimeStepper for solving for a single radiative transfer species...." alt="" coords="5,79,237,119"/>
+<area shape="rect" title="TimeStepper for advancing a single radiative transfer species on an AMR mesh." alt="" coords="5,79,237,119"/>
 <area shape="rect" href="classTimeStepper.html" title="Base class for advancing equations." alt="" coords="69,5,174,31"/>
 <area shape="poly" title=" " alt="" coords="124,44,124,79,119,79,119,44"/>
 </map>
@@ -145,9 +145,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a7004d1ee43bdd62a34d1f7424974b9ee" id="r_a7004d1ee43bdd62a34d1f7424974b9ee"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a7004d1ee43bdd62a34d1f7424974b9ee">getPlotVariableNames</a> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
 <tr class="memdesc:a7004d1ee43bdd62a34d1f7424974b9ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get plot variable names.  <br /></td></tr>
 <tr class="separator:a7004d1ee43bdd62a34d1f7424974b9ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3396482eb902894cb703bb28fa7edd6b" id="r_a3396482eb902894cb703bb28fa7edd6b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a3396482eb902894cb703bb28fa7edd6b">writePlotData</a> (<a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_output</a>, <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_icomp</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> <a class="el" href="classTracerParticleSolver.html">a_outputRealm</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_level</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
-<tr class="memdesc:a3396482eb902894cb703bb28fa7edd6b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data to output holder.  <br /></td></tr>
-<tr class="separator:a3396482eb902894cb703bb28fa7edd6b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab9b8a81fb16e449086c6b4abb8260e05" id="r_ab9b8a81fb16e449086c6b4abb8260e05"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#ab9b8a81fb16e449086c6b4abb8260e05">writePlotData</a> (<a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_output</a>, <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_icomp</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_outputRealm</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_level</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
+<tr class="memdesc:ab9b8a81fb16e449086c6b4abb8260e05"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data to output holder.  <br /></td></tr>
+<tr class="separator:ab9b8a81fb16e449086c6b4abb8260e05"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa1ac5dad6e2e210132062e6c945ed17c" id="r_aa1ac5dad6e2e210132062e6c945ed17c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#aa1ac5dad6e2e210132062e6c945ed17c">computeDt</a> () <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
 <tr class="memdesc:aa1ac5dad6e2e210132062e6c945ed17c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute a time step to be used by <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a>.  <br /></td></tr>
 <tr class="separator:aa1ac5dad6e2e210132062e6c945ed17c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -155,7 +155,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a6be891e4077d9946373e3229d1e14a89"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advancement method. Calls the solver function.  <br /></td></tr>
 <tr class="separator:a6be891e4077d9946373e3229d1e14a89"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af3f0940f307ac333cbee523efd6aaccb" id="r_af3f0940f307ac333cbee523efd6aaccb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#af3f0940f307ac333cbee523efd6aaccb">synchronizeSolverTimes</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_step</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_time</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_dt</a>) <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
-<tr class="memdesc:af3f0940f307ac333cbee523efd6aaccb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Synchronzie solver times and time steps.  <br /></td></tr>
+<tr class="memdesc:af3f0940f307ac333cbee523efd6aaccb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Synchronize solver times and time steps.  <br /></td></tr>
 <tr class="separator:af3f0940f307ac333cbee523efd6aaccb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac61f8497b3b3b7989756cba0bec2fabd" id="r_ac61f8497b3b3b7989756cba0bec2fabd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#ac61f8497b3b3b7989756cba0bec2fabd">printStepReport</a> () <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
 <tr class="memdesc:ac61f8497b3b3b7989756cba0bec2fabd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Print a step report (does nothing)  <br /></td></tr>
@@ -170,7 +170,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a0126610cf9deae093a9a49ec36a4dfc0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register operators &ndash; calls the solver registration routine.  <br /></td></tr>
 <tr class="separator:a0126610cf9deae093a9a49ec36a4dfc0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a839ea4b0579c3705ecd5cd157b83b7cf" id="r_a839ea4b0579c3705ecd5cd157b83b7cf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a839ea4b0579c3705ecd5cd157b83b7cf">preRegrid</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_lmin</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_oldFinestLevel</a>) <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
-<tr class="memdesc:a839ea4b0579c3705ecd5cd157b83b7cf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform pre-regrid operations &ndash; calls the solver function. operation takes a lot of memory.  <br /></td></tr>
+<tr class="memdesc:a839ea4b0579c3705ecd5cd157b83b7cf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform pre-regrid operations — calls the solver function.  <br /></td></tr>
 <tr class="separator:a839ea4b0579c3705ecd5cd157b83b7cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a10999d870ae87a4adf4872cca9479e94" id="r_a10999d870ae87a4adf4872cca9479e94"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a10999d870ae87a4adf4872cca9479e94">regrid</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_lmin</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_oldFinestLevel</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_newFinestLevel</a>) <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
 <tr class="memdesc:a10999d870ae87a4adf4872cca9479e94"><td class="mdescLeft">&#160;</td><td class="mdescRight">Regrid function. Calls the solver function.  <br /></td></tr>
@@ -181,13 +181,11 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ab4de1a40959a4745c1a62fb847e51ca1" id="r_ab4de1a40959a4745c1a62fb847e51ca1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#ab4de1a40959a4745c1a62fb847e51ca1">forceDt</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_dt</a>)</td></tr>
 <tr class="memdesc:ab4de1a40959a4745c1a62fb847e51ca1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Force usage of a time step.  <br /></td></tr>
 <tr class="separator:ab4de1a40959a4745c1a62fb847e51ca1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a11ca7829a38f489638ebcae9d056f960" id="r_a11ca7829a38f489638ebcae9d056f960"><td class="memItemLeft" align="right" valign="top"><a id="a11ca7829a38f489638ebcae9d056f960" name="a11ca7829a38f489638ebcae9d056f960"></a>
-<a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><b>getDt</b> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:a11ca7829a38f489638ebcae9d056f960"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the time step. <br /></td></tr>
+<tr class="memitem:a11ca7829a38f489638ebcae9d056f960" id="r_a11ca7829a38f489638ebcae9d056f960"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a11ca7829a38f489638ebcae9d056f960">getDt</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:a11ca7829a38f489638ebcae9d056f960"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the time step.  <br /></td></tr>
 <tr class="separator:a11ca7829a38f489638ebcae9d056f960"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afe63e91fc214250129e9482190662fad" id="r_afe63e91fc214250129e9482190662fad"><td class="memItemLeft" align="right" valign="top"><a id="afe63e91fc214250129e9482190662fad" name="afe63e91fc214250129e9482190662fad"></a>
-<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getPhi</b> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:afe63e91fc214250129e9482190662fad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the solver solution. <br /></td></tr>
+<tr class="memitem:afe63e91fc214250129e9482190662fad" id="r_afe63e91fc214250129e9482190662fad"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#afe63e91fc214250129e9482190662fad">getPhi</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:afe63e91fc214250129e9482190662fad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the solver solution.  <br /></td></tr>
 <tr class="separator:afe63e91fc214250129e9482190662fad"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classTimeStepper"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classTimeStepper')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classTimeStepper.html">TimeStepper</a></td></tr>
 <tr class="memitem:a88c17d2b22882ca947e83c25e903be1d inherit pub_methods_classTimeStepper" id="r_a88c17d2b22882ca947e83c25e903be1d"><td class="memItemLeft" align="right" valign="top">
@@ -198,6 +196,21 @@ Public Member Functions</h2></td></tr>
 <a class="el" href="classTracerParticleSolver.html">virtual</a>&#160;</td><td class="memItemRight" valign="bottom"><b>~TimeStepper</b> ()</td></tr>
 <tr class="memdesc:a2d80eb58c811581ef79a0b3749fb5825 inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default destructor (does nothing) <br /></td></tr>
 <tr class="separator:a2d80eb58c811581ef79a0b3749fb5825 inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a48cbba74e3ff157cd5aa28e14089c363 inherit pub_methods_classTimeStepper" id="r_a48cbba74e3ff157cd5aa28e14089c363"><td class="memItemLeft" align="right" valign="top">
+&#160;</td><td class="memItemRight" valign="bottom"><b>TimeStepper</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTimeStepper.html">TimeStepper</a> &amp;)=<a class="el" href="classTracerParticleSolver.html">delete</a></td></tr>
+<tr class="memdesc:a48cbba74e3ff157cd5aa28e14089c363 inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallow copy construction. <br /></td></tr>
+<tr class="separator:a48cbba74e3ff157cd5aa28e14089c363 inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a51e57863b92479bde54b800c33215e97 inherit pub_methods_classTimeStepper" id="r_a51e57863b92479bde54b800c33215e97"><td class="memItemLeft" align="right" valign="top">
+<a class="el" href="classTimeStepper.html">TimeStepper</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTimeStepper.html">TimeStepper</a> &amp;)=<a class="el" href="classTracerParticleSolver.html">delete</a></td></tr>
+<tr class="memdesc:a51e57863b92479bde54b800c33215e97 inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallow copy assignment. <br /></td></tr>
+<tr class="separator:a51e57863b92479bde54b800c33215e97 inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a438db473d7ae7d4a0eb8a62d7eab5e7e inherit pub_methods_classTimeStepper" id="r_a438db473d7ae7d4a0eb8a62d7eab5e7e"><td class="memItemLeft" align="right" valign="top">
+&#160;</td><td class="memItemRight" valign="bottom"><b>TimeStepper</b> (<a class="el" href="classTimeStepper.html">TimeStepper</a> &amp;&amp;)=<a class="el" href="classTracerParticleSolver.html">default</a></td></tr>
+<tr class="memdesc:a438db473d7ae7d4a0eb8a62d7eab5e7e inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allow move construction. <br /></td></tr>
+<tr class="separator:a438db473d7ae7d4a0eb8a62d7eab5e7e inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4e1eebd499c502ae435ee336395f12cf inherit pub_methods_classTimeStepper" id="r_a4e1eebd499c502ae435ee336395f12cf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTimeStepper.html">TimeStepper</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#a4e1eebd499c502ae435ee336395f12cf">operator=</a> (<a class="el" href="classTimeStepper.html">TimeStepper</a> &amp;&amp;)=<a class="el" href="classTracerParticleSolver.html">default</a></td></tr>
+<tr class="memdesc:a4e1eebd499c502ae435ee336395f12cf inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allow move assignment.  <br /></td></tr>
+<tr class="separator:a4e1eebd499c502ae435ee336395f12cf inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aefcab8753df3fa6bee6ea9fa5231de47 inherit pub_methods_classTimeStepper" id="r_aefcab8753df3fa6bee6ea9fa5231de47"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#aefcab8753df3fa6bee6ea9fa5231de47">setAmr</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classAmrMesh.html">AmrMesh</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_amr</a>)</td></tr>
 <tr class="memdesc:aefcab8753df3fa6bee6ea9fa5231de47 inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set <a class="el" href="classAmrMesh.html" title="Class for handling spatial operations.">AmrMesh</a>.  <br /></td></tr>
 <tr class="separator:aefcab8753df3fa6bee6ea9fa5231de47 inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -210,27 +223,26 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aef658c5bd734a8f14f4db9400d2b2045 inherit pub_methods_classTimeStepper" id="r_aef658c5bd734a8f14f4db9400d2b2045"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#aef658c5bd734a8f14f4db9400d2b2045">postPlot</a> ()</td></tr>
 <tr class="memdesc:aef658c5bd734a8f14f4db9400d2b2045 inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">An option for calling special functions prior to plotting data. Called by <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a> in the IMMEDIATELY after writing the plot file.  <br /></td></tr>
 <tr class="separator:aef658c5bd734a8f14f4db9400d2b2045 inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a078de2c883b297d696f2e3d40bc270be inherit pub_methods_classTimeStepper" id="r_a078de2c883b297d696f2e3d40bc270be"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">int</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#a078de2c883b297d696f2e3d40bc270be">getCheckpointLoads</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> <a class="el" href="classTracerParticleSolver.html">a_realm</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_level</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:a078de2c883b297d696f2e3d40bc270be inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get computational loads to be checkpointed.  <br /></td></tr>
-<tr class="separator:a078de2c883b297d696f2e3d40bc270be inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a86094bdcb5a99b01c60fbc3429d0d846 inherit pub_methods_classTimeStepper" id="r_a86094bdcb5a99b01c60fbc3429d0d846"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">int</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#a86094bdcb5a99b01c60fbc3429d0d846">getCheckpointLoads</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_realm</a>, <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_level</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:a86094bdcb5a99b01c60fbc3429d0d846 inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get computational loads to be checkpointed.  <br /></td></tr>
+<tr class="separator:a86094bdcb5a99b01c60fbc3429d0d846 inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aba1d6a5006558bc0e0029a89e88e9899 inherit pub_methods_classTimeStepper" id="r_aba1d6a5006558bc0e0029a89e88e9899"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#aba1d6a5006558bc0e0029a89e88e9899">needToRegrid</a> ()</td></tr>
-<tr class="memdesc:aba1d6a5006558bc0e0029a89e88e9899 inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fuction which can have <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a> do regrids at arbitrary points in the simulation.  <br /></td></tr>
+<tr class="memdesc:aba1d6a5006558bc0e0029a89e88e9899 inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function which can have <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a> do regrids at arbitrary points in the simulation.  <br /></td></tr>
 <tr class="separator:aba1d6a5006558bc0e0029a89e88e9899 inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a56fb3c2953b664594ecf0f303c7645d3 inherit pub_methods_classTimeStepper" id="r_a56fb3c2953b664594ecf0f303c7645d3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#a56fb3c2953b664594ecf0f303c7645d3">keepGoing</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
 <tr class="memdesc:a56fb3c2953b664594ecf0f303c7645d3 inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Query whether the time stepper wants to continue stepping.  <br /></td></tr>
 <tr class="separator:a56fb3c2953b664594ecf0f303c7645d3 inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a975558fbeeb797d24c27f904666fefe7 inherit pub_methods_classTimeStepper" id="r_a975558fbeeb797d24c27f904666fefe7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#a975558fbeeb797d24c27f904666fefe7">loadBalanceThisRealm</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> <a class="el" href="classTracerParticleSolver.html">a_realm</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:a975558fbeeb797d24c27f904666fefe7 inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load balancing query for a specified realm. If this returns true for a_realm, load balancing routines will be called during regrids.  <br /></td></tr>
-<tr class="separator:a975558fbeeb797d24c27f904666fefe7 inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a77d9120fc07c2d552fda78e30562fcbe inherit pub_methods_classTimeStepper" id="r_a77d9120fc07c2d552fda78e30562fcbe"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#a77d9120fc07c2d552fda78e30562fcbe">loadBalanceBoxes</a> (<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">int</a> &gt; &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_procs</a>, <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Box</a> &gt; &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_boxes</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> <a class="el" href="classTracerParticleSolver.html">a_realm</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">DisjointBoxLayout</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_grids</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_lmin</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_finestLevel</a>)</td></tr>
-<tr class="memdesc:a77d9120fc07c2d552fda78e30562fcbe inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load balance grid boxes for a specified realm.  <br /></td></tr>
-<tr class="separator:a77d9120fc07c2d552fda78e30562fcbe inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4e4adb87e49889bae84ff140f3e783bd inherit pub_methods_classTimeStepper" id="r_a4e4adb87e49889bae84ff140f3e783bd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#a4e4adb87e49889bae84ff140f3e783bd">loadBalanceThisRealm</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_realm</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:a4e4adb87e49889bae84ff140f3e783bd inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load balancing query for a specified realm. If this returns true for a_realm, load balancing routines will be called during regrids.  <br /></td></tr>
+<tr class="separator:a4e4adb87e49889bae84ff140f3e783bd inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a71a18458809d602d8fb5b5ad5427539e inherit pub_methods_classTimeStepper" id="r_a71a18458809d602d8fb5b5ad5427539e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#a71a18458809d602d8fb5b5ad5427539e">loadBalanceBoxes</a> (<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">int</a> &gt; &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_procs</a>, <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Box</a> &gt; &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_boxes</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_realm</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">DisjointBoxLayout</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_grids</a>, <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_lmin</a>, <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_finestLevel</a>)</td></tr>
+<tr class="memdesc:a71a18458809d602d8fb5b5ad5427539e inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load balance grid boxes for a specified realm.  <br /></td></tr>
+<tr class="separator:a71a18458809d602d8fb5b5ad5427539e inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
-<tr class="memitem:ab02809e76d079702f3b7f6efed3b6fbe" id="r_ab02809e76d079702f3b7f6efed3b6fbe"><td class="memItemLeft" align="right" valign="top"><a id="ab02809e76d079702f3b7f6efed3b6fbe" name="ab02809e76d079702f3b7f6efed3b6fbe"></a>
-<a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>setGaussianSource</b> ()</td></tr>
-<tr class="memdesc:ab02809e76d079702f3b7f6efed3b6fbe"><td class="mdescLeft">&#160;</td><td class="mdescRight">For setting a Gaussian source in the radiative transfer equation solver. <br /></td></tr>
+<tr class="memitem:ab02809e76d079702f3b7f6efed3b6fbe" id="r_ab02809e76d079702f3b7f6efed3b6fbe"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#ab02809e76d079702f3b7f6efed3b6fbe">setGaussianSource</a> ()</td></tr>
+<tr class="memdesc:ab02809e76d079702f3b7f6efed3b6fbe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set a Gaussian source term in the <a class="el" href="classRtSolver.html" title="Abstract RTE solver class for doing various kinds of radiative transfer equations....">RtSolver</a>.  <br /></td></tr>
 <tr class="separator:ab02809e76d079702f3b7f6efed3b6fbe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
@@ -285,7 +297,8 @@ Protected Attributes</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">T</a>&gt;<br />
-class Physics::RadiativeTransfer::RadiativeTransferStepper&lt; T &gt;</div><p>Implementation of <a class="el" href="classTimeStepper.html" title="Base class for advancing equations.">TimeStepper</a> for solving for a single radiative transfer species. This supports both Monte Carlo photons and Helmholtz approximations through the common <a class="el" href="classRtSolver.html" title="Abstract RTE solver class for doing various kinds of radiative transfer equations....">RtSolver</a> interface. </p>
+class Physics::RadiativeTransfer::RadiativeTransferStepper&lt; T &gt;</div><p><a class="el" href="classTimeStepper.html" title="Base class for advancing equations.">TimeStepper</a> for advancing a single radiative transfer species on an AMR mesh. </p>
+<p>Supports both Monte Carlo photon transport and Eddington/Helmholtz continuum approximations through the common <a class="el" href="classRtSolver.html" title="Abstract RTE solver class for doing various kinds of radiative transfer equations....">RtSolver</a> interface. The template parameter <code>T</code> is the concrete <a class="el" href="classRtSolver.html" title="Abstract RTE solver class for doing various kinds of radiative transfer equations....">RtSolver</a> type. A source term modelled as a Gaussian blob is applied to the solver at initialization and after every regrid; the shape is set via the input script. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a6be891e4077d9946373e3229d1e14a89" name="a6be891e4077d9946373e3229d1e14a89"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a6be891e4077d9946373e3229d1e14a89">&#9670;&#160;</a></span>advance()</h2>
@@ -322,7 +335,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>a_dt </dd></dl>
 
-<p>Implements <a class="el" href="classTimeStepper.html#ab52d52be7a9fcae0dcd7901bd9b4fd08">TimeStepper</a>.</p>
+<p>Implements <a class="el" href="classTimeStepper.html#a6d82290e504dd10820cb3e315ed8183c">TimeStepper</a>.</p>
 
 </div>
 </div>
@@ -383,6 +396,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 </div><div class="memdoc">
 
 <p>Compute a time step to be used by <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a>. </p>
+<dl class="section return"><dt>Returns</dt><dd>The fixed time step m_dt read from input options. </dd></dl>
 
 <p>Implements <a class="el" href="classTimeStepper.html#a3b7cf2a18ad3aa6abf1f79098651cc02">TimeStepper</a>.</p>
 
@@ -416,6 +430,28 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 
 </div>
 </div>
+<a id="a11ca7829a38f489638ebcae9d056f960" name="a11ca7829a38f489638ebcae9d056f960"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a11ca7829a38f489638ebcae9d056f960">&#9670;&#160;</a></span>getDt()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">T</a> &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html">Physics::RadiativeTransfer::RadiativeTransferStepper</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt;::getDt </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the time step. </p>
+<dl class="section return"><dt>Returns</dt><dd>The current time step m_dt. </dd></dl>
+
+</div>
+</div>
 <a id="a82b1b42f285558f8c8654f1f360701e9" name="a82b1b42f285558f8c8654f1f360701e9"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a82b1b42f285558f8c8654f1f360701e9">&#9670;&#160;</a></span>getNumberOfPlotVariables()</h2>
 
@@ -442,8 +478,31 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 </div><div class="memdoc">
 
 <p>Get number of plot variables for this physics module. </p>
+<dl class="section return"><dt>Returns</dt><dd>Number of plot variables contributed by the <a class="el" href="classRtSolver.html" title="Abstract RTE solver class for doing various kinds of radiative transfer equations....">RtSolver</a>. </dd></dl>
 
 <p>Implements <a class="el" href="classTimeStepper.html#a914746cb3a04bcbd965f1fdd09631ce4">TimeStepper</a>.</p>
+
+</div>
+</div>
+<a id="afe63e91fc214250129e9482190662fad" name="afe63e91fc214250129e9482190662fad"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afe63e91fc214250129e9482190662fad">&#9670;&#160;</a></span>getPhi()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">T</a> &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp; RadiativeTransferStepper::getPhi </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the solver solution. </p>
+<dl class="section return"><dt>Returns</dt><dd>Const reference to the <a class="el" href="classRtSolver.html" title="Abstract RTE solver class for doing various kinds of radiative transfer equations....">RtSolver</a>'s photon density field on the AMR hierarchy. </dd></dl>
 
 </div>
 </div>
@@ -473,6 +532,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 </div><div class="memdoc">
 
 <p>Get plot variable names. </p>
+<dl class="section return"><dt>Returns</dt><dd>Vector of variable name strings. </dd></dl>
 
 <p>Implements <a class="el" href="classTimeStepper.html#a6700e35c58582eee7b875c4a75808f53">TimeStepper</a>.</p>
 
@@ -669,16 +729,16 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 </table>
 </div><div class="memdoc">
 
-<p>Perform pre-regrid operations &ndash; calls the solver function. operation takes a lot of memory. </p>
+<p>Perform pre-regrid operations — calls the solver function. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_lmin</td><td>The coarsest level that changes </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_lmin</td><td>The coarsest level that changes. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_oldFinestLevel</td><td>The finest level before the regrid. </td></tr>
   </table>
   </dd>
 </dl>
 
-<p>Implements <a class="el" href="classTimeStepper.html#a5332298b62730f2d120137a241fef332">TimeStepper</a>.</p>
+<p>Implements <a class="el" href="classTimeStepper.html#a033714dec74fcd419b30b9120ed40d60">TimeStepper</a>.</p>
 
 </div>
 </div>
@@ -828,7 +888,37 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
   </dd>
 </dl>
 
-<p>Implements <a class="el" href="classTimeStepper.html#a653b195c640ac95a01197b70b9e0e260">TimeStepper</a>.</p>
+<p>Implements <a class="el" href="classTimeStepper.html#a14bac32b1a9237cac27ff0efa0c6922b">TimeStepper</a>.</p>
+
+</div>
+</div>
+<a id="ab02809e76d079702f3b7f6efed3b6fbe" name="ab02809e76d079702f3b7f6efed3b6fbe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab02809e76d079702f3b7f6efed3b6fbe">&#9670;&#160;</a></span>setGaussianSource()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">T</a> &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> RadiativeTransferStepper::setGaussianSource </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Set a Gaussian source term in the <a class="el" href="classRtSolver.html" title="Abstract RTE solver class for doing various kinds of radiative transfer equations....">RtSolver</a>. </p>
+<p>Reads the blob center, amplitude, and width from the input script and fills the solver's source field with a Gaussian distribution. Called after initialization and each regrid. </p>
 
 </div>
 </div>
@@ -905,22 +995,22 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 </table>
 </div><div class="memdoc">
 
-<p>Synchronzie solver times and time steps. </p>
+<p>Synchronize solver times and time steps. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_step</td><td>Time step </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_time</td><td>Time (in seconds) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_step</td><td>Current time step number. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_time</td><td>Current simulation time in seconds. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time step that was used. </td></tr>
   </table>
   </dd>
 </dl>
 
-<p>Implements <a class="el" href="classTimeStepper.html#a1b3e2640412b7fe4ab176ad1029834ac">TimeStepper</a>.</p>
+<p>Implements <a class="el" href="classTimeStepper.html#a94aa8013ce2a2ef0b426763e248c6840">TimeStepper</a>.</p>
 
 </div>
 </div>
-<a id="a3396482eb902894cb703bb28fa7edd6b" name="a3396482eb902894cb703bb28fa7edd6b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3396482eb902894cb703bb28fa7edd6b">&#9670;&#160;</a></span>writePlotData()</h2>
+<a id="ab9b8a81fb16e449086c6b4abb8260e05" name="ab9b8a81fb16e449086c6b4abb8260e05"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab9b8a81fb16e449086c6b4abb8260e05">&#9670;&#160;</a></span>writePlotData()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -945,7 +1035,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;&#160;</td>
           <td class="paramname"><em>a_outputRealm</em>, </td>
         </tr>
         <tr>
@@ -978,7 +1068,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
   </dd>
 </dl>
 
-<p>Implements <a class="el" href="classTimeStepper.html#a22859f521ede9fac08fe05a06f929193">TimeStepper</a>.</p>
+<p>Implements <a class="el" href="classTimeStepper.html#a25e6e41b52aa1bd6d0a64818996185df">TimeStepper</a>.</p>
 
 </div>
 </div>

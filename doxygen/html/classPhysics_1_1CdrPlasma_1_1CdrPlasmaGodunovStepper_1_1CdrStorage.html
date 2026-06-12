@@ -88,28 +88,10 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>Utility class for memory handling in <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html" title="Abstract class for evolving the minimal plasma model in time.">CdrPlasmaStepper</a>.  
+<p>Utility class for memory handling in <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html" title="Abstract base class for advancing the coupled CDR plasma equations in time.">CdrPlasmaStepper</a>.  
  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper_1_1CdrStorage.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="CD__CdrPlasmaGodunovStorage_8H_source.html">CD_CdrPlasmaGodunovStorage.H</a>&gt;</code></p>
-<div class="dynheader">
-Collaboration diagram for Physics::CdrPlasma::CdrPlasmaGodunovStepper::CdrStorage:</div>
-<div class="dyncontent">
-<div class="center"><img src="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper_1_1CdrStorage__coll__graph.png" border="0" usemap="#aPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper_1_1CdrStorage_coll__map" alt="Collaboration graph"/></div>
-<map name="aPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper_1_1CdrStorage_coll__map" id="aPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper_1_1CdrStorage_coll__map">
-<area shape="rect" title="Utility class for memory handling in CdrPlasmaStepper." alt="" coords="214,240,422,295"/>
-<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="5,101,201,126"/>
-<area shape="poly" title=" " alt="" coords="130,132,238,214,275,238,272,242,235,218,126,137"/>
-<area shape="rect" href="classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="249,5,387,31"/>
-<area shape="poly" title=" " alt="" coords="266,37,212,57,124,103,121,98,210,52,265,32"/>
-<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="226,93,410,133"/>
-<area shape="poly" title=" " alt="" coords="321,44,321,93,315,93,315,44"/>
-<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="434,101,679,126"/>
-<area shape="poly" title=" " alt="" coords="401,26,445,36,487,52,522,75,548,98,544,102,518,79,485,57,443,42,400,31"/>
-<area shape="poly" title=" " alt="" coords="321,148,321,240,315,240,315,148"/>
-<area shape="poly" title=" " alt="" coords="534,137,481,176,418,218,374,242,372,238,415,214,478,171,530,132"/>
-</map>
-<center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
@@ -117,13 +99,25 @@ Public Member Functions</h2></td></tr>
 &#160;</td><td class="memItemRight" valign="bottom"><b>CdrStorage</b> ()=<a class="el" href="classTracerParticleSolver.html">delete</a></td></tr>
 <tr class="memdesc:aa5219fab64ffa113cd1bdc2e21742f43"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed constructor. Only strong construction allowed. <br /></td></tr>
 <tr class="separator:aa5219fab64ffa113cd1bdc2e21742f43"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a90c6e5ac8f39cfbc7cac403cc396f8c5" id="r_a90c6e5ac8f39cfbc7cac403cc396f8c5"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper_1_1CdrStorage.html#a90c6e5ac8f39cfbc7cac403cc396f8c5">CdrStorage</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classAmrMesh.html">AmrMesh</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_amr</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> <a class="el" href="classTracerParticleSolver.html">a_realm</a>, <a class="el" href="classTracerParticleSolver.html">const</a> phase::which_phase <a class="el" href="classTracerParticleSolver.html">a_phase</a>)</td></tr>
-<tr class="memdesc:a90c6e5ac8f39cfbc7cac403cc396f8c5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor. After this, user may call allocateStorage and deallocateStorage.  <br /></td></tr>
-<tr class="separator:a90c6e5ac8f39cfbc7cac403cc396f8c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a384add48db408d2f6001467efb74319e" id="r_a384add48db408d2f6001467efb74319e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper_1_1CdrStorage.html#a384add48db408d2f6001467efb74319e">CdrStorage</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classAmrMesh.html">AmrMesh</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_amr</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_realm</a>, <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> <a class="el" href="classTracerParticleSolver.html">a_phase</a>)</td></tr>
+<tr class="memdesc:a384add48db408d2f6001467efb74319e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor. After this, user may call allocateStorage and deallocateStorage.  <br /></td></tr>
+<tr class="separator:a384add48db408d2f6001467efb74319e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8b1631d204f0d5b8d04b445134811943" id="r_a8b1631d204f0d5b8d04b445134811943"><td class="memItemLeft" align="right" valign="top"><a id="a8b1631d204f0d5b8d04b445134811943" name="a8b1631d204f0d5b8d04b445134811943"></a>
 <a class="el" href="classTracerParticleSolver.html">virtual</a>&#160;</td><td class="memItemRight" valign="bottom"><b>~CdrStorage</b> ()</td></tr>
 <tr class="memdesc:a8b1631d204f0d5b8d04b445134811943"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. <br /></td></tr>
 <tr class="separator:a8b1631d204f0d5b8d04b445134811943"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4d06c33a22301806fe6e45302061066f" id="r_a4d06c33a22301806fe6e45302061066f"><td class="memItemLeft" align="right" valign="top"><a id="a4d06c33a22301806fe6e45302061066f" name="a4d06c33a22301806fe6e45302061066f"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>CdrStorage</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper_1_1CdrStorage.html">CdrStorage</a> &amp;)=<a class="el" href="classTracerParticleSolver.html">delete</a></td></tr>
+<tr class="separator:a4d06c33a22301806fe6e45302061066f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac78cc9c152ce7bd8ccf12370e3a96526" id="r_ac78cc9c152ce7bd8ccf12370e3a96526"><td class="memItemLeft" align="right" valign="top"><a id="ac78cc9c152ce7bd8ccf12370e3a96526" name="ac78cc9c152ce7bd8ccf12370e3a96526"></a>
+<a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper_1_1CdrStorage.html">CdrStorage</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper_1_1CdrStorage.html">CdrStorage</a> &amp;)=<a class="el" href="classTracerParticleSolver.html">delete</a></td></tr>
+<tr class="separator:ac78cc9c152ce7bd8ccf12370e3a96526"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9742cd4d8f231c528b98b34ba9b0f7dc" id="r_a9742cd4d8f231c528b98b34ba9b0f7dc"><td class="memItemLeft" align="right" valign="top"><a id="a9742cd4d8f231c528b98b34ba9b0f7dc" name="a9742cd4d8f231c528b98b34ba9b0f7dc"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>CdrStorage</b> (<a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper_1_1CdrStorage.html">CdrStorage</a> &amp;&amp;)=<a class="el" href="classTracerParticleSolver.html">delete</a></td></tr>
+<tr class="separator:a9742cd4d8f231c528b98b34ba9b0f7dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8e35bdb833e982731c378307d5da8b34" id="r_a8e35bdb833e982731c378307d5da8b34"><td class="memItemLeft" align="right" valign="top"><a id="a8e35bdb833e982731c378307d5da8b34" name="a8e35bdb833e982731c378307d5da8b34"></a>
+<a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper_1_1CdrStorage.html">CdrStorage</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (<a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper_1_1CdrStorage.html">CdrStorage</a> &amp;&amp;)=<a class="el" href="classTracerParticleSolver.html">delete</a></td></tr>
+<tr class="separator:a8e35bdb833e982731c378307d5da8b34"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0ec3a2e31114f9266d16dc7d078c9b99" id="r_a0ec3a2e31114f9266d16dc7d078c9b99"><td class="memItemLeft" align="right" valign="top"><a id="a0ec3a2e31114f9266d16dc7d078c9b99" name="a0ec3a2e31114f9266d16dc7d078c9b99"></a>
 <a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>allocateStorage</b> ()</td></tr>
 <tr class="memdesc:a0ec3a2e31114f9266d16dc7d078c9b99"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocation function. This will allocate all transient storage in this class. <br /></td></tr>
@@ -132,53 +126,41 @@ Public Member Functions</h2></td></tr>
 <a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>deallocateStorage</b> ()</td></tr>
 <tr class="memdesc:a2d3542b01e8a5fc2eea19619d1e5b649"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocation function. This will delete all transient storage in this class. <br /></td></tr>
 <tr class="separator:a2d3542b01e8a5fc2eea19619d1e5b649"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adc747b5e819f3f144b9b82ebdf026e62" id="r_adc747b5e819f3f144b9b82ebdf026e62"><td class="memItemLeft" align="right" valign="top"><a id="adc747b5e819f3f144b9b82ebdf026e62" name="adc747b5e819f3f144b9b82ebdf026e62"></a>
-<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getScratch</b> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:adc747b5e819f3f144b9b82ebdf026e62"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get scratch storage. <br /></td></tr>
+<tr class="memitem:adc747b5e819f3f144b9b82ebdf026e62" id="r_adc747b5e819f3f144b9b82ebdf026e62"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper_1_1CdrStorage.html#adc747b5e819f3f144b9b82ebdf026e62">getScratch</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:adc747b5e819f3f144b9b82ebdf026e62"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get scratch storage.  <br /></td></tr>
 <tr class="separator:adc747b5e819f3f144b9b82ebdf026e62"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7eddaa1131a431ebe4a117ce272f826d" id="r_a7eddaa1131a431ebe4a117ce272f826d"><td class="memItemLeft" align="right" valign="top"><a id="a7eddaa1131a431ebe4a117ce272f826d" name="a7eddaa1131a431ebe4a117ce272f826d"></a>
-<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getScratch2</b> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:a7eddaa1131a431ebe4a117ce272f826d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the other scratch storage. <br /></td></tr>
+<tr class="memitem:a7eddaa1131a431ebe4a117ce272f826d" id="r_a7eddaa1131a431ebe4a117ce272f826d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper_1_1CdrStorage.html#a7eddaa1131a431ebe4a117ce272f826d">getScratch2</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:a7eddaa1131a431ebe4a117ce272f826d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the other scratch storage.  <br /></td></tr>
 <tr class="separator:a7eddaa1131a431ebe4a117ce272f826d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa407c2d319e6b0b2bd3d69fe1bf35835" id="r_aa407c2d319e6b0b2bd3d69fe1bf35835"><td class="memItemLeft" align="right" valign="top"><a id="aa407c2d319e6b0b2bd3d69fe1bf35835" name="aa407c2d319e6b0b2bd3d69fe1bf35835"></a>
-<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getExtrap</b> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:aa407c2d319e6b0b2bd3d69fe1bf35835"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the extrapolation storage. This is usually used for holding phi + <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">0.5</a>*dt*S. <br /></td></tr>
+<tr class="memitem:aa407c2d319e6b0b2bd3d69fe1bf35835" id="r_aa407c2d319e6b0b2bd3d69fe1bf35835"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper_1_1CdrStorage.html#aa407c2d319e6b0b2bd3d69fe1bf35835">getExtrap</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:aa407c2d319e6b0b2bd3d69fe1bf35835"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the extrapolation storage. This is usually used for holding phi + <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">0.5</a>*dt*S.  <br /></td></tr>
 <tr class="separator:aa407c2d319e6b0b2bd3d69fe1bf35835"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4bc8fa6daa02f04f4ba0e9daabbf1671" id="r_a4bc8fa6daa02f04f4ba0e9daabbf1671"><td class="memItemLeft" align="right" valign="top"><a id="a4bc8fa6daa02f04f4ba0e9daabbf1671" name="a4bc8fa6daa02f04f4ba0e9daabbf1671"></a>
-<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getGradient</b> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:a4bc8fa6daa02f04f4ba0e9daabbf1671"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get storage for holding gradient. <br /></td></tr>
+<tr class="memitem:a4bc8fa6daa02f04f4ba0e9daabbf1671" id="r_a4bc8fa6daa02f04f4ba0e9daabbf1671"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper_1_1CdrStorage.html#a4bc8fa6daa02f04f4ba0e9daabbf1671">getGradient</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:a4bc8fa6daa02f04f4ba0e9daabbf1671"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get storage for holding gradient.  <br /></td></tr>
 <tr class="separator:a4bc8fa6daa02f04f4ba0e9daabbf1671"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a89095594d5a9bbe1921e2ffa28a4f67c" id="r_a89095594d5a9bbe1921e2ffa28a4f67c"><td class="memItemLeft" align="right" valign="top"><a id="a89095594d5a9bbe1921e2ffa28a4f67c" name="a89095594d5a9bbe1921e2ffa28a4f67c"></a>
-<a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getEbState</b> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:a89095594d5a9bbe1921e2ffa28a4f67c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get scratch storage that holds the density on the EB. <br /></td></tr>
+<tr class="memitem:a89095594d5a9bbe1921e2ffa28a4f67c" id="r_a89095594d5a9bbe1921e2ffa28a4f67c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">EBAMRIVData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper_1_1CdrStorage.html#a89095594d5a9bbe1921e2ffa28a4f67c">getEbState</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:a89095594d5a9bbe1921e2ffa28a4f67c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get scratch storage that holds the density on the EB.  <br /></td></tr>
 <tr class="separator:a89095594d5a9bbe1921e2ffa28a4f67c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae451377ce1a2f3896cf0aa68ce43be2b" id="r_ae451377ce1a2f3896cf0aa68ce43be2b"><td class="memItemLeft" align="right" valign="top"><a id="ae451377ce1a2f3896cf0aa68ce43be2b" name="ae451377ce1a2f3896cf0aa68ce43be2b"></a>
-<a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getEbVelo</b> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:ae451377ce1a2f3896cf0aa68ce43be2b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the scratch storage holding the normal component of the velocity on the EB. <br /></td></tr>
+<tr class="memitem:ae451377ce1a2f3896cf0aa68ce43be2b" id="r_ae451377ce1a2f3896cf0aa68ce43be2b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">EBAMRIVData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper_1_1CdrStorage.html#ae451377ce1a2f3896cf0aa68ce43be2b">getEbVelo</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:ae451377ce1a2f3896cf0aa68ce43be2b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the scratch storage holding the normal component of the velocity on the EB.  <br /></td></tr>
 <tr class="separator:ae451377ce1a2f3896cf0aa68ce43be2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7d59748e8f1d36a95a1d3b68954fd7bd" id="r_a7d59748e8f1d36a95a1d3b68954fd7bd"><td class="memItemLeft" align="right" valign="top"><a id="a7d59748e8f1d36a95a1d3b68954fd7bd" name="a7d59748e8f1d36a95a1d3b68954fd7bd"></a>
-<a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getEbFlux</b> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:a7d59748e8f1d36a95a1d3b68954fd7bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the scratch storage holding the extrapolated flux on the EB. <br /></td></tr>
+<tr class="memitem:a7d59748e8f1d36a95a1d3b68954fd7bd" id="r_a7d59748e8f1d36a95a1d3b68954fd7bd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">EBAMRIVData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper_1_1CdrStorage.html#a7d59748e8f1d36a95a1d3b68954fd7bd">getEbFlux</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:a7d59748e8f1d36a95a1d3b68954fd7bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the scratch storage holding the extrapolated flux on the EB.  <br /></td></tr>
 <tr class="separator:a7d59748e8f1d36a95a1d3b68954fd7bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8522473cc00c8460090054808e282e84" id="r_a8522473cc00c8460090054808e282e84"><td class="memItemLeft" align="right" valign="top"><a id="a8522473cc00c8460090054808e282e84" name="a8522473cc00c8460090054808e282e84"></a>
-<a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getEbGrad</b> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:a8522473cc00c8460090054808e282e84"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the scratch storage holding the extrapolated gradient on the EB. <br /></td></tr>
+<tr class="memitem:a8522473cc00c8460090054808e282e84" id="r_a8522473cc00c8460090054808e282e84"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">EBAMRIVData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper_1_1CdrStorage.html#a8522473cc00c8460090054808e282e84">getEbGrad</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:a8522473cc00c8460090054808e282e84"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the scratch storage holding the extrapolated gradient on the EB.  <br /></td></tr>
 <tr class="separator:a8522473cc00c8460090054808e282e84"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8d5bbb2567d868422d167b2613c0b048" id="r_a8d5bbb2567d868422d167b2613c0b048"><td class="memItemLeft" align="right" valign="top"><a id="a8d5bbb2567d868422d167b2613c0b048" name="a8d5bbb2567d868422d167b2613c0b048"></a>
-<a class="el" href="classEBAMRData.html">EBAMRIFData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getDomainState</b> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:a8d5bbb2567d868422d167b2613c0b048"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the scratch storage holding the extrapolated density on domain faces. <br /></td></tr>
+<tr class="memitem:a8d5bbb2567d868422d167b2613c0b048" id="r_a8d5bbb2567d868422d167b2613c0b048"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">EBAMRIFData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper_1_1CdrStorage.html#a8d5bbb2567d868422d167b2613c0b048">getDomainState</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:a8d5bbb2567d868422d167b2613c0b048"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the scratch storage holding the extrapolated density on domain faces.  <br /></td></tr>
 <tr class="separator:a8d5bbb2567d868422d167b2613c0b048"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a29c283bff6edb333df6ce72b575dee06" id="r_a29c283bff6edb333df6ce72b575dee06"><td class="memItemLeft" align="right" valign="top"><a id="a29c283bff6edb333df6ce72b575dee06" name="a29c283bff6edb333df6ce72b575dee06"></a>
-<a class="el" href="classEBAMRData.html">EBAMRIFData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getDomainVelo</b> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:a29c283bff6edb333df6ce72b575dee06"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the scratch storage holding the extrapolated velocity (normal component only) on domain faces. <br /></td></tr>
+<tr class="memitem:a29c283bff6edb333df6ce72b575dee06" id="r_a29c283bff6edb333df6ce72b575dee06"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">EBAMRIFData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper_1_1CdrStorage.html#a29c283bff6edb333df6ce72b575dee06">getDomainVelo</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:a29c283bff6edb333df6ce72b575dee06"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the scratch storage holding the extrapolated velocity (normal component only) on domain faces.  <br /></td></tr>
 <tr class="separator:a29c283bff6edb333df6ce72b575dee06"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a74cbdaa888123139a8da84b8c0fbafa1" id="r_a74cbdaa888123139a8da84b8c0fbafa1"><td class="memItemLeft" align="right" valign="top"><a id="a74cbdaa888123139a8da84b8c0fbafa1" name="a74cbdaa888123139a8da84b8c0fbafa1"></a>
-<a class="el" href="classEBAMRData.html">EBAMRIFData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getDomainFlux</b> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:a74cbdaa888123139a8da84b8c0fbafa1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the scratch storage holding the extrapolated flux on domain faces. <br /></td></tr>
+<tr class="memitem:a74cbdaa888123139a8da84b8c0fbafa1" id="r_a74cbdaa888123139a8da84b8c0fbafa1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">EBAMRIFData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper_1_1CdrStorage.html#a74cbdaa888123139a8da84b8c0fbafa1">getDomainFlux</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:a74cbdaa888123139a8da84b8c0fbafa1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the scratch storage holding the extrapolated flux on domain faces.  <br /></td></tr>
 <tr class="separator:a74cbdaa888123139a8da84b8c0fbafa1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a05adbbf2bee1aab1e50965e9ccd3f26c" id="r_a05adbbf2bee1aab1e50965e9ccd3f26c"><td class="memItemLeft" align="right" valign="top"><a id="a05adbbf2bee1aab1e50965e9ccd3f26c" name="a05adbbf2bee1aab1e50965e9ccd3f26c"></a>
-<a class="el" href="classEBAMRData.html">EBAMRIFData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getDomainGrad</b> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:a05adbbf2bee1aab1e50965e9ccd3f26c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the scratch storage holding the extrapolated gradient (normal component only) on domain faces. <br /></td></tr>
+<tr class="memitem:a05adbbf2bee1aab1e50965e9ccd3f26c" id="r_a05adbbf2bee1aab1e50965e9ccd3f26c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">EBAMRIFData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper_1_1CdrStorage.html#a05adbbf2bee1aab1e50965e9ccd3f26c">getDomainGrad</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:a05adbbf2bee1aab1e50965e9ccd3f26c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the scratch storage holding the extrapolated gradient (normal component only) on domain faces.  <br /></td></tr>
 <tr class="separator:a05adbbf2bee1aab1e50965e9ccd3f26c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
@@ -192,64 +174,64 @@ Protected Attributes</h2></td></tr>
 <tr class="memdesc:a592a0c530a5709db875ae6ee777bb0d5"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> where data lives. <br /></td></tr>
 <tr class="separator:a592a0c530a5709db875ae6ee777bb0d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0a5a1009219894f1b16fcec208b3d279" id="r_a0a5a1009219894f1b16fcec208b3d279"><td class="memItemLeft" align="right" valign="top"><a id="a0a5a1009219894f1b16fcec208b3d279" name="a0a5a1009219894f1b16fcec208b3d279"></a>
-phase::which_phase&#160;</td><td class="memItemRight" valign="bottom"><b>m_phase</b></td></tr>
+<a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_phase</b></td></tr>
 <tr class="memdesc:a0a5a1009219894f1b16fcec208b3d279"><td class="mdescLeft">&#160;</td><td class="mdescRight">Phase where data lives. <br /></td></tr>
 <tr class="separator:a0a5a1009219894f1b16fcec208b3d279"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa8fa0bbe211554d2e6862c65ed6a2177" id="r_aa8fa0bbe211554d2e6862c65ed6a2177"><td class="memItemLeft" align="right" valign="top"><a id="aa8fa0bbe211554d2e6862c65ed6a2177" name="aa8fa0bbe211554d2e6862c65ed6a2177"></a>
-<a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_scratch</b></td></tr>
+<a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_scratch</b></td></tr>
 <tr class="memdesc:aa8fa0bbe211554d2e6862c65ed6a2177"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cell-centered scratch data. <br /></td></tr>
 <tr class="separator:aa8fa0bbe211554d2e6862c65ed6a2177"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9e3b64193449372385104e04b46dbe55" id="r_a9e3b64193449372385104e04b46dbe55"><td class="memItemLeft" align="right" valign="top"><a id="a9e3b64193449372385104e04b46dbe55" name="a9e3b64193449372385104e04b46dbe55"></a>
-<a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_scratch2</b></td></tr>
+<a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_scratch2</b></td></tr>
 <tr class="memdesc:a9e3b64193449372385104e04b46dbe55"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cell-centered scratch data. <br /></td></tr>
 <tr class="separator:a9e3b64193449372385104e04b46dbe55"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ace6619cb0e01216f44ea013973a78bb2" id="r_ace6619cb0e01216f44ea013973a78bb2"><td class="memItemLeft" align="right" valign="top"><a id="ace6619cb0e01216f44ea013973a78bb2" name="ace6619cb0e01216f44ea013973a78bb2"></a>
-<a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_cellExtr</b></td></tr>
+<a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_cellExtr</b></td></tr>
 <tr class="memdesc:ace6619cb0e01216f44ea013973a78bb2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cell-centered scratch data. Used for holding phi + <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">0.5</a>*dt*S. <br /></td></tr>
 <tr class="separator:ace6619cb0e01216f44ea013973a78bb2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a282ed3457a88576a9c31ef93d6d10814" id="r_a282ed3457a88576a9c31ef93d6d10814"><td class="memItemLeft" align="right" valign="top"><a id="a282ed3457a88576a9c31ef93d6d10814" name="a282ed3457a88576a9c31ef93d6d10814"></a>
-<a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_gradient</b></td></tr>
+<a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_gradient</b></td></tr>
 <tr class="memdesc:a282ed3457a88576a9c31ef93d6d10814"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cell-centered scratch data for holding the gradient. <br /></td></tr>
 <tr class="separator:a282ed3457a88576a9c31ef93d6d10814"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae282a440c08ca0601636e622b92a57ed" id="r_ae282a440c08ca0601636e622b92a57ed"><td class="memItemLeft" align="right" valign="top"><a id="ae282a440c08ca0601636e622b92a57ed" name="ae282a440c08ca0601636e622b92a57ed"></a>
-<a class="el" href="classEBAMRData.html">EBAMRIVData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_scratchIV1</b></td></tr>
+<a class="el" href="classTracerParticleSolver.html">EBAMRIVData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_scratchIV1</b></td></tr>
 <tr class="memdesc:ae282a440c08ca0601636e622b92a57ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">EB-centered scratch data. <br /></td></tr>
 <tr class="separator:ae282a440c08ca0601636e622b92a57ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a48f1fa8f51de65a9521f6097891cfbdc" id="r_a48f1fa8f51de65a9521f6097891cfbdc"><td class="memItemLeft" align="right" valign="top"><a id="a48f1fa8f51de65a9521f6097891cfbdc" name="a48f1fa8f51de65a9521f6097891cfbdc"></a>
-<a class="el" href="classEBAMRData.html">EBAMRIVData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_scratchIV2</b></td></tr>
+<a class="el" href="classTracerParticleSolver.html">EBAMRIVData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_scratchIV2</b></td></tr>
 <tr class="memdesc:a48f1fa8f51de65a9521f6097891cfbdc"><td class="mdescLeft">&#160;</td><td class="mdescRight">EB-centered scratch data. <br /></td></tr>
 <tr class="separator:a48f1fa8f51de65a9521f6097891cfbdc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aac6cc7c04e9e5ad8547e8e5b8b0a96d1" id="r_aac6cc7c04e9e5ad8547e8e5b8b0a96d1"><td class="memItemLeft" align="right" valign="top"><a id="aac6cc7c04e9e5ad8547e8e5b8b0a96d1" name="aac6cc7c04e9e5ad8547e8e5b8b0a96d1"></a>
-<a class="el" href="classEBAMRData.html">EBAMRIVData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_scratchIV3</b></td></tr>
+<a class="el" href="classTracerParticleSolver.html">EBAMRIVData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_scratchIV3</b></td></tr>
 <tr class="memdesc:aac6cc7c04e9e5ad8547e8e5b8b0a96d1"><td class="mdescLeft">&#160;</td><td class="mdescRight">EB-centered scratch data. <br /></td></tr>
 <tr class="separator:aac6cc7c04e9e5ad8547e8e5b8b0a96d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a54d8bac6fd380fabde63b0d557d5e009" id="r_a54d8bac6fd380fabde63b0d557d5e009"><td class="memItemLeft" align="right" valign="top"><a id="a54d8bac6fd380fabde63b0d557d5e009" name="a54d8bac6fd380fabde63b0d557d5e009"></a>
-<a class="el" href="classEBAMRData.html">EBAMRIVData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_scratchIV4</b></td></tr>
+<a class="el" href="classTracerParticleSolver.html">EBAMRIVData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_scratchIV4</b></td></tr>
 <tr class="memdesc:a54d8bac6fd380fabde63b0d557d5e009"><td class="mdescLeft">&#160;</td><td class="mdescRight">EB-centered scratch data. <br /></td></tr>
 <tr class="separator:a54d8bac6fd380fabde63b0d557d5e009"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae53b520fae8ea51a0ca1f7e557af6d66" id="r_ae53b520fae8ea51a0ca1f7e557af6d66"><td class="memItemLeft" align="right" valign="top"><a id="ae53b520fae8ea51a0ca1f7e557af6d66" name="ae53b520fae8ea51a0ca1f7e557af6d66"></a>
-<a class="el" href="classEBAMRData.html">EBAMRIFData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_scratchIF1</b></td></tr>
+<a class="el" href="classTracerParticleSolver.html">EBAMRIFData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_scratchIF1</b></td></tr>
 <tr class="memdesc:ae53b520fae8ea51a0ca1f7e557af6d66"><td class="mdescLeft">&#160;</td><td class="mdescRight">Domain-centered scratch data. <br /></td></tr>
 <tr class="separator:ae53b520fae8ea51a0ca1f7e557af6d66"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2200920c22e31e10dd9697995e366ee7" id="r_a2200920c22e31e10dd9697995e366ee7"><td class="memItemLeft" align="right" valign="top"><a id="a2200920c22e31e10dd9697995e366ee7" name="a2200920c22e31e10dd9697995e366ee7"></a>
-<a class="el" href="classEBAMRData.html">EBAMRIFData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_scratchIF2</b></td></tr>
+<a class="el" href="classTracerParticleSolver.html">EBAMRIFData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_scratchIF2</b></td></tr>
 <tr class="memdesc:a2200920c22e31e10dd9697995e366ee7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Domain-centered scratch data. <br /></td></tr>
 <tr class="separator:a2200920c22e31e10dd9697995e366ee7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac6ffb11ffd9a646f8954a1c49e218989" id="r_ac6ffb11ffd9a646f8954a1c49e218989"><td class="memItemLeft" align="right" valign="top"><a id="ac6ffb11ffd9a646f8954a1c49e218989" name="ac6ffb11ffd9a646f8954a1c49e218989"></a>
-<a class="el" href="classEBAMRData.html">EBAMRIFData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_scratchIF3</b></td></tr>
+<a class="el" href="classTracerParticleSolver.html">EBAMRIFData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_scratchIF3</b></td></tr>
 <tr class="memdesc:ac6ffb11ffd9a646f8954a1c49e218989"><td class="mdescLeft">&#160;</td><td class="mdescRight">Domain-centered scratch data. <br /></td></tr>
 <tr class="separator:ac6ffb11ffd9a646f8954a1c49e218989"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a38224f641a01edff425788d45b184eea" id="r_a38224f641a01edff425788d45b184eea"><td class="memItemLeft" align="right" valign="top"><a id="a38224f641a01edff425788d45b184eea" name="a38224f641a01edff425788d45b184eea"></a>
-<a class="el" href="classEBAMRData.html">EBAMRIFData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_scratchIF4</b></td></tr>
+<a class="el" href="classTracerParticleSolver.html">EBAMRIFData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_scratchIF4</b></td></tr>
 <tr class="memdesc:a38224f641a01edff425788d45b184eea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Domain-centered scratch data. <br /></td></tr>
 <tr class="separator:a38224f641a01edff425788d45b184eea"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Utility class for memory handling in <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html" title="Abstract class for evolving the minimal plasma model in time.">CdrPlasmaStepper</a>. </p>
+<div class="textblock"><p>Utility class for memory handling in <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html" title="Abstract base class for advancing the coupled CDR plasma equations in time.">CdrPlasmaStepper</a>. </p>
 <p>This class exists because we often need some extra storage when advancing the equations. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a90c6e5ac8f39cfbc7cac403cc396f8c5" name="a90c6e5ac8f39cfbc7cac403cc396f8c5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a90c6e5ac8f39cfbc7cac403cc396f8c5">&#9670;&#160;</a></span>CdrStorage()</h2>
+<a id="a384add48db408d2f6001467efb74319e" name="a384add48db408d2f6001467efb74319e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a384add48db408d2f6001467efb74319e">&#9670;&#160;</a></span>CdrStorage()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -263,13 +245,13 @@ phase::which_phase&#160;</td><td class="memItemRight" valign="bottom"><b>m_phase
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;&#160;</td>
           <td class="paramname"><em>a_realm</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> phase::which_phase&#160;</td>
+          <td class="paramtype"><a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a>&#160;</td>
           <td class="paramname"><em>a_phase</em>&#160;</td>
         </tr>
         <tr>
@@ -289,6 +271,343 @@ phase::which_phase&#160;</td><td class="memItemRight" valign="bottom"><b>m_phase
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="a74cbdaa888123139a8da84b8c0fbafa1" name="a74cbdaa888123139a8da84b8c0fbafa1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a74cbdaa888123139a8da84b8c0fbafa1">&#9670;&#160;</a></span>getDomainFlux()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">EBAMRIFData</a> &amp; Physics::CdrPlasma::CdrPlasmaGodunovStepper::CdrStorage::getDomainFlux </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the scratch storage holding the extrapolated flux on domain faces. </p>
+<dl class="section return"><dt>Returns</dt><dd>Domain flux </dd></dl>
+
+</div>
+</div>
+<a id="a05adbbf2bee1aab1e50965e9ccd3f26c" name="a05adbbf2bee1aab1e50965e9ccd3f26c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a05adbbf2bee1aab1e50965e9ccd3f26c">&#9670;&#160;</a></span>getDomainGrad()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">EBAMRIFData</a> &amp; Physics::CdrPlasma::CdrPlasmaGodunovStepper::CdrStorage::getDomainGrad </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the scratch storage holding the extrapolated gradient (normal component only) on domain faces. </p>
+<dl class="section return"><dt>Returns</dt><dd>Domain grad </dd></dl>
+
+</div>
+</div>
+<a id="a8d5bbb2567d868422d167b2613c0b048" name="a8d5bbb2567d868422d167b2613c0b048"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8d5bbb2567d868422d167b2613c0b048">&#9670;&#160;</a></span>getDomainState()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">EBAMRIFData</a> &amp; Physics::CdrPlasma::CdrPlasmaGodunovStepper::CdrStorage::getDomainState </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the scratch storage holding the extrapolated density on domain faces. </p>
+<dl class="section return"><dt>Returns</dt><dd>Domain state </dd></dl>
+
+</div>
+</div>
+<a id="a29c283bff6edb333df6ce72b575dee06" name="a29c283bff6edb333df6ce72b575dee06"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a29c283bff6edb333df6ce72b575dee06">&#9670;&#160;</a></span>getDomainVelo()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">EBAMRIFData</a> &amp; Physics::CdrPlasma::CdrPlasmaGodunovStepper::CdrStorage::getDomainVelo </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the scratch storage holding the extrapolated velocity (normal component only) on domain faces. </p>
+<dl class="section return"><dt>Returns</dt><dd>Domain velo </dd></dl>
+
+</div>
+</div>
+<a id="a7d59748e8f1d36a95a1d3b68954fd7bd" name="a7d59748e8f1d36a95a1d3b68954fd7bd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7d59748e8f1d36a95a1d3b68954fd7bd">&#9670;&#160;</a></span>getEbFlux()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">EBAMRIVData</a> &amp; Physics::CdrPlasma::CdrPlasmaGodunovStepper::CdrStorage::getEbFlux </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the scratch storage holding the extrapolated flux on the EB. </p>
+<dl class="section return"><dt>Returns</dt><dd>Eb flux </dd></dl>
+
+</div>
+</div>
+<a id="a8522473cc00c8460090054808e282e84" name="a8522473cc00c8460090054808e282e84"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8522473cc00c8460090054808e282e84">&#9670;&#160;</a></span>getEbGrad()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">EBAMRIVData</a> &amp; Physics::CdrPlasma::CdrPlasmaGodunovStepper::CdrStorage::getEbGrad </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the scratch storage holding the extrapolated gradient on the EB. </p>
+<dl class="section return"><dt>Returns</dt><dd>Eb grad </dd></dl>
+
+</div>
+</div>
+<a id="a89095594d5a9bbe1921e2ffa28a4f67c" name="a89095594d5a9bbe1921e2ffa28a4f67c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a89095594d5a9bbe1921e2ffa28a4f67c">&#9670;&#160;</a></span>getEbState()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">EBAMRIVData</a> &amp; Physics::CdrPlasma::CdrPlasmaGodunovStepper::CdrStorage::getEbState </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get scratch storage that holds the density on the EB. </p>
+<dl class="section return"><dt>Returns</dt><dd>Eb state </dd></dl>
+
+</div>
+</div>
+<a id="ae451377ce1a2f3896cf0aa68ce43be2b" name="ae451377ce1a2f3896cf0aa68ce43be2b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae451377ce1a2f3896cf0aa68ce43be2b">&#9670;&#160;</a></span>getEbVelo()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">EBAMRIVData</a> &amp; Physics::CdrPlasma::CdrPlasmaGodunovStepper::CdrStorage::getEbVelo </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the scratch storage holding the normal component of the velocity on the EB. </p>
+<dl class="section return"><dt>Returns</dt><dd>Eb velo </dd></dl>
+
+</div>
+</div>
+<a id="aa407c2d319e6b0b2bd3d69fe1bf35835" name="aa407c2d319e6b0b2bd3d69fe1bf35835"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa407c2d319e6b0b2bd3d69fe1bf35835">&#9670;&#160;</a></span>getExtrap()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp; Physics::CdrPlasma::CdrPlasmaGodunovStepper::CdrStorage::getExtrap </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the extrapolation storage. This is usually used for holding phi + <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">0.5</a>*dt*S. </p>
+<dl class="section return"><dt>Returns</dt><dd>Extrap </dd></dl>
+
+</div>
+</div>
+<a id="a4bc8fa6daa02f04f4ba0e9daabbf1671" name="a4bc8fa6daa02f04f4ba0e9daabbf1671"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4bc8fa6daa02f04f4ba0e9daabbf1671">&#9670;&#160;</a></span>getGradient()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp; Physics::CdrPlasma::CdrPlasmaGodunovStepper::CdrStorage::getGradient </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get storage for holding gradient. </p>
+<dl class="section return"><dt>Returns</dt><dd>Gradient </dd></dl>
+
+</div>
+</div>
+<a id="adc747b5e819f3f144b9b82ebdf026e62" name="adc747b5e819f3f144b9b82ebdf026e62"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adc747b5e819f3f144b9b82ebdf026e62">&#9670;&#160;</a></span>getScratch()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp; Physics::CdrPlasma::CdrPlasmaGodunovStepper::CdrStorage::getScratch </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get scratch storage. </p>
+<dl class="section return"><dt>Returns</dt><dd>Scratch </dd></dl>
+
+</div>
+</div>
+<a id="a7eddaa1131a431ebe4a117ce272f826d" name="a7eddaa1131a431ebe4a117ce272f826d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7eddaa1131a431ebe4a117ce272f826d">&#9670;&#160;</a></span>getScratch2()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp; Physics::CdrPlasma::CdrPlasmaGodunovStepper::CdrStorage::getScratch2 </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the other scratch storage. </p>
+<dl class="section return"><dt>Returns</dt><dd>Scratch2 </dd></dl>
 
 </div>
 </div>

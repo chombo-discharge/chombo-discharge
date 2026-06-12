@@ -8,7 +8,7 @@
 <area shape="poly" id="edge22_Node000001_Node000005" title=" " alt="" coords="433,24,636,29,759,36,886,48,1008,66,1116,90,1163,105,1204,123,1237,143,1262,165,1270,179,1268,192,1257,203,1240,213,1188,228,1118,239,952,251,794,254,794,249,951,245,1118,233,1187,223,1238,208,1254,199,1263,190,1264,180,1258,168,1234,147,1201,128,1161,110,1115,95,1007,71,885,53,759,41,636,34,433,29"/>
 <area shape="rect" id="Node000006" href="$CD__NeedleIF_8H.html" title="Declaration of needle electrode (cylinder with one pointy end and one flat end)" alt="" coords="283,93,402,119"/>
 <area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="345,46,345,79,340,79,340,46"/>
-<area shape="rect" id="Node000009" href="$CD__EBGeometryIF_8H.html" title="Binding of EBGeometry signed distance functions to Chombo objcts." alt="" coords="613,93,768,119"/>
+<area shape="rect" id="Node000009" href="$CD__EBGeometryIF_8H.html" title="Binding of EBGeometry signed distance functions to Chombo objects." alt="" coords="613,93,768,119"/>
 <area shape="poly" id="edge10_Node000001_Node000009" title=" " alt="" coords="427,43,627,88,626,93,425,48"/>
 <area shape="rect" id="Node000003" title=" " alt="" coords="11,240,80,265"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="55,193,51,227,45,226,49,192"/>

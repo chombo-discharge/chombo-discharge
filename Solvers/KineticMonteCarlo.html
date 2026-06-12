@@ -169,7 +169,7 @@
              
   <section id="kinetic-monte-carlo">
 <span id="chap-kineticmontecarlo"></span><h1>Kinetic Monte Carlo<a class="headerlink" href="#kinetic-monte-carlo" title="Permalink to this heading"></a></h1>
-<p>Kinetic Monte Carlo (KMC) algoritms are composed of various methods for stochastically simulating chemically reacting systems.
+<p>Kinetic Monte Carlo (KMC) algorithms are composed of various methods for stochastically simulating chemically reacting systems.
 While various flavors of KMC are encountered in different fields of science, KMC in the context of <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is primarily associated with chemistry kernels.</p>
 <section id="concept">
 <h2>Concept<a class="headerlink" href="#concept" title="Permalink to this heading"></a></h2>
@@ -218,7 +218,7 @@ The hybrid algorithm is taken from <span id="id2">Cao <em>et al.</em> [<a class=
 <div class="math notranslate nohighlight">
 \[T = \frac{1}{\sum_{r\in\vec{R}} a_r}\ln\left(\frac{1}{u_1}\right)\]</div>
 <p>where <span class="math notranslate nohighlight">\(A = \sum_{r\in\vec{R}} a_r\)</span> and <span class="math notranslate nohighlight">\(u_1\)</span> is a uniformly distributed random variable between <span class="math notranslate nohighlight">\(0\)</span> and <span class="math notranslate nohighlight">\(1\)</span>.
-The type of reaction that fires is deterimined from</p>
+The type of reaction that fires is determined from</p>
 <div class="math notranslate nohighlight">
 \[r_c = \textrm{smallest integer satisfying } \sum_{r^\prime = 1}^{r_c} a_{r^\prime} &gt; u_2A,\]</div>
 <p>where and <span class="math notranslate nohighlight">\(u_2\)</span> is another uniformly distributed random variable between <span class="math notranslate nohighlight">\(0\)</span> and <span class="math notranslate nohighlight">\(1\)</span>.
@@ -307,28 +307,32 @@ Let <span class="math notranslate nohighlight">\(\Delta\tau_{\textrm{nc}} \right
 <section id="implementation">
 <span id="chap-kmcsolver"></span><h2>Implementation<a class="headerlink" href="#implementation" title="Permalink to this heading"></a></h2>
 <p>In <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>, the KMC solver is implemented as</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
-<span class="cm">  @brief Class for running Kinetic Monte-Carlo simulations. </span>
-<span class="cm">  @details The template parameter State is the underlying state type that KMC operators on. There are rather simple required member functions on the State parameter,</span>
-<span class="cm">  but the reaction type (template parameter R) MUST be able to operate on the state through the following functions:</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
+<span class="cm">  @brief Class for running Kinetic Monte-Carlo simulations.</span>
+<span class="cm">  @details The template parameter State is the underlying state type that KMC operators on. There are rather simple</span>
+<span class="cm">  required member functions on the State parameter, but the reaction type (template parameter R) MUST be able to</span>
+<span class="cm">  operate on the state through the following functions:</span>
 
 <span class="cm">  1. Real R::propensity(State) const -&gt; Computes the reaction propensity for the input state.</span>
-<span class="cm">  2. T R::computeCriticalNumberOfReactions(State) const -&gt; Computes the minimum number of reactions that exhausts one of the reactants. </span>
-<span class="cm">  3. void R::advanceState(State&amp;, const T numReactions) const -&gt; Advance state by numReactions</span>
-<span class="cm">  4. std::&lt;some_container&gt; getReactants() const -&gt; Get reactants involved in the reactions.</span>
-<span class="cm">  5. static T R::population(const &lt;some_type&gt; reactant, const State&amp; a_state) -&gt; Get the population of the input reactant in the input state. </span>
+<span class="cm">  2. T R::computeCriticalNumberOfReactions(State) const -&gt; Computes the minimum number of reactions that exhausts one of the reactants.</span>
+<span class="cm">  3. void R::advanceState(State&amp;, const T numReactions) const -&gt; Advance state by numReactions.</span>
+<span class="cm">  4. std::&amp;lt;some_container&amp;gt; getReactants() const -&gt; Get reactants involved in the reactions.</span>
+<span class="cm">  5. static T R::population(const &amp;lt;some_type&amp;gt; reactant, const State&amp; a_state) -&gt; Get the population of the input reactant in the input state.</span>
 
-<span class="cm">  The template parameter T should agree across both both R, State, and KMCSolver. Note that this must be a signed integer type.</span>
+<span class="cm">  The template parameter T should agree across both R, State, and KMCSolver. Note that this must be a signed integer type.</span>
 <span class="cm">*/</span>
 <span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">R</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">State</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="o">&gt;</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">KMCSolver</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">    @brief Alias for the list of reactions.</span>
+<span class="cm">  */</span>
 <span class="w">  </span><span class="k">using</span><span class="w"> </span><span class="n">ReactionList</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="n">R</span><span class="o">&gt;&gt;</span><span class="p">;</span>
 
-<span class="w">  </span><span class="cm">/*!</span>
-<span class="cm">    @brief Full constructor. </span>
-<span class="cm">    @param[in] a_reactions List of reactions. </span>
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">    @brief Full constructor.</span>
+<span class="cm">    @param[in] a_reactions List of reactions.</span>
 <span class="cm">  */</span>
 <span class="w">  </span><span class="kr">inline</span><span class="w"> </span><span class="n">KMCSolver</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">ReactionList</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_reactions</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
@@ -348,9 +352,9 @@ Several template constraints exist on the reaction type <code class="docutils li
 <section id="state">
 <h3>State<a class="headerlink" href="#state" title="Permalink to this heading"></a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">State</span></code> representation <em>must</em> have a member function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
-<span class="cm">  @brief Check if state is a valid state. </span>
-<span class="cm">  @return Returns false if any populations are negative. </span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
+<span class="cm">  @brief Check if state is a valid state.</span>
+<span class="cm">  @return Returns false if any populations are negative.</span>
 <span class="cm">*/</span>
 <span class="kr">inline</span><span class="w"> </span><span class="kt">bool</span>
 <span class="nf">isValidState</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
@@ -362,39 +366,42 @@ The functionality is used when using the hybrid advancement algorithm, see <a cl
 <section id="reaction-s">
 <h3>Reaction(s)<a class="headerlink" href="#reaction-s" title="Permalink to this heading"></a></h3>
 <p>The reaction representation <code class="docutils literal notranslate"><span class="pre">R</span></code> <em>must</em> have the following member functions:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
-<span class="cm">  @brief Compute the propensity function for this reaction type. </span>
-<span class="cm">  @param[in] a_state State vector</span>
-<span class="cm">  @note User should set the rate before calling this routine. </span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
+<span class="cm">  @brief Compute the propensity function for this reaction type.</span>
+<span class="cm">  @param[in] a_state State vector.</span>
+<span class="cm">  @return Reaction propensity.</span>
+<span class="cm">  @note User should set the rate before calling this routine.</span>
 <span class="cm">*/</span>
 <span class="kr">inline</span><span class="w"> </span><span class="n">Real</span>
 <span class="nf">propensity</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">State</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_state</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="cm">/*!</span>
+<span class="cm">/**</span>
 <span class="cm">  @brief Compute the number of times the reaction can fire before exhausting one of the reactants.</span>
-<span class="cm">  @param[in] a_state State vector</span>
+<span class="cm">  @param[in] a_state State vector.</span>
+<span class="cm">  @return Critical number of reactions.</span>
 <span class="cm">*/</span>
 <span class="kr">inline</span><span class="w"> </span><span class="n">T</span>
 <span class="nf">computeCriticalNumberOfReactions</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">State</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_state</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="cm">/*!</span>
+<span class="cm">/**</span>
 <span class="cm">  @brief Get the reactants involved in the reaction.</span>
 <span class="cm">  @return m_reactants</span>
 <span class="cm">*/</span>
 <span class="kr">inline</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="o">&gt;</span>
 <span class="n">getReactants</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="cm">/*!</span>
+<span class="cm">/**</span>
 <span class="cm">  @brief Get the state change due to a change in the input reactant species.</span>
-<span class="cm">  @param[in] a_rectant Reactant species. </span>
+<span class="cm">  @param[in] a_particleReactant Reactant species.</span>
+<span class="cm">  @return State change for the reactant.</span>
 <span class="cm">*/</span>
 <span class="kr">inline</span><span class="w"> </span><span class="n">T</span>
-<span class="nf">getStateChange</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">a_reactant</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="nf">getStateChange</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">a_particleReactant</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="cm">/*!</span>
-<span class="cm">  @brief Advance the incoming state with the number of reactions. </span>
-<span class="cm">  @param[in] a_state        State vector</span>
-<span class="cm">  @param[in] a_numReactions Number of reactions.</span>
+<span class="cm">/**</span>
+<span class="cm">  @brief Advance the incoming state with the number of reactions.</span>
+<span class="cm">  @param[in,out] a_state        State vector.</span>
+<span class="cm">  @param[in]    a_numReactions Number of reactions.</span>
 <span class="cm">*/</span>
 <span class="kr">inline</span><span class="w"> </span><span class="kt">void</span>
 <span class="nf">advanceState</span><span class="p">(</span><span class="n">State</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_state</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_numReactions</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
@@ -473,36 +480,31 @@ Using <code class="docutils literal notranslate"><span class="pre">MyState</span
 <h3>Advancement routines<a class="headerlink" href="#advancement-routines" title="Permalink to this heading"></a></h3>
 <p>Many advancement routines for the <code class="docutils literal notranslate"><span class="pre">KMCSolver</span></code> are defined internally.
 The most general one that uses the hybrid advance is</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm">  @brief Advance using Cao et. al. hybrid algorithm over the input time. This can end up using substepping.</span>
-<span class="cm">  @param[inout] a_state          State vector to advance</span>
-<span class="cm">  @param[in]    a_dt             Time increment</span>
-<span class="cm">  @param[in]    a_leapPropagator Which leap propagator to use. </span>
-<span class="cm">  @note Calls the other version with m_reactions</span>
+<span class="cm">  @param[in,out] a_state          State vector to advance.</span>
+<span class="cm">  @param[in]    a_dt             Time increment.</span>
+<span class="cm">  @param[in]    a_leapPropagator Which leap propagator to use.</span>
+<span class="cm">  @note Calls the other version with m_reactions.</span>
 <span class="cm">*/</span>
 <span class="kr">inline</span><span class="w"> </span><span class="kt">void</span>
 <span class="nf">advanceHybrid</span><span class="p">(</span><span class="n">State</span><span class="o">&amp;</span><span class="w">                   </span><span class="n">a_state</span><span class="p">,</span>
-<span class="w">              </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">               </span><span class="n">a_dt</span><span class="p">,</span>
+<span class="w">              </span><span class="n">Real</span><span class="w">                     </span><span class="n">a_dt</span><span class="p">,</span>
 <span class="w">              </span><span class="k">const</span><span class="w"> </span><span class="n">KMCLeapPropagator</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_leapPropagator</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">KMCLeapPropagator</span><span class="o">::</span><span class="n">ExplicitEuler</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>When using the hybrid algorithm, the user should set the hybrid solver parameters through the function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
-<span class="cm">  @brief Set solver parameters</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
+<span class="cm">  @brief Set solver parameters.</span>
 <span class="cm">  @param[in] a_numCrit Determines critical reactions. This is the number of reactions that need to fire before depleting a reactant.</span>
 <span class="cm">  @param[in] a_numSSA  Maximum number of SSA steps to run when switching from tau-leaping to SSA (hybrid algorithm only).</span>
-<span class="cm">  @param[in] a_maxIter Maximum permitted number of iterations for the implicit solver    </span>
+<span class="cm">  @param[in] a_maxIter Maximum permitted number of iterations for the implicit solver.</span>
 <span class="cm">  @param[in] a_eps     Maximum permitted change in propensities when performing tau-leaping for non-critical reactions.</span>
-<span class="cm">  @param[in] a_SSAlim  Threshold for switching from tau-leaping of non-critical reactions to SSA for all reactions (hybrid algorithm only)</span>
-<span class="cm">  @param[in] a_exitTol Exit tolerance for implicit solvres. </span>
+<span class="cm">  @param[in] a_SSAlim  Threshold for switching from tau-leaping of non-critical reactions to SSA for all reactions (hybrid algorithm only).</span>
+<span class="cm">  @param[in] a_exitTol Exit tolerance for implicit solvers.</span>
 <span class="cm">*/</span>
 <span class="kr">inline</span><span class="w"> </span><span class="kt">void</span>
-<span class="nf">setSolverParameters</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="w">    </span><span class="n">a_numCrit</span><span class="p">,</span>
-<span class="w">                    </span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="w">    </span><span class="n">a_numSSA</span><span class="p">,</span>
-<span class="w">                    </span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="w">    </span><span class="n">a_maxIter</span><span class="p">,</span>
-<span class="w">                    </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_eps</span><span class="p">,</span>
-<span class="w">                    </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_SSAlim</span><span class="p">,</span>
-<span class="w">                    </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_exitTol</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="nf">setSolverParameters</span><span class="p">(</span><span class="n">T</span><span class="w"> </span><span class="n">a_numCrit</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="n">a_numSSA</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="n">a_maxIter</span><span class="p">,</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_eps</span><span class="p">,</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_SSAlim</span><span class="p">,</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_exitTol</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
 </section>

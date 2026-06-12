@@ -95,23 +95,23 @@ Inheritance diagram for CellTagger:</div>
 <div class="center"><img src="classCellTagger__inherit__graph.png" border="0" usemap="#aCellTagger_inherit__map" alt="Inheritance graph"/></div>
 <map name="aCellTagger_inherit__map" id="aCellTagger_inherit__map">
 <area shape="rect" title="Base class for tagging cells across an AMR hierarchy." alt="" coords="5,141,96,166"/>
-<area shape="rect" href="classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionTagger.html" title="Class for tagging cells in AdvectionDiffusion physics." alt="" coords="174,5,377,45"/>
+<area shape="rect" href="classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionTagger.html" title="Cell tagger for the advection&#45;diffusion physics module." alt="" coords="174,5,377,45"/>
 <area shape="poly" title=" " alt="" coords="67,128,99,90,120,71,143,55,173,41,175,46,145,60,123,75,103,94,71,131"/>
-<area shape="rect" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerTagger.html" title="Implementation of CellTagger for tagging cells for Brownian walker physics." alt="" coords="183,69,367,109"/>
+<area shape="rect" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerTagger.html" title="CellTagger implementation for the Brownian walker physics module." alt="" coords="183,69,367,109"/>
 <area shape="poly" title=" " alt="" coords="98,134,143,119,187,107,188,112,145,124,100,139"/>
-<area shape="rect" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaTagger.html" title="Abstract Class which implements CellTagger for the CDR plasma physics module." alt="" coords="201,133,350,173"/>
+<area shape="rect" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaTagger.html" title="Abstract CellTagger base class for the CDR plasma physics module." alt="" coords="201,133,350,173"/>
 <area shape="poly" title=" " alt="" coords="110,151,200,151,200,156,110,156"/>
-<area shape="rect" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionTagger.html" title="Class for tagging cells in the DischargeInception module." alt="" coords="173,197,377,237"/>
+<area shape="rect" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionTagger.html" title="CellTagger for the DischargeInception module." alt="" coords="173,197,377,237"/>
 <area shape="poly" title=" " alt="" coords="100,168,145,183,188,195,187,200,143,188,98,173"/>
-<area shape="rect" href="classPhysics_1_1ItoKMC_1_1ItoKMCTagger.html" title="Class for tagging grid cells using the Ito&#45;KMC&#45;Poisson module. Note that S is the time integrator typ..." alt="" coords="144,262,407,287"/>
+<area shape="rect" href="classPhysics_1_1ItoKMC_1_1ItoKMCTagger.html" title="Abstract CellTagger for the Ito&#45;KMC&#45;Poisson physics module." alt="" coords="144,262,407,287"/>
 <area shape="poly" title=" " alt="" coords="70,176,102,213,123,232,145,247,176,259,173,264,143,252,119,236,99,217,66,179"/>
-<area shape="rect" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaFieldTagger.html" title="Lightweight tagging class which flags cells for refinement/coarsening using the electric field only." alt="" coords="473,133,648,173"/>
+<area shape="rect" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaFieldTagger.html" title="Intermediate CdrPlasmaTagger subclass that computes tracer fields from the electric field only." alt="" coords="473,133,648,173"/>
 <area shape="poly" title=" " alt="" coords="364,151,473,151,473,156,364,156"/>
-<area shape="rect" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStreamerTagger.html" title="Class which implements CdrPlasmaFieldTagger and refines cells based on the criterion alpha*dx &gt; thres..." alt="" coords="734,133,937,173"/>
+<area shape="rect" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStreamerTagger.html" title="Concrete CdrPlasmaFieldTagger that tags cells based on streamer inception criteria." alt="" coords="734,133,937,173"/>
 <area shape="poly" title=" " alt="" coords="662,151,734,151,734,156,662,156"/>
 <area shape="rect" href="classPhysics_1_1ItoKMC_1_1ItoKMCFieldTagger.html" title="Lightweight tagging class. Only tags cells based on the electric field." alt="" coords="455,255,667,295"/>
 <area shape="poly" title=" " alt="" coords="420,272,454,272,454,277,420,277"/>
-<area shape="rect" href="classPhysics_1_1ItoKMC_1_1ItoKMCStreamerTagger.html" title="Cell tagging class for streamers." alt="" coords="715,255,956,295"/>
+<area shape="rect" href="classPhysics_1_1ItoKMC_1_1ItoKMCStreamerTagger.html" title="CellTagger for the ItoKMC module that refines on the ionization coefficient and field curvature." alt="" coords="715,255,956,295"/>
 <area shape="poly" title=" " alt="" coords="680,272,714,272,714,277,680,277"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
@@ -150,22 +150,21 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a29d8f87b38dd9d3ad38f2cfdc0ab055e" id="r_a29d8f87b38dd9d3ad38f2cfdc0ab055e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCellTagger.html#a29d8f87b38dd9d3ad38f2cfdc0ab055e">getPlotVariableNames</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
 <tr class="memdesc:a29d8f87b38dd9d3ad38f2cfdc0ab055e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get plot variable names.  <br /></td></tr>
 <tr class="separator:a29d8f87b38dd9d3ad38f2cfdc0ab055e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a06edfc8c441cde0cc2d27ddf6eac4678" id="r_a06edfc8c441cde0cc2d27ddf6eac4678"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCellTagger.html#a06edfc8c441cde0cc2d27ddf6eac4678">writePlotData</a> (<a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_output</a>, <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_icomp</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> <a class="el" href="classTracerParticleSolver.html">a_outputRealm</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_level</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:a06edfc8c441cde0cc2d27ddf6eac4678"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data.  <br /></td></tr>
-<tr class="separator:a06edfc8c441cde0cc2d27ddf6eac4678"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a61a81a83d8cc3275649fa105d0bf3f64" id="r_a61a81a83d8cc3275649fa105d0bf3f64"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCellTagger.html#a61a81a83d8cc3275649fa105d0bf3f64">writePlotData</a> (<a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_output</a>, <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_icomp</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_outputRealm</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_level</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:a61a81a83d8cc3275649fa105d0bf3f64"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data.  <br /></td></tr>
+<tr class="separator:a61a81a83d8cc3275649fa105d0bf3f64"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a483e64129b074374cb8601c84c387147" id="r_a483e64129b074374cb8601c84c387147"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCellTagger.html#a483e64129b074374cb8601c84c387147">getBuffer</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
 <tr class="memdesc:a483e64129b074374cb8601c84c387147"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get tag buffer.  <br /></td></tr>
 <tr class="separator:a483e64129b074374cb8601c84c387147"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
-<tr class="memitem:a404119a0d5bd88069c9f8ef242f998b8" id="r_a404119a0d5bd88069c9f8ef242f998b8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCellTagger.html#a404119a0d5bd88069c9f8ef242f998b8">insideTagBox</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> <a class="el" href="classTracerParticleSolver.html">a_pos</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:a404119a0d5bd88069c9f8ef242f998b8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if a point is inside a tagging box.  <br /></td></tr>
-<tr class="separator:a404119a0d5bd88069c9f8ef242f998b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a85c2d738be38ae3e297be8b0e6fd9d8b" id="r_a85c2d738be38ae3e297be8b0e6fd9d8b"><td class="memItemLeft" align="right" valign="top"><a id="a85c2d738be38ae3e297be8b0e6fd9d8b" name="a85c2d738be38ae3e297be8b0e6fd9d8b"></a>
-<a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><b>getManualRefinementLevel</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> <a class="el" href="classTracerParticleSolver.html">a_pos</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:a85c2d738be38ae3e297be8b0e6fd9d8b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the specified level for this position when doing manual refinement. <br /></td></tr>
-<tr class="separator:a85c2d738be38ae3e297be8b0e6fd9d8b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad22a234fe5e49afd2030653445d82eb8" id="r_ad22a234fe5e49afd2030653445d82eb8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCellTagger.html#ad22a234fe5e49afd2030653445d82eb8">insideTagBox</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_pos</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:ad22a234fe5e49afd2030653445d82eb8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if a point is inside a tagging box.  <br /></td></tr>
+<tr class="separator:ad22a234fe5e49afd2030653445d82eb8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adb3bf2db87dd64cb86c080e0066774e5" id="r_adb3bf2db87dd64cb86c080e0066774e5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCellTagger.html#adb3bf2db87dd64cb86c080e0066774e5">getManualRefinementLevel</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_pos</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:adb3bf2db87dd64cb86c080e0066774e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the specified level for this position when doing manual refinement.  <br /></td></tr>
+<tr class="separator:adb3bf2db87dd64cb86c080e0066774e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2d5c143b72fd551bb4043bd814b6163c" id="r_a2d5c143b72fd551bb4043bd814b6163c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCellTagger.html#a2d5c143b72fd551bb4043bd814b6163c">parseTagBoxes</a> ()</td></tr>
 <tr class="memdesc:a2d5c143b72fd551bb4043bd814b6163c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse boxes.  <br /></td></tr>
 <tr class="separator:a2d5c143b72fd551bb4043bd814b6163c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -205,7 +204,7 @@ Protected Attributes</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Base class for tagging cells across an AMR hierarchy. </p>
-<p>This is a pure class that users must implemented in order to enable refinement/coarsening of grid cells. This class will require implementing at least three functions, one for parsing options, one for regridding, and one which flags/removes cell for refinement. This class can also provide data to plot files, in which case the user must overwrite <a class="el" href="classCellTagger.html#aa87baee458d22fecd0786ba4ab1ceda3" title="Get number of plot variables that will be written to file (by Driver).">getNumberOfPlotVariables()</a> and <a class="el" href="classCellTagger.html#a06edfc8c441cde0cc2d27ddf6eac4678" title="Write plot data.">writePlotData()</a>. A supporting utility for <a class="el" href="classCellTagger.html" title="Base class for tagging cells across an AMR hierarchy.">CellTagger</a> is that the parent class provides functionality for restricting cell refinement to specified regions in space. This can be used to prune tags where it is (heuristically) known that cell refinement is unnecessary. </p>
+<p>This is a pure class that users must implemented in order to enable refinement/coarsening of grid cells. This class will require implementing at least three functions, one for parsing options, one for regridding, and one which flags/removes cell for refinement. This class can also provide data to plot files, in which case the user must overwrite <a class="el" href="classCellTagger.html#aa87baee458d22fecd0786ba4ab1ceda3" title="Get number of plot variables that will be written to file (by Driver).">getNumberOfPlotVariables()</a> and <a class="el" href="classCellTagger.html#a61a81a83d8cc3275649fa105d0bf3f64" title="Write plot data.">writePlotData()</a>. A supporting utility for <a class="el" href="classCellTagger.html" title="Base class for tagging cells across an AMR hierarchy.">CellTagger</a> is that the parent class provides functionality for restricting cell refinement to specified regions in space. This can be used to prune tags where it is (heuristically) known that cell refinement is unnecessary. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a483e64129b074374cb8601c84c387147" name="a483e64129b074374cb8601c84c387147"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a483e64129b074374cb8601c84c387147">&#9670;&#160;</a></span>getBuffer()</h2>
@@ -232,7 +231,42 @@ Protected Attributes</h2></td></tr>
 
 <p>Get tag buffer. </p>
 <p>This returns an integer &gt; 0 which adds additional tags around the cells that were refined. This is used by <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a> to grow the refined region. </p><dl class="section return"><dt>Returns</dt><dd>Returns m_buffer </dd></dl>
-<dl class="section note"><dt>Note</dt><dd>This will look for a string in the form "m_name.buffer = &lt;integer&gt;". </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This will look for a string in the form "m_name.buffer = &amp;lt;integer&amp;gt;". </dd></dl>
+
+</div>
+</div>
+<a id="adb3bf2db87dd64cb86c080e0066774e5" name="adb3bf2db87dd64cb86c080e0066774e5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adb3bf2db87dd64cb86c080e0066774e5">&#9670;&#160;</a></span>getManualRefinementLevel()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">int</a> CellTagger::getManualRefinementLevel </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_pos</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the specified level for this position when doing manual refinement. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_pos</td><td>Physical coordinates of the point. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Refinement level assigned to a_pos by the manual refinement boxes. Returns -1 if not in any box. </dd></dl>
 
 </div>
 </div>
@@ -290,13 +324,14 @@ Protected Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Get plot variable names. </p>
+<dl class="section return"><dt>Returns</dt><dd>Names of plot variables that will be written to file. </dd></dl>
 
 <p>Reimplemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCTagger.html#ab9e530ee1f404760de4a872ccf2500ab">Physics::ItoKMC::ItoKMCTagger&lt; S &gt;</a>, and <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaTagger.html#a61ec0536599b29a1114cf3084f2b8a2d">Physics::CdrPlasma::CdrPlasmaTagger</a>.</p>
 
 </div>
 </div>
-<a id="a404119a0d5bd88069c9f8ef242f998b8" name="a404119a0d5bd88069c9f8ef242f998b8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a404119a0d5bd88069c9f8ef242f998b8">&#9670;&#160;</a></span>insideTagBox()</h2>
+<a id="ad22a234fe5e49afd2030653445d82eb8" name="ad22a234fe5e49afd2030653445d82eb8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad22a234fe5e49afd2030653445d82eb8">&#9670;&#160;</a></span>insideTagBox()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -307,7 +342,7 @@ Protected Attributes</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="classTracerParticleSolver.html">bool</a> CellTagger::insideTagBox </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;&#160;</td>
           <td class="paramname"><em>a_pos</em></td><td>)</td>
           <td> const</td>
         </tr>
@@ -354,7 +389,7 @@ Protected Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Parse refinement buffer. </p>
-<p>This will look for an input parameter in the form "m_name.buffer = &lt;integer&gt;". If this is called but the string does not exist, it will cause a run-time error. </p>
+<p>This will look for an input parameter in the form "m_name.buffer = &amp;lt;integer&amp;gt;". If this is called but the string does not exist, it will cause a run-time error. </p>
 
 </div>
 </div>
@@ -470,7 +505,7 @@ Protected Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Parse the verbosity from the input file or command line. </p>
-<p>This will look for an input parameter in the form "m_name.verbosity = &lt;integer&gt;". This is used to control "verbosity" for the cell tagger class. Turning on verbosity for this class is mostly for debugging purposes. </p>
+<p>This will look for an input parameter in the form "m_name.verbosity = &amp;lt;integer&amp;gt;". This is used to control "verbosity" for the cell tagger class. Turning on verbosity for this class is mostly for debugging purposes. </p>
 
 </div>
 </div>
@@ -593,14 +628,14 @@ Protected Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
-<p>EBAMRTags is a data-type Vector&lt;RefCountedPtr&lt;LayoutData&lt;DenseIntVectSet&gt; &gt; &gt;. The vector indicates the grid level, the LayoutData indicates data ownership (in much the same way as LevelData. The DenseIntVectSet is essentially an IntVectSet restricted to the patch (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">i.e</a>. one cannot add IntVects that are outside the patch). This function cells for refinement or coarsening. The user's responsibility is to add (or remove) tags from a_tags. </p>
+<p>EBAMRTags is a data-type Vector&lt;RefCountedPtr&lt;LayoutData&lt;DenseIntVectSet&gt; &gt; &gt;. The vector indicates the grid level, the LayoutData indicates data ownership (in much the same way as LevelData. The DenseIntVectSet is essentially an IntVectSet restricted to the patch (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">i.e</a>. one cannot add IntVects that are outside the patch). This function cells for refinement or coarsening. The user's responsibility is to add (or remove) tags from a_tags. </p><dl class="section return"><dt>Returns</dt><dd>Returns true if tags changed. </dd></dl>
 
 <p>Implemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCTagger.html#a31c64e51df47e4620fefe82dd67fda41">Physics::ItoKMC::ItoKMCTagger&lt; S &gt;</a>, <a class="el" href="classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionTagger.html#a2d9eaad047306b5bf9ace2ce98b1d8d9">Physics::AdvectionDiffusion::AdvectionDiffusionTagger</a>, <a class="el" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerTagger.html#a5a4045d2b637e23de8fd37b9eb28d347">Physics::BrownianWalker::BrownianWalkerTagger</a>, <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaTagger.html#a8037505f223508128dfed4defd197f2a">Physics::CdrPlasma::CdrPlasmaTagger</a>, and <a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionTagger.html#aabf1b05ecbd2e65f235c1f4b5d548bc0">Physics::DischargeInception::DischargeInceptionTagger</a>.</p>
 
 </div>
 </div>
-<a id="a06edfc8c441cde0cc2d27ddf6eac4678" name="a06edfc8c441cde0cc2d27ddf6eac4678"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a06edfc8c441cde0cc2d27ddf6eac4678">&#9670;&#160;</a></span>writePlotData()</h2>
+<a id="a61a81a83d8cc3275649fa105d0bf3f64" name="a61a81a83d8cc3275649fa105d0bf3f64"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a61a81a83d8cc3275649fa105d0bf3f64">&#9670;&#160;</a></span>writePlotData()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -623,7 +658,7 @@ Protected Attributes</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;&#160;</td>
           <td class="paramname"><em>a_outputRealm</em>, </td>
         </tr>
         <tr>
@@ -656,7 +691,7 @@ Protected Attributes</h2></td></tr>
   </dd>
 </dl>
 
-<p>Reimplemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCTagger.html#aea650afe83d93406470f55980d72e785">Physics::ItoKMC::ItoKMCTagger&lt; S &gt;</a>, and <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaTagger.html#aae0c97cf7a4b6961295772a1274f8a41">Physics::CdrPlasma::CdrPlasmaTagger</a>.</p>
+<p>Reimplemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCTagger.html#a7db0a2ae5882ad7163437108c564142a">Physics::ItoKMC::ItoKMCTagger&lt; S &gt;</a>, and <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaTagger.html#ae1cd1f97acfc81d577bbd4343e3479d5">Physics::CdrPlasma::CdrPlasmaTagger</a>.</p>
 
 </div>
 </div>

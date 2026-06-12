@@ -216,7 +216,7 @@ Output from <code class="docutils literal notranslate"><span class="pre">chombo-
 <h3>Parallel with OpenMP<a class="headerlink" href="#parallel-with-openmp" title="Permalink to this heading"></a></h3>
 <p>When running with OpenMP one must specify the number of threads, and possibly also pin threads to CPUs.
 <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is compiled with run-time thread scheduling (which defaults to static scheduling).
-Prior to running with OpenMP, one should define the number of threads, thread palcement, and the scheduling.
+Prior to running with OpenMP, one should define the number of threads, thread placement, and the scheduling.
 For example</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">OMP_NUM_THREADS</span><span class="o">=</span><span class="m">8</span>
 <span class="nb">export</span><span class="w"> </span><span class="nv">OMP_PLACES</span><span class="o">=</span>cores

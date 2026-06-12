@@ -121,13 +121,11 @@ Public Member Functions</h2></td></tr>
 <a class="el" href="classTracerParticleSolver.html">virtual</a>&#160;</td><td class="memItemRight" valign="bottom"><b>~BoxSdf</b> ()</td></tr>
 <tr class="memdesc:ad62334c049d49382ed7b10b43b0a0734"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. <br /></td></tr>
 <tr class="separator:ad62334c049d49382ed7b10b43b0a0734"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acda824e8445a5d6fe2f248a8ae970459" id="r_acda824e8445a5d6fe2f248a8ae970459"><td class="memItemLeft" align="right" valign="top"><a id="acda824e8445a5d6fe2f248a8ae970459" name="acda824e8445a5d6fe2f248a8ae970459"></a>
-<a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><b>value</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_pos</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:acda824e8445a5d6fe2f248a8ae970459"><td class="mdescLeft">&#160;</td><td class="mdescRight">Test if object is on inside or outside. <br /></td></tr>
+<tr class="memitem:acda824e8445a5d6fe2f248a8ae970459" id="r_acda824e8445a5d6fe2f248a8ae970459"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBoxSdf.html#acda824e8445a5d6fe2f248a8ae970459">value</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_pos</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:acda824e8445a5d6fe2f248a8ae970459"><td class="mdescLeft">&#160;</td><td class="mdescRight">Test if object is on inside or outside.  <br /></td></tr>
 <tr class="separator:acda824e8445a5d6fe2f248a8ae970459"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac386439e8419488b78cd92e622a89c02" id="r_ac386439e8419488b78cd92e622a89c02"><td class="memItemLeft" align="right" valign="top"><a id="ac386439e8419488b78cd92e622a89c02" name="ac386439e8419488b78cd92e622a89c02"></a>
-<a class="el" href="classTracerParticleSolver.html">virtual</a> BaseIF *&#160;</td><td class="memItemRight" valign="bottom"><b>newImplicitFunction</b> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:ac386439e8419488b78cd92e622a89c02"><td class="mdescLeft">&#160;</td><td class="mdescRight">IF Factory method. <br /></td></tr>
+<tr class="memitem:ac386439e8419488b78cd92e622a89c02" id="r_ac386439e8419488b78cd92e622a89c02"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> BaseIF *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBoxSdf.html#ac386439e8419488b78cd92e622a89c02">newImplicitFunction</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:ac386439e8419488b78cd92e622a89c02"><td class="mdescLeft">&#160;</td><td class="mdescRight">IF Factory method.  <br /></td></tr>
 <tr class="separator:ac386439e8419488b78cd92e622a89c02"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
@@ -185,7 +183,7 @@ Protected Attributes</h2></td></tr>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_loCorner</td><td>Lower left corner </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_hiCorner</td><td>Upper right corner </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_inside</td><td>Object on inside or outside </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_fluidInside</td><td>Fluid inside </td></tr>
   </table>
   </dd>
 </dl>
@@ -212,6 +210,70 @@ Protected Attributes</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_inputIF</td><td>Another <a class="el" href="classBoxSdf.html" title="Class for defining a two- or three-dimensional box with arbitrary centroid and orientation.">BoxSdf</a> </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="ac386439e8419488b78cd92e622a89c02" name="ac386439e8419488b78cd92e622a89c02"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac386439e8419488b78cd92e622a89c02">&#9670;&#160;</a></span>newImplicitFunction()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">BaseIF * BoxSdf::newImplicitFunction </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>IF Factory method. </p>
+<dl class="section return"><dt>Returns</dt><dd>New copy of this implicit function </dd></dl>
+
+</div>
+</div>
+<a id="acda824e8445a5d6fe2f248a8ae970459" name="acda824e8445a5d6fe2f248a8ae970459"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acda824e8445a5d6fe2f248a8ae970459">&#9670;&#160;</a></span>value()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">Real</a> BoxSdf::value </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_pos</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Test if object is on inside or outside. </p>
+<dl class="section return"><dt>Returns</dt><dd>Function value at the given point </dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_pos</td><td>Description </td></tr>
   </table>
   </dd>
 </dl>

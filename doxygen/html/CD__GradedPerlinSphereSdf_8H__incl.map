@@ -1,6 +1,6 @@
 <map id="Source/ImplicitFunctions/CD_GradedPerlinSphereSdf.H" name="Source/ImplicitFunctions/CD_GradedPerlinSphereSdf.H">
 <area shape="rect" id="Node000001" title="Declaration of a graded noisy sphere." alt="" coords="247,5,461,45"/>
-<area shape="rect" id="Node000002" href="$CD__PerlinSphereSdf_8H.html" title="Implementation of CD_PerlinSphereSdf.H." alt="" coords="272,93,436,119"/>
+<area shape="rect" id="Node000002" href="$CD__PerlinSphereSdf_8H.html" title="Declaration of noisy sphere." alt="" coords="272,93,436,119"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="357,46,357,79,351,79,351,46"/>
 <area shape="rect" id="Node000007" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="5,240,191,265"/>
 <area shape="poly" id="edge11_Node000001_Node000007" title=" " alt="" coords="318,48,237,97,192,131,151,168,128,199,111,229,106,226,123,196,147,165,188,126,234,93,316,43"/>

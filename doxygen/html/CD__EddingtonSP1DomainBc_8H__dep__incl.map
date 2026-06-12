@@ -1,0 +1,14 @@
+<map id="Source/RadiativeTransfer/CD_EddingtonSP1DomainBc.H" name="Source/RadiativeTransfer/CD_EddingtonSP1DomainBc.H">
+<area shape="rect" id="Node000001" title="Simple data holder for holding domain boundary condition types for EddingtonSP1." alt="" coords="491,5,713,45"/>
+<area shape="rect" id="Node000002" href="$CD__EBHelmholtzEddingtonSP1DomainBC_8H_source.html" title=" " alt="" coords="5,101,313,141"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="500,51,249,103,248,98,499,46"/>
+<area shape="rect" id="Node000003" href="$CD__EBHelmholtzEddingtonSP1DomainBCFactory_8H_source.html" title=" " alt="" coords="337,93,613,148"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="567,56,513,95,509,91,564,51"/>
+<area shape="rect" id="Node000005" href="$CD__EddingtonSP1_8H.html" title="Declaration of a first order Eddington solver for radiative transfer." alt="" coords="638,101,822,141"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="641,51,706,98,703,103,637,56"/>
+<area shape="rect" id="Node000006" href="$CD__EddingtonSP1DomainBc_8cpp.html" title="Implementation of CD_EddingtonSP1DomainBc.H." alt="" coords="846,101,1081,141"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="689,46,891,98,890,103,688,51"/>
+<area shape="rect" id="Node000004" href="$CD__EddingtonSP1_8cpp.html" title="Implementation of CD_EddingtonSP1.H." alt="" coords="510,196,694,236"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="524,154,578,194,575,198,520,158"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="695,151,629,198,626,194,691,147"/>
+</map>

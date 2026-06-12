@@ -137,8 +137,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aa6dca862a9703bfadc406fd12840dbcf" id="r_aa6dca862a9703bfadc406fd12840dbcf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCellCentroidInterpolation.html#aa6dca862a9703bfadc406fd12840dbcf">interpolate</a> (<a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_data</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:aa6dca862a9703bfadc406fd12840dbcf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function for interpolating data.  <br /></td></tr>
 <tr class="separator:aa6dca862a9703bfadc406fd12840dbcf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4b02f7643d75024f40e107f8fe62fb6f" id="r_a4b02f7643d75024f40e107f8fe62fb6f"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> T &gt; </td></tr>
-<tr class="memitem:a4b02f7643d75024f40e107f8fe62fb6f"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classCellCentroidInterpolation.html#a4b02f7643d75024f40e107f8fe62fb6f">interpolate</a> (T &amp;<a class="el" href="classTracerParticleSolver.html">a_centroidData</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_cellData</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">DataIndex</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_din</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a4b02f7643d75024f40e107f8fe62fb6f" id="r_a4b02f7643d75024f40e107f8fe62fb6f"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">T</a> &gt; </td></tr>
+<tr class="memitem:a4b02f7643d75024f40e107f8fe62fb6f"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classCellCentroidInterpolation.html#a4b02f7643d75024f40e107f8fe62fb6f">interpolate</a> (<a class="el" href="classTracerParticleSolver.html">T</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_centroidData</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_cellData</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">DataIndex</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_din</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:a4b02f7643d75024f40e107f8fe62fb6f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolation function.  <br /></td></tr>
 <tr class="separator:a4b02f7643d75024f40e107f8fe62fb6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -190,12 +190,12 @@ Protected Attributes</h2></td></tr>
 <tr class="separator:a00a3d448eda3e6c572e8bcdca7ae8f0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0d083f014579b90355b2ff5f212d2011" id="r_a0d083f014579b90355b2ff5f212d2011"><td class="memItemLeft" align="right" valign="top"><a id="a0d083f014579b90355b2ff5f212d2011" name="a0d083f014579b90355b2ff5f212d2011"></a>
 <a class="el" href="classTracerParticleSolver.html">LayoutData</a>&lt; <a class="el" href="classTracerParticleSolver.html">BaseIVFAB</a>&lt; <a class="el" href="classTracerParticleSolver.html">VoFStencil</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_interpStencils</b></td></tr>
-<tr class="memdesc:a0d083f014579b90355b2ff5f212d2011"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stencils. This is only populated when the interpolation is expressable as a stencil. <br /></td></tr>
+<tr class="memdesc:a0d083f014579b90355b2ff5f212d2011"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stencils. This is only populated when the interpolation is expressible as a stencil. <br /></td></tr>
 <tr class="separator:a0d083f014579b90355b2ff5f212d2011"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Class for interpolating cell-centered data to the cell centroid. </p>
-<p>Various interpolation methods are supported, where some are supported by explicitly expressable stencils and others through limiters.</p>
+<p>Various interpolation methods are supported, where some are supported by explicitly expressible stencils and others through limiters.</p>
 <p>This is a per-level class without AMR functionality. On coarse-fine interfaces near the EB the user must fill the ghost cells prior to the interpolation. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="acc5a688dd3ee559186a6a774fa4a3d58" name="acc5a688dd3ee559186a6a774fa4a3d58"></a>
@@ -360,6 +360,7 @@ Protected Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Least squares stencil </dd></dl>
 
 </div>
 </div>
@@ -419,6 +420,7 @@ Protected Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Linear stencil </dd></dl>
 
 </div>
 </div>
@@ -479,6 +481,7 @@ Protected Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Piecewise linear stencil </dd></dl>
 
 </div>
 </div>
@@ -539,6 +542,7 @@ Protected Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Taylor extrapolation stencil </dd></dl>
 
 </div>
 </div>
@@ -659,7 +663,7 @@ Protected Attributes</h2></td></tr>
 <p>Function for interpolating data. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_centroidData</td><td>Cell-centered on input and centroid centered on output. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_data</td><td>Data </td></tr>
   </table>
   </dd>
 </dl>
@@ -672,7 +676,7 @@ Protected Attributes</h2></td></tr>
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> T &gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">T</a> &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -680,7 +684,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> T &
         <tr>
           <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> CellCentroidInterpolation::interpolate </td>
           <td>(</td>
-          <td class="paramtype">T &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">T</a> &amp;&#160;</td>
           <td class="paramname"><em>a_centroidData</em>, </td>
         </tr>
         <tr>
@@ -717,6 +721,12 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> T &
   </dd>
 </dl>
 <dl class="section note"><dt>Note</dt><dd>T can be either a BaseIVFAB&lt;Real&gt; or an EBCellFAB. </dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_din</td><td>Description </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -762,6 +772,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> T &
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Return value </dd></dl>
 
 </div>
 </div>
@@ -807,6 +818,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> T &
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Return value </dd></dl>
 
 </div>
 </div>
@@ -852,6 +864,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> T &
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Return value </dd></dl>
 
 </div>
 </div>

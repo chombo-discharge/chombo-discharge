@@ -1,9 +1,5 @@
 <map id="Physics::TracerParticle::TracerParticleStepper&lt; P &gt;" name="Physics::TracerParticle::TracerParticleStepper&lt; P &gt;">
-<area shape="rect" id="Node000001" title="Implementation of TimeStepper for advancing tracer particles in a fixed velocity field." alt="" coords="10,181,215,221"/>
-<area shape="rect" id="Node000002" href="$classTimeStepper.html" title="Base class for advancing equations." alt="" coords="5,93,111,119"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="74,129,104,180,99,183,69,132"/>
-<area shape="rect" id="Node000003" href="$classEBAMRData.html" title=" " alt="" coords="135,93,331,119"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="208,129,139,183,135,179,205,125"/>
-<area shape="rect" id="Node000004" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="163,5,302,31"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="235,45,235,93,230,93,230,45"/>
+<area shape="rect" id="Node000001" title="TimeStepper for advancing tracer particles in a prescribed velocity field on an AMR mesh." alt="" coords="5,79,211,119"/>
+<area shape="rect" id="Node000002" href="$classTimeStepper.html" title="Base class for advancing equations." alt="" coords="55,5,161,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="111,44,111,79,105,79,105,44"/>
 </map>

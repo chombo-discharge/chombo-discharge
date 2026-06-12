@@ -167,7 +167,7 @@
 \[\frac{\partial \vec{\phi}}{\partial t} = \vec{S},\]</div>
 <p>where <span class="math notranslate nohighlight">\(\vec{\phi}\)</span> represents <span class="math notranslate nohighlight">\(N\)</span> unknowns on the mesh, and <span class="math notranslate nohighlight">\(\vec{S}\)</span> is the corresponding source term.
 The class is templated as</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm">  @brief Class for solving dy/dt = f on an AMR hierarchy. </span>
 <span class="cm">  @details The template parameter is the number of variables in y and f.</span>
 <span class="cm">*/</span>
@@ -178,7 +178,7 @@ The class is templated as</p>
 <p>where <code class="docutils literal notranslate"><span class="pre">N</span></code> indicates the number of variables stored on the mesh.</p>
 <p><code class="docutils literal notranslate"><span class="pre">MeshODESolver&lt;N&gt;</span></code> is designed to store <code class="docutils literal notranslate"><span class="pre">N</span></code> variables in each grid cell, without any cell-to-cell coupling.
 To instantiate the solver, use the full constructor with reference to <a class="reference internal" href="../Source/AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a>:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm">  @brief Full constructor. </span>
 <span class="cm">  @param[in] a_amr AMR core.</span>
 <span class="cm">*/</span>
@@ -195,8 +195,9 @@ See <a class="reference external" href="https://chombo-discharge.github.io/chomb
 <section id="mesh-based">
 <h3>Mesh-based<a class="headerlink" href="#mesh-based" title="Permalink to this heading"></a></h3>
 <p>To set <span class="math notranslate nohighlight">\(\vec{\phi}\)</span>, one can fetch the <span class="math notranslate nohighlight">\(N\)</span> mesh components from</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm">  @brief Get the solution vector (left-hand side of equation).</span>
+<span class="cm">  @return m_phi</span>
 <span class="cm">*/</span>
 <span class="n">EBAMRCellData</span><span class="o">&amp;</span>
 <span class="nf">getPhi</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
@@ -208,15 +209,15 @@ See <a class="reference internal" href="../Source/MeshData.html#chap-meshdata"><
 <section id="analytic-function">
 <h3>Analytic function<a class="headerlink" href="#analytic-function" title="Permalink to this heading"></a></h3>
 <p>One can set <span class="math notranslate nohighlight">\(\vec{\phi}(\mathbf{x}) = \vec{f}\left(\mathbf{x}\right)\)</span> through the following functions:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
-<span class="cm">  @brief Set phi for a specific component. </span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
+<span class="cm">  @brief Set phi for a specific component.</span>
 <span class="cm">  @param[in] a_phiFunc Phi function</span>
 <span class="cm">  @param[in] a_comp    Component</span>
 <span class="cm">*/</span>
 <span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
-<span class="nf">setPhi</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_pos</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_phiFunc</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">a_comp</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="nf">setPhi</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_pos</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_phiFunc</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">a_comp</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="cm">/*!</span>
+<span class="cm">/**</span>
 <span class="cm">  @brief Set phi everywhere. </span>
 <span class="cm">  @param[in] a_phiFunc Phi function. </span>
 <span class="cm">*/</span>
@@ -232,8 +233,9 @@ See <a class="reference internal" href="../Source/MeshData.html#chap-meshdata"><
 <section id="id1">
 <h3>Mesh-based<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
 <p>For a general method of setting the source term one can fetch <span class="math notranslate nohighlight">\(\vec{S}\)</span> through</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
-<span class="cm">  @brief Get the solution vector (left-hand side of equation).</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
+<span class="cm">  @brief Get the right-hand side vector.</span>
+<span class="cm">  @return m_rhs</span>
 <span class="cm">*/</span>
 <span class="n">EBAMRCellData</span><span class="o">&amp;</span>
 <span class="nf">getRHS</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
@@ -245,25 +247,25 @@ See <a class="reference internal" href="../Source/MeshData.html#chap-meshdata"><
 <section id="spatially-dependent">
 <h3>Spatially dependent<a class="headerlink" href="#spatially-dependent" title="Permalink to this heading"></a></h3>
 <p>The source term can also be set on a component-by-component basis using</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
-<span class="cm">  @brief Set right-hand side for specified component. </span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
+<span class="cm">  @brief Set right-hand side for specified component.</span>
 <span class="cm">  @param[in] a_srcFunc Source term function.</span>
 <span class="cm">  @param[in] a_comp    Component</span>
 <span class="cm">*/</span>
 <span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
-<span class="nf">setRHS</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_pos</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_srcFunc</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">a_comp</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="nf">setRHS</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_pos</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_srcFunc</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">a_comp</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
 </section>
 <section id="as-a-function-of-vec-phi">
 <h3>As a function of <span class="math notranslate nohighlight">\(\vec{\phi}\)</span><a class="headerlink" href="#as-a-function-of-vec-phi" title="Permalink to this heading"></a></h3>
 <p>In order to compute the source term <span class="math notranslate nohighlight">\(\vec{S}\)</span> as a function of <span class="math notranslate nohighlight">\(\vec{\phi}\)</span>, <code class="docutils literal notranslate"><span class="pre">MeshOdeSolver&lt;N&gt;</span></code> has a function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm">  @brief Alias for right-hand side</span>
 <span class="cm">*/</span>
 <span class="k">using</span><span class="w"> </span><span class="n">RHSFunction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;&amp;</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="p">)</span><span class="o">&gt;</span><span class="p">;</span>
 
-<span class="cm">/*!</span>
+<span class="cm">/**</span>
 <span class="cm">  @brief Compute right-hand side from left-hand side. I.e. compute f = f(y,t). </span>
 <span class="cm">  @param[in] a_rhsFunction Function for computing the right-hand side. </span>
 <span class="cm">*/</span>
@@ -289,28 +291,28 @@ See <a class="reference internal" href="../Source/MeshData.html#chap-meshdata"><
 <section id="regridding">
 <h2>Regridding<a class="headerlink" href="#regridding" title="Permalink to this heading"></a></h2>
 <p>When regridding the <code class="docutils literal notranslate"><span class="pre">MeshODESolver&lt;N&gt;</span></code>, one must first ensure that the mesh data on the old mesh is stored before calling the regrid function:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
-<span class="cm">  @brief Perform pre-regrid operations. </span>
-<span class="cm">  @param[in] a_lbase          Coarsest level that changed during regrid. </span>
-<span class="cm">  @param[in] a_oldFinestLevel Finest grid level before the regrid operation. </span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
+<span class="cm">  @brief Perform pre-regrid operations.</span>
+<span class="cm">  @param[in] a_lbase          Coarsest level that changed during regrid.</span>
+<span class="cm">  @param[in] a_oldFinestLevel Finest grid level before the regrid operation.</span>
 <span class="cm">  @note This copies m_phi onto m_cache</span>
 <span class="cm">*/</span>
 <span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
-<span class="nf">preRegrid</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lbase</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_oldFinestLevel</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="nf">preRegrid</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">a_lbase</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_oldFinestLevel</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>This must be done <em>before</em> <a class="reference internal" href="../Source/AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> creates the new grids.
 This will store <span class="math notranslate nohighlight">\(\vec{\phi}\)</span> on the old mesh.
 After <a class="reference internal" href="../Source/AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> has generated the new grids, <span class="math notranslate nohighlight">\(\vec{\phi}\)</span> can be interpolated onto the new grids by calling</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
-<span class="cm">  @brief Regrid this solver. </span>
-<span class="cm">  @param[in] a_lmin           Coarsest level where grids did not change. </span>
-<span class="cm">  @param[in] a_oldFinestLevel Finest AMR level before the regrid. </span>
-<span class="cm">  @param[in] a_newFinestLevel Finest AMR level after the regrid. </span>
-<span class="cm">  @details This linearly interpolates (potentially with limiters) m_phi to the new grids. </span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
+<span class="cm">  @brief Regrid this solver.</span>
+<span class="cm">  @param[in] a_lmin           Coarsest level where grids did not change.</span>
+<span class="cm">  @param[in] a_oldFinestLevel Finest AMR level before the regrid.</span>
+<span class="cm">  @param[in] a_newFinestLevel Finest AMR level after the regrid.</span>
+<span class="cm">  @details This linearly interpolates (potentially with limiters) m_phi to the new grids.</span>
 <span class="cm">*/</span>
 <span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
-<span class="nf">regrid</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lmin</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_oldFinestLevel</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_newFinestLevel</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="nf">regrid</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">a_lmin</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_oldFinestLevel</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_newFinestLevel</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>Users can also choose to turn on/off slope limiters when putting the solution on the new mesh.</p>

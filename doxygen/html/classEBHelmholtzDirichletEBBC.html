@@ -132,9 +132,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:af2f74c2f3a86d6016d471afd4f74410d" id="r_af2f74c2f3a86d6016d471afd4f74410d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzDirichletEBBC.html#af2f74c2f3a86d6016d471afd4f74410d">setValue</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_pos</a>)&gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_value</a>)</td></tr>
 <tr class="memdesc:af2f74c2f3a86d6016d471afd4f74410d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the value on the EB.  <br /></td></tr>
 <tr class="separator:af2f74c2f3a86d6016d471afd4f74410d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3948127cd47dc88770c08aab54edecf3" id="r_a3948127cd47dc88770c08aab54edecf3"><td class="memItemLeft" align="right" valign="top"><a id="a3948127cd47dc88770c08aab54edecf3" name="a3948127cd47dc88770c08aab54edecf3"></a>
-<a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>setDomainDropOrder</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_domainSize</a>)</td></tr>
-<tr class="memdesc:a3948127cd47dc88770c08aab54edecf3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Drop BC order if domain size is equal or below this. <br /></td></tr>
+<tr class="memitem:a3948127cd47dc88770c08aab54edecf3" id="r_a3948127cd47dc88770c08aab54edecf3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzDirichletEBBC.html#a3948127cd47dc88770c08aab54edecf3">setDomainDropOrder</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_domainSize</a>)</td></tr>
+<tr class="memdesc:a3948127cd47dc88770c08aab54edecf3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Drop BC order if domain size is equal or below this.  <br /></td></tr>
 <tr class="separator:a3948127cd47dc88770c08aab54edecf3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acaed62e38a9913a4c87674aac717216b" id="r_acaed62e38a9913a4c87674aac717216b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzDirichletEBBC.html#acaed62e38a9913a4c87674aac717216b">setCoarseGridDropOrder</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classTracerParticleSolver.html">a_dropOrder</a>)</td></tr>
 <tr class="memdesc:acaed62e38a9913a4c87674aac717216b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Signal that we should drop the stencil order if the cell is a coarsened cell.  <br /></td></tr>
@@ -184,39 +183,37 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:ab99773c8806a0728fa432c7a67abc77c inherit pro_methods_classEBHelmholtzEBBC" id="r_ab99773c8806a0728fa432c7a67abc77c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzEBBC.html#ab99773c8806a0728fa432c7a67abc77c">isStencilValidCF</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">VoFStencil</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_stencil</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">DataIndex</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_dit</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
 <tr class="memdesc:ab99773c8806a0728fa432c7a67abc77c inherit pro_methods_classEBHelmholtzEBBC"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if stencil is valid.  <br /></td></tr>
 <tr class="separator:ab99773c8806a0728fa432c7a67abc77c inherit pro_methods_classEBHelmholtzEBBC"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a57ed1c409e516217d58f5163d0a77578 inherit pro_methods_classEBHelmholtzEBBC" id="r_a57ed1c409e516217d58f5163d0a77578"><td class="memItemLeft" align="right" valign="top">
-<a class="el" href="classTracerParticleSolver.html">RealVect</a>&#160;</td><td class="memItemRight" valign="bottom"><b>getBoundaryPosition</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">VolIndex</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_vof</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">DataIndex</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_dit</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:a57ed1c409e516217d58f5163d0a77578 inherit pro_methods_classEBHelmholtzEBBC"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns physical position at the boundary. <br /></td></tr>
+<tr class="memitem:a57ed1c409e516217d58f5163d0a77578 inherit pro_methods_classEBHelmholtzEBBC" id="r_a57ed1c409e516217d58f5163d0a77578"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">RealVect</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzEBBC.html#a57ed1c409e516217d58f5163d0a77578">getBoundaryPosition</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">VolIndex</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_vof</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">DataIndex</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_dit</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:a57ed1c409e516217d58f5163d0a77578 inherit pro_methods_classEBHelmholtzEBBC"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns physical position at the boundary.  <br /></td></tr>
 <tr class="separator:a57ed1c409e516217d58f5163d0a77578 inherit pro_methods_classEBHelmholtzEBBC"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2124c5c954ba10e3e2df331cbcaa1b9c inherit pro_methods_classEBHelmholtzEBBC" id="r_a2124c5c954ba10e3e2df331cbcaa1b9c"><td class="memItemLeft" align="right" valign="top">
-<a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><b>applyStencil</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">VoFStencil</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_stencil</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_phi</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:a2124c5c954ba10e3e2df331cbcaa1b9c inherit pro_methods_classEBHelmholtzEBBC"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply stencil to data holder and return result. <br /></td></tr>
+<tr class="memitem:a2124c5c954ba10e3e2df331cbcaa1b9c inherit pro_methods_classEBHelmholtzEBBC" id="r_a2124c5c954ba10e3e2df331cbcaa1b9c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzEBBC.html#a2124c5c954ba10e3e2df331cbcaa1b9c">applyStencil</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">VoFStencil</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_stencil</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_phi</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:a2124c5c954ba10e3e2df331cbcaa1b9c inherit pro_methods_classEBHelmholtzEBBC"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply stencil to data holder and return result.  <br /></td></tr>
 <tr class="separator:a2124c5c954ba10e3e2df331cbcaa1b9c inherit pro_methods_classEBHelmholtzEBBC"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
 <tr class="memitem:ab3310411a7edfc0454de55f715b20aa7" id="r_ab3310411a7edfc0454de55f715b20aa7"><td class="memItemLeft" align="right" valign="top"><a id="ab3310411a7edfc0454de55f715b20aa7" name="ab3310411a7edfc0454de55f715b20aa7"></a>
-<a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_useConstant</b></td></tr>
+<a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_useConstant</b> = <a class="el" href="classTracerParticleSolver.html">false</a></td></tr>
 <tr class="memdesc:ab3310411a7edfc0454de55f715b20aa7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Use constant for BC. <br /></td></tr>
 <tr class="separator:ab3310411a7edfc0454de55f715b20aa7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a87f7d096acbdc2163d2ff8373f803685" id="r_a87f7d096acbdc2163d2ff8373f803685"><td class="memItemLeft" align="right" valign="top"><a id="a87f7d096acbdc2163d2ff8373f803685" name="a87f7d096acbdc2163d2ff8373f803685"></a>
-<a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_useFunction</b></td></tr>
+<a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_useFunction</b> = <a class="el" href="classTracerParticleSolver.html">false</a></td></tr>
 <tr class="memdesc:a87f7d096acbdc2163d2ff8373f803685"><td class="mdescLeft">&#160;</td><td class="mdescRight">Use function for BC value. <br /></td></tr>
 <tr class="separator:a87f7d096acbdc2163d2ff8373f803685"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1a9417be917fcb28ed3cf9d9d782c7c6" id="r_a1a9417be917fcb28ed3cf9d9d782c7c6"><td class="memItemLeft" align="right" valign="top"><a id="a1a9417be917fcb28ed3cf9d9d782c7c6" name="a1a9417be917fcb28ed3cf9d9d782c7c6"></a>
-<a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_order</b></td></tr>
+<a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_order</b> = -1</td></tr>
 <tr class="memdesc:a1a9417be917fcb28ed3cf9d9d782c7c6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stencil approximation order,. <br /></td></tr>
 <tr class="separator:a1a9417be917fcb28ed3cf9d9d782c7c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7f14e885829622f81d447bc64c7782ac" id="r_a7f14e885829622f81d447bc64c7782ac"><td class="memItemLeft" align="right" valign="top"><a id="a7f14e885829622f81d447bc64c7782ac" name="a7f14e885829622f81d447bc64c7782ac"></a>
-<a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_weight</b></td></tr>
+<a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_weight</b> = -1</td></tr>
 <tr class="memdesc:a7f14e885829622f81d447bc64c7782ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Distance weighting factor for stencils. <br /></td></tr>
 <tr class="separator:a7f14e885829622f81d447bc64c7782ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab22c3958abfab71ccec35c98f2f5cdaa" id="r_ab22c3958abfab71ccec35c98f2f5cdaa"><td class="memItemLeft" align="right" valign="top"><a id="ab22c3958abfab71ccec35c98f2f5cdaa" name="ab22c3958abfab71ccec35c98f2f5cdaa"></a>
-<a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_domainDropOrder</b></td></tr>
+<a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_domainDropOrder</b> = 0</td></tr>
 <tr class="memdesc:ab22c3958abfab71ccec35c98f2f5cdaa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Special flag for dropping stencil order when domains become coarser than this. <br /></td></tr>
 <tr class="separator:ab22c3958abfab71ccec35c98f2f5cdaa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a517434a3ec85091d97daf8e1b9d5d1ac" id="r_a517434a3ec85091d97daf8e1b9d5d1ac"><td class="memItemLeft" align="right" valign="top"><a id="a517434a3ec85091d97daf8e1b9d5d1ac" name="a517434a3ec85091d97daf8e1b9d5d1ac"></a>
-<a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_dropOrder</b></td></tr>
+<a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_dropOrder</b> = <a class="el" href="classTracerParticleSolver.html">false</a></td></tr>
 <tr class="memdesc:a517434a3ec85091d97daf8e1b9d5d1ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Special flag for dropping stencil order if the cell is a coarsened cell. <br /></td></tr>
 <tr class="separator:a517434a3ec85091d97daf8e1b9d5d1ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acb4942ea31a94ade80a0a7a8f42b74e8" id="r_acb4942ea31a94ade80a0a7a8f42b74e8"><td class="memItemLeft" align="right" valign="top"><a id="acb4942ea31a94ade80a0a7a8f42b74e8" name="acb4942ea31a94ade80a0a7a8f42b74e8"></a>
@@ -439,7 +436,6 @@ Additional Inherited Members</h2></td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">a_stencil</td><td>Weight and stencil </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">a_vof</td><td>Grid cell </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dit</td><td>Data index </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_order</td><td>Attempted order for stencil. This is also the stencil radius. </td></tr>
   </table>
   </dd>
 </dl>
@@ -564,7 +560,7 @@ Additional Inherited Members</h2></td></tr>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">a_stencil</td><td>Weight and stencil </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">a_vof</td><td>Grid cell </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_neighborhood</td><td>Neighboorhood specifier </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_neighborhood</td><td>Neighborhood specifier </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dit</td><td>Data index </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_order</td><td>Attempted order for stencil. This is also the stencil radius. </td></tr>
   </table>
@@ -603,6 +599,40 @@ Additional Inherited Members</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dropOrder</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a3948127cd47dc88770c08aab54edecf3" name="a3948127cd47dc88770c08aab54edecf3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3948127cd47dc88770c08aab54edecf3">&#9670;&#160;</a></span>setDomainDropOrder()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> EBHelmholtzDirichletEBBC::setDomainDropOrder </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramname"><em>a_domainSize</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Drop BC order if domain size is equal or below this. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_domainSize</td><td>Description </td></tr>
   </table>
   </dd>
 </dl>

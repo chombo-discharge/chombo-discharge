@@ -91,7 +91,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>Base class for interaction between Kinetic Monte Carlo and Ito-based plasma solvers.  
+<p>Abstract base class coupling Kinetic Monte Carlo chemistry to Ito/CDR plasma solvers.  
  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="CD__ItoKMCPhysics_8H_source.html">CD_ItoKMCPhysics.H</a>&gt;</code></p>
@@ -100,7 +100,7 @@ Inheritance diagram for Physics::ItoKMC::ItoKMCPhysics:</div>
 <div class="dyncontent">
 <div class="center"><img src="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics__inherit__graph.png" border="0" usemap="#aPhysics_1_1ItoKMC_1_1ItoKMCPhysics_inherit__map" alt="Inheritance graph"/></div>
 <map name="aPhysics_1_1ItoKMC_1_1ItoKMCPhysics_inherit__map" id="aPhysics_1_1ItoKMC_1_1ItoKMCPhysics_inherit__map">
-<area shape="rect" title="Base class for interaction between Kinetic Monte Carlo and Ito&#45;based plasma solvers." alt="" coords="5,5,236,31"/>
+<area shape="rect" title="Abstract base class coupling Kinetic Monte Carlo chemistry to Ito/CDR plasma solvers." alt="" coords="5,5,236,31"/>
 <area shape="rect" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html" title="Implementation of ItoKMCPhysics which parses input data from a JSON file." alt="" coords="14,79,227,104"/>
 <area shape="poly" title=" " alt="" coords="123,44,123,79,118,79,118,44"/>
 </map>
@@ -110,7 +110,7 @@ Collaboration diagram for Physics::ItoKMC::ItoKMCPhysics:</div>
 <div class="dyncontent">
 <div class="center"><img src="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics__coll__graph.png" border="0" usemap="#aPhysics_1_1ItoKMC_1_1ItoKMCPhysics_coll__map" alt="Collaboration graph"/></div>
 <map name="aPhysics_1_1ItoKMC_1_1ItoKMCPhysics_coll__map" id="aPhysics_1_1ItoKMC_1_1ItoKMCPhysics_coll__map">
-<area shape="rect" title="Base class for interaction between Kinetic Monte Carlo and Ito&#45;based plasma solvers." alt="" coords="421,55,652,80"/>
+<area shape="rect" title="Abstract base class coupling Kinetic Monte Carlo chemistry to Ito/CDR plasma solvers." alt="" coords="421,55,652,80"/>
 <area shape="rect" href="classKMCSolver.html" title="Class for running Kinetic Monte&#45;Carlo simulations." alt="" coords="25,5,216,31"/>
 <area shape="poly" title=" " alt="" coords="230,26,398,45,452,52,451,57,397,50,229,31"/>
 <area shape="rect" href="classKMCDualState.html" title="Declaration of a &quot;dual state&quot; for advancing with the Kinetic Monte Carlo module." alt="" coords="43,55,198,80"/>
@@ -138,15 +138,15 @@ Public Member Functions</h2></td></tr>
 <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>killKMC</b> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:ad9f3a89c6c7be3cd3e7f078da8dc817b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Kill the KMC solver. <br /></td></tr>
 <tr class="separator:ad9f3a89c6c7be3cd3e7f078da8dc817b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adf86eba4533f555e8286b4016329ccf4" id="r_adf86eba4533f555e8286b4016329ccf4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#adf86eba4533f555e8286b4016329ccf4">getNeutralDensity</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> <a class="el" href="classTracerParticleSolver.html">a_pos</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a>=0</td></tr>
-<tr class="memdesc:adf86eba4533f555e8286b4016329ccf4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the neutral density at a position in space.  <br /></td></tr>
-<tr class="separator:adf86eba4533f555e8286b4016329ccf4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6098547f6792d1b247ca84bd836a5bab" id="r_a6098547f6792d1b247ca84bd836a5bab"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a6098547f6792d1b247ca84bd836a5bab">computeAlpha</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_E</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> <a class="el" href="classTracerParticleSolver.html">a_x</a>) <a class="el" href="classTracerParticleSolver.html">const</a> =0</td></tr>
-<tr class="memdesc:a6098547f6792d1b247ca84bd836a5bab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute Townsend ionization coefficient.  <br /></td></tr>
-<tr class="separator:a6098547f6792d1b247ca84bd836a5bab"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aec975bb7d1c66f65f14dd3c769246e79" id="r_aec975bb7d1c66f65f14dd3c769246e79"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#aec975bb7d1c66f65f14dd3c769246e79">computeEta</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_E</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> <a class="el" href="classTracerParticleSolver.html">a_x</a>) <a class="el" href="classTracerParticleSolver.html">const</a> =0</td></tr>
-<tr class="memdesc:aec975bb7d1c66f65f14dd3c769246e79"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute Townsend attachment coefficient.  <br /></td></tr>
-<tr class="separator:aec975bb7d1c66f65f14dd3c769246e79"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7fcb534d048627466793e3d8c8cf916b" id="r_a7fcb534d048627466793e3d8c8cf916b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a7fcb534d048627466793e3d8c8cf916b">getNeutralDensity</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_pos</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a>=0</td></tr>
+<tr class="memdesc:a7fcb534d048627466793e3d8c8cf916b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the neutral density at a position in space.  <br /></td></tr>
+<tr class="separator:a7fcb534d048627466793e3d8c8cf916b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a89ebbbdf2ff907a6672ca00668a82f7d" id="r_a89ebbbdf2ff907a6672ca00668a82f7d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a89ebbbdf2ff907a6672ca00668a82f7d">computeAlpha</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_E</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_x</a>) <a class="el" href="classTracerParticleSolver.html">const</a> =0</td></tr>
+<tr class="memdesc:a89ebbbdf2ff907a6672ca00668a82f7d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute Townsend ionization coefficient.  <br /></td></tr>
+<tr class="separator:a89ebbbdf2ff907a6672ca00668a82f7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a08f01b701bbd61de8eda7e8bb94ea7ea" id="r_a08f01b701bbd61de8eda7e8bb94ea7ea"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a08f01b701bbd61de8eda7e8bb94ea7ea">computeEta</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_E</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_x</a>) <a class="el" href="classTracerParticleSolver.html">const</a> =0</td></tr>
+<tr class="memdesc:a08f01b701bbd61de8eda7e8bb94ea7ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute Townsend attachment coefficient.  <br /></td></tr>
+<tr class="separator:a08f01b701bbd61de8eda7e8bb94ea7ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6a40e664a6f09e13cb6787205101f8c6" id="r_a6a40e664a6f09e13cb6787205101f8c6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classItoSpecies.html">ItoSpecies</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a6a40e664a6f09e13cb6787205101f8c6">getItoSpecies</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
 <tr class="memdesc:a6a40e664a6f09e13cb6787205101f8c6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get all particle drift-diffusion species.  <br /></td></tr>
 <tr class="separator:a6a40e664a6f09e13cb6787205101f8c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -156,54 +156,48 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a526dfe8eb5688788c2c31c9e1fcbe7f3" id="r_a526dfe8eb5688788c2c31c9e1fcbe7f3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classRtSpecies.html">RtSpecies</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a526dfe8eb5688788c2c31c9e1fcbe7f3">getRtSpecies</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
 <tr class="memdesc:a526dfe8eb5688788c2c31c9e1fcbe7f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get all photon species.  <br /></td></tr>
 <tr class="separator:a526dfe8eb5688788c2c31c9e1fcbe7f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4ae4ba1291e0dbe35c10be5ef0e817e2" id="r_a4ae4ba1291e0dbe35c10be5ef0e817e2"><td class="memItemLeft" align="right" valign="top"><a id="a4ae4ba1291e0dbe35c10be5ef0e817e2" name="a4ae4ba1291e0dbe35c10be5ef0e817e2"></a>
-<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="CD__ItoKMCPhysics_8H.html#af239bef953a1c981907a54033285c3d8">DiffusionFunction</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getItoDiffusionFunctions</b> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:a4ae4ba1291e0dbe35c10be5ef0e817e2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get diffusion functions. <br /></td></tr>
+<tr class="memitem:a4ae4ba1291e0dbe35c10be5ef0e817e2" id="r_a4ae4ba1291e0dbe35c10be5ef0e817e2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="CD__ItoKMCPhysics_8H.html#af239bef953a1c981907a54033285c3d8">DiffusionFunction</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a4ae4ba1291e0dbe35c10be5ef0e817e2">getItoDiffusionFunctions</a> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a4ae4ba1291e0dbe35c10be5ef0e817e2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get diffusion functions for all Ito species.  <br /></td></tr>
 <tr class="separator:a4ae4ba1291e0dbe35c10be5ef0e817e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab3927a58224709970310b6b4227d73cd" id="r_ab3927a58224709970310b6b4227d73cd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#ab3927a58224709970310b6b4227d73cd">getPlotVariableNames</a> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:ab3927a58224709970310b6b4227d73cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get number of plot variables.  <br /></td></tr>
+<tr class="memdesc:ab3927a58224709970310b6b4227d73cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get plot variable names.  <br /></td></tr>
 <tr class="separator:ab3927a58224709970310b6b4227d73cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a374c90727c10f3f68f3af1c14c729899" id="r_a374c90727c10f3f68f3af1c14c729899"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a374c90727c10f3f68f3af1c14c729899">getPlotVariables</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> <a class="el" href="classTracerParticleSolver.html">a_E</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> <a class="el" href="classTracerParticleSolver.html">a_pos</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_phi</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RealVect</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_gradPhi</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_dx</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_kappa</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:a374c90727c10f3f68f3af1c14c729899"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get plot variables.  <br /></td></tr>
-<tr class="separator:a374c90727c10f3f68f3af1c14c729899"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af564a449dad010e38f47df790cdca0a9" id="r_af564a449dad010e38f47df790cdca0a9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#af564a449dad010e38f47df790cdca0a9">getPlotVariables</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_E</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_pos</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_phi</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RealVect</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_gradPhi</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_dx</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_kappa</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:af564a449dad010e38f47df790cdca0a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get plot variables.  <br /></td></tr>
+<tr class="separator:af564a449dad010e38f47df790cdca0a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acf71fafffbd4fd283e1c3a35cae97f87" id="r_acf71fafffbd4fd283e1c3a35cae97f87"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#acf71fafffbd4fd283e1c3a35cae97f87">getNumberOfPlotVariables</a> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:acf71fafffbd4fd283e1c3a35cae97f87"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get number of plot variables.  <br /></td></tr>
+<tr class="memdesc:acf71fafffbd4fd283e1c3a35cae97f87"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get number of extra plot variables contributed by this physics model.  <br /></td></tr>
 <tr class="separator:acf71fafffbd4fd283e1c3a35cae97f87"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac5615d2d27acc18c2a4c6ce8d0032bb1" id="r_ac5615d2d27acc18c2a4c6ce8d0032bb1"><td class="memItemLeft" align="right" valign="top"><a id="ac5615d2d27acc18c2a4c6ce8d0032bb1" name="ac5615d2d27acc18c2a4c6ce8d0032bb1"></a>
-<a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><b>getNumItoSpecies</b> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:ac5615d2d27acc18c2a4c6ce8d0032bb1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return number of Ito solvers. <br /></td></tr>
+<tr class="memitem:ac5615d2d27acc18c2a4c6ce8d0032bb1" id="r_ac5615d2d27acc18c2a4c6ce8d0032bb1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#ac5615d2d27acc18c2a4c6ce8d0032bb1">getNumItoSpecies</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:ac5615d2d27acc18c2a4c6ce8d0032bb1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return number of Ito solvers.  <br /></td></tr>
 <tr class="separator:ac5615d2d27acc18c2a4c6ce8d0032bb1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae5d2897a9091a5e3086f1a28a60d8451" id="r_ae5d2897a9091a5e3086f1a28a60d8451"><td class="memItemLeft" align="right" valign="top"><a id="ae5d2897a9091a5e3086f1a28a60d8451" name="ae5d2897a9091a5e3086f1a28a60d8451"></a>
-<a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><b>getNumCdrSpecies</b> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:ae5d2897a9091a5e3086f1a28a60d8451"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return number of CDR solvers. <br /></td></tr>
+<tr class="memitem:ae5d2897a9091a5e3086f1a28a60d8451" id="r_ae5d2897a9091a5e3086f1a28a60d8451"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#ae5d2897a9091a5e3086f1a28a60d8451">getNumCdrSpecies</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:ae5d2897a9091a5e3086f1a28a60d8451"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return number of CDR solvers.  <br /></td></tr>
 <tr class="separator:ae5d2897a9091a5e3086f1a28a60d8451"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abe9cc62528566a23b974793ecf344909" id="r_abe9cc62528566a23b974793ecf344909"><td class="memItemLeft" align="right" valign="top"><a id="abe9cc62528566a23b974793ecf344909" name="abe9cc62528566a23b974793ecf344909"></a>
-<a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><b>getNumPlasmaSpecies</b> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:abe9cc62528566a23b974793ecf344909"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return total number of plasma species. <br /></td></tr>
+<tr class="memitem:abe9cc62528566a23b974793ecf344909" id="r_abe9cc62528566a23b974793ecf344909"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#abe9cc62528566a23b974793ecf344909">getNumPlasmaSpecies</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:abe9cc62528566a23b974793ecf344909"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return total number of plasma species.  <br /></td></tr>
 <tr class="separator:abe9cc62528566a23b974793ecf344909"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab1caa896fb2b7ceb4d6e50a3acd43fde" id="r_ab1caa896fb2b7ceb4d6e50a3acd43fde"><td class="memItemLeft" align="right" valign="top"><a id="ab1caa896fb2b7ceb4d6e50a3acd43fde" name="ab1caa896fb2b7ceb4d6e50a3acd43fde"></a>
-<a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><b>getNumPhotonSpecies</b> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:ab1caa896fb2b7ceb4d6e50a3acd43fde"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return number of RTE solvers. <br /></td></tr>
+<tr class="memitem:ab1caa896fb2b7ceb4d6e50a3acd43fde" id="r_ab1caa896fb2b7ceb4d6e50a3acd43fde"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#ab1caa896fb2b7ceb4d6e50a3acd43fde">getNumPhotonSpecies</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:ab1caa896fb2b7ceb4d6e50a3acd43fde"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return number of RTE solvers.  <br /></td></tr>
 <tr class="separator:ab1caa896fb2b7ceb4d6e50a3acd43fde"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aea4fc097ef2944cbc42c17b412d05817" id="r_aea4fc097ef2944cbc42c17b412d05817"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#aea4fc097ef2944cbc42c17b412d05817">needGradients</a> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:aea4fc097ef2944cbc42c17b412d05817"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return true/false if physics model needs species gradients.  <br /></td></tr>
+<tr class="memdesc:aea4fc097ef2944cbc42c17b412d05817"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return true if the physics model requires species density gradients.  <br /></td></tr>
 <tr class="separator:aea4fc097ef2944cbc42c17b412d05817"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7dc34c72891621ccefa995ac84d1c673" id="r_a7dc34c72891621ccefa995ac84d1c673"><td class="memItemLeft" align="right" valign="top"><a id="a7dc34c72891621ccefa995ac84d1c673" name="a7dc34c72891621ccefa995ac84d1c673"></a>
-<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::map</a>&lt; <a class="el" href="classTracerParticleSolver.html">int</a>, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt; <a class="el" href="CD__ItoKMCPhysics_8H.html#ac739724a1bd29688091b459d5b183731">SpeciesType</a>, <a class="el" href="classTracerParticleSolver.html">int</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getSpeciesMap</b> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:a7dc34c72891621ccefa995ac84d1c673"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the internal mapping between plasma species and Ito solvers. <br /></td></tr>
+<tr class="memitem:a7dc34c72891621ccefa995ac84d1c673" id="r_a7dc34c72891621ccefa995ac84d1c673"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::map</a>&lt; <a class="el" href="classTracerParticleSolver.html">int</a>, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt; <a class="el" href="CD__ItoKMCPhysics_8H.html#ac739724a1bd29688091b459d5b183731">SpeciesType</a>, <a class="el" href="classTracerParticleSolver.html">int</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a7dc34c72891621ccefa995ac84d1c673">getSpeciesMap</a> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a7dc34c72891621ccefa995ac84d1c673"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the internal mapping from plasma-species index to solver type and solver index.  <br /></td></tr>
 <tr class="separator:a7dc34c72891621ccefa995ac84d1c673"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa632c381a987a629a4432d40fa057406" id="r_aa632c381a987a629a4432d40fa057406"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#aa632c381a987a629a4432d40fa057406">parseRuntimeOptions</a> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:aa632c381a987a629a4432d40fa057406"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse run-time options.  <br /></td></tr>
 <tr class="separator:aa632c381a987a629a4432d40fa057406"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac5bf38412f2a25472f9a22bc1b3d8189" id="r_ac5bf38412f2a25472f9a22bc1b3d8189"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#ac5bf38412f2a25472f9a22bc1b3d8189">initialSigma</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_time</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> <a class="el" href="classTracerParticleSolver.html">a_pos</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:ac5bf38412f2a25472f9a22bc1b3d8189"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set initial surface charge. Default is 0, override if you want.  <br /></td></tr>
-<tr class="separator:ac5bf38412f2a25472f9a22bc1b3d8189"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a85645b853f5cea654c3b21c9d16ddc68" id="r_a85645b853f5cea654c3b21c9d16ddc68"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a85645b853f5cea654c3b21c9d16ddc68">computeMobilities</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_time</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> <a class="el" href="classTracerParticleSolver.html">a_pos</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> <a class="el" href="classTracerParticleSolver.html">a_E</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a>=0</td></tr>
-<tr class="memdesc:a85645b853f5cea654c3b21c9d16ddc68"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the Ito solver mobilities.  <br /></td></tr>
-<tr class="separator:a85645b853f5cea654c3b21c9d16ddc68"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab1f3832da679bcc1cabd2e93c690f1a6" id="r_ab1f3832da679bcc1cabd2e93c690f1a6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#ab1f3832da679bcc1cabd2e93c690f1a6">computeDiffusionCoefficients</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_time</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> <a class="el" href="classTracerParticleSolver.html">a_pos</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> <a class="el" href="classTracerParticleSolver.html">a_E</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a>=0</td></tr>
-<tr class="memdesc:ab1f3832da679bcc1cabd2e93c690f1a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the Ito solver diffusion coefficients.  <br /></td></tr>
-<tr class="separator:ab1f3832da679bcc1cabd2e93c690f1a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a596bb3b284dca6cf0bd0c82b100f8cdd" id="r_a596bb3b284dca6cf0bd0c82b100f8cdd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a596bb3b284dca6cf0bd0c82b100f8cdd">initialSigma</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_time</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_pos</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:a596bb3b284dca6cf0bd0c82b100f8cdd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set initial surface charge. Default is 0, override if you want.  <br /></td></tr>
+<tr class="separator:a596bb3b284dca6cf0bd0c82b100f8cdd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9f955bd0692a29c53fc2af441c3c7792" id="r_a9f955bd0692a29c53fc2af441c3c7792"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a9f955bd0692a29c53fc2af441c3c7792">computeMobilities</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_time</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_pos</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_E</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a>=0</td></tr>
+<tr class="memdesc:a9f955bd0692a29c53fc2af441c3c7792"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the Ito solver mobilities.  <br /></td></tr>
+<tr class="separator:a9f955bd0692a29c53fc2af441c3c7792"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a229c44b63ea4161d30b22a6413b823ac" id="r_a229c44b63ea4161d30b22a6413b823ac"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a229c44b63ea4161d30b22a6413b823ac">computeDiffusionCoefficients</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_time</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_pos</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_E</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a>=0</td></tr>
+<tr class="memdesc:a229c44b63ea4161d30b22a6413b823ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the Ito solver diffusion coefficients.  <br /></td></tr>
+<tr class="separator:a229c44b63ea4161d30b22a6413b823ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abeabcee4916388300237eb39ee587afa" id="r_abeabcee4916388300237eb39ee587afa"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#abeabcee4916388300237eb39ee587afa">secondaryEmissionEB</a> (<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">List</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_secondaryParticles</a>, <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_cdrFluxes</a>, <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">List</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_secondaryPhotons</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">List</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_primaryParticles</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_cdrFluxesExtrap</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">List</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_primaryPhotons</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_E</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_physicalCellCenter</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_cellCentroid</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_bndryCentroid</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_bndryNormal</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_bndryArea</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_dx</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_dt</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classTracerParticleSolver.html">a_isDielectric</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_matIndex</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a>=0</td></tr>
 <tr class="memdesc:abeabcee4916388300237eb39ee587afa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resolve secondary emission at the EB.  <br /></td></tr>
 <tr class="separator:abeabcee4916388300237eb39ee587afa"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -223,26 +217,26 @@ Public Member Functions</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-types" name="pro-types"></a>
 Protected Types</h2></td></tr>
 <tr class="memitem:a988145ba22d311afbd51d4fa10d1cc6b" id="r_a988145ba22d311afbd51d4fa10d1cc6b"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a988145ba22d311afbd51d4fa10d1cc6b">Algorithm</a> { <br />
-&#160;&#160;<b>SSA</b>
-, <b>ExplicitEuler</b>
-, <b>Midpoint</b>
-, <b>PRC</b>
+&#160;&#160;<a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a988145ba22d311afbd51d4fa10d1cc6ba7c9d6b001a87e497d6b96fbd4c6fdf51">SSA</a>
+, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a988145ba22d311afbd51d4fa10d1cc6ba96fdcdf2e719153ba8daa0a24976e73e">ExplicitEuler</a>
+, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a988145ba22d311afbd51d4fa10d1cc6ba7f56c02b34d312867e3f63c9f21fe5c8">Midpoint</a>
+, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a988145ba22d311afbd51d4fa10d1cc6bae01a919b068424df394a7f38a3a02ed2">PRC</a>
 , <br />
-&#160;&#160;<b>ImplicitEuler</b>
-, <b>HybridExplicitEuler</b>
-, <b>HybridMidpoint</b>
-, <b>HybridPRC</b>
+&#160;&#160;<a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a988145ba22d311afbd51d4fa10d1cc6ba1b41e1bf0ba9f22aff9ae08cba5197c5">ImplicitEuler</a>
+, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a988145ba22d311afbd51d4fa10d1cc6bad5b1f94bb4fd58c4cbe037e99164d4a1">HybridExplicitEuler</a>
+, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a988145ba22d311afbd51d4fa10d1cc6ba1905ea46c5e8728e8b3f247cbb5eb8cd">HybridMidpoint</a>
+, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a988145ba22d311afbd51d4fa10d1cc6bace14b88208b0cd644615caef2f9670ca">HybridPRC</a>
 , <br />
-&#160;&#160;<b>HybridImplicitEuler</b>
+&#160;&#160;<a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a988145ba22d311afbd51d4fa10d1cc6bab9a4a445bef9c879a8ad1cbc60d9da4b">HybridImplicitEuler</a>
 <br />
  }</td></tr>
-<tr class="memdesc:a988145ba22d311afbd51d4fa10d1cc6b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enum for switching between KMC algorithms.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a988145ba22d311afbd51d4fa10d1cc6b">More...</a><br /></td></tr>
+<tr class="memdesc:a988145ba22d311afbd51d4fa10d1cc6b"><td class="mdescLeft">&#160;</td><td class="mdescRight">KMC time-stepping algorithms available for advancing the reaction network.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a988145ba22d311afbd51d4fa10d1cc6b">More...</a><br /></td></tr>
 <tr class="separator:a988145ba22d311afbd51d4fa10d1cc6b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa6e9e09095e6fb652536663026257774" id="r_aa6e9e09095e6fb652536663026257774"><td class="memItemLeft" align="right" valign="top"><a id="aa6e9e09095e6fb652536663026257774" name="aa6e9e09095e6fb652536663026257774"></a>enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#aa6e9e09095e6fb652536663026257774">ParticlePlacement</a> { <b>Random</b>
-, <b>Centroid</b>
-, <b>Downstream</b>
+<tr class="memitem:aa6e9e09095e6fb652536663026257774" id="r_aa6e9e09095e6fb652536663026257774"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#aa6e9e09095e6fb652536663026257774">ParticlePlacement</a> { <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#aa6e9e09095e6fb652536663026257774a64663f4646781c9c0110838b905daa23">Random</a>
+, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#aa6e9e09095e6fb652536663026257774a9b49197cf2fea5efc68ef8a88489e1b6">Centroid</a>
+, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#aa6e9e09095e6fb652536663026257774a1f26ed6d29f1966178f4eaa5b920f551">Downstream</a>
  }</td></tr>
-<tr class="memdesc:aa6e9e09095e6fb652536663026257774"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enum for switching between various particle placement algorithms. <br /></td></tr>
+<tr class="memdesc:aa6e9e09095e6fb652536663026257774"><td class="mdescLeft">&#160;</td><td class="mdescRight">Strategies for placing secondary particles created during the KMC advance.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#aa6e9e09095e6fb652536663026257774">More...</a><br /></td></tr>
 <tr class="separator:aa6e9e09095e6fb652536663026257774"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
@@ -401,12 +395,12 @@ Static Protected Attributes</h2></td></tr>
 <tr class="memdesc:af771ab203558b3226f6ccfd7e5e315e4"><td class="mdescLeft">&#160;</td><td class="mdescRight">KMC state used in advanceReactionNetwork. <br /></td></tr>
 <tr class="separator:af771ab203558b3226f6ccfd7e5e315e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaf57f007555b5e427f5b542359f0e5c2" id="r_aaf57f007555b5e427f5b542359f0e5c2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">static</a> <a class="el" href="classTracerParticleSolver.html">thread_local</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::shared_ptr</a>&lt; <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__ItoKMCPhysics_8H.html#ad61b790100426fb082d6276c5c66a811">KMCReaction</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#aaf57f007555b5e427f5b542359f0e5c2">m_kmcReactionsThreadLocal</a></td></tr>
-<tr class="memdesc:aaf57f007555b5e427f5b542359f0e5c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">KMC reactions used in advanceReactionNetowkr.  <br /></td></tr>
+<tr class="memdesc:aaf57f007555b5e427f5b542359f0e5c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Thread-local copies of KMC reactions used in advanceReactionNetwork.  <br /></td></tr>
 <tr class="separator:aaf57f007555b5e427f5b542359f0e5c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Base class for interaction between Kinetic Monte Carlo and Ito-based plasma solvers. </p>
-<p>When using this class, the user should populate m_kmcReactions with the appropriate reactions AND implement routines for computing the mobility/diffusion coefficeints. </p>
+<div class="textblock"><p>Abstract base class coupling Kinetic Monte Carlo chemistry to Ito/CDR plasma solvers. </p>
+<p>Subclasses must implement <code><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a12a370f24d9e421357c28631595be4b4" title="Update reaction rates.">updateReactionRates()</a></code>, <code><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a9f955bd0692a29c53fc2af441c3c7792" title="Compute the Ito solver mobilities.">computeMobilities()</a></code>, <code><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a229c44b63ea4161d30b22a6413b823ac" title="Compute the Ito solver diffusion coefficients.">computeDiffusionCoefficients()</a></code>, <code><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#abeabcee4916388300237eb39ee587afa" title="Resolve secondary emission at the EB.">secondaryEmissionEB()</a></code>, <code><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a89ebbbdf2ff907a6672ca00668a82f7d" title="Compute Townsend ionization coefficient.">computeAlpha()</a></code>, <code><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a08f01b701bbd61de8eda7e8bb94ea7ea" title="Compute Townsend attachment coefficient.">computeEta()</a></code>, and <code><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a7fcb534d048627466793e3d8c8cf916b" title="Get the neutral density at a position in space.">getNeutralDensity()</a></code>. The reaction network is specified by populating <code>m_kmcReactions</code> and (optionally) <code>m_photoReactions</code> and <code>m_surfaceReactions</code> in the subclass constructor. </p>
 </div><h2 class="groupheader">Member Enumeration Documentation</h2>
 <a id="a988145ba22d311afbd51d4fa10d1cc6b" name="a988145ba22d311afbd51d4fa10d1cc6b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a988145ba22d311afbd51d4fa10d1cc6b">&#9670;&#160;</a></span>Algorithm</h2>
@@ -428,8 +422,59 @@ Static Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Enum for switching between KMC algorithms. </p>
-<p>'SSA' is the Gillespie algorithm, 'Tau' is tau-leaping and 'Hybrid' is the Cao et. al. algorithm. </p>
+<p>KMC time-stepping algorithms available for advancing the reaction network. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a988145ba22d311afbd51d4fa10d1cc6ba7c9d6b001a87e497d6b96fbd4c6fdf51" name="a988145ba22d311afbd51d4fa10d1cc6ba7c9d6b001a87e497d6b96fbd4c6fdf51"></a>SSA&#160;</td><td class="fielddoc"><p>Gillespie's Stochastic Simulation Algorithm (exact). </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a988145ba22d311afbd51d4fa10d1cc6ba96fdcdf2e719153ba8daa0a24976e73e" name="a988145ba22d311afbd51d4fa10d1cc6ba96fdcdf2e719153ba8daa0a24976e73e"></a>ExplicitEuler&#160;</td><td class="fielddoc"><p>Explicit tau-leaping with Euler steps. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a988145ba22d311afbd51d4fa10d1cc6ba7f56c02b34d312867e3f63c9f21fe5c8" name="a988145ba22d311afbd51d4fa10d1cc6ba7f56c02b34d312867e3f63c9f21fe5c8"></a>Midpoint&#160;</td><td class="fielddoc"><p>Explicit tau-leaping with midpoint (second-order) steps. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a988145ba22d311afbd51d4fa10d1cc6bae01a919b068424df394a7f38a3a02ed2" name="a988145ba22d311afbd51d4fa10d1cc6bae01a919b068424df394a7f38a3a02ed2"></a>PRC&#160;</td><td class="fielddoc"><p>Partially-rejected corrections tau-leaping. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a988145ba22d311afbd51d4fa10d1cc6ba1b41e1bf0ba9f22aff9ae08cba5197c5" name="a988145ba22d311afbd51d4fa10d1cc6ba1b41e1bf0ba9f22aff9ae08cba5197c5"></a>ImplicitEuler&#160;</td><td class="fielddoc"><p>Implicit tau-leaping with Euler steps. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a988145ba22d311afbd51d4fa10d1cc6bad5b1f94bb4fd58c4cbe037e99164d4a1" name="a988145ba22d311afbd51d4fa10d1cc6bad5b1f94bb4fd58c4cbe037e99164d4a1"></a>HybridExplicitEuler&#160;</td><td class="fielddoc"><p>Hybrid SSA / explicit Euler (Cao et al.). </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a988145ba22d311afbd51d4fa10d1cc6ba1905ea46c5e8728e8b3f247cbb5eb8cd" name="a988145ba22d311afbd51d4fa10d1cc6ba1905ea46c5e8728e8b3f247cbb5eb8cd"></a>HybridMidpoint&#160;</td><td class="fielddoc"><p>Hybrid SSA / midpoint (Cao et al.). </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a988145ba22d311afbd51d4fa10d1cc6bace14b88208b0cd644615caef2f9670ca" name="a988145ba22d311afbd51d4fa10d1cc6bace14b88208b0cd644615caef2f9670ca"></a>HybridPRC&#160;</td><td class="fielddoc"><p>Hybrid SSA / PRC (Cao et al.). </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a988145ba22d311afbd51d4fa10d1cc6bab9a4a445bef9c879a8ad1cbc60d9da4b" name="a988145ba22d311afbd51d4fa10d1cc6bab9a4a445bef9c879a8ad1cbc60d9da4b"></a>HybridImplicitEuler&#160;</td><td class="fielddoc"><p>Hybrid SSA / implicit Euler (Cao et al.). </p>
+</td></tr>
+</table>
+
+</div>
+</div>
+<a id="aa6e9e09095e6fb652536663026257774" name="aa6e9e09095e6fb652536663026257774"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa6e9e09095e6fb652536663026257774">&#9670;&#160;</a></span>ParticlePlacement</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">enum</a> <a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#aa6e9e09095e6fb652536663026257774">Physics::ItoKMC::ItoKMCPhysics::ParticlePlacement</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">strong</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Strategies for placing secondary particles created during the KMC advance. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="aa6e9e09095e6fb652536663026257774a64663f4646781c9c0110838b905daa23" name="aa6e9e09095e6fb652536663026257774a64663f4646781c9c0110838b905daa23"></a>Random&#160;</td><td class="fielddoc"><p>Place particles at a uniformly random position within the cell. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="aa6e9e09095e6fb652536663026257774a9b49197cf2fea5efc68ef8a88489e1b6" name="aa6e9e09095e6fb652536663026257774a9b49197cf2fea5efc68ef8a88489e1b6"></a>Centroid&#160;</td><td class="fielddoc"><p>Place particles at the cell centroid. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="aa6e9e09095e6fb652536663026257774a1f26ed6d29f1966178f4eaa5b920f551" name="aa6e9e09095e6fb652536663026257774a1f26ed6d29f1966178f4eaa5b920f551"></a>Downstream&#160;</td><td class="fielddoc"><p>Place particles in the downstream region relative to the primary particle drift. </p>
+</td></tr>
+</table>
 
 </div>
 </div>
@@ -535,8 +580,8 @@ Static Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a6098547f6792d1b247ca84bd836a5bab" name="a6098547f6792d1b247ca84bd836a5bab"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6098547f6792d1b247ca84bd836a5bab">&#9670;&#160;</a></span>computeAlpha()</h2>
+<a id="a89ebbbdf2ff907a6672ca00668a82f7d" name="a89ebbbdf2ff907a6672ca00668a82f7d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a89ebbbdf2ff907a6672ca00668a82f7d">&#9670;&#160;</a></span>computeAlpha()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -553,7 +598,7 @@ Static Protected Attributes</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;&#160;</td>
           <td class="paramname"><em>a_x</em>&#160;</td>
         </tr>
         <tr>
@@ -579,12 +624,12 @@ Static Protected Attributes</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Should return the Townsend ionization coefficient. </dd></dl>
 
-<p>Implemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#abd91a6b7d203c0902f4e34958a918e6a">Physics::ItoKMC::ItoKMCJSON</a>.</p>
+<p>Implemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#ab5faed8a6975ba22eff1908f3c7aa8e1">Physics::ItoKMC::ItoKMCJSON</a>.</p>
 
 </div>
 </div>
-<a id="ab1f3832da679bcc1cabd2e93c690f1a6" name="ab1f3832da679bcc1cabd2e93c690f1a6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab1f3832da679bcc1cabd2e93c690f1a6">&#9670;&#160;</a></span>computeDiffusionCoefficients()</h2>
+<a id="a229c44b63ea4161d30b22a6413b823ac" name="a229c44b63ea4161d30b22a6413b823ac"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a229c44b63ea4161d30b22a6413b823ac">&#9670;&#160;</a></span>computeDiffusionCoefficients()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -601,13 +646,13 @@ Static Protected Attributes</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;&#160;</td>
           <td class="paramname"><em>a_pos</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;&#160;</td>
           <td class="paramname"><em>a_E</em>&#160;</td>
         </tr>
         <tr>
@@ -634,12 +679,12 @@ Static Protected Attributes</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Must return a vector of non-negative diffusion coefficients for the plasma species </dd></dl>
 
-<p>Implemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a0f195b2cca0a24071d78abd95e0197c5">Physics::ItoKMC::ItoKMCJSON</a>.</p>
+<p>Implemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#aa608c6ed153178fb03bf647ac852a18b">Physics::ItoKMC::ItoKMCJSON</a>.</p>
 
 </div>
 </div>
-<a id="aec975bb7d1c66f65f14dd3c769246e79" name="aec975bb7d1c66f65f14dd3c769246e79"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aec975bb7d1c66f65f14dd3c769246e79">&#9670;&#160;</a></span>computeEta()</h2>
+<a id="a08f01b701bbd61de8eda7e8bb94ea7ea" name="a08f01b701bbd61de8eda7e8bb94ea7ea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a08f01b701bbd61de8eda7e8bb94ea7ea">&#9670;&#160;</a></span>computeEta()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -656,7 +701,7 @@ Static Protected Attributes</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;&#160;</td>
           <td class="paramname"><em>a_x</em>&#160;</td>
         </tr>
         <tr>
@@ -682,12 +727,12 @@ Static Protected Attributes</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Should return the Townsend attachment coefficient. </dd></dl>
 
-<p>Implemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a504faed441abfa2f7222a9d238907622">Physics::ItoKMC::ItoKMCJSON</a>.</p>
+<p>Implemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a0b3b4f36ba982ecf2300c38a9d37be8e">Physics::ItoKMC::ItoKMCJSON</a>.</p>
 
 </div>
 </div>
-<a id="a85645b853f5cea654c3b21c9d16ddc68" name="a85645b853f5cea654c3b21c9d16ddc68"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a85645b853f5cea654c3b21c9d16ddc68">&#9670;&#160;</a></span>computeMobilities()</h2>
+<a id="a9f955bd0692a29c53fc2af441c3c7792" name="a9f955bd0692a29c53fc2af441c3c7792"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9f955bd0692a29c53fc2af441c3c7792">&#9670;&#160;</a></span>computeMobilities()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -704,13 +749,13 @@ Static Protected Attributes</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;&#160;</td>
           <td class="paramname"><em>a_pos</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;&#160;</td>
           <td class="paramname"><em>a_E</em>&#160;</td>
         </tr>
         <tr>
@@ -737,7 +782,7 @@ Static Protected Attributes</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Must return a vector of non-negative mobility coefficients for the plasma species </dd></dl>
 
-<p>Implemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a633020d80e1e5fbb4398506fc74725a9">Physics::ItoKMC::ItoKMCJSON</a>.</p>
+<p>Implemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#ad4cf980d45225f1e8fad9bd607820121">Physics::ItoKMC::ItoKMCJSON</a>.</p>
 
 </div>
 </div>
@@ -825,6 +870,7 @@ Static Protected Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Computed upstream position </dd></dl>
 
 </div>
 </div>
@@ -852,7 +898,7 @@ Static Protected Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Build internal representation of how we distinguish the Ito and CDR solvers. </p>
-<dl class="section note"><dt>Note</dt><dd>This should ALWAYS be called after initializing the species since <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html" title="Base time stepper class that advances the Ito-KMC-Poisson system of equations. If you want a differen...">ItoKMCStepper</a> will rely on it. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This should ALWAYS be called after initializing the species since <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html" title="Abstract TimeStepper for the Ito-KMC-Poisson system of equations.">ItoKMCStepper</a> will rely on it. </dd></dl>
 
 </div>
 </div>
@@ -930,6 +976,34 @@ Static Protected Attributes</h2></td></tr>
 
 </div>
 </div>
+<a id="a4ae4ba1291e0dbe35c10be5ef0e817e2" name="a4ae4ba1291e0dbe35c10be5ef0e817e2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4ae4ba1291e0dbe35c10be5ef0e817e2">&#9670;&#160;</a></span>getItoDiffusionFunctions()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="CD__ItoKMCPhysics_8H.html#af239bef953a1c981907a54033285c3d8">DiffusionFunction</a> &gt; &amp; ItoKMCPhysics::getItoDiffusionFunctions </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get diffusion functions for all Ito species. </p>
+<dl class="section return"><dt>Returns</dt><dd>Vector of per-species diffusion displacement functors. </dd></dl>
+
+</div>
+</div>
 <a id="a6a40e664a6f09e13cb6787205101f8c6" name="a6a40e664a6f09e13cb6787205101f8c6"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a6a40e664a6f09e13cb6787205101f8c6">&#9670;&#160;</a></span>getItoSpecies()</h2>
 
@@ -958,8 +1032,8 @@ Static Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="adf86eba4533f555e8286b4016329ccf4" name="adf86eba4533f555e8286b4016329ccf4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adf86eba4533f555e8286b4016329ccf4">&#9670;&#160;</a></span>getNeutralDensity()</h2>
+<a id="a7fcb534d048627466793e3d8c8cf916b" name="a7fcb534d048627466793e3d8c8cf916b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7fcb534d048627466793e3d8c8cf916b">&#9670;&#160;</a></span>getNeutralDensity()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -970,7 +1044,7 @@ Static Protected Attributes</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a> Physics::ItoKMC::ItoKMCPhysics::getNeutralDensity </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;&#160;</td>
           <td class="paramname"><em>a_pos</em></td><td>)</td>
           <td> const</td>
         </tr>
@@ -991,7 +1065,7 @@ Static Protected Attributes</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Neutral density </dd></dl>
 
-<p>Implemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#ae3b60588b84ef4fce5d12e0fc8d5fd26">Physics::ItoKMC::ItoKMCJSON</a>.</p>
+<p>Implemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a6ebe78f5ec269d03d4a1d22eeae8dec8">Physics::ItoKMC::ItoKMCJSON</a>.</p>
 
 </div>
 </div>
@@ -1018,9 +1092,122 @@ Static Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Get number of plot variables. </p>
+<p>Get number of extra plot variables contributed by this physics model. </p>
+<dl class="section return"><dt>Returns</dt><dd>Number of diagnostic plot variables. </dd></dl>
 
 <p>Reimplemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#aeff4c7f1d637c2fdfc22493ca2fbd663">Physics::ItoKMC::ItoKMCJSON</a>.</p>
+
+</div>
+</div>
+<a id="ae5d2897a9091a5e3086f1a28a60d8451" name="ae5d2897a9091a5e3086f1a28a60d8451"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae5d2897a9091a5e3086f1a28a60d8451">&#9670;&#160;</a></span>getNumCdrSpecies()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">int</a> ItoKMCPhysics::getNumCdrSpecies </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Return number of CDR solvers. </p>
+<dl class="section return"><dt>Returns</dt><dd>Num cdr species </dd></dl>
+
+</div>
+</div>
+<a id="ac5615d2d27acc18c2a4c6ce8d0032bb1" name="ac5615d2d27acc18c2a4c6ce8d0032bb1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac5615d2d27acc18c2a4c6ce8d0032bb1">&#9670;&#160;</a></span>getNumItoSpecies()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">int</a> ItoKMCPhysics::getNumItoSpecies </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Return number of Ito solvers. </p>
+<dl class="section return"><dt>Returns</dt><dd>Num ito species </dd></dl>
+
+</div>
+</div>
+<a id="ab1caa896fb2b7ceb4d6e50a3acd43fde" name="ab1caa896fb2b7ceb4d6e50a3acd43fde"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab1caa896fb2b7ceb4d6e50a3acd43fde">&#9670;&#160;</a></span>getNumPhotonSpecies()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">int</a> ItoKMCPhysics::getNumPhotonSpecies </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Return number of RTE solvers. </p>
+<dl class="section return"><dt>Returns</dt><dd>Num photon species </dd></dl>
+
+</div>
+</div>
+<a id="abe9cc62528566a23b974793ecf344909" name="abe9cc62528566a23b974793ecf344909"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abe9cc62528566a23b974793ecf344909">&#9670;&#160;</a></span>getNumPlasmaSpecies()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">int</a> ItoKMCPhysics::getNumPlasmaSpecies </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Return total number of plasma species. </p>
+<dl class="section return"><dt>Returns</dt><dd>Num plasma species </dd></dl>
 
 </div>
 </div>
@@ -1047,14 +1234,15 @@ Static Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Get number of plot variables. </p>
+<p>Get plot variable names. </p>
+<dl class="section return"><dt>Returns</dt><dd>Vector of variable name strings for extra diagnostic quantities. </dd></dl>
 
 <p>Reimplemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a569d6ea90d4a5498f390ce915df6478c">Physics::ItoKMC::ItoKMCJSON</a>.</p>
 
 </div>
 </div>
-<a id="a374c90727c10f3f68f3af1c14c729899" name="a374c90727c10f3f68f3af1c14c729899"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a374c90727c10f3f68f3af1c14c729899">&#9670;&#160;</a></span>getPlotVariables()</h2>
+<a id="af564a449dad010e38f47df790cdca0a9" name="af564a449dad010e38f47df790cdca0a9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af564a449dad010e38f47df790cdca0a9">&#9670;&#160;</a></span>getPlotVariables()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1065,13 +1253,13 @@ Static Protected Attributes</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a> &gt; ItoKMCPhysics::getPlotVariables </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;&#160;</td>
           <td class="paramname"><em>a_E</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;&#160;</td>
           <td class="paramname"><em>a_pos</em>, </td>
         </tr>
         <tr>
@@ -1123,8 +1311,9 @@ Static Protected Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Plot variables </dd></dl>
 
-<p>Reimplemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a52c18eb67aa9ef2ebe411b20a1d1dbc9">Physics::ItoKMC::ItoKMCJSON</a>.</p>
+<p>Reimplemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a21b04aa50177dd0aafa7f009499390a4">Physics::ItoKMC::ItoKMCJSON</a>.</p>
 
 </div>
 </div>
@@ -1156,8 +1345,36 @@ Static Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="ac5bf38412f2a25472f9a22bc1b3d8189" name="ac5bf38412f2a25472f9a22bc1b3d8189"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac5bf38412f2a25472f9a22bc1b3d8189">&#9670;&#160;</a></span>initialSigma()</h2>
+<a id="a7dc34c72891621ccefa995ac84d1c673" name="a7dc34c72891621ccefa995ac84d1c673"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7dc34c72891621ccefa995ac84d1c673">&#9670;&#160;</a></span>getSpeciesMap()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::map</a>&lt; <a class="el" href="classTracerParticleSolver.html">int</a>, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt; <a class="el" href="CD__ItoKMCPhysics_8H.html#ac739724a1bd29688091b459d5b183731">SpeciesType</a>, <a class="el" href="classTracerParticleSolver.html">int</a> &gt; &gt; &amp; ItoKMCPhysics::getSpeciesMap </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the internal mapping from plasma-species index to solver type and solver index. </p>
+<dl class="section return"><dt>Returns</dt><dd>Map from plasma species index to (SpeciesType, solver index) pair. </dd></dl>
+
+</div>
+</div>
+<a id="a596bb3b284dca6cf0bd0c82b100f8cdd" name="a596bb3b284dca6cf0bd0c82b100f8cdd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a596bb3b284dca6cf0bd0c82b100f8cdd">&#9670;&#160;</a></span>initialSigma()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1174,7 +1391,7 @@ Static Protected Attributes</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;&#160;</td>
           <td class="paramname"><em>a_pos</em>&#160;</td>
         </tr>
         <tr>
@@ -1198,6 +1415,7 @@ Static Protected Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Return value </dd></dl>
 
 </div>
 </div>
@@ -1270,7 +1488,8 @@ Static Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Return true/false if physics model needs species gradients. </p>
+<p>Return true if the physics model requires species density gradients. </p>
+<dl class="section return"><dt>Returns</dt><dd>True if density gradients must be computed and passed to <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a12a370f24d9e421357c28631595be4b4" title="Update reaction rates.">updateReactionRates()</a>. </dd></dl>
 
 <p>Reimplemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#ab26daaca1d1373dc63bee1f6e7ee8a37">Physics::ItoKMC::ItoKMCJSON</a>.</p>
 
@@ -1454,8 +1673,6 @@ Static Protected Attributes</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_electricField</td><td>Electric field in cell </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_cellPos</td><td>Cell center position </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_centroidPos</td><td>Cell centroid position </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_loCorner</td><td>Low corner of minimum box enclosing the cut-cell </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_hiCorner</td><td>High corner of minimum box enclosing the cut-cell </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_bndryCentroid</td><td>Cut-cell boundary centroid </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_bndryNormal</td><td>Cut-cell normal (pointing into the domain) </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Grid resolution </td></tr>
@@ -1463,7 +1680,14 @@ Static Protected Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section note"><dt>Note</dt><dd>Public because this is called by <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html" title="Base time stepper class that advances the Ito-KMC-Poisson system of equations. If you want a differen...">ItoKMCStepper</a> </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Public because this is called by <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html" title="Abstract TimeStepper for the Ito-KMC-Poisson system of equations.">ItoKMCStepper</a> </dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_lo</td><td>Lo </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_hi</td><td>Hi </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -1510,13 +1734,17 @@ Static Protected Attributes</h2></td></tr>
 <p>Reconcile photoionization reactions. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_itoPrticles</td><td>Particle products placed in Ito solvers. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_cdrParticles</td><td>Particle products placed in CDR solvers. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_absorbedPhotons</td><td>Photons absorbed on the mesh.</td></tr>
   </table>
   </dd>
 </dl>
-<p>This runs through the photo-reactions and associates photo-ionization products. </p>
+<p>This runs through the photo-reactions and associates photo-ionization products. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_itoParticles</td><td>Ito particles </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -1609,8 +1837,6 @@ Static Protected Attributes</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_numNewPhotons</td><td>Number of physical photons to be generated. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_cellPos</td><td>Cell center position </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_centroidPos</td><td>Cell centroid position </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_loCorner</td><td>Low corner of minimum box enclosing the cut-cell </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_hiCorner</td><td>High corner of minimum box enclosing the cut-cell </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_bndryCentroid</td><td>Cut-cell boundary centroid </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_bndryNormal</td><td>Cut-cell normal (pointing into the domain) </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Grid resolution </td></tr>
@@ -1618,7 +1844,14 @@ Static Protected Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section note"><dt>Note</dt><dd>Public because this is called by <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html" title="Base time stepper class that advances the Ito-KMC-Poisson system of equations. If you want a differen...">ItoKMCStepper</a> </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Public because this is called by <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html" title="Abstract TimeStepper for the Ito-KMC-Poisson system of equations.">ItoKMCStepper</a> </dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_lo</td><td>Lo </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_hi</td><td>Hi </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -1794,10 +2027,6 @@ Static Protected Attributes</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_primaryParticles</td><td>Particles that left the computational domain through the EB. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_cdrFluxesExtrap</td><td>Extrapolated CDR fluxes. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_primaryPhotons</td><td>Photons that left the computational domain through the EB. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_newNumParticles</td><td>Total number of particles in the cut-cell AFTER the transport step. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_oldNumParticles</td><td>Total number of particles in the cut-cell BEFORE the transport step. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_electricField</td><td>Electric field. <br  />
- </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_physicalCellCenter</td><td>Physical position of the cell center. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_cellCentroid</td><td>Cell centroid relative to the cell center (not multiplied by dx). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_bndryCentroid</td><td>EB face centroid relative to the cell center (not multiplied by dx). </td></tr>
@@ -1807,6 +2036,7 @@ Static Protected Attributes</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time step. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_isDielectric</td><td><a class="el" href="classDielectric.html" title="dielectric class. Simple tuple.">Dielectric</a> or electrode. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_matIndex</td><td>Material index (taken from computationalGeometry). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_E</td><td>E </td></tr>
   </table>
   </dd>
 </dl>
@@ -1976,8 +2206,8 @@ Static Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>KMC reactions used in advanceReactionNetowkr. </p>
-<dl class="section note"><dt>Note</dt><dd>This is set up via setupKMC in order toi ensure OpenMP thread safety when calling advanceReactionNetwork. The vector is later depopulated in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#ad9f3a89c6c7be3cd3e7f078da8dc817b" title="Kill the KMC solver.">killKMC()</a>. </dd></dl>
+<p>Thread-local copies of KMC reactions used in advanceReactionNetwork. </p>
+<p>Set up via <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a3cfc673476893a4ad398e52509fbef3c" title="Define the KMC solver and state.">defineKMC()</a> to ensure OpenMP thread safety; depopulated by <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#ad9f3a89c6c7be3cd3e7f078da8dc817b" title="Kill the KMC solver.">killKMC()</a>. </p>
 
 </div>
 </div>

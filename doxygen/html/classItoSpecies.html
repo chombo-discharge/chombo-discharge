@@ -94,7 +94,7 @@ Inheritance diagram for ItoSpecies:</div>
 <div class="center"><img src="classItoSpecies__inherit__graph.png" border="0" usemap="#aItoSpecies_inherit__map" alt="Inheritance graph"/></div>
 <map name="aItoSpecies_inherit__map" id="aItoSpecies_inherit__map">
 <area shape="rect" title="Class that acts as user interface for parsing initial data and mobility/diffusion kernels into ItoSol..." alt="" coords="53,5,143,31"/>
-<area shape="rect" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerSpecies.html" title="Species which is advected/diffused in Brownian walker code." alt="" coords="5,79,191,119"/>
+<area shape="rect" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerSpecies.html" title="Concrete ItoSpecies for the Brownian walker physics module." alt="" coords="5,79,191,119"/>
 <area shape="poly" title=" " alt="" coords="101,44,101,79,95,79,95,44"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
@@ -105,9 +105,9 @@ Public Member Functions</h2></td></tr>
 &#160;</td><td class="memItemRight" valign="bottom"><b>ItoSpecies</b> ()</td></tr>
 <tr class="memdesc:a02fbc2a52fde5d103b1e852c9128e8ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor, but user should set the name, charge/mobility/diffusivity etc. <br /></td></tr>
 <tr class="separator:a02fbc2a52fde5d103b1e852c9128e8ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a48a8e9e6ca96784e29c44dd8684cf9d5" id="r_a48a8e9e6ca96784e29c44dd8684cf9d5"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSpecies.html#a48a8e9e6ca96784e29c44dd8684cf9d5">ItoSpecies</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> <a class="el" href="classTracerParticleSolver.html">a_name</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_chargeNumber</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classTracerParticleSolver.html">a_mobile</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classTracerParticleSolver.html">a_diffusive</a>)</td></tr>
-<tr class="memdesc:a48a8e9e6ca96784e29c44dd8684cf9d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor.  <br /></td></tr>
-<tr class="separator:a48a8e9e6ca96784e29c44dd8684cf9d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a39138b3472b0fbed42c6cc6f721064b1" id="r_a39138b3472b0fbed42c6cc6f721064b1"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSpecies.html#a39138b3472b0fbed42c6cc6f721064b1">ItoSpecies</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_name</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_chargeNumber</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classTracerParticleSolver.html">a_mobile</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classTracerParticleSolver.html">a_diffusive</a>)</td></tr>
+<tr class="memdesc:a39138b3472b0fbed42c6cc6f721064b1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor.  <br /></td></tr>
+<tr class="separator:a39138b3472b0fbed42c6cc6f721064b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac6469bbc15c51b87cd283a2d0264378f" id="r_ac6469bbc15c51b87cd283a2d0264378f"><td class="memItemLeft" align="right" valign="top"><a id="ac6469bbc15c51b87cd283a2d0264378f" name="ac6469bbc15c51b87cd283a2d0264378f"></a>
 <a class="el" href="classTracerParticleSolver.html">virtual</a>&#160;</td><td class="memItemRight" valign="bottom"><b>~ItoSpecies</b> ()</td></tr>
 <tr class="memdesc:ac6469bbc15c51b87cd283a2d0264378f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor (does nothing): <br /></td></tr>
@@ -121,13 +121,11 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a5312d384652227f811f048228c156f19" id="r_a5312d384652227f811f048228c156f19"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">x</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;<a class="el" href="classTracerParticleSolver.html">t</a>)&gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSpecies.html#a5312d384652227f811f048228c156f19">getInitialDensity</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
 <tr class="memdesc:a5312d384652227f811f048228c156f19"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the initial density.  <br /></td></tr>
 <tr class="separator:a5312d384652227f811f048228c156f19"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1237915a28a61e4059c55199d945fbcd" id="r_a1237915a28a61e4059c55199d945fbcd"><td class="memItemLeft" align="right" valign="top"><a id="a1237915a28a61e4059c55199d945fbcd" name="a1237915a28a61e4059c55199d945fbcd"></a>
-<a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><b>isDiffusive</b> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:a1237915a28a61e4059c55199d945fbcd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return diffusive or not. <br /></td></tr>
+<tr class="memitem:a1237915a28a61e4059c55199d945fbcd" id="r_a1237915a28a61e4059c55199d945fbcd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSpecies.html#a1237915a28a61e4059c55199d945fbcd">isDiffusive</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:a1237915a28a61e4059c55199d945fbcd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return diffusive or not.  <br /></td></tr>
 <tr class="separator:a1237915a28a61e4059c55199d945fbcd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4d3c79342a6059b850d81355b4af191c" id="r_a4d3c79342a6059b850d81355b4af191c"><td class="memItemLeft" align="right" valign="top"><a id="a4d3c79342a6059b850d81355b4af191c" name="a4d3c79342a6059b850d81355b4af191c"></a>
-<a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><b>isMobile</b> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:a4d3c79342a6059b850d81355b4af191c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mobile <a class="el" href="classItoSpecies.html" title="Class that acts as user interface for parsing initial data and mobility/diffusion kernels into ItoSol...">ItoSpecies</a> or not. <br /></td></tr>
+<tr class="memitem:a4d3c79342a6059b850d81355b4af191c" id="r_a4d3c79342a6059b850d81355b4af191c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSpecies.html#a4d3c79342a6059b850d81355b4af191c">isMobile</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:a4d3c79342a6059b850d81355b4af191c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mobile <a class="el" href="classItoSpecies.html" title="Class that acts as user interface for parsing initial data and mobility/diffusion kernels into ItoSol...">ItoSpecies</a> or not.  <br /></td></tr>
 <tr class="separator:a4d3c79342a6059b850d81355b4af191c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a60ffd4cb59f0fd5daf7e3fe7db381c1b" id="r_a60ffd4cb59f0fd5daf7e3fe7db381c1b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSpecies.html#a60ffd4cb59f0fd5daf7e3fe7db381c1b">mobility</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_energy</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
 <tr class="memdesc:a60ffd4cb59f0fd5daf7e3fe7db381c1b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the mobility as a function of energy.  <br /></td></tr>
@@ -180,8 +178,8 @@ Protected Attributes</h2></td></tr>
 <div class="textblock"><p>Class that acts as user interface for parsing initial data and mobility/diffusion kernels into <a class="el" href="classItoSolver.html" title="Base class for Ito diffusion particle models.">ItoSolver</a>. </p>
 <p>This class is used for passing initial data and information into an <a class="el" href="classItoSolver.html" title="Base class for Ito diffusion particle models.">ItoSolver</a>. This class is required because the <a class="el" href="classItoSolver.html" title="Base class for Ito diffusion particle models.">ItoSolver</a> may not know about whether or not it will use advect/diffusion, and it is also does not know about initial conditions. All of that is supplied by this class. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a48a8e9e6ca96784e29c44dd8684cf9d5" name="a48a8e9e6ca96784e29c44dd8684cf9d5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a48a8e9e6ca96784e29c44dd8684cf9d5">&#9670;&#160;</a></span>ItoSpecies()</h2>
+<a id="a39138b3472b0fbed42c6cc6f721064b1" name="a39138b3472b0fbed42c6cc6f721064b1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a39138b3472b0fbed42c6cc6f721064b1">&#9670;&#160;</a></span>ItoSpecies()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -189,7 +187,7 @@ Protected Attributes</h2></td></tr>
         <tr>
           <td class="memname">ItoSpecies::ItoSpecies </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;&#160;</td>
           <td class="paramname"><em>a_name</em>, </td>
         </tr>
         <tr>
@@ -264,6 +262,7 @@ Protected Attributes</h2></td></tr>
   </dd>
 </dl>
 <dl class="section note"><dt>Note</dt><dd>Default implementation returns <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">0.0</a> </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Return value </dd></dl>
 
 </div>
 </div>
@@ -367,6 +366,46 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
+<a id="a1237915a28a61e4059c55199d945fbcd" name="a1237915a28a61e4059c55199d945fbcd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1237915a28a61e4059c55199d945fbcd">&#9670;&#160;</a></span>isDiffusive()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">bool</a> ItoSpecies::isDiffusive </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Return diffusive or not. </p>
+<dl class="section return"><dt>Returns</dt><dd>True if diffusive, false otherwise </dd></dl>
+
+</div>
+</div>
+<a id="a4d3c79342a6059b850d81355b4af191c" name="a4d3c79342a6059b850d81355b4af191c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4d3c79342a6059b850d81355b4af191c">&#9670;&#160;</a></span>isMobile()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">bool</a> ItoSpecies::isMobile </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Mobile <a class="el" href="classItoSpecies.html" title="Class that acts as user interface for parsing initial data and mobility/diffusion kernels into ItoSol...">ItoSpecies</a> or not. </p>
+<dl class="section return"><dt>Returns</dt><dd>True if mobile, false otherwise </dd></dl>
+
+</div>
+</div>
 <a id="a60ffd4cb59f0fd5daf7e3fe7db381c1b" name="a60ffd4cb59f0fd5daf7e3fe7db381c1b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a60ffd4cb59f0fd5daf7e3fe7db381c1b">&#9670;&#160;</a></span>mobility()</h2>
 
@@ -399,6 +438,7 @@ Protected Attributes</h2></td></tr>
   </dd>
 </dl>
 <dl class="section note"><dt>Note</dt><dd>Default implementation returns <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">0.0</a> </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Return value </dd></dl>
 
 </div>
 </div>

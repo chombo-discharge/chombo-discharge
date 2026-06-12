@@ -52,7 +52,7 @@
 <area shape="poly" id="edge21_Node000015_Node000019" title=" " alt="" coords="936,283,747,327,746,322,935,277"/>
 <area shape="rect" id="Node000020" title=" " alt="" coords="765,328,841,353"/>
 <area shape="poly" id="edge22_Node000015_Node000020" title=" " alt="" coords="955,283,846,325,844,320,953,278"/>
-<area shape="rect" id="Node000021" href="$CD__Decorations_8H_source.html" title=" " alt="" coords="1064,328,1204,353"/>
+<area shape="rect" id="Node000021" href="$CD__Decorations_8H.html" title="Declaration of various decoration macros." alt="" coords="1064,328,1204,353"/>
 <area shape="poly" id="edge23_Node000015_Node000021" title=" " alt="" coords="1009,278,1098,320,1096,324,1006,282"/>
 <area shape="rect" id="Node000022" href="$CD__BoxLoopsImplem_8H.html" title="Implementation of CD_BoxLoops.H." alt="" coords="865,328,1040,353"/>
 <area shape="poly" id="edge28_Node000015_Node000022" title=" " alt="" coords="981,281,965,317,960,315,976,279"/>
@@ -74,7 +74,7 @@
 <area shape="poly" id="edge39_Node000023_Node000027" title=" " alt="" coords="2105,121,2046,167,2043,163,2102,117"/>
 <area shape="rect" id="Node000030" href="$CD__Location_8H.html" title="Declaration of cell positions." alt="" coords="1802,255,1919,280"/>
 <area shape="poly" id="edge58_Node000023_Node000030" title=" " alt="" coords="2067,121,2010,140,1953,169,1910,206,1878,245,1874,242,1906,203,1950,164,2008,135,2066,116"/>
-<area shape="rect" id="Node000032" href="$CD__LeastSquaresImplem_8H_source.html" title=" " alt="" coords="2547,255,2745,280"/>
+<area shape="rect" id="Node000032" href="$CD__LeastSquaresImplem_8H.html" title="Implementation of CD_LeastSquares.H." alt="" coords="2547,255,2745,280"/>
 <area shape="poly" id="edge61_Node000023_Node000032" title=" " alt="" coords="2160,116,2345,164,2482,208,2596,248,2594,253,2480,213,2344,169,2159,121"/>
 <area shape="poly" id="edge40_Node000027_Node000009" title=" " alt="" coords="2055,197,2210,248,2208,253,2053,202"/>
 <area shape="poly" id="edge56_Node000027_Node000012" title=" " alt="" coords="2040,197,2071,221,2101,253,2118,289,2125,328,2127,341,2124,354,2111,377,2093,395,2090,391,2107,373,2119,352,2121,341,2119,328,2113,290,2097,256,2068,224,2037,202"/>
@@ -102,7 +102,7 @@
 <area shape="poly" id="edge66_Node000032_Node000023" title=" " alt="" coords="2622,257,2513,216,2368,169,2191,124,2192,119,2369,164,2514,211,2624,252"/>
 <area shape="rect" id="Node000033" href="$CD__LaPackUtils_8H.html" title="Interface to some LaPack routines." alt="" coords="2607,328,2744,353"/>
 <area shape="poly" id="edge62_Node000032_Node000033" title=" " alt="" coords="2653,279,2668,314,2663,316,2648,281"/>
-<area shape="rect" id="Node000035" href="$CD__MultiIndex_8H_source.html" title=" " alt="" coords="2921,328,3051,353"/>
+<area shape="rect" id="Node000035" href="$CD__MultiIndex_8H.html" title="Declaration of a SpaceDim multi&#45;index type for use with higher order Taylor series." alt="" coords="2921,328,3051,353"/>
 <area shape="poly" id="edge67_Node000032_Node000035" title=" " alt="" coords="2701,277,2918,323,2917,328,2700,283"/>
 <area shape="poly" id="edge64_Node000033_Node000012" title=" " alt="" coords="2607,354,2588,356,2172,404,2171,398,2587,351,2606,348"/>
 <area shape="poly" id="edge65_Node000033_Node000013" title=" " alt="" coords="2606,354,2587,356,2282,379,1979,396,1514,413,1514,407,1979,390,2281,374,2587,351,2606,349"/>

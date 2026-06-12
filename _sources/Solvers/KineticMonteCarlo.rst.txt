@@ -3,7 +3,7 @@
 Kinetic Monte Carlo
 ===================
 
-Kinetic Monte Carlo (KMC) algoritms are composed of various methods for stochastically simulating chemically reacting systems.
+Kinetic Monte Carlo (KMC) algorithms are composed of various methods for stochastically simulating chemically reacting systems.
 While various flavors of KMC are encountered in different fields of science, KMC in the context of ``chombo-discharge`` is primarily associated with chemistry kernels.
 
 Concept
@@ -78,7 +78,7 @@ For the SSA we compute the time until the next reaction by
    T = \frac{1}{\sum_{r\in\vec{R}} a_r}\ln\left(\frac{1}{u_1}\right)
 
 where :math:`A = \sum_{r\in\vec{R}} a_r` and :math:`u_1` is a uniformly distributed random variable between :math:`0` and :math:`1`.
-The type of reaction that fires is deterimined from
+The type of reaction that fires is determined from
 
 .. math::
 
@@ -203,7 +203,7 @@ In ``chombo-discharge``, the KMC solver is implemented as
 
 .. literalinclude:: ../../../../Source/KineticMonteCarlo/CD_KMCSolver.H
    :language: c++
-   :lines: 40-57, 73-78
+   :lines: 42-63,79-84
    :dedent: 0
 
 Here, the template parameters are:
@@ -226,7 +226,7 @@ The ``State`` representation *must* have a member function
 
 .. literalinclude:: ../../../../Source/KineticMonteCarlo/CD_KMCSingleState.H
    :language: c++
-   :lines: 87-92
+   :lines: 95-100
    :dedent: 2
 
 This function should return true if the state is a valid one (e.g., no negative populations) and false otherwise. 
@@ -239,7 +239,7 @@ The reaction representation ``R`` *must* have the following member functions:
 
 .. literalinclude:: ../../../../Source/KineticMonteCarlo/CD_KMCSingleStateReaction.H
    :language: c++
-   :lines: 73-108
+   :lines: 75-113
    :dedent: 2
 
 These template requirements exist so that users can define their states independent of their reactions.
@@ -324,14 +324,14 @@ The most general one that uses the hybrid advance is
 
 .. literalinclude:: ../../../../Source/KineticMonteCarlo/CD_KMCSolver.H
    :language: c++
-   :lines: 396-406
+   :lines: 413-423
    :dedent: 2
 
 When using the hybrid algorithm, the user should set the hybrid solver parameters through the function
 
 .. literalinclude:: ../../../../Source/KineticMonteCarlo/CD_KMCSolver.H
    :language: c++
-   :lines: 104-119
+   :lines: 112-122
    :dedent: 2
 
 State and reaction examples

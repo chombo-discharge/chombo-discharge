@@ -67,7 +67,7 @@ The function signature for setting the voltage on various parts is
 
 .. literalinclude:: ../../../../Source/Electrostatics/CD_FieldSolver.H
    :language: c++
-   :lines: 385-391
+   :lines: 386-392
    :dedent: 2
 
 This allows setting a time-dependent voltage on electrodes and domain boundaries.
@@ -126,7 +126,7 @@ To set a domain boundary condition function on a side, one can use the following
 					     const std::function<Real(const RealVect a_position, const Real a_time)>);
 
 For a general way of setting the function value on the domain side, one will use the above function together with an identifier ``dirichlet_custom`` or ``neumann_custom`` in the input script.
-This identifier simply tells ``FieldSolver`` to use that function to either specifiy :math:`\Phi` or :math:`\partial_n\Phi` on the boundary. 
+This identifier simply tells ``FieldSolver`` to use that function to either specify :math:`\Phi` or :math:`\partial_n\Phi` on the boundary. 
 These functions are then directly processed by the numerical discretizations.
 
 .. note::
@@ -347,7 +347,7 @@ The member function that does this is
 
 .. literalinclude:: ../../../../Source/Electrostatics/CD_FieldSolver.H
    :language: c++
-   :lines: 405-411
+   :lines: 406-412
    :dedent: 2
 
 Here, the type ``ElectrostaticEbBc::BcFunction`` is just an alias of ``std::function<Real(const RealVect a_position, const Real a_time)>``.
@@ -368,7 +368,7 @@ In principle, one can then also set spatially varying voltages along an electrod
 
 In the majority of cases the voltage on electrodes is either a live voltage or ground.
 Thus, although the above format is a general way of setting the voltage individually on each electrode (in both space and time) ``FieldSolver`` supports a simpler way of generating these voltage waveforms.
-When ``FieldSolver`` is instantiated, it will interally generate these functions through simplified expression such that the user only needs to set a single wave form that applies to all electrodes.
+When ``FieldSolver`` is instantiated, it will internally generate these functions through simplified expression such that the user only needs to set a single wave form that applies to all electrodes.
 The voltages that are set on the various electrodes are thus in the form:
 
 .. code-block:: c++
@@ -400,7 +400,7 @@ This is encapsulated by the pure member function
 
 .. literalinclude:: ../../../../Source/Electrostatics/CD_FieldSolver.H
    :language: c++
-   :lines: 111-121
+   :lines: 112-122
    :dedent: 2
 
 where ``a_phi`` is the resulting potential that was computing with the space charge density ``a_rho``, and surface charge density ``a_sigma``.

@@ -1,5 +1,5 @@
 <map id="Source/Multifluid/CD_MFMultigridInterpolator.cpp" name="Source/Multifluid/CD_MFMultigridInterpolator.cpp">
-<area shape="rect" id="Node000001" title="Implmementation of CD_MFMultigridInterpolator.H." alt="" coords="365,5,575,45"/>
+<area shape="rect" id="Node000001" title="Implementation of CD_MFMultigridInterpolator.H." alt="" coords="365,5,575,45"/>
 <area shape="rect" id="Node000002" href="$CD__MFMultigridInterpolator_8H.html" title="Declaration of a wrapper class for holding multifluid EBMultigridInterpolators." alt="" coords="363,93,577,119"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="473,46,473,79,467,79,467,46"/>
 <area shape="rect" id="Node000008" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="5,240,191,265"/>
@@ -8,7 +8,7 @@
 <area shape="poly" id="edge12_Node000001_Node000009" title=" " alt="" coords="515,43,554,64,592,91,625,125,655,162,698,227,693,230,651,165,621,129,588,95,551,69,513,48"/>
 <area shape="rect" id="Node000003" title=" " alt="" coords="579,167,630,192"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="493,116,572,158,569,162,490,121"/>
-<area shape="rect" id="Node000004" href="$CD__EBMultigridInterpolator_8H.html" title="Declaration of a class that can interpolate more ghost cells near the coarse&#45;fine boundary near the E..." alt="" coords="293,167,505,192"/>
+<area shape="rect" id="Node000004" href="$CD__EBMultigridInterpolator_8H.html" title="Parent base class for multigrid interpolation." alt="" coords="293,167,505,192"/>
 <area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="460,121,422,159,418,155,456,117"/>
 <area shape="poly" id="edge9_Node000002_Node000008" title=" " alt="" coords="429,121,359,142,282,169,201,203,134,236,131,231,199,199,280,164,358,137,427,116"/>
 <area shape="poly" id="edge10_Node000002_Node000009" title=" " alt="" coords="483,117,519,152,569,190,615,214,661,233,659,238,613,219,566,194,516,156,479,121"/>

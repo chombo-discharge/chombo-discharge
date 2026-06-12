@@ -79,6 +79,7 @@ $(function() {
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pro-methods">Protected Member Functions</a> &#124;
+<a href="#pro-static-methods">Static Protected Member Functions</a> &#124;
 <a href="#pro-attribs">Protected Attributes</a> &#124;
 <a href="#pro-static-attribs">Static Protected Attributes</a> &#124;
 <a href="classEBHelmholtzDomainBC-members.html">List of all members</a>  </div>
@@ -152,9 +153,12 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:a17d17cdc9365a5004575ed2b2015c513" id="r_a17d17cdc9365a5004575ed2b2015c513"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">RealVect</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzDomainBC.html#a17d17cdc9365a5004575ed2b2015c513">getBoundaryPosition</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_iv</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_dir</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">Side::LoHiSide</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_side</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
 <tr class="memdesc:a17d17cdc9365a5004575ed2b2015c513"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the cell-centered position at the boundary.  <br /></td></tr>
 <tr class="separator:a17d17cdc9365a5004575ed2b2015c513"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7490f4615fc89eafb6aaccfe3be36b27" id="r_a7490f4615fc89eafb6aaccfe3be36b27"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzDomainBC.html#a7490f4615fc89eafb6aaccfe3be36b27">multiplyByBcoef</a> (<a class="el" href="classTracerParticleSolver.html">BaseFab</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_flux</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">BaseFab</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_bco</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_dir</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">Side::LoHiSide</a> <a class="el" href="classTracerParticleSolver.html">a_side</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:a7490f4615fc89eafb6aaccfe3be36b27"><td class="mdescLeft">&#160;</td><td class="mdescRight">Utility function which multiplies the flux (or actually, dphi/dn) by the B-coefficient. This is used by the implementation classes when they compute the regular flux at the domain edges/faces.  <br /></td></tr>
-<tr class="separator:a7490f4615fc89eafb6aaccfe3be36b27"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-static-methods" name="pro-static-methods"></a>
+Static Protected Member Functions</h2></td></tr>
+<tr class="memitem:adc1e00dc20c55fa4b1ee1a1339d937d3" id="r_adc1e00dc20c55fa4b1ee1a1339d937d3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">static</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzDomainBC.html#adc1e00dc20c55fa4b1ee1a1339d937d3">multiplyByBcoef</a> (<a class="el" href="classTracerParticleSolver.html">BaseFab</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_flux</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">BaseFab</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_bco</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_dir</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">Side::LoHiSide</a> <a class="el" href="classTracerParticleSolver.html">a_side</a>)</td></tr>
+<tr class="memdesc:adc1e00dc20c55fa4b1ee1a1339d937d3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Utility function which multiplies the flux (or actually, dphi/dn) by the B-coefficient. This is used by the implementation classes when they compute the regular flux at the domain edges/faces.  <br /></td></tr>
+<tr class="separator:adc1e00dc20c55fa4b1ee1a1339d937d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -245,6 +249,12 @@ Static Protected Attributes</h2></td></tr>
   </dd>
 </dl>
 <dl class="section note"><dt>Note</dt><dd>This sets the internals for the BC object. This is called by <a class="el" href="classEBHelmholtzOp.html" title="Helmholtz operator for equations like alpha*a(x)*phi(x) + beta*div(b(x)*grad(phi(x))) = rho.">EBHelmholtzOp</a> when it defines stencils. </dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dataLocation</td><td>Description </td></tr>
+  </table>
+  </dd>
+</dl>
 
 <p>Reimplemented in <a class="el" href="classEBHelmholtzElectrostaticDomainBC.html#a045ab60ba7347e173c0b8428a83ebc3a">EBHelmholtzElectrostaticDomainBC</a>, and <a class="el" href="classEBHelmholtzEddingtonSP1DomainBC.html#ad4a797bf1dd6aca3a7bd8b1f7faa2e5a">EBHelmholtzEddingtonSP1DomainBC</a>.</p>
 
@@ -299,6 +309,7 @@ Static Protected Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Boundary position </dd></dl>
 
 </div>
 </div>
@@ -462,13 +473,14 @@ Static Protected Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Face flux </dd></dl>
 
 <p>Implemented in <a class="el" href="classEBHelmholtzDirichletDomainBC.html#a5862e7c0017deec19c2d403c8e7fc1f2">EBHelmholtzDirichletDomainBC</a>, <a class="el" href="classEBHelmholtzNeumannDomainBC.html#a882d13dc5401a6b1b8fc10f405e87292">EBHelmholtzNeumannDomainBC</a>, <a class="el" href="classEBHelmholtzRobinDomainBC.html#aa94ba1c4e56929cb94bbf04d1595b1a6">EBHelmholtzRobinDomainBC</a>, <a class="el" href="classEBHelmholtzElectrostaticDomainBC.html#aae9a109bce48785facc775159740f23c">EBHelmholtzElectrostaticDomainBC</a>, and <a class="el" href="classEBHelmholtzEddingtonSP1DomainBC.html#aa7e0f1e145a79ebc970405e107fa6d61">EBHelmholtzEddingtonSP1DomainBC</a>.</p>
 
 </div>
 </div>
-<a id="a7490f4615fc89eafb6aaccfe3be36b27" name="a7490f4615fc89eafb6aaccfe3be36b27"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7490f4615fc89eafb6aaccfe3be36b27">&#9670;&#160;</a></span>multiplyByBcoef()</h2>
+<a id="adc1e00dc20c55fa4b1ee1a1339d937d3" name="adc1e00dc20c55fa4b1ee1a1339d937d3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adc1e00dc20c55fa4b1ee1a1339d937d3">&#9670;&#160;</a></span>multiplyByBcoef()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -503,12 +515,12 @@ Static Protected Attributes</h2></td></tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td> const</td>
+          <td></td><td></td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">protected</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">

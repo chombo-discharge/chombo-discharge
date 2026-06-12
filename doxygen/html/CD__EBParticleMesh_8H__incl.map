@@ -16,7 +16,7 @@
 <area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="1375,29,1039,34,814,41,581,53,362,72,179,98,108,115,53,134,19,155,11,166,8,178,8,327,11,348,18,364,29,375,44,384,82,397,127,409,166,418,224,426,390,440,605,450,849,457,1345,466,1720,468,1720,474,1345,471,849,463,605,455,390,445,224,432,165,424,126,415,81,402,42,389,26,380,13,367,5,350,3,327,3,178,6,164,16,151,51,129,106,110,178,93,362,66,581,48,814,35,1038,28,1375,24"/>
 <area shape="rect" id="Node000009" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="2577,460,2756,485"/>
 <area shape="poly" id="edge10_Node000001_Node000009" title=" " alt="" coords="1518,24,2083,31,2491,39,2923,53,3335,72,3684,98,3821,114,3926,132,3994,153,4012,164,4019,177,4019,328,4012,361,3994,383,3967,400,3933,414,3905,423,3864,430,3746,443,3418,461,3056,470,2770,473,2769,468,3056,465,3417,455,3746,438,3863,425,3904,418,3931,410,3964,395,3990,379,4007,359,4013,327,4013,179,4008,168,3991,158,3925,137,3821,119,3684,103,3335,77,2923,58,2491,45,2083,36,1518,30"/>
-<area shape="rect" id="Node000010" href="$CD__EBParticleMeshImplem_8H.html" title="Implementatoin of CD_EBParticleMesh.H." alt="" coords="994,93,1206,119"/>
+<area shape="rect" id="Node000010" href="$CD__EBParticleMeshImplem_8H.html" title="Implementation of CD_EBParticleMesh.H." alt="" coords="994,93,1206,119"/>
 <area shape="poly" id="edge11_Node000001_Node000010" title=" " alt="" coords="1376,44,1158,93,1157,88,1375,39"/>
 <area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="2586,413,2574,415,2223,446,1934,467,1933,462,2222,440,2573,409,2585,408"/>
 <area shape="poly" id="edge8_Node000007_Node000009" title=" " alt="" coords="2669,412,2669,446,2664,446,2664,412"/>
@@ -42,7 +42,7 @@
 <area shape="poly" id="edge18_Node000012_Node000016" title=" " alt="" coords="772,336,573,357,315,389,315,384,572,352,772,331"/>
 <area shape="rect" id="Node000017" title=" " alt="" coords="325,387,437,412"/>
 <area shape="poly" id="edge19_Node000012_Node000017" title=" " alt="" coords="772,340,451,390,451,385,771,335"/>
-<area shape="rect" id="Node000018" href="$CD__Decorations_8H_source.html" title=" " alt="" coords="765,387,905,412"/>
+<area shape="rect" id="Node000018" href="$CD__Decorations_8H.html" title="Declaration of various decoration macros." alt="" coords="765,387,905,412"/>
 <area shape="poly" id="edge21_Node000012_Node000018" title=" " alt="" coords="837,339,837,373,832,373,832,339"/>
 <area shape="rect" id="Node000019" href="$CD__BoxLoopsImplem_8H.html" title="Implementation of CD_BoxLoops.H." alt="" coords="929,387,1103,412"/>
 <area shape="poly" id="edge26_Node000012_Node000019" title=" " alt="" coords="865,336,975,379,973,384,863,341"/>
@@ -59,7 +59,7 @@
 <area shape="poly" id="edge31_Node000020_Node000022" title=" " alt="" coords="1836,195,1799,214,1763,242,1740,267,1723,290,1717,313,1720,325,1729,337,1756,356,1796,368,1845,375,1901,379,2015,380,2111,384,2111,389,2015,385,1900,384,1845,381,1795,373,1754,360,1725,341,1716,327,1712,313,1718,288,1736,263,1760,238,1796,209,1833,190"/>
 <area shape="rect" id="Node000023" href="$CD__EBAMRData_8H.html" title="Class for holding data across EBAMR hierarchies." alt="" coords="3494,313,3634,339"/>
 <area shape="poly" id="edge33_Node000020_Node000023" title=" " alt="" coords="1933,181,2325,200,2588,216,2855,237,3203,275,3480,310,3480,316,3202,280,2854,243,2587,222,2324,205,1933,186"/>
-<area shape="rect" id="Node000039" href="$CD__ParticleMap_8H_source.html" title=" " alt="" coords="2464,240,2603,265"/>
+<area shape="rect" id="Node000039" href="$CD__ParticleMap_8H.html" title="Implementation of CD_ParticleOps.H." alt="" coords="2464,240,2603,265"/>
 <area shape="poly" id="edge65_Node000020_Node000039" title=" " alt="" coords="1933,185,2451,240,2450,245,1933,190"/>
 <area shape="rect" id="Node000044" href="$CD__ParticleOpsImplem_8H.html" title="Implementation of CD_ParticleOps.H." alt="" coords="1773,240,1958,265"/>
 <area shape="poly" id="edge74_Node000020_Node000044" title=" " alt="" coords="1861,192,1859,227,1854,226,1856,192"/>

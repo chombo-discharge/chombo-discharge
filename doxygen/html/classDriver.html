@@ -89,18 +89,6 @@ $(function() {
  <a href="classDriver.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="CD__Driver_8H_source.html">CD_Driver.H</a>&gt;</code></p>
-<div class="dynheader">
-Collaboration diagram for Driver:</div>
-<div class="dyncontent">
-<div class="center"><img src="classDriver__coll__graph.png" border="0" usemap="#aDriver_coll__map" alt="Collaboration graph"/></div>
-<map name="aDriver_coll__map" id="aDriver_coll__map">
-<area shape="rect" title="Main class for time/space advancement of streamer equations." alt="" coords="59,196,121,221"/>
-<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="5,93,175,133"/>
-<area shape="poly" title=" " alt="" coords="93,147,93,196,87,196,87,147"/>
-<area shape="rect" href="classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="21,5,159,31"/>
-<area shape="poly" title=" " alt="" coords="93,44,93,93,87,93,87,44"/>
-</map>
-<center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
@@ -115,8 +103,9 @@ Public Member Functions</h2></td></tr>
 <a class="el" href="classTracerParticleSolver.html">virtual</a>&#160;</td><td class="memItemRight" valign="bottom"><b>~Driver</b> ()</td></tr>
 <tr class="memdesc:ac7645eea8d3ce2bc39ddbda5e840297a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor (does nothing) <br /></td></tr>
 <tr class="separator:ac7645eea8d3ce2bc39ddbda5e840297a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae758bbee13aa1c712423674db8598e54" id="r_ae758bbee13aa1c712423674db8598e54"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDriver.html#ae758bbee13aa1c712423674db8598e54">setupAndRun</a> ()</td></tr>
-<tr class="memdesc:ae758bbee13aa1c712423674db8598e54"><td class="mdescLeft">&#160;</td><td class="mdescRight">Setup and run simulations.  <br /></td></tr>
+<tr class="memitem:ae758bbee13aa1c712423674db8598e54" id="r_ae758bbee13aa1c712423674db8598e54"><td class="memItemLeft" align="right" valign="top"><a id="ae758bbee13aa1c712423674db8598e54" name="ae758bbee13aa1c712423674db8598e54"></a>
+<a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>setupAndRun</b> ()</td></tr>
+<tr class="memdesc:ae758bbee13aa1c712423674db8598e54"><td class="mdescLeft">&#160;</td><td class="mdescRight">Setup and run simulations. <br /></td></tr>
 <tr class="separator:ae758bbee13aa1c712423674db8598e54"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
@@ -124,9 +113,9 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:aa52e9e3c4a04da44ecc3af54ac5d9245" id="r_aa52e9e3c4a04da44ecc3af54ac5d9245"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDriver.html#aa52e9e3c4a04da44ecc3af54ac5d9245">run</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_startTime</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_endTime</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_maxSteps</a>)</td></tr>
 <tr class="memdesc:aa52e9e3c4a04da44ecc3af54ac5d9245"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run a simulation for a specific time, or until a maximum number of steps have been performed.  <br /></td></tr>
 <tr class="separator:aa52e9e3c4a04da44ecc3af54ac5d9245"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a80a09dd4343b51d772fceb0af3ed8f65" id="r_a80a09dd4343b51d772fceb0af3ed8f65"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDriver.html#a80a09dd4343b51d772fceb0af3ed8f65">setup</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> <a class="el" href="classTracerParticleSolver.html">a_inputFile</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_initialRegrids</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classTracerParticleSolver.html">a_restart</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> <a class="el" href="classTracerParticleSolver.html">a_restartFile</a>)</td></tr>
-<tr class="memdesc:a80a09dd4343b51d772fceb0af3ed8f65"><td class="mdescLeft">&#160;</td><td class="mdescRight">Setup function.  <br /></td></tr>
-<tr class="separator:a80a09dd4343b51d772fceb0af3ed8f65"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aee30876f7fdc16faba411e075d53b44f" id="r_aee30876f7fdc16faba411e075d53b44f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDriver.html#aee30876f7fdc16faba411e075d53b44f">setup</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_inputFile</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_initialRegrids</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classTracerParticleSolver.html">a_restart</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_restartFile</a>)</td></tr>
+<tr class="memdesc:aee30876f7fdc16faba411e075d53b44f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Setup function.  <br /></td></tr>
+<tr class="separator:aee30876f7fdc16faba411e075d53b44f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af37d047ade6449a47d1041872fd6624d" id="r_af37d047ade6449a47d1041872fd6624d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDriver.html#af37d047ade6449a47d1041872fd6624d">setAmr</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classAmrMesh.html">AmrMesh</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_amrMesh</a>)</td></tr>
 <tr class="memdesc:af37d047ade6449a47d1041872fd6624d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set amr.  <br /></td></tr>
 <tr class="separator:af37d047ade6449a47d1041872fd6624d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -161,9 +150,8 @@ Protected Member Functions</h2></td></tr>
 <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>allocateInternals</b> ()</td></tr>
 <tr class="memdesc:a32b646c38ca923ddf9112fa4922b260d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocate internal storage for <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a>. <br /></td></tr>
 <tr class="separator:a32b646c38ca923ddf9112fa4922b260d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0c822e790df55582389fc5c4a814e8d7" id="r_a0c822e790df55582389fc5c4a814e8d7"><td class="memItemLeft" align="right" valign="top"><a id="a0c822e790df55582389fc5c4a814e8d7" name="a0c822e790df55582389fc5c4a814e8d7"></a>
-<a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>cacheTags</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__EBAMRTags_8H.html#a23ff4c2bc0ca3002cc8c0cde60fe9181">EBAMRTags</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_tags</a>)</td></tr>
-<tr class="memdesc:a0c822e790df55582389fc5c4a814e8d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cache tags. This is used. <br /></td></tr>
+<tr class="memitem:a0c822e790df55582389fc5c4a814e8d7" id="r_a0c822e790df55582389fc5c4a814e8d7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDriver.html#a0c822e790df55582389fc5c4a814e8d7">cacheTags</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__EBAMRTags_8H.html#a23ff4c2bc0ca3002cc8c0cde60fe9181">EBAMRTags</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_tags</a>)</td></tr>
+<tr class="memdesc:a0c822e790df55582389fc5c4a814e8d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cache tags for use after regrid.  <br /></td></tr>
 <tr class="separator:a0c822e790df55582389fc5c4a814e8d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af8f2ba13f8a28e22c5eb4f8a5f03981c" id="r_af8f2ba13f8a28e22c5eb4f8a5f03981c"><td class="memItemLeft" align="right" valign="top"><a id="af8f2ba13f8a28e22c5eb4f8a5f03981c" name="af8f2ba13f8a28e22c5eb4f8a5f03981c"></a>
 <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>writeEBIS</b> ()</td></tr>
@@ -173,7 +161,7 @@ Protected Member Functions</h2></td></tr>
 <tr class="memdesc:a79d453ef518210bbb882d105dad0e76c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get geometric tags.  <br /></td></tr>
 <tr class="separator:a79d453ef518210bbb882d105dad0e76c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a09795ee144b10d2ec3dde66bc64bf196" id="r_a09795ee144b10d2ec3dde66bc64bf196"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDriver.html#a09795ee144b10d2ec3dde66bc64bf196">getCellsAndBoxes</a> (<a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_numLocalCells</a>, <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_numLocalCellsGhosts</a>, <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_numLocalBoxes</a>, <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_numTotalCells</a>, <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_numTotalCellsGhosts</a>, <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_numTotalBoxes</a>, <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_numLocalLevelBoxes</a>, <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_numTotalLevelBoxes</a>, <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_numLocalLevelCells</a>, <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_numTotalLevelCells</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_finestLevel</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">DisjointBoxLayout</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_grids</a>)</td></tr>
-<tr class="memdesc:a09795ee144b10d2ec3dde66bc64bf196"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get statics about a DisjointBoxLaout. This will compute the number of grid cells and patches both locally and globally.  <br /></td></tr>
+<tr class="memdesc:a09795ee144b10d2ec3dde66bc64bf196"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get statistics about a DisjointBoxLaout. This will compute the number of grid cells and patches both locally and globally.  <br /></td></tr>
 <tr class="separator:a09795ee144b10d2ec3dde66bc64bf196"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3da91a3c074c0c8ef8fb33bb8d3b9a75" id="r_a3da91a3c074c0c8ef8fb33bb8d3b9a75"><td class="memItemLeft" align="right" valign="top"><a id="a3da91a3c074c0c8ef8fb33bb8d3b9a75" name="a3da91a3c074c0c8ef8fb33bb8d3b9a75"></a>
 <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>gridReport</b> ()</td></tr>
@@ -194,24 +182,21 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:a9b71898d8e6985fbdbaaa763644bc23a" id="r_a9b71898d8e6985fbdbaaa763644bc23a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDriver.html#a9b71898d8e6985fbdbaaa763644bc23a">setCellTagger</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classCellTagger.html">CellTagger</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_cellTagger</a>)</td></tr>
 <tr class="memdesc:a9b71898d8e6985fbdbaaa763644bc23a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the cell tagger.  <br /></td></tr>
 <tr class="separator:a9b71898d8e6985fbdbaaa763644bc23a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3200bfb2c8b2811bba7589afd877ef3a" id="r_a3200bfb2c8b2811bba7589afd877ef3a"><td class="memItemLeft" align="right" valign="top"><a id="a3200bfb2c8b2811bba7589afd877ef3a" name="a3200bfb2c8b2811bba7589afd877ef3a"></a>
-<a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>setupFresh</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_initialRegrids</a>)</td></tr>
-<tr class="memdesc:a3200bfb2c8b2811bba7589afd877ef3a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Setup function. <br /></td></tr>
+<tr class="memitem:a3200bfb2c8b2811bba7589afd877ef3a" id="r_a3200bfb2c8b2811bba7589afd877ef3a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDriver.html#a3200bfb2c8b2811bba7589afd877ef3a">setupFresh</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_initialRegrids</a>)</td></tr>
+<tr class="memdesc:a3200bfb2c8b2811bba7589afd877ef3a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Setup function for fresh (non-restart) simulations.  <br /></td></tr>
 <tr class="separator:a3200bfb2c8b2811bba7589afd877ef3a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a11094cd4cb0ae89ecba017c63087c827" id="r_a11094cd4cb0ae89ecba017c63087c827"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDriver.html#a11094cd4cb0ae89ecba017c63087c827">setupGeometryOnly</a> ()</td></tr>
 <tr class="memdesc:a11094cd4cb0ae89ecba017c63087c827"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set for restart.  <br /></td></tr>
 <tr class="separator:a11094cd4cb0ae89ecba017c63087c827"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae696beba11754418f71f4b359ba7552d" id="r_ae696beba11754418f71f4b359ba7552d"><td class="memItemLeft" align="right" valign="top"><a id="ae696beba11754418f71f4b359ba7552d" name="ae696beba11754418f71f4b359ba7552d"></a>
-<a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>checkRestartFile</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> <a class="el" href="classTracerParticleSolver.html">a_restartFile</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:ae696beba11754418f71f4b359ba7552d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if restart file exists. <br /></td></tr>
-<tr class="separator:ae696beba11754418f71f4b359ba7552d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a32eecb9a56648cff29e56ba2e787c06e" id="r_a32eecb9a56648cff29e56ba2e787c06e"><td class="memItemLeft" align="right" valign="top"><a id="a32eecb9a56648cff29e56ba2e787c06e" name="a32eecb9a56648cff29e56ba2e787c06e"></a>
-<a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>stepReport</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_startTime</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_endTime</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_maxSteps</a>)</td></tr>
-<tr class="memdesc:a32eecb9a56648cff29e56ba2e787c06e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write a time step report. <br /></td></tr>
+<tr class="memitem:a03baf6737bb0fb211b6eb87df8d5b748" id="r_a03baf6737bb0fb211b6eb87df8d5b748"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDriver.html#a03baf6737bb0fb211b6eb87df8d5b748">checkRestartFile</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_restartFile</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:a03baf6737bb0fb211b6eb87df8d5b748"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if restart file exists and abort if not found.  <br /></td></tr>
+<tr class="separator:a03baf6737bb0fb211b6eb87df8d5b748"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a32eecb9a56648cff29e56ba2e787c06e" id="r_a32eecb9a56648cff29e56ba2e787c06e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDriver.html#a32eecb9a56648cff29e56ba2e787c06e">stepReport</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_startTime</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_endTime</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_maxSteps</a>)</td></tr>
+<tr class="memdesc:a32eecb9a56648cff29e56ba2e787c06e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write a time step report to stdout.  <br /></td></tr>
 <tr class="separator:a32eecb9a56648cff29e56ba2e787c06e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:affe9ec6a33f8628d128fba84c0924eb2" id="r_affe9ec6a33f8628d128fba84c0924eb2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDriver.html#affe9ec6a33f8628d128fba84c0924eb2">writePlotFile</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> <a class="el" href="classTracerParticleSolver.html">a_filename</a>)</td></tr>
-<tr class="memdesc:affe9ec6a33f8628d128fba84c0924eb2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write a plot file.  <br /></td></tr>
-<tr class="separator:affe9ec6a33f8628d128fba84c0924eb2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a24ae57e5859a1e453bbd1223e37d8592" id="r_a24ae57e5859a1e453bbd1223e37d8592"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDriver.html#a24ae57e5859a1e453bbd1223e37d8592">writePlotFile</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_filename</a>)</td></tr>
+<tr class="memdesc:a24ae57e5859a1e453bbd1223e37d8592"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write a plot file to the specified path.  <br /></td></tr>
+<tr class="separator:a24ae57e5859a1e453bbd1223e37d8592"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a479d79338b9225afb339c7d0e623d115" id="r_a479d79338b9225afb339c7d0e623d115"><td class="memItemLeft" align="right" valign="top"><a id="a479d79338b9225afb339c7d0e623d115" name="a479d79338b9225afb339c7d0e623d115"></a>
 <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>writePlotFile</b> ()</td></tr>
 <tr class="memdesc:a479d79338b9225afb339c7d0e623d115"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write a plot file. This writes to plt/. <br /></td></tr>
@@ -240,19 +225,18 @@ Protected Member Functions</h2></td></tr>
 <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>writeCheckpointFile</b> ()</td></tr>
 <tr class="memdesc:a54dfb57d63da7c3ced666a1f16b09770"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write a checkpoint file. <br /></td></tr>
 <tr class="separator:a54dfb57d63da7c3ced666a1f16b09770"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a83f879fc3857db6548c7493e9cbe7a95" id="r_a83f879fc3857db6548c7493e9cbe7a95"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDriver.html#a83f879fc3857db6548c7493e9cbe7a95">writeGeometry</a> ()</td></tr>
-<tr class="memdesc:a83f879fc3857db6548c7493e9cbe7a95"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write checkpoint data.  <br /></td></tr>
+<tr class="memitem:a83f879fc3857db6548c7493e9cbe7a95" id="r_a83f879fc3857db6548c7493e9cbe7a95"><td class="memItemLeft" align="right" valign="top"><a id="a83f879fc3857db6548c7493e9cbe7a95" name="a83f879fc3857db6548c7493e9cbe7a95"></a>
+<a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>writeGeometry</b> ()</td></tr>
+<tr class="memdesc:a83f879fc3857db6548c7493e9cbe7a95"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the geometry to file. <br /></td></tr>
 <tr class="separator:a83f879fc3857db6548c7493e9cbe7a95"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2d4bf1bdf482b45c5e388047d18bbfc9" id="r_a2d4bf1bdf482b45c5e388047d18bbfc9"><td class="memItemLeft" align="right" valign="top"><a id="a2d4bf1bdf482b45c5e388047d18bbfc9" name="a2d4bf1bdf482b45c5e388047d18bbfc9"></a>
-<a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><b>tagCells</b> (<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">IntVectSet</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_allTags</a>, <a class="el" href="CD__EBAMRTags_8H.html#a23ff4c2bc0ca3002cc8c0cde60fe9181">EBAMRTags</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_cellTags</a>)</td></tr>
-<tr class="memdesc:a2d4bf1bdf482b45c5e388047d18bbfc9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tag cells for refinement. This computes cell tags and global tags (union of cell tags with geometric tags);. <br /></td></tr>
+<tr class="memitem:a2d4bf1bdf482b45c5e388047d18bbfc9" id="r_a2d4bf1bdf482b45c5e388047d18bbfc9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDriver.html#a2d4bf1bdf482b45c5e388047d18bbfc9">tagCells</a> (<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">IntVectSet</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_allTags</a>, <a class="el" href="CD__EBAMRTags_8H.html#a23ff4c2bc0ca3002cc8c0cde60fe9181">EBAMRTags</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_cellTags</a>)</td></tr>
+<tr class="memdesc:a2d4bf1bdf482b45c5e388047d18bbfc9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tag cells for refinement. Computes cell tags and global tags (union of cell tags with geometric tags).  <br /></td></tr>
 <tr class="separator:a2d4bf1bdf482b45c5e388047d18bbfc9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a48fbd2567a1e85f8bc7be58b1a12204d" id="r_a48fbd2567a1e85f8bc7be58b1a12204d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDriver.html#a48fbd2567a1e85f8bc7be58b1a12204d">getNumberOfPlotVariables</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
 <tr class="memdesc:a48fbd2567a1e85f8bc7be58b1a12204d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get number of plot variables.  <br /></td></tr>
 <tr class="separator:a48fbd2567a1e85f8bc7be58b1a12204d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aec17207fb854b43dac8b20e4d3e80060" id="r_aec17207fb854b43dac8b20e4d3e80060"><td class="memItemLeft" align="right" valign="top"><a id="aec17207fb854b43dac8b20e4d3e80060" name="aec17207fb854b43dac8b20e4d3e80060"></a>
-<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>getPlotVariableNames</b> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:aec17207fb854b43dac8b20e4d3e80060"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the string identifiers for the internal plot variables from <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a>. <br /></td></tr>
+<tr class="memitem:aec17207fb854b43dac8b20e4d3e80060" id="r_aec17207fb854b43dac8b20e4d3e80060"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDriver.html#aec17207fb854b43dac8b20e4d3e80060">getPlotVariableNames</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:aec17207fb854b43dac8b20e4d3e80060"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the string identifiers for the internal plot variables from <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a>.  <br /></td></tr>
 <tr class="separator:aec17207fb854b43dac8b20e4d3e80060"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8c64a1810eaae35d5077f4fcfe181534" id="r_a8c64a1810eaae35d5077f4fcfe181534"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDriver.html#a8c64a1810eaae35d5077f4fcfe181534">writePlotData</a> (<a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_output</a>, <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_comp</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_level</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:a8c64a1810eaae35d5077f4fcfe181534"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write internal plot data.  <br /></td></tr>
@@ -269,9 +253,8 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:a25dd1773104c4f0b5471daa0a30529f2" id="r_a25dd1773104c4f0b5471daa0a30529f2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDriver.html#a25dd1773104c4f0b5471daa0a30529f2">writeLoads</a> (<a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_output</a>, <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_comp</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_level</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:a25dd1773104c4f0b5471daa0a30529f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write computational loads to output.  <br /></td></tr>
 <tr class="separator:a25dd1773104c4f0b5471daa0a30529f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0539d9687fe6840da428beebc72ce384" id="r_a0539d9687fe6840da428beebc72ce384"><td class="memItemLeft" align="right" valign="top"><a id="a0539d9687fe6840da428beebc72ce384" name="a0539d9687fe6840da428beebc72ce384"></a>
-<a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><b>getFinestTagLevel</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__EBAMRTags_8H.html#a23ff4c2bc0ca3002cc8c0cde60fe9181">EBAMRTags</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_cellTags</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:a0539d9687fe6840da428beebc72ce384"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the finest tag level. <br /></td></tr>
+<tr class="memitem:a0539d9687fe6840da428beebc72ce384" id="r_a0539d9687fe6840da428beebc72ce384"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDriver.html#a0539d9687fe6840da428beebc72ce384">getFinestTagLevel</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__EBAMRTags_8H.html#a23ff4c2bc0ca3002cc8c0cde60fe9181">EBAMRTags</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_cellTags</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:a0539d9687fe6840da428beebc72ce384"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the finest AMR level that contains any cell tags.  <br /></td></tr>
 <tr class="separator:a0539d9687fe6840da428beebc72ce384"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3c8bcc44287a7582601dfcb4492f8425" id="r_a3c8bcc44287a7582601dfcb4492f8425"><td class="memItemLeft" align="right" valign="top"><a id="a3c8bcc44287a7582601dfcb4492f8425" name="a3c8bcc44287a7582601dfcb4492f8425"></a>
 <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>rebuildParmParse</b> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
@@ -396,7 +379,7 @@ Protected Attributes</h2></td></tr>
 <tr class="memdesc:a4cce3bacbfdebf49b23b9148472a1101"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tags. <br /></td></tr>
 <tr class="separator:a4cce3bacbfdebf49b23b9148472a1101"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3079d174fba043b2c3b5bcef0528d64c" id="r_a3079d174fba043b2c3b5bcef0528d64c"><td class="memItemLeft" align="right" valign="top"><a id="a3079d174fba043b2c3b5bcef0528d64c" name="a3079d174fba043b2c3b5bcef0528d64c"></a>
-<a class="el" href="classEBAMRData.html">EBAMRBool</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_cachedTags</b></td></tr>
+<a class="el" href="classTracerParticleSolver.html">EBAMRBool</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_cachedTags</b></td></tr>
 <tr class="memdesc:a3079d174fba043b2c3b5bcef0528d64c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cached tags. This is done so that when we regrid and change box ownership we can copy the tags around. <br /></td></tr>
 <tr class="separator:a3079d174fba043b2c3b5bcef0528d64c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac69410d5d7e25d61424c1822be00e854" id="r_ac69410d5d7e25d61424c1822be00e854"><td class="memItemLeft" align="right" valign="top"><a id="ac69410d5d7e25d61424c1822be00e854" name="ac69410d5d7e25d61424c1822be00e854"></a>
@@ -421,6 +404,7 @@ Protected Attributes</h2></td></tr>
 <tr class="separator:a82af33033665b6b3397b331a68dfde0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a47951b90db96b833908981a0372622dd" id="r_a47951b90db96b833908981a0372622dd"><td class="memItemLeft" align="right" valign="top"><a id="a47951b90db96b833908981a0372622dd" name="a47951b90db96b833908981a0372622dd"></a>
 <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_capacitance</b></td></tr>
+<tr class="memdesc:a47951b90db96b833908981a0372622dd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Capacitance of the geometry (used for electrical energy calculations). <br /></td></tr>
 <tr class="separator:a47951b90db96b833908981a0372622dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8def665fc7c4991d036e82329f4c2ee7" id="r_a8def665fc7c4991d036e82329f4c2ee7"><td class="memItemLeft" align="right" valign="top"><a id="a8def665fc7c4991d036e82329f4c2ee7" name="a8def665fc7c4991d036e82329f4c2ee7"></a>
 <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_wallClockStart</b></td></tr>
@@ -558,6 +542,74 @@ Protected Attributes</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="a0c822e790df55582389fc5c4a814e8d7" name="a0c822e790df55582389fc5c4a814e8d7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0c822e790df55582389fc5c4a814e8d7">&#9670;&#160;</a></span>cacheTags()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> Driver::cacheTags </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__EBAMRTags_8H.html#a23ff4c2bc0ca3002cc8c0cde60fe9181">EBAMRTags</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_tags</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Cache tags for use after regrid. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_tags</td><td>Tags to cache. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a03baf6737bb0fb211b6eb87df8d5b748" name="a03baf6737bb0fb211b6eb87df8d5b748"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a03baf6737bb0fb211b6eb87df8d5b748">&#9670;&#160;</a></span>checkRestartFile()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> Driver::checkRestartFile </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_restartFile</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Check if restart file exists and abort if not found. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_restartFile</td><td>Path to the restart file. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a09795ee144b10d2ec3dde66bc64bf196" name="a09795ee144b10d2ec3dde66bc64bf196"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a09795ee144b10d2ec3dde66bc64bf196">&#9670;&#160;</a></span>getCellsAndBoxes()</h2>
 
@@ -652,15 +704,15 @@ Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Get statics about a DisjointBoxLaout. This will compute the number of grid cells and patches both locally and globally. </p>
+<p>Get statistics about a DisjointBoxLaout. This will compute the number of grid cells and patches both locally and globally. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">a_numLocalCells</td><td>Local number of grid cells, excluding ghost cells. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">a_numLocalCellsGhosts</td><td>Local number of grid cells, including ghost cells. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_numLocalBox</td><td>Local number of grid patches (over all levels) </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_numLocalBoxes</td><td>Local number of grid patches (over all levels) </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">a_numTotalCells</td><td>Total number of grid cells, excluding ghost cells. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">a_numTotalCellsGhosts</td><td>Total number of grid cells, including ghost cells. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_numTotalBox</td><td>Total number of grid patches </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_numTotalBoxes</td><td>Total number of grid patches </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">a_numLocalLevelBoxes</td><td>Local number of grid boxes (per level) </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">a_numTotalLevelBoxes</td><td>Total number of grid boxes (per level) </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">a_numLocalLevelCells</td><td>Local number of grid cells (per level) </td></tr>
@@ -670,6 +722,41 @@ Protected Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="a0539d9687fe6840da428beebc72ce384" name="a0539d9687fe6840da428beebc72ce384"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0539d9687fe6840da428beebc72ce384">&#9670;&#160;</a></span>getFinestTagLevel()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">int</a> Driver::getFinestTagLevel </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__EBAMRTags_8H.html#a23ff4c2bc0ca3002cc8c0cde60fe9181">EBAMRTags</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_cellTags</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Return the finest AMR level that contains any cell tags. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cellTags</td><td>Cell tags on all AMR levels. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Finest AMR level with at least one tagged cell. </dd></dl>
 
 </div>
 </div>
@@ -726,6 +813,34 @@ Protected Attributes</h2></td></tr>
 
 <p>Get number of plot variables. </p>
 <dl class="section return"><dt>Returns</dt><dd>Returns the number of internal plot variables that <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a> will write to file. </dd></dl>
+
+</div>
+</div>
+<a id="aec17207fb854b43dac8b20e4d3e80060" name="aec17207fb854b43dac8b20e4d3e80060"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aec17207fb854b43dac8b20e4d3e80060">&#9670;&#160;</a></span>getPlotVariableNames()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &gt; Driver::getPlotVariableNames </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the string identifiers for the internal plot variables from <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a>. </p>
+<dl class="section return"><dt>Returns</dt><dd>Names of the internal plot variables. </dd></dl>
 
 </div>
 </div>
@@ -1154,8 +1269,8 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a80a09dd4343b51d772fceb0af3ed8f65" name="a80a09dd4343b51d772fceb0af3ed8f65"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a80a09dd4343b51d772fceb0af3ed8f65">&#9670;&#160;</a></span>setup()</h2>
+<a id="aee30876f7fdc16faba411e075d53b44f" name="aee30876f7fdc16faba411e075d53b44f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aee30876f7fdc16faba411e075d53b44f">&#9670;&#160;</a></span>setup()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1166,7 +1281,7 @@ Protected Attributes</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> Driver::setup </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;&#160;</td>
           <td class="paramname"><em>a_inputFile</em>, </td>
         </tr>
         <tr>
@@ -1184,7 +1299,7 @@ Protected Attributes</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;&#160;</td>
           <td class="paramname"><em>a_restartFile</em>&#160;</td>
         </tr>
         <tr>
@@ -1213,25 +1328,34 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="ae758bbee13aa1c712423674db8598e54" name="ae758bbee13aa1c712423674db8598e54"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae758bbee13aa1c712423674db8598e54">&#9670;&#160;</a></span>setupAndRun()</h2>
+<a id="a3200bfb2c8b2811bba7589afd877ef3a" name="a3200bfb2c8b2811bba7589afd877ef3a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3200bfb2c8b2811bba7589afd877ef3a">&#9670;&#160;</a></span>setupFresh()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> Driver::setupAndRun </td>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> Driver::setupFresh </td>
           <td>(</td>
-          <td class="paramname"></td><td>)</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramname"><em>a_initialRegrids</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
-<p>Setup and run simulations. </p>
+<p>Setup function for fresh (non-restart) simulations. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_inputFile</td><td>Input file containing parameters for the simulation. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_initialRegrids</td><td>Number of initial regrids to perform during setup. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1266,6 +1390,104 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
+<a id="a32eecb9a56648cff29e56ba2e787c06e" name="a32eecb9a56648cff29e56ba2e787c06e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a32eecb9a56648cff29e56ba2e787c06e">&#9670;&#160;</a></span>stepReport()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> Driver::stepReport </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td>
+          <td class="paramname"><em>a_startTime</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td>
+          <td class="paramname"><em>a_endTime</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramname"><em>a_maxSteps</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Write a time step report to stdout. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_startTime</td><td>Simulation start time. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_endTime</td><td>Simulation end time. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_maxSteps</td><td>Maximum number of time steps. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a2d4bf1bdf482b45c5e388047d18bbfc9" name="a2d4bf1bdf482b45c5e388047d18bbfc9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2d4bf1bdf482b45c5e388047d18bbfc9">&#9670;&#160;</a></span>tagCells()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">bool</a> Driver::tagCells </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">IntVectSet</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_allTags</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="CD__EBAMRTags_8H.html#a23ff4c2bc0ca3002cc8c0cde60fe9181">EBAMRTags</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_cellTags</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Tag cells for refinement. Computes cell tags and global tags (union of cell tags with geometric tags). </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_allTags</td><td>Global tags (cell + geometric). </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_cellTags</td><td>Tags from cell tagger only. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if any tags changed. </dd></dl>
+
+</div>
+</div>
 <a id="a3cd284c12a76d4ef82ecb7efb9aa7993" name="a3cd284c12a76d4ef82ecb7efb9aa7993"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a3cd284c12a76d4ef82ecb7efb9aa7993">&#9670;&#160;</a></span>writeCrashFile()</h2>
 
@@ -1291,35 +1513,6 @@ Protected Attributes</h2></td></tr>
 
 <p>Write a crash file. </p>
 <p>This writes a regular plot file to /crash </p>
-
-</div>
-</div>
-<a id="a83f879fc3857db6548c7493e9cbe7a95" name="a83f879fc3857db6548c7493e9cbe7a95"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a83f879fc3857db6548c7493e9cbe7a95">&#9670;&#160;</a></span>writeGeometry()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> Driver::writeGeometry </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Write checkpoint data. </p>
-<p>Read <a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> loads.</p>
-<p>Write the geometry to file. </p>
 
 </div>
 </div>
@@ -1366,8 +1559,9 @@ Protected Attributes</h2></td></tr>
 <p>Write level sets. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_output</td><td>Output data holder </td></tr>
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_comp</td><td>Starting component</td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_output</td><td>Output data holder. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_comp</td><td>Starting component. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>AMR level.</td></tr>
   </table>
   </dd>
 </dl>
@@ -1481,8 +1675,8 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="affe9ec6a33f8628d128fba84c0924eb2" name="affe9ec6a33f8628d128fba84c0924eb2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#affe9ec6a33f8628d128fba84c0924eb2">&#9670;&#160;</a></span>writePlotFile()</h2>
+<a id="a24ae57e5859a1e453bbd1223e37d8592" name="a24ae57e5859a1e453bbd1223e37d8592"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a24ae57e5859a1e453bbd1223e37d8592">&#9670;&#160;</a></span>writePlotFile()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1493,7 +1687,7 @@ Protected Attributes</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> Driver::writePlotFile </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;&#160;</td>
           <td class="paramname"><em>a_filename</em></td><td>)</td>
           <td></td>
         </tr>
@@ -1505,14 +1699,13 @@ Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Write a plot file. </p>
+<p>Write a plot file to the specified path. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_file</td><td>File name</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_filename</td><td>File name including path. <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">E.g</a>. /crash/abc.hdf5. </td></tr>
   </table>
   </dd>
 </dl>
-<p>This can write an arbitrary folder. <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">E.g</a>. filename = /crash/abc.hdf5 </p>
 
 </div>
 </div>

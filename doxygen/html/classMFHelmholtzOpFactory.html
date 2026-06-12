@@ -80,6 +80,7 @@ $(function() {
 <a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pro-methods">Protected Member Functions</a> &#124;
+<a href="#pro-static-methods">Static Protected Member Functions</a> &#124;
 <a href="#pro-attribs">Protected Attributes</a> &#124;
 <a href="#pro-static-attribs">Static Protected Attributes</a> &#124;
 <a href="classMFHelmholtzOpFactory-members.html">List of all members</a>  </div>
@@ -106,13 +107,9 @@ Collaboration diagram for MFHelmholtzOpFactory:</div>
 <div class="dyncontent">
 <div class="center"><img src="classMFHelmholtzOpFactory__coll__graph.png" border="0" usemap="#aMFHelmholtzOpFactory_coll__map" alt="Collaboration graph"/></div>
 <map name="aMFHelmholtzOpFactory_coll__map" id="aMFHelmholtzOpFactory_coll__map">
-<area shape="rect" title="Factory class for making MFHelmholtzOp." alt="" coords="43,196,217,221"/>
-<area shape="rect" title=" " alt="" coords="5,93,212,133"/>
-<area shape="poly" title=" " alt="" coords="119,146,130,195,125,196,113,147"/>
-<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="237,93,421,133"/>
-<area shape="poly" title=" " alt="" coords="277,142,156,198,153,193,275,137"/>
-<area shape="rect" href="classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="259,5,398,31"/>
-<area shape="poly" title=" " alt="" coords="331,44,331,93,326,93,326,44"/>
+<area shape="rect" title="Factory class for making MFHelmholtzOp." alt="" coords="21,93,196,119"/>
+<area shape="rect" title=" " alt="" coords="5,5,212,45"/>
+<area shape="poly" title=" " alt="" coords="111,59,111,93,106,93,106,59"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -120,48 +117,63 @@ Collaboration diagram for MFHelmholtzOpFactory:</div>
 Public Types</h2></td></tr>
 <tr class="memitem:aca2f1a4102e812018ae4dd25db9938f1" id="r_aca2f1a4102e812018ae4dd25db9938f1"><td class="memItemLeft" align="right" valign="top"><a id="aca2f1a4102e812018ae4dd25db9938f1" name="aca2f1a4102e812018ae4dd25db9938f1"></a>
 <a class="el" href="classTracerParticleSolver.html">using</a>&#160;</td><td class="memItemRight" valign="bottom"><b>MFIS</b> = <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classMultiFluidIndexSpace.html">MultiFluidIndexSpace</a> &gt;</td></tr>
+<tr class="memdesc:aca2f1a4102e812018ae4dd25db9938f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">alias type alias. <br /></td></tr>
 <tr class="separator:aca2f1a4102e812018ae4dd25db9938f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afc73fbf7dee302eaf8e50a883095141d" id="r_afc73fbf7dee302eaf8e50a883095141d"><td class="memItemLeft" align="right" valign="top"><a id="afc73fbf7dee302eaf8e50a883095141d" name="afc73fbf7dee302eaf8e50a883095141d"></a>
 <a class="el" href="classTracerParticleSolver.html">using</a>&#160;</td><td class="memItemRight" valign="bottom"><b>AmrLevelGrids</b> = <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &gt;</td></tr>
+<tr class="memdesc:afc73fbf7dee302eaf8e50a883095141d"><td class="mdescLeft">&#160;</td><td class="mdescRight">alias type alias. <br /></td></tr>
 <tr class="separator:afc73fbf7dee302eaf8e50a883095141d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8427b4146c6a939dd27f4264189eec78" id="r_a8427b4146c6a939dd27f4264189eec78"><td class="memItemLeft" align="right" valign="top"><a id="a8427b4146c6a939dd27f4264189eec78" name="a8427b4146c6a939dd27f4264189eec78"></a>
 <a class="el" href="classTracerParticleSolver.html">using</a>&#160;</td><td class="memItemRight" valign="bottom"><b>AmrInterpolators</b> = <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classMFMultigridInterpolator.html">MFMultigridInterpolator</a> &gt;</td></tr>
+<tr class="memdesc:a8427b4146c6a939dd27f4264189eec78"><td class="mdescLeft">&#160;</td><td class="mdescRight">alias type alias. <br /></td></tr>
 <tr class="separator:a8427b4146c6a939dd27f4264189eec78"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a237983a4831148e375249cf8973c4048" id="r_a237983a4831148e375249cf8973c4048"><td class="memItemLeft" align="right" valign="top"><a id="a237983a4831148e375249cf8973c4048" name="a237983a4831148e375249cf8973c4048"></a>
 <a class="el" href="classTracerParticleSolver.html">using</a>&#160;</td><td class="memItemRight" valign="bottom"><b>AmrFluxRegisters</b> = <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classMFReflux.html">MFReflux</a> &gt;</td></tr>
+<tr class="memdesc:a237983a4831148e375249cf8973c4048"><td class="mdescLeft">&#160;</td><td class="mdescRight">alias type alias. <br /></td></tr>
 <tr class="separator:a237983a4831148e375249cf8973c4048"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a51e4f0804aea1d4e176211d75972ed7b" id="r_a51e4f0804aea1d4e176211d75972ed7b"><td class="memItemLeft" align="right" valign="top"><a id="a51e4f0804aea1d4e176211d75972ed7b" name="a51e4f0804aea1d4e176211d75972ed7b"></a>
 <a class="el" href="classTracerParticleSolver.html">using</a>&#160;</td><td class="memItemRight" valign="bottom"><b>AmrCoarseners</b> = <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classMFCoarAve.html">MFCoarAve</a> &gt;</td></tr>
+<tr class="memdesc:a51e4f0804aea1d4e176211d75972ed7b"><td class="mdescLeft">&#160;</td><td class="mdescRight">alias type alias. <br /></td></tr>
 <tr class="separator:a51e4f0804aea1d4e176211d75972ed7b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab56040353fba81d52456fac0940e78de" id="r_ab56040353fba81d52456fac0940e78de"><td class="memItemLeft" align="right" valign="top"><a id="ab56040353fba81d52456fac0940e78de" name="ab56040353fba81d52456fac0940e78de"></a>
 <a class="el" href="classTracerParticleSolver.html">using</a>&#160;</td><td class="memItemRight" valign="bottom"><b>AmrResolutions</b> = <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a> &gt;</td></tr>
+<tr class="memdesc:ab56040353fba81d52456fac0940e78de"><td class="mdescLeft">&#160;</td><td class="mdescRight">alias type alias. <br /></td></tr>
 <tr class="separator:ab56040353fba81d52456fac0940e78de"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae8614ff20feb4f1013d33c90e08c19ba" id="r_ae8614ff20feb4f1013d33c90e08c19ba"><td class="memItemLeft" align="right" valign="top"><a id="ae8614ff20feb4f1013d33c90e08c19ba" name="ae8614ff20feb4f1013d33c90e08c19ba"></a>
 <a class="el" href="classTracerParticleSolver.html">using</a>&#160;</td><td class="memItemRight" valign="bottom"><b>AmrRefRatios</b> = <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">int</a> &gt;</td></tr>
+<tr class="memdesc:ae8614ff20feb4f1013d33c90e08c19ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">alias type alias. <br /></td></tr>
 <tr class="separator:ae8614ff20feb4f1013d33c90e08c19ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a499f8ff8cb8d8403af7b4bddb433a6bb" id="r_a499f8ff8cb8d8403af7b4bddb433a6bb"><td class="memItemLeft" align="right" valign="top"><a id="a499f8ff8cb8d8403af7b4bddb433a6bb" name="a499f8ff8cb8d8403af7b4bddb433a6bb"></a>
 <a class="el" href="classTracerParticleSolver.html">using</a>&#160;</td><td class="memItemRight" valign="bottom"><b>AmrMask</b> = <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">BaseFab</a>&lt; <a class="el" href="classTracerParticleSolver.html">bool</a> &gt; &gt; &gt; &gt;</td></tr>
+<tr class="memdesc:a499f8ff8cb8d8403af7b4bddb433a6bb"><td class="mdescLeft">&#160;</td><td class="mdescRight">alias type alias. <br /></td></tr>
 <tr class="separator:a499f8ff8cb8d8403af7b4bddb433a6bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac46f7094af8188dd2db03c687a327e33" id="r_ac46f7094af8188dd2db03c687a327e33"><td class="memItemLeft" align="right" valign="top"><a id="ac46f7094af8188dd2db03c687a327e33" name="ac46f7094af8188dd2db03c687a327e33"></a>
 <a class="el" href="classTracerParticleSolver.html">using</a>&#160;</td><td class="memItemRight" valign="bottom"><b>AmrCellData</b> = <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">MFCellFAB</a> &gt; &gt; &gt;</td></tr>
+<tr class="memdesc:ac46f7094af8188dd2db03c687a327e33"><td class="mdescLeft">&#160;</td><td class="mdescRight">alias type alias. <br /></td></tr>
 <tr class="separator:ac46f7094af8188dd2db03c687a327e33"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1c4a70b9bae161ec9708ba4b3a44d649" id="r_a1c4a70b9bae161ec9708ba4b3a44d649"><td class="memItemLeft" align="right" valign="top"><a id="a1c4a70b9bae161ec9708ba4b3a44d649" name="a1c4a70b9bae161ec9708ba4b3a44d649"></a>
 <a class="el" href="classTracerParticleSolver.html">using</a>&#160;</td><td class="memItemRight" valign="bottom"><b>AmrFluxData</b> = <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">MFFluxFAB</a> &gt; &gt; &gt;</td></tr>
+<tr class="memdesc:a1c4a70b9bae161ec9708ba4b3a44d649"><td class="mdescLeft">&#160;</td><td class="mdescRight">alias type alias. <br /></td></tr>
 <tr class="separator:a1c4a70b9bae161ec9708ba4b3a44d649"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad2c44479794801fb16224533ce47eb5a" id="r_ad2c44479794801fb16224533ce47eb5a"><td class="memItemLeft" align="right" valign="top"><a id="ad2c44479794801fb16224533ce47eb5a" name="ad2c44479794801fb16224533ce47eb5a"></a>
 <a class="el" href="classTracerParticleSolver.html">using</a>&#160;</td><td class="memItemRight" valign="bottom"><b>AmrIrreData</b> = <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classMFBaseIVFAB.html">MFBaseIVFAB</a> &gt; &gt; &gt;</td></tr>
+<tr class="memdesc:ad2c44479794801fb16224533ce47eb5a"><td class="mdescLeft">&#160;</td><td class="mdescRight">alias type alias. <br /></td></tr>
 <tr class="separator:ad2c44479794801fb16224533ce47eb5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a93c37f00c4fa507b91bb5bf2276ed5a2" id="r_a93c37f00c4fa507b91bb5bf2276ed5a2"><td class="memItemLeft" align="right" valign="top"><a id="a93c37f00c4fa507b91bb5bf2276ed5a2" name="a93c37f00c4fa507b91bb5bf2276ed5a2"></a>
 <a class="el" href="classTracerParticleSolver.html">using</a>&#160;</td><td class="memItemRight" valign="bottom"><b>DomainBCFactory</b> = <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classMFHelmholtzDomainBCFactory.html">MFHelmholtzDomainBCFactory</a> &gt;</td></tr>
+<tr class="memdesc:a93c37f00c4fa507b91bb5bf2276ed5a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">alias type alias. <br /></td></tr>
 <tr class="separator:a93c37f00c4fa507b91bb5bf2276ed5a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a51734e41be4f67883a65ebe2aee4a3b0" id="r_a51734e41be4f67883a65ebe2aee4a3b0"><td class="memItemLeft" align="right" valign="top"><a id="a51734e41be4f67883a65ebe2aee4a3b0" name="a51734e41be4f67883a65ebe2aee4a3b0"></a>
 <a class="el" href="classTracerParticleSolver.html">using</a>&#160;</td><td class="memItemRight" valign="bottom"><b>EBBCFactory</b> = <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classMFHelmholtzEBBCFactory.html">MFHelmholtzEBBCFactory</a> &gt;</td></tr>
+<tr class="memdesc:a51734e41be4f67883a65ebe2aee4a3b0"><td class="mdescLeft">&#160;</td><td class="mdescRight">alias type alias. <br /></td></tr>
 <tr class="separator:a51734e41be4f67883a65ebe2aee4a3b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a869ab9bf9340529f18a49eab4d0e1171" id="r_a869ab9bf9340529f18a49eab4d0e1171"><td class="memItemLeft" align="right" valign="top"><a id="a869ab9bf9340529f18a49eab4d0e1171" name="a869ab9bf9340529f18a49eab4d0e1171"></a>
 <a class="el" href="classTracerParticleSolver.html">using</a>&#160;</td><td class="memItemRight" valign="bottom"><b>JumpBCFactory</b> = <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classMFHelmholtzJumpBCFactory.html">MFHelmholtzJumpBCFactory</a> &gt;</td></tr>
+<tr class="memdesc:a869ab9bf9340529f18a49eab4d0e1171"><td class="mdescLeft">&#160;</td><td class="mdescRight">alias type alias. <br /></td></tr>
 <tr class="separator:a869ab9bf9340529f18a49eab4d0e1171"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab34ea258e7e49acf74e3ff78c9e73f01" id="r_ab34ea258e7e49acf74e3ff78c9e73f01"><td class="memItemLeft" align="right" valign="top"><a id="ab34ea258e7e49acf74e3ff78c9e73f01" name="ab34ea258e7e49acf74e3ff78c9e73f01"></a>
 <a class="el" href="classTracerParticleSolver.html">using</a>&#160;</td><td class="memItemRight" valign="bottom"><b>Smoother</b> = <a class="el" href="classMFHelmholtzOp.html#afa2411375a5509aae293271cda50c2f1">MFHelmholtzOp::Smoother</a></td></tr>
+<tr class="memdesc:ab34ea258e7e49acf74e3ff78c9e73f01"><td class="mdescLeft">&#160;</td><td class="mdescRight">Smoother type alias. <br /></td></tr>
 <tr class="separator:ab34ea258e7e49acf74e3ff78c9e73f01"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
@@ -174,21 +186,20 @@ Public Member Functions</h2></td></tr>
 &#160;</td><td class="memItemRight" valign="bottom"><b>MFHelmholtzOpFactory</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFHelmholtzOpFactory.html">MFHelmholtzOpFactory</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_otherFactory</a>)=<a class="el" href="classTracerParticleSolver.html">delete</a></td></tr>
 <tr class="memdesc:a59046d0f9a950da0a9107e8bddf6cc16"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed constructor. <br /></td></tr>
 <tr class="separator:a59046d0f9a950da0a9107e8bddf6cc16"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad3f6f303b15450601fd3920a400907d5" id="r_ad3f6f303b15450601fd3920a400907d5"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOpFactory.html#ad3f6f303b15450601fd3920a400907d5">MFHelmholtzOpFactory</a> (<a class="el" href="classTracerParticleSolver.html">const</a> MFIS &amp;<a class="el" href="classTracerParticleSolver.html">a_mfis</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a> <a class="el" href="classTracerParticleSolver.html">a_dataLocation</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_alpha</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_beta</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_probLo</a>, <a class="el" href="classTracerParticleSolver.html">const</a> AmrLevelGrids &amp;<a class="el" href="classTracerParticleSolver.html">a_amrLevelGrids</a>, <a class="el" href="classTracerParticleSolver.html">const</a> AmrMask &amp;<a class="el" href="classTracerParticleSolver.html">a_validCells</a>, <a class="el" href="classTracerParticleSolver.html">const</a> AmrInterpolators &amp;<a class="el" href="classTracerParticleSolver.html">a_amrInterpolators</a>, <a class="el" href="classTracerParticleSolver.html">const</a> AmrFluxRegisters &amp;<a class="el" href="classTracerParticleSolver.html">a_amrFluxRegisters</a>, <a class="el" href="classTracerParticleSolver.html">const</a> AmrCoarseners &amp;<a class="el" href="classTracerParticleSolver.html">a_amrCoarseners</a>, <a class="el" href="classTracerParticleSolver.html">const</a> AmrRefRatios &amp;<a class="el" href="classTracerParticleSolver.html">a_amrRefRatios</a>, <a class="el" href="classTracerParticleSolver.html">const</a> AmrResolutions &amp;<a class="el" href="classTracerParticleSolver.html">a_amrResolutions</a>, <a class="el" href="classTracerParticleSolver.html">const</a> AmrCellData &amp;<a class="el" href="classTracerParticleSolver.html">a_amrAcoef</a>, <a class="el" href="classTracerParticleSolver.html">const</a> AmrFluxData &amp;<a class="el" href="classTracerParticleSolver.html">a_amrBcoef</a>, <a class="el" href="classTracerParticleSolver.html">const</a> AmrIrreData &amp;<a class="el" href="classTracerParticleSolver.html">a_amrBcoefIrreg</a>, <a class="el" href="classTracerParticleSolver.html">const</a> DomainBCFactory &amp;<a class="el" href="classTracerParticleSolver.html">a_domainBcFactory</a>, <a class="el" href="classTracerParticleSolver.html">const</a> EBBCFactory &amp;<a class="el" href="classTracerParticleSolver.html">a_ebBcFactory</a>, <a class="el" href="classTracerParticleSolver.html">const</a> JumpBCFactory &amp;<a class="el" href="classTracerParticleSolver.html">a_jumpBcFactory</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_ghostPhi</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_ghostRhs</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFHelmholtzOp.html#afa2411375a5509aae293271cda50c2f1">Smoother</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_smoother</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_relaxFactor</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_bottomDomain</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_jumpOrder</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_jumpWeight</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_preCondSmooth</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_blockingFactor</a>, <a class="el" href="classTracerParticleSolver.html">const</a> AmrLevelGrids &amp;<a class="el" href="classTracerParticleSolver.html">a_deeperLevelGrids</a>=AmrLevelGrids())</td></tr>
+<tr class="memitem:ad3f6f303b15450601fd3920a400907d5" id="r_ad3f6f303b15450601fd3920a400907d5"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOpFactory.html#ad3f6f303b15450601fd3920a400907d5">MFHelmholtzOpFactory</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFHelmholtzOpFactory.html#aca2f1a4102e812018ae4dd25db9938f1">MFIS</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_mfis</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a> <a class="el" href="classTracerParticleSolver.html">a_dataLocation</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_alpha</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_beta</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_probLo</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFHelmholtzOpFactory.html#afc73fbf7dee302eaf8e50a883095141d">AmrLevelGrids</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_amrLevelGrids</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFHelmholtzOpFactory.html#a499f8ff8cb8d8403af7b4bddb433a6bb">AmrMask</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_validCells</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFHelmholtzOpFactory.html#a8427b4146c6a939dd27f4264189eec78">AmrInterpolators</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_amrInterpolators</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFHelmholtzOpFactory.html#a237983a4831148e375249cf8973c4048">AmrFluxRegisters</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_amrFluxRegisters</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFHelmholtzOpFactory.html#a51e4f0804aea1d4e176211d75972ed7b">AmrCoarseners</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_amrCoarseners</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFHelmholtzOpFactory.html#ae8614ff20feb4f1013d33c90e08c19ba">AmrRefRatios</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_amrRefRatios</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFHelmholtzOpFactory.html#ab56040353fba81d52456fac0940e78de">AmrResolutions</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_amrResolutions</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFHelmholtzOpFactory.html#ac46f7094af8188dd2db03c687a327e33">AmrCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_amrAcoef</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFHelmholtzOpFactory.html#a1c4a70b9bae161ec9708ba4b3a44d649">AmrFluxData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_amrBcoef</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFHelmholtzOpFactory.html#ad2c44479794801fb16224533ce47eb5a">AmrIrreData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_amrBcoefIrreg</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFHelmholtzOpFactory.html#a93c37f00c4fa507b91bb5bf2276ed5a2">DomainBCFactory</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_domainBcFactory</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFHelmholtzOpFactory.html#a51734e41be4f67883a65ebe2aee4a3b0">EBBCFactory</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_ebBcFactory</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFHelmholtzOpFactory.html#a869ab9bf9340529f18a49eab4d0e1171">JumpBCFactory</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_jumpBcFactory</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_ghostPhi</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_ghostRhs</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFHelmholtzOp.html#afa2411375a5509aae293271cda50c2f1">Smoother</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_smoother</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_relaxFactor</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_bottomDomain</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_jumpOrder</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_jumpWeight</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_preCondSmooth</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_blockingFactor</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFHelmholtzOpFactory.html#afc73fbf7dee302eaf8e50a883095141d">AmrLevelGrids</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_deeperLevelGrids</a>=<a class="el" href="classMFHelmholtzOpFactory.html#afc73fbf7dee302eaf8e50a883095141d">AmrLevelGrids</a>())</td></tr>
 <tr class="memdesc:ad3f6f303b15450601fd3920a400907d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor.  <br /></td></tr>
 <tr class="separator:ad3f6f303b15450601fd3920a400907d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afca1114767d710eaf8db0dc416d49a10" id="r_afca1114767d710eaf8db0dc416d49a10"><td class="memItemLeft" align="right" valign="top"><a id="afca1114767d710eaf8db0dc416d49a10" name="afca1114767d710eaf8db0dc416d49a10"></a>
 <a class="el" href="classTracerParticleSolver.html">virtual</a>&#160;</td><td class="memItemRight" valign="bottom"><b>~MFHelmholtzOpFactory</b> ()</td></tr>
 <tr class="memdesc:afca1114767d710eaf8db0dc416d49a10"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. Does nothing. <br /></td></tr>
 <tr class="separator:afca1114767d710eaf8db0dc416d49a10"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa5106972b030d4c14d7d7c570e721cec" id="r_aa5106972b030d4c14d7d7c570e721cec"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOpFactory.html#aa5106972b030d4c14d7d7c570e721cec">setJump</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_sigma</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_scale</a>)</td></tr>
+<tr class="memitem:aa5106972b030d4c14d7d7c570e721cec" id="r_aa5106972b030d4c14d7d7c570e721cec"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOpFactory.html#aa5106972b030d4c14d7d7c570e721cec">setJump</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRIVData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_sigma</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_scale</a>)</td></tr>
 <tr class="memdesc:aa5106972b030d4c14d7d7c570e721cec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set jump condition. This is passed to the operators by reference.  <br /></td></tr>
 <tr class="separator:aa5106972b030d4c14d7d7c570e721cec"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5f96432ab4f7c8a03b87c273adc10856" id="r_a5f96432ab4f7c8a03b87c273adc10856"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOpFactory.html#a5f96432ab4f7c8a03b87c273adc10856">setJump</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_sigma</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_scale</a>)</td></tr>
 <tr class="separator:a5f96432ab4f7c8a03b87c273adc10856"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a54ea83d95f03fab33d83774b9d4331d4" id="r_a54ea83d95f03fab33d83774b9d4331d4"><td class="memItemLeft" align="right" valign="top"><a id="a54ea83d95f03fab33d83774b9d4331d4" name="a54ea83d95f03fab33d83774b9d4331d4"></a>
-<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getSigma</b> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:a54ea83d95f03fab33d83774b9d4331d4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the BC jump factor. <br /></td></tr>
+<tr class="memitem:a54ea83d95f03fab33d83774b9d4331d4" id="r_a54ea83d95f03fab33d83774b9d4331d4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRIVData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOpFactory.html#a54ea83d95f03fab33d83774b9d4331d4">getSigma</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:a54ea83d95f03fab33d83774b9d4331d4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the BC jump factor.  <br /></td></tr>
 <tr class="separator:a54ea83d95f03fab33d83774b9d4331d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad7e8385fb04a5522c4277d946c4e91c2" id="r_ad7e8385fb04a5522c4277d946c4e91c2"><td class="memItemLeft" align="right" valign="top"><a id="ad7e8385fb04a5522c4277d946c4e91c2" name="ad7e8385fb04a5522c4277d946c4e91c2"></a>
 <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>coarsenCoefficientsMG</b> ()</td></tr>
@@ -200,9 +211,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a3be8948d5c41a31adc2da5771e2ee156" id="r_a3be8948d5c41a31adc2da5771e2ee156"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classMFHelmholtzOp.html">MFHelmholtzOp</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOpFactory.html#a3be8948d5c41a31adc2da5771e2ee156">AMRnewOp</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_domain</a>) <a class="el" href="classTracerParticleSolver.html">override</a> <a class="el" href="classTracerParticleSolver.html">final</a></td></tr>
 <tr class="memdesc:a3be8948d5c41a31adc2da5771e2ee156"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create AMR operator for specified domain.  <br /></td></tr>
 <tr class="separator:a3be8948d5c41a31adc2da5771e2ee156"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4d850306cd39b6d5de43eb228c96c194" id="r_a4d850306cd39b6d5de43eb228c96c194"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOpFactory.html#a4d850306cd39b6d5de43eb228c96c194">refToFiner</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_indexspace</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">override</a> <a class="el" href="classTracerParticleSolver.html">final</a></td></tr>
-<tr class="memdesc:a4d850306cd39b6d5de43eb228c96c194"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get refinement ratio to next finest level.  <br /></td></tr>
-<tr class="separator:a4d850306cd39b6d5de43eb228c96c194"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af67c809939b4c4672569e2c319545ed5" id="r_af67c809939b4c4672569e2c319545ed5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOpFactory.html#af67c809939b4c4672569e2c319545ed5">refToFiner</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_domain</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">override</a> <a class="el" href="classTracerParticleSolver.html">final</a></td></tr>
+<tr class="memdesc:af67c809939b4c4672569e2c319545ed5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get refinement ratio to next finest level.  <br /></td></tr>
+<tr class="separator:af67c809939b4c4672569e2c319545ed5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
@@ -214,26 +225,29 @@ Protected Member Functions</h2></td></tr>
 <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>defineJump</b> ()</td></tr>
 <tr class="memdesc:af6cbb7553fc0a38978cb109a329baca3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define jump data. <br /></td></tr>
 <tr class="separator:af6cbb7553fc0a38978cb109a329baca3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad4078af1548ca0fcf5f08102f4e828ef" id="r_ad4078af1548ca0fcf5f08102f4e828ef"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOpFactory.html#ad4078af1548ca0fcf5f08102f4e828ef">isCoarser</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_domainOne</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_domainTwo</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:ad4078af1548ca0fcf5f08102f4e828ef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if a domain is coarser than the other.  <br /></td></tr>
-<tr class="separator:ad4078af1548ca0fcf5f08102f4e828ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a374c3e7804cbb49536440b4214aa7685" id="r_a374c3e7804cbb49536440b4214aa7685"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOpFactory.html#a374c3e7804cbb49536440b4214aa7685">isFiner</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_domainOne</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_domainTwo</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:a374c3e7804cbb49536440b4214aa7685"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if a domain is finer than the other.  <br /></td></tr>
-<tr class="separator:a374c3e7804cbb49536440b4214aa7685"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8058922bd17bd7e43fe493c3a1aff895" id="r_a8058922bd17bd7e43fe493c3a1aff895"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOpFactory.html#a8058922bd17bd7e43fe493c3a1aff895">getCoarserLayout</a> (<a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_coarseGrid</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_fineGrid</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_refRat</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_blockingFactor</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:a8058922bd17bd7e43fe493c3a1aff895"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct coarsening of a grid level.  <br /></td></tr>
-<tr class="separator:a8058922bd17bd7e43fe493c3a1aff895"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a07c420e3274a45e5501188518e8ca272" id="r_a07c420e3274a45e5501188518e8ca272"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOpFactory.html#a07c420e3274a45e5501188518e8ca272">coarsenCoefficients</a> (<a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">MFCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_coarAcoef</a>, <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">MFFluxFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_coarBcoef</a>, <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classMFBaseIVFAB.html">MFBaseIVFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_coarBcoefIrreg</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">MFCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_fineAcoef</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">MFFluxFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_fineBcoef</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classMFBaseIVFAB.html">MFBaseIVFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_fineBcoefIrreg</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_eblgCoar</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_eblgFine</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_refRat</a>)</td></tr>
-<tr class="memdesc:a07c420e3274a45e5501188518e8ca272"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsen coefficients (conservatively)  <br /></td></tr>
-<tr class="separator:a07c420e3274a45e5501188518e8ca272"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4969c8ea5b3a789ed2157a88aa97c74e" id="r_a4969c8ea5b3a789ed2157a88aa97c74e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOpFactory.html#a4969c8ea5b3a789ed2157a88aa97c74e">getCoarserLayout</a> (<a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_coarMflg</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_fineMflg</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_refRat</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_blockingFactor</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:a4969c8ea5b3a789ed2157a88aa97c74e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct coarsening of a grid level.  <br /></td></tr>
+<tr class="separator:a4969c8ea5b3a789ed2157a88aa97c74e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aad97b4f76d0dd7151c20c38afa7fb40b" id="r_aad97b4f76d0dd7151c20c38afa7fb40b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOpFactory.html#aad97b4f76d0dd7151c20c38afa7fb40b">findAmrLevel</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_domain</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
 <tr class="memdesc:aad97b4f76d0dd7151c20c38afa7fb40b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find level corresponding to amr level.  <br /></td></tr>
 <tr class="separator:aad97b4f76d0dd7151c20c38afa7fb40b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-static-methods" name="pro-static-methods"></a>
+Static Protected Member Functions</h2></td></tr>
+<tr class="memitem:a10e93150901f81f049485c37bc2ec83c" id="r_a10e93150901f81f049485c37bc2ec83c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">static</a> <a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOpFactory.html#a10e93150901f81f049485c37bc2ec83c">isCoarser</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_domainOne</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;<a class="el" href="classTracerParticleSolver.html">B</a>)</td></tr>
+<tr class="memdesc:a10e93150901f81f049485c37bc2ec83c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if a domain is coarser than the other.  <br /></td></tr>
+<tr class="separator:a10e93150901f81f049485c37bc2ec83c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeecd905830d3a2f466fd254e504752c0" id="r_aeecd905830d3a2f466fd254e504752c0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">static</a> <a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOpFactory.html#aeecd905830d3a2f466fd254e504752c0">isFiner</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_domainOne</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;<a class="el" href="classTracerParticleSolver.html">B</a>)</td></tr>
+<tr class="memdesc:aeecd905830d3a2f466fd254e504752c0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if a domain is finer than the other.  <br /></td></tr>
+<tr class="separator:aeecd905830d3a2f466fd254e504752c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6d0de414ec6813cea4cd05cf6f226417" id="r_a6d0de414ec6813cea4cd05cf6f226417"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">static</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOpFactory.html#a6d0de414ec6813cea4cd05cf6f226417">coarsenCoefficients</a> (<a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">MFCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_coarAcoef</a>, <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">MFFluxFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_coarBcoef</a>, <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classMFBaseIVFAB.html">MFBaseIVFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_coarBcoefIrreg</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">MFCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_fineAcoef</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">MFFluxFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_fineBcoef</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classMFBaseIVFAB.html">MFBaseIVFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_fineBcoefIrreg</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_mflgCoar</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_mflgFine</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_refRat</a>)</td></tr>
+<tr class="memdesc:a6d0de414ec6813cea4cd05cf6f226417"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsen coefficients (conservatively)  <br /></td></tr>
+<tr class="separator:a6d0de414ec6813cea4cd05cf6f226417"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
 <tr class="memitem:a8a0a519f6050764830762a300cff5583" id="r_a8a0a519f6050764830762a300cff5583"><td class="memItemLeft" align="right" valign="top"><a id="a8a0a519f6050764830762a300cff5583" name="a8a0a519f6050764830762a300cff5583"></a>
-MFIS&#160;</td><td class="memItemRight" valign="bottom"><b>m_mfis</b></td></tr>
+<a class="el" href="classMFHelmholtzOpFactory.html#aca2f1a4102e812018ae4dd25db9938f1">MFIS</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_mfis</b></td></tr>
 <tr class="memdesc:a8a0a519f6050764830762a300cff5583"><td class="mdescLeft">&#160;</td><td class="mdescRight">Index space. <br /></td></tr>
 <tr class="separator:a8a0a519f6050764830762a300cff5583"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a399e99503319027282af4d9e984bbde7" id="r_a399e99503319027282af4d9e984bbde7"><td class="memItemLeft" align="right" valign="top"><a id="a399e99503319027282af4d9e984bbde7" name="a399e99503319027282af4d9e984bbde7"></a>
@@ -277,59 +291,59 @@ MFIS&#160;</td><td class="memItemRight" valign="bottom"><b>m_mfis</b></td></tr>
 <tr class="memdesc:acb15651b9fdd6fbcc88f2ace9a44aead"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lower-left corner of computational domain. <br /></td></tr>
 <tr class="separator:acb15651b9fdd6fbcc88f2ace9a44aead"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a75ba9f60963fdaefe6a2045cd3cdea8c" id="r_a75ba9f60963fdaefe6a2045cd3cdea8c"><td class="memItemLeft" align="right" valign="top"><a id="a75ba9f60963fdaefe6a2045cd3cdea8c" name="a75ba9f60963fdaefe6a2045cd3cdea8c"></a>
-AmrLevelGrids&#160;</td><td class="memItemRight" valign="bottom"><b>m_amrLevelGrids</b></td></tr>
+<a class="el" href="classMFHelmholtzOpFactory.html#afc73fbf7dee302eaf8e50a883095141d">AmrLevelGrids</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_amrLevelGrids</b></td></tr>
 <tr class="memdesc:a75ba9f60963fdaefe6a2045cd3cdea8c"><td class="mdescLeft">&#160;</td><td class="mdescRight">AMR grids. <br /></td></tr>
 <tr class="separator:a75ba9f60963fdaefe6a2045cd3cdea8c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a99997ce31406c4547d4e3b1433c73ef6" id="r_a99997ce31406c4547d4e3b1433c73ef6"><td class="memItemLeft" align="right" valign="top"><a id="a99997ce31406c4547d4e3b1433c73ef6" name="a99997ce31406c4547d4e3b1433c73ef6"></a>
-AmrMask&#160;</td><td class="memItemRight" valign="bottom"><b>m_validCells</b></td></tr>
+<a class="el" href="classMFHelmholtzOpFactory.html#a499f8ff8cb8d8403af7b4bddb433a6bb">AmrMask</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_validCells</b></td></tr>
 <tr class="memdesc:a99997ce31406c4547d4e3b1433c73ef6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Valid cells. <br /></td></tr>
 <tr class="separator:a99997ce31406c4547d4e3b1433c73ef6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae2d662154f34d52c9e59087d0113f310" id="r_ae2d662154f34d52c9e59087d0113f310"><td class="memItemLeft" align="right" valign="top"><a id="ae2d662154f34d52c9e59087d0113f310" name="ae2d662154f34d52c9e59087d0113f310"></a>
-AmrInterpolators&#160;</td><td class="memItemRight" valign="bottom"><b>m_amrInterpolators</b></td></tr>
+<a class="el" href="classMFHelmholtzOpFactory.html#a8427b4146c6a939dd27f4264189eec78">AmrInterpolators</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_amrInterpolators</b></td></tr>
 <tr class="memdesc:ae2d662154f34d52c9e59087d0113f310"><td class="mdescLeft">&#160;</td><td class="mdescRight">Multigrid interpolators. <br /></td></tr>
 <tr class="separator:ae2d662154f34d52c9e59087d0113f310"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a283c2330bd97d69cbaf3c6280a596fa2" id="r_a283c2330bd97d69cbaf3c6280a596fa2"><td class="memItemLeft" align="right" valign="top"><a id="a283c2330bd97d69cbaf3c6280a596fa2" name="a283c2330bd97d69cbaf3c6280a596fa2"></a>
-AmrFluxRegisters&#160;</td><td class="memItemRight" valign="bottom"><b>m_amrFluxRegisters</b></td></tr>
+<a class="el" href="classMFHelmholtzOpFactory.html#a237983a4831148e375249cf8973c4048">AmrFluxRegisters</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_amrFluxRegisters</b></td></tr>
 <tr class="memdesc:a283c2330bd97d69cbaf3c6280a596fa2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flux registers. <br /></td></tr>
 <tr class="separator:a283c2330bd97d69cbaf3c6280a596fa2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4e3c5cd2bd61287a3dfa0c7ae5e38604" id="r_a4e3c5cd2bd61287a3dfa0c7ae5e38604"><td class="memItemLeft" align="right" valign="top"><a id="a4e3c5cd2bd61287a3dfa0c7ae5e38604" name="a4e3c5cd2bd61287a3dfa0c7ae5e38604"></a>
-AmrCoarseners&#160;</td><td class="memItemRight" valign="bottom"><b>m_amrCoarseners</b></td></tr>
+<a class="el" href="classMFHelmholtzOpFactory.html#a51e4f0804aea1d4e176211d75972ed7b">AmrCoarseners</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_amrCoarseners</b></td></tr>
 <tr class="memdesc:a4e3c5cd2bd61287a3dfa0c7ae5e38604"><td class="mdescLeft">&#160;</td><td class="mdescRight">Data coarseners. <br /></td></tr>
 <tr class="separator:a4e3c5cd2bd61287a3dfa0c7ae5e38604"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad194a77865e96e84e113812076a517f1" id="r_ad194a77865e96e84e113812076a517f1"><td class="memItemLeft" align="right" valign="top"><a id="ad194a77865e96e84e113812076a517f1" name="ad194a77865e96e84e113812076a517f1"></a>
-AmrRefRatios&#160;</td><td class="memItemRight" valign="bottom"><b>m_amrRefRatios</b></td></tr>
+<a class="el" href="classMFHelmholtzOpFactory.html#ae8614ff20feb4f1013d33c90e08c19ba">AmrRefRatios</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_amrRefRatios</b></td></tr>
 <tr class="memdesc:ad194a77865e96e84e113812076a517f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Refinement ratios. <br /></td></tr>
 <tr class="separator:ad194a77865e96e84e113812076a517f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9d646b116d1e5dd47f5077cf42f75a35" id="r_a9d646b116d1e5dd47f5077cf42f75a35"><td class="memItemLeft" align="right" valign="top"><a id="a9d646b116d1e5dd47f5077cf42f75a35" name="a9d646b116d1e5dd47f5077cf42f75a35"></a>
-AmrResolutions&#160;</td><td class="memItemRight" valign="bottom"><b>m_amrResolutions</b></td></tr>
+<a class="el" href="classMFHelmholtzOpFactory.html#ab56040353fba81d52456fac0940e78de">AmrResolutions</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_amrResolutions</b></td></tr>
 <tr class="memdesc:a9d646b116d1e5dd47f5077cf42f75a35"><td class="mdescLeft">&#160;</td><td class="mdescRight">Grid resolutions. <br /></td></tr>
 <tr class="separator:a9d646b116d1e5dd47f5077cf42f75a35"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adf7b2f13c1225daa9e8e3d80b4870a0c" id="r_adf7b2f13c1225daa9e8e3d80b4870a0c"><td class="memItemLeft" align="right" valign="top"><a id="adf7b2f13c1225daa9e8e3d80b4870a0c" name="adf7b2f13c1225daa9e8e3d80b4870a0c"></a>
-AmrCellData&#160;</td><td class="memItemRight" valign="bottom"><b>m_amrAcoef</b></td></tr>
+<a class="el" href="classMFHelmholtzOpFactory.html#ac46f7094af8188dd2db03c687a327e33">AmrCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_amrAcoef</b></td></tr>
 <tr class="memdesc:adf7b2f13c1225daa9e8e3d80b4870a0c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Operator A-coefficient. <br /></td></tr>
 <tr class="separator:adf7b2f13c1225daa9e8e3d80b4870a0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a26f69cdf737863e765ff44c41bfecd0f" id="r_a26f69cdf737863e765ff44c41bfecd0f"><td class="memItemLeft" align="right" valign="top"><a id="a26f69cdf737863e765ff44c41bfecd0f" name="a26f69cdf737863e765ff44c41bfecd0f"></a>
-AmrFluxData&#160;</td><td class="memItemRight" valign="bottom"><b>m_amrBcoef</b></td></tr>
+<a class="el" href="classMFHelmholtzOpFactory.html#a1c4a70b9bae161ec9708ba4b3a44d649">AmrFluxData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_amrBcoef</b></td></tr>
 <tr class="memdesc:a26f69cdf737863e765ff44c41bfecd0f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Operator B-coefficient. <br /></td></tr>
 <tr class="separator:a26f69cdf737863e765ff44c41bfecd0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6e59e1d60bdd5fd339262e3d5769a27d" id="r_a6e59e1d60bdd5fd339262e3d5769a27d"><td class="memItemLeft" align="right" valign="top"><a id="a6e59e1d60bdd5fd339262e3d5769a27d" name="a6e59e1d60bdd5fd339262e3d5769a27d"></a>
-AmrIrreData&#160;</td><td class="memItemRight" valign="bottom"><b>m_amrBcoefIrreg</b></td></tr>
+<a class="el" href="classMFHelmholtzOpFactory.html#ad2c44479794801fb16224533ce47eb5a">AmrIrreData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_amrBcoefIrreg</b></td></tr>
 <tr class="memdesc:a6e59e1d60bdd5fd339262e3d5769a27d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Operator B-coefficient. <br /></td></tr>
 <tr class="separator:a6e59e1d60bdd5fd339262e3d5769a27d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaadcef2bc277e8ccd7890953874c39c7" id="r_aaadcef2bc277e8ccd7890953874c39c7"><td class="memItemLeft" align="right" valign="top"><a id="aaadcef2bc277e8ccd7890953874c39c7" name="aaadcef2bc277e8ccd7890953874c39c7"></a>
-DomainBCFactory&#160;</td><td class="memItemRight" valign="bottom"><b>m_domainBcFactory</b></td></tr>
+<a class="el" href="classMFHelmholtzOpFactory.html#a93c37f00c4fa507b91bb5bf2276ed5a2">DomainBCFactory</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_domainBcFactory</b></td></tr>
 <tr class="memdesc:aaadcef2bc277e8ccd7890953874c39c7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Domain BC factory. <br /></td></tr>
 <tr class="separator:aaadcef2bc277e8ccd7890953874c39c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a156bb63e700966bc0470cf30e98d49b8" id="r_a156bb63e700966bc0470cf30e98d49b8"><td class="memItemLeft" align="right" valign="top"><a id="a156bb63e700966bc0470cf30e98d49b8" name="a156bb63e700966bc0470cf30e98d49b8"></a>
-EBBCFactory&#160;</td><td class="memItemRight" valign="bottom"><b>m_ebBcFactory</b></td></tr>
+<a class="el" href="classMFHelmholtzOpFactory.html#a51734e41be4f67883a65ebe2aee4a3b0">EBBCFactory</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_ebBcFactory</b></td></tr>
 <tr class="memdesc:a156bb63e700966bc0470cf30e98d49b8"><td class="mdescLeft">&#160;</td><td class="mdescRight">EB BC factory. <br /></td></tr>
 <tr class="separator:a156bb63e700966bc0470cf30e98d49b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a744f0c9db1b10435e19c2a7321dcfa5b" id="r_a744f0c9db1b10435e19c2a7321dcfa5b"><td class="memItemLeft" align="right" valign="top"><a id="a744f0c9db1b10435e19c2a7321dcfa5b" name="a744f0c9db1b10435e19c2a7321dcfa5b"></a>
-JumpBCFactory&#160;</td><td class="memItemRight" valign="bottom"><b>m_jumpBcFactory</b></td></tr>
+<a class="el" href="classMFHelmholtzOpFactory.html#a869ab9bf9340529f18a49eab4d0e1171">JumpBCFactory</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_jumpBcFactory</b></td></tr>
 <tr class="memdesc:a744f0c9db1b10435e19c2a7321dcfa5b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Jump BC factory. <br /></td></tr>
 <tr class="separator:a744f0c9db1b10435e19c2a7321dcfa5b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1d2ef7aaae402de1836948236222f13e" id="r_a1d2ef7aaae402de1836948236222f13e"><td class="memItemLeft" align="right" valign="top"><a id="a1d2ef7aaae402de1836948236222f13e" name="a1d2ef7aaae402de1836948236222f13e"></a>
-<a class="el" href="classEBAMRData.html">EBAMRIVData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_amrJump</b></td></tr>
+<a class="el" href="classTracerParticleSolver.html">EBAMRIVData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_amrJump</b></td></tr>
 <tr class="memdesc:a1d2ef7aaae402de1836948236222f13e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Jump on multiphase cells. <br /></td></tr>
 <tr class="separator:a1d2ef7aaae402de1836948236222f13e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a07a2e6ebd37036e9eea6bad1128597c9" id="r_a07a2e6ebd37036e9eea6bad1128597c9"><td class="memItemLeft" align="right" valign="top"><a id="a07a2e6ebd37036e9eea6bad1128597c9" name="a07a2e6ebd37036e9eea6bad1128597c9"></a>
@@ -338,7 +352,7 @@ JumpBCFactory&#160;</td><td class="memItemRight" valign="bottom"><b>m_jumpBcFact
 <tr class="separator:a07a2e6ebd37036e9eea6bad1128597c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a27f117e7af501c8111bdcceab5f971b8" id="r_a27f117e7af501c8111bdcceab5f971b8"><td class="memItemLeft" align="right" valign="top"><a id="a27f117e7af501c8111bdcceab5f971b8" name="a27f117e7af501c8111bdcceab5f971b8"></a>
 <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_mgBlockingFactor</b></td></tr>
-<tr class="memdesc:a27f117e7af501c8111bdcceab5f971b8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Blocking factor for grid aggregration. <br /></td></tr>
+<tr class="memdesc:a27f117e7af501c8111bdcceab5f971b8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Blocking factor for grid aggregation. <br /></td></tr>
 <tr class="separator:a27f117e7af501c8111bdcceab5f971b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:affec95f554befce11e3f46889f89ab84" id="r_affec95f554befce11e3f46889f89ab84"><td class="memItemLeft" align="right" valign="top"><a id="affec95f554befce11e3f46889f89ab84" name="affec95f554befce11e3f46889f89ab84"></a>
 <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_jumpOrder</b></td></tr>
@@ -349,7 +363,7 @@ JumpBCFactory&#160;</td><td class="memItemRight" valign="bottom"><b>m_jumpBcFact
 <tr class="memdesc:a47f2302244f7c42abca5d7f693159d2b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Weighting for least squares reconstruction in jump cells. <br /></td></tr>
 <tr class="separator:a47f2302244f7c42abca5d7f693159d2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad1f7ba6013040f7e50f2054f1f70972f" id="r_ad1f7ba6013040f7e50f2054f1f70972f"><td class="memItemLeft" align="right" valign="top"><a id="ad1f7ba6013040f7e50f2054f1f70972f" name="ad1f7ba6013040f7e50f2054f1f70972f"></a>
-AmrLevelGrids&#160;</td><td class="memItemRight" valign="bottom"><b>m_deeperLevelGrids</b></td></tr>
+<a class="el" href="classMFHelmholtzOpFactory.html#afc73fbf7dee302eaf8e50a883095141d">AmrLevelGrids</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_deeperLevelGrids</b></td></tr>
 <tr class="memdesc:ad1f7ba6013040f7e50f2054f1f70972f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deeper grids. <br /></td></tr>
 <tr class="separator:ad1f7ba6013040f7e50f2054f1f70972f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1971fe0d5aab7709a2dd57c8ee402677" id="r_a1971fe0d5aab7709a2dd57c8ee402677"><td class="memItemLeft" align="right" valign="top"><a id="a1971fe0d5aab7709a2dd57c8ee402677" name="a1971fe0d5aab7709a2dd57c8ee402677"></a>
@@ -357,23 +371,23 @@ AmrLevelGrids&#160;</td><td class="memItemRight" valign="bottom"><b>m_deeperLeve
 <tr class="memdesc:a1971fe0d5aab7709a2dd57c8ee402677"><td class="mdescLeft">&#160;</td><td class="mdescRight">For checking if an AMR level has multigrid levels. <br /></td></tr>
 <tr class="separator:a1971fe0d5aab7709a2dd57c8ee402677"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a473eb7ddac5cbd4b366825b0657019ab" id="r_a473eb7ddac5cbd4b366825b0657019ab"><td class="memItemLeft" align="right" valign="top"><a id="a473eb7ddac5cbd4b366825b0657019ab" name="a473eb7ddac5cbd4b366825b0657019ab"></a>
-<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; AmrLevelGrids &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_mgLevelGrids</b></td></tr>
+<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classMFHelmholtzOpFactory.html#afc73fbf7dee302eaf8e50a883095141d">AmrLevelGrids</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_mgLevelGrids</b></td></tr>
 <tr class="memdesc:a473eb7ddac5cbd4b366825b0657019ab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deeper grids. Always weird to write this but <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">e.g</a>. m_mgLevelGrids[0] corresponds to the the multigrid levels below amr level 0. <br /></td></tr>
 <tr class="separator:a473eb7ddac5cbd4b366825b0657019ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5db3fe47fe6da545dba7ed904094b597" id="r_a5db3fe47fe6da545dba7ed904094b597"><td class="memItemLeft" align="right" valign="top"><a id="a5db3fe47fe6da545dba7ed904094b597" name="a5db3fe47fe6da545dba7ed904094b597"></a>
-<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; AmrCellData &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_mgAcoef</b></td></tr>
+<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classMFHelmholtzOpFactory.html#ac46f7094af8188dd2db03c687a327e33">AmrCellData</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_mgAcoef</b></td></tr>
 <tr class="memdesc:a5db3fe47fe6da545dba7ed904094b597"><td class="mdescLeft">&#160;</td><td class="mdescRight">A-coefficient on deeper grids. Always weird to write this but <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">e.g</a>. m_mgLevelGrids[0] corresponds to the the multigrid levels below amr level 0. <br /></td></tr>
 <tr class="separator:a5db3fe47fe6da545dba7ed904094b597"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a15937e7e88a6c154d9872888bbb2a673" id="r_a15937e7e88a6c154d9872888bbb2a673"><td class="memItemLeft" align="right" valign="top"><a id="a15937e7e88a6c154d9872888bbb2a673" name="a15937e7e88a6c154d9872888bbb2a673"></a>
-<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; AmrFluxData &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_mgBcoef</b></td></tr>
+<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classMFHelmholtzOpFactory.html#a1c4a70b9bae161ec9708ba4b3a44d649">AmrFluxData</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_mgBcoef</b></td></tr>
 <tr class="memdesc:a15937e7e88a6c154d9872888bbb2a673"><td class="mdescLeft">&#160;</td><td class="mdescRight">B-coefficient on deeper grids. Always weird to write this but <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">e.g</a>. m_mgLevelGrids[0] corresponds to the the multigrid levels below amr level 0. <br /></td></tr>
 <tr class="separator:a15937e7e88a6c154d9872888bbb2a673"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae66d199c9e75bd021d453fe279c7119e" id="r_ae66d199c9e75bd021d453fe279c7119e"><td class="memItemLeft" align="right" valign="top"><a id="ae66d199c9e75bd021d453fe279c7119e" name="ae66d199c9e75bd021d453fe279c7119e"></a>
-<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; AmrIrreData &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_mgBcoefIrreg</b></td></tr>
+<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classMFHelmholtzOpFactory.html#ad2c44479794801fb16224533ce47eb5a">AmrIrreData</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_mgBcoefIrreg</b></td></tr>
 <tr class="memdesc:ae66d199c9e75bd021d453fe279c7119e"><td class="mdescLeft">&#160;</td><td class="mdescRight">B-coefficient on deeper grids. Always weird to write this but <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">e.g</a>. m_mgLevelGrids[0] corresponds to the the multigrid levels below amr level 0. <br /></td></tr>
 <tr class="separator:ae66d199c9e75bd021d453fe279c7119e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a115a0a1a401413a5954f01d948f068e8" id="r_a115a0a1a401413a5954f01d948f068e8"><td class="memItemLeft" align="right" valign="top"><a id="a115a0a1a401413a5954f01d948f068e8" name="a115a0a1a401413a5954f01d948f068e8"></a>
-<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classEBAMRData.html">EBAMRIVData</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_mgJump</b></td></tr>
+<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBAMRIVData</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_mgJump</b></td></tr>
 <tr class="memdesc:a115a0a1a401413a5954f01d948f068e8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Jump coefficient on deeper grids. <br /></td></tr>
 <tr class="separator:a115a0a1a401413a5954f01d948f068e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad3a1471c42d636f0f7dc56fc4394f373" id="r_ad3a1471c42d636f0f7dc56fc4394f373"><td class="memItemLeft" align="right" valign="top"><a id="ad3a1471c42d636f0f7dc56fc4394f373" name="ad3a1471c42d636f0f7dc56fc4394f373"></a>
@@ -411,7 +425,7 @@ This factory is designed without time-dependence in BCs. Time-dependent BCs are 
         <tr>
           <td class="memname">MFHelmholtzOpFactory::MFHelmholtzOpFactory </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> MFIS &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFHelmholtzOpFactory.html#aca2f1a4102e812018ae4dd25db9938f1">MFIS</a> &amp;&#160;</td>
           <td class="paramname"><em>a_mfis</em>, </td>
         </tr>
         <tr>
@@ -441,79 +455,79 @@ This factory is designed without time-dependence in BCs. Time-dependent BCs are 
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> AmrLevelGrids &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFHelmholtzOpFactory.html#afc73fbf7dee302eaf8e50a883095141d">AmrLevelGrids</a> &amp;&#160;</td>
           <td class="paramname"><em>a_amrLevelGrids</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> AmrMask &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFHelmholtzOpFactory.html#a499f8ff8cb8d8403af7b4bddb433a6bb">AmrMask</a> &amp;&#160;</td>
           <td class="paramname"><em>a_validCells</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> AmrInterpolators &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFHelmholtzOpFactory.html#a8427b4146c6a939dd27f4264189eec78">AmrInterpolators</a> &amp;&#160;</td>
           <td class="paramname"><em>a_amrInterpolators</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> AmrFluxRegisters &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFHelmholtzOpFactory.html#a237983a4831148e375249cf8973c4048">AmrFluxRegisters</a> &amp;&#160;</td>
           <td class="paramname"><em>a_amrFluxRegisters</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> AmrCoarseners &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFHelmholtzOpFactory.html#a51e4f0804aea1d4e176211d75972ed7b">AmrCoarseners</a> &amp;&#160;</td>
           <td class="paramname"><em>a_amrCoarseners</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> AmrRefRatios &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFHelmholtzOpFactory.html#ae8614ff20feb4f1013d33c90e08c19ba">AmrRefRatios</a> &amp;&#160;</td>
           <td class="paramname"><em>a_amrRefRatios</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> AmrResolutions &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFHelmholtzOpFactory.html#ab56040353fba81d52456fac0940e78de">AmrResolutions</a> &amp;&#160;</td>
           <td class="paramname"><em>a_amrResolutions</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> AmrCellData &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFHelmholtzOpFactory.html#ac46f7094af8188dd2db03c687a327e33">AmrCellData</a> &amp;&#160;</td>
           <td class="paramname"><em>a_amrAcoef</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> AmrFluxData &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFHelmholtzOpFactory.html#a1c4a70b9bae161ec9708ba4b3a44d649">AmrFluxData</a> &amp;&#160;</td>
           <td class="paramname"><em>a_amrBcoef</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> AmrIrreData &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFHelmholtzOpFactory.html#ad2c44479794801fb16224533ce47eb5a">AmrIrreData</a> &amp;&#160;</td>
           <td class="paramname"><em>a_amrBcoefIrreg</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> DomainBCFactory &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFHelmholtzOpFactory.html#a93c37f00c4fa507b91bb5bf2276ed5a2">DomainBCFactory</a> &amp;&#160;</td>
           <td class="paramname"><em>a_domainBcFactory</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> EBBCFactory &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFHelmholtzOpFactory.html#a51734e41be4f67883a65ebe2aee4a3b0">EBBCFactory</a> &amp;&#160;</td>
           <td class="paramname"><em>a_ebBcFactory</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> JumpBCFactory &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFHelmholtzOpFactory.html#a869ab9bf9340529f18a49eab4d0e1171">JumpBCFactory</a> &amp;&#160;</td>
           <td class="paramname"><em>a_jumpBcFactory</em>, </td>
         </tr>
         <tr>
@@ -573,8 +587,8 @@ This factory is designed without time-dependence in BCs. Time-dependent BCs are 
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> AmrLevelGrids &amp;&#160;</td>
-          <td class="paramname"><em>a_deeperLevelGrids</em> = <code>AmrLevelGrids()</code>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFHelmholtzOpFactory.html#afc73fbf7dee302eaf8e50a883095141d">AmrLevelGrids</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_deeperLevelGrids</em> = <code><a class="el" href="classMFHelmholtzOpFactory.html#afc73fbf7dee302eaf8e50a883095141d">AmrLevelGrids</a>()</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -600,18 +614,21 @@ This factory is designed without time-dependence in BCs. Time-dependent BCs are 
     <tr><td class="paramdir">[in]</td><td class="paramname">a_amrAcoef</td><td>A-coefficient in Helmholtz operator. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_amrBcoef</td><td>B-coefficient in Helmholtz operator. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_amrBcoefIrreg</td><td>B-coefficient in Helmholtz operator. This one is defined on EB faces. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_domainBCFactory</td><td>Factory class for making domain BC objects. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_ebbcFactory</td><td>Factory class for making BC objects for EB boundary conditions. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_jumpBCFactory</td><td>Factory class for making jump BC objects. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_ghostPhi</td><td>Number of ghost cells in solution vector. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_ghostRhs</td><td>Number of ghost cells in right-hand side. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_jumpOrder</td><td>Stencil order in multiphase cells </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_jumpWeight</td><td>Equation weighting in multiphase cells </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_preCondSmooth</td><td>Number of smoothings in the preconditioner </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_relaxationMethod</td><td>Relaxation method. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_relaxFactor</td><td>Relaxation factor </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_bottomDomain</td><td>Coarsest domain on which we run multigrid. Must be a coarsening of the AMR problem domains. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_deeperLevelGrids</td><td>Optional object in case you want to pre-define the deeper multigrid levels. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_amrLevelGrids</td><td>Amr level grids </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_amrRefRatios</td><td>Amr ref ratios </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_domainBcFactory</td><td>Domain bc factory </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ebBcFactory</td><td>Eb bc factory </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_jumpBcFactory</td><td>Jump bc factory </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_smoother</td><td>Smoother </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_blockingFactor</td><td>Blocking factor </td></tr>
   </table>
   </dd>
 </dl>
@@ -650,11 +667,12 @@ This factory is designed without time-dependence in BCs. Time-dependent BCs are 
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Return value </dd></dl>
 
 </div>
 </div>
-<a id="a07c420e3274a45e5501188518e8ca272" name="a07c420e3274a45e5501188518e8ca272"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a07c420e3274a45e5501188518e8ca272">&#9670;&#160;</a></span>coarsenCoefficients()</h2>
+<a id="a6d0de414ec6813cea4cd05cf6f226417" name="a6d0de414ec6813cea4cd05cf6f226417"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6d0de414ec6813cea4cd05cf6f226417">&#9670;&#160;</a></span>coarsenCoefficients()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -702,13 +720,13 @@ This factory is designed without time-dependence in BCs. Time-dependent BCs are 
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_eblgCoar</em>, </td>
+          <td class="paramname"><em>a_mflgCoar</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_eblgFine</em>, </td>
+          <td class="paramname"><em>a_mflgFine</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -724,7 +742,7 @@ This factory is designed without time-dependence in BCs. Time-dependent BCs are 
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">protected</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -738,8 +756,8 @@ This factory is designed without time-dependence in BCs. Time-dependent BCs are 
     <tr><td class="paramdir">[in]</td><td class="paramname">a_fineAcoef</td><td>Fine A-coefficient </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_fineBcoef</td><td>Fine B-coefficient </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_fineBcoefIrreg</td><td>Fine B-coefficient on EB faces </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgCoar</td><td>Coarse grids </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_eblgFine</td><td>Fine grids </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_mflgCoar</td><td>Coarse grids </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_mflgFine</td><td>Fine grids </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_refRat</td><td>Coarsening factor </td></tr>
   </table>
   </dd>
@@ -783,8 +801,8 @@ This factory is designed without time-dependence in BCs. Time-dependent BCs are 
 
 </div>
 </div>
-<a id="a8058922bd17bd7e43fe493c3a1aff895" name="a8058922bd17bd7e43fe493c3a1aff895"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8058922bd17bd7e43fe493c3a1aff895">&#9670;&#160;</a></span>getCoarserLayout()</h2>
+<a id="a4969c8ea5b3a789ed2157a88aa97c74e" name="a4969c8ea5b3a789ed2157a88aa97c74e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4969c8ea5b3a789ed2157a88aa97c74e">&#9670;&#160;</a></span>getCoarserLayout()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -796,13 +814,13 @@ This factory is designed without time-dependence in BCs. Time-dependent BCs are 
           <td class="memname"><a class="el" href="classTracerParticleSolver.html">bool</a> MFHelmholtzOpFactory::getCoarserLayout </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_coarseGrid</em>, </td>
+          <td class="paramname"><em>a_coarMflg</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_fineGrid</em>, </td>
+          <td class="paramname"><em>a_fineMflg</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -832,8 +850,8 @@ This factory is designed without time-dependence in BCs. Time-dependent BCs are 
 <p>Construct coarsening of a grid level. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_coarseGrid</td><td>The coarse grid layout. Must be a pointer to an undefined EBLevelGrid on input </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_fineGrid</td><td>The coarse grid layout. Must be a pointer to an undefined EBLevelGrid on input </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_coarMflg</td><td>The coarse grid layout. Must be an undefined <a class="el" href="classMFLevelGrid.html" title="Wrapper class for holding multifluid EBLevelGrids.">MFLevelGrid</a> on input. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_fineMflg</td><td>The fine grid layout. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_refRat</td><td>Refinement ratio </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_blockingFactor</td><td>Blocking factor to use for grid aggregation </td></tr>
   </table>
@@ -843,8 +861,28 @@ This factory is designed without time-dependence in BCs. Time-dependent BCs are 
 
 </div>
 </div>
-<a id="ad4078af1548ca0fcf5f08102f4e828ef" name="ad4078af1548ca0fcf5f08102f4e828ef"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad4078af1548ca0fcf5f08102f4e828ef">&#9670;&#160;</a></span>isCoarser()</h2>
+<a id="a54ea83d95f03fab33d83774b9d4331d4" name="a54ea83d95f03fab33d83774b9d4331d4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a54ea83d95f03fab33d83774b9d4331d4">&#9670;&#160;</a></span>getSigma()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRIVData</a> &amp; MFHelmholtzOpFactory::getSigma </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the BC jump factor. </p>
+<dl class="section return"><dt>Returns</dt><dd>Sigma </dd></dl>
+
+</div>
+</div>
+<a id="a10e93150901f81f049485c37bc2ec83c" name="a10e93150901f81f049485c37bc2ec83c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a10e93150901f81f049485c37bc2ec83c">&#9670;&#160;</a></span>isCoarser()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -862,17 +900,17 @@ This factory is designed without time-dependence in BCs. Time-dependent BCs are 
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_domainTwo</em>&#160;</td>
+          <td class="paramname"><em>B</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td> const</td>
+          <td></td><td></td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">protected</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -881,16 +919,16 @@ This factory is designed without time-dependence in BCs. Time-dependent BCs are 
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_domainOne</td><td>The first domain </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_domainTwo</td><td>The second domain </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">B</td><td>The second domain </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Returns true of a_domainOne has fewer grid points than a_domainTwo </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns true of a_domainOne has fewer grid points than B </dd></dl>
 
 </div>
 </div>
-<a id="a374c3e7804cbb49536440b4214aa7685" name="a374c3e7804cbb49536440b4214aa7685"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a374c3e7804cbb49536440b4214aa7685">&#9670;&#160;</a></span>isFiner()</h2>
+<a id="aeecd905830d3a2f466fd254e504752c0" name="aeecd905830d3a2f466fd254e504752c0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeecd905830d3a2f466fd254e504752c0">&#9670;&#160;</a></span>isFiner()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -908,17 +946,17 @@ This factory is designed without time-dependence in BCs. Time-dependent BCs are 
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_domainTwo</em>&#160;</td>
+          <td class="paramname"><em>B</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td> const</td>
+          <td></td><td></td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">protected</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -927,11 +965,11 @@ This factory is designed without time-dependence in BCs. Time-dependent BCs are 
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_domainOne</td><td>The first domain </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_domainTwo</td><td>The second domain </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">B</td><td>The second domain </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Returns true of a_domainOne has more grid points than a_domainTwo </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns true of a_domainOne has more grid points than B </dd></dl>
 
 </div>
 </div>
@@ -984,11 +1022,12 @@ This factory is designed without time-dependence in BCs. Time-dependent BCs are 
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Return value </dd></dl>
 
 </div>
 </div>
-<a id="a4d850306cd39b6d5de43eb228c96c194" name="a4d850306cd39b6d5de43eb228c96c194"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4d850306cd39b6d5de43eb228c96c194">&#9670;&#160;</a></span>refToFiner()</h2>
+<a id="af67c809939b4c4672569e2c319545ed5" name="af67c809939b4c4672569e2c319545ed5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af67c809939b4c4672569e2c319545ed5">&#9670;&#160;</a></span>refToFiner()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1000,7 +1039,7 @@ This factory is designed without time-dependence in BCs. Time-dependent BCs are 
           <td class="memname"><a class="el" href="classTracerParticleSolver.html">int</a> MFHelmholtzOpFactory::refToFiner </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_indexspace</em></td><td>)</td>
+          <td class="paramname"><em>a_domain</em></td><td>)</td>
           <td> const</td>
         </tr>
       </table>
@@ -1013,6 +1052,13 @@ This factory is designed without time-dependence in BCs. Time-dependent BCs are 
 
 <p>Get refinement ratio to next finest level. </p>
 <dl class="section note"><dt>Note</dt><dd>Returns -1 when there are no finer levels. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Return value </dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_domain</td><td>Domain </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -1025,7 +1071,7 @@ This factory is designed without time-dependence in BCs. Time-dependent BCs are 
         <tr>
           <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> MFHelmholtzOpFactory::setJump </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRIVData</a> &amp;&#160;</td>
           <td class="paramname"><em>a_sigma</em>, </td>
         </tr>
         <tr>

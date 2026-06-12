@@ -105,7 +105,7 @@ Public Member Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">T</a>, <a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">S</a>&gt;<br />
 class ItoFactory&lt; T, S &gt;</div><p>Factory class for making <a class="el" href="classItoLayout.html" title="Class for holding a set of ItoSolvers.">ItoLayout</a>. </p>
-<p>This is used for generating a layout &ndash; this class has no fundamental usefulness, it is basically a glorified casting machine. The template parameters T control the <a class="el" href="classItoLayout.html" title="Class for holding a set of ItoSolvers.">ItoLayout</a> template parameter while the template parameter S controls the derived class. <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">E.g</a>. if one has a derived class S the factory can automatically create either an <a class="el" href="classItoLayout.html" title="Class for holding a set of ItoSolvers.">ItoLayout</a><s>, or it can automatically cast to an ItoLayout&lt;T&gt;. </s></p>
+<p>This is used for generating a layout &ndash; this class has no fundamental usefulness, it is basically a glorified casting machine. The template parameters T control the <a class="el" href="classItoLayout.html" title="Class for holding a set of ItoSolvers.">ItoLayout</a> template parameter while the template parameter S controls the derived class. <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">E.g</a>. if one has a derived class S the factory can automatically create either an <a class="el" href="classItoLayout.html" title="Class for holding a set of ItoSolvers.">ItoLayout</a>&lt;S&gt;, or it can automatically cast to an <a class="el" href="classItoLayout.html" title="Class for holding a set of ItoSolvers.">ItoLayout</a>&lt;T&gt;. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a2e7bc11e6eb0e50f1fa6ab868ce62587" name="a2e7bc11e6eb0e50f1fa6ab868ce62587"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a2e7bc11e6eb0e50f1fa6ab868ce62587">&#9670;&#160;</a></span>newLayout()</h2>
@@ -132,6 +132,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Return value </dd></dl>
 
 </div>
 </div>

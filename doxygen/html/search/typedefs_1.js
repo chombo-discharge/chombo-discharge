@@ -4,5 +4,6 @@ var searchData=
   ['bcfunction_1',['bcfunction',['../classElectrostaticDomainBc.html#ac70aabaa096724823b87222bf5bd8cb6',1,'ElectrostaticDomainBc::BcFunction'],['../classElectrostaticEbBc.html#a03db9643a359651dfca064b206ea1a3e',1,'ElectrostaticEbBc::BcFunction'],['../classEddingtonSP1DomainBc.html#a762ad6ae08db2f412a8922074bdfce6b',1,'EddingtonSP1DomainBc::BcFunction']]],
   ['bcoefptr_2',['bcoefptr',['../classMFHelmholtzSaturationChargeJumpBCFactory.html#add6f1774cceafac27095e61ed0c7a453',1,'MFHelmholtzSaturationChargeJumpBCFactory::BcoefPtr'],['../classMFHelmholtzJumpBC.html#a61156d11a5b573946d13dd03f82e03d9',1,'MFHelmholtzJumpBC::BcoefPtr'],['../classMFHelmholtzJumpBCFactory.html#a6850045e2e7821d844989ef19ce9cf05',1,'MFHelmholtzJumpBCFactory::BcoefPtr']]],
   ['binaryparticlereconcile_3',['BinaryParticleReconcile',['../namespaceParticleManagement.html#a355c356fabec1650406a887b59c2068f',1,'ParticleManagement']]],
-  ['bv_4',['BV',['../classTriangleCollection.html#a0ff4c4a67cc7f532d28dacca0801a250',1,'TriangleCollection']]]
+  ['boxids_4',['BoxIDs',['../classLevelTiles.html#adbfa720456d7a7a78206e3f5f2d4decf',1,'LevelTiles']]],
+  ['bv_5',['BV',['../classTriangleCollection.html#a0ff4c4a67cc7f532d28dacca0801a250',1,'TriangleCollection']]]
 ];

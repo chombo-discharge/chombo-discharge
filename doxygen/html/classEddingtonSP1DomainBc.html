@@ -133,9 +133,9 @@ Public Member Functions</h2></td></tr>
 <a class="el" href="classTracerParticleSolver.html">virtual</a>&#160;</td><td class="memItemRight" valign="bottom"><b>~EddingtonSP1DomainBc</b> ()</td></tr>
 <tr class="memdesc:aa90480951c91b16b589c62beb03b3d55"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. This. <br /></td></tr>
 <tr class="separator:aa90480951c91b16b589c62beb03b3d55"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5f83c81b8e4ec9d0ed39044fd76bb4bb" id="r_a5f83c81b8e4ec9d0ed39044fd76bb4bb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEddingtonSP1DomainBc.html#a5f83c81b8e4ec9d0ed39044fd76bb4bb">setBc</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEddingtonSP1DomainBc.html#a8916606aa7fbfc96d52eb7a859eb7079">DomainSide</a> <a class="el" href="classTracerParticleSolver.html">a_domainSide</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEddingtonSP1DomainBc.html#a03c33566004315ba7bc10f14a411419e">Bc</a> <a class="el" href="classTracerParticleSolver.html">a_bc</a>)</td></tr>
-<tr class="memdesc:a5f83c81b8e4ec9d0ed39044fd76bb4bb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the boundary condition on a domain side. You must set both the type, and the associated function.  <br /></td></tr>
-<tr class="separator:a5f83c81b8e4ec9d0ed39044fd76bb4bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a716d7c31dfad6d908159f9b52dd815a9" id="r_a716d7c31dfad6d908159f9b52dd815a9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEddingtonSP1DomainBc.html#a716d7c31dfad6d908159f9b52dd815a9">setBc</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEddingtonSP1DomainBc.html#a8916606aa7fbfc96d52eb7a859eb7079">DomainSide</a> <a class="el" href="classTracerParticleSolver.html">a_domainSide</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEddingtonSP1DomainBc.html#a03c33566004315ba7bc10f14a411419e">Bc</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_bc</a>)</td></tr>
+<tr class="memdesc:a716d7c31dfad6d908159f9b52dd815a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the boundary condition on a domain side. You must set both the type, and the associated function.  <br /></td></tr>
+<tr class="separator:a716d7c31dfad6d908159f9b52dd815a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0d868916e399acab85d4aa05f299f75e" id="r_a0d868916e399acab85d4aa05f299f75e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classEddingtonSP1DomainBc.html#a03c33566004315ba7bc10f14a411419e">Bc</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEddingtonSP1DomainBc.html#a0d868916e399acab85d4aa05f299f75e">getBc</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEddingtonSP1DomainBc.html#a8916606aa7fbfc96d52eb7a859eb7079">DomainSide</a> <a class="el" href="classTracerParticleSolver.html">a_domainSide</a>)</td></tr>
 <tr class="memdesc:a0d868916e399acab85d4aa05f299f75e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the boundary condition for a side and direction.  <br /></td></tr>
 <tr class="separator:a0d868916e399acab85d4aa05f299f75e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -152,7 +152,7 @@ Protected Attributes</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Class which maps boundary condition types to a side and direction. </p>
-<p>This class is simply meant to hold boundary conditions for use in <a class="el" href="classEddingtonSP1.html" title="Radiative tranfer equation solver in the SP1 (diffusion) approximation.">EddingtonSP1</a>. It provides no functionality otherwise, </p>
+<p>This class is simply meant to hold boundary conditions for use in <a class="el" href="classEddingtonSP1.html" title="Radiative transfer equation solver in the SP1 (diffusion) approximation.">EddingtonSP1</a>. It provides no functionality otherwise, </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a364c96e84bca47d444588ec64b777031" name="a364c96e84bca47d444588ec64b777031"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a364c96e84bca47d444588ec64b777031">&#9670;&#160;</a></span>EddingtonSP1DomainBc() <span class="overload">[1/2]</span></h2>
@@ -247,6 +247,7 @@ Protected Attributes</h2></td></tr>
   </dd>
 </dl>
 <dl class="section note"><dt>Note</dt><dd>If the boundary condition for the associated side and direction has not been previously set, this routine will cause a run-time error. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Bc </dd></dl>
 
 </div>
 </div>
@@ -274,6 +275,7 @@ Protected Attributes</h2></td></tr>
   </dd>
 </dl>
 <dl class="section note"><dt>Note</dt><dd>If the boundary condition for the associated side and direction has not been previously set, this routine will cause a run-time error. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Bc </dd></dl>
 
 </div>
 </div>
@@ -342,11 +344,12 @@ Protected Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Return value </dd></dl>
 
 </div>
 </div>
-<a id="a5f83c81b8e4ec9d0ed39044fd76bb4bb" name="a5f83c81b8e4ec9d0ed39044fd76bb4bb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5f83c81b8e4ec9d0ed39044fd76bb4bb">&#9670;&#160;</a></span>setBc()</h2>
+<a id="a716d7c31dfad6d908159f9b52dd815a9" name="a716d7c31dfad6d908159f9b52dd815a9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a716d7c31dfad6d908159f9b52dd815a9">&#9670;&#160;</a></span>setBc()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -360,7 +363,7 @@ Protected Attributes</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEddingtonSP1DomainBc.html#a03c33566004315ba7bc10f14a411419e">Bc</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEddingtonSP1DomainBc.html#a03c33566004315ba7bc10f14a411419e">Bc</a> &amp;&#160;</td>
           <td class="paramname"><em>a_bc</em>&#160;</td>
         </tr>
         <tr>

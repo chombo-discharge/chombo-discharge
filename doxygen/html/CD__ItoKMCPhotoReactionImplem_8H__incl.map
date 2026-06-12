@@ -1,6 +1,6 @@
 <map id="Physics/ItoKMC/CD_ItoKMCPhotoReactionImplem.H" name="Physics/ItoKMC/CD_ItoKMCPhotoReactionImplem.H">
 <area shape="rect" id="Node000001" title="Implementation of CD_ItoKMCPhotoReaction.H." alt="" coords="110,5,346,45"/>
-<area shape="rect" id="Node000002" href="$CD__ItoKMCPhotoReaction_8H.html" title="Declaration of a class for holding photoionization reaction types in ito_plasma physics." alt="" coords="57,93,260,119"/>
+<area shape="rect" id="Node000002" href="$CD__ItoKMCPhotoReaction_8H.html" title="Declaration of the Physics::ItoKMC::ItoKMCPhotoReaction class." alt="" coords="57,93,260,119"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="205,47,173,84,169,80,201,44"/>
 <area shape="rect" id="Node000005" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="166,167,351,192"/>
 <area shape="poly" id="edge7_Node000001_Node000005" title=" " alt="" coords="247,44,262,66,275,93,277,125,271,154,266,153,272,124,269,94,258,69,243,47"/>

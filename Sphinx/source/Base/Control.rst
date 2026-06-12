@@ -68,7 +68,7 @@ ____________________
 
 When running with OpenMP one must specify the number of threads, and possibly also pin threads to CPUs.
 ``chombo-discharge`` is compiled with run-time thread scheduling (which defaults to static scheduling).
-Prior to running with OpenMP, one should define the number of threads, thread palcement, and the scheduling.
+Prior to running with OpenMP, one should define the number of threads, thread placement, and the scheduling.
 For example
 
 .. code-block:: bash

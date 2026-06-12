@@ -14,7 +14,7 @@
 <area shape="poly" id="edge27_Node000001_Node000008" title=" " alt="" coords="529,48,482,95,456,129,437,168,428,198,422,227,417,226,423,196,432,166,451,126,478,92,526,44"/>
 <area shape="rect" id="Node000009" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="533,240,712,265"/>
 <area shape="poly" id="edge28_Node000001_Node000009" title=" " alt="" coords="615,43,660,62,707,88,751,122,770,142,785,165,790,179,790,192,784,203,774,213,747,228,713,239,711,234,745,223,771,209,780,200,784,191,785,180,780,168,765,146,747,126,704,92,658,66,613,48"/>
-<area shape="rect" id="Node000011" href="$CD__EBMultigridInterpolator_8H.html" title="Declaration of a class that can interpolate more ghost cells near the coarse&#45;fine boundary near the E..." alt="" coords="130,167,342,192"/>
+<area shape="rect" id="Node000011" href="$CD__EBMultigridInterpolator_8H.html" title="Parent base class for multigrid interpolation." alt="" coords="130,167,342,192"/>
 <area shape="poly" id="edge13_Node000001_Node000011" title=" " alt="" coords="484,48,424,69,361,96,307,128,262,160,259,156,304,123,359,91,422,64,483,43"/>
 <area shape="rect" id="Node000014" href="$CD__CoarseInterpQuadCF_8H.html" title="Supporting class for doing the coarse&#45;side interpolation for multigrid." alt="" coords="875,167,1069,192"/>
 <area shape="poly" id="edge19_Node000001_Node000014" title=" " alt="" coords="662,37,759,57,809,72,857,91,909,122,951,155,948,159,906,126,855,96,807,77,757,62,661,42"/>

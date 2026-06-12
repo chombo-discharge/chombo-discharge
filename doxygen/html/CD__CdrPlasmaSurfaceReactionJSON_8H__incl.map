@@ -6,7 +6,7 @@
 <area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="188,62,139,101,136,97,184,58"/>
 <area shape="rect" id="Node000004" title=" " alt="" coords="168,108,211,133"/>
 <area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="212,61,200,96,195,94,207,59"/>
-<area shape="rect" id="Node000005" href="$CD__CdrPlasmaPhysics_8H.html" title="Declaration of basic physics coupling functions for Physics/CdrPlasma." alt="" coords="1508,108,1689,133"/>
+<area shape="rect" id="Node000005" href="$CD__CdrPlasmaPhysics_8H.html" title="Declaration of the Physics::CdrPlasma::CdrPlasmaPhysics interface class." alt="" coords="1508,108,1689,133"/>
 <area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="344,39,1495,110,1494,116,344,44"/>
 <area shape="rect" id="Node000019" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="470,475,655,500"/>
 <area shape="poly" id="edge45_Node000001_Node000019" title=" " alt="" coords="229,60,243,120,251,193,251,342,256,374,270,400,292,422,319,440,351,454,386,464,457,478,456,483,385,470,350,459,317,444,288,426,266,403,251,375,245,342,245,193,238,121,224,61"/>

@@ -81,13 +81,14 @@ $(function() {
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pro-types">Protected Types</a> &#124;
 <a href="#pro-methods">Protected Member Functions</a> &#124;
+<a href="#pro-static-methods">Static Protected Member Functions</a> &#124;
 <a href="#pro-attribs">Protected Attributes</a> &#124;
 <a href="classMcPhoto-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">McPhoto Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
 
-<p>Radiative tranfer equation solver using Monte-Carlo simulation.  
+<p>Radiative transfer equation solver using Monte-Carlo simulation.  
  <a href="classMcPhoto.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="CD__McPhoto_8H_source.html">CD_McPhoto.H</a>&gt;</code></p>
@@ -96,7 +97,7 @@ Inheritance diagram for McPhoto:</div>
 <div class="dyncontent">
 <div class="center"><img src="classMcPhoto__inherit__graph.png" border="0" usemap="#aMcPhoto_inherit__map" alt="Inheritance graph"/></div>
 <map name="aMcPhoto_inherit__map" id="aMcPhoto_inherit__map">
-<area shape="rect" title="Radiative tranfer equation solver using Monte&#45;Carlo simulation." alt="" coords="5,79,84,104"/>
+<area shape="rect" title="Radiative transfer equation solver using Monte&#45;Carlo simulation." alt="" coords="5,79,84,104"/>
 <area shape="rect" href="classRtSolver.html" title="Abstract RTE solver class for doing various kinds of radiative transfer equations...." alt="" coords="6,5,83,31"/>
 <area shape="poly" title=" " alt="" coords="47,44,47,79,42,79,42,44"/>
 </map>
@@ -106,25 +107,13 @@ Collaboration diagram for McPhoto:</div>
 <div class="dyncontent">
 <div class="center"><img src="classMcPhoto__coll__graph.png" border="0" usemap="#aMcPhoto_coll__map" alt="Collaboration graph"/></div>
 <map name="aMcPhoto_coll__map" id="aMcPhoto_coll__map">
-<area shape="rect" title="Radiative tranfer equation solver using Monte&#45;Carlo simulation." alt="" coords="997,126,1076,151"/>
-<area shape="rect" href="classRtSolver.html" title="Abstract RTE solver class for doing various kinds of radiative transfer equations...." alt="" coords="717,91,795,117"/>
-<area shape="poly" title=" " alt="" coords="809,108,997,131,997,137,808,113"/>
-<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="356,31,552,57"/>
-<area shape="poly" title=" " alt="" coords="510,25,577,12,619,8,660,12,751,27,821,45,889,68,974,103,1015,123,1013,128,972,108,887,73,819,50,750,32,660,17,619,14,578,17,511,30"/>
-<area shape="poly" title=" " alt="" coords="555,56,661,76,718,90,716,96,659,81,554,62"/>
-<area shape="rect" href="classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="5,81,144,106"/>
-<area shape="poly" title=" " alt="" coords="153,76,168,73,355,50,356,56,168,79,154,81"/>
-<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="355,81,553,106"/>
-<area shape="poly" title=" " alt="" coords="158,91,354,91,354,96,158,96"/>
-<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="362,131,546,171"/>
-<area shape="poly" title=" " alt="" coords="145,106,168,111,362,138,362,143,168,116,144,111"/>
-<area shape="poly" title=" " alt="" coords="567,95,717,100,717,105,567,100"/>
-<area shape="poly" title=" " alt="" coords="560,153,688,157,828,155,997,140,997,146,828,160,688,162,560,159"/>
-<area shape="poly" title=" " alt="" coords="559,134,660,119,716,109,717,114,660,124,560,139"/>
-<area shape="rect" href="classParticleContainer.html" title=" " alt="" coords="684,256,828,296"/>
-<area shape="poly" title=" " alt="" coords="842,293,875,295,909,294,942,287,972,272,986,261,998,246,1016,212,1026,178,1031,151,1037,152,1032,180,1021,214,1003,249,990,264,975,277,943,292,909,299,875,301,841,298"/>
-<area shape="rect" href="classParticleContainer.html" title="Templated class for holding particles on an AMR hierarchy with particle remapping." alt="" coords="369,263,539,289"/>
-<area shape="poly" title=" " alt="" coords="553,273,684,273,684,279,553,279"/>
+<area shape="rect" title="Radiative transfer equation solver using Monte&#45;Carlo simulation." alt="" coords="49,255,127,280"/>
+<area shape="rect" href="classRtSolver.html" title="Abstract RTE solver class for doing various kinds of radiative transfer equations...." alt="" coords="5,101,83,126"/>
+<area shape="poly" title=" " alt="" coords="54,138,87,254,82,255,48,140"/>
+<area shape="rect" href="classParticleContainer.html" title=" " alt="" coords="107,93,251,133"/>
+<area shape="poly" title=" " alt="" coords="163,147,97,256,93,253,158,144"/>
+<area shape="rect" href="classParticleContainer.html" title="Templated class for holding particles on an AMR hierarchy with particle remapping." alt="" coords="93,5,264,31"/>
+<area shape="poly" title=" " alt="" coords="181,44,181,93,176,93,176,44"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -148,32 +137,27 @@ Public Member Functions</h2></td></tr>
 &#160;</td><td class="memItemRight" valign="bottom"><b>McPhoto</b> ()</td></tr>
 <tr class="memdesc:a852aed4d457e23aaabed633ec8abcc25"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor. <br /></td></tr>
 <tr class="separator:a852aed4d457e23aaabed633ec8abcc25"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a812891c7384f315793b242dba18f1739" id="r_a812891c7384f315793b242dba18f1739"><td class="memItemLeft" align="right" valign="top"><a id="a812891c7384f315793b242dba18f1739" name="a812891c7384f315793b242dba18f1739"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>McPhoto</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMcPhoto.html">McPhoto</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_other</a>)</td></tr>
-<tr class="memdesc:a812891c7384f315793b242dba18f1739"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed copy constructor. <br /></td></tr>
+<tr class="memitem:a812891c7384f315793b242dba18f1739" id="r_a812891c7384f315793b242dba18f1739"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a812891c7384f315793b242dba18f1739">McPhoto</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMcPhoto.html">McPhoto</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_other</a>)</td></tr>
+<tr class="memdesc:a812891c7384f315793b242dba18f1739"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed copy constructor.  <br /></td></tr>
 <tr class="separator:a812891c7384f315793b242dba18f1739"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac0dae30c8ce8768edfcdd074161f5dfa" id="r_ac0dae30c8ce8768edfcdd074161f5dfa"><td class="memItemLeft" align="right" valign="top"><a id="ac0dae30c8ce8768edfcdd074161f5dfa" name="ac0dae30c8ce8768edfcdd074161f5dfa"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>McPhoto</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMcPhoto.html">McPhoto</a> &amp;&amp;<a class="el" href="classTracerParticleSolver.html">a_other</a>)</td></tr>
-<tr class="memdesc:ac0dae30c8ce8768edfcdd074161f5dfa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed move constructor. <br /></td></tr>
+<tr class="memitem:ac0dae30c8ce8768edfcdd074161f5dfa" id="r_ac0dae30c8ce8768edfcdd074161f5dfa"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#ac0dae30c8ce8768edfcdd074161f5dfa">McPhoto</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMcPhoto.html">McPhoto</a> &amp;&amp;<a class="el" href="classTracerParticleSolver.html">a_other</a>)</td></tr>
+<tr class="memdesc:ac0dae30c8ce8768edfcdd074161f5dfa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed move constructor.  <br /></td></tr>
 <tr class="separator:ac0dae30c8ce8768edfcdd074161f5dfa"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad79dc456a19b21165e2d27c510bcf4de" id="r_ad79dc456a19b21165e2d27c510bcf4de"><td class="memItemLeft" align="right" valign="top"><a id="ad79dc456a19b21165e2d27c510bcf4de" name="ad79dc456a19b21165e2d27c510bcf4de"></a>
-<a class="el" href="classMcPhoto.html">McPhoto</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMcPhoto.html">McPhoto</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_other</a>)</td></tr>
-<tr class="memdesc:ad79dc456a19b21165e2d27c510bcf4de"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed assignment operator. <br /></td></tr>
+<tr class="memitem:ad79dc456a19b21165e2d27c510bcf4de" id="r_ad79dc456a19b21165e2d27c510bcf4de"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classMcPhoto.html">McPhoto</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#ad79dc456a19b21165e2d27c510bcf4de">operator=</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMcPhoto.html">McPhoto</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_other</a>)</td></tr>
+<tr class="memdesc:ad79dc456a19b21165e2d27c510bcf4de"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed assignment operator.  <br /></td></tr>
 <tr class="separator:ad79dc456a19b21165e2d27c510bcf4de"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acd7a17e9ba9c147e7d21c6b34c0155bf" id="r_acd7a17e9ba9c147e7d21c6b34c0155bf"><td class="memItemLeft" align="right" valign="top"><a id="acd7a17e9ba9c147e7d21c6b34c0155bf" name="acd7a17e9ba9c147e7d21c6b34c0155bf"></a>
-<a class="el" href="classMcPhoto.html">McPhoto</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMcPhoto.html">McPhoto</a> &amp;&amp;<a class="el" href="classTracerParticleSolver.html">a_other</a>)</td></tr>
-<tr class="memdesc:acd7a17e9ba9c147e7d21c6b34c0155bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed move assignement operator. <br /></td></tr>
+<tr class="memitem:acd7a17e9ba9c147e7d21c6b34c0155bf" id="r_acd7a17e9ba9c147e7d21c6b34c0155bf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classMcPhoto.html">McPhoto</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#acd7a17e9ba9c147e7d21c6b34c0155bf">operator=</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMcPhoto.html">McPhoto</a> &amp;&amp;<a class="el" href="classTracerParticleSolver.html">a_other</a>)</td></tr>
+<tr class="memdesc:acd7a17e9ba9c147e7d21c6b34c0155bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed move assignment operator.  <br /></td></tr>
 <tr class="separator:acd7a17e9ba9c147e7d21c6b34c0155bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a53a80d21c0b2a1822117c9a1101d54eb" id="r_a53a80d21c0b2a1822117c9a1101d54eb"><td class="memItemLeft" align="right" valign="top"><a id="a53a80d21c0b2a1822117c9a1101d54eb" name="a53a80d21c0b2a1822117c9a1101d54eb"></a>
 <a class="el" href="classTracerParticleSolver.html">virtual</a>&#160;</td><td class="memItemRight" valign="bottom"><b>~McPhoto</b> ()</td></tr>
 <tr class="memdesc:a53a80d21c0b2a1822117c9a1101d54eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. <br /></td></tr>
 <tr class="separator:a53a80d21c0b2a1822117c9a1101d54eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adc6e367b73c037c53d71871db7733658" id="r_adc6e367b73c037c53d71871db7733658"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#adc6e367b73c037c53d71871db7733658">advance</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_dt</a>, <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_phi</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_source</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classTracerParticleSolver.html">a_zeroPhi</a>=<a class="el" href="classTracerParticleSolver.html">false</a>) <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
+<tr class="memitem:adc6e367b73c037c53d71871db7733658" id="r_adc6e367b73c037c53d71871db7733658"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#adc6e367b73c037c53d71871db7733658">advance</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_dt</a>, <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_phi</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_source</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classTracerParticleSolver.html">a_zeroPhi</a>=<a class="el" href="classTracerParticleSolver.html">false</a>) <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
 <tr class="memdesc:adc6e367b73c037c53d71871db7733658"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance RTE and deposit photon particles on the mesh.  <br /></td></tr>
 <tr class="separator:adc6e367b73c037c53d71871db7733658"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aef6d651972be5b22b0dfc778a834b9d8" id="r_aef6d651972be5b22b0dfc778a834b9d8"><td class="memItemLeft" align="right" valign="top"><a id="aef6d651972be5b22b0dfc778a834b9d8" name="aef6d651972be5b22b0dfc778a834b9d8"></a>
-<a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><b>isInstantaneous</b> ()</td></tr>
-<tr class="memdesc:aef6d651972be5b22b0dfc778a834b9d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Instantaneous solver or not. <br /></td></tr>
+<tr class="memitem:aef6d651972be5b22b0dfc778a834b9d8" id="r_aef6d651972be5b22b0dfc778a834b9d8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#aef6d651972be5b22b0dfc778a834b9d8">isInstantaneous</a> ()</td></tr>
+<tr class="memdesc:aef6d651972be5b22b0dfc778a834b9d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Instantaneous solver or not.  <br /></td></tr>
 <tr class="separator:aef6d651972be5b22b0dfc778a834b9d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac417c104ce1b2ded82dba7d55910237b" id="r_ac417c104ce1b2ded82dba7d55910237b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#ac417c104ce1b2ded82dba7d55910237b">advancePhotonsInstantaneous</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_bulkPhotons</a>, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_ebPhotons</a>, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_domainPhotons</a>, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_photons</a>)</td></tr>
 <tr class="memdesc:ac417c104ce1b2ded82dba7d55910237b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Move photons and absorb them on various objects.  <br /></td></tr>
@@ -181,13 +165,13 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a801909315b9d81eaaec819a6ebd25fdd" id="r_a801909315b9d81eaaec819a6ebd25fdd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a801909315b9d81eaaec819a6ebd25fdd">advancePhotonsTransient</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_bulkPhotons</a>, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_ebPhotons</a>, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_domainPhotons</a>, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_photons</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_dt</a>)</td></tr>
 <tr class="memdesc:a801909315b9d81eaaec819a6ebd25fdd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Move photons and absorb them on various objects.  <br /></td></tr>
 <tr class="separator:a801909315b9d81eaaec819a6ebd25fdd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2996c54ec6cc903a1bb7919feb8d0147" id="r_a2996c54ec6cc903a1bb7919feb8d0147"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a2996c54ec6cc903a1bb7919feb8d0147">computeNumPhysicalPhotons</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_numPhysPhotonsTotal</a>, <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_numPhysPhotonsPerPacket</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_source</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_dt</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:a2996c54ec6cc903a1bb7919feb8d0147"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the number of physical photons in each grid cell.  <br /></td></tr>
-<tr class="separator:a2996c54ec6cc903a1bb7919feb8d0147"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aedfb09455408860523c0513e62363ef5" id="r_aedfb09455408860523c0513e62363ef5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#aedfb09455408860523c0513e62363ef5">generateComputationalPhotons</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_photons</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_numPhysicalPhotons</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">size_t</a> <a class="el" href="classTracerParticleSolver.html">a_maxPhotonsPerCell</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:aedfb09455408860523c0513e62363ef5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generate computational photons.  <br /></td></tr>
-<tr class="separator:aedfb09455408860523c0513e62363ef5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a53e8ff8f986e801623a1c11094251738" id="r_a53e8ff8f986e801623a1c11094251738"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a53e8ff8f986e801623a1c11094251738">dirtySamplePhotons</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPointParticle.html">PointParticle</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_photons</a>, <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_phi</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_numPhysicalPhotons</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">size_t</a> <a class="el" href="classTracerParticleSolver.html">a_maxPhotonsPerCell</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a6711fd52f84cff45c11eb31ec4fe49f5" id="r_a6711fd52f84cff45c11eb31ec4fe49f5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a6711fd52f84cff45c11eb31ec4fe49f5">computeNumPhysicalPhotons</a> (<a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_numPhysPhotonsTotal</a>, <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_numPhysPhotonsPacket</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_source</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_dt</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a6711fd52f84cff45c11eb31ec4fe49f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the number of physical photons in each grid cell.  <br /></td></tr>
+<tr class="separator:a6711fd52f84cff45c11eb31ec4fe49f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae078305361eaa69552b37b26d0bff567" id="r_ae078305361eaa69552b37b26d0bff567"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#ae078305361eaa69552b37b26d0bff567">generateComputationalPhotons</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_photons</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_numPhysPhotons</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">size_t</a> <a class="el" href="classTracerParticleSolver.html">a_maxPhotonsPerCell</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:ae078305361eaa69552b37b26d0bff567"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generate computational photons.  <br /></td></tr>
+<tr class="separator:ae078305361eaa69552b37b26d0bff567"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a53e8ff8f986e801623a1c11094251738" id="r_a53e8ff8f986e801623a1c11094251738"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a53e8ff8f986e801623a1c11094251738">dirtySamplePhotons</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPointParticle.html">PointParticle</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_photons</a>, <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_phi</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_numPhysicalPhotons</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">size_t</a> <a class="el" href="classTracerParticleSolver.html">a_maxPhotonsPerCell</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:a53e8ff8f986e801623a1c11094251738"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dirty-sampling method for photons.  <br /></td></tr>
 <tr class="separator:a53e8ff8f986e801623a1c11094251738"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a83b71abb5f05186cdf9e1ca7392c5378" id="r_a83b71abb5f05186cdf9e1ca7392c5378"><td class="memItemLeft" align="right" valign="top"><a id="a83b71abb5f05186cdf9e1ca7392c5378" name="a83b71abb5f05186cdf9e1ca7392c5378"></a>
@@ -201,7 +185,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:ab43303c3391364188cf423c8b9e1d4ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit photons on the mesh.  <br /></td></tr>
 <tr class="separator:ab43303c3391364188cf423c8b9e1d4ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9a8bb3676937e8dbf2e7b43fe560dc19" id="r_a9a8bb3676937e8dbf2e7b43fe560dc19"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">Ret</a> , <a class="el" href="classTracerParticleSolver.html">Ret</a>(P::*)() <a class="el" href="classTracerParticleSolver.html">const</a> MemberFunc&gt; </td></tr>
-<tr class="memitem:a9a8bb3676937e8dbf2e7b43fe560dc19"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a9a8bb3676937e8dbf2e7b43fe560dc19">depositPhotons</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_phi</a>, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_particles</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_deposition</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a9a8bb3676937e8dbf2e7b43fe560dc19"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a9a8bb3676937e8dbf2e7b43fe560dc19">depositPhotons</a> (<a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_phi</a>, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_particles</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_deposition</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:a9a8bb3676937e8dbf2e7b43fe560dc19"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit photons.  <br /></td></tr>
 <tr class="separator:a9a8bb3676937e8dbf2e7b43fe560dc19"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ada8ed4f1b1f0f9e242d4caa01f45655d" id="r_ada8ed4f1b1f0f9e242d4caa01f45655d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#ada8ed4f1b1f0f9e242d4caa01f45655d">sortPhotonsByCell</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMcPhoto.html#a3e74abc2e95a4dd5ff480a4cad3288f6">WhichContainer</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_which</a>)</td></tr>
@@ -219,9 +203,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a84732e26e5cdbbbbf795e3753d0caf58" id="r_a84732e26e5cdbbbbf795e3753d0caf58"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a84732e26e5cdbbbbf795e3753d0caf58">allocate</a> () <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
 <tr class="memdesc:a84732e26e5cdbbbbf795e3753d0caf58"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocate internal storage.  <br /></td></tr>
 <tr class="separator:a84732e26e5cdbbbbf795e3753d0caf58"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1ca87608627761f39fb02ec898ce2af5" id="r_a1ca87608627761f39fb02ec898ce2af5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a1ca87608627761f39fb02ec898ce2af5">preRegrid</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_base</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_oldFinestLevel</a>) <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
-<tr class="memdesc:a1ca87608627761f39fb02ec898ce2af5"><td class="mdescLeft">&#160;</td><td class="mdescRight">preRegrid operations  <br /></td></tr>
-<tr class="separator:a1ca87608627761f39fb02ec898ce2af5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a875616d3da380d518bf43aefe4ee1b2e" id="r_a875616d3da380d518bf43aefe4ee1b2e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a875616d3da380d518bf43aefe4ee1b2e">preRegrid</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_lmin</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_oldFinestLevel</a>) <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
+<tr class="memdesc:a875616d3da380d518bf43aefe4ee1b2e"><td class="mdescLeft">&#160;</td><td class="mdescRight">preRegrid operations  <br /></td></tr>
+<tr class="separator:a875616d3da380d518bf43aefe4ee1b2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7a3d69f4dc5c298d453aaae79413e0f0" id="r_a7a3d69f4dc5c298d453aaae79413e0f0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a7a3d69f4dc5c298d453aaae79413e0f0">deallocate</a> () <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
 <tr class="memdesc:a7a3d69f4dc5c298d453aaae79413e0f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deallocate internal storage.  <br /></td></tr>
 <tr class="separator:a7a3d69f4dc5c298d453aaae79413e0f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -231,16 +215,16 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aea71995214232725b668c1b80b4d746f" id="r_aea71995214232725b668c1b80b4d746f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#aea71995214232725b668c1b80b4d746f">registerOperators</a> () <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
 <tr class="memdesc:aea71995214232725b668c1b80b4d746f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register operators that this solver needs.  <br /></td></tr>
 <tr class="separator:aea71995214232725b668c1b80b4d746f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a681a513ffc82b1879b6c1c1b1d2a9cf0" id="r_a681a513ffc82b1879b6c1c1b1d2a9cf0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a681a513ffc82b1879b6c1c1b1d2a9cf0">computeBoundaryFlux</a> (<a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_ebFlux</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_phi</a>) <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
+<tr class="memitem:a681a513ffc82b1879b6c1c1b1d2a9cf0" id="r_a681a513ffc82b1879b6c1c1b1d2a9cf0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a681a513ffc82b1879b6c1c1b1d2a9cf0">computeBoundaryFlux</a> (<a class="el" href="classTracerParticleSolver.html">EBAMRIVData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_ebFlux</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_phi</a>) <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
 <tr class="memdesc:a681a513ffc82b1879b6c1c1b1d2a9cf0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the boundary flux.  <br /></td></tr>
 <tr class="separator:a681a513ffc82b1879b6c1c1b1d2a9cf0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7fd8797c7de7a25b480022a8a05fb068" id="r_a7fd8797c7de7a25b480022a8a05fb068"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a7fd8797c7de7a25b480022a8a05fb068">computeDomainFlux</a> (<a class="el" href="classEBAMRData.html">EBAMRIFData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_domainFlux</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_phi</a>) <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
+<tr class="memitem:a7fd8797c7de7a25b480022a8a05fb068" id="r_a7fd8797c7de7a25b480022a8a05fb068"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a7fd8797c7de7a25b480022a8a05fb068">computeDomainFlux</a> (<a class="el" href="classTracerParticleSolver.html">EBAMRIFData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_domainFlux</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_phi</a>) <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
 <tr class="memdesc:a7fd8797c7de7a25b480022a8a05fb068"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the domain flux.  <br /></td></tr>
 <tr class="separator:a7fd8797c7de7a25b480022a8a05fb068"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a16166b0bf3e5d6b2435b53faa6a69a32" id="r_a16166b0bf3e5d6b2435b53faa6a69a32"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a16166b0bf3e5d6b2435b53faa6a69a32">computeFlux</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_flux</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_phi</a>) <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
+<tr class="memitem:a16166b0bf3e5d6b2435b53faa6a69a32" id="r_a16166b0bf3e5d6b2435b53faa6a69a32"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a16166b0bf3e5d6b2435b53faa6a69a32">computeFlux</a> (<a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_flux</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_phi</a>) <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
 <tr class="memdesc:a16166b0bf3e5d6b2435b53faa6a69a32"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the flux.  <br /></td></tr>
 <tr class="separator:a16166b0bf3e5d6b2435b53faa6a69a32"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a448449129511613333d2ae4224f41dd2" id="r_a448449129511613333d2ae4224f41dd2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a448449129511613333d2ae4224f41dd2">computeDensity</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_isotropic</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_phi</a>) <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
+<tr class="memitem:a448449129511613333d2ae4224f41dd2" id="r_a448449129511613333d2ae4224f41dd2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a448449129511613333d2ae4224f41dd2">computeDensity</a> (<a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_isotropic</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_phi</a>) <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
 <tr class="memdesc:a448449129511613333d2ae4224f41dd2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute isotropic radiative density from mesh solution.  <br /></td></tr>
 <tr class="separator:a448449129511613333d2ae4224f41dd2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a72d5f0f977eccadc439c0a31c8b8ede1" id="r_a72d5f0f977eccadc439c0a31c8b8ede1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a72d5f0f977eccadc439c0a31c8b8ede1">clear</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMcPhoto.html#a3e74abc2e95a4dd5ff480a4cad3288f6">WhichContainer</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_which</a>)</td></tr>
@@ -259,11 +243,11 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ab228cfc01dd6fe62c7148471b9f8daae" id="r_ab228cfc01dd6fe62c7148471b9f8daae"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#ab228cfc01dd6fe62c7148471b9f8daae">writePlotFile</a> () <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
 <tr class="memdesc:ab228cfc01dd6fe62c7148471b9f8daae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot file.  <br /></td></tr>
 <tr class="separator:ab228cfc01dd6fe62c7148471b9f8daae"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac92ea0a12fc857448b303bbceeb10df9" id="r_ac92ea0a12fc857448b303bbceeb10df9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#ac92ea0a12fc857448b303bbceeb10df9">writePlotData</a> (<a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_output</a>, <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_icomp</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> <a class="el" href="classTracerParticleSolver.html">a_outputRealm</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_level</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a> <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
-<tr class="memdesc:ac92ea0a12fc857448b303bbceeb10df9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data.  <br /></td></tr>
-<tr class="separator:ac92ea0a12fc857448b303bbceeb10df9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a32b71c2936f95e89212a2672c0189d25" id="r_a32b71c2936f95e89212a2672c0189d25"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a32b71c2936f95e89212a2672c0189d25">writePlotData</a> (<a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_output</a>, <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_comp</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_outputRealm</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_level</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a> <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
+<tr class="memdesc:a32b71c2936f95e89212a2672c0189d25"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data.  <br /></td></tr>
+<tr class="separator:a32b71c2936f95e89212a2672c0189d25"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8b982cfadf26e4b63c241540e5b5a935" id="r_a8b982cfadf26e4b63c241540e5b5a935"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a8b982cfadf26e4b63c241540e5b5a935">getPlotVariableNames</a> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
-<tr class="memdesc:a8b982cfadf26e4b63c241540e5b5a935"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write checkpoint data into handle.  <br /></td></tr>
+<tr class="memdesc:a8b982cfadf26e4b63c241540e5b5a935"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get output plot names.  <br /></td></tr>
 <tr class="separator:a8b982cfadf26e4b63c241540e5b5a935"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0b37ce1c18fb0aa1d63349c33d3f4bd6" id="r_a0b37ce1c18fb0aa1d63349c33d3f4bd6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a0b37ce1c18fb0aa1d63349c33d3f4bd6">getNumberOfPlotVariables</a> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
 <tr class="memdesc:a0b37ce1c18fb0aa1d63349c33d3f4bd6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get number of output variables.  <br /></td></tr>
@@ -286,13 +270,11 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a92c8a2364df70e13445d4f05d26a7955" id="r_a92c8a2364df70e13445d4f05d26a7955"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a92c8a2364df70e13445d4f05d26a7955">getSourcePhotons</a> ()</td></tr>
 <tr class="memdesc:a92c8a2364df70e13445d4f05d26a7955"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get source photons.  <br /></td></tr>
 <tr class="separator:a92c8a2364df70e13445d4f05d26a7955"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad6b49636701b47b7387f4efae225e8ac" id="r_ad6b49636701b47b7387f4efae225e8ac"><td class="memItemLeft" align="right" valign="top"><a id="ad6b49636701b47b7387f4efae225e8ac" name="ad6b49636701b47b7387f4efae225e8ac"></a>
-<a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><b>getMaxPhotonsPerCell</b> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:ad6b49636701b47b7387f4efae225e8ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get maximum number of photons generated per cell. <br /></td></tr>
+<tr class="memitem:ad6b49636701b47b7387f4efae225e8ac" id="r_ad6b49636701b47b7387f4efae225e8ac"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#ad6b49636701b47b7387f4efae225e8ac">getMaxPhotonsPerCell</a> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:ad6b49636701b47b7387f4efae225e8ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get maximum number of photons generated per cell.  <br /></td></tr>
 <tr class="separator:ad6b49636701b47b7387f4efae225e8ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adb531c420343d9d5cfc88be405332062" id="r_adb531c420343d9d5cfc88be405332062"><td class="memItemLeft" align="right" valign="top"><a id="adb531c420343d9d5cfc88be405332062" name="adb531c420343d9d5cfc88be405332062"></a>
-<a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><b>getNumSamplingPackets</b> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:adb531c420343d9d5cfc88be405332062"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get maximum number of photons generated per cell. <br /></td></tr>
+<tr class="memitem:adb531c420343d9d5cfc88be405332062" id="r_adb531c420343d9d5cfc88be405332062"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#adb531c420343d9d5cfc88be405332062">getNumSamplingPackets</a> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:adb531c420343d9d5cfc88be405332062"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get maximum number of photons generated per cell.  <br /></td></tr>
 <tr class="separator:adb531c420343d9d5cfc88be405332062"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8574c44adb26c8415fcce0f03496fdd1" id="r_a8574c44adb26c8415fcce0f03496fdd1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a8574c44adb26c8415fcce0f03496fdd1">computeLoads</a> (<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_loads</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">DisjointBoxLayout</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_dbl</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_level</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a> <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
 <tr class="memdesc:a8574c44adb26c8415fcce0f03496fdd1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get computational loads for a specific grid level. This computes the number of photons in the bulk data holder.  <br /></td></tr>
@@ -306,33 +288,31 @@ Public Member Functions</h2></td></tr>
 <a class="el" href="classTracerParticleSolver.html">virtual</a>&#160;</td><td class="memItemRight" valign="bottom"><b>~RtSolver</b> ()</td></tr>
 <tr class="memdesc:a7c4fc6b99803bfe6acf688f649b98b53 inherit pub_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor (does nothing) <br /></td></tr>
 <tr class="separator:a7c4fc6b99803bfe6acf688f649b98b53 inherit pub_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af3e8fe119256dde3d9c091cdfaaa11d4 inherit pub_methods_classRtSolver" id="r_af3e8fe119256dde3d9c091cdfaaa11d4"><td class="memItemLeft" align="right" valign="top">
-<a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a>&#160;</td><td class="memItemRight" valign="bottom"><b>getName</b> ()</td></tr>
-<tr class="memdesc:af3e8fe119256dde3d9c091cdfaaa11d4 inherit pub_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get solver name. <br /></td></tr>
+<tr class="memitem:af3e8fe119256dde3d9c091cdfaaa11d4 inherit pub_methods_classRtSolver" id="r_af3e8fe119256dde3d9c091cdfaaa11d4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#af3e8fe119256dde3d9c091cdfaaa11d4">getName</a> ()</td></tr>
+<tr class="memdesc:af3e8fe119256dde3d9c091cdfaaa11d4 inherit pub_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get solver name.  <br /></td></tr>
 <tr class="separator:af3e8fe119256dde3d9c091cdfaaa11d4 inherit pub_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:accc0f190f552e16dbc89b408fde1d0f5 inherit pub_methods_classRtSolver" id="r_accc0f190f552e16dbc89b408fde1d0f5"><td class="memItemLeft" align="right" valign="top">
-<a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a>&#160;</td><td class="memItemRight" valign="bottom"><b>getRealm</b> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:accc0f190f552e16dbc89b408fde1d0f5 inherit pub_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the realm where the solver lives. <br /></td></tr>
-<tr class="separator:accc0f190f552e16dbc89b408fde1d0f5 inherit pub_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a21b5a009aeefb7ba629ef4be8214fe06 inherit pub_methods_classRtSolver" id="r_a21b5a009aeefb7ba629ef4be8214fe06"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a21b5a009aeefb7ba629ef4be8214fe06">getRealm</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:a21b5a009aeefb7ba629ef4be8214fe06 inherit pub_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the realm where the solver lives.  <br /></td></tr>
+<tr class="separator:a21b5a009aeefb7ba629ef4be8214fe06 inherit pub_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afab22f65be49033a88f611ed0d98c8e3 inherit pub_methods_classRtSolver" id="r_afab22f65be49033a88f611ed0d98c8e3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#afab22f65be49033a88f611ed0d98c8e3">advance</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_dt</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classTracerParticleSolver.html">a_zeroPhi</a>=<a class="el" href="classTracerParticleSolver.html">false</a>)</td></tr>
 <tr class="memdesc:afab22f65be49033a88f611ed0d98c8e3 inherit pub_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance equation one time step.  <br /></td></tr>
 <tr class="separator:afab22f65be49033a88f611ed0d98c8e3 inherit pub_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0803ec0ad6bed502bc7cb229efdcd062 inherit pub_methods_classRtSolver" id="r_a0803ec0ad6bed502bc7cb229efdcd062"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a0803ec0ad6bed502bc7cb229efdcd062">advance</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_dt</a>, <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_phi</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classTracerParticleSolver.html">a_zeroPhi</a>=<a class="el" href="classTracerParticleSolver.html">false</a>)</td></tr>
+<tr class="memitem:a0803ec0ad6bed502bc7cb229efdcd062 inherit pub_methods_classRtSolver" id="r_a0803ec0ad6bed502bc7cb229efdcd062"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a0803ec0ad6bed502bc7cb229efdcd062">advance</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_dt</a>, <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_phi</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classTracerParticleSolver.html">a_zeroPhi</a>=<a class="el" href="classTracerParticleSolver.html">false</a>)</td></tr>
 <tr class="memdesc:a0803ec0ad6bed502bc7cb229efdcd062 inherit pub_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance method. Advances one time step.  <br /></td></tr>
 <tr class="separator:a0803ec0ad6bed502bc7cb229efdcd062 inherit pub_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab8036d7aa354200389a9f2fecc6cc35c inherit pub_methods_classRtSolver" id="r_ab8036d7aa354200389a9f2fecc6cc35c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#ab8036d7aa354200389a9f2fecc6cc35c">setRealm</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> <a class="el" href="classTracerParticleSolver.html">a_realm</a>)</td></tr>
-<tr class="memdesc:ab8036d7aa354200389a9f2fecc6cc35c inherit pub_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set realm where this solver lives.  <br /></td></tr>
-<tr class="separator:ab8036d7aa354200389a9f2fecc6cc35c inherit pub_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a00eb23b092393b8df6a902ba98a3175c inherit pub_methods_classRtSolver" id="r_a00eb23b092393b8df6a902ba98a3175c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a00eb23b092393b8df6a902ba98a3175c">setRtSpecies</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classRtSpecies.html">RtSpecies</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_species</a>)</td></tr>
-<tr class="memdesc:a00eb23b092393b8df6a902ba98a3175c inherit pub_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the radiative transfer species (<a class="el" href="classRtSpecies.html" title="Declaration of a class that defines an interface to radiative transfer solvers, i....">RtSpecies</a>)  <br /></td></tr>
-<tr class="separator:a00eb23b092393b8df6a902ba98a3175c inherit pub_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaf26205b8fe427419686946e4b4e6460 inherit pub_methods_classRtSolver" id="r_aaf26205b8fe427419686946e4b4e6460"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#aaf26205b8fe427419686946e4b4e6460">setComputationalGeometry</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classComputationalGeometry.html">ComputationalGeometry</a> &gt; <a class="el" href="classTracerParticleSolver.html">a_computationalGeometry</a>)</td></tr>
-<tr class="memdesc:aaf26205b8fe427419686946e4b4e6460 inherit pub_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set computational geometry.  <br /></td></tr>
-<tr class="separator:aaf26205b8fe427419686946e4b4e6460 inherit pub_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0167cf0adbeb3f5f396418a42927b17b inherit pub_methods_classRtSolver" id="r_a0167cf0adbeb3f5f396418a42927b17b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a0167cf0adbeb3f5f396418a42927b17b">setRealm</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_realm</a>)</td></tr>
+<tr class="memdesc:a0167cf0adbeb3f5f396418a42927b17b inherit pub_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set realm where this solver lives.  <br /></td></tr>
+<tr class="separator:a0167cf0adbeb3f5f396418a42927b17b inherit pub_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5329cca91713ac2ce117641317450143 inherit pub_methods_classRtSolver" id="r_a5329cca91713ac2ce117641317450143"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a5329cca91713ac2ce117641317450143">setRtSpecies</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classRtSpecies.html">RtSpecies</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_RtSpecies</a>)</td></tr>
+<tr class="memdesc:a5329cca91713ac2ce117641317450143 inherit pub_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the radiative transfer species (<a class="el" href="classRtSpecies.html" title="Declaration of a class that defines an interface to radiative transfer solvers, i....">RtSpecies</a>)  <br /></td></tr>
+<tr class="separator:a5329cca91713ac2ce117641317450143 inherit pub_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a92afcec9c19053596d3140bc290e440d inherit pub_methods_classRtSolver" id="r_a92afcec9c19053596d3140bc290e440d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a92afcec9c19053596d3140bc290e440d">setComputationalGeometry</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classComputationalGeometry.html">ComputationalGeometry</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_computationalGeometry</a>)</td></tr>
+<tr class="memdesc:a92afcec9c19053596d3140bc290e440d inherit pub_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set computational geometry.  <br /></td></tr>
+<tr class="separator:a92afcec9c19053596d3140bc290e440d inherit pub_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a01b8a6ecb69b68033a00a2e2197c137a inherit pub_methods_classRtSolver" id="r_a01b8a6ecb69b68033a00a2e2197c137a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a01b8a6ecb69b68033a00a2e2197c137a">setAmr</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classAmrMesh.html">AmrMesh</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_amr</a>)</td></tr>
 <tr class="memdesc:a01b8a6ecb69b68033a00a2e2197c137a inherit pub_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the amr object.  <br /></td></tr>
 <tr class="separator:a01b8a6ecb69b68033a00a2e2197c137a inherit pub_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a56d4509c766880c6047ceb84cde4efa6 inherit pub_methods_classRtSolver" id="r_a56d4509c766880c6047ceb84cde4efa6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a56d4509c766880c6047ceb84cde4efa6">setPhase</a> (phase::which_phase <a class="el" href="classTracerParticleSolver.html">a_phase</a>=phase::gas)</td></tr>
+<tr class="memitem:a56d4509c766880c6047ceb84cde4efa6 inherit pub_methods_classRtSolver" id="r_a56d4509c766880c6047ceb84cde4efa6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a56d4509c766880c6047ceb84cde4efa6">setPhase</a> (<a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> <a class="el" href="classTracerParticleSolver.html">a_phase</a>=<a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108bad0a7c1eb8fd916c8b7ec85be0fd23b38">phase::gas</a>)</td></tr>
 <tr class="memdesc:a56d4509c766880c6047ceb84cde4efa6 inherit pub_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set phase.  <br /></td></tr>
 <tr class="separator:a56d4509c766880c6047ceb84cde4efa6 inherit pub_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a622d20e4452eaa134441b8c84936772e inherit pub_methods_classRtSolver" id="r_a622d20e4452eaa134441b8c84936772e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a622d20e4452eaa134441b8c84936772e">setVerbosity</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_verbosity</a>)</td></tr>
@@ -348,43 +328,41 @@ Public Member Functions</h2></td></tr>
 <a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>sanityCheck</b> ()</td></tr>
 <tr class="memdesc:a752e1379763cd8b33fe645119870a3a2 inherit pub_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sanity check. <br /></td></tr>
 <tr class="separator:a752e1379763cd8b33fe645119870a3a2 inherit pub_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa4167be0c920b8c720e6fb604821bef7 inherit pub_methods_classRtSolver" id="r_aa4167be0c920b8c720e6fb604821bef7"><td class="memItemLeft" align="right" valign="top">
-<a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><b>isStationary</b> ()</td></tr>
-<tr class="memdesc:aa4167be0c920b8c720e6fb604821bef7 inherit pub_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if solver is stationary. <br /></td></tr>
+<tr class="memitem:aa4167be0c920b8c720e6fb604821bef7 inherit pub_methods_classRtSolver" id="r_aa4167be0c920b8c720e6fb604821bef7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#aa4167be0c920b8c720e6fb604821bef7">isStationary</a> ()</td></tr>
+<tr class="memdesc:aa4167be0c920b8c720e6fb604821bef7 inherit pub_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if solver is stationary.  <br /></td></tr>
 <tr class="separator:aa4167be0c920b8c720e6fb604821bef7 inherit pub_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8c9ff80791eb1abe86043834f8bc7d38 inherit pub_methods_classRtSolver" id="r_a8c9ff80791eb1abe86043834f8bc7d38"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a8c9ff80791eb1abe86043834f8bc7d38">initialData</a> ()</td></tr>
 <tr class="memdesc:a8c9ff80791eb1abe86043834f8bc7d38 inherit pub_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill solver with initial data. By default, this sets internal data to zero.  <br /></td></tr>
 <tr class="separator:a8c9ff80791eb1abe86043834f8bc7d38 inherit pub_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acf8d8cad248f9f2c483737d67095b06f inherit pub_methods_classRtSolver" id="r_acf8d8cad248f9f2c483737d67095b06f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#acf8d8cad248f9f2c483737d67095b06f">setSource</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_source</a>)</td></tr>
+<tr class="memitem:acf8d8cad248f9f2c483737d67095b06f inherit pub_methods_classRtSolver" id="r_acf8d8cad248f9f2c483737d67095b06f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#acf8d8cad248f9f2c483737d67095b06f">setSource</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_source</a>)</td></tr>
 <tr class="memdesc:acf8d8cad248f9f2c483737d67095b06f inherit pub_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set source term.  <br /></td></tr>
 <tr class="separator:acf8d8cad248f9f2c483737d67095b06f inherit pub_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a84736055c8def8d6e5f32acb042143e3 inherit pub_methods_classRtSolver" id="r_a84736055c8def8d6e5f32acb042143e3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a84736055c8def8d6e5f32acb042143e3">setSource</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_source</a>)</td></tr>
 <tr class="memdesc:a84736055c8def8d6e5f32acb042143e3 inherit pub_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set source.  <br /></td></tr>
 <tr class="separator:a84736055c8def8d6e5f32acb042143e3 inherit pub_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac4737b50759400092d1fb2e78c2f0451 inherit pub_methods_classRtSolver" id="r_ac4737b50759400092d1fb2e78c2f0451"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#ac4737b50759400092d1fb2e78c2f0451">setSource</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> <a class="el" href="classTracerParticleSolver.html">a_pos</a>)&gt; <a class="el" href="classTracerParticleSolver.html">a_source</a>)</td></tr>
-<tr class="memdesc:ac4737b50759400092d1fb2e78c2f0451 inherit pub_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set source.  <br /></td></tr>
-<tr class="separator:ac4737b50759400092d1fb2e78c2f0451 inherit pub_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5754d35669e678ca9528f7e979350b19 inherit pub_methods_classRtSolver" id="r_a5754d35669e678ca9528f7e979350b19"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a5754d35669e678ca9528f7e979350b19">setSource</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> <a class="el" href="classTracerParticleSolver.html">a_pos</a>)&gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_source</a>)</td></tr>
+<tr class="memdesc:a5754d35669e678ca9528f7e979350b19 inherit pub_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set source.  <br /></td></tr>
+<tr class="separator:a5754d35669e678ca9528f7e979350b19 inherit pub_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0ff3b079fde1768aa6f7b951020c0a63 inherit pub_methods_classRtSolver" id="r_a0ff3b079fde1768aa6f7b951020c0a63"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a0ff3b079fde1768aa6f7b951020c0a63">getTime</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
 <tr class="memdesc:a0ff3b079fde1768aa6f7b951020c0a63 inherit pub_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get current time.  <br /></td></tr>
 <tr class="separator:a0ff3b079fde1768aa6f7b951020c0a63 inherit pub_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a13f2a4a345a8e4830d8bbd65207f6430 inherit pub_methods_classRtSolver" id="r_a13f2a4a345a8e4830d8bbd65207f6430"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> phase::which_phase&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a13f2a4a345a8e4830d8bbd65207f6430">getPhase</a> ()</td></tr>
+<tr class="memitem:a13f2a4a345a8e4830d8bbd65207f6430 inherit pub_methods_classRtSolver" id="r_a13f2a4a345a8e4830d8bbd65207f6430"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a13f2a4a345a8e4830d8bbd65207f6430">getPhase</a> ()</td></tr>
 <tr class="memdesc:a13f2a4a345a8e4830d8bbd65207f6430 inherit pub_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the RTE phase.  <br /></td></tr>
 <tr class="separator:a13f2a4a345a8e4830d8bbd65207f6430 inherit pub_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a19b876edea4718bdee9cc4436e107c9d inherit pub_methods_classRtSolver" id="r_a19b876edea4718bdee9cc4436e107c9d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a19b876edea4718bdee9cc4436e107c9d">getPhi</a> ()</td></tr>
+<tr class="memitem:a19b876edea4718bdee9cc4436e107c9d inherit pub_methods_classRtSolver" id="r_a19b876edea4718bdee9cc4436e107c9d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a19b876edea4718bdee9cc4436e107c9d">getPhi</a> ()</td></tr>
 <tr class="memdesc:a19b876edea4718bdee9cc4436e107c9d inherit pub_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get solver state.  <br /></td></tr>
 <tr class="separator:a19b876edea4718bdee9cc4436e107c9d inherit pub_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9b56f888f09a4dc38c8ecd172e6eb0ed inherit pub_methods_classRtSolver" id="r_a9b56f888f09a4dc38c8ecd172e6eb0ed"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a9b56f888f09a4dc38c8ecd172e6eb0ed">getSource</a> ()</td></tr>
+<tr class="memitem:a9b56f888f09a4dc38c8ecd172e6eb0ed inherit pub_methods_classRtSolver" id="r_a9b56f888f09a4dc38c8ecd172e6eb0ed"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a9b56f888f09a4dc38c8ecd172e6eb0ed">getSource</a> ()</td></tr>
 <tr class="memdesc:a9b56f888f09a4dc38c8ecd172e6eb0ed inherit pub_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get multifluid source.  <br /></td></tr>
 <tr class="separator:a9b56f888f09a4dc38c8ecd172e6eb0ed inherit pub_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6b88752ec61d7f506bb6cff96a5b97d5 inherit pub_methods_classRtSolver" id="r_a6b88752ec61d7f506bb6cff96a5b97d5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classEBAMRData.html">EBAMRFluxData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a6b88752ec61d7f506bb6cff96a5b97d5">getKappa</a> ()</td></tr>
+<tr class="memitem:a6b88752ec61d7f506bb6cff96a5b97d5 inherit pub_methods_classRtSolver" id="r_a6b88752ec61d7f506bb6cff96a5b97d5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">EBAMRFluxData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a6b88752ec61d7f506bb6cff96a5b97d5">getKappa</a> ()</td></tr>
 <tr class="memdesc:a6b88752ec61d7f506bb6cff96a5b97d5 inherit pub_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the absorption length.  <br /></td></tr>
 <tr class="separator:a6b88752ec61d7f506bb6cff96a5b97d5 inherit pub_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a684fb7325af1b1912e0c4cec9fb90770 inherit pub_methods_classRtSolver" id="r_a684fb7325af1b1912e0c4cec9fb90770"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a684fb7325af1b1912e0c4cec9fb90770">getKappaEb</a> ()</td></tr>
+<tr class="memitem:a684fb7325af1b1912e0c4cec9fb90770 inherit pub_methods_classRtSolver" id="r_a684fb7325af1b1912e0c4cec9fb90770"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">EBAMRIVData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a684fb7325af1b1912e0c4cec9fb90770">getKappaEb</a> ()</td></tr>
 <tr class="memdesc:a684fb7325af1b1912e0c4cec9fb90770 inherit pub_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the absorption coefficient on irregular EB faces.  <br /></td></tr>
 <tr class="separator:a684fb7325af1b1912e0c4cec9fb90770 inherit pub_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4957a57c3c1caad571d3284a9c95155a inherit pub_methods_classRtSolver" id="r_a4957a57c3c1caad571d3284a9c95155a"><td class="memItemLeft" align="right" valign="top">
-<a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classRtSpecies.html">RtSpecies</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getSpecies</b> ()</td></tr>
-<tr class="memdesc:a4957a57c3c1caad571d3284a9c95155a inherit pub_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get species. <br /></td></tr>
+<tr class="memitem:a4957a57c3c1caad571d3284a9c95155a inherit pub_methods_classRtSolver" id="r_a4957a57c3c1caad571d3284a9c95155a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classRtSpecies.html">RtSpecies</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a4957a57c3c1caad571d3284a9c95155a">getSpecies</a> ()</td></tr>
+<tr class="memdesc:a4957a57c3c1caad571d3284a9c95155a inherit pub_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get species.  <br /></td></tr>
 <tr class="separator:a4957a57c3c1caad571d3284a9c95155a inherit pub_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-types" name="pro-types"></a>
@@ -412,20 +390,14 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:a22ac8d5d0ff805aa90bb48465742137e" id="r_a22ac8d5d0ff805aa90bb48465742137e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a22ac8d5d0ff805aa90bb48465742137e">drawPhotons</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_source</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_volume</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_dt</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:a22ac8d5d0ff805aa90bb48465742137e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw photons in a cell and volume.  <br /></td></tr>
 <tr class="separator:a22ac8d5d0ff805aa90bb48465742137e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9202da5518777b2e7de354acd0b7625e" id="r_a9202da5518777b2e7de354acd0b7625e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a9202da5518777b2e7de354acd0b7625e">domainBcMap</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_dir</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">Side::LoHiSide</a> <a class="el" href="classTracerParticleSolver.html">a_side</a>)</td></tr>
-<tr class="memdesc:a9202da5518777b2e7de354acd0b7625e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mapping function for domain boundary conditions.  <br /></td></tr>
-<tr class="separator:a9202da5518777b2e7de354acd0b7625e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad9ebc3b9b6ea2f3332b8247897142ded" id="r_ad9ebc3b9b6ea2f3332b8247897142ded"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#ad9ebc3b9b6ea2f3332b8247897142ded">randomExponential</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_rate</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:ad9ebc3b9b6ea2f3332b8247897142ded"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classRandom.html" title="Class for encapsulating random number generation. This class is MPI and OpenMP safe.">Random</a> exponential trial.  <br /></td></tr>
-<tr class="separator:ad9ebc3b9b6ea2f3332b8247897142ded"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab0c2deba0fb666679c4d7ac54a33977b" id="r_ab0c2deba0fb666679c4d7ac54a33977b"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">Ret</a> , <a class="el" href="classTracerParticleSolver.html">Ret</a>(P::*)() <a class="el" href="classTracerParticleSolver.html">const</a> MemberFunc&gt; </td></tr>
-<tr class="memitem:ab0c2deba0fb666679c4d7ac54a33977b"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#ab0c2deba0fb666679c4d7ac54a33977b">depositKappaConservative</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_phi</a>, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_particles</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> <a class="el" href="classTracerParticleSolver.html">a_deposition</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a> <a class="el" href="classTracerParticleSolver.html">a_coarseFineDeposition</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:ab0c2deba0fb666679c4d7ac54a33977b"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#ab0c2deba0fb666679c4d7ac54a33977b">depositKappaConservative</a> (<a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_phi</a>, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_particles</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> <a class="el" href="classTracerParticleSolver.html">a_deposition</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a> <a class="el" href="classTracerParticleSolver.html">a_coarseFineDeposition</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:ab0c2deba0fb666679c4d7ac54a33977b"><td class="mdescLeft">&#160;</td><td class="mdescRight">This computes the "conservative" deposition, multiplied by kappa.  <br /></td></tr>
 <tr class="separator:ab0c2deba0fb666679c4d7ac54a33977b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a020f7d583686b3cc75e40b61a68e0c98" id="r_a020f7d583686b3cc75e40b61a68e0c98"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a020f7d583686b3cc75e40b61a68e0c98">depositNonConservative</a> (<a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_depositionNC</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_depositionKappaC</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a020f7d583686b3cc75e40b61a68e0c98" id="r_a020f7d583686b3cc75e40b61a68e0c98"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a020f7d583686b3cc75e40b61a68e0c98">depositNonConservative</a> (<a class="el" href="classTracerParticleSolver.html">EBAMRIVData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_depositionNC</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_depositionKappaC</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:a020f7d583686b3cc75e40b61a68e0c98"><td class="mdescLeft">&#160;</td><td class="mdescRight">Make the "non-conservative" kappa deposition.  <br /></td></tr>
 <tr class="separator:a020f7d583686b3cc75e40b61a68e0c98"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9640bbb15f46473cf1542118c86ab3c2" id="r_a9640bbb15f46473cf1542118c86ab3c2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a9640bbb15f46473cf1542118c86ab3c2">depositHybrid</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_depositionH</a>, <a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_massDifference</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_depositionNC</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a9640bbb15f46473cf1542118c86ab3c2" id="r_a9640bbb15f46473cf1542118c86ab3c2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a9640bbb15f46473cf1542118c86ab3c2">depositHybrid</a> (<a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_depositionH</a>, <a class="el" href="classTracerParticleSolver.html">EBAMRIVData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_massDifference</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRIVData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_depositionNC</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:a9640bbb15f46473cf1542118c86ab3c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Make the hybrid deposition. Also compute the mass difference.  <br /></td></tr>
 <tr class="separator:a9640bbb15f46473cf1542118c86ab3c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a65acbf58522501756e8e944ca006ff45" id="r_a65acbf58522501756e8e944ca006ff45"><td class="memItemLeft" align="right" valign="top"><a id="a65acbf58522501756e8e944ca006ff45" name="a65acbf58522501756e8e944ca006ff45"></a>
@@ -467,21 +439,29 @@ Protected Member Functions</h2></td></tr>
 <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>parsePlotVariables</b> ()</td></tr>
 <tr class="memdesc:ad0e8145b5850c2739886793bb6ec36a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse plot variables. <br /></td></tr>
 <tr class="separator:ad0e8145b5850c2739886793bb6ec36a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afb69d6354e2b8a8a3f6966e505ab28c1" id="r_afb69d6354e2b8a8a3f6966e505ab28c1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#afb69d6354e2b8a8a3f6966e505ab28c1">depositPhotonsNGP</a> (<a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_output</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_particles</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_level</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:afb69d6354e2b8a8a3f6966e505ab28c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do an NGP deposit on a specific grid level. Used for IO.  <br /></td></tr>
-<tr class="separator:afb69d6354e2b8a8a3f6966e505ab28c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae890b9d798f66ccfa025f8eb8643fec1" id="r_ae890b9d798f66ccfa025f8eb8643fec1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#ae890b9d798f66ccfa025f8eb8643fec1">depositPhotonsNGP</a> (<a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_output</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_photons</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_level</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:ae890b9d798f66ccfa025f8eb8643fec1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do an NGP deposit on a specific grid level. Used for IO.  <br /></td></tr>
+<tr class="separator:ae890b9d798f66ccfa025f8eb8643fec1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_methods_classRtSolver"><td colspan="2" onclick="javascript:toggleInherit('pro_methods_classRtSolver')"><img src="closed.png" alt="-"/>&#160;Protected Member Functions inherited from <a class="el" href="classRtSolver.html">RtSolver</a></td></tr>
-<tr class="memitem:a0bde04785c5e7d9dca2537391d5ead5a inherit pro_methods_classRtSolver" id="r_a0bde04785c5e7d9dca2537391d5ead5a"><td class="memItemLeft" align="right" valign="top">
-<a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>setEbIndexSpace</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBIndexSpace</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_ebis</a>)</td></tr>
-<tr class="memdesc:a0bde04785c5e7d9dca2537391d5ead5a inherit pro_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set ebis. <br /></td></tr>
+<tr class="memitem:a0bde04785c5e7d9dca2537391d5ead5a inherit pro_methods_classRtSolver" id="r_a0bde04785c5e7d9dca2537391d5ead5a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a0bde04785c5e7d9dca2537391d5ead5a">setEbIndexSpace</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBIndexSpace</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_ebis</a>)</td></tr>
+<tr class="memdesc:a0bde04785c5e7d9dca2537391d5ead5a inherit pro_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set ebis.  <br /></td></tr>
 <tr class="separator:a0bde04785c5e7d9dca2537391d5ead5a inherit pro_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a431f024c83df8b2b33c11e6a675a37e3 inherit pro_methods_classRtSolver" id="r_a431f024c83df8b2b33c11e6a675a37e3"><td class="memItemLeft" align="right" valign="top">
 <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>parseVerbosity</b> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:a431f024c83df8b2b33c11e6a675a37e3 inherit pro_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse verbosity. <br /></td></tr>
 <tr class="separator:a431f024c83df8b2b33c11e6a675a37e3 inherit pro_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acec6324d8518126de3cc196b4fa53d51 inherit pro_methods_classRtSolver" id="r_acec6324d8518126de3cc196b4fa53d51"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#acec6324d8518126de3cc196b4fa53d51">writeData</a> (<a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_output</a>, <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_comp</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_data</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> <a class="el" href="classTracerParticleSolver.html">a_outputRealm</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_level</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classTracerParticleSolver.html">a_interpToCentroids</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classTracerParticleSolver.html">a_interpGhost</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:acec6324d8518126de3cc196b4fa53d51 inherit pro_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write data to output. Convenience function.  <br /></td></tr>
-<tr class="separator:acec6324d8518126de3cc196b4fa53d51 inherit pro_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7331b0b401951ccf4ef4c4b28f18557b inherit pro_methods_classRtSolver" id="r_a7331b0b401951ccf4ef4c4b28f18557b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a7331b0b401951ccf4ef4c4b28f18557b">writeData</a> (<a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_output</a>, <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_comp</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_data</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_outputRealm</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_level</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classTracerParticleSolver.html">a_interpToCentroids</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classTracerParticleSolver.html">a_interpGhost</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a7331b0b401951ccf4ef4c4b28f18557b inherit pro_methods_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write data to output. Convenience function.  <br /></td></tr>
+<tr class="separator:a7331b0b401951ccf4ef4c4b28f18557b inherit pro_methods_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-static-methods" name="pro-static-methods"></a>
+Static Protected Member Functions</h2></td></tr>
+<tr class="memitem:a9202da5518777b2e7de354acd0b7625e" id="r_a9202da5518777b2e7de354acd0b7625e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">static</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a9202da5518777b2e7de354acd0b7625e">domainBcMap</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_dir</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">Side::LoHiSide</a> <a class="el" href="classTracerParticleSolver.html">a_side</a>)</td></tr>
+<tr class="memdesc:a9202da5518777b2e7de354acd0b7625e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mapping function for domain boundary conditions.  <br /></td></tr>
+<tr class="separator:a9202da5518777b2e7de354acd0b7625e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aee7c33ccf32d753898a5982d06b0b713" id="r_aee7c33ccf32d753898a5982d06b0b713"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">static</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#aee7c33ccf32d753898a5982d06b0b713">randomExponential</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_rate</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:aee7c33ccf32d753898a5982d06b0b713"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classRandom.html" title="Class for encapsulating random number generation. This class is MPI and OpenMP safe.">Random</a> exponential trial.  <br /></td></tr>
+<tr class="separator:aee7c33ccf32d753898a5982d06b0b713"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -535,6 +515,7 @@ Protected Attributes</h2></td></tr>
 <tr class="separator:a64fee208dfd98b7136e189092a8ed803"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abaf73acbdce5500f0250d29bc0375895" id="r_abaf73acbdce5500f0250d29bc0375895"><td class="memItemLeft" align="right" valign="top"><a id="abaf73acbdce5500f0250d29bc0375895" name="abaf73acbdce5500f0250d29bc0375895"></a>
 <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_numSamplingPackets</b></td></tr>
+<tr class="memdesc:abaf73acbdce5500f0250d29bc0375895"><td class="mdescLeft">&#160;</td><td class="mdescRight">Num sampling packets. <br /></td></tr>
 <tr class="separator:abaf73acbdce5500f0250d29bc0375895"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad5cbdbb16e6ee4444c4ebccb96c12286" id="r_ad5cbdbb16e6ee4444c4ebccb96c12286"><td class="memItemLeft" align="right" valign="top"><a id="ad5cbdbb16e6ee4444c4ebccb96c12286" name="ad5cbdbb16e6ee4444c4ebccb96c12286"></a>
 <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_seed</b></td></tr>
@@ -554,6 +535,7 @@ Protected Attributes</h2></td></tr>
 <tr class="separator:a1cd95a7a887f25440c6325332dcd96cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1e63b1a1a4809a24e992509c38b1e253" id="r_a1e63b1a1a4809a24e992509c38b1e253"><td class="memItemLeft" align="right" valign="top"><a id="a1e63b1a1a4809a24e992509c38b1e253" name="a1e63b1a1a4809a24e992509c38b1e253"></a>
 <a class="el" href="classMcPhoto.html#a7e35b68b51370bf36ed4e6061f150dcb">IntersectionEB</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_intersectionEB</b></td></tr>
+<tr class="memdesc:a1e63b1a1a4809a24e992509c38b1e253"><td class="mdescLeft">&#160;</td><td class="mdescRight">Intersection e b. <br /></td></tr>
 <tr class="separator:a1e63b1a1a4809a24e992509c38b1e253"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a612355eb088e1faf64dd93c487dcab12" id="r_a612355eb088e1faf64dd93c487dcab12"><td class="memItemLeft" align="right" valign="top"><a id="a612355eb088e1faf64dd93c487dcab12" name="a612355eb088e1faf64dd93c487dcab12"></a>
 <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_deposition</b></td></tr>
@@ -564,15 +546,15 @@ Protected Attributes</h2></td></tr>
 <tr class="memdesc:aab0a91bc1e8343dd91ff07daa52b44ce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarse-fine deposition strategy. <br /></td></tr>
 <tr class="separator:aab0a91bc1e8343dd91ff07daa52b44ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aee98ffcf85890b1e101d475b74e39099" id="r_aee98ffcf85890b1e101d475b74e39099"><td class="memItemLeft" align="right" valign="top"><a id="aee98ffcf85890b1e101d475b74e39099" name="aee98ffcf85890b1e101d475b74e39099"></a>
-<a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_scratch</b></td></tr>
+<a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_scratch</b></td></tr>
 <tr class="memdesc:aee98ffcf85890b1e101d475b74e39099"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarse data for interpolation of deposition clouds. <br /></td></tr>
 <tr class="separator:aee98ffcf85890b1e101d475b74e39099"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae9f71af70d0ef3dc565d67874cbb715a" id="r_ae9f71af70d0ef3dc565d67874cbb715a"><td class="memItemLeft" align="right" valign="top"><a id="ae9f71af70d0ef3dc565d67874cbb715a" name="ae9f71af70d0ef3dc565d67874cbb715a"></a>
-<a class="el" href="classEBAMRData.html">EBAMRIVData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_depositionNC</b></td></tr>
+<a class="el" href="classTracerParticleSolver.html">EBAMRIVData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_depositionNC</b></td></tr>
 <tr class="memdesc:ae9f71af70d0ef3dc565d67874cbb715a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scratch storage for holding the non-conservative deposition. <br /></td></tr>
 <tr class="separator:ae9f71af70d0ef3dc565d67874cbb715a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a81f7329fb83c8feed0d01dcfa6778b55" id="r_a81f7329fb83c8feed0d01dcfa6778b55"><td class="memItemLeft" align="right" valign="top"><a id="a81f7329fb83c8feed0d01dcfa6778b55" name="a81f7329fb83c8feed0d01dcfa6778b55"></a>
-<a class="el" href="classEBAMRData.html">EBAMRIVData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_massDiff</b></td></tr>
+<a class="el" href="classTracerParticleSolver.html">EBAMRIVData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_massDiff</b></td></tr>
 <tr class="memdesc:a81f7329fb83c8feed0d01dcfa6778b55"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scratch storage for holding the mass difference when using hybrid deposition. <br /></td></tr>
 <tr class="separator:a81f7329fb83c8feed0d01dcfa6778b55"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab05c505a4ff40163d9803c89b0a2df26" id="r_ab05c505a4ff40163d9803c89b0a2df26"><td class="memItemLeft" align="right" valign="top"><a id="ab05c505a4ff40163d9803c89b0a2df26" name="ab05c505a4ff40163d9803c89b0a2df26"></a>
@@ -621,33 +603,33 @@ Protected Attributes</h2></td></tr>
 <tr class="memdesc:a4be6481630f7823d6d9c878b70547692 inherit pro_attribs_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">AMR; needed for grid stuff. <br /></td></tr>
 <tr class="separator:a4be6481630f7823d6d9c878b70547692 inherit pro_attribs_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a867990a2d576dbac63ebea6025b2ff9b inherit pro_attribs_classRtSolver" id="r_a867990a2d576dbac63ebea6025b2ff9b"><td class="memItemLeft" align="right" valign="top">
-phase::which_phase&#160;</td><td class="memItemRight" valign="bottom"><b>m_phase</b></td></tr>
+<a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_phase</b></td></tr>
 <tr class="memdesc:a867990a2d576dbac63ebea6025b2ff9b inherit pro_attribs_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Phase. <br /></td></tr>
 <tr class="separator:a867990a2d576dbac63ebea6025b2ff9b inherit pro_attribs_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a82a3cfbe7398e27f0638effd2d6b8bbf inherit pro_attribs_classRtSolver" id="r_a82a3cfbe7398e27f0638effd2d6b8bbf"><td class="memItemLeft" align="right" valign="top">
-<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_name</b></td></tr>
+<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_name</b> = &quot;RtSolver&quot;</td></tr>
 <tr class="memdesc:a82a3cfbe7398e27f0638effd2d6b8bbf inherit pro_attribs_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Name for this solver. <br /></td></tr>
 <tr class="separator:a82a3cfbe7398e27f0638effd2d6b8bbf inherit pro_attribs_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa678dd961614107076486084f300d5b2 inherit pro_attribs_classRtSolver" id="r_aa678dd961614107076486084f300d5b2"><td class="memItemLeft" align="right" valign="top">
-<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_className</b></td></tr>
+<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_className</b> = &quot;RtSolver&quot;</td></tr>
 <tr class="memdesc:aa678dd961614107076486084f300d5b2 inherit pro_attribs_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Class name &ndash; needed because inherited classes will be named different. <br /></td></tr>
 <tr class="separator:aa678dd961614107076486084f300d5b2 inherit pro_attribs_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9cf5f3964061b742e46636a2b7f2f9df inherit pro_attribs_classRtSolver" id="r_a9cf5f3964061b742e46636a2b7f2f9df"><td class="memItemLeft" align="right" valign="top">
-<a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_cachePhi</b></td></tr>
+<a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_cachePhi</b></td></tr>
 <tr class="memdesc:a9cf5f3964061b742e46636a2b7f2f9df inherit pro_attribs_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cached state used for regridding. <br /></td></tr>
 <tr class="separator:a9cf5f3964061b742e46636a2b7f2f9df inherit pro_attribs_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a82687b0e09a0c731b282bebc8ba6047e inherit pro_attribs_classRtSolver" id="r_a82687b0e09a0c731b282bebc8ba6047e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a82687b0e09a0c731b282bebc8ba6047e">m_phi</a></td></tr>
+<tr class="memitem:a82687b0e09a0c731b282bebc8ba6047e inherit pro_attribs_classRtSolver" id="r_a82687b0e09a0c731b282bebc8ba6047e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a82687b0e09a0c731b282bebc8ba6047e">m_phi</a></td></tr>
 <tr class="memdesc:a82687b0e09a0c731b282bebc8ba6047e inherit pro_attribs_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Internal state.  <br /></td></tr>
 <tr class="separator:a82687b0e09a0c731b282bebc8ba6047e inherit pro_attribs_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3156fd486cd828dffc5d8a0fb380772e inherit pro_attribs_classRtSolver" id="r_a3156fd486cd828dffc5d8a0fb380772e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a3156fd486cd828dffc5d8a0fb380772e">m_source</a></td></tr>
+<tr class="memitem:a3156fd486cd828dffc5d8a0fb380772e inherit pro_attribs_classRtSolver" id="r_a3156fd486cd828dffc5d8a0fb380772e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRtSolver.html#a3156fd486cd828dffc5d8a0fb380772e">m_source</a></td></tr>
 <tr class="memdesc:a3156fd486cd828dffc5d8a0fb380772e inherit pro_attribs_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Source term.  <br /></td></tr>
 <tr class="separator:a3156fd486cd828dffc5d8a0fb380772e inherit pro_attribs_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a02749194fbf5eaf3610cf2aa13bfc546 inherit pro_attribs_classRtSolver" id="r_a02749194fbf5eaf3610cf2aa13bfc546"><td class="memItemLeft" align="right" valign="top">
-<a class="el" href="classEBAMRData.html">EBAMRFluxData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_kappa</b></td></tr>
+<a class="el" href="classTracerParticleSolver.html">EBAMRFluxData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_kappa</b></td></tr>
 <tr class="memdesc:a02749194fbf5eaf3610cf2aa13bfc546 inherit pro_attribs_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Absorption coefficient. <br /></td></tr>
 <tr class="separator:a02749194fbf5eaf3610cf2aa13bfc546 inherit pro_attribs_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4e48c707308f5c75d3fb0d121014e378 inherit pro_attribs_classRtSolver" id="r_a4e48c707308f5c75d3fb0d121014e378"><td class="memItemLeft" align="right" valign="top">
-<a class="el" href="classEBAMRData.html">EBAMRIVData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_kappaEB</b></td></tr>
+<a class="el" href="classTracerParticleSolver.html">EBAMRIVData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_kappaEB</b></td></tr>
 <tr class="memdesc:a4e48c707308f5c75d3fb0d121014e378 inherit pro_attribs_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Absorption coefficient on EB faces. <br /></td></tr>
 <tr class="separator:a4e48c707308f5c75d3fb0d121014e378 inherit pro_attribs_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac83a547335a4beb10898f76234cc0344 inherit pro_attribs_classRtSolver" id="r_ac83a547335a4beb10898f76234cc0344"><td class="memItemLeft" align="right" valign="top">
@@ -671,7 +653,8 @@ phase::which_phase&#160;</td><td class="memItemRight" valign="bottom"><b>m_phase
 <tr class="memdesc:a6f9fa29014a1974fd243545afd9b4cf3 inherit pro_attribs_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Output source term. <br /></td></tr>
 <tr class="separator:a6f9fa29014a1974fd243545afd9b4cf3 inherit pro_attribs_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab754253053b06ff7adfe5ba4a0689154 inherit pro_attribs_classRtSolver" id="r_ab754253053b06ff7adfe5ba4a0689154"><td class="memItemLeft" align="right" valign="top">
-<a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_verbosity</b></td></tr>
+<a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_verbosity</b> = -1</td></tr>
+<tr class="memdesc:ab754253053b06ff7adfe5ba4a0689154 inherit pro_attribs_classRtSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Verbosity. <br /></td></tr>
 <tr class="separator:ab754253053b06ff7adfe5ba4a0689154 inherit pro_attribs_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af6014e7cdca13c65327f8ea142ff7325 inherit pro_attribs_classRtSolver" id="r_af6014e7cdca13c65327f8ea142ff7325"><td class="memItemLeft" align="right" valign="top">
 <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_timeStep</b></td></tr>
@@ -691,7 +674,7 @@ Additional Inherited Members</h2></td></tr>
 <tr class="separator:a2e37fa6937f1cdd789b063c5f56b575e inherit pro_static_attribs_classRtSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Radiative tranfer equation solver using Monte-Carlo simulation. </p>
+<div class="textblock"><p>Radiative transfer equation solver using Monte-Carlo simulation. </p>
 <p>This class is, by default, a non-stationary radiative transfer solver which simulates computational photons that can also be deposited on the mesh. Various options are available for specifying how the photons are generated, and how they are propagated (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">e.g</a>. with speed of light or instantaneously). Note that this solver runs its own intersection tests with the EB due to dependencies on how the photons are moved (we store free-flight photons, absorbed photons, intersected photons, etc). </p><dl class="section note"><dt>Note</dt><dd>The solver is missing appropriate boundary conditions on domain faces. </dd></dl>
 </div><h2 class="groupheader">Member Enumeration Documentation</h2>
 <a id="a7e35b68b51370bf36ed4e6061f150dcb" name="a7e35b68b51370bf36ed4e6061f150dcb"></a>
@@ -719,6 +702,59 @@ Additional Inherited Members</h2></td></tr>
 
 </div>
 </div>
+<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="a812891c7384f315793b242dba18f1739" name="a812891c7384f315793b242dba18f1739"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a812891c7384f315793b242dba18f1739">&#9670;&#160;</a></span>McPhoto() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">McPhoto::McPhoto </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMcPhoto.html">McPhoto</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_other</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Disallowed copy constructor. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_other</td><td>Description </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ac0dae30c8ce8768edfcdd074161f5dfa" name="ac0dae30c8ce8768edfcdd074161f5dfa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac0dae30c8ce8768edfcdd074161f5dfa">&#9670;&#160;</a></span>McPhoto() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">McPhoto::McPhoto </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMcPhoto.html">McPhoto</a> &amp;&amp;&#160;</td>
+          <td class="paramname"><em>a_other</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Disallowed move constructor. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_other</td><td>Description </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <h2 class="groupheader">Member Function Documentation</h2>
 <a id="adc6e367b73c037c53d71871db7733658" name="adc6e367b73c037c53d71871db7733658"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#adc6e367b73c037c53d71871db7733658">&#9670;&#160;</a></span>advance()</h2>
@@ -738,13 +774,13 @@ Additional Inherited Members</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td>
           <td class="paramname"><em>a_phi</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td>
           <td class="paramname"><em>a_source</em>, </td>
         </tr>
         <tr>
@@ -777,7 +813,7 @@ Additional Inherited Members</h2></td></tr>
   </dd>
 </dl>
 <dl class="section note"><dt>Note</dt><dd>This is the "fluid interface" to the radiative transfer solver in which the solver uses discrete photons for sampling the isotropic density. Particle codes will probably use advancePhotonsInstantaneous or advancePhotonsTransient .</dd></dl>
-<p>This routine switches between stationary and transient solvers depending on whether or not the solver is stationary. </p>
+<p>This routine switches between stationary and transient solvers depending on whether or not the solver is stationary. </p><dl class="section return"><dt>Returns</dt><dd>Time step used </dd></dl>
 
 <p>Implements <a class="el" href="classRtSolver.html#a55c549d050929d2a183add227e2811fe">RtSolver</a>.</p>
 
@@ -1053,13 +1089,13 @@ Additional Inherited Members</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> McPhoto::computeBoundaryFlux </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">EBAMRIVData</a> &amp;&#160;</td>
           <td class="paramname"><em>a_ebFlux</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td>
           <td class="paramname"><em>a_phi</em>&#160;</td>
         </tr>
         <tr>
@@ -1101,13 +1137,13 @@ Additional Inherited Members</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> McPhoto::computeDensity </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td>
           <td class="paramname"><em>a_isotropic</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td>
           <td class="paramname"><em>a_phi</em>&#160;</td>
         </tr>
         <tr>
@@ -1149,13 +1185,13 @@ Additional Inherited Members</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> McPhoto::computeDomainFlux </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRIFData</a> &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">EBAMRIFData</a> &amp;&#160;</td>
           <td class="paramname"><em>a_domainFlux</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td>
           <td class="paramname"><em>a_phi</em>&#160;</td>
         </tr>
         <tr>
@@ -1197,13 +1233,13 @@ Additional Inherited Members</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> McPhoto::computeFlux </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td>
           <td class="paramname"><em>a_flux</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td>
           <td class="paramname"><em>a_phi</em>&#160;</td>
         </tr>
         <tr>
@@ -1282,7 +1318,6 @@ Additional Inherited Members</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd><a class="el" href="classLoads.html" title="Class for holding computational loads.">Loads</a> for each box on a grid level. </dd></dl>
 <dl class="section note"><dt>Note</dt><dd>The return vector should have the same order as the boxes in a_dbl. <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">E.g</a>. ret[0] must be the load for <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">a_dbl.boxArray()</a>[0];</dd></dl>
 <p>The default implementation returns the number of cells in the grid patch as a proxy for the load. </p>
 
@@ -1290,8 +1325,8 @@ Additional Inherited Members</h2></td></tr>
 
 </div>
 </div>
-<a id="a2996c54ec6cc903a1bb7919feb8d0147" name="a2996c54ec6cc903a1bb7919feb8d0147"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2996c54ec6cc903a1bb7919feb8d0147">&#9670;&#160;</a></span>computeNumPhysicalPhotons()</h2>
+<a id="a6711fd52f84cff45c11eb31ec4fe49f5" name="a6711fd52f84cff45c11eb31ec4fe49f5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6711fd52f84cff45c11eb31ec4fe49f5">&#9670;&#160;</a></span>computeNumPhysicalPhotons()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1302,19 +1337,19 @@ Additional Inherited Members</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> McPhoto::computeNumPhysicalPhotons </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td>
           <td class="paramname"><em>a_numPhysPhotonsTotal</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_numPhysPhotonsPerPacket</em>, </td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_numPhysPhotonsPacket</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td>
           <td class="paramname"><em>a_source</em>, </td>
         </tr>
         <tr>
@@ -1340,7 +1375,7 @@ Additional Inherited Members</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">a_numPhysPhotonsTotal</td><td>Total number of physical photons to be generated in each grid cell. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_numPhysPhotonsPacket</td><td>Number of physical photons to be generated in each packet. Must have a components = m_numSamplingPackets </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_numPhysPhotonsPacket</td><td>Num phys photons per packet </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_source</td><td>Source term &ndash; the interpretation of this depends on the user-specified interpretation of the source term. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time step </td></tr>
   </table>
@@ -1380,6 +1415,7 @@ Additional Inherited Members</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Return value </dd></dl>
 
 </div>
 </div>
@@ -1424,19 +1460,19 @@ Additional Inherited Members</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> McPhoto::depositHybrid </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td>
           <td class="paramname"><em>a_depositionH</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">EBAMRIVData</a> &amp;&#160;</td>
           <td class="paramname"><em>a_massDifference</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRIVData</a> &amp;&#160;</td>
           <td class="paramname"><em>a_depositionNC</em>&#160;</td>
         </tr>
         <tr>
@@ -1457,7 +1493,7 @@ Additional Inherited Members</h2></td></tr>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_depositionH</td><td>On input this should be the conservative deposition </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">a_massDifference</td><td>Mass difference between conservative and non-conservative </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_depositioNC</td><td>Non-conservative deposition </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_depositionNC</td><td>Deposition n c </td></tr>
   </table>
   </dd>
 </dl>
@@ -1478,7 +1514,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
         <tr>
           <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> McPhoto::depositKappaConservative </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td>
           <td class="paramname"><em>a_phi</em>, </td>
         </tr>
         <tr>
@@ -1537,13 +1573,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
         <tr>
           <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> McPhoto::depositNonConservative </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">EBAMRIVData</a> &amp;&#160;</td>
           <td class="paramname"><em>a_depositionNC</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td>
           <td class="paramname"><em>a_depositionKappaC</em>&#160;</td>
         </tr>
         <tr>
@@ -1612,7 +1648,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
         <tr>
           <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> McPhoto::depositPhotons </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td>
           <td class="paramname"><em>a_phi</em>, </td>
         </tr>
         <tr>
@@ -1644,16 +1680,16 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">a_phi</td><td>Deposited mesh density </td></tr>
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_photons</td><td>Computational photons to be deposited </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_deposition</td><td>Deposition method </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_particles</td><td>Particles </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="afb69d6354e2b8a8a3f6966e505ab28c1" name="afb69d6354e2b8a8a3f6966e505ab28c1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afb69d6354e2b8a8a3f6966e505ab28c1">&#9670;&#160;</a></span>depositPhotonsNGP()</h2>
+<a id="ae890b9d798f66ccfa025f8eb8643fec1" name="ae890b9d798f66ccfa025f8eb8643fec1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae890b9d798f66ccfa025f8eb8643fec1">&#9670;&#160;</a></span>depositPhotonsNGP()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1671,7 +1707,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_particles</em>, </td>
+          <td class="paramname"><em>a_photons</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1696,7 +1732,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">a_output</td><td>Contains NGP deposition of photons. Ignores cut-cells. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_photons</td><td>photons </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_photons</td><td>Particles </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
   </table>
   </dd>
@@ -1722,13 +1758,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td>
           <td class="paramname"><em>a_phi</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td>
           <td class="paramname"><em>a_numPhysicalPhotons</em>, </td>
         </tr>
         <tr>
@@ -1792,7 +1828,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">protected</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -1805,6 +1841,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Return value </dd></dl>
 
 </div>
 </div>
@@ -1857,12 +1894,12 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
   </table>
   </dd>
 </dl>
-<p>The return result of this function depends on the input parameters to this class. </p>
+<p>The return result of this function depends on the input parameters to this class. </p><dl class="section return"><dt>Returns</dt><dd>Return value </dd></dl>
 
 </div>
 </div>
-<a id="aedfb09455408860523c0513e62363ef5" name="aedfb09455408860523c0513e62363ef5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aedfb09455408860523c0513e62363ef5">&#9670;&#160;</a></span>generateComputationalPhotons()</h2>
+<a id="ae078305361eaa69552b37b26d0bff567" name="ae078305361eaa69552b37b26d0bff567"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae078305361eaa69552b37b26d0bff567">&#9670;&#160;</a></span>generateComputationalPhotons()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1879,8 +1916,8 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_numPhysicalPhotons</em>, </td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_numPhysPhotons</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1905,7 +1942,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_photons</td><td>Computational photons </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_numPhysicalPhotons</td><td>Number of physical photons to add to a_photons </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_numPhysPhotons</td><td>Number of physical photons to add to a_photons </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_maxPhotonsPerCell</td><td>Maximum number of photons generated per cell. </td></tr>
   </table>
   </dd>
@@ -1997,6 +2034,34 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
 
 </div>
 </div>
+<a id="ad6b49636701b47b7387f4efae225e8ac" name="ad6b49636701b47b7387f4efae225e8ac"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad6b49636701b47b7387f4efae225e8ac">&#9670;&#160;</a></span>getMaxPhotonsPerCell()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">int</a> McPhoto::getMaxPhotonsPerCell </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get maximum number of photons generated per cell. </p>
+<dl class="section return"><dt>Returns</dt><dd>Max photons per cell </dd></dl>
+
+</div>
+</div>
 <a id="a0b37ce1c18fb0aa1d63349c33d3f4bd6" name="a0b37ce1c18fb0aa1d63349c33d3f4bd6"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a0b37ce1c18fb0aa1d63349c33d3f4bd6">&#9670;&#160;</a></span>getNumberOfPlotVariables()</h2>
 
@@ -2024,6 +2089,34 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
 <dl class="section return"><dt>Returns</dt><dd>Returns number of plot variables that will be written to file in writePlotData </dd></dl>
 
 <p>Reimplemented from <a class="el" href="classRtSolver.html#a61ef9ae5ac5333f9c562d4496346c480">RtSolver</a>.</p>
+
+</div>
+</div>
+<a id="adb531c420343d9d5cfc88be405332062" name="adb531c420343d9d5cfc88be405332062"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adb531c420343d9d5cfc88be405332062">&#9670;&#160;</a></span>getNumSamplingPackets()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">int</a> McPhoto::getNumSamplingPackets </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get maximum number of photons generated per cell. </p>
+<dl class="section return"><dt>Returns</dt><dd>Num sampling packets </dd></dl>
 
 </div>
 </div>
@@ -2078,22 +2171,8 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
 </table>
 </div><div class="memdoc">
 
-<p>Write checkpoint data into handle. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_handle</td><td>HDF5 file </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level</td></tr>
-  </table>
-  </dd>
-</dl>
-<p>Read checkpoint data from handle </p><dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_handle</td><td>HDF5 file </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level</td></tr>
-  </table>
-  </dd>
-</dl>
-<p>Get output plot names </p><dl class="section return"><dt>Returns</dt><dd>Returns a list of plot variable names. </dd></dl>
+<p>Get output plot names. </p>
+<dl class="section return"><dt>Returns</dt><dd>Returns a list of plot variable names. </dd></dl>
 
 <p>Reimplemented from <a class="el" href="classRtSolver.html#a804f78527ec2e9d5a1079e5d84b7a19b">RtSolver</a>.</p>
 
@@ -2124,6 +2203,88 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
 
 <p>Get source photons. </p>
 <dl class="section return"><dt>Returns</dt><dd>m_sourcePhotons </dd></dl>
+
+</div>
+</div>
+<a id="aef6d651972be5b22b0dfc778a834b9d8" name="aef6d651972be5b22b0dfc778a834b9d8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aef6d651972be5b22b0dfc778a834b9d8">&#9670;&#160;</a></span>isInstantaneous()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">bool</a> McPhoto::isInstantaneous </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Instantaneous solver or not. </p>
+<dl class="section return"><dt>Returns</dt><dd>True if instantaneous, false otherwise </dd></dl>
+
+</div>
+</div>
+<a id="acd7a17e9ba9c147e7d21c6b34c0155bf" name="acd7a17e9ba9c147e7d21c6b34c0155bf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acd7a17e9ba9c147e7d21c6b34c0155bf">&#9670;&#160;</a></span>operator=() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classMcPhoto.html">McPhoto</a> &amp; McPhoto::operator= </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMcPhoto.html">McPhoto</a> &amp;&amp;&#160;</td>
+          <td class="paramname"><em>a_other</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Disallowed move assignment operator. </p>
+<dl class="section return"><dt>Returns</dt><dd>Return value </dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_other</td><td>Description </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ad79dc456a19b21165e2d27c510bcf4de" name="ad79dc456a19b21165e2d27c510bcf4de"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad79dc456a19b21165e2d27c510bcf4de">&#9670;&#160;</a></span>operator=() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classMcPhoto.html">McPhoto</a> &amp; McPhoto::operator= </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMcPhoto.html">McPhoto</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_other</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Disallowed assignment operator. </p>
+<dl class="section return"><dt>Returns</dt><dd>Return value </dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_other</td><td>Description </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -2213,8 +2374,8 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
 
 </div>
 </div>
-<a id="a1ca87608627761f39fb02ec898ce2af5" name="a1ca87608627761f39fb02ec898ce2af5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1ca87608627761f39fb02ec898ce2af5">&#9670;&#160;</a></span>preRegrid()</h2>
+<a id="a875616d3da380d518bf43aefe4ee1b2e" name="a875616d3da380d518bf43aefe4ee1b2e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a875616d3da380d518bf43aefe4ee1b2e">&#9670;&#160;</a></span>preRegrid()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2226,7 +2387,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
           <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> McPhoto::preRegrid </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
-          <td class="paramname"><em>a_base</em>, </td>
+          <td class="paramname"><em>a_lmin</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -2250,7 +2411,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
 <p>preRegrid operations </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_base</td><td>Coarsest level which changes during regrid </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_lmin</td><td>Coarsest level which changes during regrid </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_oldFinestLevel</td><td>Finest grid level before regrid </td></tr>
   </table>
   </dd>
@@ -2260,8 +2421,8 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
 
 </div>
 </div>
-<a id="ad9ebc3b9b6ea2f3332b8247897142ded" name="ad9ebc3b9b6ea2f3332b8247897142ded"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad9ebc3b9b6ea2f3332b8247897142ded">&#9670;&#160;</a></span>randomExponential()</h2>
+<a id="aee7c33ccf32d753898a5982d06b0b713" name="aee7c33ccf32d753898a5982d06b0b713"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aee7c33ccf32d753898a5982d06b0b713">&#9670;&#160;</a></span>randomExponential()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2274,12 +2435,12 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
           <td>(</td>
           <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td>
           <td class="paramname"><em>a_rate</em></td><td>)</td>
-          <td> const</td>
+          <td></td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">noexcept</span></span>  </td>
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">protected</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -2291,6 +2452,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Return value </dd></dl>
 
 </div>
 </div>
@@ -2367,8 +2529,8 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_lmin</td><td>Coarsest level that changed during regrid </td></tr>
-    <tr><td class="paramdir"></td><td class="paramname">[i]</td><td>a_oldFinestLevel Finest grid level before the regrid </td></tr>
-    <tr><td class="paramdir"></td><td class="paramname">[i]</td><td>a_newFinestLevel Finest grid level after the regrid </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_oldFinestLevel</td><td>Finest grid level before the regrid </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_newFinestLevel</td><td>Finest grid level after the regrid </td></tr>
   </table>
   </dd>
 </dl>
@@ -2479,8 +2641,8 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
 
 </div>
 </div>
-<a id="ac92ea0a12fc857448b303bbceeb10df9" name="ac92ea0a12fc857448b303bbceeb10df9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac92ea0a12fc857448b303bbceeb10df9">&#9670;&#160;</a></span>writePlotData()</h2>
+<a id="a32b71c2936f95e89212a2672c0189d25" name="a32b71c2936f95e89212a2672c0189d25"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a32b71c2936f95e89212a2672c0189d25">&#9670;&#160;</a></span>writePlotData()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2498,12 +2660,12 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">int</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_icomp</em>, </td>
+          <td class="paramname"><em>a_comp</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;&#160;</td>
           <td class="paramname"><em>a_outputRealm</em>, </td>
         </tr>
         <tr>
@@ -2528,15 +2690,15 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
 <p>Write plot data. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_ouput</td><td>Output data holder </td></tr>
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_icomp</td><td>Starting component where we begin to write data to a_output </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_output</td><td>Output data holder </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_comp</td><td>Starting component where we begin to write data to a_output </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_outputRealm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> where a_output belongs </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
   </table>
   </dd>
 </dl>
 
-<p>Reimplemented from <a class="el" href="classRtSolver.html#a1f2b90f183af78630cdd7211d962b9c3">RtSolver</a>.</p>
+<p>Reimplemented from <a class="el" href="classRtSolver.html#a78d93d1e888ff1cfca79bf111e908d0b">RtSolver</a>.</p>
 
 </div>
 </div>

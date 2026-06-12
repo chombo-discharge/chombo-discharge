@@ -1,6 +1,6 @@
 <map id="Physics::ItoKMC::ItoKMCJSON" name="Physics::ItoKMC::ItoKMCJSON">
 <area shape="rect" id="Node000001" title="Implementation of ItoKMCPhysics which parses input data from a JSON file." alt="" coords="701,55,915,80"/>
-<area shape="rect" id="Node000002" href="$classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html" title="Base class for interaction between Kinetic Monte Carlo and Ito&#45;based plasma solvers." alt="" coords="421,55,652,80"/>
+<area shape="rect" id="Node000002" href="$classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html" title="Abstract base class coupling Kinetic Monte Carlo chemistry to Ito/CDR plasma solvers." alt="" coords="421,55,652,80"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="666,65,701,65,701,70,666,70"/>
 <area shape="rect" id="Node000003" href="$classKMCSolver.html" title="Class for running Kinetic Monte&#45;Carlo simulations." alt="" coords="25,5,216,31"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="230,26,398,45,452,52,451,57,397,50,229,31"/>

@@ -88,7 +88,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>Reaction class for describing secondary emissions due to a single outgoing particle in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html" title="Base class for interaction between Kinetic Monte Carlo and Ito-based plasma solvers.">ItoKMCPhysics</a>.  
+<p>Reaction class for describing secondary emissions due to a single outgoing particle in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html" title="Abstract base class coupling Kinetic Monte Carlo chemistry to Ito/CDR plasma solvers.">ItoKMCPhysics</a>.  
  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="CD__ItoKMCSurfaceReaction_8H_source.html">CD_ItoKMCSurfaceReaction.H</a>&gt;</code></p>
@@ -109,29 +109,23 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a88268eb6d0a4ef165855d282cd45b711" id="r_a88268eb6d0a4ef165855d282cd45b711"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a88268eb6d0a4ef165855d282cd45b711">define</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">size_t</a> <a class="el" href="classTracerParticleSolver.html">a_reactant</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::list</a>&lt; <a class="el" href="classTracerParticleSolver.html">size_t</a> &gt; <a class="el" href="classTracerParticleSolver.html">a_products</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_efficiency</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:a88268eb6d0a4ef165855d282cd45b711"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full define function.  <br /></td></tr>
 <tr class="separator:a88268eb6d0a4ef165855d282cd45b711"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7ad732de65882df4e924f5320e758d58" id="r_a7ad732de65882df4e924f5320e758d58"><td class="memItemLeft" align="right" valign="top"><a id="a7ad732de65882df4e924f5320e758d58" name="a7ad732de65882df4e924f5320e758d58"></a>
-<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">size_t</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getReactant</b> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:a7ad732de65882df4e924f5320e758d58"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the reactant. <br /></td></tr>
+<tr class="memitem:a7ad732de65882df4e924f5320e758d58" id="r_a7ad732de65882df4e924f5320e758d58"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">size_t</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a7ad732de65882df4e924f5320e758d58">getReactant</a> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a7ad732de65882df4e924f5320e758d58"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the reactant species index (const).  <br /></td></tr>
 <tr class="separator:a7ad732de65882df4e924f5320e758d58"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abd6fa5d4b33abc846add7e40e656c438" id="r_abd6fa5d4b33abc846add7e40e656c438"><td class="memItemLeft" align="right" valign="top"><a id="abd6fa5d4b33abc846add7e40e656c438" name="abd6fa5d4b33abc846add7e40e656c438"></a>
-<a class="el" href="classTracerParticleSolver.html">size_t</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getReactant</b> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:abd6fa5d4b33abc846add7e40e656c438"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the reactant. <br /></td></tr>
+<tr class="memitem:abd6fa5d4b33abc846add7e40e656c438" id="r_abd6fa5d4b33abc846add7e40e656c438"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">size_t</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#abd6fa5d4b33abc846add7e40e656c438">getReactant</a> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:abd6fa5d4b33abc846add7e40e656c438"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the reactant species index (mutable).  <br /></td></tr>
 <tr class="separator:abd6fa5d4b33abc846add7e40e656c438"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adaf61bda608bfeff6b30afb6bbe09336" id="r_adaf61bda608bfeff6b30afb6bbe09336"><td class="memItemLeft" align="right" valign="top"><a id="adaf61bda608bfeff6b30afb6bbe09336" name="adaf61bda608bfeff6b30afb6bbe09336"></a>
-<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::list</a>&lt; <a class="el" href="classTracerParticleSolver.html">size_t</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getProducts</b> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:adaf61bda608bfeff6b30afb6bbe09336"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the plasma products. <br /></td></tr>
+<tr class="memitem:adaf61bda608bfeff6b30afb6bbe09336" id="r_adaf61bda608bfeff6b30afb6bbe09336"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::list</a>&lt; <a class="el" href="classTracerParticleSolver.html">size_t</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#adaf61bda608bfeff6b30afb6bbe09336">getProducts</a> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:adaf61bda608bfeff6b30afb6bbe09336"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the plasma product species indices (const).  <br /></td></tr>
 <tr class="separator:adaf61bda608bfeff6b30afb6bbe09336"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae6514a9ee77de7c52523961883e088ce" id="r_ae6514a9ee77de7c52523961883e088ce"><td class="memItemLeft" align="right" valign="top"><a id="ae6514a9ee77de7c52523961883e088ce" name="ae6514a9ee77de7c52523961883e088ce"></a>
-<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::list</a>&lt; <a class="el" href="classTracerParticleSolver.html">size_t</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getProducts</b> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:ae6514a9ee77de7c52523961883e088ce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the plasma products. <br /></td></tr>
+<tr class="memitem:ae6514a9ee77de7c52523961883e088ce" id="r_ae6514a9ee77de7c52523961883e088ce"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::list</a>&lt; <a class="el" href="classTracerParticleSolver.html">size_t</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#ae6514a9ee77de7c52523961883e088ce">getProducts</a> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:ae6514a9ee77de7c52523961883e088ce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the plasma product species indices (mutable).  <br /></td></tr>
 <tr class="separator:ae6514a9ee77de7c52523961883e088ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4bb8ac5be2dcf5f61eecb3c367b836c1" id="r_a4bb8ac5be2dcf5f61eecb3c367b836c1"><td class="memItemLeft" align="right" valign="top"><a id="a4bb8ac5be2dcf5f61eecb3c367b836c1" name="a4bb8ac5be2dcf5f61eecb3c367b836c1"></a>
-<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getEfficiency</b> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:a4bb8ac5be2dcf5f61eecb3c367b836c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the reaction efficiency. <br /></td></tr>
+<tr class="memitem:a4bb8ac5be2dcf5f61eecb3c367b836c1" id="r_a4bb8ac5be2dcf5f61eecb3c367b836c1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a4bb8ac5be2dcf5f61eecb3c367b836c1">getEfficiency</a> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a4bb8ac5be2dcf5f61eecb3c367b836c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the reaction efficiency (const).  <br /></td></tr>
 <tr class="separator:a4bb8ac5be2dcf5f61eecb3c367b836c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a72648e8b790fe32ac99f4d112292bc50" id="r_a72648e8b790fe32ac99f4d112292bc50"><td class="memItemLeft" align="right" valign="top"><a id="a72648e8b790fe32ac99f4d112292bc50" name="a72648e8b790fe32ac99f4d112292bc50"></a>
-<a class="el" href="classTracerParticleSolver.html">Real</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getEfficiency</b> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:a72648e8b790fe32ac99f4d112292bc50"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the reaction efficiencies. <br /></td></tr>
+<tr class="memitem:a72648e8b790fe32ac99f4d112292bc50" id="r_a72648e8b790fe32ac99f4d112292bc50"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Real</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html#a72648e8b790fe32ac99f4d112292bc50">getEfficiency</a> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a72648e8b790fe32ac99f4d112292bc50"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the reaction efficiency (mutable).  <br /></td></tr>
 <tr class="separator:a72648e8b790fe32ac99f4d112292bc50"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
@@ -150,7 +144,7 @@ Protected Attributes</h2></td></tr>
 <tr class="separator:ae9aa9481028cbb183fb4083a91a86a5f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Reaction class for describing secondary emissions due to a single outgoing particle in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html" title="Base class for interaction between Kinetic Monte Carlo and Ito-based plasma solvers.">ItoKMCPhysics</a>. </p>
+<div class="textblock"><p>Reaction class for describing secondary emissions due to a single outgoing particle in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html" title="Abstract base class coupling Kinetic Monte Carlo chemistry to Ito/CDR plasma solvers.">ItoKMCPhysics</a>. </p>
 <p>This class supports multiple emissions due to single impinging particles, and encapsulates all reactions A -&gt; B, A -&gt; B + C, etc. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a619129f05f3183a2b1b347ae703c90a2" name="a619129f05f3183a2b1b347ae703c90a2"></a>
@@ -255,6 +249,174 @@ Protected Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="a4bb8ac5be2dcf5f61eecb3c367b836c1" name="a4bb8ac5be2dcf5f61eecb3c367b836c1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4bb8ac5be2dcf5f61eecb3c367b836c1">&#9670;&#160;</a></span>getEfficiency() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp; ItoKMCSurfaceReaction::getEfficiency </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the reaction efficiency (const). </p>
+<dl class="section return"><dt>Returns</dt><dd>Probability that an impinging particle triggers this reaction. </dd></dl>
+
+</div>
+</div>
+<a id="a72648e8b790fe32ac99f4d112292bc50" name="a72648e8b790fe32ac99f4d112292bc50"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a72648e8b790fe32ac99f4d112292bc50">&#9670;&#160;</a></span>getEfficiency() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">Real</a> &amp; ItoKMCSurfaceReaction::getEfficiency </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the reaction efficiency (mutable). </p>
+<dl class="section return"><dt>Returns</dt><dd>Probability that an impinging particle triggers this reaction. </dd></dl>
+
+</div>
+</div>
+<a id="adaf61bda608bfeff6b30afb6bbe09336" name="adaf61bda608bfeff6b30afb6bbe09336"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adaf61bda608bfeff6b30afb6bbe09336">&#9670;&#160;</a></span>getProducts() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::list</a>&lt; <a class="el" href="classTracerParticleSolver.html">size_t</a> &gt; &amp; ItoKMCSurfaceReaction::getProducts </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the plasma product species indices (const). </p>
+<dl class="section return"><dt>Returns</dt><dd>List of indices into the plasma species list produced by this reaction. </dd></dl>
+
+</div>
+</div>
+<a id="ae6514a9ee77de7c52523961883e088ce" name="ae6514a9ee77de7c52523961883e088ce"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae6514a9ee77de7c52523961883e088ce">&#9670;&#160;</a></span>getProducts() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::list</a>&lt; <a class="el" href="classTracerParticleSolver.html">size_t</a> &gt; &amp; ItoKMCSurfaceReaction::getProducts </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the plasma product species indices (mutable). </p>
+<dl class="section return"><dt>Returns</dt><dd>List of indices into the plasma species list produced by this reaction. </dd></dl>
+
+</div>
+</div>
+<a id="a7ad732de65882df4e924f5320e758d58" name="a7ad732de65882df4e924f5320e758d58"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7ad732de65882df4e924f5320e758d58">&#9670;&#160;</a></span>getReactant() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">size_t</a> &amp; ItoKMCSurfaceReaction::getReactant </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the reactant species index (const). </p>
+<dl class="section return"><dt>Returns</dt><dd>Index into the plasma/photon species list that triggers this reaction. </dd></dl>
+
+</div>
+</div>
+<a id="abd6fa5d4b33abc846add7e40e656c438" name="abd6fa5d4b33abc846add7e40e656c438"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abd6fa5d4b33abc846add7e40e656c438">&#9670;&#160;</a></span>getReactant() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">size_t</a> &amp; ItoKMCSurfaceReaction::getReactant </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the reactant species index (mutable). </p>
+<dl class="section return"><dt>Returns</dt><dd>Index into the plasma/photon species list that triggers this reaction. </dd></dl>
 
 </div>
 </div>

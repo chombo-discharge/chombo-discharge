@@ -18,7 +18,7 @@
 <area shape="poly" id="edge91_Node000001_Node000012" title=" " alt="" coords="1520,25,2319,46,2797,65,2997,77,3148,91,3224,96,3294,97,3360,97,3420,101,3474,113,3499,123,3522,137,3544,155,3564,178,3583,206,3600,239,3605,254,3599,267,3581,276,3546,283,3431,295,3272,305,3084,313,2687,322,2374,327,2374,321,2687,317,3084,307,3272,300,3431,290,3545,278,3579,271,3595,264,3599,253,3595,241,3578,208,3560,181,3540,159,3519,142,3496,128,3472,118,3419,106,3359,103,3294,102,3224,101,3148,96,2997,82,2797,70,2319,51,1519,31"/>
 <area shape="rect" id="Node000018" href="$CD__Location_8H.html" title="Declaration of cell positions." alt="" coords="2949,167,3067,192"/>
 <area shape="poly" id="edge21_Node000001_Node000018" title=" " alt="" coords="1520,29,1840,54,2259,91,2641,132,2936,166,2935,172,2640,137,2258,96,1840,59,1519,35"/>
-<area shape="rect" id="Node000021" href="$CD__EBMultigridInterpolator_8H.html" title="Declaration of a class that can interpolate more ghost cells near the coarse&#45;fine boundary near the E..." alt="" coords="1415,167,1627,192"/>
+<area shape="rect" id="Node000021" href="$CD__EBMultigridInterpolator_8H.html" title="Parent base class for multigrid interpolation." alt="" coords="1415,167,1627,192"/>
 <area shape="poly" id="edge29_Node000001_Node000021" title=" " alt="" coords="1459,45,1512,153,1507,155,1454,47"/>
 <area shape="rect" id="Node000025" href="$CD__EBCoarAve_8H.html" title="Declaration of conservative coarsening utility." alt="" coords="1257,167,1391,192"/>
 <area shape="poly" id="edge35_Node000001_Node000025" title=" " alt="" coords="1433,48,1344,158,1340,154,1429,44"/>

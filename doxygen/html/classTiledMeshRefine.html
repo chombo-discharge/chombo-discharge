@@ -104,9 +104,9 @@ Public Member Functions</h2></td></tr>
 <a class="el" href="classTracerParticleSolver.html">virtual</a>&#160;</td><td class="memItemRight" valign="bottom"><b>~TiledMeshRefine</b> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:a89816a5aa8bea7e1893e6db548678cf4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor (does nothing) <br /></td></tr>
 <tr class="separator:a89816a5aa8bea7e1893e6db548678cf4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7983ae033ecfe289b20961c1afa864e9" id="r_a7983ae033ecfe289b20961c1afa864e9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTiledMeshRefine.html#a7983ae033ecfe289b20961c1afa864e9">regrid</a> (<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Box</a> &gt; &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_newBoxes</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">IntVectSet</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_tagsLevel</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:a7983ae033ecfe289b20961c1afa864e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Regrid using the tile clustering algorithm.  <br /></td></tr>
-<tr class="separator:a7983ae033ecfe289b20961c1afa864e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a91798a2aa9d1a9d012217ad5845495c3" id="r_a91798a2aa9d1a9d012217ad5845495c3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTiledMeshRefine.html#a91798a2aa9d1a9d012217ad5845495c3">regrid</a> (<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Box</a> &gt; &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_newGrids</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">IntVectSet</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_tagsLevel</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a91798a2aa9d1a9d012217ad5845495c3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Regrid using the tile clustering algorithm.  <br /></td></tr>
+<tr class="separator:a91798a2aa9d1a9d012217ad5845495c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-types" name="pro-types"></a>
 Protected Types</h2></td></tr>
@@ -121,13 +121,11 @@ Protected Types</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
-<tr class="memitem:a18a090528c2dea9d62d2b3f32a6e469b" id="r_a18a090528c2dea9d62d2b3f32a6e469b"><td class="memItemLeft" align="right" valign="top"><a id="a18a090528c2dea9d62d2b3f32a6e469b" name="a18a090528c2dea9d62d2b3f32a6e469b"></a>
-<a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>makeLevelTiles</b> (<a class="el" href="classTiledMeshRefine.html#a4f7547fb490a24fbbadb011b8d414da1">TileSet</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_tiles</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTiledMeshRefine.html#a4f7547fb490a24fbbadb011b8d414da1">TileSet</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_fineTiles</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVectSet</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_coarTags</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_domain</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_refToFine</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_refToCoar</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:a18a090528c2dea9d62d2b3f32a6e469b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Make tiles on the current level from tags and tile coarsening from finer levels. <br /></td></tr>
+<tr class="memitem:a18a090528c2dea9d62d2b3f32a6e469b" id="r_a18a090528c2dea9d62d2b3f32a6e469b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTiledMeshRefine.html#a18a090528c2dea9d62d2b3f32a6e469b">makeLevelTiles</a> (<a class="el" href="classTiledMeshRefine.html#a4f7547fb490a24fbbadb011b8d414da1">TileSet</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_tiles</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTiledMeshRefine.html#a4f7547fb490a24fbbadb011b8d414da1">TileSet</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_fineTiles</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVectSet</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_coarTags</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_domain</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_refToFine</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_refToCoar</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a18a090528c2dea9d62d2b3f32a6e469b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Make tiles on the current level from tags and tile coarsening from finer levels.  <br /></td></tr>
 <tr class="separator:a18a090528c2dea9d62d2b3f32a6e469b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab5ade263d072e3164e397e94da3be31f" id="r_ab5ade263d072e3164e397e94da3be31f"><td class="memItemLeft" align="right" valign="top"><a id="ab5ade263d072e3164e397e94da3be31f" name="ab5ade263d072e3164e397e94da3be31f"></a>
-<a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>makeBoxesFromTiles</b> (<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Box</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_boxes</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTiledMeshRefine.html#a4f7547fb490a24fbbadb011b8d414da1">TileSet</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_tiles</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_domain</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:ab5ade263d072e3164e397e94da3be31f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Turn tiles into boxes. <br /></td></tr>
+<tr class="memitem:ab5ade263d072e3164e397e94da3be31f" id="r_ab5ade263d072e3164e397e94da3be31f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTiledMeshRefine.html#ab5ade263d072e3164e397e94da3be31f">makeBoxesFromTiles</a> (<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Box</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_boxes</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTiledMeshRefine.html#a4f7547fb490a24fbbadb011b8d414da1">TileSet</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_tiles</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_domain</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:ab5ade263d072e3164e397e94da3be31f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Turn tiles into boxes.  <br /></td></tr>
 <tr class="separator:ab5ade263d072e3164e397e94da3be31f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
@@ -201,8 +199,133 @@ Protected Attributes</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a7983ae033ecfe289b20961c1afa864e9" name="a7983ae033ecfe289b20961c1afa864e9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7983ae033ecfe289b20961c1afa864e9">&#9670;&#160;</a></span>regrid()</h2>
+<a id="ab5ade263d072e3164e397e94da3be31f" name="ab5ade263d072e3164e397e94da3be31f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab5ade263d072e3164e397e94da3be31f">&#9670;&#160;</a></span>makeBoxesFromTiles()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> TiledMeshRefine::makeBoxesFromTiles </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Box</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_boxes</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTiledMeshRefine.html#a4f7547fb490a24fbbadb011b8d414da1">TileSet</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_tiles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_domain</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Turn tiles into boxes. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_boxes</td><td>Grid boxes generated from the tiles </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_tiles</td><td>Tiles to convert </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_domain</td><td>Problem domain </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a18a090528c2dea9d62d2b3f32a6e469b" name="a18a090528c2dea9d62d2b3f32a6e469b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a18a090528c2dea9d62d2b3f32a6e469b">&#9670;&#160;</a></span>makeLevelTiles()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> TiledMeshRefine::makeLevelTiles </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTiledMeshRefine.html#a4f7547fb490a24fbbadb011b8d414da1">TileSet</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_tiles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTiledMeshRefine.html#a4f7547fb490a24fbbadb011b8d414da1">TileSet</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_fineTiles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVectSet</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_coarTags</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_domain</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramname"><em>a_refToFine</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramname"><em>a_refToCoar</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Make tiles on the current level from tags and tile coarsening from finer levels. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_tiles</td><td>Tiles on the current level </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_fineTiles</td><td>Tiles on the finer level </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarTags</td><td>Refinement tags on the current level </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_domain</td><td>Problem domain on the current level </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_refToFine</td><td>Refinement ratio to the finer level </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_refToCoar</td><td>Refinement ratio to the coarser level </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a91798a2aa9d1a9d012217ad5845495c3" name="a91798a2aa9d1a9d012217ad5845495c3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a91798a2aa9d1a9d012217ad5845495c3">&#9670;&#160;</a></span>regrid()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -214,7 +337,7 @@ Protected Attributes</h2></td></tr>
           <td class="memname"><a class="el" href="classTracerParticleSolver.html">int</a> TiledMeshRefine::regrid </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Box</a> &gt; &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_newBoxes</em>, </td>
+          <td class="paramname"><em>a_newGrids</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -238,7 +361,7 @@ Protected Attributes</h2></td></tr>
 <p>Regrid using the tile clustering algorithm. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_newBoxes</td><td>The new grid boxes </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_newGrids</td><td>The new grid boxes </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_tagsLevel</td><td>Grid tags on each level </td></tr>
   </table>
   </dd>

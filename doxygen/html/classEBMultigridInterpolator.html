@@ -126,9 +126,8 @@ Public Member Functions</h2></td></tr>
 &#160;</td><td class="memItemRight" valign="bottom"><b>~EBMultigridInterpolator</b> ()</td></tr>
 <tr class="memdesc:a8d42104483e8039f9a9453f142696e10"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor (does nothing) <br /></td></tr>
 <tr class="separator:a8d42104483e8039f9a9453f142696e10"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a83209539a9ed604cf726bbc4eff8f8f5" id="r_a83209539a9ed604cf726bbc4eff8f8f5"><td class="memItemLeft" align="right" valign="top"><a id="a83209539a9ed604cf726bbc4eff8f8f5" name="a83209539a9ed604cf726bbc4eff8f8f5"></a>
-<a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><b>getGhostCF</b> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:a83209539a9ed604cf726bbc4eff8f8f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return number of ghost cells across CF interface. <br /></td></tr>
+<tr class="memitem:a83209539a9ed604cf726bbc4eff8f8f5" id="r_a83209539a9ed604cf726bbc4eff8f8f5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBMultigridInterpolator.html#a83209539a9ed604cf726bbc4eff8f8f5">getGhostCF</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:a83209539a9ed604cf726bbc4eff8f8f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return number of ghost cells across CF interface.  <br /></td></tr>
 <tr class="separator:a83209539a9ed604cf726bbc4eff8f8f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afab6cbf756f75a54abb595c7c490a8e6" id="r_afab6cbf756f75a54abb595c7c490a8e6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBMultigridInterpolator.html#afab6cbf756f75a54abb595c7c490a8e6">coarseFineInterp</a> (<a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_phiFine</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_phiCoar</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Interval</a> <a class="el" href="classTracerParticleSolver.html">a_variables</a>)</td></tr>
 <tr class="memdesc:afab6cbf756f75a54abb595c7c490a8e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do inhomogeneous interpolation.  <br /></td></tr>
@@ -299,7 +298,7 @@ Static Protected Attributes</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Multigrid interpolator class. </p>
-<p>Multigrid interpolator parent class. Virtual beause I want different implementations to do different things.</p>
+<p>Multigrid interpolator parent class. Virtual because I want different implementations to do different things.</p>
 <p>This interpolator class interpolates with classical multigrid-type interpolation where the interpolation stencils only reach into valid cells, ignoring the region underneath the fine level. Near regular refinement boundaries we use the conventional approach where we interpolate coarse data onto the line of cells that runs between the fine-grid cells and the ghost cell. This value is used together with the valid data on the fine-grid cells to interpolate the ghost cell to O(h^2). Near EBs this is much more complex since both the fine and coarse regions may be missing cells that make that interpolation possible. Worse, EB stencils may be much bigger than the 5/7-point Laplacian, requiring us to fill more ghost cells across the coarse-fine interface near the EB. We achieve this by switching to least-squares based interpolation here, again using only the valid fine and coarse-level cells. The way of achieving this consists of building dual-level stencils for each ghost cell; these stencils represent the part of the interpolation stencil that reach into the fine and coarse grids. For efficiency reasons, we copy the coarse grid data onto data layouts that may have more ghost cells than your regular data. Since the least squares stencils require a specified number of cells to reach specified order, this permits us to use fine-grid stencils that only reach into valid data without dropping order. This optimization is useful for pruning extra communications due homogeneous multigrid interpolation. This means that our interpolation, which is in the form</p>
 <p>phiGhost = sum(vofCoar) w(vofCoar)*phi(vofCoar) + sum(vofFine)[w(vofFine)*phi(vofFine)]</p>
 <p>will have a coarse and and a fine grid stencil, but the fine stencil does not reach out of the ghosted fine-grid patch. The fine-grid part of the stencil is thus allowed to use the ghost cells in the patch that are filled from neighboring patches. </p><dl class="section note"><dt>Note</dt><dd>This class should work with data holders have exactly one component or SpaceDim components. </dd></dl>
@@ -711,8 +710,28 @@ Static Protected Attributes</h2></td></tr>
 
 </div>
 </div>
+<a id="a83209539a9ed604cf726bbc4eff8f8f5" name="a83209539a9ed604cf726bbc4eff8f8f5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a83209539a9ed604cf726bbc4eff8f8f5">&#9670;&#160;</a></span>getGhostCF() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">int</a> EBMultigridInterpolator::getGhostCF </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Return number of ghost cells across CF interface. </p>
+<dl class="section return"><dt>Returns</dt><dd>Ghost c f </dd></dl>
+
+</div>
+</div>
 <a id="a82dbe484ab2d13dddf72d2ed2cf4b69c" name="a82dbe484ab2d13dddf72d2ed2cf4b69c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a82dbe484ab2d13dddf72d2ed2cf4b69c">&#9670;&#160;</a></span>getGhostCF()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a82dbe484ab2d13dddf72d2ed2cf4b69c">&#9670;&#160;</a></span>getGhostCF() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -735,6 +754,7 @@ Static Protected Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Return number of ghost cells across CF interface. </p>
+<dl class="section return"><dt>Returns</dt><dd>Ghost c f </dd></dl>
 
 <p>Implemented in <a class="el" href="classEBLeastSquaresMultigridInterpolator.html#a2112527c53b85c8e2deeba6568d16397">EBLeastSquaresMultigridInterpolator</a>.</p>
 
@@ -844,6 +864,7 @@ Static Protected Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Interpolation stencil regular </dd></dl>
 
 <p>Implemented in <a class="el" href="classEBLeastSquaresMultigridInterpolator.html#a7e8dbf3a874b49884596efe0ac2ca098">EBLeastSquaresMultigridInterpolator</a>.</p>
 
@@ -957,8 +978,6 @@ Static Protected Attributes</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dataLocation</td><td>Data location </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_ghostVofFine</td><td>Ghost cell which is to be filled on the coarse grid. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_ghostVofCoar</td><td>Vof corresponding to a_ghostVofFine on the coarse grid </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_ebisBoxFine</td><td>Fine grid EBISBox </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_ebisBxoCoar</td><td>Coarse grid EBISBox </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_validFineCells</td><td>Fine-grid region which we are allowed to use in the interpolation. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_validCoarCells</td><td>Coarse-grid region which we are allowed to use in the interpolation. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dxFine</td><td>Grid resolution on the fine level </td></tr>
@@ -969,6 +988,13 @@ Static Protected Attributes</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns true if a stencil was found, in which case it is defined in a_stencilFine and a_stencilCoar. </dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ebisboxFine</td><td>Ebisbox fine </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ebisboxCoar</td><td>Ebisbox coar </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

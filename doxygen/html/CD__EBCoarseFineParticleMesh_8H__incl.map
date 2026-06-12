@@ -1,5 +1,5 @@
 <map id="Source/Particle/CD_EBCoarseFineParticleMesh.H" name="Source/Particle/CD_EBCoarseFineParticleMesh.H">
-<area shape="rect" id="Node000001" title="Declaration of a class for handling particle deposition arithmetics near refinement boundaries." alt="" coords="326,5,541,45"/>
+<area shape="rect" id="Node000001" title="Declaration of a class for handling particle deposition arithmetic near refinement boundaries." alt="" coords="326,5,541,45"/>
 <area shape="rect" id="Node000002" title=" " alt="" coords="5,93,160,119"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="350,48,148,93,147,88,349,43"/>
 <area shape="rect" id="Node000003" title=" " alt="" coords="249,167,364,192"/>

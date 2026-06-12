@@ -157,7 +157,7 @@
              
   <section id="mesh-data">
 <span id="chap-meshdata"></span><h1>Mesh data<a class="headerlink" href="#mesh-data" title="Permalink to this heading"></a></h1>
-<p>Mesh data structures of the type discussed in <a class="reference internal" href="SpatialDiscretization.html#chap-spatialdiscretization"><span class="std std-ref">Spatial discretization</span></a> are derived from a class <code class="docutils literal notranslate"><span class="pre">EBAMRData&lt;T&gt;</span></code> which holds a <code class="docutils literal notranslate"><span class="pre">T</span></code> in every grid patch across the AMR hiearchy.
+<p>Mesh data structures of the type discussed in <a class="reference internal" href="SpatialDiscretization.html#chap-spatialdiscretization"><span class="std std-ref">Spatial discretization</span></a> are derived from a class <code class="docutils literal notranslate"><span class="pre">EBAMRData&lt;T&gt;</span></code> which holds a <code class="docutils literal notranslate"><span class="pre">T</span></code> in every grid patch across the AMR hierarchy.
 A requirement on the datatype <code class="docutils literal notranslate"><span class="pre">T</span></code> is that it must be linearizable so that it can be communicated across MPI ranks.
 Internally, the data is stored as a <code class="docutils literal notranslate"><span class="pre">Vector&lt;RefCountedPtr&lt;LevelData&lt;T&gt;&gt;&gt;</span></code>.
 Here, the <code class="docutils literal notranslate"><span class="pre">Vector</span></code> holds data on each AMR level; the data is allocated with a smart pointer called <code class="docutils literal notranslate"><span class="pre">RefCountedPtr</span></code> which points to a <code class="docutils literal notranslate"><span class="pre">LevelData</span></code> template structure, see <a class="reference internal" href="ChomboBasics.html#chap-basics"><span class="std std-ref">Chombo-3 basics</span></a>.
@@ -192,7 +192,7 @@ These are outlined below:</p>
 <p>For example, <code class="docutils literal notranslate"><span class="pre">EBAMRCellData</span></code> is a <code class="docutils literal notranslate"><span class="pre">Vector&lt;RefCountedPtr&lt;LevelData&lt;EBCellFAB&gt;</span> <span class="pre">&gt;</span> <span class="pre">&gt;</span></code>, describing cell-centered data across the entire AMR hierarchy.
 There are many more data structures in place, but the above data structures are the most commonly used ones.
 Here, <code class="docutils literal notranslate"><span class="pre">EBAMRFluxData</span></code> is precisely like <code class="docutils literal notranslate"><span class="pre">EBAMRCellData</span></code>, except that the data is stored on <em>cell faces</em> rather than cell centers.
-Likewise, <code class="docutils literal notranslate"><span class="pre">EBAMRIVData</span></code> is a data holder that holds data on each EB centroid (or boundary centroid) across the entire AMR hierachy.
+Likewise, <code class="docutils literal notranslate"><span class="pre">EBAMRIVData</span></code> is a data holder that holds data on each EB centroid (or boundary centroid) across the entire AMR hierarchy.
 In the same way, <code class="docutils literal notranslate"><span class="pre">EBAMRIFData</span></code> holds data on each face of all cut-cells in the hierarchy.</p>
 <section id="allocating-mesh-data">
 <h2>Allocating mesh data<a class="headerlink" href="#allocating-mesh-data" title="Permalink to this heading"></a></h2>
@@ -323,34 +323,34 @@ This implies that the total mass on the coarse-grid cell is identical to the tot
 </ul>
 <p>These functions are available for both cell-centered data, cut-cell data, and face-centered data.
 Multiply signatures for this functionality exists, see the code-block below.</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm">  @brief Average multifluid data over a specified realm</span>
-<span class="cm">  @param[inout] a_data    Data to be coarsened.</span>
+<span class="cm">  @param[in,out] a_data    Data to be coarsened.</span>
 <span class="cm">  @param[in]    a_realm   Realm name</span>
 <span class="cm">  @param[in]    a_average Averaging method</span>
 <span class="cm">*/</span>
 <span class="kt">void</span>
-<span class="nf">average</span><span class="p">(</span><span class="n">MFAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_data</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_realm</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Average</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_average</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<span class="nf">average</span><span class="p">(</span><span class="n">MFAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_data</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_realm</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Average</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_average</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 
-<span class="cm">/*!</span>
+<span class="cm">/**</span>
 <span class="cm">  @brief Average multifluid data over a specified realm</span>
-<span class="cm">  @param[inout] a_data    Data to be coarsened.</span>
+<span class="cm">  @param[in,out] a_data    Data to be coarsened.</span>
 <span class="cm">  @param[in]    a_realm   Realm name</span>
 <span class="cm">  @param[in]    a_average Averaging method</span>
 <span class="cm">*/</span>
 <span class="kt">void</span>
-<span class="nf">average</span><span class="p">(</span><span class="n">MFAMRFluxData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_data</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_realm</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Average</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_average</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<span class="nf">average</span><span class="p">(</span><span class="n">MFAMRFluxData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_data</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_realm</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Average</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_average</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 
-<span class="cm">/*!</span>
+<span class="cm">/**</span>
 <span class="cm">  @brief Average down on specific realm and phase. </span>
-<span class="cm">  @param[inout] a_data  Data to be coarsened.</span>
+<span class="cm">  @param[in,out] a_data  Data to be coarsened.</span>
 <span class="cm">  @param[in]    a_realm Realm name</span>
 <span class="cm">  @param[in]    a_phase Phase (gas or solid)</span>
 <span class="cm">  @param[in]    a_average Averaging method</span>
 <span class="cm">*/</span>
 <span class="kt">void</span>
 <span class="nf">average</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w">           </span><span class="n">a_data</span><span class="p">,</span>
-<span class="w">        </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w">        </span><span class="n">a_realm</span><span class="p">,</span>
+<span class="w">        </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w">       </span><span class="n">a_realm</span><span class="p">,</span>
 <span class="w">        </span><span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="w"> </span><span class="n">a_phase</span><span class="p">,</span>
 <span class="w">        </span><span class="k">const</span><span class="w"> </span><span class="n">Average</span><span class="o">&amp;</span><span class="w">           </span><span class="n">a_average</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 </pre></div>
@@ -367,30 +367,30 @@ This process adheres to the following rules:</p>
 Currently, this slope is calculated with a minmod limiter, although support for superbee, piecewise constant, and van Leer limiters are also implemented.</p></li>
 </ol>
 <p>The signatures for updating the ghost cells are:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm">  @brief Interpolate ghost vectors over a realm, using the default ghost cell interpolation method. </span>
-<span class="cm">  @param[inout] a_data  Data to be interpolated.</span>
+<span class="cm">  @param[in,out] a_data  Data to be interpolated.</span>
 <span class="cm">  @param[in]    a_realm Realm name</span>
 <span class="cm">  @param[in]    a_phase Phase (gas or solid)</span>
 <span class="cm">*/</span>
 <span class="kt">void</span>
-<span class="nf">interpGhost</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_data</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_realm</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="w"> </span><span class="n">a_phase</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<span class="nf">interpGhost</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_data</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_realm</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="w"> </span><span class="n">a_phase</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>As one alternative, one can update ghost cells on a single grid level:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm">  @brief Interpolate ghost cells over a realm, using the default ghost cell interpolation method on a specific level. </span>
-<span class="cm">  @param[inout] a_fineData Fine grid data</span>
-<span class="cm">  @param[inout] a_coarData Coarse grid data</span>
-<span class="cm">  @param[in]    a_level    The grid level corresponding to a_fineData</span>
-<span class="cm">  @param[in]    a_realm    Realm name</span>
-<span class="cm">  @param[in]    a_phase    Phase (gas or solid)</span>
+<span class="cm">  @param[in,out] a_fineData  Fine grid data</span>
+<span class="cm">  @param[in,out] a_coarData  Coarse grid data</span>
+<span class="cm">  @param[in]    a_fineLevel The grid level corresponding to a_fineData</span>
+<span class="cm">  @param[in]    a_realm     Realm name</span>
+<span class="cm">  @param[in]    a_phase     Phase (gas or solid)</span>
 <span class="cm">*/</span>
 <span class="kt">void</span>
 <span class="nf">interpGhost</span><span class="p">(</span><span class="n">LevelData</span><span class="o">&lt;</span><span class="n">EBCellFAB</span><span class="o">&gt;&amp;</span><span class="w">       </span><span class="n">a_fineData</span><span class="p">,</span>
 <span class="w">            </span><span class="k">const</span><span class="w"> </span><span class="n">LevelData</span><span class="o">&lt;</span><span class="n">EBCellFAB</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_coarData</span><span class="p">,</span>
-<span class="w">            </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                   </span><span class="n">a_level</span><span class="p">,</span>
-<span class="w">            </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w">           </span><span class="n">a_realm</span><span class="p">,</span>
+<span class="w">            </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                   </span><span class="n">a_fineLevel</span><span class="p">,</span>
+<span class="w">            </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w">          </span><span class="n">a_realm</span><span class="p">,</span>
 <span class="w">            </span><span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="w">    </span><span class="n">a_phase</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 </pre></div>
 </div>
@@ -405,7 +405,7 @@ If one needs data on a grid level where no data already exists, it is possible t
 <p>This type of interpolation is distinctly different from the ghost cell interpolation, as it affects data across the whole grid patch.</p>
 </div>
 <p>The interpolation function that fill fine-grid data from a coarse grid has the following signature:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm">  @brief Interpolate data to new grids</span>
 <span class="cm">  @details This is called when requiring data to be interpolated to new grids. Takes old data as argument</span>
 <span class="cm">  and fills the new grid data with an interpolation of the old grid data. </span>
@@ -469,7 +469,7 @@ The blue stencils shows a much more complex stencil which is computed using a le
 </figcaption>
 </figure>
 <p>To compute gradients of a scalar, one can simply call <code class="docutils literal notranslate"><span class="pre">AmrMesh::computeGradient(...)</span></code> functions:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm">  @brief Compute cell-centered gradient over an AMR hierarchy. </span>
 <span class="cm">  @param[out] a_gradient Cell centered gradient. </span>
 <span class="cm">  @param[in]  a_phi      The scalar for which the gradient is computed. </span>
@@ -481,7 +481,7 @@ The blue stencils shows a much more complex stencil which is computed using a le
 <span class="kt">void</span>
 <span class="nf">computeGradient</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w">           </span><span class="n">a_gradient</span><span class="p">,</span>
 <span class="w">                </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w">     </span><span class="n">a_phi</span><span class="p">,</span>
-<span class="w">                </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w">        </span><span class="n">a_realm</span><span class="p">,</span>
+<span class="w">                </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w">       </span><span class="n">a_realm</span><span class="p">,</span>
 <span class="w">                </span><span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="w"> </span><span class="n">a_phase</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 </pre></div>
 </div>
@@ -494,9 +494,9 @@ See <a class="reference internal" href="AmrMesh.html#chap-amrmesh"><span class="
 <p>The simplest way of copying data between data holders is via <code class="docutils literal notranslate"><span class="pre">DataOps::copy</span></code>, which does a <em>local-only</em> direct copy that also includes ghost cells.
 This version requires that the source and destination data holders are defined on the same realm, and does not invoke MPI calls.</p>
 <p>A more general version is supplied by <a class="reference internal" href="AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a>, and has the following structure:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm">  @brief Method for copying from a source container to a destination container. User supplies information</span>
-<span class="cm">  @param[inout] a_dst        Destination data </span>
+<span class="cm">  @param[in,out] a_dst        Destination data </span>
 <span class="cm">  @param[in]    a_src        Source data</span>
 <span class="cm">  @param[in]    a_dstComps   Destination components</span>
 <span class="cm">  @param[in]    a_srcComps   Source components</span>

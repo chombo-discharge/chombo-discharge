@@ -1,5 +1,5 @@
 <map id="Source/AmrMesh/CD_EBMultigridInterpolator.H" name="Source/AmrMesh/CD_EBMultigridInterpolator.H">
-<area shape="rect" id="Node000001" title="Declaration of a class that can interpolate more ghost cells near the coarse&#45;fine boundary near the E..." alt="" coords="211,5,448,45"/>
+<area shape="rect" id="Node000001" title="Parent base class for multigrid interpolation." alt="" coords="211,5,448,45"/>
 <area shape="rect" id="Node000002" title=" " alt="" coords="5,93,120,119"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="266,48,116,92,114,87,265,43"/>
 <area shape="rect" id="Node000003" title=" " alt="" coords="145,93,247,119"/>

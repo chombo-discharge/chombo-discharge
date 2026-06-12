@@ -112,9 +112,37 @@
 <p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Contributions</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#pull-requests">Pull requests</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#bug-reports">Bug reports</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#coding-conventions">Coding conventions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#naming">Naming</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#file-naming">File naming</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#header-guards">Header guards</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#include-ordering">Include ordering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#namespace">Namespace</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#spdx-reuse-compliance">SPDX/REUSE compliance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#documentation-standards">Documentation standards</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#file-level-block">File-level block</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#function-documentation">Function documentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hiding-implementation-details">Hiding implementation details</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hdf5-guarded-functions">HDF5-guarded functions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#code-quality-tools">Code quality tools</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pre-commit-hooks">Pre-commit hooks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#clang-format">clang-format</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#clang-tidy">clang-tidy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#generating-compile-commands-json">Generating <code class="docutils literal notranslate"><span class="pre">compile_commands.json</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#running-clang-tidy">Running clang-tidy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cppcheck">cppcheck</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#codespell">codespell</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#checkdocs-py">CheckDocs.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#options-and-inputs-file-format">Options and inputs file format</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#submitting-a-pull-request">Submitting a pull request</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#continuous-integration">Continuous integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#bug-reports">Bug reports</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="CodeStandard.html">Code standard</a></li>
@@ -150,47 +178,554 @@
              
   <section id="contributions">
 <span id="chap-contributions"></span><h1>Contributions<a class="headerlink" href="#contributions" title="Permalink to this heading"></a></h1>
-<p>We welcome feedback, bug reports, and contributions to <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.
-If you have feedback, questions, or general types of queries, use the issue tracker or discussion tab at <a class="reference external" href="https://github.com/chombo-discharge/chombo-discharge">https://github.com/chombo-discharge</a>.</p>
-<section id="pull-requests">
-<h2>Pull requests<a class="headerlink" href="#pull-requests" title="Permalink to this heading"></a></h2>
-<p>If you want to submit code to <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>, use the pull request system at <a class="reference external" href="https://github.com/chombo-discharge/chombo-discharge">https://github.com/chombo-discharge</a>.
-When submitting a pull request, mark it as <em>draft</em> if you believe the pull request is not yet ready for merging.
-Note that when a pull request is submitted, you are asked to provide a brief summary of the changes that are made.</p>
+<p>We welcome feedback, bug reports, and code contributions to <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.
+For questions or general discussion use the issue tracker or discussion tab at
+<a class="reference external" href="https://github.com/chombo-discharge/chombo-discharge">github.com/chombo-discharge</a>.</p>
+<div class="contents local topic" id="on-this-page">
+<p class="topic-title">On this page</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#coding-conventions" id="id1">Coding conventions</a></p>
+<ul>
+<li><p><a class="reference internal" href="#naming" id="id2">Naming</a></p></li>
+<li><p><a class="reference internal" href="#file-naming" id="id3">File naming</a></p></li>
+<li><p><a class="reference internal" href="#header-guards" id="id4">Header guards</a></p></li>
+<li><p><a class="reference internal" href="#include-ordering" id="id5">Include ordering</a></p></li>
+<li><p><a class="reference internal" href="#namespace" id="id6">Namespace</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#spdx-reuse-compliance" id="id7">SPDX/REUSE compliance</a></p></li>
+<li><p><a class="reference internal" href="#documentation-standards" id="id8">Documentation standards</a></p>
+<ul>
+<li><p><a class="reference internal" href="#file-level-block" id="id9">File-level block</a></p></li>
+<li><p><a class="reference internal" href="#function-documentation" id="id10">Function documentation</a></p></li>
+<li><p><a class="reference internal" href="#hiding-implementation-details" id="id11">Hiding implementation details</a></p></li>
+<li><p><a class="reference internal" href="#hdf5-guarded-functions" id="id12">HDF5-guarded functions</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#code-quality-tools" id="id13">Code quality tools</a></p>
+<ul>
+<li><p><a class="reference internal" href="#pre-commit-hooks" id="id14">Pre-commit hooks</a></p></li>
+<li><p><a class="reference internal" href="#clang-format" id="id15">clang-format</a></p></li>
+<li><p><a class="reference internal" href="#clang-tidy" id="id16">clang-tidy</a></p></li>
+<li><p><a class="reference internal" href="#generating-compile-commands-json" id="id17">Generating <code class="docutils literal notranslate"><span class="pre">compile_commands.json</span></code></a></p></li>
+<li><p><a class="reference internal" href="#running-clang-tidy" id="id18">Running clang-tidy</a></p></li>
+<li><p><a class="reference internal" href="#cppcheck" id="id19">cppcheck</a></p></li>
+<li><p><a class="reference internal" href="#codespell" id="id20">codespell</a></p></li>
+<li><p><a class="reference internal" href="#checkdocs-py" id="id21">CheckDocs.py</a></p></li>
+<li><p><a class="reference internal" href="#options-and-inputs-file-format" id="id22">Options and inputs file format</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#submitting-a-pull-request" id="id23">Submitting a pull request</a></p></li>
+<li><p><a class="reference internal" href="#continuous-integration" id="id24">Continuous integration</a></p></li>
+<li><p><a class="reference internal" href="#bug-reports" id="id25">Bug reports</a></p></li>
+</ul>
+</div>
+<section id="coding-conventions">
+<h2><a class="toc-backref" href="#id1">Coding conventions</a><a class="headerlink" href="#coding-conventions" title="Permalink to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> follows a consistent set of coding conventions.
+A more detailed overview of the code structure is given in <a class="reference internal" href="CodeStandard.html#chap-codestandard"><span class="std std-ref">Code standard</span></a>.</p>
+<section id="naming">
+<h3><a class="toc-backref" href="#id2">Naming</a><a class="headerlink" href="#naming" title="Permalink to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 27%" />
+<col style="width: 25%" />
+<col style="width: 48%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Entity</p></th>
+<th class="head"><p>Convention</p></th>
+<th class="head"><p>Example</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Classes/structs</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">PascalCase</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code>, <code class="docutils literal notranslate"><span class="pre">CdrSolver</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Member variables</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">m_camelCase</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">m_phi</span></code>, <code class="docutils literal notranslate"><span class="pre">m_amrMesh</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Function arguments</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">a_camelCase</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">a_phi</span></code>, <code class="docutils literal notranslate"><span class="pre">a_level</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Local variables</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">camelCase</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">numCells</span></code>, <code class="docutils literal notranslate"><span class="pre">loCorner</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Static variables</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">s_camelCase</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">s_defaultOrder</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="file-naming">
+<h3><a class="toc-backref" href="#id3">File naming</a><a class="headerlink" href="#file-naming" title="Permalink to this heading"></a></h3>
+<p>Every file must be prefixed with <code class="docutils literal notranslate"><span class="pre">CD_</span></code>:</p>
+<ul class="simple">
+<li><p>Header files: <code class="docutils literal notranslate"><span class="pre">CD_MyClass.H</span></code> (capital <code class="docutils literal notranslate"><span class="pre">.H</span></code>, not <code class="docutils literal notranslate"><span class="pre">.h</span></code> or <code class="docutils literal notranslate"><span class="pre">.hpp</span></code>).</p></li>
+<li><p>Implementation files: <code class="docutils literal notranslate"><span class="pre">CD_MyClass.cpp</span></code>.</p></li>
+<li><p>Template/inline implementations: <code class="docutils literal notranslate"><span class="pre">CD_MyClassImplem.H</span></code>.</p></li>
+</ul>
+</section>
+<section id="header-guards">
+<h3><a class="toc-backref" href="#id4">Header guards</a><a class="headerlink" href="#header-guards" title="Permalink to this heading"></a></h3>
+<p>Header guards must be fully uppercased, matching the filename with dots replaced by underscores:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#ifndef CD_MYCLASS_H</span>
+<span class="cp">#define CD_MYCLASS_H</span>
+<span class="c1">// ...</span>
+<span class="cp">#endif</span>
+</pre></div>
+</div>
+</section>
+<section id="include-ordering">
+<h3><a class="toc-backref" href="#id5">Include ordering</a><a class="headerlink" href="#include-ordering" title="Permalink to this heading"></a></h3>
+<p>Group includes into labelled sections in the following order:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// Std includes</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;memory&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;vector&gt;</span>
+
+<span class="c1">// Chombo includes</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;LevelData.H&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;EBISBox.H&gt;</span>
+
+<span class="c1">// Our includes</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_AmrMesh.H&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_NamespaceHeader.H&gt;</span>
+</pre></div>
+</div>
+<p>Omit a group entirely (including its label) when it has no entries.</p>
+</section>
+<section id="namespace">
+<h3><a class="toc-backref" href="#id6">Namespace</a><a class="headerlink" href="#namespace" title="Permalink to this heading"></a></h3>
+<p>All <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> code lives inside the <code class="docutils literal notranslate"><span class="pre">ChomboDischarge</span></code> namespace, opened and closed with:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_NamespaceHeader.H&gt;</span>
+<span class="c1">// ... declarations ...</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_NamespaceFooter.H&gt;</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="spdx-reuse-compliance">
+<h2><a class="toc-backref" href="#id7">SPDX/REUSE compliance</a><a class="headerlink" href="#spdx-reuse-compliance" title="Permalink to this heading"></a></h2>
+<p>Every <code class="docutils literal notranslate"><span class="pre">.H</span></code> and <code class="docutils literal notranslate"><span class="pre">.cpp</span></code> file must carry a REUSE-compliant SPDX block at the very top, before any other content:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*</span>
+<span class="cm"> * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research</span>
+<span class="cm"> *</span>
+<span class="cm"> * SPDX-License-Identifier: GPL-3.0-or-later</span>
+<span class="cm"> */</span>
+</pre></div>
+</div>
+<p>Use <code class="docutils literal notranslate"><span class="pre">reuse</span> <span class="pre">annotate</span></code> to apply the header automatically:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>reuse<span class="w"> </span>annotate<span class="w"> </span>--copyright<span class="w"> </span><span class="s2">&quot;2021-2026 SINTEF Energy Research&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">               </span>--license<span class="w"> </span>GPL-3.0-or-later<span class="w"> </span><span class="se">\</span>
+<span class="w">               </span>--style<span class="w"> </span>c<span class="w"> </span>Source/MyModule/CD_MyClass.H<span class="w"> </span><span class="se">\</span>
+<span class="w">               </span>Source/MyModule/CD_MyClass.cpp
+</pre></div>
+</div>
+<p>Do <strong>not</strong> add SPDX headers to <code class="docutils literal notranslate"><span class="pre">.options</span></code> or <code class="docutils literal notranslate"><span class="pre">.inputs</span></code> files; those are covered by glob
+patterns in <code class="docutils literal notranslate"><span class="pre">REUSE.toml</span></code>.</p>
+</section>
+<section id="documentation-standards">
+<h2><a class="toc-backref" href="#id8">Documentation standards</a><a class="headerlink" href="#documentation-standards" title="Permalink to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> uses Doxygen to generate an API reference.
+The CI <code class="docutils literal notranslate"><span class="pre">Build-documentation</span></code> job runs <code class="docutils literal notranslate"><span class="pre">doxygen</span></code> with <code class="docutils literal notranslate"><span class="pre">WARN_AS_ERROR</span> <span class="pre">=</span> <span class="pre">FAIL_ON_WARNINGS</span></code>,
+so any documentation warning causes a build failure.</p>
+<section id="file-level-block">
+<h3><a class="toc-backref" href="#id9">File-level block</a><a class="headerlink" href="#file-level-block" title="Permalink to this heading"></a></h3>
+<p>Every <code class="docutils literal notranslate"><span class="pre">.H</span></code> and <code class="docutils literal notranslate"><span class="pre">.cpp</span></code> file must have a <code class="docutils literal notranslate"><span class="pre">/**</span></code> Doxygen block immediately after the SPDX
+block, containing <code class="docutils literal notranslate"><span class="pre">&#64;file</span></code>, <code class="docutils literal notranslate"><span class="pre">&#64;brief</span></code>, and <code class="docutils literal notranslate"><span class="pre">&#64;author</span></code>:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
+<span class="cm">  @file   CD_MyClass.H</span>
+<span class="cm">  @brief  Declaration of MyClass.</span>
+<span class="cm">  @author Robert Marskar</span>
+<span class="cm">*/</span>
+</pre></div>
+</div>
+<p>For <code class="docutils literal notranslate"><span class="pre">.cpp</span></code> files the <code class="docutils literal notranslate"><span class="pre">&#64;brief</span></code> must read <code class="docutils literal notranslate"><span class="pre">&quot;Implementation</span> <span class="pre">of</span> <span class="pre">CD_MyClass.H&quot;</span></code>.</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p>Always squash your git commits into a single commit for the PR as a whole.</p>
+<p>All Doxygen comment blocks <strong>must</strong> use the <code class="docutils literal notranslate"><span class="pre">/**</span></code> opening delimiter.</p>
 </div>
-<p>It will be beneficial to first compile the changes locally and run e.g. the test suite, see <a class="reference internal" href="../Base/Testing.html#chap-testing"><span class="std std-ref">Code testing</span></a> in debug mode.
-Also make sure to run e.g. <em>valgrind</em> to spot memory leaks.
-In serial, running valgrind can be done by calling valgrind with <code class="docutils literal notranslate"><span class="pre">--leak-check=yes</span></code>, e.g.:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>valgrind<span class="w"> </span>--leak-check<span class="o">=</span>full<span class="w"> </span>--track-origins<span class="o">=</span>yes<span class="w"> </span>&lt;my_executable&gt;<span class="w"> </span>&lt;my_inputs_file&gt;
-</pre></div>
-</div>
-<p>With MPI this looks like</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mpirun<span class="w"> </span>-np<span class="w"> </span><span class="m">12</span><span class="w"> </span>valgrind<span class="w"> </span>--leak-check<span class="o">=</span>full<span class="w"> </span>--track-origins<span class="o">=</span>yes<span class="w"> </span>&lt;my_executable&gt;<span class="w"> </span>&lt;my_inputs_file&gt;
+</section>
+<section id="function-documentation">
+<h3><a class="toc-backref" href="#id10">Function documentation</a><a class="headerlink" href="#function-documentation" title="Permalink to this heading"></a></h3>
+<p>Every function — public, protected, or private — must have at minimum a <code class="docutils literal notranslate"><span class="pre">&#64;brief</span></code>.
+All parameters must be tagged with a direction:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&#64;param[in]</span></code>    — input-only parameter.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&#64;param[out]</span></code>   — output-only parameter.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&#64;param[in,out]</span></code> — parameter that is read and modified (note: <code class="docutils literal notranslate"><span class="pre">&#64;param[inout]</span></code> is invalid).</p></li>
+</ul>
+<p>Non-void functions must have a <code class="docutils literal notranslate"><span class="pre">&#64;return</span></code> tag.</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
+<span class="cm">  @brief Solve the system on a single level.</span>
+<span class="cm">  @param[in,out] a_phi    Solution data; initial guess on entry.</span>
+<span class="cm">  @param[in]     a_rhs    Right-hand side data.</span>
+<span class="cm">  @param[in]     a_level  AMR level index.</span>
+<span class="cm">  @return Residual norm after the solve.</span>
+<span class="cm">*/</span>
+<span class="n">Real</span>
+<span class="nf">solve</span><span class="p">(</span><span class="n">LevelData</span><span class="o">&lt;</span><span class="n">EBCellFAB</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_phi</span><span class="p">,</span>
+<span class="w">      </span><span class="k">const</span><span class="w"> </span><span class="n">LevelData</span><span class="o">&lt;</span><span class="n">EBCellFAB</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_rhs</span><span class="p">,</span>
+<span class="w">      </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_level</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
-<section id="bug-reports">
-<h2>Bug reports<a class="headerlink" href="#bug-reports" title="Permalink to this heading"></a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is probably not bug-free.
-If encountering unexpected behavior, do not hesitate to use the issue tracker at <a class="reference external" href="https://github.com/chombo-discharge/chombo-discharge/issues">https://github.com/chombo-discharge/chombo-discharge/issues</a>.</p>
+<section id="hiding-implementation-details">
+<h3><a class="toc-backref" href="#id11">Hiding implementation details</a><a class="headerlink" href="#hiding-implementation-details" title="Permalink to this heading"></a></h3>
+<p>Template specialisations, explicit instantiations, and other implementation artefacts in
+<code class="docutils literal notranslate"><span class="pre">.cpp</span></code> files that should not appear in the API reference must be wrapped with:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">/// @cond DOXYGEN_SKIP</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;&gt;</span>
+<span class="kt">void</span><span class="w"> </span><span class="n">MyClass</span><span class="o">::</span><span class="n">specialised</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span>
+<span class="c1">/// @endcond</span>
+</pre></div>
+</div>
+</section>
+<section id="hdf5-guarded-functions">
+<h3><a class="toc-backref" href="#id12">HDF5-guarded functions</a><a class="headerlink" href="#hdf5-guarded-functions" title="Permalink to this heading"></a></h3>
+<p>Documentation comments for functions inside <code class="docutils literal notranslate"><span class="pre">#ifdef</span> <span class="pre">CH_USE_HDF5</span></code> blocks must be placed
+<strong>inside</strong> the <code class="docutils literal notranslate"><span class="pre">#ifdef</span></code> block.  Comments placed before the <code class="docutils literal notranslate"><span class="pre">#ifdef</span></code> are associated with
+the next visible symbol when <code class="docutils literal notranslate"><span class="pre">CH_USE_HDF5</span></code> is not defined, producing spurious warnings:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// Correct — comment is inside the guard</span>
+<span class="cp">#ifdef CH_USE_HDF5</span>
+<span class="cm">/**</span>
+<span class="cm">  @brief Write checkpoint data.</span>
+<span class="cm">  @param[out] a_handle HDF5 file handle.</span>
+<span class="cm">  @param[in]  a_level  Grid level.</span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">writeCheckpointLevel</span><span class="p">(</span><span class="n">HDF5Handle</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_handle</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_level</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<span class="cp">#endif</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="code-quality-tools">
+<h2><a class="toc-backref" href="#id13">Code quality tools</a><a class="headerlink" href="#code-quality-tools" title="Permalink to this heading"></a></h2>
+<section id="pre-commit-hooks">
+<h3><a class="toc-backref" href="#id14">Pre-commit hooks</a><a class="headerlink" href="#pre-commit-hooks" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> uses <a class="reference external" href="https://pre-commit.com">pre-commit</a> to enforce code quality
+checks automatically before each commit.</p>
+<p>Install and activate the hooks once per clone:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>pre-commit
+pre-commit<span class="w"> </span>install
+</pre></div>
+</div>
+<p>Run all hooks manually across the entire repository:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pre-commit<span class="w"> </span>run<span class="w"> </span>--all-files
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">sphinx-build</span></code> hook is on a <strong>manual stage</strong> and must be invoked explicitly:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pre-commit<span class="w"> </span>run<span class="w"> </span>sphinx-build<span class="w"> </span>--hook-stage<span class="w"> </span>manual
+</pre></div>
+</div>
+<p>It builds the HTML documentation with <code class="docutils literal notranslate"><span class="pre">-W</span> <span class="pre">--keep-going</span></code>, which treats all Sphinx warnings
+as errors and collects every warning before reporting failure.  Run this before opening a
+pull request if you have made changes to RST files.</p>
+<p>The following hooks are active (see <code class="docutils literal notranslate"><span class="pre">.pre-commit-config.yaml</span></code>):</p>
+<table class="colwidths-given docutils align-default">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 50%" />
+<col style="width: 30%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Hook</p></th>
+<th class="head"><p>What it checks</p></th>
+<th class="head"><p>Notes</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">clang-format</span></code></p></td>
+<td><p>C++ source formatting</p></td>
+<td><p>Enforces <code class="docutils literal notranslate"><span class="pre">.clang-format</span></code> style; fails if any diff is produced</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">clang-tidy</span></code></p></td>
+<td><p>Static analysis of staged <code class="docutils literal notranslate"><span class="pre">.cpp</span></code> files</p></td>
+<td><p>Requires <code class="docutils literal notranslate"><span class="pre">compile_commands.json</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cppcheck</span></code></p></td>
+<td><p>Lightweight static analysis of staged <code class="docutils literal notranslate"><span class="pre">.cpp</span></code> files</p></td>
+<td><p>No compilation database required; checks for warnings, performance, and portability issues</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">reuse</span></code></p></td>
+<td><p>REUSE/SPDX licence compliance</p></td>
+<td><p>Runs <code class="docutils literal notranslate"><span class="pre">reuse</span> <span class="pre">lint</span></code> on the whole repo</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">codespell</span></code></p></td>
+<td><p>Spelling in source, docs, and physics files</p></td>
+<td><p>Word exceptions are listed in <code class="docutils literal notranslate"><span class="pre">.codespellignore</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">format-input-files</span></code></p></td>
+<td><p>Banner comment format in <code class="docutils literal notranslate"><span class="pre">.options</span></code>/<code class="docutils literal notranslate"><span class="pre">.inputs</span></code> files</p></td>
+<td><p>Header must be a 100-character <code class="docutils literal notranslate"><span class="pre">====</span></code> rule followed by class name</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">doxygen-check</span></code></p></td>
+<td><p>Runs <code class="docutils literal notranslate"><span class="pre">doxygen</span> <span class="pre">Docs/doxygen.conf</span></code></p></td>
+<td><p>Fails on any warning (<code class="docutils literal notranslate"><span class="pre">WARN_AS_ERROR</span> <span class="pre">=</span> <span class="pre">FAIL_ON_WARNINGS</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">sphinx-build</span></code></p></td>
+<td><p>Builds the HTML documentation; fails on any warning or error</p></td>
+<td><p><strong>Manual stage only</strong> — not triggered on commit; invoke explicitly (see below)</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="clang-format">
+<h3><a class="toc-backref" href="#id15">clang-format</a><a class="headerlink" href="#clang-format" title="Permalink to this heading"></a></h3>
+<p>All C++ source files are formatted with <code class="docutils literal notranslate"><span class="pre">clang-format</span></code> v18 using the configuration in
+<code class="docutils literal notranslate"><span class="pre">.clang-format</span></code> at the repository root.  Key settings:</p>
+<ul class="simple">
+<li><p>Language standard: C++11.</p></li>
+<li><p>Indent width: 2 spaces (no tabs).</p></li>
+<li><p>Column limit: 120 characters.</p></li>
+<li><p>Pointer alignment: left (<code class="docutils literal notranslate"><span class="pre">int*</span> <span class="pre">a_ptr</span></code>).</p></li>
+<li><p>Brace wrapping: opening braces on new lines for classes, enums, structs, and functions;
+<code class="docutils literal notranslate"><span class="pre">else</span></code> on new line after closing brace.</p></li>
+</ul>
+<p>To format all source files in the repository:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>find<span class="w"> </span>Source<span class="w"> </span>Physics<span class="w"> </span>Geometries<span class="w"> </span>Exec<span class="w"> </span><span class="se">\(</span><span class="w"> </span>-name<span class="w"> </span><span class="s2">&quot;*.H&quot;</span><span class="w"> </span>-o<span class="w"> </span>-name<span class="w"> </span><span class="s2">&quot;*.cpp&quot;</span><span class="w"> </span><span class="se">\)</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-exec<span class="w"> </span>clang-format<span class="w"> </span>-i<span class="w"> </span><span class="o">{}</span><span class="w"> </span>+
+</pre></div>
+</div>
+<p>Or rely on the pre-commit hook, which runs automatically on staged files.</p>
+</section>
+<section id="clang-tidy">
+<h3><a class="toc-backref" href="#id16">clang-tidy</a><a class="headerlink" href="#clang-tidy" title="Permalink to this heading"></a></h3>
+<p>Static analysis is performed with <code class="docutils literal notranslate"><span class="pre">clang-tidy</span></code> using the configuration in <code class="docutils literal notranslate"><span class="pre">.clang-tidy</span></code>.
+The active check families target C++14: <code class="docutils literal notranslate"><span class="pre">bugprone-*</span></code>, <code class="docutils literal notranslate"><span class="pre">clang-analyzer-*</span></code>,
+<code class="docutils literal notranslate"><span class="pre">cppcoreguidelines-*</span></code>, <code class="docutils literal notranslate"><span class="pre">misc-*</span></code>, a curated subset of <code class="docutils literal notranslate"><span class="pre">modernize-*</span></code>
+(<code class="docutils literal notranslate"><span class="pre">loop-convert</span></code>, <code class="docutils literal notranslate"><span class="pre">make-unique</span></code>, <code class="docutils literal notranslate"><span class="pre">use-auto</span></code>, <code class="docutils literal notranslate"><span class="pre">use-default-member-init</span></code>,
+<code class="docutils literal notranslate"><span class="pre">use-nullptr</span></code>, <code class="docutils literal notranslate"><span class="pre">use-override</span></code>), <code class="docutils literal notranslate"><span class="pre">performance-*</span></code>, and <code class="docutils literal notranslate"><span class="pre">readability-*</span></code>,
+with noisy or inapplicable checks disabled.
+Only <code class="docutils literal notranslate"><span class="pre">.cpp</span></code> files under <code class="docutils literal notranslate"><span class="pre">Source/</span></code>, <code class="docutils literal notranslate"><span class="pre">Physics/</span></code>, <code class="docutils literal notranslate"><span class="pre">Exec/</span></code>, and <code class="docutils literal notranslate"><span class="pre">Geometries/</span></code>
+are analysed directly; headers are checked transitively.</p>
+</section>
+<section id="generating-compile-commands-json">
+<h3><a class="toc-backref" href="#id17">Generating <code class="docutils literal notranslate"><span class="pre">compile_commands.json</span></code></a><a class="headerlink" href="#generating-compile-commands-json" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">clang-tidy</span></code> requires a compilation database.
+<code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> uses a GNU Make build system, so the database must be generated
+with <a class="reference external" href="https://github.com/rizsotto/Bear">Bear</a>, which intercepts the compiler invocations
+during a normal build:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>bear<span class="w">        </span><span class="c1"># install Bear</span>
+<span class="nb">cd</span><span class="w"> </span><span class="nv">$DISCHARGE_HOME</span>
+bear<span class="w"> </span>--<span class="w"> </span>make<span class="w"> </span>-j<span class="k">$(</span>nproc<span class="k">)</span><span class="w"> </span><span class="nv">DIM</span><span class="o">=</span><span class="m">2</span><span class="w"> </span>discharge-lib
+</pre></div>
+</div>
+<p>This produces <code class="docutils literal notranslate"><span class="pre">compile_commands.json</span></code> in <code class="docutils literal notranslate"><span class="pre">$DISCHARGE_HOME</span></code>.
+Regenerate it whenever you add or remove source files, or change compiler flags.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The compilation database must cover the files you want to analyse.
+If you are working on a single physics module, build that module explicitly:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>bear<span class="w"> </span>--<span class="w"> </span>make<span class="w"> </span>-j<span class="k">$(</span>nproc<span class="k">)</span><span class="w"> </span><span class="nv">DIM</span><span class="o">=</span><span class="m">2</span><span class="w"> </span>electrostatics
+</pre></div>
+</div>
+</div>
+</section>
+<section id="running-clang-tidy">
+<h3><a class="toc-backref" href="#id18">Running clang-tidy</a><a class="headerlink" href="#running-clang-tidy" title="Permalink to this heading"></a></h3>
+<p><strong>Via the pre-commit hook</strong> (staged <code class="docutils literal notranslate"><span class="pre">.cpp</span></code> files only):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pre-commit<span class="w"> </span>run<span class="w"> </span>clang-tidy
+</pre></div>
+</div>
+<p>The hook runs automatically on <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">commit</span></code>.  It passes only the staged <code class="docutils literal notranslate"><span class="pre">.cpp</span></code>
+files in the four project directories to <code class="docutils literal notranslate"><span class="pre">clang-tidy</span></code>.
+Headers are analysed transitively.
+No action is taken if no <code class="docutils literal notranslate"><span class="pre">.cpp</span></code> files are staged.</p>
+<p><strong>In the CI pipeline</strong> (changed files in the pull request):</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">Clang-tidy</span></code> GitHub Actions job builds a compilation database with Bear, then
+runs <code class="docutils literal notranslate"><span class="pre">clang-tidy</span></code> on only the <code class="docutils literal notranslate"><span class="pre">.cpp</span></code> files that differ between the PR branch and
+<code class="docutils literal notranslate"><span class="pre">main</span></code>.  This keeps CI fast regardless of repository size.  If a pull request
+touches no <code class="docutils literal notranslate"><span class="pre">.cpp</span></code> files the job exits immediately with success.</p>
+</section>
+<section id="cppcheck">
+<h3><a class="toc-backref" href="#id19">cppcheck</a><a class="headerlink" href="#cppcheck" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">cppcheck</span></code> provides fast, lightweight static analysis that does not require a
+compilation database.  It catches memory errors, use-after-free, null pointer
+dereferences, performance anti-patterns, and portability issues directly from
+source files in seconds.</p>
+<p>The pre-commit hook runs automatically on staged <code class="docutils literal notranslate"><span class="pre">.cpp</span></code> files:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pre-commit<span class="w"> </span>run<span class="w"> </span>cppcheck
+</pre></div>
+</div>
+<p>Or invoke <code class="docutils literal notranslate"><span class="pre">cppcheck</span></code> manually on specific files or directories:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cppcheck<span class="w"> </span>--enable<span class="o">=</span>warning,performance,portability<span class="w"> </span><span class="se">\</span>
+<span class="w">         </span>--suppress<span class="o">=</span>missingInclude<span class="w"> </span>--suppress<span class="o">=</span>missingIncludeSystem<span class="w"> </span><span class="se">\</span>
+<span class="w">         </span>--inline-suppr<span class="w"> </span>--error-exitcode<span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="se">\</span>
+<span class="w">         </span>Source/<span class="w"> </span>Physics/<span class="w"> </span>Geometries/<span class="w"> </span>Exec/
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">--inline-suppr</span></code> flag enables per-line suppression comments in source:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// cppcheck-suppress someWarningId</span>
+<span class="n">risky_call</span><span class="p">();</span>
+</pre></div>
+</div>
+<p>The CI <code class="docutils literal notranslate"><span class="pre">Cppcheck</span></code> job runs with a full compilation database (generated by Bear), so
+it has complete include paths and can report more precisely than the pre-commit hook.</p>
+</section>
+<section id="codespell">
+<h3><a class="toc-backref" href="#id20">codespell</a><a class="headerlink" href="#codespell" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">codespell</span></code> checks for common spelling mistakes in source code, documentation, and physics
+configuration files.  False positives (technical terms, variable names) are listed one per
+line in <code class="docutils literal notranslate"><span class="pre">.codespellignore</span></code>.  Entries must be lowercase.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">codespell</span></code> flags a word that is intentional, add it to <code class="docutils literal notranslate"><span class="pre">.codespellignore</span></code> in your
+pull request.</p>
+</section>
+<section id="checkdocs-py">
+<h3><a class="toc-backref" href="#id21">CheckDocs.py</a><a class="headerlink" href="#checkdocs-py" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">CheckDocs.py</span></code> (at the repository root) cross-references your local changes against the
+Sphinx documentation.  It compares the current branch against <code class="docutils literal notranslate"><span class="pre">main</span></code>, collects every
+modified <code class="docutils literal notranslate"><span class="pre">.H</span></code>, <code class="docutils literal notranslate"><span class="pre">.cpp</span></code>, <code class="docutils literal notranslate"><span class="pre">.options</span></code>, <code class="docutils literal notranslate"><span class="pre">.inputs</span></code>, and <code class="docutils literal notranslate"><span class="pre">.md</span></code> file, and then scans all
+RST files for <code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">literalinclude::</span></code> directives that point to any of those files.</p>
+<p>Run it manually at any time:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>CheckDocs.py
+</pre></div>
+</div>
+<p>Example output when a changed file is included in the docs:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Found literalincludes referencing changed files:
+
+Docs/Sphinx/source/Base/MyPage.rst:42 -&gt; includes &#39;../../Source/MyModule/CD_MyClass.H&#39;
+</pre></div>
+</div>
+<p>The hook <strong>always passes</strong> — it never blocks a commit.  Its purpose is to remind you to
+review the listed documentation pages and check that the included code excerpts still render
+correctly after your changes.</p>
+</section>
+<section id="options-and-inputs-file-format">
+<h3><a class="toc-backref" href="#id22">Options and inputs file format</a><a class="headerlink" href="#options-and-inputs-file-format" title="Permalink to this heading"></a></h3>
+<p>Every <code class="docutils literal notranslate"><span class="pre">.options</span></code> and <code class="docutils literal notranslate"><span class="pre">.inputs</span></code> file must begin with a three-line banner:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># ====================================================================================================
+# ClassName class options
+# ====================================================================================================
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">ClassName</span></code> must match the C++ class name exactly.  The <code class="docutils literal notranslate"><span class="pre">format-input-files</span></code> hook
+enforces this automatically.</p>
+</section>
+</section>
+<section id="submitting-a-pull-request">
+<h2><a class="toc-backref" href="#id23">Submitting a pull request</a><a class="headerlink" href="#submitting-a-pull-request" title="Permalink to this heading"></a></h2>
+<ol class="arabic">
+<li><p><strong>Create a feature branch</strong> from <code class="docutils literal notranslate"><span class="pre">main</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>checkout<span class="w"> </span>main
+git<span class="w"> </span>pull
+git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span>feature/my-feature
+</pre></div>
+</div>
+</li>
+<li><p><strong>Develop the feature.</strong> Follow the coding conventions above.
+Add or update Sphinx documentation and Doxygen comments as appropriate.</p></li>
+<li><p><strong>Run pre-commit</strong> to catch formatting and documentation issues before committing:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pre-commit<span class="w"> </span>run<span class="w"> </span>--all-files
+</pre></div>
+</div>
+<p>Fix any reported issues, then stage and commit:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>add<span class="w"> </span>Source/MyModule/CD_MyClass.H<span class="w"> </span>Source/MyModule/CD_MyClass.cpp
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Add MyClass for ...&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Run the test suite</strong> locally in debug mode to check for assertion failures or memory
+errors (see <a class="reference internal" href="../Base/Testing.html#chap-testing"><span class="std std-ref">Code testing</span></a>):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>Exec/Tests/MyTest
+make<span class="w"> </span>-j<span class="k">$(</span>nproc<span class="k">)</span><span class="w"> </span><span class="nv">DIM</span><span class="o">=</span><span class="m">2</span><span class="w"> </span><span class="nv">DEBUG</span><span class="o">=</span>TRUE
+./main.*.ex<span class="w"> </span>regression2d.inputs
+</pre></div>
+</div>
+<p>For memory leak checking with <code class="docutils literal notranslate"><span class="pre">valgrind</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>valgrind<span class="w"> </span>--leak-check<span class="o">=</span>full<span class="w"> </span>--track-origins<span class="o">=</span>yes<span class="w"> </span>./main.*.ex<span class="w"> </span>regression2d.inputs
+</pre></div>
+</div>
+</li>
+<li><p><strong>Push the branch</strong> to GitHub:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>push<span class="w"> </span>--set-upstream<span class="w"> </span>origin<span class="w"> </span>feature/my-feature
+</pre></div>
+</div>
+</li>
+<li><p><strong>Open a pull request</strong> against <code class="docutils literal notranslate"><span class="pre">main</span></code> via the GitHub web interface.
+Mark it as <em>Draft</em> if the work is still in progress.
+Provide a clear description of what was changed and why.</p></li>
+<li><p><strong>Ensure all CI checks pass</strong> (see <a class="reference internal" href="#chap-ci"><span class="std std-ref">Continuous integration</span></a> below).  Address any failures before
+requesting a review.</p></li>
+</ol>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Squash your commits into a single commit before the pull request is merged.</p>
+</div>
 </section>
 <section id="continuous-integration">
-<h2>Continuous integration<a class="headerlink" href="#continuous-integration" title="Permalink to this heading"></a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> uses continuous integration (CI) with GitHub actions for:</p>
-<ul class="simple">
-<li><p>Running the test suite (see <a class="reference internal" href="../Base/Testing.html#chap-testing"><span class="std std-ref">Code testing</span></a>).</p></li>
-<li><p>Building HTML, PDF, and doxygen documentation.</p></li>
-<li><p>Ensuring correct code format.</p></li>
-<li><p>Automated code review via Claude (triggered by commenting <code class="docutils literal notranslate"><span class="pre">&#64;claude</span> <span class="pre">review</span></code> on the pull request).</p></li>
-</ul>
-<p>When submitting pull request for review, the above tests will start.
-In general, all the above tests should pass before merging the pull request into the main branch.
-Note that all actions on GitHub run in debug mode (<code class="docutils literal notranslate"><span class="pre">DEBUG=TRUE</span></code>) for turning on assertions.</p>
-<p>Upon merging with the main branch, the documentation is again rebuilt and deployed to GitHub pages (see <a class="reference external" href="https://pages.github.com/">GitHub pages</a>).
-This ensures that the online documentation (HTML, PDF, and doxygen) is always up-to-date with the latest <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> release.</p>
+<span id="chap-ci"></span><h2><a class="toc-backref" href="#id24">Continuous integration</a><a class="headerlink" href="#continuous-integration" title="Permalink to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> uses GitHub Actions (<code class="docutils literal notranslate"><span class="pre">CI.yml</span></code>) to validate every pull request.
+All jobs must pass before a pull request can be merged into <code class="docutils literal notranslate"><span class="pre">main</span></code>.</p>
+<table class="colwidths-given docutils align-default">
+<colgroup>
+<col style="width: 24%" />
+<col style="width: 18%" />
+<col style="width: 59%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Job</p></th>
+<th class="head"><p>Runs on</p></th>
+<th class="head"><p>Purpose</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Formatting</span></code></p></td>
+<td><p>Ubuntu</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">clang-format</span></code> diff check; fails if any file is not correctly formatted</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">REUSE</span></code></p></td>
+<td><p>Ubuntu</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">reuse</span> <span class="pre">lint</span></code>; fails if any file is missing an SPDX header or REUSE.toml entry</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Codespell</span></code></p></td>
+<td><p>Ubuntu</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">codespell</span></code> spelling check across source, docs, and physics files</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Clang-tidy</span></code></p></td>
+<td><p>Ubuntu</p></td>
+<td><p>Builds a compilation database with Bear, then runs <code class="docutils literal notranslate"><span class="pre">clang-tidy</span></code> (via <code class="docutils literal notranslate"><span class="pre">clang-tidy-cache</span></code>) in parallel on only the <code class="docutils literal notranslate"><span class="pre">.cpp</span></code> files changed in the pull request; skipped if no <code class="docutils literal notranslate"><span class="pre">.cpp</span></code> files changed</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Cppcheck</span></code></p></td>
+<td><p>Ubuntu</p></td>
+<td><p>Builds a compilation database with Bear, then runs <code class="docutils literal notranslate"><span class="pre">cppcheck</span></code> on only the <code class="docutils literal notranslate"><span class="pre">.cpp</span></code> files changed in the pull request; skipped if no <code class="docutils literal notranslate"><span class="pre">.cpp</span></code> files changed</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Linux-GNU</span></code></p></td>
+<td><p>Ubuntu</p></td>
+<td><p>Full 2D and 3D debug builds with GCC; depends on Formatting, REUSE, and Codespell</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Linux-oneAPI</span></code></p></td>
+<td><p>Ubuntu</p></td>
+<td><p>Full 2D and 3D debug builds with Intel oneAPI; same dependencies as Linux-GNU</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Build-documentation</span></code></p></td>
+<td><p>Ubuntu</p></td>
+<td><p>Doxygen HTML + Sphinx HTML; validates all <code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">literalinclude::</span></code> paths</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">CI-passed</span></code></p></td>
+<td><p>—</p></td>
+<td><p>Final gate job; all other jobs must succeed before this passes</p></td>
+</tr>
+</tbody>
+</table>
+<p>CI runs in 2-D without MPI and with <code class="docutils literal notranslate"><span class="pre">DEBUG=TRUE</span></code> so that all assertions are active.
+Executables are not run in CI; only compilation is checked.</p>
+<p>Upon merging to <code class="docutils literal notranslate"><span class="pre">main</span></code>, the documentation is rebuilt and deployed to
+<a class="reference external" href="https://pages.github.com/">GitHub Pages</a>, keeping the online HTML, PDF, and doxygen
+API always in sync with the latest release.</p>
+</section>
+<section id="bug-reports">
+<h2><a class="toc-backref" href="#id25">Bug reports</a><a class="headerlink" href="#bug-reports" title="Permalink to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is probably not bug-free.
+If you encounter unexpected behaviour, please open an issue at
+<a class="reference external" href="https://github.com/chombo-discharge/chombo-discharge/issues">github.com/chombo-discharge/chombo-discharge/issues</a>.
+Include a minimal reproducible example (inputs file and build flags) where possible.</p>
 </section>
 </section>
 

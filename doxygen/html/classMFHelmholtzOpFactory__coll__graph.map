@@ -1,9 +1,5 @@
 <map id="MFHelmholtzOpFactory" name="MFHelmholtzOpFactory">
-<area shape="rect" id="Node000001" title="Factory class for making MFHelmholtzOp." alt="" coords="43,196,217,221"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,212,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="119,146,130,195,125,196,113,147"/>
-<area shape="rect" id="Node000003" href="$classEBAMRData.html" title=" " alt="" coords="237,93,421,133"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="277,142,156,198,153,193,275,137"/>
-<area shape="rect" id="Node000004" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="259,5,398,31"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="331,44,331,93,326,93,326,44"/>
+<area shape="rect" id="Node000001" title="Factory class for making MFHelmholtzOp." alt="" coords="21,93,196,119"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,5,212,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="111,59,111,93,106,93,106,59"/>
 </map>
