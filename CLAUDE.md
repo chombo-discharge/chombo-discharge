@@ -279,3 +279,22 @@ inout     # GeometryService::InOut Chombo type in CD_ScanShop
 lod       # const Real loD = ... in CD_CdrSolver.cpp
 visiter   # EBGeometry::BVH::Visiter<> external API type
 ```
+
+---
+
+## 6. Current work in progress
+
+Branch `dataops` — DataOps reorganization.
+
+**At the start of every session on this branch, read `TODO.md` in the repository root.**
+It contains the full design plan and a checkpoint-by-checkpoint task list with per-call-site
+checkboxes. Resume from the first unchecked item.
+
+Key points:
+- `DataOps` is being refactored to receive pre-built `VoFIterator` objects from `AmrMesh`
+  instead of constructing them on-the-fly.
+- `AmrMesh` / `Realm` / `PhaseRealm` are being extended with a second iterator that covers
+  only multiply-cut cells (`getMultiCutVofIterator`).
+- Checkpoints 1–5 in `TODO.md` are the design and call-site inventory. Checkpoint 6 is the
+  pre-merge cleanup list.
+- `TODO.md` itself must be deleted before the PR is merged (see Checkpoint 6.4).

@@ -1512,3 +1512,6 @@ new file should be:
 
 Delete the unwanted files, stage the deletion, and amend or add a new commit before the
 final push. Do **not** merge until every new file has been explicitly classified.
+
+- [ ] Remove the `## 6. Current work in progress` section from `CLAUDE.md` (added on this
+  branch to help Claude pick up context across sessions; must not appear on `main`).
