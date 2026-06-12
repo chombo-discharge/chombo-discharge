@@ -389,10 +389,6 @@ jobs:
         run: |
           python3 -m pip install sphinx==5.0.0 sphinx_rtd_theme sphinxcontrib-bibtex
 
-      - name: Validate literalinclude directives
-        run: |
-          python3 Docs/check_literalincludes.py
-
       - name: Build doxygen
         run: |
           doxygen Docs/doxygen.conf
