@@ -203,7 +203,7 @@ In ``chombo-discharge``, the KMC solver is implemented as
 
 .. literalinclude:: ../../../../Source/KineticMonteCarlo/CD_KMCSolver.H
    :language: c++
-   :lines: 41-62,78-83
+   :lines: 42-63,79-84
    :dedent: 0
 
 Here, the template parameters are:
@@ -324,14 +324,14 @@ The most general one that uses the hybrid advance is
 
 .. literalinclude:: ../../../../Source/KineticMonteCarlo/CD_KMCSolver.H
    :language: c++
-   :lines: 417-427
+   :lines: 413-423
    :dedent: 2
 
 When using the hybrid algorithm, the user should set the hybrid solver parameters through the function
 
 .. literalinclude:: ../../../../Source/KineticMonteCarlo/CD_KMCSolver.H
    :language: c++
-   :lines: 111-126
+   :lines: 112-122
    :dedent: 2
 
 State and reaction examples

@@ -373,7 +373,7 @@ This is relatively simple to achieve, and is done as follows:
 1. *Before* creating the new grids, each MPI rank collects *all* particles on a single ``List<P>`` by calling
 
    .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-      :lines: 136-142
+      :lines: 153-158
       :language: c++
       :dedent: 2   		   
       
@@ -384,7 +384,7 @@ This is relatively simple to achieve, and is done as follows:
    This is done by calling the ``ParticleContainer<P>`` regrid function:
 
    .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-      :lines: 116-135
+      :lines: 132-151
       :language: c++
       :dedent: 2
 
