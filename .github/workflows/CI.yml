@@ -68,15 +68,6 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install g++ gfortran csh libblas-dev liblapack-dev bear clang-tidy
-          pip install clang-tidy-cache
-
-      - name: Restore clang-tidy-cache
-        uses: actions/cache@v5
-        with:
-          path: ~/.cache/clang-tidy-cache
-          key: clang-tidy-cache-${{ hashFiles('.clang-tidy') }}-${{ github.sha }}
-          restore-keys: |
-            clang-tidy-cache-${{ hashFiles('.clang-tidy') }}-
 
       - name: Copy makefile
         run: |
@@ -91,7 +82,7 @@ jobs:
           mapfile -t changed < <(git diff --name-only origin/${{ github.base_ref }} HEAD \
             | grep -E '^(Source|Exec|Physics|Geometries)/.*\.cpp$' || true)
           [ ${#changed[@]} -eq 0 ] && { echo "No changed .cpp files — skipping"; exit 0; }
-          printf '%s\n' "${changed[@]}" | xargs -n1 clang-tidy-cache clang-tidy -p .
+          printf '%s\n' "${changed[@]}" | xargs -n1 clang-tidy -p .
 
   Cppcheck:
     if: github.event.pull_request.draft == false
