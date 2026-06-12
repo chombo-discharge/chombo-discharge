@@ -24,7 +24,7 @@ The general routine for drawing a random number is
 
 .. literalinclude:: ../../../../Source/Utilities/CD_Random.H
    :language: c++
-   :lines: 118-125
+   :lines: 120-127
    :dedent: 2
 
 Here, the template parameter ``T`` is some distribution that follows the appropriate C++ template constraints of ``<random>``.
@@ -43,7 +43,7 @@ Pre-defined distributions exist for performing the following operations:
 
 .. literalinclude:: ../../../../Source/Utilities/CD_Random.H
    :language: c++
-   :lines: 70-116
+   :lines: 72-118
    :dedent: 2
 
 Seeding the RNG

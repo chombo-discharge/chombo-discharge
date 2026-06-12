@@ -10,7 +10,7 @@ The main class implements :ref:`Chap:TimeStepper` and is templated as follows:
 
 .. literalinclude:: ../../../../Physics/MeshODE/CD_MeshODEStepper.H
    :language: c++
-   :lines: 44-48
+   :lines: 37-48
    :dedent: 4
 
 Here, ``N`` is the number of variables that will be stored on the mesh.

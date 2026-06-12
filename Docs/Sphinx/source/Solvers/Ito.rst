@@ -399,7 +399,7 @@ In addition, the user must first supply a particle merging function:
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 92-102
+   :lines: 92-97
    :dedent: 2
 
 In the code above, ``ParticleManagement::ParticleMerger<P>`` is an alias:

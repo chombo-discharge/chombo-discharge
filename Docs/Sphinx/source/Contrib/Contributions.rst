@@ -244,7 +244,7 @@ The following hooks are active (see ``.pre-commit-config.yaml``):
      - Enforces ``.clang-format`` style; fails if any diff is produced
    * - ``clang-tidy``
      - Static analysis of staged ``.cpp`` files
-     - Requires ``compile_commands.json``; runs ``run_clang_tidy.sh`` in parallel; uses ``clang-tidy-cache`` when available
+     - Requires ``compile_commands.json``.
    * - ``cppcheck``
      - Lightweight static analysis of staged ``.cpp`` files
      - No compilation database required; checks for warnings, performance, and portability issues
@@ -327,18 +327,6 @@ Regenerate it whenever you add or remove source files, or change compiler flags.
 Running clang-tidy
 ..................
 
-``chombo-discharge`` provides ``run_clang_tidy.sh`` at the repository root as a
-convenience wrapper around ``run-clang-tidy``.
-
-**Full local run** (all project ``.cpp`` files, all cores):
-
-.. code-block:: bash
-
-   ./run_clang_tidy.sh
-
-This invokes ``run-clang-tidy -j$(nproc)`` and analyses every ``.cpp`` file under
-``Source/``, ``Exec/``, ``Physics/``, and ``Geometries/`` in parallel.
-
 **Via the pre-commit hook** (staged ``.cpp`` files only):
 
 .. code-block:: bash
@@ -346,9 +334,9 @@ This invokes ``run-clang-tidy -j$(nproc)`` and analyses every ``.cpp`` file unde
    pre-commit run clang-tidy
 
 The hook runs automatically on ``git commit``.  It passes only the staged ``.cpp``
-files in the four project directories to ``clang-tidy``, running them in parallel
-via the same script.  Headers are analysed transitively.  No action is taken if no
-``.cpp`` files are staged.
+files in the four project directories to ``clang-tidy``.
+Headers are analysed transitively.
+No action is taken if no ``.cpp`` files are staged.
 
 **In the CI pipeline** (changed files in the pull request):
 
@@ -356,27 +344,6 @@ The ``Clang-tidy`` GitHub Actions job builds a compilation database with Bear, t
 runs ``clang-tidy`` on only the ``.cpp`` files that differ between the PR branch and
 ``main``.  This keeps CI fast regardless of repository size.  If a pull request
 touches no ``.cpp`` files the job exits immediately with success.
-
-Run ``./run_clang_tidy.sh`` locally and resolve any warnings before opening a pull
-request.
-
-**Speeding up repeated runs with** ``clang-tidy-cache``
-
-``run_clang_tidy.sh`` automatically uses ``clang-tidy-cache`` as a transparent wrapper
-if it is installed.  On a warm cache — typical when only a handful of files have changed —
-unmodified translation units are served from the cache without re-running the analyser,
-giving an 80–90 % reduction in wall time.
-
-Install once per machine:
-
-.. code-block:: bash
-
-   pip install clang-tidy-cache
-
-The cache directory defaults to ``~/.cache/clang-tidy-cache`` and is keyed on file
-content, so it remains valid across branches and rebases as long as the source content
-is unchanged.  The CI pipeline pre-seeds and restores this cache between runs using
-GitHub Actions ``actions/cache``.
 
 cppcheck
 ........

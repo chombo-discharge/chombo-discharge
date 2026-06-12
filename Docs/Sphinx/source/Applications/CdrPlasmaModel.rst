@@ -422,10 +422,17 @@ Complete API
 
 The full API for the ``CdrPlasmaPhysics`` class is given below:
 
+.. raw:: html
+
+   <details>
+   <summary><a>Show/hide full 0D interface</a></summary>
+
 .. literalinclude:: ../../../../Physics/CdrPlasma/CD_CdrPlasmaPhysics.H
-   :language: c++
-   :dedent: 4
-   :lines: 48-290
+   :language: c++   
+
+.. raw:: html
+
+   </details><br>   
 
 .. _Chap:CdrPlasmaJSON:
 

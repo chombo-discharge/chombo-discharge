@@ -30,7 +30,7 @@ To instantiate the solver, use one of the following constructors:
 
 .. literalinclude:: ../../../../Source/SurfaceODESolver/CD_SurfaceODESolver.H
    :language: c++
-   :lines: 31-44
+   :lines: 33-44
    :dedent: 2
 
 The solver also requires a reference to :ref:`Chap:AmrMesh`, and the computational geometry such that a full instantiation example is

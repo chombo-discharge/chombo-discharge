@@ -75,7 +75,7 @@ The constructor for the electrode class is given in :numref:`List:Electrode`.
 .. _List:Electrode:
 .. literalinclude:: ../../../../Source/Geometry/CD_Electrode.H
    :caption: Constructor for the the ``Electrode`` object.
-   :lines: 41
+   :lines: 34-41
    :language: c++
    :dedent: 2
 

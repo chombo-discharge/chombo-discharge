@@ -23,7 +23,7 @@ GenericParticle
 The particle type is essentially a template
 
 .. literalinclude:: ../../../../Source/Particle/CD_GenericParticle.H
-   :lines: 75-76
+   :lines: 68-76
    :language: c++
 
 where ``M`` and ``N`` are the number of ``Real`` and ``RealVect`` variables for the particle.
@@ -31,15 +31,10 @@ The ``GenericParticle`` always stores the position of the particle, which is ava
 
 To fetch the ``Real`` and ``RealVect`` variables, :ref:`Chap:GenericParticle` has member functions
 
-.. code-block:: c++
-
-   template <size_t K>
-   inline Real&
-   GenericParticle<M,N>::real();
-
-   template <size_t K>
-   inline RealVect&
-   GenericParticle<M,N>::vect();
+.. literalinclude:: ../../../../Source/Particle/CD_GenericParticle.H
+   :lines: 165-173,184-193
+   :language: c++
+   :dedent: 2
 
 If using ``GenericParticle`` directly, the correct C++ way of fetching one of these variables is
 
@@ -49,7 +44,7 @@ If using ``GenericParticle`` directly, the correct C++ way of fetching one of th
 
    Real& s = p.template real<0>();
 
-Note that one must include the template keyword.
+Note that one must include the ``template`` keyword.
 
 :ref:`Chap:GenericParticle` can also store the local (per MPI rank) particle ID and the MPI rank ID on the particle.
 These are available through member functions ``particleID()`` and ``rankID``.
@@ -409,7 +404,7 @@ To fill the masked particles, ``ParticleContainer<P>`` has members functions for
 The function signatures for this is
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 150-156
+   :lines: 166-172
    :language: c++
    :dedent: 2
 
@@ -417,16 +412,15 @@ The argument ``a_mask`` holds a bool at each cell in the AMR hierarchy.
 Particles that live in cells where ``a_mask`` is true will be copied to an internal data holder in ``ParticleContainer<P>`` which can be retrieved through a call
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 268-273
+   :lines: 284-289
    :language: c++
    :dedent: 2
-
 
 In the above functions the mask particles are *copied*, and the original particles are left untouched.
 After the user is done with the particles, they should be deleted through the function
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 200-204
+   :lines: 216-220
    :language: c++
    :dedent: 2
 
