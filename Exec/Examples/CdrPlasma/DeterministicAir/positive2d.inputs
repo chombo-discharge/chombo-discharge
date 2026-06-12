@@ -41,7 +41,7 @@ Driver.ebis_memory_load_balance     = false               ## If using Chombo geo
 Driver.output_dt                    = -1.0                ## Output interval (values <= 0 enforces step-based output)
 Driver.plot_interval                = 10                  ## Plot interval
 Driver.checkpoint_interval          = 100                 ## Checkpoint interval
-Driver.regrid_interval              = 5                   ## Regrid interval
+Driver.regrid_interval              = 2                   ## Regrid interval
 Driver.write_regrid_files           = false               ## Write regrid files or not.
 Driver.write_restart_files          = false               ## Write restart files or not
 Driver.initial_regrids              = 8                   ## Number of initial regrids
@@ -243,5 +243,5 @@ CdrPlasmaStreamerTagger.buffer            = 4              ## Grow tagged cells
 CdrPlasmaStreamerTagger.refine_curvature      = 1.E99    ## Curvature refinement
 CdrPlasmaStreamerTagger.coarsen_curvature     = 1.E99    ## Curvature coarsening
 CdrPlasmaStreamerTagger.refine_alpha          = 1.0      ## Set alpha refinement. Lower  => More mesh
-CdrPlasmaStreamerTagger.coarsen_alpha         = 0.1      ## Set alpha coarsening. Higher => Less mesh
+CdrPlasmaStreamerTagger.coarsen_alpha         = 0.2      ## Set alpha coarsening. Higher => Less mesh
 CdrPlasmaStreamerTagger.max_coarsen_lvl       = 6        ## Set max coarsening depth
