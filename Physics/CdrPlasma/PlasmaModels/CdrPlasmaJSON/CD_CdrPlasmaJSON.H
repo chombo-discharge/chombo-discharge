@@ -953,7 +953,7 @@ namespace Physics {
 
       /**
          @brief Initialize photon species.
-         @details This will initialize the radiative transfer species absed on the "photon_species" field in the JSON file. 
+         @details This will initialize the radiative transfer species based on the "photon_species" field in the JSON file. 
       */
       virtual void
       initializePhotonSpecies();

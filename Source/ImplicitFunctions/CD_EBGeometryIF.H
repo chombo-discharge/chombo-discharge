@@ -6,7 +6,7 @@
 
 /**
   @file   CD_EBGeometryIF.H
-  @brief  Binding of EBGeometry signed distance functions to Chombo objcts. 
+  @brief  Binding of EBGeometry signed distance functions to Chombo objects. 
   @author Robert marskar
 */
 

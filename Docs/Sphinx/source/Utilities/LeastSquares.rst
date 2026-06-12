@@ -119,7 +119,7 @@ Typically, the weights are some power of the Euclidean distance
 Pseudo-inverse
 --------------
 
-An over-determined system does not have a unique solution, and so to obtain the solution to :math:`\mathbf{u}` for the system :math:`\mathbf{W}\mathbf{A}\mathbf{u} = \mathbf{W}\mathbf{b}` we use ordinary least squres.
+An over-determined system does not have a unique solution, and so to obtain the solution to :math:`\mathbf{u}` for the system :math:`\mathbf{W}\mathbf{A}\mathbf{u} = \mathbf{W}\mathbf{b}` we use ordinary least squares.
 The solution is then
 
 .. math::

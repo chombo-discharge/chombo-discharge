@@ -987,7 +987,7 @@ ParticleContainer<P>::remap()
   using LevelAndIndex = std::pair<uint32_t, uint32_t>;
 
   // These are the particles that get sent to each MPI rank. The pair contains the grid level and grid index.
-  // Each MPI rank (and OpenMP thread) goes through it's particles and checks if they've falled off the grid. If they have,
+  // Each MPI rank (and OpenMP thread) goes through it's particles and checks if they've fallen off the grid. If they have,
   // then the particles are moved onto appropriate lists that will get sent to each rank.
   std::vector<ParticleMap<List<P>>> particlesToSend(numRanks);
 
@@ -1333,7 +1333,7 @@ ParticleContainer<P>::regrid(const Vector<DisjointBoxLayout>&         a_grids,
   using LevelAndIndex = std::pair<uint32_t, uint32_t>;
 
   // These are the particles that get sent to each MPI rank. The pair contains the grid level and grid index.
-  // Each MPI rank (and OpenMP thread) goes through it's particles and checks if they've falled off the grid. If they have,
+  // Each MPI rank (and OpenMP thread) goes through it's particles and checks if they've fallen off the grid. If they have,
   // then the particles are moved onto appropriate lists that will get sent to each rank.
   std::vector<ParticleMap<List<P>>> particlesToSend(numRanks);
 

@@ -46,6 +46,7 @@ jobs:
         with:
           path: Source Docs Exec Physics Geometries
           ignore_words_file: .codespellignore
+          skip: "*.bib,*.js,Docs/Sphinx/build,Docs/doxygen"
 
   Clang-tidy:
     if: github.event.pull_request.draft == false
