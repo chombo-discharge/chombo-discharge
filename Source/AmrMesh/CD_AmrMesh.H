@@ -1776,6 +1776,30 @@ public:
   getMultiCutVofIterator(const std::string& a_realm, const phase::which_phase a_phase) const;
 
   /**
+    @brief Get face iterators over cut-cell faces in each valid grid box.
+    @details Each per-box entry is an array of SpaceDim FaceIterators. Faces are enumerated
+             over the valid box with FaceStop::SurroundingWithBoundary.
+    @param[in] a_realm Realm name
+    @param[in] a_phase Phase (gas or solid)
+    @return Per-level LayoutData of FaceIterator arrays
+  */
+  Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+  getFaceIterator(const std::string& a_realm, const phase::which_phase a_phase) const;
+
+  /**
+    @brief Get face iterators over cut-cell faces in boxes grown by 1 and clipped to the domain.
+    @details Each per-box entry is an array of SpaceDim FaceIterators. The box is grown
+             isotropically by 1 cell and clipped to the problem domain. Faces are enumerated
+             with FaceStop::SurroundingNoBoundary, so domain boundary faces are excluded.
+             Intended for stencils that require tangential ghost faces.
+    @param[in] a_realm Realm name
+    @param[in] a_phase Phase (gas or solid)
+    @return Per-level LayoutData of FaceIterator arrays
+  */
+  Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+  getFaceIteratorWithTangentialGhosts(const std::string& a_realm, const phase::which_phase a_phase) const;
+
+  /**
     @brief Get levelset function, allocated over a grid for a Realm and phase
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)

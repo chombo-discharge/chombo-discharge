@@ -123,6 +123,8 @@ PhaseRealm::preRegrid()
   m_eblgFiCo.resize(0);
   m_vofIter.resize(0);
   m_multiCutVofIter.resize(0);
+  m_faceIter.resize(0);
+  m_faceIterTanGhost.resize(0);
   m_coarAve.resize(0);
   m_multigridInterpolator.resize(0);
   m_ebFineInterp.resize(0);
@@ -429,11 +431,17 @@ PhaseRealm::defineVofIterator(const int a_lmin)
 
   m_vofIter.resize(1 + m_finestLevel);
   m_multiCutVofIter.resize(1 + m_finestLevel);
+  m_faceIter.resize(1 + m_finestLevel);
+  m_faceIterTanGhost.resize(1 + m_finestLevel);
 
   for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++) {
 
     m_vofIter[lvl]         = RefCountedPtr<LayoutData<VoFIterator>>(new LayoutData<VoFIterator>(m_grids[lvl]));
     m_multiCutVofIter[lvl] = RefCountedPtr<LayoutData<VoFIterator>>(new LayoutData<VoFIterator>(m_grids[lvl]));
+    m_faceIter[lvl] =
+      RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>(new LayoutData<std::array<FaceIterator, SpaceDim>>(m_grids[lvl]));
+    m_faceIterTanGhost[lvl] =
+      RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>(new LayoutData<std::array<FaceIterator, SpaceDim>>(m_grids[lvl]));
 
     const DisjointBoxLayout& dbl = m_grids[lvl];
     const DataIterator&      dit = dbl.dataIterator();
@@ -454,6 +462,22 @@ PhaseRealm::defineVofIterator(const int a_lmin)
 
       vofit.define(irreg, ebgraph);
       multiCutVofit.define(multiCut, ebgraph);
+
+      // Standard face iterators over cut-cell faces in the valid box
+      std::array<FaceIterator, SpaceDim>& faceIter = (*m_faceIter[lvl])[din];
+      for (int dir = 0; dir < SpaceDim; dir++) {
+        faceIter[dir].define(irreg, ebgraph, dir, FaceStop::SurroundingWithBoundary);
+      }
+
+      // Face iterators over a box grown by 1 and clipped to the domain, for tangential ghost faces
+      Box grownBox = cellBox;
+      grownBox.grow(1);
+      grownBox &= m_domains[lvl];
+      const IntVectSet                    irregGrown      = ebisbox.getIrregIVS(grownBox);
+      std::array<FaceIterator, SpaceDim>& faceIterTanGhost = (*m_faceIterTanGhost[lvl])[din];
+      for (int dir = 0; dir < SpaceDim; dir++) {
+        faceIterTanGhost[dir].define(irregGrown, ebgraph, dir, FaceStop::SurroundingNoBoundary);
+      }
     }
   }
 }
@@ -898,6 +922,18 @@ Vector<RefCountedPtr<LayoutData<VoFIterator>>>&
 PhaseRealm::getMultiCutVofIterator() const
 {
   return m_multiCutVofIter;
+}
+
+Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+PhaseRealm::getFaceIterator() const
+{
+  return m_faceIter;
+}
+
+Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+PhaseRealm::getFaceIteratorWithTangentialGhosts() const
+{
+  return m_faceIterTanGhost;
 }
 
 const Vector<RefCountedPtr<EBGradient>>&

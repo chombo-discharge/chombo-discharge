@@ -13,6 +13,9 @@
 #ifndef CD_PHASEREALM_H
 #define CD_PHASEREALM_H
 
+// Std includes
+#include <array>
+
 // Chombo includes
 #include <DisjointBoxLayout.H>
 #include <ProblemDomain.H>
@@ -270,7 +273,26 @@ public:
   getMultiCutVofIterator() const;
 
   /**
-    @brief Get objects for interpolation from cell centers to centroids. 
+    @brief Return face iterators over cut-cell faces in each valid grid box
+    @details Each entry is an array of SpaceDim FaceIterators, one per coordinate direction.
+    Faces are enumerated over the valid box with FaceStop::SurroundingWithBoundary.
+    @return m_faceIter (which is, in fact, mutable)
+  */
+  Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+  getFaceIterator() const;
+
+  /**
+    @brief Return face iterators over cut-cell faces in a box grown by 1 and clipped to the domain
+    @details Each entry is an array of SpaceDim FaceIterators, one per coordinate direction.
+    Faces are enumerated over the grown box with FaceStop::SurroundingNoBoundary, so domain
+    boundary faces are excluded. Intended for stencils that require tangential ghost faces.
+    @return m_faceIterTanGhost (which is, in fact, mutable)
+  */
+  Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+  getFaceIteratorWithTangentialGhosts() const;
+
+  /**
+    @brief Get objects for interpolation from cell centers to centroids.
     @return Cell centroid interpolation
   */
   const Vector<RefCountedPtr<CellCentroidInterpolation>>&
@@ -514,6 +536,16 @@ protected:
     @brief Cut-cell iterator restricted to multiply-cut cells (cells with more than one VoF)
   */
   mutable Vector<RefCountedPtr<LayoutData<VoFIterator>>> m_multiCutVofIter;
+
+  /**
+    @brief Face iterators over cut-cell faces (valid box, all surrounding faces including EB boundary)
+  */
+  mutable Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>> m_faceIter;
+
+  /**
+    @brief Face iterators over cut-cell faces in a box grown by 1 and clipped to the domain
+  */
+  mutable Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>> m_faceIterTanGhost;
 
   /**
     @brief Coarsening operator

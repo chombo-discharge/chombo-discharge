@@ -288,6 +288,22 @@ public:
   getMultiCutVofIterator(const phase::which_phase a_phase) const;
 
   /**
+    @brief Get face iterators over cut-cell faces in each valid grid box for a particular phase
+    @param[in] a_phase Phase
+    @return Face iterator
+  */
+  Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+  getFaceIterator(const phase::which_phase a_phase) const;
+
+  /**
+    @brief Get face iterators over cut-cell faces in boxes grown by 1 and clipped to the domain
+    @param[in] a_phase Phase
+    @return Tangential-ghost face iterator
+  */
+  Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+  getFaceIteratorWithTangentialGhosts(const phase::which_phase a_phase) const;
+
+  /**
     @brief Get objects for computing "non-conservative divergences"
     @param[in] a_phase Phase
     @return Non conservative divergence

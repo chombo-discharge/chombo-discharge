@@ -3245,6 +3245,41 @@ AmrMesh::getMultiCutVofIterator(const std::string& a_realm, const phase::which_p
   return m_realms[a_realm]->getMultiCutVofIterator(a_phase);
 }
 
+Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+AmrMesh::getFaceIterator(const std::string& a_realm, const phase::which_phase a_phase) const
+{
+  CH_TIME("AmrMesh::getFaceIterator(string, phase::which_phase)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getFaceIterator(string, phase::which_phase)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str =
+      "AmrMesh::getFaceIterator(string, phase::which_phase) - could not find realm '" + a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getFaceIterator(a_phase);
+}
+
+Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+AmrMesh::getFaceIteratorWithTangentialGhosts(const std::string& a_realm, const phase::which_phase a_phase) const
+{
+  CH_TIME("AmrMesh::getFaceIteratorWithTangentialGhosts(string, phase::which_phase)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getFaceIteratorWithTangentialGhosts(string, phase::which_phase)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getFaceIteratorWithTangentialGhosts(string, phase::which_phase) - could not find "
+                            "realm '" +
+                            a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getFaceIteratorWithTangentialGhosts(a_phase);
+}
+
 const AMRMask&
 AmrMesh::getMask(const std::string& a_mask, const int a_buffer, const std::string& a_realm) const
 {

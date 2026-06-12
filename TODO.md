@@ -17,10 +17,10 @@
 - [x] **2-code** — Write `PhaseRealm` / `Realm` / `AmrMesh` changes (6 files; see §2 task list)
 - [x] **3+4-code** — Write `DataOps` signature + implementation changes (see §3+4 task list)
 - [x] **5-sites** — Update all call sites in Checkpoint 5 (all VoFIter-needing calls updated; MF variants and FaceIterator-based functions intentionally unchanged)
-- [ ] **7-face-iters** — Audit and pre-build remaining locally-constructed iterators in DataOps.cpp (see §7 below)
+- [x] **7-face-iters** — Pre-built FaceIterators added to PhaseRealm/Realm/AmrMesh; new overloads added to DataOps for getMaxMin, invert, squareRoot, setValue(EBFluxFAB), averageCellToFace, averageCellVelocityToFaceVelocity
 - [ ] **6-cleanup** — Pre-merge cleanup (do last)
 
-**Resume here:** `7-face-iters` — audit locally-constructed iterators (see §7 task list).
+**Resume here:** `6-cleanup` — pre-merge cleanup.
 
 ### Key design decisions (for future reference)
 
@@ -66,15 +66,25 @@ DataOps.cpp line, the function, iterator type, the IVS source, and the FaceStop/
 | 2768 | `setValue(LD<MFCellFAB>, function<Real>)` | `getIrregIVS(box)` | **MF variant** — deferred |
 | 3371 | `squareRoot(LD<MFCellFAB>)` | `getMultiCells(box)` | **MF variant**, uses multi-cells not all irregular — deferred |
 
-### 7-face-iters task list
+### 7-face-iters — DONE
 
-- [ ] Decide: can `getMaxMin(LD<EBFluxFAB>)`, `invert(LD<EBFluxFAB>)`, `squareRoot(LD<EBFluxFAB>)` share a pre-built face iterator type?
-- [ ] Audit `setValue(LD<EBFluxFAB>, function)` ghost issue: `box = lhs.getCellRegion()` may include ghosts; determine if this is intentional or a bug.
-- [ ] `averageCellToFace` / `averageCellVelocityToFaceVelocity`: grown-box iterators are intentional; document and close.
-- [ ] Domain-boundary FaceIterators (lines 137, 349, 1033): entirely different face type; document and close.
-- [ ] `filterSmooth`, `setInvalidValue`: already documented as kept local; close.
-- [ ] MF variants (lines 2127, 2768, 3371): already documented as deferred; close.
-- [ ] `BaseIVFAB` VoFIterators (lines 983, 1079, 1121, 2235, 2313, 2534): IVS is intrinsic to the IV data; cannot pre-build externally; close.
+Two pre-built FaceIterator types added to PhaseRealm/Realm/AmrMesh:
+- `m_faceIter` (valid box, `SurroundingWithBoundary`): for getMaxMin/invert/squareRoot/setValue on EBFluxFAB
+- `m_faceIterTanGhost` (grow(1)+domain clip, `SurroundingNoBoundary`): for averageCellToFace/averageCellVelocityToFaceVelocity
+
+New DataOps overloads added (all as new overloads alongside existing ones; existing functions unchanged):
+- `getMaxMin(EBAMRFluxData/LD<EBFluxFAB>, comp, faceIter)`
+- `invert(EBAMRFluxData/LD<EBFluxFAB>, faceIter)`
+- `squareRoot(EBAMRFluxData/LD<EBFluxFAB>, faceIter)`
+- `setValue(EBAMRFluxData/LD<EBFluxFAB>, function, faceIter)`
+- `averageCellToFace(EBAMRFluxData/LD<EBFluxFAB>, ..., faceIter)`
+- `averageCellVelocityToFaceVelocity(EBAMRFluxData/LD<EBFluxFAB>, ..., faceIter)`
+
+Still kept local (intentional):
+- Domain-boundary FaceIterators (lines 137, 349, 1033): different face type (`AllBoundaryOnly`), domain-specific IVS
+- `filterSmooth`, `setInvalidValue`: construct over computed IVS not derivable from pre-built iterators
+- MF variants: deferred (phase-keyed iterator not yet designed)
+- `BaseIVFAB` VoFIterators: IVS is intrinsic to IVData; cannot pre-build externally
 
 > **Keep this current.** When finishing a session, update "Resume here" and the last-updated
 > date so the next session (on any machine) can orient instantly.

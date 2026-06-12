@@ -13,7 +13,11 @@
 #ifndef CD_DATAOPS_H
 #define CD_DATAOPS_H
 
+// Std includes
+#include <array>
+
 // Chombo includes
+#include <FaceIterator.H>
 #include <VoFIterator.H>
 
 // Our includes
@@ -63,9 +67,24 @@ public:
                                     const int                    a_tanGhosts);
 
   /**
+    @brief Routine which computes the average of a cell-centered quantity on faces using pre-built face iterators.
+    @param[out] a_faceData  Face data. Must have one component.
+    @param[in]  a_cellData  Cell data. Must have SpaceDim components.
+    @param[in]  a_domains   AMR domains.
+    @param[in]  a_tanGhosts Tangential ghost faces.
+    @param[in]  a_faceIter  Pre-built tangential-ghost face iterators for each level.
+  */
+  static void
+  averageCellVelocityToFaceVelocity(EBAMRFluxData&                                                                  a_faceData,
+                                    const EBAMRCellData&                                                            a_cellData,
+                                    const Vector<ProblemDomain>&                                                    a_domains,
+                                    const int                                                                       a_tanGhosts,
+                                    Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_faceIter);
+
+  /**
     @brief Routine which computes the average of a cell-centered quantity on faces for the normal component only.
-    @param[out] a_faceData Face data. Must have one component. 
-    @param[in]  a_cellData Cell data. Must have SpaceDim components. 
+    @param[out] a_faceData Face data. Must have one component.
+    @param[in]  a_cellData Cell data. Must have SpaceDim components.
     @param[in]  a_domain   Problem domain
     @param[in] a_tanGhosts Tan ghosts
   */
@@ -74,6 +93,21 @@ public:
                                     const LevelData<EBCellFAB>& a_cellData,
                                     const ProblemDomain&        a_domain,
                                     const int                   a_tanGhosts);
+
+  /**
+    @brief Routine which computes the average of a cell-centered quantity on faces using pre-built face iterators.
+    @param[out] a_faceData  Face data. Must have one component.
+    @param[in]  a_cellData  Cell data. Must have SpaceDim components.
+    @param[in]  a_domain    Problem domain.
+    @param[in]  a_tanGhosts Tangential ghost faces.
+    @param[in]  a_faceIter  Pre-built tangential-ghost face iterators.
+  */
+  static void
+  averageCellVelocityToFaceVelocity(LevelData<EBFluxFAB>&                                   a_faceData,
+                                    const LevelData<EBCellFAB>&                             a_cellData,
+                                    const ProblemDomain&                                    a_domain,
+                                    const int                                               a_tanGhosts,
+                                    LayoutData<std::array<FaceIterator, SpaceDim>>&         a_faceIter);
 
   /**
     @brief Average all components of the cell-centered data to faces.
@@ -109,7 +143,28 @@ public:
                     const Average&               a_average);
 
   /**
-    @brief Routine which averages a cell-centered component to faces. 
+    @brief Routine which averages a cell-centered component to faces using pre-built face iterators.
+    @param[out] a_faceData     Face data.
+    @param[in]  a_cellData     Cell data.
+    @param[in]  a_domains      AMR domains.
+    @param[in]  a_tanGhosts    Tangential ghost faces to fill.
+    @param[in]  a_faceInterval Face variables.
+    @param[in]  a_cellInterval Cell variables.
+    @param[in]  a_average      Averaging method.
+    @param[in]  a_faceIter     Pre-built tangential-ghost face iterators for each level.
+  */
+  static void
+  averageCellToFace(EBAMRFluxData&                                                                  a_faceData,
+                    const EBAMRCellData&                                                            a_cellData,
+                    const Vector<ProblemDomain>&                                                    a_domains,
+                    const int                                                                       a_tanGhosts,
+                    const Interval&                                                                 a_faceInterval,
+                    const Interval&                                                                 a_cellInterval,
+                    const Average&                                                                  a_average,
+                    Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_faceIter);
+
+  /**
+    @brief Routine which averages a cell-centered component to faces.
     @details User can choose what type of averaging to use, as well as choosing the number of ghost face to fill. These
     faces are "tangential ghost faces", i.e. if the face direction is along +x, we extend the box with faces in the y- and z-
     directions.
@@ -129,6 +184,27 @@ public:
                     const Interval&             a_faceInterval,
                     const Interval&             a_cellInterval,
                     const Average&              a_average);
+
+  /**
+    @brief Routine which averages a cell-centered component to faces using pre-built face iterators.
+    @param[out] a_faceData     Face data.
+    @param[in]  a_cellData     Cell data.
+    @param[in]  a_domain       Problem domain.
+    @param[in]  a_tanGhosts    Tangential ghost faces to fill.
+    @param[in]  a_faceInterval Face variables.
+    @param[in]  a_cellInterval Cell variables.
+    @param[in]  a_average      Averaging method.
+    @param[in]  a_faceIter     Pre-built tangential-ghost face iterators.
+  */
+  static void
+  averageCellToFace(LevelData<EBFluxFAB>&                                   a_faceData,
+                    const LevelData<EBCellFAB>&                             a_cellData,
+                    const ProblemDomain&                                    a_domain,
+                    const int                                               a_tanGhosts,
+                    const Interval&                                         a_faceInterval,
+                    const Interval&                                         a_cellInterval,
+                    const Average&                                          a_average,
+                    LayoutData<std::array<FaceIterator, SpaceDim>>&         a_faceIter);
 
   /**
     @brief Average all components of face centered data to cell centers.
@@ -697,6 +773,22 @@ public:
   getMaxMin(Real& a_max, Real& a_min, EBAMRFluxData& a_data, const int a_comp) noexcept;
 
   /**
+    @brief Get maximum and minimum value of specified component using pre-built face iterators.
+    @param[out] a_max      Maximum value
+    @param[out] a_min      Minimum value
+    @param[in]  a_data     Face-centered data
+    @param[in]  a_comp     Component
+    @param[in]  a_faceIter Pre-built face iterators (cut-cell faces, all directions) for each level.
+    @note This does the calculation over all levels, including grids that are covered by other grids.
+  */
+  static void
+  getMaxMin(Real&                                                                   a_max,
+            Real&                                                                   a_min,
+            EBAMRFluxData&                                                          a_data,
+            const int                                                               a_comp,
+            Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_faceIter) noexcept;
+
+  /**
     @brief Get maximum and minimum value of specified component
     @param[out] a_max  Maximum value
     @param[out] a_min  Minimum value
@@ -705,6 +797,21 @@ public:
   */
   static void
   getMaxMin(Real& a_max, Real& a_min, LevelData<EBFluxFAB>& a_data, const int a_comp) noexcept;
+
+  /**
+    @brief Get maximum and minimum value of specified component using pre-built face iterators.
+    @param[out] a_max      Maximum value
+    @param[out] a_min      Minimum value
+    @param[in]  a_data     Face-centered data
+    @param[in]  a_comp     Component
+    @param[in]  a_faceIter Pre-built face iterators (cut-cell faces, all directions).
+  */
+  static void
+  getMaxMin(Real&                                           a_max,
+            Real&                                           a_min,
+            LevelData<EBFluxFAB>&                           a_data,
+            const int                                       a_comp,
+            LayoutData<std::array<FaceIterator, SpaceDim>>& a_faceIter) noexcept;
 
   /**
     @brief Get maximum and minimum value. Assumes single-component data.
@@ -773,12 +880,31 @@ public:
   invert(EBAMRFluxData& a_data);
 
   /**
+    @brief Invert data using pre-built face iterators.
+    @note Does all components and does not guard against division by zero.
+    @param[in,out] a_data     Data
+    @param[in]     a_faceIter Pre-built face iterators (cut-cell faces, all directions) for each level.
+  */
+  static void
+  invert(EBAMRFluxData&                                                                  a_data,
+         Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_faceIter);
+
+  /**
     @brief Invert data
     @note Does all components and does not guard against division by zero.
     @param[in] a_data Data
   */
   static void
   invert(LevelData<EBFluxFAB>& a_data);
+
+  /**
+    @brief Invert data using pre-built face iterators.
+    @note Does all components and does not guard against division by zero.
+    @param[in,out] a_data     Data
+    @param[in]     a_faceIter Pre-built face iterators (cut-cell faces, all directions).
+  */
+  static void
+  invert(LevelData<EBFluxFAB>& a_data, LayoutData<std::array<FaceIterator, SpaceDim>>& a_faceIter);
 
   /**
     @brief Invert data
@@ -1206,10 +1332,27 @@ public:
            const int                                  a_comp);
 
   /**
+    @brief Polymorphic set value function using pre-built face iterators.
+    @param[out] a_lhs      Data to set.
+    @param[in]  a_function Function to use for setting the value.
+    @param[in]  a_probLo   Lower-left corner of physical domain.
+    @param[in]  a_dx       Grid resolutions.
+    @param[in]  a_comp     Component to set.
+    @param[in]  a_faceIter Pre-built face iterators (cut-cell faces, all directions) for each level.
+  */
+  static void
+  setValue(EBAMRFluxData&                                                                  a_lhs,
+           const std::function<Real(const RealVect)>&                                     a_function,
+           const RealVect&                                                                 a_probLo,
+           const Vector<Real>&                                                             a_dx,
+           const int                                                                       a_comp,
+           Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_faceIter);
+
+  /**
     @brief Polymorphic set value function. Takes a spatially varying function and sets the value in the specified component from that function.
     @param[out] a_lhs      Data to set
-    @param[in]  a_function Function to use for setting the value. 
-    @param[in]  a_probLo   Lower-left corner of physical domain. 
+    @param[in]  a_function Function to use for setting the value.
+    @param[in]  a_probLo   Lower-left corner of physical domain.
     @param[in]  a_dx       Grid resolutions
     @param[in]  a_comp     Component to set
     @note Uses a VofIterator everywhere to this might be slow!
@@ -1220,6 +1363,23 @@ public:
            const RealVect                             a_probLo,
            const Real                                 a_dx,
            const int                                  a_comp);
+
+  /**
+    @brief Polymorphic set value function using pre-built face iterators.
+    @param[out] a_lhs      Data to set.
+    @param[in]  a_function Function to use for setting the value.
+    @param[in]  a_probLo   Lower-left corner of physical domain.
+    @param[in]  a_dx       Grid resolution.
+    @param[in]  a_comp     Component to set.
+    @param[in]  a_faceIter Pre-built face iterators (cut-cell faces, all directions).
+  */
+  static void
+  setValue(LevelData<EBFluxFAB>&                                   a_lhs,
+           const std::function<Real(const RealVect)>&              a_function,
+           const RealVect                                          a_probLo,
+           const Real                                              a_dx,
+           const int                                               a_comp,
+           LayoutData<std::array<FaceIterator, SpaceDim>>&         a_faceIter);
 
   /**
     @brief Polymorphic set value function. Takes a spatially varying function and sets the value in the specified component from that function.
@@ -1431,12 +1591,31 @@ public:
   squareRoot(EBAMRFluxData& a_lhs);
 
   /**
+    @brief Compute the square root of the input data using pre-built face iterators.
+    @param[in,out] a_lhs      On output, contains sqrt(a_lhs).
+    @param[in]     a_faceIter Pre-built face iterators (cut-cell faces, all directions) for each level.
+    @note Does not do ghosted faces.
+  */
+  static void
+  squareRoot(EBAMRFluxData&                                                                  a_lhs,
+             Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_faceIter);
+
+  /**
     @brief Compute the square root of the input data
     @param[in,out] a_lhs On output, contains sqrt(a_lhs)
-    @note Does not do ghosted faces. 
+    @note Does not do ghosted faces.
   */
   static void
   squareRoot(LevelData<EBFluxFAB>& a_lhs);
+
+  /**
+    @brief Compute the square root of the input data using pre-built face iterators.
+    @param[in,out] a_lhs      On output, contains sqrt(a_lhs).
+    @param[in]     a_faceIter Pre-built face iterators (cut-cell faces, all directions).
+    @note Does not do ghosted faces.
+  */
+  static void
+  squareRoot(LevelData<EBFluxFAB>& a_lhs, LayoutData<std::array<FaceIterator, SpaceDim>>& a_faceIter);
 
   /**
     @brief Take the square root of the input data
