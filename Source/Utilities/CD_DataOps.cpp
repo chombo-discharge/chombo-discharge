@@ -25,11 +25,12 @@
 #include <CD_NamespaceHeader.H>
 
 void
-DataOps::averageCellVelocityToFaceVelocity(EBAMRFluxData&                                                                  a_faceData,
-                                           const EBAMRCellData&                                                            a_cellData,
-                                           const Vector<ProblemDomain>&                                                    a_domains,
-                                           const int                                                                       a_tanGhosts,
-                                           Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_faceIter)
+DataOps::averageCellVelocityToFaceVelocity(
+  EBAMRFluxData&                                                         a_faceData,
+  const EBAMRCellData&                                                   a_cellData,
+  const Vector<ProblemDomain>&                                           a_domains,
+  const int                                                              a_tanGhosts,
+  Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_faceIter)
 {
   CH_TIME("DataOps::averageCellVelocityToFaceVelocity(EBAMRFluxData, faceIter)");
 
@@ -38,16 +39,20 @@ DataOps::averageCellVelocityToFaceVelocity(EBAMRFluxData&                       
     CH_assert(a_faceData[lvl]->nComp() == 1);
     CH_assert(a_cellData[lvl]->nComp() == SpaceDim);
 
-    DataOps::averageCellVelocityToFaceVelocity(*a_faceData[lvl], *a_cellData[lvl], a_domains[lvl], a_tanGhosts, *a_faceIter[lvl]);
+    DataOps::averageCellVelocityToFaceVelocity(*a_faceData[lvl],
+                                               *a_cellData[lvl],
+                                               a_domains[lvl],
+                                               a_tanGhosts,
+                                               *a_faceIter[lvl]);
   }
 }
 
 void
-DataOps::averageCellVelocityToFaceVelocity(LevelData<EBFluxFAB>&                                   a_faceData,
-                                           const LevelData<EBCellFAB>&                             a_cellData,
-                                           const ProblemDomain&                                    a_domain,
-                                           const int                                               a_tanGhosts,
-                                           LayoutData<std::array<FaceIterator, SpaceDim>>&         a_faceIter)
+DataOps::averageCellVelocityToFaceVelocity(LevelData<EBFluxFAB>&                           a_faceData,
+                                           const LevelData<EBCellFAB>&                     a_cellData,
+                                           const ProblemDomain&                            a_domain,
+                                           const int                                       a_tanGhosts,
+                                           LayoutData<std::array<FaceIterator, SpaceDim>>& a_faceIter)
 {
   CH_TIME("DataOps::averageCellVelocityToFaceVelocity(LD<EBFluxFAB>, faceIter)");
 
@@ -144,9 +149,9 @@ DataOps::averageCellVelocityToFaceVelocity(LevelData<EBFluxFAB>&                
 }
 
 void
-DataOps::averageCellToFace(EBAMRFluxData&                                                                  a_faceData,
-                           const EBAMRCellData&                                                            a_cellData,
-                           const Vector<ProblemDomain>&                                                    a_domains,
+DataOps::averageCellToFace(EBAMRFluxData&                                                         a_faceData,
+                           const EBAMRCellData&                                                   a_cellData,
+                           const Vector<ProblemDomain>&                                           a_domains,
                            Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_faceIter)
 {
   CH_TIME("DataOps::averageCellToFace(EBAMRFluxData, EBAMRCellData, Vector<ProblemDomain>, faceIter)");
@@ -156,18 +161,25 @@ DataOps::averageCellToFace(EBAMRFluxData&                                       
     const int      tanGhost = 0;
     const Interval interv   = Interval(0, 0);
 
-    DataOps::averageCellToFace(*a_faceData[lvl], *a_cellData[lvl], a_domains[lvl], tanGhost, interv, interv, average, *a_faceIter[lvl]);
+    DataOps::averageCellToFace(*a_faceData[lvl],
+                               *a_cellData[lvl],
+                               a_domains[lvl],
+                               tanGhost,
+                               interv,
+                               interv,
+                               average,
+                               *a_faceIter[lvl]);
   }
 }
 
 void
-DataOps::averageCellToFace(EBAMRFluxData&                                                                  a_faceData,
-                           const EBAMRCellData&                                                            a_cellData,
-                           const Vector<ProblemDomain>&                                                    a_domains,
-                           const int                                                                       a_tanGhosts,
-                           const Interval&                                                                 a_faceInterval,
-                           const Interval&                                                                 a_cellInterval,
-                           const Average&                                                                  a_average,
+DataOps::averageCellToFace(EBAMRFluxData&                                                         a_faceData,
+                           const EBAMRCellData&                                                   a_cellData,
+                           const Vector<ProblemDomain>&                                           a_domains,
+                           const int                                                              a_tanGhosts,
+                           const Interval&                                                        a_faceInterval,
+                           const Interval&                                                        a_cellInterval,
+                           const Average&                                                         a_average,
                            Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_faceIter)
 {
   CH_TIME("DataOps::averageCellToFace(EBAMRFluxData, faceIter)");
@@ -185,14 +197,14 @@ DataOps::averageCellToFace(EBAMRFluxData&                                       
 }
 
 void
-DataOps::averageCellToFace(LevelData<EBFluxFAB>&                                   a_faceData,
-                           const LevelData<EBCellFAB>&                             a_cellData,
-                           const ProblemDomain&                                    a_domain,
-                           const int                                               a_tanGhosts,
-                           const Interval&                                         a_faceInterval,
-                           const Interval&                                         a_cellInterval,
-                           const Average&                                          a_average,
-                           LayoutData<std::array<FaceIterator, SpaceDim>>&         a_faceIter)
+DataOps::averageCellToFace(LevelData<EBFluxFAB>&                           a_faceData,
+                           const LevelData<EBCellFAB>&                     a_cellData,
+                           const ProblemDomain&                            a_domain,
+                           const int                                       a_tanGhosts,
+                           const Interval&                                 a_faceInterval,
+                           const Interval&                                 a_cellInterval,
+                           const Average&                                  a_average,
+                           LayoutData<std::array<FaceIterator, SpaceDim>>& a_faceIter)
 {
   CH_TIME("DataOps::averageCellToFace(LD<EBFluxFAB>, faceIter)");
 
@@ -318,7 +330,7 @@ DataOps::averageCellToFace(LevelData<EBFluxFAB>&                                
       // Fix up domain faces
       for (SideIterator sit; sit.ok(); ++sit) {
 
-        const Box bndryBox   = (sit() == Side::Lo) ? adjCellLo(a_domain, faceDir, -1) : adjCellHi(a_domain, faceDir, -1);
+        const Box bndryBox = (sit() == Side::Lo) ? adjCellLo(a_domain, faceDir, -1) : adjCellHi(a_domain, faceDir, -1);
         const Box computeBox = cellBox & bndryBox;
 
         for (BoxIterator bit(computeBox); bit.ok(); ++bit) {
@@ -951,7 +963,7 @@ DataOps::incr(EBAMRIVData&                                          a_lhs,
 }
 
 void
-DataOps::incr(LevelData<BaseIVFAB<Real>>& a_lhs,
+DataOps::incr(LevelData<BaseIVFAB<Real>>&       a_lhs,
               const LevelData<BaseIVFAB<Real>>& a_rhs,
               const Real&                       a_scale,
               LayoutData<VoFIterator>&          a_vofIter)
@@ -1047,7 +1059,7 @@ DataOps::incr(EBAMRCellData&                                        a_lhs,
 }
 
 void
-DataOps::incr(LevelData<EBCellFAB>&           a_lhs,
+DataOps::incr(LevelData<EBCellFAB>&             a_lhs,
               const LevelData<BaseIVFAB<Real>>& a_rhs,
               const Real                        a_scale,
               LayoutData<VoFIterator>&          a_vofIter)
@@ -1702,10 +1714,10 @@ DataOps::getMaxMin(Real&                    a_max,
 }
 
 void
-DataOps::getMaxMin(Real&                                                                   a_max,
-                   Real&                                                                   a_min,
-                   EBAMRFluxData&                                                          a_data,
-                   const int                                                               a_comp,
+DataOps::getMaxMin(Real&                                                                  a_max,
+                   Real&                                                                  a_min,
+                   EBAMRFluxData&                                                         a_data,
+                   const int                                                              a_comp,
                    Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_faceIter) noexcept
 {
   CH_TIME("DataOps::getMaxMin(Real, Real, EBAMRFluxData, int, faceIter)");
@@ -1939,7 +1951,8 @@ DataOps::getMaxMinNorm(Real& a_max, Real& a_min, LevelData<BaseIVFAB<Real>>& a_d
 }
 
 void
-DataOps::invert(EBAMRFluxData& a_data, Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_faceIter)
+DataOps::invert(EBAMRFluxData&                                                         a_data,
+                Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_faceIter)
 {
   CH_TIME("DataOps::invert(EBAMRFluxData, faceIter)");
 
@@ -1967,8 +1980,8 @@ DataOps::invert(LevelData<EBFluxFAB>& a_data, LayoutData<std::array<FaceIterator
     for (int dir = 0; dir < SpaceDim; dir++) {
       EBFaceFAB& data = a_data[din][dir];
 
-      const Box    facebox = surroundingNodes(box, dir);
-      EBFaceFAB    cpy(data.getEBISBox(), box, dir, numComp);
+      const Box facebox = surroundingNodes(box, dir);
+      EBFaceFAB cpy(data.getEBISBox(), box, dir, numComp);
       cpy.setVal(0.0);
       cpy += data;
 
@@ -2076,9 +2089,9 @@ DataOps::kappaScale(LevelData<EBCellFAB>& a_data, LayoutData<VoFIterator>& a_vof
 }
 
 void
-DataOps::kappaScale(MFAMRCellData&                                                a_data,
-                    const Vector<RefCountedPtr<LayoutData<VoFIterator>>>&         a_vofIterPhase0,
-                    const Vector<RefCountedPtr<LayoutData<VoFIterator>>>&         a_vofIterPhase1) noexcept
+DataOps::kappaScale(MFAMRCellData&                                        a_data,
+                    const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIterPhase0,
+                    const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIterPhase1) noexcept
 {
   CH_TIME("DataOps::kappaScale(MFAMRCellData, vofIter)");
 
@@ -2088,7 +2101,7 @@ DataOps::kappaScale(MFAMRCellData&                                              
 }
 
 void
-DataOps::kappaScale(LevelData<MFCellFAB>&                        a_data,
+DataOps::kappaScale(LevelData<MFCellFAB>&                         a_data,
                     const RefCountedPtr<LayoutData<VoFIterator>>& a_vofIterPhase0,
                     const RefCountedPtr<LayoutData<VoFIterator>>& a_vofIterPhase1) noexcept
 {
@@ -2106,7 +2119,8 @@ DataOps::kappaScale(LevelData<MFCellFAB>&                        a_data,
 
     for (int iphase = 0; iphase < mfdata.numPhases(); iphase++) {
       const RefCountedPtr<LayoutData<VoFIterator>>& vofIter = (iphase == 0) ? a_vofIterPhase0 : a_vofIterPhase1;
-      if (vofIter.isNull()) continue;
+      if (vofIter.isNull())
+        continue;
 
       EBCellFAB&     data    = mfdata.getPhase(iphase);
       const EBISBox& ebisbox = data.getEBISBox();
@@ -2200,7 +2214,7 @@ DataOps::multiply(EBAMRIVData&                                          a_lhs,
 void
 DataOps::multiply(LevelData<BaseIVFAB<Real>>&       a_lhs,
                   const LevelData<BaseIVFAB<Real>>& a_rhs,
-                  LayoutData<VoFIterator>&           a_vofIter)
+                  LayoutData<VoFIterator>&          a_vofIter)
 {
   CH_TIME("DataOps::multiply(LD<BaseIVFAB>, vofIter)");
 
@@ -2275,7 +2289,7 @@ DataOps::multiplyScalar(EBAMRIVData&                                          a_
 void
 DataOps::multiplyScalar(LevelData<BaseIVFAB<Real>>&       a_lhs,
                         const LevelData<BaseIVFAB<Real>>& a_rhs,
-                        LayoutData<VoFIterator>&           a_vofIter)
+                        LayoutData<VoFIterator>&          a_vofIter)
 {
   CH_TIME("DataOps::multiplyScalar(LD<BaseIVFAB>, vofIter)");
 
@@ -2432,9 +2446,7 @@ DataOps::scale(LevelData<MFFluxFAB>& a_lhs, const Real& a_scale)
 }
 
 void
-DataOps::scale(EBAMRIVData&                                          a_lhs,
-               const Real&                                           a_scale,
-               const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter)
+DataOps::scale(EBAMRIVData& a_lhs, const Real& a_scale, const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter)
 {
   CH_TIME("DataOps::scale(EBAMRIVData, vofIter)");
 
@@ -2714,11 +2726,11 @@ DataOps::setValue(MFAMRCellData&                                        a_lhs,
 }
 
 void
-DataOps::setValue(LevelData<MFCellFAB>&                        a_lhs,
-                  const std::function<Real(const RealVect)>&   a_function,
-                  const RealVect                               a_probLo,
-                  const Real                                   a_dx,
-                  const int                                    a_comp,
+DataOps::setValue(LevelData<MFCellFAB>&                         a_lhs,
+                  const std::function<Real(const RealVect)>&    a_function,
+                  const RealVect                                a_probLo,
+                  const Real                                    a_dx,
+                  const int                                     a_comp,
                   const RefCountedPtr<LayoutData<VoFIterator>>& a_vofIterPhase0,
                   const RefCountedPtr<LayoutData<VoFIterator>>& a_vofIterPhase1)
 {
@@ -2736,7 +2748,8 @@ DataOps::setValue(LevelData<MFCellFAB>&                        a_lhs,
 
     for (int i = 0; i < lhs.numPhases(); i++) {
       const RefCountedPtr<LayoutData<VoFIterator>>& vofIter = (i == 0) ? a_vofIterPhase0 : a_vofIterPhase1;
-      if (vofIter.isNull()) continue;
+      if (vofIter.isNull())
+        continue;
 
       EBCellFAB&     phaseData    = lhs.getPhase(i);
       BaseFab<Real>& phaseDataFAB = phaseData.getSingleValuedFAB();
@@ -2744,13 +2757,13 @@ DataOps::setValue(LevelData<MFCellFAB>&                        a_lhs,
       const Box box = phaseData.box();
 
       auto regularKernel = [&](const IntVect& iv) -> void {
-        const RealVect pos    = a_probLo + (0.5 * RealVect::Unit + RealVect(iv)) * a_dx;
+        const RealVect pos       = a_probLo + (0.5 * RealVect::Unit + RealVect(iv)) * a_dx;
         phaseDataFAB(iv, a_comp) = a_function(pos);
       };
 
       auto irregularKernel = [&](const VolIndex& vof) -> void {
-        const IntVect& iv  = vof.gridIndex();
-        const RealVect pos = a_probLo + (0.5 * RealVect::Unit + RealVect(iv)) * a_dx;
+        const IntVect& iv      = vof.gridIndex();
+        const RealVect pos     = a_probLo + (0.5 * RealVect::Unit + RealVect(iv)) * a_dx;
         phaseData(vof, a_comp) = a_function(pos);
       };
 
@@ -2822,11 +2835,11 @@ DataOps::setValue(LevelData<EBCellFAB>&                      a_lhs,
 }
 
 void
-DataOps::setValue(EBAMRFluxData&                                                                  a_lhs,
-                  const std::function<Real(const RealVect)>&                                     a_function,
-                  const RealVect&                                                                 a_probLo,
-                  const Vector<Real>&                                                             a_dx,
-                  const int                                                                       a_comp,
+DataOps::setValue(EBAMRFluxData&                                                         a_lhs,
+                  const std::function<Real(const RealVect)>&                             a_function,
+                  const RealVect&                                                        a_probLo,
+                  const Vector<Real>&                                                    a_dx,
+                  const int                                                              a_comp,
                   Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_faceIter)
 {
   CH_TIME("DataOps::setValue(EBAMRFluxData, std::function, faceIter)");
@@ -2837,12 +2850,12 @@ DataOps::setValue(EBAMRFluxData&                                                
 }
 
 void
-DataOps::setValue(LevelData<EBFluxFAB>&                                   a_lhs,
-                  const std::function<Real(const RealVect)>&              a_function,
-                  const RealVect                                          a_probLo,
-                  const Real                                              a_dx,
-                  const int                                               a_comp,
-                  LayoutData<std::array<FaceIterator, SpaceDim>>&         a_faceIter)
+DataOps::setValue(LevelData<EBFluxFAB>&                           a_lhs,
+                  const std::function<Real(const RealVect)>&      a_function,
+                  const RealVect                                  a_probLo,
+                  const Real                                      a_dx,
+                  const int                                       a_comp,
+                  LayoutData<std::array<FaceIterator, SpaceDim>>& a_faceIter)
 {
   CH_TIME("DataOps::setValue(LD<EBFluxFAB>, std::function, faceIter)");
 
@@ -3236,7 +3249,8 @@ DataOps::sum(Real& a_value)
 }
 
 void
-DataOps::squareRoot(EBAMRFluxData& a_lhs, Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_faceIter)
+DataOps::squareRoot(EBAMRFluxData&                                                         a_lhs,
+                    Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_faceIter)
 {
   CH_TIME("DataOps::squareRoot(EBAMRFluxData, faceIter)");
 
@@ -3290,9 +3304,9 @@ DataOps::squareRoot(LevelData<EBFluxFAB>& a_lhs, LayoutData<std::array<FaceItera
 }
 
 void
-DataOps::squareRoot(MFAMRCellData&                                                a_lhs,
-                    const Vector<RefCountedPtr<LayoutData<VoFIterator>>>&         a_vofIterPhase0,
-                    const Vector<RefCountedPtr<LayoutData<VoFIterator>>>&         a_vofIterPhase1)
+DataOps::squareRoot(MFAMRCellData&                                        a_lhs,
+                    const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIterPhase0,
+                    const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIterPhase1)
 {
   CH_TIME("DataOps::squareRoot(MFAMRCellData, vofIter)");
 
@@ -3302,7 +3316,7 @@ DataOps::squareRoot(MFAMRCellData&                                              
 }
 
 void
-DataOps::squareRoot(LevelData<MFCellFAB>&                        a_lhs,
+DataOps::squareRoot(LevelData<MFCellFAB>&                         a_lhs,
                     const RefCountedPtr<LayoutData<VoFIterator>>& a_vofIterPhase0,
                     const RefCountedPtr<LayoutData<VoFIterator>>& a_vofIterPhase1)
 {
@@ -3320,7 +3334,8 @@ DataOps::squareRoot(LevelData<MFCellFAB>&                        a_lhs,
 
     for (int i = 0; i < lhs.numPhases(); i++) {
       const RefCountedPtr<LayoutData<VoFIterator>>& vofIter = (i == 0) ? a_vofIterPhase0 : a_vofIterPhase1;
-      if (vofIter.isNull()) continue;
+      if (vofIter.isNull())
+        continue;
 
       EBCellFAB& phaseData    = lhs.getPhase(i);
       FArrayBox& phaseDataReg = phaseData.getFArrayBox();

@@ -5158,7 +5158,10 @@ ItoKMCStepper<I, C, R, F>::resolveSecondaryEmissionEB(Vector<ParticleContainer<I
                                                                               *a_primaryParticles[idx]);
 
       m_amr->copyData(m_fluidScratchEB, m_particleScratchEB);
-      DataOps::incr(a_surfaceChargeDensity, m_fluidScratchEB, 1.0 * Z * Units::Qe, m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase));
+      DataOps::incr(a_surfaceChargeDensity,
+                    m_fluidScratchEB,
+                    1.0 * Z * Units::Qe,
+                    m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase));
 
       // Subtract charge from secondary particles
       m_amr->depositParticles<ItoParticle, const Real&, &ItoParticle::weight>(m_particleScratchEB,
@@ -5167,7 +5170,10 @@ ItoKMCStepper<I, C, R, F>::resolveSecondaryEmissionEB(Vector<ParticleContainer<I
                                                                               *a_secondaryParticles[idx]);
 
       m_amr->copyData(m_fluidScratchEB, m_particleScratchEB);
-      DataOps::incr(a_surfaceChargeDensity, m_fluidScratchEB, -1.0 * Z * Units::Qe, m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase));
+      DataOps::incr(a_surfaceChargeDensity,
+                    m_fluidScratchEB,
+                    -1.0 * Z * Units::Qe,
+                    m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase));
     }
 
     // Add the secondary particles into the solvers and remove the primary particles.
@@ -5190,7 +5196,10 @@ ItoKMCStepper<I, C, R, F>::resolveSecondaryEmissionEB(Vector<ParticleContainer<I
     const int Z   = species->getChargeNumber();
 
     if (Z != 0) {
-      DataOps::incr(a_surfaceChargeDensity, *a_cdrFluxes[idx], Z * a_dt * Units::Qe, m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase));
+      DataOps::incr(a_surfaceChargeDensity,
+                    *a_cdrFluxes[idx],
+                    Z * a_dt * Units::Qe,
+                    m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase));
     }
 
     // Add mass to CDR solvers -- this is an inefficient way of doing it but I don't know if it'll be a performance bottleneck as well.

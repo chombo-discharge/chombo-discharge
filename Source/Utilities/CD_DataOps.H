@@ -62,10 +62,10 @@ public:
     @param[in]  a_faceIter  Pre-built tangential-ghost face iterators for each level.
   */
   static void
-  averageCellVelocityToFaceVelocity(EBAMRFluxData&                                                                  a_faceData,
-                                    const EBAMRCellData&                                                            a_cellData,
-                                    const Vector<ProblemDomain>&                                                    a_domains,
-                                    const int                                                                       a_tanGhosts,
+  averageCellVelocityToFaceVelocity(EBAMRFluxData&                                                         a_faceData,
+                                    const EBAMRCellData&                                                   a_cellData,
+                                    const Vector<ProblemDomain>&                                           a_domains,
+                                    const int                                                              a_tanGhosts,
                                     Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_faceIter);
 
   /**
@@ -77,11 +77,11 @@ public:
     @param[in]  a_faceIter  Pre-built tangential-ghost face iterators.
   */
   static void
-  averageCellVelocityToFaceVelocity(LevelData<EBFluxFAB>&                                   a_faceData,
-                                    const LevelData<EBCellFAB>&                             a_cellData,
-                                    const ProblemDomain&                                    a_domain,
-                                    const int                                               a_tanGhosts,
-                                    LayoutData<std::array<FaceIterator, SpaceDim>>&         a_faceIter);
+  averageCellVelocityToFaceVelocity(LevelData<EBFluxFAB>&                           a_faceData,
+                                    const LevelData<EBCellFAB>&                     a_cellData,
+                                    const ProblemDomain&                            a_domain,
+                                    const int                                       a_tanGhosts,
+                                    LayoutData<std::array<FaceIterator, SpaceDim>>& a_faceIter);
 
   /**
     @brief Average all components of the cell-centered data to faces (arithmetic, no tangential ghost faces).
@@ -92,9 +92,9 @@ public:
     @param[in]  a_faceIter Pre-built face iterators for each level.
   */
   static void
-  averageCellToFace(EBAMRFluxData&                                                                  a_faceData,
-                    const EBAMRCellData&                                                            a_cellData,
-                    const Vector<ProblemDomain>&                                                    a_domains,
+  averageCellToFace(EBAMRFluxData&                                                         a_faceData,
+                    const EBAMRCellData&                                                   a_cellData,
+                    const Vector<ProblemDomain>&                                           a_domains,
                     Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_faceIter);
 
   /**
@@ -109,13 +109,13 @@ public:
     @param[in]  a_faceIter     Pre-built tangential-ghost face iterators for each level.
   */
   static void
-  averageCellToFace(EBAMRFluxData&                                                                  a_faceData,
-                    const EBAMRCellData&                                                            a_cellData,
-                    const Vector<ProblemDomain>&                                                    a_domains,
-                    const int                                                                       a_tanGhosts,
-                    const Interval&                                                                 a_faceInterval,
-                    const Interval&                                                                 a_cellInterval,
-                    const Average&                                                                  a_average,
+  averageCellToFace(EBAMRFluxData&                                                         a_faceData,
+                    const EBAMRCellData&                                                   a_cellData,
+                    const Vector<ProblemDomain>&                                           a_domains,
+                    const int                                                              a_tanGhosts,
+                    const Interval&                                                        a_faceInterval,
+                    const Interval&                                                        a_cellInterval,
+                    const Average&                                                         a_average,
                     Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_faceIter);
 
   /**
@@ -130,14 +130,14 @@ public:
     @param[in]  a_faceIter     Pre-built tangential-ghost face iterators.
   */
   static void
-  averageCellToFace(LevelData<EBFluxFAB>&                                   a_faceData,
-                    const LevelData<EBCellFAB>&                             a_cellData,
-                    const ProblemDomain&                                    a_domain,
-                    const int                                               a_tanGhosts,
-                    const Interval&                                         a_faceInterval,
-                    const Interval&                                         a_cellInterval,
-                    const Average&                                          a_average,
-                    LayoutData<std::array<FaceIterator, SpaceDim>>&         a_faceIter);
+  averageCellToFace(LevelData<EBFluxFAB>&                           a_faceData,
+                    const LevelData<EBCellFAB>&                     a_cellData,
+                    const ProblemDomain&                            a_domain,
+                    const int                                       a_tanGhosts,
+                    const Interval&                                 a_faceInterval,
+                    const Interval&                                 a_cellInterval,
+                    const Average&                                  a_average,
+                    LayoutData<std::array<FaceIterator, SpaceDim>>& a_faceIter);
 
   /**
     @brief Average all components of face centered data to cell centers.
@@ -381,7 +381,7 @@ public:
     @param[in]     a_vofIter Pre-built VoF iterators (all cut-cells) for each grid box.
   */
   static void
-  incr(LevelData<BaseIVFAB<Real>>& a_lhs,
+  incr(LevelData<BaseIVFAB<Real>>&       a_lhs,
        const LevelData<BaseIVFAB<Real>>& a_rhs,
        const Real&                       a_scale,
        LayoutData<VoFIterator>&          a_vofIter);
@@ -427,7 +427,7 @@ public:
     @param[in]     a_vofIter Pre-built VoF iterators (all cut-cells) for each grid box.
   */
   static void
-  incr(LevelData<EBCellFAB>&           a_lhs,
+  incr(LevelData<EBCellFAB>&             a_lhs,
        const LevelData<BaseIVFAB<Real>>& a_rhs,
        const Real                        a_scale,
        LayoutData<VoFIterator>&          a_vofIter);
@@ -644,10 +644,10 @@ public:
   roof(LevelData<EBCellFAB>& a_lhs, const Real a_value, LayoutData<VoFIterator>& a_vofIter);
 
   /**
-    @brief Roof values in data holder. This sets all values above a_value to a_value
-    @param[in,out] a_lhs Data to be roofed.
-    @param[in]    a_value Roof value
-    @note Also roofs ghost cells. 
+    @brief Roof values in data holder. This sets all values above a_value to a_value.
+    @param[in,out] a_lhs     Data to be roofed.
+    @param[in]    a_value   Roof value.
+    @param[in]    a_vofIter Pre-built VoF iterators (all cut-cells) for each level.
   */
   static void
   roof(EBAMRIVData& a_lhs, const Real a_value, const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter);
@@ -728,10 +728,10 @@ public:
     @note This does the calculation over all levels, including grids that are covered by other grids.
   */
   static void
-  getMaxMin(Real&                                                                   a_max,
-            Real&                                                                   a_min,
-            EBAMRFluxData&                                                          a_data,
-            const int                                                               a_comp,
+  getMaxMin(Real&                                                                  a_max,
+            Real&                                                                  a_min,
+            EBAMRFluxData&                                                         a_data,
+            const int                                                              a_comp,
             Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_faceIter) noexcept;
 
   /**
@@ -874,9 +874,9 @@ public:
     @param[in]     a_vofIterPhase1 Pre-built VoF iterators (all cut-cells) for phase 1 (solid). May be null if phase 1 is absent.
   */
   static void
-  kappaScale(MFAMRCellData&                                                a_data,
-             const Vector<RefCountedPtr<LayoutData<VoFIterator>>>&         a_vofIterPhase0,
-             const Vector<RefCountedPtr<LayoutData<VoFIterator>>>&         a_vofIterPhase1) noexcept;
+  kappaScale(MFAMRCellData&                                        a_data,
+             const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIterPhase0,
+             const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIterPhase1) noexcept;
 
   /**
     @brief Scale data by volume fraction.
@@ -885,7 +885,7 @@ public:
     @param[in]     a_vofIterPhase1 Pre-built VoF iterator (all cut-cells) for phase 1 (solid). May be null if phase 1 is absent.
   */
   static void
-  kappaScale(LevelData<MFCellFAB>&                        a_data,
+  kappaScale(LevelData<MFCellFAB>&                         a_data,
              const RefCountedPtr<LayoutData<VoFIterator>>& a_vofIterPhase0,
              const RefCountedPtr<LayoutData<VoFIterator>>& a_vofIterPhase1) noexcept;
 
@@ -995,7 +995,7 @@ public:
   static void
   multiplyScalar(LevelData<BaseIVFAB<Real>>&       a_lhs,
                  const LevelData<BaseIVFAB<Real>>& a_rhs,
-                 LayoutData<VoFIterator>&           a_vofIter);
+                 LayoutData<VoFIterator>&          a_vofIter);
 
   /**
     @brief Compute specified norm of data.
@@ -1076,9 +1076,7 @@ public:
     @param[in]     a_vofIter Pre-built VoF iterators (all cut-cells) for each level.
   */
   static void
-  scale(EBAMRIVData&                                          a_lhs,
-        const Real&                                           a_scale,
-        const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter);
+  scale(EBAMRIVData& a_lhs, const Real& a_scale, const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter);
 
   /**
     @brief Scale data by factor
@@ -1228,11 +1226,11 @@ public:
     @param[in]  a_vofIterPhase1 Pre-built VoF iterator (all cut-cells) for phase 1 (solid). May be null if phase 1 is absent.
   */
   static void
-  setValue(LevelData<MFCellFAB>&                        a_lhs,
-           const std::function<Real(const RealVect)>&   a_function,
-           const RealVect                               a_probLo,
-           const Real                                   a_dx,
-           const int                                    a_comp,
+  setValue(LevelData<MFCellFAB>&                         a_lhs,
+           const std::function<Real(const RealVect)>&    a_function,
+           const RealVect                                a_probLo,
+           const Real                                    a_dx,
+           const int                                     a_comp,
            const RefCountedPtr<LayoutData<VoFIterator>>& a_vofIterPhase0,
            const RefCountedPtr<LayoutData<VoFIterator>>& a_vofIterPhase1);
 
@@ -1280,11 +1278,11 @@ public:
     @param[in]  a_faceIter Pre-built face iterators (cut-cell faces, all directions) for each level.
   */
   static void
-  setValue(EBAMRFluxData&                                                                  a_lhs,
-           const std::function<Real(const RealVect)>&                                     a_function,
-           const RealVect&                                                                 a_probLo,
-           const Vector<Real>&                                                             a_dx,
-           const int                                                                       a_comp,
+  setValue(EBAMRFluxData&                                                         a_lhs,
+           const std::function<Real(const RealVect)>&                             a_function,
+           const RealVect&                                                        a_probLo,
+           const Vector<Real>&                                                    a_dx,
+           const int                                                              a_comp,
            Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_faceIter);
 
   /**
@@ -1297,12 +1295,12 @@ public:
     @param[in]  a_faceIter Pre-built face iterators (cut-cell faces, all directions).
   */
   static void
-  setValue(LevelData<EBFluxFAB>&                                   a_lhs,
-           const std::function<Real(const RealVect)>&              a_function,
-           const RealVect                                          a_probLo,
-           const Real                                              a_dx,
-           const int                                               a_comp,
-           LayoutData<std::array<FaceIterator, SpaceDim>>&         a_faceIter);
+  setValue(LevelData<EBFluxFAB>&                           a_lhs,
+           const std::function<Real(const RealVect)>&      a_function,
+           const RealVect                                  a_probLo,
+           const Real                                      a_dx,
+           const int                                       a_comp,
+           LayoutData<std::array<FaceIterator, SpaceDim>>& a_faceIter);
 
   /**
     @brief Polymorphic set value function. Takes a spatially varying function and sets the value in the specified component from that function.
@@ -1531,9 +1529,9 @@ public:
     @note The VoFIterators must cover only multiply-cut cells (from AmrMesh::getMultiCutVofIterator), because the regular-cell pass via getSingleValuedFAB already handles VoF 0 of all cut-cells.
   */
   static void
-  squareRoot(MFAMRCellData&                                                a_lhs,
-             const Vector<RefCountedPtr<LayoutData<VoFIterator>>>&         a_vofIterPhase0,
-             const Vector<RefCountedPtr<LayoutData<VoFIterator>>>&         a_vofIterPhase1);
+  squareRoot(MFAMRCellData&                                        a_lhs,
+             const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIterPhase0,
+             const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIterPhase1);
 
   /**
     @brief Take the square root of the input data.
@@ -1543,7 +1541,7 @@ public:
     @note The VoFIterators must cover only multiply-cut cells (from AmrMesh::getMultiCutVofIterator), because the regular-cell pass via getSingleValuedFAB already handles VoF 0 of all cut-cells.
   */
   static void
-  squareRoot(LevelData<MFCellFAB>&                        a_lhs,
+  squareRoot(LevelData<MFCellFAB>&                         a_lhs,
              const RefCountedPtr<LayoutData<VoFIterator>>& a_vofIterPhase0,
              const RefCountedPtr<LayoutData<VoFIterator>>& a_vofIterPhase1);
 

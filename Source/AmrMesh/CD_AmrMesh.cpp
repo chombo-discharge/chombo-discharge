@@ -3254,8 +3254,8 @@ AmrMesh::getFaceIterator(const std::string& a_realm, const phase::which_phase a_
   }
 
   if (!this->queryRealm(a_realm)) {
-    const std::string str =
-      "AmrMesh::getFaceIterator(string, phase::which_phase) - could not find realm '" + a_realm + "'";
+    const std::string str = "AmrMesh::getFaceIterator(string, phase::which_phase) - could not find realm '" + a_realm +
+                            "'";
     MayDay::Abort(str.c_str());
   }
 

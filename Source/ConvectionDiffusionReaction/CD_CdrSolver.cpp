@@ -2976,8 +2976,8 @@ CdrSolver::gwnDiffusionSource(EBAMRCellData& a_noiseSource, const EBAMRCellData&
 
     // scratchFluxOne = phis on faces (smoothing as to avoid negative densities)
     this->smoothHeavisideFaces(scratchFluxOne, a_cellPhi);
-    DataOps::multiply(scratchFluxOne, m_faceCenteredDiffusionCoefficient); // scratchFluxOne = D*phis
-    DataOps::scale(scratchFluxOne, 2.0);                                   // scratchFluxOne = 2*D*phis
+    DataOps::multiply(scratchFluxOne, m_faceCenteredDiffusionCoefficient);         // scratchFluxOne = D*phis
+    DataOps::scale(scratchFluxOne, 2.0);                                           // scratchFluxOne = 2*D*phis
     DataOps::squareRoot(scratchFluxOne, m_amr->getFaceIterator(m_realm, m_phase)); // scratchFluxOne = sqrt(2*D*phis)
 
 #ifndef NDEBUG

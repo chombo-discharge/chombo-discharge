@@ -438,10 +438,10 @@ PhaseRealm::defineVofIterator(const int a_lmin)
 
     m_vofIter[lvl]         = RefCountedPtr<LayoutData<VoFIterator>>(new LayoutData<VoFIterator>(m_grids[lvl]));
     m_multiCutVofIter[lvl] = RefCountedPtr<LayoutData<VoFIterator>>(new LayoutData<VoFIterator>(m_grids[lvl]));
-    m_faceIter[lvl] =
-      RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>(new LayoutData<std::array<FaceIterator, SpaceDim>>(m_grids[lvl]));
-    m_faceIterTanGhost[lvl] =
-      RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>(new LayoutData<std::array<FaceIterator, SpaceDim>>(m_grids[lvl]));
+    m_faceIter[lvl]        = RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>(
+      new LayoutData<std::array<FaceIterator, SpaceDim>>(m_grids[lvl]));
+    m_faceIterTanGhost[lvl] = RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>(
+      new LayoutData<std::array<FaceIterator, SpaceDim>>(m_grids[lvl]));
 
     const DisjointBoxLayout& dbl = m_grids[lvl];
     const DataIterator&      dit = dbl.dataIterator();
@@ -473,7 +473,7 @@ PhaseRealm::defineVofIterator(const int a_lmin)
       Box grownBox = cellBox;
       grownBox.grow(1);
       grownBox &= m_domains[lvl];
-      const IntVectSet                    irregGrown      = ebisbox.getIrregIVS(grownBox);
+      const IntVectSet                    irregGrown       = ebisbox.getIrregIVS(grownBox);
       std::array<FaceIterator, SpaceDim>& faceIterTanGhost = (*m_faceIterTanGhost[lvl])[din];
       for (int dir = 0; dir < SpaceDim; dir++) {
         faceIterTanGhost[dir].define(irregGrown, ebgraph, dir, FaceStop::SurroundingNoBoundary);

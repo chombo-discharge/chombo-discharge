@@ -1199,17 +1199,21 @@ ItoKMCGodunovStepper<I, C, R, F>::computeFaceConductivity() noexcept
   const int      tanGhost = 1;
   const Interval interv(0, 0);
 
-  DataOps::averageCellToFace((this->m_conductivityFace),
-                             (this->m_conductivityCell),
-                             (this->m_amr)->getDomains(),
-                             tanGhost,
-                             interv,
-                             interv,
-                             average,
-                             (this->m_amr)->getFaceIteratorWithTangentialGhosts(this->m_fluidRealm, this->m_plasmaPhase));
+  DataOps::averageCellToFace(
+    (this->m_conductivityFace),
+    (this->m_conductivityCell),
+    (this->m_amr)->getDomains(),
+    tanGhost,
+    interv,
+    interv,
+    average,
+    (this->m_amr)->getFaceIteratorWithTangentialGhosts(this->m_fluidRealm, this->m_plasmaPhase));
 
   // Set the EB conductivity.
-  DataOps::incr((this->m_conductivityEB), (this->m_conductivityCell), 1.0, (this->m_amr)->getVofIterator(this->m_fluidRealm, this->m_plasmaPhase));
+  DataOps::incr((this->m_conductivityEB),
+                (this->m_conductivityCell),
+                1.0,
+                (this->m_amr)->getVofIterator(this->m_fluidRealm, this->m_plasmaPhase));
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -1350,7 +1354,10 @@ ItoKMCGodunovStepper<I, C, R, F>::setupSemiImplicitPoisson(const Real a_dt) noex
   // Increment the field solver permittivities by a_factor*sigma. After this, the "permittivities" are
   // given by epsr + a_factor*sigma
   DataOps::incr(permFaceGas, (this->m_conductivityFace), a_dt / Units::eps0);
-  DataOps::incr(permEBGas, (this->m_conductivityEB), a_dt / Units::eps0, (this->m_amr)->getVofIterator(this->m_fluidRealm, this->m_plasmaPhase));
+  DataOps::incr(permEBGas,
+                (this->m_conductivityEB),
+                a_dt / Units::eps0,
+                (this->m_amr)->getVofIterator(this->m_fluidRealm, this->m_plasmaPhase));
 
   // Coarsen coefficients.
   (this->m_amr)->arithmeticAverage(permFaceGas, this->m_fluidRealm, (this->m_plasmaPhase));

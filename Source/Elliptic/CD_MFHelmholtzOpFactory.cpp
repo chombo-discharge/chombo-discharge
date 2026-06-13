@@ -132,7 +132,7 @@ MFHelmholtzOpFactory::setJump(const EBAMRIVData& a_sigma, const Real& a_scale)
 
     LayoutData<VoFIterator> vofIter(dbl);
     for (int mybox = 0; mybox < nbox; mybox++) {
-      const DataIndex& din       = dit[mybox];
+      const DataIndex&       din = dit[mybox];
       const BaseIVFAB<Real>& ivf = (*m_amrJump[lvl])[din];
       vofIter[din]               = VoFIterator(ivf.getIVS(), ivf.getEBGraph());
     }
