@@ -259,7 +259,8 @@ public:
   getEBLevelGridFiCo() const;
 
   /**
-    @brief Return vof iterator for iterating over irregular cells in each grid patch
+    @brief Return VoF iterators covering all cut-cells (singly- and multiply-cut) in each grid patch.
+    @details For a pass that covers only multiply-cut cells, use getMultiCutVofIterator instead.
     @return m_vofIter (which is, in fact, mutable)
   */
   Vector<RefCountedPtr<LayoutData<VoFIterator>>>&

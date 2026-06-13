@@ -794,7 +794,7 @@ protected:
     @param[in]     a_ebisbox EBIS box
     @param[in]     a_probLo  Lower-left corner of computational domain
     @param[in]     a_dx      Resolution
-    @param[in,out] a_vofit   Pre-built VoF iterator for grown-box irregular cells.
+    @param[in,out] a_vofit   Pre-built VoF iterator covering all cut-cells (singly- and multiply-cut) in grow(a_cellBox, 1). Obtain via m_grownCellVofIter.
   */
   virtual void
   setCellPermittivities(EBCellFAB&      a_relPerm,
@@ -811,7 +811,7 @@ protected:
     @param[in]     a_ebisbox  EBIS box
     @param[in]     a_probLo   Lower-left corner of computational domain
     @param[in]     a_dx       Resolution
-    @param[in,out] a_faceIter Pre-built face iterators for each coordinate direction.
+    @param[in,out] a_faceIter Pre-built face iterators with FaceStop::SurroundingWithBoundary over all cut-cell faces in a_cellBox, one per coordinate direction. Obtain via AmrMesh::getFaceIterator.
   */
   virtual void
   setFacePermittivities(EBFluxFAB&                          a_relPerm,
@@ -828,7 +828,7 @@ protected:
     @param[in]     a_ebisbox EBIS box
     @param[in]     a_origin  Origin
     @param[in]     a_dx      Resolution
-    @param[in,out] a_vofit   Pre-built VoF iterator for valid-box irregular cells.
+    @param[in,out] a_vofit   Pre-built VoF iterator covering all cut-cells (singly- and multiply-cut) in a_cellBox. Obtain via AmrMesh::getVofIterator.
   */
   virtual void
   setEbPermittivities(BaseIVFAB<Real>& a_relPerm,

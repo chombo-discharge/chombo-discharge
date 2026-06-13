@@ -1754,11 +1754,12 @@ public:
   getMFLevelGrid(const std::string& a_realm) const;
 
   /**
-    @brief Get vof iterators for a Realm and phase. This has the capability of iterating through cut-cells.
-    @details Not const because we need to reset the vofiterator
-    @return Vof iterator
-    @param[in] a_realm Description
-    @param[in] a_phase Description
+    @brief Get VoF iterators covering all cut-cells (singly- and multiply-cut) for a Realm and phase.
+    @details Not const because we need to reset the VoFIterator. For a pass covering only multiply-cut
+             cells, use getMultiCutVofIterator instead.
+    @param[in] a_realm Realm name
+    @param[in] a_phase Phase (gas or solid)
+    @return Per-level LayoutData of VoFIterators covering all irregular cells
   */
   Vector<RefCountedPtr<LayoutData<VoFIterator>>>&
   getVofIterator(const std::string& a_realm, const phase::which_phase a_phase) const;

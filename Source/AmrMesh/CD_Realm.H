@@ -272,9 +272,10 @@ public:
   getEBLevelGridCoFi(const phase::which_phase a_phase) const;
 
   /**
-    @brief Get VoFIterators for particular phase
-    @param[in] a_phase Phase
-    @return Vof iterator
+    @brief Get VoFIterators covering all cut-cells (singly- and multiply-cut) for a particular phase.
+    @details For a pass covering only multiply-cut cells, use getMultiCutVofIterator instead.
+    @param[in] a_phase Phase (gas or solid)
+    @return Per-level LayoutData of VoFIterators covering all irregular cells
   */
   Vector<RefCountedPtr<LayoutData<VoFIterator>>>&
   getVofIterator(const phase::which_phase a_phase) const;
@@ -288,9 +289,10 @@ public:
   getMultiCutVofIterator(const phase::which_phase a_phase) const;
 
   /**
-    @brief Get face iterators over cut-cell faces in each valid grid box for a particular phase
-    @param[in] a_phase Phase
-    @return Face iterator
+    @brief Get face iterators with FaceStop::SurroundingWithBoundary over cut-cell faces in each valid grid box for a particular phase.
+    @details Includes domain-boundary faces. For grown-box tangential-ghost faces, use getFaceIteratorWithTangentialGhosts.
+    @param[in] a_phase Phase (gas or solid)
+    @return Per-level LayoutData of FaceIterator arrays (one per coordinate direction)
   */
   Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
   getFaceIterator(const phase::which_phase a_phase) const;

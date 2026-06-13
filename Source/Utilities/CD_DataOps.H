@@ -744,7 +744,7 @@ public:
     @param[out] a_min      Minimum value
     @param[in]  a_data     Face-centered data
     @param[in]  a_comp     Component
-    @param[in]  a_faceIter Pre-built face iterators (cut-cell faces, all directions) for each level.
+    @param[in]  a_faceIter Pre-built face iterators with FaceStop::SurroundingWithBoundary over all cut-cell faces (including domain-boundary faces) for each level. Obtain via AmrMesh::getFaceIterator.
     @note This does the calculation over all levels, including grids that are covered by other grids.
   */
   static void
@@ -760,7 +760,7 @@ public:
     @param[out] a_min      Minimum value
     @param[in]  a_data     Face-centered data
     @param[in]  a_comp     Component
-    @param[in]  a_faceIter Pre-built face iterators (cut-cell faces, all directions).
+    @param[in]  a_faceIter Pre-built face iterators with FaceStop::SurroundingWithBoundary over all cut-cell faces (including domain-boundary faces). Obtain via AmrMesh::getFaceIterator.
   */
   static void
   getMaxMin(Real&                                           a_max,
@@ -839,7 +839,7 @@ public:
     @brief Invert data using pre-built face iterators.
     @note Does all components and does not guard against division by zero.
     @param[in,out] a_data     Data
-    @param[in]     a_faceIter Pre-built face iterators (cut-cell faces, all directions) for each level.
+    @param[in]     a_faceIter Pre-built face iterators with FaceStop::SurroundingWithBoundary over all cut-cell faces (including domain-boundary faces) for each level. Obtain via AmrMesh::getFaceIterator.
   */
   static void
   invert(EBAMRFluxData& a_data, Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>& a_faceIter);
@@ -848,7 +848,7 @@ public:
     @brief Invert data.
     @note Does all components and does not guard against division by zero.
     @param[in,out] a_data     Data
-    @param[in]     a_faceIter Pre-built face iterators (cut-cell faces, all directions).
+    @param[in]     a_faceIter Pre-built face iterators with FaceStop::SurroundingWithBoundary over all cut-cell faces (including domain-boundary faces). Obtain via AmrMesh::getFaceIterator.
   */
   static void
   invert(LevelData<EBFluxFAB>& a_data, LayoutData<std::array<FaceIterator, SpaceDim>>& a_faceIter);
@@ -1295,7 +1295,7 @@ public:
     @param[in]  a_probLo   Lower-left corner of physical domain.
     @param[in]  a_dx       Grid resolutions.
     @param[in]  a_comp     Component to set.
-    @param[in]  a_faceIter Pre-built face iterators (cut-cell faces, all directions) for each level.
+    @param[in]  a_faceIter Pre-built face iterators with FaceStop::SurroundingWithBoundary over all cut-cell faces (including domain-boundary faces) for each level. Obtain via AmrMesh::getFaceIterator.
   */
   static void
   setValue(EBAMRFluxData&                                                         a_lhs,
@@ -1312,7 +1312,7 @@ public:
     @param[in]  a_probLo   Lower-left corner of physical domain.
     @param[in]  a_dx       Grid resolution.
     @param[in]  a_comp     Component to set.
-    @param[in]  a_faceIter Pre-built face iterators (cut-cell faces, all directions).
+    @param[in]  a_faceIter Pre-built face iterators with FaceStop::SurroundingWithBoundary over all cut-cell faces (including domain-boundary faces). Obtain via AmrMesh::getFaceIterator.
   */
   static void
   setValue(LevelData<EBFluxFAB>&                           a_lhs,
@@ -1526,7 +1526,7 @@ public:
   /**
     @brief Compute the square root of the input data.
     @param[in,out] a_lhs      On output, contains sqrt(a_lhs).
-    @param[in]     a_faceIter Pre-built face iterators (cut-cell faces, all directions) for each level.
+    @param[in]     a_faceIter Pre-built face iterators with FaceStop::SurroundingWithBoundary over all cut-cell faces (including domain-boundary faces) for each level. Obtain via AmrMesh::getFaceIterator.
     @note Does not do ghosted faces.
   */
   static void
@@ -1535,7 +1535,7 @@ public:
   /**
     @brief Compute the square root of the input data.
     @param[in,out] a_lhs      On output, contains sqrt(a_lhs).
-    @param[in]     a_faceIter Pre-built face iterators (cut-cell faces, all directions).
+    @param[in]     a_faceIter Pre-built face iterators with FaceStop::SurroundingWithBoundary over all cut-cell faces (including domain-boundary faces). Obtain via AmrMesh::getFaceIterator.
     @note Does not do ghosted faces.
   */
   static void
