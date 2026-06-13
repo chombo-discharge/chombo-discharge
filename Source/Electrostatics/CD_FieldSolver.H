@@ -806,33 +806,37 @@ protected:
 
   /**
     @brief Set face-centered permittivities
-    @param[out] a_relPerm Permittivity (on face centroid or center)
-    @param[in]  a_cellBox Computation box
-    @param[in]  a_ebisbox EBIS box
-    @param[in]  a_probLo  Lower-left corner off comptuational domain
-    @param[in]  a_dx       Resolution
+    @param[out]    a_relPerm  Permittivity (on face centroid or center)
+    @param[in]     a_cellBox  Computation box
+    @param[in]     a_ebisbox  EBIS box
+    @param[in]     a_probLo   Lower-left corner of computational domain
+    @param[in]     a_dx       Resolution
+    @param[in,out] a_faceIter Pre-built face iterators for each coordinate direction.
   */
   virtual void
-  setFacePermittivities(EBFluxFAB&      a_relPerm,
-                        const Box&      a_cellBox,
-                        const EBISBox&  a_ebisbox,
-                        const RealVect& a_probLo,
-                        const Real&     a_dx);
+  setFacePermittivities(EBFluxFAB&                          a_relPerm,
+                        const Box&                          a_cellBox,
+                        const EBISBox&                      a_ebisbox,
+                        const RealVect&                     a_probLo,
+                        const Real&                         a_dx,
+                        std::array<FaceIterator, SpaceDim>& a_faceIter);
 
   /**
     @brief Set EB-centered permittivities
-    @param[out] a_relPerm Permittivity (on face centroid or center)
-    @param[in]  a_cellBox Computation box
-    @param[in]  a_ebisbox EBIS box
-    @param[in]  a_origin  Origin
-    @param[in]  a_dx      Resolution
+    @param[out]    a_relPerm Permittivity (on face centroid or center)
+    @param[in]     a_cellBox Computation box
+    @param[in]     a_ebisbox EBIS box
+    @param[in]     a_origin  Origin
+    @param[in]     a_dx      Resolution
+    @param[in,out] a_vofit   Pre-built VoF iterator for valid-box irregular cells.
   */
   virtual void
   setEbPermittivities(BaseIVFAB<Real>& a_relPerm,
                       const Box&       a_cellBox,
                       const EBISBox&   a_ebisbox,
                       const RealVect&  a_origin,
-                      const Real&      a_dx);
+                      const Real&      a_dx,
+                      VoFIterator&     a_vofit);
 
   /**
     @brief Returns BC type based on string.

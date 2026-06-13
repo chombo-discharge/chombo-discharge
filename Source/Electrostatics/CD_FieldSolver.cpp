@@ -1117,8 +1117,18 @@ FieldSolver::setPermittivities()
         const EBISBox&   ebisbox     = cellPermFAB.getEBISBox();
 
         this->setCellPermittivities(cellPermFAB, cellBox, ebisbox, probLo, dx, (*m_grownCellVofIter[lvl])[din]);
-        this->setFacePermittivities(facePermFAB, cellBox, ebisbox, probLo, dx);
-        this->setEbPermittivities(ebPermFAB, cellBox, ebisbox, probLo, dx);
+        this->setFacePermittivities(facePermFAB,
+                                    cellBox,
+                                    ebisbox,
+                                    probLo,
+                                    dx,
+                                    (*m_amr->getFaceIterator(m_realm, phase::solid)[lvl])[din]);
+        this->setEbPermittivities(ebPermFAB,
+                                  cellBox,
+                                  ebisbox,
+                                  probLo,
+                                  dx,
+                                  (*m_amr->getVofIterator(m_realm, phase::solid)[lvl])[din]);
       }
     }
   }
@@ -1161,11 +1171,12 @@ FieldSolver::setCellPermittivities(EBCellFAB&      a_relPerm,
 }
 
 void
-FieldSolver::setFacePermittivities(EBFluxFAB&      a_relPerm,
-                                   const Box&      a_cellBox,
-                                   const EBISBox&  a_ebisbox,
-                                   const RealVect& a_probLo,
-                                   const Real&     a_dx)
+FieldSolver::setFacePermittivities(EBFluxFAB&                          a_relPerm,
+                                   const Box&                          a_cellBox,
+                                   const EBISBox&                      a_ebisbox,
+                                   const RealVect&                     a_probLo,
+                                   const Real&                         a_dx,
+                                   std::array<FaceIterator, SpaceDim>& a_faceIter)
 {
   CH_TIME("FieldSolver::setFacePermittivities(EBFluxFAB, Box, EBISBox, RealVect, Real)");
   if (m_verbosity > 10) {
@@ -1174,14 +1185,11 @@ FieldSolver::setFacePermittivities(EBFluxFAB&      a_relPerm,
 
   CH_assert(a_relPerm.nComp() == 1);
 
-  const EBGraph&   ebgraph = a_ebisbox.getEBGraph();
-  const IntVectSet irreg   = a_ebisbox.getIrregIVS(a_cellBox);
-
   for (int dir = 0; dir < SpaceDim; dir++) {
 
     // Kernel regions.
-    const Box    facebox = surroundingNodes(a_cellBox, dir);
-    FaceIterator faceit  = FaceIterator(irreg, ebgraph, dir, FaceStop::SurroundingWithBoundary);
+    const Box     facebox = surroundingNodes(a_cellBox, dir);
+    FaceIterator& faceit  = a_faceIter[dir];
 
     // Single-valued data.
     BaseFab<Real>& relPermFAB = a_relPerm[dir].getSingleValuedFAB();
@@ -1209,7 +1217,8 @@ FieldSolver::setEbPermittivities(BaseIVFAB<Real>& a_relPerm,
                                  const Box& /*a_cellBox*/,
                                  const EBISBox& a_ebisbox,
                                  const RealVect& /*a_probLo*/,
-                                 const Real& a_dx)
+                                 const Real&  a_dx,
+                                 VoFIterator& a_vofit)
 {
   CH_TIME("FieldSolver::setEbPermittivities(BaseIVFAB<Real>, Box, EBISBox, RealVect, Real)");
   if (m_verbosity > 10) {
@@ -1218,18 +1227,13 @@ FieldSolver::setEbPermittivities(BaseIVFAB<Real>& a_relPerm,
 
   CH_assert(a_relPerm.nComp() == 1);
 
-  const IntVectSet& ivs     = a_relPerm.getIVS();
-  const EBGraph&    ebgraph = a_relPerm.getEBGraph();
-
-  VoFIterator vofit(ivs, ebgraph);
-
   auto kernel = [&](const VolIndex& vof) -> void {
     const RealVect pos = Location::position(Location::Cell::Boundary, vof, a_ebisbox, a_dx);
 
     a_relPerm(vof, m_comp) = this->getDielectricPermittivity(pos);
   };
 
-  BoxLoops::loop(vofit, kernel);
+  BoxLoops::loop(a_vofit, kernel);
 }
 
 void

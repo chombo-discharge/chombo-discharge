@@ -1412,14 +1412,11 @@ CdrSolver::interpolateFluxToFaceCentroids(LevelData<EBFluxFAB>& a_flux, const in
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
-    const Box        cellBox  = dbl.get(din);
-    const EBISBox&   ebisbox  = ebisl[din];
-    const EBGraph&   ebgraph  = ebisbox.getEBGraph();
-    const IntVectSet irregIVS = ebisbox.getIrregIVS(cellBox);
-
-    const bool isRegular   = ebisbox.isRegular(cellBox);
-    const bool isCovered   = ebisbox.isCovered(cellBox);
-    const bool isIrregular = !isRegular && !isCovered;
+    const Box      cellBox     = dbl.get(din);
+    const EBISBox& ebisbox     = ebisl[din];
+    const bool     isRegular   = ebisbox.isRegular(cellBox);
+    const bool     isCovered   = ebisbox.isCovered(cellBox);
+    const bool     isIrregular = !isRegular && !isCovered;
 
     if (isIrregular) {
       for (int dir = 0; dir < SpaceDim; dir++) {
@@ -1433,7 +1430,7 @@ CdrSolver::interpolateFluxToFaceCentroids(LevelData<EBFluxFAB>& a_flux, const in
 
         // Compute face centroid flux on cut-cell face centroids. Since a_flux enforces boundary conditions
         // we include domain boundary cut-cell faces in the interpolation.
-        FaceIterator faceit(irregIVS, ebgraph, dir, FaceStop::SurroundingWithBoundary);
+        FaceIterator& faceit = (*m_amr->getFaceIterator(m_realm, m_phase)[a_lvl])[din][dir];
 
         auto kernel = [&](const FaceIndex& face) -> void {
           const FaceStencil& sten = (*m_interpStencils[dir][a_lvl])[din](face, m_comp);
