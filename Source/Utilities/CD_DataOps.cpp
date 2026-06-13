@@ -208,6 +208,12 @@ DataOps::averageCellToFace(LevelData<EBFluxFAB>&                           a_fac
 {
   CH_TIME("DataOps::averageCellToFace(LD<EBFluxFAB>, faceIter)");
 
+  // When a_faceIter uses FaceStop::SurroundingWithBoundary, domain-boundary cut-cell faces are
+  // also processed: the kernel reads cellData on the ghost VoF across the domain boundary.
+  // Callers that use SurroundingWithBoundary must ensure ghost cells are filled (e.g. via
+  // interpGhost or exchange) before calling this function. Domain-boundary face values set here
+  // are typically overwritten by subsequent boundary-condition application.
+
   const int numVars   = a_cellInterval.size();
   const int cellBegin = a_cellInterval.begin();
   const int faceBegin = a_faceInterval.begin();
@@ -569,7 +575,9 @@ DataOps::dotProduct(LevelData<MFCellFAB>&       a_result,
       const EBCellFAB& data2Phase  = data2.getPhase(i);
 
       const EBISBox& ebisbox = resultPhase.getEBISBox();
-      VoFIterator    vofit(ebisbox.getIrregIVS(box), ebisbox.getEBGraph());
+      // Cannot use prebuilt iterator: MFCellFAB provides its own per-phase EBISBox; there is no
+      // AmrMesh-level per-phase pre-built iterator that covers both phases of an MF level.
+      VoFIterator vofit(ebisbox.getIrregIVS(box), ebisbox.getEBGraph());
       DataOps::dotProduct(resultPhase, data1Phase, data2Phase, box, vofit);
     }
   }
@@ -719,6 +727,8 @@ DataOps::filterSmooth(LevelData<EBCellFAB>& a_data,
     irregCells.grow(a_stride - 1);
     irregCells &= cellBox;
 
+    // Cannot use prebuilt iterator: the IVS is grown by (a_stride - 1) beyond the standard
+    // irregular IVS, so it does not match any pre-built per-patch iterator.
     VoFIterator vofit(irregCells, ebgraph);
 
     // Storage for copy of input data.
@@ -979,6 +989,8 @@ DataOps::incr(LevelData<BaseIVFAB<Real>>& a_lhs, const LevelData<BaseIVFAB<Real>
     BaseIVFAB<Real>&       lhs = a_lhs[din];
     const BaseIVFAB<Real>& rhs = a_rhs[din];
 
+    // Cannot use prebuilt iterator: the data lives on a BaseIVFAB whose IVS (irregular boundary
+    // faces only) does not correspond to any per-patch pre-built VoFIterator.
     VoFIterator vofit(lhs.getIVS(), lhs.getEBGraph());
 
     auto kernel = [&](const VolIndex& vof) -> void {
@@ -1073,6 +1085,8 @@ DataOps::incr(LevelData<DomainFluxIFFAB>& a_lhs, const LevelData<DomainFluxIFFAB
         const IntVectSet& ivs     = curLHS.getIVS();
         const EBGraph&    ebgraph = curLHS.getEBGraph();
 
+        // Cannot use prebuilt iterator: the data lives on a BaseIFFAB whose IVS (EB boundary
+        // faces only) does not correspond to any per-patch pre-built FaceIterator.
         FaceIterator faceit(ivs, ebgraph, dir, FaceStop::SurroundingWithBoundary);
 
         auto kernel = [&](const FaceIndex& face) -> void {
@@ -2151,10 +2165,10 @@ DataOps::kappaScale(MFAMRCellData&                                        a_data
   const RefCountedPtr<LayoutData<VoFIterator>> nullIter;
 
   for (int lvl = 0; lvl < a_data.size(); lvl++) {
-    const RefCountedPtr<LayoutData<VoFIterator>> iter0 =
-      (lvl < a_vofIterPhase0.size()) ? a_vofIterPhase0[lvl] : nullIter;
-    const RefCountedPtr<LayoutData<VoFIterator>> iter1 =
-      (lvl < a_vofIterPhase1.size()) ? a_vofIterPhase1[lvl] : nullIter;
+    const RefCountedPtr<LayoutData<VoFIterator>> iter0 = (lvl < a_vofIterPhase0.size()) ? a_vofIterPhase0[lvl]
+                                                                                        : nullIter;
+    const RefCountedPtr<LayoutData<VoFIterator>> iter1 = (lvl < a_vofIterPhase1.size()) ? a_vofIterPhase1[lvl]
+                                                                                        : nullIter;
     DataOps::kappaScale(*a_data[lvl], iter0, iter1);
   }
 }
@@ -2377,7 +2391,7 @@ DataOps::multiplyScalar(LevelData<BaseIVFAB<Real>>&       a_lhs,
 }
 
 Real
-DataOps::norm(const LevelData<EBCellFAB>& a_data, const int a_p, const int a_comp, LayoutData<VoFIterator>& a_vofIter)
+DataOps::norm(const LevelData<EBCellFAB>& a_data, const int a_p, LayoutData<VoFIterator>& a_vofIter, const int a_comp)
 {
   CH_TIME("DataOps::norm");
 
@@ -2745,6 +2759,8 @@ DataOps::setInvalidValue(EBAMRCellData& a_lhs, const Vector<int>& a_refRat, cons
         if (!overlapBox.isEmpty()) {
 
           // Multi-cut cells need a second pass because getSingleValuedFAB covers VoF 0.
+          // Cannot use prebuilt iterator: the IVS is multi-cut cells within overlapBox (a
+          // coarse-fine overlap region), not the full valid box — no pre-built iterator covers this.
           VoFIterator vofit(ebGraph.getMultiCells(overlapBox), ebGraph);
 
           BaseFab<Real>& coarFAB = coarData.getSingleValuedFAB();
@@ -2782,10 +2798,10 @@ DataOps::setValue(MFAMRCellData&                                        a_lhs,
   const RefCountedPtr<LayoutData<VoFIterator>> nullIter;
 
   for (int lvl = 0; lvl < a_lhs.size(); lvl++) {
-    const RefCountedPtr<LayoutData<VoFIterator>> iter0 =
-      (lvl < a_vofIterPhase0.size()) ? a_vofIterPhase0[lvl] : nullIter;
-    const RefCountedPtr<LayoutData<VoFIterator>> iter1 =
-      (lvl < a_vofIterPhase1.size()) ? a_vofIterPhase1[lvl] : nullIter;
+    const RefCountedPtr<LayoutData<VoFIterator>> iter0 = (lvl < a_vofIterPhase0.size()) ? a_vofIterPhase0[lvl]
+                                                                                        : nullIter;
+    const RefCountedPtr<LayoutData<VoFIterator>> iter1 = (lvl < a_vofIterPhase1.size()) ? a_vofIterPhase1[lvl]
+                                                                                        : nullIter;
     DataOps::setValue(*a_lhs[lvl], a_function, a_probLo, a_dx[lvl], a_comp, iter0, iter1);
   }
 }
@@ -3378,10 +3394,10 @@ DataOps::squareRoot(MFAMRCellData&                                        a_lhs,
   const RefCountedPtr<LayoutData<VoFIterator>> nullIter;
 
   for (int lvl = 0; lvl < a_lhs.size(); lvl++) {
-    const RefCountedPtr<LayoutData<VoFIterator>> iter0 =
-      (lvl < a_vofIterPhase0.size()) ? a_vofIterPhase0[lvl] : nullIter;
-    const RefCountedPtr<LayoutData<VoFIterator>> iter1 =
-      (lvl < a_vofIterPhase1.size()) ? a_vofIterPhase1[lvl] : nullIter;
+    const RefCountedPtr<LayoutData<VoFIterator>> iter0 = (lvl < a_vofIterPhase0.size()) ? a_vofIterPhase0[lvl]
+                                                                                        : nullIter;
+    const RefCountedPtr<LayoutData<VoFIterator>> iter1 = (lvl < a_vofIterPhase1.size()) ? a_vofIterPhase1[lvl]
+                                                                                        : nullIter;
     DataOps::squareRoot(*a_lhs[lvl], iter0, iter1);
   }
 }

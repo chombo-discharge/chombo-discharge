@@ -95,7 +95,7 @@ protected:
   /**
     @brief Build m_grownVofIter for all AMR levels.
   */
-  virtual void
+  void
   defineIterators();
 
   /**

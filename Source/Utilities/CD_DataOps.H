@@ -1021,13 +1021,13 @@ public:
     @brief Compute specified norm of data.
     @param[in]  a_data    Data to compute the norm of.
     @param[in]  a_p       Norm factor, e.g. a_p = 2 => squared norm. 0 => inf norm.
-    @param[in]  a_comp    Component.
     @param[in]  a_vofIter Pre-built VoF iterator (all cut-cells).
+    @param[in]  a_comp    Component.
     @note Does not do kappa-weighting.
     @return Return value.
   */
   static Real
-  norm(const LevelData<EBCellFAB>& a_data, const int a_p, const int a_comp, LayoutData<VoFIterator>& a_vofIter);
+  norm(const LevelData<EBCellFAB>& a_data, const int a_p, LayoutData<VoFIterator>& a_vofIter, const int a_comp = 0);
 
   /**
     @brief General addition operator for adding together data. The user can choose which components to add. 

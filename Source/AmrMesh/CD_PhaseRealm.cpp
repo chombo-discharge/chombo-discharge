@@ -473,7 +473,9 @@ PhaseRealm::defineVofIterator(const int a_lmin)
         faceIter[dir].define(irreg, ebgraph, dir, FaceStop::SurroundingWithBoundary);
       }
 
-      // Face iterators over a box grown by 1 and clipped to the domain, for tangential ghost faces
+      // Face iterators over a box grown by 1 and clipped to the domain, for tangential ghost faces.
+      // Because the box is grown by exactly 1, callers that pass a_tanGhosts to DataOps functions
+      // must use a_tanGhosts <= 1; the iterator cannot cover more than one ghost layer.
       Box grownBox = cellBox;
       grownBox.grow(1);
       grownBox &= m_domains[lvl];
