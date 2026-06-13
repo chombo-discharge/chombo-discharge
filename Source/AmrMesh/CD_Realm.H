@@ -304,6 +304,16 @@ public:
   getFaceIteratorWithTangentialGhosts(const phase::which_phase a_phase) const;
 
   /**
+    @brief Get face iterators restricted to multiply-cut faces in each valid grid box.
+    @details Only faces abutting multiply-cut cells (cells with more than one VoF) are visited.
+    Faces are enumerated with FaceStop::SurroundingNoBoundary.
+    @param[in] a_phase Phase
+    @return Multi-cut face iterator
+  */
+  Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+  getMultiCutFaceIterator(const phase::which_phase a_phase) const;
+
+  /**
     @brief Get objects for computing "non-conservative divergences"
     @param[in] a_phase Phase
     @return Non conservative divergence

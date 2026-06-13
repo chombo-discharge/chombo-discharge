@@ -842,13 +842,11 @@ EddingtonSP1::setHelmholtzCoefficientsBox(EBCellFAB&       a_helmAco,
     }
     grownCellBox &= m_amr->getDomains()[a_lvl];
 
-    // Cut-cells in the grown box.
-    const IntVectSet irregIVS = ebisbox.getIrregIVS(grownCellBox);
-
     // Actual kernel region. The face-centered box which also contains the "ghost faces" and a FaceIterator for
-    // doing the irregular face stuff.
+    // doing the irregular face stuff. Only multi-cut cells need the irregular kernel since singly-cut faces are
+    // already covered by the regular box loop above.
     const Box    faceBox = surroundingNodes(grownCellBox, dir);
-    FaceIterator faceit(irregIVS, ebgraph, dir, FaceStop::SurroundingWithBoundary);
+    FaceIterator faceit(ebisbox.getMultiCells(grownCellBox), ebgraph, dir, FaceStop::SurroundingWithBoundary);
 
     // Regular kernel.
     BaseFab<Real>& helmBcoReg       = helmBcoFace.getSingleValuedFAB();

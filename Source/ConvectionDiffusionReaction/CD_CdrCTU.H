@@ -63,7 +63,41 @@ public:
   virtual Real
   computeAdvectionDt() override;
 
+  /**
+    @brief Allocate internal storage and build pre-built VoF iterators.
+  */
+  virtual void
+  allocate() override;
+
+  /**
+    @brief Regrid method — also rebuilds the grown VoF iterators.
+    @param[in] a_lbase          Coarsest level that changes
+    @param[in] a_oldFinestLevel Finest level before regrid
+    @param[in] a_newFinestLevel Finest level after regrid
+  */
+  virtual void
+  regrid(const int a_lbase, const int a_oldFinestLevel, const int a_newFinestLevel) override;
+
+  /**
+    @brief Pre-regrid hook — releases the grown VoF iterators.
+    @param[in] a_lbase          Coarsest level that changes
+    @param[in] a_oldFinestLevel Finest level before regrid
+  */
+  virtual void
+  preRegrid(const int a_lbase, const int a_oldFinestLevel) override;
+
 protected:
+  /**
+    @brief Pre-built VoFIterators over grow(validBox,1) for the irregular kernel in computeNormalSlopes.
+  */
+  Vector<RefCountedPtr<LayoutData<VoFIterator>>> m_grownVofIter;
+
+  /**
+    @brief Build m_grownVofIter for all AMR levels.
+  */
+  virtual void
+  defineIterators();
+
   /**
     @brief Supported limiters
   */

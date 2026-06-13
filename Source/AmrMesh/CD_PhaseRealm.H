@@ -292,6 +292,17 @@ public:
   getFaceIteratorWithTangentialGhosts() const;
 
   /**
+    @brief Return face iterators restricted to multiply-cut faces in each valid grid box.
+    @details Each entry is an array of SpaceDim FaceIterators, one per coordinate direction.
+    Only faces that abut at least one multiply-cut cell (cells with more than one VoF) are
+    iterated. Faces are enumerated with FaceStop::SurroundingNoBoundary. Used as a second
+    pass after a box loop over getSingleValuedFAB to avoid double-processing singly-cut faces.
+    @return m_multiCutFaceIter (which is, in fact, mutable)
+  */
+  Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+  getMultiCutFaceIterator() const;
+
+  /**
     @brief Get objects for interpolation from cell centers to centroids.
     @return Cell centroid interpolation
   */
@@ -546,6 +557,11 @@ protected:
     @brief Face iterators over cut-cell faces in a box grown by 1 and clipped to the domain
   */
   mutable Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>> m_faceIterTanGhost;
+
+  /**
+    @brief Face iterators over multiply-cut faces in each valid grid box (SurroundingNoBoundary stop criterion)
+  */
+  mutable Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>> m_multiCutFaceIter;
 
   /**
     @brief Coarsening operator

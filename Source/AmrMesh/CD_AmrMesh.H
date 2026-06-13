@@ -1800,6 +1800,19 @@ public:
   getFaceIteratorWithTangentialGhosts(const std::string& a_realm, const phase::which_phase a_phase) const;
 
   /**
+    @brief Get face iterators restricted to multiply-cut faces in each valid grid box.
+    @details Only faces abutting at least one multiply-cut cell (cells with more than one VoF)
+             are visited. Faces are enumerated with FaceStop::SurroundingNoBoundary. Used as a
+             second pass after a box loop over getSingleValuedFAB to avoid double-processing
+             singly-cut faces.
+    @param[in] a_realm Realm name
+    @param[in] a_phase Phase (gas or solid)
+    @return Per-level LayoutData of FaceIterator arrays
+  */
+  Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+  getMultiCutFaceIterator(const std::string& a_realm, const phase::which_phase a_phase) const;
+
+  /**
     @brief Get levelset function, allocated over a grid for a Realm and phase
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)

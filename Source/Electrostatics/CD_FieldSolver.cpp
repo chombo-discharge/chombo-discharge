@@ -231,18 +231,14 @@ FieldSolver::computeDisplacementField(MFAMRCellData& a_displacementField, const 
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-        const Box        cellBox = dbl[din];
-        const EBISBox&   ebisbox = ebisl[din];
-        const EBGraph&   ebgraph = ebisbox.getEBGraph();
-        const IntVectSet ivs     = ebisbox.getIrregIVS(cellBox);
+        const Box      cellBox = dbl[din];
+        const EBISBox& ebisbox = ebisl[din];
+        VoFIterator&   vofit   = (*m_amr->getVofIterator(m_realm, phase::solid)[lvl])[din];
 
         // Get handle to data on the solid phase
         MFCellFAB& D    = (*a_displacementField[lvl])[din];
         EBCellFAB& Dsol = D.getPhase(phase::solid);
         FArrayBox& Dreg = Dsol.getFArrayBox();
-
-        // Iteration space for irregular cells.
-        VoFIterator vofit(ivs, ebgraph);
 
         // Regular kernel
         auto regularKernel = [&](const IntVect& iv) -> void {
@@ -1078,6 +1074,23 @@ FieldSolver::setPermittivities()
   const Vector<Dielectric>& dielectrics = m_computationalGeometry->getDielectrics();
 
   if (dielectrics.size() > 0 && m_multifluidIndexSpace->numPhases() > 1) {
+
+    // Pre-build grown-box VoF iterators for the solid phase. These are used by setCellPermittivities.
+    m_grownCellVofIter.resize(1 + m_amr->getFinestLevel());
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      const DisjointBoxLayout& dbl2   = m_amr->getGrids(m_realm)[lvl];
+      const EBISLayout&        ebisl2 = m_amr->getEBISLayout(m_realm, phase::solid)[lvl];
+      const ProblemDomain&     dom    = m_amr->getDomains()[lvl];
+
+      m_grownCellVofIter[lvl] = RefCountedPtr<LayoutData<VoFIterator>>(new LayoutData<VoFIterator>(dbl2));
+
+      for (DataIterator dit2 = dbl2.dataIterator(); dit2.ok(); ++dit2) {
+        const Box      grownBox = grow(dbl2[dit2], 1) & dom;
+        const EBISBox& ebisbox2 = ebisl2[dit2()];
+        (*m_grownCellVofIter[lvl])[dit2()].define(ebisbox2.getIrregIVS(grownBox), ebisbox2.getEBGraph());
+      }
+    }
+
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
       const DataIterator&      dit    = dbl.dataIterator();
@@ -1103,7 +1116,7 @@ FieldSolver::setPermittivities()
         const Box        cellBox     = dbl[din];
         const EBISBox&   ebisbox     = cellPermFAB.getEBISBox();
 
-        this->setCellPermittivities(cellPermFAB, cellBox, ebisbox, probLo, dx);
+        this->setCellPermittivities(cellPermFAB, cellBox, ebisbox, probLo, dx, (*m_grownCellVofIter[lvl])[din]);
         this->setFacePermittivities(facePermFAB, cellBox, ebisbox, probLo, dx);
         this->setEbPermittivities(ebPermFAB, cellBox, ebisbox, probLo, dx);
       }
@@ -1116,7 +1129,8 @@ FieldSolver::setCellPermittivities(EBCellFAB&      a_relPerm,
                                    const Box&      a_cellBox,
                                    const EBISBox&  a_ebisbox,
                                    const RealVect& a_probLo,
-                                   const Real&     a_dx)
+                                   const Real&     a_dx,
+                                   VoFIterator&    a_vofit)
 {
   CH_TIME("FieldSolver::setCellPermittivities(EBCellFAB, Box, EBISBox, RealVect, Real)");
   if (m_verbosity > 10) {
@@ -1141,15 +1155,9 @@ FieldSolver::setCellPermittivities(EBCellFAB&      a_relPerm,
     a_relPerm(vof, m_comp) = this->getDielectricPermittivity(pos);
   };
 
-  // Kernel regions.
-  const Box        grownBox = grow(a_cellBox, 1);
-  const EBGraph&   ebgraph  = a_ebisbox.getEBGraph();
-  const IntVectSet irreg    = a_ebisbox.getIrregIVS(grownBox);
-  VoFIterator      irregRegion(irreg, ebgraph);
-
   // Launch kernels.
   BoxLoops::loop<D_DECL(1, 1, 1)>(a_cellBox, regularKernel);
-  BoxLoops::loop(irregRegion, irregularKernel);
+  BoxLoops::loop(a_vofit, irregularKernel);
 }
 
 void

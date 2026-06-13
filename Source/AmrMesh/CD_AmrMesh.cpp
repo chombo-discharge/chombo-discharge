@@ -3280,6 +3280,23 @@ AmrMesh::getFaceIteratorWithTangentialGhosts(const std::string& a_realm, const p
   return m_realms[a_realm]->getFaceIteratorWithTangentialGhosts(a_phase);
 }
 
+Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+AmrMesh::getMultiCutFaceIterator(const std::string& a_realm, const phase::which_phase a_phase) const
+{
+  CH_TIME("AmrMesh::getMultiCutFaceIterator(string, phase::which_phase)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getMultiCutFaceIterator(string, phase::which_phase)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getMultiCutFaceIterator(string, phase::which_phase) - could not find realm '" +
+                            a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getMultiCutFaceIterator(a_phase);
+}
+
 const AMRMask&
 AmrMesh::getMask(const std::string& a_mask, const int a_buffer, const std::string& a_realm) const
 {

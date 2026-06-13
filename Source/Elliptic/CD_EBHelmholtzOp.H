@@ -880,6 +880,13 @@ public:
   const LevelData<EBCellFAB>&
   getRelaxationCoeff() const noexcept;
 
+  /**
+    @brief Return all-cut VoFIterators (one per patch). Used by MFHelmholtzOp.
+    @return All-cut VoF iterators over irregular cells on this level.
+  */
+  LayoutData<VoFIterator>&
+  getVofIterIrreg() const noexcept;
+
 protected:
   /**
     @brief Number of components that we solve for (always one..)

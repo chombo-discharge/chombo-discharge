@@ -645,9 +645,10 @@ CdrSolver::computeDiffusionFlux(LevelData<EBFluxFAB>& a_flux, const LevelData<EB
       grownCellBox &= domain;
       grownCellBox.grow(dir, -1);
 
-      // These are the "regions" for the regular and cut-cell kernels.
+      // These are the "regions" for the regular and cut-cell kernels. Only multi-cut cells need the irregular
+      // kernel since singly-cut faces are already covered by the regular box loop above.
       const Box    grownFaceBox = surroundingNodes(grownCellBox, dir);
-      FaceIterator faceit(ebisbox.getIrregIVS(grownCellBox), ebgraph, dir, FaceStop::SurroundingWithBoundary);
+      FaceIterator faceit(ebisbox.getMultiCells(grownCellBox), ebgraph, dir, FaceStop::SurroundingWithBoundary);
 
       // Regular kernel. Note that we call the kernel on a face-centered box, so the cell on the high side is located at
       // iv, and the cell at the low side is at iv - BASISV(dir).
@@ -735,7 +736,7 @@ CdrSolver::computeAdvectionDiffusionFlux(EBAMRFluxData&       a_flux,
         interiorFaces.grow(dir, -1);
         interiorFaces.surroundingNodes(dir);
 
-        FaceIterator faceit(ebisbox.getIrregIVS(grownBox), ebgraph, dir, FaceStop::SurroundingNoBoundary);
+        FaceIterator faceit(ebisbox.getMultiCells(grownBox), ebgraph, dir, FaceStop::SurroundingNoBoundary);
 
         // Regular kernel. Note that we call the kernel on a face-centered box, so the cell on the high side is located at
         // iv, and the cell at the low side is at iv - BASISV(dir).
@@ -3035,10 +3036,8 @@ CdrSolver::smoothHeavisideFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      const Box&        cellBox  = dbl[din];
-      const EBISBox&    ebisbox  = ebisl[din];
-      const EBGraph&    ebgraph  = ebisbox.getEBGraph();
-      const IntVectSet& irregIVS = ebisbox.getIrregIVS(cellBox);
+      const Box&     cellBox = dbl[din];
+      const EBISBox& ebisbox = ebisl[din];
 
       for (int dir = 0; dir < SpaceDim; dir++) {
         EBFaceFAB&       facePhi = (*a_facePhi[lvl])[din][dir];
@@ -3116,8 +3115,8 @@ CdrSolver::smoothHeavisideFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a
         };
 
         // These are the computation regions for the kernels.
-        const Box    faceBox = surroundingNodes(cellBox, dir);
-        FaceIterator faceit(irregIVS, ebgraph, dir, FaceStop::SurroundingNoBoundary);
+        const Box     faceBox = surroundingNodes(cellBox, dir);
+        FaceIterator& faceit  = (*m_amr->getMultiCutFaceIterator(m_realm, m_phase)[lvl])[din][dir];
 
         // Execute the kernels.
         BoxLoops::loop<D_DECL(1, 1, 1)>(faceBox, regularKernel);
@@ -3167,18 +3166,15 @@ CdrSolver::fillGwn(EBAMRFluxData& a_noise, const Real a_sigma)
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      const Box&        cellBox = dbl[din];
-      const EBISBox&    ebisbox = ebisl[din];
-      const EBGraph&    ebgraph = ebisbox.getEBGraph();
-      const IntVectSet& irreg   = ebisbox.getIrregIVS(cellBox);
+      const Box& cellBox = dbl[din];
 
       for (int dir = 0; dir < SpaceDim; dir++) {
         EBFaceFAB&     noise    = (*a_noise[lvl])[din][dir];
         BaseFab<Real>& noiseReg = noise.getSingleValuedFAB();
 
         // Regular faces
-        const Box    facebox = surroundingNodes(cellBox, dir);
-        FaceIterator faceit(irreg, ebgraph, dir, FaceStop::SurroundingNoBoundary);
+        const Box     facebox = surroundingNodes(cellBox, dir);
+        FaceIterator& faceit  = (*m_amr->getMultiCutFaceIterator(m_realm, m_phase)[lvl])[din][dir];
 
         // Regular kernel
         auto regularKernel = [&](const IntVect& iv) -> void {
