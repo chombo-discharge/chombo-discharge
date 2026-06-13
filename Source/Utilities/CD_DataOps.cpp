@@ -1981,7 +1981,7 @@ DataOps::invert(LevelData<EBFluxFAB>& a_data, LayoutData<std::array<FaceIterator
         };
 
         auto irregularKernel = [&](const FaceIndex& face) -> void {
-          data(face, comp) = 1. / data(face, comp);
+          data(face, comp) = 1. / cpy(face, comp);
         };
 
         BoxLoops::loop<D_DECL(1, 1, 1)>(facebox, regularKernel);
@@ -2673,28 +2673,21 @@ DataOps::setInvalidValue(EBAMRCellData& a_lhs, const Vector<int>& a_refRat, cons
 
         if (!overlapBox.isEmpty()) {
 
-          // Irregular kernel region.
-          VoFIterator vofit(IntVectSet(overlapBox), ebGraph);
+          // Multi-cut cells need a second pass because getSingleValuedFAB covers VoF 0.
+          VoFIterator vofit(ebGraph.getMultiCells(overlapBox), ebGraph);
 
-          // Regular and covered cells' kernel.
           BaseFab<Real>& coarFAB = coarData.getSingleValuedFAB();
 
-          // Do all components.
           for (int comp = 0; comp < nComp; comp++) {
 
-            // Kernel called for all cells.
             auto regularKernel = [&](const IntVect& iv) -> void {
               coarFAB(iv, comp) = a_value;
             };
 
-            // Kernel called for irregular cells.
             auto irregularKernel = [&](const VolIndex& vof) -> void {
-              for (int comp = 0; comp < nComp; comp++) {
-                coarData(vof, comp) = a_value;
-              }
+              coarData(vof, comp) = a_value;
             };
 
-            // Execute kernels.
             BoxLoops::loop<D_DECL(1, 1, 1)>(overlapBox, regularKernel);
             BoxLoops::loop(vofit, irregularKernel);
           }
