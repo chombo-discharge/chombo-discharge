@@ -1908,7 +1908,7 @@ CdrSolver::writePlotData(LevelData<EBCellFAB>& a_output,
   // Plot EB fluxes. These are stored on sparse data structures but we need them on cell centers. So copy them to scratch and write data.
   if (m_plotEbFlux && m_isMobile) {
     DataOps::setValue(*scratch[a_level], 0.0);
-    DataOps::incr(*scratch[a_level], *m_ebFlux[a_level], 1.0);
+    DataOps::incr(*scratch[a_level], *m_ebFlux[a_level], 1.0, *m_amr->getVofIterator(m_realm, m_phase)[a_level]);
     this->writeData(a_output, a_icomp, scratch, a_outputRealm, a_level, false, false);
   }
 }

@@ -1059,7 +1059,7 @@ EddingtonSP1::computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_
   m_amr->interpToEB(a_ebFlux, a_phi, m_realm, m_phase);
   m_amr->conservativeAverage(a_ebFlux, m_realm, m_phase);
 
-  DataOps::scale(a_ebFlux, 0.5 * Units::c);
+  DataOps::scale(a_ebFlux, 0.5 * Units::c, m_amr->getVofIterator(m_realm, m_phase));
 }
 
 void

@@ -361,22 +361,30 @@ public:
   incr(EBFluxFAB& a_lhs, const EBFluxFAB& a_rhs, const Real& a_scale);
 
   /**
-    @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
-    @param[in,out] a_lhs   Data to be incremented.
-    @param[in]    a_rhs   Incrementation.
-    @param[in]    a_scale Scale factor.
+    @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components.
+    @param[in,out] a_lhs    Data to be incremented.
+    @param[in]     a_rhs    Incrementation.
+    @param[in]     a_scale  Scale factor.
+    @param[in]     a_vofIter Pre-built VoF iterators (all cut-cells) for each level.
   */
   static void
-  incr(EBAMRIVData& a_lhs, const EBAMRIVData& a_rhs, const Real& a_scale);
+  incr(EBAMRIVData&                                          a_lhs,
+       const EBAMRIVData&                                    a_rhs,
+       const Real&                                           a_scale,
+       const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter);
 
   /**
-    @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
-    @param[in,out] a_lhs   Data to be incremented.
-    @param[in]    a_rhs   Incrementation.
-    @param[in]    a_scale Scale factor.
+    @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components.
+    @param[in,out] a_lhs    Data to be incremented.
+    @param[in]     a_rhs    Incrementation.
+    @param[in]     a_scale  Scale factor.
+    @param[in]     a_vofIter Pre-built VoF iterators (all cut-cells) for each grid box.
   */
   static void
-  incr(LevelData<BaseIVFAB<Real>>& a_lhs, const LevelData<BaseIVFAB<Real>>& a_rhs, const Real& a_scale);
+  incr(LevelData<BaseIVFAB<Real>>& a_lhs,
+       const LevelData<BaseIVFAB<Real>>& a_rhs,
+       const Real&                       a_scale,
+       LayoutData<VoFIterator>&          a_vofIter);
 
   /**
     @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
@@ -397,44 +405,60 @@ public:
   incr(LevelData<DomainFluxIFFAB>& a_lhs, const LevelData<DomainFluxIFFAB>& a_rhs, const Real& a_scale);
 
   /**
-    @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
-    @details This versions only adds irregular data from an EBAMRIVFAB. It ignores regular cells. 
-    @param[in,out] a_lhs   Data to be incremented.
-    @param[in]    a_rhs   Incrementation.
-    @param[in]    a_scale Scale factor.
+    @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components.
+    @details Only adds irregular data from an EBAMRIVData. Ignores regular cells.
+    @param[in,out] a_lhs    Data to be incremented.
+    @param[in]     a_rhs    Incrementation.
+    @param[in]     a_scale  Scale factor.
+    @param[in]     a_vofIter Pre-built VoF iterators (all cut-cells) for each level.
   */
   static void
-  incr(EBAMRCellData& a_lhs, const EBAMRIVData& a_rhs, const Real a_scale);
+  incr(EBAMRCellData&                                        a_lhs,
+       const EBAMRIVData&                                    a_rhs,
+       const Real                                            a_scale,
+       const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter);
 
   /**
-    @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
-    @details This versions only adds irregular data from an EBAMRIVFAB. It ignores regular cells. 
-    @param[in,out] a_lhs   Data to be incremented.
-    @param[in]    a_rhs   Incrementation.
-    @param[in]    a_scale Scale factor.
+    @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components.
+    @details Only adds irregular data from a BaseIVFAB. Ignores regular cells.
+    @param[in,out] a_lhs    Data to be incremented.
+    @param[in]     a_rhs    Incrementation.
+    @param[in]     a_scale  Scale factor.
+    @param[in]     a_vofIter Pre-built VoF iterators (all cut-cells) for each grid box.
   */
   static void
-  incr(LevelData<EBCellFAB>& a_lhs, const LevelData<BaseIVFAB<Real>>& a_rhs, const Real a_scale);
+  incr(LevelData<EBCellFAB>&           a_lhs,
+       const LevelData<BaseIVFAB<Real>>& a_rhs,
+       const Real                        a_scale,
+       LayoutData<VoFIterator>&          a_vofIter);
 
   /**
-    @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
-    @details This versions only adds irregular data form an EBCellFAB to an BaseIVFAB. It ignores regular cells. 
-    @param[in,out] a_lhs   Data to be incremented.
-    @param[in]    a_rhs   Incrementation.
-    @param[in]    a_scale Scale factor.
+    @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components.
+    @details Only adds irregular data from an EBCellFAB to a BaseIVFAB. Ignores regular cells.
+    @param[in,out] a_lhs    Data to be incremented.
+    @param[in]     a_rhs    Incrementation.
+    @param[in]     a_scale  Scale factor.
+    @param[in]     a_vofIter Pre-built VoF iterators (all cut-cells) for each level.
   */
   static void
-  incr(EBAMRIVData& a_lhs, const EBAMRCellData& a_rhs, const Real a_scale);
+  incr(EBAMRIVData&                                          a_lhs,
+       const EBAMRCellData&                                  a_rhs,
+       const Real                                            a_scale,
+       const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter);
 
   /**
-    @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
-    @details This versions only adds irregular data form an EBCellFAB to an BaseIVFAB. It ignores regular cells. 
-    @param[in,out] a_lhs   Data to be incremented.
-    @param[in]    a_rhs   Incrementation.
-    @param[in]    a_scale Scale factor.
+    @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components.
+    @details Only adds irregular data from an EBCellFAB to a BaseIVFAB. Ignores regular cells.
+    @param[in,out] a_lhs    Data to be incremented.
+    @param[in]     a_rhs    Incrementation.
+    @param[in]     a_scale  Scale factor.
+    @param[in]     a_vofIter Pre-built VoF iterators (all cut-cells) for each grid box.
   */
   static void
-  incr(LevelData<BaseIVFAB<Real>>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const Real a_scale);
+  incr(LevelData<BaseIVFAB<Real>>& a_lhs,
+       const LevelData<EBCellFAB>& a_rhs,
+       const Real                  a_scale,
+       LayoutData<VoFIterator>&    a_vofIter);
 
   /**
     @brief Copy data from one data holder to another.
@@ -902,22 +926,28 @@ public:
   multiply(LevelData<EBFluxFAB>& a_lhs, const LevelData<EBFluxFAB>& a_rhs);
 
   /**
-    @brief Multiply data holder by another data holder
-    @param[in,out] a_lhs Data to be multiplied
-    @param[in]    a_rhs Multiplication factor
-    @note Does all components
+    @brief Multiply data holder by another data holder element-wise over all cut-cells.
+    @param[in,out] a_lhs     Data to be multiplied.
+    @param[in]     a_rhs     Multiplication factor.
+    @param[in]     a_vofIter Pre-built VoF iterators (all cut-cells) for each level.
+    @note Does all components.
   */
   static void
-  multiply(EBAMRIVData& a_lhs, const EBAMRIVData& a_rhs);
+  multiply(EBAMRIVData&                                          a_lhs,
+           const EBAMRIVData&                                    a_rhs,
+           const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter);
 
   /**
-    @brief Multiply data holder by another data holder
-    @param[in,out] a_lhs Data to be multiplied
-    @param[in]    a_rhs Multiplication factor
-    @note Does all components
+    @brief Multiply data holder by another data holder element-wise over all cut-cells.
+    @param[in,out] a_lhs     Data to be multiplied.
+    @param[in]     a_rhs     Multiplication factor.
+    @param[in]     a_vofIter Pre-built VoF iterators (all cut-cells) for each grid box.
+    @note Does all components.
   */
   static void
-  multiply(LevelData<BaseIVFAB<Real>>& a_lhs, const LevelData<BaseIVFAB<Real>>& a_rhs);
+  multiply(LevelData<BaseIVFAB<Real>>&       a_lhs,
+           const LevelData<BaseIVFAB<Real>>& a_rhs,
+           LayoutData<VoFIterator>&          a_vofIter);
 
   /**
     @brief Multiply data holder by another data holder
@@ -938,22 +968,26 @@ public:
   multiplyScalar(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs);
 
   /**
-    @brief Multiply data holder by another data holder
-    @param[in,out] a_lhs Data to be multiplied
-    @param[in]    a_rhs Multiplication factor
-    @note This multiplies all components in a_lhs with the single component in a_rhs
+    @brief Multiply all components of a_lhs by the single component of a_rhs over all cut-cells.
+    @param[in,out] a_lhs     Data to be multiplied.
+    @param[in]     a_rhs     Scalar multiplication factor (must have one component).
+    @param[in]     a_vofIter Pre-built VoF iterators (all cut-cells) for each level.
   */
   static void
-  multiplyScalar(EBAMRIVData& a_lhs, const EBAMRIVData& a_rhs);
+  multiplyScalar(EBAMRIVData&                                          a_lhs,
+                 const EBAMRIVData&                                    a_rhs,
+                 const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter);
 
   /**
-    @brief Multiply data holder by another data holder
-    @param[in,out] a_lhs Data to be multiplied
-    @param[in]    a_rhs Multiplication factor
-    @note This multiplies all components in a_lhs with the single component in a_rhs
+    @brief Multiply all components of a_lhs by the single component of a_rhs over all cut-cells.
+    @param[in,out] a_lhs     Data to be multiplied.
+    @param[in]     a_rhs     Scalar multiplication factor (must have one component).
+    @param[in]     a_vofIter Pre-built VoF iterators (all cut-cells) for each grid box.
   */
   static void
-  multiplyScalar(LevelData<BaseIVFAB<Real>>& a_lhs, const LevelData<BaseIVFAB<Real>>& a_rhs);
+  multiplyScalar(LevelData<BaseIVFAB<Real>>&       a_lhs,
+                 const LevelData<BaseIVFAB<Real>>& a_rhs,
+                 LayoutData<VoFIterator>&           a_vofIter);
 
   /**
     @brief Compute specified norm of data.
@@ -1028,12 +1062,15 @@ public:
   scale(LevelData<MFFluxFAB>& a_lhs, const Real& a_scale);
 
   /**
-    @brief Scale data by factor
-    @param[in,out] a_lhs   Data to be scaled
-    @param[in]    a_scale Scaling factor
+    @brief Scale data by factor over all cut-cells.
+    @param[in,out] a_lhs     Data to be scaled.
+    @param[in]     a_scale   Scaling factor.
+    @param[in]     a_vofIter Pre-built VoF iterators (all cut-cells) for each level.
   */
   static void
-  scale(EBAMRIVData& a_lhs, const Real& a_scale);
+  scale(EBAMRIVData&                                          a_lhs,
+        const Real&                                           a_scale,
+        const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter);
 
   /**
     @brief Scale data by factor
@@ -1068,12 +1105,13 @@ public:
   scale(LevelData<EBFluxFAB>& a_lhs, const Real a_scale);
 
   /**
-    @brief Scale data by factor
-    @param[in,out] a_lhs   Data to be scaled
-    @param[in]    a_scale Scaling factor
+    @brief Scale data by factor over all cut-cells.
+    @param[in,out] a_lhs     Data to be scaled.
+    @param[in]     a_scale   Scaling factor.
+    @param[in]     a_vofIter Pre-built VoF iterators (all cut-cells) for each grid box.
   */
   static void
-  scale(LevelData<BaseIVFAB<Real>>& a_lhs, const Real& a_scale);
+  scale(LevelData<BaseIVFAB<Real>>& a_lhs, const Real& a_scale, LayoutData<VoFIterator>& a_vofIter);
 
   /**
     @brief Set value in covered cells. Does specified component

@@ -336,7 +336,7 @@ CdrPlasmaStepper::setupSemiImplicitPoisson(const EBAMRFluxData& a_conductivityFa
   // Increment the field solver permittivities by a_factor*sigma. After this, the "permittivities" are
   // given by epsr + a_factor*sigma
   DataOps::incr(permFaceGas, a_conductivityFace, a_factor);
-  DataOps::incr(permEBGas, a_conductivityEB, a_factor);
+  DataOps::incr(permEBGas, a_conductivityEB, a_factor, m_amr->getVofIterator(m_realm, phase::gas));
 
   // Coarsen coefficients.
   m_amr->arithmeticAverage(permFaceGas, m_realm, phase::gas);
@@ -2593,8 +2593,8 @@ CdrPlasmaStepper::computeExtrapolatedFluxes(Vector<EBAMRIVData*>&         a_extr
 
       // Now compute v*phi on the EB -- stored in an EBAMRIVData holder with SpaceDim components.
       DataOps::setValue(ebFlux, 0.0);
-      DataOps::incr(ebFlux, ebVel, 1.0);
-      DataOps::multiplyScalar(ebFlux, ebPhi);
+      DataOps::incr(ebFlux, ebVel, 1.0, m_amr->getVofIterator(m_realm, a_phase));
+      DataOps::multiplyScalar(ebFlux, ebPhi, m_amr->getVofIterator(m_realm, a_phase));
 
       // Project the flux in order to only get the normal component.
       this->projectFlux(*a_extrapCdrFluxesEB[idx], ebFlux);

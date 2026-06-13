@@ -302,7 +302,7 @@ FieldSolverGMG::solve(MFAMRCellData&       a_phi,
 
   // Do the scaled surface charge
   DataOps::copy(sigmaByEps0, a_sigma);
-  DataOps::scale(sigmaByEps0, 1. / (Units::eps0));
+  DataOps::scale(sigmaByEps0, 1. / (Units::eps0), m_amr->getVofIterator(m_realm, phase::gas));
   CH_STOP(t2);
 
   // Factory needs knowledge of the new surface charge -- it passes this data by reference to the multigrid operators (MFHelmholtzOps).
@@ -359,7 +359,7 @@ FieldSolverGMG::solve(MFAMRCellData&       a_phi,
   if (m_jumpBcType == JumpBCType::SaturationCharge) {
     const EBAMRIVData& factorySigma = m_helmholtzOpFactory->getSigma();
     DataOps::copy(m_sigma, factorySigma);
-    DataOps::scale(m_sigma, Units::eps0);
+    DataOps::scale(m_sigma, Units::eps0, m_amr->getVofIterator(m_realm, phase::gas));
 
     m_amr->conservativeAverage(m_sigma, m_realm, phase::gas);
   }
