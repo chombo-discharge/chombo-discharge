@@ -1601,7 +1601,12 @@ CdrSolver::setDiffusionCoefficient(const std::function<Real(const RealVect a_pos
                     m_amr->getDx(),
                     m_comp,
                     m_amr->getMultiCutVofIterator(m_realm, m_phase));
-  DataOps::setValue(m_faceCenteredDiffusionCoefficient, a_diffCo, m_amr->getProbLo(), m_amr->getDx(), m_comp);
+  DataOps::setValue(m_faceCenteredDiffusionCoefficient,
+                    a_diffCo,
+                    m_amr->getProbLo(),
+                    m_amr->getDx(),
+                    m_comp,
+                    m_amr->getFaceIterator(m_realm, m_phase));
   DataOps::setValue(m_ebCenteredDiffusionCoefficient,
                     a_diffCo,
                     m_amr->getProbLo(),

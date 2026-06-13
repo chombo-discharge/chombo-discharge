@@ -568,7 +568,9 @@ DataOps::dotProduct(LevelData<MFCellFAB>&       a_result,
       const EBCellFAB& data1Phase  = data1.getPhase(i);
       const EBCellFAB& data2Phase  = data2.getPhase(i);
 
-      DataOps::dotProduct(resultPhase, data1Phase, data2Phase, box);
+      const EBISBox& ebisbox = resultPhase.getEBISBox();
+      VoFIterator    vofit(ebisbox.getIrregIVS(box), ebisbox.getEBGraph());
+      DataOps::dotProduct(resultPhase, data1Phase, data2Phase, box, vofit);
     }
   }
 }
@@ -946,6 +948,46 @@ DataOps::incr(EBFluxFAB& a_lhs, const EBFluxFAB& a_rhs, const Real& a_scale)
 
     rhsClone[dir] *= a_scale;
     lhs += rhsClone[dir];
+  }
+}
+
+void
+DataOps::incr(EBAMRIVData& a_lhs, const EBAMRIVData& a_rhs, const Real& a_scale)
+{
+  CH_TIME("DataOps::incr(EBAMRIVData, EBAMRIVData, Real)");
+
+  for (int lvl = 0; lvl < a_lhs.size(); lvl++) {
+    DataOps::incr(*a_lhs[lvl], *a_rhs[lvl], a_scale);
+  }
+}
+
+void
+DataOps::incr(LevelData<BaseIVFAB<Real>>& a_lhs, const LevelData<BaseIVFAB<Real>>& a_rhs, const Real& a_scale)
+{
+  CH_TIME("DataOps::incr(LD<BaseIVFAB>, LD<BaseIVFAB>, Real)");
+
+  CH_assert(a_lhs.nComp() == a_rhs.nComp());
+
+  const DataIterator& dit     = a_lhs.dataIterator();
+  const int           numComp = a_lhs.nComp();
+  const int           nbox    = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    BaseIVFAB<Real>&       lhs = a_lhs[din];
+    const BaseIVFAB<Real>& rhs = a_rhs[din];
+
+    VoFIterator vofit(lhs.getIVS(), lhs.getEBGraph());
+
+    auto kernel = [&](const VolIndex& vof) -> void {
+      for (int comp = 0; comp < numComp; comp++) {
+        lhs(vof, comp) += rhs(vof, comp) * a_scale;
+      }
+    };
+
+    BoxLoops::loop(vofit, kernel);
   }
 }
 
@@ -1794,7 +1836,18 @@ DataOps::getMaxMin(Vector<Real>& a_max, Vector<Real>& a_min, Vector<EBAMRCellDat
   for (int i = 0; i < a_data.size(); i++) {
     CH_assert(a_data[i][0]->nComp() == numComp);
 
-    DataOps::getMaxMin(a_max[i], a_min[i], a_data[i], comp);
+    Vector<RefCountedPtr<LayoutData<VoFIterator>>> vofIter(a_data[i].size());
+    for (int lvl = 0; lvl < a_data[i].size(); lvl++) {
+      const DisjointBoxLayout& dbl = a_data[i][lvl]->disjointBoxLayout();
+      vofIter[lvl]                 = RefCountedPtr<LayoutData<VoFIterator>>(new LayoutData<VoFIterator>(dbl));
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
+        const EBCellFAB& fab     = (*a_data[i][lvl])[dit()];
+        const EBISBox&   ebisbox = fab.getEBISBox();
+        (*vofIter[lvl])[dit()].define(ebisbox.getIrregIVS(dbl.get(dit())), ebisbox.getEBGraph());
+      }
+    }
+
+    DataOps::getMaxMin(a_max[i], a_min[i], a_data[i], comp, vofIter);
   }
 }
 

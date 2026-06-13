@@ -1694,7 +1694,7 @@ FieldSolver::writeSurfaceData(LevelData<EBCellFAB>&             a_output,
   m_amr->allocate(scratch, m_realm, phase::gas, a_level, numComp);
 
   DataOps::setValue(scratch, 0.0);
-  DataOps::incr(scratch, a_data, 1.0);
+  DataOps::incr(scratch, a_data, 1.0, (*m_amr->getVofIterator(m_realm, phase::gas)[a_level]));
 
   // Copy to a_output
   const Interval srcInterv = Interval(0, 0);

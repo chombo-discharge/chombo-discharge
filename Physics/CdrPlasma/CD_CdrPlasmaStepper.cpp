@@ -3959,7 +3959,10 @@ CdrPlasmaStepper::computeElectrodeCurrent()
 
     // Add the flux to the total charge flux.
     if (Z != 0) {
-      DataOps::incr(currentDensity, solverFlux, species->getChargeNumber() * Units::Qe);
+      DataOps::incr(currentDensity,
+                    solverFlux,
+                    species->getChargeNumber() * Units::Qe,
+                    m_amr->getVofIterator(m_realm, m_cdr->getPhase()));
     }
   }
 
@@ -4047,7 +4050,10 @@ CdrPlasmaStepper::computeDielectricCurrent()
 
     // Add the flux to the total charge flux.
     if (Z != 0) {
-      DataOps::incr(currentDensity, solverFlux, species->getChargeNumber() * Units::Qe);
+      DataOps::incr(currentDensity,
+                    solverFlux,
+                    species->getChargeNumber() * Units::Qe,
+                    m_amr->getVofIterator(m_realm, m_cdr->getPhase()));
     }
   }
 

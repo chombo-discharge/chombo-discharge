@@ -362,6 +362,26 @@ public:
 
   /**
     @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components.
+    @details Builds VoF iterators internally from the lhs data's own IVS and EBGraph.
+    @param[in,out] a_lhs   Data to be incremented.
+    @param[in]     a_rhs   Incrementation.
+    @param[in]     a_scale Scale factor.
+  */
+  static void
+  incr(EBAMRIVData& a_lhs, const EBAMRIVData& a_rhs, const Real& a_scale);
+
+  /**
+    @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components.
+    @details Builds VoF iterators internally from the lhs data's own IVS and EBGraph.
+    @param[in,out] a_lhs   Data to be incremented.
+    @param[in]     a_rhs   Incrementation.
+    @param[in]     a_scale Scale factor.
+  */
+  static void
+  incr(LevelData<BaseIVFAB<Real>>& a_lhs, const LevelData<BaseIVFAB<Real>>& a_rhs, const Real& a_scale);
+
+  /**
+    @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components.
     @param[in,out] a_lhs    Data to be incremented.
     @param[in]     a_rhs    Incrementation.
     @param[in]     a_scale  Scale factor.
