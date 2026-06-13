@@ -2,7 +2,7 @@
 
 ## Status — update at the start/end of each session
 
-**Branch:** `dataops` | **Last updated:** 2026-06-12 | **5-sites complete.**
+**Branch:** `dataops` | **Last updated:** 2026-06-13 | **Phase 2 BaseIVFAB vofIter extensions complete.**
 
 ### Planning — complete (do not re-litigate these decisions)
 
@@ -18,6 +18,7 @@
 - [x] **3+4-code** — Write `DataOps` signature + implementation changes (see §3+4 task list)
 - [x] **5-sites** — Update all call sites in Checkpoint 5 (all VoFIter-needing calls updated; MF variants and FaceIterator-based functions intentionally unchanged)
 - [x] **7-face-iters** — Pre-built FaceIterators added to PhaseRealm/Realm/AmrMesh; new overloads added to DataOps for getMaxMin, invert, squareRoot, setValue(EBFluxFAB), averageCellToFace, averageCellVelocityToFaceVelocity
+- [x] **Phase 2 BaseIVFAB vofIter** — Extended incr/multiply/multiplyScalar/scale for LevelData<BaseIVFAB> and EBAMRIVData wrappers to require explicit VoFIterator. Fixed latent vofit()/vof bug in scale. Updated all call sites (CdrPlasmaStepper, ItoKMCStepper, ItoKMCGodunovStepper, CdrSolver, FieldSolverGMG, EddingtonSP1, MFHelmholtzOpFactory, SurfaceODESolver).
 - [ ] **6-cleanup** — Pre-merge cleanup (do last)
 
 **Resume here:** `6-cleanup` — pre-merge cleanup.
