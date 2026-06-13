@@ -1401,7 +1401,7 @@ AmrMesh::computeGradient(EBAMRFluxData&           a_gradient,
   this->interpGhost(scratch, a_realm, a_phase);
 
   // Average the cells to face and replace the normal derivative with a tighter stencil.
-  DataOps::averageCellToFace(a_gradient, scratch, this->getDomains());
+  DataOps::averageCellToFace(a_gradient, scratch, this->getDomains(), this->getFaceIterator(a_realm, a_phase));
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const RefCountedPtr<EBGradient>& gradientOp = m_realms[a_realm]->getGradientOp(a_phase)[lvl];
 

@@ -1205,7 +1205,8 @@ ItoKMCGodunovStepper<I, C, R, F>::computeFaceConductivity() noexcept
                              tanGhost,
                              interv,
                              interv,
-                             average);
+                             average,
+                             (this->m_amr)->getFaceIteratorWithTangentialGhosts(this->m_fluidRealm, this->m_plasmaPhase));
 
   // Set the EB conductivity.
   DataOps::incr((this->m_conductivityEB), (this->m_conductivityCell), 1.0);

@@ -3459,7 +3459,8 @@ ItoKMCStepper<I, C, R, F>::averageDiffusionCoefficientsCellToFace() noexcept
                                  tanGhost,
                                  interv,
                                  interv,
-                                 average);
+                                 average,
+                                 m_amr->getFaceIteratorWithTangentialGhosts(m_fluidRealm, m_cdr->getPhase()));
     }
   }
 }

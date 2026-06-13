@@ -384,7 +384,8 @@ CdrSolver::averageVelocityToFaces(EBAMRFluxData& a_faceVelocity, const EBAMRCell
     DataOps::averageCellVelocityToFaceVelocity(*a_faceVelocity[lvl],
                                                *a_cellVelocity[lvl],
                                                m_amr->getDomains()[lvl],
-                                               tanGhosts);
+                                               tanGhosts,
+                                               *m_amr->getFaceIteratorWithTangentialGhosts(m_realm, m_phase)[lvl]);
   }
 }
 
@@ -2977,13 +2978,13 @@ CdrSolver::gwnDiffusionSource(EBAMRCellData& a_noiseSource, const EBAMRCellData&
     this->smoothHeavisideFaces(scratchFluxOne, a_cellPhi);
     DataOps::multiply(scratchFluxOne, m_faceCenteredDiffusionCoefficient); // scratchFluxOne = D*phis
     DataOps::scale(scratchFluxOne, 2.0);                                   // scratchFluxOne = 2*D*phis
-    DataOps::squareRoot(scratchFluxOne);                                   // scratchFluxOne = sqrt(2*D*phis)
+    DataOps::squareRoot(scratchFluxOne, m_amr->getFaceIterator(m_realm, m_phase)); // scratchFluxOne = sqrt(2*D*phis)
 
 #ifndef NDEBUG
     Real max;
     Real min;
 
-    DataOps::getMaxMin(max, min, scratchFluxOne, 0);
+    DataOps::getMaxMin(max, min, scratchFluxOne, 0, m_amr->getFaceIterator(m_realm, m_phase));
 
     if (min < 0.0 || max < 0.0) {
       MayDay::Abort("CdrSolver::gwnDiffusionSource - negative face value");

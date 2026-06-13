@@ -256,7 +256,8 @@ CdrPlasmaStepper::computeFaceConductivity(EBAMRFluxData&       a_conductivityFac
                              tanGhost,
                              interv,
                              interv,
-                             average);
+                             average,
+                             m_amr->getFaceIteratorWithTangentialGhosts(m_realm, m_phase));
 
 #if 1 // Don't do this if the cell-centered values were interpolated to centroids.
   m_amr->interpToEB(a_conductivityEB, a_conductivityCell, m_realm, m_phase);
@@ -1671,7 +1672,8 @@ CdrPlasmaStepper::computeCdrDiffusionFace(Vector<EBAMRFluxData*>&       a_cdrDco
                                  tanGhost,
                                  interv,
                                  interv,
-                                 average);
+                                 average,
+                                 m_amr->getFaceIteratorWithTangentialGhosts(m_realm, m_phase));
     }
   }
 }

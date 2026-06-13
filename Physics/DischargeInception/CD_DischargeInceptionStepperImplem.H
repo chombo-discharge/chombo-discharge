@@ -5281,7 +5281,8 @@ DischargeInceptionStepper<P, F, C>::computeIonDiffusion(const Real& a_voltage) n
                              1,
                              Interval(0, 0),
                              Interval(0, 0),
-                             Average::Arithmetic);
+                             Average::Arithmetic,
+                             m_amr->getFaceIteratorWithTangentialGhosts(m_realm, m_phase));
 }
 
 template <typename P, typename F, typename C>

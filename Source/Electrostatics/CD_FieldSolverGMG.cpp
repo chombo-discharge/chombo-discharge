@@ -537,7 +537,14 @@ FieldSolverGMG::setPermittivities()
     // cell-centered data to faces, including one ghost face.
     m_amr->interpGhost(permCellGas, m_realm, phase::gas);
 
-    DataOps::averageCellToFace(permFluxGas, permCellGas, m_amr->getDomains(), tanGhost, interv, interv, average);
+    DataOps::averageCellToFace(permFluxGas,
+                               permCellGas,
+                               m_amr->getDomains(),
+                               tanGhost,
+                               interv,
+                               interv,
+                               average,
+                               m_amr->getFaceIteratorWithTangentialGhosts(m_realm, phase::gas));
 
     m_amr->average(permFluxGas, m_realm, phase::gas, average);
   }
@@ -555,7 +562,14 @@ FieldSolverGMG::setPermittivities()
     // cell-centered data to faces, including one ghost face.
     m_amr->interpGhost(permCellSol, m_realm, phase::solid);
 
-    DataOps::averageCellToFace(permFluxSol, permCellSol, m_amr->getDomains(), tanGhost, interv, interv, average);
+    DataOps::averageCellToFace(permFluxSol,
+                               permCellSol,
+                               m_amr->getDomains(),
+                               tanGhost,
+                               interv,
+                               interv,
+                               average,
+                               m_amr->getFaceIteratorWithTangentialGhosts(m_realm, phase::solid));
 
     m_amr->average(permFluxSol, m_realm, phase::solid, average);
   }
