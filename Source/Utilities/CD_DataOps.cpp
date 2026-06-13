@@ -2148,8 +2148,14 @@ DataOps::kappaScale(MFAMRCellData&                                        a_data
 {
   CH_TIME("DataOps::kappaScale(MFAMRCellData, vofIter)");
 
+  const RefCountedPtr<LayoutData<VoFIterator>> nullIter;
+
   for (int lvl = 0; lvl < a_data.size(); lvl++) {
-    DataOps::kappaScale(*a_data[lvl], a_vofIterPhase0[lvl], a_vofIterPhase1[lvl]);
+    const RefCountedPtr<LayoutData<VoFIterator>> iter0 =
+      (lvl < a_vofIterPhase0.size()) ? a_vofIterPhase0[lvl] : nullIter;
+    const RefCountedPtr<LayoutData<VoFIterator>> iter1 =
+      (lvl < a_vofIterPhase1.size()) ? a_vofIterPhase1[lvl] : nullIter;
+    DataOps::kappaScale(*a_data[lvl], iter0, iter1);
   }
 }
 
@@ -2773,8 +2779,14 @@ DataOps::setValue(MFAMRCellData&                                        a_lhs,
 {
   CH_TIME("DataOps::setValue(MFAMRCellData, std::function, vofIter)");
 
+  const RefCountedPtr<LayoutData<VoFIterator>> nullIter;
+
   for (int lvl = 0; lvl < a_lhs.size(); lvl++) {
-    DataOps::setValue(*a_lhs[lvl], a_function, a_probLo, a_dx[lvl], a_comp, a_vofIterPhase0[lvl], a_vofIterPhase1[lvl]);
+    const RefCountedPtr<LayoutData<VoFIterator>> iter0 =
+      (lvl < a_vofIterPhase0.size()) ? a_vofIterPhase0[lvl] : nullIter;
+    const RefCountedPtr<LayoutData<VoFIterator>> iter1 =
+      (lvl < a_vofIterPhase1.size()) ? a_vofIterPhase1[lvl] : nullIter;
+    DataOps::setValue(*a_lhs[lvl], a_function, a_probLo, a_dx[lvl], a_comp, iter0, iter1);
   }
 }
 
@@ -3363,8 +3375,14 @@ DataOps::squareRoot(MFAMRCellData&                                        a_lhs,
 {
   CH_TIME("DataOps::squareRoot(MFAMRCellData, vofIter)");
 
+  const RefCountedPtr<LayoutData<VoFIterator>> nullIter;
+
   for (int lvl = 0; lvl < a_lhs.size(); lvl++) {
-    DataOps::squareRoot(*a_lhs[lvl], a_vofIterPhase0[lvl], a_vofIterPhase1[lvl]);
+    const RefCountedPtr<LayoutData<VoFIterator>> iter0 =
+      (lvl < a_vofIterPhase0.size()) ? a_vofIterPhase0[lvl] : nullIter;
+    const RefCountedPtr<LayoutData<VoFIterator>> iter1 =
+      (lvl < a_vofIterPhase1.size()) ? a_vofIterPhase1[lvl] : nullIter;
+    DataOps::squareRoot(*a_lhs[lvl], iter0, iter1);
   }
 }
 
