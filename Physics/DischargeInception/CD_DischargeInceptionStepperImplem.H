@@ -1154,7 +1154,9 @@ DischargeInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>
       DataOps::incr(m_electricField, m_electricFieldHomo, Real(V));
       DataOps::incr(m_electricField, m_electricFieldInho, 1.0);
       DataOps::dotProduct(scratch, m_electricField, m_electricField);
-      DataOps::squareRoot(scratch);
+      DataOps::squareRoot(scratch,
+                          m_amr->getMultiCutVofIterator(m_realm, phase::gas),
+                          m_amr->getMultiCutVofIterator(m_realm, phase::solid));
       m_fieldSolver->writeMultifluidData(a_output, a_icomp, scratch, phase::gas, a_outputRealm, a_level, true);
       m_fieldSolver->writeMultifluidData(a_output, a_icomp, m_electricField, phase::gas, a_outputRealm, a_level, true);
 
@@ -1163,13 +1165,21 @@ DischargeInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>
       DataOps::incr(m_electricField, m_electricFieldHomo, -Real(V));
       DataOps::incr(m_electricField, m_electricFieldInho, 1.0);
       DataOps::dotProduct(scratch, m_electricField, m_electricField);
-      DataOps::squareRoot(scratch);
+      DataOps::squareRoot(scratch,
+                          m_amr->getMultiCutVofIterator(m_realm, phase::gas),
+                          m_amr->getMultiCutVofIterator(m_realm, phase::solid));
       m_fieldSolver->writeMultifluidData(a_output, a_icomp, scratch, phase::gas, a_outputRealm, a_level, true);
       m_fieldSolver->writeMultifluidData(a_output, a_icomp, m_electricField, phase::gas, a_outputRealm, a_level, true);
     }
 
     // Write the space charge density
-    DataOps::setValue(scratch, m_rho, m_amr->getProbLo(), m_amr->getDx(), 0);
+    DataOps::setValue(scratch,
+                      m_rho,
+                      m_amr->getProbLo(),
+                      m_amr->getDx(),
+                      0,
+                      m_amr->getVofIterator(m_realm, phase::gas),
+                      m_amr->getVofIterator(m_realm, phase::solid));
     m_amr->arithmeticAverage(scratch, m_realm);
     m_amr->interpGhostPwl(scratch, m_realm);
     m_fieldSolver->writeMultifluidData(a_output, a_icomp, scratch, phase::gas, a_outputRealm, a_level, true);
@@ -1342,7 +1352,9 @@ DischargeInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>&
     m_amr->allocate(scratchSurf, m_realm, phase::gas, 1);
 
     DataOps::dotProduct(scratch, m_electricField, m_electricField);
-    DataOps::squareRoot(scratch);
+    DataOps::squareRoot(scratch,
+                        m_amr->getMultiCutVofIterator(m_realm, phase::gas),
+                        m_amr->getMultiCutVofIterator(m_realm, phase::solid));
     m_amr->arithmeticAverage(scratch, m_realm);
     m_amr->interpGhostPwl(scratch, m_realm);
 
@@ -1351,7 +1363,13 @@ DischargeInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>&
     m_fieldSolver->writeMultifluidData(a_output, a_icomp, m_electricField, phase::gas, a_outputRealm, a_level, true);
 
     // Write the space charge density
-    DataOps::setValue(scratch, m_rho, m_amr->getProbLo(), m_amr->getDx(), 0);
+    DataOps::setValue(scratch,
+                      m_rho,
+                      m_amr->getProbLo(),
+                      m_amr->getDx(),
+                      0,
+                      m_amr->getVofIterator(m_realm, phase::gas),
+                      m_amr->getVofIterator(m_realm, phase::solid));
     m_amr->arithmeticAverage(scratch, m_realm);
     m_amr->interpGhostPwl(scratch, m_realm);
     m_fieldSolver->writeMultifluidData(a_output, a_icomp, scratch, phase::gas, a_outputRealm, a_level, true);

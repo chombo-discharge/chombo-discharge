@@ -481,7 +481,13 @@ FieldSolver::setRho(const std::function<Real(const RealVect)>& a_rho)
     pout() << "FieldSolver::setRho(std::function<Real(const RealVect)>))" << endl;
   }
 
-  DataOps::setValue(m_rho, a_rho, m_amr->getProbLo(), m_amr->getDx(), m_comp);
+  DataOps::setValue(m_rho,
+                    a_rho,
+                    m_amr->getProbLo(),
+                    m_amr->getDx(),
+                    m_comp,
+                    m_amr->getVofIterator(m_realm, phase::gas),
+                    m_amr->getVofIterator(m_realm, phase::solid));
 
   m_amr->conservativeAverage(m_rho, m_realm);
   m_amr->interpGhost(m_rho, m_realm);

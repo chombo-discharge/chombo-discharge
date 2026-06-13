@@ -292,7 +292,9 @@ FieldSolverGMG::solve(MFAMRCellData&       a_phi,
   // Special flag for when a_rho is on the centroid but was not scaled by kappa on input. The multigrid operator solves
   // kappa*L(phi) = kappa*rho so the right-hand side must be kappa-weighted.
   if (m_kappaSource) {
-    DataOps::kappaScale(kappaRhoByEps0);
+    DataOps::kappaScale(kappaRhoByEps0,
+                        m_amr->getVofIterator(m_realm, phase::gas),
+                        m_amr->getVofIterator(m_realm, phase::solid));
   }
 
   m_amr->conservativeAverage(a_phi, m_realm);

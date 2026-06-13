@@ -2076,19 +2076,23 @@ DataOps::kappaScale(LevelData<EBCellFAB>& a_data, LayoutData<VoFIterator>& a_vof
 }
 
 void
-DataOps::kappaScale(MFAMRCellData& a_data) noexcept
+DataOps::kappaScale(MFAMRCellData&                                                a_data,
+                    const Vector<RefCountedPtr<LayoutData<VoFIterator>>>&         a_vofIterPhase0,
+                    const Vector<RefCountedPtr<LayoutData<VoFIterator>>>&         a_vofIterPhase1) noexcept
 {
-  CH_TIME("DataOps::kappaScale(MFAMRCellData");
+  CH_TIME("DataOps::kappaScale(MFAMRCellData, vofIter)");
 
   for (int lvl = 0; lvl < a_data.size(); lvl++) {
-    DataOps::kappaScale(*a_data[lvl]);
+    DataOps::kappaScale(*a_data[lvl], a_vofIterPhase0[lvl], a_vofIterPhase1[lvl]);
   }
 }
 
 void
-DataOps::kappaScale(LevelData<MFCellFAB>& a_data) noexcept
+DataOps::kappaScale(LevelData<MFCellFAB>&                        a_data,
+                    const RefCountedPtr<LayoutData<VoFIterator>>& a_vofIterPhase0,
+                    const RefCountedPtr<LayoutData<VoFIterator>>& a_vofIterPhase1) noexcept
 {
-  CH_TIME("DataOps::kappaScale(LD<MFCellFAB>)");
+  CH_TIME("DataOps::kappaScale(LD<MFCellFAB>, vofIter)");
 
   const DisjointBoxLayout& dbl = a_data.disjointBoxLayout();
   const DataIterator&      dit = dbl.dataIterator();
@@ -2101,21 +2105,17 @@ DataOps::kappaScale(LevelData<MFCellFAB>& a_data) noexcept
     MFCellFAB& mfdata = a_data[din];
 
     for (int iphase = 0; iphase < mfdata.numPhases(); iphase++) {
-      EBCellFAB& data = mfdata.getPhase(iphase);
+      const RefCountedPtr<LayoutData<VoFIterator>>& vofIter = (iphase == 0) ? a_vofIterPhase0 : a_vofIterPhase1;
+      if (vofIter.isNull()) continue;
 
-      const Box      cellBox = dbl[din];
+      EBCellFAB&     data    = mfdata.getPhase(iphase);
       const EBISBox& ebisbox = data.getEBISBox();
-      const EBGraph& ebgraph = ebisbox.getEBGraph();
-
-      VoFIterator vofit(ebisbox.getIrregIVS(cellBox), ebgraph);
 
       for (int comp = 0; comp < data.nComp(); comp++) {
-
         auto irregularKernel = [&](const VolIndex& vof) -> void {
           data(vof, comp) *= ebisbox.volFrac(vof);
         };
-
-        BoxLoops::loop(vofit, irregularKernel);
+        BoxLoops::loop((*vofIter)[din], irregularKernel);
       }
     }
   }
@@ -2705,27 +2705,31 @@ DataOps::setInvalidValue(EBAMRCellData& a_lhs, const Vector<int>& a_refRat, cons
 }
 
 void
-DataOps::setValue(MFAMRCellData&                             a_lhs,
-                  const std::function<Real(const RealVect)>& a_function,
-                  const RealVect&                            a_probLo,
-                  const Vector<Real>&                        a_dx,
-                  const int                                  a_comp)
+DataOps::setValue(MFAMRCellData&                                        a_lhs,
+                  const std::function<Real(const RealVect)>&            a_function,
+                  const RealVect&                                       a_probLo,
+                  const Vector<Real>&                                   a_dx,
+                  const int                                             a_comp,
+                  const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIterPhase0,
+                  const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIterPhase1)
 {
-  CH_TIME("DataOps::setValue(MFAMRCellData, std::function)");
+  CH_TIME("DataOps::setValue(MFAMRCellData, std::function, vofIter)");
 
   for (int lvl = 0; lvl < a_lhs.size(); lvl++) {
-    DataOps::setValue(*a_lhs[lvl], a_function, a_probLo, a_dx[lvl], a_comp);
+    DataOps::setValue(*a_lhs[lvl], a_function, a_probLo, a_dx[lvl], a_comp, a_vofIterPhase0[lvl], a_vofIterPhase1[lvl]);
   }
 }
 
 void
-DataOps::setValue(LevelData<MFCellFAB>&                      a_lhs,
-                  const std::function<Real(const RealVect)>& a_function,
-                  const RealVect                             a_probLo,
-                  const Real                                 a_dx,
-                  const int                                  a_comp)
+DataOps::setValue(LevelData<MFCellFAB>&                        a_lhs,
+                  const std::function<Real(const RealVect)>&   a_function,
+                  const RealVect                               a_probLo,
+                  const Real                                   a_dx,
+                  const int                                    a_comp,
+                  const RefCountedPtr<LayoutData<VoFIterator>>& a_vofIterPhase0,
+                  const RefCountedPtr<LayoutData<VoFIterator>>& a_vofIterPhase1)
 {
-  CH_TIME("DataOps::setValue(LD<MFCellFAB>, std::function)");
+  CH_TIME("DataOps::setValue(LD<MFCellFAB>, std::function, vofIter)");
 
   const DataIterator& dit = a_lhs.dataIterator();
 
@@ -2738,35 +2742,27 @@ DataOps::setValue(LevelData<MFCellFAB>&                      a_lhs,
     MFCellFAB& lhs = a_lhs[din];
 
     for (int i = 0; i < lhs.numPhases(); i++) {
+      const RefCountedPtr<LayoutData<VoFIterator>>& vofIter = (i == 0) ? a_vofIterPhase0 : a_vofIterPhase1;
+      if (vofIter.isNull()) continue;
+
       EBCellFAB&     phaseData    = lhs.getPhase(i);
       BaseFab<Real>& phaseDataFAB = phaseData.getSingleValuedFAB();
 
-      // Kernel regions
-      const Box         box     = phaseData.box();
-      const EBISBox&    ebisbox = phaseData.getEBISBox();
-      const EBGraph&    ebgraph = ebisbox.getEBGraph();
-      const IntVectSet& irreg   = ebisbox.getIrregIVS(box);
-      VoFIterator       vofit(irreg, ebgraph);
+      const Box box = phaseData.box();
 
-      // Regular cells
       auto regularKernel = [&](const IntVect& iv) -> void {
-        const RealVect pos = a_probLo + (0.5 * RealVect::Unit + RealVect(iv)) * a_dx;
-
+        const RealVect pos    = a_probLo + (0.5 * RealVect::Unit + RealVect(iv)) * a_dx;
         phaseDataFAB(iv, a_comp) = a_function(pos);
       };
 
-      // Cut-cells.
       auto irregularKernel = [&](const VolIndex& vof) -> void {
-        const IntVect& iv = vof.gridIndex();
-
+        const IntVect& iv  = vof.gridIndex();
         const RealVect pos = a_probLo + (0.5 * RealVect::Unit + RealVect(iv)) * a_dx;
-
         phaseData(vof, a_comp) = a_function(pos);
       };
 
-      // Run kernels.
       BoxLoops::loop<D_DECL(1, 1, 1)>(box, regularKernel);
-      BoxLoops::loop(vofit, irregularKernel);
+      BoxLoops::loop((*vofIter)[din], irregularKernel);
     }
   }
 }
@@ -3301,19 +3297,23 @@ DataOps::squareRoot(LevelData<EBFluxFAB>& a_lhs, LayoutData<std::array<FaceItera
 }
 
 void
-DataOps::squareRoot(MFAMRCellData& a_lhs)
+DataOps::squareRoot(MFAMRCellData&                                                a_lhs,
+                    const Vector<RefCountedPtr<LayoutData<VoFIterator>>>&         a_vofIterPhase0,
+                    const Vector<RefCountedPtr<LayoutData<VoFIterator>>>&         a_vofIterPhase1)
 {
-  CH_TIME("DataOps::squareRoot(MFAMRCellData)");
+  CH_TIME("DataOps::squareRoot(MFAMRCellData, vofIter)");
 
   for (int lvl = 0; lvl < a_lhs.size(); lvl++) {
-    DataOps::squareRoot(*a_lhs[lvl]);
+    DataOps::squareRoot(*a_lhs[lvl], a_vofIterPhase0[lvl], a_vofIterPhase1[lvl]);
   }
 }
 
 void
-DataOps::squareRoot(LevelData<MFCellFAB>& a_lhs)
+DataOps::squareRoot(LevelData<MFCellFAB>&                        a_lhs,
+                    const RefCountedPtr<LayoutData<VoFIterator>>& a_vofIterPhase0,
+                    const RefCountedPtr<LayoutData<VoFIterator>>& a_vofIterPhase1)
 {
-  CH_TIME("DataOps::squareRoot(LD<MFCellFAB>)");
+  CH_TIME("DataOps::squareRoot(LD<MFCellFAB>, vofIter)");
 
   const DataIterator& dit = a_lhs.dataIterator();
 
@@ -3326,30 +3326,25 @@ DataOps::squareRoot(LevelData<MFCellFAB>& a_lhs)
     MFCellFAB& lhs = a_lhs[din];
 
     for (int i = 0; i < lhs.numPhases(); i++) {
+      const RefCountedPtr<LayoutData<VoFIterator>>& vofIter = (i == 0) ? a_vofIterPhase0 : a_vofIterPhase1;
+      if (vofIter.isNull()) continue;
+
       EBCellFAB& phaseData    = lhs.getPhase(i);
       FArrayBox& phaseDataReg = phaseData.getFArrayBox();
 
-      // Kernel regions
-      const Box         box     = phaseData.box();
-      const EBISBox&    ebisbox = phaseData.getEBISBox();
-      const EBGraph&    ebgraph = ebisbox.getEBGraph();
-      const IntVectSet& irreg   = ebisbox.getMultiCells(box);
-      VoFIterator       vofit(irreg, ebgraph);
+      const Box box = phaseData.box();
 
-      // Regular cells
       for (int comp = 0; comp < phaseData.nComp(); comp++) {
         auto regularKernel = [&](const IntVect& iv) -> void {
           phaseDataReg(iv, comp) = sqrt(phaseDataReg(iv, comp));
         };
 
-        // Cut-cells.
         auto irregularKernel = [&](const VolIndex& vof) -> void {
           phaseData(vof, comp) = sqrt(phaseData(vof, comp));
         };
 
-        // Run kernels.
         BoxLoops::loop<D_DECL(1, 1, 1)>(box, regularKernel);
-        BoxLoops::loop(vofit, irregularKernel);
+        BoxLoops::loop((*vofIter)[din], irregularKernel);
       }
     }
   }

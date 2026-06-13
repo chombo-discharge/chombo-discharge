@@ -868,18 +868,26 @@ public:
   kappaScale(LevelData<EBCellFAB>& a_data, LayoutData<VoFIterator>& a_vofIter) noexcept;
 
   /**
-    @brief Scale data by volume fraction
-    @param[in,out] a_data Data to be scaled. On output we have a_data = kappa * a_data
+    @brief Scale data by volume fraction.
+    @param[in,out] a_data         Data to be scaled. On output we have a_data = kappa * a_data.
+    @param[in]     a_vofIterPhase0 Pre-built VoF iterators (all cut-cells) for phase 0 (gas). May be null if phase 0 is absent.
+    @param[in]     a_vofIterPhase1 Pre-built VoF iterators (all cut-cells) for phase 1 (solid). May be null if phase 1 is absent.
   */
   static void
-  kappaScale(MFAMRCellData& a_data) noexcept;
+  kappaScale(MFAMRCellData&                                                a_data,
+             const Vector<RefCountedPtr<LayoutData<VoFIterator>>>&         a_vofIterPhase0,
+             const Vector<RefCountedPtr<LayoutData<VoFIterator>>>&         a_vofIterPhase1) noexcept;
 
   /**
-    @brief Scale data by volume fraction
-    @param[in,out] a_data Data to be scaled. On output we have a_data = kappa * a_data
+    @brief Scale data by volume fraction.
+    @param[in,out] a_data         Data to be scaled. On output we have a_data = kappa * a_data.
+    @param[in]     a_vofIterPhase0 Pre-built VoF iterator (all cut-cells) for phase 0 (gas). May be null if phase 0 is absent.
+    @param[in]     a_vofIterPhase1 Pre-built VoF iterator (all cut-cells) for phase 1 (solid). May be null if phase 1 is absent.
   */
   static void
-  kappaScale(LevelData<MFCellFAB>& a_data) noexcept;
+  kappaScale(LevelData<MFCellFAB>&                        a_data,
+             const RefCountedPtr<LayoutData<VoFIterator>>& a_vofIterPhase0,
+             const RefCountedPtr<LayoutData<VoFIterator>>& a_vofIterPhase1) noexcept;
 
   /**
     @brief Scale data by dx^SpaceDim
@@ -1192,35 +1200,41 @@ public:
 
   /**
     @brief Polymorphic set value function. Takes a spatially varying function and sets the value in the specified component from that function.
-    @param[out] a_lhs      Data to set
-    @param[in]  a_function Function to use for setting the value. 
-    @param[in]  a_probLo   Lower-left corner of physical domain. 
-    @param[in]  a_dx       Grid resolutions
-    @param[in]  a_comp     Component to set
-    @note Uses a VofIterator everywhere to this might be slow!
+    @param[out] a_lhs           Data to set.
+    @param[in]  a_function      Function to use for setting the value.
+    @param[in]  a_probLo        Lower-left corner of physical domain.
+    @param[in]  a_dx            Grid resolutions.
+    @param[in]  a_comp          Component to set.
+    @param[in]  a_vofIterPhase0 Pre-built VoF iterators (all cut-cells) for phase 0 (gas). May be null if phase 0 is absent.
+    @param[in]  a_vofIterPhase1 Pre-built VoF iterators (all cut-cells) for phase 1 (solid). May be null if phase 1 is absent.
   */
   static void
-  setValue(MFAMRCellData&                             a_lhs,
-           const std::function<Real(const RealVect)>& a_function,
-           const RealVect&                            a_probLo,
-           const Vector<Real>&                        a_dx,
-           const int                                  a_comp);
+  setValue(MFAMRCellData&                                        a_lhs,
+           const std::function<Real(const RealVect)>&            a_function,
+           const RealVect&                                       a_probLo,
+           const Vector<Real>&                                   a_dx,
+           const int                                             a_comp,
+           const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIterPhase0,
+           const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIterPhase1);
 
   /**
     @brief Polymorphic set value function. Takes a spatially varying function and sets the value in the specified component from that function.
-    @param[out] a_lhs      Data to set
-    @param[in]  a_function Function to use for setting the value. 
-    @param[in]  a_probLo   Lower-left corner of physical domain. 
-    @param[in]  a_dx       Grid resolutions
-    @param[in]  a_comp     Component to set
-    @note Uses a VofIterator everywhere to this might be slow!
+    @param[out] a_lhs           Data to set.
+    @param[in]  a_function      Function to use for setting the value.
+    @param[in]  a_probLo        Lower-left corner of physical domain.
+    @param[in]  a_dx            Grid resolution.
+    @param[in]  a_comp          Component to set.
+    @param[in]  a_vofIterPhase0 Pre-built VoF iterator (all cut-cells) for phase 0 (gas). May be null if phase 0 is absent.
+    @param[in]  a_vofIterPhase1 Pre-built VoF iterator (all cut-cells) for phase 1 (solid). May be null if phase 1 is absent.
   */
   static void
-  setValue(LevelData<MFCellFAB>&                      a_lhs,
-           const std::function<Real(const RealVect)>& a_function,
-           const RealVect                             a_probLo,
-           const Real                                 a_dx,
-           const int                                  a_comp);
+  setValue(LevelData<MFCellFAB>&                        a_lhs,
+           const std::function<Real(const RealVect)>&   a_function,
+           const RealVect                               a_probLo,
+           const Real                                   a_dx,
+           const int                                    a_comp,
+           const RefCountedPtr<LayoutData<VoFIterator>>& a_vofIterPhase0,
+           const RefCountedPtr<LayoutData<VoFIterator>>& a_vofIterPhase1);
 
   /**
     @brief Polymorphic set value function. Takes a spatially varying function and sets the value in the specified component from that function.
@@ -1510,18 +1524,28 @@ public:
   squareRoot(LevelData<EBFluxFAB>& a_lhs, LayoutData<std::array<FaceIterator, SpaceDim>>& a_faceIter);
 
   /**
-    @brief Take the square root of the input data
-    @param[in,out] a_lhs Input data
+    @brief Take the square root of the input data.
+    @param[in,out] a_lhs           Input data.
+    @param[in]     a_vofIterPhase0 Pre-built VoF iterators restricted to multiply-cut cells for phase 0 (gas). May be null if phase 0 is absent.
+    @param[in]     a_vofIterPhase1 Pre-built VoF iterators restricted to multiply-cut cells for phase 1 (solid). May be null if phase 1 is absent.
+    @note The VoFIterators must cover only multiply-cut cells (from AmrMesh::getMultiCutVofIterator), because the regular-cell pass via getSingleValuedFAB already handles VoF 0 of all cut-cells.
   */
   static void
-  squareRoot(MFAMRCellData& a_lhs);
+  squareRoot(MFAMRCellData&                                                a_lhs,
+             const Vector<RefCountedPtr<LayoutData<VoFIterator>>>&         a_vofIterPhase0,
+             const Vector<RefCountedPtr<LayoutData<VoFIterator>>>&         a_vofIterPhase1);
 
   /**
-    @brief Take the square root of the input data
-    @param[in,out] a_lhs Input data
+    @brief Take the square root of the input data.
+    @param[in,out] a_lhs           Input data.
+    @param[in]     a_vofIterPhase0 Pre-built VoF iterator restricted to multiply-cut cells for phase 0 (gas). May be null if phase 0 is absent.
+    @param[in]     a_vofIterPhase1 Pre-built VoF iterator restricted to multiply-cut cells for phase 1 (solid). May be null if phase 1 is absent.
+    @note The VoFIterators must cover only multiply-cut cells (from AmrMesh::getMultiCutVofIterator), because the regular-cell pass via getSingleValuedFAB already handles VoF 0 of all cut-cells.
   */
   static void
-  squareRoot(LevelData<MFCellFAB>& a_lhs);
+  squareRoot(LevelData<MFCellFAB>&                        a_lhs,
+             const RefCountedPtr<LayoutData<VoFIterator>>& a_vofIterPhase0,
+             const RefCountedPtr<LayoutData<VoFIterator>>& a_vofIterPhase1);
 
   /**
     @brief Compute the vector length of a data holder. Sets a_lhs = |a_rhs| where a_rhs contains SpaceDim components.
