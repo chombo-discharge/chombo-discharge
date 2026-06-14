@@ -1401,7 +1401,10 @@ AmrMesh::computeGradient(EBAMRFluxData&           a_gradient,
   this->interpGhost(scratch, a_realm, a_phase);
 
   // Average the cells to face and replace the normal derivative with a tighter stencil.
-  DataOps::averageCellToFace(a_gradient, scratch, this->getDomains(), this->getFaceIterator(a_realm, a_phase));
+  DataOps::averageCellToFace(a_gradient,
+                             scratch,
+                             this->getDomains(),
+                             this->getFaceIteratorNoBoundary(a_realm, a_phase));
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const RefCountedPtr<EBGradient>& gradientOp = m_realms[a_realm]->getGradientOp(a_phase)[lvl];
 
@@ -3260,6 +3263,23 @@ AmrMesh::getFaceIterator(const std::string& a_realm, const phase::which_phase a_
   }
 
   return m_realms[a_realm]->getFaceIterator(a_phase);
+}
+
+Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+AmrMesh::getFaceIteratorNoBoundary(const std::string& a_realm, const phase::which_phase a_phase) const
+{
+  CH_TIME("AmrMesh::getFaceIteratorNoBoundary(string, phase::which_phase)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getFaceIteratorNoBoundary(string, phase::which_phase)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getFaceIteratorNoBoundary(string, phase::which_phase) - could not find realm '" +
+                            a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getFaceIteratorNoBoundary(a_phase);
 }
 
 Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&

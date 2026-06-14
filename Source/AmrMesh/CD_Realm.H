@@ -290,12 +290,24 @@ public:
 
   /**
     @brief Get face iterators with FaceStop::SurroundingWithBoundary over cut-cell faces in each valid grid box for a particular phase.
-    @details Includes domain-boundary faces. For faces that extend into the tangential ghost layer, use getFaceIteratorWithTangentialGhosts.
+    @details Includes domain-boundary faces. For cell-to-face averaging that excludes domain boundary
+    faces, use getFaceIteratorNoBoundary. For faces that extend into the tangential ghost layer, use
+    getFaceIteratorWithTangentialGhosts.
     @param[in] a_phase Phase (gas or solid)
     @return Per-level LayoutData of FaceIterator arrays (one per coordinate direction)
   */
   Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
   getFaceIterator(const phase::which_phase a_phase) const;
+
+  /**
+    @brief Get face iterators with FaceStop::SurroundingNoBoundary over cut-cell faces in each valid grid box for a particular phase.
+    @details Domain boundary faces are excluded. Intended for cell-to-face averaging where boundary
+    faces are fixed up separately. For iterators that include domain boundary faces, use getFaceIterator.
+    @param[in] a_phase Phase (gas or solid)
+    @return Per-level LayoutData of FaceIterator arrays (one per coordinate direction)
+  */
+  Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+  getFaceIteratorNoBoundary(const phase::which_phase a_phase) const;
 
   /**
     @brief Get per-direction face iterators covering cut-cell faces that reach into the tangential ghost layer.

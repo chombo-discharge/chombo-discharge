@@ -1777,15 +1777,26 @@ public:
   getMultiCutVofIterator(const std::string& a_realm, const phase::which_phase a_phase) const;
 
   /**
-    @brief Get face iterators over cut-cell faces in each valid grid box.
-    @details Each per-box entry is an array of SpaceDim FaceIterators. Faces are enumerated
-             over the valid box with FaceStop::SurroundingWithBoundary.
+    @brief Get face iterators over cut-cell faces in each valid grid box (FaceStop::SurroundingWithBoundary).
+    @details Each per-box entry is an array of SpaceDim FaceIterators. Domain boundary faces are included.
+             For cell-to-face averaging that excludes domain boundary faces, use getFaceIteratorNoBoundary.
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)
     @return Per-level LayoutData of FaceIterator arrays
   */
   Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
   getFaceIterator(const std::string& a_realm, const phase::which_phase a_phase) const;
+
+  /**
+    @brief Get face iterators over cut-cell faces in each valid grid box (FaceStop::SurroundingNoBoundary).
+    @details Each per-box entry is an array of SpaceDim FaceIterators. Domain boundary faces are excluded.
+             Intended for cell-to-face averaging where boundary faces are fixed up separately.
+    @param[in] a_realm Realm name
+    @param[in] a_phase Phase (gas or solid)
+    @return Per-level LayoutData of FaceIterator arrays
+  */
+  Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+  getFaceIteratorNoBoundary(const std::string& a_realm, const phase::which_phase a_phase) const;
 
   /**
     @brief Get per-direction face iterators covering cut-cell faces that reach into the tangential ghost layer.

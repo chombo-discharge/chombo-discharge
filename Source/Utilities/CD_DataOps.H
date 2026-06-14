@@ -86,10 +86,12 @@ public:
   /**
     @brief Average all components of the cell-centered data to faces (arithmetic, no tangential ghost faces).
     @details Convenience wrapper: calls the full overload with tanGhost=0, Interval(0,0), Average::Arithmetic.
+    The face iterator should use FaceStop::SurroundingNoBoundary; domain boundary faces are fixed up
+    separately by this function. Use AmrMesh::getFaceIteratorNoBoundary to obtain a suitable iterator.
     @param[out] a_faceData Face data.
     @param[in]  a_cellData Cell data.
     @param[in]  a_domains  AMR domains.
-    @param[in]  a_faceIter Pre-built face iterators for each level.
+    @param[in]  a_faceIter Pre-built face iterators (SurroundingNoBoundary) for each level.
   */
   static void
   averageCellToFace(EBAMRFluxData&                                                         a_faceData,
@@ -106,7 +108,8 @@ public:
     @param[in]  a_faceInterval Face variables.
     @param[in]  a_cellInterval Cell variables.
     @param[in]  a_average      Averaging method.
-    @param[in]  a_faceIter     Pre-built tangential-ghost face iterators for each level.
+    @param[in]  a_faceIter     Pre-built face iterators (SurroundingNoBoundary with tangential ghosts) for each level.
+                               Use AmrMesh::getFaceIteratorWithTangentialGhosts when a_tanGhosts > 0.
   */
   static void
   averageCellToFace(EBAMRFluxData&                                                         a_faceData,

@@ -274,13 +274,24 @@ public:
   getMultiCutVofIterator() const;
 
   /**
-    @brief Return face iterators over cut-cell faces in each valid grid box
+    @brief Return face iterators over cut-cell faces in each valid grid box (FaceStop::SurroundingWithBoundary).
     @details Each entry is an array of SpaceDim FaceIterators, one per coordinate direction.
-    Faces are enumerated over the valid box with FaceStop::SurroundingWithBoundary.
+    Domain boundary faces are included. For cell-to-face averaging that excludes domain boundary faces,
+    use getFaceIteratorNoBoundary instead.
     @return m_faceIter (which is, in fact, mutable)
   */
   Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
   getFaceIterator() const;
+
+  /**
+    @brief Return face iterators over cut-cell faces in each valid grid box (FaceStop::SurroundingNoBoundary).
+    @details Each entry is an array of SpaceDim FaceIterators, one per coordinate direction.
+    Domain boundary faces are excluded. Intended for cell-to-face averaging where domain boundary faces
+    are fixed up separately.
+    @return m_faceIterNoBoundary (which is, in fact, mutable)
+  */
+  Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+  getFaceIteratorNoBoundary() const;
 
   /**
     @brief Return per-direction face iterators covering cut-cell faces that reach into the tangential ghost layer.
@@ -552,12 +563,22 @@ protected:
   mutable Vector<RefCountedPtr<LayoutData<VoFIterator>>> m_multiCutVofIter;
 
   /**
-    @brief Face iterators over cut-cell faces (valid box, all surrounding faces including EB boundary)
+    @brief Face iterators over cut-cell faces in the valid box (FaceStop::SurroundingWithBoundary).
   */
   mutable Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>> m_faceIter;
 
   /**
-    @brief Face iterators over cut-cell faces in a box grown by 1 and clipped to the domain
+    @brief Face iterators over cut-cell faces in the valid box (FaceStop::SurroundingNoBoundary).
+    @details Domain boundary faces are excluded. Use this for cell-to-face averaging where boundary
+    faces are fixed up separately. See getFaceIteratorNoBoundary.
+  */
+  mutable Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>> m_faceIterNoBoundary;
+
+  /**
+    @brief Per-direction face iterators covering cut-cell faces that reach into the tangential ghost layer.
+    @details For the iterator in direction dir, the IVS covers irregular cells in a box grown by 1
+    in the two directions tangential to dir; the dir extent stays at the valid-box boundary.
+    Domain boundary faces are excluded (FaceStop::SurroundingNoBoundary).
   */
   mutable Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>> m_faceIterTanGhost;
 

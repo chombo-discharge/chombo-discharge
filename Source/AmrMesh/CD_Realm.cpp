@@ -1223,6 +1223,12 @@ Realm::getFaceIterator(const phase::which_phase a_phase) const
 }
 
 Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+Realm::getFaceIteratorNoBoundary(const phase::which_phase a_phase) const
+{
+  return m_realms[a_phase]->getFaceIteratorNoBoundary();
+}
+
+Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
 Realm::getFaceIteratorWithTangentialGhosts(const phase::which_phase a_phase) const
 {
   return m_realms[a_phase]->getFaceIteratorWithTangentialGhosts();

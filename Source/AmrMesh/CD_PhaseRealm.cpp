@@ -124,6 +124,7 @@ PhaseRealm::preRegrid()
   m_vofIter.resize(0);
   m_multiCutVofIter.resize(0);
   m_faceIter.resize(0);
+  m_faceIterNoBoundary.resize(0);
   m_faceIterTanGhost.resize(0);
   m_multiCutFaceIter.resize(0);
   m_coarAve.resize(0);
@@ -433,6 +434,7 @@ PhaseRealm::defineVofIterator(const int a_lmin)
   m_vofIter.resize(1 + m_finestLevel);
   m_multiCutVofIter.resize(1 + m_finestLevel);
   m_faceIter.resize(1 + m_finestLevel);
+  m_faceIterNoBoundary.resize(1 + m_finestLevel);
   m_faceIterTanGhost.resize(1 + m_finestLevel);
   m_multiCutFaceIter.resize(1 + m_finestLevel);
 
@@ -441,6 +443,8 @@ PhaseRealm::defineVofIterator(const int a_lmin)
     m_vofIter[lvl]         = RefCountedPtr<LayoutData<VoFIterator>>(new LayoutData<VoFIterator>(m_grids[lvl]));
     m_multiCutVofIter[lvl] = RefCountedPtr<LayoutData<VoFIterator>>(new LayoutData<VoFIterator>(m_grids[lvl]));
     m_faceIter[lvl]        = RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>(
+      new LayoutData<std::array<FaceIterator, SpaceDim>>(m_grids[lvl]));
+    m_faceIterNoBoundary[lvl] = RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>(
       new LayoutData<std::array<FaceIterator, SpaceDim>>(m_grids[lvl]));
     m_faceIterTanGhost[lvl] = RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>(
       new LayoutData<std::array<FaceIterator, SpaceDim>>(m_grids[lvl]));
@@ -467,10 +471,12 @@ PhaseRealm::defineVofIterator(const int a_lmin)
       vofit.define(irreg, ebgraph);
       multiCutVofit.define(multiCut, ebgraph);
 
-      // Standard face iterators over cut-cell faces in the valid box
-      std::array<FaceIterator, SpaceDim>& faceIter = (*m_faceIter[lvl])[din];
+      // Face iterators over cut-cell faces in the valid box, with and without domain boundary faces.
+      std::array<FaceIterator, SpaceDim>& faceIter           = (*m_faceIter[lvl])[din];
+      std::array<FaceIterator, SpaceDim>& faceIterNoBoundary = (*m_faceIterNoBoundary[lvl])[din];
       for (int dir = 0; dir < SpaceDim; dir++) {
         faceIter[dir].define(irreg, ebgraph, dir, FaceStop::SurroundingWithBoundary);
+        faceIterNoBoundary[dir].define(irreg, ebgraph, dir, FaceStop::SurroundingNoBoundary);
       }
 
       // Per-direction tangential-ghost face iterators. For faces in direction dir the IVS covers
@@ -947,6 +953,12 @@ Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
 PhaseRealm::getFaceIterator() const
 {
   return m_faceIter;
+}
+
+Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+PhaseRealm::getFaceIteratorNoBoundary() const
+{
+  return m_faceIterNoBoundary;
 }
 
 Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&

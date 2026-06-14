@@ -121,16 +121,12 @@ DataOps::averageCellVelocityToFaceVelocity(LevelData<EBFluxFAB>&                
             insideBox.shift(faceDir, -1);
           }
 
-          for (BoxIterator bit(insideBox); bit.ok(); ++bit) {
-            const IntVect ivCell = bit();
+          const IntVect faceShift = (sit() == Side::Lo) ? IntVect::Zero : BASISV(faceDir);
 
-            if (sit() == Side::Lo) {
-              faceDataReg(ivCell, 0) = cellDataReg(ivCell, faceDir);
-            }
-            else {
-              faceDataReg(ivCell + BASISV(faceDir), 0) = cellDataReg(ivCell, faceDir);
-            }
-          }
+          auto domainFaceKernel = [&](const IntVect& iv) -> void {
+            faceDataReg(iv + faceShift, 0) = cellDataReg(iv, faceDir);
+          };
+          BoxLoops::loop(insideBox, domainFaceKernel);
 
           FaceIterator bndryFaces(IntVectSet(insideBox), ebgraph, faceDir, FaceStop::AllBoundaryOnly);
 
@@ -207,12 +203,6 @@ DataOps::averageCellToFace(LevelData<EBFluxFAB>&                           a_fac
                            LayoutData<std::array<FaceIterator, SpaceDim>>& a_faceIter)
 {
   CH_TIME("DataOps::averageCellToFace(LD<EBFluxFAB>, faceIter)");
-
-  // When a_faceIter uses FaceStop::SurroundingWithBoundary, domain-boundary cut-cell faces are
-  // also processed: the kernel reads cellData on the ghost VoF across the domain boundary.
-  // Callers that use SurroundingWithBoundary must ensure ghost cells are filled (e.g. via
-  // interpGhost or exchange) before calling this function. Domain-boundary face values set here
-  // are typically overwritten by subsequent boundary-condition application.
 
   const int numVars   = a_cellInterval.size();
   const int cellBegin = a_cellInterval.begin();
@@ -339,17 +329,14 @@ DataOps::averageCellToFace(LevelData<EBFluxFAB>&                           a_fac
         const Box bndryBox = (sit() == Side::Lo) ? adjCellLo(a_domain, faceDir, -1) : adjCellHi(a_domain, faceDir, -1);
         const Box computeBox = cellBox & bndryBox;
 
-        for (BoxIterator bit(computeBox); bit.ok(); ++bit) {
-          const IntVect ivCell = bit();
-          const IntVect ivFace = (sit() == Side::Lo) ? ivCell : ivCell + BASISV(faceDir);
+        const IntVect faceShift = (sit() == Side::Lo) ? IntVect::Zero : BASISV(faceDir);
 
+        auto domainFaceKernel = [&](const IntVect& iv) -> void {
           for (int ioff = 0; ioff < numVars; ioff++) {
-            const int cellVar = cellBegin + ioff;
-            const int faceVar = faceBegin + ioff;
-
-            faceDataReg(ivFace, faceVar) = cellDataReg(ivCell, cellVar);
+            faceDataReg(iv + faceShift, faceBegin + ioff) = cellDataReg(iv, cellBegin + ioff);
           }
-        }
+        };
+        BoxLoops::loop(computeBox, domainFaceKernel);
 
         FaceIterator bndryFaces(IntVectSet(computeBox), ebgraph, faceDir, FaceStop::AllBoundaryOnly);
 
