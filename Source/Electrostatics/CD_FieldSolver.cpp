@@ -423,6 +423,7 @@ FieldSolver::deallocate()
   m_permittivityCell.clear();
   m_permittivityFace.clear();
   m_permittivityEB.clear();
+  m_grownCellVofIter.resize(0);
 }
 
 void

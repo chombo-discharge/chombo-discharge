@@ -996,7 +996,7 @@ DataOps::incr(EBAMRIVData&                                          a_lhs,
               const Real&                                           a_scale,
               const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter)
 {
-  CH_TIME("DataOps::incr(EBAMRIVData, faceIter)");
+  CH_TIME("DataOps::incr(EBAMRIVData, EBAMRIVData, Real, vofIter)");
 
   for (int lvl = 0; lvl < a_lhs.size(); lvl++) {
     DataOps::incr(*a_lhs[lvl], *a_rhs[lvl], a_scale, *a_vofIter[lvl]);

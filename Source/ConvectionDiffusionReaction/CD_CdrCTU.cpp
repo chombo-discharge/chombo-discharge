@@ -100,7 +100,7 @@ CdrCTU::regrid(const int a_lbase, const int a_oldFinestLevel, const int a_newFin
     pout() << m_name + "::regrid(int, int, int)" << endl;
   }
 
-  CdrSolver::regrid(a_lbase, a_oldFinestLevel, a_newFinestLevel);
+  CdrMultigrid::regrid(a_lbase, a_oldFinestLevel, a_newFinestLevel);
   this->defineIterators();
 }
 
