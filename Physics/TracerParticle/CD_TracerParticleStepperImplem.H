@@ -418,7 +418,11 @@ TracerParticleStepper<P>::setVelocity()
   }
   }
 
-  DataOps::setValue(m_velocity, velFunc, m_amr->getProbLo(), m_amr->getDx());
+  DataOps::setValue(m_velocity,
+                    velFunc,
+                    m_amr->getProbLo(),
+                    m_amr->getDx(),
+                    m_amr->getMultiCutVofIterator(m_realm, m_phase));
 
   m_amr->conservativeAverage(m_velocity, m_realm, m_phase);
   m_amr->interpGhost(m_velocity, m_realm, m_phase);

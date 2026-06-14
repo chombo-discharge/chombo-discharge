@@ -417,7 +417,7 @@ AdvectionDiffusionStepper::advance(const Real a_dt)
         m_solver->computeDivF(k1, state, a_dt, conservativeOnly, addEbFlux, addDomainFlux);
       }
 
-      DataOps::kappaScale(k1);
+      DataOps::kappaScale(k1, m_amr->getVofIterator(m_realm, m_phase));
       DataOps::scale(k1, -1.0);
 
       // Use k1 as the old solution.

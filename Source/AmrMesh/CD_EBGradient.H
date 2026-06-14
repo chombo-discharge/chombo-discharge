@@ -13,9 +13,13 @@
 #ifndef CD_EBGRADIENT_H
 #define CD_EBGRADIENT_H
 
+// Std includes
+#include <array>
+
 // Chombo includes
 #include <EBLevelGrid.H>
 #include <AggStencil.H>
+#include <FaceIterator.H>
 
 // Our includes
 #include <CD_Location.H>
@@ -248,10 +252,17 @@ protected:
   mutable LayoutData<VoFIterator> m_levelIterator;
 
   /**
-    @brief Iterator for EBCF cells. 
-    @note Lives on the coarse layout. 
+    @brief Iterator for EBCF cells.
+    @note Lives on the coarse layout.
   */
   mutable LayoutData<VoFIterator> m_ebcfIterator;
+
+  /**
+    @brief Face iterators restricted to multiply-cut faces per direction (valid box, SurroundingNoBoundary).
+    @details Used in computeFaceGradient as a second pass after the regular box loop to avoid
+    double-processing singly-cut faces.
+  */
+  mutable LayoutData<std::array<FaceIterator, SpaceDim>> m_multiCutFaceIter;
 
   /**
     @brief Define level stencils. 

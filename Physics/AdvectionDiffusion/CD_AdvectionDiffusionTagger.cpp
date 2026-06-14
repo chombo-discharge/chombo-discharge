@@ -78,8 +78,8 @@ AdvectionDiffusionTagger::tagCells(EBAMRTags& a_tags) // NOLINT(readability-conv
 
   // Compute the gradient
   m_amr->computeGradient(vec, sca, m_realm, phase::gas); // vec =  grad(phi)
-  DataOps::vectorLength(sca, vec);                       // sca = |grad(phi)|
-  DataOps::setCoveredValue(sca, 0, 0.0);                 // Set covered cell values to zero.
+  DataOps::vectorLength(sca, vec, m_amr->getMultiCutVofIterator(m_realm, phase::gas));
+  DataOps::setCoveredValue(sca, 0, 0.0); // Set covered cell values to zero.
 
   int foundTags = 0;
 

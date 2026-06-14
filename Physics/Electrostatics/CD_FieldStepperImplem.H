@@ -227,7 +227,12 @@ namespace Physics {
       EBAMRIVData&   sigma = m_sigma->getPhi();
 
       DataOps::setValue(state, 0.0);
-      DataOps::setValue(sigma, m_surfaceChargeDensity, m_amr->getProbLo(), m_amr->getDx(), 0);
+      DataOps::setValue(sigma,
+                        m_surfaceChargeDensity,
+                        m_amr->getProbLo(),
+                        m_amr->getDx(),
+                        0,
+                        m_amr->getVofIterator(m_realm, phase::gas));
       m_sigma->resetElectrodes(sigma, 0.0);
       m_fieldSolver->setRho(m_rhoGas);
 

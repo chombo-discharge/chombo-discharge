@@ -278,6 +278,12 @@ EBHelmholtzOp::getRelaxationCoeff() const noexcept
   return m_relCoef;
 }
 
+LayoutData<VoFIterator>&
+EBHelmholtzOp::getVofIterIrreg() const noexcept
+{
+  return m_vofIterIrreg;
+}
+
 void
 EBHelmholtzOp::defineStencils()
 {
@@ -607,10 +613,8 @@ EBHelmholtzOp::dotProduct(const LevelData<EBCellFAB>& a_lhs, const LevelData<EBC
     const bool isIrregular = !isCovered && !isRegular;
 
     if (isIrregular) {
-      VoFIterator vofit(ebisbox.getIrregIVS(cellBox), ebgraph);
-
       BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
-      BoxLoops::loop(vofit, irregularKernel);
+      BoxLoops::loop(m_vofIterIrreg[din], irregularKernel);
     }
     else if (isCovered) {
       BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
@@ -1500,7 +1504,7 @@ EBHelmholtzOp::diagonalScale(LevelData<EBCellFAB>& a_rhs, bool a_kappaWeighted)
 
   // Scale by volume fraction if asked.
   if (a_kappaWeighted) {
-    DataOps::kappaScale(a_rhs);
+    DataOps::kappaScale(a_rhs, m_vofIterIrreg);
   }
 
   // Scale by a-coefficient and alpha, too.

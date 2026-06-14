@@ -272,12 +272,63 @@ public:
   getEBLevelGridCoFi(const phase::which_phase a_phase) const;
 
   /**
-    @brief Get VoFIterators for particular phase
-    @param[in] a_phase Phase
-    @return Vof iterator
+    @brief Get VoFIterators covering all cut-cells (singly- and multiply-cut) for a particular phase.
+    @details For a pass covering only multiply-cut cells, use getMultiCutVofIterator instead.
+    @param[in] a_phase Phase (gas or solid)
+    @return Per-level LayoutData of VoFIterators covering all irregular cells
   */
   Vector<RefCountedPtr<LayoutData<VoFIterator>>>&
   getVofIterator(const phase::which_phase a_phase) const;
+
+  /**
+    @brief Get VoFIterators restricted to multiply-cut cells for a particular phase
+    @param[in] a_phase Phase
+    @return Multi-cut vof iterator
+  */
+  Vector<RefCountedPtr<LayoutData<VoFIterator>>>&
+  getMultiCutVofIterator(const phase::which_phase a_phase) const;
+
+  /**
+    @brief Get face iterators with FaceStop::SurroundingWithBoundary over cut-cell faces in each valid grid box for a particular phase.
+    @details Includes domain-boundary faces. For cell-to-face averaging that excludes domain boundary
+    faces, use getFaceIteratorNoBoundary. For faces that extend into the tangential ghost layer, use
+    getFaceIteratorWithTangentialGhosts.
+    @param[in] a_phase Phase (gas or solid)
+    @return Per-level LayoutData of FaceIterator arrays (one per coordinate direction)
+  */
+  Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+  getFaceIterator(const phase::which_phase a_phase) const;
+
+  /**
+    @brief Get face iterators with FaceStop::SurroundingNoBoundary over cut-cell faces in each valid grid box for a particular phase.
+    @details Domain boundary faces are excluded. Intended for cell-to-face averaging where boundary
+    faces are fixed up separately. For iterators that include domain boundary faces, use getFaceIterator.
+    @param[in] a_phase Phase (gas or solid)
+    @return Per-level LayoutData of FaceIterator arrays (one per coordinate direction)
+  */
+  Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+  getFaceIteratorNoBoundary(const phase::which_phase a_phase) const;
+
+  /**
+    @brief Get per-direction face iterators covering cut-cell faces that reach into the tangential ghost layer.
+    @details For the iterator in direction dir, the underlying IVS covers irregular cells in a box grown by 1
+    in the two directions tangential to dir; the dir extent stays at the valid box. Domain boundary faces are
+    excluded (FaceStop::SurroundingNoBoundary). Callers require at least 1 ghost layer in cell data.
+    @param[in] a_phase Phase
+    @return Tangential-ghost face iterator
+  */
+  Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+  getFaceIteratorWithTangentialGhosts(const phase::which_phase a_phase) const;
+
+  /**
+    @brief Get face iterators restricted to multiply-cut faces in each valid grid box.
+    @details Only faces abutting multiply-cut cells (cells with more than one VoF) are visited.
+    Faces are enumerated with FaceStop::SurroundingNoBoundary.
+    @param[in] a_phase Phase
+    @return Multi-cut face iterator
+  */
+  Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+  getMultiCutFaceIterator(const phase::which_phase a_phase) const;
 
   /**
     @brief Get objects for computing "non-conservative divergences"

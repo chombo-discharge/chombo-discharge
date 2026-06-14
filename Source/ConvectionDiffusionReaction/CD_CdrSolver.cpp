@@ -384,7 +384,8 @@ CdrSolver::averageVelocityToFaces(EBAMRFluxData& a_faceVelocity, const EBAMRCell
     DataOps::averageCellVelocityToFaceVelocity(*a_faceVelocity[lvl],
                                                *a_cellVelocity[lvl],
                                                m_amr->getDomains()[lvl],
-                                               tanGhosts);
+                                               tanGhosts,
+                                               *m_amr->getFaceIteratorWithTangentialGhosts(m_realm, m_phase)[lvl]);
   }
 }
 
@@ -644,9 +645,10 @@ CdrSolver::computeDiffusionFlux(LevelData<EBFluxFAB>& a_flux, const LevelData<EB
       grownCellBox &= domain;
       grownCellBox.grow(dir, -1);
 
-      // These are the "regions" for the regular and cut-cell kernels.
+      // These are the "regions" for the regular and cut-cell kernels. Only multi-cut cells need the irregular
+      // kernel since singly-cut faces are already covered by the regular box loop above.
       const Box    grownFaceBox = surroundingNodes(grownCellBox, dir);
-      FaceIterator faceit(ebisbox.getIrregIVS(grownCellBox), ebgraph, dir, FaceStop::SurroundingWithBoundary);
+      FaceIterator faceit(ebisbox.getMultiCells(grownCellBox), ebgraph, dir, FaceStop::SurroundingWithBoundary);
 
       // Regular kernel. Note that we call the kernel on a face-centered box, so the cell on the high side is located at
       // iv, and the cell at the low side is at iv - BASISV(dir).
@@ -734,7 +736,7 @@ CdrSolver::computeAdvectionDiffusionFlux(EBAMRFluxData&       a_flux,
         interiorFaces.grow(dir, -1);
         interiorFaces.surroundingNodes(dir);
 
-        FaceIterator faceit(ebisbox.getIrregIVS(grownBox), ebgraph, dir, FaceStop::SurroundingNoBoundary);
+        FaceIterator faceit(ebisbox.getMultiCells(grownBox), ebgraph, dir, FaceStop::SurroundingNoBoundary);
 
         // Regular kernel. Note that we call the kernel on a face-centered box, so the cell on the high side is located at
         // iv, and the cell at the low side is at iv - BASISV(dir).
@@ -1224,7 +1226,12 @@ CdrSolver::initialDataDistribution()
   EBAMRCellData scratch;
   m_amr->allocate(scratch, m_realm, m_phase, m_nComp);
 
-  DataOps::setValue(scratch, initFunc, m_amr->getProbLo(), m_amr->getDx(), m_comp);
+  DataOps::setValue(scratch,
+                    initFunc,
+                    m_amr->getProbLo(),
+                    m_amr->getDx(),
+                    m_comp,
+                    m_amr->getMultiCutVofIterator(m_realm, m_phase));
   DataOps::incr(m_phi, scratch, 1.0);
   DataOps::setCoveredValue(m_phi, 0, 0.0);
 
@@ -1405,14 +1412,11 @@ CdrSolver::interpolateFluxToFaceCentroids(LevelData<EBFluxFAB>& a_flux, const in
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
-    const Box        cellBox  = dbl.get(din);
-    const EBISBox&   ebisbox  = ebisl[din];
-    const EBGraph&   ebgraph  = ebisbox.getEBGraph();
-    const IntVectSet irregIVS = ebisbox.getIrregIVS(cellBox);
-
-    const bool isRegular   = ebisbox.isRegular(cellBox);
-    const bool isCovered   = ebisbox.isCovered(cellBox);
-    const bool isIrregular = !isRegular && !isCovered;
+    const Box      cellBox     = dbl.get(din);
+    const EBISBox& ebisbox     = ebisl[din];
+    const bool     isRegular   = ebisbox.isRegular(cellBox);
+    const bool     isCovered   = ebisbox.isCovered(cellBox);
+    const bool     isIrregular = !isRegular && !isCovered;
 
     if (isIrregular) {
       for (int dir = 0; dir < SpaceDim; dir++) {
@@ -1426,7 +1430,7 @@ CdrSolver::interpolateFluxToFaceCentroids(LevelData<EBFluxFAB>& a_flux, const in
 
         // Compute face centroid flux on cut-cell face centroids. Since a_flux enforces boundary conditions
         // we include domain boundary cut-cell faces in the interpolation.
-        FaceIterator faceit(irregIVS, ebgraph, dir, FaceStop::SurroundingWithBoundary);
+        FaceIterator& faceit = (*m_amr->getFaceIterator(m_realm, m_phase)[a_lvl])[din][dir];
 
         auto kernel = [&](const FaceIndex& face) -> void {
           const FaceStencil& sten = (*m_interpStencils[dir][a_lvl])[din](face, m_comp);
@@ -1591,9 +1595,24 @@ CdrSolver::setDiffusionCoefficient(const std::function<Real(const RealVect a_pos
     pout() << m_name + "::setDiffusionCoefficient(std::function<Real(const RealVect a_position)>)" << endl;
   }
 
-  DataOps::setValue(m_cellCenteredDiffusionCoefficient, a_diffCo, m_amr->getProbLo(), m_amr->getDx(), m_comp);
-  DataOps::setValue(m_faceCenteredDiffusionCoefficient, a_diffCo, m_amr->getProbLo(), m_amr->getDx(), m_comp);
-  DataOps::setValue(m_ebCenteredDiffusionCoefficient, a_diffCo, m_amr->getProbLo(), m_amr->getDx(), m_comp);
+  DataOps::setValue(m_cellCenteredDiffusionCoefficient,
+                    a_diffCo,
+                    m_amr->getProbLo(),
+                    m_amr->getDx(),
+                    m_comp,
+                    m_amr->getMultiCutVofIterator(m_realm, m_phase));
+  DataOps::setValue(m_faceCenteredDiffusionCoefficient,
+                    a_diffCo,
+                    m_amr->getProbLo(),
+                    m_amr->getDx(),
+                    m_comp,
+                    m_amr->getFaceIterator(m_realm, m_phase));
+  DataOps::setValue(m_ebCenteredDiffusionCoefficient,
+                    a_diffCo,
+                    m_amr->getProbLo(),
+                    m_amr->getDx(),
+                    m_comp,
+                    m_amr->getVofIterator(m_realm, m_phase));
 }
 
 void
@@ -1674,7 +1693,12 @@ CdrSolver::setSource(const std::function<Real(const RealVect a_position)>& a_sou
     pout() << m_name + "::setSource(std::function<Real(const RealVect a_position)>)" << endl;
   }
 
-  DataOps::setValue(m_source, a_source, m_amr->getProbLo(), m_amr->getDx(), m_comp);
+  DataOps::setValue(m_source,
+                    a_source,
+                    m_amr->getProbLo(),
+                    m_amr->getDx(),
+                    m_comp,
+                    m_amr->getMultiCutVofIterator(m_realm, m_phase));
 
   m_amr->conservativeAverage(m_source, m_realm, m_phase);
   m_amr->interpGhost(m_source, m_realm, m_phase);
@@ -1735,7 +1759,11 @@ CdrSolver::setVelocity(const std::function<RealVect(const RealVect a_pos)>& a_ve
     pout() << m_name + "::setVelocity(std::function<RealVect(const RealVect a_pos)>)" << endl;
   }
 
-  DataOps::setValue(m_cellVelocity, a_velo, m_amr->getProbLo(), m_amr->getDx());
+  DataOps::setValue(m_cellVelocity,
+                    a_velo,
+                    m_amr->getProbLo(),
+                    m_amr->getDx(),
+                    m_amr->getMultiCutVofIterator(m_realm, m_phase));
 }
 
 void
@@ -1848,13 +1876,15 @@ CdrSolver::writePlotData(LevelData<EBCellFAB>& a_output,
   if (m_plotDiffusionCoefficient && m_isDiffusive) {
     DataOps::averageFaceToCell(*scratch[a_level],
                                *m_faceCenteredDiffusionCoefficient[a_level],
-                               m_amr->getDomains()[a_level]);
+                               m_amr->getDomains()[a_level],
+                               *m_amr->getVofIterator(m_realm, m_phase)[a_level]);
 
     // Do the previous because we need the ghost cells too.
     if (a_level > 0) {
       DataOps::averageFaceToCell(*scratch[a_level - 1],
                                  *m_faceCenteredDiffusionCoefficient[a_level - 1],
-                                 m_amr->getDomains()[a_level - 1]);
+                                 m_amr->getDomains()[a_level - 1],
+                                 *m_amr->getVofIterator(m_realm, m_phase)[a_level - 1]);
     }
 
     this->writeData(a_output, a_icomp, scratch, a_outputRealm, a_level, false, true);
@@ -1881,7 +1911,7 @@ CdrSolver::writePlotData(LevelData<EBCellFAB>& a_output,
   // Plot EB fluxes. These are stored on sparse data structures but we need them on cell centers. So copy them to scratch and write data.
   if (m_plotEbFlux && m_isMobile) {
     DataOps::setValue(*scratch[a_level], 0.0);
-    DataOps::incr(*scratch[a_level], *m_ebFlux[a_level], 1.0);
+    DataOps::incr(*scratch[a_level], *m_ebFlux[a_level], 1.0, *m_amr->getVofIterator(m_realm, m_phase)[a_level]);
     this->writeData(a_output, a_icomp, scratch, a_outputRealm, a_level, false, false);
   }
 }
@@ -2466,7 +2496,7 @@ CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_pow)
     EBAMRCellData zero;
     m_amr->allocate(zero, m_realm, m_phase, m_nComp);
     DataOps::setValue(zero, 0.0);
-    DataOps::divideFallback(a_weightedUpwindPhi, scratch, zero);
+    DataOps::divideFallback(a_weightedUpwindPhi, scratch, zero, m_amr->getMultiCutVofIterator(m_realm, m_phase));
 
     m_amr->conservativeAverage(a_weightedUpwindPhi, m_realm, m_phase);
     m_amr->interpGhost(a_weightedUpwindPhi, m_realm, m_phase);
@@ -2949,15 +2979,15 @@ CdrSolver::gwnDiffusionSource(EBAMRCellData& a_noiseSource, const EBAMRCellData&
 
     // scratchFluxOne = phis on faces (smoothing as to avoid negative densities)
     this->smoothHeavisideFaces(scratchFluxOne, a_cellPhi);
-    DataOps::multiply(scratchFluxOne, m_faceCenteredDiffusionCoefficient); // scratchFluxOne = D*phis
-    DataOps::scale(scratchFluxOne, 2.0);                                   // scratchFluxOne = 2*D*phis
-    DataOps::squareRoot(scratchFluxOne);                                   // scratchFluxOne = sqrt(2*D*phis)
+    DataOps::multiply(scratchFluxOne, m_faceCenteredDiffusionCoefficient);         // scratchFluxOne = D*phis
+    DataOps::scale(scratchFluxOne, 2.0);                                           // scratchFluxOne = 2*D*phis
+    DataOps::squareRoot(scratchFluxOne, m_amr->getFaceIterator(m_realm, m_phase)); // scratchFluxOne = sqrt(2*D*phis)
 
 #ifndef NDEBUG
     Real max;
     Real min;
 
-    DataOps::getMaxMin(max, min, scratchFluxOne, 0);
+    DataOps::getMaxMin(max, min, scratchFluxOne, 0, m_amr->getFaceIterator(m_realm, m_phase));
 
     if (min < 0.0 || max < 0.0) {
       MayDay::Abort("CdrSolver::gwnDiffusionSource - negative face value");
@@ -3008,10 +3038,8 @@ CdrSolver::smoothHeavisideFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      const Box&        cellBox  = dbl[din];
-      const EBISBox&    ebisbox  = ebisl[din];
-      const EBGraph&    ebgraph  = ebisbox.getEBGraph();
-      const IntVectSet& irregIVS = ebisbox.getIrregIVS(cellBox);
+      const Box&     cellBox = dbl[din];
+      const EBISBox& ebisbox = ebisl[din];
 
       for (int dir = 0; dir < SpaceDim; dir++) {
         EBFaceFAB&       facePhi = (*a_facePhi[lvl])[din][dir];
@@ -3089,8 +3117,8 @@ CdrSolver::smoothHeavisideFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a
         };
 
         // These are the computation regions for the kernels.
-        const Box    faceBox = surroundingNodes(cellBox, dir);
-        FaceIterator faceit(irregIVS, ebgraph, dir, FaceStop::SurroundingNoBoundary);
+        const Box     faceBox = surroundingNodes(cellBox, dir);
+        FaceIterator& faceit  = (*m_amr->getMultiCutFaceIterator(m_realm, m_phase)[lvl])[din][dir];
 
         // Execute the kernels.
         BoxLoops::loop<D_DECL(1, 1, 1)>(faceBox, regularKernel);
@@ -3140,18 +3168,15 @@ CdrSolver::fillGwn(EBAMRFluxData& a_noise, const Real a_sigma)
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      const Box&        cellBox = dbl[din];
-      const EBISBox&    ebisbox = ebisl[din];
-      const EBGraph&    ebgraph = ebisbox.getEBGraph();
-      const IntVectSet& irreg   = ebisbox.getIrregIVS(cellBox);
+      const Box& cellBox = dbl[din];
 
       for (int dir = 0; dir < SpaceDim; dir++) {
         EBFaceFAB&     noise    = (*a_noise[lvl])[din][dir];
         BaseFab<Real>& noiseReg = noise.getSingleValuedFAB();
 
         // Regular faces
-        const Box    facebox = surroundingNodes(cellBox, dir);
-        FaceIterator faceit(irreg, ebgraph, dir, FaceStop::SurroundingNoBoundary);
+        const Box     facebox = surroundingNodes(cellBox, dir);
+        FaceIterator& faceit  = (*m_amr->getMultiCutFaceIterator(m_realm, m_phase)[lvl])[din][dir];
 
         // Regular kernel
         auto regularKernel = [&](const IntVect& iv) -> void {

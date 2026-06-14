@@ -334,7 +334,7 @@ DischargeInceptionStepper<P, F, C>::solvePoisson() noexcept
     Real max;
     Real min;
 
-    DataOps::getMaxMin(max, min, phiGas, 0);
+    DataOps::getMaxMin(max, min, phiGas, 0, m_amr->getMultiCutVofIterator(m_realm, m_phase));
 
     if (std::max(std::abs(max), std::abs(min)) > errorThresh * testVoltage) {
       MayDay::Error("DischargeInceptionStepper::solvePoisson - debug test failed. Check your BCs!");
@@ -1154,7 +1154,9 @@ DischargeInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>
       DataOps::incr(m_electricField, m_electricFieldHomo, Real(V));
       DataOps::incr(m_electricField, m_electricFieldInho, 1.0);
       DataOps::dotProduct(scratch, m_electricField, m_electricField);
-      DataOps::squareRoot(scratch);
+      DataOps::squareRoot(scratch,
+                          m_amr->getMultiCutVofIterator(m_realm, phase::gas),
+                          m_amr->getMultiCutVofIterator(m_realm, phase::solid));
       m_fieldSolver->writeMultifluidData(a_output, a_icomp, scratch, phase::gas, a_outputRealm, a_level, true);
       m_fieldSolver->writeMultifluidData(a_output, a_icomp, m_electricField, phase::gas, a_outputRealm, a_level, true);
 
@@ -1163,18 +1165,31 @@ DischargeInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>
       DataOps::incr(m_electricField, m_electricFieldHomo, -Real(V));
       DataOps::incr(m_electricField, m_electricFieldInho, 1.0);
       DataOps::dotProduct(scratch, m_electricField, m_electricField);
-      DataOps::squareRoot(scratch);
+      DataOps::squareRoot(scratch,
+                          m_amr->getMultiCutVofIterator(m_realm, phase::gas),
+                          m_amr->getMultiCutVofIterator(m_realm, phase::solid));
       m_fieldSolver->writeMultifluidData(a_output, a_icomp, scratch, phase::gas, a_outputRealm, a_level, true);
       m_fieldSolver->writeMultifluidData(a_output, a_icomp, m_electricField, phase::gas, a_outputRealm, a_level, true);
     }
 
     // Write the space charge density
-    DataOps::setValue(scratch, m_rho, m_amr->getProbLo(), m_amr->getDx(), 0);
+    DataOps::setValue(scratch,
+                      m_rho,
+                      m_amr->getProbLo(),
+                      m_amr->getDx(),
+                      0,
+                      m_amr->getVofIterator(m_realm, phase::gas),
+                      m_amr->getVofIterator(m_realm, phase::solid));
     m_amr->arithmeticAverage(scratch, m_realm);
     m_amr->interpGhostPwl(scratch, m_realm);
     m_fieldSolver->writeMultifluidData(a_output, a_icomp, scratch, phase::gas, a_outputRealm, a_level, true);
 
-    DataOps::setValue(scratchSurf, m_sigma, m_amr->getProbLo(), m_amr->getDx(), 0);
+    DataOps::setValue(scratchSurf,
+                      m_sigma,
+                      m_amr->getProbLo(),
+                      m_amr->getDx(),
+                      0,
+                      m_amr->getVofIterator(m_realm, phase::gas));
     m_fieldSolver->writeSurfaceData(a_output, a_icomp, *scratchSurf[a_level], a_outputRealm, a_level);
   }
 
@@ -1337,7 +1352,9 @@ DischargeInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>&
     m_amr->allocate(scratchSurf, m_realm, phase::gas, 1);
 
     DataOps::dotProduct(scratch, m_electricField, m_electricField);
-    DataOps::squareRoot(scratch);
+    DataOps::squareRoot(scratch,
+                        m_amr->getMultiCutVofIterator(m_realm, phase::gas),
+                        m_amr->getMultiCutVofIterator(m_realm, phase::solid));
     m_amr->arithmeticAverage(scratch, m_realm);
     m_amr->interpGhostPwl(scratch, m_realm);
 
@@ -1346,12 +1363,23 @@ DischargeInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>&
     m_fieldSolver->writeMultifluidData(a_output, a_icomp, m_electricField, phase::gas, a_outputRealm, a_level, true);
 
     // Write the space charge density
-    DataOps::setValue(scratch, m_rho, m_amr->getProbLo(), m_amr->getDx(), 0);
+    DataOps::setValue(scratch,
+                      m_rho,
+                      m_amr->getProbLo(),
+                      m_amr->getDx(),
+                      0,
+                      m_amr->getVofIterator(m_realm, phase::gas),
+                      m_amr->getVofIterator(m_realm, phase::solid));
     m_amr->arithmeticAverage(scratch, m_realm);
     m_amr->interpGhostPwl(scratch, m_realm);
     m_fieldSolver->writeMultifluidData(a_output, a_icomp, scratch, phase::gas, a_outputRealm, a_level, true);
 
-    DataOps::setValue(scratchSurf, m_sigma, m_amr->getProbLo(), m_amr->getDx(), 0);
+    DataOps::setValue(scratchSurf,
+                      m_sigma,
+                      m_amr->getProbLo(),
+                      m_amr->getDx(),
+                      0,
+                      m_amr->getVofIterator(m_realm, phase::gas));
     m_fieldSolver->writeSurfaceData(a_output, a_icomp, *scratchSurf[a_level], a_outputRealm, a_level);
   }
 
@@ -1654,8 +1682,8 @@ DischargeInceptionStepper<P, F, C>::advance(const Real a_dt)
     Real maxT = -std::numeric_limits<Real>::max();
     Real minT = +std::numeric_limits<Real>::max();
 
-    DataOps::getMaxMin(maxK, minK, m_inceptionIntegral, 0);
-    DataOps::getMaxMin(maxT, minT, m_townsendCriterion, 0);
+    DataOps::getMaxMin(maxK, minK, m_inceptionIntegral, 0, m_amr->getMultiCutVofIterator(m_realm, m_phase));
+    DataOps::getMaxMin(maxT, minT, m_townsendCriterion, 0, m_amr->getMultiCutVofIterator(m_realm, m_phase));
 
     if (!m_fullIntegration) {
       maxK = std::min(maxK, m_inceptionK);
@@ -1696,7 +1724,7 @@ DischargeInceptionStepper<P, F, C>::advanceIons(const Real a_dt) noexcept
   // flux is an incoming flux.
   EBAMRIVData& ebFlux = m_ionSolver->getEbFlux();
   m_ionSolver->extrapolateAdvectiveFluxToEB(ebFlux);
-  DataOps::floor(ebFlux, 0.0);
+  DataOps::floor(ebFlux, 0.0, m_amr->getVofIterator(m_realm, m_phase));
 
   switch (m_transportAlgorithm) {
   case TransportAlgorithm::Euler: {
@@ -1744,7 +1772,7 @@ DischargeInceptionStepper<P, F, C>::advanceIons(const Real a_dt) noexcept
 
     m_ionSolver->computeDivF(k1, phi, a_dt, false, true, true);
 
-    DataOps::kappaScale(k1);
+    DataOps::kappaScale(k1, m_amr->getVofIterator(m_realm, m_phase));
     DataOps::scale(k1, -1.0);
 
     // Use k1 as the old solution.
@@ -1760,7 +1788,7 @@ DischargeInceptionStepper<P, F, C>::advanceIons(const Real a_dt) noexcept
   }
   }
 
-  DataOps::floor(phi, 0.0);
+  DataOps::floor(phi, 0.0, m_amr->getVofIterator(m_realm, m_phase));
 
   m_amr->average(phi, m_realm, m_phase, Average::Conservative);
   m_amr->interpGhost(phi, m_realm, m_phase);
@@ -2370,8 +2398,8 @@ DischargeInceptionStepper<P, F, C>::postInitialize()
     Real maxT = -std::numeric_limits<Real>::max();
     Real minT = +std::numeric_limits<Real>::max();
 
-    DataOps::getMaxMin(maxK, minK, m_inceptionIntegral, 0);
-    DataOps::getMaxMin(maxT, minT, m_townsendCriterion, 0);
+    DataOps::getMaxMin(maxK, minK, m_inceptionIntegral, 0, m_amr->getMultiCutVofIterator(m_realm, m_phase));
+    DataOps::getMaxMin(maxT, minT, m_townsendCriterion, 0, m_amr->getMultiCutVofIterator(m_realm, m_phase));
     if (!m_fullIntegration) {
       maxK = std::min(maxK, m_inceptionK);
       maxT = std::min(maxT, 1.0);
@@ -2485,7 +2513,7 @@ DischargeInceptionStepper<P, F, C>::computeInceptionIntegralStationary() noexcep
 
   this->superposition(gasField, 1.0);
 
-  DataOps::getMaxMinNorm(maxField, minField, gasField);
+  DataOps::getMaxMinNorm(maxField, minField, gasField, m_amr->getMultiCutVofIterator(m_realm, m_phase));
 
   // Compute the critical field and the minimum possible inception voltage.
   const Real Ecrit = this->getCriticalField();
@@ -3140,8 +3168,8 @@ DischargeInceptionStepper<P, F, C>::computeTownsendCriterionStationary() noexcep
       DataOps::copy(expKPlus, KPlus);
       DataOps::copy(expKMinu, KMinu);
 
-      DataOps::compute(expKPlus, exponentiate);
-      DataOps::compute(expKMinu, exponentiate);
+      DataOps::compute(expKPlus, exponentiate, m_amr->getMultiCutVofIterator(m_realm, m_phase));
+      DataOps::compute(expKMinu, exponentiate, m_amr->getMultiCutVofIterator(m_realm, m_phase));
 
       DataOps::multiply(townsendCriterionPlus, expKPlus);
       DataOps::multiply(townsendCriterionMinu, expKMinu);
@@ -3155,8 +3183,8 @@ DischargeInceptionStepper<P, F, C>::computeTownsendCriterionStationary() noexcep
           return std::min(x, 1.0);
         };
 
-        DataOps::compute(townsendCriterionPlus, truncate);
-        DataOps::compute(townsendCriterionMinu, truncate);
+        DataOps::compute(townsendCriterionPlus, truncate, m_amr->getMultiCutVofIterator(m_realm, m_phase));
+        DataOps::compute(townsendCriterionMinu, truncate, m_amr->getMultiCutVofIterator(m_realm, m_phase));
       }
     }
 
@@ -3207,14 +3235,17 @@ DischargeInceptionStepper<P, F, C>::computeTownsendCriterionTransient(const Real
     return x > 0.0 ? exp(x) - 1 : 0.0;
   };
   DataOps::copy(m_townsendCriterion, m_inceptionIntegral);
-  DataOps::compute(m_townsendCriterion, exponentiate);
+  DataOps::compute(m_townsendCriterion, exponentiate, m_amr->getMultiCutVofIterator(m_realm, m_phase));
   DataOps::multiply(m_townsendCriterion, gamma);
 
   // If we're running without full integration we truncate the Townsend value to 1.
   if (!m_fullIntegration) {
-    DataOps::compute(m_townsendCriterion, [](const Real x) {
-      return std::min(x, 1.0);
-    });
+    DataOps::compute(
+      m_townsendCriterion,
+      [](const Real x) {
+        return std::min(x, 1.0);
+      },
+      m_amr->getMultiCutVofIterator(m_realm, m_phase));
   }
 
   m_amr->conservativeAverage(m_townsendCriterion, m_realm, m_phase);
@@ -5268,7 +5299,8 @@ DischargeInceptionStepper<P, F, C>::computeIonDiffusion(const Real& a_voltage) n
                              1,
                              Interval(0, 0),
                              Interval(0, 0),
-                             Average::Arithmetic);
+                             Average::Arithmetic,
+                             m_amr->getFaceIteratorWithTangentialGhosts(m_realm, m_phase));
 }
 
 template <typename P, typename F, typename C>

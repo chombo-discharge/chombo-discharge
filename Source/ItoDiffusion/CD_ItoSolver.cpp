@@ -1554,7 +1554,7 @@ ItoSolver::writePlotData(LevelData<EBCellFAB>& a_output,
       a_level);
 
     // Set scratch = totalEnergy/totalWeight
-    DataOps::divideFallback(scratch, weight, 0.0);
+    DataOps::divideFallback(scratch, weight, 0.0, *m_amr->getMultiCutVofIterator(m_realm, m_phase)[a_level]);
 
     m_amr->copyData(a_output, scratch, a_level, a_outputRealm, m_realm, Interval(a_comp, a_comp), Interval(0, 0));
 
@@ -1755,7 +1755,7 @@ ItoSolver::computeAverageMobility(EBAMRCellData& a_phi, ParticleContainer<ItoPar
   // Make averageMobility = weight*mu/weight. If there is no weight then set the value to zero.
   constexpr Real zero = 0.0;
 
-  DataOps::divideFallback(a_phi, weight, zero);
+  DataOps::divideFallback(a_phi, weight, zero, m_amr->getMultiCutVofIterator(m_realm, m_phase));
 }
 
 void
@@ -1786,7 +1786,7 @@ ItoSolver::computeAverageDiffusion(EBAMRCellData& a_phi, ParticleContainer<ItoPa
   // Make average diffusion coefficient = weight*D/weight. If there is no weight then set the value to zero.
   constexpr Real zero = 0.0;
 
-  DataOps::divideFallback(a_phi, weight, zero);
+  DataOps::divideFallback(a_phi, weight, zero, m_amr->getMultiCutVofIterator(m_realm, m_phase));
 }
 
 void
@@ -1818,7 +1818,7 @@ ItoSolver::computeAverageEnergy(EBAMRCellData& a_phi, ParticleContainer<ItoParti
   // Make average energy = weight*energy/weight. If there is no weight then set the value to zero.
   constexpr Real zero = 0.0;
 
-  DataOps::divideFallback(a_phi, weight, zero);
+  DataOps::divideFallback(a_phi, weight, zero, m_amr->getMultiCutVofIterator(m_realm, m_phase));
 }
 
 void
@@ -2217,7 +2217,7 @@ ItoSolver::interpolateMobilities()
     case WhichMobilityInterpolation::Velocity: {
 
       // Compute |v|
-      DataOps::vectorLength(velocityMagnitude, m_velocityFunction);
+      DataOps::vectorLength(velocityMagnitude, m_velocityFunction, m_amr->getMultiCutVofIterator(m_realm, m_phase));
 
       m_amr->conservativeAverage(velocityMagnitude, m_realm, m_phase);
       m_amr->interpGhostPwl(velocityMagnitude, m_realm, m_phase);

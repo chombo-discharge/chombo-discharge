@@ -448,7 +448,6 @@ MFHelmholtzOp::dotProduct(const LevelData<MFCellFAB>& a_lhs, const LevelData<MFC
       const FArrayBox& regY = Y.getFArrayBox();
 
       const EBISBox& ebisbox = X.getEBISBox();
-      const EBGraph& ebgraph = ebisbox.getEBGraph();
 
       auto regularKernel = [&](const IntVect& iv) -> void {
         if (ebisbox.isRegular(iv)) {
@@ -466,10 +465,8 @@ MFHelmholtzOp::dotProduct(const LevelData<MFCellFAB>& a_lhs, const LevelData<MFC
 
       const bool isCovered = ebisbox.isAllCovered();
       if (!isCovered) {
-        VoFIterator vofit(ebisbox.getIrregIVS(cellBox), ebgraph);
-
         BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
-        BoxLoops::loop(vofit, irregularKernel);
+        BoxLoops::loop(m_helmOps.at(i)->getVofIterIrreg()[din], irregularKernel);
       }
     }
   }
