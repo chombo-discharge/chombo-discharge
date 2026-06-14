@@ -290,7 +290,7 @@ public:
 
   /**
     @brief Get face iterators with FaceStop::SurroundingWithBoundary over cut-cell faces in each valid grid box for a particular phase.
-    @details Includes domain-boundary faces. For grown-box tangential-ghost faces, use getFaceIteratorWithTangentialGhosts.
+    @details Includes domain-boundary faces. For faces that extend into the tangential ghost layer, use getFaceIteratorWithTangentialGhosts.
     @param[in] a_phase Phase (gas or solid)
     @return Per-level LayoutData of FaceIterator arrays (one per coordinate direction)
   */
@@ -298,7 +298,10 @@ public:
   getFaceIterator(const phase::which_phase a_phase) const;
 
   /**
-    @brief Get face iterators over cut-cell faces in boxes grown by 1 and clipped to the domain
+    @brief Get per-direction face iterators covering cut-cell faces that reach into the tangential ghost layer.
+    @details For the iterator in direction dir, the underlying IVS covers irregular cells in a box grown by 1
+    in the two directions tangential to dir; the dir extent stays at the valid box. Domain boundary faces are
+    excluded (FaceStop::SurroundingNoBoundary). Callers require at least 1 ghost layer in cell data.
     @param[in] a_phase Phase
     @return Tangential-ghost face iterator
   */

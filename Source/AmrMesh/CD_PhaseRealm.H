@@ -283,10 +283,12 @@ public:
   getFaceIterator() const;
 
   /**
-    @brief Return face iterators over cut-cell faces in a box grown by 1 and clipped to the domain
+    @brief Return per-direction face iterators covering cut-cell faces that reach into the tangential ghost layer.
     @details Each entry is an array of SpaceDim FaceIterators, one per coordinate direction.
-    Faces are enumerated over the grown box with FaceStop::SurroundingNoBoundary, so domain
-    boundary faces are excluded. Intended for stencils that require tangential ghost faces.
+    For the iterator in direction dir, the underlying IVS covers irregular cells in a box grown by 1
+    in the two directions tangential to dir; the dir extent stays at the valid box. Domain boundary
+    faces are excluded (FaceStop::SurroundingNoBoundary). Callers require at least 1 ghost layer in
+    cell data. For faces strictly inside the valid box, use getFaceIterator instead.
     @return m_faceIterTanGhost (which is, in fact, mutable)
   */
   Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&

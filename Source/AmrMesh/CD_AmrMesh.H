@@ -1788,11 +1788,12 @@ public:
   getFaceIterator(const std::string& a_realm, const phase::which_phase a_phase) const;
 
   /**
-    @brief Get face iterators over cut-cell faces in boxes grown by 1 and clipped to the domain.
-    @details Each per-box entry is an array of SpaceDim FaceIterators. The box is grown
-             isotropically by 1 cell and clipped to the problem domain. Faces are enumerated
-             with FaceStop::SurroundingNoBoundary, so domain boundary faces are excluded.
-             Intended for stencils that require tangential ghost faces.
+    @brief Get per-direction face iterators covering cut-cell faces that reach into the tangential ghost layer.
+    @details Each per-box entry is an array of SpaceDim FaceIterators, one per coordinate direction.
+             For the iterator in direction dir, the underlying IVS covers irregular cells in a box grown by 1
+             in the two directions tangential to dir; the dir extent stays at the valid box. Domain boundary
+             faces are excluded (FaceStop::SurroundingNoBoundary). Callers require at least 1 ghost layer in
+             cell data.
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)
     @return Per-level LayoutData of FaceIterator arrays

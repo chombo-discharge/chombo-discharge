@@ -473,10 +473,11 @@ PhaseRealm::defineVofIterator(const int a_lmin)
         faceIter[dir].define(irreg, ebgraph, dir, FaceStop::SurroundingWithBoundary);
       }
 
-      // Face iterators for tangential ghost faces. For faces in direction dir, the IVS is built
-      // from irregular cells in a box grown by 1 in the tangential directions only (not in dir).
-      // This matches the old per-call grow+shrink logic and requires only 1 ghost layer in the
-      // cell data, because no face can reach a cell more than 1 layer beyond the valid box.
+      // Per-direction tangential-ghost face iterators. For faces in direction dir the IVS covers
+      // irregular cells in a box grown by 1 in the two tangential directions only; dir itself is
+      // kept at the valid-box extent. With FaceStop::SurroundingNoBoundary, this gives exactly
+      // the cut-cell faces that reach into the first tangential ghost layer while staying within
+      // 1 cell of the valid box in the normal (dir) direction.
       std::array<FaceIterator, SpaceDim>& faceIterTanGhost = (*m_faceIterTanGhost[lvl])[din];
       for (int dir = 0; dir < SpaceDim; dir++) {
         Box tanBox = cellBox;
