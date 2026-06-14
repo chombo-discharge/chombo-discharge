@@ -473,16 +473,21 @@ PhaseRealm::defineVofIterator(const int a_lmin)
         faceIter[dir].define(irreg, ebgraph, dir, FaceStop::SurroundingWithBoundary);
       }
 
-      // Face iterators over a box grown by 1 and clipped to the domain, for tangential ghost faces.
-      // Because the box is grown by exactly 1, callers that pass a_tanGhosts to DataOps functions
-      // must use a_tanGhosts <= 1; the iterator cannot cover more than one ghost layer.
-      Box grownBox = cellBox;
-      grownBox.grow(1);
-      grownBox &= m_domains[lvl];
-      const IntVectSet                    irregGrown       = ebisbox.getIrregIVS(grownBox);
+      // Face iterators for tangential ghost faces. For faces in direction dir, the IVS is built
+      // from irregular cells in a box grown by 1 in the tangential directions only (not in dir).
+      // This matches the old per-call grow+shrink logic and requires only 1 ghost layer in the
+      // cell data, because no face can reach a cell more than 1 layer beyond the valid box.
       std::array<FaceIterator, SpaceDim>& faceIterTanGhost = (*m_faceIterTanGhost[lvl])[din];
       for (int dir = 0; dir < SpaceDim; dir++) {
-        faceIterTanGhost[dir].define(irregGrown, ebgraph, dir, FaceStop::SurroundingNoBoundary);
+        Box tanBox = cellBox;
+        for (int tanDir = 0; tanDir < SpaceDim; tanDir++) {
+          if (tanDir != dir) {
+            tanBox.grow(tanDir, 1);
+          }
+        }
+        tanBox &= m_domains[lvl];
+        const IntVectSet irregTan = ebisbox.getIrregIVS(tanBox);
+        faceIterTanGhost[dir].define(irregTan, ebgraph, dir, FaceStop::SurroundingNoBoundary);
       }
 
       // Multi-cut face iterators over the valid box (SurroundingNoBoundary). Used as a second pass
