@@ -613,7 +613,7 @@ EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData
 
     // If we're doing a stationary solve, we must scale the source term by kappa (unless it's otherwise been done).
     if (m_kappaScale) {
-      DataOps::kappaScale(scaledSource);
+      DataOps::kappaScale(scaledSource, m_amr->getVofIterator(m_realm, m_phase));
     }
 
     // Aliasing, because Chombo is not too smart.
@@ -714,7 +714,7 @@ EddingtonSP1::advanceEuler(EBAMRCellData&       a_phi,
 
   DataOps::incr(scratch, a_source, a_dt);
   if (m_kappaScale) {
-    DataOps::kappaScale(scratch);
+    DataOps::kappaScale(scratch, m_amr->getVofIterator(m_realm, m_phase));
   }
 
   Vector<LevelData<EBCellFAB>*> newPhi;
@@ -842,13 +842,11 @@ EddingtonSP1::setHelmholtzCoefficientsBox(EBCellFAB&       a_helmAco,
     }
     grownCellBox &= m_amr->getDomains()[a_lvl];
 
-    // Cut-cells in the grown box.
-    const IntVectSet irregIVS = ebisbox.getIrregIVS(grownCellBox);
-
     // Actual kernel region. The face-centered box which also contains the "ghost faces" and a FaceIterator for
-    // doing the irregular face stuff.
+    // doing the irregular face stuff. Only multi-cut cells need the irregular kernel since singly-cut faces are
+    // already covered by the regular box loop above.
     const Box    faceBox = surroundingNodes(grownCellBox, dir);
-    FaceIterator faceit(irregIVS, ebgraph, dir, FaceStop::SurroundingWithBoundary);
+    FaceIterator faceit(ebisbox.getMultiCells(grownCellBox), ebgraph, dir, FaceStop::SurroundingWithBoundary);
 
     // Regular kernel.
     BaseFab<Real>& helmBcoReg       = helmBcoFace.getSingleValuedFAB();
@@ -1059,7 +1057,7 @@ EddingtonSP1::computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_
   m_amr->interpToEB(a_ebFlux, a_phi, m_realm, m_phase);
   m_amr->conservativeAverage(a_ebFlux, m_realm, m_phase);
 
-  DataOps::scale(a_ebFlux, 0.5 * Units::c);
+  DataOps::scale(a_ebFlux, 0.5 * Units::c, m_amr->getVofIterator(m_realm, m_phase));
 }
 
 void

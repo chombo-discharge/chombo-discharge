@@ -292,7 +292,9 @@ FieldSolverGMG::solve(MFAMRCellData&       a_phi,
   // Special flag for when a_rho is on the centroid but was not scaled by kappa on input. The multigrid operator solves
   // kappa*L(phi) = kappa*rho so the right-hand side must be kappa-weighted.
   if (m_kappaSource) {
-    DataOps::kappaScale(kappaRhoByEps0);
+    DataOps::kappaScale(kappaRhoByEps0,
+                        m_amr->getVofIterator(m_realm, phase::gas),
+                        m_amr->getVofIterator(m_realm, phase::solid));
   }
 
   m_amr->conservativeAverage(a_phi, m_realm);
@@ -302,7 +304,7 @@ FieldSolverGMG::solve(MFAMRCellData&       a_phi,
 
   // Do the scaled surface charge
   DataOps::copy(sigmaByEps0, a_sigma);
-  DataOps::scale(sigmaByEps0, 1. / (Units::eps0));
+  DataOps::scale(sigmaByEps0, 1. / (Units::eps0), m_amr->getVofIterator(m_realm, phase::gas));
   CH_STOP(t2);
 
   // Factory needs knowledge of the new surface charge -- it passes this data by reference to the multigrid operators (MFHelmholtzOps).
@@ -359,7 +361,7 @@ FieldSolverGMG::solve(MFAMRCellData&       a_phi,
   if (m_jumpBcType == JumpBCType::SaturationCharge) {
     const EBAMRIVData& factorySigma = m_helmholtzOpFactory->getSigma();
     DataOps::copy(m_sigma, factorySigma);
-    DataOps::scale(m_sigma, Units::eps0);
+    DataOps::scale(m_sigma, Units::eps0, m_amr->getVofIterator(m_realm, phase::gas));
 
     m_amr->conservativeAverage(m_sigma, m_realm, phase::gas);
   }
@@ -537,7 +539,14 @@ FieldSolverGMG::setPermittivities()
     // cell-centered data to faces, including one ghost face.
     m_amr->interpGhost(permCellGas, m_realm, phase::gas);
 
-    DataOps::averageCellToFace(permFluxGas, permCellGas, m_amr->getDomains(), tanGhost, interv, interv, average);
+    DataOps::averageCellToFace(permFluxGas,
+                               permCellGas,
+                               m_amr->getDomains(),
+                               tanGhost,
+                               interv,
+                               interv,
+                               average,
+                               m_amr->getFaceIteratorWithTangentialGhosts(m_realm, phase::gas));
 
     m_amr->average(permFluxGas, m_realm, phase::gas, average);
   }
@@ -555,7 +564,14 @@ FieldSolverGMG::setPermittivities()
     // cell-centered data to faces, including one ghost face.
     m_amr->interpGhost(permCellSol, m_realm, phase::solid);
 
-    DataOps::averageCellToFace(permFluxSol, permCellSol, m_amr->getDomains(), tanGhost, interv, interv, average);
+    DataOps::averageCellToFace(permFluxSol,
+                               permCellSol,
+                               m_amr->getDomains(),
+                               tanGhost,
+                               interv,
+                               interv,
+                               average,
+                               m_amr->getFaceIteratorWithTangentialGhosts(m_realm, phase::solid));
 
     m_amr->average(permFluxSol, m_realm, phase::solid, average);
   }

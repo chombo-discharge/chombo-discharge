@@ -13,6 +13,9 @@
 #ifndef CD_PHASEREALM_H
 #define CD_PHASEREALM_H
 
+// Std includes
+#include <array>
+
 // Chombo includes
 #include <DisjointBoxLayout.H>
 #include <ProblemDomain.H>
@@ -256,14 +259,65 @@ public:
   getEBLevelGridFiCo() const;
 
   /**
-    @brief Return vof iterator for iterating over irregular cells in each grid patch
+    @brief Return VoF iterators covering all cut-cells (singly- and multiply-cut) in each grid patch.
+    @details For a pass that covers only multiply-cut cells, use getMultiCutVofIterator instead.
     @return m_vofIter (which is, in fact, mutable)
   */
   Vector<RefCountedPtr<LayoutData<VoFIterator>>>&
   getVofIterator() const;
 
   /**
-    @brief Get objects for interpolation from cell centers to centroids. 
+    @brief Return vof iterator for iterating over multiply-cut cells only (cells with more than one VoF)
+    @return m_multiCutVofIter (which is, in fact, mutable)
+  */
+  Vector<RefCountedPtr<LayoutData<VoFIterator>>>&
+  getMultiCutVofIterator() const;
+
+  /**
+    @brief Return face iterators over cut-cell faces in each valid grid box (FaceStop::SurroundingWithBoundary).
+    @details Each entry is an array of SpaceDim FaceIterators, one per coordinate direction.
+    Domain boundary faces are included. For cell-to-face averaging that excludes domain boundary faces,
+    use getFaceIteratorNoBoundary instead.
+    @return m_faceIter (which is, in fact, mutable)
+  */
+  Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+  getFaceIterator() const;
+
+  /**
+    @brief Return face iterators over cut-cell faces in each valid grid box (FaceStop::SurroundingNoBoundary).
+    @details Each entry is an array of SpaceDim FaceIterators, one per coordinate direction.
+    Domain boundary faces are excluded. Intended for cell-to-face averaging where domain boundary faces
+    are fixed up separately.
+    @return m_faceIterNoBoundary (which is, in fact, mutable)
+  */
+  Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+  getFaceIteratorNoBoundary() const;
+
+  /**
+    @brief Return per-direction face iterators covering cut-cell faces that reach into the tangential ghost layer.
+    @details Each entry is an array of SpaceDim FaceIterators, one per coordinate direction.
+    For the iterator in direction dir, the underlying IVS covers irregular cells in a box grown by 1
+    in the two directions tangential to dir; the dir extent stays at the valid box. Domain boundary
+    faces are excluded (FaceStop::SurroundingNoBoundary). Callers require at least 1 ghost layer in
+    cell data. For faces strictly inside the valid box, use getFaceIterator instead.
+    @return m_faceIterTanGhost (which is, in fact, mutable)
+  */
+  Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+  getFaceIteratorWithTangentialGhosts() const;
+
+  /**
+    @brief Return face iterators restricted to multiply-cut faces in each valid grid box.
+    @details Each entry is an array of SpaceDim FaceIterators, one per coordinate direction.
+    Only faces that abut at least one multiply-cut cell (cells with more than one VoF) are
+    iterated. Faces are enumerated with FaceStop::SurroundingNoBoundary. Used as a second
+    pass after a box loop over getSingleValuedFAB to avoid double-processing singly-cut faces.
+    @return m_multiCutFaceIter (which is, in fact, mutable)
+  */
+  Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+  getMultiCutFaceIterator() const;
+
+  /**
+    @brief Get objects for interpolation from cell centers to centroids.
     @return Cell centroid interpolation
   */
   const Vector<RefCountedPtr<CellCentroidInterpolation>>&
@@ -498,10 +552,40 @@ protected:
   */
   EBAMRFAB m_levelset;
 
-  /** 
-    @brief Cut-cell iterator
+  /**
+    @brief Cut-cell iterator (all irregular cells)
   */
   mutable Vector<RefCountedPtr<LayoutData<VoFIterator>>> m_vofIter;
+
+  /**
+    @brief Cut-cell iterator restricted to multiply-cut cells (cells with more than one VoF)
+  */
+  mutable Vector<RefCountedPtr<LayoutData<VoFIterator>>> m_multiCutVofIter;
+
+  /**
+    @brief Face iterators over cut-cell faces in the valid box (FaceStop::SurroundingWithBoundary).
+  */
+  mutable Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>> m_faceIter;
+
+  /**
+    @brief Face iterators over cut-cell faces in the valid box (FaceStop::SurroundingNoBoundary).
+    @details Domain boundary faces are excluded. Use this for cell-to-face averaging where boundary
+    faces are fixed up separately. See getFaceIteratorNoBoundary.
+  */
+  mutable Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>> m_faceIterNoBoundary;
+
+  /**
+    @brief Per-direction face iterators covering cut-cell faces that reach into the tangential ghost layer.
+    @details For the iterator in direction dir, the IVS covers irregular cells in a box grown by 1
+    in the two directions tangential to dir; the dir extent stays at the valid-box boundary.
+    Domain boundary faces are excluded (FaceStop::SurroundingNoBoundary).
+  */
+  mutable Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>> m_faceIterTanGhost;
+
+  /**
+    @brief Face iterators over multiply-cut faces in each valid grid box (SurroundingNoBoundary stop criterion)
+  */
+  mutable Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>> m_multiCutFaceIter;
 
   /**
     @brief Coarsening operator

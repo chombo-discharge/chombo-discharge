@@ -168,7 +168,7 @@ BrownianWalkerStepper::setVelocity()
   };
 
   DataOps::setValue(vel, 0.0);
-  DataOps::setValue(vel, veloFunc, m_amr->getProbLo(), m_amr->getDx());
+  DataOps::setValue(vel, veloFunc, m_amr->getProbLo(), m_amr->getDx(), m_amr->getMultiCutVofIterator(m_realm, m_phase));
 
   // Coarsen and update ghost cells.
   m_amr->conservativeAverage(vel, m_realm, m_phase);

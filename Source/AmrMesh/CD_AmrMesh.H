@@ -1754,14 +1754,76 @@ public:
   getMFLevelGrid(const std::string& a_realm) const;
 
   /**
-    @brief Get vof iterators for a Realm and phase. This has the capability of iterating through cut-cells. 
-    @details Not const because we need to reset the vofiterator
-    @return Vof iterator
-    @param[in] a_realm Description
-    @param[in] a_phase Description
+    @brief Get VoF iterators covering all cut-cells (singly- and multiply-cut) for a Realm and phase.
+    @details Not const because we need to reset the VoFIterator. For a pass covering only multiply-cut
+             cells, use getMultiCutVofIterator instead.
+    @param[in] a_realm Realm name
+    @param[in] a_phase Phase (gas or solid)
+    @return Per-level LayoutData of VoFIterators covering all irregular cells
   */
   Vector<RefCountedPtr<LayoutData<VoFIterator>>>&
   getVofIterator(const std::string& a_realm, const phase::which_phase a_phase) const;
+
+  /**
+    @brief Get vof iterators restricted to multiply-cut cells for a Realm and phase.
+    @details Multiply-cut cells are those with more than one VoF per cell. This iterator is used
+             as a second pass after BoxLoops::loop over getSingleValuedFAB, which already covers
+             VoF 0 of all cut-cells.
+    @param[in] a_realm Realm name
+    @param[in] a_phase Phase (gas or solid)
+    @return Per-level LayoutData of VoFIterators restricted to multiply-cut cells
+  */
+  Vector<RefCountedPtr<LayoutData<VoFIterator>>>&
+  getMultiCutVofIterator(const std::string& a_realm, const phase::which_phase a_phase) const;
+
+  /**
+    @brief Get face iterators over cut-cell faces in each valid grid box (FaceStop::SurroundingWithBoundary).
+    @details Each per-box entry is an array of SpaceDim FaceIterators. Domain boundary faces are included.
+             For cell-to-face averaging that excludes domain boundary faces, use getFaceIteratorNoBoundary.
+    @param[in] a_realm Realm name
+    @param[in] a_phase Phase (gas or solid)
+    @return Per-level LayoutData of FaceIterator arrays
+  */
+  Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+  getFaceIterator(const std::string& a_realm, const phase::which_phase a_phase) const;
+
+  /**
+    @brief Get face iterators over cut-cell faces in each valid grid box (FaceStop::SurroundingNoBoundary).
+    @details Each per-box entry is an array of SpaceDim FaceIterators. Domain boundary faces are excluded.
+             Intended for cell-to-face averaging where boundary faces are fixed up separately.
+    @param[in] a_realm Realm name
+    @param[in] a_phase Phase (gas or solid)
+    @return Per-level LayoutData of FaceIterator arrays
+  */
+  Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+  getFaceIteratorNoBoundary(const std::string& a_realm, const phase::which_phase a_phase) const;
+
+  /**
+    @brief Get per-direction face iterators covering cut-cell faces that reach into the tangential ghost layer.
+    @details Each per-box entry is an array of SpaceDim FaceIterators, one per coordinate direction.
+             For the iterator in direction dir, the underlying IVS covers irregular cells in a box grown by 1
+             in the two directions tangential to dir; the dir extent stays at the valid box. Domain boundary
+             faces are excluded (FaceStop::SurroundingNoBoundary). Callers require at least 1 ghost layer in
+             cell data.
+    @param[in] a_realm Realm name
+    @param[in] a_phase Phase (gas or solid)
+    @return Per-level LayoutData of FaceIterator arrays
+  */
+  Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+  getFaceIteratorWithTangentialGhosts(const std::string& a_realm, const phase::which_phase a_phase) const;
+
+  /**
+    @brief Get face iterators restricted to multiply-cut faces in each valid grid box.
+    @details Only faces abutting at least one multiply-cut cell (cells with more than one VoF)
+             are visited. Faces are enumerated with FaceStop::SurroundingNoBoundary. Used as a
+             second pass after a box loop over getSingleValuedFAB to avoid double-processing
+             singly-cut faces.
+    @param[in] a_realm Realm name
+    @param[in] a_phase Phase (gas or solid)
+    @return Per-level LayoutData of FaceIterator arrays
+  */
+  Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+  getMultiCutFaceIterator(const std::string& a_realm, const phase::which_phase a_phase) const;
 
   /**
     @brief Get levelset function, allocated over a grid for a Realm and phase
