@@ -650,7 +650,7 @@ EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData
     }
     m_multigridSolver->revert(phi, rhs, finestLevel, 0);
 
-    DataOps::setCoveredValue(a_phi, 0, 0.0);
+    DataOps::setCoveredValue(a_phi, m_amr->getCoveredCells(m_realm, m_phase), 0, 0.0);
   }
   else {
     this->advanceEuler(a_phi, scaledSource, Units::c * a_dt, a_zeroPhi);
@@ -661,7 +661,7 @@ EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData
     }
   }
 
-  DataOps::setCoveredValue(a_phi, 0.0);
+  DataOps::setCoveredValue(a_phi, m_amr->getCoveredCells(m_realm, m_phase), 0.0);
 
   m_amr->conservativeAverage(a_phi, m_realm, m_phase);
   m_amr->interpGhost(a_phi, m_realm, m_phase);

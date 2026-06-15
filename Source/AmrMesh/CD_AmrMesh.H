@@ -1835,6 +1835,42 @@ public:
   getLevelset(const std::string& a_realm, const phase::which_phase a_phase) const;
 
   /**
+    @brief Get the regular-cell mask (value 1 in regular cells, 0 elsewhere) for a Realm and phase.
+    @param[in] a_realm Realm name
+    @param[in] a_phase Phase (gas or solid)
+    @return Regular-cell mask
+  */
+  const EBAMRCellData&
+  getRegularCells(const std::string& a_realm, const phase::which_phase a_phase) const;
+
+  /**
+    @brief Get the covered-cell mask (value 1 in covered cells, 0 elsewhere) for a Realm and phase.
+    @param[in] a_realm Realm name
+    @param[in] a_phase Phase (gas or solid)
+    @return Covered-cell mask
+  */
+  const EBAMRCellData&
+  getCoveredCells(const std::string& a_realm, const phase::which_phase a_phase) const;
+
+  /**
+    @brief Get the non-covered-cell mask (1 in regular/irregular cells, 0 in covered cells) for a Realm and phase.
+    @param[in] a_realm Realm name
+    @param[in] a_phase Phase (gas or solid)
+    @return Non-covered-cell mask
+  */
+  const EBAMRCellData&
+  getNotCoveredCells(const std::string& a_realm, const phase::which_phase a_phase) const;
+
+  /**
+    @brief Get the irregular-cell mask (value 1 in irregular cells, 0 elsewhere) for a Realm and phase.
+    @param[in] a_realm Realm name
+    @param[in] a_phase Phase (gas or solid)
+    @return Irregular-cell mask
+  */
+  const EBAMRCellData&
+  getIrregularCells(const std::string& a_realm, const phase::which_phase a_phase) const;
+
+  /**
     @brief Get EBAMRParticleMesh operator
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)    

@@ -174,7 +174,7 @@ BrownianWalkerStepper::setVelocity()
   m_amr->conservativeAverage(vel, m_realm, m_phase);
   m_amr->interpGhost(vel, m_realm, m_phase);
 
-  DataOps::setCoveredValue(vel, 0, 0.0);
+  DataOps::setCoveredValue(vel, m_amr->getCoveredCells(m_realm, m_phase), 0, 0.0);
 }
 
 bool
@@ -638,7 +638,7 @@ BrownianWalkerStepper::loadBalanceBoxesMesh(Vector<Vector<int>>&             a_p
   constexpr Real zero = 0.0;
 
   DataOps::setInvalidValue(newParticlesPerCell, refRat, zero);
-  DataOps::setCoveredValue(newParticlesPerCell, zero);
+  DataOps::setCoveredValue(newParticlesPerCell, m_amr->getCoveredCells(a_realm, m_phase), zero);
 
   // We now have everything we need to start load balancing.
   a_procs.resize(1 + a_finestLevel);

@@ -435,6 +435,38 @@ public:
   getLevelset(const phase::which_phase a_phase) const;
 
   /**
+    @brief Get the regular-cell mask (value 1 in regular cells, 0 elsewhere) for a phase.
+    @param[in] a_phase Phase
+    @return Regular-cell mask
+  */
+  const EBAMRCellData&
+  getRegularCells(const phase::which_phase a_phase) const;
+
+  /**
+    @brief Get the covered-cell mask (value 1 in covered cells, 0 elsewhere) for a phase.
+    @param[in] a_phase Phase
+    @return Covered-cell mask
+  */
+  const EBAMRCellData&
+  getCoveredCells(const phase::which_phase a_phase) const;
+
+  /**
+    @brief Get the non-covered-cell mask (1 in regular/irregular cells, 0 in covered cells) for a phase.
+    @param[in] a_phase Phase
+    @return Non-covered-cell mask
+  */
+  const EBAMRCellData&
+  getNotCoveredCells(const phase::which_phase a_phase) const;
+
+  /**
+    @brief Get the irregular-cell mask (value 1 in irregular cells, 0 elsewhere) for a phase.
+    @param[in] a_phase Phase
+    @return Irregular-cell mask
+  */
+  const EBAMRCellData&
+  getIrregularCells(const phase::which_phase a_phase) const;
+
+  /**
     @brief Get AMR mask
     @return Mask
     @param[in] a_mask Mask

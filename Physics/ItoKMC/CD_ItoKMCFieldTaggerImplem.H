@@ -80,7 +80,10 @@ ItoKMCFieldTagger<S>::computeElectricField(EBAMRCellData& a_E, EBAMRCellData& a_
   CH_assert(a_gradE[0]->nComp() == SpaceDim);
 
   this->m_timeStepper->computeElectricField(a_E, this->m_phase);
-  DataOps::vectorLength(m_scratch, a_E, this->m_amr->getMultiCutVofIterator(this->m_realm, this->m_phase));
+  DataOps::vectorLength(m_scratch,
+                        a_E,
+                        this->m_amr->getNotCoveredCells(this->m_realm, this->m_phase),
+                        this->m_amr->getMultiCutVofIterator(this->m_realm, this->m_phase));
   this->m_amr->computeGradient(a_gradE, m_scratch, this->m_realm, this->m_phase);
 
   this->m_amr->conservativeAverage(a_gradE, this->m_realm, this->m_phase);

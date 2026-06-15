@@ -866,13 +866,18 @@ public:
 
   /**
     @brief Compute the kappa-weighted sum of the input data. Assumes one component.
-    @param[out] a_mass    Total mass, computed as kappa * lhs.
-    @param[in]  a_lhs     Cell data.
-    @param[in]  a_comp    Component.
-    @param[in]  a_vofIter Pre-built VoF iterator (all cut-cells).
+    @param[out] a_mass        Total mass, computed as kappa * lhs.
+    @param[in]  a_lhs         Cell data.
+    @param[in]  a_regularMask Regular-cell mask (1 in regular cells, 0 in covered/irregular cells).
+    @param[in]  a_comp        Component.
+    @param[in]  a_vofIter     Pre-built VoF iterator (all cut-cells).
   */
   static void
-  kappaSum(Real& a_mass, const LevelData<EBCellFAB>& a_lhs, const int a_comp, LayoutData<VoFIterator>& a_vofIter);
+  kappaSum(Real&                       a_mass,
+           const LevelData<EBCellFAB>& a_lhs,
+           const LevelData<EBCellFAB>& a_regularMask,
+           const int                   a_comp,
+           LayoutData<VoFIterator>&    a_vofIter);
 
   /**
     @brief Scale data by volume fraction.
@@ -1022,15 +1027,20 @@ public:
 
   /**
     @brief Compute specified norm of data.
-    @param[in]  a_data    Data to compute the norm of.
-    @param[in]  a_p       Norm factor, e.g. a_p = 2 => squared norm. 0 => inf norm.
-    @param[in]  a_vofIter Pre-built VoF iterator (all cut-cells).
-    @param[in]  a_comp    Component.
+    @param[in]  a_data        Data to compute the norm of.
+    @param[in]  a_regularMask Regular-cell mask (1 in regular cells, 0 in covered/irregular cells).
+    @param[in]  a_p           Norm factor, e.g. a_p = 2 => squared norm. 0 => inf norm.
+    @param[in]  a_vofIter     Pre-built VoF iterator (all cut-cells).
+    @param[in]  a_comp        Component.
     @note Does not do kappa-weighting.
     @return Return value.
   */
   static Real
-  norm(const LevelData<EBCellFAB>& a_data, const int a_p, LayoutData<VoFIterator>& a_vofIter, const int a_comp = 0);
+  norm(const LevelData<EBCellFAB>& a_data,
+       const LevelData<EBCellFAB>& a_regularMask,
+       const int                   a_p,
+       LayoutData<VoFIterator>&    a_vofIter,
+       const int                   a_comp = 0);
 
   /**
     @brief General addition operator for adding together data. The user can choose which components to add. 
@@ -1144,37 +1154,44 @@ public:
 
   /**
     @brief Set value in covered cells. Does specified component
-    @param[in,out] a_lhs   Input/output data. 
-    @param[in]   a_comp  Component to set
-    @param[in]   a_value Value to set
+    @param[in,out] a_lhs        Input/output data.
+    @param[in]     a_coveredMask Covered-cell mask (1 in covered cells, 0 elsewhere).
+    @param[in]     a_comp       Component to set
+    @param[in]     a_value      Value to set
   */
   static void
-  setCoveredValue(EBAMRCellData& a_lhs, const int a_comp, const Real a_value);
+  setCoveredValue(EBAMRCellData& a_lhs, const EBAMRCellData& a_coveredMask, const int a_comp, const Real a_value);
 
   /**
     @brief Set value in covered cells. Does specified component
-    @param[in,out] a_lhs   Input/output data. 
-    @param[in]   a_comp  Component to set
-    @param[in]   a_value Value to set
+    @param[in,out] a_lhs        Input/output data.
+    @param[in]     a_coveredMask Covered-cell mask (1 in covered cells, 0 elsewhere).
+    @param[in]     a_comp       Component to set
+    @param[in]     a_value      Value to set
   */
   static void
-  setCoveredValue(LevelData<EBCellFAB>& a_lhs, const int a_comp, const Real a_value);
+  setCoveredValue(LevelData<EBCellFAB>&       a_lhs,
+                  const LevelData<EBCellFAB>& a_coveredMask,
+                  const int                   a_comp,
+                  const Real                  a_value);
 
   /**
     @brief Version of setCoveredValue which does all components
-    @param[in,out] a_lhs   Data 
-    @param[in]    a_value Value in covered grid cells. 
+    @param[in,out] a_lhs        Data
+    @param[in]     a_coveredMask Covered-cell mask (1 in covered cells, 0 elsewhere).
+    @param[in]     a_value      Value in covered grid cells.
   */
   static void
-  setCoveredValue(EBAMRCellData& a_lhs, const Real a_value);
+  setCoveredValue(EBAMRCellData& a_lhs, const EBAMRCellData& a_coveredMask, const Real a_value);
 
   /**
     @brief Version of setCoveredValue which does all component
-    @param[in,out] a_lhs   Data 
-    @param[in]    a_value Value in covered grid cells. 
+    @param[in,out] a_lhs        Data
+    @param[in]     a_coveredMask Covered-cell mask (1 in covered cells, 0 elsewhere).
+    @param[in]     a_value      Value in covered grid cells.
   */
   static void
-  setCoveredValue(LevelData<EBCellFAB>& a_lhs, const Real a_value);
+  setCoveredValue(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_coveredMask, const Real a_value);
 
   /**
     @brief Set value on covered faces.
@@ -1570,69 +1587,91 @@ public:
 
   /**
     @brief Compute the vector length of a data holder. Sets a_lhs = |a_rhs| where a_rhs contains SpaceDim components.
-    @param[out] a_lhs     Vector length.
-    @param[in]  a_rhs     Input vector.
-    @param[in]  a_vofIter Pre-built VoF iterators (multiply-cut cells) for each level.
+    @param[out] a_lhs        Vector length.
+    @param[in]  a_rhs        Input vector.
+    @param[in]  a_notCovered Non-covered mask (1 in regular/irregular cells, 0 in covered cells).
+    @param[in]  a_vofIter    Pre-built VoF iterators (multiply-cut cells) for each level.
     @note a_lhs must have one component and a_rhs must have SpaceDim components.
   */
   static void
   vectorLength(EBAMRCellData&                                        a_lhs,
                const EBAMRCellData&                                  a_rhs,
+               const EBAMRCellData&                                  a_notCovered,
                const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter);
 
   /**
     @brief Compute the vector length of a data holder. Sets a_lhs = |a_rhs| where a_rhs contains SpaceDim components.
-    @param[out] a_lhs     Vector length.
-    @param[in]  a_rhs     Input vector.
-    @param[in]  a_vofIter Pre-built VoF iterator (multiply-cut cells).
+    @param[out] a_lhs        Vector length.
+    @param[in]  a_rhs        Input vector.
+    @param[in]  a_notCovered Non-covered mask (1 in regular/irregular cells, 0 in covered cells).
+    @param[in]  a_vofIter    Pre-built VoF iterator (multiply-cut cells).
     @note a_lhs must have one component and a_rhs must have SpaceDim components.
   */
   static void
-  vectorLength(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, LayoutData<VoFIterator>& a_vofIter);
+  vectorLength(LevelData<EBCellFAB>&       a_lhs,
+               const LevelData<EBCellFAB>& a_rhs,
+               const LevelData<EBCellFAB>& a_notCovered,
+               LayoutData<VoFIterator>&    a_vofIter);
 
   /**
     @brief Compute the vector length of a data holder. Sets a_lhs = |a_rhs| where a_rhs contains SpaceDim components.
-    @param[out] a_lhs     Vector length.
-    @param[in]  a_rhs     Input vector.
-    @param[in]  box       Cell box.
-    @param[in]  a_vofIter Pre-built VoF iterator (multiply-cut cells) for this patch.
+    @param[out] a_lhs        Vector length.
+    @param[in]  a_rhs        Input vector.
+    @param[in]  a_notCovered Non-covered mask (1 in regular/irregular cells, 0 in covered cells).
+    @param[in]  box          Cell box.
+    @param[in]  a_vofIter    Pre-built VoF iterator (multiply-cut cells) for this patch.
     @note a_lhs must have one component and a_rhs must have SpaceDim components.
   */
   static void
-  vectorLength(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& box, VoFIterator& a_vofIter);
+  vectorLength(EBCellFAB&       a_lhs,
+               const EBCellFAB& a_rhs,
+               const EBCellFAB& a_notCovered,
+               const Box&       box,
+               VoFIterator&     a_vofIter);
 
   /**
     @brief Compute the squared vector length of a data holder. Sets a_lhs = |a_rhs|^2 where a_rhs contains SpaceDim components.
-    @param[out] a_lhs     Vector length.
-    @param[in]  a_rhs     Input vector.
-    @param[in]  a_vofIter Pre-built VoF iterators (multiply-cut cells) for each level.
+    @param[out] a_lhs        Vector length.
+    @param[in]  a_rhs        Input vector.
+    @param[in]  a_notCovered Non-covered mask (1 in regular/irregular cells, 0 in covered cells).
+    @param[in]  a_vofIter    Pre-built VoF iterators (multiply-cut cells) for each level.
     @note a_lhs must have one component and a_rhs must have SpaceDim components.
   */
   static void
   vectorLength2(EBAMRCellData&                                        a_lhs,
                 const EBAMRCellData&                                  a_rhs,
+                const EBAMRCellData&                                  a_notCovered,
                 const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter);
 
   /**
     @brief Compute the squared vector length of a data holder. Sets a_lhs = |a_rhs|^2 where a_rhs contains SpaceDim components.
-    @param[out] a_lhs     Vector length.
-    @param[in]  a_rhs     Input vector.
-    @param[in]  a_vofIter Pre-built VoF iterator (multiply-cut cells).
+    @param[out] a_lhs        Vector length.
+    @param[in]  a_rhs        Input vector.
+    @param[in]  a_notCovered Non-covered mask (1 in regular/irregular cells, 0 in covered cells).
+    @param[in]  a_vofIter    Pre-built VoF iterator (multiply-cut cells).
     @note a_lhs must have one component and a_rhs must have SpaceDim components.
   */
   static void
-  vectorLength2(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, LayoutData<VoFIterator>& a_vofIter);
+  vectorLength2(LevelData<EBCellFAB>&       a_lhs,
+                const LevelData<EBCellFAB>& a_rhs,
+                const LevelData<EBCellFAB>& a_notCovered,
+                LayoutData<VoFIterator>&    a_vofIter);
 
   /**
     @brief Compute the squared vector length of a data holder. Sets a_lhs = |a_rhs|^2 where a_rhs contains SpaceDim components.
-    @param[out] a_lhs     Vector length.
-    @param[in]  a_rhs     Input vector.
-    @param[in]  box       Cell box.
-    @param[in]  a_vofIter Pre-built VoF iterator (multiply-cut cells) for this patch.
+    @param[out] a_lhs        Vector length.
+    @param[in]  a_rhs        Input vector.
+    @param[in]  a_notCovered Non-covered mask (1 in regular/irregular cells, 0 in covered cells).
+    @param[in]  box          Cell box.
+    @param[in]  a_vofIter    Pre-built VoF iterator (multiply-cut cells) for this patch.
     @note a_lhs must have one component and a_rhs must have SpaceDim components.
   */
   static void
-  vectorLength2(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& box, VoFIterator& a_vofIter);
+  vectorLength2(EBCellFAB&       a_lhs,
+                const EBCellFAB& a_rhs,
+                const EBCellFAB& a_notCovered,
+                const Box&       box,
+                VoFIterator&     a_vofIter);
 
   /**
     @brief Compute the tightest possible valid box around a cut-cell volume

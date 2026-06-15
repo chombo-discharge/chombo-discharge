@@ -248,9 +248,11 @@ ItoKMCBackgroundEvaluator<I, C, R, F>::evaluateSpaceChargeEffects() noexcept
   // Compute the field magnitude, and then the relative change in field magnitude.
   DataOps::vectorLength(poissonNorm,
                         poissonField,
+                        (this->m_amr)->getNotCoveredCells(this->m_fluidRealm, this->m_plasmaPhase),
                         (this->m_amr)->getMultiCutVofIterator(this->m_fluidRealm, this->m_plasmaPhase));
   DataOps::vectorLength(laplaceNorm,
                         laplaceField,
+                        (this->m_amr)->getNotCoveredCells(this->m_fluidRealm, this->m_plasmaPhase),
                         (this->m_amr)->getMultiCutVofIterator(this->m_fluidRealm, this->m_plasmaPhase));
 
   DataOps::copy(deltaE, poissonNorm);

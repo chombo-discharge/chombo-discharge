@@ -1140,10 +1140,11 @@ CdrPlasmaImExSdcStepper::finalizeErrors()
       DataOps::incr(error, phi_p, 1.0);
 
       // Compute norms. Only coarsest level
-      Real      Lerr, Lphi;
-      const int lvl = 0;
-      Lerr          = DataOps::norm(*error[lvl], m_errorNorm, *m_amr->getVofIterator(m_realm, m_phase)[lvl]);
-      Lphi          = DataOps::norm(*phi_p[lvl], m_errorNorm, *m_amr->getVofIterator(m_realm, m_phase)[lvl]);
+      Real                        Lerr, Lphi;
+      const int                   lvl          = 0;
+      const LevelData<EBCellFAB>& regularCells = *m_amr->getRegularCells(m_realm, m_phase)[lvl];
+      Lerr = DataOps::norm(*error[lvl], regularCells, m_errorNorm, *m_amr->getVofIterator(m_realm, m_phase)[lvl]);
+      Lphi = DataOps::norm(*phi_p[lvl], regularCells, m_errorNorm, *m_amr->getVofIterator(m_realm, m_phase)[lvl]);
 
       if (Lphi > 0.0) {
         m_cdrError[idx] = Lerr / Lphi;

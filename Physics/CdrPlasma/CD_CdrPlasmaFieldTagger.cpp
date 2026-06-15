@@ -70,7 +70,10 @@ CdrPlasmaFieldTagger::computeElectricField(EBAMRCellData& a_electricField, EBAMR
   m_timeStepper->computeElectricField(a_electricField, m_phase);
 
   // Compute |E| onto scratch
-  DataOps::vectorLength(m_scratch, a_electricField, m_amr->getMultiCutVofIterator(m_realm, m_phase));
+  DataOps::vectorLength(m_scratch,
+                        a_electricField,
+                        m_amr->getNotCoveredCells(m_realm, m_phase),
+                        m_amr->getMultiCutVofIterator(m_realm, m_phase));
 
   // Now compute grad(|E|).
   m_amr->computeGradient(a_gradElectricField, m_scratch, m_realm, phase::gas);

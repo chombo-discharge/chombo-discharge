@@ -2675,7 +2675,7 @@ Driver::writeCheckpointTags(HDF5Handle& a_handle, const int a_level)
 
     BoxLoops::loop<D_DECL(1, 1, 1)>(dbl[din], kernel);
 
-    DataOps::setCoveredValue(scratch, 0, 0.0);
+    DataOps::setCoveredValue(scratch, *m_amr->getCoveredCells(m_realm, phase::gas)[a_level], 0, 0.0);
   }
 
   // Write tags

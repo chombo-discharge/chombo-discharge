@@ -1318,6 +1318,30 @@ Realm::getLevelset(const phase::which_phase a_phase) const
   return m_realms[a_phase]->getLevelset();
 }
 
+const EBAMRCellData&
+Realm::getRegularCells(const phase::which_phase a_phase) const
+{
+  return m_realms[a_phase]->getRegularCells();
+}
+
+const EBAMRCellData&
+Realm::getCoveredCells(const phase::which_phase a_phase) const
+{
+  return m_realms[a_phase]->getCoveredCells();
+}
+
+const EBAMRCellData&
+Realm::getNotCoveredCells(const phase::which_phase a_phase) const
+{
+  return m_realms[a_phase]->getNotCoveredCells();
+}
+
+const EBAMRCellData&
+Realm::getIrregularCells(const phase::which_phase a_phase) const
+{
+  return m_realms[a_phase]->getIrregularCells();
+}
+
 const AMRMask&
 Realm::getMask(const std::string& a_mask, const int a_buffer) const
 {

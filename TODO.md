@@ -36,6 +36,38 @@ This session consists of:
   them when normalizing raw iterator loops.
 - Audit tool: `python3 CheckDocs.py` (compares against `main`).
 
+### Verification harness (how to actually check vectorization)
+
+`CD_PRAGMA_SIMD` is **empty in debug builds** — vectorization only happens with
+`OPT=HIGH DEBUG=FALSE` (which defines `NDEBUG`; GCC then uses `#pragma GCC ivdep`). The
+active config builds with `g++ -O3 -march=native`.
+
+To get a per-call-site verdict for one translation unit, compile it standalone with GCC's
+optimization-record JSON (basic `-fopt-info` loses the inlining context because the
+`BoxLoops` inner loop is `ALWAYS_INLINE`d and reported at `CD_BoxLoopsImplem.H:31`):
+
+```bash
+cd $DISCHARGE_HOME/Source
+# 1. capture the real flags from the Chombo build database
+make discharge-lib DIM=2 OPT=HIGH MPI=TRUE DEBUG=FALSE -pn 2>/dev/null \
+  | grep -E '^CPPFLAGS :=' | head -1 | sed 's/^CPPFLAGS := //' > /tmp/cppflags.txt
+make discharge-lib DIM=2 OPT=HIGH MPI=TRUE DEBUG=FALSE -pn 2>/dev/null \
+  | grep -E '^CXXFLAGS :=' | head -1 | sed 's/^CXXFLAGS := //' > /tmp/cxxflags.txt
+# 2. compile the single TU. NOTE: -DCH_LANG_CC is required (part of Chombo's recipe).
+mpic++ $(cat /tmp/cxxflags.txt) $(cat /tmp/cppflags.txt) -DCH_LANG_CC \
+  -fsave-optimization-record -c Utilities/CD_DataOps.cpp -o /tmp/probe.o
+# 3. parse /tmp/probe.cpp.opt-record.json.gz: top level is [meta, passes, records];
+#    each record has kind (success/failure/note), message[], location, inlining_chain[].
+#    Filter location.file == CD_BoxLoopsImplem.H, attribute via innermost 'DataOps::' frame
+#    in inlining_chain. message 'loop vectorized' = success.
+```
+
+Caveats: per-*function* attribution is reliable; exact per-*line* attribution is fuzzy when a
+function holds several Box kernels. `not vectorized: multiple nested loops` /
+`...consecutive inner loops` are about the *outer* j-loop and are expected/benign; the
+meaningful blocker is `not vectorized: control flow in loop` (data-dependent branch in the
+kernel) or a non-inlinable call (e.g. `std::function`).
+
 ### Working notes / conventions
 
 - **Work one file at a time.** Do not start a new file until the current one is finished and
@@ -66,7 +98,47 @@ This session consists of:
 Files sorted by occurrence count (all overloads). Triage each call for the `Box` overload.
 
 ### Source/Utilities
-- [ ] `Source/Utilities/CD_DataOps.cpp` (76)
+- [x] `Source/Utilities/CD_DataOps.cpp` (76) — DONE. Done: 3 IVS-path plain-Box loops
+      converted to `loop<D_DECL(1,1,1)>` (averageCellVelocityToFaceVelocity L129,
+      averageCellToFace L339, filterSmooth L748) — all verified vectorizing. Already
+      vectorizing: averageCellToFace, averageCellVelocityToFaceVelocity, filterSmooth, floor,
+      roof, invert, setInvalidValue. Remaining non-vectorizing kernels are pending a user
+      decision on acceptable behavioral changes (see report). `squareRoot` needs
+      `-fno-math-errno` (build flag, no code change; documented in Installation.rst).
+      `compute`/`setValue` documented as non-vectorizable (std::function callback).
+      `setCoveredValue` rewritten with a precomputed covered-cell mask → vectorizes.
+      Finding: a ternary directly on `ebisbox.isRegular/isCovered(iv)` does NOT vectorize
+      (out-of-line EBGraph.cpp call); a precomputed contiguous mask does. kappaSum/norm/
+      getMaxMinNorm need the mask AND the postponed reduction fix (cat 4) to vectorize.
+      Mask infrastructure added: PhaseRealm/Realm/AmrMesh now build+expose per-phase
+      m_regularCells / m_coveredCells / m_irregularCells (EBAMRCellData, ghosted) via
+      get{Regular,Covered,Irregular}Cells(realm, phase). kappaSum + norm now take the
+      regular-cell mask as an argument (callers updated); setCoveredValue kept on its local
+      covered-mask (already vectorizes; Realm-mask threading through its 21 callers deferred).
+      Full discharge-lib build passes.
+      Added a 4th mask m_notCoveredCells (1 in regular+irregular, 0 in covered) to
+      PhaseRealm/Realm/AmrMesh (getNotCoveredCells). vectorLength + vectorLength2 rewritten
+      branchless (lhs = notCovered * f(rhs)); all 9 call sites pass the mask. Both VECTORIZE.
+      discharge-lib + ItoKMC test build pass.
+      Point 4 (local accumulators): kappaSum now VECTORIZES. norm got the accumulator too but
+      still does not vectorize — p>0 is blocked by std::pow (runtime int exponent), p==0
+      (inf-norm max-reduction) needs -ffinite-math-only which is unsafe for a norm.
+      norm, getMaxMin, getMaxMinNorm documented as non-vectorizable (min/max reductions need
+      -ffinite-math-only; norm p>0 also blocked by std::pow runtime exponent).
+      Point 5 (hoist component/direction loop outside the cell loop): averageFaceToCell,
+      dotProduct, max all now VECTORIZE. discharge-lib builds.
+      setCoveredValue: local mask removed; now takes the Realm covered-cell mask as an argument
+      (m_amr->getCoveredCells(realm, phase)); all 20 cell call sites updated (the EBFluxFAB
+      overload is unchanged). Uses a ternary/select (not multiply) to avoid 0*inf on covered
+      cells. Vectorizes. Verified by discharge-lib + 7 physics test builds (CdrPlasma, AdvDiff,
+      BrownianWalker, ItoKMC, DischargeInception, MeshODE, TracerParticles).
+      -fno-math-errno added to all GNU cxxoptflags (top-level Lib/Local + betzy; fram/Intel get
+      it via -Ofast). With it, squareRoot now VECTORIZES (verified). norm still does not
+      (pow runtime exponent; p==0 max needs unsafe -ffinite-math-only) — could special-case
+      p=1/p=2 later if wanted. CD_DataOps.cpp is COMPLETE: every kernel vectorizes or is
+      documented non-vectorizable.
+      VERIFY-BEFORE-MERGE: the two tagger plot-output callers (CdrPlasmaTagger, ItoKMCTagger)
+      use getCoveredCells(a_outputRealm, m_phase) — confirm a_output's realm/phase matches.
 - [ ] `Source/Utilities/CD_VofUtils.cpp` (1)
 
 ### Source/AmrMesh

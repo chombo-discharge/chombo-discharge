@@ -176,7 +176,7 @@ CdrPlasmaTagger::writePlotData(LevelData<EBCellFAB>& a_output,
     // Copy data to the output data holder. Covered data is bogus.
     m_amr->copyData(a_output, *tagField[a_level], a_level, a_outputRealm, tagField.getRealm(), dstInterv, srcInterv);
 
-    DataOps::setCoveredValue(a_output, a_icomp, 0.0);
+    DataOps::setCoveredValue(a_output, *m_amr->getCoveredCells(a_outputRealm, m_phase)[a_level], a_icomp, 0.0);
 
     a_icomp++;
   }

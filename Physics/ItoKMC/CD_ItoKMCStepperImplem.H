@@ -1090,7 +1090,7 @@ ItoKMCStepper<I, C, R, F>::writeData(LevelData<EBCellFAB>& a_output,
   }
   CH_STOP(t4);
 
-  DataOps::setCoveredValue(scratch, 0.0);
+  DataOps::setCoveredValue(scratch, *m_amr->getCoveredCells(a_data.getRealm(), m_plasmaPhase)[a_level], 0.0);
 
   CH_START(t5);
   m_amr->copyData(a_output,
@@ -1833,7 +1833,10 @@ ItoKMCStepper<I, C, R, F>::computeMaxReducedElectricField(const phase::which_pha
   EBAMRCellData tmp;
   m_amr->allocate(tmp, m_fluidRealm, a_phase, 1);
 
-  DataOps::vectorLength(tmp, cellCenteredE, m_amr->getMultiCutVofIterator(m_fluidRealm, a_phase));
+  DataOps::vectorLength(tmp,
+                        cellCenteredE,
+                        m_amr->getNotCoveredCells(m_fluidRealm, a_phase),
+                        m_amr->getMultiCutVofIterator(m_fluidRealm, a_phase));
   m_amr->interpToCentroids(tmp, m_fluidRealm, m_plasmaPhase);
 
   DataOps::divideFallback(tmp, m_neutralDensity, 0.0, m_amr->getMultiCutVofIterator(m_fluidRealm, m_plasmaPhase));
@@ -4789,8 +4792,8 @@ ItoKMCStepper<I, C, R, F>::coarsenCDRSolvers() noexcept
     this->m_amr->interpGhostPwl(phi, phi.getRealm(), this->m_plasmaPhase);
     this->m_amr->interpGhostPwl(src, src.getRealm(), this->m_plasmaPhase);
 
-    DataOps::setCoveredValue(phi, 0.0);
-    DataOps::setCoveredValue(src, 0.0);
+    DataOps::setCoveredValue(phi, this->m_amr->getCoveredCells(phi.getRealm(), this->m_plasmaPhase), 0.0);
+    DataOps::setCoveredValue(src, this->m_amr->getCoveredCells(src.getRealm(), this->m_plasmaPhase), 0.0);
   }
 }
 

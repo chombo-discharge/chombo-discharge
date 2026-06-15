@@ -1233,7 +1233,7 @@ CdrSolver::initialDataDistribution()
                     m_comp,
                     m_amr->getMultiCutVofIterator(m_realm, m_phase));
   DataOps::incr(m_phi, scratch, 1.0);
-  DataOps::setCoveredValue(m_phi, 0, 0.0);
+  DataOps::setCoveredValue(m_phi, m_amr->getCoveredCells(m_realm, m_phase), 0, 0.0);
 
   m_amr->conservativeAverage(m_phi, m_realm, m_phase);
   m_amr->interpGhost(m_phi, m_realm, m_phase);
@@ -1965,7 +1965,7 @@ CdrSolver::writeData(LevelData<EBCellFAB>& a_output,
   }
   CH_STOP(t4);
 
-  DataOps::setCoveredValue(scratch, 0.0);
+  DataOps::setCoveredValue(scratch, *m_amr->getCoveredCells(m_realm, m_phase)[a_level], 0.0);
 
   CH_START(t5);
   m_amr->copyData(a_output, scratch, a_level, a_outputRealm, m_realm, dstInterv, srcInterv);
