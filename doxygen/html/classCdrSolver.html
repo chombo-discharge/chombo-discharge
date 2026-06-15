@@ -1031,7 +1031,7 @@ Static Protected Attributes</h2></td></tr>
 <p>Allocate internal storage. </p>
 <dl class="section note"><dt>Note</dt><dd>This allocates a bunch of storage &ndash; if the solver is not diffusive or mobile then we do our best to trim memory. </dd></dl>
 
-<p>Reimplemented in <a class="el" href="classCdrGodunov.html#afc8940528450c901de9ae6164df0c95f">CdrGodunov</a>, and <a class="el" href="classCdrMultigrid.html#aac65554f8fac228c7bd492208f99346c">CdrMultigrid</a>.</p>
+<p>Reimplemented in <a class="el" href="classCdrCTU.html#a48ef7deef4a29bb8d210b57ee9ec6f94">CdrCTU</a>, <a class="el" href="classCdrGodunov.html#afc8940528450c901de9ae6164df0c95f">CdrGodunov</a>, and <a class="el" href="classCdrMultigrid.html#aac65554f8fac228c7bd492208f99346c">CdrMultigrid</a>.</p>
 
 </div>
 </div>
@@ -3441,7 +3441,7 @@ Virtual because some solvers might want to do this differently. </dd></dl>
 </dl>
 <dl class="section note"><dt>Note</dt><dd>This stores m_phi and m_source. </dd></dl>
 
-<p>Reimplemented in <a class="el" href="classCdrMultigrid.html#a73ed7f3e655d15541fefdf6d621b8092">CdrMultigrid</a>.</p>
+<p>Reimplemented in <a class="el" href="classCdrCTU.html#a9040300c6214172b4e771d766c99bcd4">CdrCTU</a>, and <a class="el" href="classCdrMultigrid.html#a73ed7f3e655d15541fefdf6d621b8092">CdrMultigrid</a>.</p>
 
 </div>
 </div>
@@ -3570,6 +3570,8 @@ Virtual because some solvers might want to do this differently. </dd></dl>
   </dd>
 </dl>
 <p>This linearly interpolates (with limiters) m_state to the new grids. Velocities are left undefined. </p>
+
+<p>Reimplemented in <a class="el" href="classCdrCTU.html#ae6de5b84675d09b4a59af713528645a7">CdrCTU</a>.</p>
 
 </div>
 </div>

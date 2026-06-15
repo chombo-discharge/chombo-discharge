@@ -353,6 +353,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:af7b310f56af8bc0fd708b220929b01f9" id="r_af7b310f56af8bc0fd708b220929b01f9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#af7b310f56af8bc0fd708b220929b01f9">getRelaxationCoeff</a> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:af7b310f56af8bc0fd708b220929b01f9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns m_relCoef. Used by <a class="el" href="classMFHelmholtzOp.html" title="Operator for solving multifluid Helmholtz on a grid level.">MFHelmholtzOp</a>.  <br /></td></tr>
 <tr class="separator:af7b310f56af8bc0fd708b220929b01f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aab8b94b8c56584a5a574612b42ddee16" id="r_aab8b94b8c56584a5a574612b42ddee16"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">LayoutData</a>&lt; <a class="el" href="classTracerParticleSolver.html">VoFIterator</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#aab8b94b8c56584a5a574612b42ddee16">getVofIterIrreg</a> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:aab8b94b8c56584a5a574612b42ddee16"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return all-cut VoFIterators (one per patch). Used by <a class="el" href="classMFHelmholtzOp.html" title="Operator for solving multifluid Helmholtz on a grid level.">MFHelmholtzOp</a>.  <br /></td></tr>
+<tr class="separator:aab8b94b8c56584a5a574612b42ddee16"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
@@ -3465,6 +3468,34 @@ Static Protected Attributes</h2></td></tr>
 
 <p>Returns m_relCoef. Used by <a class="el" href="classMFHelmholtzOp.html" title="Operator for solving multifluid Helmholtz on a grid level.">MFHelmholtzOp</a>. </p>
 <dl class="section return"><dt>Returns</dt><dd>Relaxation coeff </dd></dl>
+
+</div>
+</div>
+<a id="aab8b94b8c56584a5a574612b42ddee16" name="aab8b94b8c56584a5a574612b42ddee16"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aab8b94b8c56584a5a574612b42ddee16">&#9670;&#160;</a></span>getVofIterIrreg()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">LayoutData</a>&lt; <a class="el" href="classTracerParticleSolver.html">VoFIterator</a> &gt; &amp; EBHelmholtzOp::getVofIterIrreg </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Return all-cut VoFIterators (one per patch). Used by <a class="el" href="classMFHelmholtzOp.html" title="Operator for solving multifluid Helmholtz on a grid level.">MFHelmholtzOp</a>. </p>
+<dl class="section return"><dt>Returns</dt><dd>All-cut VoF iterators over irregular cells on this level. </dd></dl>
 
 </div>
 </div>

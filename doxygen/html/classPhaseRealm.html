@@ -174,8 +174,23 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:aade764263141d96833e6c9bdfd2b5653"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get refined grids.  <br /></td></tr>
 <tr class="separator:aade764263141d96833e6c9bdfd2b5653"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4a6c82b907a8db5574b0d5f9dbe85a8b" id="r_a4a6c82b907a8db5574b0d5f9dbe85a8b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LayoutData</a>&lt; <a class="el" href="classTracerParticleSolver.html">VoFIterator</a> &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#a4a6c82b907a8db5574b0d5f9dbe85a8b">getVofIterator</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:a4a6c82b907a8db5574b0d5f9dbe85a8b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return vof iterator for iterating over irregular cells in each grid patch.  <br /></td></tr>
+<tr class="memdesc:a4a6c82b907a8db5574b0d5f9dbe85a8b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return VoF iterators covering all cut-cells (singly- and multiply-cut) in each grid patch.  <br /></td></tr>
 <tr class="separator:a4a6c82b907a8db5574b0d5f9dbe85a8b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac26cbe3fa353e0909c5168beb9463f2b" id="r_ac26cbe3fa353e0909c5168beb9463f2b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LayoutData</a>&lt; <a class="el" href="classTracerParticleSolver.html">VoFIterator</a> &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#ac26cbe3fa353e0909c5168beb9463f2b">getMultiCutVofIterator</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:ac26cbe3fa353e0909c5168beb9463f2b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return vof iterator for iterating over multiply-cut cells only (cells with more than one VoF)  <br /></td></tr>
+<tr class="separator:ac26cbe3fa353e0909c5168beb9463f2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6b82a916296565bd9378b7b7cdd4c1e7" id="r_a6b82a916296565bd9378b7b7cdd4c1e7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LayoutData</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::array</a>&lt; <a class="el" href="classTracerParticleSolver.html">FaceIterator</a>, <a class="el" href="classTracerParticleSolver.html">SpaceDim</a> &gt; &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#a6b82a916296565bd9378b7b7cdd4c1e7">getFaceIterator</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:a6b82a916296565bd9378b7b7cdd4c1e7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return face iterators over cut-cell faces in each valid grid box (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">FaceStop::SurroundingWithBoundary</a>).  <br /></td></tr>
+<tr class="separator:a6b82a916296565bd9378b7b7cdd4c1e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2b39c993e3a2327f139600d2e468a63f" id="r_a2b39c993e3a2327f139600d2e468a63f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LayoutData</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::array</a>&lt; <a class="el" href="classTracerParticleSolver.html">FaceIterator</a>, <a class="el" href="classTracerParticleSolver.html">SpaceDim</a> &gt; &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#a2b39c993e3a2327f139600d2e468a63f">getFaceIteratorNoBoundary</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:a2b39c993e3a2327f139600d2e468a63f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return face iterators over cut-cell faces in each valid grid box (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">FaceStop::SurroundingNoBoundary</a>).  <br /></td></tr>
+<tr class="separator:a2b39c993e3a2327f139600d2e468a63f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac4d459183b67f70760aa6d50dc408a7d" id="r_ac4d459183b67f70760aa6d50dc408a7d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LayoutData</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::array</a>&lt; <a class="el" href="classTracerParticleSolver.html">FaceIterator</a>, <a class="el" href="classTracerParticleSolver.html">SpaceDim</a> &gt; &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#ac4d459183b67f70760aa6d50dc408a7d">getFaceIteratorWithTangentialGhosts</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:ac4d459183b67f70760aa6d50dc408a7d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return per-direction face iterators covering cut-cell faces that reach into the tangential ghost layer.  <br /></td></tr>
+<tr class="separator:ac4d459183b67f70760aa6d50dc408a7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3b6f388395b8c6f30d201589611352e4" id="r_a3b6f388395b8c6f30d201589611352e4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LayoutData</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::array</a>&lt; <a class="el" href="classTracerParticleSolver.html">FaceIterator</a>, <a class="el" href="classTracerParticleSolver.html">SpaceDim</a> &gt; &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#a3b6f388395b8c6f30d201589611352e4">getMultiCutFaceIterator</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:a3b6f388395b8c6f30d201589611352e4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return face iterators restricted to multiply-cut faces in each valid grid box.  <br /></td></tr>
+<tr class="separator:a3b6f388395b8c6f30d201589611352e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3775570bfe834ac4ecaa35a24182f02b" id="r_a3775570bfe834ac4ecaa35a24182f02b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classCellCentroidInterpolation.html">CellCentroidInterpolation</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#a3775570bfe834ac4ecaa35a24182f02b">getCellCentroidInterpolation</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
 <tr class="memdesc:a3775570bfe834ac4ecaa35a24182f02b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get objects for interpolation from cell centers to centroids.  <br /></td></tr>
 <tr class="separator:a3775570bfe834ac4ecaa35a24182f02b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -385,8 +400,26 @@ Protected Attributes</h2></td></tr>
 <tr class="separator:a318b7e957a7c1cbbfe11b58e149ec85c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7af73476212af40233d9456abaec2053" id="r_a7af73476212af40233d9456abaec2053"><td class="memItemLeft" align="right" valign="top"><a id="a7af73476212af40233d9456abaec2053" name="a7af73476212af40233d9456abaec2053"></a>
 <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LayoutData</a>&lt; <a class="el" href="classTracerParticleSolver.html">VoFIterator</a> &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_vofIter</b></td></tr>
-<tr class="memdesc:a7af73476212af40233d9456abaec2053"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cut-cell iterator. <br /></td></tr>
+<tr class="memdesc:a7af73476212af40233d9456abaec2053"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cut-cell iterator (all irregular cells) <br /></td></tr>
 <tr class="separator:a7af73476212af40233d9456abaec2053"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5345a6f5d458e73e2e4130b659dfa75f" id="r_a5345a6f5d458e73e2e4130b659dfa75f"><td class="memItemLeft" align="right" valign="top"><a id="a5345a6f5d458e73e2e4130b659dfa75f" name="a5345a6f5d458e73e2e4130b659dfa75f"></a>
+<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LayoutData</a>&lt; <a class="el" href="classTracerParticleSolver.html">VoFIterator</a> &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_multiCutVofIter</b></td></tr>
+<tr class="memdesc:a5345a6f5d458e73e2e4130b659dfa75f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cut-cell iterator restricted to multiply-cut cells (cells with more than one VoF) <br /></td></tr>
+<tr class="separator:a5345a6f5d458e73e2e4130b659dfa75f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8ec0be6d2c58944373031b791a537461" id="r_a8ec0be6d2c58944373031b791a537461"><td class="memItemLeft" align="right" valign="top"><a id="a8ec0be6d2c58944373031b791a537461" name="a8ec0be6d2c58944373031b791a537461"></a>
+<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LayoutData</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::array</a>&lt; <a class="el" href="classTracerParticleSolver.html">FaceIterator</a>, <a class="el" href="classTracerParticleSolver.html">SpaceDim</a> &gt; &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_faceIter</b></td></tr>
+<tr class="memdesc:a8ec0be6d2c58944373031b791a537461"><td class="mdescLeft">&#160;</td><td class="mdescRight">Face iterators over cut-cell faces in the valid box (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">FaceStop::SurroundingWithBoundary</a>). <br /></td></tr>
+<tr class="separator:a8ec0be6d2c58944373031b791a537461"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0781ef18736c05c56c6fc47cce252f7d" id="r_a0781ef18736c05c56c6fc47cce252f7d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LayoutData</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::array</a>&lt; <a class="el" href="classTracerParticleSolver.html">FaceIterator</a>, <a class="el" href="classTracerParticleSolver.html">SpaceDim</a> &gt; &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#a0781ef18736c05c56c6fc47cce252f7d">m_faceIterNoBoundary</a></td></tr>
+<tr class="memdesc:a0781ef18736c05c56c6fc47cce252f7d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Face iterators over cut-cell faces in the valid box (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">FaceStop::SurroundingNoBoundary</a>).  <br /></td></tr>
+<tr class="separator:a0781ef18736c05c56c6fc47cce252f7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af9c502cba0c517964dc8d3c4b6ab2155" id="r_af9c502cba0c517964dc8d3c4b6ab2155"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LayoutData</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::array</a>&lt; <a class="el" href="classTracerParticleSolver.html">FaceIterator</a>, <a class="el" href="classTracerParticleSolver.html">SpaceDim</a> &gt; &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#af9c502cba0c517964dc8d3c4b6ab2155">m_faceIterTanGhost</a></td></tr>
+<tr class="memdesc:af9c502cba0c517964dc8d3c4b6ab2155"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-direction face iterators covering cut-cell faces that reach into the tangential ghost layer.  <br /></td></tr>
+<tr class="separator:af9c502cba0c517964dc8d3c4b6ab2155"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6671a0a8c71988a42b626da46bcaf71c" id="r_a6671a0a8c71988a42b626da46bcaf71c"><td class="memItemLeft" align="right" valign="top"><a id="a6671a0a8c71988a42b626da46bcaf71c" name="a6671a0a8c71988a42b626da46bcaf71c"></a>
+<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LayoutData</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::array</a>&lt; <a class="el" href="classTracerParticleSolver.html">FaceIterator</a>, <a class="el" href="classTracerParticleSolver.html">SpaceDim</a> &gt; &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_multiCutFaceIter</b></td></tr>
+<tr class="memdesc:a6671a0a8c71988a42b626da46bcaf71c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Face iterators over multiply-cut faces in each valid grid box (SurroundingNoBoundary stop criterion) <br /></td></tr>
+<tr class="separator:a6671a0a8c71988a42b626da46bcaf71c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a167b9c1681269fadf612e4a6a2f7a2e1" id="r_a167b9c1681269fadf612e4a6a2f7a2e1"><td class="memItemLeft" align="right" valign="top"><a id="a167b9c1681269fadf612e4a6a2f7a2e1" name="a167b9c1681269fadf612e4a6a2f7a2e1"></a>
 <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classEBCoarAve.html">EBCoarAve</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_coarAve</b></td></tr>
 <tr class="memdesc:a167b9c1681269fadf612e4a6a2f7a2e1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsening operator. <br /></td></tr>
@@ -1449,6 +1482,66 @@ To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.v
 
 </div>
 </div>
+<a id="a6b82a916296565bd9378b7b7cdd4c1e7" name="a6b82a916296565bd9378b7b7cdd4c1e7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6b82a916296565bd9378b7b7cdd4c1e7">&#9670;&#160;</a></span>getFaceIterator()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LayoutData</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::array</a>&lt; <a class="el" href="classTracerParticleSolver.html">FaceIterator</a>, <a class="el" href="classTracerParticleSolver.html">SpaceDim</a> &gt; &gt; &gt; &gt; &amp; PhaseRealm::getFaceIterator </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Return face iterators over cut-cell faces in each valid grid box (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">FaceStop::SurroundingWithBoundary</a>). </p>
+<p>Each entry is an array of SpaceDim FaceIterators, one per coordinate direction. Domain boundary faces are included. For cell-to-face averaging that excludes domain boundary faces, use getFaceIteratorNoBoundary instead. </p><dl class="section return"><dt>Returns</dt><dd>m_faceIter (which is, in fact, mutable) </dd></dl>
+
+</div>
+</div>
+<a id="a2b39c993e3a2327f139600d2e468a63f" name="a2b39c993e3a2327f139600d2e468a63f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2b39c993e3a2327f139600d2e468a63f">&#9670;&#160;</a></span>getFaceIteratorNoBoundary()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LayoutData</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::array</a>&lt; <a class="el" href="classTracerParticleSolver.html">FaceIterator</a>, <a class="el" href="classTracerParticleSolver.html">SpaceDim</a> &gt; &gt; &gt; &gt; &amp; PhaseRealm::getFaceIteratorNoBoundary </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Return face iterators over cut-cell faces in each valid grid box (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">FaceStop::SurroundingNoBoundary</a>). </p>
+<p>Each entry is an array of SpaceDim FaceIterators, one per coordinate direction. Domain boundary faces are excluded. Intended for cell-to-face averaging where domain boundary faces are fixed up separately. </p><dl class="section return"><dt>Returns</dt><dd>m_faceIterNoBoundary (which is, in fact, mutable) </dd></dl>
+
+</div>
+</div>
+<a id="ac4d459183b67f70760aa6d50dc408a7d" name="ac4d459183b67f70760aa6d50dc408a7d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac4d459183b67f70760aa6d50dc408a7d">&#9670;&#160;</a></span>getFaceIteratorWithTangentialGhosts()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LayoutData</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::array</a>&lt; <a class="el" href="classTracerParticleSolver.html">FaceIterator</a>, <a class="el" href="classTracerParticleSolver.html">SpaceDim</a> &gt; &gt; &gt; &gt; &amp; PhaseRealm::getFaceIteratorWithTangentialGhosts </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Return per-direction face iterators covering cut-cell faces that reach into the tangential ghost layer. </p>
+<p>Each entry is an array of SpaceDim FaceIterators, one per coordinate direction. For the iterator in direction dir, the underlying IVS covers irregular cells in a box grown by 1 in the two directions tangential to dir; the dir extent stays at the valid box. Domain boundary faces are excluded (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">FaceStop::SurroundingNoBoundary</a>). Callers require at least 1 ghost layer in cell data. For faces strictly inside the valid box, use getFaceIterator instead. </p><dl class="section return"><dt>Returns</dt><dd>m_faceIterTanGhost (which is, in fact, mutable) </dd></dl>
+
+</div>
+</div>
 <a id="a039dce8556d380230a3b045cbcd21a45" name="a039dce8556d380230a3b045cbcd21a45"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a039dce8556d380230a3b045cbcd21a45">&#9670;&#160;</a></span>getFineInterp()</h2>
 
@@ -1566,6 +1659,46 @@ To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.v
 
 <p>Get level-set function. </p>
 <dl class="section return"><dt>Returns</dt><dd>Levelset </dd></dl>
+
+</div>
+</div>
+<a id="a3b6f388395b8c6f30d201589611352e4" name="a3b6f388395b8c6f30d201589611352e4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3b6f388395b8c6f30d201589611352e4">&#9670;&#160;</a></span>getMultiCutFaceIterator()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LayoutData</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::array</a>&lt; <a class="el" href="classTracerParticleSolver.html">FaceIterator</a>, <a class="el" href="classTracerParticleSolver.html">SpaceDim</a> &gt; &gt; &gt; &gt; &amp; PhaseRealm::getMultiCutFaceIterator </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Return face iterators restricted to multiply-cut faces in each valid grid box. </p>
+<p>Each entry is an array of SpaceDim FaceIterators, one per coordinate direction. Only faces that abut at least one multiply-cut cell (cells with more than one VoF) are iterated. Faces are enumerated with <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">FaceStop::SurroundingNoBoundary</a>. Used as a second pass after a box loop over getSingleValuedFAB to avoid double-processing singly-cut faces. </p><dl class="section return"><dt>Returns</dt><dd>m_multiCutFaceIter (which is, in fact, mutable) </dd></dl>
+
+</div>
+</div>
+<a id="ac26cbe3fa353e0909c5168beb9463f2b" name="ac26cbe3fa353e0909c5168beb9463f2b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac26cbe3fa353e0909c5168beb9463f2b">&#9670;&#160;</a></span>getMultiCutVofIterator()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LayoutData</a>&lt; <a class="el" href="classTracerParticleSolver.html">VoFIterator</a> &gt; &gt; &gt; &amp; PhaseRealm::getMultiCutVofIterator </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Return vof iterator for iterating over multiply-cut cells only (cells with more than one VoF) </p>
+<dl class="section return"><dt>Returns</dt><dd>m_multiCutVofIter (which is, in fact, mutable) </dd></dl>
 
 </div>
 </div>
@@ -1704,8 +1837,8 @@ To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.v
       </table>
 </div><div class="memdoc">
 
-<p>Return vof iterator for iterating over irregular cells in each grid patch. </p>
-<dl class="section return"><dt>Returns</dt><dd>m_vofIter (which is, in fact, mutable) </dd></dl>
+<p>Return VoF iterators covering all cut-cells (singly- and multiply-cut) in each grid patch. </p>
+<p>For a pass that covers only multiply-cut cells, use getMultiCutVofIterator instead. </p><dl class="section return"><dt>Returns</dt><dd>m_vofIter (which is, in fact, mutable) </dd></dl>
 
 </div>
 </div>
@@ -1971,6 +2104,56 @@ To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.v
 
 <p>Coarsened fine-level EB grids. </p>
 <p>m_eblgFiCo[lvl] holds the refinement of the grids on level lvl-1 </p>
+
+</div>
+</div>
+<a id="a0781ef18736c05c56c6fc47cce252f7d" name="a0781ef18736c05c56c6fc47cce252f7d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0781ef18736c05c56c6fc47cce252f7d">&#9670;&#160;</a></span>m_faceIterNoBoundary</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt;<a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt;<a class="el" href="classTracerParticleSolver.html">LayoutData</a>&lt;<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::array</a>&lt;<a class="el" href="classTracerParticleSolver.html">FaceIterator</a>, <a class="el" href="classTracerParticleSolver.html">SpaceDim</a>&gt; &gt; &gt; &gt; PhaseRealm::m_faceIterNoBoundary</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">mutable</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Face iterators over cut-cell faces in the valid box (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">FaceStop::SurroundingNoBoundary</a>). </p>
+<p>Domain boundary faces are excluded. Use this for cell-to-face averaging where boundary faces are fixed up separately. See getFaceIteratorNoBoundary. </p>
+
+</div>
+</div>
+<a id="af9c502cba0c517964dc8d3c4b6ab2155" name="af9c502cba0c517964dc8d3c4b6ab2155"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af9c502cba0c517964dc8d3c4b6ab2155">&#9670;&#160;</a></span>m_faceIterTanGhost</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt;<a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt;<a class="el" href="classTracerParticleSolver.html">LayoutData</a>&lt;<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::array</a>&lt;<a class="el" href="classTracerParticleSolver.html">FaceIterator</a>, <a class="el" href="classTracerParticleSolver.html">SpaceDim</a>&gt; &gt; &gt; &gt; PhaseRealm::m_faceIterTanGhost</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">mutable</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Per-direction face iterators covering cut-cell faces that reach into the tangential ghost layer. </p>
+<p>For the iterator in direction dir, the IVS covers irregular cells in a box grown by 1 in the two directions tangential to dir; the dir extent stays at the valid-box boundary. Domain boundary faces are excluded (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">FaceStop::SurroundingNoBoundary</a>). </p>
 
 </div>
 </div>

@@ -1069,7 +1069,7 @@ For simpler problems this routine is relatively straightforward to implement, ho
 <span class="w">        </span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">computeDivF</span><span class="p">(</span><span class="n">k1</span><span class="p">,</span><span class="w"> </span><span class="n">state</span><span class="p">,</span><span class="w"> </span><span class="n">a_dt</span><span class="p">,</span><span class="w"> </span><span class="n">conservativeOnly</span><span class="p">,</span><span class="w"> </span><span class="n">addEbFlux</span><span class="p">,</span><span class="w"> </span><span class="n">addDomainFlux</span><span class="p">);</span>
 <span class="w">      </span><span class="p">}</span>
 
-<span class="w">      </span><span class="n">DataOps</span><span class="o">::</span><span class="n">kappaScale</span><span class="p">(</span><span class="n">k1</span><span class="p">);</span>
+<span class="w">      </span><span class="n">DataOps</span><span class="o">::</span><span class="n">kappaScale</span><span class="p">(</span><span class="n">k1</span><span class="p">,</span><span class="w"> </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">getVofIterator</span><span class="p">(</span><span class="n">m_realm</span><span class="p">,</span><span class="w"> </span><span class="n">m_phase</span><span class="p">));</span>
 <span class="w">      </span><span class="n">DataOps</span><span class="o">::</span><span class="n">scale</span><span class="p">(</span><span class="n">k1</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.0</span><span class="p">);</span>
 
 <span class="w">      </span><span class="c1">// Use k1 as the old solution.</span>

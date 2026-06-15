@@ -1,22 +1,26 @@
 <map id="Source/AmrMesh/CD_EBGradient.H" name="Source/AmrMesh/CD_EBGradient.H">
-<area shape="rect" id="Node000001" title="Declaration of a class which computes gradients in an EBAMR context." alt="" coords="163,5,413,31"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="5,79,120,104"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="253,33,113,77,111,72,251,28"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="145,79,250,104"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="275,33,225,72,221,68,272,29"/>
-<area shape="rect" id="Node000004" href="$CD__Location_8H.html" title="Declaration of cell positions." alt="" coords="439,79,556,104"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="322,28,451,72,449,77,321,33"/>
-<area shape="rect" id="Node000006" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="603,225,789,251"/>
-<area shape="poly" id="edge11_Node000001_Node000006" title=" " alt="" coords="376,28,470,47,569,76,644,100,673,118,698,151,707,181,705,212,700,211,702,182,694,153,669,122,642,105,567,81,469,52,375,33"/>
-<area shape="rect" id="Node000007" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="249,225,428,251"/>
-<area shape="poly" id="edge12_Node000001_Node000007" title=" " alt="" coords="293,30,335,211,330,212,288,32"/>
-<area shape="rect" id="Node000005" title=" " alt="" coords="376,152,467,177"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="487,106,446,144,442,141,483,102"/>
-<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="557,96,617,114,647,129,673,150,690,180,697,211,692,212,685,182,669,154,644,134,615,119,555,102"/>
-<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="448,107,404,125,384,138,366,154,350,182,343,212,338,210,345,180,362,150,380,133,402,120,446,102"/>
-<area shape="rect" id="Node000008" href="$CD__LocationImplem_8H.html" title="Implementation of CD_Location.H." alt="" coords="491,152,658,177"/>
-<area shape="poly" id="edge7_Node000004_Node000008" title=" " alt="" coords="505,102,546,141,543,145,501,106"/>
-<area shape="poly" id="edge8_Node000008_Node000004" title=" " alt="" coords="567,154,525,114,529,111,571,150"/>
-<area shape="poly" id="edge9_Node000008_Node000006" title=" " alt="" coords="596,175,666,216,663,221,593,180"/>
-<area shape="poly" id="edge10_Node000008_Node000007" title=" " alt="" coords="538,180,391,224,389,219,536,175"/>
+<area shape="rect" id="Node000001" title="Declaration of a class which computes gradients in an EBAMR context." alt="" coords="285,5,534,31"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,79,61,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="333,33,215,53,76,81,75,76,214,48,332,28"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="85,79,200,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="367,33,200,78,199,72,366,28"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="225,79,330,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="389,33,312,74,310,70,387,28"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="353,79,465,104"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="412,31,412,65,407,65,407,31"/>
+<area shape="rect" id="Node000006" href="$CD__Location_8H.html" title="Declaration of cell positions." alt="" coords="653,79,771,104"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="459,28,650,73,649,78,457,33"/>
+<area shape="rect" id="Node000008" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="818,225,1003,251"/>
+<area shape="poly" id="edge13_Node000001_Node000008" title=" " alt="" coords="534,25,656,43,721,57,783,76,859,100,887,118,913,151,921,181,920,212,914,211,916,182,908,153,884,122,856,105,782,81,720,62,656,48,534,30"/>
+<area shape="rect" id="Node000009" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="464,225,643,251"/>
+<area shape="poly" id="edge14_Node000001_Node000009" title=" " alt="" coords="428,29,454,50,479,77,502,111,521,148,548,211,543,213,516,150,498,114,475,80,450,54,424,33"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="591,152,681,177"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="702,106,660,144,657,141,698,102"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="772,96,832,114,862,129,887,150,905,180,912,211,907,212,900,182,883,154,859,134,830,119,770,102"/>
+<area shape="poly" id="edge8_Node000006_Node000009" title=" " alt="" coords="662,107,619,125,598,138,581,154,565,182,558,212,553,210,560,180,577,150,595,133,616,120,660,102"/>
+<area shape="rect" id="Node000010" href="$CD__LocationImplem_8H.html" title="Implementation of CD_Location.H." alt="" coords="706,152,873,177"/>
+<area shape="poly" id="edge9_Node000006_Node000010" title=" " alt="" coords="720,102,761,141,757,145,716,106"/>
+<area shape="poly" id="edge10_Node000010_Node000006" title=" " alt="" coords="782,154,740,114,744,111,785,150"/>
+<area shape="poly" id="edge11_Node000010_Node000008" title=" " alt="" coords="810,175,881,216,878,221,807,180"/>
+<area shape="poly" id="edge12_Node000010_Node000009" title=" " alt="" coords="752,180,605,224,604,219,751,175"/>
 </map>

@@ -240,6 +240,9 @@ Protected Attributes</h2></td></tr>
 <tr class="memitem:adb693feaf78150f97da56c75ddc17f40" id="r_adb693feaf78150f97da56c75ddc17f40"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">LayoutData</a>&lt; <a class="el" href="classTracerParticleSolver.html">VoFIterator</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#adb693feaf78150f97da56c75ddc17f40">m_ebcfIterator</a></td></tr>
 <tr class="memdesc:adb693feaf78150f97da56c75ddc17f40"><td class="mdescLeft">&#160;</td><td class="mdescRight">Iterator for EBCF cells.  <br /></td></tr>
 <tr class="separator:adb693feaf78150f97da56c75ddc17f40"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae983caceb45dccd724b0ebfb9a178557" id="r_ae983caceb45dccd724b0ebfb9a178557"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">LayoutData</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::array</a>&lt; <a class="el" href="classTracerParticleSolver.html">FaceIterator</a>, <a class="el" href="classTracerParticleSolver.html">SpaceDim</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGradient.html#ae983caceb45dccd724b0ebfb9a178557">m_multiCutFaceIter</a></td></tr>
+<tr class="memdesc:ae983caceb45dccd724b0ebfb9a178557"><td class="mdescLeft">&#160;</td><td class="mdescRight">Face iterators restricted to multiply-cut faces per direction (valid box, SurroundingNoBoundary).  <br /></td></tr>
+<tr class="separator:ae983caceb45dccd724b0ebfb9a178557"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-static-attribs" name="pro-static-attribs"></a>
 Static Protected Attributes</h2></td></tr>
@@ -1056,6 +1059,31 @@ This class requires at least one ghost cell. </dd></dl>
 
 <p>Stencils for boundaries and cut-cells. </p>
 <dl class="section note"><dt>Note</dt><dd>Lives on the coarse layout. </dd></dl>
+
+</div>
+</div>
+<a id="ae983caceb45dccd724b0ebfb9a178557" name="ae983caceb45dccd724b0ebfb9a178557"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae983caceb45dccd724b0ebfb9a178557">&#9670;&#160;</a></span>m_multiCutFaceIter</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">LayoutData</a>&lt;<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::array</a>&lt;<a class="el" href="classTracerParticleSolver.html">FaceIterator</a>, <a class="el" href="classTracerParticleSolver.html">SpaceDim</a>&gt; &gt; EBGradient::m_multiCutFaceIter</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">mutable</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Face iterators restricted to multiply-cut faces per direction (valid box, SurroundingNoBoundary). </p>
+<p>Used in computeFaceGradient as a second pass after the regular box loop to avoid double-processing singly-cut faces. </p>
 
 </div>
 </div>

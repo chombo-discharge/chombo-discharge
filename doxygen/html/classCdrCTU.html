@@ -140,6 +140,15 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a819e4dee2d5c7bf95d4c6d3b0ec29c95" id="r_a819e4dee2d5c7bf95d4c6d3b0ec29c95"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrCTU.html#a819e4dee2d5c7bf95d4c6d3b0ec29c95">computeAdvectionDt</a> () <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
 <tr class="memdesc:a819e4dee2d5c7bf95d4c6d3b0ec29c95"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the largest possible advective time step (for explicit methods).  <br /></td></tr>
 <tr class="separator:a819e4dee2d5c7bf95d4c6d3b0ec29c95"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a48ef7deef4a29bb8d210b57ee9ec6f94" id="r_a48ef7deef4a29bb8d210b57ee9ec6f94"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrCTU.html#a48ef7deef4a29bb8d210b57ee9ec6f94">allocate</a> () <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
+<tr class="memdesc:a48ef7deef4a29bb8d210b57ee9ec6f94"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocate internal storage and build pre-built VoF iterators.  <br /></td></tr>
+<tr class="separator:a48ef7deef4a29bb8d210b57ee9ec6f94"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae6de5b84675d09b4a59af713528645a7" id="r_ae6de5b84675d09b4a59af713528645a7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrCTU.html#ae6de5b84675d09b4a59af713528645a7">regrid</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_lbase</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_oldFinestLevel</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_newFinestLevel</a>) <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
+<tr class="memdesc:ae6de5b84675d09b4a59af713528645a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Regrid method — also rebuilds the grown VoF iterators.  <br /></td></tr>
+<tr class="separator:ae6de5b84675d09b4a59af713528645a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9040300c6214172b4e771d766c99bcd4" id="r_a9040300c6214172b4e771d766c99bcd4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrCTU.html#a9040300c6214172b4e771d766c99bcd4">preRegrid</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_lbase</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_oldFinestLevel</a>) <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
+<tr class="memdesc:a9040300c6214172b4e771d766c99bcd4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pre-regrid hook — releases the grown VoF iterators.  <br /></td></tr>
+<tr class="separator:a9040300c6214172b4e771d766c99bcd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classCdrMultigrid"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classCdrMultigrid')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classCdrMultigrid.html">CdrMultigrid</a></td></tr>
 <tr class="memitem:a15f7a374c7303fb7268d37cb1aa1e290 inherit pub_methods_classCdrMultigrid" id="r_a15f7a374c7303fb7268d37cb1aa1e290"><td class="memItemLeft" align="right" valign="top">
 &#160;</td><td class="memItemRight" valign="bottom"><b>CdrMultigrid</b> ()</td></tr>
@@ -152,12 +161,6 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a0034a5ef2613e6f829834db1376f2685 inherit pub_methods_classCdrMultigrid" id="r_a0034a5ef2613e6f829834db1376f2685"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrMultigrid.html#a0034a5ef2613e6f829834db1376f2685">registerOperators</a> () <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
 <tr class="memdesc:a0034a5ef2613e6f829834db1376f2685 inherit pub_methods_classCdrMultigrid"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register operator.  <br /></td></tr>
 <tr class="separator:a0034a5ef2613e6f829834db1376f2685 inherit pub_methods_classCdrMultigrid"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aac65554f8fac228c7bd492208f99346c inherit pub_methods_classCdrMultigrid" id="r_aac65554f8fac228c7bd492208f99346c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrMultigrid.html#aac65554f8fac228c7bd492208f99346c">allocate</a> () <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
-<tr class="memdesc:aac65554f8fac228c7bd492208f99346c inherit pub_methods_classCdrMultigrid"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocate internal storage.  <br /></td></tr>
-<tr class="separator:aac65554f8fac228c7bd492208f99346c inherit pub_methods_classCdrMultigrid"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a73ed7f3e655d15541fefdf6d621b8092 inherit pub_methods_classCdrMultigrid" id="r_a73ed7f3e655d15541fefdf6d621b8092"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrMultigrid.html#a73ed7f3e655d15541fefdf6d621b8092">preRegrid</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_lbase</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_oldFinestLevel</a>) <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
-<tr class="memdesc:a73ed7f3e655d15541fefdf6d621b8092 inherit pub_methods_classCdrMultigrid"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform pre-regrid operations.  <br /></td></tr>
-<tr class="separator:a73ed7f3e655d15541fefdf6d621b8092 inherit pub_methods_classCdrMultigrid"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad87773680e2ab4d91afb8ef735a143eb inherit pub_methods_classCdrMultigrid" id="r_ad87773680e2ab4d91afb8ef735a143eb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrMultigrid.html#ad87773680e2ab4d91afb8ef735a143eb">computeDivJ</a> (<a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_divJ</a>, <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_phi</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_extrapDt</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classTracerParticleSolver.html">a_conservativeOnly</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classTracerParticleSolver.html">a_ebFlux</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classTracerParticleSolver.html">a_domainFlux</a>) <a class="el" href="classTracerParticleSolver.html">override</a> <a class="el" href="classTracerParticleSolver.html">final</a></td></tr>
 <tr class="memdesc:ad87773680e2ab4d91afb8ef735a143eb inherit pub_methods_classCdrMultigrid"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute div(J) explicitly, where J = nV - D*grad(n).  <br /></td></tr>
 <tr class="separator:ad87773680e2ab4d91afb8ef735a143eb inherit pub_methods_classCdrMultigrid"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -289,9 +292,6 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a47484105a57a90b008ba59658f094b6f inherit pub_methods_classCdrSolver" id="r_a47484105a57a90b008ba59658f094b6f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a47484105a57a90b008ba59658f094b6f">writePlotData</a> (<a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_output</a>, <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_icomp</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_outputRealm</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_level</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:a47484105a57a90b008ba59658f094b6f inherit pub_methods_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write output data to a_output.  <br /></td></tr>
 <tr class="separator:a47484105a57a90b008ba59658f094b6f inherit pub_methods_classCdrSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ace7446a0ff354cbd7b4ce57066b97e20 inherit pub_methods_classCdrSolver" id="r_ace7446a0ff354cbd7b4ce57066b97e20"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#ace7446a0ff354cbd7b4ce57066b97e20">regrid</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_lmin</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_oldFinestLevel</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_newFinestLevel</a>)</td></tr>
-<tr class="memdesc:ace7446a0ff354cbd7b4ce57066b97e20 inherit pub_methods_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Regrid this solver.  <br /></td></tr>
-<tr class="separator:ace7446a0ff354cbd7b4ce57066b97e20 inherit pub_methods_classCdrSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9c5259c827a4fb56c2e57d3db3f13d9f inherit pub_methods_classCdrSolver" id="r_a9c5259c827a4fb56c2e57d3db3f13d9f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a9c5259c827a4fb56c2e57d3db3f13d9f">getRealm</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
 <tr class="memdesc:a9c5259c827a4fb56c2e57d3db3f13d9f inherit pub_methods_classCdrSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the realm where this solver is registered.  <br /></td></tr>
 <tr class="separator:a9c5259c827a4fb56c2e57d3db3f13d9f inherit pub_methods_classCdrSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -401,6 +401,10 @@ Protected Types</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
+<tr class="memitem:a39aee712e523803402536c61e40db970" id="r_a39aee712e523803402536c61e40db970"><td class="memItemLeft" align="right" valign="top"><a id="a39aee712e523803402536c61e40db970" name="a39aee712e523803402536c61e40db970"></a>
+<a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>defineIterators</b> ()</td></tr>
+<tr class="memdesc:a39aee712e523803402536c61e40db970"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build m_grownVofIter for all AMR levels. <br /></td></tr>
+<tr class="separator:a39aee712e523803402536c61e40db970"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8669c8b4359fd4fb25ae7f37c03a47f7" id="r_a8669c8b4359fd4fb25ae7f37c03a47f7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrCTU.html#a8669c8b4359fd4fb25ae7f37c03a47f7">computeNormalSlopes</a> (<a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_normalSlopes</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_cellPhi</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Box</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_cellBox</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_domain</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_level</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">DataIndex</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_dit</a>)</td></tr>
 <tr class="memdesc:a8669c8b4359fd4fb25ae7f37c03a47f7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute slopes.  <br /></td></tr>
 <tr class="separator:a8669c8b4359fd4fb25ae7f37c03a47f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -545,6 +549,10 @@ Static Protected Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
+<tr class="memitem:a96f23cde04175313906aba9f3d9288eb" id="r_a96f23cde04175313906aba9f3d9288eb"><td class="memItemLeft" align="right" valign="top"><a id="a96f23cde04175313906aba9f3d9288eb" name="a96f23cde04175313906aba9f3d9288eb"></a>
+<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LayoutData</a>&lt; <a class="el" href="classTracerParticleSolver.html">VoFIterator</a> &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_grownVofIter</b></td></tr>
+<tr class="memdesc:a96f23cde04175313906aba9f3d9288eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pre-built VoFIterators over grow(validBox,1) for the irregular kernel in computeNormalSlopes. <br /></td></tr>
+<tr class="separator:a96f23cde04175313906aba9f3d9288eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae0d198b254c963ff42852a3eb5bb98ff" id="r_ae0d198b254c963ff42852a3eb5bb98ff"><td class="memItemLeft" align="right" valign="top"><a id="ae0d198b254c963ff42852a3eb5bb98ff" name="ae0d198b254c963ff42852a3eb5bb98ff"></a>
 <a class="el" href="classCdrCTU.html#a3d5082e026542171ce2a335d88418b9d">Limiter</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_limiter</b></td></tr>
 <tr class="memdesc:ae0d198b254c963ff42852a3eb5bb98ff"><td class="mdescLeft">&#160;</td><td class="mdescRight">If true, slopes are limited in the normal direction. <br /></td></tr>
@@ -868,6 +876,35 @@ Additional Inherited Members</h2></td></tr>
 
 </div>
 </div>
+<a id="a48ef7deef4a29bb8d210b57ee9ec6f94" name="a48ef7deef4a29bb8d210b57ee9ec6f94"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a48ef7deef4a29bb8d210b57ee9ec6f94">&#9670;&#160;</a></span>allocate()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> CdrCTU::allocate </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Allocate internal storage and build pre-built VoF iterators. </p>
+
+<p>Reimplemented from <a class="el" href="classCdrMultigrid.html#aac65554f8fac228c7bd492208f99346c">CdrMultigrid</a>.</p>
+
+</div>
+</div>
 <a id="a819e4dee2d5c7bf95d4c6d3b0ec29c95" name="a819e4dee2d5c7bf95d4c6d3b0ec29c95"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a819e4dee2d5c7bf95d4c6d3b0ec29c95">&#9670;&#160;</a></span>computeAdvectionDt()</h2>
 
@@ -1118,6 +1155,107 @@ Additional Inherited Members</h2></td></tr>
 <p>Parse runtime options. </p>
 
 <p>Implements <a class="el" href="classCdrMultigrid.html#a81c1fd85fe89af5d32b239acdead5feb">CdrMultigrid</a>.</p>
+
+</div>
+</div>
+<a id="a9040300c6214172b4e771d766c99bcd4" name="a9040300c6214172b4e771d766c99bcd4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9040300c6214172b4e771d766c99bcd4">&#9670;&#160;</a></span>preRegrid()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> CdrCTU::preRegrid </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramname"><em>a_lbase</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramname"><em>a_oldFinestLevel</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Pre-regrid hook — releases the grown VoF iterators. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_lbase</td><td>Coarsest level that changes </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_oldFinestLevel</td><td>Finest level before regrid </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Reimplemented from <a class="el" href="classCdrMultigrid.html#a73ed7f3e655d15541fefdf6d621b8092">CdrMultigrid</a>.</p>
+
+</div>
+</div>
+<a id="ae6de5b84675d09b4a59af713528645a7" name="ae6de5b84675d09b4a59af713528645a7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae6de5b84675d09b4a59af713528645a7">&#9670;&#160;</a></span>regrid()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> CdrCTU::regrid </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramname"><em>a_lbase</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramname"><em>a_oldFinestLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramname"><em>a_newFinestLevel</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Regrid method — also rebuilds the grown VoF iterators. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_lbase</td><td>Coarsest level that changes </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_oldFinestLevel</td><td>Finest level before regrid </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_newFinestLevel</td><td>Finest level after regrid </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Reimplemented from <a class="el" href="classCdrSolver.html#ace7446a0ff354cbd7b4ce57066b97e20">CdrSolver</a>.</p>
 
 </div>
 </div>
