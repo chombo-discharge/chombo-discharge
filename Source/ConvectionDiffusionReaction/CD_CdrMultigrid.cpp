@@ -201,7 +201,7 @@ CdrMultigrid::advanceEuler(EBAMRCellData&       a_newPhi,
     //
     // we need to put the right-hand side somewhere. We use scratch for holding kappa*phi^k + kappa*dt*S. Note that we assume that S comes in weighted.
     DataOps::copy(scratch, a_oldPhi);
-    DataOps::kappaScale(scratch);
+    DataOps::kappaScale(scratch, m_amr->getVofIterator(m_realm, m_phase));
     DataOps::incr(scratch, a_source, a_dt);
 
     // As above, the alpha and beta-coefficients for the Helmholtz operator need to be 1 and -a_dt. The kappas on the left-hand side
@@ -287,7 +287,7 @@ CdrMultigrid::advanceCrankNicholson(EBAMRCellData&       a_newPhi,
 
     // First, put kappa*phi^k in scratch.
     DataOps::copy(scratch, a_oldPhi);
-    DataOps::kappaScale(scratch);
+    DataOps::kappaScale(scratch, m_amr->getVofIterator(m_realm, m_phase));
 
     // Add the source term, which by assumption comes in weighted by the volume fraction.
     DataOps::incr(scratch, a_source, a_dt);

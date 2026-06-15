@@ -68,6 +68,69 @@ CdrCTU::parseRuntimeOptions()
   this->parseRegridSlopes();          // Parses regrid slopes
 }
 
+void
+CdrCTU::allocate()
+{
+  CH_TIME("CdrCTU::allocate()");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::allocate()" << endl;
+  }
+
+  CdrMultigrid::allocate();
+  this->defineIterators();
+}
+
+void
+CdrCTU::preRegrid(const int a_lbase, const int a_oldFinestLevel)
+{
+  CH_TIME("CdrCTU::preRegrid(int, int)");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::preRegrid(int, int)" << endl;
+  }
+
+  CdrMultigrid::preRegrid(a_lbase, a_oldFinestLevel);
+  m_grownVofIter.resize(0);
+}
+
+void
+CdrCTU::regrid(const int a_lbase, const int a_oldFinestLevel, const int a_newFinestLevel)
+{
+  CH_TIME("CdrCTU::regrid(int, int, int)");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::regrid(int, int, int)" << endl;
+  }
+
+  CdrMultigrid::regrid(a_lbase, a_oldFinestLevel, a_newFinestLevel);
+  this->defineIterators();
+}
+
+void
+CdrCTU::defineIterators()
+{
+  CH_TIME("CdrCTU::defineIterators()");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::defineIterators()" << endl;
+  }
+
+  const int finest = m_amr->getFinestLevel();
+
+  m_grownVofIter.resize(1 + finest);
+
+  for (int lvl = 0; lvl <= finest; lvl++) {
+    const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
+    const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    const ProblemDomain&     domain = m_amr->getDomains()[lvl];
+
+    m_grownVofIter[lvl] = RefCountedPtr<LayoutData<VoFIterator>>(new LayoutData<VoFIterator>(dbl));
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
+      const Box      grownBox = grow(dbl[dit], 1) & domain;
+      const EBISBox& ebisbox  = ebisl[dit()];
+      (*m_grownVofIter[lvl])[dit()].define(ebisbox.getIrregIVS(grownBox), ebisbox.getEBGraph());
+    }
+  }
+}
+
 Real
 CdrCTU::computeAdvectionDt()
 {
@@ -246,8 +309,8 @@ CdrCTU::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
                             const EBCellFAB&     a_cellPhi,
                             const Box&           a_cellBox,
                             const ProblemDomain& a_domain,
-                            const int /*a_level*/,
-                            const DataIndex& /*a_dit*/)
+                            const int            a_level,
+                            const DataIndex&     a_dit)
 {
   CH_TIME("CdrCTU::computeNormalSlopes(EBCellFAB, EBCellFAB, Box, ProblemDomain, int, DataIndex)");
   if (m_verbosity > 5) {
@@ -259,7 +322,6 @@ CdrCTU::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
 
   const Box&     domainBox = a_domain.domainBox();
   const EBISBox& ebisbox   = a_cellPhi.getEBISBox();
-  const EBGraph& ebgraph   = ebisbox.getEBGraph();
 
   // Compute slopes in regular cells.
   BaseFab<Real>&       slopesReg = a_normalSlopes.getSingleValuedFAB();
@@ -290,8 +352,7 @@ CdrCTU::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
     CH_assert(a_domain.contains(bndryHi));
 
     // Irregular kernel domain -- also does boundary cells if they are cut.
-    const IntVectSet irregIVS = ebisbox.getIrregIVS(grownBox);
-    VoFIterator      vofit(irregIVS, ebgraph);
+    VoFIterator& vofit = (*m_grownVofIter[a_level])[a_dit];
 
     const IntVect shift = BASISV(dir);
 

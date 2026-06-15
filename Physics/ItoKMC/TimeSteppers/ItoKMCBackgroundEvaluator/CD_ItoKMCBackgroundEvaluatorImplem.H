@@ -246,12 +246,19 @@ ItoKMCBackgroundEvaluator<I, C, R, F>::evaluateSpaceChargeEffects() noexcept
   (this->m_amr)->interpToCentroids(laplaceField, this->m_fluidRealm, this->m_plasmaPhase);
 
   // Compute the field magnitude, and then the relative change in field magnitude.
-  DataOps::vectorLength(poissonNorm, poissonField);
-  DataOps::vectorLength(laplaceNorm, laplaceField);
+  DataOps::vectorLength(poissonNorm,
+                        poissonField,
+                        (this->m_amr)->getMultiCutVofIterator(this->m_fluidRealm, this->m_plasmaPhase));
+  DataOps::vectorLength(laplaceNorm,
+                        laplaceField,
+                        (this->m_amr)->getMultiCutVofIterator(this->m_fluidRealm, this->m_plasmaPhase));
 
   DataOps::copy(deltaE, poissonNorm);
   DataOps::incr(deltaE, laplaceNorm, -1.0);
-  DataOps::divideFallback(deltaE, laplaceNorm, 0.0);
+  DataOps::divideFallback(deltaE,
+                          laplaceNorm,
+                          0.0,
+                          (this->m_amr)->getMultiCutVofIterator(this->m_fluidRealm, this->m_plasmaPhase));
 
   (this->m_amr)->arithmeticAverage(deltaE, this->m_fluidRealm, this->m_plasmaPhase);
   (this->m_amr)->interpGhost(deltaE, this->m_fluidRealm, this->m_plasmaPhase);
@@ -268,8 +275,16 @@ ItoKMCBackgroundEvaluator<I, C, R, F>::evaluateSpaceChargeEffects() noexcept
   Real maxBackgroundField  = 0.0;
   Real minBackgroundField  = 0.0;
 
-  DataOps::getMaxMin(maxSpaceChargeField, minSpaceChargeField, poissonNorm, 0);
-  DataOps::getMaxMin(maxBackgroundField, minBackgroundField, laplaceNorm, 0);
+  DataOps::getMaxMin(maxSpaceChargeField,
+                     minSpaceChargeField,
+                     poissonNorm,
+                     0,
+                     (this->m_amr)->getMultiCutVofIterator(this->m_fluidRealm, this->m_plasmaPhase));
+  DataOps::getMaxMin(maxBackgroundField,
+                     minBackgroundField,
+                     laplaceNorm,
+                     0,
+                     (this->m_amr)->getMultiCutVofIterator(this->m_fluidRealm, this->m_plasmaPhase));
 
   for (int lvl = 0; lvl <= (this->m_amr)->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl   = (this->m_amr)->getGrids(this->m_fluidRealm)[lvl];

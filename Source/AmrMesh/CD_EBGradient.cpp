@@ -230,11 +230,9 @@ EBGradient::computeNormalDerivative(LevelData<EBFluxFAB>& a_gradient, const Leve
       interiorCells.grow(dir, -1);
 
       // Turn the interiorCells Box to a face-centered box in the dir-direction. When we do this we get all faces that are oriented along the direction
-      // dir, but which are not boundary faces. Also define an iterator for going through the subset of those cells that shared a cell edge/face with a cut-cell.
-      const Box         interiorFaces = surroundingNodes(interiorCells, dir);
-      const IntVectSet& irregIVS      = ebisBox.getIrregIVS(interiorCells);
-
-      FaceIterator faceit(irregIVS, ebgraph, dir, FaceStop::SurroundingNoBoundary);
+      // dir, but which are not boundary faces. Also fetch the pre-built multi-cut face iterator for this direction.
+      const Box     interiorFaces = surroundingNodes(interiorCells, dir);
+      FaceIterator& faceit        = m_multiCutFaceIter[din][dir];
 
       // C++ kernel for regular grid faces. Note that we iterate over the IntVects in the face-centered boxes, so
       // the cell on the high side of the face has index iv and on the low side it has index iv - BASISV(dir);
@@ -355,6 +353,7 @@ EBGradient::defineLevelStencils() noexcept
 
   m_levelStencils.define(dbl);
   m_levelIterator.define(dbl);
+  m_multiCutFaceIter.define(dbl);
 
   const int nbox = dit.size();
   CH_STOP(t1);
@@ -386,6 +385,11 @@ EBGradient::defineLevelStencils() noexcept
 
     bndryIterator.define(bndryIVS, ebgraph);
     bndryStencils.define(bndryIVS, ebgraph, m_nComp);
+
+    const IntVectSet& multiCut = ebisbox.getMultiCells(cellBox);
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      m_multiCutFaceIter[din][dir].define(multiCut, ebgraph, dir, FaceStop::SurroundingNoBoundary);
+    }
     CH_STOP(t3);
 
     CH_START(t4);

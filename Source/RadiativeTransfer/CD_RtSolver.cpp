@@ -220,7 +220,12 @@ RtSolver::setSource(const std::function<Real(const RealVect a_pos)>& a_source)
 
   constexpr int defaultComponent = 0;
 
-  DataOps::setValue(m_source, a_source, m_amr->getProbLo(), m_amr->getDx(), defaultComponent);
+  DataOps::setValue(m_source,
+                    a_source,
+                    m_amr->getProbLo(),
+                    m_amr->getDx(),
+                    defaultComponent,
+                    m_amr->getMultiCutVofIterator(m_realm, m_phase));
 }
 
 void

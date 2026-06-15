@@ -728,7 +728,7 @@ SurfaceODESolver<N>::writeCheckpointLevel(HDF5Handle& a_handle, const int a_leve
   m_amr->allocate(scratch, m_realm, m_phase, N);
 
   DataOps::setValue(*scratch[a_level], 0.0);
-  DataOps::incr(*scratch[a_level], *m_phi[a_level], 1.0);
+  DataOps::incr(*scratch[a_level], *m_phi[a_level], 1.0, *m_amr->getVofIterator(m_realm, m_phase)[a_level]);
 
   write(a_handle, *scratch[a_level], id);
 }
@@ -758,7 +758,7 @@ SurfaceODESolver<N>::readCheckpointLevel(HDF5Handle& a_handle, const int a_level
   read<EBCellFAB>(a_handle, *scratch[a_level], id, m_amr->getGrids(m_realm)[a_level], Interval(0, N - 1), false);
 
   DataOps::setValue(*m_phi[a_level], 0.0);
-  DataOps::incr(*m_phi[a_level], *scratch[a_level], 1.0);
+  DataOps::incr(*m_phi[a_level], *scratch[a_level], 1.0, *m_amr->getVofIterator(m_realm, m_phase)[a_level]);
 }
 #endif
 
@@ -838,7 +838,7 @@ SurfaceODESolver<N>::writePlotData(LevelData<EBCellFAB>& a_output,
   // Copy m_phi to a_output
   if (m_plotPhi) {
     DataOps::setValue(scratch, 0.0);
-    DataOps::incr(scratch, *m_phi[a_level], 1.0);
+    DataOps::incr(scratch, *m_phi[a_level], 1.0, *m_amr->getVofIterator(m_realm, m_phase)[a_level]);
 
     const Interval srcInterv(0, N - 1);
     const Interval dstInterv(a_comp, a_comp + N - 1);
@@ -853,7 +853,7 @@ SurfaceODESolver<N>::writePlotData(LevelData<EBCellFAB>& a_output,
   // Copy m_rhs to a_output
   if (m_plotRHS) {
     DataOps::setValue(scratch, 0.0);
-    DataOps::incr(scratch, *m_rhs[a_level], 1.0);
+    DataOps::incr(scratch, *m_rhs[a_level], 1.0, *m_amr->getVofIterator(m_realm, m_phase)[a_level]);
 
     const Interval srcInterv(0, N - 1);
     const Interval dstInterv(a_comp, a_comp + N - 1);

@@ -182,7 +182,7 @@ CdrPlasmaStepper::computeCellConductivity(EBAMRCellData& a_cellConductivity) con
   m_amr->allocate(speciesConductivity, m_realm, m_phase, 1);
 
   // Compute the electric field magnitude
-  DataOps::vectorLength(fieldMagnitude, cellCenteredElectricField);
+  DataOps::vectorLength(fieldMagnitude, cellCenteredElectricField, m_amr->getMultiCutVofIterator(m_realm, m_phase));
 
   // Reset the conductivity.
   DataOps::setValue(a_cellConductivity, 0.0);
@@ -201,9 +201,11 @@ CdrPlasmaStepper::computeCellConductivity(EBAMRCellData& a_cellConductivity) con
 
       // In the below comments, f = speciesConductivity. The loop just adds to the total conductivity.
       if (Z != 0) {
-        DataOps::vectorLength(speciesConductivity, cellVel);          // Compute f = |v|
-        DataOps::divideByScalar(speciesConductivity, fieldMagnitude); // Compute f = |v|/|E| = |mu|
-        DataOps::multiply(speciesConductivity, phi);                  // Compute f = mu*n
+        DataOps::vectorLength(speciesConductivity,
+                              cellVel,
+                              m_amr->getMultiCutVofIterator(m_realm, m_phase)); // Compute f = |v|
+        DataOps::divideByScalar(speciesConductivity, fieldMagnitude);           // Compute f = |v|/|E| = |mu|
+        DataOps::multiply(speciesConductivity, phi);                            // Compute f = mu*n
 
         // Add to total conductivity.
         DataOps::incr(a_cellConductivity, speciesConductivity, 1.0 * std::abs(Z));
@@ -254,7 +256,8 @@ CdrPlasmaStepper::computeFaceConductivity(EBAMRFluxData&       a_conductivityFac
                              tanGhost,
                              interv,
                              interv,
-                             average);
+                             average,
+                             m_amr->getFaceIteratorWithTangentialGhosts(m_realm, m_phase));
 
 #if 1 // Don't do this if the cell-centered values were interpolated to centroids.
   m_amr->interpToEB(a_conductivityEB, a_conductivityCell, m_realm, m_phase);
@@ -263,7 +266,7 @@ CdrPlasmaStepper::computeFaceConductivity(EBAMRFluxData&       a_conductivityFac
   DataOps::incr(a_conductivityEB, a_conductivityCell, 1.0);
 #endif
 
-  DataOps::floor(a_conductivityEB, 0.0);
+  DataOps::floor(a_conductivityEB, 0.0, m_amr->getVofIterator(m_realm, m_phase));
 
   // Coarsen coefficients.
   m_amr->arithmeticAverage(a_conductivityFace, m_realm, phase::gas);
@@ -333,7 +336,7 @@ CdrPlasmaStepper::setupSemiImplicitPoisson(const EBAMRFluxData& a_conductivityFa
   // Increment the field solver permittivities by a_factor*sigma. After this, the "permittivities" are
   // given by epsr + a_factor*sigma
   DataOps::incr(permFaceGas, a_conductivityFace, a_factor);
-  DataOps::incr(permEBGas, a_conductivityEB, a_factor);
+  DataOps::incr(permEBGas, a_conductivityEB, a_factor, m_amr->getVofIterator(m_realm, phase::gas));
 
   // Coarsen coefficients.
   m_amr->arithmeticAverage(permFaceGas, m_realm, phase::gas);
@@ -1669,7 +1672,8 @@ CdrPlasmaStepper::computeCdrDiffusionFace(Vector<EBAMRFluxData*>&       a_cdrDco
                                  tanGhost,
                                  interv,
                                  interv,
-                                 average);
+                                 average,
+                                 m_amr->getFaceIteratorWithTangentialGhosts(m_realm, m_phase));
     }
   }
 }
@@ -2585,12 +2589,12 @@ CdrPlasmaStepper::computeExtrapolatedFluxes(Vector<EBAMRIVData*>&         a_extr
       m_amr->interpToEB(ebPhi, *a_cdrDensities[idx], m_realm, a_phase);
 
       // No negative densities please.
-      DataOps::floor(ebPhi, 0.0);
+      DataOps::floor(ebPhi, 0.0, m_amr->getVofIterator(m_realm, a_phase));
 
       // Now compute v*phi on the EB -- stored in an EBAMRIVData holder with SpaceDim components.
       DataOps::setValue(ebFlux, 0.0);
-      DataOps::incr(ebFlux, ebVel, 1.0);
-      DataOps::multiplyScalar(ebFlux, ebPhi);
+      DataOps::incr(ebFlux, ebVel, 1.0, m_amr->getVofIterator(m_realm, a_phase));
+      DataOps::multiplyScalar(ebFlux, ebPhi, m_amr->getVofIterator(m_realm, a_phase));
 
       // Project the flux in order to only get the normal component.
       this->projectFlux(*a_extrapCdrFluxesEB[idx], ebFlux);
@@ -2851,7 +2855,10 @@ CdrPlasmaStepper::computeJ(EBAMRCellData& a_J) const
       // scratchONE now holds grad(phi). We need to put the diffusion coefficient on the cell center now.
       const EBAMRFluxData& diffusionCoefficientFace = solver->getFaceCenteredDiffusionCoefficient();
 
-      DataOps::averageFaceToCell(scratchONE, diffusionCoefficientFace, m_amr->getDomains());
+      DataOps::averageFaceToCell(scratchONE,
+                                 diffusionCoefficientFace,
+                                 m_amr->getDomains(),
+                                 m_amr->getVofIterator(m_realm, m_phase));
 
       // Now make DgradPhi = D * grad(Phi)
       DataOps::multiplyScalar(scratchDIM, scratchONE);
@@ -3010,7 +3017,7 @@ CdrPlasmaStepper::computeMaxElectricField(Real& a_maximumElectricField, const ph
   Real max = -std::numeric_limits<Real>::max();
   Real min = std::numeric_limits<Real>::max();
 
-  DataOps::getMaxMinNorm(max, min, E);
+  DataOps::getMaxMinNorm(max, min, E, m_amr->getMultiCutVofIterator(m_realm, a_phase));
 
   a_maximumElectricField = max;
 }
@@ -3223,7 +3230,7 @@ CdrPlasmaStepper::getCdrMax(Real& a_cdrMax, std::string& a_solverName) const
     Real min = std::numeric_limits<Real>::max();
     Real max = -std::numeric_limits<Real>::max();
 
-    DataOps::getMaxMin(max, min, solver->getPhi(), comp);
+    DataOps::getMaxMin(max, min, solver->getPhi(), comp, m_amr->getMultiCutVofIterator(m_realm, m_phase));
 
     if (max > a_cdrMax) {
       a_cdrMax     = max;
@@ -3952,7 +3959,10 @@ CdrPlasmaStepper::computeElectrodeCurrent()
 
     // Add the flux to the total charge flux.
     if (Z != 0) {
-      DataOps::incr(currentDensity, solverFlux, species->getChargeNumber() * Units::Qe);
+      DataOps::incr(currentDensity,
+                    solverFlux,
+                    species->getChargeNumber() * Units::Qe,
+                    m_amr->getVofIterator(m_realm, m_cdr->getPhase()));
     }
   }
 
@@ -4040,7 +4050,10 @@ CdrPlasmaStepper::computeDielectricCurrent()
 
     // Add the flux to the total charge flux.
     if (Z != 0) {
-      DataOps::incr(currentDensity, solverFlux, species->getChargeNumber() * Units::Qe);
+      DataOps::incr(currentDensity,
+                    solverFlux,
+                    species->getChargeNumber() * Units::Qe,
+                    m_amr->getVofIterator(m_realm, m_cdr->getPhase()));
     }
   }
 
@@ -4208,7 +4221,7 @@ CdrPlasmaStepper::computeOhmicInductionCurrent()
   this->computeJ(J);
 
   // Compute the dot product between E and J and coarsen it.
-  DataOps::dotProduct(JdotE, J, E);
+  DataOps::dotProduct(JdotE, J, E, m_amr->getMultiCutVofIterator(m_realm, m_phase));
 
   // Coarsen so we can integrate on the coarsest level.
   m_amr->arithmeticAverage(JdotE, m_realm, m_cdr->getPhase());
@@ -4216,7 +4229,7 @@ CdrPlasmaStepper::computeOhmicInductionCurrent()
   // Integrate on the coarsest level.
   const int integrationLevel = 0;
 
-  DataOps::kappaSum(current, *JdotE[integrationLevel]);
+  DataOps::kappaSum(current, *JdotE[integrationLevel], 0, *m_amr->getVofIterator(m_realm, m_phase)[integrationLevel]);
 
   // kappaSum only does the sum, we need int(dV) so multiply by dx^SpaceDim.
   const Real dx = m_amr->getDx()[integrationLevel];
@@ -4259,7 +4272,7 @@ CdrPlasmaStepper::computeRelaxationTime()
   Real maxVal = -std::numeric_limits<Real>::max();
   Real minVal = std::numeric_limits<Real>::max();
 
-  DataOps::getMaxMinNorm(maxVal, minVal, relaxTime);
+  DataOps::getMaxMinNorm(maxVal, minVal, relaxTime, m_amr->getMultiCutVofIterator(m_realm, phase::gas));
 
   return minVal;
 }

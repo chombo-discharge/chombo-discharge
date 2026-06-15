@@ -1401,7 +1401,10 @@ AmrMesh::computeGradient(EBAMRFluxData&           a_gradient,
   this->interpGhost(scratch, a_realm, a_phase);
 
   // Average the cells to face and replace the normal derivative with a tighter stencil.
-  DataOps::averageCellToFace(a_gradient, scratch, this->getDomains());
+  DataOps::averageCellToFace(a_gradient,
+                             scratch,
+                             this->getDomains(),
+                             this->getFaceIteratorNoBoundary(a_realm, a_phase));
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const RefCountedPtr<EBGradient>& gradientOp = m_realms[a_realm]->getGradientOp(a_phase)[lvl];
 
@@ -3226,6 +3229,92 @@ AmrMesh::getVofIterator(const std::string& a_realm, const phase::which_phase a_p
   }
 
   return m_realms[a_realm]->getVofIterator(a_phase);
+}
+
+Vector<RefCountedPtr<LayoutData<VoFIterator>>>&
+AmrMesh::getMultiCutVofIterator(const std::string& a_realm, const phase::which_phase a_phase) const
+{
+  CH_TIME("AmrMesh::getMultiCutVofIterator(string, phase::which_phase)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getMultiCutVofIterator(string, phase::which_phase)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getMultiCutVofIterator(string, phase::which_phase) - could not find realm '" +
+                            a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getMultiCutVofIterator(a_phase);
+}
+
+Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+AmrMesh::getFaceIterator(const std::string& a_realm, const phase::which_phase a_phase) const
+{
+  CH_TIME("AmrMesh::getFaceIterator(string, phase::which_phase)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getFaceIterator(string, phase::which_phase)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getFaceIterator(string, phase::which_phase) - could not find realm '" + a_realm +
+                            "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getFaceIterator(a_phase);
+}
+
+Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+AmrMesh::getFaceIteratorNoBoundary(const std::string& a_realm, const phase::which_phase a_phase) const
+{
+  CH_TIME("AmrMesh::getFaceIteratorNoBoundary(string, phase::which_phase)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getFaceIteratorNoBoundary(string, phase::which_phase)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getFaceIteratorNoBoundary(string, phase::which_phase) - could not find realm '" +
+                            a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getFaceIteratorNoBoundary(a_phase);
+}
+
+Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+AmrMesh::getFaceIteratorWithTangentialGhosts(const std::string& a_realm, const phase::which_phase a_phase) const
+{
+  CH_TIME("AmrMesh::getFaceIteratorWithTangentialGhosts(string, phase::which_phase)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getFaceIteratorWithTangentialGhosts(string, phase::which_phase)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getFaceIteratorWithTangentialGhosts(string, phase::which_phase) - could not find "
+                            "realm '" +
+                            a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getFaceIteratorWithTangentialGhosts(a_phase);
+}
+
+Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+AmrMesh::getMultiCutFaceIterator(const std::string& a_realm, const phase::which_phase a_phase) const
+{
+  CH_TIME("AmrMesh::getMultiCutFaceIterator(string, phase::which_phase)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getMultiCutFaceIterator(string, phase::which_phase)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getMultiCutFaceIterator(string, phase::which_phase) - could not find realm '" +
+                            a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getMultiCutFaceIterator(a_phase);
 }
 
 const AMRMask&
