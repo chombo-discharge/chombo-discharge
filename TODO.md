@@ -66,7 +66,7 @@ This session consists of:
 Files sorted by occurrence count (all overloads). Triage each call for the `Box` overload.
 
 ### Source/Utilities
-- [ ] `Source/Utilities/CD_DataOps.cpp` (72)
+- [ ] `Source/Utilities/CD_DataOps.cpp` (76)
 - [ ] `Source/Utilities/CD_VofUtils.cpp` (1)
 
 ### Source/AmrMesh
@@ -85,6 +85,7 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
 - [ ] `Source/AmrMesh/CD_PhaseRealm.cpp` (1)
 - [ ] `Source/AmrMesh/CD_EBNonConservativeDivergence.cpp` (1)
 - [ ] `Source/AmrMesh/CD_EBFluxRedistribution.cpp` (1)
+- [ ] `Source/AmrMesh/CD_AmrMesh.H` (1)
 
 ### Source/Elliptic
 - [ ] `Source/Elliptic/CD_EBHelmholtzOp.cpp` (29)
@@ -101,7 +102,6 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
 - [ ] `Source/Elliptic/CD_EBHelmholtzNeumannDomainBC.cpp` (1)
 - [ ] `Source/Elliptic/CD_EBHelmholtzDomainBC.cpp` (1)
 - [ ] `Source/Elliptic/CD_EBHelmholtzDirichletDomainBC.cpp` (1)
-- [ ] `Source/Elliptic/CD_EddingtonSP1.cpp` — **NOTE: deleted on this branch (`git status` shows `D`)**; confirm before touching.
 
 ### Source/ConvectionDiffusionReaction
 - [ ] `Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp` (30)
@@ -143,7 +143,6 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
 
 ## Task 2 — Normalize raw `BoxIterator` loops
 
-- [ ] `Source/Utilities/CD_DataOps.cpp` (3)
 - [ ] `Source/Utilities/CD_DischargeIO.cpp` (2)
 - [ ] `Source/AmrMesh/CD_EBCoarAve.cpp` (3)
 - [ ] `Source/AmrMesh/CD_TiledMeshRefine.cpp` (2)
