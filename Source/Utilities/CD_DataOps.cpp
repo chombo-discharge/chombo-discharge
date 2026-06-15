@@ -739,11 +739,13 @@ DataOps::filterSmooth(LevelData<EBCellFAB>& a_data,
         for (SideIterator sit; sit.ok(); ++sit) {
           const Box insideBox = adjCellBox(domain.domainBox(), dir, sit(), -1) & cellBox;
 
-          for (BoxIterator bit(insideBox); bit.ok(); ++bit) {
+          auto ghostKernel = [&](const IntVect& iv) -> void {
             for (int s = 1; s <= a_stride; s++) {
-              cloneReg(bit() + s * sign(sit()) * BASISV(dir)) = dataReg(bit(), icomp);
+              cloneReg(iv + s * sign(sit()) * BASISV(dir)) = dataReg(iv, icomp);
             }
-          }
+          };
+
+          BoxLoops::loop(insideBox, ghostKernel);
         }
       }
 

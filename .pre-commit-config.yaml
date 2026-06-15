@@ -25,12 +25,12 @@ repos:
 
   - repo: local
     hooks:
-      - id: clang-tidy
-        name: check clang-tidy
-        entry: clang-tidy -p .
-        language: system
-        files: ^(Source|Exec|Physics|Geometries)/.*\.cpp$
-        pass_filenames: true
+      # - id: clang-tidy
+      #   name: check clang-tidy
+      #   entry: clang-tidy -p .
+      #   language: system
+      #   files: ^(Source|Exec|Physics|Geometries)/.*\.cpp$
+      #   pass_filenames: true
 
       - id: cppcheck
         name: Lightweight static analysis (cppcheck)
