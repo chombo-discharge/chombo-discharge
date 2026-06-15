@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_RadiativeTransferSpecies.cpp
   @brief  Implementation of CD_RadiativeTransferSpecies.H
   @author Robert Marskar
@@ -33,7 +34,7 @@ RadiativeTransferSpecies::RadiativeTransferSpecies()
   pp.get("kappa", kappa);
 
   // Set the spatially varying absorption coefficient to a constant.
-  m_kappa = [kappa](const RealVect a_pos) -> Real {
+  m_kappa = [kappa](const RealVect& /*a_pos*/) -> Real {
     return kappa;
   };
 }
@@ -44,7 +45,7 @@ RadiativeTransferSpecies::~RadiativeTransferSpecies()
 }
 
 Real
-RadiativeTransferSpecies::getAbsorptionCoefficient(const RealVect a_pos) const
+RadiativeTransferSpecies::getAbsorptionCoefficient(const RealVect& a_pos) const
 {
   return m_kappa(a_pos);
 }

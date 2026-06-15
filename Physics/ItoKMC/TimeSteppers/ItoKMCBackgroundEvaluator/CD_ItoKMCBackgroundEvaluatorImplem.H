@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2025 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_ItoKMCBackgroundEvaluatorImplem.H
   @brief  Implementation of CD_ItoKMCBackgroundEvaluator.H
   @author Robert Marskar
 */
 
-#ifndef CD_ItoKMCBackgroundEvaluatorImplem_H
-#define CD_ItoKMCBackgroundEvaluatorImplem_H
+#ifndef CD_ITOKMCBACKGROUNDEVALUATORIMPLEM_H
+#define CD_ITOKMCBACKGROUNDEVALUATORIMPLEM_H
 
 // Our includes
 #include <CD_ItoKMCBackgroundEvaluator.H>

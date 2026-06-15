@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_CdrDomainBCImplem.H
   @brief  Implementation of CD_CdrDomainBC.H
   @author Robert Marskar
 */
 
-#ifndef CD_CdrDomainBCImplem_H
-#define CD_CdrDomainBCImplem_H
+#ifndef CD_CDRDOMAINBCIMPLEM_H
+#define CD_CDRDOMAINBCIMPLEM_H
 
 // Our includes
 #include <CD_CdrDomainBC.H>
@@ -22,7 +23,7 @@ CdrDomainBC::CdrDomainBC()
   //       can later override these.
 
   // Flux function which returns zero everywhere.
-  auto wallBc = [](const RealVect a_position, const Real a_time) -> Real {
+  auto wallBc = [](const RealVect& a_position, const Real a_time) -> Real {
     return 0.0;
   };
 

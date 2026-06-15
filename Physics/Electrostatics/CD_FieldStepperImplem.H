@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_FieldStepperImplem.H
   @brief  Implementation of CD_FieldStepper.H
   @author Robert Marskar
 */
 
-#ifndef CD_FieldStepperImplem_H
-#define CD_FieldStepperImplem_H
+#ifndef CD_FIELDSTEPPERIMPLEM_H
+#define CD_FIELDSTEPPERIMPLEM_H
 
 // Std includes
 #include <math.h>
@@ -243,7 +244,7 @@ namespace Physics {
         pout() << "FieldStepper<T>::advance" << endl;
       }
 
-      MayDay::Error("FieldStepper<T>::advance - callling this is an error. Please set Driver.max_steps = 0");
+      MayDay::Error("FieldStepper<T>::advance - calling this is an error. Please set Driver.max_steps = 0");
 
       return std::numeric_limits<Real>::max();
     }
@@ -312,7 +313,7 @@ namespace Physics {
     void
     FieldStepper<T>::writePlotData(LevelData<EBCellFAB>& a_output,
                                    int&                  a_icomp,
-                                   const std::string     a_outputRealm,
+                                   const std::string&    a_outputRealm,
                                    const int             a_level) const
     {
       CH_TIME("FieldStepper::writePlotData");
@@ -387,7 +388,7 @@ namespace Physics {
 
     template <class T>
     bool
-    FieldStepper<T>::loadBalanceThisRealm(const std::string a_realm) const
+    FieldStepper<T>::loadBalanceThisRealm(const std::string& a_realm) const
     {
       CH_TIME("FieldStepper::loadBalanceThisRealm");
       if (m_verbosity > 5) {
@@ -401,7 +402,7 @@ namespace Physics {
     void
     FieldStepper<T>::loadBalanceBoxes(Vector<Vector<int>>&             a_procs,
                                       Vector<Vector<Box>>&             a_boxes,
-                                      const std::string                a_realm,
+                                      const std::string&               a_realm,
                                       const Vector<DisjointBoxLayout>& a_grids,
                                       const int                        a_lmin,
                                       const int                        a_finestLevel)

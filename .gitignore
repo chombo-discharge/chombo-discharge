@@ -11,6 +11,8 @@
 compile_and_run.sh
 LB.txt
 
+compile_commands.json
+compile_commands.events.json
 
 **/doc/html/**
 **/doc/sphinx/build/html/**

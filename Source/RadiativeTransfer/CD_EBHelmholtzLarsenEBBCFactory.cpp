@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_EBHelmholtzLarsenEBBCFactory.cpp
   @brief  Implementation of CD_EBHelmholtzLarsenEBBCFactory.H
   @author Robert Marskar
@@ -20,19 +21,15 @@ EBHelmholtzLarsenEBBCFactory::EBHelmholtzLarsenEBBCFactory(const int            
                                                            const Real                      a_r1,
                                                            const Real                      a_r2,
                                                            const Real                      a_source)
+  : m_species(a_species), m_r1(a_r1), m_r2(a_r2), m_source(a_source)
 {
-  m_order   = a_order;
-  m_weight  = a_weight;
-  m_species = a_species;
-  m_r1      = a_r1;
-  m_r2      = a_r2;
-  m_source  = a_source;
+  m_order  = a_order;
+  m_weight = a_weight;
 
   this->setRobinCoefficients();
 }
 
-EBHelmholtzLarsenEBBCFactory::~EBHelmholtzLarsenEBBCFactory()
-{}
+EBHelmholtzLarsenEBBCFactory::~EBHelmholtzLarsenEBBCFactory() = default;
 
 void
 EBHelmholtzLarsenEBBCFactory::setRobinCoefficients()
@@ -57,7 +54,7 @@ EBHelmholtzLarsenEBBCFactory::setRobinCoefficients()
 
   // This is the right-hand side of the Robin BC, i.e. the source function. Time is a dummy parameter, and the user should
   // have captured some external time (e.g., RtSolver::m_time) by reference in the function that was passed into the full constructor.
-  m_functionC = [source = this->m_source](const RealVect& a_position) {
+  m_functionC = [source = this->m_source](const RealVect& /*a_position*/) {
     return source;
   };
 

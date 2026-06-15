@@ -1,28 +1,25 @@
-/* chombo-discharge
- * Copyright © 2022 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_GenericParticleImplem.H
   @brief  Implementation of CD_GenericParticle.H
   @author Robert Marskar
 */
 
-#ifndef CD_GenericParticleImplem_H
-#define CD_GenericParticleImplem_H
+#ifndef CD_GENERICPARTICLEIMPLEM_H
+#define CD_GENERICPARTICLEIMPLEM_H
 
 // Our includes
 #include <CD_GenericParticle.H>
 #include <CD_NamespaceHeader.H>
 
 template <size_t M, size_t N>
-inline GenericParticle<M, N>::GenericParticle()
+inline GenericParticle<M, N>::GenericParticle() : m_particleID(-1), m_rankID(-1), m_position(RealVect::Zero)
 {
-  m_particleID = -1;
-  m_rankID     = -1;
-  m_position   = RealVect::Zero;
-
   for (auto& s : m_scalars) {
     s = 0.0;
   }
@@ -41,8 +38,7 @@ inline GenericParticle<M, N>::GenericParticle(const GenericParticle<M, N>& a_oth
 }
 
 template <size_t M, size_t N>
-inline GenericParticle<M, N>::~GenericParticle()
-{}
+GenericParticle<M, N>::~GenericParticle() = default;
 
 template <size_t M, size_t N>
 inline RealVect&
@@ -210,7 +206,7 @@ template <size_t M, size_t N>
 inline void
 GenericParticle<M, N>::linearOut(void* const a_buffer) const
 {
-  uint8_t* p = static_cast<uint8_t*>(a_buffer);
+  auto* p = static_cast<uint8_t*>(a_buffer);
 
   detail::pushParticleProperty(p, m_particleID);
   detail::pushParticleProperty(p, m_rankID);
@@ -238,7 +234,7 @@ template <size_t M, size_t N>
 inline void
 GenericParticle<M, N>::linearIn(const void* const a_buffer)
 {
-  const uint8_t* p = static_cast<const uint8_t*>(a_buffer);
+  const auto* p = static_cast<const uint8_t*>(a_buffer);
 
   detail::pullParticleProperty(p, m_particleID);
   detail::pullParticleProperty(p, m_rankID);
@@ -279,7 +275,7 @@ template <size_t M, size_t N>
 inline void
 GenericParticle<M, N>::H5linearOut(void* const a_buffer) const
 {
-  uint8_t* p = static_cast<uint8_t*>(a_buffer);
+  auto* p = static_cast<uint8_t*>(a_buffer);
 
   detail::pushParticleProperty(p, m_position[0]);
   detail::pushParticleProperty(p, m_position[1]);
@@ -304,7 +300,7 @@ template <size_t M, size_t N>
 inline void
 GenericParticle<M, N>::H5linearIn(const void* const a_buffer)
 {
-  const uint8_t* p = static_cast<const uint8_t*>(a_buffer);
+  const auto* p = static_cast<const uint8_t*>(a_buffer);
 
   detail::pullParticleProperty(p, m_position[0]);
   detail::pullParticleProperty(p, m_position[1]);

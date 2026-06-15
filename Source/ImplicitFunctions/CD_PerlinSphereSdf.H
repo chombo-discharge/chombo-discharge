@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_PerlinSphereSdf.H
   @brief  Declaration of noisy sphere
   @author Robert Marskar
 */
 
-#ifndef CD_PerlinSphereSdf_H
-#define CD_PerlinSphereSdf_H
+#ifndef CD_PERLINSPHERESDF_H
+#define CD_PERLINSPHERESDF_H
 
 // Chombo includes
 #include <BaseIF.H>
@@ -20,19 +21,19 @@
 #include <CD_PerlinSdf.H>
 #include <CD_NamespaceHeader.H>
 
-/*!
+/**
   @brief Noisy sphere geometry (with Perlin noise).
 */
 class PerlinSphereSdf : public BaseIF
 {
 public:
-  /*!
+  /**
     @brief No weak construction
   */
   PerlinSphereSdf()
   {}
 
-  /*!
+  /**
     @brief Constructor
     @param[in] a_rad         Sphere radius
     @param[in] a_center      Sphere center
@@ -53,47 +54,49 @@ public:
                   const int&      a_octaves,
                   const bool&     a_reseed = false);
 
-  /*!
+  /**
     @brief Copy constructor
     @param[in] a_inputIF Other perlin sphere
   */
   PerlinSphereSdf(const PerlinSphereSdf& a_inputIF);
 
-  /*!
+  /**
     @brief Destructor (does nothing)
   */
   virtual ~PerlinSphereSdf();
 
-  /*!
+  /**
     @brief Value function. Returns distance to object
     @param[in] a_pos Position
+    @return Function value at the given point
   */
   virtual Real
   value(const RealVect& a_pos) const;
 
-  /*!
+  /**
     @brief Factory function
+    @return New copy of this implicit function
   */
   virtual BaseIF*
   newImplicitFunction() const;
 
 protected:
-  /*!
+  /**
     @brief Radius
   */
   Real m_rad;
 
-  /*!
+  /**
     @brief Center
   */
   RealVect m_center;
 
-  /*!
+  /**
     @brief Inside/outside
   */
   bool m_inside;
 
-  /*!
+  /**
     @brief Noise function
   */
   RefCountedPtr<BaseIF> m_perlinIF;

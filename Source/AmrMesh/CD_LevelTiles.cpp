@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2024 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_LevelTiles.cpp
   @brief  Implementation of CD_LevelTiles.H
   @author Robert Marskar
@@ -18,11 +19,9 @@
 #include <CD_LevelTiles.H>
 #include <CD_NamespaceHeader.H>
 
-LevelTiles::LevelTiles() noexcept
+LevelTiles::LevelTiles() noexcept : m_isDefined(false)
 {
   CH_TIME("LevelTiles::LevelTiles(weak)");
-
-  m_isDefined = false;
 }
 
 LevelTiles::LevelTiles(const DisjointBoxLayout& a_dbl, const int a_blockingFactor) noexcept
@@ -42,15 +41,14 @@ LevelTiles::define(const DisjointBoxLayout& a_dbl, const int a_blockingFactor) n
 {
   CH_TIME("LevelTiles::define");
 
-  const unsigned int numRanks = numProc();
-  const unsigned int myRank   = procID();
+  const unsigned int myRank = procID();
 
   m_myTiles.clear();
   m_otherTiles.clear();
   m_myGrids.clear();
 
   for (LayoutIterator lit = a_dbl.layoutIterator(); lit.ok(); ++lit) {
-    const LayoutIndex  lidx   = lit();
+    const LayoutIndex& lidx   = lit();
     const IntVect      tile   = coarsen(a_dbl[lidx], a_blockingFactor).smallEnd();
     const unsigned int rankID = a_dbl.procID(lidx);
     const unsigned int tileID = a_dbl.index(lidx);

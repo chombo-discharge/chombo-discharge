@@ -1,21 +1,22 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_CoarseFineDeposition.H
   @brief  Declaration of deposition algorithms in an AMR context. 
   @author Robert Marskar
 */
 
-#ifndef CD_CoarseFineDeposition_H
-#define CD_CoarseFineDeposition_H
+#ifndef CD_COARSEFINEDEPOSITION_H
+#define CD_COARSEFINEDEPOSITION_H
 
 // Our includes
 #include <CD_NamespaceHeader.H>
 
-/*!
+/**
   @brief Coarse-fine deposition types (see CD_EBAMRParticleMesh for how these are handled).
   @details Interp means that the mass on the fine level is put there via interpolation of the coarse level.
   @details Halo means that we deposit the particles on the coarse side of the refinement boundary directly on the fine level, using

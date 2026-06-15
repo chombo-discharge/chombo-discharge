@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_EddingtonSP1.cpp
   @brief  Implementation of CD_EddingtonSP1.H
   @author Robert Marskar
@@ -12,7 +13,7 @@
 
 // Std includes
 #include <chrono>
-#include <time.h>
+#include <ctime>
 
 // Chombo includes
 #include <ParmParse.H>
@@ -33,29 +34,27 @@ constexpr Real EddingtonSP1::m_alpha;
 constexpr Real EddingtonSP1::m_beta;
 
 Real
-EddingtonSP1::s_defaultDomainBcFunction(const RealVect a_position, const Real a_time)
+EddingtonSP1::s_defaultDomainBcFunction(const RealVect& /*a_position*/, const Real /*a_time*/)
 {
   return 1.0;
 }
 
-EddingtonSP1::EddingtonSP1() : RtSolver()
+EddingtonSP1::EddingtonSP1() : m_isSolverSetup(false), m_regridSlopes(true)
 {
 
   // Default settings
   m_name      = "EddingtonSP1";
   m_className = "EddingtonSP1";
 
-  m_verbosity     = -1;
-  m_isSolverSetup = false;
-  m_dataLocation  = Location::Cell::Center;
-  m_regridSlopes  = true;
+  m_verbosity = -1;
+
+  m_dataLocation = Location::Cell::Center;
 
   // This fills m_domainBcFunctions with s_defaultDomainBcFunction on every domain side.
   this->setDefaultDomainBcFunctions();
 }
 
-EddingtonSP1::~EddingtonSP1()
-{}
+EddingtonSP1::~EddingtonSP1() = default;
 
 void
 EddingtonSP1::parseOptions()
@@ -157,7 +156,7 @@ EddingtonSP1::makeBcString(const int a_dir, const Side::LoHiSide a_side) const
 }
 
 EddingtonSP1DomainBc::BcType
-EddingtonSP1::parseBcString(const std::string a_str) const
+EddingtonSP1::parseBcString(const std::string& a_str) const
 {
   CH_TIME("EddingtonSP1::parseBcString");
   if (m_verbosity > 5) {
@@ -221,7 +220,7 @@ EddingtonSP1::parseDomainBC()
         pp.get(bcString.c_str(), str, 0);
 
         // Set the function. Capture solver time by reference.
-        curFunc = [&bcFunc, &time = this->m_time](const RealVect a_pos, const Real a_time) {
+        curFunc = [&bcFunc, &time = this->m_time](const RealVect& a_pos, const Real /*a_time*/) {
           return bcFunc(a_pos, time);
         };
 
@@ -250,7 +249,7 @@ EddingtonSP1::parseDomainBC()
 
         bcType = this->parseBcString(str);
 
-        curFunc = [&bcFunc, &time = this->m_time, val](const RealVect a_pos, const Real a_time) {
+        curFunc = [&bcFunc, &time = this->m_time, val](const RealVect& a_pos, const Real /*a_time*/) {
           return bcFunc(a_pos, time) * val;
         };
 
@@ -317,8 +316,7 @@ EddingtonSP1::parseStationary()
     pout() << m_name + "::parseStationary" << endl;
   }
 
-  ParmParse   pp(m_className.c_str());
-  std::string str;
+  ParmParse pp(m_className.c_str());
 
   pp.get("stationary", m_stationary);
 }
@@ -340,10 +338,12 @@ EddingtonSP1::parsePlotVariables()
   pp.getarr("plt_vars", str, 0, num);
 
   for (int i = 0; i < num; i++) {
-    if (str[i] == "phi")
+    if (str[i] == "phi") {
       m_plotPhi = true;
-    else if (str[i] == "src")
+    }
+    else if (str[i] == "src") {
       m_plotSource = true;
+    }
   }
 }
 
@@ -469,7 +469,7 @@ EddingtonSP1::parseRegridSlopes()
 }
 
 void
-EddingtonSP1::preRegrid(const int a_base, const int a_oldFinestLevel)
+EddingtonSP1::preRegrid(const int /*a_base*/, const int /*a_oldFinestLevel*/)
 {
   CH_TIME("EddingtonSP1::preRegrid");
   if (m_verbosity > 5) {
@@ -700,14 +700,14 @@ EddingtonSP1::advanceEuler(EBAMRCellData&       a_phi,
   Vector<AMRLevelOp<LevelData<EBCellFAB>>*> amrOps = m_multigridSolver->getAMROperators();
   Vector<MGLevelOp<LevelData<EBCellFAB>>*>  mgOps  = m_multigridSolver->getAllOperators();
   for (int i = 0; i < amrOps.size(); i++) {
-    TGAHelmOp<LevelData<EBCellFAB>>* helmholtzOperator = (TGAHelmOp<LevelData<EBCellFAB>>*)amrOps[i];
+    auto* helmholtzOperator = (TGAHelmOp<LevelData<EBCellFAB>>*)amrOps[i];
 
     helmholtzOperator->diagonalScale(*scratch[i], false);
   }
 
   // Set coefficients for multigrid solve.
   for (int i = 0; i < mgOps.size(); i++) {
-    TGAHelmOp<LevelData<EBCellFAB>>* helmholtzOperator = (TGAHelmOp<LevelData<EBCellFAB>>*)mgOps[i];
+    auto* helmholtzOperator = (TGAHelmOp<LevelData<EBCellFAB>>*)mgOps[i];
 
     helmholtzOperator->setAlphaAndBeta(1.0, -a_dt);
   }
@@ -804,7 +804,7 @@ EddingtonSP1::setHelmholtzCoefficientsBox(EBCellFAB&       a_helmAco,
 #endif
 
   // TLDR: This routine is for setting coefficients in the Helmholtz operator. These coefficients are set as A = kappa, B = 1/(3*kappa). We happen to know that
-  //       the interior face stencils are interpolated using the neigboring face, so we must fill the "ghost faces" around the B-coefficient grid patch.
+  //       the interior face stencils are interpolated using the neighboring face, so we must fill the "ghost faces" around the B-coefficient grid patch.
 
   const RealVect probLo = m_amr->getProbLo();
   const Real     dx     = m_amr->getDx()[a_lvl];
@@ -812,9 +812,7 @@ EddingtonSP1::setHelmholtzCoefficientsBox(EBCellFAB&       a_helmAco,
   const EBISBox& ebisbox = a_helmAco.getEBISBox();
   const EBGraph& ebgraph = ebisbox.getEBGraph();
 
-  const Box cellBox    = m_amr->getGrids(m_realm)[a_lvl][a_dit];
-  const Box helmAcoBox = a_helmAco.box() & m_amr->getDomains()[a_lvl];
-  const Box helmBcoBox = a_helmBco.box() & m_amr->getDomains()[a_lvl];
+  const Box cellBox = m_amr->getGrids(m_realm)[a_lvl][a_dit];
 
   // Regular A-coefficient kernel. Recall that the A-coefficient only affects the diagonal part of the stencil so there's no need to fill anything
   // outside of the cell-centered grid patch.
@@ -982,7 +980,7 @@ EddingtonSP1::setupMultigrid()
   }
 
   // Select the bottom solver
-  LinearSolver<LevelData<EBCellFAB>>* botsolver = NULL;
+  LinearSolver<LevelData<EBCellFAB>>* botsolver = nullptr;
   if (m_bottomSolverType == BottomSolverType::Simple) {
     botsolver = &m_simpleSolver;
   }
@@ -1057,8 +1055,6 @@ EddingtonSP1::computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_
 
   // TLDR: Equations say boundary flux => F_n = c*Psi/2, so we
   //       extrapolate the solution to the boundary and multiply by c/2.
-
-  const int finestLevel = m_amr->getFinestLevel();
 
   m_amr->interpToEB(a_ebFlux, a_phi, m_realm, m_phase);
   m_amr->conservativeAverage(a_ebFlux, m_realm, m_phase);

@@ -35,7 +35,7 @@ Currently, three types of file reads are supported:
 
    .. literalinclude:: ../../../../Source/Utilities/CD_DataParser.H
       :language: c++
-      :lines: 29-85
+      :lines: 30-89
       :dedent: 2
 
 #. Read triangle mesh data from PLY or VTK files, returning a list of ``Triangle`` objects
@@ -50,7 +50,7 @@ Currently, three types of file reads are supported:
 
    .. literalinclude:: ../../../../Source/Utilities/CD_DataParser.H
       :language: c++
-      :lines: 87-105
+      :lines: 91-109
       :dedent: 2
 
    .. note::

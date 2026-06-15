@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_TorusSdf.cpp
   @brief  Implementation of CD_TorusSdf.H
   @author Robert Marskar
@@ -13,27 +14,21 @@
 #include <CD_TorusSdf.H>
 #include <CD_NamespaceHeader.H>
 
-TorusSdf::TorusSdf(const RealVect a_center,
-                   const Real     a_majorRadius,
-                   const Real     a_minorRadius,
-                   const bool     a_fluidInside)
-{
-  m_center      = a_center;
-  m_majorRadius = a_majorRadius;
-  m_minorRadius = a_minorRadius;
-  m_fluidInside = a_fluidInside;
-}
+TorusSdf::TorusSdf(const RealVect& a_center,
+                   const Real      a_majorRadius,
+                   const Real      a_minorRadius,
+                   const bool      a_fluidInside)
+  : m_center(a_center), m_majorRadius(a_majorRadius), m_minorRadius(a_minorRadius), m_fluidInside(a_fluidInside)
+{}
 
 TorusSdf::TorusSdf(const TorusSdf& a_inputIF)
-{
-  m_center      = a_inputIF.m_center;
-  m_majorRadius = a_inputIF.m_majorRadius;
-  m_minorRadius = a_inputIF.m_minorRadius;
-  m_fluidInside = a_inputIF.m_fluidInside;
-}
-
-TorusSdf::~TorusSdf()
+  : m_center(a_inputIF.m_center),
+    m_majorRadius(a_inputIF.m_majorRadius),
+    m_minorRadius(a_inputIF.m_minorRadius),
+    m_fluidInside(a_inputIF.m_fluidInside)
 {}
+
+TorusSdf::~TorusSdf() = default;
 
 Real
 TorusSdf::value(const RealVect& a_point) const

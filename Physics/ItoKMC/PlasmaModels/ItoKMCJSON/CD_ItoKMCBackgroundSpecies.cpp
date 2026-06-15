@@ -1,11 +1,12 @@
-/* chombo-discharge
- * Copyright © 2023 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_ItoKMCBackgroundSpeciesImplem.cpp
-  @brief  Implementation of ItoKMCBackgroundSpecies.H
+/**
+  @file   CD_ItoKMCBackgroundSpecies.cpp
+  @brief  Implementation of CD_ItoKMCBackgroundSpecies.H
   @author Robert Marskar
 */
 
@@ -15,10 +16,8 @@
 
 using namespace Physics::ItoKMC;
 
-ItoKMCBackgroundSpecies::ItoKMCBackgroundSpecies() noexcept
-{
-  m_isDefined = false;
-}
+ItoKMCBackgroundSpecies::ItoKMCBackgroundSpecies() noexcept : m_isDefined(false)
+{}
 
 ItoKMCBackgroundSpecies::ItoKMCBackgroundSpecies(const std::string&   a_name,
                                                  const MolarFraction& a_molarFraction) noexcept
@@ -26,8 +25,7 @@ ItoKMCBackgroundSpecies::ItoKMCBackgroundSpecies(const std::string&   a_name,
   this->define(a_name, a_molarFraction);
 }
 
-ItoKMCBackgroundSpecies::~ItoKMCBackgroundSpecies() noexcept
-{}
+ItoKMCBackgroundSpecies::~ItoKMCBackgroundSpecies() noexcept = default;
 
 void
 ItoKMCBackgroundSpecies::define(const std::string& a_name, const MolarFraction& a_molarFraction) noexcept
@@ -38,7 +36,7 @@ ItoKMCBackgroundSpecies::define(const std::string& a_name, const MolarFraction& 
 }
 
 Real
-ItoKMCBackgroundSpecies::molarFraction(const RealVect a_pos) const noexcept
+ItoKMCBackgroundSpecies::molarFraction(const RealVect& a_pos) const noexcept
 {
   CH_assert(m_isDefined);
 

@@ -1,11 +1,12 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_MFMultigridInterpolator.cpp
-  @brief  Implmementation of CD_MFMultigridInterpolator.H
+  @brief  Implementation of CD_MFMultigridInterpolator.H
   @author Robert Marskar
 */
 
@@ -13,24 +14,17 @@
 #include <CD_MFMultigridInterpolator.H>
 #include <CD_NamespaceHeader.H>
 
-MFMultigridInterpolator::MFMultigridInterpolator()
-{}
+MFMultigridInterpolator::MFMultigridInterpolator() = default;
 
 MFMultigridInterpolator::MFMultigridInterpolator(const Vector<RefCountedPtr<EBMultigridInterpolator>>& a_interpolators)
 {
   this->define(a_interpolators);
 }
 
-MFMultigridInterpolator::~MFMultigridInterpolator()
-{}
+MFMultigridInterpolator::~MFMultigridInterpolator() = default;
 
 MFMultigridInterpolator&
-MFMultigridInterpolator::operator=(const MFMultigridInterpolator& a_other)
-{
-  m_interpolators = a_other.m_interpolators;
-
-  return *this;
-}
+MFMultigridInterpolator::operator=(const MFMultigridInterpolator&) = default;
 
 void
 MFMultigridInterpolator::define(const Vector<RefCountedPtr<EBMultigridInterpolator>>& a_interpolators)

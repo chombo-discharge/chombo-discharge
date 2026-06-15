@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2024 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_Loads.cpp
   @brief  Implementation of CD_Loads.H
   @author Robert Marskar
@@ -67,7 +68,7 @@ Loads::assignLoads(const std::map<int, Real>& a_assignedLoads) noexcept
 {
   CH_TIME("Loads::assignLoads(std::map)");
 
-  const int numRanks = numProc();
+  const int numRanks = static_cast<int>(numProc());
 
   if (a_assignedLoads.size() != numRanks) {
     MayDay::Abort("Loads::assignLoads(std::map) -- a_assignedLoads.size() != numProc()");
@@ -84,7 +85,7 @@ Loads::assignLoads(const std::vector<Real>& a_assignedLoads) noexcept
 {
   CH_TIME("Loads::assignLoads(std::vector)");
 
-  const int numRanks = numProc();
+  const int numRanks = static_cast<int>(numProc());
 
   if (a_assignedLoads.size() != numRanks) {
     MayDay::Abort("Loads::assignLoads(std::vector) -- a_assignedLoads.size() != numProc()");
@@ -101,7 +102,7 @@ Loads::assignLoads(const Vector<Real>& a_assignedLoads) noexcept
 {
   CH_TIME("Loads::assignLoads(Vector)");
 
-  const int numRanks = numProc();
+  const int numRanks = static_cast<int>(numProc());
 
   if (a_assignedLoads.size() != numRanks) {
     MayDay::Abort("Loads::assignLoads(Vector) -- a_assignedLoads.size() != numProc()");
@@ -118,7 +119,7 @@ Loads::incrementLoads(const std::map<int, Real>& a_increments) noexcept
 {
   CH_TIME("Loads::incrementLoads(std::map)");
 
-  const int numRanks = numProc();
+  const int numRanks = static_cast<int>(numProc());
 
   if (a_increments.size() != numRanks) {
     MayDay::Abort("Loads::incrementLoads(std::map) -- a_increments.size() != numProc()");
@@ -135,7 +136,7 @@ Loads::incrementLoads(const std::vector<Real>& a_increments) noexcept
 {
   CH_TIME("Loads::incrementLoads(std::vector)");
 
-  const int numRanks = numProc();
+  const int numRanks = static_cast<int>(numProc());
 
   if (a_increments.size() != numRanks) {
     MayDay::Abort("Loads::incrementLoads(std::vector) -- a_increments.size() != numProc()");
@@ -152,7 +153,7 @@ Loads::incrementLoads(const Vector<Real>& a_increments) noexcept
 {
   CH_TIME("Loads::incrementLoads(Vector)");
 
-  const int numRanks = numProc();
+  const int numRanks = static_cast<int>(numProc());
 
   if (a_increments.size() != numRanks) {
     MayDay::Abort("Loads::incrementLoads(Vector) -- a_increments.size() != numProc()");
@@ -169,7 +170,7 @@ Loads::incrementLoad(const int a_rank, const Real a_increment) noexcept
 {
   CH_TIME("Loads::incrementLoad");
 
-  const int numRanks = numProc();
+  const int numRanks = static_cast<int>(numProc());
 
   if (a_rank >= numRanks) {
     MayDay::Abort("Loads::incrementLoad -- 'a_rank > numProc()'");
@@ -187,6 +188,7 @@ Loads::getSortedLoads() const noexcept
   std::vector<std::pair<int, Real>> sortedLoads;
 
   // Insert loads into a vector so we can sort
+  sortedLoads.reserve(m_loads.size());
   for (const auto& curLoad : m_loads) {
     sortedLoads.emplace_back(curLoad.first, curLoad.second);
   }

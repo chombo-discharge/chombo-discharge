@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2023 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_ItoKMCCdrSpecies.H
-  @brief  Declaration of a simple CdrSpecies derived class for usage in ItoKMC
+/**
+  @file   CD_ItoKMCCDRSpecies.H
+  @brief  Declaration of the Physics::ItoKMC::ItoKMCCDRSpecies CdrSpecies
   @author Robert Marskar
 */
 
-#ifndef CD_ItoKMCCDRSpecies_H
-#define CD_ItoKMCCDRSpecies_H
+#ifndef CD_ITOKMCCDRSPECIES_H
+#define CD_ITOKMCCDRSPECIES_H
 
 // Std includes
 #include <functional>
@@ -22,30 +23,30 @@
 namespace Physics {
   namespace ItoKMC {
 
-    /*!
+    /**
       @brief Simple CdrSpecies class for usage with ItoKMC
     */
     class ItoKMCCDRSpecies : public CdrSpecies
     {
     public:
-      /*!
+      /**
 	@brief Function alias for e.g. initial data.
 	@param[in] a_position Physical coordinates
 	@param[in] a_time     Time
       */
       using FunctionXt = std::function<Real(const RealVect a_position, const Real a_time)>;
 
-      /*!
-	@brief Full constructor
-	@param[in] a_name         Name of the species
-	@param[in] a_chargeNumber Charge number
-	@param[in] a_isMbile      Mobile or not
-	@param[in] a_isDiffusive  Diffusive or not
+      /**
+	@brief Full constructor.
+	@param[in] a_name         Name of the species.
+	@param[in] a_chargeNumber Charge number (elementary charges).
+	@param[in] a_isMobile     Mobile or not.
+	@param[in] a_isDiffusive  Diffusive or not.
       */
-      ItoKMCCDRSpecies(const std::string a_name,
-                       const int         a_chargeNumber,
-                       const bool        a_isMobile,
-                       const bool        a_isDiffusive)
+      ItoKMCCDRSpecies(const std::string& a_name,
+                       const int          a_chargeNumber,
+                       const bool         a_isMobile,
+                       const bool         a_isDiffusive)
       {
         m_name         = a_name;
         m_chargeNumber = a_chargeNumber;
@@ -54,30 +55,32 @@ namespace Physics {
 
         m_initialParticles.clear();
 
-        m_initialData = [&](const RealVect a_pos, const Real a_time) -> Real {
+        m_initialData = [&](const RealVect& a_pos, const Real a_time) -> Real {
           return 0.0;
         };
       }
 
-      /*!
+      /**
 	@brief Destructor. Does nothing
       */
       virtual ~ItoKMCCDRSpecies() noexcept
       {}
 
-      /*!
+      /**
 	@brief Returns initial data for this species.
-	@param[in] a_pos Physical position
-	@param[in] a_time Time
+	@param[in] a_pos  Physical position.
+	@param[in] a_time Simulation time.
+	@return Initial density at the given position and time.
       */
       virtual Real
-      initialData(const RealVect a_pos, const Real a_time) const override final
+      initialData(const RealVect& a_pos, const Real a_time) const override final
       {
         return m_initialData(a_pos, a_time);
       }
 
-      /*!
-	@brief Set the initial data function for this species
+      /**
+	@brief Set the initial data function for this species.
+	@param[in] a_initialData Callable returning the initial density at (position, time).
       */
       virtual void
       setInitialData(const FunctionXt& a_initialData)
@@ -86,7 +89,7 @@ namespace Physics {
       }
 
     protected:
-      /*!
+      /**
 	@brief Initial data function
       */
       FunctionXt m_initialData;

@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2025 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_CellCentroidInterpolationImplem.H
   @brief  Implementation of CD_CellCentroidInterpolation.H
   @author Robert Marskar
 */
 
-#ifndef CD_CellCentroidInterpolationImplem_H
-#define CD_CellCentroidInterpolationImplem_H
+#ifndef CD_CELLCENTROIDINTERPOLATIONIMPLEM_H
+#define CD_CELLCENTROIDINTERPOLATIONIMPLEM_H
 
 // Chombo includes
 #include <CH_Timer.H>
@@ -46,7 +47,7 @@ CellCentroidInterpolation::interpolate(T&               a_centroidData,
 
   for (int comp = 0; comp < nComp; comp++) {
 
-    // This is the kernel that is used when the interpolation is expressable as a stencil.
+    // This is the kernel that is used when the interpolation is expressible as a stencil.
     auto stencilKernel = [&](const VolIndex& vof) -> void {
       a_centroidData(vof, comp) = 0.0;
 

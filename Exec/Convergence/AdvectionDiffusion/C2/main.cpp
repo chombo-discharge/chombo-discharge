@@ -1,3 +1,15 @@
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+/**
+  @file   main.cpp
+  @brief  Convergence test for advection-diffusion on a uniform grid.
+  @author Robert Marskar
+*/
+
 #include <CD_Driver.H>
 #include <CD_CdrCTU.H>
 #include <CD_RodDielectric.H>
@@ -26,7 +38,7 @@ main(int argc, char* argv[])
 
   // Build class options from input script and command line options
   const std::string input_file = argv[1];
-  ParmParse         pp(argc - 2, argv + 2, NULL, input_file.c_str());
+  ParmParse         pp(argc - 2, argv + 2, nullptr, input_file.c_str());
 
   // How much we refine the time step. numRefine = 1 => refine once => two runs. And so on.
   Real      cfl       = 0.8;
@@ -85,7 +97,7 @@ main(int argc, char* argv[])
               << "L1 error\t"
               << "L2 error\n";
 
-    for (int i = 0; i < norms.size(); i++) {
+    for (size_t i = 0; i < norms.size(); i++) {
       std::cout << std::pow(2, i + 1) << "\t" << std::get<0>(norms[i]) << "\t" << std::get<1>(norms[i]) << "\t"
                 << std::get<2>(norms[i]) << "\n";
     }

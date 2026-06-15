@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_RtLayoutImplem.H
   @brief  Implementation of CD_RtLayout.H
   @author Robert Marskar
 */
 
-#ifndef CD_RtLayoutImplem_H
-#define CD_RtLayoutImplem_H
+#ifndef CD_RTLAYOUTIMPLEM_H
+#define CD_RTLAYOUTIMPLEM_H
 
 // Chombo includes
 #include <CH_Timer.H>
@@ -53,7 +54,7 @@ RtLayout<T>::getRealm() const
 
 template <class T>
 void
-RtLayout<T>::setRealm(const std::string a_realm)
+RtLayout<T>::setRealm(const std::string& a_realm)
 {
   m_realm = a_realm;
 

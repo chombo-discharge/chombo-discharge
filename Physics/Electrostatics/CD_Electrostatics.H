@@ -1,19 +1,20 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_Electrostatics.H
-  @brief  Documentation of Physics/Electrostatics namespace
+  @brief  Declaration of the Physics::Electrostatics namespace
   @author Robert Marskar
 */
 
-#ifndef CD_Electrostatics_H
-#define CD_Electrostatics_H
+#ifndef CD_ELECTROSTATICS_H
+#define CD_ELECTROSTATICS_H
 
 namespace Physics {
-  /*!
+  /**
     @brief Namespace for encapsulating physics code for electrostatic problems
   */
   namespace Electrostatics {}

@@ -1,6 +1,7 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 /*
@@ -17,13 +18,9 @@
 #include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
-EBHelmholtzNeumannEBBC::EBHelmholtzNeumannEBBC()
+EBHelmholtzNeumannEBBC::EBHelmholtzNeumannEBBC() : m_multByBco(true), m_useConstant(false), m_useFunction(false)
 {
   CH_TIME("EBHelmholtzNeumannEBBC::EBHelmholtzNeumannEBBC()");
-
-  m_multByBco   = true;
-  m_useConstant = false;
-  m_useFunction = false;
 }
 
 EBHelmholtzNeumannEBBC::~EBHelmholtzNeumannEBBC()
@@ -122,9 +119,9 @@ EBHelmholtzNeumannEBBC::define()
 }
 
 void
-EBHelmholtzNeumannEBBC::applyEBFlux(VoFIterator&           a_vofit,
-                                    EBCellFAB&             a_Lphi,
-                                    const EBCellFAB&       a_phi,
+EBHelmholtzNeumannEBBC::applyEBFlux(VoFIterator& a_vofit,
+                                    EBCellFAB&   a_Lphi,
+                                    const EBCellFAB& /*a_phi*/,
                                     const BaseIVFAB<Real>& a_Bcoef,
                                     const DataIndex&       a_dit,
                                     const Real&            a_beta,
@@ -163,8 +160,6 @@ EBHelmholtzNeumannEBBC::applyEBFlux(VoFIterator&           a_vofit,
 
     BoxLoops::loop(a_vofit, kernel);
   }
-
-  return;
 }
 
 #include <CD_NamespaceFooter.H>

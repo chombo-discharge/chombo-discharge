@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2026 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_TriangleCollection.cpp
   @brief  Implementation of CD_TriangleCollection.H
   @author Robert Marskar
@@ -17,10 +18,7 @@
 #include <CD_TriangleCollection.H>
 #include <CD_NamespaceHeader.H>
 
-TriangleCollection::TriangleCollection() noexcept
-{
-  m_isDefined = false;
-}
+TriangleCollection::TriangleCollection() noexcept = default;
 
 TriangleCollection::TriangleCollection(const std::vector<std::shared_ptr<Triangle>>& a_triangles) noexcept
 {
@@ -32,13 +30,12 @@ TriangleCollection::TriangleCollection(const std::string& a_filename, const std:
   this->define(DataParser::readTriangles(a_filename, a_vertexDataIdentifier));
 }
 
-TriangleCollection::~TriangleCollection() noexcept
-{}
+TriangleCollection::~TriangleCollection() noexcept = default;
 
 void
 TriangleCollection::define(const std::vector<std::shared_ptr<Triangle>>& a_triangles) noexcept
 {
-  CH_assert(a_triangles.size() > 0);
+  CH_assert(!a_triangles.empty());
   if (a_triangles.empty()) {
     return;
   }
@@ -83,7 +80,7 @@ TriangleCollection::getClosestTriangles(const Vec3& a_point) const noexcept
 
   // Visitation pattern. Go into the node if the point is inside or the distance to the BV is shorter than the shortest distance
   // that we've found so far.
-  EBGeometry::BVH::Visiter<Node, Real> visiter = [&shortestDistanceSoFar](const Node&    a_node,
+  EBGeometry::BVH::Visiter<Node, Real> visiter = [&shortestDistanceSoFar](const Node& /*a_node*/,
                                                                           const BVHMeta& a_bvDist) noexcept -> bool {
     return a_bvDist <= 0.0 || a_bvDist <= shortestDistanceSoFar;
   };

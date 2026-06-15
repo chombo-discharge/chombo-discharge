@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_ItoKMCStreamerTaggerImplem.H
-  @brief  Implementation CD_ItoKMCStreamerTagger.H
+  @brief  Implementation of CD_ItoKMCStreamerTagger.H
   @author Robert Marskar
 */
 
-#ifndef CD_ItoKMCStreamerTaggerImplem_H
-#define CD_ItoKMCStreamerTaggerImplem_H
+#ifndef CD_ITOKMCSTREAMERTAGGERIMPLEM_H
+#define CD_ITOKMCSTREAMERTAGGERIMPLEM_H
 
 // Chombo includes
 #include <ParmParse.H>
@@ -94,15 +95,15 @@ ItoKMCStreamerTagger<S>::parseRuntimeOptions() noexcept
 
 template <typename S>
 Vector<Real>
-ItoKMCStreamerTagger<S>::computeTagFields(const RealVect a_pos,
-                                          const Real     a_time,
-                                          const Real     a_dx,
-                                          const RealVect a_E,
-                                          const Real     a_minE,
-                                          const Real     a_maxE,
-                                          const RealVect a_gradE,
-                                          const Real     a_minGradE,
-                                          const Real     a_maxGradE) const noexcept
+ItoKMCStreamerTagger<S>::computeTagFields(const RealVect& a_pos,
+                                          const Real      a_time,
+                                          const Real      a_dx,
+                                          const RealVect& a_E,
+                                          const Real      a_minE,
+                                          const Real      a_maxE,
+                                          const RealVect& a_gradE,
+                                          const Real      a_minGradE,
+                                          const Real      a_maxGradE) const noexcept
 {
   CH_TIME("ItoKMCStreamerTagger::computeTagFields");
   if (this->m_verbosity > 5) {
@@ -121,12 +122,12 @@ ItoKMCStreamerTagger<S>::computeTagFields(const RealVect a_pos,
 
 template <typename S>
 bool
-ItoKMCStreamerTagger<S>::coarsenCell(const RealVect         a_pos,
-                                     const Real             a_time,
-                                     const Real             a_dx,
-                                     const int              a_lvl,
-                                     const Vector<Real>     a_tagFields,
-                                     const Vector<RealVect> a_gradTagFields) const noexcept
+ItoKMCStreamerTagger<S>::coarsenCell(const RealVect&         a_pos,
+                                     const Real              a_time,
+                                     const Real              a_dx,
+                                     const int               a_lvl,
+                                     const Vector<Real>&     a_tagFields,
+                                     const Vector<RealVect>& a_gradTagFields) const noexcept
 {
   CH_TIME("ItoKMCStreamerTagger::coarsenCell");
   if (this->m_verbosity > 5) {
@@ -154,12 +155,12 @@ ItoKMCStreamerTagger<S>::coarsenCell(const RealVect         a_pos,
 
 template <typename S>
 bool
-ItoKMCStreamerTagger<S>::refineCell(const RealVect         a_pos,
-                                    const Real             a_time,
-                                    const Real             a_dx,
-                                    const int              a_lvl,
-                                    const Vector<Real>     a_tagFields,
-                                    const Vector<RealVect> a_gradTagFields) const noexcept
+ItoKMCStreamerTagger<S>::refineCell(const RealVect&         a_pos,
+                                    const Real              a_time,
+                                    const Real              a_dx,
+                                    const int               a_lvl,
+                                    const Vector<Real>&     a_tagFields,
+                                    const Vector<RealVect>& a_gradTagFields) const noexcept
 {
   CH_TIME("ItoKMCStreamerTagger::refineCell");
   if (this->m_verbosity > 5) {

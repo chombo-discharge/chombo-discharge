@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_TiledMeshRefine.cpp
   @brief  Implementation of CD_TiledMeshRefine.H
   @author Robert Marskar
@@ -25,11 +26,9 @@
 TiledMeshRefine::TiledMeshRefine(const ProblemDomain& a_coarsestDomain,
                                  const Vector<int>&   a_refRatios,
                                  const IntVect&       a_tileSize) noexcept
+  : m_refRatios(a_refRatios), m_tileSize(a_tileSize)
 {
   CH_TIME("TiledMeshRefine::TiledMeshRefine");
-
-  m_refRatios = a_refRatios;
-  m_tileSize  = a_tileSize;
 
   m_amrDomains.resize(0);
 
@@ -130,7 +129,7 @@ TiledMeshRefine::makeLevelTiles(TileSet&             a_tiles,
                                       (tag[2] - coarProbLo[2]) / (m_tileSize[2] / a_refToCoar)));
 
     if (tileBox.contains(iv)) {
-      a_tiles.emplace(Tile(D_DECL(iv[0], iv[1], iv[2])));
+      a_tiles.emplace(D_DECL(iv[0], iv[1], iv[2]));
     }
   }
   CH_STOP(t1);
@@ -138,7 +137,7 @@ TiledMeshRefine::makeLevelTiles(TileSet&             a_tiles,
   // Gather tiles globally
 #ifdef CH_MPI
   CH_START(t2);
-  const int mySendCount  = a_tiles.size() * SpaceDim;
+  const int mySendCount  = static_cast<int>(a_tiles.size()) * SpaceDim;
   int*      mySendBuffer = new int[mySendCount];
 
   // Get the number of elements sent by each MPI rank and compute the offset array which is required by Allgatherv
@@ -167,8 +166,9 @@ TiledMeshRefine::makeLevelTiles(TileSet&             a_tiles,
   MPI_Allgatherv(mySendBuffer, mySendCount, MPI_INT, recvBuffer, sendCounts, offsets, MPI_INT, Chombo_MPI::comm);
 
   // de-linearize the received data back into tiles
-  for (int i = 0; i < recvCount; i += SpaceDim) {
-    a_tiles.emplace(Tile(D_DECL(recvBuffer[i], recvBuffer[i + 1], recvBuffer[i + 2])));
+  for (int i = 0; i < recvCount;) {
+    a_tiles.emplace(D_DECL(recvBuffer[i], recvBuffer[i + 1], recvBuffer[i + 2]));
+    i += SpaceDim;
   }
 
   delete[] recvBuffer;
@@ -196,7 +196,7 @@ TiledMeshRefine::makeLevelTiles(TileSet&             a_tiles,
     for (BoxIterator bit(box); bit.ok(); ++bit) {
       const IntVect iv = bit();
 
-      a_tiles.emplace(Tile(D_DECL(iv[0], iv[1], iv[2])));
+      a_tiles.emplace(D_DECL(iv[0], iv[1], iv[2]));
     }
   }
 

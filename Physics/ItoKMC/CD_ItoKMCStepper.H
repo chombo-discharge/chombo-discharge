@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_ItoKMCStepper.H
+  @brief  Declaration of the Physics::ItoKMC::ItoKMCStepper abstract TimeStepper
   @author Robert Marskar
-  @brief  Declaration of an abstract class for integrating the Ito-KMC-Poisson equations.
 */
 
-#ifndef CD_ItoKMCStepper_H
-#define CD_ItoKMCStepper_H
+#ifndef CD_ITOKMCSTEPPER_H
+#define CD_ITOKMCSTEPPER_H
 
 // Std includes
 #include <functional>
@@ -33,27 +34,30 @@
 namespace Physics {
   namespace ItoKMC {
 
-    /*!
-      @brief Enum for differentiating between types of particles
+    /**
+      @brief Enum for selecting a subset of plasma species by mobility/diffusion/charge properties.
     */
     enum class SpeciesSubset
     {
-      All,
-      AllMobile,
-      AllDiffusive,
-      AllMobileOrDiffusive,
-      AllMobileAndDiffusive,
-      Charged,
-      ChargedMobile,
-      ChargedDiffusive,
-      ChargedMobileOrDiffusive,
-      ChargedMobileAndDiffusive,
-      Stationary,
+      All,                       ///< All plasma species.
+      AllMobile,                 ///< All species with nonzero mobility.
+      AllDiffusive,              ///< All species with nonzero diffusion coefficient.
+      AllMobileOrDiffusive,      ///< All species that are mobile or diffusive.
+      AllMobileAndDiffusive,     ///< All species that are both mobile and diffusive.
+      Charged,                   ///< All charged species (any mobility/diffusion).
+      ChargedMobile,             ///< All charged, mobile species.
+      ChargedDiffusive,          ///< All charged, diffusive species.
+      ChargedMobileOrDiffusive,  ///< All charged species that are mobile or diffusive.
+      ChargedMobileAndDiffusive, ///< All charged species that are both mobile and diffusive.
+      Stationary,                ///< All stationary (non-mobile, non-diffusive) species.
     };
 
-    /*!
-      @brief Base time stepper class that advances the Ito-KMC-Poisson system of equations. If you want a different
-      underlying solver, change the template arguments. 
+    /**
+      @brief Abstract TimeStepper for the Ito-KMC-Poisson system of equations.
+      @details Couples Ito stochastic drift-diffusion solvers (type @p I), CDR fluid solvers (type @p C),
+      Monte Carlo photon transport solvers (type @p R), and a field solver (type @p F) through the
+      ItoKMCPhysics interface. Subclasses must implement `advance()` to define the time-integration scheme.
+      The default template arguments use standard chombo-discharge solver implementations.
     */
     template <typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, typename F = FieldSolverGMG>
     class ItoKMCStepper : public TimeStepper
@@ -64,129 +68,131 @@ namespace Physics {
       static_assert(std::is_base_of<McPhoto, R>::value, "R must derive from McPhoto");
       static_assert(std::is_base_of<FieldSolver, FieldSolverGMG>::value, "F must derive from FieldSolver");
 
-      /*!
+      /**
 	@brief Default constructor. Sets default options. 
       */
       ItoKMCStepper() noexcept;
 
-      /*!
+      /**
 	@brief Full constructor. Calls the other constructor
 	@param[in] a_physics Implementation of the Ito plasma physics model.
       */
       ItoKMCStepper(RefCountedPtr<ItoKMCPhysics>& a_physics) noexcept;
 
-      /*!
+      /**
 	@brief Destructor
       */
       virtual ~ItoKMCStepper() noexcept;
 
-      /*!
+      /**
 	@brief Parse options
       */
       virtual void
       parseOptions() noexcept;
 
-      /*!
+      /**
 	@brief Parse runtime configurable options
       */
       virtual void
       parseRuntimeOptions() noexcept override;
 
-      /*!
+      /**
 	@brief Allocate storage for solvers.
       */
       virtual void
       allocate() noexcept override;
 
-      /*!
+      /**
 	@brief Set up solvers.
       */
       virtual void
       setupSolvers() noexcept override;
 
-      /*!
+      /**
 	@brief Fill solvers with initial data
       */
       virtual void
       initialData() noexcept override;
 
-      /*!
+      /**
 	@brief Perform post-checkpoint operations
 	@details This allocates the internal storage, recomputes the electric field and recomputes the velocity and diffusion coefficients. 
       */
       virtual void
       postCheckpointSetup() noexcept override;
 
-      /*!
+      /**
 	@brief Post-initialization operations. Default does nothing
       */
       virtual void
       postInitialize() noexcept override;
 
 #ifdef CH_USE_HDF5
-      /*!
+      /**
 	@brief Write header data to checkpoint file.
-	@param[inout] a_header HDF5 header.
+	@param[in,out] a_header HDF5 header.
       */
       virtual void
       writeCheckpointHeader(HDF5HeaderData& a_header) const noexcept override;
 #endif
 
 #ifdef CH_USE_HDF5
-      /*!
+      /**
 	@brief Read header data from checkpoint file.
-	@param[inout] a_header HDF5 header.
+	@param[in,out] a_header HDF5 header.
       */
       virtual void
       readCheckpointHeader(HDF5HeaderData& a_header) noexcept override;
 #endif
 
 #ifdef CH_USE_HDF5
-      /*!  
-	@brief Write checkpoint data to file
-	@param[inout] a_handle HDF5 fil
-	@param[in]    a_lvl    Grid level
+      /**
+	@brief Write checkpoint data to file.
+	@param[in,out] a_handle HDF5 file.
+	@param[in]    a_lvl    Grid level.
       */
       virtual void
       writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const noexcept override;
 #endif
 
 #ifdef CH_USE_HDF5
-      /*!
+      /**
 	@brief Read checkpoint data from file
-	@param[inout] a_handle HDF5 file
+	@param[in,out] a_handle HDF5 file
 	@param[in]    a_lvl    Grid level
       */
       virtual void
       readCheckpointData(HDF5Handle& a_handle, const int a_lvl) noexcept override;
 #endif
 
-      /*!
-	@brief Get number of plot variables for the output file
+      /**
+	@brief Get number of plot variables for the output file.
+	@return Total number of plot variables contributed by all solvers and the physics model.
       */
       virtual int
       getNumberOfPlotVariables() const noexcept override;
 
-      /*!
-	@brief Get plot variable names
+      /**
+	@brief Get plot variable names.
+	@return Vector of variable name strings.
       */
       virtual Vector<std::string>
       getPlotVariableNames() const noexcept override;
 
-      /*!
+      /**
 	@brief Write plot data to output holder. 
-	@param[inout] a_output Output data holder.
-	@param[inout] a_icomp  Starting component in a_output to begin at. 
+	@param[in,out] a_output Output data holder.
+	@param[in,out] a_icomp  Starting component in a_output to begin at. 
 	@param[in]    a_outputRealm Realm where a_output belongs
 	@param[in]    a_level  Grid level
       */
       virtual void
       writePlotData(LevelData<EBCellFAB>& a_output,
                     int&                  a_icomp,
-                    const std::string     a_outputRealm,
+                    const std::string&    a_outputRealm,
                     const int             a_level) const noexcept override;
 
-      /*!
+      /**
 	@brief Get computational loads to be checkpointed. 
 	@details This is used by Driver both for setting up load-balanced restarts AND for plotting the computational loads to a file. This routine is
 	disjoint from loadBalanceBoxes because this routine is not part of a regrid. This means that we are not operating with temporarily load balanced
@@ -196,9 +202,9 @@ namespace Physics {
 	@return Returns computational loads for each box on grid level a_level. 
       */
       virtual Vector<long int>
-      getCheckpointLoads(const std::string a_realm, const int a_level) const override;
+      getCheckpointLoads(const std::string& a_realm, const int a_level) const override;
 
-      /*!
+      /**
 	@brief Advancement method. Needs to be implemented by subclasses.
 	@param[in] a_dt Time step to be used for advancement
 	@return    Returns the time step that was used. 
@@ -206,52 +212,53 @@ namespace Physics {
       virtual Real
       advance(const Real a_dt) override = 0;
 
-      /*!
-	@brief Compute a time step used for the advance method
+      /**
+	@brief Compute a time step used for the advance method.
+	@return Time step satisfying all solver CFL and physics restrictions.
       */
       virtual Real
       computeDt() override;
 
-      /*!
-	@brief Synchronize solver times for all the solvers
-	@param[in] a_step Time step
-	@param[in] a_time Simulation time
-	@param[in] a_dt   Last time step used. 
+      /**
+	@brief Synchronize solver times for all the solvers.
+	@param[in] a_step Current time step number.
+	@param[in] a_time Current simulation time in seconds.
+	@param[in] a_dt   Time step that was used.
       */
       virtual void
       synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt) noexcept override;
 
-      /*!
+      /**
 	@brief Print a step report. Used by Driver for user monitoring of simulation.
       */
       virtual void
       printStepReport() noexcept override;
 
-      /*!
+      /**
 	@brief Register realms used for the simulation
       */
       virtual void
       registerRealms() noexcept override;
 
-      /*!
+      /**
 	@brief Register operators used for the simulation
       */
       virtual void
       registerOperators() noexcept override;
 
-      /*!
+      /**
 	@brief Perform pre-plot operations
       */
       virtual void
       prePlot() noexcept override;
 
-      /*!
+      /**
 	@brief Perform post-plot operations
       */
       virtual void
       postPlot() noexcept override;
 
-      /*!
+      /**
 	@brief Perform pre-regrid operations - storing relevant data from the old grids. 
 	@param[in] a_lmin           The coarsest level that changes
 	@param[in] a_oldFinestLevel The finest level before the regrid. 
@@ -259,7 +266,7 @@ namespace Physics {
       virtual void
       preRegrid(const int a_lmin, const int a_oldFinestLevel) noexcept override;
 
-      /*!
+      /**
 	@brief Regrid methods -- puts all data on the new mesh. 
 	@param[in] a_lmin           The coarsest level that changed. 
 	@param[in] a_oldFinestLevel The finest level before the regrid. 
@@ -268,20 +275,21 @@ namespace Physics {
       virtual void
       regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) noexcept override;
 
-      /*!
+      /**
 	@brief Perform post-regrid operations.
       */
       virtual void
       postRegrid() noexcept override;
 
-      /*!
+      /**
 	@brief Load balancing query for a specified realm. If this returns true for a_realm, load balancing routines will be called during regrids for the input realm. 
 	@param[in] a_realm Realm name
+        @return Return value
       */
       virtual bool
-      loadBalanceThisRealm(const std::string a_realm) const override;
+      loadBalanceThisRealm(const std::string& a_realm) const override;
 
-      /*!
+      /**
 	@brief Load balance grid boxes for a specified realm. 
 	@param[out] a_procs       MPI ranks owning the various grid boxes. 
 	@param[out] a_boxes       Grid boxes on every level (obtain them with a_grids[lvl].boxArray())
@@ -297,12 +305,12 @@ namespace Physics {
       virtual void
       loadBalanceBoxes(Vector<Vector<int>>&             a_procs,
                        Vector<Vector<Box>>&             a_boxes,
-                       const std::string                a_realm,
+                       const std::string&               a_realm,
                        const Vector<DisjointBoxLayout>& a_grids,
                        const int                        a_lmin,
                        const int                        a_finestLevel) override;
 
-      /*!
+      /**
 	@brief Set voltage used for the simulation
 	@param[in] a_voltage Voltage
 	@note This should be done BEFORE calling setupSolvers. 
@@ -310,14 +318,14 @@ namespace Physics {
       virtual void
       setVoltage(const std::function<Real(const Real a_time)>& a_voltage) noexcept;
 
-      /*!
+      /**
 	@brief Get current simulation time
 	@return m_time
       */
       virtual Real
       getTime() const noexcept;
 
-      /*!
+      /**
 	@brief Recompute the electric field onto the specified data holder
 	@param[out] a_electricField Electric field on cell centroid (defined on the fluid realm). 
 	@param[in]  a_phase Phase where we compute the electric field. 
@@ -326,7 +334,7 @@ namespace Physics {
       computeElectricField(EBAMRCellData& a_electricField, const phase::which_phase a_phase) const noexcept;
 
     protected:
-      /*!
+      /**
 	@brief An enum for encapsulating how time steps were restricted. 
       */
       enum class TimeCode
@@ -340,501 +348,500 @@ namespace Physics {
         Physics
       };
 
-      /*!
+      /**
 	@brief Box sorting method when using dual-grid with particle load balancing.
       */
       BoxSorting m_boxSort;
 
-      /*!
+      /**
 	@brief Time code for understanding how the time step was restricted. 
       */
       TimeCode m_timeCode;
 
-      /*!
+      /**
 	@brief Realm used for the fluid part (i.e., electrostatic) part of the simulation
 	@note This is hardcoded to Realm::Primal
       */
       std::string m_fluidRealm;
 
-      /*!
+      /**
 	@brief Realm used for the particle part of the simulation. 
       */
       std::string m_particleRealm;
 
-      /*!
+      /**
 	@brief Time stepper name
       */
       std::string m_name;
 
-      /*!
+      /**
 	@brief Phase where we solve for the plasma. 
 	@note This is hardcoded to phase::gas
       */
       phase::which_phase m_plasmaPhase;
 
-      /*!
+      /**
 	@brief Implementation of ItoKMCPhysics. 
 	@details All solver coupling occurs through the implementation of this class
       */
       RefCountedPtr<ItoKMCPhysics> m_physics;
 
-      /*!
+      /**
 	@brief Ito solvers
       */
       RefCountedPtr<ItoLayout<ItoSolver>> m_ito;
 
-      /*!
+      /**
 	@brief CDR solvers
       */
       RefCountedPtr<CdrLayout<CdrSolver>> m_cdr;
 
-      /*!
+      /**
 	@brief Radiative transfer solvers. 
       */
       RefCountedPtr<RtLayout<McPhoto>> m_rte;
 
-      /*!
+      /**
 	@brief Field solver. 
       */
       RefCountedPtr<FieldSolver> m_fieldSolver;
 
-      /*!
+      /**
 	@brief Surface charge solver. 
       */
       RefCountedPtr<SurfaceODESolver<1>> m_sigmaSolver;
 
-      /*!
+      /**
 	@brief List of secondary particles injected through the EB
 	@details This is used when injecting secondary particles through the EB.
 	@note Stored on the particle realm
       */
       Vector<ParticleContainer<ItoParticle>> m_secondaryParticles;
 
-      /*!
+      /**
 	@brief List of secondary photons injected through the EB
 	@details This is used when injecting secondary photons through the EB.
 	@note Stored on the particle realm
       */
       Vector<ParticleContainer<Photon>> m_secondaryPhotons;
 
-      /*!
+      /**
 	@brief CDR fluxes for CDR BCs.
 	@details There's a version of this inside the solvers, but we need this one because the EB coupling
 	takes place on the particle realm.
       */
       Vector<EBAMRIVData> m_cdrFluxes;
 
-      /*!
+      /**
 	@brief Extrapolated CDR fluxes.
       */
       Vector<EBAMRIVData> m_cdrFluxesExtrap;
 
-      /*!
+      /**
 	@brief Voltage curve on the electrodes used in the simulation.
       */
       std::function<Real(const Real a_time)> m_voltage;
 
-      /*!
-	@brief Flag for abandoning simulation of Poisson solver fails
+      /**
+	@brief Flag for aborting the simulation if the Poisson solver fails to converge.
       */
       bool m_abortOnFailure;
 
-      /*!
-	@brief Flag for abandoning simulation of Poisson solver fails
+      /**
+	@brief Flag for redistributing CDR mass when particles cross the EB.
       */
       bool m_redistributeCDR;
 
-      /*!
+      /**
 	@brief Using dual grid or not
       */
       bool m_dualGrid;
 
-      /*!
+      /**
 	@brief Profile kernels or not
       */
       bool m_profile;
 
-      /*!
+      /**
 	@brief Do or do not superparticle merging/splitting on regrids.
       */
       bool m_regridSuperparticles;
 
-      /*!
+      /**
 	@brief Load balance particle realm or not
       */
       bool m_loadBalanceParticles;
 
-      /*!
+      /**
 	@brief Load balance fluid realm or not
       */
       bool m_loadBalanceFluid;
 
-      /*!
-	@brief Plot conductivity or not
+      /**
+	@brief Plot conductivity or not.
       */
       bool m_plotConductivity;
 
-      /*!
-	@brief Plot conductivity or not
+      /**
+	@brief Plot current density or not.
       */
       bool m_plotCurrentDensity;
 
-      /*!
+      /**
 	@brief Plot number of particles per patch or not
       */
       bool m_plotParticlesPerPatch;
 
-      /*!
+      /**
 	@brief Target number of particles per cell when squishing ItoParticle's into superparticles
       */
       Vector<int> m_particlesPerCell;
 
-      /*!
+      /**
 	@brief How often to merge superparticles
 	@details If <= 1 we merge every time step. 
       */
       int m_mergeInterval;
 
-      /*!
+      /**
         @brief Storage for the maximum field strength that was computed
       */
       Real m_maxReducedField;
 
-      /*!
+      /**
 	@brief Previous time step
       */
       Real m_prevDt;
 
-      /*!
+      /**
 	@brief Maximum permissible time step growth
       */
       Real m_maxGrowthDt;
 
-      /*!
+      /**
 	@brief Maximum permissible time step shrinkage
       */
       Real m_maxShrinkDt;
 
-      /*!
+      /**
 	@brief The "background" load per cell when using particle load balancing.
 	@note This is used when computing the loads per patch on the particle realm such that the total load 
 	is m_loadPerCell * numGridPoints + numParticles. 
       */
       Real m_loadPerCell;
 
-      /*!
+      /**
 	@brief Accepted tolerance (relative to dx) for EB intersection
       */
       Real m_toleranceEB;
 
-      /*!
+      /**
 	@brief Minimum CFL-like time step for particle advection
       */
       Real m_minParticleAdvectionCFL;
 
-      /*!
+      /**
 	@brief Maximum CFL-like time step for particle advection
       */
       Real m_maxParticleAdvectionCFL;
 
-      /*!
-	@brief Minium CFL-like time step for particle diffusion
+      /**
+	@brief Minimum CFL-like time step for particle diffusion.
       */
       Real m_minParticleDiffusionCFL;
 
-      /*!
+      /**
 	@brief Maximum CFL-like time step for particle diffusion
       */
       Real m_maxParticleDiffusionCFL;
 
-      /*!
+      /**
 	@brief Maximum CFL-like time step for particle advection-diffusion
       */
       Real m_minParticleAdvectionDiffusionCFL;
 
-      /*!
+      /**
 	@brief Maximum CFL-like time step for particle advection-diffusion
       */
       Real m_maxParticleAdvectionDiffusionCFL;
 
-      /*!
+      /**
 	@brief CFL-like time step for fluid advection-diffusion
       */
       Real m_fluidAdvectionDiffusionCFL;
 
-      /*!
+      /**
 	@brief Factor proportional to the dielectric relaxation time dtRelax = eps0/sigma
 	@details Used for restricting dt < m_relaxTimeFactor * eps0/sigma
       */
       Real m_relaxTimeFactor;
 
-      /*!
+      /**
 	@brief Minimum permitted time step
       */
       Real m_minDt;
 
-      /*!
+      /**
 	@brief Maximum permitted time step
       */
       Real m_maxDt;
 
-      /*!
+      /**
 	@brief The particle advective time step
       */
       Real m_particleAdvectionDt;
 
-      /*!
+      /**
 	@brief The particle diffusive time step
       */
       Real m_particleDiffusionDt;
 
-      /*!
+      /**
 	@brief The advection-diffusion time step
       */
       Real m_particleAdvectionDiffusionDt;
 
-      /*!
+      /**
 	@brief The advection-diffusion time step for the CDR equations
       */
       Real m_fluidAdvectionDiffusionDt;
 
-      /*!
+      /**
 	@brief The relaxation time eps0/sigma
       */
       Real m_relaxationTime;
 
-      /*!
+      /**
 	@brief The physics-based time step
       */
       Real m_physicsDt;
 
-      /*!
-	@brief Relative factor for controlling
+      /**
+	@brief Scaling factor applied to the physics-based time step estimate.
       */
       Real m_physicsDtFactor;
 
-      /*!
+      /**
 	@brief For holding the number of computational particles per cell when load balancing
       */
       Vector<EBAMRCellData> m_loadBalancePPC;
 
-      /*!
+      /**
 	@brief For holding the mobilities for the CDR species
 	@note Defined on the fluid realm. 
       */
       Vector<EBAMRCellData> m_cdrMobilities;
 
-      /*!
+      /**
 	@brief For holding the gradient of all CDR species densities
 	@note Defined on the fluid realm
       */
       Vector<EBAMRCellData> m_fluidGradPhiCDR;
 
-      /*!
+      /**
 	@brief For holding the gradient of all Ito species densities
 	@note Defined on the fluid realm
       */
       Vector<EBAMRCellData> m_fluidGradPhiIto;
 
-      /*!
+      /**
 	@brief For holding the Ito species densities on the fluid realm
       */
       Vector<EBAMRCellData> m_fluidPhiIto;
 
-      /*!
+      /**
 	@brief Photoionization products to be put in the CDR equations
 	@note This is agglomerated with Ito particle photoionization functionality, and is
 	therefore defined on the particle realm. 
       */
       mutable Vector<ParticleContainer<PointParticle>> m_cdrPhotoiProducts;
 
-      /*!
+      /**
 	@brief Solver indices used when load-balancing the particle solvers.
       */
       Vector<int> m_loadBalanceIndices;
 
-      /*!
+      /**
 	@brief Storage for current density.
 	@note Defined over the fluid realm with SpaceDim components. 
       */
       EBAMRCellData m_currentDensity;
 
-      /*!
+      /**
 	@brief Storage for physics plot variables
       */
       EBAMRCellData m_physicsPlotVariables;
 
-      /*!
+      /**
 	@brief Storage for the neutral density.
       */
       EBAMRCellData m_neutralDensity;
 
-      /*!
+      /**
 	@brief Cell-centered conductivity.
 	@note Defined on the fluid realm with 1 component
       */
       EBAMRCellData m_conductivityCell;
 
-      /*!
+      /**
 	@brief Face-centered conductivity.
 	@note Defined on the fluid realm with 1 component
       */
       EBAMRFluxData m_conductivityFace;
 
-      /*!
+      /**
 	@brief EB-centered conductivity.
 	@note Defined on the fluid realm with 1 component
       */
       EBAMRIVData m_conductivityEB;
 
-      /*!
+      /**
 	@brief For holding the number of physical particles per cell for all Ito species.
 	@note Defined on the particle realm with components = number of Ito species
       */
       EBAMRCellData m_particleItoPPC;
 
-      /*!
+      /**
 	@brief For holding the number of generated photons per cell.
 	@note Defined on the particle realm with components = number of photon species
       */
       EBAMRCellData m_particleYPC;
 
-      /*!
+      /**
 	@brief For holding the mean particle energy
 	@note Defined on the particle realm with components = number of plasma species
       */
       EBAMRCellData m_particleEPS;
 
-      /*!
+      /**
 	@brief For holding the previous number of particles per cell for all species
 	@note Defined on the particle realm with components = number of plasma species
       */
       EBAMRCellData m_particleOldItoPPC;
 
-      /*!
+      /**
 	@brief For holding the number of physical particles per cell for all CDR species.
 	@note Defined on the fluid realm with components = number of CDr species
       */
       EBAMRCellData m_fluidCdrPPC;
 
-      /*!
+      /**
 	@brief For holding the previous number of physical particles per cell for all CDR species.
 	@note Defined on the fluid realm with components = number of CDR species
       */
       EBAMRCellData m_fluidOldCdrPPC;
 
-      /*!
+      /**
 	@brief For holding the number of particles per cell for all species.
 	@note Defined on the fluid realm with components = number of plasma species
       */
       EBAMRCellData m_fluidPPC;
 
-      /*!
+      /**
 	@brief For holding the number of generated photons per cell.
 	@note Defined on the fluid realm with components = number of photon species
       */
       EBAMRCellData m_fluidYPC;
 
-      /*!
+      /**
 	@brief Storage for holding the plasma phase electric field on the fluid realm
       */
       EBAMRCellData m_electricFieldFluid;
 
-      /*!
+      /**
 	@brief Storage for holding the plasma phase electric field on the particle realm
       */
       EBAMRCellData m_electricFieldParticle;
 
-      /*!
+      /**
 	@brief Storage for the non-critical time step computed by ItoKMCPhysics.
 	@details This is computed using the non-critical reactions assuming eps=1
 	@note Defined on the fluid realm. 	
       */
       EBAMRCellData m_kmcDt;
 
-      /*!
+      /**
 	@brief Storage for holding the energy sources for each species.
 	@note Defined on the particle realm but about to get deprecated when we switch to the new reaction algorithm. 
       */
       Vector<EBAMRCellData> m_energySources;
 
-      /*!
-	@brief Storage for holdnig E*J on the fluid realm. 1 component
+      /**
+	@brief Storage for E·J (Ohmic heating) on the fluid realm. 1 component.
       */
       EBAMRCellData m_EdotJ;
 
-      /*!
+      /**
 	@brief Scratch storage on the fluid realm having 1 component
       */
       mutable EBAMRCellData m_fluidScratch1;
 
-      /*!
+      /**
 	@brief Scratch storage on the fluid realm with SpaceDim components
       */
       mutable EBAMRCellData m_fluidScratchD;
 
-      /*!
+      /**
 	@brief Scratch storage on the particle realm with 1 component
       */
       mutable EBAMRCellData m_particleScratch1;
 
-      /*!
+      /**
 	@brief Scratch storage on the particle realm with SpaceDim components
       */
       mutable EBAMRCellData m_particleScratchD;
 
-      /*!
+      /**
 	@brief Scratch storage for EB-only data on the fluid realm. One component. 
       */
       mutable EBAMRIVData m_fluidScratchEB;
 
-      /*!
+      /**
 	@brief Scratch storage for EB-only data on the particle realm. One component. 
       */
       mutable EBAMRIVData m_particleScratchEB;
 
-      /*!
+      /**
 	@brief Allocate "internal" storage.
       */
       virtual void
       allocateInternals() noexcept;
 
-      /*!
+      /**
 	@brief Set up the Ito particle solvers.
       */
       virtual void
       setupIto() noexcept;
 
-      /*!
+      /**
 	@brief Set up the CDR solvers.
       */
       virtual void
       setupCdr() noexcept;
 
-      /*!
+      /**
 	@brief Set up the radiative transfer solver
       */
       virtual void
       setupRadiativeTransfer() noexcept;
 
-      /*!
+      /**
 	@brief Set up the electrostatic field solver
       */
       virtual void
       setupPoisson() noexcept;
 
-      /*!
+      /**
 	@brief Set up the surface charge solver
       */
       virtual void
       setupSigma() noexcept;
 
-      /*!
+      /**
 	@brief Intersect a subset of the particles with the domain and embedded boundary. 
 	@details This calls the other version, intersecting the Ito bulk particles with the EB and placing the collided particles
 	in the appropriate particle containers (ItoSolver::WhichContainer::EB, for example). 
 	@param[in] a_speciesSubset       Subset of particles to intersect. Can be charged, mobile, diffusive, etc. 
-	@param[in] a_intersectionAlg     Representation of the EB -- basically an algorithmic selection. 
 	@param[in] a_delete              Delete original particles. If this is left to false, the particles are copied into the other containers. 
 	@param[in] a_nonDeletionModifier Optional input argument for letting the user manipulate particles that were intersected but not deleted
       */
@@ -846,13 +853,12 @@ namespace Physics {
           return;
         }) noexcept;
 
-      /*!
+      /**
 	@brief Intersect a subset of the particles with the domain and embedded boundary. 
 	@param[in] a_speciesSubset       Subset of particles to intersect. Can be charged, mobile, diffusive, etc. 
 	@param[in] a_containerBulk       ItoSolver container for "bulk" particles, i.e. particles that will be intersected. 
 	@param[in] a_containerEB         ItoSolver container for EB particles. 
 	@param[in] a_containerDomain     ItoSolver container for domain particles. 
-	@param[in] a_intersectionAlg     EB intersection algorithm
 	@param[in] a_delete              Delete original particles. If this is left to false, the particles are copied into the other containers. 
 	@param[in] a_nonDeletionModifier Optional input argument for letting the user manipulate particles that were intersected but not deleted
       */
@@ -867,25 +873,25 @@ namespace Physics {
           return;
         }) noexcept;
 
-      /*!
+      /**
 	@brief Remove covered particles (i.e., particles inside the EB)
-	@param[in] a_speciesSubset   Subset of particles to intersect. Can be charged, mobile, diffusive, etc. 
 	@param[in] a_representation  Representation of the EB.
 	@param[in] a_tolerance       Tolerance for removal. Removes up to distance a_tolerance from the EB.
 	@note a_representation is basically an algorithmic selection that propagates into ItoSolver
+        @param[in] a_which Which
       */
       virtual void
       removeCoveredParticles(const SpeciesSubset    a_which,
                              const EBRepresentation a_representation,
                              const Real             a_tolerance) noexcept;
 
-      /*!
+      /**
 	@brief Remove covered particles (i.e., particles inside the EB)
-	@param[in] a_speciesSubset   Subset of particles to intersect. Can be charged, mobile, diffusive, etc. 
 	@param[in] a_container       Which of the containers in ItoSolver to remove from. 
 	@param[in] a_representation  Representation of the EB.
 	@param[in] a_tolerance       Tolerance for removal. Removes up to distance a_tolerance from the EB.
 	@note a_representation is basically an algorithmic selection that propagates into ItoSolver
+        @param[in] a_which Which
       */
       virtual void
       removeCoveredParticles(const SpeciesSubset             a_which,
@@ -893,7 +899,7 @@ namespace Physics {
                              const EBRepresentation          a_representation,
                              const Real                      a_tolerance) noexcept;
 
-      /*!
+      /**
 	@brief Transfer covered particles (i.e., particles inside the EB) from the ItoSolver bulk container to EB container. 
 	@param[in] a_speciesSubset   Subset of particles to intersect. Can be charged, mobile, diffusive, etc. 
 	@param[in] a_representation  Representation of the EB.
@@ -905,7 +911,7 @@ namespace Physics {
                                const EBRepresentation a_representation,
                                const Real             a_tolerance) noexcept;
 
-      /*!
+      /**
 	@brief Transfer covered particles (i.e., particles inside the EB) from the ItoSolver bulk container to EB container. 
 	@param[in] a_speciesSubset   Subset of particles to intersect. Can be charged, mobile, diffusive, etc. 
 	@param[in] a_containerFrom   Particle container (in ItoSolver) to transfer from
@@ -921,15 +927,15 @@ namespace Physics {
                                const EBRepresentation          a_representation,
                                const Real                      a_tolerance) noexcept;
 
-      /*!
+      /**
 	@brief Write data to output. Convenience function. 
-	@param[inout] a_output Output data holder.
-	@param[inout] a_icomp  Starting component where this solver begins writing the output. 
+	@param[in,out] a_output Output data holder.
 	@param[in]    a_data   Data to write. 
 	@param[in]    a_outputRealm Realm where a_output belogns
 	@param[in]    a_level  Grid level
 	@param[in]    a_interpToCentroids If true, a_data will be interpolated to cell centroids before writing to a_output. 
 	@param[in]    a_interpGhost If true, interpolate ghost cells
+        @param[in] a_comp Comp
       */
       virtual void
       writeData(LevelData<EBCellFAB>& a_output,
@@ -940,10 +946,10 @@ namespace Physics {
                 const bool            a_interpToCentroids,
                 const bool            a_interpGhost) const noexcept;
 
-      /*!
+      /**
 	@brief Write number of particles per patch to output holder. 
-	@param[inout] a_output Output data holder.
-	@param[inout] a_icomp  Starting component in a_output to begin at. 
+	@param[in,out] a_output Output data holder.
+	@param[in,out] a_icomp  Starting component in a_output to begin at. 
 	@param[in]    a_outputRealm Realm where a_output belogns
 	@param[in]    a_level  Grid level
       */
@@ -953,12 +959,12 @@ namespace Physics {
                                      const std::string     a_outputRealm,
                                      const int             a_level) const noexcept;
 
-      /*!
+      /**
 	@brief Get maximum density of the Ito species (only for charged species)
-	@param[inout] a_maxDensity Maximum mesh density
-	@param[inout] a_minDensity Minium mesh density
-	@param[inout] a_maxSolver  Solver with highest density
-	@param[inout] a_minSolver  Solver with lowest density
+	@param[in,out] a_maxDensity Maximum mesh density
+	@param[in,out] a_minDensity Minimum mesh density
+	@param[in,out] a_maxSolver  Solver with highest density
+	@param[in,out] a_minSolver  Solver with lowest density
       */
       virtual void
       getMaxMinRelativeItoDensity(Real&        a_maxDensity,
@@ -966,12 +972,12 @@ namespace Physics {
                                   std::string& a_maxSolver,
                                   std::string& a_minSolver) const noexcept;
 
-      /*!
+      /**
 	@brief Get maximum density of the CDR species (only for charged species)
-	@param[inout] a_maxDensity Maximum mesh density
-	@param[inout] a_minDensity Minium mesh density
-	@param[inout] a_maxSolver  Solver with highest density
-	@param[inout] a_minSolver  Solver with lowest density
+	@param[in,out] a_maxDensity Maximum mesh density
+	@param[in,out] a_minDensity Minimum mesh density
+	@param[in,out] a_maxSolver  Solver with highest density
+	@param[in,out] a_minSolver  Solver with lowest density
       */
       virtual void
       getMaxMinRelativeCDRDensity(Real&        a_maxDensity,
@@ -979,9 +985,9 @@ namespace Physics {
                                   std::string& a_maxSolver,
                                   std::string& a_minSolver) const noexcept;
 
-      /*!
+      /**
 	@brief Compute some particle statistics
-	@param[out] a_avgParticles Average numer of particles
+	@param[out] a_avgParticles Average number of particles
 	@param[out] a_sigma        Particle standard deviation (across MPI ranks)
 	@param[out] a_minParticles Minimum number of particles
 	@param[out] a_maxParticles Maximum number of particles
@@ -996,7 +1002,7 @@ namespace Physics {
                             int&  a_minRank,
                             int&  a_maxRank);
 
-      /*!
+      /**
 	@brief Routine called by loadBalanceBoxes and used for particle-based load balancing.
 	@param[out] a_procs       MPI ranks owning the various grid boxes. 
 	@param[out] a_boxes       Grid boxes on every level (obtain them with a_grids[lvl].boxArray())
@@ -1013,7 +1019,7 @@ namespace Physics {
                                const int                        a_lmin,
                                const int                        a_finestLevel) noexcept;
 
-      /*!
+      /**
 	@brief Routine called by loadBalanceBoxes and used for particle-based load balancing.
 	@param[out] a_procs       MPI ranks owning the various grid boxes. 
 	@param[out] a_boxes       Grid boxes on every level (obtain them with a_grids[lvl].boxArray())
@@ -1030,35 +1036,37 @@ namespace Physics {
                             const int                        a_lmin,
                             const int                        a_finestLevel) noexcept;
 
-      /*!
+      /**
 	@brief Get the solvers used for load balancing
 	@details This depends on m_loadBalanceIndex -- if it's < 0 we use ALL plasma species for load balancing.
+        @return Load balance solvers
       */
       virtual Vector<RefCountedPtr<ItoSolver>>
       getLoadBalanceSolvers() const noexcept;
 
-      /*!
+      /**
 	@brief Compute the neutral density on the mesh.
 	@details This will populate m_neutralDensity with a density given by the physics interface
       */
       virtual void
       fillNeutralDensity() noexcept;
 
-      /*!
+      /**
 	@brief Compute the maximum electric field (norm)
 	@param[in] a_phase Phase where we compute the field. 
+        @return Computed max reduced electric field
       */
       virtual Real
       computeMaxReducedElectricField(const phase::which_phase a_phase) const noexcept;
 
-      /*!
+      /**
 	@brief Compute the space charge. Calls the other version. 
 	@note This runs through the ItoSolver and CdrSolver densities -- user should remember to update these before calling this routine. 
       */
       virtual void
       computeSpaceChargeDensity() noexcept;
 
-      /*!
+      /**
 	@brief Compute the space charge density.
 	@param[out] a_rho          Space charge density
 	@param[in]  a_itoDensities List of Ito solver species densities
@@ -1069,7 +1077,7 @@ namespace Physics {
                                 const Vector<EBAMRCellData*>& a_itoDensities,
                                 const Vector<EBAMRCellData*>& a_cdrDensities) noexcept;
 
-      /*!
+      /**
 	@brief Compute the cell-centered conductiivty
 	@param[out] a_conductivity Cell-centered conductivity
 	@note User should have updated the mobilities before calling this routine.
@@ -1077,7 +1085,7 @@ namespace Physics {
       virtual void
       computeConductivityCell(EBAMRCellData& a_conductivity) noexcept;
 
-      /*!
+      /**
 	@brief Compute the cell-centered conductiivty
 	@param[out] a_conductivity Cell-centered conductivity
 	@param[in]  a_particles    Ito particles.
@@ -1087,7 +1095,7 @@ namespace Physics {
       computeConductivityCell(EBAMRCellData&                                 a_conductivity,
                               const Vector<ParticleContainer<ItoParticle>*>& a_particles) noexcept;
 
-      /*!
+      /**
 	@brief Compute grad(phi) and phi for both CDR and Ito species and put the result on the fluid realm. 
 	@details This will compute the gradients using the results in the solvers. The user should make sure he/she deposits
 	the Ito particles before calling this routine. The results are put in m_fluidGradPhiCDR and and m_fluidGradPhiito
@@ -1095,20 +1103,22 @@ namespace Physics {
       virtual void
       computeDensityGradients() noexcept;
 
-      /*!
+      /**
 	@brief Compute the current density. 
 	@note This calls computeConductivityCell and uses m_electricFieldFluid. Make sure they're updated.
+        @param[in,out] a_J Description
       */
       virtual void
       computeCurrentDensity(EBAMRCellData& a_J) noexcept;
 
-      /*!
+      /**
 	@brief Compute the dielectric relaxation time
+        @return Computed relaxation time
       */
       virtual Real
       computeRelaxationTime() noexcept;
 
-      /*!
+      /**
 	@brief Solve the electrostatic problem
 	@details This calls the other version with all lhs/rhs taken from the field solver. Space charge density is computed
 	in this routine. 
@@ -1117,14 +1127,15 @@ namespace Physics {
       virtual bool
       solvePoisson() noexcept;
 
-      /*!
+      /**
 	@brief Deposit a subset of the ItoSolver particles on the mesh
 	@note Calls the other version with ItoSolver::WhichContainer::Bulk
+        @param[in] a_speciesSubset Description
       */
       virtual void
       depositParticles(const SpeciesSubset a_speciesSubset) noexcept;
 
-      /*!
+      /**
 	@brief Deposit a subset of the ItoSolver particles on the mesh
 	@param[in] a_speciesSubset Subset of species to deposit
 	@param[in] a_container     Which container in ItoSolver to deposit. 
@@ -1132,7 +1143,7 @@ namespace Physics {
       virtual void
       depositParticles(const SpeciesSubset a_speciesSubset, const ItoSolver::WhichContainer a_container) noexcept;
 
-      /*!
+      /**
 	@brief Remap a subset of ItoSolver particles
 	@param[in] a_speciesSubset Subset of species to remap
 	@note Calls the other version with ItoSolver::WhichContainer::Bulk
@@ -1140,7 +1151,7 @@ namespace Physics {
       virtual void
       remapParticles(const SpeciesSubset a_speciesSubset) noexcept;
 
-      /*!
+      /**
 	@brief Remap a subset of ItoSolver particles
 	@param[in] a_speciesSubset Subset of species to remap
 	@param[in] a_container     Which container in ItoSolver to remap.       
@@ -1148,34 +1159,34 @@ namespace Physics {
       virtual void
       remapParticles(const SpeciesSubset a_speciesSubset, const ItoSolver::WhichContainer a_container) noexcept;
 
-      /*!
+      /**
 	@brief Compute ItoSolver velocities.
 	@details This will compute the mobilities and then interpolate mu*E to particle positions.  
       */
       virtual void
       computeDriftVelocities() noexcept;
 
-      /*!
+      /**
 	@brief Set the Ito velocity functions. This is sgn(charge) * E
 	@note This should be set before ItoSolver computes velocities. 
       */
       virtual void
       setItoVelocityFunctions() noexcept;
 
-      /*!
+      /**
 	@brief Set the Cdr velocities to be sgn(charge) * E. 
 	@details To set the final drift velocity, mobilities should be computed and multiplied in with the drift velocities. 
       */
       virtual void
       setCdrVelocityFunctions() noexcept;
 
-      /*!
+      /**
 	@brief Multiply CDR solver velocities by mobilities
       */
       virtual void
       multiplyCdrVelocitiesByMobilities() noexcept;
 
-      /*!
+      /**
 	@brief Compute mesh-based mobilities for LFA coupling
 	@details This updates the mobilities in the Ito particle solvers AND m_cdrMobilities (not owned by solvers)
 	@note Calls the other version with mesh mobilities taken from ItoSolver solvers. 
@@ -1183,7 +1194,7 @@ namespace Physics {
       virtual void
       computeMobilities() noexcept;
 
-      /*!
+      /**
 	@brief Compute mesh-based mobilities for LFA coupling
 	@param[out] a_itoMobilities  Mesh-based mobilities for Ito solvers. Must be defined on the particle realm. 
 	@param[out] a_cdrMobilities  Mesh-based mobilities for CDR solvers. Must be defined on the fluid realm. 
@@ -1196,13 +1207,13 @@ namespace Physics {
                         const EBAMRCellData&    a_electricField,
                         const Real              a_time) noexcept;
 
-      /*!
+      /**
 	@brief Level-routine when computing mesh-based mobilities for LFA coupling
 	@param[out] a_itoMobilities  Mesh-based mobilities for Ito solvers. Must be defined on the particle realm. 
 	@param[out] a_cdrMobilities  Mesh-based mobilities for CDR solvers. Must be defined on the fluid realm. 
-	@param[in]  a_electricField  Electric field. Must be defined on the fluid realm. 
 	@param[in]  a_level          Grid level
 	@param[in]  a_time           Time
+        @param[in] a_E E
       */
       virtual void
       computeMobilities(Vector<LevelData<EBCellFAB>*>& a_itoMobilities,
@@ -1211,7 +1222,7 @@ namespace Physics {
                         const int                      a_level,
                         const Real                     a_time) noexcept;
 
-      /*!
+      /**
 	@brief Patch-routine when computing mesh-based mobilities for LFA coupling
 	@param[out] a_itoMobilities  Mesh-based mobilities for Ito solvers. Must be defined on the particle realm. 
 	@param[out] a_cdrMobilities  Mesh-based mobilities for CDR solvers. Must be defined on the fluid realm. 
@@ -1230,14 +1241,14 @@ namespace Physics {
                         const Box           a_cellBox,
                         const Real          a_time) noexcept;
 
-      /*!
+      /**
 	@brief Compute mesh-based diffusion coefficients for LFA coupling
 	@note Calls the other version with diffusion coefficients taken from the solvers.
       */
       virtual void
       computeDiffusionCoefficients() noexcept;
 
-      /*!
+      /**
 	@brief Compute mesh-based diffusion coefficients for LFA coupling
 	@param[out] a_itoDiffusionCoefficients Mesh-based diffusion coefficients for Ito solvers. Must be defined on the particle realm. 
 	@param[out] a_cdrDiffusionCoefficients Mesh-based diffusion coefficients for CDR solvers. Must be defined on the fluid realm. 
@@ -1250,7 +1261,7 @@ namespace Physics {
                                    const EBAMRCellData&    a_electricField,
                                    const Real              a_time) noexcept;
 
-      /*!
+      /**
 	@brief Level-routine when computing mesh-based mobilities for LFA coupling
 	@param[out] a_itoDiffusionCoefficients Mesh-based diffusion coefficients for Ito solvers. Must be defined on the fluid realm. 
 	@param[out] a_cdrDiffusionCoefficients Mesh-based diffusion coefficients for CDR solvers. Must be defined on the fluid realm. 
@@ -1265,17 +1276,15 @@ namespace Physics {
                                    const int                      a_level,
                                    const Real                     a_time) noexcept;
 
-      /*!
+      /**
 	@brief Patch-routine when computing mesh-based diffusion coefficients in the LFA coupling
 	@param[out] a_itoDiffusionCoefficients Mesh-based diffusion coefficients for Ito solvers. Must be defined on the fluid realm. 
 	@param[out] a_cdrDiffusionCoefficients Mesh-based diffusion coefficients for CDR solvers. Must be defined on the fluid realm. 
-	@param[in]  a_electricField            Electric field. Must be defined on the fluid realm. 
 	@param[in]  a_level                    Grid level
 	@param[in]  a_time                     Time
-	@param[in]  a_level                    Grid level
 	@param[in]  a_din                      Grid index
-	@param[in]  a_cellBox                  Computation box
-	@param[in]  a_time                     Time      
+        @param[in] a_E E
+        @param[in] a_box Box
       */
       virtual void
       computeDiffusionCoefficients(Vector<EBCellFAB*>& a_itoDiffusionCoefficients,
@@ -1286,20 +1295,20 @@ namespace Physics {
                                    const Box           a_box,
                                    const Real          a_time) noexcept;
 
-      /*!
+      /**
 	@brief Average cell-centered diffusion coefficient to faces
       */
       virtual void
       averageDiffusionCoefficientsCellToFace() noexcept;
 
-      /*!
+      /**
 	@brief Get the physical number of particles per cell.
 	@param[out] a_ppc Number of physical particles per cell. Must be defined over the fluid realm.
        */
       virtual void
       getPhysicalParticlesPerCell(EBAMRCellData& a_ppc) const noexcept;
 
-      /*!
+      /**
 	@brief Compute the number of reactive particles per cell
 	@param[out] a_ppc Number of physical particles per grid cell for all species
 	@note a_ppc Must be defined over the particle realm and have the same number of components as the number of plasma species involved in the simulation. 
@@ -1307,7 +1316,7 @@ namespace Physics {
       virtual void
       computeReactiveItoParticlesPerCell(EBAMRCellData& a_ppc) noexcept;
 
-      /*!
+      /**
 	@brief Compute the number of reactive particles per cell
 	@param[out] a_ppc  Number of physical particles per grid cell for all species
 	@param[in]  a_level Grid level
@@ -1316,7 +1325,7 @@ namespace Physics {
       virtual void
       computeReactiveItoParticlesPerCell(LevelData<EBCellFAB>& a_ppc, const int a_level) noexcept;
 
-      /*!
+      /**
 	@brief Compute the number of reactive particles per cell
 	@param[out] a_ppc     Number of physical particles per grid cell for all species
 	@param[in]  a_level   Grid level
@@ -1332,7 +1341,7 @@ namespace Physics {
                                          const Box       a_box,
                                          const EBISBox&  a_ebisbox) noexcept;
 
-      /*!
+      /**
 	@brief Compute the number of reactive particles per cell for the CDR solvers.
 	@details This truncates the number of particles in the cell. 
 	@param[out] a_ppc Number of physical particles per grid cell for all CDR species
@@ -1341,7 +1350,7 @@ namespace Physics {
       virtual void
       computeReactiveCdrParticlesPerCell(EBAMRCellData& a_ppc) noexcept;
 
-      /*!
+      /**
 	@brief Compute the number of reactive particles per cell for the CDR solvers.
 	@param[out] a_ppc  Number of physical particles per grid cell for all CDR species
 	@param[in]  a_level Grid level
@@ -1350,7 +1359,7 @@ namespace Physics {
       virtual void
       computeReactiveCdrParticlesPerCell(LevelData<EBCellFAB>& a_ppc, const int a_level) noexcept;
 
-      /*!
+      /**
 	@brief Compute the number of reactive particles per cell for the CDR solvers.
 	@param[out] a_ppc     Number of physical particles per grid cell for all CDR species
 	@param[in]  a_level   Grid level
@@ -1366,7 +1375,7 @@ namespace Physics {
                                          const Box       a_box,
                                          const EBISBox&  a_ebisbox) noexcept;
 
-      /*!
+      /**
 	@brief Compute the mean particle energy in all grid cells.
 	@param[out] a_meanEnergies Mean particle energies = sum(w * E)/sum(w) for all species. 
 	@note a_meanEnergies must be defined over the particle realm and have the same number of components as the number of palsma species involved in the simulation. 
@@ -1374,7 +1383,7 @@ namespace Physics {
       virtual void
       computeReactiveMeanEnergiesPerCell(EBAMRCellData& a_meanEnergies) noexcept;
 
-      /*!
+      /**
 	@brief Compute the mean particle energy in all grid cells. Level version. 
 	@param[out] a_meanEnergies Mean particle energies = sum(w * E)/sum(w) for all species. 
 	@param[in]  a_level        Grid level
@@ -1383,7 +1392,7 @@ namespace Physics {
       virtual void
       computeReactiveMeanEnergiesPerCell(LevelData<EBCellFAB>& a_meanEnergies, const int a_level) noexcept;
 
-      /*!
+      /**
 	@brief Compute the mean particle energy in all grid cells. Patch version. 
 	@param[out] a_meanEnergies Number of physical particles per grid cell for all species
 	@param[in]  a_level        Grid level
@@ -1399,7 +1408,7 @@ namespace Physics {
                                          const Box       a_box,
                                          const EBISBox&  a_ebisbox) noexcept;
 
-      /*!
+      /**
 	@brief Chemistry advance over time a_dt
 	@param[in] a_dt Time step
 	@note This will call the other version. The kernel will only run over valid grid cells (not covered by a finer grid. 
@@ -1407,19 +1416,19 @@ namespace Physics {
       virtual void
       advanceReactionNetwork(const Real a_dt) noexcept;
 
-      /*!
+      /**
 	@brief Chemistry advance over time a_dt. AMR version. 
-	@param[in] a_electricField Electric field. Must be defined on the fluid realm. 
 	@param[in] a_dt            Time step
 	@note This will call the level versions AND reconcileParticles. The kernel will only run over valid grid cells (not covered by a finer grid. 
+        @param[in] a_E E
       */
       virtual void
       advanceReactionNetwork(const EBAMRCellData& a_E, const Real a_dt) noexcept;
 
-      /*!
+      /**
 	@brief Chemistry advance over time a_dt. Level version. 
-	@param[inout] a_particlesPerCell      Number of particles per cell for each plasma species
-	@param[inout] a_newPhotonsPerCell     Number of physical photons to be generated for each photon species
+	@param[in,out] a_particlesPerCell      Number of particles per cell for each plasma species
+	@param[in,out] a_newPhotonsPerCell     Number of physical photons to be generated for each photon species
 	@param[in]    a_electricField         Electric field. 
 	@param[in]    a_level                 Grid level
 	@param[in]    a_dt                    Time increment
@@ -1433,10 +1442,10 @@ namespace Physics {
                              const int                   a_level,
                              const Real                  a_dt) const noexcept;
 
-      /*!
+      /**
 	@brief Chemistry advance over time a_dt. Patch version. 
-	@param[inout] a_particlesPerCell      Number of particles per cell for each plasma species
-	@param[inout] a_newPhotonsPerCell     Number of physical photons to be generated for each photon species
+	@param[in,out] a_particlesPerCell      Number of particles per cell for each plasma species
+	@param[in,out] a_newPhotonsPerCell     Number of physical photons to be generated for each photon species
 	@param[in]    a_electricField         Electric field. 
 	@param[in]    a_level                 Grid level
 	@param[in]    a_din                   Grid index.
@@ -1456,11 +1465,11 @@ namespace Physics {
                              const Real       a_dx,
                              const Real       a_dt) const noexcept;
 
-      /*!
+      /**
 	@brief Reconcile particles. At the bottom, this will call the physics interface for particle reconciliation
 	@param[in] a_newParticlesPerCell  Particles per cell after the chemistry advance. 
 	@param[in] a_oldParticlesPerCell  Particles per cell before the chemistry advance. 
-	@param[in] a_newPhotonsPerCell    Newly generated photons per cell after the chemistry avance.
+	@param[in] a_newPhotonsPerCell    Newly generated photons per cell after the chemistry advance.
 	@param[in] a_electricField        Electric field
 	@note All data should be defined on the particle realm since this is where the particle reconciliation takes place. 
       */
@@ -1470,11 +1479,11 @@ namespace Physics {
                          const EBAMRCellData& a_newPhotonsPerCell,
                          const EBAMRCellData& a_electricField) const noexcept;
 
-      /*!
+      /**
 	@brief Reconcile particles. At the bottom, this will call the physics interface for particle reconciliation
 	@param[in] a_newParticlesPerCell  Particles per cell after the chemistry advance. 
 	@param[in] a_oldParticlesPerCell  Particles per cell before the chemistry advance. 
-	@param[in] a_newPhotonsPerCell    Newly generated photons per cell after the chemistry avance.
+	@param[in] a_newPhotonsPerCell    Newly generated photons per cell after the chemistry advance.
 	@param[in] a_electricField        Electric field	
 	@param[in] a_level                Grid level
 	@note All data should be defined on the particle realm since this is where the particle reconciliation takes place. 
@@ -1486,11 +1495,11 @@ namespace Physics {
                          const LevelData<EBCellFAB>& a_electricField,
                          const int                   a_level) const noexcept;
 
-      /*!
+      /**
 	@brief Reconcile particles. At the bottom, this will call the physics interface for particle reconciliation
 	@param[in] a_newParticlesPerCell  Particles per cell after the chemistry advance. 
 	@param[in] a_oldParticlesPerCell  Particles per cell before the chemistry advance. 
-	@param[in] a_newPhotonsPerCell    Newly generated photons per cell after the chemistry avance.
+	@param[in] a_newPhotonsPerCell    Newly generated photons per cell after the chemistry advance.
 	@param[in] a_electricField        Electric field				 	
 	@param[in] a_level                Grid level
 	@param[in] a_din                  Grid index
@@ -1508,7 +1517,7 @@ namespace Physics {
                          const Box        a_box,
                          const Real       a_dx) const noexcept;
 
-      /*!
+      /**
 	@brief Reconcile the results from photoionization reactions
 	@note This adds particles directly into the ItoSolver particle data holders and into m_cdrPhotoiProducts. 
 	@note This is not used (yet) -- it does a per-patch call to m_physics, which means that its done outside
@@ -1517,7 +1526,7 @@ namespace Physics {
       virtual void
       reconcilePhotoionization() noexcept;
 
-      /*!
+      /**
 	@brief Reconcile the CDR densities after the reaction network. 
 	@details This adds the a_newPPC - a_oldPPC to the densities and sets the source term to (a_newPPC - a_oldPPC)/(vol * dt)
 	@param[in] a_newParticlesPerCell  Particles per cell after the chemistry advance. 
@@ -1529,7 +1538,7 @@ namespace Physics {
                             const EBAMRCellData& a_oldParticlesPerCell,
                             const Real           a_dt) noexcept;
 
-      /*!
+      /**
 	@brief Reconcile the CDR densities after the reaction network. 
 	@details This adds the a_newPPC - a_oldPPC to the densities and sets the source term to (a_newPPC - a_oldPPC)/(vol * dt)
 	@param[in] a_newParticlesPerCell  Particles per cell after the chemistry advance. 
@@ -1543,7 +1552,7 @@ namespace Physics {
                             const int                   a_level,
                             const Real                  a_dt) noexcept;
 
-      /*!
+      /**
 	@brief Reconcile the CDR densities after the reaction network. 
 	@details This adds the a_newPPC - a_oldPPC to the densities and sets the source term to (a_newPPC - a_oldPPC)/(vol * dt)
 	@param[in] a_newParticlesPerCell  Particles per cell after the chemistry advance. 
@@ -1563,13 +1572,13 @@ namespace Physics {
                             const Real       a_dx,
                             const Real       a_dt) noexcept;
 
-      /*!
+      /**
 	@brief Coarsen data for CDR solvers
       */
       virtual void
       coarsenCDRSolvers() noexcept;
 
-      /*!
+      /**
 	@brief Resolve particle injection at EBs.
 	@param[in] a_dt Time step.
 	@note Calls the other version.
@@ -1577,7 +1586,7 @@ namespace Physics {
       virtual void
       fillSecondaryEmissionEB(const Real a_dt) noexcept;
 
-      /*!
+      /**
 	@brief Compute secondary emission at the EB.
 	@details This routine fills the input data holders using physics framework. It does NOT fill solvers.
 	@param[out] a_secondaryParticles   Secondary emitted (gained) particles at the EB
@@ -1599,7 +1608,7 @@ namespace Physics {
                               const EBAMRCellData&                     a_electricField,
                               const Real                               a_dt) noexcept;
 
-      /*!
+      /**
 	@brief Resolve secondary emission at the EB.
 	@param[in] a_dt Time step.
 	@note Calls the other version. 
@@ -1607,7 +1616,7 @@ namespace Physics {
       virtual void
       resolveSecondaryEmissionEB(const Real a_dt) noexcept;
 
-      /*!      
+      /**      
 	@brief Resolve secondary emission at the EB.
 	@details This does three things: 
 	   1) It deposits the primary and second particles on the mesh and update the surface charge density.
@@ -1626,7 +1635,7 @@ namespace Physics {
                                  EBAMRIVData&                             a_surfaceChargeDensity,
                                  const Real                               a_dt) noexcept;
 
-      /*!
+      /**
 	@brief Compute a physics-based maximum time step.
 	@details This routine simply returns the non-critical KMC time step. Note that this time step
 	is the one computed AFTER advanceReactionNetwork has been called. I.e., this routine sets
@@ -1637,7 +1646,7 @@ namespace Physics {
       virtual void
       computePhysicsDt() noexcept;
 
-      /*!
+      /**
         @brief Special routine which performs a dummy KMC advance over a zero time step.
         @details This is only used in order to compute a good physics-based time step before
         the first time step
@@ -1645,59 +1654,63 @@ namespace Physics {
       virtual void
       computeDummyPhysicsDt() noexcept;
 
-      /*!
+      /**
 	@brief Compute total charge
+        @return Computed total charge
       */
       virtual Real
       computeTotalCharge() const noexcept;
 
-      /*!
+      /**
 	@brief Compute positive charge
+        @return Computed qplus
       */
       virtual Real
       computeQplus() const noexcept;
 
-      /*!
+      /**
 	@brief Compute negative charge
+        @return Computed qminu
       */
       virtual Real
       computeQminu() const noexcept;
 
-      /*!
+      /**
 	@brief Compute surface charge
+        @return Computed qsurf
       */
       virtual Real
       computeQsurf() const noexcept;
 
-      /*!
+      /**
 	@brief Photon advancement routine
 	@param[in] a_dt Time step
       */
       virtual void
       advancePhotons(const Real a_dt) noexcept;
 
-      /*!
+      /**
 	@brief Sort photons by cells
 	@param[in] a_which Which container to sort by cell
       */
       virtual void
       sortPhotonsByCell(const McPhoto::WhichContainer a_which) noexcept;
 
-      /*!
+      /**
 	@brief Sort photons by patch
 	@param[in] a_which Which container to sort by patch
       */
       virtual void
       sortPhotonsByPatch(const McPhoto::WhichContainer a_which) noexcept;
 
-      /*!
+      /**
 	@brief Do some post-checkpoint operations for the electrostatic part. 
 	@details This computes the electric field from the checkpointed potential and populates m_electricFieldFluid and m_electricFieldParticle.
       */
       virtual void
       postCheckpointPoisson() noexcept;
 
-      /*!
+      /**
 	@brief Compute the energy source term for the various plasma species
 	@param[in] a_dt Time step during which the particles move. 
 	@note This fills m_EdotJ
@@ -1705,70 +1718,70 @@ namespace Physics {
       virtual void
       computeEdotJSource(const Real a_dt) noexcept;
 
-      /*!
+      /**
 	@brief Fill surface charge solver with initial data taken from the physics interface.
       */
       virtual void
       initialSigma() noexcept;
 
-      /*!
+      /**
 	@brief Parse chattiness
 	@details Sets m_verbosity from input script. 
       */
       virtual void
       parseVerbosity() noexcept;
 
-      /*!
+      /**
 	@brief Parse exit on failure.
       */
       virtual void
       parseExitOnFailure() noexcept;
 
-      /*!
+      /**
 	@brief Parse CDR mass redistribution when assigning reactive products. 
       */
       virtual void
       parseRedistributeCDR() noexcept;
 
-      /*!
+      /**
 	@brief Parse the desired number of particles per cell. 
 	@details Sets m_particlesPerCell from input script. 
       */
       virtual void
       parseSuperParticles() noexcept;
 
-      /*!
+      /**
 	@brief Parse dual or single realm calculations
 	@details Sets m_particleRealm = "ParticleRealm" if 'dual_grid' is true.
       */
       virtual void
       parseDualGrid() noexcept;
 
-      /*!
+      /**
 	@brief Parse load balancing
       */
       virtual void
       parseLoadBalance() noexcept;
 
-      /*!
+      /**
 	@brief Parse time step restrictions
       */
       virtual void
       parseTimeStepRestrictions() noexcept;
 
-      /*!
+      /**
 	@brief Parse parameters related to how we treat particle-EB interaction.
       */
       virtual void
       parseParametersEB() noexcept;
 
-      /*!
+      /**
 	@brief Parse plot variables
       */
       virtual void
       parsePlotVariables() noexcept;
 
-      /*!
+      /**
 	@brief Compute physics plot variables
 	@param[out] a_physicsPlotVars Plot variables from physics implementation
       */

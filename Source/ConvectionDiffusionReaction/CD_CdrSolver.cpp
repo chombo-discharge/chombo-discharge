@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_CdrSolver.cpp
   @brief  Implementation of CD_CdrSolver.H
   @author Robert Marskar
@@ -26,21 +27,16 @@
 constexpr int CdrSolver::m_comp;
 constexpr int CdrSolver::m_nComp;
 
-CdrSolver::CdrSolver()
+CdrSolver::CdrSolver() : m_name("CdrSolver"), m_className("CdrSolver"), m_verbosity(-1), m_regridSlopes(true)
 {
 
   // Default options.
-  m_verbosity    = -1;
-  m_name         = "CdrSolver";
-  m_className    = "CdrSolver";
-  m_regridSlopes = true;
 
   this->setRealm(Realm::Primal);
   this->setDefaultDomainBC(); // Set default domain BCs (wall)
 }
 
-CdrSolver::~CdrSolver()
-{}
+CdrSolver::~CdrSolver() = default;
 
 RefCountedPtr<CdrSpecies>&
 CdrSolver::getSpecies() noexcept
@@ -75,7 +71,7 @@ CdrSolver::setDefaultDomainBC()
   // TLDR: This sets the domain boundary condition to be a wall BC (no incoming/outgoing mass).
 
   // Lambda function for wall bc -- mostly left in place so I can remind myself how to do this.
-  auto zero = [](const RealVect a_position, const Real a_time) -> Real {
+  auto zero = [](const RealVect& /*a_position*/, const Real /*a_time*/) -> Real {
     return 0.0;
   };
 
@@ -101,8 +97,8 @@ CdrSolver::setDomainBcType(const CdrDomainBC::DomainSide a_domainSide, const Cdr
 }
 
 void
-CdrSolver::setDomainBcFunction(const CdrDomainBC::DomainSide   a_domainSide,
-                               const CdrDomainBC::FluxFunction a_fluxFunction)
+CdrSolver::setDomainBcFunction(const CdrDomainBC::DomainSide    a_domainSide,
+                               const CdrDomainBC::FluxFunction& a_fluxFunction)
 {
   CH_TIME("CdrSolver::setDomainBcFunction(CdrDomainBC::DomainSide, CdrDomainBC::FluxFunction)");
   if (m_verbosity > 5) {
@@ -135,7 +131,7 @@ CdrSolver::getRealm() const
 }
 
 void
-CdrSolver::setRealm(const std::string a_realm)
+CdrSolver::setRealm(const std::string& a_realm)
 {
   CH_TIME("CdrSolver::setRealm(std::string)");
   if (m_verbosity > 5) {
@@ -393,7 +389,7 @@ CdrSolver::averageVelocityToFaces(EBAMRFluxData& a_faceVelocity, const EBAMRCell
 }
 
 void
-CdrSolver::preRegrid(const int a_lmin, const int a_oldFinestLevel)
+CdrSolver::preRegrid(const int /*a_lmin*/, const int /*a_oldFinestLevel*/)
 {
   CH_TIME("CdrSolver::preRegrid(int, int)");
   if (m_verbosity > 5) {
@@ -658,7 +654,7 @@ CdrSolver::computeDiffusionFlux(LevelData<EBFluxFAB>& a_flux, const LevelData<EB
         regFlux(iv, m_comp) = inverseDx * regDco(iv, m_comp) * (regPhi(iv, m_comp) - regPhi(iv - BASISV(dir), m_comp));
       };
 
-      // Cut-cell kernel. Basically the same as the above but we need to explicity get vofs on the low/high side (because
+      // Cut-cell kernel. Basically the same as the above but we need to explicitly get vofs on the low/high side (because
       // we may have multi-cells but the above kernel only does single-valued cells).
       auto irregularKernel = [&](const FaceIndex& face) -> void {
         if (!face.isBoundary()) {
@@ -751,7 +747,7 @@ CdrSolver::computeAdvectionDiffusionFlux(EBAMRFluxData&       a_flux,
           faceFlux -= idx * faceDco * (cellPhiHi - cellPhiLo);
         };
 
-        // Cut-cell kernel. Basically the same as the above but we need to explicity get vofs on the low/high side (because
+        // Cut-cell kernel. Basically the same as the above but we need to explicitly get vofs on the low/high side (because
         // we may have multi-cells but the above kernel only does single-valued cells).
         auto irregularKernel = [&](const FaceIndex& face) -> void {
           const VolIndex hiVoF = face.getVoF(Side::Hi);
@@ -937,7 +933,7 @@ CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const int a_level)
 
             const std::vector<FaceIndex> neighborFaces = ebisbox.getFaces(interiorVof, dir, flip(sit())).stdVector();
 
-            if (neighborFaces.size() > 0) {
+            if (!neighborFaces.empty()) {
               Real sumArea = 0.0;
 
               for (const auto& f : neighborFaces) {
@@ -953,7 +949,7 @@ CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const int a_level)
             break;
           }
           case CdrDomainBC::BcType::Solver: {
-            // Don't do anything beacuse the solver will have filled the flux already.
+            // Don't do anything because the solver will have filled the flux already.
 
             break;
           }
@@ -1060,8 +1056,8 @@ CdrSolver::computeDivergenceIrregular(LevelData<EBCellFAB>&             a_divG,
           const Vector<FaceIndex> faces = ebisbox.getFaces(vof, dir, side);
 
           for (int iface = 0; iface < faces.size(); iface++) {
-            const FaceIndex face     = faces[iface];
-            const Real      faceArea = ebisbox.areaFrac(face);
+            const FaceIndex& face     = faces[iface];
+            const Real       faceArea = ebisbox.areaFrac(face);
 
             divG(vof, m_comp) += isign * faceArea * flux(face, m_comp);
           }
@@ -1251,7 +1247,7 @@ CdrSolver::initialDataParticles()
 
   const List<PointParticle>& initialParticles = m_species->getInitialParticles();
 
-  const long long numParticles = (long long)initialParticles.length();
+  const auto numParticles = (long long)initialParticles.length();
 
   if (ParallelOps::sum(numParticles) > 0LL) {
 
@@ -1671,7 +1667,7 @@ CdrSolver::setSource(const Real a_source)
 }
 
 void
-CdrSolver::setSource(const std::function<Real(const RealVect a_position)> a_source)
+CdrSolver::setSource(const std::function<Real(const RealVect a_position)>& a_source)
 {
   CH_TIME("CdrSolver::setSource(std::function<Real(const RealVect a_position)>)");
   if (m_verbosity > 5) {
@@ -1714,7 +1710,7 @@ CdrSolver::setVelocity(const EBAMRCellData& a_velo)
 }
 
 void
-CdrSolver::setVelocity(const RealVect a_velo)
+CdrSolver::setVelocity(const RealVect& a_velo)
 {
   CH_TIME("CdrSolver::setVelocity(RealVect)");
   if (m_verbosity > 5) {
@@ -1821,7 +1817,7 @@ CdrSolver::writePlotFile()
 void
 CdrSolver::writePlotData(LevelData<EBCellFAB>& a_output,
                          int&                  a_icomp,
-                         const std::string     a_outputRealm,
+                         const std::string&    a_outputRealm,
                          const int             a_level) const noexcept
 {
   CH_TIME("CdrSolver::writePlotData");
@@ -1894,7 +1890,7 @@ void
 CdrSolver::writeData(LevelData<EBCellFAB>& a_output,
                      int&                  a_comp,
                      const EBAMRCellData&  a_data,
-                     const std::string     a_outputRealm,
+                     const std::string&    a_outputRealm,
                      const int             a_level,
                      const bool            a_interpToCentroids,
                      const bool            a_interpGhost) const noexcept
@@ -2182,7 +2178,6 @@ CdrSolver::computeAdvectionDiffusionDt()
         const EBCellFAB& velo       = (*m_cellVelocity[lvl])[din];
         const EBFluxFAB& diffCoFace = (*m_faceCenteredDiffusionCoefficient[lvl])[din];
         const EBISBox&   ebisbox    = ebisl[din];
-        const Box        cellBox    = dbl[din];
 
         VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
@@ -2274,9 +2269,8 @@ CdrSolver::computeSourceDt(const Real a_max, const Real a_tolerance)
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-        const EBCellFAB& phi     = (*m_phi[lvl])[din];
-        const EBCellFAB& source  = (*m_source[lvl])[din];
-        const Box        cellBox = dbl[din];
+        const EBCellFAB& phi    = (*m_phi[lvl])[din];
+        const EBCellFAB& source = (*m_source[lvl])[din];
 
         VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
@@ -2753,7 +2747,6 @@ CdrSolver::extrapolateAdvectiveFluxToEB(EBAMRIVData& a_ebFlux) const noexcept
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-        const Box      cellBox = dbl[din];
         const EBISBox& ebisBox = ebisl[din];
 
         BaseIVFAB<Real>&       scalarFlux = (*a_ebFlux[lvl])[din];
@@ -2997,7 +2990,7 @@ CdrSolver::smoothHeavisideFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a
   // It is inspired by a desire to gradually turn off fluctuations as the number of particles in a grid become small, as to avoid negative densities. So, we
   // compute the value of phi on faces with the following rules:
   //
-  //    1. If theres more than one particle in the cells, we take the arithmetic average as usual.
+  //    1. If there's more than one particle in the cells, we take the arithmetic average as usual.
   //    2. If there's between zero and one particle in the cells, we use an averaging function phis = 0.5*(phiLo + phiHi) * loFactor * hiFactor
   //       where loFactor and hiFactor are the number of particles in the grid cell.
 

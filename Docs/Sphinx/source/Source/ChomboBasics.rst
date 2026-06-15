@@ -220,4 +220,4 @@ To implement a new implicit function, the user must inherit from ``BaseIF`` and 
 
    virtual Real BaseIF::value(const RealVect& a_point) const = 0;
 
-The implemention should return a positive value if the point ``a_point`` is inside the object and a negative value otherwise.
+The implementation should return a positive value if the point ``a_point`` is inside the object and a negative value otherwise.

@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2023 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_EBGhostCellInterpolator.cpp
   @brief  Implementation of CD_EBGhostCellInterpolator.H
   @author Robert Marskar
@@ -21,11 +22,9 @@
 #include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
-EBGhostCellInterpolator::EBGhostCellInterpolator() noexcept
+EBGhostCellInterpolator::EBGhostCellInterpolator() noexcept : m_isDefined(false)
 {
   CH_TIME("EBGhostCellInterpolator::EBGhostCellInterpolator(weak)");
-
-  m_isDefined = false;
 }
 
 EBGhostCellInterpolator::EBGhostCellInterpolator(const EBLevelGrid& a_eblgFine,
@@ -83,7 +82,6 @@ EBGhostCellInterpolator::defineGhostRegions() noexcept
   const EBISLayout& ebislCoar = m_eblgCoFi.getEBISL();
 
   const ProblemDomain& domainFine = m_eblgFine.getDomain();
-  const ProblemDomain& domainCoar = m_eblgCoFi.getDomain();
 
   const DataIterator dit = dblFine.dataIterator();
 
@@ -269,7 +267,7 @@ EBGhostCellInterpolator::interpolateRegular(FArrayBox&       a_phiFine,
               const bool hasHi = domainCoar.contains(iv + s);
 
               if (hasLo && hasHi) {
-                slopes(iv, 0) = this->minmod(dwl, dwr);
+                slopes(iv, 0) = ChomboDischarge::EBGhostCellInterpolator::minmod(dwl, dwr);
               }
               else if (hasLo && !hasHi) {
                 slopes(iv, 0) = dwl;
@@ -293,7 +291,7 @@ EBGhostCellInterpolator::interpolateRegular(FArrayBox&       a_phiFine,
               const bool hasHi = domainCoar.contains(iv + s);
 
               if (hasLo && hasHi) {
-                slopes(iv, 0) = this->monotonizedCentral(dwl, dwr);
+                slopes(iv, 0) = ChomboDischarge::EBGhostCellInterpolator::monotonizedCentral(dwl, dwr);
               }
               else if (hasLo && !hasHi) {
                 slopes(iv, 0) = dwl;
@@ -317,7 +315,7 @@ EBGhostCellInterpolator::interpolateRegular(FArrayBox&       a_phiFine,
               const bool hasHi = domainCoar.contains(iv + s);
 
               if (hasLo && hasHi) {
-                slopes(iv, 0) = this->superbee(dwl, dwr);
+                slopes(iv, 0) = superbee(dwl, dwr);
               }
               else if (hasLo && !hasHi) {
                 slopes(iv, 0) = dwl;
@@ -376,16 +374,12 @@ EBGhostCellInterpolator::interpolateIrregular(EBCellFAB&       a_phiFine,
   CH_assert(a_phiFine.nComp() > a_fineVar);
   CH_assert(a_phiCoar.nComp() > a_coarVar);
 
-  const ProblemDomain& fineDomain = m_eblgFine.getDomain();
-  const ProblemDomain& coarDomain = m_eblgCoFi.getDomain();
+  const ProblemDomain& coarDomain    = m_eblgCoFi.getDomain();
+  const Box            coarDomainBox = coarDomain.domainBox();
 
   const EBISLayout& fineEBISL = m_eblgFine.getEBISL();
   const EBISLayout& coarEBISL = m_eblgCoFi.getEBISL();
 
-  const Box fineDomainBox = fineDomain.domainBox();
-  const Box coarDomainBox = coarDomain.domainBox();
-
-  const EBISBox& fineEBISBox = a_phiFine.getEBISBox();
   const EBISBox& coarEBISBox = a_phiCoar.getEBISBox();
 
   VoFIterator&     vofitCoar = m_coarIrregCells[a_dit];
@@ -443,17 +437,17 @@ EBGhostCellInterpolator::interpolateIrregular(EBCellFAB&       a_phiFine,
         break;
       }
       case EBGhostCellInterpolator::Type::MinMod: {
-        slopes(coarVoF, dir) = this->minmod(dwl, dwr);
+        slopes(coarVoF, dir) = ChomboDischarge::EBGhostCellInterpolator::minmod(dwl, dwr);
 
         break;
       }
       case EBGhostCellInterpolator::Type::MonotonizedCentral: {
-        slopes(coarVoF, dir) = this->monotonizedCentral(dwl, dwr);
+        slopes(coarVoF, dir) = ChomboDischarge::EBGhostCellInterpolator::monotonizedCentral(dwl, dwr);
 
         break;
       }
       case EBGhostCellInterpolator::Type::Superbee: {
-        slopes(coarVoF, dir) = this->superbee(dwl, dwr);
+        slopes(coarVoF, dir) = superbee(dwl, dwr);
 
         break;
       }
@@ -485,7 +479,7 @@ EBGhostCellInterpolator::interpolateIrregular(EBCellFAB&       a_phiFine,
 }
 
 Real
-EBGhostCellInterpolator::minmod(const Real& dwl, const Real& dwr) const noexcept
+EBGhostCellInterpolator::minmod(const Real& dwl, const Real& dwr) noexcept
 {
   Real slope = 0.0;
 
@@ -497,13 +491,13 @@ EBGhostCellInterpolator::minmod(const Real& dwl, const Real& dwr) const noexcept
 }
 
 Real
-EBGhostCellInterpolator::superbee(const Real& dwl, const Real& dwr) const noexcept
+EBGhostCellInterpolator::superbee(const Real& dwl, const Real& dwr) noexcept
 {
   Real slope = 0.0;
 
   if (dwl * dwr > 0.0) {
-    const Real s1 = this->minmod(dwl, 2 * dwr);
-    const Real s2 = this->minmod(dwr, 2 * dwl);
+    const Real s1 = ChomboDischarge::EBGhostCellInterpolator::minmod(dwl, 2 * dwr);
+    const Real s2 = ChomboDischarge::EBGhostCellInterpolator::minmod(dwr, 2 * dwl);
 
     if (s1 * s2 > 0.0) {
       slope = std::abs(s1) > std::abs(s2) ? s1 : s2;
@@ -514,7 +508,7 @@ EBGhostCellInterpolator::superbee(const Real& dwl, const Real& dwr) const noexce
 }
 
 Real
-EBGhostCellInterpolator::monotonizedCentral(const Real& dwl, const Real& dwr) const noexcept
+EBGhostCellInterpolator::monotonizedCentral(const Real& dwl, const Real& dwr) noexcept
 {
   Real slope = 0.0;
 

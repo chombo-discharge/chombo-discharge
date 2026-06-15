@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_MFHelmholtzOp.cpp
   @brief  Implementation of CD_MFHelmholtzOp.H
   @author Robert Marskar
@@ -120,12 +121,12 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
 
   // Make the operators on eachphase.
   for (int iphase = 0; iphase < m_numPhases; iphase++) {
-    EBLevelGrid eblg = a_mflg.getEBLevelGrid(iphase);
-    EBLevelGrid dummy;
-    EBLevelGrid eblgFine   = a_hasFine ? a_mflgFine.getEBLevelGrid(iphase) : dummy;
-    EBLevelGrid eblgCoFi   = a_hasCoar ? a_mflgCoFi.getEBLevelGrid(iphase) : dummy;
-    EBLevelGrid eblgCoar   = a_hasCoar ? a_mflgCoar.getEBLevelGrid(iphase) : dummy;
-    EBLevelGrid eblgCoarMG = a_hasMGObjects ? a_mflgCoarMG.getEBLevelGrid(iphase) : dummy;
+    const EBLevelGrid& eblg = a_mflg.getEBLevelGrid(iphase);
+    EBLevelGrid        dummy;
+    EBLevelGrid        eblgFine   = a_hasFine ? a_mflgFine.getEBLevelGrid(iphase) : dummy;
+    EBLevelGrid        eblgCoFi   = a_hasCoar ? a_mflgCoFi.getEBLevelGrid(iphase) : dummy;
+    EBLevelGrid        eblgCoar   = a_hasCoar ? a_mflgCoar.getEBLevelGrid(iphase) : dummy;
+    EBLevelGrid        eblgCoarMG = a_hasMGObjects ? a_mflgCoarMG.getEBLevelGrid(iphase) : dummy;
 
     RefCountedPtr<EBMultigridInterpolator> interpolator = RefCountedPtr<EBMultigridInterpolator>(nullptr);
     RefCountedPtr<EBReflux>                fluxRegister = RefCountedPtr<EBReflux>(nullptr);
@@ -337,11 +338,11 @@ MFHelmholtzOp::fillGrad(const LevelData<MFCellFAB>& a_phi)
 }
 
 void
-MFHelmholtzOp::getFlux(MFFluxFAB&                  a_flux,
-                       const LevelData<MFCellFAB>& a_data,
-                       const Box&                  a_grid,
-                       const DataIndex&            a_dit,
-                       Real                        a_scale)
+MFHelmholtzOp::getFlux(MFFluxFAB& /*a_flux*/,
+                       const LevelData<MFCellFAB>& /*a_data*/,
+                       const Box& /*a_grid*/,
+                       const DataIndex& /*a_dit*/,
+                       Real /*a_scale*/)
 {
   MayDay::Warning("MFHelmholtzOp::getFlux - not implemented (yet)");
 }
@@ -463,10 +464,7 @@ MFHelmholtzOp::dotProduct(const LevelData<MFCellFAB>& a_lhs, const LevelData<MFC
         sumVolume += kappa;
       };
 
-      const bool isCovered   = ebisbox.isAllCovered();
-      const bool isRegular   = ebisbox.isAllRegular();
-      const bool isIrregular = !isCovered && !isRegular;
-
+      const bool isCovered = ebisbox.isAllCovered();
       if (!isCovered) {
         VoFIterator vofit(ebisbox.getIrregIVS(cellBox), ebgraph);
 
@@ -505,7 +503,7 @@ MFHelmholtzOp::create(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a
 }
 
 void
-MFHelmholtzOp::createCoarser(LevelData<MFCellFAB>& a_coarse, const LevelData<MFCellFAB>& a_fine, bool a_ghosted)
+MFHelmholtzOp::createCoarser(LevelData<MFCellFAB>& a_coarse, const LevelData<MFCellFAB>& a_fine, bool /*a_ghosted*/)
 {
   CH_TIME("MFHelmholtzOp::createCoarser");
 
@@ -521,7 +519,7 @@ MFHelmholtzOp::createCoarser(LevelData<MFCellFAB>& a_coarse, const LevelData<MFC
 }
 
 void
-MFHelmholtzOp::createCoarsened(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs, const int& a_refRat)
+MFHelmholtzOp::createCoarsened(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs, const int& /*a_refRat*/)
 {
   CH_TIME("MFHelmholtzOp::createCoarsened");
 
@@ -598,8 +596,8 @@ MFHelmholtzOp::applyOp(LevelData<MFCellFAB>&             a_Lphi,
       const int iphase = op.first;
 
       // Doing the nasty, but applyOp will only monkey with ghost cells in a_phi.
-      EBCellFAB& Lph = (EBCellFAB&)a_Lphi[din].getPhase(iphase);
-      EBCellFAB& phi = (EBCellFAB&)a_phi[din].getPhase(iphase);
+      auto& Lph = a_Lphi[din].getPhase(iphase);
+      auto& phi = (EBCellFAB&)a_phi[din].getPhase(iphase);
 
       const EBCellFAB&       Acoef      = (*m_Acoef)[din].getPhase(iphase);
       const EBFluxFAB&       Bcoef      = (*m_Bcoef)[din].getPhase(iphase);
@@ -635,7 +633,7 @@ MFHelmholtzOp::interpolateCF(const LevelData<MFCellFAB>& a_phi,
 
           RefCountedPtr<EBMultigridInterpolator>& phaseInterpolator = m_interpolator.getInterpolator(iphase);
 
-          EBCellFAB& phi = (EBCellFAB&)a_phi[din].getPhase(iphase);
+          auto& phi = (EBCellFAB&)a_phi[din].getPhase(iphase);
 
           phaseInterpolator->coarseFineInterpH(phi, Interval(m_comp, m_comp), din);
         }
@@ -714,7 +712,7 @@ MFHelmholtzOp::exchangeGhost(const LevelData<MFCellFAB>& a_phi) const
     MayDay::Abort("MFHelmholtzOp::exchangeGhost -- a_phi.disjointBoxLayout() != m_mflg.getGrids");
   }
 
-  LevelData<MFCellFAB>& phi = (LevelData<MFCellFAB>&)a_phi;
+  auto& phi = (LevelData<MFCellFAB>&)a_phi;
 
   phi.exchange(m_exchangeCopier);
 }
@@ -1109,8 +1107,6 @@ MFHelmholtzOp::AMROperatorNF(LevelData<MFCellFAB>&       a_Lphi,
 {
   CH_TIME("MFHelmholtzOp::AMROperatorNF");
 
-  constexpr bool homogeneousCFBC = false;
-
   // Note; There is no coarse-fine interpolation here because that will have been
   // done by AMROperator (which is called before this routine).
   this->exchangeGhost(a_phi);
@@ -1147,7 +1143,7 @@ MFHelmholtzOp::AMROperatorNC(LevelData<MFCellFAB>&             a_Lphi,
   CH_TIME("MFHelmholtzOp::AMROperatorNC");
 
   if (m_hasFine) {
-    MFHelmholtzOp* finerOp = (MFHelmholtzOp*)a_finerOp;
+    auto* finerOp = (MFHelmholtzOp*)a_finerOp;
 
     for (auto& op : finerOp->m_helmOps) {
       LevelData<EBCellFAB> phi;
@@ -1172,7 +1168,7 @@ MFHelmholtzOp::AMROperatorNC(LevelData<MFCellFAB>&             a_Lphi,
     MultifluidAlias::aliasMF(phiFine, op.first, a_phiFine);
     MultifluidAlias::aliasMF(phi, op.first, a_phi);
 
-    MFHelmholtzOp* finerOp = (MFHelmholtzOp*)(a_finerOp);
+    auto* finerOp = (MFHelmholtzOp*)(a_finerOp);
 
     // Don't need to update ghost cells again, coarsen, or exchange data.
     op.second->turnOffCFInterp();
@@ -1197,10 +1193,8 @@ MFHelmholtzOp::AMROperator(LevelData<MFCellFAB>&             a_Lphi,
 {
   CH_TIME("MFHelmholtzOp::AMROperator");
 
-  constexpr bool homogeneousCFBC = false;
-
   if (m_hasFine) {
-    MFHelmholtzOp* finerOp = (MFHelmholtzOp*)a_finerOp;
+    auto* finerOp = (MFHelmholtzOp*)a_finerOp;
 
     for (auto& op : finerOp->m_helmOps) {
       LevelData<EBCellFAB> phi;
@@ -1227,7 +1221,7 @@ MFHelmholtzOp::AMROperator(LevelData<MFCellFAB>&             a_Lphi,
     MultifluidAlias::aliasMF(phi, op.first, a_phi);
     MultifluidAlias::aliasMF(phiCoar, op.first, a_phiCoar);
 
-    MFHelmholtzOp* finerOp = (MFHelmholtzOp*)(a_finerOp);
+    auto* finerOp = (MFHelmholtzOp*)(a_finerOp);
 
     // Don't need to update ghost cells again, coarsen, or exchange data. Our ability to turn off coarse-fine interpolation comes from
     // the fact that EBHelmholtzOp will interpolate the ghost cells on the finer level during the reflux stage. When we enter this routine

@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_Dielectric.cpp
   @brief  Implementation of CD_Dielectric.H
   @author Robert marskar
@@ -14,11 +15,9 @@
 #include <CD_Dielectric.H>
 #include <CD_NamespaceHeader.H>
 
-Dielectric::Dielectric()
+Dielectric::Dielectric() : m_isDefined(false)
 {
   CH_TIME("Dielectric::Dielectric()");
-
-  m_isDefined = false;
 }
 
 Dielectric::Dielectric(const RefCountedPtr<BaseIF>& a_baseIF, const Real a_permittivity) : Dielectric()
@@ -41,8 +40,7 @@ Dielectric::Dielectric(const RefCountedPtr<BaseIF>&                     a_baseIF
   this->define(a_baseIF, a_permittivity);
 }
 
-Dielectric::~Dielectric()
-{}
+Dielectric::~Dielectric() = default;
 
 void
 Dielectric::define(const RefCountedPtr<BaseIF>& a_baseIF, const Real a_permittivity)
@@ -82,7 +80,7 @@ Dielectric::getImplicitFunction() const
 }
 
 Real
-Dielectric::getPermittivity(const RealVect a_pos) const
+Dielectric::getPermittivity(const RealVect& a_pos) const
 {
   CH_TIME("Dielectric::getPermittivity(RealVect)");
 

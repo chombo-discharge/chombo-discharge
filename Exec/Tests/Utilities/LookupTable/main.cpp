@@ -1,3 +1,15 @@
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+/**
+  @file   main.cpp
+  @brief  Unit test for LookupTable1D.
+  @author Robert Marskar
+*/
+
 #include <CD_Driver.H>
 #include <CD_LookupTable.H>
 

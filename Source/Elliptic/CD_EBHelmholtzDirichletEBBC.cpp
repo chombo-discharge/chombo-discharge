@@ -1,6 +1,7 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 /*
@@ -23,14 +24,6 @@
 EBHelmholtzDirichletEBBC::EBHelmholtzDirichletEBBC()
 {
   CH_TIME("EBHelmholtzDirichletEBBC::EBHelmholtzDirichletEBBC()");
-
-  m_order           = -1;
-  m_weight          = -1;
-  m_domainDropOrder = 0;
-  m_dropOrder       = false;
-
-  m_useConstant = false;
-  m_useFunction = false;
 }
 
 EBHelmholtzDirichletEBBC::~EBHelmholtzDirichletEBBC()
@@ -216,7 +209,7 @@ EBHelmholtzDirichletEBBC::define()
         // const std::string vofErr  = " on vof = ";
         // const std::string impErr  = " (this may cause multigrid divergence)";
 
-        // std::cout << baseErr << m_eblg.getDomain() << vofErr << vof << impErr << std::endl;
+        // std::cout << baseErr << m_eblg.getDomain() << vofErr << vof << impErr << endl;
 
         weights(vof, m_comp) = 0.0;
         stencils(vof, m_comp).clear();
@@ -228,9 +221,9 @@ EBHelmholtzDirichletEBBC::define()
 }
 
 void
-EBHelmholtzDirichletEBBC::applyEBFlux(VoFIterator&           a_vofit,
-                                      EBCellFAB&             a_Lphi,
-                                      const EBCellFAB&       a_phi,
+EBHelmholtzDirichletEBBC::applyEBFlux(VoFIterator& a_vofit,
+                                      EBCellFAB&   a_Lphi,
+                                      const EBCellFAB& /*a_phi*/,
                                       const BaseIVFAB<Real>& a_Bcoef,
                                       const DataIndex&       a_dit,
                                       const Real&            a_beta,
@@ -265,8 +258,6 @@ EBHelmholtzDirichletEBBC::applyEBFlux(VoFIterator&           a_vofit,
 
     BoxLoops::loop(a_vofit, kernel);
   }
-
-  return;
 }
 
 bool

@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_Realm.cpp
   @brief  Implementation of CD_Realm.H
   @author Robert Marskar
@@ -23,10 +24,8 @@
 const std::string Realm::Primal = "primal";
 const std::string Realm::primal = "primal";
 
-Realm::Realm()
+Realm::Realm() : m_isDefined(false), m_verbosity(-1)
 {
-  m_isDefined = false;
-  m_verbosity = -1;
 
   ParmParse pp("Realm");
 
@@ -37,28 +36,27 @@ Realm::Realm()
   m_realms.emplace(phase::solid, RefCountedPtr<PhaseRealm>(new PhaseRealm()));
 }
 
-Realm::~Realm()
-{}
+Realm::~Realm() = default;
 
 void
-Realm::define(const Vector<DisjointBoxLayout>&                          a_grids,
-              const Vector<ProblemDomain>&                              a_domains,
-              const Vector<int>&                                        a_refRat,
-              const Vector<Real>&                                       a_dx,
-              const RealVect                                            a_probLo,
-              const int                                                 a_finestLevel,
-              const int                                                 a_blockingFactor,
-              const int                                                 a_ebGhost,
-              const int                                                 a_numGhost,
-              const int                                                 a_lsfGhost,
-              const int                                                 a_redistRad,
-              const int                                                 a_mgInterpOrder,
-              const int                                                 a_mgInterpRadius,
-              const int                                                 a_mgInterpWeight,
-              const CellCentroidInterpolation::Type                     a_centroidInterpType,
-              const EBCentroidInterpolation::Type                       a_ebInterpType,
-              const std::map<phase::which_phase, RefCountedPtr<BaseIF>> a_baseif,
-              const RefCountedPtr<MultiFluidIndexSpace>&                a_mfis)
+Realm::define(const Vector<DisjointBoxLayout>&                           a_grids,
+              const Vector<ProblemDomain>&                               a_domains,
+              const Vector<int>&                                         a_refRat,
+              const Vector<Real>&                                        a_dx,
+              const RealVect&                                            a_probLo,
+              const int                                                  a_finestLevel,
+              const int                                                  a_blockingFactor,
+              const int                                                  a_ebGhost,
+              const int                                                  a_numGhost,
+              const int                                                  a_lsfGhost,
+              const int                                                  a_redistRad,
+              const int                                                  a_mgInterpOrder,
+              const int                                                  a_mgInterpRadius,
+              const int                                                  a_mgInterpWeight,
+              const CellCentroidInterpolation::Type                      a_centroidInterpType,
+              const EBCentroidInterpolation::Type                        a_ebInterpType,
+              const std::map<phase::which_phase, RefCountedPtr<BaseIF>>& a_baseif,
+              const RefCountedPtr<MultiFluidIndexSpace>&                 a_mfis)
 {
   CH_TIME("Realm::define");
   if (m_verbosity > 5) {
@@ -211,7 +209,7 @@ Realm::defineMasks(const int a_lmin)
 }
 
 void
-Realm::defineMFLevelGrid(const int a_lmin)
+Realm::defineMFLevelGrid(const int /*a_lmin*/)
 {
   CH_TIME("Realm::defineMFLevelGrid");
   if (m_verbosity > 5) {
@@ -283,7 +281,7 @@ Realm::defineMFLevelGrid(const int a_lmin)
 }
 
 void
-Realm::defineOuterHaloMask(const int a_lmin)
+Realm::defineOuterHaloMask(const int /*a_lmin*/)
 {
   CH_TIME("Realm::defineOuterHaloMask");
   if (m_verbosity > 5) {
@@ -298,8 +296,9 @@ Realm::defineOuterHaloMask(const int a_lmin)
     const int         buffer     = m.first.second;
 
     if (which_mask == s_outer_particle_halo) {
-      if (buffer <= 0)
+      if (buffer <= 0) {
         MayDay::Abort("Realm::defineOuterHaloMask -- cannot have buffer <= 0!");
+      }
 
       AMRMask& mask = m.second;
 
@@ -336,11 +335,11 @@ Realm::defineOuterHaloMask(const int a_lmin)
 void
 Realm::defineOuterHaloMask(LevelData<BaseFab<bool>>& a_coarMask,
                            const ProblemDomain&      a_domainCoar,
-                           const ProblemDomain&      a_domainFine,
-                           const DisjointBoxLayout&  a_gridsCoar,
-                           const DisjointBoxLayout&  a_gridsFine,
-                           const int                 a_buffer,
-                           const int                 a_refRat)
+                           const ProblemDomain& /*a_domainFine*/,
+                           const DisjointBoxLayout& a_gridsCoar,
+                           const DisjointBoxLayout& a_gridsFine,
+                           const int                a_buffer,
+                           const int                a_refRat)
 {
   CH_TIME("Realm::defineOuterHaloMask");
   if (m_verbosity > 5) {
@@ -469,7 +468,7 @@ Realm::defineOuterHaloMask(LevelData<BaseFab<bool>>& a_coarMask,
 }
 
 void
-Realm::defineInnerHaloMask(const int a_lmin)
+Realm::defineInnerHaloMask(const int /*a_lmin*/)
 {
   CH_TIME("Realm::defineInnerHaloMask");
   if (m_verbosity > 5) {
@@ -523,13 +522,11 @@ Realm::defineInnerHaloMask(const int a_lmin)
           const DisjointBoxLayout& gridsFine = m_grids[lvl];
 
           const ProblemDomain& domainCoar = m_domains[lvl - 1];
-          const ProblemDomain& domainFine = m_domains[lvl];
 
           const DataIterator& ditCoar = gridsCoar.dataIterator();
           const DataIterator& ditFine = gridsFine.dataIterator();
 
           const int numBoxesCoar = ditCoar.size();
-          const int numBoxesFine = ditFine.size();
 
           Vector<Box> boxesCoar = gridsCoar.boxArray();
           Vector<Box> boxesFine = gridsFine.boxArray();
@@ -580,8 +577,7 @@ Realm::defineInnerHaloMask(const int a_lmin)
           // Reset the mask on the coarsened grid
 #pragma omp parallel for schedule(runtime)
           for (int mybox = 0; mybox < numBoxes; mybox++) {
-            const DataIndex& din     = dit[mybox];
-            const Box&       cellBox = boxLayoutCoFi[din];
+            const DataIndex& din = dit[mybox];
 
             FArrayBox& coFiMask = coFiLevelMask[din];
 
@@ -589,7 +585,7 @@ Realm::defineInnerHaloMask(const int a_lmin)
           }
 
           // Increment the data from the coarse grid to the coarsened fine grid. This must
-          // also increment with the ghost vell values.
+          // also increment with the ghost well values.
           const Interval srcInterv(comp, comp);
           const Interval dstInterv(comp, comp);
 
@@ -622,7 +618,7 @@ Realm::defineInnerHaloMask(const int a_lmin)
 }
 
 void
-Realm::defineOuterCFMask(const int a_lmin)
+Realm::defineOuterCFMask(const int /*a_lmin*/)
 {
   CH_TIME("Realm::defineOuterCFMask");
   if (m_verbosity > 5) {
@@ -637,8 +633,9 @@ Realm::defineOuterCFMask(const int a_lmin)
     const int         buffer     = m.first.second;
 
     if (which_mask == s_outer_cf_region) {
-      if (buffer <= 0)
+      if (buffer <= 0) {
         MayDay::Abort("Realm::defineOuterCFMask -- cannot have buffer <= 0!");
+      }
 
       AMRMask& mask = m.second;
 
@@ -675,11 +672,11 @@ Realm::defineOuterCFMask(const int a_lmin)
 void
 Realm::defineOuterCFMask(LevelData<BaseFab<bool>>& a_coarMask,
                          const ProblemDomain&      a_domainCoar,
-                         const ProblemDomain&      a_domainFine,
-                         const DisjointBoxLayout&  a_gridsCoar,
-                         const DisjointBoxLayout&  a_gridsFine,
-                         const int                 a_buffer,
-                         const int                 a_refRat)
+                         const ProblemDomain& /*a_domainFine*/,
+                         const DisjointBoxLayout& a_gridsCoar,
+                         const DisjointBoxLayout& a_gridsFine,
+                         const int                a_buffer,
+                         const int                a_refRat)
 {
   CH_TIME("Realm::defineOuterCFMask");
   if (m_verbosity > 5) {
@@ -808,14 +805,13 @@ Realm::defineOuterCFMask(LevelData<BaseFab<bool>>& a_coarMask,
 }
 
 void
-Realm::defineInnerCFMask(const int a_lmin)
+Realm::defineInnerCFMask(const int /*a_lmin*/)
 {
   CH_TIME("Realm::defineInnerCFMask");
   if (m_verbosity > 5) {
     pout() << "Realm::defineInnerCFMask" << endl;
   }
 
-  const int comp    = 0;
   const int numComp = 1;
 
   // Loop through all masks and do something about the halo masks only.
@@ -866,12 +862,12 @@ Realm::defineInnerCFMask(const int a_lmin)
               auto kernel = [&](const IntVect& iv) -> void {
                 const Box box = grow(Box(iv, iv), buffer) & domain;
 
-                int c = box.numPts();
+                int c = static_cast<int>(box.numPts());
 
                 for (int i = 0; i < neighborBoxes.size(); i++) {
                   const Box overlapBox = box & neighborBoxes[i];
 
-                  c -= overlapBox.numPts();
+                  c -= static_cast<int>(overlapBox.numPts());
                 }
 
                 mask(iv) = (c == 0) ? false : true;
@@ -888,7 +884,7 @@ Realm::defineInnerCFMask(const int a_lmin)
 }
 
 void
-Realm::defineCFIVS(const int a_lmin)
+Realm::defineCFIVS(const int /*a_lmin*/)
 {
   CH_TIME("Realm::defineCFIVS");
   if (m_verbosity > 5) {
@@ -1024,8 +1020,6 @@ Realm::defineValidCells()
       for (int mybox = 0; mybox < nboxCoar; mybox++) {
         const DataIndex& din = ditCoar[mybox];
 
-        const Box cellBox = dblCoar[din];
-
         BaseFab<bool>&   boolMask = (*m_validCells[lvl])[din];
         const FArrayBox& fabMask  = coarData[din];
 
@@ -1086,7 +1080,7 @@ Realm::definePetscGrid() noexcept
 }
 
 void
-Realm::registerOperator(const std::string a_operator, const phase::which_phase a_phase)
+Realm::registerOperator(const std::string& a_operator, const phase::which_phase a_phase)
 {
   CH_TIME("Realm::registerOperator(operator, phase)");
   if (m_verbosity > 5) {
@@ -1097,7 +1091,7 @@ Realm::registerOperator(const std::string a_operator, const phase::which_phase a
 }
 
 bool
-Realm::queryOperator(const std::string a_operator, const phase::which_phase a_phase) const
+Realm::queryOperator(const std::string& a_operator, const phase::which_phase a_phase) const
 {
   CH_TIME("Realm::queryOperator");
   if (m_verbosity > 5) {
@@ -1108,7 +1102,7 @@ Realm::queryOperator(const std::string a_operator, const phase::which_phase a_ph
 }
 
 void
-Realm::registerMask(const std::string a_mask, const int a_buffer)
+Realm::registerMask(const std::string& a_mask, const int a_buffer)
 {
   CH_TIME("Realm::registerMask(mask, buffer)");
   if (m_verbosity > 5) {
@@ -1119,7 +1113,7 @@ Realm::registerMask(const std::string a_mask, const int a_buffer)
 }
 
 bool
-Realm::queryMask(const std::string a_mask, const int a_buffer) const
+Realm::queryMask(const std::string& a_mask, const int a_buffer) const
 {
   CH_TIME("Realm::queryMask(mask, buffer)");
   if (m_verbosity > 5) {
@@ -1295,7 +1289,7 @@ Realm::getLevelset(const phase::which_phase a_phase) const
 }
 
 const AMRMask&
-Realm::getMask(const std::string a_mask, const int a_buffer) const
+Realm::getMask(const std::string& a_mask, const int a_buffer) const
 {
   if (!this->queryMask(a_mask, a_buffer)) {
     std::string str = "Realm::getMask - could not find mask '" + a_mask + "'";

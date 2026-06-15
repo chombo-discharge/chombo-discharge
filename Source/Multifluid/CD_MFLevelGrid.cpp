@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_MFLevelGrid.cpp
   @brief  Implementation of CD_MFLevelGrid.H
   @author Robert Marskar
@@ -14,8 +15,7 @@
 #include <CD_MFLevelGrid.H>
 #include <CD_NamespaceHeader.H>
 
-MFLevelGrid::MFLevelGrid()
-{}
+MFLevelGrid::MFLevelGrid() = default;
 
 void
 MFLevelGrid::setMaxRefinementRatio(const int a_refRat)
@@ -31,8 +31,9 @@ MFLevelGrid::MFLevelGrid(const DisjointBoxLayout&                   a_dbl,
                          const ProblemDomain&                       a_domain,
                          const int                                  a_ebghost,
                          const RefCountedPtr<MultiFluidIndexSpace>& a_multiFluidIndexSpace)
+  : m_multifluidIndexSpace(a_multiFluidIndexSpace)
 {
-  m_multifluidIndexSpace = a_multiFluidIndexSpace;
+
   m_eblg.resize(0);
   for (int i = 0; i < a_multiFluidIndexSpace->numPhases(); i++) {
     m_eblg.push_back(EBLevelGrid(a_dbl, a_domain, a_ebghost, a_multiFluidIndexSpace->getEBIndexSpace(i)));
@@ -45,13 +46,12 @@ MFLevelGrid::MFLevelGrid(const RefCountedPtr<MultiFluidIndexSpace>& a_multiFluid
   this->define(a_multiFluidIndexSpace, a_eblg);
 }
 
-MFLevelGrid::~MFLevelGrid()
-{}
+MFLevelGrid::~MFLevelGrid() = default;
 
 int
 MFLevelGrid::numPhases() const
 {
-  return m_eblg.size();
+  return static_cast<int>(m_eblg.size());
 }
 
 void

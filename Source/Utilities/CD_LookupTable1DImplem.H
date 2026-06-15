@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_LookupTable1D.H
+/**
+  @file   CD_LookupTable1DImplem.H
   @brief  Declaration of a lookup table in one independent variable.
   @author Robert Marskar
 */
 
-#ifndef CD_LookupTableImplem_H
-#define CD_LookupTableImplem_H
+#ifndef CD_LOOKUPTABLEIMPLEM_H
+#define CD_LOOKUPTABLEIMPLEM_H
 
 // Std includes
 #include <algorithm>

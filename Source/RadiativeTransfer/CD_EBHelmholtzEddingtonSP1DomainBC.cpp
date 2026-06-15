@@ -1,6 +1,7 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 /*
@@ -23,13 +24,9 @@ EBHelmholtzEddingtonSP1DomainBC::EBHelmholtzEddingtonSP1DomainBC(const Eddington
                                                                  const RefCountedPtr<RtSpecies>& a_species,
                                                                  const Real                      a_r1,
                                                                  const Real                      a_r2)
+  : m_eddingtonBCs(a_eddingtonBCs), m_species(a_species), m_r1(a_r1), m_r2(a_r2)
 {
   CH_TIME("EBHelmholtzEddingtonSP1DomainBC::EBHelmholtzEddingtonSP1DomainBC");
-
-  m_eddingtonBCs = a_eddingtonBCs;
-  m_species      = a_species;
-  m_r1           = a_r1;
-  m_r2           = a_r2;
 
   for (int dir = 0; dir < SpaceDim; dir++) {
     for (SideIterator sit; sit.ok(); ++sit) {

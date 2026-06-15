@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_EBAMRDataImplem.H
   @brief  Implementation of EBAMRData.H
   @author Robert Marskar
 */
 
-#ifndef CD_EBAMRDataImplem_H
-#define CD_EBAMRDataImplem_H
+#ifndef CD_EBAMRDATAIMPLEM_H
+#define CD_EBAMRDATAIMPLEM_H
 
 // Chombo includes
 #include <CH_Timer.H>
@@ -139,7 +140,7 @@ EBAMRData<T>::getRealm() const noexcept
 
 template <typename T>
 void
-EBAMRData<T>::setRealm(const std::string a_realm) noexcept
+EBAMRData<T>::setRealm(const std::string& a_realm) noexcept
 {
   m_realm = a_realm;
 }
@@ -156,7 +157,7 @@ template class EBAMRData<DomainFluxIFFAB>;
 template class EBAMRData<BaseFab<bool>>;
 template class EBAMRData<FArrayBox>;
 
-// Typedefs for simple typing.
+/// @cond DOXYGEN_SKIP
 typedef EBAMRData<MFCellFAB>       MFAMRCellData; // Cell-centered multifluid data
 typedef EBAMRData<MFFluxFAB>       MFAMRFluxData; // Face-centered multifluid data
 typedef EBAMRData<MFBaseIVFAB>     MFAMRIVData;   // Irregular face multifluid data
@@ -167,6 +168,7 @@ typedef EBAMRData<BaseIVFAB<Real>> EBAMRIVData;   // Data on irregular data cent
 typedef EBAMRData<DomainFluxIFFAB> EBAMRIFData;   // Data on domain phases
 typedef EBAMRData<BaseFab<bool>>   EBAMRBool;     // For holding bool at every cell
 typedef EBAMRData<FArrayBox>       EBAMRFAB;      // Just regular grid data.
+/// @endcond
 
 #include <CD_NamespaceFooter.H>
 

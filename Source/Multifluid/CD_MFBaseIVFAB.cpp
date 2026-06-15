@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_MFBaseIVFAB.cpp
   @brief  Implementation of CD_MFBaseIVFAB.H
   @author Robert Marskar
@@ -13,8 +14,7 @@
 #include <CD_MFBaseIVFAB.H>
 #include <CD_NamespaceHeader.H>
 
-MFBaseIVFAB::MFBaseIVFAB()
-{}
+MFBaseIVFAB::MFBaseIVFAB() = default;
 
 MFBaseIVFAB::MFBaseIVFAB(const Vector<IntVectSet>& a_regions,
                          const Vector<EBGraph>&    a_phaseGraphs,
@@ -22,7 +22,7 @@ MFBaseIVFAB::MFBaseIVFAB(const Vector<IntVectSet>& a_regions,
 {
   CH_TIME("MFBaseIVFAB::MFBaseIVFAB");
 
-  const int numPhases = a_regions.size();
+  const int numPhases = static_cast<int>(a_regions.size());
 
   CH_assert(a_phaseGraphs.size() == numPhases);
   CH_assert(a_nComp.size() == numPhases);
@@ -67,7 +67,7 @@ MFBaseIVFAB::getPhasePtr(int a_phase)
 int
 MFBaseIVFAB::numPhases()
 {
-  return m_phase.size();
+  return static_cast<int>(m_phase.size());
 }
 
 void
@@ -99,7 +99,7 @@ MFBaseIVFAB::preAllocatable()
 int
 MFBaseIVFAB::size(const Box& R, const Interval& comps) const
 {
-  int size = m_phase.size() * sizeof(int);
+  int size = static_cast<int>(m_phase.size() * sizeof(int));
   for (int i = 0; i < m_phase.size(); ++i) {
     size += m_phase[i]->size(R, comps);
   }
@@ -115,8 +115,8 @@ MFBaseIVFAB::linearOut(void* buf, const Box& R, const Interval& comps) const
     *buffer = m_phase[i]->size(R, comps);
     ++buffer;
   }
-  int*           size     = (int*)buf;
-  unsigned char* ebbuffer = (unsigned char*)buffer;
+  int*  size     = (int*)buf;
+  auto* ebbuffer = (unsigned char*)buffer;
   for (int i = 0; i < m_phase.size(); ++i) {
     m_phase[i]->linearOut(ebbuffer, R, comps);
     ebbuffer += size[i];
@@ -132,7 +132,7 @@ MFBaseIVFAB::linearIn(void* buf, const Box& R, const Interval& comps)
     CH_assert(size[i] == m_phase[i]->size(R, comps));
   }
 
-  unsigned char* ebbuffer = (unsigned char*)(size + m_phase.size());
+  auto* ebbuffer = (unsigned char*)(size + m_phase.size());
   for (int i = 0; i < m_phase.size(); ++i) {
     m_phase[i]->linearIn(ebbuffer, R, comps);
     ebbuffer += size[i];
@@ -160,11 +160,11 @@ MFBaseIVFABFactory::define(Vector<EBISLayout>& a_ebisl, const Vector<int>& a_nCo
 }
 
 MFBaseIVFAB*
-MFBaseIVFABFactory::create(const Box& a_box, int a_ignored_argument, const DataIndex& a_dit) const
+MFBaseIVFABFactory::create(const Box& a_box, int /*a_ignored_argument*/, const DataIndex& a_dit) const
 {
   CH_TIME("MFBaseIVFABFactory::create");
 
-  const int numPhases = m_ebisl.size();
+  const int numPhases = static_cast<int>(m_ebisl.size());
 
   Vector<IntVectSet> ivs(numPhases);
   Vector<EBGraph>    ebgraph(numPhases);

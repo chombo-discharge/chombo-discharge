@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*
+/**
   @file   CD_MFHelmholtzNeumannEBBC.cpp
   @brief  Implementation of CD_MFHelmholtzNeumannEBBC.H
   @author Robert Marskar
@@ -18,12 +19,9 @@
 #include <CD_NamespaceHeader.H>
 
 MFHelmholtzNeumannEBBC::MFHelmholtzNeumannEBBC(const int a_phase, const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC)
-  : MFHelmholtzEBBC(a_phase, a_jumpBC)
+  : MFHelmholtzEBBC(a_phase, a_jumpBC), m_useConstant(false), m_useFunction(false)
 {
   CH_TIME("MFHelmholtzNeumannEBBC::MFHelmholtzNeumannEBBC(int, RefCountedPtr<MFHelmholtzJumpBC>)");
-
-  m_useConstant = false;
-  m_useFunction = false;
 }
 
 MFHelmholtzNeumannEBBC::~MFHelmholtzNeumannEBBC()
@@ -89,9 +87,9 @@ MFHelmholtzNeumannEBBC::defineSinglePhase()
 }
 
 void
-MFHelmholtzNeumannEBBC::applyEBFluxSinglePhase(VoFIterator&           a_singlePhaseVofs,
-                                               EBCellFAB&             a_Lphi,
-                                               const EBCellFAB&       a_phi,
+MFHelmholtzNeumannEBBC::applyEBFluxSinglePhase(VoFIterator& a_singlePhaseVofs,
+                                               EBCellFAB&   a_Lphi,
+                                               const EBCellFAB& /*a_phi*/,
                                                const BaseIVFAB<Real>& a_Bcoef,
                                                const DataIndex&       a_dit,
                                                const Real&            a_beta,
@@ -125,8 +123,6 @@ MFHelmholtzNeumannEBBC::applyEBFluxSinglePhase(VoFIterator&           a_singlePh
 
     BoxLoops::loop(a_singlePhaseVofs, kernel);
   }
-
-  return;
 }
 
 #include <CD_NamespaceFooter.H>

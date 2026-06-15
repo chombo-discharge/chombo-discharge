@@ -1,6 +1,7 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 /*
@@ -18,12 +19,9 @@
 #include <CD_EBHelmholtzDirichletDomainBC.H>
 #include <CD_NamespaceHeader.H>
 
-EBHelmholtzDirichletDomainBC::EBHelmholtzDirichletDomainBC()
+EBHelmholtzDirichletDomainBC::EBHelmholtzDirichletDomainBC() : m_useConstant(false), m_useFunction(false)
 {
   CH_TIME("EBHelmholtzDirichletDomainBC::EBHelmholtzDirichletDomainBC()");
-
-  m_useConstant = false;
-  m_useFunction = false;
 }
 
 EBHelmholtzDirichletDomainBC::EBHelmholtzDirichletDomainBC(const Real a_value)
@@ -73,8 +71,8 @@ EBHelmholtzDirichletDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
                                           const BaseFab<Real>&  a_Bcoef,
                                           const int&            a_dir,
                                           const Side::LoHiSide& a_side,
-                                          const DataIndex&      a_dit,
-                                          const bool            a_useHomogeneous) const
+                                          const DataIndex& /*a_dit*/,
+                                          const bool a_useHomogeneous) const
 {
   CH_TIME(
     "EBHelmholtzDirichletDomainBC::getFaceFlux(BaseFab<Real>, BaseFab<Real>, int, Side::LoHiSide, DataIndex, bool)");
@@ -122,7 +120,7 @@ EBHelmholtzDirichletDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
   BoxLoops::loop<D_DECL(1, 1, 1)>(a_faceFlux.box(), kernel);
 
   // Multiplies by B-coefficient so that a_faceFlux = B*dphi/dn.
-  this->multiplyByBcoef(a_faceFlux, a_Bcoef, a_dir, a_side);
+  ChomboDischarge::EBHelmholtzDirichletDomainBC::multiplyByBcoef(a_faceFlux, a_Bcoef, a_dir, a_side);
 }
 
 Real
@@ -140,7 +138,6 @@ EBHelmholtzDirichletDomainBC::getFaceFlux(const VolIndex&       a_vof,
 
   const int            isign   = (a_side == Side::Lo) ? -1 : 1;
   const Real           ihdx    = 2.0 / m_dx;
-  const IntVect        iv      = a_vof.gridIndex();
   const EBISBox&       ebisbox = m_eblg.getEBISL()[a_dit];
   const ProblemDomain& domain  = m_eblg.getDomain();
 

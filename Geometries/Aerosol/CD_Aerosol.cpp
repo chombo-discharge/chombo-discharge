@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_Aerosol.cpp
   @brief  Implementation of CD_Aerosol.H
   @author Robert Marskar
@@ -54,7 +55,7 @@ Aerosol::Aerosol()
   m_dielectrics.resize(0);
   m_electrodes.resize(0);
 
-  // Construct tht CSG union of spheres
+  // Construct the CSG union of spheres
   if (numSpheres > 0) {
     std::vector<std::shared_ptr<EBGeometry::ImplicitFunction<Real>>> spheres;
 

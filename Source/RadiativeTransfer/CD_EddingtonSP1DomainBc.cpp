@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_EddingtonSP1DomainBc.cpp
   @brief  Implementation of CD_EddingtonSP1DomainBc.H
   @author Robert Marskar
@@ -17,7 +18,7 @@ EddingtonSP1DomainBc::EddingtonSP1DomainBc()
 {
   m_bcFunctions.clear();
 
-  auto zero = [](const RealVect a_pos, const Real a_time) {
+  auto zero = [](const RealVect& /*a_pos*/, const Real /*a_time*/) {
     return 0.0;
   };
 
@@ -36,7 +37,7 @@ EddingtonSP1DomainBc::~EddingtonSP1DomainBc()
 }
 
 void
-EddingtonSP1DomainBc::setBc(const DomainSide a_domainSide, const Bc a_bc)
+EddingtonSP1DomainBc::setBc(const DomainSide a_domainSide, const Bc& a_bc)
 {
   m_bcFunctions.at(a_domainSide) = a_bc;
 }

@@ -1,6 +1,7 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 /*
@@ -17,12 +18,9 @@
 #include <CD_MFHelmholtzRobinDomainBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
-MFHelmholtzRobinDomainBCFactory::MFHelmholtzRobinDomainBCFactory()
+MFHelmholtzRobinDomainBCFactory::MFHelmholtzRobinDomainBCFactory() : m_useConstant(false), m_useFunction(false)
 {
   CH_TIME("MFHelmholtzRobinDomainBCFactory::MFHelmholtzRobinDomainBCFactory()");
-
-  m_useConstant = false;
-  m_useFunction = false;
 }
 
 MFHelmholtzRobinDomainBCFactory::MFHelmholtzRobinDomainBCFactory(const Real a_A, const Real a_B, const Real a_C)
@@ -75,7 +73,7 @@ MFHelmholtzRobinDomainBCFactory::setCoefficients(const std::function<Real(const 
 }
 
 RefCountedPtr<EBHelmholtzDomainBC>
-MFHelmholtzRobinDomainBCFactory::create(const int a_iphase) const
+MFHelmholtzRobinDomainBCFactory::create(const int /*a_iphase*/) const
 {
   CH_TIME("MFHelmholtzRobinDomainBCFactory::create(int)");
 
@@ -87,7 +85,7 @@ MFHelmholtzRobinDomainBCFactory::create(const int a_iphase) const
       "MFHelmholtzRobinDomaniBCFactory::create -- not using constant or function. Did you forget to set coefficients?");
   }
 
-  EBHelmholtzRobinDomainBC* bc = new EBHelmholtzRobinDomainBC();
+  auto* bc = new EBHelmholtzRobinDomainBC();
 
   if (m_useConstant) {
     bc->setCoefficients(m_constantA, m_constantB, m_constantC);

@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2023 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_EBCoarAve.cpp
   @brief  Implementation of CD_EBCoarAve.H
   @author Robert Marskar
@@ -20,10 +21,9 @@
 #include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
-EBCoarAve::EBCoarAve() noexcept
+EBCoarAve::EBCoarAve() noexcept : m_isDefined(false)
 {
   CH_TIME("EBCoarAve::EBCoarAve");
-  m_isDefined = false;
 }
 
 EBCoarAve::~EBCoarAve() noexcept
@@ -66,10 +66,9 @@ EBCoarAve::EBCoarAve(const EBLevelGrid& a_eblgFine,
                      const EBLevelGrid& a_eblgCoar,
                      const EBLevelGrid& a_eblgCoFi,
                      const int&         a_refRat) noexcept
+  : m_isDefined(false)
 {
   CH_TIME("EBCoarAve::EBCoarAve(EBLevelGrid version)");
-
-  m_isDefined = false;
 
   this->define(a_eblgFine, a_eblgCoar, a_eblgCoFi, a_refRat);
 }
@@ -158,7 +157,7 @@ EBCoarAve::defineCellStencils() noexcept
     auto buildStencils = [&](const VolIndex& coarVoF) -> void {
       const Real             kappaC      = ebisBoxCoar.volFrac(coarVoF);
       const Vector<VolIndex> fineVoFs    = ebislCoar.refine(coarVoF, m_refRat, din);
-      const int              numFineVoFs = fineVoFs.size();
+      const int              numFineVoFs = static_cast<int>(fineVoFs.size());
 
       VoFStencil& arithSten = arithmeticStencils(coarVoF, 0);
       VoFStencil& harmSten  = harmonicStencils(coarVoF, 0);
@@ -240,7 +239,7 @@ EBCoarAve::defineFaceStencils() noexcept
       auto buildStencils = [&](const FaceIndex& coarFace) -> void {
         const Real              areaCoar     = ebisBoxCoar.areaFrac(coarFace);
         const Vector<FaceIndex> fineFaces    = ebislCoar.refine(coarFace, m_refRat, din);
-        const int               numFineFaces = fineFaces.size();
+        const int               numFineFaces = static_cast<int>(fineFaces.size());
 
         FaceStencil& arithSten = arithmeticStencils(coarFace, 0);
         FaceStencil& harmSten  = harmonicStencils(coarFace, 0);
@@ -330,7 +329,7 @@ EBCoarAve::defineEBStencils() noexcept
           fineVoFs.push_back(refinedVoFs[i]);
         }
       }
-      const int numFineVoFs = fineVoFs.size();
+      const int numFineVoFs = static_cast<int>(fineVoFs.size());
 
       if (numFineVoFs > 0) {
         for (int ifine = 0; ifine < numFineVoFs; ifine++) {
@@ -512,7 +511,7 @@ EBCoarAve::harmonicAverage(EBCellFAB&       a_coarData,
 
   // Regular cells
   const Box  refiBox    = Box(IntVect::Zero, (m_refRat - 1) * IntVect::Unit);
-  const Real numPerCoar = refiBox.numPts();
+  const Real numPerCoar = static_cast<double>(refiBox.numPts());
 
   FArrayBox&       coarDataReg = a_coarData.getFArrayBox();
   const FArrayBox& fineDataReg = a_fineData.getFArrayBox();

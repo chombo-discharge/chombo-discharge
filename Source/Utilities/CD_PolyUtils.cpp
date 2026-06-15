@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_PolyUtils.cpp
   @brief  Implementation of CD_PolyUtils.cpp
   @author Robert Marskar
@@ -59,7 +60,6 @@ PolyUtils::brentRootFinder(const RefCountedPtr<BaseIF>& a_impFunc, const RealVec
   // Init to be safe
   a = 0.;
   b = 0.;
-  c = 0.;
   d = 0.;
   e = 0.;
 
@@ -111,8 +111,9 @@ PolyUtils::brentRootFinder(const RefCountedPtr<BaseIF>& a_impFunc, const RealVec
         q = (q - 1.0) * (r - 1.0) * (s - 1.0);
       }
 
-      if (p > 0)
+      if (p > 0) {
         q = -q;
+      }
 
       p = Abs(p);
 
@@ -154,7 +155,7 @@ PolyUtils::brentRootFinder(const RefCountedPtr<BaseIF>& a_impFunc, const RealVec
     }
 
     fb = -a_impFunc->value(bPt + a_point1);
-    //    std::cout << "Iteration: " << i << "\t Function value: " << fb << std::endl;
+    //    std::cout << "Iteration: " << i << "\t Function value: " << fb << endl;
   }
 
   // if(i >= maxIter){
@@ -165,7 +166,9 @@ PolyUtils::brentRootFinder(const RefCountedPtr<BaseIF>& a_impFunc, const RealVec
 }
 
 Real
-PolyUtils::brentSolve(const Real a_point1, const Real a_point2, const std::function<Real(const Real x)> a_func) noexcept
+PolyUtils::brentSolve(const Real                               a_point1,
+                      const Real                               a_point2,
+                      const std::function<Real(const Real x)>& a_func) noexcept
 {
   CH_TIME("PolyUtils::bretSolve");
 
@@ -190,9 +193,6 @@ PolyUtils::brentSolve(const Real a_point1, const Real a_point2, const std::funct
   Real fc = fa;
   Real d  = b - a;
   Real e  = d;
-
-  Real x  = b;
-  Real fx = fb;
 
   for (int iter = 0; iter < maxIter; iter++) {
     if ((fb > 0 && fc > 0) || (fb < 0 && fc < 0)) {

@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_MFHelmholtzSaturationChargeJumpBC.cpp
   @brief  Implementation of CD_MFHelmholtzSaturationChargeJumpBC.H
   @author Robert Marskar
@@ -33,11 +34,10 @@ MFHelmholtzSaturationChargeJumpBC::MFHelmholtzSaturationChargeJumpBC(const phase
                       a_weight,
                       a_radius,
                       a_ghostCF,
-                      a_ghostPhi)
+                      a_ghostPhi),
+    m_phase(a_phase)
 {
   CH_TIME("MFHelmholtzSaturationChargeJumpBC::MFHelmholtzSaturationChargeJumpBC");
-
-  m_phase = a_phase;
 }
 
 MFHelmholtzSaturationChargeJumpBC::~MFHelmholtzSaturationChargeJumpBC()
@@ -48,7 +48,7 @@ MFHelmholtzSaturationChargeJumpBC::~MFHelmholtzSaturationChargeJumpBC()
 void
 MFHelmholtzSaturationChargeJumpBC::matchBC(BaseIVFAB<Real>& a_jump,
                                            const MFCellFAB& a_phi,
-                                           const bool       a_homogeneousPhysBC,
+                                           const bool /*a_homogeneousPhysBC*/,
                                            const DataIndex& a_dit) const
 {
   CH_assert(m_multiPhase);

@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file  CD_WedgeIF.cpp
   @brief Implementation of CD_WedgeIF.H
   @author Robert Marskar
@@ -22,7 +23,7 @@
 #include <CD_SphereSdf.H>
 #include <CD_NamespaceHeader.H>
 
-WedgeIF::WedgeIF(const int a_dir, const Real a_angle, const Real a_curv, const RealVect a_point, const bool a_inside)
+WedgeIF::WedgeIF(const int a_dir, const Real a_angle, const Real a_curv, const RealVect& a_point, const bool a_inside)
 {
 
   // By default, constructed with infinite extent along the z-axis
@@ -40,14 +41,14 @@ WedgeIF::WedgeIF(const int a_dir, const Real a_angle, const Real a_curv, const R
   Vector<BaseIF*> planes;
   planes.push_back(new PlaneIF(n1, p1, a_inside));
   planes.push_back(new PlaneIF(n2, p2, a_inside));
-  BaseIF* base_planes = static_cast<BaseIF*>(new UnionIF(planes));
+  auto*   base_planes = static_cast<BaseIF*>(new UnionIF(planes));
   BaseIF* cut_plane   = static_cast<BaseIF*>(new PlaneIF(RealVect(D_DECL(0.0, 1.0, 0.0)), p1, a_inside));
 
   // Union the planes and create the cylinder for rounding
   Vector<BaseIF*> plane_parts;
   plane_parts.push_back(base_planes);
   plane_parts.push_back(cut_plane);
-  BaseIF* wedge = static_cast<BaseIF*>(new UnionIF(plane_parts));
+  auto* wedge = static_cast<BaseIF*>(new UnionIF(plane_parts));
 
 #if CH_SPACEDIM == 3
   const RealVect c1        = point - 1.E10 * RealVect(BASISV(2));
@@ -63,11 +64,13 @@ WedgeIF::WedgeIF(const int a_dir, const Real a_angle, const Real a_curv, const R
   parts.push_back(round_cyl);
 
   // Rotate the wedge
-  TransformIF* rot_wedge = new TransformIF(*(new IntersectionIF(parts)));
-  if (a_dir == 0)
+  auto* rot_wedge = new TransformIF(*(new IntersectionIF(parts)));
+  if (a_dir == 0) {
     rot_wedge->rotate(RealVect(BASISV(1)), RealVect(BASISV(0)), point);
-  if (a_dir == 2)
+  }
+  if (a_dir == 2) {
     rot_wedge->rotate(RealVect(BASISV(1)), RealVect(BASISV(2)), point);
+  }
 
   m_baseIF = RefCountedPtr<BaseIF>(static_cast<BaseIF*>(rot_wedge));
 }
@@ -78,8 +81,7 @@ WedgeIF::WedgeIF(const WedgeIF& a_inputIF)
   m_baseIF = a_inputIF.m_baseIF;
 }
 
-WedgeIF::~WedgeIF()
-{}
+WedgeIF::~WedgeIF() = default;
 
 Real
 WedgeIF::value(const RealVect& a_pos) const

@@ -1,6 +1,7 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 /*
@@ -20,15 +21,9 @@
 #include <CD_NamespaceHeader.H>
 
 MFHelmholtzRobinEBBC::MFHelmholtzRobinEBBC(const int a_phase, const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC)
-  : MFHelmholtzEBBC(a_phase, a_jumpBC)
+  : MFHelmholtzEBBC(a_phase, a_jumpBC), m_useConstant(false), m_useFunction(false), m_order(-1), m_weight(-1)
 {
   CH_TIME("MFHelmholtzRobinEBBC::MFHelmholtzRobinEBBC(int, RefCountedPtr<MFHelmholtzJumpBC>)");
-
-  m_order  = -1;
-  m_weight = -1;
-
-  m_useConstant = false;
-  m_useFunction = false;
 }
 
 MFHelmholtzRobinEBBC::~MFHelmholtzRobinEBBC()
@@ -129,7 +124,6 @@ MFHelmholtzRobinEBBC::defineSinglePhase()
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
-    const Box      box     = dbl[din];
     const EBISBox& ebisbox = m_eblg.getEBISL()[din];
 
     BaseIVFAB<Real>&       weights  = m_boundaryWeights[din];
@@ -209,7 +203,7 @@ MFHelmholtzRobinEBBC::defineSinglePhase()
         // const std::string vofErr  = " on vof = ";
         // const std::string impErr  = " (this may cause multigrid divergence)";
 
-        // std::cout << baseErr << m_eblg.getDomain() << vofErr << vof << impErr << std::endl;
+        // std::cout << baseErr << m_eblg.getDomain() << vofErr << vof << impErr << endl;
 
         fluxStencil.clear();
       }
@@ -220,9 +214,9 @@ MFHelmholtzRobinEBBC::defineSinglePhase()
 }
 
 void
-MFHelmholtzRobinEBBC::applyEBFluxSinglePhase(VoFIterator&           a_singlePhaseVofs,
-                                             EBCellFAB&             a_Lphi,
-                                             const EBCellFAB&       a_phi,
+MFHelmholtzRobinEBBC::applyEBFluxSinglePhase(VoFIterator& a_singlePhaseVofs,
+                                             EBCellFAB&   a_Lphi,
+                                             const EBCellFAB& /*a_phi*/,
                                              const BaseIVFAB<Real>& a_Bcoef,
                                              const DataIndex&       a_dit,
                                              const Real&            a_beta,
@@ -264,8 +258,6 @@ MFHelmholtzRobinEBBC::applyEBFluxSinglePhase(VoFIterator&           a_singlePhas
 
     BoxLoops::loop(a_singlePhaseVofs, kernel);
   }
-
-  return;
 }
 
 VoFStencil
@@ -325,7 +317,7 @@ MFHelmholtzRobinEBBC::getInterpolationStencil(const VolIndex&              a_vof
   // M = Number of unknowns in Taylor expansion of order a_order.
   // K = Number of equations (displacements)
   const int M = LeastSquares::getTaylorExpansionSize(a_order);
-  const int K = displacements.size();
+  const int K = static_cast<int>(displacements.size());
 
   // If we have enough equations we can get an interpolation stencil.
   VoFStencil interpStencil;

@@ -74,7 +74,7 @@ _______________________
 
 ``chombo-discharge`` uses (approximations to) signed distance functions (SDFs) for describing geometries.
 Signed distance fields are functions :math:`f: \mathbb{R}^3\rightarrow \mathbb{R}` that describe the distance from the object.
-These functions are also *implicit functions*, i.e., :math:`f\left(\mathbf{x}\right)=0` describes the surface of the object, :math:`f\left(\mathbf{x}\right) > 0` decribes a point inside the object and :math:`f\left(\mathbf{x}\right) < 0` describes a point outside the object.
+These functions are also *implicit functions*, i.e., :math:`f\left(\mathbf{x}\right)=0` describes the surface of the object, :math:`f\left(\mathbf{x}\right) > 0` describes a point inside the object and :math:`f\left(\mathbf{x}\right) < 0` describes a point outside the object.
 
 Many EB applications only use the implicit function formulation, but ``chombo-discharge`` requires (an approximation to) the signed distance field for the following reasons:
 There are two reasons for this:
@@ -94,7 +94,7 @@ To illustrate the difference between an SDF and an implicit function, consider t
 
 Here, only :math:`d_1\left(\mathbf{x}\right)` is a signed distance function.    
 
-In ``chombo-discharge``, SDFs can be generated through analytic expressions, constructive solid geometry, or by supplying polygon tesselation.
+In ``chombo-discharge``, SDFs can be generated through analytic expressions, constructive solid geometry, or by supplying polygon tessellation.
 NURBS geometries are not supported.
 Fundamentally, all geometric objects are described using ``BaseIF`` objects from ``Chombo``, see :ref:`Chap:BaseIF`.
 
@@ -118,7 +118,7 @@ EBGeometry
 ^^^^^^^^^^
 
 While functions like :math:`R - \left|\mathbf{x}\right|` are quick to compute, a polygon surface may consist of hundreds of thousands of primitives (e.g., triangles).
-Generating signed distance function from polygon tesselations is quite involved as it requires computing the signed distance to the closest feature, which can be a planar polygon (e.g., a triangle), edge, or a vertex. 
+Generating signed distance function from polygon tessellations is quite involved as it requires computing the signed distance to the closest feature, which can be a planar polygon (e.g., a triangle), edge, or a vertex. 
 ``chombo-discharge`` supports such functions through the `EBGeometry <https://github.com/rmrsk/EBGeometry>`_ package.
 
 .. warning::
@@ -135,7 +135,7 @@ Additional details are provided in the `EBGeometry documentation <https://rmrsk.
    :width: 50%
    :align: center
 
-   Example of an SDF reconstruction and cut-cell grid from a surface tesselation in ``chombo-discharge``.
+   Example of an SDF reconstruction and cut-cell grid from a surface tessellation in ``chombo-discharge``.
 
 .. _Chap:GeometryGeneration:
 

@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_NewIntersectionIF.cpp
   @brief  Implementation of NewIntersectionIF.H
   @author Robert Marskar
@@ -16,16 +17,15 @@
 #include <CD_NewIntersectionIF.H>
 #include <CD_NamespaceHeader.H>
 
-NewIntersectionIF::NewIntersectionIF()
+NewIntersectionIF::NewIntersectionIF() : m_numFuncs(0)
 {
-  m_numFuncs = 0;
+
   m_impFuncs.resize(0);
 }
 
 NewIntersectionIF::NewIntersectionIF(const Vector<BaseIF*>& a_impFuncs)
+  : m_numFuncs(static_cast<int>(a_impFuncs.size()))
 {
-
-  m_numFuncs = a_impFuncs.size();
 
   m_impFuncs.resize(m_numFuncs);
 

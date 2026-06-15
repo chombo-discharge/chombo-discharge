@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_PhaseRealm.cpp
   @brief  Implementation of CD_PhaseRealm.H
   @author Robert Marskar
@@ -25,14 +26,11 @@
 #include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
-PhaseRealm::PhaseRealm()
+PhaseRealm::PhaseRealm() : m_isDefined(false), m_profile(false), m_verbose(false)
 {
   CH_TIME("PhaseRealm::PhaseRealm");
 
   // Default settings
-  m_isDefined = false;
-  m_profile   = false;
-  m_verbose   = false;
 
   this->registerOperator(s_eb_gradient);
   this->registerOperator(s_eb_irreg_interp);
@@ -43,15 +41,14 @@ PhaseRealm::PhaseRealm()
   pp.query("verbosity", m_verbose);
 }
 
-PhaseRealm::~PhaseRealm()
-{}
+PhaseRealm::~PhaseRealm() = default;
 
 void
 PhaseRealm::define(const Vector<DisjointBoxLayout>&      a_grids,
                    const Vector<ProblemDomain>&          a_domains,
                    const Vector<int>&                    a_refRat,
                    const Vector<Real>&                   a_dx,
-                   const RealVect                        a_probLo,
+                   const RealVect&                       a_probLo,
                    const int                             a_finestLevel,
                    const int                             a_ebGhost,
                    const int                             a_numGhost,
@@ -330,7 +327,7 @@ PhaseRealm::regridOperators(const int a_lmin)
 }
 
 void
-PhaseRealm::registerOperator(const std::string a_operator)
+PhaseRealm::registerOperator(const std::string& a_operator)
 {
   CH_TIME("PhaseRealm::registerOperator");
   if (m_verbose) {
@@ -338,12 +335,10 @@ PhaseRealm::registerOperator(const std::string a_operator)
   }
 
   // These are the supported operators - issue an error if we ask for something that is not supported.
-  if (!(a_operator.compare(s_eb_coar_ave) == 0 || a_operator.compare(s_eb_fill_patch) == 0 ||
-        a_operator.compare(s_eb_fine_interp) == 0 || a_operator.compare(s_eb_flux_reg) == 0 ||
-        a_operator.compare(s_eb_redist) == 0 || a_operator.compare(s_noncons_div) == 0 ||
-        a_operator.compare(s_eb_gradient) == 0 || a_operator.compare(s_particle_mesh) == 0 ||
-        a_operator.compare(s_eb_irreg_interp) == 0 || a_operator.compare(s_eb_multigrid) == 0 ||
-        a_operator.compare(s_levelset) == 0)) {
+  if (!(a_operator == s_eb_coar_ave || a_operator == s_eb_fill_patch || a_operator == s_eb_fine_interp ||
+        a_operator == s_eb_flux_reg || a_operator == s_eb_redist || a_operator == s_noncons_div ||
+        a_operator == s_eb_gradient || a_operator == s_particle_mesh || a_operator == s_eb_irreg_interp ||
+        a_operator == s_eb_multigrid || a_operator == s_levelset)) {
 
     const std::string str = "PhaseRealm::registerOperator - unknown operator '" + a_operator + "' requested";
     MayDay::Error(str.c_str());
@@ -355,7 +350,7 @@ PhaseRealm::registerOperator(const std::string a_operator)
 }
 
 bool
-PhaseRealm::queryOperator(const std::string a_operator) const
+PhaseRealm::queryOperator(const std::string& a_operator) const
 {
   CH_TIME("PhaseRealm::queryOperator");
   if (m_verbose) {
@@ -588,7 +583,6 @@ PhaseRealm::defineFillPatch(const int a_lmin)
 
   if (doThisOperator) {
 
-    const int     comps  = SpaceDim;
     const int     radius = m_numGhostCells;
     const IntVect ghost  = m_numGhostCells * IntVect::Unit;
 
@@ -636,7 +630,7 @@ PhaseRealm::defineEBCoarseToFineInterp(const int a_lmin)
 }
 
 void
-PhaseRealm::defineFluxReg(const int a_lmin, const int a_regsize)
+PhaseRealm::defineFluxReg(const int a_lmin, const int /*a_regsize*/)
 {
   CH_TIME("PhaseRealm::defineFluxReg");
   if (m_verbose) {
@@ -653,8 +647,6 @@ PhaseRealm::defineFluxReg(const int a_lmin, const int a_regsize)
 
   if (doThisOperator) {
 
-    const int comps = a_regsize;
-
     for (int lvl = std::max(0, a_lmin - 1); lvl <= m_finestLevel; lvl++) {
 
       const bool hasFine = lvl < m_finestLevel;
@@ -669,7 +661,7 @@ PhaseRealm::defineFluxReg(const int a_lmin, const int a_regsize)
 }
 
 void
-PhaseRealm::defineRedistOper(const int a_lmin, const int a_regsize)
+PhaseRealm::defineRedistOper(const int a_lmin, const int /*a_regsize*/)
 {
   CH_TIME("PhaseRealm::defineRedistOper");
   if (m_verbose) {
@@ -740,7 +732,7 @@ PhaseRealm::defineParticleMesh()
 }
 
 void
-PhaseRealm::defineGradSten(const int a_lmin)
+PhaseRealm::defineGradSten(const int /*a_lmin*/)
 {
   CH_TIME("PhaseRealm::defineGradSten");
   if (m_verbose) {
@@ -817,7 +809,7 @@ PhaseRealm::defineIrregSten()
 }
 
 void
-PhaseRealm::defineNonConservativeDivergence(const int a_lmin)
+PhaseRealm::defineNonConservativeDivergence(const int /*a_lmin*/)
 {
   CH_TIME("PhaseRealm::defineNonConservativeDivergence");
   if (m_verbose) {

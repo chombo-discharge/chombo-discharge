@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_MFHelmholtzDirichletEBBC.cpp
   @brief  Implementation of CD_MFHelmholtzDirichletEBBC.H
   @author Robert Marskar
@@ -19,17 +20,16 @@
 #include <CD_NamespaceHeader.H>
 
 MFHelmholtzDirichletEBBC::MFHelmholtzDirichletEBBC(const int a_phase, const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC)
-  : MFHelmholtzEBBC(a_phase, a_jumpBC)
+  : MFHelmholtzEBBC(a_phase, a_jumpBC),
+    m_useConstant(false),
+    m_useFunction(false),
+    m_order(-1),
+    m_weight(-1),
+    m_dropOrder(false)
 {
   CH_TIME("MFHelmholtzDirichletEBBC::MFHelmholtzDirichletEBBC(int, RefCountedPtr<MFHelmholtzJumpBC>)");
 
   // Default settings.
-  m_order  = -1;
-  m_weight = -1;
-
-  m_useConstant = false;
-  m_useFunction = false;
-  m_dropOrder   = false;
 }
 
 MFHelmholtzDirichletEBBC::~MFHelmholtzDirichletEBBC()
@@ -225,7 +225,7 @@ MFHelmholtzDirichletEBBC::defineSinglePhase()
         // const std::string vofErr  = " on vof = ";
         // const std::string impErr  = " (this may cause multigrid divergence)";
 
-        // std::cout << baseErr << m_eblg.getDomain() << vofErr << vof << impErr << std::endl;
+        // std::cout << baseErr << m_eblg.getDomain() << vofErr << vof << impErr << endl;
 
         weights(vof, m_comp) = 0.0;
         stencils(vof, m_comp).clear();
@@ -237,9 +237,9 @@ MFHelmholtzDirichletEBBC::defineSinglePhase()
 }
 
 void
-MFHelmholtzDirichletEBBC::applyEBFluxSinglePhase(VoFIterator&           a_singlePhaseVofs,
-                                                 EBCellFAB&             a_Lphi,
-                                                 const EBCellFAB&       a_phi,
+MFHelmholtzDirichletEBBC::applyEBFluxSinglePhase(VoFIterator& a_singlePhaseVofs,
+                                                 EBCellFAB&   a_Lphi,
+                                                 const EBCellFAB& /*a_phi*/,
                                                  const BaseIVFAB<Real>& a_Bcoef,
                                                  const DataIndex&       a_dit,
                                                  const Real&            a_beta,
@@ -275,8 +275,6 @@ MFHelmholtzDirichletEBBC::applyEBFluxSinglePhase(VoFIterator&           a_single
 
     BoxLoops::loop(a_singlePhaseVofs, kernel);
   }
-
-  return;
 }
 
 #include <CD_NamespaceFooter.H>

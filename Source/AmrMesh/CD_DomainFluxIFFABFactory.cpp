@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_DomainFluxIFFABFactory.cpp
   @brief  Implementation of CD_DomainFluxIFFABFactory.H
   @author Robert Marskar
@@ -14,13 +15,10 @@
 #include <CD_NamespaceHeader.H>
 
 DomainFluxIFFABFactory::DomainFluxIFFABFactory(const EBISLayout& a_ebisl, const ProblemDomain& a_domain)
-{
-  m_ebisl  = a_ebisl;
-  m_domain = a_domain;
-}
-
-DomainFluxIFFABFactory::~DomainFluxIFFABFactory()
+  : m_ebisl(a_ebisl), m_domain(a_domain)
 {}
+
+DomainFluxIFFABFactory::~DomainFluxIFFABFactory() = default;
 
 DomainFluxIFFAB*
 DomainFluxIFFABFactory::create(const Box& a_box, int a_nComp, const DataIndex& a_dit) const

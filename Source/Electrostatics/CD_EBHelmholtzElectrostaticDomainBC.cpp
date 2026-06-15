@@ -1,6 +1,7 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 /*
@@ -16,10 +17,9 @@
 #include <CD_NamespaceHeader.H>
 
 EBHelmholtzElectrostaticDomainBC::EBHelmholtzElectrostaticDomainBC(const ElectrostaticDomainBc& a_electrostaticBCs)
+  : m_electrostaticBCs(a_electrostaticBCs)
 {
   CH_TIME("EBHelmholtzElectrostaticDomainBC::EBHelmholtzElectrostaticDomainBC()");
-
-  m_electrostaticBCs = a_electrostaticBCs;
 
   for (int dir = 0; dir < SpaceDim; dir++) {
     for (SideIterator sit; sit.ok(); ++sit) {
@@ -81,7 +81,7 @@ EBHelmholtzElectrostaticDomainBC::define(const Location::Cell a_dataLocation,
   CH_TIME(
     "EBHelmholtzElectrostaticDomainBC::define(Location::Cell, EBLevelGrid, RefCountedPtr<LD<EBFluxFAB> >, RealVect, Real)");
 
-  // This function is called by EBHelmholtzOp and is used for defining the boudnary condition object (it needs stencils and all that). Since
+  // This function is called by EBHelmholtzOp and is used for defining the boundary condition object (it needs stencils and all that). Since
   // this class is just a wrapper for Dirichlet/Neumann BCs, we've allocated the BC objects already (one for each side). But they have not
   // been defined yet, so we do that here.
 

@@ -1,10 +1,10 @@
-/*!
+/**
   chombo-discharge
   Copyright © 2026 SINTEF Energy Research.
   Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
 */
 
-/*!
+/**
   @file   CD_PetscGrid.cpp
   @brief  Implementation of CD_PetscGrid.H
   @author Robert Marskar
@@ -508,7 +508,7 @@ PetscGrid::putPetscInChombo(MFAMRCellData& a_y, const Vec& a_x) const noexcept
 }
 
 void
-PetscGrid::dumpPetscGrid(const std::string a_filename) const noexcept
+PetscGrid::dumpPetscGrid(const std::string& a_filename) const noexcept
 {
   CH_TIME("PetscGrid::dumpPetscGrid");
   if (m_verbose) {

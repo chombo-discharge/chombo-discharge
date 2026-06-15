@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2022 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_TracerParticleStepperImplem.H
   @brief  Implementation of CD_TracerParticleStepper.H
   @author Robert Marskar
 */
 
-#ifndef CD_TracerParticleStepperImplem_H
-#define CD_TracerParticleStepperImplem_H
+#ifndef CD_TRACERPARTICLESTEPPERIMPLEM_H
+#define CD_TRACERPARTICLESTEPPERIMPLEM_H
 
 // Chombo includes
 #include <CH_Timer.H>
@@ -268,7 +269,7 @@ template <typename P>
 inline void
 TracerParticleStepper<P>::writePlotData(LevelData<EBCellFAB>& a_output,
                                         int&                  a_icomp,
-                                        const std::string     a_outputRealm,
+                                        const std::string&    a_outputRealm,
                                         const int             a_level) const
 {
   CH_TIME("TracerParticleStepper::writePlotData(EBAMRCellData, Vector<std::string>, int)");

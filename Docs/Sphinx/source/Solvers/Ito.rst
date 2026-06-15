@@ -27,7 +27,7 @@ It derives from :ref:`Chap:GenericParticle` as follows:
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoParticle.H
    :language: c++
-   :lines: 39
+   :lines: 40
    :dedent: 0
 
 From the signature one can see that ``ItoParticle`` contains a number of extra class ``Real`` and ``RealVect`` class members.
@@ -51,7 +51,7 @@ This class can advance a set of computational particles (see :ref:`Chap:ItoParti
 #. Move particles the a microscopic drift-diffusion model.
 #. Compute particle intersection with embedded boundaries and domain edges.
 #. Deposit particles and other particle types on the mesh.
-#. Interpolate velocities and diffusion coefficients to the particle positons.
+#. Interpolate velocities and diffusion coefficients to the particle positions.
 #. Manage superparticle splitting and merging.
 
 Internally, ``ItoSolver`` stores its particles in various ``ParticleContainer<ItoParticle>`` containers.
@@ -78,7 +78,7 @@ The constructor for the ``ItoSpecies`` class is
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSpecies.H
    :language: c++
-   :lines: 35-42
+   :lines: 36-43
    :dedent: 2
 
 Here, ``a_name`` indicates a variable name for the solver.
@@ -101,14 +101,14 @@ In particular, there are two data members that must be populated:
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSpecies.H
    :language: c++
-   :lines: 147-155
+   :lines: 152-160
    :dedent: 2
 
 These can either be populated during construction, or explicitly supplied via the following set functions:
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSpecies.H
    :language: c++
-   :lines: 100-112
+   :lines: 105-117
    :dedent: 2
 
 When ``ItoSolver`` initializes the data in the solver, it will copy the particle list ``m_initialParticles`` from the species and into the solver.
@@ -145,7 +145,7 @@ The particles are available from the solver through the function
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 608-613
+   :lines: 631-637
    :dedent: 2
 
 Usually, ``ItoSolver`` will perform a drift-diffusion advance and the user will then check if some of the particles crossed into the EB.
@@ -158,7 +158,7 @@ Remapping particles
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 848-859
+   :lines: 864-875
    :dedent: 2
 
 The bottom function lets the user remap any ``ParticleContainer<ItoParticle>`` that lives in the solver.
@@ -172,7 +172,7 @@ The most general version is given below:
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 308-322
+   :lines: 333-347
    :dedent: 2
 
 This version permits the user to select any particle container ``a_particles`` and deposit them onto some pre-allocated mesh storage ``a_phi``.
@@ -187,7 +187,7 @@ A simpler version that deposits the bulk particles as a density on the mesh is
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 268-274
+   :lines: 293-299
    :dedent: 2
 
 The particles are deposited into the class member ``m_phi``, which stores the particle density on the mesh. 
@@ -195,7 +195,7 @@ This data can then be fetched with
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 629-634
+   :lines: 654-659
    :dedent: 2
    
 For the full list of available deposition functions, see the ``ItoSolver`` C++ API `<https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classItoSolver.html>`_.
@@ -215,7 +215,7 @@ Functionality for the above deposited quantities exist as the following function
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 170-177, 192-201
+   :lines: 204-217,228-240
    :dedent: 2
 
 .. _Chap:ItoInterpolation:
@@ -243,7 +243,7 @@ Complete interpolation of the particle velocity consists of calling two function
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 724-729, 705-712
+   :lines: 749-755,731-737
    :dedent: 2
 
 Here, the calling sequence is such that the mobilities must be interpolated first, and then the velocity fields. 
@@ -282,7 +282,7 @@ The function signatures is
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 738-743
+   :lines: 763-768
    :dedent: 2
 
 Particle intersections
@@ -295,7 +295,7 @@ The most relevant function is
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 389-404
+   :lines: 414-429
    :dedent: 2
 
 Here, ``EbIntersection`` is a just an enum for putting logic into how the intersection is computed.
@@ -322,7 +322,7 @@ This routine is implemented as
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 962-966
+   :lines: 986-991
    :dedent: 2
 
 which returns a CFL-like condition
@@ -338,7 +338,7 @@ The signatures for the diffusion time step are similar to the ones for drift:
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 983-987
+   :lines: 1010-1015
    :dedent: 2
 
 which returns a CFL-like condition
@@ -356,7 +356,7 @@ A combination of the advection and diffusion time step routines also exists as
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 881-890
+   :lines: 899-909
    :dedent: 2
 
 This time step limitation is inspired by fully explicit and non-split fluid models, and is calculated as
@@ -375,7 +375,7 @@ The function for splitting and merging the particles is in all cases
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 766-772
+   :lines: 791-797
    :dedent: 2
 
 Calling this function will merge/split the particles.
@@ -399,14 +399,14 @@ In addition, the user must first supply a particle merging function:
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 68-73
+   :lines: 92-97
    :dedent: 2
 
 In the code above, ``ParticleManagement::ParticleMerger<P>`` is an alias:
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleManagement.H
    :language: c++
-   :lines: 33-41
+   :lines: 34-42
    :dedent: 2  
 
 .. tip::

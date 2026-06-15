@@ -400,40 +400,37 @@ for test in config.sections():
                             print("\t Regression test '" + str(test) + "' has generated benchmark files.")
                         elif not args.benchmark and args.compare:
                             # --------------------------------------------------
-                            # Loop through all files that were generated and
-                            # compare them with h5diff. Print an error message
-                            # if files don't match.
+                            # Glob for all output files that were generated and
+                            # compare each one with its benchmark counterpart.
+                            # This handles early termination (keepGoing()==false)
+                            # and avoids assuming files exist at specific step
+                            # numbers derived from nsteps/plot_interval.
                             # --------------------------------------------------
-                            for i in range (0, nsteps+nplot, nplot):
+                            output_prefix = str(config[str(test)]['output'])
+                            bench_prefix  = str(config[str(test)]['benchmark'])
+                            reg_pattern   = "plt/" + output_prefix + ".step*." + str(dim) + "d.hdf5"
+                            reg_files     = sorted(glob.glob(reg_pattern))
 
-                                # --------------------------------------------------
-                                # Get the two files that will be compared
-                                # --------------------------------------------------
-                                regFile =  "plt/" + str(config[str(test)]['output'])
-                                benFile =  "plt/" + str(config[str(test)]['benchmark'])
+                            if not reg_files:
+                                print("\t No output files found to compare")
+                            else:
+                                for regFile in reg_files:
+                                    benFile = "plt/" + bench_prefix + regFile[len("plt/" + output_prefix):]
 
-                                regFile = regFile + (".step{0:07}.".format(i)) + str(dim) + "d.hdf5"
-                                benFile = benFile + (".step{0:07}.".format(i)) + str(dim) + "d.hdf5"
-
-                                if not os.path.exists(benFile):
-                                    print("\t Benchmark file(s) not found, generate them with --benchmark")
-                                else:
-                                    print("\t Comparing files " + regFile +  " and " + str(benFile))
-
-                                    # --------------------------------------------------
-                                    # Run h5diff and compare the two files. Print a
-                                    # petite message if they match, and a huge-ass
-                                    # warning if they don't.
-                                    # --------------------------------------------------
-                                    compare_command = "h5diff " + regFile + " " + benFile
-                                    if args.silent:
-                                        compare_code = subprocess.call(compare_command, shell=True, stdout=DEVNULL, stderr=DEVNULL)
+                                    if not os.path.exists(benFile):
+                                        print("\t Benchmark file(s) not found, generate them with --benchmark")
                                     else:
-                                        compare_code = subprocess.call(compare_command, shell=True)
+                                        print("\t Comparing files " + regFile +  " and " + str(benFile))
 
-                                        if compare_code != 0:
-                                            print("\t FILES '" + regFile +  "' AND '" + benFile + "' DO NOT MATCH - REGRESSION TEST FAILED")
+                                        compare_command = "h5diff " + regFile + " " + benFile
+                                        if args.silent:
+                                            compare_code = subprocess.call(compare_command, shell=True, stdout=DEVNULL, stderr=DEVNULL)
                                         else:
-                                            print("\t Benchmark test succeded for files " + regFile +  " and " + str(benFile))
+                                            compare_code = subprocess.call(compare_command, shell=True)
+
+                                            if compare_code != 0:
+                                                print("\t FILES '" + regFile +  "' AND '" + benFile + "' DO NOT MATCH - REGRESSION TEST FAILED")
+                                            else:
+                                                print("\t Benchmark test succeeded for files " + regFile +  " and " + str(benFile))
 
 exit(ret_code)

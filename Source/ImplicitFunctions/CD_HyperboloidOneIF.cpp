@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_HyperboloidOneIF.cpp
   @brief  Implementation of CD_HyperboloidOneIF.H
   @author Robert Marskar
@@ -14,23 +15,21 @@
 #include <CD_NamespaceHeader.H>
 
 HyperboloidOneIF::HyperboloidOneIF(const RealVect& a_radii, const RealVect& a_center, const bool& a_inside)
+  : m_radii(a_radii), m_sign(RealVect::Unit), m_center(a_center), m_inside(a_inside)
 {
-  m_radii              = a_radii;
-  m_center             = a_center;
-  m_inside             = a_inside;
-  m_radii2             = m_radii * m_radii;
-  m_sign               = RealVect::Unit;
+
+  m_radii2 = m_radii * m_radii;
+
   m_sign[SpaceDim - 1] = -1.;
 }
 
 HyperboloidOneIF::HyperboloidOneIF(const HyperboloidOneIF& a_inputIF)
-{
-  m_radii  = a_inputIF.m_radii;
-  m_center = a_inputIF.m_center;
-  m_inside = a_inputIF.m_inside;
-  m_radii2 = a_inputIF.m_radii2;
-  m_sign   = a_inputIF.m_sign;
-}
+  : m_radii(a_inputIF.m_radii),
+    m_radii2(a_inputIF.m_radii2),
+    m_sign(a_inputIF.m_sign),
+    m_center(a_inputIF.m_center),
+    m_inside(a_inputIF.m_inside)
+{}
 
 Real
 HyperboloidOneIF::value(const RealVect& a_point) const

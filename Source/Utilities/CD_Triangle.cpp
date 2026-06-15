@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2026 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_Triangle.cpp
   @brief  Implementation of CD_Triangle.H
   @author Robert Marskar
@@ -25,8 +26,7 @@ Triangle::Triangle(const std::array<Vec3, 3>& a_vertexPositions) noexcept
   this->computeArea();
 }
 
-Triangle::~Triangle() noexcept
-{}
+Triangle::~Triangle() noexcept = default;
 
 void
 Triangle::setVertexPositions(const std::array<Vec3, 3>& a_vertexPositions) noexcept
@@ -55,10 +55,6 @@ Triangle::projectToTrianglePlane(const Vec3& a_point) const noexcept
 bool
 Triangle::isInside(const Vec3& a_point) const noexcept
 {
-  auto sgn = [](const Real x) -> int {
-    return (x >= 0.0) ? 1 : -1;
-  };
-
   const Vec3 A = m_vertexPositions[0] - a_point;
   const Vec3 B = m_vertexPositions[1] - a_point;
   const Vec3 C = m_vertexPositions[2] - a_point;
@@ -71,7 +67,7 @@ Triangle::isInside(const Vec3& a_point) const noexcept
 }
 
 Real
-Triangle::computeTriangleArea(const Vec3 a_x1, const Vec3 a_x2, const Vec3 a_x3) const noexcept
+Triangle::computeTriangleArea(const Vec3& a_x1, const Vec3& a_x2, const Vec3& a_x3) noexcept
 {
   const Vec3 a = a_x2 - a_x1;
   const Vec3 b = a_x3 - a_x1;
@@ -114,19 +110,17 @@ Triangle::interpolate(const Vec3& a_point) const noexcept
       j = (d0 <= d1) ? 0 : 1;
     }
 
-    const Real di    = (i == 0) ? d0 : (i == 1) ? d1 : d2;
-    const Real dj    = (j == 0) ? d0 : (j == 1) ? d1 : d2;
-    const Real denom = di + dj;
+    const std::array<Real, 3> dArr  = {d0, d1, d2};
+    const Real                di    = dArr[i];
+    const Real                dj    = dArr[j];
+    const Real                denom = di + dj;
 
     const Real wi = (denom > Real(0)) ? dj / denom : Real(0.5);
     const Real wj = (denom > Real(0)) ? di / denom : Real(0.5);
 
-    const Real dataI = (i == 0)   ? std::get<0>(m_metaData)
-                       : (i == 1) ? std::get<1>(m_metaData)
-                                  : std::get<2>(m_metaData);
-    const Real dataJ = (j == 0)   ? std::get<0>(m_metaData)
-                       : (j == 1) ? std::get<1>(m_metaData)
-                                  : std::get<2>(m_metaData);
+    const std::array<Real, 3> mArr  = {std::get<0>(m_metaData), std::get<1>(m_metaData), std::get<2>(m_metaData)};
+    const Real                dataI = mArr[i];
+    const Real                dataJ = mArr[j];
 
     return wi * dataI + wj * dataJ;
   }

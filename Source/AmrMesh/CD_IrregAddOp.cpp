@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2023 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_IrregAddOp.cpp
   @brief  Implementation of CD_IrregAddOp.H
   @author Robert Marskar
@@ -53,8 +54,8 @@ IrregAddOp::linearIn(BaseIVFAB<Real>& a_data, void* a_buffer, const Box& a_regio
 }
 
 void
-IrregAddOp::op(BaseIVFAB<Real>&       a_dst,
-               const Box&             a_regionFrom,
+IrregAddOp::op(BaseIVFAB<Real>& a_dst,
+               const Box& /*a_regionFrom*/,
                const Interval&        a_dstVars,
                const Box&             a_regionTo,
                const BaseIVFAB<Real>& a_src,

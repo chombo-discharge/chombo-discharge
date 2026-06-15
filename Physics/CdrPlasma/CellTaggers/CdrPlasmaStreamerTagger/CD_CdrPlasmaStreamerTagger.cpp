@@ -1,12 +1,13 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_CdrPlasmaStreamerTagger.cpp
-  @brief  Implementation CD_CdrPlasmaStreamerTagger.H
-  @author Robert Marskar
+/**
+   @file   CD_CdrPlasmaStreamerTagger.cpp
+   @brief  Implementation of CD_CdrPlasmaStreamerTagger.H
+   @author Robert Marskar
 */
 
 // Chombo includes
@@ -76,15 +77,15 @@ CdrPlasmaStreamerTagger::parseRuntimeOptions()
 }
 
 Vector<Real>
-CdrPlasmaStreamerTagger::tracer(const RealVect a_pos,
-                                const Real     a_time,
-                                const Real     a_dx,
-                                const RealVect a_electricField,
-                                const Real     a_minElectricField,
-                                const Real     a_maxElectricField,
-                                const RealVect a_gradElectricField,
-                                const Real     a_minGradElectricField,
-                                const Real     a_maxGradElectricField) const
+CdrPlasmaStreamerTagger::tracer(const RealVect& a_pos,
+                                const Real /*a_time*/,
+                                const Real /*a_dx*/,
+                                const RealVect& a_electricField,
+                                const Real /*a_minElectricField*/,
+                                const Real a_maxElectricField,
+                                const RealVect& /*a_gradElectricField*/,
+                                const Real /*a_minGradElectricField*/,
+                                const Real /*a_maxGradElectricField*/) const
 {
   Vector<Real> tracers(m_numTracers, 0.0);
 
@@ -101,12 +102,12 @@ CdrPlasmaStreamerTagger::tracer(const RealVect a_pos,
 }
 
 bool
-CdrPlasmaStreamerTagger::coarsenCell(const RealVect         a_pos,
-                                     const Real             a_time,
-                                     const Real             a_dx,
-                                     const int              a_lvl,
-                                     const Vector<Real>     a_tracers,
-                                     const Vector<RealVect> a_gradTracers) const
+CdrPlasmaStreamerTagger::coarsenCell(const RealVect& /*a_pos*/,
+                                     const Real /*a_time*/,
+                                     const Real              a_dx,
+                                     const int               a_lvl,
+                                     const Vector<Real>&     a_tracers,
+                                     const Vector<RealVect>& a_gradTracers) const
 {
   bool coarsen = false;
 
@@ -126,12 +127,12 @@ CdrPlasmaStreamerTagger::coarsenCell(const RealVect         a_pos,
 }
 
 bool
-CdrPlasmaStreamerTagger::refineCell(const RealVect         a_pos,
-                                    const Real             a_time,
-                                    const Real             a_dx,
-                                    const int              a_lvl,
-                                    const Vector<Real>     a_tracers,
-                                    const Vector<RealVect> a_gradTracers) const
+CdrPlasmaStreamerTagger::refineCell(const RealVect& a_pos,
+                                    const Real /*a_time*/,
+                                    const Real              a_dx,
+                                    const int               a_lvl,
+                                    const Vector<Real>&     a_tracers,
+                                    const Vector<RealVect>& a_gradTracers) const
 {
   // TLDR: Refine if either criterion are met.
 

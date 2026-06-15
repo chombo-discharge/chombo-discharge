@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2023 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_CoarseInterpQuadCF.cpp
   @brief  Implementation of CD_CoarseInterpQuadCF.H
   @author Robert Marskar
@@ -18,11 +19,9 @@
 #include <CD_CoarseInterpQuadCF.H>
 #include <CD_NamespaceHeader.H>
 
-CoarseInterpQuadCF::CoarseInterpQuadCF() noexcept
+CoarseInterpQuadCF::CoarseInterpQuadCF() noexcept : m_isDefined(false)
 {
   CH_TIME("CoarseInterpQuadCF::CoarseInterpQuadCF()");
-
-  m_isDefined = false;
 }
 
 CoarseInterpQuadCF::~CoarseInterpQuadCF() noexcept
@@ -310,9 +309,9 @@ CoarseInterpQuadCF::computeSecondDeriv(const FArrayBox& a_coarPhi,
 }
 
 Real
-CoarseInterpQuadCF::computeMixedDeriv(const FArrayBox& a_coarPhi,
-                                      const IntVect&   a_ivCoar,
-                                      const int        a_coarVar) const noexcept
+CoarseInterpQuadCF::computeMixedDeriv([[maybe_unused]] const FArrayBox& a_coarPhi,
+                                      const IntVect&                    a_ivCoar,
+                                      [[maybe_unused]] int              a_coarVar) const noexcept
 {
   CH_TIME("CoarseInterpQuadCF::computeMixedDeriv");
 

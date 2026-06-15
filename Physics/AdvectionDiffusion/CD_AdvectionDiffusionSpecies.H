@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_AdvectionDiffusionSpecies.H
-  @brief  Simple species for AdvectionDiffusion test problem
-  @author Robert Marskar
+/**
+   @file   CD_AdvectionDiffusionSpecies.H
+   @brief  Declaration of the Physics::AdvectionDiffusion::AdvectionDiffusionSpecies class
+   @author Robert Marskar
 */
 
-#ifndef CD_AdvectionDiffusionSpecies_H
-#define CD_AdvectionDiffusionSpecies_H
+#ifndef CD_ADVECTIONDIFFUSIONSPECIES_H
+#define CD_ADVECTIONDIFFUSIONSPECIES_H
 
 // Our includes
 #include <CD_CdrSpecies.H>
@@ -19,49 +20,80 @@
 namespace Physics {
   namespace AdvectionDiffusion {
 
-    /*!
-      @brief Advection and diffused species for AdvectionDiffusionStepper
-      @details The initial conditions and mobility/diffusion settings are initialized upon construction.
+    /**
+       @brief Concrete CdrSpecies implementation for the advection-diffusion test problem.
+       @details This class defines a single passive scalar species for use with
+       AdvectionDiffusionStepper. The initial data, mobility, and diffusivity are set at
+       construction time. The species carries no net charge.
     */
     class AdvectionDiffusionSpecies : public CdrSpecies
     {
     public:
-      /*!
-	@brief Constructor
-	@param[in] a_initialData Initial data
-	@param[in] a_mobile      Mobile or not
-	@param[in] a_diffusive   Diffusive or not
+      /**
+         @brief Full constructor.
+         @param[in] a_initialData Functor returning the initial scalar concentration at a given position.
+         @param[in] a_mobile      If true, the species is advected by the velocity field.
+         @param[in] a_diffusive   If true, the species undergoes diffusion.
       */
       AdvectionDiffusionSpecies(const std::function<Real(const RealVect& a_pos)>& a_initialData,
                                 const bool                                        a_mobile,
                                 const bool                                        a_diffusive)
+        : m_initialData(a_initialData)
       {
-        m_initialData  = a_initialData;
         m_isMobile     = a_mobile;
         m_isDiffusive  = a_diffusive;
         m_chargeNumber = 0;
         m_name         = "AdvectionDiffusionSpecies";
       }
 
-      /*!
-	@brief Destructor
+      /**
+         @brief Destructor.
       */
-      virtual ~AdvectionDiffusionSpecies()
-      {}
+      ~AdvectionDiffusionSpecies() override = default;
 
-      /*!
-	@brief Initial data. 
-	@details This returns a super-Gaussian blob. 
-	@param[in] a_pos  Position.
-	@param[in] a_time Time
+      /**
+         @brief Copy constructor.
+         @param[in] a_other Object to copy.
+      */
+      AdvectionDiffusionSpecies(const AdvectionDiffusionSpecies& a_other) = default;
+
+      /**
+         @brief Copy assignment operator.
+         @param[in] a_other Object to copy.
+         @return Reference to this object.
+      */
+      AdvectionDiffusionSpecies&
+      operator=(const AdvectionDiffusionSpecies& a_other) = default;
+
+      /**
+         @brief Move constructor.
+         @param[in,out] a_other Object to move from.
+      */
+      AdvectionDiffusionSpecies(AdvectionDiffusionSpecies&& a_other) = default;
+
+      /**
+         @brief Move assignment operator.
+         @param[in,out] a_other Object to move from.
+         @return Reference to this object.
+      */
+      AdvectionDiffusionSpecies&
+      operator=(AdvectionDiffusionSpecies&& a_other) = default;
+
+      /**
+         @brief Return the initial scalar concentration at a given position and time.
+         @param[in] a_pos Physical position.
+         @return Initial concentration evaluated at a_pos.
       */
       Real
-      initialData(const RealVect a_pos, const Real a_time) const override
+      initialData(const RealVect& a_pos, const Real /*a_time*/) const override
       {
         return m_initialData(a_pos);
       }
 
     protected:
+      /**
+         @brief Functor encoding the initial concentration profile.
+      */
       std::function<Real(const RealVect& a_pos)> m_initialData;
     };
   } // namespace AdvectionDiffusion

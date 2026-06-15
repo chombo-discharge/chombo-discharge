@@ -1,6 +1,7 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 /*
@@ -15,7 +16,6 @@
 #include <EBCellFactory.H>
 #include <EBLevelGrid.H>
 #include <EBFluxFactory.H>
-#include <EBCellFactory.H>
 #include <EBLevelDataOps.H>
 #include <CH_Timer.H>
 
@@ -73,14 +73,12 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
     m_beta(a_beta),
     m_dx(a_dx),
     m_probLo(a_probLo),
-    m_eblgFine(),
+
     m_eblg(a_eblg),
-    m_eblgCoFi(),
-    m_eblgCoar(),
-    m_eblgCoarMG(),
+
+    m_validCells(a_validCells),
     m_domainBc(a_domainBc),
     m_ebBc(a_ebBc),
-    m_validCells(a_validCells),
     m_interpolator(a_interpolator),
     m_fluxReg(a_fluxReg),
     m_coarAve(a_coarAve),
@@ -527,7 +525,7 @@ EBHelmholtzOp::preCond(LevelData<EBCellFAB>& a_corr, const LevelData<EBCellFAB>&
   CH_TIME("EBHelmholtzOp::preCond");
 
   this->assignLocal(a_corr, a_residual);
-  this->scaleLocal(a_corr, m_relCoef);
+  scaleLocal(a_corr, m_relCoef);
 
   this->relax(a_corr, a_residual, m_numSmoothPreCond);
 }
@@ -660,7 +658,7 @@ EBHelmholtzOp::scale(LevelData<EBCellFAB>& a_lhs, const Real& a_scale)
 }
 
 void
-EBHelmholtzOp::scaleLocal(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs) const noexcept
+EBHelmholtzOp::scaleLocal(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs) noexcept
 {
   CH_TIME("EBHelmholtzOp::scaleLocal");
 
@@ -681,7 +679,7 @@ EBHelmholtzOp::scaleLocal(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB
 }
 
 Real
-EBHelmholtzOp::norm(const LevelData<EBCellFAB>& a_rhs, const int a_order)
+EBHelmholtzOp::norm(const LevelData<EBCellFAB>& a_rhs, const int /*a_order*/)
 {
   CH_TIMERS("EBHelmholtzOp::norm");
   CH_TIMER("EBHelmholtzOp::norm::regular_cells", t1);
@@ -743,7 +741,7 @@ EBHelmholtzOp::setToZero(LevelData<EBCellFAB>& a_lhs)
 }
 
 void
-EBHelmholtzOp::createCoarser(LevelData<EBCellFAB>& a_coarse, const LevelData<EBCellFAB>& a_fine, bool a_ghosted)
+EBHelmholtzOp::createCoarser(LevelData<EBCellFAB>& a_coarse, const LevelData<EBCellFAB>& a_fine, bool /*a_ghosted*/)
 {
   CH_TIME("EBHelmholtzOp::createCoarser(LD<EBCellFAB>, LD<EBCellFAB>, bool)");
 
@@ -753,7 +751,7 @@ EBHelmholtzOp::createCoarser(LevelData<EBCellFAB>& a_coarse, const LevelData<EBC
 }
 
 void
-EBHelmholtzOp::createCoarsened(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const int& a_refRat)
+EBHelmholtzOp::createCoarsened(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const int& /*a_refRat*/)
 {
   CH_TIME("EBHelmholtzOp::createCoarsened(LD<EBCellFAB>, LD<EBCellFAB>, bool)");
 
@@ -819,7 +817,7 @@ EBHelmholtzOp::AMROperator(LevelData<EBCellFAB>&             a_Lphi,
     // it might fetch potentially bogus data. A clunky way of handling this is to coarsen the data on the fine level
     // first. The best solution would probably be to have the EB flux stencil reach directly into the fine level.
     if (m_hasFine && m_doCoarsen) {
-      EBHelmholtzOp* fineOp = (EBHelmholtzOp*)a_finerOp;
+      auto* fineOp = (EBHelmholtzOp*)a_finerOp;
       fineOp->coarsenCell((LevelData<EBCellFAB>&)a_phi, a_phiFine);
     }
 
@@ -854,7 +852,7 @@ EBHelmholtzOp::refluxFreeAMROperator(LevelData<EBCellFAB>&             a_Lphi,
   // it might fetch potentially bogus data. A clunky way of handling this is to coarsen the data on the fine level
   // first. The best solution would probably be to have the EB flux stencil reach directly into the fine level.
   if (m_hasFine && m_doCoarsen) {
-    EBHelmholtzOp* fineOp = (EBHelmholtzOp*)a_finerOp;
+    auto* fineOp = (EBHelmholtzOp*)a_finerOp;
     fineOp->coarsenCell((LevelData<EBCellFAB>&)a_phi, a_phiFine);
   }
 
@@ -864,7 +862,7 @@ EBHelmholtzOp::refluxFreeAMROperator(LevelData<EBCellFAB>&             a_Lphi,
   // are there because MFHelmholtzOp might decide to update ghost cells for us, in
   // which case we won't redo them.
   if (m_doExchange) {
-    LevelData<EBCellFAB>& phi = (LevelData<EBCellFAB>&)a_phi;
+    auto& phi = (LevelData<EBCellFAB>&)a_phi;
 
     phi.exchange(m_exchangeCopier);
   }
@@ -879,11 +877,11 @@ EBHelmholtzOp::refluxFreeAMROperator(LevelData<EBCellFAB>&             a_Lphi,
   // although this MIGHT have been done already we have no guarantee of that. Then we coarsen those fluxes
   // onto this level.
   if (m_hasFine) {
-    EBHelmholtzOp* fineOp = (EBHelmholtzOp*)a_finerOp;
+    auto* fineOp = (EBHelmholtzOp*)a_finerOp;
 
     fineOp->allocateFlux();
 
-    LevelData<EBCellFAB>& phiFine = (LevelData<EBCellFAB>&)a_phiFine;
+    auto& phiFine = (LevelData<EBCellFAB>&)a_phiFine;
 
     phiFine.exchange(m_exchangeCopierFine);
     fineOp->inhomogeneousCFInterp(phiFine, a_phi);
@@ -970,8 +968,8 @@ EBHelmholtzOp::refluxFreeAMROperator(LevelData<EBCellFAB>&             a_Lphi,
           const Vector<FaceIndex> faces = ebisbox.getFaces(vof, dir, side);
 
           for (int iface = 0; iface < faces.size(); iface++) {
-            const FaceIndex face     = faces[iface];
-            const Real      faceArea = ebisbox.areaFrac(face);
+            const FaceIndex& face     = faces[iface];
+            const Real       faceArea = ebisbox.areaFrac(face);
 
             // Distinguish between domain and internal faces; the domain bc object does not multiply the
             // flux by beta.
@@ -1087,7 +1085,7 @@ EBHelmholtzOp::AMRRestrict(LevelData<EBCellFAB>&       a_residualCoarse,
                            const LevelData<EBCellFAB>& a_residual,
                            const LevelData<EBCellFAB>& a_correction,
                            const LevelData<EBCellFAB>& a_coarseCorrection,
-                           bool                        a_skip_res)
+                           bool /*a_skip_res*/)
 {
   CH_TIME("EBHelmholtzOp::AMRRestrict(4xLD<EBCellFAB>, bool)");
 
@@ -1160,7 +1158,7 @@ EBHelmholtzOp::applyOp(LevelData<EBCellFAB>&             a_Lphi,
 
   // Nasty cast, but there's no guarantee that a_phi came in with valid ghost cells. We could
   // do a local copy, but that can end up being expensive since this is called on every relaxation.
-  LevelData<EBCellFAB>& phi = (LevelData<EBCellFAB>&)a_phi;
+  auto& phi = (LevelData<EBCellFAB>&)a_phi;
 
   if (m_doExchange) {
     phi.exchange(m_exchangeCopier);
@@ -1221,14 +1219,14 @@ EBHelmholtzOp::applyOp(EBCellFAB&             a_Lphi,
 }
 
 void
-EBHelmholtzOp::applyOpRegular(EBCellFAB&             a_Lphi,
-                              EBCellFAB&             a_phi,
-                              const EBCellFAB&       a_Acoef,
-                              const EBFluxFAB&       a_Bcoef,
-                              const BaseIVFAB<Real>& a_BcoefIrreg,
-                              const Box&             a_cellBox,
-                              const DataIndex&       a_dit,
-                              const bool             a_homogeneousPhysBC) const noexcept
+EBHelmholtzOp::applyOpRegular(EBCellFAB&       a_Lphi,
+                              EBCellFAB&       a_phi,
+                              const EBCellFAB& a_Acoef,
+                              const EBFluxFAB& a_Bcoef,
+                              const BaseIVFAB<Real>& /*a_BcoefIrreg*/,
+                              const Box&       a_cellBox,
+                              const DataIndex& a_dit,
+                              const bool       a_homogeneousPhysBC) const noexcept
 {
   CH_TIMERS("EBHelmholtzOp::applyOpRegular");
   CH_TIMER("EBHelmholtzOp::applyOpRegular::domain_flux", t1);
@@ -1370,8 +1368,6 @@ EBHelmholtzOp::fillDomainFlux(EBFluxFAB& a_flux, const EBCellFAB& a_phi, const B
   //       the domain so that centered differences on the edge cells inject said flux. This is a simple trick for enforcing the flux
   //       on the domain edges when we later compute the finite volume Laplacian.
 
-  constexpr Real tol = 1.E-15;
-
   for (int dir = 0; dir < SpaceDim; dir++) {
 
     BaseFab<Real>&       fluxReg = a_flux[dir].getSingleValuedFAB();
@@ -1416,15 +1412,15 @@ EBHelmholtzOp::fillDomainFlux(EBFluxFAB& a_flux, const EBCellFAB& a_phi, const B
 }
 
 void
-EBHelmholtzOp::applyOpIrregular(EBCellFAB&             a_Lphi,
-                                const EBCellFAB&       a_phi,
-                                const EBCellFAB&       a_Acoef,
+EBHelmholtzOp::applyOpIrregular(EBCellFAB&       a_Lphi,
+                                const EBCellFAB& a_phi,
+                                const EBCellFAB& /*a_Acoef*/,
                                 const EBFluxFAB&       a_Bcoef,
                                 const BaseIVFAB<Real>& a_BcoefIrreg,
                                 const BaseIVFAB<Real>& a_alphaDiagWeight,
-                                const Box&             a_cellBox,
-                                const DataIndex&       a_dit,
-                                const bool             a_homogeneousPhysBC) const noexcept
+                                const Box& /*a_cellBox*/,
+                                const DataIndex& a_dit,
+                                const bool       a_homogeneousPhysBC) const noexcept
 {
   CH_TIMERS("EBHelmholtzOp::applyOpIrregular");
   CH_TIMER("AggStencil", t1);
@@ -1538,7 +1534,7 @@ EBHelmholtzOp::divideByIdentityCoef(LevelData<EBCellFAB>& a_rhs)
 void
 EBHelmholtzOp::applyOpNoBoundary(LevelData<EBCellFAB>& a_Lphi, const LevelData<EBCellFAB>& a_phi)
 {
-  CH_TIME("EBHelmholtzOp::applyOpNoBounary(LD<EBCellFAB>, LD<EBCellFAB>)");
+  CH_TIME("EBHelmholtzOp::applyOpNoBoundary(LD<EBCellFAB>, LD<EBCellFAB>)");
 
   m_doInterpCF = false;
   this->applyOp(a_Lphi, a_phi, true);
@@ -1546,7 +1542,7 @@ EBHelmholtzOp::applyOpNoBoundary(LevelData<EBCellFAB>& a_Lphi, const LevelData<E
 }
 
 void
-EBHelmholtzOp::fillGrad(const LevelData<EBCellFAB>& a_phi)
+EBHelmholtzOp::fillGrad(const LevelData<EBCellFAB>& /*a_phi*/)
 {
   CH_TIME("EBHelmholtzOp::fillGrad(LD<EBCellFAB>, LD)");
 
@@ -1554,11 +1550,11 @@ EBHelmholtzOp::fillGrad(const LevelData<EBCellFAB>& a_phi)
 }
 
 void
-EBHelmholtzOp::getFlux(EBFluxFAB&                  a_flux,
-                       const LevelData<EBCellFAB>& a_data,
-                       const Box&                  a_grid,
-                       const DataIndex&            a_dit,
-                       Real                        a_scale)
+EBHelmholtzOp::getFlux(EBFluxFAB& /*a_flux*/,
+                       const LevelData<EBCellFAB>& /*a_data*/,
+                       const Box& /*a_grid*/,
+                       const DataIndex& /*a_dit*/,
+                       Real /*a_scale*/)
 {
   CH_TIME("EBHelmholtzOp::getFlux(EBFluxFAB, LD<EBCellFAB>, Box, DataIndex, Real)");
 
@@ -1907,8 +1903,9 @@ EBHelmholtzOp::gauSaiMultiColorKernel(EBCellFAB&             a_Lcorr,
     IntVect loIV = a_cellBox.smallEnd();
     IntVect hiIV = a_cellBox.bigEnd();
     for (int dir = 0; dir < SpaceDim; dir++) {
-      if (loIV[dir] % 2 != a_color[dir])
+      if (loIV[dir] % 2 != a_color[dir]) {
         loIV[dir]++;
+      }
     }
 
     if (loIV <= hiIV) {
@@ -2318,8 +2315,8 @@ EBHelmholtzOp::reflux(LevelData<EBCellFAB>&             a_Lphi,
   // we subtract the contribution from the coarse grid fluxes in a_Lphi and add in the contribution from the fine grid fluxes.
   //
 
-  EBHelmholtzOp&        finerOp = (EBHelmholtzOp&)(a_finerOp);
-  LevelData<EBCellFAB>& phiFine = (LevelData<EBCellFAB>&)a_phiFine;
+  auto& finerOp = (EBHelmholtzOp&)(a_finerOp);
+  auto& phiFine = (LevelData<EBCellFAB>&)a_phiFine;
   phiFine.exchange(m_exchangeCopierFine);
   finerOp.inhomogeneousCFInterp(phiFine, a_phi);
 

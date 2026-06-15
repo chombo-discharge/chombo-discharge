@@ -41,7 +41,7 @@ Driver.ebis_memory_load_balance     = false               ## If using Chombo geo
 Driver.output_dt                    = -1.0                ## Output interval (values <= 0 enforces step-based output)
 Driver.plot_interval                = 10                  ## Plot interval
 Driver.checkpoint_interval          = 100                 ## Checkpoint interval
-Driver.regrid_interval              = 5                   ## Regrid interval
+Driver.regrid_interval              = 2                   ## Regrid interval
 Driver.write_regrid_files           = false               ## Write regrid files or not.
 Driver.write_restart_files          = false               ## Write restart files or not
 Driver.initial_regrids              = 8                   ## Number of initial regrids
@@ -55,7 +55,7 @@ Driver.write_loads                  = false               ## Write (accumulated)
 Driver.output_directory             = ./                  ## Output directory
 Driver.output_names                 = positive            ## Simulation output names
 Driver.max_plot_depth               = -1                  ## Restrict maximum plot depth (-1 => finest simulation level)
-Driver.max_chk_depth                = -1                  ## Restrict chechkpoint depth (-1 => finest simulation level)
+Driver.max_chk_depth                = -1                  ## Restrict checkpoint depth (-1 => finest simulation level)
 Driver.num_plot_ghost               = 1                   ## Number of ghost cells to include in plots
 Driver.plt_vars                     = 0                   ## 'tags', 'mpi_rank', 'levelset'
 Driver.restart                      = 0                   ## Restart step (less or equal to 0 implies fresh simulation)
@@ -177,7 +177,7 @@ SurfaceODESolver.plt_vars      = phi             ## Plot variables. Valid argume
 # ====================================================================================================
 # Vessel geometry class options
 #
-# This class is a pin-mushroom type geometry commonly used in high-voltage pressure/vaccum
+# This class is a pin-mushroom type geometry commonly used in high-voltage pressure/vacuum
 # Vessel. It (currently) consists of a rod electrode and a "mushroom" flat plate electrode, set up
 # along +y/+z in 2D/3D
 # ====================================================================================================
@@ -235,7 +235,7 @@ CdrPlasmaJSON.chemistry_dt         = 1.E99                 ## Maximum allowed ch
 # CdrPlasmaStreamerTagger class options
 # ====================================================================================================
 CdrPlasmaStreamerTagger.verbosity         = -1             ## Verbosity
-CdrPlasmaStreamerTagger.num_tag_boxes     = 0              ## Number of allowed tag boxes (0 = tags allowe everywhere)
+CdrPlasmaStreamerTagger.num_tag_boxes     = 0              ## Number of allowed tag boxes (0 = tags allowed everywhere)
 CdrPlasmaStreamerTagger.tag_box1_lo       = 0.0 0.0 0.0    ## Only allow tags that fall between
 CdrPlasmaStreamerTagger.tag_box1_hi       = 0.0 0.0 0.0    ## these two corners
 CdrPlasmaStreamerTagger.buffer            = 4              ## Grow tagged cells
@@ -243,5 +243,5 @@ CdrPlasmaStreamerTagger.buffer            = 4              ## Grow tagged cells
 CdrPlasmaStreamerTagger.refine_curvature      = 1.E99    ## Curvature refinement
 CdrPlasmaStreamerTagger.coarsen_curvature     = 1.E99    ## Curvature coarsening
 CdrPlasmaStreamerTagger.refine_alpha          = 1.0      ## Set alpha refinement. Lower  => More mesh
-CdrPlasmaStreamerTagger.coarsen_alpha         = 0.1      ## Set alpha coarsening. Higher => Less mesh
+CdrPlasmaStreamerTagger.coarsen_alpha         = 0.2      ## Set alpha coarsening. Higher => Less mesh
 CdrPlasmaStreamerTagger.max_coarsen_lvl       = 6        ## Set max coarsening depth

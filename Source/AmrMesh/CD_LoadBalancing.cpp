@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file    CD_LoadBalancing.cpp
   @details Implementation of CD_LoadBalancing.H
   @author  Robert Marskar
@@ -37,14 +38,15 @@ LoadBalancing::gatherBoxes(Vector<Box>& a_boxes)
   //       (BoxesForMPIRank=0, BoxesForMPIRank=1, BoxesForMPIRank=2, ....)
 
   // 1. Linearize local boxes
-  int  send_size   = 2 * CH_SPACEDIM;            // Message size for one box
-  int  send_count  = a_boxes.size() * send_size; // Number of elements sent from this rank
-  int* send_buffer = new int[send_count];        // Send buffer for this MPI rank
+  int  send_size   = 2 * CH_SPACEDIM;                              // Message size for one box
+  int  send_count  = static_cast<int>(a_boxes.size()) * send_size; // Number of elements sent from this rank
+  int* send_buffer = new int[send_count];                          // Send buffer for this MPI rank
   int* send_buf2   = send_buffer; // Backup address. Going to monkey with pointer increments on send buffer
 
   // Linearize a_boxes onto send_buffer
   for (int i = 0; i < a_boxes.size(); i++, send_buffer += send_size) {
     const Box& b = a_boxes[i];
+    // cppcheck-suppress unknownMacro
     D_TERM6(send_buffer[0] = b.smallEnd(0); send_buffer[1] = b.bigEnd(0);, send_buffer[2] = b.smallEnd(1);
             send_buffer[3] = b.bigEnd(1);
             , send_buffer[4] = b.smallEnd(2);
@@ -115,9 +117,9 @@ LoadBalancing::gatherLoads(Vector<Real>& a_loads)
   //       (LoadsForRank=0, LoadsForRank=1, LoadsForRank2=2, ....)
 
   // 1. Linearize local boxes onto appropriate memory structure
-  int   send_size   = 1;                          // Message size for one element. Just one Real.
-  int   mySendCount = a_loads.size() * send_size; // Number of elements sent from this rank
-  Real* send_buffer = new Real[mySendCount];      // Send buffer for this MPI rank
+  int   send_size   = 1;                                            // Message size for one element. Just one Real.
+  int   mySendCount = static_cast<int>(a_loads.size()) * send_size; // Number of elements sent from this rank
+  Real* send_buffer = new Real[mySendCount];                        // Send buffer for this MPI rank
   for (int i = 0; i < a_loads.size(); i++) {
     send_buffer[i] = a_loads[i];
   }
@@ -173,9 +175,9 @@ LoadBalancing::gatherLoads(Vector<long>& a_loads)
   //       (LoadsForRank=0, LoadsForRank=1, LoadsForRank2=2, ....)
 
   // 1. Linearize local boxes onto appropriate memory structure
-  int   send_size   = 1;                          // Message size for one element. Just one long.
-  int   mySendCount = a_loads.size() * send_size; // Number of elements sent from this rank
-  long* send_buffer = new long[mySendCount];      // Send buffer for this MPI rank
+  int   send_size   = 1;                                            // Message size for one element. Just one long.
+  int   mySendCount = static_cast<int>(a_loads.size()) * send_size; // Number of elements sent from this rank
+  long* send_buffer = new long[mySendCount];                        // Send buffer for this MPI rank
   for (int i = 0; i < a_loads.size(); i++) {
     send_buffer[i] = a_loads[i];
   }
@@ -224,9 +226,9 @@ LoadBalancing::gatherLoads(Vector<int>& a_loads)
   //       (LoadsForRank=0, LoadsForRank=1, LoadsForRank2=2, ....)
 
   // 1. Linearize local boxes onto appropriate memory structure
-  int  send_size   = 1;                          // Message size for one element. Just one int.
-  int  mySendCount = a_loads.size() * send_size; // Number of elements sent from this rank
-  int* send_buffer = new int[mySendCount];       // Send buffer for this MPI rank
+  int  send_size   = 1;                                            // Message size for one element. Just one int.
+  int  mySendCount = static_cast<int>(a_loads.size()) * send_size; // Number of elements sent from this rank
+  int* send_buffer = new int[mySendCount];                         // Send buffer for this MPI rank
   for (int i = 0; i < a_loads.size(); i++) {
     send_buffer[i] = a_loads[i];
   }

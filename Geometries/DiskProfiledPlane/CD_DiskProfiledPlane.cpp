@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @brief CD_DiskProfiledPlane.cpp
   @brief Implementation of CD_DiskProfiledPlane.H
   @author Robert Marskar
@@ -25,8 +26,10 @@
 
 using namespace EBGeometry;
 
+/// @cond DOXYGEN_SKIP
 using Vec3    = EBGeometry::Vec3T<Real>;
 using ImpFunc = EBGeometry::ImplicitFunction<Real>;
+/// @endcond
 
 DiskProfiledPlane::DiskProfiledPlane() noexcept
 {

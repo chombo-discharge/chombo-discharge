@@ -1,5 +1,5 @@
 #include <CD_Driver.H>
-#include <CD_Tesselation.H>
+#include <CD_Tessellation.H>
 #include <CD_GeometryStepper.H>
 
 using namespace ChomboDischarge;
@@ -10,7 +10,7 @@ main(int argc, char* argv[])
 {
   ChomboDischarge::initialize(argc, argv);
 
-  auto compgeom    = RefCountedPtr<ComputationalGeometry>(new Tesselation());
+  auto compgeom    = RefCountedPtr<ComputationalGeometry>(new Tessellation());
   auto amr         = RefCountedPtr<AmrMesh>(new AmrMesh());
   auto tagger      = RefCountedPtr<CellTagger>(nullptr);
   auto timestepper = RefCountedPtr<GeometryStepper>(new GeometryStepper());

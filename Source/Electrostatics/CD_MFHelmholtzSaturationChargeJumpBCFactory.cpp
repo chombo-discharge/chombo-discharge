@@ -1,6 +1,7 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 /*
@@ -18,10 +19,9 @@
 #include <CD_NamespaceHeader.H>
 
 MFHelmholtzSaturationChargeJumpBCFactory::MFHelmholtzSaturationChargeJumpBCFactory(const phase::which_phase a_phase)
+  : m_phase(a_phase)
 {
   CH_TIME("MFHelmholtzSaturationChargeJumpBCFactory::MFHelmholtzSaturationChargeJumpBCFactory");
-
-  m_phase = a_phase;
 }
 
 MFHelmholtzSaturationChargeJumpBCFactory::~MFHelmholtzSaturationChargeJumpBCFactory()

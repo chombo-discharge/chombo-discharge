@@ -1,11 +1,12 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_SphereSdf.H
-  @brief  Implementationo CD_SphereSdf.H
+/**
+  @file   CD_SphereSdf.cpp
+  @brief  Implementation of CD_SphereSdf.H
   @author Robert Marskar
 */
 
@@ -14,21 +15,14 @@
 #include <CD_NamespaceHeader.H>
 
 SphereSdf::SphereSdf(const RealVect& a_center, const Real& a_radius, const bool& a_fluidInside)
-{
-  m_center      = a_center;
-  m_radius      = a_radius;
-  m_fluidInside = a_fluidInside;
-}
+  : m_center(a_center), m_radius(a_radius), m_fluidInside(a_fluidInside)
+{}
 
 SphereSdf::SphereSdf(const SphereSdf& a_inputIF)
-{
-  m_center      = a_inputIF.m_center;
-  m_radius      = a_inputIF.m_radius;
-  m_fluidInside = a_inputIF.m_fluidInside;
-}
-
-SphereSdf::~SphereSdf()
+  : m_center(a_inputIF.m_center), m_radius(a_inputIF.m_radius), m_fluidInside(a_inputIF.m_fluidInside)
 {}
+
+SphereSdf::~SphereSdf() = default;
 
 Real
 SphereSdf::value(const RealVect& a_point) const

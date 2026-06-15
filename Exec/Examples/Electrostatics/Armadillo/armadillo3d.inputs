@@ -49,7 +49,7 @@ Driver.write_loads                  = false                ## Write (accumulated
 Driver.output_directory             = ./                   ## Output directory
 Driver.output_names                 = simulation           ## Simulation output names
 Driver.max_plot_depth               = -1                   ## Restrict maximum plot depth (-1 => finest simulation level)
-Driver.max_chk_depth                = -1                   ## Restrict chechkpoint depth (-1 => finest simulation level)
+Driver.max_chk_depth                = -1                   ## Restrict checkpoint depth (-1 => finest simulation level)
 Driver.num_plot_ghost               = 1                    ## Number of ghost cells to include in plots
 Driver.plt_vars                     = mpi_rank levelset    ## 'tags', 'mpi_rank', 'levelset'
 Driver.restart                      = 0                    ## Restart step (less or equal to 0 implies fresh simulation)
@@ -107,13 +107,13 @@ SurfaceODESolver.regrid        = conservative    ## Regrid method. 'conservative
 SurfaceODESolver.plt_vars      = phi             ## Plot variables. Valid arguments are 'phi' and 'rhs'
 
 # ====================================================================================================
-# TESSELATION GEOMETRY CLASS
+# TESSELLATION GEOMETRY CLASS
 # ====================================================================================================
-Tesselation.mesh_file       = armadillo.stl    ## Ply file
-Tesselation.partitioner     = default          ## Partitioner. Valid options are 'default', 'overlap', 'sah'
-Tesselation.use_bvh         = true             ## Use bounding volume hierarchy for accelerating search
-Tesselation.z_coord         = 0.0              ## z-coordinate for 2D slicing this object
-Tesselation.flip_inside     = false
+Tessellation.mesh_file       = armadillo.stl    ## Ply file
+Tessellation.partitioner     = default          ## Partitioner. Valid options are 'default', 'overlap', 'sah'
+Tessellation.use_bvh         = true             ## Use bounding volume hierarchy for accelerating search
+Tessellation.z_coord         = 0.0              ## z-coordinate for 2D slicing this object
+Tessellation.flip_inside     = false
 
 # ====================================================================================================
 # FIELD_STEPPER CLASS OPTIONS

@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_EBAddOp.cpp
   @brief  Implementation of CD_EBAddOp.H
   @author Robert Marskar
@@ -46,8 +47,8 @@ EBAddOp::linearIn(EBCellFAB& a_data, void* a_buffer, const Box& a_region, const 
 }
 
 void
-EBAddOp::op(EBCellFAB&       a_dst,
-            const Box&       a_regionFrom,
+EBAddOp::op(EBCellFAB& a_dst,
+            const Box& /*a_regionFrom*/,
             const Interval&  a_dstVars,
             const Box&       a_regionTo,
             const EBCellFAB& a_src,

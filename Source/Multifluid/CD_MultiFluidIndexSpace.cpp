@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_MultiFluidIndexSpace.cpp
   @brief  Implementation of CD_MultiFluidIndexSpace.H
   @author Robert Marskar
@@ -25,8 +26,7 @@ MultiFluidIndexSpace::MultiFluidIndexSpace()
   }
 }
 
-MultiFluidIndexSpace::~MultiFluidIndexSpace()
-{}
+MultiFluidIndexSpace::~MultiFluidIndexSpace() = default;
 
 void
 MultiFluidIndexSpace::define(const Box&                      a_domain,
@@ -36,7 +36,7 @@ MultiFluidIndexSpace::define(const Box&                      a_domain,
                              const bool                      a_distributedData,
                              int                             a_nCellMax,
                              int                             a_max_coar,
-                             bool                            a_fix_phase)
+                             bool /*a_fix_phase*/)
 {
 
   // Define the gas geoserver
@@ -49,7 +49,7 @@ MultiFluidIndexSpace::define(const Box&                      a_domain,
 
   // Define the solid state geoserver. This EBIS might not exist.
   if (a_geoservers[phase::solid] == NULL) {
-    m_ebis[phase::solid] = RefCountedPtr<EBIndexSpace>(NULL);
+    m_ebis[phase::solid] = RefCountedPtr<EBIndexSpace>(nullptr);
   }
   else {
     if (a_distributedData) {

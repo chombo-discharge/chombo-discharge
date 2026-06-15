@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_Driver.cpp
   @brief  Implementation of CD_Driver.H
   @author Robert Marskar
@@ -43,10 +44,16 @@ Driver::Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeomet
                const RefCountedPtr<TimeStepper>&           a_timeStepper,
                const RefCountedPtr<AmrMesh>&               a_amr,
                const RefCountedPtr<CellTagger>&            a_cellTagger)
+  : m_realm(Realm::Primal),
+    m_verbosity(-1),
+    m_timeStep(0),
+    m_outputDt(-1.0),
+    m_dt(0.0),
+    m_time(0.0),
+    m_profile(false),
+    m_doCoarsening(true)
 {
   CH_TIME("Driver::Driver");
-
-  m_verbosity = -1;
 
   this->setComputationalGeometry(a_computationalGeometry); // Set computational geometry
   this->setTimeStepper(a_timeStepper);                     // Set time stepper
@@ -57,27 +64,17 @@ Driver::Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeomet
   m_amr->sanityCheck();  // Sanity check, make sure everything is set up correctly
   m_amr->buildDomains(); // Build domains and resolutions, nothing else
 
-  // Reset time steps.
-  m_timeStep = 0;
-  m_time     = 0.0;
-  m_dt       = 0.0;
-  m_outputDt = -1.0;
-
-  m_profile      = false;
-  m_doCoarsening = true;
-
   // Parse some class options and create the output directories for the simulation.
   this->parseOptions();
 
   // Always register this Realm and these operators.
-  m_realm = Realm::Primal;
   m_amr->registerRealm(m_realm);
   m_amr->registerOperator(s_eb_fill_patch, m_realm, phase::gas);
 
   // Seed the RNG.
   Random::seed();
 
-  m_time = m_startTime;
+  m_time = m_startTime; // NOLINT(cppcoreguidelines-prefer-member-initializer) -- depends on parseOptions()
 }
 
 Driver::~Driver()
@@ -99,13 +96,13 @@ Driver::getNumberOfPlotVariables() const
     numPlotVars += 1;
   }
   if (m_plotRanks) {
-    numPlotVars += m_amr->getRealms().size();
+    numPlotVars += static_cast<int>(m_amr->getRealms().size());
   }
   if (m_plotLevelset) {
     numPlotVars = numPlotVars + 2;
   }
   if (m_plotLoads) {
-    numPlotVars += m_amr->getRealms().size();
+    numPlotVars += static_cast<int>(m_amr->getRealms().size());
   }
 
   return numPlotVars;
@@ -188,7 +185,7 @@ Driver::allocateInternals()
 }
 
 void
-Driver::cacheTags(const EBAMRTags& a_tags)
+Driver::cacheTags(const EBAMRTags& /*a_tags*/)
 {
   CH_TIME("Driver::cacheTags(EBAMRTags)");
   if (m_verbosity > 5) {
@@ -284,16 +281,13 @@ Driver::getGeometryTags()
 
     const int nGhost = std::min(2, m_amr->getNumberOfGhostCells());
 
-    for (int is = 0; is < 2; is++) {
-      const RefCountedPtr<EBIndexSpace>& ebis = indexSpaces[is];
-
+    for (const auto& ebis : indexSpaces) {
       if (!(ebis.isNull())) {
         DisjointBoxLayout irregGrids = ebis->getIrregGrids(curDomain);
         EBISLayout        ebisl;
         ebis->fillEBISLayout(ebisl, irregGrids, curDomain, nGhost);
 
-        const RealVect     probLo = m_amr->getProbLo();
-        const DataIterator dit    = irregGrids.dataIterator();
+        const DataIterator dit = irregGrids.dataIterator();
 
         const int nbox = dit.size();
 
@@ -360,8 +354,9 @@ Driver::getGeometryTags()
   // Processes may not agree what is the maximum tag depth. Make sure they're all on the same page.
   int deepestTagLevel = 0;
   for (int lvl = 0; lvl < m_geomTags.size(); lvl++) {
-    if (!m_geomTags[lvl].isEmpty())
+    if (!m_geomTags[lvl].isEmpty()) {
       deepestTagLevel = lvl;
+    }
   }
 
   m_geometricTagsDepth = ParallelOps::max(deepestTagLevel);
@@ -418,8 +413,8 @@ Driver::getCellsAndBoxes(long long&                       a_numLocalCells,
       const Box box      = dbl[din];
       const Box grownBox = grow(dbl[din], ghost);
 
-      numCellsNoGhosts += box.numPts();
-      numCellsWithGhosts += grownBox.numPts();
+      numCellsNoGhosts += static_cast<long long>(box.numPts());
+      numCellsWithGhosts += static_cast<long long>(grownBox.numPts());
       numBoxes += 1;
     }
 
@@ -472,7 +467,7 @@ Driver::gridReport()
   Vector<long long> validLevelCells;
 
   // Total number of grid points for a Cartesian grid covering entire finest domain. Used for "grid sparsity".
-  const long long uniformPoints = (domains[finestLevel].domainBox()).numPts();
+  const auto uniformPoints = static_cast<long long>((domains[finestLevel].domainBox()).numPts());
 
   // Some stuff
   const ProblemDomain coarsest_domain = m_amr->getDomains()[0];
@@ -503,16 +498,18 @@ Driver::gridReport()
   validLevelCells = totalLevelCells;
 
   for (int lvl = 0; lvl < finestLevel; lvl++) {
-    validLevelCells[lvl] -= llround(totalLevelCells[lvl + 1] / std::pow(refRat[lvl], SpaceDim));
+    validLevelCells[lvl] -= llround(static_cast<int>(totalLevelCells[lvl + 1]) / std::pow(refRat[lvl], SpaceDim));
 
     totalValidCells += validLevelCells[lvl];
   }
 
+#ifdef _OPENMP
   int numThreads = 0;
 #pragma omp parallel reduction(+ : numThreads)
   {
     numThreads += 1;
   }
+#endif
 
   // Begin writing a report.
   pout() << "=======================================================================" << endl
@@ -535,7 +532,8 @@ Driver::gridReport()
          << coarsestBox.size()[2] << endl
 #endif
          << "\tRefinement ratios........ = " << ref_rat << endl
-         << "\tGrid sparsity............ = " << 1.0 * totalCells / uniformPoints << endl
+         << "\tGrid sparsity............ = "
+         << 1.0 * static_cast<double>(totalCells) / static_cast<double>(uniformPoints) << endl
          << "\tFinest dx................ = " << dx[finestLevel] << endl
          << "\tTotal number boxes....... = " << DischargeIO::numberFmt(totalBoxes) << endl
          << "\tNumber of cells.......... = " << DischargeIO::numberFmt(totalCells) << endl
@@ -580,8 +578,10 @@ Driver::gridReport()
 
   overallMemoryUsage(localUnfreedMemory, localPeakMemory);
 
-  pout() << "\tUnfreed memory        = " << std::ceil(localUnfreedMemory / BytesPerMB) << " (MB)" << endl
-         << "\tPeak memory usage     = " << std::ceil(localPeakMemory / BytesPerMB) << " (MB)" << endl;
+  pout() << "\tUnfreed memory        = " << std::ceil(static_cast<double>(localUnfreedMemory) / BytesPerMB) << " (MB)"
+         << endl
+         << "\tPeak memory usage     = " << std::ceil(static_cast<double>(localPeakMemory) / BytesPerMB) << " (MB)"
+         << endl;
 #ifdef CH_MPI
 
   // If this is an MPI run we want to include the maximum consum memory in the report as well. We compute the
@@ -591,10 +591,14 @@ Driver::gridReport()
   const long long maxUnfreedMemory = ParallelOps::max(localUnfreedMemory);
   const long long maxPeakMemory    = ParallelOps::max(localPeakMemory);
 
-  pout() << "\tMin unfreed memory    = " << std::ceil(minUnfreedMemory / BytesPerMB) << " (MB)" << endl
-         << "\tMin peak memory       = " << std::ceil(minPeakMemory / BytesPerMB) << " (MB)" << endl
-         << "\tMax unfreed memory    = " << std::ceil(maxUnfreedMemory / BytesPerMB) << " (MB)" << endl
-         << "\tMax peak memory       = " << std::ceil(maxPeakMemory / BytesPerMB) << " (MB)" << endl;
+  pout() << "\tMin unfreed memory    = " << std::ceil(static_cast<double>(minUnfreedMemory) / BytesPerMB) << " (MB)"
+         << endl
+         << "\tMin peak memory       = " << std::ceil(static_cast<double>(minPeakMemory) / BytesPerMB) << " (MB)"
+         << endl
+         << "\tMax unfreed memory    = " << std::ceil(static_cast<double>(maxUnfreedMemory) / BytesPerMB) << " (MB)"
+         << endl
+         << "\tMax peak memory       = " << std::ceil(static_cast<double>(maxPeakMemory) / BytesPerMB) << " (MB)"
+         << endl;
 #endif
 #endif
   pout() << "=======================================================================" << endl;
@@ -874,14 +878,12 @@ Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSteps)
       if (m_outputDt > 0.0) {
         const int k = std::floor(m_time / m_outputDt);
 
-        Real lastOutputTime = k * m_outputDt;
         Real nextOutputTime = (k + 1) * m_outputDt;
 
         const Real thresh = 1.E-10 * m_outputDt;
 
         // Weird, but can happen due to flooring when m_time is an integer multiple of m_outputDt
         if (std::abs(m_time - nextOutputTime) < thresh) {
-          lastOutputTime += m_outputDt;
           nextOutputTime += m_outputDt;
         }
 
@@ -1276,61 +1278,61 @@ Driver::createOutputDirectories()
     cmd     = "mkdir -p " + m_outputDirectory;
     success = system(cmd.c_str());
     if (success != 0) {
-      std::cout << "Driver::createOutputDirectories - master could not create directory" << std::endl;
+      std::cout << "Driver::createOutputDirectories - master could not create directory" << endl;
     }
 
     cmd     = "mkdir -p " + m_outputDirectory + "/plt";
     success = system(cmd.c_str());
     if (success != 0) {
-      std::cout << "Driver::createOutputDirectories - master could not create plot directory" << std::endl;
+      std::cout << "Driver::createOutputDirectories - master could not create plot directory" << endl;
     }
 
     cmd     = "mkdir -p " + m_outputDirectory + "/geo";
     success = system(cmd.c_str());
     if (success != 0) {
-      std::cout << "Driver::createOutputDirectories - master could not create geo directory" << std::endl;
+      std::cout << "Driver::createOutputDirectories - master could not create geo directory" << endl;
     }
 
     cmd     = "mkdir -p " + m_outputDirectory + "/chk";
     success = system(cmd.c_str());
     if (success != 0) {
-      std::cout << "Driver::createOutputDirectories - master could not create checkpoint directory" << std::endl;
+      std::cout << "Driver::createOutputDirectories - master could not create checkpoint directory" << endl;
     }
 
     cmd     = "mkdir -p " + m_outputDirectory + "/mpi";
     success = system(cmd.c_str());
     if (success != 0) {
-      std::cout << "Driver::createOutputDirectories - master could not create mpi directory" << std::endl;
+      std::cout << "Driver::createOutputDirectories - master could not create mpi directory" << endl;
     }
 
     cmd     = "mkdir -p " + m_outputDirectory + "/mpi/memory";
     success = system(cmd.c_str());
     if (success != 0) {
-      std::cout << "Driver::createOutputDirectories - master could not create mpi/memory directory" << std::endl;
+      std::cout << "Driver::createOutputDirectories - master could not create mpi/memory directory" << endl;
     }
 
     cmd     = "mkdir -p " + m_outputDirectory + "/mpi/loads";
     success = system(cmd.c_str());
     if (success != 0) {
-      std::cout << "Driver::createOutputDirectories - master could not create mpi/loads directory" << std::endl;
+      std::cout << "Driver::createOutputDirectories - master could not create mpi/loads directory" << endl;
     }
 
     cmd     = "mkdir -p " + m_outputDirectory + "/regrid";
     success = system(cmd.c_str());
     if (success != 0) {
-      std::cout << "Driver::createOutputDirectories - master could not create regrid directory" << std::endl;
+      std::cout << "Driver::createOutputDirectories - master could not create regrid directory" << endl;
     }
 
     cmd     = "mkdir -p " + m_outputDirectory + "/restart";
     success = system(cmd.c_str());
     if (success != 0) {
-      std::cout << "Driver::createOutputDirectories - master could not create restart directory" << std::endl;
+      std::cout << "Driver::createOutputDirectories - master could not create restart directory" << endl;
     }
 
     cmd     = "mkdir -p " + m_outputDirectory + "/crash";
     success = system(cmd.c_str());
     if (success != 0) {
-      std::cout << "Driver::createOutputDirectories - master could not create crash directory" << std::endl;
+      std::cout << "Driver::createOutputDirectories - master could not create crash directory" << endl;
     }
   }
 
@@ -1352,10 +1354,10 @@ Driver::setAmr(const RefCountedPtr<AmrMesh>& a_amrMesh)
 }
 
 void
-Driver::setup(const std::string a_inputFile,
-              const int         a_initialRegrids,
-              const bool        a_restart,
-              const std::string a_restartFile)
+Driver::setup(const std::string& a_inputFile,
+              const int          a_initialRegrids,
+              const bool         a_restart,
+              const std::string& a_restartFile)
 {
   CH_TIME("Driver::setup(string, int, bool, string)");
   if (m_verbosity > 5) {
@@ -1454,8 +1456,9 @@ Driver::setupGeometryOnly()
                                            m_amr->getNumberOfEbGhostCells(),
                                            numCoarsenings);
   const Real t1 = Timer::wallClock();
-  if (procID() == 0)
-    std::cout << "geotime = " << t1 - t0 << std::endl;
+  if (procID() == 0) {
+    std::cout << "geotime = " << t1 - t0 << endl;
+  }
 
   // Set implicit functions now.
   m_amr->setBaseImplicitFunction(phase::gas, m_computationalGeometry->getGasImplicitFunction());
@@ -1637,7 +1640,7 @@ Driver::setupFresh(const int a_initialRegrids)
 
 #ifdef CH_USE_HDF5
 void
-Driver::setupForRestart(const int a_initialRegrids, const std::string a_restartFile)
+Driver::setupForRestart(const int a_initialRegrids, const std::string& a_restartFile)
 {
   CH_TIME("Driver::setupForRestart");
   if (m_verbosity > 5) {
@@ -1725,7 +1728,7 @@ Driver::setupForRestart(const int a_initialRegrids, const std::string a_restartF
 #endif
 
 void
-Driver::checkRestartFile(const std::string a_restartFile) const
+Driver::checkRestartFile(const std::string& a_restartFile) const
 {
   CH_TIME("Driver::checkRestartFile");
   if (m_verbosity > 4) {
@@ -1865,19 +1868,19 @@ Driver::stepReport(const Real a_startTime, const Real a_endTime, const int a_max
 
   //  overallMemoryUsage(unfreedMem, peakMem);
 
-  pout() << "                                -- Unfreed memory        : " << std::ceil(unfreedMem / bytesPerMB)
-         << "(MB)" << endl;
-  pout() << "                                -- Peak memory usage     : " << std::ceil(peakMem / bytesPerMB) << "(MB)"
-         << endl;
+  pout() << "                                -- Unfreed memory        : "
+         << std::ceil(static_cast<double>(unfreedMem) / bytesPerMB) << "(MB)" << endl;
+  pout() << "                                -- Peak memory usage     : "
+         << std::ceil(static_cast<double>(peakMem) / bytesPerMB) << "(MB)" << endl;
 
 #ifdef CH_MPI
   const long long maxUnfreedMem = ParallelOps::max(unfreedMem);
   const long long maxPeakMem    = ParallelOps::max(peakMem);
 
-  pout() << "                                -- Max unfreed memory    : " << std::ceil(maxUnfreedMem / bytesPerMB)
-         << "(MB)" << endl;
-  pout() << "                                -- Max peak memory usage : " << std::ceil(maxPeakMem / bytesPerMB)
-         << "(MB)" << endl;
+  pout() << "                                -- Max unfreed memory    : "
+         << std::ceil(static_cast<double>(maxUnfreedMem) / bytesPerMB) << "(MB)" << endl;
+  pout() << "                                -- Max peak memory usage : "
+         << std::ceil(static_cast<double>(maxPeakMem) / bytesPerMB) << "(MB)" << endl;
 #endif
 #endif
 }
@@ -1944,7 +1947,7 @@ Driver::tagCells(Vector<IntVectSet>& a_allTags, EBAMRTags& a_cellTags)
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      // Implicity converts to TreeIntVecSet
+      // Implicitly converts to TreeIntVecSet
       tags |= IntVectSet((*a_cellTags[lvl])[din]);
     }
 
@@ -2030,7 +2033,7 @@ Driver::writeComputationalLoads()
   // 0       X             Y
   // 1       XX            YY
 
-  const int nProc = numProc();
+  const int nProc = static_cast<int>(numProc());
 
   // Filename for output.
   char              suffix[32];
@@ -2081,7 +2084,7 @@ Driver::writeComputationalLoads()
     // Write header
     std::stringstream ss;
     ss << std::left << std::setw(width) << "# Rank";
-    for (auto r : realmLoads) {
+    for (const auto& r : realmLoads) {
       ss << std::left << std::setw(width) << r.first;
     }
     f << ss.str() << endl;
@@ -2094,7 +2097,7 @@ Driver::writeComputationalLoads()
       for (auto r : realmLoads) {
         ds << std::left << std::setw(width) << r.second[irank];
       }
-      f << ds.str() << std::endl;
+      f << ds.str() << endl;
     }
 
     f.close();
@@ -2246,7 +2249,7 @@ Driver::writeCrashFile()
 }
 
 void
-Driver::writePlotFile(const std::string a_filename)
+Driver::writePlotFile(const std::string& a_filename)
 {
   CH_TIMERS("Driver::writePlotFile(string)");
   CH_TIMER("Driver::writePlotFile::allocate", t1);
@@ -2288,7 +2291,7 @@ Driver::writePlotFile(const std::string a_filename)
 
     // Write HDF5 header.
 #ifdef CH_USE_HDF5
-    HDF5Handle handle(a_filename.c_str(), HDF5Handle::CREATE);
+    HDF5Handle handle(a_filename, HDF5Handle::CREATE);
     DischargeIO::writeEBHDF5Header(handle, numPlotLevels, m_amr->getProbLo(), plotVariableNames);
     handle.close();
 #endif
@@ -2322,7 +2325,7 @@ Driver::writePlotFile(const std::string a_filename)
       }
 
       timer.startEvent("HDF5 write");
-      HDF5Handle handle(a_filename.c_str(), HDF5Handle::OPEN_RDWR);
+      HDF5Handle handle(a_filename, HDF5Handle::OPEN_RDWR);
       const int  refRat = (lvl < m_amr->getFinestLevel()) ? m_amr->getRefinementRatios()[lvl] : 1;
       DischargeIO::writeEBHDF5Level(handle,
                                     outputData,
@@ -2533,7 +2536,7 @@ Driver::writeLoads(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_leve
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      scratch[din].setVal(loads[din.intCode()]);
+      scratch[din].setVal(static_cast<double>(loads[din.intCode()]));
     }
 
     const Interval srcInterv(0, 0);
@@ -2571,7 +2574,7 @@ Driver::writeCheckpointFile()
 
   // Write realm names -- these are needed because we also write computational loads to checkpoint files
   // so we can load balance on immediately restart, using the checkpointed loads.
-  for (auto r : m_amr->getRealms()) {
+  for (const auto& r : m_amr->getRealms()) {
     header.m_string[r] = r;
   }
 
@@ -2585,7 +2588,7 @@ Driver::writeCheckpointFile()
   const std::string str = prefix + suffix;
 
   // Output file
-  HDF5Handle handleOut(str.c_str(), HDF5Handle::CREATE);
+  HDF5Handle handleOut(str, HDF5Handle::CREATE);
   header.writeToFile(handleOut);
 
   Timer timer("Driver::writeCheckpointFile");
@@ -2699,14 +2702,14 @@ Driver::writeCheckpointRealmLoads(HDF5Handle& a_handle, const int a_level)
   LevelData<FArrayBox> scratch(dbl, 1, IntVect::Zero);
 
   // Get loads.
-  for (auto r : m_amr->getRealms()) {
+  for (const auto& r : m_amr->getRealms()) {
     const Vector<long int> loads = m_timeStepper->getCheckpointLoads(r, a_level);
 
 #pragma omp parallel for schedule(runtime)
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      scratch[din].setVal(loads[din.intCode()]);
+      scratch[din].setVal(static_cast<double>(loads[din.intCode()]));
     }
 
     // String identifier in HDF file.
@@ -2752,7 +2755,7 @@ Driver::readCheckpointFile(const std::string& a_restartFile)
 
   // Get the names of the realms that were checkpointed. This is a part of the HDF header.
   std::map<std::string, Vector<Vector<long int>>> checkpointedLoads;
-  for (auto s : header.m_string) {
+  for (const auto& s : header.m_string) {
     checkpointedLoads.emplace(s.second, Vector<Vector<long int>>());
   }
 
@@ -2767,7 +2770,7 @@ Driver::readCheckpointFile(const std::string& a_restartFile)
   // Print checkpointed Realm names.
   if (m_verbosity > 2) {
     pout() << "Driver::readCheckpointFile - checked Realms are: ";
-    for (auto r : checkpointedLoads) {
+    for (const auto& r : checkpointedLoads) {
       pout() << '"' << r.first << '"' << "\t";
     }
     pout() << endl;
@@ -2904,10 +2907,10 @@ Driver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level)
 
 #ifdef CH_USE_HDF5
 void
-Driver::readCheckpointRealmLoads(Vector<long int>& a_loads,
-                                 HDF5Handle&       a_handle,
-                                 const std::string a_realm,
-                                 const int         a_level)
+Driver::readCheckpointRealmLoads(Vector<long int>&  a_loads,
+                                 HDF5Handle&        a_handle,
+                                 const std::string& a_realm,
+                                 const int          a_level)
 {
   CH_TIME("Driver::readCheckpointRealmLoads(Vector<long int>, HDF5Handle, string, int)");
   if (m_verbosity > 5) {
@@ -2921,7 +2924,7 @@ Driver::readCheckpointRealmLoads(Vector<long int>& a_loads,
   const std::string str = a_realm + "_loads";
 
 #ifdef CH_MPI
-  const int                 nBoxes   = a_loads.size();
+  const int                 nBoxes   = static_cast<int>(a_loads.size());
   const std::pair<int, int> beginEnd = ParallelOps::partition(nBoxes);
   for (int i = 0; i < nBoxes; i++) {
     a_loads[i] = 0L;

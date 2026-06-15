@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2022 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2022-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_CdrPlasmaSurfaceReactionJSON.H
-  @brief  Declaration of a class that encapsulates reactions for usage with CdrPlasmaJSON
-  @author Robert Marskar
+/**
+   @file   CD_CdrPlasmaSurfaceReactionJSON.H
+   @brief  Declaration of a class that encapsulates reactions for usage with CdrPlasmaJSON
+   @author Robert Marskar
 */
 
-#ifndef CD_CdrPlasmaSurfaceReactionJSON_H
-#define CD_CdrPlasmaSurfaceReactionJSON_H
+#ifndef CD_CDRPLASMASURFACEREACTIONJSON_H
+#define CD_CDRPLASMASURFACEREACTIONJSON_H
 
 // Std includes
 #include <map>
@@ -24,69 +25,69 @@
 namespace Physics {
   namespace CdrPlasma {
 
-    /*!
-      @brief Class for encapsulating reactive process of type A + B + Y -> X3 +  for CdrPlasmaPhysics. This class just stores a list
-      of product target species. 
-      @details This class is specifically for surface reactions. When including more species on the left hand side, e.g. A + B -> C, it is the same
-      as specifying A -> C, B -> C with equal reaction rates. 
+    /**
+       @brief Class for encapsulating reactive process of type A + B + Y -> X3 +  for CdrPlasmaPhysics. This class just stores a list
+       of product target species. 
+       @details This class is specifically for surface reactions. When including more species on the left hand side, e.g. A + B -> C, it is the same
+       as specifying A -> C, B -> C with equal reaction rates. 
     */
     class CdrPlasmaSurfaceReactionJSON
     {
     public:
-      /*!
-	@brief Disallowed weak construction.
+      /**
+         @brief Disallowed weak construction.
       */
       CdrPlasmaSurfaceReactionJSON();
 
-      /*!
-	@brief Full constructor. 
-	@param[in] a_plasmaReactants  Plasma species on the left-hand side of the reaction
-	@param[in] a_photonReactants  Photon species on the left hand side of the reaction.
-	@param[in] a_plasmaProducts   Plasma species on the right-hand side of the reaction. 
+      /**
+         @brief Full constructor. 
+         @param[in] a_plasmaReactants  Plasma species on the left-hand side of the reaction
+         @param[in] a_photonReactants  Photon species on the left hand side of the reaction.
+         @param[in] a_plasmaProducts   Plasma species on the right-hand side of the reaction. 
       */
-      CdrPlasmaSurfaceReactionJSON(const std::list<int> a_plasmaReactants,
-                                   const std::list<int> a_photonReactants,
-                                   const std::list<int> a_plasmaProducts);
+      CdrPlasmaSurfaceReactionJSON(const std::list<int>& a_plasmaReactants,
+                                   const std::list<int>& a_photonReactants,
+                                   const std::list<int>& a_plasmaProducts);
 
-      /*!
-	@brief Destructor
+      /**
+         @brief Destructor
       */
       virtual ~CdrPlasmaSurfaceReactionJSON();
 
-      /*!
-	@brief Get the plasma reactants
-	@return Returns m_plasmaReactants
+      /**
+         @brief Get the plasma reactants
+         @return Returns m_plasmaReactants
       */
       const std::list<int>&
       getPlasmaReactants() const;
 
-      /*!
-	@brief Get the photo-reactants
-	@return Returns m_photonReactants
+      /**
+         @brief Get the photo-reactants
+         @return Returns m_photonReactants
       */
       const std::list<int>&
       getPhotonReactants() const;
 
-      /*!
-	@brief Get the plasma products
-	@return Returns m_plasmaProducts
+      /**
+         @brief Get the plasma products
+         @return Returns m_plasmaProducts
       */
       const std::list<int>&
       getPlasmaProducts() const;
 
     protected:
-      /*!
-	@brief Plasma species on the left-hand side of the reaction
+      /**
+         @brief Plasma species on the left-hand side of the reaction
       */
       std::list<int> m_plasmaReactants;
 
-      /*!
-	@brief Photon species on the left-hand side of the reaction
+      /**
+         @brief Photon species on the left-hand side of the reaction
       */
       std::list<int> m_photonReactants;
 
-      /*!
-	@brief Plasma species on the right-hand side of the reaction
+      /**
+         @brief Plasma species on the right-hand side of the reaction
       */
       std::list<int> m_plasmaProducts;
     };

@@ -1,15 +1,16 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_MFHelmholtzRobinEBBCFactory.cpp
   @brief  Implementation of CD_MFHelmholtzRobinEBBCFactory.H
   @author Robert Marskar
 */
 
-// Chombo inculdes
+// Chombo includes
 #include <CH_Timer.H>
 
 // Our includes
@@ -120,7 +121,7 @@ MFHelmholtzRobinEBBCFactory::create(const int a_iphase, const RefCountedPtr<MFHe
   CH_assert(m_order > 0);
   CH_assert(m_weight >= 0);
 
-  auto bc = new MFHelmholtzRobinEBBC(a_iphase, a_jumpBC);
+  auto* bc = new MFHelmholtzRobinEBBC(a_iphase, a_jumpBC);
 
   bc->setOrder(m_order);
   bc->setWeight(m_weight);

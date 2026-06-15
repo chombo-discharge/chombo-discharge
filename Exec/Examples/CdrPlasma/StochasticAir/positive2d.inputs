@@ -55,7 +55,7 @@ Driver.write_loads                  = false               ## Write (accumulated)
 Driver.output_directory             = ./                  ## Output directory
 Driver.output_names                 = positive            ## Simulation output names
 Driver.max_plot_depth               = -1                  ## Restrict maximum plot depth (-1 => finest simulation level)
-Driver.max_chk_depth                = -1                  ## Restrict chechkpoint depth (-1 => finest simulation level)
+Driver.max_chk_depth                = -1                  ## Restrict checkpoint depth (-1 => finest simulation level)
 Driver.num_plot_ghost               = 1                   ## Number of ghost cells to include in plots
 Driver.plt_vars                     = 0                   ## 'tags', 'mpi_rank', 'levelset'
 Driver.restart                      = 0                   ## Restart step (less or equal to 0 implies fresh simulation)
@@ -176,7 +176,7 @@ SurfaceODESolver.plt_vars      = phi             ## Plot variables. Valid argume
 # ====================================================================================================
 # Vessel geometry class options
 #
-# This class is a pin-mushroom type geometry commonly used in high-voltage pressure/vaccum
+# This class is a pin-mushroom type geometry commonly used in high-voltage pressure/vacuum
 # Vessel. It (currently) consists of a rod electrode and a "mushroom" flat plate electrode, set up
 # along +y/+z in 2D/3D
 # ====================================================================================================
@@ -234,7 +234,7 @@ CdrPlasmaJSON.chemistry_dt         = 1.E99                 ## Maximum allowed ch
 # CdrPlasmaStreamerTagger class options
 # ====================================================================================================
 CdrPlasmaStreamerTagger.verbosity         = -1             ## Verbosity
-CdrPlasmaStreamerTagger.num_tag_boxes     = 0              ## Number of allowed tag boxes (0 = tags allowe everywhere)
+CdrPlasmaStreamerTagger.num_tag_boxes     = 0              ## Number of allowed tag boxes (0 = tags allowed everywhere)
 CdrPlasmaStreamerTagger.tag_box1_lo       = 0.0 0.0 0.0    ## Only allow tags that fall between
 CdrPlasmaStreamerTagger.tag_box1_hi       = 0.0 0.0 0.0    ## these two corners
 CdrPlasmaStreamerTagger.buffer            = 8              ## Grow tagged cells

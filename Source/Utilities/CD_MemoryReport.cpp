@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_MemoryReport.cpp
   @brief  Implementation of CD_MemoryReport.H
   @author Robert Marskar
@@ -110,8 +111,8 @@ MemoryReport::getMemoryUsage(Vector<Real>& a_peak, Vector<Real>& a_unfreed)
     a_unfreed[i] = 1.0 * unfreed[i] / BytesPerMB;
   }
 
-  delete unfreed;
-  delete peak;
+  free(unfreed);
+  free(peak);
 #else
   a_peak.resize(1);
   a_unfreed.resize(1);

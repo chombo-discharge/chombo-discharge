@@ -48,7 +48,7 @@ Driver.write_loads                  = false               ## Write (accumulated)
 Driver.output_directory             = ./                  ## Output directory
 Driver.output_names                 = simulation          ## Simulation output names
 Driver.max_plot_depth               = -1                  ## Restrict maximum plot depth (-1 => finest simulation level)
-Driver.max_chk_depth                = -1                  ## Restrict chechkpoint depth (-1 => finest simulation level)
+Driver.max_chk_depth                = -1                  ## Restrict checkpoint depth (-1 => finest simulation level)
 Driver.num_plot_ghost               = 1                   ## Number of ghost cells to include in plots
 Driver.plt_vars                     = 0                   ## 'tags', 'mpi_rank'
 Driver.restart                      = 0                   ## Restart step (less or equal to 0 implies fresh simulation)
@@ -74,7 +74,7 @@ Driver.refine_dielectrics           = -1                  ## Refine dielectric s
 # filled the source term with just the number of Photons that will be produced in a cell, you should
 # use source_type = number.
 #
-# The photogeneration mechanism can be done stochastically or determinsitically. How this is interpreted
+# The photogeneration mechanism can be done stochastically or deterministically. How this is interpreted
 # depends on how you implemented your source terms through the plasma_kinetics interface (or equivalent).
 # This design makes sense for FHD models because the number of Photons produced in a cell can be
 # computed directly, e.g. with SSA algorithms. In this way the stochasticity is provided by the SSA

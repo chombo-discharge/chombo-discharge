@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2023 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_EBReflux.cpp
   @brief  Implementation of CD_EBReflux.H
   @author Robert Marskar
@@ -20,11 +21,9 @@
 #include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
-EBReflux::EBReflux() noexcept
+EBReflux::EBReflux() noexcept : m_isDefined(false)
 {
   CH_TIME("EBReflux::EBReflux(weak)");
-
-  m_isDefined = false;
 }
 
 EBReflux::EBReflux(const EBLevelGrid& a_eblg,
@@ -73,8 +72,7 @@ EBReflux::defineRegionsCF() noexcept
   const DisjointBoxLayout& dbl     = m_eblg.getDBL();
   const DisjointBoxLayout& dblCoFi = m_eblgCoFi.getDBL();
 
-  const ProblemDomain& domain     = m_eblg.getDomain();
-  const ProblemDomain& domainCoFi = m_eblgCoFi.getDomain();
+  const ProblemDomain& domain = m_eblg.getDomain();
 
   const EBISLayout& ebisl     = m_eblg.getEBISL();
   const EBISLayout& ebislCoFi = m_eblgCoFi.getEBISL();
@@ -213,13 +211,11 @@ EBReflux::defineStencils() noexcept
     const DataIndex& din = ditCoar[mybox];
 
     const Box boxCoar = dblCoar[din];
-    const Box boxFine = dblFine[din];
 
     const EBISBox& ebisBoxCoar = ebislCoar[din];
     const EBISBox& ebisBoxFine = ebislFine[din];
 
     const EBGraph& graphCoar = ebisBoxCoar.getEBGraph();
-    const EBGraph& graphFine = ebisBoxFine.getEBGraph();
 
     for (int dir = 0; dir < SpaceDim; dir++) {
       for (SideIterator sit; sit.ok(); ++sit) {
@@ -331,8 +327,6 @@ EBReflux::coarsenFluxesCF(LevelData<EBFluxFAB>&       a_coarFluxes,
   const EBISLayout& ebislCoar = m_eblgCoFi.getEBISL();
   const EBISLayout& ebislFine = m_eblgFine.getEBISL();
 
-  const Real dxCoar         = 1.0;
-  const Real dxFine         = dxCoar / m_refRat;
   const Real invFinePerCoar = 1.0 / std::pow(m_refRat, SpaceDim - 1);
 
   const int nbox = ditCoar.size();
@@ -341,16 +335,8 @@ EBReflux::coarsenFluxesCF(LevelData<EBFluxFAB>&       a_coarFluxes,
     const DataIndex& din = ditCoar[mybox];
 
     const Box& coarCellBox = dblCoar[din];
-    const Box& fineCellBox = dblFine[din];
-
-    const EBISBox& coarEBISBox = ebislCoar[din];
-    const EBISBox& fineEBISBox = ebislFine[din];
-
-    const EBGraph& coarGraph = coarEBISBox.getEBGraph();
-    const EBGraph& fineGraph = fineEBISBox.getEBGraph();
 
     for (int dir = 0; dir < SpaceDim; dir++) {
-      const Box coarFaceBox = surroundingNodes(coarCellBox, dir);
 
       EBFaceFAB&       coarFlux = a_coarFluxes[din][dir];
       const EBFaceFAB& fineFlux = a_fineFluxes[din][dir];
@@ -450,7 +436,6 @@ EBReflux::refluxIntoCoarse(LevelData<EBCellFAB>&       a_Lphi,
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
-    const Box      cellBox = dbl[din];
     const EBISBox& ebisBox = ebisl[din];
 
     EBCellFAB& Lphi    = a_Lphi[din];

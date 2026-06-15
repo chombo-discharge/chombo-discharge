@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_BoxSdf.cpp
   @brief  Implements CD_BoxSdf.H
   @author Robert Marskar
@@ -20,21 +21,14 @@
 #include <CD_NamespaceHeader.H>
 
 BoxSdf::BoxSdf(const RealVect& a_loCorner, const RealVect& a_hiCorner, const bool& a_fluidInside)
-{
-  m_loCorner    = a_loCorner;
-  m_hiCorner    = a_hiCorner;
-  m_fluidInside = a_fluidInside;
-}
+  : m_loCorner(a_loCorner), m_hiCorner(a_hiCorner), m_fluidInside(a_fluidInside)
+{}
 
 BoxSdf::BoxSdf(const BoxSdf& a_inputIF)
-{
-  m_loCorner    = a_inputIF.m_loCorner;
-  m_hiCorner    = a_inputIF.m_hiCorner;
-  m_fluidInside = a_inputIF.m_fluidInside;
-}
-
-BoxSdf::~BoxSdf()
+  : m_loCorner(a_inputIF.m_loCorner), m_hiCorner(a_inputIF.m_hiCorner), m_fluidInside(a_inputIF.m_fluidInside)
 {}
+
+BoxSdf::~BoxSdf() = default;
 
 Real
 BoxSdf::value(const RealVect& a_pos) const

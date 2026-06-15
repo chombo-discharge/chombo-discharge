@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2022 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_GenericParticle.H
   @brief  Declaration of a generic particle class. 
   @author Robert Marskar
 */
 
-#ifndef CD_GenericParticle_H
-#define CD_GenericParticle_H
+#ifndef CD_GENERICPARTICLE_H
+#define CD_GENERICPARTICLE_H
 
 // Std includes
 #include <string>
@@ -27,9 +28,9 @@
 #include <CD_NamespaceHeader.H>
 
 namespace detail {
-  /*!
+  /**
     @brief Helper function for linearizing a particle onto a buffer.
-    @detail This copies T into the buffer p and increments the pointer.
+    @details This copies T into the buffer p and increments the pointer.
     @param[in,out] p Buffer
     @param[in] a_x Particle property. Must be a trivial type.
   */
@@ -45,9 +46,9 @@ namespace detail {
     p += sizeof(T);
   };
 
-  /*!
+  /**
     @brief Helper function for linearizing a buffer onto a particle property.
-    @detail This copies from the buffer p into the particle property T. 
+    @details This copies from the buffer p into the particle property T. 
     @param[in,out] p Buffer. 
     @param[in] a_x Particle property. Must be a trivial type.
   */
@@ -64,7 +65,7 @@ namespace detail {
   };
 } // namespace detail
 
-/*!
+/**
   @brief A generic particle class, holding the position and a specified number of real and vector values.
   @details For the sake of simplicity, I have added separate linearization functions H5size, H5linearOut, H5linearIn that only linearizes
   the Real components of the particle. This is done for convenience only, so I don't have to rewrite all of Chombo's particle HDF5 checkpointing
@@ -75,89 +76,93 @@ template <size_t M, size_t N>
 class GenericParticle
 {
 public:
-  /*!
+  /**
     @brief Default constructor -- initializes everything to zero. 
   */
   inline GenericParticle();
 
-  /*!
+  /**
     @brief Copy constructor. Copies all fields.
     @param[in] a_other Other particle. 
   */
   inline GenericParticle(const GenericParticle<M, N>& a_other);
 
-  /*!
+  /**
     @brief Destructor (deallocates runtime memory storage)
   */
   inline virtual ~GenericParticle();
 
-  /*!
+  /**
     @brief Get the particle ID
+    @return Unique particle identifier
   */
   inline const int32_t&
   particleID() const noexcept;
 
-  /*!
+  /**
     @brief Get the particle ID
+    @return Unique particle identifier
   */
   inline int32_t&
   particleID() noexcept;
 
-  /*!
+  /**
     @brief Get the MPI rank ID
+    @return Unique particle identifier
   */
   inline const int32_t&
   rankID() const noexcept;
 
-  /*!
+  /**
     @brief Get the MPI rank ID
+    @return Unique particle identifier
   */
   inline int32_t&
   rankID() noexcept;
 
-  /*!
+  /**
     @brief Get the particle position. 
     @return m_position
   */
   inline RealVect&
   position();
 
-  /*!
+  /**
     @brief Get the particle position.
     @return m_position
   */
   inline const RealVect&
   position() const;
 
-  /*!
+  /**
     @brief Get the M scalars
     @return m_scalars
   */
   inline const std::array<Real, M>&
   getReals() const noexcept;
 
-  /*!
+  /**
     @brief Get the M scalars
     @return m_scalars
   */
   inline std::array<Real, M>&
   getReals() noexcept;
 
-  /*!
+  /**
     @brief Get the N vectors
     @return m_vects
   */
   inline const std::array<RealVect, N>&
   getVects() const noexcept;
 
-  /*!
+  /**
     @brief Get the N vectors
     @return m_vects
   */
   inline std::array<RealVect, N>&
   getVects() noexcept;
 
-  /*!
+  /**
     @brief Get one of the scalars. 
     @details Template parameter is the position in the m_scalars array. This is templated so that compilers may throw
     compile-time errors if trying to fetch elements out of range. 
@@ -167,7 +172,7 @@ public:
   inline Real&
   real();
 
-  /*!
+  /**
     @brief Get one of the scalars. 
     @details Template parameter is the position in the m_scalars array. This is templated so that compilers may throw
     compile-time errors if trying to fetch elements out of range. 
@@ -177,7 +182,7 @@ public:
   inline const Real&
   real() const;
 
-  /*!
+  /**
     @brief Get one of the RealVects.
     @details Template parameter is the position in the m_vectors array. This is templated so that compilers may throw
     compile-time errors if trying to fetch elements out of range. 
@@ -187,7 +192,7 @@ public:
   inline RealVect&
   vect();
 
-  /*!
+  /**
     @brief Get one of the RealVects.
     @details Template parameter is the position in the m_vectors array. This is templated so that compilers may throw
     compile-time errors if trying to fetch elements out of range. 
@@ -197,106 +202,113 @@ public:
   inline const RealVect&
   vect() const;
 
-  /*!
-    @brief Comparison operator with other particle. 
-    @param[in] a_other Other particle
-    @note Does not compare the M and N Reals and RealVects. 
-  */
-  inline bool
-  operator==(const GenericParticle<M, N>& a_other) const;
-
-  /*!
+  /**
     @brief Comparison operator with other particle.
-    @param[in] a_other Other particle
-    @note Does not compare the M and N Reals and RealVects. 
+    @param[in] a_p Other particle
+    @note Does not compare the M and N Reals and RealVects.
+    @return Return value
   */
   inline bool
-  operator!=(const GenericParticle<M, N>& a_other) const;
+  operator==(const GenericParticle<M, N>& a_p) const;
 
-  /*!
+  /**
+    @brief Comparison operator with other particle.
+    @param[in] a_p Other particle
+    @note Does not compare the M and N Reals and RealVects.
+    @return Return value
+  */
+  inline bool
+  operator!=(const GenericParticle<M, N>& a_p) const;
+
+  /**
     @brief Particle comparison operator. Returns lexicographical ordering.
+    @return Return value
+    @param[in,out] a_other Description
   */
   inline bool
   operator<(const GenericParticle<M, N>& a_other) const noexcept;
 
-  /*!
+  /**
     @brief Returns the size, in number of bytes, of a flat representation of the data in this object.
+    @return Return value
   */
   inline virtual int
   size() const;
 
-  /*!
+  /**
     @brief Write a linear binary representation of the internal data. Assumes that
     sufficient memory for the buffer has already been allocated by the caller. 
     @param[in] a_buffer Pointer to memory block
   */
   inline virtual void
-  linearOut(void* const a_buffer) const;
+  linearOut(void* a_buffer) const;
 
-  /*!
+  /**
     @brief Read a linear binary representation of the internal data. Assumes that the buffer has the correct data.
     @param[in] a_buffer Pointer to memory block.
   */
   inline virtual void
-  linearIn(const void* const a_buffer);
+  linearIn(const void* a_buffer);
 
-  /*!
+  /**
     @brief Function that is used when writing particles to HDF5.
     @details This ignores the particleID and rankID, so we can directory plug into Chombo's HDF5 APIs.
     @note Please do not try to output anything other than Real components. Chombo will expect only Reals. 
+    @return Return value
   */
   inline virtual int
   H5size() const;
 
-  /*!
+  /**
     @brief Linearize the Real components onto a buffer workable by HDF5.
     @details Ignores the particleID and rankID, so we can directly plug into Chombo's HDF5 API.
     @param[in] a_buffer Pointer to memory block.
     @note Please do not try to output anything other than Real components. Chombo will expect only Reals.     
   */
   inline virtual void
-  H5linearOut(void* const a_buffer) const;
+  H5linearOut(void* a_buffer) const;
 
-  /*!
+  /**
     @brief Delinearize the buffer onto the real components in the particle class.
     @details Ignores the particleID and rankID, so we can directly plug into Chombo's HDF5 API.
     @param[in] a_buffer Pointer to memory block.
     @note Please do not try to output anything other than Real components. Chombo will expect only Reals.     
   */
   inline virtual void
-  H5linearIn(const void* const a_buffer);
+  H5linearIn(const void* a_buffer);
 
 protected:
-  /*!
+  /**
     @brief Particle ID
   */
   int32_t m_particleID;
 
-  /*!
+  /**
     @brief MPI rank owning this particle
   */
   int32_t m_rankID;
 
-  /*!
+  /**
     @brief Particle position
   */
   RealVect m_position;
 
-  /*!
+  /**
     @brief Scalar storage array
   */
   std::array<Real, M> m_scalars;
 
-  /*!
+  /**
     @brief vector storage array
   */
   std::array<RealVect, N> m_vectors;
 };
 
-/*!
+/**
   @brief Particle printing function
-  @param[in] ostr       Output stream
-  @param[in] a_particle Particle to output
+  @param[in] ostr Output stream
+  @param[in] p    Particle to output
+  @return Reference to the output stream
 */
 template <size_t M, size_t N>
 inline std::ostream&

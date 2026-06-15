@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_AmrMesh.cpp
   @brief  Implementation of CD_AmrMesh.H
   @author Robert Marskar
@@ -28,23 +29,18 @@
 #include <CD_DataOps.H>
 #include <CD_NamespaceHeader.H>
 
-AmrMesh::AmrMesh()
+AmrMesh::AmrMesh() : m_finestLevel(0), m_oldFinestLevel(-1), m_hasGrids(false)
 {
 
   // Default things
   this->parseOptions();
-
-  m_finestLevel    = 0;
-  m_oldFinestLevel = -1;
-  m_hasGrids       = false;
 
   // Some things might require a vector which is just a tiny bit longer.
   m_refinementRatios.resize(m_maxAmrDepth);
   m_refinementRatios.push_back(2);
 }
 
-AmrMesh::~AmrMesh()
-{}
+AmrMesh::~AmrMesh() = default;
 
 EBAMRCellData
 AmrMesh::slice(EBAMRCellData& a_original, const Interval a_variables) const noexcept
@@ -67,7 +63,7 @@ AmrMesh::slice(EBAMRCellData& a_original, const Interval a_variables) const noex
   return ret;
 }
 
-const EBAMRCellData
+EBAMRCellData
 AmrMesh::slice(const EBAMRCellData& a_original, const Interval a_variables) const noexcept
 {
   CH_TIME("AmrMesh::alias(phase::which_phase, MFAMRCellData)");
@@ -222,7 +218,7 @@ AmrMesh::alias(EBAMRIVData& a_data, const phase::which_phase a_phase, const MFAM
 
 void
 AmrMesh::allocate(EBAMRCellData&           a_data,
-                  const std::string        a_realm,
+                  const std::string&       a_realm,
                   const phase::which_phase a_phase,
                   const int                a_nComp,
                   const int                a_ghost) const
@@ -261,7 +257,7 @@ AmrMesh::allocate(EBAMRCellData&           a_data,
 
 void
 AmrMesh::allocate(LevelData<EBCellFAB>&    a_data,
-                  const std::string        a_realm,
+                  const std::string&       a_realm,
                   const phase::which_phase a_phase,
                   const int                a_level,
                   const int                a_nComp,
@@ -291,7 +287,7 @@ AmrMesh::allocate(LevelData<EBCellFAB>&    a_data,
 
 void
 AmrMesh::allocate(EBAMRFluxData&           a_data,
-                  const std::string        a_realm,
+                  const std::string&       a_realm,
                   const phase::which_phase a_phase,
                   const int                a_nComp,
                   const int                a_ghost) const
@@ -330,7 +326,7 @@ AmrMesh::allocate(EBAMRFluxData&           a_data,
 
 void
 AmrMesh::allocate(EBAMRIVData&             a_data,
-                  const std::string        a_realm,
+                  const std::string&       a_realm,
                   const phase::which_phase a_phase,
                   const int                a_nComp,
                   const int                a_ghost) const
@@ -382,7 +378,7 @@ AmrMesh::allocate(EBAMRIVData&             a_data,
 
 void
 AmrMesh::allocate(EBAMRIFData&             a_data,
-                  const std::string        a_realm,
+                  const std::string&       a_realm,
                   const phase::which_phase a_phase,
                   const int                a_nComp,
                   const int                a_ghost) const
@@ -420,7 +416,7 @@ AmrMesh::allocate(EBAMRIFData&             a_data,
 }
 
 void
-AmrMesh::allocate(EBAMRBool& a_data, const std::string a_realm, const int a_nComp, const int a_ghost) const
+AmrMesh::allocate(EBAMRBool& a_data, const std::string& a_realm, const int a_nComp, const int a_ghost) const
 {
   CH_TIME("AmrMesh::allocate(EBAMRBool, string, int, int)");
   if (m_verbosity > 5) {
@@ -449,7 +445,7 @@ AmrMesh::allocate(EBAMRBool& a_data, const std::string a_realm, const int a_nCom
 }
 
 void
-AmrMesh::allocate(MFAMRCellData& a_data, const std::string a_realm, const int a_nComp, const int a_ghost) const
+AmrMesh::allocate(MFAMRCellData& a_data, const std::string& a_realm, const int a_nComp, const int a_ghost) const
 {
   CH_TIME("AmrMesh::allocate(MFAMRCellData, string, int, int)");
   if (m_verbosity > 5) {
@@ -478,10 +474,12 @@ AmrMesh::allocate(MFAMRCellData& a_data, const std::string a_realm, const int a_
     Vector<EBISLayout> ebisl(nphases);
     Vector<int>        comps(nphases, a_nComp);
 
-    if (!ebisGas.isNull())
+    if (!ebisGas.isNull()) {
       ebisl[phase::gas] = m_realms[a_realm]->getEBISLayout(phase::gas)[lvl];
-    if (!ebisSol.isNull())
+    }
+    if (!ebisSol.isNull()) {
       ebisl[phase::solid] = m_realms[a_realm]->getEBISLayout(phase::solid)[lvl];
+    }
 
     MFCellFactory factory(ebisl, comps);
 
@@ -493,7 +491,7 @@ AmrMesh::allocate(MFAMRCellData& a_data, const std::string a_realm, const int a_
 }
 
 void
-AmrMesh::allocate(MFAMRFluxData& a_data, const std::string a_realm, const int a_nComp, const int a_ghost) const
+AmrMesh::allocate(MFAMRFluxData& a_data, const std::string& a_realm, const int a_nComp, const int a_ghost) const
 {
   CH_TIME("AmrMesh::allocate(MFAMRFluxData, string, int, int)");
   if (m_verbosity > 5) {
@@ -522,10 +520,12 @@ AmrMesh::allocate(MFAMRFluxData& a_data, const std::string a_realm, const int a_
     Vector<EBISLayout> ebisl(nphases);
     Vector<int>        comps(nphases, a_nComp);
 
-    if (!ebisGas.isNull())
+    if (!ebisGas.isNull()) {
       ebisl[phase::gas] = m_realms[a_realm]->getEBISLayout(phase::gas)[lvl];
-    if (!ebisSol.isNull())
+    }
+    if (!ebisSol.isNull()) {
       ebisl[phase::solid] = m_realms[a_realm]->getEBISLayout(phase::solid)[lvl];
+    }
 
     MFFluxFactory factory(ebisl, comps);
 
@@ -537,7 +537,7 @@ AmrMesh::allocate(MFAMRFluxData& a_data, const std::string a_realm, const int a_
 }
 
 void
-AmrMesh::allocate(MFAMRIVData& a_data, const std::string a_realm, const int a_nComp, const int a_ghost) const
+AmrMesh::allocate(MFAMRIVData& a_data, const std::string& a_realm, const int a_nComp, const int a_ghost) const
 {
   CH_TIME("AmrMesh::allocate(MFAMRIVData, string, int, int)");
   if (m_verbosity > 5) {
@@ -566,10 +566,12 @@ AmrMesh::allocate(MFAMRIVData& a_data, const std::string a_realm, const int a_nC
     Vector<EBISLayout> ebisl(nphases);
     Vector<int>        comps(nphases, a_nComp);
 
-    if (!ebisGas.isNull())
+    if (!ebisGas.isNull()) {
       ebisl[phase::gas] = m_realms[a_realm]->getEBISLayout(phase::gas)[lvl];
-    if (!ebisSol.isNull())
+    }
+    if (!ebisSol.isNull()) {
       ebisl[phase::solid] = m_realms[a_realm]->getEBISLayout(phase::solid)[lvl];
+    }
 
     MFBaseIVFABFactory factory(ebisl, comps);
 
@@ -787,10 +789,12 @@ AmrMesh::reallocate(MFAMRCellData& a_data, const int a_lmin) const
 
     const DisjointBoxLayout& dbl = m_realms[a_realm]->getGrids()[lvl];
 
-    if (!ebisGas.isNull())
+    if (!ebisGas.isNull()) {
       ebisl[phase::gas] = m_realms[a_realm]->getEBISLayout(phase::gas)[lvl];
-    if (!ebisSol.isNull())
+    }
+    if (!ebisSol.isNull()) {
       ebisl[phase::solid] = m_realms[a_realm]->getEBISLayout(phase::solid)[lvl];
+    }
 
     MFCellFactory factory(ebisl, comps);
 
@@ -831,10 +835,12 @@ AmrMesh::reallocate(MFAMRFluxData& a_data, const int a_lmin) const
 
     const DisjointBoxLayout& dbl = m_realms[a_realm]->getGrids()[lvl];
 
-    if (!ebisGas.isNull())
+    if (!ebisGas.isNull()) {
       ebisl[phase::gas] = m_realms[a_realm]->getEBISLayout(phase::gas)[lvl];
-    if (!ebisSol.isNull())
+    }
+    if (!ebisSol.isNull()) {
       ebisl[phase::solid] = m_realms[a_realm]->getEBISLayout(phase::solid)[lvl];
+    }
 
     MFFluxFactory factory(ebisl, comps);
 
@@ -875,10 +881,12 @@ AmrMesh::reallocate(MFAMRIVData& a_data, const int a_lmin) const
 
     const DisjointBoxLayout& dbl = m_realms[a_realm]->getGrids()[lvl];
 
-    if (!ebisGas.isNull())
+    if (!ebisGas.isNull()) {
       ebisl[phase::gas] = m_realms[a_realm]->getEBISLayout(phase::gas)[lvl];
-    if (!ebisSol.isNull())
+    }
+    if (!ebisSol.isNull()) {
       ebisl[phase::solid] = m_realms[a_realm]->getEBISLayout(phase::solid)[lvl];
+    }
 
     MFBaseIVFABFactory factory(ebisl, comps);
 
@@ -1112,7 +1120,7 @@ AmrMesh::regridOperators(const int a_lmin)
 }
 
 void
-AmrMesh::regridOperators(const std::string a_realm, const int a_lmin)
+AmrMesh::regridOperators(const std::string& a_realm, const int a_lmin)
 {
   CH_TIME("AmrMesh::regridOperators(string, int)");
   if (m_verbosity > 1) {
@@ -1141,7 +1149,7 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
   // baseLevel is the coarsest level which does not change. topLevel is the finest level where we have tags. We should never
   // have tags on max_amr_depth, and we make that restriction here.
   const int baseLevel = std::max(0, a_lmin - 1);
-  const int topLevel  = (m_finestLevel == m_maxAmrDepth) ? m_finestLevel - 1 : a_tags.size() - 1;
+  const int topLevel  = (m_finestLevel == m_maxAmrDepth) ? m_finestLevel - 1 : static_cast<int>(a_tags.size()) - 1;
 
   // New and old grid boxes
   Vector<Vector<Box>> newBoxes(1 + topLevel);
@@ -1236,7 +1244,7 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
     Vector<long int>   boxLoads(levelBoxes.size());
 
     for (int ibox = 0; ibox < levelBoxes.size(); ibox++) {
-      boxLoads[ibox] = levelBoxes[ibox].numPts();
+      boxLoads[ibox] = static_cast<long>(levelBoxes[ibox].numPts());
     }
 
     // Load balance this grid -- assign grid subsets to the least loaded rank.
@@ -1319,7 +1327,7 @@ AmrMesh::buildCopiers()
 void
 AmrMesh::computeGradient(LevelData<EBCellFAB>&       a_gradient,
                          const LevelData<EBCellFAB>& a_phi,
-                         const std::string           a_realm,
+                         const std::string&          a_realm,
                          const phase::which_phase    a_phase,
                          const int                   a_lvl) const
 {
@@ -1336,7 +1344,7 @@ AmrMesh::computeGradient(LevelData<EBCellFAB>&       a_gradient,
 void
 AmrMesh::computeGradient(EBAMRCellData&           a_gradient,
                          const EBAMRCellData&     a_phi,
-                         const std::string        a_realm,
+                         const std::string&       a_realm,
                          const phase::which_phase a_phase) const
 {
   CH_TIME("AmrMesh::computeGradient(EBAMRCellData, EBAMRCellData, string, phase::which_phase)");
@@ -1365,7 +1373,7 @@ AmrMesh::computeGradient(EBAMRCellData&           a_gradient,
 void
 AmrMesh::computeGradient(EBAMRFluxData&           a_gradient,
                          const EBAMRCellData&     a_phi,
-                         const std::string        a_realm,
+                         const std::string&       a_realm,
                          const phase::which_phase a_phase) const
 {
   CH_TIME("AmrMesh::computeGradient(EBAMRFluxData, EBAMRCellData, string, phase::which_phase)");
@@ -1405,7 +1413,7 @@ AmrMesh::computeGradient(EBAMRFluxData&           a_gradient,
 }
 
 void
-AmrMesh::computeGradient(MFAMRCellData& a_gradient, const MFAMRCellData& a_phi, const std::string a_realm) const
+AmrMesh::computeGradient(MFAMRCellData& a_gradient, const MFAMRCellData& a_phi, const std::string& a_realm) const
 {
   CH_TIME("AmrMesh::computeGradient(MFAMRCellData, MFAMRCellData, string)");
   if (m_verbosity > 5) {
@@ -1437,7 +1445,7 @@ AmrMesh::computeGradient(MFAMRCellData& a_gradient, const MFAMRCellData& a_phi, 
 }
 
 void
-AmrMesh::computeGradient(MFAMRFluxData& a_gradient, const MFAMRCellData& a_phi, const std::string a_realm) const
+AmrMesh::computeGradient(MFAMRFluxData& a_gradient, const MFAMRCellData& a_phi, const std::string& a_realm) const
 {
   CH_TIME("AmrMesh::computeGradient(MFAMRFluxData, MFAMRCellData, string)");
   if (m_verbosity > 5) {
@@ -1469,7 +1477,7 @@ AmrMesh::computeGradient(MFAMRFluxData& a_gradient, const MFAMRCellData& a_phi, 
 }
 
 void
-AmrMesh::average(MFAMRCellData& a_data, const std::string a_realm, const Average& a_average) const
+AmrMesh::average(MFAMRCellData& a_data, const std::string& a_realm, const Average& a_average) const
 {
   CH_TIME("AmrMesh::average(MFAMRCellData, string, Average)");
   if (m_verbosity > 3) {
@@ -1509,7 +1517,7 @@ AmrMesh::average(MFAMRCellData& a_data, const std::string a_realm, const Average
 }
 
 void
-AmrMesh::arithmeticAverage(MFAMRCellData& a_data, const std::string a_realm) const
+AmrMesh::arithmeticAverage(MFAMRCellData& a_data, const std::string& a_realm) const
 {
   CH_TIME("AmrMesh::arithmeticAverage(MFAMRCellData, string)");
   if (m_verbosity > 3) {
@@ -1520,7 +1528,7 @@ AmrMesh::arithmeticAverage(MFAMRCellData& a_data, const std::string a_realm) con
 }
 
 void
-AmrMesh::harmonicAverage(MFAMRCellData& a_data, const std::string a_realm) const
+AmrMesh::harmonicAverage(MFAMRCellData& a_data, const std::string& a_realm) const
 {
   CH_TIME("AmrMesh::harmonic(MFAMRCellData, string)");
   if (m_verbosity > 3) {
@@ -1531,7 +1539,7 @@ AmrMesh::harmonicAverage(MFAMRCellData& a_data, const std::string a_realm) const
 }
 
 void
-AmrMesh::conservativeAverage(MFAMRCellData& a_data, const std::string a_realm) const
+AmrMesh::conservativeAverage(MFAMRCellData& a_data, const std::string& a_realm) const
 {
   CH_TIME("AmrMesh::conservativeAverage(MFAMRCellData, string)");
   if (m_verbosity > 3) {
@@ -1542,7 +1550,7 @@ AmrMesh::conservativeAverage(MFAMRCellData& a_data, const std::string a_realm) c
 }
 
 void
-AmrMesh::average(MFAMRFluxData& a_data, const std::string a_realm, const Average& a_average) const
+AmrMesh::average(MFAMRFluxData& a_data, const std::string& a_realm, const Average& a_average) const
 {
   CH_TIME("AmrMesh::average(MFAMRFluxData, string)");
   if (m_verbosity > 3) {
@@ -1582,7 +1590,7 @@ AmrMesh::average(MFAMRFluxData& a_data, const std::string a_realm, const Average
   }
 }
 void
-AmrMesh::arithmeticAverage(MFAMRFluxData& a_data, const std::string a_realm) const
+AmrMesh::arithmeticAverage(MFAMRFluxData& a_data, const std::string& a_realm) const
 {
   CH_TIME("AmrMesh::arithmeticAverage(MFAMRFluxData, string)");
   if (m_verbosity > 3) {
@@ -1593,7 +1601,7 @@ AmrMesh::arithmeticAverage(MFAMRFluxData& a_data, const std::string a_realm) con
 }
 
 void
-AmrMesh::harmonicAverage(MFAMRFluxData& a_data, const std::string a_realm) const
+AmrMesh::harmonicAverage(MFAMRFluxData& a_data, const std::string& a_realm) const
 {
   CH_TIME("AmrMesh::harmonicAverage(MFAMRFluxData, string)");
   if (m_verbosity > 3) {
@@ -1604,7 +1612,7 @@ AmrMesh::harmonicAverage(MFAMRFluxData& a_data, const std::string a_realm) const
 }
 
 void
-AmrMesh::conservativeAverage(MFAMRFluxData& a_data, const std::string a_realm) const
+AmrMesh::conservativeAverage(MFAMRFluxData& a_data, const std::string& a_realm) const
 {
   CH_TIME("AmrMesh::conservativeAverage(MFAMRFluxData, string)");
   if (m_verbosity > 3) {
@@ -1616,7 +1624,7 @@ AmrMesh::conservativeAverage(MFAMRFluxData& a_data, const std::string a_realm) c
 
 void
 AmrMesh::average(EBAMRCellData&           a_data,
-                 const std::string        a_realm,
+                 const std::string&       a_realm,
                  const phase::which_phase a_phase,
                  const Average&           a_average) const
 {
@@ -1642,7 +1650,7 @@ AmrMesh::average(EBAMRCellData&           a_data,
 
 void
 AmrMesh::average(EBAMRCellData&           a_data,
-                 const std::string        a_realm,
+                 const std::string&       a_realm,
                  const phase::which_phase a_phase,
                  const Average&           a_average,
                  const Interval&          a_variables) const
@@ -1667,7 +1675,7 @@ AmrMesh::average(EBAMRCellData&           a_data,
 }
 
 void
-AmrMesh::arithmeticAverage(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const
+AmrMesh::arithmeticAverage(EBAMRCellData& a_data, const std::string& a_realm, const phase::which_phase a_phase) const
 {
   CH_TIME("AmrMesh::average(EBAMRCellData, string, phase::which_phase)");
   if (m_verbosity > 3) {
@@ -1679,7 +1687,7 @@ AmrMesh::arithmeticAverage(EBAMRCellData& a_data, const std::string a_realm, con
 
 void
 AmrMesh::arithmeticAverage(EBAMRCellData&           a_data,
-                           const std::string        a_realm,
+                           const std::string&       a_realm,
                            const phase::which_phase a_phase,
                            const Interval&          a_variables) const
 {
@@ -1692,7 +1700,7 @@ AmrMesh::arithmeticAverage(EBAMRCellData&           a_data,
 }
 
 void
-AmrMesh::harmonicAverage(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const
+AmrMesh::harmonicAverage(EBAMRCellData& a_data, const std::string& a_realm, const phase::which_phase a_phase) const
 {
   CH_TIME("AmrMesh::harmonicAverage(EBAMRCellData, string, phase::which_phase)");
   if (m_verbosity > 3) {
@@ -1704,7 +1712,7 @@ AmrMesh::harmonicAverage(EBAMRCellData& a_data, const std::string a_realm, const
 
 void
 AmrMesh::harmonicAverage(EBAMRCellData&           a_data,
-                         const std::string        a_realm,
+                         const std::string&       a_realm,
                          const phase::which_phase a_phase,
                          const Interval&          a_variables) const
 {
@@ -1717,7 +1725,7 @@ AmrMesh::harmonicAverage(EBAMRCellData&           a_data,
 }
 
 void
-AmrMesh::conservativeAverage(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const
+AmrMesh::conservativeAverage(EBAMRCellData& a_data, const std::string& a_realm, const phase::which_phase a_phase) const
 {
   CH_TIME("AmrMesh::conservativeAverage(EBAMRCellData, string, phase::which_phase)");
   if (m_verbosity > 3) {
@@ -1729,7 +1737,7 @@ AmrMesh::conservativeAverage(EBAMRCellData& a_data, const std::string a_realm, c
 
 void
 AmrMesh::conservativeAverage(EBAMRCellData&           a_data,
-                             const std::string        a_realm,
+                             const std::string&       a_realm,
                              const phase::which_phase a_phase,
                              const Interval&          a_variables) const
 {
@@ -1743,7 +1751,7 @@ AmrMesh::conservativeAverage(EBAMRCellData&           a_data,
 
 void
 AmrMesh::average(EBAMRFluxData&           a_data,
-                 const std::string        a_realm,
+                 const std::string&       a_realm,
                  const phase::which_phase a_phase,
                  const Average&           a_average) const
 {
@@ -1768,7 +1776,7 @@ AmrMesh::average(EBAMRFluxData&           a_data,
 }
 
 void
-AmrMesh::arithmeticAverage(EBAMRFluxData& a_data, const std::string a_realm, const phase::which_phase a_phase) const
+AmrMesh::arithmeticAverage(EBAMRFluxData& a_data, const std::string& a_realm, const phase::which_phase a_phase) const
 {
   CH_TIME("AmrMesh::arithmeticAverage(EBAMRFluxData, string, phase::which_phase");
   if (m_verbosity > 3) {
@@ -1779,7 +1787,7 @@ AmrMesh::arithmeticAverage(EBAMRFluxData& a_data, const std::string a_realm, con
 }
 
 void
-AmrMesh::harmonicAverage(EBAMRFluxData& a_data, const std::string a_realm, const phase::which_phase a_phase) const
+AmrMesh::harmonicAverage(EBAMRFluxData& a_data, const std::string& a_realm, const phase::which_phase a_phase) const
 {
   CH_TIME("AmrMesh::harmonicAverage(EBAMRFluxData, string, phase::which_phase");
   if (m_verbosity > 3) {
@@ -1790,7 +1798,7 @@ AmrMesh::harmonicAverage(EBAMRFluxData& a_data, const std::string a_realm, const
 }
 
 void
-AmrMesh::conservativeAverage(EBAMRFluxData& a_data, const std::string a_realm, const phase::which_phase a_phase) const
+AmrMesh::conservativeAverage(EBAMRFluxData& a_data, const std::string& a_realm, const phase::which_phase a_phase) const
 {
   CH_TIME("AmrMesh::conservativeAverage(EBAMRFluxData, string, phase::which_phase");
   if (m_verbosity > 3) {
@@ -1802,7 +1810,7 @@ AmrMesh::conservativeAverage(EBAMRFluxData& a_data, const std::string a_realm, c
 
 void
 AmrMesh::average(EBAMRIVData&             a_data,
-                 const std::string        a_realm,
+                 const std::string&       a_realm,
                  const phase::which_phase a_phase,
                  const Average&           a_average) const
 {
@@ -1827,7 +1835,7 @@ AmrMesh::average(EBAMRIVData&             a_data,
 }
 
 void
-AmrMesh::arithmeticAverage(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase) const
+AmrMesh::arithmeticAverage(EBAMRIVData& a_data, const std::string& a_realm, const phase::which_phase a_phase) const
 {
   CH_TIME("AmrMesh::arithmeticAverage(EBAMRIVData, string, phase::which_phase");
   if (m_verbosity > 3) {
@@ -1838,7 +1846,7 @@ AmrMesh::arithmeticAverage(EBAMRIVData& a_data, const std::string a_realm, const
 }
 
 void
-AmrMesh::harmonicAverage(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase) const
+AmrMesh::harmonicAverage(EBAMRIVData& a_data, const std::string& a_realm, const phase::which_phase a_phase) const
 {
   CH_TIME("AmrMesh::harmonicAverage(EBAMRIVData, string, phase::which_phase");
   if (m_verbosity > 3) {
@@ -1849,7 +1857,7 @@ AmrMesh::harmonicAverage(EBAMRIVData& a_data, const std::string a_realm, const p
 }
 
 void
-AmrMesh::conservativeAverage(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase) const
+AmrMesh::conservativeAverage(EBAMRIVData& a_data, const std::string& a_realm, const phase::which_phase a_phase) const
 {
   CH_TIME("AmrMesh::conservativeAverage(EBAMRFluxData, string, phase::which_phase");
   if (m_verbosity > 3) {
@@ -1860,7 +1868,7 @@ AmrMesh::conservativeAverage(EBAMRIVData& a_data, const std::string a_realm, con
 }
 
 void
-AmrMesh::interpGhost(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const
+AmrMesh::interpGhost(EBAMRCellData& a_data, const std::string& a_realm, const phase::which_phase a_phase) const
 {
   CH_TIME("AmrMesh::interpGhost(EBAMRCellData, string, phase::which_phase)");
   if (m_verbosity > 3) {
@@ -1880,7 +1888,7 @@ void
 AmrMesh::interpGhost(LevelData<EBCellFAB>&       a_fineData,
                      const LevelData<EBCellFAB>& a_coarData,
                      const int                   a_fineLevel,
-                     const std::string           a_realm,
+                     const std::string&          a_realm,
                      const phase::which_phase    a_phase) const
 {
   CH_TIME("AmrMesh::interpGhost(LD<EBCellFAB>, LD<EBCellFAB>, int, string, phase::which_phase)");
@@ -1910,7 +1918,7 @@ AmrMesh::interpGhost(LevelData<EBCellFAB>&       a_fineData,
 }
 
 void
-AmrMesh::interpGhost(MFAMRCellData& a_data, const std::string a_realm) const
+AmrMesh::interpGhost(MFAMRCellData& a_data, const std::string& a_realm) const
 {
   CH_TIME("AmrMesh::interpGhost(MFAMRCellData, string)");
   if (m_verbosity > 3) {
@@ -1950,7 +1958,7 @@ AmrMesh::interpGhost(MFAMRCellData& a_data, const std::string a_realm) const
 }
 
 void
-AmrMesh::interpGhostPwl(MFAMRCellData& a_data, const std::string a_realm) const
+AmrMesh::interpGhostPwl(MFAMRCellData& a_data, const std::string& a_realm) const
 {
   CH_TIME("AmrMesh::interpGhostPwl(MFAMRCellData, string)");
   if (m_verbosity > 3) {
@@ -1973,10 +1981,12 @@ AmrMesh::interpGhostPwl(MFAMRCellData& a_data, const std::string a_realm) const
     aliasGas[lvl] = RefCountedPtr<LevelData<EBCellFAB>>(new LevelData<EBCellFAB>());
     aliasSol[lvl] = RefCountedPtr<LevelData<EBCellFAB>>(new LevelData<EBCellFAB>());
 
-    if (!ebisGas.isNull())
+    if (!ebisGas.isNull()) {
       MultifluidAlias::aliasMF(*aliasGas[lvl], phase::gas, *a_data[lvl]);
-    if (!ebisSol.isNull())
+    }
+    if (!ebisSol.isNull()) {
       MultifluidAlias::aliasMF(*aliasSol[lvl], phase::solid, *a_data[lvl]);
+    }
   }
 
   if (!ebisGas.isNull()) {
@@ -1988,7 +1998,7 @@ AmrMesh::interpGhostPwl(MFAMRCellData& a_data, const std::string a_realm) const
 }
 
 void
-AmrMesh::interpGhostPwl(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const
+AmrMesh::interpGhostPwl(EBAMRCellData& a_data, const std::string& a_realm, const phase::which_phase a_phase) const
 {
   CH_TIME("AmrMesh::interpGhostPwl(EBAMRCellData, string, phase::which_phase)");
   if (m_verbosity > 3) {
@@ -2013,7 +2023,7 @@ AmrMesh::interpGhostPwl(EBAMRCellData& a_data, const std::string a_realm, const 
 }
 
 void
-AmrMesh::interpGhostMG(MFAMRCellData& a_data, const std::string a_realm) const
+AmrMesh::interpGhostMG(MFAMRCellData& a_data, const std::string& a_realm) const
 {
   CH_TIME("AmrMesh::interpGhostMG(MFAMRCellData, string)");
   if (m_verbosity > 3) {
@@ -2053,7 +2063,7 @@ AmrMesh::interpGhostMG(MFAMRCellData& a_data, const std::string a_realm) const
 }
 
 void
-AmrMesh::interpGhostMG(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const
+AmrMesh::interpGhostMG(EBAMRCellData& a_data, const std::string& a_realm, const phase::which_phase a_phase) const
 {
   CH_TIME("AmrMesh::interpGhostPwl(EBAMRCellData, string, phase::which_phase)");
   if (m_verbosity > 3) {
@@ -2255,7 +2265,7 @@ AmrMesh::interpToNewGrids(EBAMRIVData&                     a_newData,
 
 void
 AmrMesh::interpToCentroids(EBAMRCellData&           a_data,
-                           const std::string        a_realm,
+                           const std::string&       a_realm,
                            const phase::which_phase a_phase) const noexcept
 {
   CH_TIME("AmrMesh::interpToCentroids(AMR)");
@@ -2276,7 +2286,7 @@ AmrMesh::interpToCentroids(EBAMRCellData&           a_data,
 
 void
 AmrMesh::interpToCentroids(LevelData<EBCellFAB>&    a_data,
-                           const std::string        a_realm,
+                           const std::string&       a_realm,
                            const phase::which_phase a_phase,
                            const int                a_level) const noexcept
 {
@@ -2298,7 +2308,7 @@ AmrMesh::interpToCentroids(LevelData<EBCellFAB>&    a_data,
 void
 AmrMesh::interpToCentroids(EBCellFAB&               a_centroidData,
                            const EBCellFAB&         a_cellData,
-                           const std::string        a_realm,
+                           const std::string&       a_realm,
                            const phase::which_phase a_phase,
                            const int                a_level,
                            const DataIndex&         a_din) const noexcept
@@ -2321,7 +2331,7 @@ AmrMesh::interpToCentroids(EBCellFAB&               a_centroidData,
 void
 AmrMesh::interpToCentroids(EBAMRIVData&             a_centroidData,
                            const EBAMRCellData&     a_cellData,
-                           const std::string        a_realm,
+                           const std::string&       a_realm,
                            const phase::which_phase a_phase) const noexcept
 {
   CH_TIME("AmrMesh::interpToCentroids(ebamrivdata)");
@@ -2343,7 +2353,7 @@ AmrMesh::interpToCentroids(EBAMRIVData&             a_centroidData,
 void
 AmrMesh::interpToCentroids(LevelData<BaseIVFAB<Real>>& a_centroidData,
                            const LevelData<EBCellFAB>& a_cellData,
-                           const std::string           a_realm,
+                           const std::string&          a_realm,
                            const phase::which_phase    a_phase,
                            const int                   a_level) const noexcept
 {
@@ -2365,7 +2375,7 @@ AmrMesh::interpToCentroids(LevelData<BaseIVFAB<Real>>& a_centroidData,
 void
 AmrMesh::interpToEB(EBAMRIVData&             a_centroidData,
                     const EBAMRCellData&     a_cellData,
-                    const std::string        a_realm,
+                    const std::string&       a_realm,
                     const phase::which_phase a_phase) const noexcept
 {
   CH_TIME("AmrMesh::interpToEB(ebamrivdata)");
@@ -2387,7 +2397,7 @@ AmrMesh::interpToEB(EBAMRIVData&             a_centroidData,
 void
 AmrMesh::interpToEB(LevelData<BaseIVFAB<Real>>& a_centroidData,
                     const LevelData<EBCellFAB>& a_cellData,
-                    const std::string           a_realm,
+                    const std::string&          a_realm,
                     const phase::which_phase    a_phase,
                     const int                   a_level) const noexcept
 {
@@ -2410,7 +2420,7 @@ AmrMesh::interpToEB(LevelData<BaseIVFAB<Real>>& a_centroidData,
 void
 AmrMesh::interpToEB(BaseIVFAB<Real>&         a_centroidData,
                     const EBCellFAB&         a_cellData,
-                    const std::string        a_realm,
+                    const std::string&       a_realm,
                     const phase::which_phase a_phase,
                     const int                a_level,
                     const DataIndex&         a_din) const noexcept
@@ -2521,7 +2531,7 @@ AmrMesh::parseRefinementRatios()
   ParmParse   pp("AmrMesh");
   Vector<int> ratios;
   ratios.resize(pp.countval("ref_rat"));
-  pp.getarr("ref_rat", ratios, 0, ratios.size());
+  pp.getarr("ref_rat", ratios, 0, static_cast<int>(ratios.size()));
 
   // Pad with whatever was last specified if user didn't supply enough refinement factors
   while (ratios.size() < m_maxAmrDepth) {
@@ -2725,8 +2735,9 @@ AmrMesh::parseEbGhostCells()
 
   pp.get("eb_ghost", m_numEbGhostsCells);
 
-  if (m_numEbGhostsCells < 0)
+  if (m_numEbGhostsCells < 0) {
     MayDay::Error("AmrMesh::parseEbGhostCells -- you have specified a negative number of ghost cells");
+  }
 }
 
 void
@@ -2742,11 +2753,13 @@ AmrMesh::parseNumGhostCells()
   pp.get("num_ghost", m_numGhostCells);
   pp.get("lsf_ghost", m_numLsfGhostCells);
 
-  if (m_numGhostCells < 0)
+  if (m_numGhostCells < 0) {
     MayDay::Error("AmrMesh::parseNumGhostCells -- you have specified a negative number of ghost cells for mesh data");
-  if (m_numLsfGhostCells < 0)
+  }
+  if (m_numLsfGhostCells < 0) {
     MayDay::Error(
       "AmrMesh::parseNumGhostCells -- you have specified a negative number of ghost cells for level-set mesh data");
+  }
 }
 
 void
@@ -2763,12 +2776,15 @@ AmrMesh::parseMultigridInterpolator()
   pp.get("mg_interp_radius", m_multigridInterpRadius);
   pp.get("mg_interp_weight", m_multigridInterpWeight);
 
-  if (m_multigridInterpOrder < 0)
+  if (m_multigridInterpOrder < 0) {
     MayDay::Error("AmrMesh::parseMultigridInterpolator -- you have specified negative order!");
-  if (m_multigridInterpRadius <= 0)
+  }
+  if (m_multigridInterpRadius <= 0) {
     MayDay::Error("AmrMesh::parseMultigridInterpolator -- you have specified a non-positive radius!");
-  if (m_multigridInterpWeight < 0)
+  }
+  if (m_multigridInterpWeight < 0) {
     MayDay::Error("AmrMesh::parseMultigridInterpolator -- you have specified negative weighting");
+  }
 }
 
 void
@@ -2783,8 +2799,9 @@ AmrMesh::parseRedistributionRadius()
 
   pp.get("redist_radius", m_redistributionRadius);
 
-  if (m_redistributionRadius <= 0)
+  if (m_redistributionRadius <= 0) {
     MayDay::Error("AmrMesh::parseRedistributionRadius -- you have specified non-positive redistribution radius");
+  }
 }
 
 void
@@ -3162,7 +3179,7 @@ AmrMesh::getProxyGrids() const
 }
 
 const Vector<DisjointBoxLayout>&
-AmrMesh::getGrids(const std::string a_realm) const
+AmrMesh::getGrids(const std::string& a_realm) const
 {
   CH_TIME("AmrMesh::getGrids(string)");
   if (m_verbosity > 1) {
@@ -3178,7 +3195,7 @@ AmrMesh::getGrids(const std::string a_realm) const
 }
 
 const Vector<EBISLayout>&
-AmrMesh::getEBISLayout(const std::string a_realm, const phase::which_phase a_phase) const
+AmrMesh::getEBISLayout(const std::string& a_realm, const phase::which_phase a_phase) const
 {
   CH_TIME("AmrMesh::getEBISLayout(string, phase::which_phase)");
   if (m_verbosity > 1) {
@@ -3195,7 +3212,7 @@ AmrMesh::getEBISLayout(const std::string a_realm, const phase::which_phase a_pha
 }
 
 Vector<RefCountedPtr<LayoutData<VoFIterator>>>&
-AmrMesh::getVofIterator(const std::string a_realm, const phase::which_phase a_phase) const
+AmrMesh::getVofIterator(const std::string& a_realm, const phase::which_phase a_phase) const
 {
   CH_TIME("AmrMesh::getVofIterator(string, phase::which_phase)");
   if (m_verbosity > 1) {
@@ -3212,7 +3229,7 @@ AmrMesh::getVofIterator(const std::string a_realm, const phase::which_phase a_ph
 }
 
 const AMRMask&
-AmrMesh::getMask(const std::string a_mask, const int a_buffer, const std::string a_realm) const
+AmrMesh::getMask(const std::string& a_mask, const int a_buffer, const std::string& a_realm) const
 {
   CH_TIME("AmrMesh::getMask(string, int, string)");
   if (m_verbosity > 1) {
@@ -3228,7 +3245,7 @@ AmrMesh::getMask(const std::string a_mask, const int a_buffer, const std::string
 }
 
 const AMRMask&
-AmrMesh::getValidCells(const std::string a_realm) const
+AmrMesh::getValidCells(const std::string& a_realm) const
 {
   CH_TIME("AmrMesh::getValidCells(string)");
   if (m_verbosity > 1) {
@@ -3244,7 +3261,7 @@ AmrMesh::getValidCells(const std::string a_realm) const
 }
 
 const Vector<RefCountedPtr<LevelTiles>>&
-AmrMesh::getLevelTiles(const std::string a_realm) const
+AmrMesh::getLevelTiles(const std::string& a_realm) const
 {
   CH_TIME("AmrMesh::getLevelTiles(string)");
   if (m_verbosity > 1) {
@@ -3260,7 +3277,7 @@ AmrMesh::getLevelTiles(const std::string a_realm) const
 }
 
 const Vector<RefCountedPtr<EBLevelGrid>>&
-AmrMesh::getEBLevelGrid(const std::string a_realm, const phase::which_phase a_phase) const
+AmrMesh::getEBLevelGrid(const std::string& a_realm, const phase::which_phase a_phase) const
 {
   CH_TIME("AmrMesh::getEBLevelGrid(string, phase::which_phase)");
   if (m_verbosity > 1) {
@@ -3277,7 +3294,7 @@ AmrMesh::getEBLevelGrid(const std::string a_realm, const phase::which_phase a_ph
 }
 
 const Vector<RefCountedPtr<EBLevelGrid>>&
-AmrMesh::getEBLevelGridCoFi(const std::string a_realm, const phase::which_phase a_phase) const
+AmrMesh::getEBLevelGridCoFi(const std::string& a_realm, const phase::which_phase a_phase) const
 {
   CH_TIME("AmrMesh::getEBLevelGridCoFi(string, phase::which_phase)");
   if (m_verbosity > 1) {
@@ -3294,7 +3311,7 @@ AmrMesh::getEBLevelGridCoFi(const std::string a_realm, const phase::which_phase 
 }
 
 const Vector<RefCountedPtr<MFLevelGrid>>&
-AmrMesh::getMFLevelGrid(const std::string a_realm) const
+AmrMesh::getMFLevelGrid(const std::string& a_realm) const
 {
   CH_TIME("AmrMesh::getMFLevelGrid(string, phase::which_phase)");
   if (m_verbosity > 1) {
@@ -3311,7 +3328,7 @@ AmrMesh::getMFLevelGrid(const std::string a_realm) const
 }
 
 const EBAMRFAB&
-AmrMesh::getLevelset(const std::string a_realm, const phase::which_phase a_phase) const
+AmrMesh::getLevelset(const std::string& a_realm, const phase::which_phase a_phase) const
 {
   CH_TIME("AmrMesh::getLevelSet(string, phase::which_phase)");
   if (m_verbosity > 1) {
@@ -3327,7 +3344,7 @@ AmrMesh::getLevelset(const std::string a_realm, const phase::which_phase a_phase
 }
 
 EBAMRParticleMesh&
-AmrMesh::getParticleMesh(const std::string a_realm, const phase::which_phase a_phase) const
+AmrMesh::getParticleMesh(const std::string& a_realm, const phase::which_phase a_phase) const
 {
   CH_TIME("AmrMesh::getParticleMesh(string, phase::which_phase)");
   if (m_verbosity > 1) {
@@ -3344,7 +3361,7 @@ AmrMesh::getParticleMesh(const std::string a_realm, const phase::which_phase a_p
 }
 
 EBAMRSurfaceDeposition&
-AmrMesh::getSurfaceDeposition(const std::string a_realm, const phase::which_phase a_phase) const
+AmrMesh::getSurfaceDeposition(const std::string& a_realm, const phase::which_phase a_phase) const
 {
   CH_TIME("AmrMesh::getSurfaceDeposition(string, phase::which_phase)");
   if (m_verbosity > 1) {
@@ -3361,7 +3378,7 @@ AmrMesh::getSurfaceDeposition(const std::string a_realm, const phase::which_phas
 }
 
 Vector<RefCountedPtr<EBCoarAve>>&
-AmrMesh::getCoarseAverage(const std::string a_realm, const phase::which_phase a_phase) const
+AmrMesh::getCoarseAverage(const std::string& a_realm, const phase::which_phase a_phase) const
 {
   CH_TIME("AmrMesh::getCoarseAverage(string, phase::which_phase)");
   if (m_verbosity > 1) {
@@ -3378,7 +3395,7 @@ AmrMesh::getCoarseAverage(const std::string a_realm, const phase::which_phase a_
 }
 
 Vector<RefCountedPtr<EBMultigridInterpolator>>&
-AmrMesh::getMultigridInterpolator(const std::string a_realm, const phase::which_phase a_phase) const
+AmrMesh::getMultigridInterpolator(const std::string& a_realm, const phase::which_phase a_phase) const
 {
   CH_TIME("AmrMesh::getMultigridInterpolator(string, phase::which_phase)");
   if (m_verbosity > 1) {
@@ -3395,7 +3412,7 @@ AmrMesh::getMultigridInterpolator(const std::string a_realm, const phase::which_
 }
 
 Vector<RefCountedPtr<EBCoarseToFineInterp>>&
-AmrMesh::getFineInterp(const std::string a_realm, const phase::which_phase a_phase) const
+AmrMesh::getFineInterp(const std::string& a_realm, const phase::which_phase a_phase) const
 {
   CH_TIME("AmrMesh::getFineInterp(string, phase::which_phase)");
   if (m_verbosity > 1) {
@@ -3412,7 +3429,7 @@ AmrMesh::getFineInterp(const std::string a_realm, const phase::which_phase a_pha
 }
 
 Vector<RefCountedPtr<EBReflux>>&
-AmrMesh::getFluxRegister(const std::string a_realm, const phase::which_phase a_phase) const
+AmrMesh::getFluxRegister(const std::string& a_realm, const phase::which_phase a_phase) const
 {
   CH_TIME("AmrMesh::getFluxRegister(string, phase::which_phase)");
   if (m_verbosity > 1) {
@@ -3429,7 +3446,7 @@ AmrMesh::getFluxRegister(const std::string a_realm, const phase::which_phase a_p
 }
 
 Vector<RefCountedPtr<EBFluxRedistribution>>&
-AmrMesh::getRedistributionOp(const std::string a_realm, const phase::which_phase a_phase) const
+AmrMesh::getRedistributionOp(const std::string& a_realm, const phase::which_phase a_phase) const
 {
   CH_TIME("AmrMesh::getRedistributionOp");
   if (m_verbosity > 1) {
@@ -3447,7 +3464,7 @@ AmrMesh::getRedistributionOp(const std::string a_realm, const phase::which_phase
 
 #ifdef CH_USE_PETSC
 const RefCountedPtr<PetscGrid>&
-AmrMesh::getPetscGrid(const std::string a_realm) const noexcept
+AmrMesh::getPetscGrid(const std::string& a_realm) const noexcept
 {
   CH_TIME("AmrMesh::nonConservativeDivergence(AMR)");
   if (m_verbosity > 1) {
@@ -3503,7 +3520,7 @@ AmrMesh::nonConservativeDivergence(LevelData<BaseIVFAB<Real>>& a_nonConsDivF,
 }
 
 bool
-AmrMesh::queryRealm(const std::string a_realm) const
+AmrMesh::queryRealm(const std::string& a_realm) const
 {
   CH_TIME("AmrMesh::queryRealm(string)");
   if (m_verbosity > 5) {
@@ -3531,7 +3548,7 @@ AmrMesh::getEbCf() const
 }
 
 void
-AmrMesh::registerRealm(const std::string a_realm)
+AmrMesh::registerRealm(const std::string& a_realm)
 {
   CH_TIME("AmrMesh::registerRealm(string)");
   if (m_verbosity > 5) {
@@ -3544,7 +3561,7 @@ AmrMesh::registerRealm(const std::string a_realm)
 }
 
 void
-AmrMesh::registerOperator(const std::string a_operator, const std::string a_realm, const phase::which_phase a_phase)
+AmrMesh::registerOperator(const std::string& a_operator, const std::string& a_realm, const phase::which_phase a_phase)
 {
   CH_TIME("AmrMesh::registerOperator(string, string, phase::which_phase)");
   if (m_verbosity > 5) {
@@ -3561,7 +3578,7 @@ AmrMesh::registerOperator(const std::string a_operator, const std::string a_real
 }
 
 void
-AmrMesh::registerMask(const std::string a_mask, const int a_buffer, const std::string a_realm)
+AmrMesh::registerMask(const std::string& a_mask, const int a_buffer, const std::string& a_realm)
 {
   CH_TIME("AmrMesh::registerMask(string, int, string)");
   if (m_verbosity > 5) {
@@ -3607,7 +3624,7 @@ AmrMesh::defineRealms()
 }
 
 void
-AmrMesh::regridRealm(const std::string          a_realm,
+AmrMesh::regridRealm(const std::string&         a_realm,
                      const Vector<Vector<int>>& a_procs,
                      const Vector<Vector<Box>>& a_boxes,
                      const int                  a_lmin)
@@ -3673,6 +3690,7 @@ AmrMesh::getRealms() const
 
   std::vector<std::string> Realms;
 
+  Realms.reserve(m_realms.size());
   for (const auto& r : m_realms) {
     Realms.push_back(r.first);
   }

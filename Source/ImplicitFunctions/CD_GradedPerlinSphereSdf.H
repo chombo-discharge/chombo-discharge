@@ -1,29 +1,30 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_GradedPerlinSphereSdf.H
   @brief  Declaration of a graded noisy sphere
   @author Robert Marskar
 */
 
-#ifndef CD_GradedPerlinSphereSdf_H
-#define CD_GradedPerlinSphereSdf_H
+#ifndef CD_GRADEDPERLINSPHERESDF_H
+#define CD_GRADEDPERLINSPHERESDF_H
 
 // Our includes
 #include <CD_PerlinSphereSdf.H>
 #include <CD_NamespaceHeader.H>
 
-/*!
+/**
   @brief GradedPerlinSphereSdf function
   @details This class is a sphere with graded noise -- there is only noise on one side of the sphere. 
 */
 class GradedPerlinSphereSdf : public PerlinSphereSdf
 {
 public:
-  /*!
+  /**
     @brief Full constructor
     @param[in] a_rad         Sphere radius
     @param[in] a_center      Sphere center
@@ -44,24 +45,28 @@ public:
                         const int&      a_octaves,
                         const bool&     a_reseed = false);
 
-  /*!
+  /**
     @brief Copy constructor
+    @param[in,out] a_inputIF Description
   */
   GradedPerlinSphereSdf(const GradedPerlinSphereSdf& a_inputIF);
 
-  /*!
+  /**
     @brief Destructor
   */
   virtual ~GradedPerlinSphereSdf();
 
-  /*!
+  /**
     @brief Value function
+    @return Function value at the given point
+    @param[in,out] a_pos Description
   */
   virtual Real
   value(const RealVect& a_pos) const;
 
-  /*!
+  /**
     @brief Factory function
+    @return New copy of this implicit function
   */
   virtual BaseIF*
   newImplicitFunction() const;

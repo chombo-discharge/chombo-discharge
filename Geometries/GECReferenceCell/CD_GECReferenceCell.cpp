@@ -1,9 +1,10 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_GECReferenceCell.cpp
   @brief  Implementation of CD_GECReferenceCell.H
   @author Robert Marskar
@@ -14,8 +15,10 @@
 #include <CD_GECReferenceCell.H>
 #include <CD_NamespaceHeader.H>
 
+/// @cond DOXYGEN_SKIP
 using Vec3    = EBGeometry::Vec3T<Real>;
 using ImpFunc = std::shared_ptr<EBGeometry::ImplicitFunction<Real>>;
+/// @endcond
 
 GECReferenceCell::GECReferenceCell()
 {
@@ -23,7 +26,6 @@ GECReferenceCell::GECReferenceCell()
 
   const Real H   = 0.1016;
   const Real g   = 0.0254;
-  const Real h   = 0.5 * (H - g);
   const Real r1  = 0.0508;
   const Real r2  = 0.0523;
   const Real r3  = 0.0538;

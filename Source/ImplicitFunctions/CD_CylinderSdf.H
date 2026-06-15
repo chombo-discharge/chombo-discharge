@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_CylinderSdf.H
   @brief  Declaration of a cylindrical signed distance function
   @date   Nov. 2017
 */
 
-#ifndef CD_CylinderSdf_H
-#define CD_CylinderSdf_H
+#ifndef CD_CYLINDERSDF_H
+#define CD_CYLINDERSDF_H
 
 // Chombo includes
 #include <BaseIF.H>
@@ -18,77 +19,79 @@
 // Our includes
 #include <CD_NamespaceHeader.H>
 
-/*!
+/**
   @brief Declaration of a cylinder IF class
 */
 class CylinderSdf : public BaseIF
 {
 public:
-  /*!
+  /**
     @brief Constructor
     @param[in] a_center1 Cylinder center
     @param[in] a_center2 Cylinder center
     @param[in] a_radius  Cylinder radius
-    @param[in] a_inside  Domain on inside or outside
+    @param[in] a_fluidInside Fluid inside
   */
   CylinderSdf(const RealVect& a_center1, const RealVect& a_center2, const Real& a_radius, const bool& a_fluidInside);
 
-  /*!
+  /**
     @brief Copy constructor
     @param[in] a_inputIF Input cylinder
   */
   CylinderSdf(const CylinderSdf& a_inputIF);
 
-  /*!
+  /**
     @brief Test whether inside or not
     @param[in] a_point Physical position. 
+    @return Function value at the given point
   */
   virtual Real
   value(const RealVect& a_point) const;
 
-  /*!
+  /**
     @brief IF factory method
+    @return New copy of this implicit function
   */
   virtual BaseIF*
   newImplicitFunction() const;
 
 protected:
-  /*!
-    @brief One end poitn
+  /**
+    @brief One end point
   */
   RealVect m_endPoint1;
 
-  /*!
+  /**
     @brief The other end point. 
   */
   RealVect m_endPoint2;
 
-  /*!
+  /**
     @brief Top
   */
   RealVect m_top;
 
-  /*!
+  /**
     @brief Top
   */
   RealVect m_axis;
 
-  /*!
+  /**
     @brief Center
   */
   RealVect m_center;
 
-  /*!
+  /**
     @brief Cylinder length
   */
   Real m_length;
 
-  /*!
+  /**
     @brief Cylinder radius
   */
   Real m_radius;
 
-  /*!
+  /**
     @brief Inside or outside domain
   */
   bool m_fluidInside;

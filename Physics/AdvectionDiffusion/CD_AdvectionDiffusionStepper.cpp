@@ -1,13 +1,14 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_AdvectionDiffusionStepper.cpp
-  @brief  Implementation of CD_AdvectionDiffusionStepper.H
-  @author Robert Marskar
-  @data   March 2020
+/**
+   @file   CD_AdvectionDiffusionStepper.cpp
+   @brief  Implementation of CD_AdvectionDiffusionStepper.H
+   @author Robert Marskar
+   @date   March 2020
 */
 
 // Chombo includes
@@ -22,24 +23,22 @@
 using namespace Physics::AdvectionDiffusion;
 
 AdvectionDiffusionStepper::AdvectionDiffusionStepper()
+  : m_realm(Realm::Primal),
+    m_phase(phase::gas),
+    m_minDt(0.0),
+    m_maxDt(std::numeric_limits<Real>::max()),
+    m_forceCFL(-1.0),
+    m_debug(false)
 {
   CH_TIME("AdvectionDiffusionStepper::AdvectionDiffusionStepper");
 
   ParmParse pp("AdvectionDiffusion");
-
-  m_realm = Realm::Primal;
-  m_phase = phase::gas;
-  m_debug = false;
 
   pp.query("debug", m_debug);
   pp.get("verbosity", m_verbosity);
   pp.get("cfl", m_cfl);
   pp.get("advection", m_mobile);
   pp.get("diffusion", m_diffusive);
-
-  m_minDt    = 0.0;
-  m_maxDt    = std::numeric_limits<Real>::max();
-  m_forceCFL = -1.0;
 
   // Parse the default velocity and diffusion coefficients
   Real         diffCo        = 0.0;
@@ -65,7 +64,7 @@ AdvectionDiffusionStepper::AdvectionDiffusionStepper()
     return RealVect(D_DECL(-r * omega * sin(theta), r * omega * cos(theta), 0.));
   };
 
-  m_diffCo = [diffCo](const RealVect& pos) -> Real {
+  m_diffCo = [diffCo](const RealVect& /*pos*/) -> Real {
     return diffCo;
   };
 
@@ -216,13 +215,6 @@ AdvectionDiffusionStepper::initialData()
   if (m_solver->isMobile()) {
     m_solver->setVelocity(m_velocity);
   }
-
-  // Set flux functions
-  auto fluxFunc = [](const RealVect a_pos, const Real a_time) {
-    return 0.0;
-  };
-
-  //  m_solver->setDomainFlux(fluxFunc);
 }
 
 #ifdef CH_USE_HDF5
@@ -268,13 +260,6 @@ AdvectionDiffusionStepper::postCheckpointSetup()
   if (m_solver->isMobile()) {
     m_solver->setVelocity(m_velocity);
   }
-
-  // Set flux functions
-  auto fluxFunc = [](const RealVect a_pos, const Real a_time) {
-    return 0.0;
-  };
-
-  //  m_solver->setDomainFlux(fluxFunc);
 }
 
 int
@@ -303,7 +288,7 @@ AdvectionDiffusionStepper::getPlotVariableNames() const
 void
 AdvectionDiffusionStepper::writePlotData(LevelData<EBCellFAB>& a_output,
                                          int&                  a_icomp,
-                                         const std::string     a_outputRealm,
+                                         const std::string&    a_outputRealm,
                                          const int             a_level) const
 {
   CH_TIME("AdvectionDiffusionStepper::writePlotData");
@@ -462,7 +447,7 @@ AdvectionDiffusionStepper::advance(const Real a_dt)
 
   if (procID() == 0 && m_debug) {
     std::cout << "step = " << m_timeStep + 1 << "\t\t\t"
-              << "mass conservation % = " << 100. * (finalMass - initialMass) / initialMass << std::endl;
+              << "mass conservation % = " << 100. * (finalMass - initialMass) / initialMass << endl;
   }
 
   return a_dt;

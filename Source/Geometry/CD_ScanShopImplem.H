@@ -1,23 +1,26 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+   @return True if regular, false otherwise
  */
 
-/*!
+/**
   @brief  CD_ScanShopImplem.H
   @brief  Implementation of CD_ScanShop.H
   @author Robert Marskar
+  @return True if regular, false otherwise
 */
 
-#ifndef CD_ScanShopImplem_H
-#define CD_ScanShopImplem_H
+#ifndef CD_SCANSHOPIMPLEM_H
+#define CD_SCANSHOPIMPLEM_H
 
 // Our includes
 #include <CD_ScanShop.H>
 #include <CD_NamespaceHeader.H>
 
 inline bool
-ScanShop::isRegular(const Box a_box, const RealVect a_probLo, const Real a_dx) const
+ScanShop::isRegular(Box a_box, const RealVect& a_probLo, Real a_dx) const
 {
   CH_TIME("ScanShop::isRegular(Box, RealVect, Real)");
 
@@ -36,7 +39,7 @@ ScanShop::isRegular(const Box a_box, const RealVect a_probLo, const Real a_dx) c
 }
 
 inline bool
-ScanShop::isCovered(const Box a_box, const RealVect a_probLo, const Real a_dx) const
+ScanShop::isCovered(Box a_box, const RealVect& a_probLo, Real a_dx) const
 {
   CH_TIME("ScanShop::isCovered(Box, RealVect, Real)");
 

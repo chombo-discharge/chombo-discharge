@@ -49,7 +49,7 @@ Driver.write_loads                  = false                ## Write (accumulated
 Driver.output_directory             = ./                   ## Output directory
 Driver.output_names                 = simulation           ## Simulation output names
 Driver.max_plot_depth               = -1                   ## Restrict maximum plot depth (-1 => finest simulation level)
-Driver.max_chk_depth                = -1                   ## Restrict chechkpoint depth (-1 => finest simulation level)
+Driver.max_chk_depth                = -1                   ## Restrict checkpoint depth (-1 => finest simulation level)
 Driver.num_plot_ghost               = 1                    ## Number of ghost cells to include in plots
 Driver.plt_vars                     = mpi_rank levelset    ## 'tags', 'mpi_rank', 'levelset'
 Driver.restart                      = 0                    ## Restart step (less or equal to 0 implies fresh simulation)
@@ -62,7 +62,7 @@ Driver.refine_dielectrics           = -1                   ## Refine dielectric 
 # ====================================================================================================
 # VESSEL CLASS OPTIONS
 #
-# This class is a pin-mushroom type geometry commonly used in high-voltage pressure/vaccum
+# This class is a pin-mushroom type geometry commonly used in high-voltage pressure/vacuum
 # Vessel. It (currently) consists of a rod electrode and a "mushroom" flat plate electrode, set up
 # along +y/+z in 2D/3D
 # ====================================================================================================

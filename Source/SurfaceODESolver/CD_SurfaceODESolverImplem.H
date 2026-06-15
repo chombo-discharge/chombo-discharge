@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2022 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_SurfaceODESolverImplem.H
   @brief  Implementation of CD_SurfaceODESolver.H
   @author Robert Marskar
 */
 
-#ifndef CD_SurfaceODESolverImplem_H
-#define CD_SurfaceODESolverImplem_H
+#ifndef CD_SURFACEODESOLVERIMPLEM_H
+#define CD_SURFACEODESOLVERIMPLEM_H
 
 // Chombo includes
 #include <CH_Timer.H>
@@ -172,7 +173,7 @@ SurfaceODESolver<N>::setAmr(const RefCountedPtr<AmrMesh>& a_amr) noexcept
 
 template <int N>
 void
-SurfaceODESolver<N>::setRealm(const std::string a_realm) noexcept
+SurfaceODESolver<N>::setRealm(const std::string& a_realm) noexcept
 {
   CH_TIME("SurfaceODESolver::setRealm");
   if (m_verbosity > 5) {
@@ -184,7 +185,7 @@ SurfaceODESolver<N>::setRealm(const std::string a_realm) noexcept
 
 template <int N>
 void
-SurfaceODESolver<N>::setName(const std::string a_name) noexcept
+SurfaceODESolver<N>::setName(const std::string& a_name) noexcept
 {
   CH_TIME("SurfaceODESolver::setName");
   if (m_verbosity > 5) {
@@ -791,7 +792,7 @@ SurfaceODESolver<N>::writePlotFile() const noexcept
     sprintf(filename, "%s.step%07d.%dd.hdf5", m_name.c_str(), m_step, SpaceDim);
     std::string fname(filename);
 
-    // Alias, becuase Chombo is a bit anal about smart pointers.
+    // Alias, because Chombo is a bit anal about smart pointers.
     Vector<LevelData<EBCellFAB>*> outputPtr;
     m_amr->alias(outputPtr, output);
 
@@ -818,7 +819,7 @@ template <int N>
 void
 SurfaceODESolver<N>::writePlotData(LevelData<EBCellFAB>& a_output,
                                    int&                  a_comp,
-                                   const std::string     a_outputRealm,
+                                   const std::string&    a_outputRealm,
                                    const int             a_level) const noexcept
 {
   CH_TIME("SurfaceODESolver::writePlotData");
