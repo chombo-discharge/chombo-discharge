@@ -179,6 +179,20 @@ PhaseRealm::regridBase(const int a_lmin)
       pout() << endl;
     }
 
+    // Built here (rather than in regridOperators) so the cell masks are available to load-balancing
+    // routines, which run after regridBase but before regridOperators.
+    if (m_profile) {
+      pout() << "before/after masks define" << endl;
+      MemoryReport::getMaxMinMemoryUsage();
+    }
+    timer.startEvent("Cell masks");
+    this->defineMasks(a_lmin, m_numGhostCells);
+    timer.stopEvent("Cell masks");
+    if (m_profile) {
+      MemoryReport::getMaxMinMemoryUsage();
+      pout() << endl;
+    }
+
     if (m_profile) {
       timer.eventReport(pout());
     }
@@ -324,18 +338,6 @@ PhaseRealm::regridOperators(const int a_lmin)
     timer.startEvent("Levelset");
     this->defineLevelSet(a_lmin, m_numLsfGhostCells);
     timer.stopEvent("Levelset");
-    if (m_profile) {
-      MemoryReport::getMaxMinMemoryUsage();
-      pout() << endl;
-    }
-
-    if (m_profile) {
-      pout() << "before/after masks define" << endl;
-      MemoryReport::getMaxMinMemoryUsage();
-    }
-    timer.startEvent("Cell masks");
-    this->defineMasks(a_lmin, m_numGhostCells);
-    timer.stopEvent("Cell masks");
     if (m_profile) {
       MemoryReport::getMaxMinMemoryUsage();
       pout() << endl;
