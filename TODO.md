@@ -349,7 +349,13 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
         and the existing in-kernel code already relied on that lifetime). Behavior-preserving.
         Verified: clean build; RodSphere GMG converges identically (3.2e-7, rate ~11). No dedicated
         inhomogeneous-EB-Neumann regression exists, but the hoist is referentially transparent.
-- [ ] `Source/Elliptic/CD_EBHelmholtzDirichletEBBC.cpp` (2)
+- [x] `Source/Elliptic/CD_EBHelmholtzDirichletEBBC.cpp` (2)
+      - Both BoxLoops are sparse VoFIterator sweeps; inherently scalar. define (setup, correct
+        foundStencil binding -- no Robin bug); applyEBFlux (HOT, called every applyOp when inhomogeneous).
+      - NO perf change (same as the MF Dirichlet sibling): the hot kernel's only loop-invariant is
+        m_boundaryWeights[a_dit], an inline LayoutData index the compiler hoists; areaFrac is folded into
+        those precomputed weights so there is no getEBISL()/out-of-line lookup to lift (unlike the Neumann
+        EBBC). Hoisting would be perf-neutral, so left as-is. Documented.
 - [ ] `Source/Elliptic/CD_MFHelmholtzNeumannEBBC.cpp` (1)
 - [ ] `Source/Elliptic/CD_EBHelmholtzRobinDomainBC.cpp` (1)
 - [ ] `Source/Elliptic/CD_EBHelmholtzNeumannDomainBC.cpp` (1)
