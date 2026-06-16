@@ -370,7 +370,12 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
         of the kernel. The remaining loop-invariant (isign*BASISV(a_dir)) hoist would not enable
         vectorization, so it's perf-neutral and skipped (thin boundary slab, like applyDomainFlux).
         Documented. (The VolIndex overload is a per-vof irregular helper -- no loop.)
-- [ ] `Source/Elliptic/CD_EBHelmholtzNeumannDomainBC.cpp` (1)
+- [x] `Source/Elliptic/CD_EBHelmholtzNeumannDomainBC.cpp` (1)
+      - One BoxLoop (getFaceFlux BaseFab version), runs ONLY in the function-BC case: per-cell
+        getBoundaryPosition() + m_functionDphiDn(pos). Non-vectorizable (out-of-line position +
+        std::function indirect call), no hoist available (a_dit unused -> no getEBISL). The constant
+        case is a single setVal (optimal). Documented. No code change (std::function family pattern
+        left as-is per user).
 - [ ] `Source/Elliptic/CD_EBHelmholtzDomainBC.cpp` (1)
 - [ ] `Source/Elliptic/CD_EBHelmholtzDirichletDomainBC.cpp` (1)
 
