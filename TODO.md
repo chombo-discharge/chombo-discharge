@@ -440,7 +440,18 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
           bug). Documented in source.
         Verified behavior-preserving: AdvectionDiffusion/CTU (EB geometry, has cut cells) produces a
         BYTE-FOR-BYTE identical plot file vs the pre-change baseline.
-- [ ] `Source/ConvectionDiffusionReaction/CD_CdrCTU.cpp` (10)
+- [x] `Source/ConvectionDiffusionReaction/CD_CdrCTU.cpp` (10)
+      - Loops: computeAdvectionDt (override; 2), computeNormalSlopes (4), upwind (4).
+      - computeNormalSlopes: 4 regular/boundary kernels already auto-vectorize (opt-record Y=4) -- no action.
+      - upwind: the CTU Riemann solver + transverse-upwind correction -- inherently scalar (velocity-sign
+        branches, out-of-line getFaces, domain-containment checks). Not a std::function dispatch; genuine
+        data-dependent control flow. No change.
+      - PERF: computeAdvectionDt is the CdrCTU override of the base dt routine and had the same pattern as
+        [[CD_CdrSolver.cpp]] (isRegular guard + all-cut irregular). Applied the same cell-based mask +
+        multi-cut transform: not-covered mask replaces the per-cell out-of-line isRegular query, and the
+        irregular loop iterates only multi-valued cut-cells (singly-cut handled once by the regular loop).
+        Behavior-preserving: AdvectionDiffusion/CTU exercises THIS override and produces a byte-for-byte
+        identical plot file vs baseline.
 - [ ] `Source/ConvectionDiffusionReaction/CD_CdrGodunov.cpp` (2)
 
 ### Source/Electrostatics
