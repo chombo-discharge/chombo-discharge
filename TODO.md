@@ -376,7 +376,21 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
         std::function indirect call), no hoist available (a_dit unused -> no getEBISL). The constant
         case is a single setVal (optimal). Documented. No code change (std::function family pattern
         left as-is per user).
-- [ ] `Source/Elliptic/CD_EBHelmholtzDomainBC.cpp` (1)
+- [x] `Source/Elliptic/CD_EBHelmholtzDomainBC.cpp` (1)
+      - One BoxLoop (multiplyByBcoef): a plain elementwise `a_flux(iv) *= a_bco(iv)` over a box --
+        vectorizes; nothing to change.
+      - INVESTIGATED a suspected bug: multiplyByBcoef computes a Hi-side `shift` (BASISV) but the kernel
+        uses the UNSHIFTED a_bco(iv). a_flux is cell-centered, a_bco face-centered, so on the Hi side
+        cell iv maps to boundary face iv+BASISV (offset by one) -- confirmed via getBoundaryPosition
+        (returns the hi face of cell iv) and fillDomainFlux's output `fluxReg(iv+BASISV)=...`.
+      - NOT a live bug: in the operator path, EBHelmholtzOp::applyDomainFlux multiplies by this bco and
+        then DIVIDES it back out with the SAME unshifted index (ghost-cell trick needs raw dphi/dn), so
+        it cancels; the true face bco is reapplied by applyOpRegular's stencil. Applying `shift` here
+        would BREAK that cancellation and corrupt the operator for variable coefficients. The dead
+        `shift` is vestigial. Added an explanatory NOTE comment in source. No code change.
+      - Latent (separate) item: fillDomainFlux does NOT cancel, so its Hi-side boundary flux scales by
+        bco(iv) not bco(iv+shift) -- exact for constant coefficients, an approximation for variable ones.
+        Left for separate review; masked in all constant-coef tests.
 - [ ] `Source/Elliptic/CD_EBHelmholtzDirichletDomainBC.cpp` (1)
 
 ### Source/ConvectionDiffusionReaction

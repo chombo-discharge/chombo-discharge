@@ -68,6 +68,18 @@ EBHelmholtzDomainBC::multiplyByBcoef(BaseFab<Real>&       a_flux,
   }
 
   // Kernel -- this just multiplies.
+  //
+  // NOTE on box centering: a_flux is cell-centered (one cell per boundary face) while a_bco is
+  // face-centered, so on the Hi side cell 'iv' actually maps to boundary face iv+BASISV(a_dir) (the
+  // cell's hi face) -- i.e. the two are offset by one there, which is what 'shift' above represents.
+  // Even so, we deliberately use the UNSHIFTED a_bco(iv) and 'shift' is left unused. The reason is the
+  // operator path: EBHelmholtzOp::applyDomainFlux multiplies by this bco here and then divides it
+  // straight back out with the SAME unshifted index (its ghost-cell trick needs the raw dphi/dn), so
+  // the factor cancels and the true face b-coefficient is reintroduced later by the finite-volume
+  // Laplacian stencil. Using a_bco(iv+shift) here would break that cancellation and corrupt the
+  // operator for spatially-varying coefficients. (The only non-cancelling consumer, fillDomainFlux,
+  // therefore scales its Hi-side boundary flux by bco(iv) rather than the boundary-face bco(iv+shift);
+  // this is exact for constant coefficients and a known approximation for variable ones.)
   auto kernel = [&](const IntVect& iv) {
     a_flux(iv, m_comp) *= a_bco(iv, m_comp);
   };
