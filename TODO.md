@@ -339,7 +339,16 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
       - Same two sparse VoFIterator kernels as the MF sibling -- inherently scalar, nothing to vectorize.
       - BUG FIX: same foundStencil bug as [[CD_MFHelmholtzRobinEBBC.cpp]] (stencil always cleared);
         fixed identically. See that entry for details.
-- [ ] `Source/Elliptic/CD_EBHelmholtzNeumannEBBC.cpp` (2)
+- [x] `Source/Elliptic/CD_EBHelmholtzNeumannEBBC.cpp` (2)
+      - Both BoxLoops are sparse VoFIterator sweeps; inherently scalar. define (setup, clears stencils);
+        applyEBFlux (HOT, called every applyOp when inhomogeneous).
+      - PERF: in the hot applyEBFlux kernel, hoisted `const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit]`
+        out of the per-vof lambda. getEBISL() returns an EBISLayout BY VALUE (RefCountedPtr copy w/ atomic
+        refcount) and EBISLayout::operator[] is out-of-line, so this was doing an atomic layout copy + an
+        out-of-line call per cut-cell. Loop-invariant; the EBISBox ref stays valid (layout owned by m_eblg,
+        and the existing in-kernel code already relied on that lifetime). Behavior-preserving.
+        Verified: clean build; RodSphere GMG converges identically (3.2e-7, rate ~11). No dedicated
+        inhomogeneous-EB-Neumann regression exists, but the hoist is referentially transparent.
 - [ ] `Source/Elliptic/CD_EBHelmholtzDirichletEBBC.cpp` (2)
 - [ ] `Source/Elliptic/CD_MFHelmholtzNeumannEBBC.cpp` (1)
 - [ ] `Source/Elliptic/CD_EBHelmholtzRobinDomainBC.cpp` (1)
