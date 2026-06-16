@@ -91,6 +91,7 @@ MFHelmholtzEBBC::defineMultiPhase()
       const BaseIVFAB<Real>&       jumpWeights  = (m_jumpBC->getGradPhiWeights())[din].getIVFAB(m_phase);
 
       // Build stencils for each vof. The order for the multiphase VoFs should follow the order for jumpBC, I think.
+      // Not auto-vectorizable (and not hot): one-time, sparse VoFIterator sweep that scales the jump stencils/weights.
       auto kernel = [&](const VolIndex& vof) -> void {
         const Real areaFrac = ebisbox.bndryArea(vof);
 
@@ -139,12 +140,19 @@ MFHelmholtzEBBC::applyEBFluxMultiPhase(VoFIterator& a_multiPhaseVofs,
 
   // Apply the stencil for computing the contribution to kappaDivF. Note divF is sum(faces) B*grad(Phi)/dx and that this
   // is the contribution from the EB face. B/dx is already included in the stencils and boundary weights, but beta is not.
+  //
+  // The boundary-phi holder and boundary weights depend only on (m_phase, a_dit), so hoist them out of the per-vof
+  // kernel: getBndryPhi is an out-of-line call (different TU) that the compiler cannot lift on its own. The kernel
+  // itself is a sparse VoFIterator scatter over the multi-phase cut-cells and is inherently scalar.
+  const BaseIVFAB<Real>& bndryPhi        = m_jumpBC->getBndryPhi(m_phase, a_dit);
+  const BaseIVFAB<Real>& boundaryWeights = m_boundaryWeights[a_dit];
+
   auto kernel = [&](const VolIndex& vof) -> void {
     // Homogeneous contribution
-    const Real phiB  = m_jumpBC->getBndryPhi(m_phase, a_dit)(vof, m_comp);
+    const Real phiB  = bndryPhi(vof, m_comp);
     const Real Bcoef = a_Bcoef(vof, m_comp);
 
-    a_Lphi(vof, m_comp) += a_beta * phiB * Bcoef * m_boundaryWeights[a_dit](vof, m_comp);
+    a_Lphi(vof, m_comp) += a_beta * phiB * Bcoef * boundaryWeights(vof, m_comp);
   };
 
   BoxLoops::loop(a_multiPhaseVofs, kernel);

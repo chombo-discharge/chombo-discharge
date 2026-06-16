@@ -318,7 +318,15 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
         m_avgVoFs precomputed. The remaining IVSIterator loop is sparse with delicate ordered
         read-after-write dependencies (the phase-1 loop reads what the phase-0 loop wrote) and size-1
         inner loops -- micro-opts there are marginal and risky, so left as-is.
-- [ ] `Source/Elliptic/CD_MFHelmholtzEBBC.cpp` (2)
+- [x] `Source/Elliptic/CD_MFHelmholtzEBBC.cpp` (2)
+      - Both BoxLoops are sparse VoFIterator sweeps over multi-phase cut-cells; inherently scalar.
+        defineMultiPhase (setup, not hot); applyEBFluxMultiPhase (HOT -- called every applyOp).
+      - getLeastSquaresBoundaryGradStencil correctly returns/binds the bool (no Robin-style bug).
+      - PERF: in the hot applyEBFluxMultiPhase kernel, hoisted the loop-invariant
+        m_jumpBC->getBndryPhi(m_phase, a_dit) and m_boundaryWeights[a_dit] out of the per-vof lambda.
+        getBndryPhi is an out-of-line call (different TU) the compiler cannot lift itself, so it was
+        re-invoked per cut-cell. Behavior-preserving (same objects bound once). Verified: clean build;
+        MechShaft (multifluid electrostatics) regression converges with no NaN/divergence.
 - [ ] `Source/Elliptic/CD_MFHelmholtzDirichletEBBC.cpp` (2)
 - [x] `Source/Elliptic/CD_EBHelmholtzRobinEBBC.cpp` (2)
       - Same two sparse VoFIterator kernels as the MF sibling -- inherently scalar, nothing to vectorize.
