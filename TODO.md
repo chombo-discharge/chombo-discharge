@@ -421,11 +421,25 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
         All 4 regular kernels now vectorize (opt-record Y=2 each). Behavior bit-identical (shift is the
         same IntVect, just loop-invariant). Verified: AdvectionDiffusion/CTU regression runs to
         completion, no NaN/inf, plots through step 10.
-      - Remaining regular kernels do NOT vectorize and are inherent (documenting in TODO rather than
-        bloating this 30-loop file with per-kernel comments): control-flow from out-of-line EB/valid-cell
-        guards (isCovered/isRegular/validCells) and FP sum/max reductions (computeMass, *Dt routines,
-        weightedUpwind), or inner refinement/multi-component nested loops. These match the established
-        non-vectorizable categories (cf. EBHelmholtzOp dotProduct/norm). No further code changes.
+      - Remaining regular kernels do NOT vectorize and are inherent: control-flow from out-of-line
+        EB/valid-cell guards (isCovered/isRegular/validCells) and FP sum/max reductions (computeMass,
+        *Dt routines, weightedUpwind), or inner refinement/multi-component nested loops. They won't
+        vectorize even masked (the reduction is the hard blocker), but the masks still remove the
+        out-of-line EB query and fix double-counting -- see next item.
+      - PERF (PhaseRealm masks + "all cells + multi-cut" reduction, applied to the per-timestep dt
+        routines; behavior-preserving, NOT vectorizing):
+        * computeAdvectionDt, computeSourceDt DOUBLE-PROCESSED cut cells (regular box loop ran over them
+          AND the all-irregular loop re-did them; harmless for the min-reduction but redundant). Fixed:
+          regular loop uses the not-covered mask (advection) / stays full-box (source), and the irregular
+          loop now iterates getMultiCutVofIterator (multi-valued cut-cells only). Singly-cut cells are
+          handled once, by the regular loop (cell-centered data is single-valued-valid for them).
+        * computeDiffusionDt, computeAdvectionDiffusionDt: swapped the per-cell EBISBox::isRegular query
+          for the regular-cell mask, but KEPT the all-cut irregular loop. They cannot fold singly-cut
+          cells into the regular loop because that kernel reads neighbouring FACE coefficients, some of
+          which are covered for a cut cell and must be skipped via getFaces() (folding them in would be a
+          bug). Documented in source.
+        Verified behavior-preserving: AdvectionDiffusion/CTU (EB geometry, has cut cells) produces a
+        BYTE-FOR-BYTE identical plot file vs the pre-change baseline.
 - [ ] `Source/ConvectionDiffusionReaction/CD_CdrCTU.cpp` (10)
 - [ ] `Source/ConvectionDiffusionReaction/CD_CdrGodunov.cpp` (2)
 

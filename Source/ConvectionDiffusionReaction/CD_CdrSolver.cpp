@@ -651,9 +651,12 @@ CdrSolver::computeDiffusionFlux(LevelData<EBFluxFAB>& a_flux, const LevelData<EB
       FaceIterator faceit(ebisbox.getMultiCells(grownCellBox), ebgraph, dir, FaceStop::SurroundingWithBoundary);
 
       // Regular kernel. Note that we call the kernel on a face-centered box, so the cell on the high side is located at
-      // iv, and the cell at the low side is at iv - BASISV(dir).
+      // iv, and the cell at the low side is at iv - BASISV(dir). The offset is hoisted so it is loop-invariant (a runtime
+      // BASISV(dir) inside the kernel blocks vectorization).
+      const IntVect shift = BASISV(dir);
+
       auto regularKernel = [&](const IntVect& iv) -> void {
-        regFlux(iv, m_comp) = inverseDx * regDco(iv, m_comp) * (regPhi(iv, m_comp) - regPhi(iv - BASISV(dir), m_comp));
+        regFlux(iv, m_comp) = inverseDx * regDco(iv, m_comp) * (regPhi(iv, m_comp) - regPhi(iv - shift, m_comp));
       };
 
       // Cut-cell kernel. Basically the same as the above but we need to explicitly get vofs on the low/high side (because
@@ -739,10 +742,13 @@ CdrSolver::computeAdvectionDiffusionFlux(EBAMRFluxData&       a_flux,
         FaceIterator faceit(ebisbox.getMultiCells(grownBox), ebgraph, dir, FaceStop::SurroundingNoBoundary);
 
         // Regular kernel. Note that we call the kernel on a face-centered box, so the cell on the high side is located at
-        // iv, and the cell at the low side is at iv - BASISV(dir).
+        // iv, and the cell at the low side is at iv - BASISV(dir). The offset is hoisted so it is loop-invariant (a
+        // runtime BASISV(dir) inside the kernel blocks vectorization).
+        const IntVect shift = BASISV(dir);
+
         auto interiorKernel = [&](const IntVect& iv) -> void {
           Real&       faceFlux  = regFluxFace(iv, m_comp);
-          const Real& cellPhiLo = regPhiCell(iv - BASISV(dir), m_comp);
+          const Real& cellPhiLo = regPhiCell(iv - shift, m_comp);
           const Real& cellPhiHi = regPhiCell(iv, m_comp);
           const Real& faceDco   = regDcoFace(iv, m_comp);
 
@@ -1111,9 +1117,11 @@ CdrSolver::conservativeDivergenceRegular(LevelData<EBCellFAB>&       a_divJ,
       const BaseFab<Real>& fluxReg = flux.getSingleValuedFAB();
 
       // Regular kernel. We call this for a cell-centered box so the high flux is on iv + BASISV(dir) and the low flux
-      // on iv + BASISV(dir);
+      // on iv. The offset is hoisted so it is loop-invariant (a runtime BASISV(dir) inside the kernel blocks vectorization).
+      const IntVect shift = BASISV(dir);
+
       auto regularKernel = [&](const IntVect& iv) -> void {
-        divJReg(iv, m_comp) += inverseDx * (fluxReg(iv + BASISV(dir), m_comp) - fluxReg(iv, m_comp));
+        divJReg(iv, m_comp) += inverseDx * (fluxReg(iv + shift, m_comp) - fluxReg(iv, m_comp));
       };
 
       // Execute the kernel.
@@ -2020,10 +2028,9 @@ CdrSolver::computeAdvectionDt()
 
   if (m_isMobile) {
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
-      const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-      const Real               dx    = m_amr->getDx()[lvl];
-      const DataIterator&      dit   = dbl.dataIterator();
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+      const Real               dx  = m_amr->getDx()[lvl];
+      const DataIterator&      dit = dbl.dataIterator();
 
       const int nbox = dit.size();
 
@@ -2033,16 +2040,20 @@ CdrSolver::computeAdvectionDt()
 
         const Box        cellBox = dbl[din];
         const EBCellFAB& velo    = (*m_cellVelocity[lvl])[din];
-        const EBISBox&   ebisBox = ebisl[din];
 
-        VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
+        // Use the precomputed not-covered mask (1 in regular/irregular cells, 0 in covered) instead of a per-cell
+        // out-of-line EBISBox::isCovered query, and iterate only the MULTI-valued cut-cells in the irregular kernel.
+        // Singly-cut cells are handled by the regular box loop -- their single-valued cell velocity equals the VoF
+        // velocity -- so this removes the previous double-processing of cut cells while leaving the min unchanged.
+        VoFIterator& vofit = (*m_amr->getMultiCutVofIterator(m_realm, m_phase)[lvl])[din];
 
         // Regular grid data.
-        const BaseFab<Real>& veloReg = velo.getSingleValuedFAB();
+        const BaseFab<Real>& veloReg    = velo.getSingleValuedFAB();
+        const BaseFab<Real>& notCovered = (*m_amr->getNotCoveredCells(m_realm, m_phase)[lvl])[din].getSingleValuedFAB();
 
         // Compute dt = dx/(|vx|+|vy|+|vz|) and check if it's smaller than the smallest so far.
         auto regularKernel = [&](const IntVect& iv) -> void {
-          if (!ebisBox.isCovered(iv)) {
+          if (notCovered(iv, m_comp) > 0.0) {
             Real vel = 0.0;
             for (int dir = 0; dir < SpaceDim; dir++) {
               vel += std::abs(veloReg(iv, dir));
@@ -2110,6 +2121,14 @@ CdrSolver::computeDiffusionDt()
         const EBFluxFAB& diffCoFace = (*m_faceCenteredDiffusionCoefficient[lvl])[din];
         VoFIterator&     vofit      = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
+        // Regular-cell mask (1 in regular cells, 0 elsewhere) used in place of a per-cell out-of-line
+        // EBISBox::isRegular query. NOTE: unlike the advection/source dt routines we cannot fold the
+        // singly-cut cells into the regular box loop here, because this kernel reads the neighbouring
+        // FACE diffusion coefficients (iv and iv+BASISV(dir)); for a cut cell some of those faces are
+        // covered and must be skipped via getFaces() in the irregular kernel. So the regular loop stays
+        // strictly regular and the irregular kernel keeps iterating ALL cut-cells.
+        const BaseFab<Real>& regularMask = (*m_amr->getRegularCells(m_realm, m_phase)[lvl])[din].getSingleValuedFAB();
+
         // Regular kernel. Strictly speaking, we should have a kernel which increments with the diffusion coefficients on each face since the finite volume
         // approximation to the Laplacian becomes (in 1D) Div*(D*Grad(phi)) = -D_(i-1/2)*(phi_i - phi_(i-1)) + D_(i+1/2)*(phi_(i+1)-phi_i). A good kernel
         // would do just that, but a lazy programmer just find the largest diffusion coefficient and uses that as an approximation.
@@ -2117,7 +2136,7 @@ CdrSolver::computeDiffusionDt()
           const BaseFab<Real>& diffCoReg = diffCoFace[dir].getSingleValuedFAB();
 
           auto regularKernel = [&](const IntVect& iv) -> void {
-            if (ebisbox.isRegular(iv)) {
+            if (regularMask(iv, m_comp) > 0.0) {
 
               const Real loD = diffCoReg(iv, m_comp);
               const Real hiD = diffCoReg(iv + BASISV(dir), m_comp);
@@ -2211,12 +2230,16 @@ CdrSolver::computeAdvectionDiffusionDt()
 
         VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
-        // Single-valued data.
-        const BaseFab<Real>& veloReg = velo.getSingleValuedFAB();
+        // Single-valued data + regular-cell mask (replaces the per-cell out-of-line EBISBox::isRegular query).
+        // As in computeDiffusionDt the regular loop stays strictly regular and the irregular kernel keeps ALL
+        // cut-cells: the diffusion part reads neighbouring FACE coefficients, some of which are covered for a
+        // cut cell and must be skipped via getFaces().
+        const BaseFab<Real>& veloReg     = velo.getSingleValuedFAB();
+        const BaseFab<Real>& regularMask = (*m_amr->getRegularCells(m_realm, m_phase)[lvl])[din].getSingleValuedFAB();
 
         // Regular kernel.
         auto regularKernel = [&](const IntVect& iv) -> void {
-          if (ebisbox.isRegular(iv)) {
+          if (regularMask(iv, m_comp) > 0.0) {
             Real v = 0.0;
             Real D = 0.0;
 
@@ -2302,7 +2325,10 @@ CdrSolver::computeSourceDt(const Real a_max, const Real a_tolerance)
         const EBCellFAB& phi    = (*m_phi[lvl])[din];
         const EBCellFAB& source = (*m_source[lvl])[din];
 
-        VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
+        // Iterate only the MULTI-valued cut-cells in the irregular kernel. The regular box loop already covers every
+        // single-valued cell (regular and singly-cut) with identical cell-centered data, so the previous all-irregular
+        // iterator double-processed singly-cut cells. The min-reduction result is unchanged.
+        VoFIterator& vofit = (*m_amr->getMultiCutVofIterator(m_realm, m_phase)[lvl])[din];
 
         const BaseFab<Real>& phiReg = phi.getSingleValuedFAB();
         const BaseFab<Real>& srcReg = source.getSingleValuedFAB();
@@ -3048,9 +3074,12 @@ CdrSolver::smoothHeavisideFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a
         BaseFab<Real>&       faceReg = facePhi.getSingleValuedFAB();
         const BaseFab<Real>& cellReg = cellPhi.getSingleValuedFAB();
 
-        // Regular kernel
+        // Regular kernel. The offset is hoisted so it is loop-invariant (a runtime BASISV(dir) inside the kernel
+        // blocks vectorization).
+        const IntVect shift = BASISV(dir);
+
         auto regularKernel = [&](const IntVect& iv) -> void {
-          const Real& phiLo = cellReg(iv - BASISV(dir), m_comp);
+          const Real& phiLo = cellReg(iv - shift, m_comp);
           const Real& phiHi = cellReg(iv, m_comp);
 
           const Real loVal = vol * phiLo;
