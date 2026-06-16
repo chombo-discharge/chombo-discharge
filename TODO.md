@@ -325,8 +325,14 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
       - PERF: in the hot applyEBFluxMultiPhase kernel, hoisted the loop-invariant
         m_jumpBC->getBndryPhi(m_phase, a_dit) and m_boundaryWeights[a_dit] out of the per-vof lambda.
         getBndryPhi is an out-of-line call (different TU) the compiler cannot lift itself, so it was
-        re-invoked per cut-cell. Behavior-preserving (same objects bound once). Verified: clean build;
-        MechShaft (multifluid electrostatics) regression converges with no NaN/divergence.
+        re-invoked per cut-cell.
+      - REGRESSION + FIX: the first version of the hoist called getBndryPhi UNCONDITIONALLY, but
+        MFHelmholtzJumpBC only defines m_boundaryPhi for multi-phase problems -- in single-phase regions
+        / patches with no jump cells the original code only touched it inside the (empty) per-vof kernel.
+        The unconditional call segfaulted (3D ItoKMC multifluid Poisson setup, backtrace through
+        getBndryPhi). Fixed by guarding with `if (a_multiPhaseVofs.size() > 0)`, which restores the exact
+        original semantics while keeping the hoist for the non-empty case. Reproduced the segfault with
+        the buggy build and confirmed the guarded build runs the 3D ItoKMC/JSON regression to completion.
 - [x] `Source/Elliptic/CD_MFHelmholtzDirichletEBBC.cpp` (2)
       - Both BoxLoops are sparse VoFIterator sweeps; inherently scalar. defineSinglePhase (setup,
         correct foundStencil binding -- no Robin bug); applyEBFluxSinglePhase (HOT, called every applyOp).
@@ -402,7 +408,24 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
         rate ~10.98). [Distinct from the position-only-f(pos) family pattern, which is inherent.]
 
 ### Source/ConvectionDiffusionReaction
-- [ ] `Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp` (30)
+- [x] `Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp` (30)
+      - Large file; loops are mostly paired regular(Box)/irregular(VoF/Face) kernels. Mapped all via
+        opt-record. The irregular kernels are sparse VoF/Face sweeps -> inherently scalar.
+      - PERF (4 verified vectorization wins via the runtime-BASISV(dir) -> hoisted const IntVect shift
+        pattern; these were the only "more than one data ref" blockers in the file):
+        * computeDiffusionFlux (face diffusion flux)
+        * computeAdvectionDiffusionFlux (interior face flux)
+        * conservativeDivergenceRegular (kappa*div(F) regular term)
+        * smoothHeavisideFaces (face Heaviside smoothing -- GCC also if-converted the clamp once the
+          BASISV blocker was gone)
+        All 4 regular kernels now vectorize (opt-record Y=2 each). Behavior bit-identical (shift is the
+        same IntVect, just loop-invariant). Verified: AdvectionDiffusion/CTU regression runs to
+        completion, no NaN/inf, plots through step 10.
+      - Remaining regular kernels do NOT vectorize and are inherent (documenting in TODO rather than
+        bloating this 30-loop file with per-kernel comments): control-flow from out-of-line EB/valid-cell
+        guards (isCovered/isRegular/validCells) and FP sum/max reductions (computeMass, *Dt routines,
+        weightedUpwind), or inner refinement/multi-component nested loops. These match the established
+        non-vectorizable categories (cf. EBHelmholtzOp dotProduct/norm). No further code changes.
 - [ ] `Source/ConvectionDiffusionReaction/CD_CdrCTU.cpp` (10)
 - [ ] `Source/ConvectionDiffusionReaction/CD_CdrGodunov.cpp` (2)
 

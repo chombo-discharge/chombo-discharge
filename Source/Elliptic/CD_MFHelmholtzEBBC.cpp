@@ -141,21 +141,26 @@ MFHelmholtzEBBC::applyEBFluxMultiPhase(VoFIterator& a_multiPhaseVofs,
   // Apply the stencil for computing the contribution to kappaDivF. Note divF is sum(faces) B*grad(Phi)/dx and that this
   // is the contribution from the EB face. B/dx is already included in the stencils and boundary weights, but beta is not.
   //
-  // The boundary-phi holder and boundary weights depend only on (m_phase, a_dit), so hoist them out of the per-vof
-  // kernel: getBndryPhi is an out-of-line call (different TU) that the compiler cannot lift on its own. The kernel
-  // itself is a sparse VoFIterator scatter over the multi-phase cut-cells and is inherently scalar.
-  const BaseIVFAB<Real>& bndryPhi        = m_jumpBC->getBndryPhi(m_phase, a_dit);
-  const BaseIVFAB<Real>& boundaryWeights = m_boundaryWeights[a_dit];
+  // IMPORTANT: only touch the jump-BC boundary-phi holder when this (phase, patch) actually has multi-phase cut-cells.
+  // MFHelmholtzJumpBC only defines m_boundaryPhi for multi-phase problems, so m_jumpBC->getBndryPhi(...) dereferences
+  // undefined data in single-phase regions / patches with no jump cells. The original code dodged this implicitly by
+  // calling getBndryPhi inside the per-vof kernel (which never runs for an empty iterator); we keep that guarantee with
+  // the explicit size() check while still hoisting the loop-invariant lookups (getBndryPhi is an out-of-line call the
+  // compiler cannot lift) out of the sparse, inherently scalar per-vof kernel.
+  if (a_multiPhaseVofs.size() > 0) {
+    const BaseIVFAB<Real>& bndryPhi        = m_jumpBC->getBndryPhi(m_phase, a_dit);
+    const BaseIVFAB<Real>& boundaryWeights = m_boundaryWeights[a_dit];
 
-  auto kernel = [&](const VolIndex& vof) -> void {
-    // Homogeneous contribution
-    const Real phiB  = bndryPhi(vof, m_comp);
-    const Real Bcoef = a_Bcoef(vof, m_comp);
+    auto kernel = [&](const VolIndex& vof) -> void {
+      // Homogeneous contribution
+      const Real phiB  = bndryPhi(vof, m_comp);
+      const Real Bcoef = a_Bcoef(vof, m_comp);
 
-    a_Lphi(vof, m_comp) += a_beta * phiB * Bcoef * boundaryWeights(vof, m_comp);
-  };
+      a_Lphi(vof, m_comp) += a_beta * phiB * Bcoef * boundaryWeights(vof, m_comp);
+    };
 
-  BoxLoops::loop(a_multiPhaseVofs, kernel);
+    BoxLoops::loop(a_multiPhaseVofs, kernel);
+  }
 }
 
 bool
