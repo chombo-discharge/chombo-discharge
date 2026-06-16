@@ -363,7 +363,13 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
         `m_eblg.getEBISL()[a_dit]` (EBISLayout-by-value copy w/ atomic refcount + out-of-line operator[])
         out of the per-vof kernel. Behavior-preserving; clean build. (MechShaft multifluid regression
         already validates the MF EB-flux machinery; this hoist is referentially transparent.)
-- [ ] `Source/Elliptic/CD_EBHelmholtzRobinDomainBC.cpp` (1)
+- [x] `Source/Elliptic/CD_EBHelmholtzRobinDomainBC.cpp` (1)
+      - The one BoxLoop (getFaceFlux BaseFab version) runs over a regular domain-face slab but does NOT
+        vectorize: per-cell out-of-line ebisbox.isCovered(ivNear) query (gates the extrapolation) + the
+        std::function coefficients in the function-BC case + division. getEBISL() is already hoisted out
+        of the kernel. The remaining loop-invariant (isign*BASISV(a_dir)) hoist would not enable
+        vectorization, so it's perf-neutral and skipped (thin boundary slab, like applyDomainFlux).
+        Documented. (The VolIndex overload is a per-vof irregular helper -- no loop.)
 - [ ] `Source/Elliptic/CD_EBHelmholtzNeumannDomainBC.cpp` (1)
 - [ ] `Source/Elliptic/CD_EBHelmholtzDomainBC.cpp` (1)
 - [ ] `Source/Elliptic/CD_EBHelmholtzDirichletDomainBC.cpp` (1)
