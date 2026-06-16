@@ -307,6 +307,7 @@ EBHelmholtzOp::defineStencils()
   m_alphaDiagWeight.define(dbl);
   m_betaDiagWeight.define(dbl);
   m_relaxStencils.define(dbl);
+  m_domainBndryBoxes.define(dbl);
 
   for (int dir = 0; dir < SpaceDim; dir++) {
     m_vofIterDomLo[dir].define(dbl);
@@ -388,6 +389,16 @@ EBHelmholtzOp::defineStencils()
 
       m_vofIterDomLo[dir][din].define(loIrreg, ebgraph);
       m_vofIterDomHi[dir][din].define(hiIrreg, ebgraph);
+    }
+
+    // Precompute the domain-boundary boxes for this patch so that applyDomainFlux/fillDomainFlux do
+    // not have to recompute EBArith::loHi on every V-cycle. These depend only on the domain and the
+    // grid layout, both of which are fixed for the life of the operator.
+    DomainBndryBoxes& dbb = m_domainBndryBoxes[din];
+    dbb.touchesDomain     = false;
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      EBArith::loHi(dbb.loBox[dir], dbb.hasLo[dir], dbb.hiBox[dir], dbb.hasHi[dir], m_eblg.getDomain(), cellBox, dir);
+      dbb.touchesDomain = dbb.touchesDomain || (dbb.hasLo[dir] == 1) || (dbb.hasHi[dir] == 1);
     }
 
     // Define data holders.
@@ -594,6 +605,9 @@ EBHelmholtzOp::dotProduct(const LevelData<EBCellFAB>& a_lhs, const LevelData<EBC
     const EBISBox& ebisbox = X.getEBISBox();
     const EBGraph& ebgraph = ebisbox.getEBGraph();
 
+    // Not auto-vectorizable: the per-cell isRegular() guard is one blocker, but even a guard-free
+    // rewrite would not vectorize -- this is an FP sum-reduction, and GCC will not reassociate the
+    // running sum without -fassociative-math/-ffast-math, which this project deliberately does not set.
     auto regularKernel = [&](const IntVect& iv) -> void {
       if (ebisbox.isRegular(iv)) {
         sumKappaXY += regX(iv, 0) * regY(iv, 0);
@@ -616,7 +630,9 @@ EBHelmholtzOp::dotProduct(const LevelData<EBCellFAB>& a_lhs, const LevelData<EBC
       BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       BoxLoops::loop(m_vofIterIrreg[din], irregularKernel);
     }
-    else if (isCovered) {
+    else if (isRegular) {
+      // Fully-regular box: every cell is regular, so the regular kernel sums all of them. (Covered
+      // boxes are skipped -- they contribute nothing to the inner product.)
       BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
     }
   }
@@ -705,6 +721,9 @@ EBHelmholtzOp::norm(const LevelData<EBCellFAB>& a_rhs, const int /*a_order*/)
     const EBISBox&   ebisbox = rhs.getEBISBox();
     const Box        box     = a_rhs.disjointBoxLayout()[din];
 
+    // Not auto-vectorizable: the per-cell isRegular() guard is one blocker, but even a guard-free
+    // rewrite would not vectorize -- this is an FP max-reduction, and GCC will not vectorize it
+    // without -ffinite-math-only/-ffast-math, which this project deliberately does not set.
     auto regularKernel = [&](const IntVect& iv) -> void {
       if (ebisbox.isRegular(iv)) {
         maxNorm = std::max(maxNorm, std::abs(regRhs(iv, m_comp)));
@@ -941,9 +960,10 @@ EBHelmholtzOp::refluxFreeAMROperator(LevelData<EBCellFAB>&             a_Lphi,
     // Add in the beta-term -- b-coefficient and m_beta is already a part of the flux.
     for (int dir = 0; dir < SpaceDim; dir++) {
       const FArrayBox& fluxReg = flux[dir].getFArrayBox();
+      const IntVect    shift   = BASISV(dir); // Hoisted so the offset is loop-invariant.
 
       auto regularKernel = [&](const IntVect& iv) -> void {
-        LphiReg(iv, m_comp) += inverseDx * (fluxReg(iv + BASISV(dir), m_comp) - fluxReg(iv, m_comp));
+        LphiReg(iv, m_comp) += inverseDx * (fluxReg(iv + shift, m_comp) - fluxReg(iv, m_comp));
       };
 
       BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
@@ -1291,18 +1311,22 @@ EBHelmholtzOp::applyDomainFlux(EBCellFAB&       a_phi,
 
   constexpr Real tol = 1.E-15;
 
+  // The lo/hi domain-boundary boxes are precomputed in defineStencils (they depend only on the domain
+  // and grid layout). Patches that touch no domain face have no boundary flux to apply, so skip them.
+  const DomainBndryBoxes& dbb = m_domainBndryBoxes[a_dit];
+  if (!dbb.touchesDomain) {
+    return;
+  }
+
   for (int dir = 0; dir < SpaceDim; dir++) {
 
     FArrayBox&       phiFAB = a_phi.getFArrayBox();
     const FArrayBox& bco    = a_Bcoef[dir].getFArrayBox();
 
-    Box loBox;
-    Box hiBox;
-    int hasLo;
-    int hasHi;
-    EBArith::loHi(loBox, hasLo, hiBox, hasHi, m_eblg.getDomain(), a_cellBox, dir);
+    const Box& loBox = dbb.loBox[dir];
+    const Box& hiBox = dbb.hiBox[dir];
 
-    if (hasLo == 1) {
+    if (dbb.hasLo[dir] == 1) {
 
       // Fill the domain flux. This might look weird, and we are actually putting the flux in a cell-centered data holder. By this, we implicitly
       // understand that the flux that is stored in the box is the flux that comes in through the lo side in the coordinate direction we are looking.
@@ -1316,6 +1340,9 @@ EBHelmholtzOp::applyDomainFlux(EBCellFAB&       a_phi,
       // This kernel might look weird, but we have designed our BC classes in such a weird way -- they fill boundary fluxes but the fluxes
       // are stored in a cell-centered box abutting the domain. So, this is just like a "regular" kernel, with the exception of that pesky flux
       // which physically lives on the face but is computationally stored on the cell.
+      // Not auto-vectorizable: the div-by-zero guard (scaledFlux = faceFlux/B only where |B| > tol)
+      // keeps a branch -- GCC will not speculate the division into masked-out vector lanes. This is a
+      // thin domain-boundary ghost slab, so the cost is small.
       auto kernel = [&](const IntVect& iv) -> void {
         const Real& B = bco(iv + BASISV(dir), m_comp);
 
@@ -1332,7 +1359,7 @@ EBHelmholtzOp::applyDomainFlux(EBCellFAB&       a_phi,
       BoxLoops::loop<D_DECL(1, 1, 1)>(ghostBox, kernel);
     }
 
-    if (hasHi == 1) {
+    if (dbb.hasHi[dir] == 1) {
       // Fill the domain flux. This might look weird, and we are actually putting the flux in a cell-centered data holder. By this, we implicitly
       // understand that the flux that is stored in the box is the flux that comes in through the hi side in the coordinate direction we are looking.
       FArrayBox faceFlux(hiBox, m_nComp);
@@ -1345,6 +1372,7 @@ EBHelmholtzOp::applyDomainFlux(EBCellFAB&       a_phi,
       // This kernel might look weird, but we have designed our BC classes in such a weird way -- they fill boundary fluxes but the fluxes
       // are stored in a cell-centered box abutting the domain. So, this is just like a "regular" kernel, with the exception of that pesky flux
       // which physically lives on the face but is computationally stored on the cell.
+      // Not auto-vectorizable: the div-by-zero guard keeps a branch (see the Lo-side note above).
       auto kernel = [&](const IntVect& iv) -> void {
         const Real& B = bco(iv - BASISV(dir), m_comp);
 
@@ -1364,7 +1392,10 @@ EBHelmholtzOp::applyDomainFlux(EBCellFAB&       a_phi,
 }
 
 void
-EBHelmholtzOp::fillDomainFlux(EBFluxFAB& a_flux, const EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit)
+EBHelmholtzOp::fillDomainFlux(EBFluxFAB&       a_flux,
+                              const EBCellFAB& a_phi,
+                              const Box& /*a_cellBox*/,
+                              const DataIndex& a_dit)
 {
   CH_TIME("EBHelmholtzOp::fillDomainFlux(EBFluxFAB, EBCellFAB, Box, DataIndex)");
 
@@ -1372,19 +1403,23 @@ EBHelmholtzOp::fillDomainFlux(EBFluxFAB& a_flux, const EBCellFAB& a_phi, const B
   //       the domain so that centered differences on the edge cells inject said flux. This is a simple trick for enforcing the flux
   //       on the domain edges when we later compute the finite volume Laplacian.
 
+  // The lo/hi domain-boundary boxes are precomputed in defineStencils (they depend only on the domain
+  // and grid layout). Patches that touch no domain face have no boundary flux to fill, so skip them.
+  const DomainBndryBoxes& dbb = m_domainBndryBoxes[a_dit];
+  if (!dbb.touchesDomain) {
+    return;
+  }
+
   for (int dir = 0; dir < SpaceDim; dir++) {
 
     BaseFab<Real>&       fluxReg = a_flux[dir].getSingleValuedFAB();
     const BaseFab<Real>& phiReg  = a_phi.getSingleValuedFAB();
     const BaseFab<Real>& bco     = (*m_Bcoef)[a_dit][dir].getSingleValuedFAB();
 
-    Box loBox;
-    Box hiBox;
-    int hasLo;
-    int hasHi;
-    EBArith::loHi(loBox, hasLo, hiBox, hasHi, m_eblg.getDomain(), a_cellBox, dir);
+    const Box& loBox = dbb.loBox[dir];
+    const Box& hiBox = dbb.hiBox[dir];
 
-    if (hasLo == 1) {
+    if (dbb.hasLo[dir] == 1) {
 
       // Fill the domain flux. This might look weird because we are putting the flux in a cell-centered box. By this, we implicitly
       // understand that the flux that is stored in the box is the flux that comes in through the lo side in the coordinate direction we are looking.
@@ -1399,7 +1434,7 @@ EBHelmholtzOp::fillDomainFlux(EBFluxFAB& a_flux, const EBCellFAB& a_phi, const B
       BoxLoops::loop<D_DECL(1, 1, 1)>(loBox, kernel);
     }
 
-    if (hasHi == 1) {
+    if (dbb.hasHi[dir] == 1) {
       // Fill the domain flux. This might look weird because we are putting the flux in a cell-centered box. By this, we implicitly
       // understand that the flux that is stored in the box is the flux that comes in through the lo side in the coordinate direction we are looking.
       FArrayBox faceFlux(hiBox, m_nComp);
@@ -2029,9 +2064,11 @@ EBHelmholtzOp::computeRelaxationCoefficient()
       // Regular kernel for adding -beta*(bcoef(loFace) + bcoef(hiFace))/dx^2 to the relaxation term.
       BaseFab<Real>& regBcoDir = (*m_Bcoef)[din][dir].getSingleValuedFAB();
 
-      const Real factor        = m_beta / (m_dx * m_dx);
-      auto       regularKernel = [&](const IntVect& iv) -> void {
-        regRel(iv, m_comp) -= factor * (regBcoDir(iv + BASISV(dir), m_comp) + regBcoDir(iv, m_comp));
+      const Real    factor = m_beta / (m_dx * m_dx);
+      const IntVect shift  = BASISV(dir); // Hoisted so the offset is loop-invariant (a runtime
+                                          // BASISV(dir) inside the kernel blocks vectorization).
+      auto regularKernel = [&](const IntVect& iv) -> void {
+        regRel(iv, m_comp) -= factor * (regBcoDir(iv + shift, m_comp) + regBcoDir(iv, m_comp));
       };
 
       BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
@@ -2239,10 +2276,12 @@ EBHelmholtzOp::computeFaceCenteredFlux(EBFaceFAB&       a_fluxCenter,
 
   // This kernel does centered differencing, setting the face flux to flux = B*(phi(high) - phi(lo))/dx. Recall that regFlux
   // is face centered but phi lives on in the cell.
-  const Real inverseDx = 1. / m_dx;
+  const Real    inverseDx = 1. / m_dx;
+  const IntVect shift     = BASISV(a_dir); // Hoisted so the offset is loop-invariant (a runtime
+                                           // BASISV(a_dir) inside the kernel blocks vectorization).
 
   auto regularKernel = [&](const IntVect& iv) -> void {
-    regFlux(iv, m_comp) = regBco(iv, m_comp) * inverseDx * (regPhi(iv, m_comp) - regPhi(iv - BASISV(a_dir), m_comp));
+    regFlux(iv, m_comp) = regBco(iv, m_comp) * inverseDx * (regPhi(iv, m_comp) - regPhi(iv - shift, m_comp));
   };
 
   // Kernel region. All interior faces in compCellBox

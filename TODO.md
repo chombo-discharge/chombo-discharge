@@ -264,7 +264,32 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
       reference in a doc comment (line 1770), not an actual loop. Nothing to do.
 
 ### Source/Elliptic
-- [ ] `Source/Elliptic/CD_EBHelmholtzOp.cpp` (29)
+- [x] `Source/Elliptic/CD_EBHelmholtzOp.cpp` (29)
+      - BUG FIX: dotProduct fully-regular-box branch was `else if (isCovered)` (no-op) so regular
+        boxes were dropped from the Krylov inner product. Now `else if (isRegular)`.
+      - Vectorization wins via shift-hoist (runtime BASISV -> loop-invariant const IntVect shift):
+        computeFaceCenteredFlux, refluxFreeAMROperator, computeRelaxationCoefficient (bcoef kernel).
+        All verified vectorizing via opt-record.
+      - Already vectorizing (compile-time strides): applyOpRegular, gauSaiRedBlackKernel (manual
+        stride-2 i_start), gauSaiMultiColorKernel, computeRelaxationCoefficient inversion kernel.
+      - Inherent non-vectorizers (documented in source):
+        * dotProduct/norm regular kernels -- FP sum / max reduction; GCC won't reassociate without
+          -fassociative-math/-ffast-math (project does not set these). Empirically verified 0 packed
+          insns even after removing the isRegular guard, so the guard-removal rewrite is perf-neutral
+          (NOT done, per the EBCentroid lesson).
+        * applyDomainFlux Lo/Hi -- div-by-zero guard, GCC won't speculate division into masked lanes
+          (thin boundary slab anyway). A mask-multiply rewrite DOES vectorize but is below the noise
+          floor and weakens the defensive guard (0*inf=NaN), so not done.
+        * computeFaceCentroidFlux, computeDiagWeight, applyOpIrregular, makeAggStencil, defineStencils,
+          all *irregular* kernels -- sparse VoF/Face index lists + indirect stencil gather; inherently
+          scalar (iterate an explicit cut-cell list).
+      - PERF: precomputed domain-boundary boxes (m_domainBndryBoxes, struct DomainBndryBoxes) built
+        once in defineStencils, so applyDomainFlux/fillDomainFlux no longer call EBArith::loHi every
+        V-cycle. Interior patches (the common case) early-out on a single touchesDomain bool. Pure
+        refactor (identical boxes); RodSphere GMG converges identically (3.28e4 -> 3.2e-7, rate ~11).
+      - CONSIDERED, not done: persisting the faceFlux scratch FArrayBox in applyDomainFlux/fillDomainFlux
+        to avoid per-visit malloc (Chombo BArena = plain malloc, no pool). Boundary-patches-only and the
+        getFaceFlux fill (which must run regardless) dominates the alloc, so below the noise floor.
 - [ ] `Source/Elliptic/CD_MFHelmholtzRobinEBBC.cpp` (2)
 - [ ] `Source/Elliptic/CD_MFHelmholtzOp.cpp` (2)
 - [ ] `Source/Elliptic/CD_MFHelmholtzJumpBC.cpp` (2)
