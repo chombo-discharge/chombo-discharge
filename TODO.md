@@ -391,7 +391,15 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
       - Latent (separate) item: fillDomainFlux does NOT cancel, so its Hi-side boundary flux scales by
         bco(iv) not bco(iv+shift) -- exact for constant coefficients, an approximation for variable ones.
         Left for separate review; masked in all constant-coef tests.
-- [ ] `Source/Elliptic/CD_EBHelmholtzDirichletDomainBC.cpp` (1)
+- [x] `Source/Elliptic/CD_EBHelmholtzDirichletDomainBC.cpp` (1)
+      - PERF: getFaceFlux assigned its kernel to a `std::function<void(const IntVect&)>` and looped over
+        that -- the whole-kernel std::function anti-pattern (type-erased indirect call per cell, blocks
+        inlining/vectorization) even for the trivial HOMOGENEOUS kernel (hot: every GMG relaxation uses
+        homogeneous BCs). Refactored to dispatch the branch outside BoxLoops::loop and pass a concrete
+        lambda in each case. Verified via opt-record: the homogeneous + constant kernels now vectorize
+        (4 loops); only the function-BC kernel stays scalar (inherent std::function value eval).
+        Behavior-preserving: RodSphere (bc.y = dirichlet) GMG converges bit-identically (3.200944e-07,
+        rate ~10.98). [Distinct from the position-only-f(pos) family pattern, which is inherent.]
 
 ### Source/ConvectionDiffusionReaction
 - [ ] `Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp` (30)
