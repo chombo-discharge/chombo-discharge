@@ -327,7 +327,14 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
         getBndryPhi is an out-of-line call (different TU) the compiler cannot lift itself, so it was
         re-invoked per cut-cell. Behavior-preserving (same objects bound once). Verified: clean build;
         MechShaft (multifluid electrostatics) regression converges with no NaN/divergence.
-- [ ] `Source/Elliptic/CD_MFHelmholtzDirichletEBBC.cpp` (2)
+- [x] `Source/Elliptic/CD_MFHelmholtzDirichletEBBC.cpp` (2)
+      - Both BoxLoops are sparse VoFIterator sweeps; inherently scalar. defineSinglePhase (setup,
+        correct foundStencil binding -- no Robin bug); applyEBFluxSinglePhase (HOT, called every applyOp).
+      - NO perf change (unlike the EBBC sibling): the hot kernel's only loop-invariant is
+        m_boundaryWeights[a_dit], an INLINE LayoutData index the compiler already hoists -- there is no
+        out-of-line per-vof container call (no getBndryPhi equivalent) to lift. Verified via asm that the
+        per-vof cost is dominated by out-of-line BaseIVFAB/EBCellFAB operator() and the std::function BC.
+        Hoisting would be perf-neutral, so left as-is per the no-perf-neutral rule. Documented.
 - [x] `Source/Elliptic/CD_EBHelmholtzRobinEBBC.cpp` (2)
       - Same two sparse VoFIterator kernels as the MF sibling -- inherently scalar, nothing to vectorize.
       - BUG FIX: same foundStencil bug as [[CD_MFHelmholtzRobinEBBC.cpp]] (stencil always cleared);

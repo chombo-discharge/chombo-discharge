@@ -137,6 +137,8 @@ MFHelmholtzDirichletEBBC::defineSinglePhase()
 
     VoFIterator& singlePhaseVofs = m_jumpBC->getSinglePhaseVofs(m_phase, din);
 
+    // Not auto-vectorizable (and not hot): one-time, sparse VoFIterator sweep that builds a
+    // least-squares gradient stencil per single-phase cut-cell.
     auto kernel = [&](const VolIndex& vof) -> void {
       const Real areaFrac = ebisbox.bndryArea(vof);
 
@@ -251,6 +253,11 @@ MFHelmholtzDirichletEBBC::applyEBFluxSinglePhase(VoFIterator& a_singlePhaseVofs,
   // is the contribution from the EB face. B/dx is already included in the stencils and boundary weights, but beta is not.
 
   // Do single phase cells. Only inhomogeneous contribution here.
+  //
+  // Not auto-vectorizable: sparse VoFIterator scatter over single-phase cut-cells, with the per-vof
+  // cost dominated by out-of-line BaseIVFAB/EBCellFAB operator() lookups (and the std::function BC
+  // value when m_useFunction). Unlike MFHelmholtzEBBC there is no hoistable out-of-line container
+  // lookup here -- m_boundaryWeights[a_dit] is an inline index the compiler already lifts.
   if (!a_homogeneousPhysBC) {
 
     auto kernel = [&](const VolIndex& vof) -> void {
