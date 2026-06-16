@@ -308,7 +308,16 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
       - NO bug here (unlike EBHelmholtzOp::dotProduct): the regular kernel runs for every non-covered
         box via `if (!isCovered)`, so fully-regular boxes are correctly summed; the per-cell isRegular
         guard prevents double-counting the cut/multi-valued cells handled by the irregular kernel.
-- [ ] `Source/Elliptic/CD_MFHelmholtzJumpBC.cpp` (2)
+- [x] `Source/Elliptic/CD_MFHelmholtzJumpBC.cpp` (2)
+      - Both BoxLoops are one-time, sparse VoFIterator stencil builders (defineStencils gradient
+        stencils, buildAverageStencils AggStencil gather). Inherently scalar, not hot -- documented.
+      - defineStencils correctly binds `foundStencil = getLeastSquaresBoundaryGradStencil(...)` (returns
+        bool), so it does NOT have the [[CD_MFHelmholtzRobinEBBC.cpp]] bug. Verified.
+      - HOT path matchBC (called every relax color via MFHelmholtzOp) is already perf-conscious: the
+        heavy work is two AggStencil applies; m_denom is precomputed and folded into the stencil weights;
+        m_avgVoFs precomputed. The remaining IVSIterator loop is sparse with delicate ordered
+        read-after-write dependencies (the phase-1 loop reads what the phase-0 loop wrote) and size-1
+        inner loops -- micro-opts there are marginal and risky, so left as-is.
 - [ ] `Source/Elliptic/CD_MFHelmholtzEBBC.cpp` (2)
 - [ ] `Source/Elliptic/CD_MFHelmholtzDirichletEBBC.cpp` (2)
 - [x] `Source/Elliptic/CD_EBHelmholtzRobinEBBC.cpp` (2)
