@@ -452,7 +452,14 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
         irregular loop iterates only multi-valued cut-cells (singly-cut handled once by the regular loop).
         Behavior-preserving: AdvectionDiffusion/CTU exercises THIS override and produces a byte-for-byte
         identical plot file vs baseline.
-- [ ] `Source/ConvectionDiffusionReaction/CD_CdrGodunov.cpp` (2)
+- [x] `Source/ConvectionDiffusionReaction/CD_CdrGodunov.cpp` (2)
+      - Both BoxLoops are in computeAdvectionDt (override), structurally identical to CdrCTU's. Applied the
+        same cell-based not-covered mask + multi-cut iterator transform: removes the per-cell out-of-line
+        isRegular query and the cut-cell double-processing; singly-cut handled once by the regular loop.
+      - Verified behavior-preserving: the Godunov test's HDF5 output is non-deterministic in its per-level
+        metadata (same binary differs run-to-run), but the data regions between the metadata clusters are
+        byte-identical between changed and baseline -- i.e. identical simulation data. (Same transform was
+        byte-identical on the deterministic CdrCTU test.)
 
 ### Source/Electrostatics
 - [ ] `Source/Electrostatics/CD_FieldSolver.cpp` (12)
