@@ -178,7 +178,8 @@ EBHelmholtzRobinEBBC::define()
       // that fall within the quadrant that the cut-cell normal points into.
       order = m_order;
       while (!foundStencil && order > 0) {
-        fluxStencil = this->getInterpolationStencil(vof, din, VofUtils::Neighborhood::Quadrant, order);
+        fluxStencil  = this->getInterpolationStencil(vof, din, VofUtils::Neighborhood::Quadrant, order);
+        foundStencil = (fluxStencil.size() > 0);
         order--;
 
         // Check that the stencil doesn't reach into ghost cells it shouldn't!
@@ -190,7 +191,8 @@ EBHelmholtzRobinEBBC::define()
       // If the above failed we try a larger neighborhood
       order = m_order;
       while (!foundStencil && order > 0) {
-        fluxStencil = this->getInterpolationStencil(vof, din, VofUtils::Neighborhood::Radius, order);
+        fluxStencil  = this->getInterpolationStencil(vof, din, VofUtils::Neighborhood::Radius, order);
+        foundStencil = (fluxStencil.size() > 0);
         order--;
 
         // Check that the stencil doesn't reach into ghost cells it shouldn't!

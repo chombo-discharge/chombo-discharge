@@ -290,12 +290,25 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
       - CONSIDERED, not done: persisting the faceFlux scratch FArrayBox in applyDomainFlux/fillDomainFlux
         to avoid per-visit malloc (Chombo BArena = plain malloc, no pool). Boundary-patches-only and the
         getFaceFlux fill (which must run regardless) dominates the alloc, so below the noise floor.
-- [ ] `Source/Elliptic/CD_MFHelmholtzRobinEBBC.cpp` (2)
+- [x] `Source/Elliptic/CD_MFHelmholtzRobinEBBC.cpp` (2)
+      - Both BoxLoops are sparse VoFIterator sweeps over cut-cells (defineSinglePhase stencil build,
+        applyEBFluxSinglePhase flux) with out-of-line per-cell work (LeastSquares stencils, std::function
+        coefficients). Inherently scalar -- nothing to vectorize.
+      - BUG FIX: in defineSinglePhase the stencil-search while-loops never set `foundStencil` from the
+        returned stencil (foundStencil stayed false), so isStencilValidCF never ran and the `else` dead-cell
+        branch always fired -> the Robin gradPhi stencil (the A*phi/B coupling) was cleared for EVERY cut-cell,
+        silently degenerating the Robin EB BC. Added `foundStencil = (fluxStencil.size() > 0);` after each
+        getInterpolationStencil call (matches the canonical Dirichlet/Neumann pattern). Same bug fixed in
+        the sibling [[CD_EBHelmholtzRobinEBBC.cpp]]. Verified: builds clean; Eddington (larsen/Robin EB BC)
+        runs 100 steps with no NaN/divergence.
 - [ ] `Source/Elliptic/CD_MFHelmholtzOp.cpp` (2)
 - [ ] `Source/Elliptic/CD_MFHelmholtzJumpBC.cpp` (2)
 - [ ] `Source/Elliptic/CD_MFHelmholtzEBBC.cpp` (2)
 - [ ] `Source/Elliptic/CD_MFHelmholtzDirichletEBBC.cpp` (2)
-- [ ] `Source/Elliptic/CD_EBHelmholtzRobinEBBC.cpp` (2)
+- [x] `Source/Elliptic/CD_EBHelmholtzRobinEBBC.cpp` (2)
+      - Same two sparse VoFIterator kernels as the MF sibling -- inherently scalar, nothing to vectorize.
+      - BUG FIX: same foundStencil bug as [[CD_MFHelmholtzRobinEBBC.cpp]] (stencil always cleared);
+        fixed identically. See that entry for details.
 - [ ] `Source/Elliptic/CD_EBHelmholtzNeumannEBBC.cpp` (2)
 - [ ] `Source/Elliptic/CD_EBHelmholtzDirichletEBBC.cpp` (2)
 - [ ] `Source/Elliptic/CD_MFHelmholtzNeumannEBBC.cpp` (1)
