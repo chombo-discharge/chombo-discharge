@@ -237,6 +237,8 @@ EBGhostCellInterpolator::interpolateRegular(FArrayBox&       a_phiFine,
       const Box interpBox = m_regularGhostRegions[a_dit].at(std::make_pair(dir, sit()));
 
       // Kernel for setting phiFine = phiCoar in the ghost cells.
+      // Not auto-vectorizable: the coarse data is gathered through coarsen(fineIV, m_refRat), which is
+      // a non-contiguous (broadcast) read and involves floor-division branches.
       auto regSetFineToCoar = [&](const IntVect fineIV) -> void {
         const IntVect coarIV = coarsen(fineIV, m_refRat);
 
@@ -255,78 +257,22 @@ EBGhostCellInterpolator::interpolateRegular(FArrayBox&       a_phiFine,
         for (int slopeDir = 0; slopeDir < SpaceDim; slopeDir++) {
           const IntVect s = BASISV(slopeDir);
 
-          // Figure out how to compute the slopes.
-          std::function<void(const IntVect& iv)> regularSlopeKernel;
+          // Select the slope limiter once (a function pointer, rather than wrapping the whole kernel
+          // in a per-cell std::function). All limiters share the signature Real(const Real&, const Real&).
+          Real (*limiter)(const Real&, const Real&) = nullptr;
           switch (a_interpType) {
           case EBGhostCellInterpolator::Type::MinMod: {
-            regularSlopeKernel = [&](const IntVect& iv) -> void {
-              const Real dwl = a_phiCoar(iv, a_coarVar) - a_phiCoar(iv - s, a_coarVar);
-              const Real dwr = a_phiCoar(iv + s, a_coarVar) - a_phiCoar(iv, a_coarVar);
-
-              const bool hasLo = domainCoar.contains(iv - s);
-              const bool hasHi = domainCoar.contains(iv + s);
-
-              if (hasLo && hasHi) {
-                slopes(iv, 0) = ChomboDischarge::EBGhostCellInterpolator::minmod(dwl, dwr);
-              }
-              else if (hasLo && !hasHi) {
-                slopes(iv, 0) = dwl;
-              }
-              else if (!hasLo && hasHi) {
-                slopes(iv, 0) = dwr;
-              }
-              else {
-                slopes(iv, 0) = 0.0;
-              }
-            };
+            limiter = &EBGhostCellInterpolator::minmod;
 
             break;
           }
           case EBGhostCellInterpolator::Type::MonotonizedCentral: {
-            regularSlopeKernel = [&](const IntVect& iv) -> void {
-              const Real dwl = a_phiCoar(iv, a_coarVar) - a_phiCoar(iv - s, a_coarVar);
-              const Real dwr = a_phiCoar(iv + s, a_coarVar) - a_phiCoar(iv, a_coarVar);
-
-              const bool hasLo = domainCoar.contains(iv - s);
-              const bool hasHi = domainCoar.contains(iv + s);
-
-              if (hasLo && hasHi) {
-                slopes(iv, 0) = ChomboDischarge::EBGhostCellInterpolator::monotonizedCentral(dwl, dwr);
-              }
-              else if (hasLo && !hasHi) {
-                slopes(iv, 0) = dwl;
-              }
-              else if (!hasLo && hasHi) {
-                slopes(iv, 0) = dwr;
-              }
-              else {
-                slopes(iv, 0) = 0.0;
-              }
-            };
+            limiter = &EBGhostCellInterpolator::monotonizedCentral;
 
             break;
           }
           case EBGhostCellInterpolator::Type::Superbee: {
-            regularSlopeKernel = [&](const IntVect& iv) -> void {
-              const Real dwl = a_phiCoar(iv, a_coarVar) - a_phiCoar(iv - s, a_coarVar);
-              const Real dwr = a_phiCoar(iv + s, a_coarVar) - a_phiCoar(iv, a_coarVar);
-
-              const bool hasLo = domainCoar.contains(iv - s);
-              const bool hasHi = domainCoar.contains(iv + s);
-
-              if (hasLo && hasHi) {
-                slopes(iv, 0) = superbee(dwl, dwr);
-              }
-              else if (hasLo && !hasHi) {
-                slopes(iv, 0) = dwl;
-              }
-              else if (!hasLo && hasHi) {
-                slopes(iv, 0) = dwr;
-              }
-              else {
-                slopes(iv, 0) = 0.0;
-              }
-            };
+            limiter = &EBGhostCellInterpolator::superbee;
 
             break;
           }
@@ -335,7 +281,34 @@ EBGhostCellInterpolator::interpolateRegular(FArrayBox&       a_phiFine,
           }
           }
 
+          // Compute the (limited) slope in this direction on the coarse grid. Using a direct lambda
+          // (with the limiter as a function pointer) avoids the per-cell std::function indirection.
+          // Not auto-vectorizable: per-cell domain-boundary checks (domainCoar.contains) and the
+          // slope limiter introduce data-dependent control flow.
+          auto regularSlopeKernel = [&](const IntVect& iv) -> void {
+            const Real dwl = a_phiCoar(iv, a_coarVar) - a_phiCoar(iv - s, a_coarVar);
+            const Real dwr = a_phiCoar(iv + s, a_coarVar) - a_phiCoar(iv, a_coarVar);
+
+            const bool hasLo = domainCoar.contains(iv - s);
+            const bool hasHi = domainCoar.contains(iv + s);
+
+            if (hasLo && hasHi) {
+              slopes(iv, 0) = limiter(dwl, dwr);
+            }
+            else if (hasLo && !hasHi) {
+              slopes(iv, 0) = dwl;
+            }
+            else if (!hasLo && hasHi) {
+              slopes(iv, 0) = dwr;
+            }
+            else {
+              slopes(iv, 0) = 0.0;
+            }
+          };
+
           // Kernel for adding in slope limiter.
+          // Not auto-vectorizable: the coarse slope is gathered through coarsen(fineIV, m_refRat),
+          // which is a non-contiguous (broadcast) read and involves floor-division branches.
           auto addRegularSlopeContribution = [&](const IntVect& fineIV) -> void {
             const IntVect  coarIV = coarsen(fineIV, m_refRat);
             const RealVect delta = (RealVect(fineIV) - m_refRat * RealVect(coarIV) + 0.5 * (1.0 - m_refRat)) / m_refRat;

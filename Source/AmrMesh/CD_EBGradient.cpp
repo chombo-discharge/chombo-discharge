@@ -235,9 +235,11 @@ EBGradient::computeNormalDerivative(LevelData<EBFluxFAB>& a_gradient, const Leve
       FaceIterator& faceit        = m_multiCutFaceIter[din][dir];
 
       // C++ kernel for regular grid faces. Note that we iterate over the IntVects in the face-centered boxes, so
-      // the cell on the high side of the face has index iv and on the low side it has index iv - BASISV(dir);
+      // the cell on the high side of the face has index iv and on the low side it has index iv - shift.
+      const IntVect shift = BASISV(dir);
+
       auto regularFaceDerivative = [&](const IntVect& iv) -> void {
-        regGradient(iv, dir) = idx * regPhi(iv, m_comp) - regPhi(iv - BASISV(dir), m_comp);
+        regGradient(iv, dir) = idx * regPhi(iv, m_comp) - regPhi(iv - shift, m_comp);
       };
 
       // Cut-cell version of the above.
@@ -611,6 +613,8 @@ EBGradient::defineIteratorsEBCF(const LevelData<FArrayBox>& a_coarMaskCF,
     if (isIrregular) {
 
       // Iterate through the coarse-fine region and check if the finite difference stencil reaches into a cut-cell.
+      // Not auto-vectorizable: this is a one-time setup loop with a data-dependent branch, an
+      // out-of-line stencil-validity query, and IntVectSet insertion.
       auto kernel = [&](const IntVect& ivCoar) -> void {
         if (coarseFineRegion(ivCoar, m_comp) > zero) {
           const bool hasStencil = this->isFiniteDifferenceStencilValid(ivCoar, ebisBox, invalidRegion);
@@ -689,6 +693,8 @@ EBGradient::defineStencilsEBCF(const LevelData<FArrayBox>& a_coarMaskInvalid) no
     DenseIntVectSet validRegionCoar(grownBox, true);
     DenseIntVectSet validRegionFine(grownBoxFine, false);
 
+    // Not auto-vectorizable: this is a one-time setup loop with a data-dependent branch and
+    // DenseIntVectSet modification.
     auto regularKernel = [&](const IntVect& iv) -> void {
       if (coarMaskInvalid(iv, m_comp) > 0.0) {
         validRegionCoar -= iv;

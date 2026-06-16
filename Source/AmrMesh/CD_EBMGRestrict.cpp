@@ -146,6 +146,8 @@ EBMGRestrict::restrictResidual(LevelData<EBCellFAB>&       a_coarData,
       const BaseIVFAB<VoFStencil>& restrictStencils = m_restrictStencils[din];
 
       // Regular kernel.
+      // Not auto-vectorizable: this is a fine->coarse gather-reduction over the refRat^D fine cells
+      // (a strided gather plus the inner refinement-box loop).
       auto regularKernel = [&](const IntVect& ivCoar) -> void {
         for (BoxIterator bit(refineBox); bit.ok(); ++bit) {
           const IntVect ivFine = m_refRat * ivCoar + bit();

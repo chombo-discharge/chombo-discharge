@@ -151,6 +151,9 @@ EBMGProlong::prolongResidual(LevelData<EBCellFAB>&       a_fineData,
       const BaseIVFAB<VoFStencil>& prolongStencils = m_prolongStencils[din];
 
       // Regular kernel.
+      // Not auto-vectorizable: this is a coarse->fine scatter to the refRat^D fine cells (strided
+      // writes plus the inner refinement-box loop), gated per fine cell by the out-of-line
+      // ebisBoxFine.isIrregular(ivFine) query (cut cells are handled by the irregular kernel).
       auto regularKernel = [&](const IntVect& ivCoar) -> void {
         for (BoxIterator bit(refineBox); bit.ok(); ++bit) {
           const IntVect ivFine = m_refRat * ivCoar + bit();

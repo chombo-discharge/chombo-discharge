@@ -143,6 +143,8 @@ EBReflux::defineRegionsCF() noexcept
         const FArrayBox& mask    = coarMask[din];
         DenseIntVectSet  cfivs(dbl[din], false);
 
+        // Not auto-vectorizable: this is a one-time (define) setup loop with a data-dependent branch,
+        // an out-of-line ebisBox.isRegular(iv) query, and DenseIntVectSet insertion.
         for (BoxIterator bit(dbl[din]); bit.ok(); ++bit) {
           const IntVect iv = bit();
           if (mask(iv, 0) > 0.0 && ebisBox.isRegular(iv)) {
@@ -166,6 +168,8 @@ EBReflux::defineRegionsCF() noexcept
 
         IntVectSet irregCells;
 
+        // Not auto-vectorizable: this is a one-time (define) setup loop with a data-dependent branch,
+        // an out-of-line ebisBox.isIrregular(iv) query, and IntVectSet insertion.
         auto findIrregCells = [&](const IntVect& iv) -> void {
           if (mask(iv, 0) > 0.0 && ebisBox.isIrregular(iv)) {
             irregCells |= iv;
@@ -357,6 +361,8 @@ EBReflux::coarsenFluxesCF(LevelData<EBFluxFAB>&       a_coarFluxes,
         const auto& coarseningStencils = m_fluxCoarseningStencils[din].at(std::make_pair(dir, sit()));
 
         // Kernel for regular cells.
+        // Not auto-vectorizable: this is a fine->coarse flux gather-reduction over the fine faces
+        // (strided gather plus a nested reduction).
         auto regularKernel = [&](const IntVect& iv) -> void {
           coarFluxReg(iv, a_coarVar) = 0.0;
 
@@ -377,6 +383,9 @@ EBReflux::coarsenFluxesCF(LevelData<EBFluxFAB>&       a_coarFluxes,
           coarFluxReg(iv, a_coarVar) *= invFinePerCoar;
         };
 
+        // Runs over all cut faces (not just multiply-cut ones): it applies a geometry-aware
+        // coarsening stencil whose value differs from the regular gather-sum, so the regular kernel
+        // above does not produce the correct value on cut faces.
         auto irregularKernel = [&](const FaceIndex& face) -> void {
           coarFlux(face, a_coarVar) = 0.0;
 

@@ -562,6 +562,8 @@ PhaseRealm::defineLevelSet(const int a_lmin, const int a_numGhost)
         const Box  bx  = fab.box();
 
         if (!m_baseif.isNull()) {
+          // Not auto-vectorizable: m_baseif->value(pos) is a virtual call on the polymorphic implicit
+          // function, evaluated per cell. This is a one-time (regrid) setup loop.
           auto kernel = [&](const IntVect& iv) -> void {
             const RealVect pos = m_probLo + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
 

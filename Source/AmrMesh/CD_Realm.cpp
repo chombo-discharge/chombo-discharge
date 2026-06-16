@@ -456,6 +456,8 @@ Realm::defineOuterHaloMask(LevelData<BaseFab<bool>>& a_coarMask,
       BaseFab<bool>&   boolMask = a_coarMask[din];
       const FArrayBox& realMask = coarMask[din];
 
+      // Not auto-vectorizable: one-time (regrid) setup loop with a data-dependent conditional write
+      // to a bool mask.
       auto kernel = [&](const IntVect& iv) -> void {
         if (realMask(iv, comp) > 0.0) {
           boolMask(iv, comp) = true;
@@ -561,6 +563,8 @@ Realm::defineInnerHaloMask(const int /*a_lmin*/)
 
             coarMask.setVal(0.0);
 
+            // Not auto-vectorizable: one-time (regrid) setup loop with a data-dependent branch plus an
+            // inner box-grow scatter (flagging all cells within the buffer).
             auto flagGrownRegion = [&](const IntVect& iv) -> void {
               if (validCells(iv, comp)) {
                 const Box grownBox = grow(Box(iv, iv), buffer) & domainCoar;
@@ -601,6 +605,8 @@ Realm::defineInnerHaloMask(const int /*a_lmin*/)
             BaseFab<bool>&   curMask  = (*amrMask[lvl])[din];
             const FArrayBox& coFiMask = coFiLevelMask[din];
 
+            // Not auto-vectorizable: one-time (regrid) setup loop — coarsen() gather plus a
+            // conditional bool write.
             auto kernel = [&](const IntVect& iv) -> void {
               const IntVect coarIV = coarsen(iv, refToCoar);
 
@@ -793,6 +799,8 @@ Realm::defineOuterCFMask(LevelData<BaseFab<bool>>& a_coarMask,
       BaseFab<bool>&   boolMask = a_coarMask[din];
       const FArrayBox& realMask = coarMask[din];
 
+      // Not auto-vectorizable: one-time (regrid) setup loop with a data-dependent conditional write
+      // to a bool mask.
       auto kernel = [&](const IntVect& iv) -> void {
         if (realMask(iv, comp) > 0.0) {
           boolMask(iv, comp) = true;
@@ -859,6 +867,8 @@ Realm::defineInnerCFMask(const int /*a_lmin*/)
               const Box sideBoxLo = adjCellLo(cellBox, dir, -buffer);
               const Box sideBoxHi = adjCellHi(cellBox, dir, -buffer);
 
+              // Not auto-vectorizable: one-time (regrid) setup loop — per-cell box-grow and
+              // neighbor-overlap counting (box arithmetic plus an inner loop over neighbor boxes).
               auto kernel = [&](const IntVect& iv) -> void {
                 const Box box = grow(Box(iv, iv), buffer) & domain;
 
@@ -1023,6 +1033,8 @@ Realm::defineValidCells()
         BaseFab<bool>&   boolMask = (*m_validCells[lvl])[din];
         const FArrayBox& fabMask  = coarData[din];
 
+        // Not auto-vectorizable: one-time (regrid) setup loop with a data-dependent conditional write
+        // to a bool mask.
         auto kernel = [&](const IntVect& iv) -> void {
           if (fabMask(iv, curComp) > 0.0) {
             boolMask(iv, curComp) = false;

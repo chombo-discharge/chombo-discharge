@@ -312,6 +312,9 @@ EBCoarseToFineInterp::interpolatePWC(EBCellFAB&       a_fineData,
   const FArrayBox& coarDataReg = a_coarData.getFArrayBox();
 
   // Regular kernel. Set the fine data equal to the coarse data.
+  // Not auto-vectorizable: this is a piecewise-constant coarse->fine broadcast that scatters each
+  // coarse value to a strided block of fine cells (the inner refinement-box loop), so the writes are
+  // non-contiguous.
   auto regularKernel = [&](const IntVect& coarIV) -> void {
     const Real& coarVal = coarDataReg(coarIV, a_coarVar);
 
@@ -322,7 +325,9 @@ EBCoarseToFineInterp::interpolatePWC(EBCellFAB&       a_fineData,
     }
   };
 
-  // Cut-cell kernel.
+  // Cut-cell kernel. This runs over all cut cells (not just multiply-cut ones): the iterator is over
+  // coarse VoFs, and a single-valued coarse cell may refine to a multi-valued fine cell that the
+  // regular single-valued kernel above cannot set, so singly-cut coarse cells cannot be skipped.
   auto irregularKernel = [&](const VolIndex& coarVoF) -> void {
     const Vector<VolIndex> fineVoFs = ebislCoar.refine(coarVoF, m_refRat, a_dit);
 
@@ -368,13 +373,17 @@ EBCoarseToFineInterp::interpolateConservativePWC(EBCellFAB&       a_fineData,
   const FArrayBox& coarDataReg = a_coarData.getFArrayBox();
 
   // Regular kernel. Set the fine data equal to the coarse data.
+  // Not auto-vectorizable: the coarse data is gathered through coarsen(fineIV, m_refRat), which is a
+  // non-contiguous (broadcast) read and involves floor-division branches.
   auto regularKernel = [&](const IntVect& fineIV) -> void {
     const IntVect coarIV = coarsen(fineIV, m_refRat);
 
     fineDataReg(fineIV, a_fineVar) = coarDataReg(coarIV, a_coarVar);
   };
 
-  // Cut-cell kernel.
+  // Cut-cell kernel. This must run over all cut cells (not just multiply-cut ones): it applies a
+  // conservative volume-fraction weighting that differs from the plain copy in the regular kernel
+  // above, so the regular kernel does not produce the correct value on singly-cut cells.
   auto irregularKernel = [&](const VolIndex& fineVoF) -> void {
     const VolIndex& coarVoF = ebislFine.coarsen(fineVoF, m_refRat, a_dit);
 
@@ -460,7 +469,17 @@ EBCoarseToFineInterp::interpolateConservativeSlope(EBCellFAB&          a_fineDat
     return slope;
   };
 
-  auto superbee = [=](const Real& dwl, const Real& dwr) -> Real {
+  auto superbee = [](const Real& dwl, const Real& dwr) -> Real {
+    // Nested (captureless) minmod so that superbee itself remains captureless and converts to a
+    // function pointer.
+    const auto minmod = [](const Real& a, const Real& b) -> Real {
+      Real s = 0.0;
+      if (a * b > 0.0) {
+        s = std::abs(a) < std::abs(b) ? a : b;
+      }
+      return s;
+    };
+
     Real slope = 0.0;
 
     if (dwl * dwr > 0.0) {
@@ -475,6 +494,33 @@ EBCoarseToFineInterp::interpolateConservativeSlope(EBCellFAB&          a_fineDat
     return slope;
   };
 
+  // Select the slope limiter once (a function pointer, rather than wrapping the whole kernel in a
+  // per-cell std::function). The limiters above are captureless lambdas, which convert to a function
+  // pointer with signature Real(const Real&, const Real&).
+  Real (*limiter)(const Real&, const Real&) = nullptr;
+  switch (a_limiter) {
+  case SlopeLimiter::MinMod: {
+    limiter = minmod;
+
+    break;
+  }
+  case SlopeLimiter::MonotonizedCentral: {
+    limiter = mc;
+
+    break;
+  }
+  case SlopeLimiter::Superbee: {
+    limiter = superbee;
+
+    break;
+  }
+  default: {
+    MayDay::Error("EBCoarseToFineInterp::interpolateConservativeSlope - logic bust 1");
+
+    break;
+  }
+  }
+
   // Compute slopes in every direction. Slopes in boundary cells are zero (because what would they be?). And in
   // cut-cells we set slopes to zero (because I don't know how to combine hard conservation with slope extrapolation!).
   for (int dir = 0; dir < SpaceDim; dir++) {
@@ -482,45 +528,15 @@ EBCoarseToFineInterp::interpolateConservativeSlope(EBCellFAB&          a_fineDat
 
     const Box interiorCells = grow(grow(coarBox, 1) & domainCoar, -1);
 
-    // Define the regular grid kernel.
-    std::function<void(const IntVect& iv)> interiorKernel;
-    switch (a_limiter) {
-    case SlopeLimiter::MinMod: {
-      interiorKernel = [&](const IntVect& iv) -> void {
-        const Real dwl = coarDataReg(iv, a_coarVar) - coarDataReg(iv - shift, a_coarVar);
-        const Real dwr = coarDataReg(iv + shift, a_coarVar) - coarDataReg(iv, a_coarVar);
+    // Define the regular grid kernel. Using a direct lambda (with the limiter as a function pointer)
+    // avoids the per-cell std::function indirection.
+    // Not auto-vectorizable: the slope limiter introduces data-dependent control flow.
+    auto interiorKernel = [&](const IntVect& iv) -> void {
+      const Real dwl = coarDataReg(iv, a_coarVar) - coarDataReg(iv - shift, a_coarVar);
+      const Real dwr = coarDataReg(iv + shift, a_coarVar) - coarDataReg(iv, a_coarVar);
 
-        slopesReg(iv, 0) = minmod(dwl, dwr);
-      };
-
-      break;
-    }
-    case SlopeLimiter::MonotonizedCentral: {
-      interiorKernel = [&](const IntVect& iv) -> void {
-        const Real dwl = coarDataReg(iv, a_coarVar) - coarDataReg(iv - shift, a_coarVar);
-        const Real dwr = coarDataReg(iv + shift, a_coarVar) - coarDataReg(iv, a_coarVar);
-
-        slopesReg(iv, 0) = mc(dwl, dwr);
-      };
-
-      break;
-    }
-    case SlopeLimiter::Superbee: {
-      interiorKernel = [&](const IntVect& iv) -> void {
-        const Real dwl = coarDataReg(iv, a_coarVar) - coarDataReg(iv - shift, a_coarVar);
-        const Real dwr = coarDataReg(iv + shift, a_coarVar) - coarDataReg(iv, a_coarVar);
-
-        slopesReg(iv, 0) = superbee(dwl, dwr);
-      };
-
-      break;
-    }
-    default: {
-      MayDay::Error("EBCoarseToFineInterp::interpolateConservativeSlope - logic bust 1");
-
-      break;
-    }
-    }
+      slopesReg(iv, 0) = limiter(dwl, dwr);
+    };
 
     // Reset slopes in cut-cells because we can't extrapolate inside of them.
     auto resetSlopeIrreg = [&](const VolIndex& coarVoF) -> void {
@@ -528,6 +544,8 @@ EBCoarseToFineInterp::interpolateConservativeSlope(EBCellFAB&          a_fineDat
     };
 
     // Apply slopes in the fine-grid interior cells.
+    // Not auto-vectorizable: the coarse slope is gathered through coarsen(fineIV, m_refRat), which is
+    // a non-contiguous (broadcast) read and involves floor-division branches.
     auto slopeExtrapRegular = [&](const IntVect& fineIV) -> void {
       const IntVect  coarIV = coarsen(fineIV, m_refRat);
       const Real&    slope  = slopesReg(coarIV, 0);
@@ -537,6 +555,8 @@ EBCoarseToFineInterp::interpolateConservativeSlope(EBCellFAB&          a_fineDat
     };
 
     // Compute slopes in interior cells. Crap on boundary and cut-cells.
+    // Not auto-vectorizable: the slope-limiter (minmod/superbee/...) introduces data-dependent
+    // control flow in the inner loop.
     CH_START(t1);
     BoxLoops::loop<D_DECL(1, 1, 1)>(interiorCells, interiorKernel);
     BoxLoops::loop(m_coarVoFs[a_dit], resetSlopeIrreg);
@@ -548,13 +568,17 @@ EBCoarseToFineInterp::interpolateConservativeSlope(EBCellFAB&          a_fineDat
   }
 
   // Add in the constant term.
+  // Not auto-vectorizable: the coarse data is gathered through coarsen(fineIV, m_refRat), which is a
+  // non-contiguous (broadcast) read and involves floor-division branches.
   auto regularConstantTerm = [&](const IntVect& fineIV) {
     const IntVect coarIV = coarsen(fineIV, m_refRat);
 
     fineDataReg(fineIV, a_fineVar) += coarDataReg(coarIV, a_coarVar);
   };
 
-  // Reset irregular cells, using hard conservation.
+  // Reset irregular cells, using hard conservation. This must run over all cut cells (not just
+  // multiply-cut ones): it overwrites them with the conservative volume-fraction-weighted value,
+  // which differs from the slope-interpolated value the regular kernels accumulated above.
   auto irregularInterp = [&](const VolIndex& fineVoF) {
     const VolIndex coarVoF = ebislFine.coarsen(fineVoF, m_refRat, a_dit);
 
@@ -664,6 +688,8 @@ EBCoarseToFineInterp::checkConservation(const EBCellFAB& a_fineData,
   Real sumCoar = 0.0;
   Real sumFine = 0.0;
 
+  // Not a vectorization target: checkConservation is only called under #ifndef NDEBUG (debug builds),
+  // where the SIMD pragma is disabled anyway. These are isRegular-guarded reductions.
   auto regCoar = [&](const IntVect& iv) -> void {
     if (ebisBoxCoar.isRegular(iv)) {
       sumCoar += coarDataReg(iv, a_coarVar);

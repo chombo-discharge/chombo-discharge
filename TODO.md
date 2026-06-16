@@ -90,6 +90,24 @@ kernel) or a non-inlinable call (e.g. `std::function`).
 - Prefer rewrites that keep dimension independence via `D_DECL` / `D_TERM`.
 - Do not change numerical behavior. Vectorization rewrites must be bit-for-bit equivalent
   (modulo FP reassociation that the existing `CD_PRAGMA_SIMD` already permits).
+- **DANGER — never pass a `std::function` as a `BoxLoops::loop` kernel.** Type-erasing the
+  kernel into a `std::function<void(const IntVect&)>` (often done to select between variants in
+  a `switch`) forces an **indirect, non-inlinable call on every cell**, which both kills
+  performance and blocks vectorization of the entire kernel body. Watch for the idiom
+  `std::function<void(...)> k; switch(...) { k = [&]{...}; }  BoxLoops::loop(box, k);`.
+  Instead use a **direct lambda**. The fix when the *whole kernel* was a `std::function`: keep one
+  direct lambda and, if a per-variant helper (e.g. a slope limiter) must be selected at runtime, pass
+  *that helper* as a **function pointer** (captureless lambdas and `static` functions convert to
+  `Real(*)(...)`). Fixed (whole-kernel std::function) instances: `CD_EBGhostCellInterpolator.cpp`,
+  `CD_EBCoarseToFineInterp.cpp`.
+  - **Distinct from a `std::function` used as a genuine *API callback parameter*** — e.g.
+    `DataOps::setValue`'s user function — which is unavoidable and just documented as non-vectorizable.
+  - **DO NOT, conversely, "fix" a plain `switch` on a loop-INVARIANT enum that calls INLINE helpers**
+    (e.g. the centroid-interpolation limiter switch). Verified empirically: GCC unswitches the
+    loop-invariant switch and *inlines* the tiny helpers (0 calls), whereas converting to a function
+    pointer forces an indirect, non-inlined call per cell — a slight **regression**. Reverted on
+    `CD_EBCentroidInterpolation.cpp` / `CD_CellCentroidInterpolationImplem.H`. Rule of thumb: a
+    `std::function` *kernel* is always bad; a `switch` selecting an *inline* helper is fine.
 
 ---
 
@@ -139,25 +157,111 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
       documented non-vectorizable.
       VERIFY-BEFORE-MERGE: the two tagger plot-output callers (CdrPlasmaTagger, ItoKMCTagger)
       use getCoveredCells(a_outputRealm, m_phase) — confirm a_output's realm/phase matches.
-- [ ] `Source/Utilities/CD_VofUtils.cpp` (1)
+- [x] `Source/Utilities/CD_VofUtils.cpp` (1) — DONE. The single loop (getAllVofsInRadius) gathers
+      cut-cell VoFs via the out-of-line ebisbox.getVoFs(iv) and appends to a growing Vector;
+      documented non-vectorizable (irregular/allocating/order-dependent). No raw BoxIterator loops.
 
 ### Source/AmrMesh
-- [ ] `Source/AmrMesh/CD_EBCoarseToFineInterp.cpp` (18)
-- [ ] `Source/AmrMesh/CD_EBCoarAve.cpp` (18)
-- [ ] `Source/AmrMesh/CD_EBGradient.cpp` (9)
-- [ ] `Source/AmrMesh/CD_Realm.cpp` (7)
-- [ ] `Source/AmrMesh/CD_PetscGrid.cpp` (7)
-- [ ] `Source/AmrMesh/CD_EBReflux.cpp` (5)
-- [ ] `Source/AmrMesh/CD_EBLeastSquaresMultigridInterpolator.cpp` (5)
-- [ ] `Source/AmrMesh/CD_EBGhostCellInterpolator.cpp` (5)
-- [ ] `Source/AmrMesh/CD_EBCentroidInterpolation.cpp` (4)
-- [ ] `Source/AmrMesh/CD_CellCentroidInterpolationImplem.H` (4)
-- [ ] `Source/AmrMesh/CD_EBMGRestrict.cpp` (2)
-- [ ] `Source/AmrMesh/CD_EBMGProlong.cpp` (2)
-- [ ] `Source/AmrMesh/CD_PhaseRealm.cpp` (1)
-- [ ] `Source/AmrMesh/CD_EBNonConservativeDivergence.cpp` (1)
-- [ ] `Source/AmrMesh/CD_EBFluxRedistribution.cpp` (1)
-- [ ] `Source/AmrMesh/CD_AmrMesh.H` (1)
+- [x] `Source/AmrMesh/CD_EBCoarseToFineInterp.cpp` (18) — DONE. 7 template Box loops, all
+      inherently non-vectorizable and documented: interpolatePWC (coarse->fine scatter to strided
+      fine cells), interpolateConservativePWC / slopeExtrapRegular / regularConstantTerm (coarse
+      gather via coarsen(fineIV) — non-contiguous broadcast + floor-div branches), interpolate-
+      ConservativeSlope interiorKernel (slope-limiter control flow), checkConservation x2 (debug-only,
+      under #ifndef NDEBUG). Other 11 are VoF-iterator loops (not targets). The 1 raw BoxIterator is
+      a nested inner refinement-box loop inside the PWC scatter kernel — left as-is (intrinsic).
+      EFFICIENCY FIX: interpolateConservativeSlope's interiorKernel was a std::function selected by a
+      3-case switch (per-cell indirect call); replaced with a function-pointer limiter + direct lambda
+      (made superbee captureless via a nested minmod). Behavior-identical; CdrPlasma test runs clean.
+      AUDIT (std::function-as-BoxLoops-kernel across all branch-modified files): only two instances
+      existed — this one and CD_EBGhostCellInterpolator.cpp's regularSlopeKernel — both now fixed.
+      Other std::function uses are legitimate API callbacks (DataOps compute/setValue user functions;
+      ItoParticle/P& particle modifiers).
+- [x] `Source/AmrMesh/CD_EBCoarAve.cpp` (18) — DONE. 6 template Box loops (arithmetic/harmonic/
+      conservative averaging, cell + face), all inherently non-vectorizable: fine->coarse gather-
+      reduction over the refRat^D fine cells (strided gather + inner refinement loop). Documented.
+      The 3 raw BoxIterator are the cell-averaging inner refinement loops (intrinsic; face variants
+      use explicit i/j/k loops) — left as-is. Multi-cut/double-counting check (per user): NOT
+      applicable — irregular kernels overwrite (no double count) and use geometry-aware coarsening
+      stencils that differ from the regular gather-sum, so they must run over all cut cells.
+      Other 12 occurrences are VoF/Face-iterator loops (not targets).
+- [x] `Source/AmrMesh/CD_EBGradient.cpp` (9) — DONE. 4 template Box loops. computeLevelGradient
+      already vectorized. computeNormalDerivative NOW vectorizes — fix: hoisted the per-direction
+      shift `const IntVect shift = BASISV(dir)` out of the kernel so the offset is loop-invariant
+      (runtime BASISV(dir) inline was "more than one data ref"); bit-identical. defineIteratorsEBCF
+      and defineStencilsEBCF are one-time regrid setup loops (data-dependent branch + IntVectSet/
+      DenseIntVectSet ops) — documented non-vectorizable. Other 5 are irregular iterator loops.
+      Lib builds.
+- [x] `Source/AmrMesh/CD_Realm.cpp` (7) — DONE. All 7 template loops are one-time (regrid) mask/
+      valid-cell setup loops, documented non-vectorizable: defineOuterHaloMask/defineOuterCFMask/
+      defineValidCells (conditional bool-mask writes), defineInnerHaloMask (box-grow scatter +
+      coarsen gather), defineInnerCFMask (per-cell box-grow + neighbor-overlap counting). The 1 raw
+      BoxIterator (568) is the inner box-grow scatter inside flagGrownRegion (intrinsic) — left as-is.
+- [~] `Source/AmrMesh/CD_PetscGrid.cpp` (7) — SKIPPED (Petsc-related, per user request).
+- [x] `Source/AmrMesh/CD_EBReflux.cpp` (5) — DONE. 2 template Box loops, both non-vectorizable and
+      documented: coarsenFluxesCF regular kernel (fine->coarse flux gather-reduction over fine faces,
+      nested i/j/k sum) and defineRegionsCF findIrregCells (one-time setup: branch + isIrregular query
+      + IntVectSet insert). The 1 raw BoxIterator (146, defineRegionsCF) is the same setup pattern
+      (isRegular query + DenseIntVectSet insert) — documented, left as-is. Irregular face kernel uses
+      a geometry stencil (all cut faces). Other 3 occurrences are Face/IVS-iterator loops.
+- [x] `Source/AmrMesh/CD_EBLeastSquaresMultigridInterpolator.cpp` (5) — DONE. coarseFineInterpH
+      vectorizes. interpOnFine NOW vectorizes — hoisted `const IntVect shift = iHiLo*BASISV(dir)` out
+      of the kernel (runtime BASISV(dir) inline was "more than one data ref"; same fix as
+      computeNormalDerivative); bit-identical. Earlier ivdep/dependency worry RESOLVED: interpBox is
+      only the first ghost layer (1 cell thick in dir), so the stencil reads valid interior cells the
+      loop never writes -> no loop-carried dependency, in-place is a safe shortcut (no transient
+      buffer). applyDerivs: converted plain-Box loop(interpBox,...) (was implicit IntVectSet path) to
+      template form; non-vectorizable (coarsen gather + out-of-line CoarseInterpQuadCF derivative
+      calls) — documented. Lib builds. Other 2 occurrences are VoF-iterator loops.
+- [x] `Source/AmrMesh/CD_EBGhostCellInterpolator.cpp` (5) — DONE. 3 template Box loops, all
+      non-vectorizable and documented (coarse->fine PWL ghost interpolation, same family as
+      EBCoarseToFineInterp): regSetFineToCoar + addRegularSlopeContribution are coarsen(fineIV)
+      gathers (non-contiguous broadcast + floor-div); regularSlopeKernel (3 limiter variants) has
+      per-cell domain-boundary checks + slope-limiter control flow. Other 2 are VoF-iterator loops.
+      EFFICIENCY FIX: regularSlopeKernel was wrapped in a std::function (per-cell indirect,
+      non-inlinable call) selected by a 3-case switch; replaced with a function-pointer limiter +
+      a single direct lambda (behavior-identical, removes per-cell indirection, collapses the 3
+      ~25-line switch arms into 1). Multi-cut check: NOT safe — irregular slopes use EB connectivity
+      (getFaces/one-sided) differing from the regular Cartesian slopes even for singly-cut cells.
+- [x] `Source/AmrMesh/CD_EBCentroidInterpolation.cpp` (4) — DONE. All 4 loops are VoFIterator
+      (cut-cell) loops applying centroid VoFStencils — inherently irregular, not vectorization
+      targets. Kernels are direct lambdas (no std::function). NO CHANGE (matches main). slopeKernel
+      has a redundant inner switch on m_interpolationType (loop-invariant) to pick the limiter; I tried
+      replacing it with a function-pointer limiter but reverted — empirically the switch form INLINES
+      the (inline) limiters (GCC unswitches the loop-invariant switch → 0 calls) whereas a function
+      pointer forces an indirect call per cell (no inline), i.e. a slight regression. So the original
+      is optimal; left unchanged. No bugs (one-sided slope handling + face-count guards correct).
+      KEY LESSON: a switch on a loop-INVARIANT enum calling INLINE helpers is fine (compiler
+      unswitches + inlines); do NOT "fix" it with a function pointer (kills inlining). This differs
+      from the std::function-as-whole-kernel case, which is always worth fixing.
+- [x] `Source/AmrMesh/CD_CellCentroidInterpolationImplem.H` (4) — DONE, NO CHANGE (matches main). Same
+      structure/conclusion as sibling EBCentroidInterpolation: VoFIterator cut-cell loops (not targets),
+      direct-lambda kernels; the redundant inner limiter-switch is optimal as-is (inline limiters,
+      compiler unswitches). No bugs.
+- [x] `Source/AmrMesh/CD_EBMGRestrict.cpp` (2) — DONE. 1 template loop (restrictResidual regular
+      kernel): fine->coarse gather-reduction over refRat^D fine cells (strided gather + inner
+      refinement BoxIterator) — non-vectorizable, documented. The 1 raw BoxIterator is that inner
+      refinement loop (intrinsic). Other loop is a VoFStencil cut-cell loop. Direct-lambda kernels (no
+      std::function, no redundant dispatch); no bugs.
+- [x] `Source/AmrMesh/CD_EBMGProlong.cpp` (2) — DONE. 1 template loop (prolongResidual regular kernel):
+      coarse->fine scatter to refRat^D fine cells (strided writes + inner refinement BoxIterator),
+      gated per fine cell by out-of-line ebisBoxFine.isIrregular(ivFine) — non-vectorizable, documented.
+      The 1 raw BoxIterator is the inner refinement loop (intrinsic). Other loop is a VoFStencil cut-cell
+      loop. Direct-lambda kernels; no bugs. (Note: MG-level grids, so the Realm masks don't apply, and
+      the scatter wouldn't vectorize regardless.)
+- [x] `Source/AmrMesh/CD_PhaseRealm.cpp` (1) — DONE. The 1 template loop is defineLevelSet's kernel:
+      `fab(iv,comp) = m_baseif->value(pos)` — a virtual call on the polymorphic implicit function per
+      cell (non-inlinable → non-vectorizable), one-time regrid setup. Documented. (This file also holds
+      the new mask infrastructure; defineMasks uses setVal/setCoveredCellVal/IVSIterator, not a Box
+      loop.) Direct-lambda kernel, no std::function, no bugs.
+- [x] `Source/AmrMesh/CD_EBNonConservativeDivergence.cpp` (1) — DONE. The 1 loop is a VoFIterator
+      cut-cell loop applying a VoFStencil (non-conservative divergence is inherently a cut-cell op) —
+      not a vectorization target. Direct-lambda kernel, no std::function, no bugs.
+- [x] `Source/AmrMesh/CD_EBFluxRedistribution.cpp` (1) — DONE. The 1 template loop is a one-time
+      (regrid) setup loop with a data-dependent conditional bool-mask write (`if (mask(iv)>0)
+      validCells(iv)=false`), same family as the CD_Realm valid-cell masks — documented
+      non-vectorizable. Direct-lambda kernel, no std::function, no bugs.
+- [x] `Source/AmrMesh/CD_AmrMesh.H` (1) — DONE. The single `BoxLoops::loop` occurrence is only a
+      reference in a doc comment (line 1770), not an actual loop. Nothing to do.
 
 ### Source/Elliptic
 - [ ] `Source/Elliptic/CD_EBHelmholtzOp.cpp` (29)
