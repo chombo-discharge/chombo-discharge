@@ -356,7 +356,13 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
         m_boundaryWeights[a_dit], an inline LayoutData index the compiler hoists; areaFrac is folded into
         those precomputed weights so there is no getEBISL()/out-of-line lookup to lift (unlike the Neumann
         EBBC). Hoisting would be perf-neutral, so left as-is. Documented.
-- [ ] `Source/Elliptic/CD_MFHelmholtzNeumannEBBC.cpp` (1)
+- [x] `Source/Elliptic/CD_MFHelmholtzNeumannEBBC.cpp` (1)
+      - Single BoxLoop is the hot applyEBFluxSinglePhase (sparse VoFIterator, inherently scalar);
+        defineSinglePhase has no stencils for Neumann.
+      - PERF: same hoist as [[CD_EBHelmholtzNeumannEBBC.cpp]] -- moved the loop-invariant
+        `m_eblg.getEBISL()[a_dit]` (EBISLayout-by-value copy w/ atomic refcount + out-of-line operator[])
+        out of the per-vof kernel. Behavior-preserving; clean build. (MechShaft multifluid regression
+        already validates the MF EB-flux machinery; this hoist is referentially transparent.)
 - [ ] `Source/Elliptic/CD_EBHelmholtzRobinDomainBC.cpp` (1)
 - [ ] `Source/Elliptic/CD_EBHelmholtzNeumannDomainBC.cpp` (1)
 - [ ] `Source/Elliptic/CD_EBHelmholtzDomainBC.cpp` (1)

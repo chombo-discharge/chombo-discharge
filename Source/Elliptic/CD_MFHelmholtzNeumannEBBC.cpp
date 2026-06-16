@@ -101,6 +101,12 @@ MFHelmholtzNeumannEBBC::applyEBFluxSinglePhase(VoFIterator& a_singlePhaseVofs,
   //       dx comes from the fact that the term we are computing will be added to kappa*div(F)
   if (!a_homogeneousPhysBC) {
 
+    // The EBISBox is loop-invariant, so fetch it once. EBLevelGrid::getEBISL() returns an EBISLayout by
+    // value (a RefCountedPtr copy with atomic refcounting) and EBISLayout::operator[] is out-of-line, so
+    // evaluating this per vof inside the sparse-but-not-vectorizable kernel is needless work. The returned
+    // EBISBox reference stays valid because the underlying layout is owned by m_eblg.
+    const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
+
     auto kernel = [&](const VolIndex& vof) -> void {
       Real value = 0.0;
       if (m_useConstant) {
@@ -113,10 +119,9 @@ MFHelmholtzNeumannEBBC::applyEBFluxSinglePhase(VoFIterator& a_singlePhaseVofs,
 
       // B-coefficient, area fraction, and division by dx (from Div(F)) already a part of the boundary weights, but
       // beta is not.
-      const EBISBox& ebisbox   = m_eblg.getEBISL()[a_dit];
-      const Real     areaFrac  = ebisbox.bndryArea(vof);
-      const Real     B         = m_multByBco ? a_Bcoef(vof, m_comp) : 1;
-      const Real     kappaDivF = a_beta * B * value * areaFrac / m_dx;
+      const Real areaFrac  = ebisbox.bndryArea(vof);
+      const Real B         = m_multByBco ? a_Bcoef(vof, m_comp) : 1;
+      const Real kappaDivF = a_beta * B * value * areaFrac / m_dx;
 
       a_Lphi(vof, m_comp) += kappaDivF;
     };
