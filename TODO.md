@@ -301,7 +301,13 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
         getInterpolationStencil call (matches the canonical Dirichlet/Neumann pattern). Same bug fixed in
         the sibling [[CD_EBHelmholtzRobinEBBC.cpp]]. Verified: builds clean; Eddington (larsen/Robin EB BC)
         runs 100 steps with no NaN/divergence.
-- [ ] `Source/Elliptic/CD_MFHelmholtzOp.cpp` (2)
+- [x] `Source/Elliptic/CD_MFHelmholtzOp.cpp` (2)
+      - Both BoxLoops are in dotProduct (the rest of the class dispatches to the per-phase EBHelmholtzOps).
+        regularKernel = FP sum-reduction + isRegular guard; irregularKernel = sparse VoF reduction.
+        Inherently non-vectorizable (same as EBHelmholtzOp::dotProduct) -- documented in source.
+      - NO bug here (unlike EBHelmholtzOp::dotProduct): the regular kernel runs for every non-covered
+        box via `if (!isCovered)`, so fully-regular boxes are correctly summed; the per-cell isRegular
+        guard prevents double-counting the cut/multi-valued cells handled by the irregular kernel.
 - [ ] `Source/Elliptic/CD_MFHelmholtzJumpBC.cpp` (2)
 - [ ] `Source/Elliptic/CD_MFHelmholtzEBBC.cpp` (2)
 - [ ] `Source/Elliptic/CD_MFHelmholtzDirichletEBBC.cpp` (2)
