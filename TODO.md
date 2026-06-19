@@ -592,7 +592,18 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
       already guard isRegular so there is no double-processing to fix. The std::functions here are
       legitimate API callbacks (density field, particle merger), not kernel-selection dispatch. The 4 VoF
       loops (682, 1349, 1952, 3159) are cut-cell iterators (not targets). No raw BoxIterator loops. No bugs.
-- [ ] `Source/RadiativeTransfer/CD_McPhoto.cpp` (7)
+- [x] `Source/RadiativeTransfer/CD_McPhoto.cpp` (7) — DONE, documentation only. 3 Box loops + 4 VoF loops.
+      All 3 Box loops are photon-generation kernels, each correctly partitioned isRegular (regular kernel)
+      vs cut-cell (vofit) -- mutually exclusive, no double-processing -- and all inherently non-vectorizable:
+      - computeNumPhysicalPhotons (971): per-cell RNG photon draw (drawPhotons -> Random) + integer div/mod.
+      - generateComputationalPhotons (1124): per-cell variable-length photon generation
+        (partitionParticleWeights alloc, RNG position/direction, getAbsorptionCoefficient std::function,
+        List append).
+      - dirtySamplePhotons (1240): same + randomExponential travel distance, PointParticle append.
+      Multi-cut N/A throughout: cut cells need EB-aware sampling (computeMinValidBox + per-vof source), so
+      they cannot fold into the regular kernel; regular kernels already guard isRegular (no double-process).
+      getAbsorptionCoefficient is a legitimate species API callback. The 4th VoF loop (1357, depositHybrid)
+      is a cut-cell redistribution iterator (not a target). No raw BoxIterator loops. No bugs.
 - [ ] `Source/RadiativeTransfer/CD_EddingtonSP1.cpp` (5)
 - [ ] `Source/Driver/CD_Driver.cpp` (6)
 - [ ] `Source/MeshODESolver/CD_MeshODESolverImplem.H` (4)
