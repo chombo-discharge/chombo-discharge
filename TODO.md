@@ -557,7 +557,15 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
       BUG FIX (dead code): depositParticleTSC defined a lambda `F` (the TSC shape function) that was
       never used -- the tscKernel computes the weight analytically via the alpha/beta integral form.
       Removed the dead lambda (behavior-neutral; clean build). No correctness bugs found.
-- [ ] `Source/Particle/CD_ParticleContainerImplem.H` (3)
+- [x] `Source/Particle/CD_ParticleContainerImplem.H` (3) — DONE, documentation only. All 3 Box loops
+      iterate the cells of a BinFab<P> and operate on the per-cell List<P>: organizeParticlesByPatch
+      (addItemsDestructive), addParticles(BinFab) (join), addParticlesDestructive (catenate). These are
+      linked-list splices (out-of-line List<P> pointer surgery), not numerical kernels -> inherently
+      non-vectorizable; organizeParticlesByPatch additionally has a loop-carried dependency on the shared
+      patchParticles accumulator. Documented all 3. No EB/multi-cut relevance (full-box cell iteration;
+      per-cell List is simply empty where there are no particles). No bugs: join (non-destructive, const
+      source) vs catenate (destructive, non-const source) split is correct; OMP-over-boxes is race-free
+      (each box owns its accumulator). See [[issue-635]] for the List->std::vector/SoA follow-up.
 - [ ] `Source/Particle/CD_EBAMRParticleMesh.cpp` (2)
 
 ### Source — other modules

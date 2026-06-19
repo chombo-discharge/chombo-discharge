@@ -530,6 +530,8 @@ ParticleContainer<P>::organizeParticlesByPatch()
           patchParticles.addItemsDestructive(cellParticles(iv, comp));
         };
 
+        // Not vectorizable: per-cell linked-list splice (List<P> pointer surgery) with a loop-carried
+        // dependency on the shared patchParticles accumulator. Not a numerical kernel.
         BoxLoops::loop<D_DECL(1, 1, 1)>(dbl[din], kernel);
 
         cellParticles.clear();
@@ -699,6 +701,7 @@ ParticleContainer<P>::addParticles(const BinFab<P>& a_particles, const int a_lvl
     myParticles.join(inputParticles);
   };
 
+  // Not vectorizable: per-cell linked-list join (List<P> pointer surgery). Not a numerical kernel.
   BoxLoops::loop<D_DECL(1, 1, 1)>(m_grids[a_lvl][a_dit], kernel);
 }
 
@@ -729,6 +732,7 @@ ParticleContainer<P>::addParticlesDestructive(BinFab<P>& a_particles, const int 
     myParticles.catenate(inputParticles);
   };
 
+  // Not vectorizable: per-cell linked-list catenate (List<P> pointer surgery). Not a numerical kernel.
   BoxLoops::loop<D_DECL(1, 1, 1)>(m_grids[a_lvl][a_dit], kernel);
 }
 
