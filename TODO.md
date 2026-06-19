@@ -90,6 +90,30 @@ kernel) or a non-inlinable call (e.g. `std::function`).
 - Prefer rewrites that keep dimension independence via `D_DECL` / `D_TERM`.
 - Do not change numerical behavior. Vectorization rewrites must be bit-for-bit equivalent
   (modulo FP reassociation that the existing `CD_PRAGMA_SIMD` already permits).
+- **Per-file brief bug-check (mandatory).** When visiting any file, perform a quick scan for
+  obvious bugs before (or alongside) the vectorization work. This is *not* a deep code review —
+  flag issues that are clearly wrong and directly visible in the code being read: wrong branch
+  conditions, stencils that are always cleared, loop-invariant work inside hot kernels, off-by-one
+  index errors in gather/scatter loops, missing guards, etc. Document every finding in this TODO
+  under the relevant file entry and fix it if behavior-preserving or consult the user otherwise.
+- **Regular + multi-cut investigation (mandatory).** In every function that contains *both* a
+  regular `BoxLoops::loop(Box, ...)` kernel *and* an irregular loop over cut-cells
+  (`VoFIterator`, `FaceIterator`, etc.), investigate whether the regular kernel can be extended to
+  cover singly-cut cells so that the irregular loop only needs to iterate multi-valued cut-cells
+  (`getMultiCutVofIterator`). The established pattern (from `CD_CdrSolver.cpp`,
+  `CD_CdrCTU.cpp`, `CD_CdrGodunov.cpp`):
+  1. Replace the per-cell `ebisbox.isRegular(iv)` guard in the regular kernel with the
+     `notCovered` mask (1 on regular + singly-cut, 0 on covered) from
+     `getNotCoveredCells(realm, phase)` — or just drop the guard entirely if the kernel is safe
+     for singly-cut data.
+  2. Change the irregular loop to iterate `getMultiCutVofIterator(level, dit)` instead of the
+     full `VoFIterator`, so only multi-valued cells (where cell-centred data is multi-valued) get
+     the special treatment.
+  This removes redundant double-processing of singly-cut cells and eliminates the out-of-line
+  per-cell EB query from the hot regular path. Document the outcome (applied / not applicable /
+  unsafe — with reason) in this TODO under the relevant file entry. Unsafe cases: when the
+  regular kernel reads neighbouring FACE data that may be covered for a singly-cut cell (must use
+  `getFaces()` instead), or when geometry-aware coarsening stencils are required.
 - **DANGER — never pass a `std::function` as a `BoxLoops::loop` kernel.** Type-erasing the
   kernel into a `std::function<void(const IntVect&)>` (often done to select between variants in
   a `switch`) forces an **indirect, non-inlinable call on every cell**, which both kills
@@ -462,7 +486,29 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
         byte-identical on the deterministic CdrCTU test.)
 
 ### Source/Electrostatics
-- [ ] `Source/Electrostatics/CD_FieldSolver.cpp` (12)
+- [x] `Source/Electrostatics/CD_FieldSolver.cpp` (12) — DONE. 8 Box overloads, all inherently
+      non-vectorizable and documented in source:
+      - computeDisplacementField::regularKernel: permittivity(pos) makes virtual BaseIF::value calls
+        per cell (loop over dielectric list). Multi-cut N/A: singly-cut cells must use centroid
+        position (irregular path).
+      - computeEnergy::regularKernel: ebisbox.isRegular out-of-line + FP sum reduction (both blockers).
+        Multi-cut N/A: singly-cut cells need kappa < 1 weighting (irregular path).
+      - setCellPermittivities::regularKernel: getDielectricPermittivity out-of-line call per cell.
+        Multi-cut N/A: singly-cut cells must use centroid position (irregular path).
+      - setFacePermittivities::regularKernel: getDielectricPermittivity out-of-line call per cell.
+      - writeMultifluidData::kernel (x2): 5 per-cell EB queries + 6-branch if/else-if; plot output,
+        not hot.
+      - fillCoveredPotential::regularKernel: potential(pos) makes virtual BaseIF::value calls per
+        cell (loop over electrode list).
+      Other 4 occurrences are VoFIterator / FaceIterator loops (not targets).
+      BUG FIX: computeEnergy had a race condition on the shared `energy` accumulator inside
+      #pragma omp parallel for (accumulated without synchronization from multiple threads). Fixed
+      with a per-box localEnergy accumulator + #pragma omp atomic reduction. Also removed a
+      redundant ebisbox.isIrregular(iv) guard inside the VoFIterator loop (vofit only visits cut
+      cells; the guard was always true).
+      BUG FIX: writeMultifluidData had CH_START(t2) repeated at the end of the local-copy block
+      (should be CH_STOP(t2)); t2 timer was never stopped. Fixed.
+      Build passes.
 - [ ] `Source/Electrostatics/CD_MFHelmholtzElectrostaticEBBC.cpp` (2)
 
 ### Source/Particle
