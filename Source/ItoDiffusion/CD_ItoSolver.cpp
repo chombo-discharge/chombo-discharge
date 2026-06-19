@@ -678,6 +678,9 @@ ItoSolver::generateParticlesFromDensity(ParticleContainer<ItoParticle>&         
 
       VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
+      // Not vectorizable: per-cell variable-length particle generation (std::function density callback,
+      // std::vector allocation, RNG, List append). Multi-cut N/A: the regular kernel guards isRegular and
+      // cut cells go to the irregular kernel, which samples positions inside the EB-clipped cell volume.
       BoxLoops::loop<D_DECL(1, 1, 1)>(cellbox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
@@ -1152,6 +1155,8 @@ ItoSolver::writeCheckPointLevelFluid(HDF5Handle& a_handle, const int a_level) co
     };
 
     // Execute kernel.
+    // Not vectorizable: the per-cell body iterates a linked List<ItoParticle> (pointer chasing) to sum
+    // particle weights; checkpoint output, not hot.
     BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, kernel);
   }
 
@@ -1345,6 +1350,9 @@ ItoSolver::drawNewParticles(const LevelData<EBCellFAB>& a_particlesPerCell, cons
     };
 
     // Run the kernels.
+    // Not vectorizable: per-cell variable-length particle redraw (partitionParticleWeights allocation,
+    // RNG, List append). Multi-cut N/A: regular kernel guards isRegular; cut cells go to the irregular
+    // kernel, which clips sampling to the EB cell volume (computeMinValidBox).
     BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
     BoxLoops::loop(vofit, irregularKernel);
   }
@@ -3155,6 +3163,9 @@ ItoSolver::makeSuperparticles(const WhichContainer a_container,
   VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[a_level])[a_dit];
 
   // Run kernel
+  // Not vectorizable: per-cell body calls the m_particleMerger std::function (user-configurable merging
+  // strategy) on a linked List<ItoParticle>. Multi-cut N/A: regular kernel guards isRegular; cut cells go
+  // to the irregular kernel, which passes EB geometry (kappa/centroid/normal) to the merger via CellInfo.
   BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
   BoxLoops::loop(vofit, irregularKernel);
 }

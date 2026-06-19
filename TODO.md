@@ -576,7 +576,22 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
       correct; OMP-over-boxes race-free.
 
 ### Source — other modules
-- [ ] `Source/ItoDiffusion/CD_ItoSolver.cpp` (8)
+- [x] `Source/ItoDiffusion/CD_ItoSolver.cpp` (8) — DONE, documentation only. 4 Box loops + 4 VoF loops.
+      All 4 Box loops are particle operations, each correctly partitioned isRegular (regular kernel) vs
+      cut-cell (irregular kernel) -- mutually exclusive, no double-processing -- and all inherently
+      non-vectorizable:
+      - generateParticlesFromDensity (681): per-cell variable-length particle draw (a_densityFunc
+        std::function, sampleParticles std::vector alloc, RNG, List append).
+      - writeCheckPointLevelFluid (1155): per-cell linked-List<ItoParticle> weight sum (pointer chasing);
+        checkpoint output, not hot. Single loop (multi-valued cells dumped on first vof).
+      - drawNewParticles (1348): per-cell particle redraw (partitionParticleWeights alloc, RNG, List append).
+      - makeSuperparticles (3158): per-cell m_particleMerger std::function (user merging strategy) on a
+        linked List<ItoParticle>.
+      Multi-cut N/A throughout: cut cells need EB-aware sampling/merging (computeMinValidBox, kappa/
+      centroid/normal via CellInfo) so they cannot fold into the regular kernel; the regular kernels
+      already guard isRegular so there is no double-processing to fix. The std::functions here are
+      legitimate API callbacks (density field, particle merger), not kernel-selection dispatch. The 4 VoF
+      loops (682, 1349, 1952, 3159) are cut-cell iterators (not targets). No raw BoxIterator loops. No bugs.
 - [ ] `Source/RadiativeTransfer/CD_McPhoto.cpp` (7)
 - [ ] `Source/RadiativeTransfer/CD_EddingtonSP1.cpp` (5)
 - [ ] `Source/Driver/CD_Driver.cpp` (6)
