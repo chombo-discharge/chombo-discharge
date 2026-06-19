@@ -634,7 +634,17 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
       other threads (O(nbox^2) redundant + cross-box race). Moved it to run once after the loop. Provably
       behavior-identical: scratch is zero-initialized and the kernel only writes tagged (non-covered) cells,
       so covered cells are already 0.0 either way. No other bugs. No raw BoxIterator loops.
-- [ ] `Source/MeshODESolver/CD_MeshODESolverImplem.H` (4)
+- [x] `Source/MeshODESolver/CD_MeshODESolverImplem.H` (4) — DONE, documentation only. 2 Box loops + 2 VoF
+      loops (paired regular/irregular). Both Box loops non-vectorizable: a std::function callback per cell.
+      - setPhi (259): a_phiFunc(pos). Multi-cut N/A -- regular uses cell-CENTER, irregular uses CENTROID
+        (position-dependent), so singly-cut cells cannot fold into the regular kernel.
+      - computeRHS (376): a_rhsFunction(y, m_time). Multi-cut INVESTIGATED, NOT APPLIED (user decision):
+        a_rhsFunction is position-independent so singly-cut cells could in principle fold into the regular
+        kernel (not-covered mask + getMultiCutVofIterator), byte-identical for singly-cut. NOT done because
+        the not-covered mask also includes multi-valued cells and letting the regular kernel write their
+        single-valued-FAB entry (today left at 0) is not provably observationally-neutral; the gain is
+        marginal since the per-cell std::function call dominates and stays non-vectorizable regardless.
+      Documented both in source. No bugs. No raw BoxIterator loops. MeshODE/CoaxialCable test builds clean.
 - [ ] `Source/SurfaceODESolver/CD_SurfaceODESolverImplem.H` (3)
 
 ### Physics

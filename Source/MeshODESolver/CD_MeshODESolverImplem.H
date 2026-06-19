@@ -255,7 +255,9 @@ MeshODESolver<N>::setPhi(const std::function<std::array<Real, N>(const RealVect&
       const Box    cellBox = dbl[din];
       VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
-      // Run the kernels.
+      // Run the kernels. Not vectorizable: a_phiFunc(pos) is a std::function callback per cell.
+      // Multi-cut N/A: the regular kernel uses the cell-CENTER position while the irregular kernel uses the
+      // CENTROID (a_phiFunc is position-dependent), so singly-cut cells cannot fold into the regular kernel.
       BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
@@ -372,7 +374,12 @@ MeshODESolver<N>::computeRHS(EBAMRCellData& a_rhs, const RHSFunction& a_rhsFunct
       const Box    cellBox = dbl[din];
       VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
-      // Run the kernels.
+      // Run the kernels. Not vectorizable: a_rhsFunction(y, m_time) is a std::function callback per cell.
+      // Multi-cut investigated, NOT applied: a_rhsFunction is position-independent so singly-cut cells could
+      // in principle fold into the regular kernel (not-covered mask + getMultiCutVofIterator). Not done
+      // because the not-covered mask also includes multi-valued cells, and letting the regular kernel write
+      // their single-valued-FAB entry (today left at 0) is not provably observationally-neutral; the gain is
+      // marginal since the per-cell std::function call dominates and stays non-vectorizable regardless.
       BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
