@@ -566,7 +566,14 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
       per-cell List is simply empty where there are no particles). No bugs: join (non-destructive, const
       source) vs catenate (destructive, non-const source) split is correct; OMP-over-boxes is race-free
       (each box owns its accumulator). See [[issue-635]] for the List->std::vector/SoA follow-up.
-- [ ] `Source/Particle/CD_EBAMRParticleMesh.cpp` (2)
+- [x] `Source/Particle/CD_EBAMRParticleMesh.cpp` (2) — DONE, documentation only. Both Box loops are
+      one-time mask-building setup kernels (outer-halo bool mask; CFIVS bool mask), structurally identical:
+      a data-dependent conditional bool-mask write (if realMask > threshold) plus an emptyMask
+      early-undefine flag (loop-carried OR-reduction). Inherently non-vectorizable, same family as the
+      documented CD_Realm / CD_EBFluxRedistribution mask loops. Documented both. No raw BoxIterator loops.
+      Multi-cut N/A (AMR halo/CFIVS masks, not EB cut-cell ops; no paired irregular loop). No bugs: the
+      >0.0 vs >0.5 thresholds are both correct for their LDaddOp-summed real masks; emptyMask/clear logic
+      correct; OMP-over-boxes race-free.
 
 ### Source — other modules
 - [ ] `Source/ItoDiffusion/CD_ItoSolver.cpp` (8)
