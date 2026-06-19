@@ -337,6 +337,9 @@ EBCoarseFineParticleMesh::addFineGhostsToCoarse(LevelData<EBCellFAB>&       a_co
         coFiDataReg(ivCoar, comp) += fineDataReg(ivFine, comp) * factor;
       };
 
+      // Not vectorizable: fine->coarse scatter via coarsen(ivFine) is a non-contiguous write
+      // (m_refRat^D fine cells alias the same coarse cell). Multi-cut N/A: the irregular path below
+      // resets + re-accumulates cut cells, so the regular kernel intentionally runs over all cells.
       BoxLoops::loop<D_DECL(1, 1, 1)>(fineBox, regularKernel);
     }
 
@@ -486,19 +489,23 @@ EBCoarseFineParticleMesh::addInvalidCoarseToFine(LevelData<EBCellFAB>&       a_f
 
     // This is the regular kernel -- it sets the fine data equal to the coarse data.
     auto regularKernel = [&](const IntVect& ivCoar) -> void {
-      // May seem weird, but we are running nested box loops here. The second kernel runs over the refined box Box(IntVect::Zero, m_refRat*IntVect::Unit),
-      // which gives the number of fine-grid cells that lie on top of a coarse grid cell. So, we are iterating over that box and figuring out which cells in
-      // that box correspond to which fine cells (we just need to increment by m_refRat * ivCoar).
+      // May seem weird, but we are running nested box loops here. The second kernel runs over the refined box
+      // Box(IntVect::Zero, (m_refRat-1)*IntVect::Unit), which holds exactly the m_refRat^D fine-grid cells that lie on top
+      // of a coarse grid cell. So, we are iterating over that box and figuring out which cells in that box correspond to
+      // which fine cells (we just need to increment by m_refRat * ivCoar). NOTE: the upper bound must be m_refRat-1 (the box
+      // is inclusive); using m_refRat would over-iterate by one cell in each direction into the next coarse cell's footprint.
       auto fineKernel = [&](const IntVect& iv) {
         const IntVect ivFine = m_refRat * ivCoar + iv;
 
         fiCoDataReg(ivFine, m_comp) = coarDataReg(ivCoar, m_comp);
       };
 
-      BoxLoops::loop<D_DECL(1, 1, 1)>(Box(IntVect::Zero, m_refRat * IntVect::Unit), fineKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(Box(IntVect::Zero, (m_refRat - 1) * IntVect::Unit), fineKernel);
     };
 
     // Execute kernel over the entire coarse-grid patch.
+    // Not vectorizable: coarse->fine PWC broadcast with a nested refinement loop (strided scatter to
+    // m_refRat^D fine cells). Multi-cut N/A: cut coarse cells are overwritten by the stencil loop below.
     BoxLoops::loop<D_DECL(1, 1, 1)>(coarBox, regularKernel);
 
     // Now do the irregular cells. Here, we loop over all the coarse cells (including ghosts) and set the value in the
@@ -608,12 +615,17 @@ EBCoarseFineParticleMesh::conservativeAverageAndAdd(EBCellFAB&       a_coarData,
   FArrayBox&       coarDataReg = a_coarData.getFArrayBox();
   const FArrayBox& fineDataReg = a_fineData.getFArrayBox();
 
-  const BaseIVFAB<VoFStencil>& stencils = m_cellConservativeStencils[a_din];
+  const EBISBox&               ebisBoxCoar = m_eblgCoar.getEBISL()[a_din];
+  const BaseIVFAB<VoFStencil>& stencils    = m_cellConservativeStencils[a_din];
 
-  // Kernel for regular grid cells
+  // Kernel for regular grid cells. Cut cells are skipped here and handled by the irregular kernel
+  // below -- otherwise a single-valued cut cell would receive both the naive box-average AND the
+  // geometry-weighted stencil average (double-counting).
   auto regularKernel = [&](const IntVect& iv) -> void {
-    for (BoxIterator bit(refiBox); bit.ok(); ++bit) {
-      coarDataReg(iv, 0) += fineDataReg(m_refRat * iv + bit(), 0) * dxFactor;
+    if (ebisBoxCoar.isRegular(iv)) {
+      for (BoxIterator bit(refiBox); bit.ok(); ++bit) {
+        coarDataReg(iv, 0) += fineDataReg(m_refRat * iv + bit(), 0) * dxFactor;
+      }
     }
   };
 
@@ -629,6 +641,8 @@ EBCoarseFineParticleMesh::conservativeAverageAndAdd(EBCellFAB&       a_coarData,
     }
   };
 
+  // Not vectorizable: out-of-line ebisBoxCoar.isRegular guard + inner refinement BoxIterator
+  // (fine->coarse gather-sum over m_refRat^D fine cells).
   BoxLoops::loop<D_DECL(1, 1, 1)>(m_eblgCoar.getDBL()[a_din], regularKernel);
   BoxLoops::loop(m_vofIterCoar[a_din], irregularKernel);
 }
@@ -651,12 +665,17 @@ EBCoarseFineParticleMesh::arithmeticAverageAndAdd(EBCellFAB&       a_coarData,
   FArrayBox&       coarDataReg = a_coarData.getFArrayBox();
   const FArrayBox& fineDataReg = a_fineData.getFArrayBox();
 
-  const BaseIVFAB<VoFStencil>& stencils = m_cellArithmeticStencils[a_din];
+  const EBISBox&               ebisBoxCoar = m_eblgCoar.getEBISL()[a_din];
+  const BaseIVFAB<VoFStencil>& stencils    = m_cellArithmeticStencils[a_din];
 
-  // Kernel for regular grid cells
+  // Kernel for regular grid cells. Cut cells are skipped here and handled by the irregular kernel
+  // below -- otherwise a single-valued cut cell would receive both the naive box-average AND the
+  // geometry-weighted stencil average (double-counting).
   auto regularKernel = [&](const IntVect& iv) -> void {
-    for (BoxIterator bit(refiBox); bit.ok(); ++bit) {
-      coarDataReg(iv, 0) += fineDataReg(m_refRat * iv + bit(), 0) * dxFactor;
+    if (ebisBoxCoar.isRegular(iv)) {
+      for (BoxIterator bit(refiBox); bit.ok(); ++bit) {
+        coarDataReg(iv, 0) += fineDataReg(m_refRat * iv + bit(), 0) * dxFactor;
+      }
     }
   };
 
@@ -672,6 +691,8 @@ EBCoarseFineParticleMesh::arithmeticAverageAndAdd(EBCellFAB&       a_coarData,
     }
   };
 
+  // Not vectorizable: out-of-line ebisBoxCoar.isRegular guard + inner refinement BoxIterator
+  // (fine->coarse gather-sum over m_refRat^D fine cells).
   BoxLoops::loop<D_DECL(1, 1, 1)>(m_eblgCoar.getDBL()[a_din], regularKernel);
   BoxLoops::loop(m_vofIterCoar[a_din], irregularKernel);
 }

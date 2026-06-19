@@ -509,10 +509,39 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
       BUG FIX: writeMultifluidData had CH_START(t2) repeated at the end of the local-copy block
       (should be CH_STOP(t2)); t2 timer was never stopped. Fixed.
       Build passes.
-- [ ] `Source/Electrostatics/CD_MFHelmholtzElectrostaticEBBC.cpp` (2)
+- [x] `Source/Electrostatics/CD_MFHelmholtzElectrostaticEBBC.cpp` (2) — DONE, NO CHANGE.
+      Both BoxLoops are VoFIterator sweeps (not vectorization targets). defineSinglePhase:
+      one-time stencil build; foundStencil correctly bound from getLeastSquaresBoundaryGradStencil
+      return at all three search attempts (no Robin bug). applyEBFluxSinglePhase: HOT path,
+      inherently scalar; getBoundaryPosition/getElectrodePotential are loop-variant (per vof),
+      no loop-invariant work to hoist. No bugs found.
 
 ### Source/Particle
-- [ ] `Source/Particle/CD_EBCoarseFineParticleMesh.cpp` (12)
+- [x] `Source/Particle/CD_EBCoarseFineParticleMesh.cpp` (12) — DONE. 6 Box overloads, all coarse-fine
+      gather/scatter kernels, inherently non-vectorizable and documented in source:
+      addFineGhostsToCoarse (fine->coarse scatter via coarsen(ivFine)), addInvalidCoarseToFine outer +
+      nested fineKernel (coarse->fine PWC broadcast, strided), conservative/arithmeticAverageAndAdd
+      (fine->coarse gather-sum, inner refinement BoxIterator). Other 6 are VoF-iterator loops (not targets).
+      Multi-cut N/A throughout: cut cells go through the irregular (stencil/reset) path by construction.
+      BUG FIX (double-counting, behavior change — user-approved): conservativeAverageAndAdd and
+      arithmeticAverageAndAdd had NO isRegular guard on the regular box kernel, while the irregular
+      VoFIterator kernel also accumulated (+=) over the same cut cells via the precomputed stencil.
+      For single-valued cut cells coarDataReg(iv) and a_coarData(vof) alias the same memory, so each
+      cut cell received BOTH the naive box-average AND the geometry-weighted stencil average (~2x,
+      breaking conservation). The stencil already encodes the complete restricted value. Unlike the
+      sibling addFineGhostsToCoarse (which RESETS the cut cell before re-accumulating), these are
+      accumulate-into-existing operations so a reset would wipe caller data -> fix is an isRegular
+      guard on the regular kernel (cut cells handled by the stencil loop only). Added
+      ebisBoxCoar = m_eblgCoar.getEBISL()[a_din] to both functions.
+      BUG FIX (over-iteration, results bit-identical): addInvalidCoarseToFine's nested fineKernel
+      looped Box(IntVect::Zero, m_refRat*IntVect::Unit) = (refRat+1)^D cells instead of refRat^D
+      (inclusive box off-by-one). The extra interior writes were self-corrected by the next coarse
+      cell (BoxLoops iterates increasing order, last-writer-wins assignment) and the final boundary
+      writes landed in never-read ghost cells (m_copierFiCoToFineNoGhosts is valid->valid+ghost), so
+      results were already correct -- but it wasted ~2.25x (2D)/3.4x (3D) writes and was a latent
+      OOB-write if m_ghost==0. Fixed to (m_refRat-1)*IntVect::Unit.
+      Verified: discharge-lib builds clean; BrownianWalker/DriftDiffusion 2D regression runs to
+      completion, exit 0, no NaN/inf/abort in any pout file.
 - [ ] `Source/Particle/CD_EBParticleMeshImplem.H` (4)
 - [ ] `Source/Particle/CD_ParticleContainerImplem.H` (3)
 - [ ] `Source/Particle/CD_EBAMRParticleMesh.cpp` (2)
