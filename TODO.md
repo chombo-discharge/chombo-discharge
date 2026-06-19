@@ -604,7 +604,22 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
       they cannot fold into the regular kernel; regular kernels already guard isRegular (no double-process).
       getAbsorptionCoefficient is a legitimate species API callback. The 4th VoF loop (1357, depositHybrid)
       is a cut-cell redistribution iterator (not a target). No raw BoxIterator loops. No bugs.
-- [ ] `Source/RadiativeTransfer/CD_EddingtonSP1.cpp` (5)
+- [x] `Source/RadiativeTransfer/CD_EddingtonSP1.cpp` (5) — DONE, documentation only. 2 Box loops + 3
+      irregular (Face/VoF) loops, in setHelmholtzCoefficients (one-time coefficient setup, not per-timestep).
+      Both Box loops non-vectorizable: getAbsorptionCoefficient(pos) is an out-of-line species callback per
+      cell/face.
+      - regularAcoKernel (827): fills A=kappa over the full box; the EB vofit kernel (887) then OVERWRITES
+        (=) cut cells with the m_dataLocation value. No double-count (overwrite, not +=). Multi-cut NOT
+        applied: when m_dataLocation==Centroid the cut-cell value differs from the cell-center value, so
+        folding singly-cut cells into the regular kernel would be wrong; the redundant fill is harmless on a
+        setup routine.
+      - regularBcoKernel (869): fills B=1/(3 kappa) on faces. Multi-cut ALREADY applied -- the irregular
+        partner (870) iterates getMultiCells only; singly-cut faces are handled by the regular box loop
+        (valid because both use the face-CENTER location). Good reference example of the pattern.
+      The 3rd irregular loop (1123) is a domain-boundary face extrapolation (FaceIterator, isCovered
+      branches) -- not a Box target. No raw BoxIterator loops. No bugs (the Aco overwrite and the boundary
+      isCovered fallback logic are both correct). NOTE: the stray empty Source/Elliptic/CD_EddingtonSP1.cpp
+      deleted in 0d784618 is unrelated -- the real RadiativeTransfer file is intact.
 - [ ] `Source/Driver/CD_Driver.cpp` (6)
 - [ ] `Source/MeshODESolver/CD_MeshODESolverImplem.H` (4)
 - [ ] `Source/SurfaceODESolver/CD_SurfaceODESolverImplem.H` (3)
