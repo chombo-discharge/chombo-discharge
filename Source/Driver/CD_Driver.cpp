@@ -767,6 +767,7 @@ Driver::regridInternals(const int a_oldFinestLevel, const int a_newFinestLevel)
         }
       };
 
+      // Not vectorizable: data-dependent DenseIntVectSet insertion (loop-carried). One-time regrid.
       BoxLoops::loop<D_DECL(1, 1, 1)>(box, kernel);
     }
   }
@@ -2421,6 +2422,7 @@ Driver::writeTags(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_level
       }
     };
 
+    // Not vectorizable: data-dependent DenseIntVectSet membership query + conditional write. Plot output.
     BoxLoops::loop<D_DECL(1, 1, 1)>(dbl[din], kernel);
   }
 
@@ -2502,6 +2504,7 @@ Driver::writeLevelset(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_l
       }
     };
 
+    // Not vectorizable: virtual BaseIF::value(pos) call on the implicit function per cell. Plot output.
     BoxLoops::loop<D_DECL(1, 1, 1)>(fab.box(), kernel);
   }
 
@@ -2673,10 +2676,16 @@ Driver::writeCheckpointTags(HDF5Handle& a_handle, const int a_level)
       }
     };
 
+    // Not vectorizable: data-dependent DenseIntVectSet membership query + conditional write. One-time
+    // checkpoint output.
     BoxLoops::loop<D_DECL(1, 1, 1)>(dbl[din], kernel);
-
-    DataOps::setCoveredValue(scratch, *m_amr->getCoveredCells(m_realm, phase::gas)[a_level], 0, 0.0);
   }
+
+  // Zero out covered cells (defensive) before writing. Done ONCE over the whole LevelData -- this used to
+  // sit inside the OpenMP box loop above, where it ran nbox times and each thread wrote covered cells across
+  // every box of the shared scratch (redundant + racy). Behavior is unchanged: scratch is zero-initialized
+  // and the kernel only writes tagged (non-covered) cells, so covered cells are already 0.
+  DataOps::setCoveredValue(scratch, *m_amr->getCoveredCells(m_realm, phase::gas)[a_level], 0, 0.0);
 
   // Write tags
   write(a_handle, scratch, "tagged_cells");
@@ -2900,6 +2909,7 @@ Driver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level)
       }
     };
 
+    // Not vectorizable: data-dependent DenseIntVectSet insertion (loop-carried). One-time checkpoint read.
     BoxLoops::loop<D_DECL(1, 1, 1)>(dbl[din], kernel);
   }
 }

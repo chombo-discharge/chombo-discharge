@@ -620,7 +620,20 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
       branches) -- not a Box target. No raw BoxIterator loops. No bugs (the Aco overwrite and the boundary
       isCovered fallback logic are both correct). NOTE: the stray empty Source/Elliptic/CD_EddingtonSP1.cpp
       deleted in 0d784618 is unrelated -- the real RadiativeTransfer file is intact.
-- [ ] `Source/Driver/CD_Driver.cpp` (6)
+- [x] `Source/Driver/CD_Driver.cpp` (6) — DONE. 5 Box loops + 1 VoF loop, all one-time tag/mask/level-set
+      I/O routines (regrid / plot / checkpoint), all inherently non-vectorizable and documented:
+      - regridInternals tag reconstruction (770): data-dependent DenseIntVectSet insertion (loop-carried).
+      - writePlotData tag->FArrayBox (2424): DenseIntVectSet membership query + conditional write (plot).
+      - writePlotData level-set (2505): virtual BaseIF::value(pos) per cell (plot).
+      - writeCheckpointTags (2676): DenseIntVectSet membership + conditional write (checkpoint).
+      - readCheckpointTags (2903): DenseIntVectSet insertion from float field (checkpoint read).
+      The VoF loop (336) is cut-cell geometric tagging (EB-normal angle) -- not a target.
+      BUG FIX (behavior-preserving): in writeCheckpointTags, DataOps::setCoveredValue(scratch, ...) sat
+      INSIDE the #pragma omp parallel for box loop but operates on the WHOLE scratch LevelData -- so it ran
+      nbox times and each thread wrote covered cells across every box of the shared scratch concurrently with
+      other threads (O(nbox^2) redundant + cross-box race). Moved it to run once after the loop. Provably
+      behavior-identical: scratch is zero-initialized and the kernel only writes tagged (non-covered) cells,
+      so covered cells are already 0.0 either way. No other bugs. No raw BoxIterator loops.
 - [ ] `Source/MeshODESolver/CD_MeshODESolverImplem.H` (4)
 - [ ] `Source/SurfaceODESolver/CD_SurfaceODESolverImplem.H` (3)
 
