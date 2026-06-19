@@ -645,7 +645,12 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
         single-valued-FAB entry (today left at 0) is not provably observationally-neutral; the gain is
         marginal since the per-cell std::function call dominates and stays non-vectorizable regardless.
       Documented both in source. No bugs. No raw BoxIterator loops. MeshODE/CoaxialCable test builds clean.
-- [ ] `Source/SurfaceODESolver/CD_SurfaceODESolverImplem.H` (3)
+- [x] `Source/SurfaceODESolver/CD_SurfaceODESolverImplem.H` (3) — DONE, NO CHANGE. All 3 BoxLoops are
+      VoFIterator loops over surface/EB-boundary data (computeSum mass integral 324; resetElectrodes 661;
+      resetDielectrics 706) -- inherently irregular, NOT Box overloads, so not vectorization targets. No raw
+      BoxIterator loops (already standard BoxLoops::loop(vofit, ...) form). No bugs: computeSum correctly
+      declares #pragma omp parallel for reduction(+:dataSum) (contrast the FieldSolver::computeEnergy missing-
+      reduction bug); the two reset kernels are per-VoF assignments with race-free OMP-over-boxes.
 
 ### Physics
 - [ ] `Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H` (34)
