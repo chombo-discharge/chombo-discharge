@@ -542,7 +542,21 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
       OOB-write if m_ghost==0. Fixed to (m_refRat-1)*IntVect::Unit.
       Verified: discharge-lib builds clean; BrownianWalker/DriftDiffusion 2D regression runs to
       completion, exit 0, no NaN/inf/abort in any pout file.
-- [ ] `Source/Particle/CD_EBParticleMeshImplem.H` (4)
+- [x] `Source/Particle/CD_EBParticleMeshImplem.H` (4) — DONE. All 4 Box loops are per-particle
+      deposit/interpolate kernels over a tiny runtime-sized stencil box (CIC 3^D / TSC 5^D for deposit;
+      2^D / 3^D gather for interpolate). All inherently non-vectorizable, verified via opt-record
+      (compiled CD_McPhoto.cpp, attributed by inlining chain):
+      - depositParticleCIC / depositParticleTSC: per-particle scatter into rho; separable weight with
+        min/max clamps (+ alpha<beta ternary for TSC) -> "not vectorized: control flow in loop" +
+        "couldn't vectorize loop". Trip counts tiny (typically unrolled).
+      - interpolateParticleCIC / interpolateParticleTSC: per-particle gather-REDUCTION into
+        a_particleField (FP sum across the box); reduction blocks vectorization without reassociation,
+        and the tiny gather box is fully unrolled (no BoxLoops loop survives in the opt-record).
+      Documented all 4 call sites in source. No raw BoxIterator loops. Multi-cut N/A (per-particle
+      stencil ops, not coarse-fine; the isIrregular/isCovered checks are NGP fallbacks per particle).
+      BUG FIX (dead code): depositParticleTSC defined a lambda `F` (the TSC shape function) that was
+      never used -- the tscKernel computes the weight analytically via the alpha/beta integral form.
+      Removed the dead lambda (behavior-neutral; clean build). No correctness bugs found.
 - [ ] `Source/Particle/CD_ParticleContainerImplem.H` (3)
 - [ ] `Source/Particle/CD_EBAMRParticleMesh.cpp` (2)
 
