@@ -88,6 +88,11 @@ kernel) or a non-inlinable call (e.g. `std::function`).
   (all overloads), not only the `Box` overload — triage each call to see if it is a `Box`
   loop before acting.
 - Prefer rewrites that keep dimension independence via `D_DECL` / `D_TERM`.
+- **NEVER nest `BoxLoops::loop` inside another `BoxLoops::loop` kernel.** When a kernel contains an inner
+  loop (e.g. a refRat^D refinement loop), write that inner loop as a **direct index loop** (explicit
+  `#if CH_SPACEDIM == 3` i/j/k, matching the surrounding code), not a nested `BoxLoops::loop`. This applies
+  to Task 2 normalization of inner `BoxIterator` loops *and* to any pre-existing nested `BoxLoops::loop`
+  found along the way (e.g. `CD_EBCoarseFineParticleMesh.cpp::addInvalidCoarseToFine`).
 - Do not change numerical behavior. Vectorization rewrites must be bit-for-bit equivalent
   (modulo FP reassociation that the existing `CD_PRAGMA_SIMD` already permits).
 - **Per-file brief bug-check (mandatory).** When visiting any file, perform a quick scan for
@@ -767,10 +772,10 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
       boundaryBox). discharge-lib builds clean.
 - [x] `Source/AmrMesh/CD_EBCoarAve.cpp` (3) — DONE. The 3 raw BoxIterator loops were the inner refinement
       loops inside the cell-averaging regular kernels (arithmetic/harmonic/conservative). Converted each to a
-      nested BoxLoops::loop<D_DECL(1,1,1)>(refiBox, fineKernel) -- matching the EBCoarseFineParticleMesh
-      addInvalidCoarseToFine precedent and the branch convention. (The face-averaging variants in this file use
-      explicit i/j/k loops with face-normal DoLoop guards, which are not raw BoxIterators -- left as-is.)
-      Behavior-preserving: same iteration order, kernel logic unchanged. discharge-lib builds clean.
+      DIRECT #if-CH_SPACEDIM==3 i/j/k index loop over refiBox bounds -- matching the explicit i/j/k style the
+      FACE-averaging kernels in this same file already use. (Rule: never nest BoxLoops::loop inside another
+      BoxLoops kernel -- inner loops must be direct index loops.) Behavior-preserving: commutative gather-sum,
+      kernel logic unchanged. 2D + 3D discharge-lib build clean.
 - [x] `Source/AmrMesh/CD_TiledMeshRefine.cpp` (2) — DONE. Only 1 actual raw BoxIterator loop (the "2" counted
       the #include <BoxIterator.H> line). Converted the proper-nesting tile loop (iterates a coarsened fine-tile
       neighborhood box, emplacing tile coords into the a_tiles set) to BoxLoops::loop<D_DECL(1,1,1)> with a

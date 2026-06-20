@@ -464,10 +464,18 @@ EBCoarAve::arithmeticAverage(EBCellFAB&       a_coarData,
   auto regularKernel = [&](const IntVect& iv) -> void {
     coarDataReg(iv, a_coarVar) = 0.0;
 
-    auto fineKernel = [&](const IntVect& bit) -> void {
-      coarDataReg(iv, a_coarVar) += fineDataReg(m_refRat * iv + bit, a_fineVar);
-    };
-    BoxLoops::loop<D_DECL(1, 1, 1)>(refiBox, fineKernel);
+#if CH_SPACEDIM == 3
+    for (int k = refiBox.smallEnd(2); k <= refiBox.bigEnd(2); k++) {
+#endif
+      for (int j = refiBox.smallEnd(1); j <= refiBox.bigEnd(1); j++) {
+        for (int i = refiBox.smallEnd(0); i <= refiBox.bigEnd(0); i++) {
+          const IntVect ivFine = m_refRat * iv + IntVect(D_DECL(i, j, k));
+          coarDataReg(iv, a_coarVar) += fineDataReg(ivFine, a_fineVar);
+        }
+      }
+#if CH_SPACEDIM == 3
+    }
+#endif
 
     coarDataReg(iv, a_coarVar) *= dxFactor;
   };
@@ -530,10 +538,18 @@ EBCoarAve::harmonicAverage(EBCellFAB&       a_coarData,
   auto regularKernel = [&](const IntVect& iv) -> void {
     Real coarVal = 0.0;
 
-    auto fineKernel = [&](const IntVect& bit) -> void {
-      coarVal += 1.0 / fineDataReg(m_refRat * iv + bit, a_fineVar);
-    };
-    BoxLoops::loop<D_DECL(1, 1, 1)>(refiBox, fineKernel);
+#if CH_SPACEDIM == 3
+    for (int k = refiBox.smallEnd(2); k <= refiBox.bigEnd(2); k++) {
+#endif
+      for (int j = refiBox.smallEnd(1); j <= refiBox.bigEnd(1); j++) {
+        for (int i = refiBox.smallEnd(0); i <= refiBox.bigEnd(0); i++) {
+          const IntVect ivFine = m_refRat * iv + IntVect(D_DECL(i, j, k));
+          coarVal += 1.0 / fineDataReg(ivFine, a_fineVar);
+        }
+      }
+#if CH_SPACEDIM == 3
+    }
+#endif
 
     coarDataReg(iv, a_coarVar) = numPerCoar / coarVal;
   };
@@ -599,10 +615,18 @@ EBCoarAve::conservativeAverage(EBCellFAB&       a_coarData,
   auto regularKernel = [&](const IntVect& iv) -> void {
     coarDataReg(iv, a_coarVar) = 0.0;
 
-    auto fineKernel = [&](const IntVect& bit) -> void {
-      coarDataReg(iv, a_coarVar) += fineDataReg(m_refRat * iv + bit, a_fineVar);
-    };
-    BoxLoops::loop<D_DECL(1, 1, 1)>(refiBox, fineKernel);
+#if CH_SPACEDIM == 3
+    for (int k = refiBox.smallEnd(2); k <= refiBox.bigEnd(2); k++) {
+#endif
+      for (int j = refiBox.smallEnd(1); j <= refiBox.bigEnd(1); j++) {
+        for (int i = refiBox.smallEnd(0); i <= refiBox.bigEnd(0); i++) {
+          const IntVect ivFine = m_refRat * iv + IntVect(D_DECL(i, j, k));
+          coarDataReg(iv, a_coarVar) += fineDataReg(ivFine, a_fineVar);
+        }
+      }
+#if CH_SPACEDIM == 3
+    }
+#endif
 
     coarDataReg(iv, a_coarVar) *= dxFactor;
   };
