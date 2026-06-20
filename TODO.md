@@ -693,17 +693,13 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
         -- no race.)
       * computeLoads (5713): sum into levelLoads[din.intCode()] (distinct slot per box -> no race) + isRegular
         guard; one-time regrid.
-      computeReactiveCdrParticlesPerCell (3713): pure arithmetic ppc = max(0, floor(phi*vol)). Rewritten to a
-      branchless mask multiply (ppc = regularMask * max(0, floor(phi*vol))) per user request -- replaces the
-      out-of-line isRegular guard with the regular-cell mask; covered/cut cells -> 0 (cut overwritten by the
-      irregular kernel; 0 in covered is correct, user-confirmed; no 0*inf since CdrSolver keeps covered m_phi
-      at 0). However GCC STILL does not vectorize it ("no vectype for stmt" on the floor/strided-component
-      store, verified via opt-record) -- neither the mask-guarded conditional store nor the branchless multiply
-      gets a vector type here. Kept the branchless form anyway (cheaper scalar guard, no per-cell EBGraph call,
-      covered=0 cleaner); low-priority kernel, not chasing further. Verified behavior: ItoKMC/JSON 2D
-      regression runs to completion under MPI, exit 0, no NaN (covered=0 change is safe).
-      Multi-cut N/A throughout (center vs centroid; cut cells need EB geometry). NO bugs (all accumulators
-      local or per-box-indexed -- unlike the DischargeInception stepper's getMaxValueAndLocation race).
+      computeReactiveCdrParticlesPerCell (3713): pure arithmetic ppc = max(0, floor(phi*vol)) gated by
+      isRegular. Investigated for vectorization -- tried the regular-cell-mask guard and a branchless mask
+      multiply, but GCC vectorizes NEITHER ("no vectype for stmt" on the floor/strided-component store,
+      verified via opt-record; the mask-guarded conditional store is also not if-converted). Low-priority
+      kernel, so LEFT IN ORIGINAL isRegular-guarded form (documented in source). Multi-cut N/A throughout
+      (center vs centroid; cut cells need EB geometry). NO bugs (all accumulators local or per-box-indexed --
+      unlike the DischargeInception stepper's getMaxValueAndLocation race).
 - [ ] `Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp` (19)
 - [ ] `Physics/ItoKMC/TimeSteppers/ItoKMCBackgroundEvaluator/CD_ItoKMCBackgroundEvaluatorImplem.H` (5)
 - [ ] `Physics/DischargeInception/CD_DischargeInceptionTagger.cpp` (4)

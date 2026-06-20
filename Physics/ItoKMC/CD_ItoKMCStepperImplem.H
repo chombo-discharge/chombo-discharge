@@ -3689,18 +3689,6 @@ ItoKMCStepper<I, C, R, F>::computeReactiveCdrParticlesPerCell(EBCellFAB&      a_
   // TLDR: We go through each solver and add the number of PHYSICAL particles per cell to a_ppc.
   FArrayBox& ppcRegular = a_ppc.getFArrayBox();
 
-  // Regular-cell mask (1 on regular cells, 0 on cut/covered), built from EBISBox::isRegular. Used as a
-  // branchless multiplier below instead of a per-cell out-of-line a_ebisbox.isRegular(iv) guard. The multiply
-  // zeroes cut + covered cells: cut cells are overwritten by the irregular kernel, and 0 in covered cells is
-  // correct (they hold no fluid). No 0*inf hazard -- CdrSolver keeps covered m_phi at 0 (CD_CdrSolver.cpp
-  // setCoveredValue), so the masked-out factor is 0*finite = 0.
-  // NOTE: this removes the out-of-line isRegular EBGraph call per cell, but GCC still does NOT vectorize the
-  // kernel ("not vectorized: no vectype for stmt" on the floor/strided-component store, verified via
-  // opt-record) -- so the gain is scalar only. Kept branchless for clarity + the cheaper guard; not a hot
-  // kernel (low priority).
-  const BaseFab<Real>& regularMask = (*m_amr->getRegularCells(m_fluidRealm, m_plasmaPhase)[a_level])[a_din]
-                                       .getSingleValuedFAB();
-
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
     RefCountedPtr<CdrSolver>& solver = solverIt();
     const int                 idx    = solverIt.index();
@@ -3708,9 +3696,13 @@ ItoKMCStepper<I, C, R, F>::computeReactiveCdrParticlesPerCell(EBCellFAB&      a_
     const EBCellFAB& phi    = (*(solver->getPhi())[a_level])[a_din];
     const FArrayBox& phiReg = phi.getFArrayBox();
 
-    // Regular cells kernel -- branchless (mask multiply), covered/cut cells -> 0.
+    // Regular cells kernel. Not vectorizable: the out-of-line a_ebisbox.isRegular(iv) guard blocks it, and a
+    // branchless mask-multiply rewrite still does not vectorize on GCC ("no vectype for stmt" on the
+    // floor/strided-component store, verified via opt-record), so the original guarded form is kept.
     auto regularKernel = [&](const IntVect& iv) -> void {
-      ppcRegular(iv, idx) = regularMask(iv, 0) * std::max(zero, std::floor(phiReg(iv, 0) * vol));
+      if (a_ebisbox.isRegular(iv)) {
+        ppcRegular(iv, idx) = std::max(zero, std::floor(phiReg(iv, 0) * vol));
+      }
     };
 
     // Irregular kernel -- note that only particles that lie inside the domain get to react.
