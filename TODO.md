@@ -771,7 +771,11 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
       addInvalidCoarseToFine precedent and the branch convention. (The face-averaging variants in this file use
       explicit i/j/k loops with face-normal DoLoop guards, which are not raw BoxIterators -- left as-is.)
       Behavior-preserving: same iteration order, kernel logic unchanged. discharge-lib builds clean.
-- [ ] `Source/AmrMesh/CD_TiledMeshRefine.cpp` (2)
+- [x] `Source/AmrMesh/CD_TiledMeshRefine.cpp` (2) — DONE. Only 1 actual raw BoxIterator loop (the "2" counted
+      the #include <BoxIterator.H> line). Converted the proper-nesting tile loop (iterates a coarsened fine-tile
+      neighborhood box, emplacing tile coords into the a_tiles set) to BoxLoops::loop<D_DECL(1,1,1)> with a
+      lambda; swapped #include <BoxIterator.H> for #include <CD_BoxLoops.H>. Order-independent set insertion ->
+      behavior-preserving. discharge-lib builds clean.
 - [ ] `Source/AmrMesh/CD_CoarseInterpQuadCF.cpp` (2)
 - [ ] `Source/AmrMesh/CD_Realm.cpp` (1)
 - [ ] `Source/AmrMesh/CD_EBReflux.cpp` (1)
