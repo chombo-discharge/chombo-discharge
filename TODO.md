@@ -709,7 +709,19 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
       VoF/Face loops are irregular (not targets). Documented the 4 Box loops. NO bugs: race scan clean -- the
       three current+= boundary-flux loops (3992/4083/4161) all declare reduction(+ : current), and the
       max/min go through DataOps::getMaxMinNorm (already mask+multi-cut aware). discharge-lib builds clean.
-- [ ] `Physics/ItoKMC/TimeSteppers/ItoKMCBackgroundEvaluator/CD_ItoKMCBackgroundEvaluatorImplem.H` (5)
+- [x] `Physics/ItoKMC/TimeSteppers/ItoKMCBackgroundEvaluator/CD_ItoKMCBackgroundEvaluatorImplem.H` (5) — DONE.
+      2 Box loops + 3 VoF/Face loops. Both Box loops are reductions and non-vectorizable:
+      evaluateSpaceChargeEffects (322): max reduction (relChange) + isRegular guard; integrateOpticalExcitations
+      (460): FP sum reduction (sumPhi/sumSrc) + isRegular guard. All OMP loops correctly declare reduction
+      clauses (max:relChange, +:Enorm, +:sumPhi,sumSrc) -- no race. The 3 VoF/Face loops are irregular (not
+      targets).
+      BUG FIX (numerical, diagnostic-only): integrateOpticalExcitations' irregular kernel computed
+      kappa=volFrac(vof) but did NOT use it -- cut cells contributed phi*dV (full cell volume) instead of
+      kappa*phi*dV, over-counting cut cells by 1/kappa in the volume integral. The computed-but-unused kappa
+      and the dV=dx^SpaceDim volume element confirm a forgotten weighting (every other volume integral in the
+      codebase -- FieldSolver::computeEnergy, DischargeInception critical-volume -- weights cut cells by kappa).
+      Fixed (sumPhi/sumSrc += kappa*...). Affects only the reported diagnostics m_sumOpticalPhi/m_sumOpticalSrc
+      (not dynamics or the abort criteria). ItoKMC/JSON test builds clean.
 - [ ] `Physics/DischargeInception/CD_DischargeInceptionTagger.cpp` (4)
 - [ ] `Physics/CdrPlasma/CD_CdrPlasmaTagger.cpp` (4)
 - [ ] `Physics/ItoKMC/CD_ItoKMCTaggerImplem.H` (2)

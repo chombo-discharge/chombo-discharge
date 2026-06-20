@@ -319,6 +319,7 @@ ItoKMCBackgroundEvaluator<I, C, R, F>::evaluateSpaceChargeEffects() noexcept
 
       VoFIterator& vofit = (*(this->m_amr)->getVofIterator(this->m_fluidRealm, this->m_plasmaPhase)[lvl])[din];
 
+      // Not vectorizable: max reduction (relChange) + out-of-line isRegular guard.
       BoxLoops::loop<D_DECL(1, 1, 1)>(box, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
@@ -450,13 +451,17 @@ ItoKMCBackgroundEvaluator<I, C, R, F>::integrateOpticalExcitations() const noexc
             if (ebisbox.isIrregular(vof.gridIndex()) && validCells(vof.gridIndex(), 0)) {
               const Real kappa = ebisbox.volFrac(vof);
 
-              sumPhi += phi(vof, 0) * dV;
-              sumSrc += src(vof, 0) * dV;
+              // Volume integral -- cut cells contribute their actual fluid volume kappa*dV (the regular kernel
+              // uses the full dV, kappa=1). kappa was previously computed here but not applied, over-counting
+              // cut cells by 1/kappa.
+              sumPhi += kappa * phi(vof, 0) * dV;
+              sumSrc += kappa * src(vof, 0) * dV;
             }
           };
 
           VoFIterator& vofit = (*(this->m_amr)->getVofIterator(this->m_fluidRealm, this->m_plasmaPhase)[lvl])[din];
 
+          // Not vectorizable: FP sum reduction (sumPhi/sumSrc) + out-of-line isRegular guard.
           BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
           BoxLoops::loop(vofit, irregularKernel);
         }
