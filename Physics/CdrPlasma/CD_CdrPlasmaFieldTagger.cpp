@@ -210,9 +210,10 @@ CdrPlasmaFieldTagger::computeTracers() const
       };
 
       // Irregular kernel region
-      VoFIterator vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
+      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
-      // Execute the kernels
+      // Execute the kernels. Not vectorizable: the tracer function is a virtual call per cell returning a
+      // Vector<Real> (heap allocation). Per-box writes -> no race.
       BoxLoops::loop<D_DECL(1, 1, 1)>(box, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }

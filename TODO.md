@@ -736,11 +736,24 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
       per-box VoFIterator by value (`VoFIterator vofit = ...`, copying its internal VoF list -- the source even
       had an "I'm lazy" comment); changed to references (behavior-preserving), matching the rest of the
       codebase. discharge-lib builds clean.
-- [ ] `Physics/ItoKMC/CD_ItoKMCTaggerImplem.H` (2)
-- [ ] `Physics/ItoKMC/CD_ItoKMCFieldTaggerImplem.H` (2)
-- [ ] `Physics/CdrPlasma/CD_CdrPlasmaFieldTagger.cpp` (2)
-- [ ] `Physics/BrownianWalker/CD_BrownianWalkerStepper.cpp` (1)
-- [ ] `Physics/AdvectionDiffusion/CD_AdvectionDiffusionTagger.cpp` (1)
+- [x] `Physics/ItoKMC/CD_ItoKMCTaggerImplem.H` (2) — DONE, doc only. 1 Box + 1 VoF loop. Box loop
+      (refineCellsBox/coarsenCellsBox family) calls the virtual refineCell/coarsenCell per cell +
+      DenseIntVectSet insertion -> non-vectorizable. gotNewTags uses reduction(max:), tags per-box -> no race.
+      VoFIterator& (good). No bugs.
+- [x] `Physics/ItoKMC/CD_ItoKMCFieldTaggerImplem.H` (2) — DONE, doc only. 1 Box + 1 VoF loop. computeTagFields
+      is a virtual call per cell returning Vector<Real> (alloc) -> non-vectorizable. Per-box writes -> no race
+      (the bare #pragma omp parallel for needs no reduction). VoFIterator& (good). No bugs.
+- [x] `Physics/CdrPlasma/CD_CdrPlasmaFieldTagger.cpp` (2) — DONE. 1 Box + 1 VoF loop. tracer() is a virtual
+      call per cell returning Vector<Real> (alloc) -> non-vectorizable. Per-box writes -> no race. MINOR FIX:
+      VoFIterator copy (213) -> reference.
+- [x] `Physics/BrownianWalker/CD_BrownianWalkerStepper.cpp` (1) — DONE, doc only. The 1 Box loop (computeLoads)
+      is a box-local FP sum reduction + out-of-line isCovered guard -> non-vectorizable. sum is box-local and
+      loads[din.intCode()] is per-box -> no race (the other 3 omp loops in the file are particle/data-motion,
+      no BoxLoops). No bugs.
+- [x] `Physics/AdvectionDiffusion/CD_AdvectionDiffusionTagger.cpp` (1) — DONE, doc only. The 1 Box loop
+      (curvature tagging) is data-dependent (tags |= iv DenseIntVectSet insertion) -> non-vectorizable.
+      reduction(+ : foundTags) + per-box tags -> no race. Regular-cells-only (no irregular kernel) by design.
+      No bugs.
 
 ---
 

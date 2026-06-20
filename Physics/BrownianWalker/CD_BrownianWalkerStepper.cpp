@@ -695,6 +695,8 @@ BrownianWalkerStepper::loadBalanceBoxesMesh(Vector<Vector<int>>&             a_p
         }
       };
 
+      // Not vectorizable: local FP sum reduction over the box + out-of-line isCovered guard. One-time
+      // load balancing (per regrid). sum is box-local and loads[din.intCode()] is per-box -> no race.
       BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, kernel);
 
       loads[din.intCode()] = lround(sum);

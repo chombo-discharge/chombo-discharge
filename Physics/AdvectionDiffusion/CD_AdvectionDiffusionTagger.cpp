@@ -135,7 +135,8 @@ AdvectionDiffusionTagger::tagCells(EBAMRTags& a_tags) // NOLINT(readability-conv
         }
       };
 
-      // Execute kernel. Regular cells only.
+      // Execute kernel. Regular cells only. Not vectorizable: data-dependent curvature test + DenseIntVectSet
+      // insertion (tags |= iv). reduction(+ : foundTags) + per-box tags -> no race. One-time tagging.
       BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, taggingKernel);
     }
   }

@@ -182,7 +182,8 @@ ItoKMCFieldTagger<S>::computeTagFields() const noexcept
         }
       };
 
-      // Run the kernels
+      // Run the kernels. Not vectorizable: computeTagFields is a virtual call per cell returning a
+      // Vector<Real> (heap allocation). Per-box writes -> no race.
       VoFIterator& vofit = (*this->m_amr->getVofIterator(this->m_realm, this->m_phase)[lvl])[din];
       BoxLoops::loop<D_DECL(1, 1, 1)>(box, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
