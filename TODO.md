@@ -653,7 +653,34 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
       reduction bug); the two reset kernels are per-VoF assignments with race-free OMP-over-boxes.
 
 ### Physics
-- [ ] `Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H` (34)
+- [x] `Physics/DischargeInception/CD_DischargeInceptionStepperImplem.H` (34) — DONE. ~15 Box loops + VoF
+      partners, all inherently non-vectorizable and all correctly partitioned isRegular vs cut-cell
+      (mutually exclusive). The transport coefficients m_alpha/m_eta/m_backgroundRate/m_detachmentRate/
+      m_fieldEmission/m_ionMobility/m_ionDiffusion are ALL std::function members (user-supplied, legitimate
+      API callbacks), so every coefficient-evaluation kernel does a non-inlinable call per cell. Categories:
+      * Particle seeding (seedUniformParticles 2190, seedIonizationParticles 2315): List<P> append +
+        std::function coeffs + data-dependent branch.
+      * Stationary/eval coefficient computes (computeBackgroundIonizationStationary 3792,
+        computeDetachmentStationary 3877, evaluateFunction 4130, computeIonVelocity 5215,
+        computeIonDiffusion 5280; field-emission VoF loops 3980/4043): field = m_coeff(E,pos) std::function
+        per cell. One-time / per-voltage-sweep setup, not per-timestep hot.
+      * Reductions (computeRdot 3651 sum; computeMinimumInceptionVoltage 4463 pairmin; computeCriticalVolume
+        Stationary 4552 / Transient 4618; computeIonizationVolume Stationary 4838 / Transient 4921;
+        computeCriticalArea* VoF 4689/4742; getMaxValueAndLocation 5393 max): FP reduction + data-dependent
+        control flow.
+      * Inception voltage (computeInceptionVoltage 4385): per-cell std::vector build + out-of-line
+        calcUincInterp/calcUincNoInterp helpers.
+      Multi-cut N/A throughout (regular=center, irregular=centroid positions; particle/area kernels need EB
+      geometry). Representative source comments added per category.
+      BUG FIX (data race): getMaxValueAndLocation (5361) ran #pragma omp parallel for with NO reduction
+      clause while the kernels did a max+argmax write to the shared out-params a_maxVal/a_maxPos -> torn/lost
+      updates across OpenMP threads (3rd race this branch, cf. FieldSolver::computeEnergy and Driver). Fixed
+      by mirroring the existing pairmin infrastructure: added ThreadSafePairMax + `pairmax` declared reduction
+      to [[CD_OpenMP.H]] and rewrote the function to reduce into a local std::pair<Real,RealVect> with
+      reduction(pairmax : ...), then assign to the out-params (same shape as computeMinimumInceptionVoltage's
+      pairmin). Verified: DischargeInception/Vessel builds + runs to completion under OMP_NUM_THREADS=4 x 2
+      MPI ranks, exit 0, no NaN. Every other accumulator loop in the file already had a correct reduction
+      clause (incl. Rdot at 3587) -- this was the only missing one.
 - [ ] `Physics/ItoKMC/CD_ItoKMCStepperImplem.H` (22)
 - [ ] `Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp` (19)
 - [ ] `Physics/ItoKMC/TimeSteppers/ItoKMCBackgroundEvaluator/CD_ItoKMCBackgroundEvaluatorImplem.H` (5)

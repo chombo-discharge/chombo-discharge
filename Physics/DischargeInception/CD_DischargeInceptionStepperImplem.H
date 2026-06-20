@@ -2183,7 +2183,8 @@ DischargeInceptionStepper<P, F, C>::seedUniformParticles() noexcept
         }
       };
 
-      // Execute kernels over appropriate regions.
+      // Execute kernels over appropriate regions. Not vectorizable: per-cell List<P> append. Multi-cut
+      // N/A: regular uses cell-CENTER, irregular uses CENTROID position.
       const Box    cellBox = dbl[din];
       VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
@@ -2308,7 +2309,8 @@ DischargeInceptionStepper<P, F, C>::seedIonizationParticles(const Real a_voltage
           }
         };
 
-        // Execute kernels over appropriate regions.
+        // Execute kernels over appropriate regions. Not vectorizable: m_alpha/m_eta std::function
+        // coefficients per cell + List<P> append + data-dependent branch. Multi-cut N/A (center vs centroid).
         const Box    cellBox = dbl[din];
         VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
@@ -3644,7 +3646,8 @@ DischargeInceptionStepper<P, F, C>::computeRdot(const Real& a_voltage) const noe
         }
       };
 
-      // Run the kernels.
+      // Run the kernels. Not vectorizable: FP sum reduction (Rdot) + multiple std::function coefficients
+      // (m_alpha/m_eta/m_detachmentRate/m_fieldEmission/m_backgroundRate) + data-dependent branch.
       Box          cellBox = dbl[din];
       VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
@@ -3786,7 +3789,9 @@ DischargeInceptionStepper<P, F, C>::computeBackgroundIonizationStationary() noex
           bgIonization(vof, 0) = m_backgroundRate(E, pos);
         };
 
-        // Execute kernels
+        // Execute kernels. Not vectorizable: m_backgroundRate std::function coefficient evaluated per cell.
+        // (Representative of the stationary coefficient computes -- detachment/field-emission/evaluateFunction/
+        // ion mobility/ion diffusion all share this std::function-per-cell structure.)
         VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
         BoxLoops::loop<D_DECL(1, 1, 1)>(dbl[din], regularKernel);
@@ -5344,8 +5349,11 @@ DischargeInceptionStepper<P, F, C>::getMaxValueAndLocation(Real&                
     pout() << "DischargeInceptionStepper::getMaxValueAndLocation" << endl;
   }
 
-  a_maxVal = -std::numeric_limits<Real>::max();
-  a_maxPos = RealVect::Zero;
+  // Local (val, pos) accumulator so the OpenMP box loop can use a custom pairmax reduction -- writing the
+  // shared a_maxVal/a_maxPos directly from the kernels would be a data race across threads.
+  std::pair<Real, RealVect> maxValAndPos;
+  maxValAndPos.first  = -std::numeric_limits<Real>::max();
+  maxValAndPos.second = RealVect::Zero;
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
@@ -5358,7 +5366,7 @@ DischargeInceptionStepper<P, F, C>::getMaxValueAndLocation(Real&                
 
     const int nbox = dit.size();
 
-#pragma omp parallel for schedule(runtime)
+#pragma omp parallel for schedule(runtime) reduction(pairmax : maxValAndPos)
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din     = dit[mybox];
       const Box&       cellbox = dbl[din];
@@ -5370,20 +5378,21 @@ DischargeInceptionStepper<P, F, C>::getMaxValueAndLocation(Real&                
 
       CH_assert(data.nComp() == 1);
 
+      // Not vectorizable: max+argmax reduction with a data-dependent branch.
       auto regularKernel = [&](const IntVect& iv) -> void {
         if (validCells(iv, 0) && ebisbox.isRegular(iv)) {
-          if (dataReg(iv, 0) > a_maxVal) {
-            a_maxVal = dataReg(iv, 0);
-            a_maxPos = probLo + (RealVect(iv) + 0.5 * RealVect::Unit) * dx;
+          if (dataReg(iv, 0) > maxValAndPos.first) {
+            maxValAndPos.first  = dataReg(iv, 0);
+            maxValAndPos.second = probLo + (RealVect(iv) + 0.5 * RealVect::Unit) * dx;
           }
         }
       };
 
       auto irregularKernel = [&](const VolIndex& vof) -> void {
         if (validCells(vof.gridIndex(), 0) && ebisbox.isIrregular(vof.gridIndex())) {
-          if (data(vof, 0) > a_maxVal) {
-            a_maxVal = data(vof, 0);
-            a_maxPos = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
+          if (data(vof, 0) > maxValAndPos.first) {
+            maxValAndPos.first  = data(vof, 0);
+            maxValAndPos.second = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
           }
         }
       };
@@ -5395,7 +5404,7 @@ DischargeInceptionStepper<P, F, C>::getMaxValueAndLocation(Real&                
     }
   }
 
-  const std::pair<Real, RealVect> globalMaxValAndPos = ParallelOps::max(a_maxVal, a_maxPos);
+  const std::pair<Real, RealVect> globalMaxValAndPos = ParallelOps::max(maxValAndPos.first, maxValAndPos.second);
 
   a_maxVal = globalMaxValAndPos.first;
   a_maxPos = globalMaxValAndPos.second;
