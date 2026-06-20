@@ -729,7 +729,13 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
       and tags is per-box ((*a_tags[lvl])[din]). MINOR FIX: line 147 used `VoFIterator vofit = ...` (a copy of
       the iterator + its internal VoF list) where the rest of the codebase uses `VoFIterator&`; changed to a
       reference (behavior-preserving). discharge-lib builds clean.
-- [ ] `Physics/CdrPlasma/CD_CdrPlasmaTagger.cpp` (4)
+- [x] `Physics/CdrPlasma/CD_CdrPlasmaTagger.cpp` (4) — DONE. 2 Box loops + 2 VoF loops. Both Box loops
+      non-vectorizable: refineCellsBox (347) / coarsenCellsBox (437) call the virtual refineCell/coarsenCell
+      per cell + insideTagBox + DenseIntVectSet insertion + control flow. No race: gotNewTags uses
+      reduction(max:gotNewTags) and tags is per-box ((*a_tags[lvl])[din]). MINOR FIX: both helpers bound the
+      per-box VoFIterator by value (`VoFIterator vofit = ...`, copying its internal VoF list -- the source even
+      had an "I'm lazy" comment); changed to references (behavior-preserving), matching the rest of the
+      codebase. discharge-lib builds clean.
 - [ ] `Physics/ItoKMC/CD_ItoKMCTaggerImplem.H` (2)
 - [ ] `Physics/ItoKMC/CD_ItoKMCFieldTaggerImplem.H` (2)
 - [ ] `Physics/CdrPlasma/CD_CdrPlasmaFieldTagger.cpp` (2)

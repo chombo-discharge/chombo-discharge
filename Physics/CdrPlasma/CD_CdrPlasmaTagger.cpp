@@ -340,10 +340,11 @@ CdrPlasmaTagger::refineCellsBox(DenseIntVectSet&          a_refinedCells,
     }
   };
 
-  // Irregular kernel region. Should probably be stored in its own VoFIterator but I'm lazy so let's define it right here.
-  VoFIterator vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[a_dit];
+  // Irregular kernel region.
+  VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[a_dit];
 
-  // Execute the kernels.
+  // Execute the kernels. Not vectorizable: the regular kernel calls the virtual refineCell per cell (plus
+  // insideTagBox + DenseIntVectSet insertion + control flow). One-time tagging (per regrid).
   BoxLoops::loop<D_DECL(1, 1, 1)>(a_box, regularKernel);
   BoxLoops::loop(vofit, irregularKernel);
 }
@@ -431,9 +432,10 @@ CdrPlasmaTagger::coarsenCellsBox(DenseIntVectSet&          a_coarsenedCells,
   };
 
   // Kernel region for the irregular kernel.
-  VoFIterator vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[a_dit];
+  VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[a_dit];
 
-  // Execute the kernels
+  // Execute the kernels. Not vectorizable: the regular kernel calls the virtual coarsenCell per cell (plus
+  // insideTagBox + DenseIntVectSet insertion + control flow). One-time tagging (per regrid).
   BoxLoops::loop<D_DECL(1, 1, 1)>(a_box, regularKernel);
   BoxLoops::loop(vofit, irregularKernel);
 }
