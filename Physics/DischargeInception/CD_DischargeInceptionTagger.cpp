@@ -143,10 +143,11 @@ DischargeInceptionTagger::tagCells(EBAMRTags& a_tags)
       };
 
       // Run the kernels.
-      Box         cellBox = dbl[din];
-      VoFIterator vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
+      Box          cellBox = dbl[din];
+      VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
-      // Execute the kernels.
+      // Execute the kernels. Not vectorizable: data-dependent DenseIntVectSet insertion (tags |= iv) +
+      // out-of-line getManualRefinementLevel call + control flow. One-time tagging (per regrid).
       BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
@@ -238,6 +239,7 @@ DischargeInceptionTagger::computeTracerField() const noexcept
       Box          cellBox = dbl[din];
       VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
+      // Not vectorizable: m_alphaEff (effective Townsend coefficient) is a std::function call per cell.
       BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }

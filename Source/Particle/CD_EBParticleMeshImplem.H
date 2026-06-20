@@ -276,6 +276,9 @@ EBParticleMesh::depositParticleCIC(EBCellFAB&      a_rho,
 
     const Box particleBox = a_particleBox + particleIV;
 
+    // Not vectorizable: per-particle scatter into rho over a tiny (3^D) runtime-sized stencil box.
+    // The separable weight uses min/max clamps (control flow in loop) and the trip counts are tiny
+    // (typically fully unrolled). Verified via opt-record (control flow in loop / couldn't vectorize).
     BoxLoops::loop<D_DECL(1, 1, 1)>(particleBox, cicKernel);
   }
 }
@@ -297,12 +300,6 @@ EBParticleMesh::depositParticleTSC(EBCellFAB&      a_rho,
   CH_assert(m_region.contains(particleIV));
 
   FArrayBox& rho = a_rho.getFArrayBox();
-
-  auto F = [](const Real x) -> Real {
-    const Real a = (x <= 0.0) ? 2 * x * (1 + x) : 2 * x * (1 - x);
-
-    return (std::abs(x) <= 0.5) ? a : 0.0;
-  };
 
   if (m_ebisbox.isIrregular(particleIV) && a_forceIrregNGP) {
     for (int comp = 0; comp < a_numComp; comp++) {
@@ -332,6 +329,9 @@ EBParticleMesh::depositParticleTSC(EBCellFAB&      a_rho,
 
     const Box particleBox = a_particleBox + particleIV;
 
+    // Not vectorizable: per-particle scatter into rho over a tiny (5^D) runtime-sized stencil box.
+    // The separable weight uses min/max clamps + an (alpha<beta) ternary (control flow in loop) and
+    // the trip counts are tiny. Verified via opt-record (control flow in loop / couldn't vectorize).
     BoxLoops::loop<D_DECL(1, 1, 1)>(particleBox, tscKernel);
   }
 }
@@ -402,6 +402,9 @@ EBParticleMesh::interpolateParticleCIC(Real*            a_particleField,
 
     const Box gatherBox = a_gatherBox + loIndex;
 
+    // Not vectorizable: per-particle gather-reduction accumulating into a_particleField (FP sum across
+    // the tiny 2^D gather box). The reduction blocks vectorization without FP reassociation, and the
+    // small box is fully unrolled (no BoxLoops loop survives in the opt-record).
     BoxLoops::loop<D_DECL(1, 1, 1)>(gatherBox, cicKernel);
   }
 }
@@ -462,6 +465,9 @@ EBParticleMesh::interpolateParticleTSC(Real*            a_particleField,
 
     const Box gatherBox = a_gatherBox + loIndex;
 
+    // Not vectorizable: per-particle gather-reduction accumulating into a_particleField (FP sum across
+    // the tiny 3^D gather box). The reduction blocks vectorization without FP reassociation, and the
+    // small box is fully unrolled (no BoxLoops loop survives in the opt-record).
     BoxLoops::loop<D_DECL(1, 1, 1)>(gatherBox, tscKernel);
   }
 }

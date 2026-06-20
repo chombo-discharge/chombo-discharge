@@ -77,6 +77,9 @@ EBHelmholtzRobinDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
   const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
 
   // Kernel. As always, we linearly extrapolate to the boundary and set the flux from that.
+  // Not auto-vectorizable: the per-cell out-of-line ebisbox.isCovered(ivNear) query (which gates the
+  // extrapolation) blocks it, as do the std::function coefficients in the function-BC case. This is a
+  // thin domain-boundary face slab, so the cost is small. (getEBISL() is already hoisted above.)
   auto kernel = [&](const IntVect& iv) -> void {
     const IntVect ivNear  = iv - isign * BASISV(a_dir);
     const bool    hasNear = !ebisbox.isCovered(ivNear);

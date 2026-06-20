@@ -55,6 +55,15 @@ ThreadSafePairMin(std::pair<Real, RealVect>& ompOut, const std::pair<Real, RealV
 #pragma omp declare reduction(pairmin : std::pair<Real, RealVect> : ThreadSafePairMin(omp_out, omp_in)) \
   initializer(omp_priv = omp_orig)
 
+// Thread-safe maximum of pair<Real, RealVect>.
+inline void
+ThreadSafePairMax(std::pair<Real, RealVect>& ompOut, const std::pair<Real, RealVect>& ompIn) noexcept
+{
+  ompOut = (ompIn.first > ompOut.first) ? ompIn : ompOut;
+}
+#pragma omp declare reduction(pairmax : std::pair<Real, RealVect> : ThreadSafePairMax(omp_out, omp_in)) \
+  initializer(omp_priv = omp_orig)
+
 #endif
 
 #include <CD_NamespaceFooter.H>

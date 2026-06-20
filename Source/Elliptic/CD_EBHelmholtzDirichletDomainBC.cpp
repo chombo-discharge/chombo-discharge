@@ -87,37 +87,40 @@ EBHelmholtzDirichletDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
   const Real ihdx = 2.0 / m_dx;
   const Real sign = (a_side == Side::Lo) ? -1 : 1; // For getting the direction of the derivative correctly.
 
-  std::function<void(const IntVect&)> kernel;
-
   // Need to figure which kernel we should compute. If we have homogeneous BCs then the boundary value is zero. Likewise, with a non-zero value
   // we have the dphi/dn = (phi-bc_value)/(dx/2) on the low side and (bc_value - phi)/(dx/2) on the high side. So make a switch between homogeneous/inhomogeneous
   // and constant/non-constant values.
+  //
+  // Note: we dispatch the branch *outside* BoxLoops::loop and pass a concrete lambda in each case rather
+  // than assigning to a std::function<void(const IntVect&)> and looping over that. A std::function kernel
+  // is type-erased, so it would force an indirect call per cell and block inlining/vectorization -- even
+  // for the trivial homogeneous kernel, which is the hot one (every GMG relaxation uses homogeneous BCs).
+  const Box& faceBox = a_faceFlux.box();
+
   if (a_useHomogeneous) {
-    kernel = [&](const IntVect& iv) -> void {
+    auto kernel = [&](const IntVect& iv) -> void {
       a_faceFlux(iv, m_comp) = -sign * ihdx * a_phi(iv, m_comp);
     };
+    BoxLoops::loop<D_DECL(1, 1, 1)>(faceBox, kernel);
   }
-  else {                 // Physical BCs, select whether or not we use a constant value of spatially varying value.
-    if (m_useConstant) { // Constant value.
-      kernel = [&](const IntVect& iv) -> void {
-        a_faceFlux(iv, m_comp) = sign * ihdx * (m_constantValue - a_phi(iv, m_comp));
-      };
-    }
-    else if (m_useFunction) { // Spatially varying.
-      kernel = [&](const IntVect& iv) -> void {
-        const RealVect pos   = this->getBoundaryPosition(iv, a_dir, a_side);
-        const Real     value = m_functionValue(pos);
-
-        a_faceFlux(iv, m_comp) = sign * ihdx * (value - a_phi(iv, m_comp));
-      };
-    }
-    else {
-      MayDay::Error("EBHelmholtzDirichletDomainBC::getFaceFlux -- logic bust");
-    }
+  else if (m_useConstant) { // Constant value.
+    auto kernel = [&](const IntVect& iv) -> void {
+      a_faceFlux(iv, m_comp) = sign * ihdx * (m_constantValue - a_phi(iv, m_comp));
+    };
+    BoxLoops::loop<D_DECL(1, 1, 1)>(faceBox, kernel);
   }
+  else if (m_useFunction) { // Spatially varying.
+    auto kernel = [&](const IntVect& iv) -> void {
+      const RealVect pos   = this->getBoundaryPosition(iv, a_dir, a_side);
+      const Real     value = m_functionValue(pos);
 
-  // Execute the kernel.
-  BoxLoops::loop<D_DECL(1, 1, 1)>(a_faceFlux.box(), kernel);
+      a_faceFlux(iv, m_comp) = sign * ihdx * (value - a_phi(iv, m_comp));
+    };
+    BoxLoops::loop<D_DECL(1, 1, 1)>(faceBox, kernel);
+  }
+  else {
+    MayDay::Error("EBHelmholtzDirichletDomainBC::getFaceFlux -- logic bust");
+  }
 
   // Multiplies by B-coefficient so that a_faceFlux = B*dphi/dn.
   ChomboDischarge::EBHelmholtzDirichletDomainBC::multiplyByBcoef(a_faceFlux, a_Bcoef, a_dir, a_side);

@@ -158,7 +158,7 @@ CdrPlasmaStepper::computeSpaceChargeDensity(MFAMRCellData& a_rho, const Vector<E
   m_amr->interpGhostPwl(a_rho, m_realm);
   m_amr->interpToCentroids(rhoGas, m_realm, phase::gas);
 
-  DataOps::setCoveredValue(rhoGas, 0, 0.0);
+  DataOps::setCoveredValue(rhoGas, m_amr->getCoveredCells(m_realm, phase::gas), 0, 0.0);
 }
 
 void
@@ -182,7 +182,10 @@ CdrPlasmaStepper::computeCellConductivity(EBAMRCellData& a_cellConductivity) con
   m_amr->allocate(speciesConductivity, m_realm, m_phase, 1);
 
   // Compute the electric field magnitude
-  DataOps::vectorLength(fieldMagnitude, cellCenteredElectricField, m_amr->getMultiCutVofIterator(m_realm, m_phase));
+  DataOps::vectorLength(fieldMagnitude,
+                        cellCenteredElectricField,
+                        m_amr->getNotCoveredCells(m_realm, m_phase),
+                        m_amr->getMultiCutVofIterator(m_realm, m_phase));
 
   // Reset the conductivity.
   DataOps::setValue(a_cellConductivity, 0.0);
@@ -203,6 +206,7 @@ CdrPlasmaStepper::computeCellConductivity(EBAMRCellData& a_cellConductivity) con
       if (Z != 0) {
         DataOps::vectorLength(speciesConductivity,
                               cellVel,
+                              m_amr->getNotCoveredCells(m_realm, m_phase),
                               m_amr->getMultiCutVofIterator(m_realm, m_phase)); // Compute f = |v|
         DataOps::divideByScalar(speciesConductivity, fieldMagnitude);           // Compute f = |v|/|E| = |mu|
         DataOps::multiply(speciesConductivity, phi);                            // Compute f = mu*n
@@ -898,6 +902,8 @@ CdrPlasmaStepper::advanceReactionNetworkRegularCells(Vector<FArrayBox*>&       a
 
   // Execute the kernel. This puts the source terms in cdrSrc and rteSrc, but our target data holders are the input data holders
   // with single components. So, copy the result back to these.
+  // Not vectorizable: m_physics->advanceReactionNetwork is a virtual call per cell with per-cell Vector<Real>
+  // state (the hot reaction kernel -- inherently scalar).
   BoxLoops::loop<D_DECL(1, 1, 1)>(a_cellBox, regularKernel);
 
   // Do it for the CDR solvers.
@@ -1495,6 +1501,8 @@ CdrPlasmaStepper::computeCdrDiffusionCellRegular(Vector<FArrayBox*>&       a_cdr
   };
 
   // Launch the kernel over the input box.
+  // Not vectorizable: m_physics->computeCdrDiffusionCoefficients is a virtual call per cell returning a
+  // Vector<Real> (heap allocation).
   BoxLoops::loop<D_DECL(1, 1, 1)>(a_cellBox, regularKernel);
 
   // Linearize back -- we had all the diffusion coefficients stored in the temporary data holder -- now put them in the output data holders.
@@ -2022,6 +2030,8 @@ CdrPlasmaStepper::computeCdrDriftVelocitiesRegular(Vector<FArrayBox*>&       a_c
   };
 
   // Launch the kernel
+  // Not vectorizable: m_physics->computeCdrDriftVelocities is a virtual call per cell returning a
+  // Vector<RealVect> (heap allocation).
   BoxLoops::loop<D_DECL(1, 1, 1)>(a_cellBox, regularKernel);
 }
 
@@ -4229,7 +4239,11 @@ CdrPlasmaStepper::computeOhmicInductionCurrent()
   // Integrate on the coarsest level.
   const int integrationLevel = 0;
 
-  DataOps::kappaSum(current, *JdotE[integrationLevel], 0, *m_amr->getVofIterator(m_realm, m_phase)[integrationLevel]);
+  DataOps::kappaSum(current,
+                    *JdotE[integrationLevel],
+                    *m_amr->getRegularCells(m_realm, m_phase)[integrationLevel],
+                    0,
+                    *m_amr->getVofIterator(m_realm, m_phase)[integrationLevel]);
 
   // kappaSum only does the sum, we need int(dV) so multiply by dx^SpaceDim.
   const Real dx = m_amr->getDx()[integrationLevel];
@@ -4515,7 +4529,7 @@ CdrPlasmaStepper::writeData(LevelData<EBCellFAB>& a_output,
   }
   CH_STOP(t4);
 
-  DataOps::setCoveredValue(scratch, 0.0);
+  DataOps::setCoveredValue(scratch, *m_amr->getCoveredCells(m_realm, m_phase)[a_level], 0.0);
 
   CH_START(t5);
   m_amr->copyData(a_output, scratch, a_level, a_outputRealm, m_realm, dstInterv, srcInterv);
@@ -4724,7 +4738,8 @@ CdrPlasmaStepper::computePhysicsPlotVars(EBAMRCellData& a_plotVars) const noexce
           }
         };
 
-        // Execute the kernels.
+        // Execute the kernels. Not vectorizable: m_physics->getPlotVariables is a virtual call per cell
+        // returning a Vector<Real> (heap allocation). Plot output.
         BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
         BoxLoops::loop(vofit, irregularKernel);
       }

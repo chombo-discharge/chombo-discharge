@@ -153,10 +153,9 @@ CdrCTU::computeAdvectionDt()
     //       Minion, J. Comp. Phys 123 (435), 1996
     if (m_isMobile) {
       for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-        const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
-        const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-        const Real               dx    = m_amr->getDx()[lvl];
-        const DataIterator&      dit   = dbl.dataIterator();
+        const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+        const Real               dx  = m_amr->getDx()[lvl];
+        const DataIterator&      dit = dbl.dataIterator();
 
         const int nbox = dit.size();
 
@@ -166,17 +165,22 @@ CdrCTU::computeAdvectionDt()
 
           const Box        cellBox = dbl[din];
           const EBCellFAB& velo    = (*m_cellVelocity[lvl])[din];
-          const EBISBox&   ebisBox = ebisl[din];
 
-          VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
+          // Use the precomputed not-covered mask (1 in regular/irregular cells, 0 in covered) instead of a per-cell
+          // out-of-line EBISBox::isRegular query, and iterate only the MULTI-valued cut-cells below. Singly-cut cells
+          // are handled by the regular box loop (their single-valued cell velocity equals the VoF velocity), so cut
+          // cells are no longer processed twice and the min-reduction is unchanged.
+          VoFIterator& vofit = (*m_amr->getMultiCutVofIterator(m_realm, m_phase)[lvl])[din];
 
           // Regular grid data.
-          const BaseFab<Real>& veloReg = velo.getSingleValuedFAB();
+          const BaseFab<Real>& veloReg    = velo.getSingleValuedFAB();
+          const BaseFab<Real>& notCovered = (*m_amr->getNotCoveredCells(m_realm, m_phase)[lvl])[din]
+                                              .getSingleValuedFAB();
 
           // Compute dt = dx/(|vx|+|vy|+|vz|) and check if it's smaller than the smallest so far.
           auto regularKernel = [&](const IntVect& iv) -> void {
             Real velMax = 0.0;
-            if (ebisBox.isRegular(iv)) {
+            if (notCovered(iv, m_comp) > 0.0) {
               for (int dir = 0; dir < SpaceDim; dir++) {
                 velMax = std::max(velMax, std::abs(veloReg(iv, dir)));
               }

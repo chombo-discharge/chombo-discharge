@@ -116,6 +116,9 @@ EBHelmholtzNeumannDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
     else if (m_useFunction) {
 
       // Kernel -- get dphi/dn at spatial position.
+      // Not auto-vectorizable: per-cell out-of-line getBoundaryPosition() and the std::function BC
+      // evaluation m_functionDphiDn(pos). This runs only for function-based Neumann BCs (the constant
+      // case above is a single setVal); it is the position-only-std::function family pattern.
       auto kernel = [&](const IntVect& iv) -> void {
         const RealVect pos    = this->getBoundaryPosition(iv, a_dir, a_side);
         const Real     DphiDn = m_functionDphiDn(pos);

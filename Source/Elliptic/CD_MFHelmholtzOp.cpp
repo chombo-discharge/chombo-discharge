@@ -449,6 +449,9 @@ MFHelmholtzOp::dotProduct(const LevelData<MFCellFAB>& a_lhs, const LevelData<MFC
 
       const EBISBox& ebisbox = X.getEBISBox();
 
+      // Not auto-vectorizable: the per-cell isRegular() guard is one blocker, but even a guard-free
+      // rewrite would not vectorize -- this is an FP sum-reduction, and GCC will not reassociate the
+      // running sum without -fassociative-math/-ffast-math, which this project deliberately does not set.
       auto regularKernel = [&](const IntVect& iv) -> void {
         if (ebisbox.isRegular(iv)) {
           sumKappaXY += regX(iv, 0) * regY(iv, 0);

@@ -176,7 +176,7 @@ ItoKMCTagger<S>::writePlotData(LevelData<EBCellFAB>& a_output,
 
       m_amr->copyData(a_output, *tagField[a_level], a_level, a_outputRealm, tagField.getRealm(), dstInterv, srcInterv);
 
-      DataOps::setCoveredValue(a_output, a_icomp, 0.0);
+      DataOps::setCoveredValue(a_output, *m_amr->getCoveredCells(a_outputRealm, m_phase)[a_level], a_icomp, 0.0);
 
       a_icomp++;
     }
@@ -346,7 +346,8 @@ ItoKMCTagger<S>::tagCellsBox(DenseIntVectSet&          a_refinedCells,
     }
   };
 
-  // Run the kernels.
+  // Run the kernels. Not vectorizable: the regular kernel calls the virtual refineCell/coarsenCell per cell
+  // + DenseIntVectSet insertion + control flow. One-time tagging (per regrid).
   VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[a_dit];
 
   BoxLoops::loop<D_DECL(1, 1, 1)>(a_box, regularKernel);

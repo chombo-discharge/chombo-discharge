@@ -1195,6 +1195,47 @@ protected:
   std::map<std::pair<int, Side::LoHiSide>, Box> m_sideBox;
 
   /**
+    @brief Cached domain-boundary boxes for a single grid patch.
+    @details Precomputed in EBHelmholtzOp::defineStencils so that applyDomainFlux and fillDomainFlux
+             can avoid recomputing EBArith::loHi (and its associated timer/box-arithmetic overhead) on
+             every V-cycle. The boxes depend only on the problem domain and the grid layout, both of
+             which are fixed once the operator has been defined.
+  */
+  struct DomainBndryBoxes
+  {
+    /**
+      @brief True if the patch abuts the domain boundary on any side, i.e. if any boundary-flux work is needed at all.
+    */
+    bool touchesDomain = false;
+
+    /**
+      @brief Per-direction flag: 1 if the patch abuts the lo domain face in that direction, 0 otherwise.
+    */
+    int hasLo[SpaceDim] = {D_DECL(0, 0, 0)};
+
+    /**
+      @brief Per-direction flag: 1 if the patch abuts the hi domain face in that direction, 0 otherwise.
+    */
+    int hasHi[SpaceDim] = {D_DECL(0, 0, 0)};
+
+    /**
+      @brief Lo-side cell-centered box abutting the domain. Valid only when hasLo[dir] == 1.
+    */
+    Box loBox[SpaceDim];
+
+    /**
+      @brief Hi-side cell-centered box abutting the domain. Valid only when hasHi[dir] == 1.
+    */
+    Box hiBox[SpaceDim];
+  };
+
+  /**
+    @brief Precomputed domain-boundary boxes for each grid patch.
+    @details Filled in EBHelmholtzOp::defineStencils and consumed by applyDomainFlux/fillDomainFlux.
+  */
+  LayoutData<DomainBndryBoxes> m_domainBndryBoxes;
+
+  /**
     @brief "Colors" for the relaxation methods
   */
   Vector<IntVect> m_colors;

@@ -186,6 +186,11 @@ KMCSolver<R, State, T>::partitionReactions(const State& a_state, const ReactionL
 
   const size_t numReactions = a_reactions.size();
 
+  // Each reaction lands in exactly one of the two lists, so reserving the full count up front avoids reallocations
+  // during the emplace_back calls below.
+  criticalReactions.reserve(numReactions);
+  nonCriticalReactions.reserve(numReactions);
+
   for (size_t i = 0; i < numReactions; i++) {
     const T Lj = a_reactions[i]->computeCriticalNumberOfReactions(a_state);
 
@@ -304,9 +309,11 @@ KMCSolver<R, State, T>::getNonCriticalTimeStep(const State&             a_state,
       allReactants.insert(allReactants.end(), curReactants.begin(), curReactants.end());
     }
 
-    // Only do unique reactants.
-    const auto ip = std::unique(allReactants.begin(), allReactants.end());
-    allReactants.resize(std::distance(allReactants.begin(), ip));
+    // Only do unique reactants. Sorting before the unique() collapses ALL duplicates (std::list::unique only removes
+    // consecutive equal elements), so each distinct reactant is processed exactly once. This does not change the result:
+    // each reactant's contribution is independent and only feeds into a min-reduction.
+    allReactants.sort();
+    allReactants.unique();
 
     // 2. Iterate through all reactants and compute deviations.
     for (const auto& reactant : allReactants) {
@@ -384,9 +391,11 @@ KMCSolver<R, State, T>::computeDt(const State&             a_state,
       allReactants.insert(allReactants.end(), curReactants.begin(), curReactants.end());
     }
 
-    // Only do unique reactants.
-    const auto ip = std::unique(allReactants.begin(), allReactants.end());
-    allReactants.resize(std::distance(allReactants.begin(), ip));
+    // Only do unique reactants. Sorting before the unique() collapses ALL duplicates (std::list::unique only removes
+    // consecutive equal elements), so each distinct reactant is processed exactly once. This does not change the result:
+    // each reactant's contribution is independent and only feeds into a min-reduction.
+    allReactants.sort();
+    allReactants.unique();
 
     // 2. Iterate through all reactants and compute deviations.
     for (const auto& reactant : allReactants) {
@@ -771,7 +780,6 @@ KMCSolver<R, State, T>::stepImplicitEuler(State&              a_state,
   // Temporary storage used for computing the Jacobian matrix.
   std::vector<double> X1(static_cast<size_t>(N));
   std::vector<double> X2(static_cast<size_t>(N));
-  std::vector<double> F1(static_cast<size_t>(N));
   std::vector<double> F2(static_cast<size_t>(N));
 
   // Things that are required by LAPACK
@@ -793,27 +801,27 @@ KMCSolver<R, State, T>::stepImplicitEuler(State&              a_state,
 
   for (int k = 0; k < m_maxIter; k++) {
 
+    // Compute the residual F(X) at the current iterate. It is the unperturbed column used in every finite-difference
+    // Jacobian column (it does not depend on the perturbation direction j) and is also the right-hand side for the
+    // linear solve below, so it is computed once per Newton iteration rather than N+1 times.
+    computeF(F.data(), X.data(), C.data());
+
     // Numerically computed the Jacobian using finite differences. The Jacobian is given by
     // Jij = dF_i/dx_j
     for (int j = 0; j < N; j++) {
 
       for (int s = 0; s < N; s++) {
-        X1[s] = X[s];
         X2[s] = X[s];
       }
 
       X2[j] += std::max(0.01 * X[j], 1.0);
 
-      computeF(F1.data(), X1.data(), C.data());
       computeF(F2.data(), X2.data(), C.data());
 
       for (int i = 0; i < N; i++) {
-        J[i + j * N] = (F2[i] - F1[i]) / (X2[j] - X1[j]);
+        J[i + j * N] = (F2[i] - F[i]) / (X2[j] - X[j]);
       }
     }
-
-    // Compute F
-    computeF(F.data(), X.data(), C.data());
 
     // Solve J*dX = F, but note that the true system is J*dX = -F, so we invert the
     // dX vector below.
@@ -1044,72 +1052,78 @@ KMCSolver<R, State, T>::advanceHybrid(
       const bool nonCriticalOnly = (dtNonCrit < dtCrit) || (criticalReactions.size() == 0) ||
                                    (dtCrit > (a_dt - curTime));
 
-      if (nonCriticalOnly) {
+      // Decide whether tau-leaping is efficient enough, or whether we should fall back to an exact SSA advancement
+      // over the WHOLE reaction set. This decision is made independently of whether a critical reaction is pending --
+      // in low-activity regimes exact SSA is both cheaper and more accurate than tau-leaping, so it must be available
+      // in the critical branch as well. SSA is only used when the user has permitted at least one SSA step
+      // (m_numSSA > 0); otherwise we always tau-leap, which also avoids a no-progress infinite loop when m_numSSA == 0.
+      const Real A      = this->totalPropensity(state, a_reactions);
+      const bool useSSA = (m_numSSA >= one) && (A * curDt < m_SSAlim);
 
-        // Compute the total propensity because it might actually be better to run SSA steps.
-        Real A = this->totalPropensity(state, a_reactions);
+      if (useSSA) {
+        // TLDR: Tau-leaping is inefficient here so we switch to an SSA-based algorithm for the WHOLE reaction set.
 
-        if (A * curDt < m_SSAlim) {
-          // TLDR: Tau-leaping is inefficient here so we switch to an SSA-based algorithm for the WHOLE reaction set.
+        // Number of SSA steps taken and simulated time within the SSA. We will compute until either dtSSA >= curDt or
+        // we've exceeded the maximum number of SSA steps that the user has permitted (m_numSSA).
+        Real dtSSA  = 0.0;
+        T    numSSA = 0;
 
-          // Number of SSA steps taken and simulated time within the SSA. We will compute until either dtSSA < curDt or
-          // we've exceeded the maximum number of SSA steps that the user has permitted (m_numSSA).
-          Real dtSSA  = 0.0;
-          T    numSSA = 0;
+        while (dtSSA < curDt && numSSA < m_numSSA) {
 
-          while (dtSSA < curDt && numSSA < m_numSSA) {
+          // Recompute propensities for the full reaction set and advance everything using the SSA.
+          const std::vector<Real> propensities = this->propensities(a_state, a_reactions);
 
-            // Recompute propensities for the full reaction set and advance everything using the SSA.
-            std::vector<Real> propensities = this->propensities(a_state, a_reactions);
-
-            A = 0.0;
-            for (size_t i = 0; i < propensities.size(); i++) {
-              A += propensities[i];
-            }
-
-            // Compute the time to the next reaction.
-            const Real dtReact = this->getCriticalTimeStep(A);
-
-            if (dtSSA + dtReact < curDt) {
-              this->stepSSA(a_state, a_reactions, propensities);
-
-              dtSSA += dtReact;
-              numSSA += one;
-            }
-            else {
-
-              // Next reaction occurred outside the substep -- break out of the loop.
-              dtSSA = curDt;
-            }
+          Real Asum = 0.0;
+          for (size_t i = 0; i < propensities.size(); i++) {
+            Asum += propensities[i];
           }
 
-          validStep = true;
-          curTime += dtSSA;
-        }
-        else {
-          // Do the tau-leaping.
-          a_propagator(state, nonCriticalReactions, curDt);
+          // Compute the time to the next reaction.
+          const Real dtReact = this->getCriticalTimeStep(Asum);
 
-          // Check if we need to reject the state and rather try again with a smaller non-critical time step.
-          validStep = state.isValidState();
+          if (dtSSA + dtReact < curDt) {
+            this->stepSSA(a_state, a_reactions, propensities);
 
-          if (validStep) {
-            a_state = state;
-
-            curTime += curDt;
+            dtSSA += dtReact;
+            numSSA += one;
           }
           else {
-            dtNonCrit *= 0.5;
+
+            // Next reaction occurred outside the substep -- break out of the loop.
+            dtSSA = curDt;
           }
+        }
+
+        validStep = true;
+        curTime += dtSSA;
+      }
+      else if (nonCriticalOnly) {
+        // Do the tau-leaping over the non-critical reactions only.
+        a_propagator(state, nonCriticalReactions, curDt);
+
+        // Check if we need to reject the state and rather try again with a smaller non-critical time step.
+        validStep = state.isValidState();
+
+        if (validStep) {
+          a_state = state;
+
+          curTime += curDt;
+        }
+        else {
+          dtNonCrit *= 0.5;
         }
       }
       else {
-        // TLDR: Here, one critical reaction fired. We advance the critical reaction using the SSA and the rest of the reactions
-        //       using tau-leaping.
-        this->stepSSA(state, criticalReactions, propensitiesCrit);
-
-        // Do the tau-leaping over the non-critical reactions.
+        // TLDR: Here, one critical reaction fires. We tau-leap the non-critical reactions over curDt and fire exactly
+        //       one critical reaction using the SSA. The non-critical tau-leap is performed FIRST, while the state is
+        //       still at the start of the step, so that its propensities are evaluated at the start-of-step state. The
+        //       single critical firing is then applied as a fixed stoichiometric increment -- its reaction was already
+        //       selected from the start-of-step propensities (propensitiesCrit), so applying it last is exact. This
+        //       keeps both contributions consistent with the start-of-step state, as required by the
+        //       Cao-Gillespie-Petzold scheme.
         a_propagator(state, nonCriticalReactions, curDt);
+
+        this->stepSSA(state, criticalReactions, propensitiesCrit);
 
         // Check if we need to reject the state and rather try again with a smaller non-critical time step.
         validStep = state.isValidState();

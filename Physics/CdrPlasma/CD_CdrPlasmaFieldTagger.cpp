@@ -70,7 +70,10 @@ CdrPlasmaFieldTagger::computeElectricField(EBAMRCellData& a_electricField, EBAMR
   m_timeStepper->computeElectricField(a_electricField, m_phase);
 
   // Compute |E| onto scratch
-  DataOps::vectorLength(m_scratch, a_electricField, m_amr->getMultiCutVofIterator(m_realm, m_phase));
+  DataOps::vectorLength(m_scratch,
+                        a_electricField,
+                        m_amr->getNotCoveredCells(m_realm, m_phase),
+                        m_amr->getMultiCutVofIterator(m_realm, m_phase));
 
   // Now compute grad(|E|).
   m_amr->computeGradient(a_gradElectricField, m_scratch, m_realm, phase::gas);
@@ -207,9 +210,10 @@ CdrPlasmaFieldTagger::computeTracers() const
       };
 
       // Irregular kernel region
-      VoFIterator vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
+      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
-      // Execute the kernels
+      // Execute the kernels. Not vectorizable: the tracer function is a virtual call per cell returning a
+      // Vector<Real> (heap allocation). Per-box writes -> no race.
       BoxLoops::loop<D_DECL(1, 1, 1)>(box, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
