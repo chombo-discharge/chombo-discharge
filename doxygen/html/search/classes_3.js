@@ -6,8 +6,9 @@ var searchData=
   ['dischargeinceptionstepper_3',['DischargeInceptionStepper',['../classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html',1,'Physics::DischargeInception']]],
   ['dischargeinceptiontagger_4',['DischargeInceptionTagger',['../classPhysics_1_1DischargeInception_1_1DischargeInceptionTagger.html',1,'Physics::DischargeInception']]],
   ['diskprofiledplane_5',['DiskProfiledPlane',['../classDiskProfiledPlane.html',1,'']]],
-  ['domainfluxiffab_6',['DomainFluxIFFAB',['../classDomainFluxIFFAB.html',1,'']]],
-  ['domainfluxiffabfactory_7',['DomainFluxIFFABFactory',['../classDomainFluxIFFABFactory.html',1,'']]],
-  ['doublerod_8',['DoubleRod',['../classDoubleRod.html',1,'']]],
-  ['driver_9',['Driver',['../classDriver.html',1,'']]]
+  ['domainbndryboxes_6',['DomainBndryBoxes',['../structEBHelmholtzOp_1_1DomainBndryBoxes.html',1,'EBHelmholtzOp']]],
+  ['domainfluxiffab_7',['DomainFluxIFFAB',['../classDomainFluxIFFAB.html',1,'']]],
+  ['domainfluxiffabfactory_8',['DomainFluxIFFABFactory',['../classDomainFluxIFFABFactory.html',1,'']]],
+  ['doublerod_9',['DoubleRod',['../classDoubleRod.html',1,'']]],
+  ['driver_10',['Driver',['../classDriver.html',1,'']]]
 ];

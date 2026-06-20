@@ -297,6 +297,8 @@ LAPACK and BLAS are required. Typical values:
 The ``cxxoptflags`` and ``foptflags`` variables apply to optimized builds (``OPT=TRUE/HIGH``).
 Corresponding debug flags are ``cxxdbgflags`` and ``fdbgflags``.
 
+The provided GNU configurations include ``-fno-math-errno`` in ``cxxoptflags``; this lets the compiler auto-vectorize loops that call ``sqrt``/``pow`` (it only drops the ``errno`` side-effect and does not change numerical results). The Intel configurations get the same effect via ``-Ofast``.
+
 Configuration on clusters
 _________________________
 

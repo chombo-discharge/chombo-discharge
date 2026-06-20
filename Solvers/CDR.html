@@ -677,19 +677,22 @@ Interpolation to face-centered transport fluxes are done by <code class="docutil
 </div>
 <p>Then, <code class="docutils literal notranslate"><span class="pre">veloCell</span></code> can be filled with the cell-centered velocity.
 One can use <code class="docutils literal notranslate"><span class="pre">DataOps</span></code> functions to fill the data directly using a C++ lambda:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">static</span><span class="w"> </span><span class="kt">void</span>
-<span class="nf">setCoveredValue</span><span class="p">(</span><span class="n">LevelData</span><span class="o">&lt;</span><span class="n">EBCellFAB</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_lhs</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_value</span><span class="p">);</span>
-
-<span class="cm">/**</span>
-<span class="cm">  @brief Set value on covered faces.</span>
-<span class="cm">  @param[in,out] a_lhs   Input/output data. </span>
-<span class="cm">  @param[in]   a_comp  Component to set</span>
-<span class="cm">  @param[in]   a_value Value to set</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
+<span class="cm">  @brief Polymorphic set value function. Takes a spatially varying function and sets the value in the specified component from that function.</span>
+<span class="cm">  @param[out] a_lhs      Data to set.</span>
+<span class="cm">  @param[in]  a_function Function to use for setting the value.</span>
+<span class="cm">  @param[in]  a_probLo   Lower-left corner of physical domain.</span>
+<span class="cm">  @param[in]  a_dx       Grid resolutions.</span>
+<span class="cm">  @param[in]  a_comp     Component to set.</span>
+<span class="cm">  @param[in]  a_vofIter  Pre-built VoF iterators (multiply-cut cells) for each level.</span>
 <span class="cm">*/</span>
 <span class="k">static</span><span class="w"> </span><span class="kt">void</span>
-<span class="nf">setCoveredValue</span><span class="p">(</span><span class="n">EBAMRFluxData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_lhs</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_comp</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_value</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
-
-<span class="cm">/**</span>
+<span class="nf">setValue</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w">                                        </span><span class="n">a_lhs</span><span class="p">,</span>
+<span class="w">         </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w">            </span><span class="n">a_function</span><span class="p">,</span>
+<span class="w">         </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">                                       </span><span class="n">a_probLo</span><span class="p">,</span>
+<span class="w">         </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">                                   </span><span class="n">a_dx</span><span class="p">,</span>
+<span class="w">         </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                                             </span><span class="n">a_comp</span><span class="p">,</span>
+<span class="w">         </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">LayoutData</span><span class="o">&lt;</span><span class="n">VoFIterator</span><span class="o">&gt;&gt;&gt;&amp;</span><span class="w"> </span><span class="n">a_vofIter</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>This would typically look something like this:</p>

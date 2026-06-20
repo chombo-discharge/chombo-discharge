@@ -77,6 +77,7 @@ $(function() {
 </div><!-- top -->
 <div class="header">
   <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
@@ -119,6 +120,12 @@ Collaboration diagram for EBHelmholtzOp:</div>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structEBHelmholtzOp_1_1DomainBndryBoxes.html">DomainBndryBoxes</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cached domain-boundary boxes for a single grid patch.  <a href="structEBHelmholtzOp_1_1DomainBndryBoxes.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
 Public Types</h2></td></tr>
 <tr class="memitem:a54eab4d142d767aa607a33d7be679f17" id="r_a54eab4d142d767aa607a33d7be679f17"><td class="memItemLeft" align="right" valign="top"><a id="a54eab4d142d767aa607a33d7be679f17" name="a54eab4d142d767aa607a33d7be679f17"></a>enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a54eab4d142d767aa607a33d7be679f17">Smoother</a> { <b>NoRelax</b>
@@ -641,6 +648,9 @@ Protected Attributes</h2></td></tr>
 <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::map</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt; <a class="el" href="classTracerParticleSolver.html">int</a>, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">Side::LoHiSide</a> &gt;, <a class="el" href="classTracerParticleSolver.html">Box</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_sideBox</b></td></tr>
 <tr class="memdesc:ac102826540a335e1087e506e6c87a38d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Domain boxes on each side. <br /></td></tr>
 <tr class="separator:ac102826540a335e1087e506e6c87a38d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acc5930ae02fe33a267ec0c6cd724844b" id="r_acc5930ae02fe33a267ec0c6cd724844b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">LayoutData</a>&lt; <a class="el" href="structEBHelmholtzOp_1_1DomainBndryBoxes.html">DomainBndryBoxes</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#acc5930ae02fe33a267ec0c6cd724844b">m_domainBndryBoxes</a></td></tr>
+<tr class="memdesc:acc5930ae02fe33a267ec0c6cd724844b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Precomputed domain-boundary boxes for each grid patch.  <br /></td></tr>
+<tr class="separator:acc5930ae02fe33a267ec0c6cd724844b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad0a9e2d87e1f4abcd5e39fe2f18319e4" id="r_ad0a9e2d87e1f4abcd5e39fe2f18319e4"><td class="memItemLeft" align="right" valign="top"><a id="ad0a9e2d87e1f4abcd5e39fe2f18319e4" name="ad0a9e2d87e1f4abcd5e39fe2f18319e4"></a>
 <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">IntVect</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_colors</b></td></tr>
 <tr class="memdesc:ad0a9e2d87e1f4abcd5e39fe2f18319e4"><td class="mdescLeft">&#160;</td><td class="mdescRight">"Colors" for the relaxation methods <br /></td></tr>
@@ -4818,6 +4828,31 @@ Static Protected Attributes</h2></td></tr>
 
 <p>Do coarse-fine interpolation or not. </p>
 <dl class="section note"><dt>Note</dt><dd>Used by <a class="el" href="classMFHelmholtzOp.html" title="Operator for solving multifluid Helmholtz on a grid level.">MFHelmholtzOp</a> for optimizing how calls in <a class="el" href="classEBHelmholtzOp.html" title="Helmholtz operator for equations like alpha*a(x)*phi(x) + beta*div(b(x)*grad(phi(x))) = rho.">EBHelmholtzOp</a> are made </dd></dl>
+
+</div>
+</div>
+<a id="acc5930ae02fe33a267ec0c6cd724844b" name="acc5930ae02fe33a267ec0c6cd724844b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acc5930ae02fe33a267ec0c6cd724844b">&#9670;&#160;</a></span>m_domainBndryBoxes</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">LayoutData</a>&lt;<a class="el" href="structEBHelmholtzOp_1_1DomainBndryBoxes.html">DomainBndryBoxes</a>&gt; EBHelmholtzOp::m_domainBndryBoxes</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Precomputed domain-boundary boxes for each grid patch. </p>
+<p>Filled in <a class="el" href="classEBHelmholtzOp.html#af1e883965165f53ff42eb0312c835788" title="Define stencils.">EBHelmholtzOp::defineStencils</a> and consumed by applyDomainFlux/fillDomainFlux. </p>
 
 </div>
 </div>

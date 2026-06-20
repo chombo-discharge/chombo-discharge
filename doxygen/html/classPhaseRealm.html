@@ -233,6 +233,18 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a8bf343580e57da14c48794634a986d12" id="r_a8bf343580e57da14c48794634a986d12"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRFAB</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#a8bf343580e57da14c48794634a986d12">getLevelset</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
 <tr class="memdesc:a8bf343580e57da14c48794634a986d12"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get level-set function.  <br /></td></tr>
 <tr class="separator:a8bf343580e57da14c48794634a986d12"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9399b73ac7c1a20089f9239198785d97" id="r_a9399b73ac7c1a20089f9239198785d97"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#a9399b73ac7c1a20089f9239198785d97">getRegularCells</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:a9399b73ac7c1a20089f9239198785d97"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the regular-cell mask (value 1 in regular cells, 0 elsewhere).  <br /></td></tr>
+<tr class="separator:a9399b73ac7c1a20089f9239198785d97"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae8c21e7017265e1b115c05fc40b87c46" id="r_ae8c21e7017265e1b115c05fc40b87c46"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#ae8c21e7017265e1b115c05fc40b87c46">getCoveredCells</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:ae8c21e7017265e1b115c05fc40b87c46"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the covered-cell mask (value 1 in covered cells, 0 elsewhere).  <br /></td></tr>
+<tr class="separator:ae8c21e7017265e1b115c05fc40b87c46"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae7b54139b7f4bff1ad7539c0af7ef920" id="r_ae7b54139b7f4bff1ad7539c0af7ef920"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#ae7b54139b7f4bff1ad7539c0af7ef920">getNotCoveredCells</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:ae7b54139b7f4bff1ad7539c0af7ef920"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the non-covered-cell mask (value 1 in regular/irregular cells, 0 in covered cells).  <br /></td></tr>
+<tr class="separator:ae7b54139b7f4bff1ad7539c0af7ef920"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4546a8d1464604f5be6f244cbf2b7364" id="r_a4546a8d1464604f5be6f244cbf2b7364"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#a4546a8d1464604f5be6f244cbf2b7364">getIrregularCells</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:a4546a8d1464604f5be6f244cbf2b7364"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the irregular-cell mask (value 1 in irregular/cut cells, 0 elsewhere).  <br /></td></tr>
+<tr class="separator:a4546a8d1464604f5be6f244cbf2b7364"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
@@ -289,6 +301,9 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:a5fb73c63426c1af3d83b1074cb86cef0" id="r_a5fb73c63426c1af3d83b1074cb86cef0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#a5fb73c63426c1af3d83b1074cb86cef0">defineLevelSet</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_lmin</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_numGhost</a>)</td></tr>
 <tr class="memdesc:a5fb73c63426c1af3d83b1074cb86cef0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Put the level-set on the mesh.  <br /></td></tr>
 <tr class="separator:a5fb73c63426c1af3d83b1074cb86cef0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6323ae8b4887437caa25d8c048bfaf49" id="r_a6323ae8b4887437caa25d8c048bfaf49"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#a6323ae8b4887437caa25d8c048bfaf49">defineMasks</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_lmin</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_numGhost</a>)</td></tr>
+<tr class="memdesc:a6323ae8b4887437caa25d8c048bfaf49"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the regular/covered/irregular cell masks.  <br /></td></tr>
+<tr class="separator:a6323ae8b4887437caa25d8c048bfaf49"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -398,6 +413,22 @@ Protected Attributes</h2></td></tr>
 <a class="el" href="classTracerParticleSolver.html">EBAMRFAB</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_levelset</b></td></tr>
 <tr class="memdesc:a318b7e957a7c1cbbfe11b58e149ec85c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Level-set function. <br /></td></tr>
 <tr class="separator:a318b7e957a7c1cbbfe11b58e149ec85c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac42bc054e10480896bfcc248b5129b72" id="r_ac42bc054e10480896bfcc248b5129b72"><td class="memItemLeft" align="right" valign="top"><a id="ac42bc054e10480896bfcc248b5129b72" name="ac42bc054e10480896bfcc248b5129b72"></a>
+<a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_regularCells</b></td></tr>
+<tr class="memdesc:ac42bc054e10480896bfcc248b5129b72"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cell mask with value 1 in regular cells and 0 elsewhere. <br /></td></tr>
+<tr class="separator:ac42bc054e10480896bfcc248b5129b72"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a442c99b818fa410e5f77a2c85f5a0960" id="r_a442c99b818fa410e5f77a2c85f5a0960"><td class="memItemLeft" align="right" valign="top"><a id="a442c99b818fa410e5f77a2c85f5a0960" name="a442c99b818fa410e5f77a2c85f5a0960"></a>
+<a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_coveredCells</b></td></tr>
+<tr class="memdesc:a442c99b818fa410e5f77a2c85f5a0960"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cell mask with value 1 in covered cells and 0 elsewhere. <br /></td></tr>
+<tr class="separator:a442c99b818fa410e5f77a2c85f5a0960"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae591ea86fff42b79968b057851a6b697" id="r_ae591ea86fff42b79968b057851a6b697"><td class="memItemLeft" align="right" valign="top"><a id="ae591ea86fff42b79968b057851a6b697" name="ae591ea86fff42b79968b057851a6b697"></a>
+<a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_notCoveredCells</b></td></tr>
+<tr class="memdesc:ae591ea86fff42b79968b057851a6b697"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cell mask with value 1 in non-covered (regular and irregular) cells and 0 in covered cells. <br /></td></tr>
+<tr class="separator:ae591ea86fff42b79968b057851a6b697"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aad6ad2398bd71b005a4374808663dd16" id="r_aad6ad2398bd71b005a4374808663dd16"><td class="memItemLeft" align="right" valign="top"><a id="aad6ad2398bd71b005a4374808663dd16" name="aad6ad2398bd71b005a4374808663dd16"></a>
+<a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_irregularCells</b></td></tr>
+<tr class="memdesc:aad6ad2398bd71b005a4374808663dd16"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cell mask with value 1 in irregular (cut) cells and 0 elsewhere. <br /></td></tr>
+<tr class="separator:aad6ad2398bd71b005a4374808663dd16"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7af73476212af40233d9456abaec2053" id="r_a7af73476212af40233d9456abaec2053"><td class="memItemLeft" align="right" valign="top"><a id="a7af73476212af40233d9456abaec2053" name="a7af73476212af40233d9456abaec2053"></a>
 <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LayoutData</a>&lt; <a class="el" href="classTracerParticleSolver.html">VoFIterator</a> &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_vofIter</b></td></tr>
 <tr class="memdesc:a7af73476212af40233d9456abaec2053"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cut-cell iterator (all irregular cells) <br /></td></tr>
@@ -1115,6 +1146,51 @@ To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.v
 
 </div>
 </div>
+<a id="a6323ae8b4887437caa25d8c048bfaf49" name="a6323ae8b4887437caa25d8c048bfaf49"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6323ae8b4887437caa25d8c048bfaf49">&#9670;&#160;</a></span>defineMasks()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> PhaseRealm::defineMasks </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramname"><em>a_lmin</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramname"><em>a_numGhost</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Define the regular/covered/irregular cell masks. </p>
+<p>Each mask is a cell-centered field that is 1 in cells of the corresponding type and 0 elsewhere. The masks are built geometrically from the EBISBox and let kernels replace per-cell EBISBox::isRegular/isCovered queries (which are not inlinable) with a vectorizable mask load. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_lmin</td><td>Coarsest grid level that changes </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_numGhost</td><td>Number of ghost cells </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a6c54dc8303bbeb482dd387737de0555c" name="a6c54dc8303bbeb482dd387737de0555c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a6c54dc8303bbeb482dd387737de0555c">&#9670;&#160;</a></span>defineMultigridInjection()</h2>
 
@@ -1299,6 +1375,26 @@ To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.v
 
 <p>Get coarsening operators. </p>
 <dl class="section return"><dt>Returns</dt><dd>Coarse average </dd></dl>
+
+</div>
+</div>
+<a id="ae8c21e7017265e1b115c05fc40b87c46" name="ae8c21e7017265e1b115c05fc40b87c46"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae8c21e7017265e1b115c05fc40b87c46">&#9670;&#160;</a></span>getCoveredCells()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp; PhaseRealm::getCoveredCells </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the covered-cell mask (value 1 in covered cells, 0 elsewhere). </p>
+<dl class="section return"><dt>Returns</dt><dd>m_coveredCells </dd></dl>
 
 </div>
 </div>
@@ -1642,6 +1738,26 @@ To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.v
 
 </div>
 </div>
+<a id="a4546a8d1464604f5be6f244cbf2b7364" name="a4546a8d1464604f5be6f244cbf2b7364"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4546a8d1464604f5be6f244cbf2b7364">&#9670;&#160;</a></span>getIrregularCells()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp; PhaseRealm::getIrregularCells </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the irregular-cell mask (value 1 in irregular/cut cells, 0 elsewhere). </p>
+<dl class="section return"><dt>Returns</dt><dd>m_irregularCells </dd></dl>
+
+</div>
+</div>
 <a id="a8bf343580e57da14c48794634a986d12" name="a8bf343580e57da14c48794634a986d12"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a8bf343580e57da14c48794634a986d12">&#9670;&#160;</a></span>getLevelset()</h2>
 
@@ -1742,6 +1858,26 @@ To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.v
 
 </div>
 </div>
+<a id="ae7b54139b7f4bff1ad7539c0af7ef920" name="ae7b54139b7f4bff1ad7539c0af7ef920"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae7b54139b7f4bff1ad7539c0af7ef920">&#9670;&#160;</a></span>getNotCoveredCells()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp; PhaseRealm::getNotCoveredCells </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the non-covered-cell mask (value 1 in regular/irregular cells, 0 in covered cells). </p>
+<dl class="section return"><dt>Returns</dt><dd>m_notCoveredCells </dd></dl>
+
+</div>
+</div>
 <a id="a46b9348f5c53157c5f090e7986c365d1" name="a46b9348f5c53157c5f090e7986c365d1"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a46b9348f5c53157c5f090e7986c365d1">&#9670;&#160;</a></span>getParticleMesh()</h2>
 
@@ -1799,6 +1935,26 @@ To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.v
 
 <p>Get refinement ratios. </p>
 <dl class="section return"><dt>Returns</dt><dd>Returns m_refinementRatios </dd></dl>
+
+</div>
+</div>
+<a id="a9399b73ac7c1a20089f9239198785d97" name="a9399b73ac7c1a20089f9239198785d97"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9399b73ac7c1a20089f9239198785d97">&#9670;&#160;</a></span>getRegularCells()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp; PhaseRealm::getRegularCells </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the regular-cell mask (value 1 in regular cells, 0 elsewhere). </p>
+<dl class="section return"><dt>Returns</dt><dd>m_regularCells </dd></dl>
 
 </div>
 </div>

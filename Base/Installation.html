@@ -440,6 +440,7 @@ The user must first install PETSc and set <code class="docutils literal notransl
 </ul>
 <p>The <code class="docutils literal notranslate"><span class="pre">cxxoptflags</span></code> and <code class="docutils literal notranslate"><span class="pre">foptflags</span></code> variables apply to optimized builds (<code class="docutils literal notranslate"><span class="pre">OPT=TRUE/HIGH</span></code>).
 Corresponding debug flags are <code class="docutils literal notranslate"><span class="pre">cxxdbgflags</span></code> and <code class="docutils literal notranslate"><span class="pre">fdbgflags</span></code>.</p>
+<p>The provided GNU configurations include <code class="docutils literal notranslate"><span class="pre">-fno-math-errno</span></code> in <code class="docutils literal notranslate"><span class="pre">cxxoptflags</span></code>; this lets the compiler auto-vectorize loops that call <code class="docutils literal notranslate"><span class="pre">sqrt</span></code>/<code class="docutils literal notranslate"><span class="pre">pow</span></code> (it only drops the <code class="docutils literal notranslate"><span class="pre">errno</span></code> side-effect and does not change numerical results). The Intel configurations get the same effect via <code class="docutils literal notranslate"><span class="pre">-Ofast</span></code>.</p>
 </section>
 <section id="configuration-on-clusters">
 <h3>Configuration on clusters<a class="headerlink" href="#configuration-on-clusters" title="Permalink to this heading"></a></h3>
