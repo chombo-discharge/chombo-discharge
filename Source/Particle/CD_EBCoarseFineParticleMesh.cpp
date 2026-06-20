@@ -489,22 +489,27 @@ EBCoarseFineParticleMesh::addInvalidCoarseToFine(LevelData<EBCellFAB>&       a_f
 
     // This is the regular kernel -- it sets the fine data equal to the coarse data.
     auto regularKernel = [&](const IntVect& ivCoar) -> void {
-      // May seem weird, but we are running nested box loops here. The second kernel runs over the refined box
-      // Box(IntVect::Zero, (m_refRat-1)*IntVect::Unit), which holds exactly the m_refRat^D fine-grid cells that lie on top
-      // of a coarse grid cell. So, we are iterating over that box and figuring out which cells in that box correspond to
-      // which fine cells (we just need to increment by m_refRat * ivCoar). NOTE: the upper bound must be m_refRat-1 (the box
-      // is inclusive); using m_refRat would over-iterate by one cell in each direction into the next coarse cell's footprint.
-      auto fineKernel = [&](const IntVect& iv) {
-        const IntVect ivFine = m_refRat * ivCoar + iv;
+    // Iterate the m_refRat^D fine cells lying on top of this coarse cell (the box [0, m_refRat-1]^D) and set
+    // each to the coarse value, offsetting by m_refRat * ivCoar. This is a direct index loop rather than a
+    // nested BoxLoops::loop (BoxLoops kernels must not be nested). NOTE: the upper bound is m_refRat-1
+    // (inclusive); m_refRat would over-iterate by one cell into the next coarse cell's footprint.
+#if CH_SPACEDIM == 3
+      for (int k = 0; k < m_refRat; k++) {
+#endif
+        for (int j = 0; j < m_refRat; j++) {
+          for (int i = 0; i < m_refRat; i++) {
+            const IntVect ivFine = m_refRat * ivCoar + IntVect(D_DECL(i, j, k));
 
-        fiCoDataReg(ivFine, m_comp) = coarDataReg(ivCoar, m_comp);
-      };
-
-      BoxLoops::loop<D_DECL(1, 1, 1)>(Box(IntVect::Zero, (m_refRat - 1) * IntVect::Unit), fineKernel);
+            fiCoDataReg(ivFine, m_comp) = coarDataReg(ivCoar, m_comp);
+          }
+        }
+#if CH_SPACEDIM == 3
+      }
+#endif
     };
 
     // Execute kernel over the entire coarse-grid patch.
-    // Not vectorizable: coarse->fine PWC broadcast with a nested refinement loop (strided scatter to
+    // Not vectorizable: coarse->fine PWC broadcast with an inner refinement loop (strided scatter to
     // m_refRat^D fine cells). Multi-cut N/A: cut coarse cells are overwritten by the stencil loop below.
     BoxLoops::loop<D_DECL(1, 1, 1)>(coarBox, regularKernel);
 
@@ -623,9 +628,17 @@ EBCoarseFineParticleMesh::conservativeAverageAndAdd(EBCellFAB&       a_coarData,
   // geometry-weighted stencil average (double-counting).
   auto regularKernel = [&](const IntVect& iv) -> void {
     if (ebisBoxCoar.isRegular(iv)) {
-      for (BoxIterator bit(refiBox); bit.ok(); ++bit) {
-        coarDataReg(iv, 0) += fineDataReg(m_refRat * iv + bit(), 0) * dxFactor;
+#if CH_SPACEDIM == 3
+      for (int k = refiBox.smallEnd(2); k <= refiBox.bigEnd(2); k++) {
+#endif
+        for (int j = refiBox.smallEnd(1); j <= refiBox.bigEnd(1); j++) {
+          for (int i = refiBox.smallEnd(0); i <= refiBox.bigEnd(0); i++) {
+            coarDataReg(iv, 0) += fineDataReg(m_refRat * iv + IntVect(D_DECL(i, j, k)), 0) * dxFactor;
+          }
+        }
+#if CH_SPACEDIM == 3
       }
+#endif
     }
   };
 
@@ -673,9 +686,17 @@ EBCoarseFineParticleMesh::arithmeticAverageAndAdd(EBCellFAB&       a_coarData,
   // geometry-weighted stencil average (double-counting).
   auto regularKernel = [&](const IntVect& iv) -> void {
     if (ebisBoxCoar.isRegular(iv)) {
-      for (BoxIterator bit(refiBox); bit.ok(); ++bit) {
-        coarDataReg(iv, 0) += fineDataReg(m_refRat * iv + bit(), 0) * dxFactor;
+#if CH_SPACEDIM == 3
+      for (int k = refiBox.smallEnd(2); k <= refiBox.bigEnd(2); k++) {
+#endif
+        for (int j = refiBox.smallEnd(1); j <= refiBox.bigEnd(1); j++) {
+          for (int i = refiBox.smallEnd(0); i <= refiBox.bigEnd(0); i++) {
+            coarDataReg(iv, 0) += fineDataReg(m_refRat * iv + IntVect(D_DECL(i, j, k)), 0) * dxFactor;
+          }
+        }
+#if CH_SPACEDIM == 3
       }
+#endif
     }
   };
 

@@ -789,10 +789,20 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
       build clean (3D exercises loop 157).
 - [ ] `Source/AmrMesh/CD_Realm.cpp` (1)
 - [ ] `Source/AmrMesh/CD_EBReflux.cpp` (1)
-- [ ] `Source/AmrMesh/CD_EBMGRestrict.cpp` (1)
-- [ ] `Source/AmrMesh/CD_EBMGProlong.cpp` (1)
-- [ ] `Source/AmrMesh/CD_EBCoarseToFineInterp.cpp` (1)
-- [ ] `Source/Particle/CD_EBCoarseFineParticleMesh.cpp` (2)
+- [x] `Source/AmrMesh/CD_EBMGRestrict.cpp` (1) — DONE. The inner refRat^D refinement loop in restrictResidual's
+      regularKernel (a fine->coarse gather-sum) converted from BoxIterator to a direct #if-CH_SPACEDIM==3 i/j/k
+      index loop over refineBox bounds (NOT a nested BoxLoops). Behavior-preserving. 2D + 3D build clean.
+- [x] `Source/AmrMesh/CD_EBMGProlong.cpp` (1) — DONE. The inner refRat^D refinement loop in prolongResidual's
+      regularKernel (coarse->fine scatter, gated per fine cell by isIrregular) converted to a direct i/j/k index
+      loop over refineBox bounds. Behavior-preserving. 2D + 3D build clean.
+- [x] `Source/AmrMesh/CD_EBCoarseToFineInterp.cpp` (1) — DONE. The inner refRat^D refinement loop in the PWC
+      broadcast regularKernel (interpolatePWC) converted to a direct i/j/k index loop over refiBox bounds.
+      Behavior-preserving (PWC scatter; same fine cells written). 2D + 3D build clean.
+- [x] `Source/Particle/CD_EBCoarseFineParticleMesh.cpp` (2) — DONE. The 2 inner refRat^D refinement loops in
+      conservative/arithmeticAverageAndAdd (fine->coarse gather-sum) converted from BoxIterator to direct i/j/k
+      index loops over refiBox bounds. ALSO fixed the PRE-EXISTING nested BoxLoops::loop in addInvalidCoarseToFine
+      (the fineKernel scatter; comment even said "we are running nested box loops here") -> direct i/j/k index
+      loop. No nested BoxLoops remain in the file. Behavior-preserving. 2D + 3D build clean.
 - [ ] `Source/Geometry/CD_ScanShopImplem.H` (2)
 
 ---

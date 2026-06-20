@@ -155,14 +155,22 @@ EBMGProlong::prolongResidual(LevelData<EBCellFAB>&       a_fineData,
       // writes plus the inner refinement-box loop), gated per fine cell by the out-of-line
       // ebisBoxFine.isIrregular(ivFine) query (cut cells are handled by the irregular kernel).
       auto regularKernel = [&](const IntVect& ivCoar) -> void {
-        for (BoxIterator bit(refineBox); bit.ok(); ++bit) {
-          const IntVect ivFine = m_refRat * ivCoar + bit();
+#if CH_SPACEDIM == 3
+        for (int k = refineBox.smallEnd(2); k <= refineBox.bigEnd(2); k++) {
+#endif
+          for (int j = refineBox.smallEnd(1); j <= refineBox.bigEnd(1); j++) {
+            for (int i = refineBox.smallEnd(0); i <= refineBox.bigEnd(0); i++) {
+              const IntVect ivFine = m_refRat * ivCoar + IntVect(D_DECL(i, j, k));
 
-          // Put a guard for cut-cells on the fine grid because the irregular will do those.
-          if (!(ebisBoxFine.isIrregular(ivFine))) {
-            fineDataReg(ivFine, ivar) += coarDataReg(ivCoar, 0);
+              // Put a guard for cut-cells on the fine grid because the irregular will do those.
+              if (!(ebisBoxFine.isIrregular(ivFine))) {
+                fineDataReg(ivFine, ivar) += coarDataReg(ivCoar, 0);
+              }
+            }
           }
+#if CH_SPACEDIM == 3
         }
+#endif
       };
 
       // Irregular kernel

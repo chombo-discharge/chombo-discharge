@@ -318,11 +318,19 @@ EBCoarseToFineInterp::interpolatePWC(EBCellFAB&       a_fineData,
   auto regularKernel = [&](const IntVect& coarIV) -> void {
     const Real& coarVal = coarDataReg(coarIV, a_coarVar);
 
-    for (BoxIterator bit(refiBox); bit.ok(); ++bit) {
-      const IntVect& fineIV = m_refRat * coarIV + bit();
+#if CH_SPACEDIM == 3
+    for (int k = refiBox.smallEnd(2); k <= refiBox.bigEnd(2); k++) {
+#endif
+      for (int j = refiBox.smallEnd(1); j <= refiBox.bigEnd(1); j++) {
+        for (int i = refiBox.smallEnd(0); i <= refiBox.bigEnd(0); i++) {
+          const IntVect fineIV = m_refRat * coarIV + IntVect(D_DECL(i, j, k));
 
-      fineDataReg(fineIV, a_fineVar) = coarVal;
+          fineDataReg(fineIV, a_fineVar) = coarVal;
+        }
+      }
+#if CH_SPACEDIM == 3
     }
+#endif
   };
 
   // Cut-cell kernel. This runs over all cut cells (not just multiply-cut ones): the iterator is over
