@@ -49,14 +49,13 @@ Worth doing for the MPI remap path where we move many particles at once.
    Then a single generic `h5LinearizeParticle` walks `H5Columns` instead of all
    columns. Same machinery, different index list — still one implementation.
 
-   **Implemented in the prototype.** `ParticleSoA` exposes
-   `h5BytesPerParticle()`, `h5LinearizeParticle()`, `h5DelinearizeAndAppend()`,
-   parameterized by `Traits::H5Columns`. If the traits don't declare `H5Columns`
-   it **defaults to all columns** (detected via SFINAE). On restart, columns not in
-   the subset are left default-constructed (they get recomputed), exactly like
-   `GenericParticle::H5linearIn`. Tested in `test_ParticleSoA.cpp::testH5Subset`:
-   `ItoLikeParticle` ships 104 B for MPI but only 40 B (pos+weight+energy) to HDF5,
-   and `velocity`/`mobility` come back default after a checkpoint round-trip.
+   **Implemented.** `ParticleSoA` exposes `h5BytesPerParticle()`,
+   `h5LinearizeParticle()`, `h5DelinearizeAndAppend()`, driven by an optional
+   `ParticleTraits::h5Columns` member-pointer tuple (indices derived, so the subset
+   follows column reorders). If the traits don't declare `h5Columns` it **defaults to
+   all columns** (detected via SFINAE). On restart, columns not in the subset are
+   left default-constructed (they get recomputed), exactly like
+   `GenericParticle::H5linearIn`.
 
 3. **Endianness / heterogeneous clusters.** `memcpy` assumes homogeneous byte
    order. This matches Chombo's current behavior (it also blits raw bytes), so it's

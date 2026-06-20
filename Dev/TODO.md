@@ -5,22 +5,32 @@
 Redesign the chombo-discharge particle library to get rid of Chombo's `List<P>` and
 replace the per-bin/per-patch storage with a **Struct-of-Arrays (SoA)** layout.
 
-This is a large job. The work in `Dev/` is **design and prototyping only** — we do
-**not** modify any production code under `Source/`, `Physics/`, or `Geometries/` yet.
-The point of `Dev/` is to:
+This is a large job. The work in `Dev/` is a **staging area** — we do **not** modify
+production code under `Source/`, `Physics/`, or `Geometries/` yet. The point of
+`Dev/` is to:
 
 1. Capture how particles are *actually* used across the codebase (see
    `USAGE_PATTERNS.md`).
-2. Stand up a small, standalone, compilable **proxy** of the new SoA particle core
-   (`CD_ParticleSoA.H` + `test_ParticleSoA.cpp`) that we can iterate on and test
-   against the real usage patterns, with no Chombo build required.
+2. Harden the new SoA particle core (`CD_ParticleSoA.H`, `CD_ParticleLoops.H`) and a
+   particle type (`CD_DemoParticle.H`) by exercising them on real Chombo objects via
+   a chombo-discharge test executable (`main.cpp`, built with the local `GNUmakefile`).
 3. Decide the core methodology before touching production code.
 
 ## Hard constraints (discovered)
 
-- **C++14**. Every `Make.defs.*` sets `CXXSTD = 14`. No `if constexpr`, no C++17
-  fold expressions, no inline `static constexpr` data members, no C++20 NTTP string
-  literals. The prototype is written to compile under `-std=c++14 -Wall -Wextra`.
+- **C++17** (decided — bumped up from the previous C++14 baseline). Enables the
+  single-token member-pointer field selector (`template <auto>`), inline
+  `static constexpr` data members, `if constexpr`, fold expressions.
+
+  > **⚠️ REMINDER — project-wide C++17 migration still TODO.** `Make.defs.local` has
+  > been bumped to C++17 locally, but the rest of the tree has **not** been updated
+  > yet. Before/at integration we must:
+  > - set `CXXSTD = 17` in **all** `Lib/Local/**/Make.defs.*` (and
+  >   `Make.defs.local.template`), including the `GitHub/` CI defs;
+  > - confirm the GCC and Intel oneAPI CI compilers build at C++17;
+  > - update docs that state the standard: `CLAUDE.md` (§1 build), the Sphinx docs,
+  >   and any README mentioning C++14.
+  > Search hint: `grep -rn "CXXSTD" Lib/Local` and `grep -rni "c++14\|c++11" Docs CLAUDE.md`.
 - Particle properties must remain **trivially copyable** (memcpy linearization for
   MPI and HDF5).
 - Must keep working with the **AMR + embedded-boundary** machinery
@@ -46,13 +56,15 @@ The point of `Dev/` is to:
 ## Current status
 
 - [x] Surveyed `Source/Particle` + all `ParticleContainer` users → `USAGE_PATTERNS.md`.
-- [x] Prototype SoA container `CD_ParticleSoA.H` (traits-driven, member-pointer
-      columns; derived indices; member-pointer field selector; MPI + HDF5-subset
-      linearization; append/remove/gather/scatter/get/column).
-- [x] `test_ParticleSoA.cpp` — basic ops, deposition loop, interpolation in-place
-      update, MPI linearization, field selector, reorder safety, non-mandatory field
-      update, HDF5 subset. `test_ParticleLayoutMacro.cpp` — macro vs explicit traits.
-      Both build + pass under **C++17** (`make check`).
+- [x] SoA container `CD_ParticleSoA.H` (traits-driven, member-pointer columns; derived
+      indices; member-pointer field selector; MPI + HDF5-subset linearization;
+      append/remove/gather/scatter/get/column; move-only).
+- [x] `CD_ParticleLoops.H` — SIMD-decorated particle loop (BoxLoops analogue).
+- [x] `CD_DemoParticle.H` — example particle type.
+- [x] Exposed to real Chombo: types are `Real`/`RealVect`, namespace `ChomboDischarge`.
+      `main.cpp` builds and runs as a chombo-discharge executable via the local
+      `GNUmakefile`, exercising add / iterate+remove / SIMD kernel / center-of-mass
+      merge. Next: deposition on FArrayBoxes, EB intersections, merging on real grids.
 
 ## Decisions (locked)
 
@@ -64,11 +76,11 @@ The point of `Dev/` is to:
   arg like today).
 - **SoA granularity: per-field** — one `std::vector<RealVect>` per vector column
   (not split into per-component `x[]/y[]/z[]`).
-- **Schema: explicit traits, NOT the macro** — `ParticleTraits<P>` with a `columns`
+- **Schema: explicit traits, NOT a macro** — `ParticleTraits<P>` with a `columns`
   member-pointer tuple + `positionPtr`/`weightPtr` + optional `h5Columns`. Indices
   for position/weight/HDF5 are all **derived** from member pointers (no literal
-  indices anywhere → reordering `columns` is safe). `CD_PARTICLE_LAYOUT` exists in
-  `CD_ParticleLayoutMacro.H` for reference but is not the chosen path.
+  indices anywhere → reordering `columns` is safe). A `CD_PARTICLE_LAYOUT` macro was
+  evaluated and rejected (opaque to tooling); the file was removed.
 - **Storage granularity: per-patch** — `ParticleSoA<P>` = one patch; the AMR
   container holds `LayoutData<ParticleSoA<P>>` per level. See `ARCHITECTURE.md`.
 

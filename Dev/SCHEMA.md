@@ -9,8 +9,7 @@ Two linked questions:
 - **Runtime performance is identical across all schema options.** The choice is
   ergonomics / compile-time / tooling / error messages — not speed. (Reasoning below.)
 - The **field selector can always deduce the field type** (no `Ret` template arg
-  like today). Confirmed by the prototype: `deposit<MyParticle::Weight>(mesh, soa)`
-  compiles and runs under `-std=c++14`, with `Real` vs `RealVect` deduced internally.
+  like today), with `Real` vs `RealVect` deduced internally from the selected column.
 - The clean single-token selector form depends on the C++ standard:
   - **C++14**: `deposit<P::Weight>` via a named index/enum — clean. `deposit<&P::weight>`
     via a member pointer is **not** available as one arg (see below).
@@ -96,10 +95,11 @@ the return type. The difference is only the *spelling*:
 | Member pointer | `deposit<&P::weight>` | **C++17** | Cleanest; `template <auto>`. Unifies schema+selector. |
 | Member pointer | `deposit<decltype(&P::weight), &P::weight>` or `deposit<FIELD(weight)>` | C++14 | Verbose / macro. Confirmed: single-arg member-pointer NTTP is impossible in C++14. |
 
-Verified with the compiler:
-- `deposit<MyParticle::Weight>(mesh, soa)` — **builds & runs, `-std=c++14`** (see
-  `test_ParticleSoA.cpp::testFieldSelector`); the field type is deduced.
+Verified with the compiler at the time of the decision:
+- a named-index form `deposit<MyParticle::Weight>(mesh, soa)` works in C++14, type deduced;
 - single-arg `deposit<&P::weight>` — **C++14 reject, C++17 accept** (`template <auto>`).
+
+We chose the member-pointer form and bumped to C++17 (see "locked decisions" in TODO.md).
 
 If we use member pointers, we can compile-time **match** a `&P::weight` against the
 traits tuple to find its column index — so the same member pointers can serve as both
@@ -147,20 +147,17 @@ is identified**, not on whether a macro was used:
   become incompatible** unless the format is versioned or keyed by field name. Treat
   a layout change as a checkpoint-format change.
 
-## Status in the prototype
+## Outcome
 
-Both halves of this discussion are now implemented and tested (`make check`):
-
-- **Derived indices** — `ParticleTraits` no longer carries hand-written
+- **Derived indices (kept)** — `ParticleTraits` carries no hand-written
   `positionIndex`/`weightIndex`. The user designates position/weight by member
   pointer (`positionPtr`/`weightPtr`); `ParticleSoA` derives the indices via the
-  constexpr `indexOf`. `ParticleSoA::columnIndex(&P::field)` gives a reorder-safe
-  selector for any field. Proven by `test_ParticleSoA.cpp::testReorderSafety`
-  (`weight` is column 1 in one particle, column 0 in another; both resolve right).
-- **`CD_PARTICLE_LAYOUT` macro** — `CD_ParticleLayoutMacro.H`. Generates the exact
-  same traits from one member list. `test_ParticleLayoutMacro.cpp` defines the same
-  7-field particle both ways and `static_assert`s identical column count, derived
-  indices, byte sizes, and column types.
+  constexpr `indexOf`, and `ParticleSoA::columnIndex(&P::field)` gives a reorder-safe
+  selector for any field.
+- **`CD_PARTICLE_LAYOUT` macro (rejected)** — it was prototyped and shown to generate
+  the exact same traits as the explicit form, but it is opaque to the repo's
+  clang-format/doxygen tooling and to debuggers, so we kept explicit traits and
+  removed the macro file.
 
 ## Recommendation
 
