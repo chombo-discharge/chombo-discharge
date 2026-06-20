@@ -818,8 +818,23 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
 
 ## Task 3 — Documentation audit (pre-merge)
 
-- [ ] Run `python3 CheckDocs.py` and collect all `.rst` literalincludes referencing files
-      changed on this branch.
-- [ ] For each hit, diff the referenced code block against `main` and confirm the
-      literalinclude line ranges / anchors still bracket the intended code. Fix drift.
-- [ ] Verify Doxygen builds clean: `pre-commit run doxygen-check --all-files`.
+- [x] Ran `python3 CheckDocs.py`: 11 literalincludes reference 2 branch-changed headers --
+      CD_AmrMesh.H (x10, in Source/MeshData.rst + Source/Particles.rst) and CD_DataOps.H (x1, Solvers/CDR.rst).
+      All use absolute `:lines:` ranges (no text anchors).
+- [x] Diffed each referenced range main vs HEAD:
+      * CD_AmrMesh.H: the only edit is a +36-line insertion at line 1834 (the new mask getters). All 10
+        literalincludes reference lines <= 1283 (before the insertion) -> verified BYTE-IDENTICAL main vs HEAD.
+        No drift, no fix needed.
+      * CD_DataOps.H Solvers/CDR.rst:442 (:lines: 1176-1188): DRIFTED. The DataOps audit shifted lines and
+        removed the exact main block (the no-mask setCoveredValue(LevelData<EBCellFAB>&, Real) overload).
+        NOTE: this literalinclude was ALREADY mis-pointed on main -- it showed setCoveredValue overloads under
+        prose ("fill the data directly using a C++ lambda") + a usage example DataOps::setValue(veloCell,
+        veloFunc, ...). Re-pointed it to the EBAMRCellData lambda setValue (HEAD :lines: 1277-1292) that the
+        prose + example actually describe.
+- [x] doxygen-check: PASSED (all audit comments clean; ran on every commit + explicitly).
+- [x] Sphinx literalinclude validation: full HTML build blocked by PRE-EXISTING env issues (root-owned
+      Docs/Sphinx/build/ from a prior docker/CI run; sphinx-build pipx venv missing setuptools/pkg_resources
+      and sphinx_rtd_theme). Injected setuptools<81 into the venv and validated via the `dummy` builder
+      (`sphinx-build -W --keep-going -b dummy`) which parses all 46 .rst files + resolves every literalinclude
+      with warnings-as-errors -> BUILD SUCCEEDED, exit 0, no warnings. (HTML theme/output not needed for the
+      literalinclude audit.)
