@@ -759,7 +759,12 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
 
 ## Task 2 — Normalize raw `BoxIterator` loops
 
-- [ ] `Source/Utilities/CD_DischargeIO.cpp` (2)
+- [x] `Source/Utilities/CD_DischargeIO.cpp` (2) — DONE. Both raw BoxIterator loops in writeEBHDF5 converted to
+      BoxLoops::loop<D_DECL(1,1,1)> with named lambdas (added #include <CD_BoxLoops.H>): the EB-moment-per-cell
+      loop (ebMomentKernel) and the outside-domain ghost-copy loop (ghostCopyKernel). Behavior-preserving:
+      BoxIterator and BoxLoops iterate identical lexicographic order and both kernels are order-independent
+      (EB-moment writes per-cell; ghost-copy reads the disjoint valid region iv+shift, writes the outside-domain
+      boundaryBox). discharge-lib builds clean.
 - [ ] `Source/AmrMesh/CD_EBCoarAve.cpp` (3)
 - [ ] `Source/AmrMesh/CD_TiledMeshRefine.cpp` (2)
 - [ ] `Source/AmrMesh/CD_CoarseInterpQuadCF.cpp` (2)
