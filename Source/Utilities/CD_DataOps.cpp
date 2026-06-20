@@ -126,7 +126,7 @@ DataOps::averageCellVelocityToFaceVelocity(LevelData<EBFluxFAB>&                
           auto domainFaceKernel = [&](const IntVect& iv) -> void {
             faceDataReg(iv + faceShift, 0) = cellDataReg(iv, faceDir);
           };
-          BoxLoops::loop(insideBox, domainFaceKernel);
+          BoxLoops::loop<D_DECL(1, 1, 1)>(insideBox, domainFaceKernel);
 
           FaceIterator bndryFaces(IntVectSet(insideBox), ebgraph, faceDir, FaceStop::AllBoundaryOnly);
 
@@ -336,7 +336,7 @@ DataOps::averageCellToFace(LevelData<EBFluxFAB>&                           a_fac
             faceDataReg(iv + faceShift, faceBegin + ioff) = cellDataReg(iv, cellBegin + ioff);
           }
         };
-        BoxLoops::loop(computeBox, domainFaceKernel);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(computeBox, domainFaceKernel);
 
         FaceIterator bndryFaces(IntVectSet(computeBox), ebgraph, faceDir, FaceStop::AllBoundaryOnly);
 
@@ -405,18 +405,6 @@ DataOps::averageFaceToCell(LevelData<EBCellFAB>&       a_cellData,
       // Hooks for single-valued data.
       BaseFab<Real>& cellreg = cellData.getSingleValuedFAB();
 
-      // Regular kernel. We compute phi(cell) = sum(phi(face))/sum(faces).
-      auto regularKernel = [&](const IntVect& iv) -> void {
-        constexpr Real factor = 1. / (2 * SpaceDim);
-
-        cellreg(iv, comp) = 0.0;
-        for (int dir = 0; dir < SpaceDim; dir++) {
-          const BaseFab<Real>& facereg = fluxData[dir].getSingleValuedFAB();
-
-          cellreg(iv, comp) += factor * (facereg(iv + BASISV(dir), comp) + facereg(iv, comp));
-        }
-      };
-
       // Irregular kernel. Same as the above except that we need to explicitly get the faces. Note that this is an arithmetic average,
       // i.e. not weighted by the face area fractions.
       auto irregularKernel = [&](const VolIndex& vof) -> void {
@@ -440,8 +428,29 @@ DataOps::averageFaceToCell(LevelData<EBCellFAB>&       a_cellData,
         cellData(vof, comp) *= 1. / numFaces;
       };
 
-      // Run the kernels.
-      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
+      // Regular kernel. We compute phi(cell) = sum(phi(face))/sum(faces). The direction loop is
+      // outside the cell loop (one initialization pass plus one accumulation pass per direction) so
+      // each cell loop vectorizes.
+      constexpr Real factor = 1. / (2 * SpaceDim);
+
+      auto initKernel = [&](const IntVect& iv) -> void {
+        cellreg(iv, comp) = 0.0;
+      };
+
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, initKernel);
+
+      for (int dir = 0; dir < SpaceDim; dir++) {
+        const BaseFab<Real>& facereg = fluxData[dir].getSingleValuedFAB();
+        const IntVect        shift   = BASISV(dir);
+
+        auto regularKernel = [&](const IntVect& iv) -> void {
+          cellreg(iv, comp) += factor * (facereg(iv + shift, comp) + facereg(iv, comp));
+        };
+
+        BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
+      }
+
+      // Run the irregular kernel.
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
@@ -510,6 +519,7 @@ DataOps::compute(LevelData<EBCellFAB>&                              a_data,
     VoFIterator& vofit = a_vofIter[din];
 
     for (int comp = 0; comp < nComp; comp++) {
+      // Not auto-vectorizable: the std::function callback cannot be inlined into the SIMD loop.
       auto regularKernel = [&](const IntVect& iv) -> void {
         dataReg(iv, comp) = a_func(tmpReg(iv, comp));
       };
@@ -636,14 +646,6 @@ DataOps::dotProduct(EBCellFAB&       a_result,
 
   VoFIterator& vofit = a_vofIter;
 
-  // Regular dot product kernel.
-  auto regularKernel = [&](const IntVect& iv) -> void {
-    resultReg(iv, dstComp) = 0.0;
-    for (int comp = 0; comp < numComp; comp++) {
-      resultReg(iv, dstComp) += data1Reg(iv, comp) * data2Reg(iv, comp);
-    }
-  };
-
   // Cut-cell kernel. Same as the above but the data access is obviously different (because of multi-valued cells).
   auto irregularKernel = [&](const VolIndex& vof) -> void {
     a_result(vof, dstComp) = 0.0;
@@ -653,8 +655,23 @@ DataOps::dotProduct(EBCellFAB&       a_result,
     }
   };
 
-  // Run the kernels.
-  BoxLoops::loop<D_DECL(1, 1, 1)>(a_box, regularKernel);
+  // Regular dot product. The component loop is outside the cell loop (one initialization pass plus
+  // one accumulation pass per component) so each cell loop vectorizes.
+  auto initKernel = [&](const IntVect& iv) -> void {
+    resultReg(iv, dstComp) = 0.0;
+  };
+
+  BoxLoops::loop<D_DECL(1, 1, 1)>(a_box, initKernel);
+
+  for (int comp = 0; comp < numComp; comp++) {
+    auto regularKernel = [&](const IntVect& iv) -> void {
+      resultReg(iv, dstComp) += data1Reg(iv, comp) * data2Reg(iv, comp);
+    };
+
+    BoxLoops::loop<D_DECL(1, 1, 1)>(a_box, regularKernel);
+  }
+
+  // Run the cut-cell kernel.
   BoxLoops::loop(vofit, irregularKernel);
 }
 
@@ -745,7 +762,7 @@ DataOps::filterSmooth(LevelData<EBCellFAB>& a_data,
             }
           };
 
-          BoxLoops::loop(insideBox, ghostKernel);
+          BoxLoops::loop<D_DECL(1, 1, 1)>(insideBox, ghostKernel);
         }
       }
 
@@ -1666,12 +1683,6 @@ DataOps::max(LevelData<EBCellFAB>&       a_data,
     const FArrayBox& data1Reg = data1.getFArrayBox();
     const FArrayBox& data2Reg = data2.getFArrayBox();
 
-    auto regularKernel = [&](const IntVect& iv) -> void {
-      for (int comp = 0; comp < numComp; comp++) {
-        dataReg(iv, comp) = std::max(data1Reg(iv, comp), data2Reg(iv, comp));
-      }
-    };
-
     auto irregularKernel = [&](const VolIndex& vof) -> void {
       for (int comp = 0; comp < numComp; comp++) {
         data(vof, comp) = std::max(data1(vof, comp), data2(vof, comp));
@@ -1682,8 +1693,16 @@ DataOps::max(LevelData<EBCellFAB>&       a_data,
     const Box&   cellBox = dbl[din];
     VoFIterator& vofit   = a_vofIter[din];
 
-    // Run kernels
-    BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
+    // Run kernels. The component loop is outside the cell loop so the (elementwise) cell loop
+    // vectorizes.
+    for (int comp = 0; comp < numComp; comp++) {
+      auto regularKernel = [&](const IntVect& iv) -> void {
+        dataReg(iv, comp) = std::max(data1Reg(iv, comp), data2Reg(iv, comp));
+      };
+
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
+    }
+
     BoxLoops::loop(vofit, irregularKernel);
   }
 }
@@ -1737,6 +1756,8 @@ DataOps::getMaxMin(Real&                    a_max,
     const EBCellFAB& data    = a_data[din];
     const FArrayBox& dataReg = data.getFArrayBox();
 
+    // Not auto-vectorizable: floating-point min/max reductions are only vectorized under
+    // -ffinite-math-only, which is unsafe here (this routine is used to detect non-finite data).
     auto regularKernel = [&](const IntVect& iv) -> void {
       a_max = std::max(a_max, dataReg(iv, a_comp));
       a_min = std::min(a_min, dataReg(iv, a_comp));
@@ -1910,6 +1931,8 @@ DataOps::getMaxMinNorm(Real& a_max, Real& a_min, LevelData<EBCellFAB>& a_data, L
     VoFIterator& vofit = a_vofIter[din];
 
     // Regular kernel. This computes the max/min values from sqrt(x1*x1 + x2*x2 + x3*x3 + ...).
+    // Not auto-vectorizable: floating-point min/max reductions are only vectorized under
+    // -ffinite-math-only, which is unsafe here (this routine is used to detect non-finite data).
     auto regularKernel = [&](const IntVect& iv) -> void {
       if (mask(iv, maskComp) > 0.0) {
         Real curValue = 0.0;
@@ -2061,7 +2084,11 @@ DataOps::invert(LevelData<EBFluxFAB>& a_data, LayoutData<std::array<FaceIterator
 }
 
 void
-DataOps::kappaSum(Real& a_mass, const LevelData<EBCellFAB>& a_lhs, const int a_comp, LayoutData<VoFIterator>& a_vofIter)
+DataOps::kappaSum(Real&                       a_mass,
+                  const LevelData<EBCellFAB>& a_lhs,
+                  const LevelData<EBCellFAB>& a_regularMask,
+                  const int                   a_comp,
+                  LayoutData<VoFIterator>&    a_vofIter)
 {
   CH_TIME("DataOps::kappaSum");
 
@@ -2084,20 +2111,28 @@ DataOps::kappaSum(Real& a_mass, const LevelData<EBCellFAB>& a_lhs, const int a_c
     const Box      cellbox = dbl[din];
     const EBISBox& ebisbox = lhs.getEBISBox();
 
+    // Regular-cell mask (1 in regular cells, 0 in covered/irregular cells). Replaces the per-cell
+    // ebisbox.isRegular(iv) query so the kernel reads contiguous data.
+    const FArrayBox& maskReg = a_regularMask[din].getFArrayBox();
+
+    // Accumulate into a local so the inner loop vectorizes as a reduction. a_mass is a reference
+    // parameter (and OpenMP reduction variable), which the vectorizer cannot reduce into directly.
+    Real boxMass = 0.0;
+
     auto regularKernel = [&](const IntVect& iv) -> void {
-      if (ebisbox.isRegular(iv)) {
-        a_mass += lhsReg(iv, a_comp);
-      }
+      boxMass += maskReg(iv, 0) * lhsReg(iv, a_comp);
     };
 
     auto irregularKernel = [&](const VolIndex& vof) -> void {
-      a_mass += ebisbox.volFrac(vof) * lhs(vof, a_comp);
+      boxMass += ebisbox.volFrac(vof) * lhs(vof, a_comp);
     };
 
     VoFIterator& vofit = a_vofIter[din];
 
     BoxLoops::loop<D_DECL(1, 1, 1)>(cellbox, regularKernel);
     BoxLoops::loop(vofit, irregularKernel);
+
+    a_mass += boxMass;
   }
 
   a_mass = ParallelOps::sum(a_mass);
@@ -2380,7 +2415,11 @@ DataOps::multiplyScalar(LevelData<BaseIVFAB<Real>>&       a_lhs,
 }
 
 Real
-DataOps::norm(const LevelData<EBCellFAB>& a_data, const int a_p, LayoutData<VoFIterator>& a_vofIter, const int a_comp)
+DataOps::norm(const LevelData<EBCellFAB>& a_data,
+              const LevelData<EBCellFAB>& a_regularMask,
+              const int                   a_p,
+              LayoutData<VoFIterator>&    a_vofIter,
+              const int                   a_comp)
 {
   CH_TIME("DataOps::norm");
 
@@ -2398,38 +2437,52 @@ DataOps::norm(const LevelData<EBCellFAB>& a_data, const int a_p, LayoutData<VoFI
     const EBCellFAB& data    = a_data[din];
     const FArrayBox& dataReg = data.getFArrayBox();
 
-    const Box      cellBox = dbl[din];
-    const EBISBox& ebisbox = data.getEBISBox();
+    const Box cellBox = dbl[din];
+
+    // Regular-cell mask (1 in regular cells, 0 in covered/irregular cells). Multiplied into the data
+    // before abs()/pow() so that covered cells (which may hold bogus values) contribute exactly 0 and
+    // the per-cell ebisbox.isRegular(iv) query is avoided.
+    const FArrayBox& maskReg = a_regularMask[din].getFArrayBox();
 
     VoFIterator& vofit = a_vofIter[din];
 
     if (a_p == 0) {
+      // Local accumulator, combined into the OpenMP reduction variable after the kernels.
+      // Not auto-vectorizable: the floating-point max-reduction is only vectorized under
+      // -ffinite-math-only, which is unsafe for a norm (it must be able to detect non-finite data).
+      Real Lbox = 0.0;
+
       auto regularKernel = [&](const IntVect& iv) -> void {
-        if (ebisbox.isRegular(iv)) {
-          L = std::max(L, std::abs(dataReg(iv, a_comp)));
-        }
+        Lbox = std::max(Lbox, std::abs(maskReg(iv, 0) * dataReg(iv, a_comp)));
       };
 
       auto irregularKernel = [&](const VolIndex& vof) -> void {
-        L = std::max(L, std::abs(data(vof, a_comp)));
+        Lbox = std::max(Lbox, std::abs(data(vof, a_comp)));
       };
 
       BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
+
+      L = std::max(L, Lbox);
     }
     else if (a_p > 0) {
+      // Local accumulator, combined into the OpenMP reduction variable after the kernels. The
+      // sum-reduction itself vectorizes, but std::pow with a runtime integer exponent does not, so
+      // this kernel is not auto-vectorizable (special-case p==1/p==2 if vectorization is needed).
+      Real Lbox = 0.0;
+
       auto regularKernel = [&](const IntVect& iv) -> void {
-        if (ebisbox.isRegular(iv)) {
-          L += std::pow(std::abs(dataReg(iv, a_comp)), a_p);
-        }
+        Lbox += std::pow(std::abs(maskReg(iv, 0) * dataReg(iv, a_comp)), a_p);
       };
 
       auto irregularKernel = [&](const VolIndex& vof) -> void {
-        L += std::pow(std::abs(data(vof, a_comp)), a_p);
+        Lbox += std::pow(std::abs(data(vof, a_comp)), a_p);
       };
 
       BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
+
+      L += Lbox;
     }
   }
 
@@ -2599,17 +2652,20 @@ DataOps::scale(LevelData<BaseIVFAB<Real>>& a_lhs, const Real& a_scale, LayoutDat
 }
 
 void
-DataOps::setCoveredValue(EBAMRCellData& a_lhs, const int a_comp, const Real a_value)
+DataOps::setCoveredValue(EBAMRCellData& a_lhs, const EBAMRCellData& a_coveredMask, const int a_comp, const Real a_value)
 {
   CH_TIME("DataOps::setCoveredValue(EBAMRCellData)");
 
   for (int lvl = 0; lvl < a_lhs.size(); lvl++) {
-    DataOps::setCoveredValue(*a_lhs[lvl], a_comp, a_value);
+    DataOps::setCoveredValue(*a_lhs[lvl], *a_coveredMask[lvl], a_comp, a_value);
   }
 }
 
 void
-DataOps::setCoveredValue(LevelData<EBCellFAB>& a_lhs, const int a_comp, const Real a_value)
+DataOps::setCoveredValue(LevelData<EBCellFAB>&       a_lhs,
+                         const LevelData<EBCellFAB>& a_coveredMask,
+                         const int                   a_comp,
+                         const Real                  a_value)
 {
   CH_TIME("DataOps::setCoveredValue(LD<EBCellFAB>)");
 
@@ -2625,13 +2681,15 @@ DataOps::setCoveredValue(LevelData<EBCellFAB>& a_lhs, const int a_comp, const Re
     EBCellFAB& data    = a_lhs[din];
     FArrayBox& dataReg = data.getFArrayBox();
 
-    const Box      cellBox = dbl[din];
-    const EBISBox& ebisbox = data.getEBISBox();
+    const Box cellBox = dbl[din];
+
+    // Covered-cell mask (1.0 on covered cells, 0.0 elsewhere). The kernel reads this contiguous
+    // array instead of calling the out-of-line ebisbox.isCovered(iv). A ternary (select) is used so
+    // that covered cells, which may hold bogus values, are overwritten rather than multiplied.
+    const FArrayBox& maskReg = a_coveredMask[din].getFArrayBox();
 
     auto regularKernel = [&](const IntVect& iv) -> void {
-      if (ebisbox.isCovered(iv)) {
-        dataReg(iv, a_comp) = a_value;
-      }
+      dataReg(iv, a_comp) = (maskReg(iv, 0) > 0.0) ? a_value : dataReg(iv, a_comp);
     };
 
     BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
@@ -2639,22 +2697,22 @@ DataOps::setCoveredValue(LevelData<EBCellFAB>& a_lhs, const int a_comp, const Re
 }
 
 void
-DataOps::setCoveredValue(EBAMRCellData& a_lhs, const Real a_value)
+DataOps::setCoveredValue(EBAMRCellData& a_lhs, const EBAMRCellData& a_coveredMask, const Real a_value)
 {
   CH_TIME("DataOps::setCoveredValue(EBAMRCellData, Real)");
 
   for (int lvl = 0; lvl < a_lhs.size(); lvl++) {
-    DataOps::setCoveredValue(*a_lhs[lvl], a_value);
+    DataOps::setCoveredValue(*a_lhs[lvl], *a_coveredMask[lvl], a_value);
   }
 }
 
 void
-DataOps::setCoveredValue(LevelData<EBCellFAB>& a_lhs, const Real a_value)
+DataOps::setCoveredValue(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_coveredMask, const Real a_value)
 {
   CH_TIME("DataOps::setCoveredValue(LD<EBCellFAB>, Real)");
 
   for (int comp = 0; comp < a_lhs.nComp(); comp++) {
-    DataOps::setCoveredValue(a_lhs, comp, a_value);
+    DataOps::setCoveredValue(a_lhs, a_coveredMask, comp, a_value);
   }
 }
 
@@ -2826,6 +2884,7 @@ DataOps::setValue(LevelData<MFCellFAB>&                         a_lhs,
 
       const Box box = phaseData.box();
 
+      // Not auto-vectorizable: the std::function callback cannot be inlined into the SIMD loop.
       auto regularKernel = [&](const IntVect& iv) -> void {
         const RealVect pos       = a_probLo + (0.5 * RealVect::Unit + RealVect(iv)) * a_dx;
         phaseDataFAB(iv, a_comp) = a_function(pos);
@@ -2883,7 +2942,8 @@ DataOps::setValue(LevelData<EBCellFAB>&                      a_lhs,
     const Box    box   = lhs.box();
     VoFIterator& vofit = a_vofIter[din];
 
-    // Regular cells
+    // Regular cells. Not auto-vectorizable: the std::function callback cannot be inlined into the
+    // SIMD loop.
     auto regularKernel = [&](const IntVect& iv) -> void {
       const RealVect pos = a_probLo + (0.5 * RealVect::Unit + RealVect(iv)) * a_dx;
 
@@ -2945,6 +3005,7 @@ DataOps::setValue(LevelData<EBFluxFAB>&                           a_lhs,
       const EBISBox& ebisbox = lhs.getEBISBox();
       const Box      facebox = surroundingNodes(box, dir);
 
+      // Not auto-vectorizable: the std::function callback cannot be inlined into the SIMD loop.
       auto regularKernel = [&](const IntVect& iv) -> void {
         const RealVect pos = a_probLo + RealVect(iv) * a_dx;
 
@@ -3050,7 +3111,8 @@ DataOps::setValue(LevelData<EBCellFAB>&                          a_lhs,
     const Box    box   = lhs.box();
     VoFIterator& vofit = a_vofIter[din];
 
-    // Regular kernel.
+    // Regular kernel. Not auto-vectorizable: the std::function callback cannot be inlined into the
+    // SIMD loop.
     auto regularKernel = [&](const IntVect& iv) -> void {
       const RealVect pos = a_probLo + (0.5 * RealVect::Unit + RealVect(iv)) * a_dx;
       const RealVect val = a_function(pos);
@@ -3437,18 +3499,20 @@ DataOps::squareRoot(LevelData<MFCellFAB>&                         a_lhs,
 void
 DataOps::vectorLength(EBAMRCellData&                                        a_lhs,
                       const EBAMRCellData&                                  a_rhs,
+                      const EBAMRCellData&                                  a_notCovered,
                       const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter)
 {
   CH_TIME("DataOps::vectorLength(EBAMRCellData)");
 
   for (int lvl = 0; lvl < a_lhs.size(); lvl++) {
-    DataOps::vectorLength(*a_lhs[lvl], *a_rhs[lvl], *a_vofIter[lvl]);
+    DataOps::vectorLength(*a_lhs[lvl], *a_rhs[lvl], *a_notCovered[lvl], *a_vofIter[lvl]);
   }
 }
 
 void
 DataOps::vectorLength(LevelData<EBCellFAB>&       a_lhs,
                       const LevelData<EBCellFAB>& a_rhs,
+                      const LevelData<EBCellFAB>& a_notCovered,
                       LayoutData<VoFIterator>&    a_vofIter)
 {
   CH_TIME("DataOps::vectorLength(LD<EBCellFAB>");
@@ -3468,12 +3532,16 @@ DataOps::vectorLength(LevelData<EBCellFAB>&       a_lhs,
     const Box&       box = a_lhs.disjointBoxLayout().get(din);
     const EBCellFAB& rhs = a_rhs[din];
 
-    DataOps::vectorLength(lhs, rhs, box, a_vofIter[din]);
+    DataOps::vectorLength(lhs, rhs, a_notCovered[din], box, a_vofIter[din]);
   }
 }
 
 void
-DataOps::vectorLength(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& a_box, VoFIterator& a_vofIter)
+DataOps::vectorLength(EBCellFAB&       a_lhs,
+                      const EBCellFAB& a_rhs,
+                      const EBCellFAB& a_notCovered,
+                      const Box&       a_box,
+                      VoFIterator&     a_vofIter)
 {
   CH_TIME("DataOps::vectorLength(EBCellFAB)");
 
@@ -3483,29 +3551,27 @@ DataOps::vectorLength(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& a_box
   // Component in a_lhs that put the data into.
   constexpr int comp = 0;
 
-  // Mask for skipping computation on covered cells
-  const EBISBox& ebisbox = a_lhs.getEBISBox();
-  EBCellFAB      coveredMask(ebisbox, a_box, 1);
-  coveredMask.setVal(1.0);
-  coveredMask.setCoveredCellVal(-1.0, 0);
-
   VoFIterator& vofit = a_vofIter;
 
   // Hooks to single-valued data.
-  BaseFab<Real>&       lhsReg = a_lhs.getSingleValuedFAB();
-  const BaseFab<Real>& rhsReg = a_rhs.getSingleValuedFAB();
-  const BaseFab<Real>& mask   = coveredMask.getSingleValuedFAB();
+  BaseFab<Real>&       lhsReg     = a_lhs.getSingleValuedFAB();
+  const BaseFab<Real>& rhsReg     = a_rhs.getSingleValuedFAB();
+  const BaseFab<Real>& notCovered = a_notCovered.getSingleValuedFAB();
 
+  // Regular kernel. The non-covered mask (1 in regular/irregular cells, 0 in covered cells) makes
+  // this branchless and correct on covered cells (result 0) and singly-cut cells. Multi-valued cells
+  // are recomputed by the irregular kernel, which the caller restricts to multi-cut cells. The mask
+  // is multiplied into the components before squaring so that covered cells (which may hold large or
+  // bogus values) contribute exactly 0 and cannot overflow to inf/NaN.
   auto regularKernel = [&](const IntVect& iv) -> void {
-    lhsReg(iv, comp) = 0.0;
+    Real sum = 0.0;
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      const Real r = notCovered(iv, comp) * rhsReg(iv, dir);
 
-    if (mask(iv, comp) > 0.0) {
-      for (int dir = 0; dir < SpaceDim; dir++) {
-        lhsReg(iv, comp) += rhsReg(iv, dir) * rhsReg(iv, dir);
-      }
-
-      lhsReg(iv, comp) = sqrt(lhsReg(iv, comp));
+      sum += r * r;
     }
+
+    lhsReg(iv, comp) = sqrt(sum);
   };
 
   // Irregular kernel. Same as the above.
@@ -3527,18 +3593,20 @@ DataOps::vectorLength(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& a_box
 void
 DataOps::vectorLength2(EBAMRCellData&                                        a_lhs,
                        const EBAMRCellData&                                  a_rhs,
+                       const EBAMRCellData&                                  a_notCovered,
                        const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& a_vofIter)
 {
   CH_TIME("DataOps::vectorLength2(EBAMRCellData)");
 
   for (int lvl = 0; lvl < a_lhs.size(); lvl++) {
-    DataOps::vectorLength2(*a_lhs[lvl], *a_rhs[lvl], *a_vofIter[lvl]);
+    DataOps::vectorLength2(*a_lhs[lvl], *a_rhs[lvl], *a_notCovered[lvl], *a_vofIter[lvl]);
   }
 }
 
 void
 DataOps::vectorLength2(LevelData<EBCellFAB>&       a_lhs,
                        const LevelData<EBCellFAB>& a_rhs,
+                       const LevelData<EBCellFAB>& a_notCovered,
                        LayoutData<VoFIterator>&    a_vofIter)
 {
   CH_TIME("DataOps::vectorLength2(LD<EBCellFAB>)");
@@ -3559,12 +3627,16 @@ DataOps::vectorLength2(LevelData<EBCellFAB>&       a_lhs,
     const Box&       box = dbl[din];
     const EBCellFAB& rhs = a_rhs[din];
 
-    DataOps::vectorLength2(lhs, rhs, box, a_vofIter[din]);
+    DataOps::vectorLength2(lhs, rhs, a_notCovered[din], box, a_vofIter[din]);
   }
 }
 
 void
-DataOps::vectorLength2(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& a_box, VoFIterator& a_vofIter)
+DataOps::vectorLength2(EBCellFAB&       a_lhs,
+                       const EBCellFAB& a_rhs,
+                       const EBCellFAB& a_notCovered,
+                       const Box&       a_box,
+                       VoFIterator&     a_vofIter)
 {
   CH_TIME("DataOps::vectorLength2(EBCellFAB)");
 
@@ -3574,27 +3646,27 @@ DataOps::vectorLength2(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& a_bo
   // Component in a_lhs that put the data into.
   constexpr int comp = 0;
 
-  // Mask for skipping computation on covered cells
-  const EBISBox& ebisbox = a_lhs.getEBISBox();
-  EBCellFAB      coveredMask(ebisbox, a_box, 1);
-  coveredMask.setVal(1.0);
-  coveredMask.setCoveredCellVal(-1.0, 0);
-
   VoFIterator& vofit = a_vofIter;
 
   // Hooks to single-valued data.
-  BaseFab<Real>&       lhsReg = a_lhs.getSingleValuedFAB();
-  const BaseFab<Real>& rhsReg = a_rhs.getSingleValuedFAB();
-  const BaseFab<Real>& mask   = coveredMask.getSingleValuedFAB();
+  BaseFab<Real>&       lhsReg     = a_lhs.getSingleValuedFAB();
+  const BaseFab<Real>& rhsReg     = a_rhs.getSingleValuedFAB();
+  const BaseFab<Real>& notCovered = a_notCovered.getSingleValuedFAB();
 
+  // Regular kernel. The non-covered mask (1 in regular/irregular cells, 0 in covered cells) makes
+  // this branchless and correct on covered cells (result 0) and singly-cut cells. Multi-valued cells
+  // are recomputed by the irregular kernel, which the caller restricts to multi-cut cells. The mask
+  // is multiplied into the components before squaring so that covered cells (which may hold large or
+  // bogus values) contribute exactly 0 and cannot overflow to inf/NaN.
   auto regularKernel = [&](const IntVect& iv) -> void {
-    lhsReg(iv, comp) = 0.0;
+    Real sum = 0.0;
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      const Real r = notCovered(iv, comp) * rhsReg(iv, dir);
 
-    if (mask(iv, comp) > 0.0) {
-      for (int dir = 0; dir < SpaceDim; dir++) {
-        lhsReg(iv, comp) += rhsReg(iv, dir) * rhsReg(iv, dir);
-      }
+      sum += r * r;
     }
+
+    lhsReg(iv, comp) = sum;
   };
 
   // Irregular kernel. Same as the above.

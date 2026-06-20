@@ -226,6 +226,9 @@ VofUtils::getAllVofsInRadius(const VolIndex& a_startVof,
   bx &= a_ebisbox.getDomain();
   bx &= a_ebisbox.getRegion();
 
+  // Not auto-vectorizable: this gathers cut-cell VoFs through the out-of-line ebisbox.getVoFs(iv)
+  // (which allocates a Vector per cell) and appends them to a growing Vector. The access is
+  // irregular, allocating, and order-dependent, so the loop is left as a plain cell traversal.
   auto kernel = [&](const IntVect& iv) -> void {
     const std::vector<VolIndex> vofsInThisCell = a_ebisbox.getVoFs(iv).stdVector();
 

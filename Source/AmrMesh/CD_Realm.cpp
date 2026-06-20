@@ -456,6 +456,8 @@ Realm::defineOuterHaloMask(LevelData<BaseFab<bool>>& a_coarMask,
       BaseFab<bool>&   boolMask = a_coarMask[din];
       const FArrayBox& realMask = coarMask[din];
 
+      // Not auto-vectorizable: one-time (regrid) setup loop with a data-dependent conditional write
+      // to a bool mask.
       auto kernel = [&](const IntVect& iv) -> void {
         if (realMask(iv, comp) > 0.0) {
           boolMask(iv, comp) = true;
@@ -561,13 +563,23 @@ Realm::defineInnerHaloMask(const int /*a_lmin*/)
 
             coarMask.setVal(0.0);
 
+            // Not auto-vectorizable: one-time (regrid) setup loop with a data-dependent branch plus an
+            // inner box-grow scatter (flagging all cells within the buffer).
             auto flagGrownRegion = [&](const IntVect& iv) -> void {
               if (validCells(iv, comp)) {
                 const Box grownBox = grow(Box(iv, iv), buffer) & domainCoar;
 
-                for (BoxIterator bit(grownBox); bit.ok(); ++bit) {
-                  coarMask(bit(), comp) = 1.0;
+#if CH_SPACEDIM == 3
+                for (int k = grownBox.smallEnd(2); k <= grownBox.bigEnd(2); k++) {
+#endif
+                  for (int j = grownBox.smallEnd(1); j <= grownBox.bigEnd(1); j++) {
+                    for (int i = grownBox.smallEnd(0); i <= grownBox.bigEnd(0); i++) {
+                      coarMask(IntVect(D_DECL(i, j, k)), comp) = 1.0;
+                    }
+                  }
+#if CH_SPACEDIM == 3
                 }
+#endif
               }
             };
 
@@ -601,6 +613,8 @@ Realm::defineInnerHaloMask(const int /*a_lmin*/)
             BaseFab<bool>&   curMask  = (*amrMask[lvl])[din];
             const FArrayBox& coFiMask = coFiLevelMask[din];
 
+            // Not auto-vectorizable: one-time (regrid) setup loop — coarsen() gather plus a
+            // conditional bool write.
             auto kernel = [&](const IntVect& iv) -> void {
               const IntVect coarIV = coarsen(iv, refToCoar);
 
@@ -793,6 +807,8 @@ Realm::defineOuterCFMask(LevelData<BaseFab<bool>>& a_coarMask,
       BaseFab<bool>&   boolMask = a_coarMask[din];
       const FArrayBox& realMask = coarMask[din];
 
+      // Not auto-vectorizable: one-time (regrid) setup loop with a data-dependent conditional write
+      // to a bool mask.
       auto kernel = [&](const IntVect& iv) -> void {
         if (realMask(iv, comp) > 0.0) {
           boolMask(iv, comp) = true;
@@ -859,6 +875,8 @@ Realm::defineInnerCFMask(const int /*a_lmin*/)
               const Box sideBoxLo = adjCellLo(cellBox, dir, -buffer);
               const Box sideBoxHi = adjCellHi(cellBox, dir, -buffer);
 
+              // Not auto-vectorizable: one-time (regrid) setup loop — per-cell box-grow and
+              // neighbor-overlap counting (box arithmetic plus an inner loop over neighbor boxes).
               auto kernel = [&](const IntVect& iv) -> void {
                 const Box box = grow(Box(iv, iv), buffer) & domain;
 
@@ -1023,6 +1041,8 @@ Realm::defineValidCells()
         BaseFab<bool>&   boolMask = (*m_validCells[lvl])[din];
         const FArrayBox& fabMask  = coarData[din];
 
+        // Not auto-vectorizable: one-time (regrid) setup loop with a data-dependent conditional write
+        // to a bool mask.
         auto kernel = [&](const IntVect& iv) -> void {
           if (fabMask(iv, curComp) > 0.0) {
             boolMask(iv, curComp) = false;
@@ -1316,6 +1336,30 @@ const EBAMRFAB&
 Realm::getLevelset(const phase::which_phase a_phase) const
 {
   return m_realms[a_phase]->getLevelset();
+}
+
+const EBAMRCellData&
+Realm::getRegularCells(const phase::which_phase a_phase) const
+{
+  return m_realms[a_phase]->getRegularCells();
+}
+
+const EBAMRCellData&
+Realm::getCoveredCells(const phase::which_phase a_phase) const
+{
+  return m_realms[a_phase]->getCoveredCells();
+}
+
+const EBAMRCellData&
+Realm::getNotCoveredCells(const phase::which_phase a_phase) const
+{
+  return m_realms[a_phase]->getNotCoveredCells();
+}
+
+const EBAMRCellData&
+Realm::getIrregularCells(const phase::which_phase a_phase) const
+{
+  return m_realms[a_phase]->getIrregularCells();
 }
 
 const AMRMask&

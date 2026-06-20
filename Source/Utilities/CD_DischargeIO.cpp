@@ -20,6 +20,7 @@
 
 // Our includes
 #include <CD_DischargeIO.H>
+#include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
 std::string
@@ -242,9 +243,7 @@ DischargeIO::writeEBHDF5Level(HDF5Handle&                 a_handleH5,
 
     // Set EB moment data for each cell.
     CH_START(t5);
-    for (BoxIterator bit(outputBox); bit.ok(); ++bit) {
-      const IntVect& iv = bit();
-
+    auto ebMomentKernel = [&](const IntVect& iv) -> void {
       const bool isCovered   = ebisbox.isCovered(iv);
       const bool isRegular   = ebisbox.isRegular(iv);
       const bool isIrregular = !isCovered && !isRegular;
@@ -311,7 +310,9 @@ DischargeIO::writeEBHDF5Level(HDF5Handle&                 a_handleH5,
           levelFAB(iv, indexDist) = -PolyGeom::computeAlpha(volFrac, normal) * a_dx;
         }
       }
-    }
+    };
+
+    BoxLoops::loop<D_DECL(1, 1, 1)>(outputBox, ebMomentKernel);
     CH_STOP(t5);
 
     // At this point we want to fill one layer of ghost cells OUTSIDE the domain.
@@ -327,13 +328,13 @@ DischargeIO::writeEBHDF5Level(HDF5Handle&                 a_handleH5,
           const Box boundaryBox = adjCellBox(validBox, dir, sit(), 1);
 
           if (!(domainBox.contains(boundaryBox))) {
-            for (BoxIterator bit(boundaryBox); bit.ok(); ++bit) {
-              const IntVect iv = bit();
-
+            auto ghostCopyKernel = [&](const IntVect& iv) -> void {
               for (int comp = 0; comp < numCompTotal; comp++) {
                 levelFAB(iv, comp) = levelFAB(iv + shift, comp);
               }
-            }
+            };
+
+            BoxLoops::loop<D_DECL(1, 1, 1)>(boundaryBox, ghostCopyKernel);
           }
         }
       }

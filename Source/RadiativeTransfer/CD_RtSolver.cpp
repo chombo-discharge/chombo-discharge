@@ -372,7 +372,7 @@ RtSolver::writeData(LevelData<EBCellFAB>& a_output,
   }
   CH_STOP(t4);
 
-  DataOps::setCoveredValue(scratch, 0.0);
+  DataOps::setCoveredValue(scratch, *m_amr->getCoveredCells(m_realm, m_phase)[a_level], 0.0);
 
   CH_START(t5);
   m_amr->copyData(a_output,

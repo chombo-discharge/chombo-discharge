@@ -845,6 +845,8 @@ EBLeastSquaresMultigridInterpolator::regularCoarseFineInterp(LevelData<EBCellFAB
                                                                        : m_hiCoarseInterpCF[dir][din];
 
         // Adds first derivative to the Taylor expansion.
+        // Not auto-vectorizable: coarsen(fineIV) is a gather, and the derivative terms are evaluated
+        // through out-of-line CoarseInterpQuadCF stencil calls (computeFirstDeriv/computeSecondDeriv).
         auto applyDerivs = [&](const IntVect& fineIV) -> void {
           const IntVect coarIV = coarsen(fineIV, m_refRat);
 
@@ -878,16 +880,23 @@ EBLeastSquaresMultigridInterpolator::regularCoarseFineInterp(LevelData<EBCellFAB
 
         // We've put the coarse-grid interpolation into finePhi(fineIV, a_fineVar). Now use that value
         // when doing quadratic interpolation with the additional fine-grid data.
+        // In-place 1D quadratic stencil along 'dir'. interpBox is only the first ghost layer (1 cell
+        // thick in 'dir'), so the stencil reads the valid interior cells fineIV - k*shift, which this
+        // loop never writes -- hence no loop-carried dependency and no need for a transient buffer.
+        // shift is hoisted so the offset is loop-invariant (a runtime BASISV(dir) inside the kernel
+        // would otherwise block vectorization with "more than one data ref").
+        const IntVect shift = iHiLo * BASISV(dir);
+
         auto interpOnFine = [&](const IntVect& fineIV) -> void {
           const Real phi0 = finePhi(fineIV, a_fineVar);
-          const Real phi1 = finePhi(fineIV - iHiLo * BASISV(dir), a_fineVar);
-          const Real phi2 = finePhi(fineIV - 2 * iHiLo * BASISV(dir), a_fineVar);
+          const Real phi1 = finePhi(fineIV - shift, a_fineVar);
+          const Real phi2 = finePhi(fineIV - 2 * shift, a_fineVar);
 
           finePhi(fineIV, a_fineVar) = phi0 * L0 + phi1 * L1 + phi2 * L2;
         };
 
         CH_START(t1);
-        BoxLoops::loop(interpBox, applyDerivs);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(interpBox, applyDerivs);
         CH_STOP(t1);
 
         CH_START(t2);

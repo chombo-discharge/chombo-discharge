@@ -262,7 +262,8 @@ FieldSolver::computeDisplacementField(MFAMRCellData& a_displacementField, const 
           }
         };
 
-        // Launch kernels.
+        // Not vectorizable: permittivity(pos) makes virtual BaseIF::value calls per cell.
+        // Multi-cut N/A: singly-cut cells must use centroid position (irregular path).
         BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
         BoxLoops::loop(vofit, irregularKernel);
       }
@@ -321,25 +322,33 @@ FieldSolver::computeEnergy(const MFAMRCellData& a_electricField)
         const FArrayBox&     dataReg    = data.getFArrayBox();
         const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_realm)[lvl])[din];
 
+        Real localEnergy = 0.0;
+
         auto regularKernel = [&](const IntVect& iv) -> void {
           if (validCells(iv) && ebisbox.isRegular(iv)) {
-            energy += dataReg(iv, 0) * dV;
+            localEnergy += dataReg(iv, 0) * dV;
           }
         };
 
+        // isIrregular guard removed: vofit already iterates only cut cells.
         auto irregularKernel = [&](const VolIndex& vof) -> void {
           const IntVect iv = vof.gridIndex();
-          if (validCells(iv) && ebisbox.isIrregular(iv)) {
+          if (validCells(iv)) {
             const Real kappa = ebisbox.volFrac(vof);
 
-            energy += data(vof, 0) * kappa * dV;
+            localEnergy += data(vof, 0) * kappa * dV;
           }
         };
 
         VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, a_phase)[lvl])[din];
 
+        // Not vectorizable: isRegular out-of-line + FP sum reduction.
+        // Multi-cut N/A: singly-cut cells need kappa weighting (irregular path).
         BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
         BoxLoops::loop(vofit, irregularKernel);
+
+#pragma omp atomic
+        energy += localEnergy;
       }
     }
 
@@ -1166,7 +1175,8 @@ FieldSolver::setCellPermittivities(EBCellFAB&      a_relPerm,
     a_relPerm(vof, m_comp) = this->getDielectricPermittivity(pos);
   };
 
-  // Launch kernels.
+  // Not vectorizable: getDielectricPermittivity is an out-of-line call per cell.
+  // Multi-cut N/A: singly-cut cells must use centroid position (irregular path).
   BoxLoops::loop<D_DECL(1, 1, 1)>(a_cellBox, regularKernel);
   BoxLoops::loop(a_vofit, irregularKernel);
 }
@@ -1207,7 +1217,7 @@ FieldSolver::setFacePermittivities(EBFluxFAB&                          a_relPerm
       a_relPerm[dir](face, m_comp) = this->getDielectricPermittivity(pos);
     };
 
-    // Launch kernels.
+    // Not vectorizable: getDielectricPermittivity is an out-of-line call per cell.
     BoxLoops::loop<D_DECL(1, 1, 1)>(facebox, regularKernel);
     BoxLoops::loop(faceit, irregularKernel);
   }
@@ -1519,7 +1529,7 @@ FieldSolver::writeMultifluidData(LevelData<EBCellFAB>&    a_output,
 
     scratchGas.exchange();
   }
-  CH_START(t2);
+  CH_STOP(t2);
 
   // Interpolate ghost cells on both phases.
   CH_START(t3);
@@ -1639,12 +1649,14 @@ FieldSolver::writeMultifluidData(LevelData<EBCellFAB>&    a_output,
           // In this case we are looking at a grid patch that lies on the gas-solid boundary. We need to determine which cells
           // go into the output region. We happen to know that all gas-side data is already filled, so we only need to grok
           // the solid-side data.
+          // Not vectorizable: multiple per-cell EB queries + dense data-dependent branching (plot output only).
           for (comp = 0; comp < numComp; comp++) {
             BoxLoops::loop<D_DECL(1, 1, 1)>(fabGas.box() & domain, kernel);
           }
         }
         else if (isSolidCovered && isGasIrregular) {
           // In this case we are looking at a grid patch that lies on the gas-electrode boundary.
+          // Not vectorizable: multiple per-cell EB queries + dense data-dependent branching (plot output only).
           for (comp = 0; comp < numComp; comp++) {
             BoxLoops::loop<D_DECL(1, 1, 1)>(fabGas.box() & domain, kernel);
           }
@@ -2003,6 +2015,7 @@ FieldSolver::fillCoveredPotential(MFAMRCellData& a_phi) const noexcept
           }
         };
 
+        // Not vectorizable: potential(pos) makes virtual BaseIF::value calls per cell.
         BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       }
     }

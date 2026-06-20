@@ -14,13 +14,13 @@
 #include <set>
 
 // Chombo includes
-#include <BoxIterator.H>
 #include <CH_Timer.H>
 
 // Our includes
 #include <CD_Tile.H>
 #include <CD_ParallelOps.H>
 #include <CD_TiledMeshRefine.H>
+#include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
 TiledMeshRefine::TiledMeshRefine(const ProblemDomain& a_coarsestDomain,
@@ -193,11 +193,9 @@ TiledMeshRefine::makeLevelTiles(TileSet&             a_tiles,
     const Box     fineBox    = grow(Box(fineTileIV, fineTileIV), 1) & tileBoxFine;
     const Box     box        = coarsen(fineBox, a_refToFine);
 
-    for (BoxIterator bit(box); bit.ok(); ++bit) {
-      const IntVect iv = bit();
-
+    BoxLoops::loop<D_DECL(1, 1, 1)>(box, [&](const IntVect& iv) -> void {
       a_tiles.emplace(D_DECL(iv[0], iv[1], iv[2]));
-    }
+    });
   }
 
   CH_STOP(t3);

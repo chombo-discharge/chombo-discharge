@@ -200,7 +200,8 @@ MFHelmholtzJumpBC::defineStencils()
         // Iteration space for kernel
         VoFIterator vofit(ivs, ebgraph);
 
-        // Kernel
+        // Kernel. Not auto-vectorizable (and not hot): this is a one-time, sparse VoFIterator sweep
+        // over the multi-phase interface cells that builds a least-squares gradient stencil per cell.
         auto kernel = [&](const VolIndex& vof) -> void {
           int order = -1;
 
@@ -419,6 +420,8 @@ MFHelmholtzJumpBC::buildAverageStencils()
       Vector<RefCountedPtr<BaseIndex>>   dstBaseIndex;
       Vector<RefCountedPtr<BaseStencil>> dstBaseStencil;
 
+      // Not auto-vectorizable (and not hot): one-time, sparse VoFIterator sweep that gathers the
+      // per-cell averaging stencils into the AggStencil builder vectors.
       auto kernel = [&](const VolIndex& vof) -> void {
         const VoFStencil& stencil = (m_avgStencils[din].getIVFAB(iphase))(VolIndex(vof.gridIndex(), 0), 0);
 

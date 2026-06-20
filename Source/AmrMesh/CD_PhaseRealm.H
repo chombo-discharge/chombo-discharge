@@ -414,6 +414,34 @@ public:
   const EBAMRFAB&
   getLevelset() const;
 
+  /**
+    @brief Get the regular-cell mask (value 1 in regular cells, 0 elsewhere).
+    @return m_regularCells
+  */
+  const EBAMRCellData&
+  getRegularCells() const;
+
+  /**
+    @brief Get the covered-cell mask (value 1 in covered cells, 0 elsewhere).
+    @return m_coveredCells
+  */
+  const EBAMRCellData&
+  getCoveredCells() const;
+
+  /**
+    @brief Get the non-covered-cell mask (value 1 in regular/irregular cells, 0 in covered cells).
+    @return m_notCoveredCells
+  */
+  const EBAMRCellData&
+  getNotCoveredCells() const;
+
+  /**
+    @brief Get the irregular-cell mask (value 1 in irregular/cut cells, 0 elsewhere).
+    @return m_irregularCells
+  */
+  const EBAMRCellData&
+  getIrregularCells() const;
+
 protected:
   /**
     @brief True if things on this phase can be defined. False otherwise. Only used internally. 
@@ -551,6 +579,26 @@ protected:
     @brief Level-set function
   */
   EBAMRFAB m_levelset;
+
+  /**
+    @brief Cell mask with value 1 in regular cells and 0 elsewhere.
+  */
+  EBAMRCellData m_regularCells;
+
+  /**
+    @brief Cell mask with value 1 in covered cells and 0 elsewhere.
+  */
+  EBAMRCellData m_coveredCells;
+
+  /**
+    @brief Cell mask with value 1 in non-covered (regular and irregular) cells and 0 in covered cells.
+  */
+  EBAMRCellData m_notCoveredCells;
+
+  /**
+    @brief Cell mask with value 1 in irregular (cut) cells and 0 elsewhere.
+  */
+  EBAMRCellData m_irregularCells;
 
   /**
     @brief Cut-cell iterator (all irregular cells)
@@ -769,6 +817,17 @@ protected:
   */
   void
   defineLevelSet(const int a_lmin, const int a_numGhost);
+
+  /**
+    @brief Define the regular/covered/irregular cell masks.
+    @details Each mask is a cell-centered field that is 1 in cells of the corresponding type and 0
+    elsewhere. The masks are built geometrically from the EBISBox and let kernels replace per-cell
+    EBISBox::isRegular/isCovered queries (which are not inlinable) with a vectorizable mask load.
+    @param[in] a_lmin     Coarsest grid level that changes
+    @param[in] a_numGhost Number of ghost cells
+  */
+  void
+  defineMasks(const int a_lmin, const int a_numGhost);
 };
 
 #include <CD_NamespaceFooter.H>

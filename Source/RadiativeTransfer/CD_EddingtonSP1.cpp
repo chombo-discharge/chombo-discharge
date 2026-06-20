@@ -650,7 +650,7 @@ EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData
     }
     m_multigridSolver->revert(phi, rhs, finestLevel, 0);
 
-    DataOps::setCoveredValue(a_phi, 0, 0.0);
+    DataOps::setCoveredValue(a_phi, m_amr->getCoveredCells(m_realm, m_phase), 0, 0.0);
   }
   else {
     this->advanceEuler(a_phi, scaledSource, Units::c * a_dt, a_zeroPhi);
@@ -661,7 +661,7 @@ EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData
     }
   }
 
-  DataOps::setCoveredValue(a_phi, 0.0);
+  DataOps::setCoveredValue(a_phi, m_amr->getCoveredCells(m_realm, m_phase), 0.0);
 
   m_amr->conservativeAverage(a_phi, m_realm, m_phase);
   m_amr->interpGhost(a_phi, m_realm, m_phase);
@@ -824,6 +824,11 @@ EddingtonSP1::setHelmholtzCoefficientsBox(EBCellFAB&       a_helmAco,
     helmAcoReg(iv, m_comp) = kappa;
   };
 
+  // Not vectorizable: getAbsorptionCoefficient(pos) is an out-of-line species callback per cell. One-time
+  // coefficient setup (not per-timestep). Multi-cut not applied here: the irregular kernel below overwrites
+  // (=) every cut cell with the m_dataLocation value (which differs from the cell-center value when
+  // m_dataLocation is Centroid), so folding singly-cut cells into this regular kernel would be wrong for the
+  // centroid discretization; the redundant cut-cell fill is overwritten and harmless on a setup routine.
   BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularAcoKernel); // Fill single-valued a-coefficient.
 
   // Regular B-coefficient. Recall that EBHelmholtzOp sets up the face centroid fluxes by interpolating with neighboring face-centered fluxes. The interpolating stencil
@@ -865,7 +870,9 @@ EddingtonSP1::setHelmholtzCoefficientsBox(EBCellFAB&       a_helmAco,
       helmBcoFace(face, m_comp) = 1. / (3.0 * kappa);
     };
 
-    // Run the kernels
+    // Run the kernels. Not vectorizable: getAbsorptionCoefficient(pos) is an out-of-line species callback
+    // per face. Multi-cut ALREADY applied: faceit iterates only getMultiCells (multi-cut faces); singly-cut
+    // faces are handled by the regular box loop, valid because both use the face-CENTER location.
     BoxLoops::loop<D_DECL(1, 1, 1)>(faceBox, regularBcoKernel);
     BoxLoops::loop(faceit, irregularBcoKernel);
   }

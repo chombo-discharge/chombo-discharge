@@ -335,6 +335,8 @@ EBAMRParticleMesh::defineOuterHaloMasks()
           }
         };
 
+        // Not vectorizable: one-time mask setup with a data-dependent conditional bool write plus the
+        // emptyMask early-undefine flag (loop-carried OR-reduction). Same family as the CD_Realm masks.
         BoxLoops::loop<D_DECL(1, 1, 1)>(box, kernel);
 
         // Undefine the BaseFab if the mask is empty. This means we can never do a copy.
@@ -446,6 +448,8 @@ EBAMRParticleMesh::defineTransitionMasks()
           }
         };
 
+        // Not vectorizable: one-time CFIVS mask setup with a data-dependent conditional bool write plus
+        // the emptyMask early-undefine flag (loop-carried OR-reduction). Same family as the CD_Realm masks.
         BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, kernel);
 
         // Undefine the BaseFab if the mask is empty. This means we can never do a copy.

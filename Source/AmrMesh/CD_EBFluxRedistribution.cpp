@@ -351,6 +351,8 @@ EBFluxRedistribution::defineValidCells(LevelData<BaseFab<bool>>& a_validCells) c
       BaseFab<bool>&   validCells = a_validCells[din];
       const FArrayBox& mask       = data[din];
 
+      // Not auto-vectorizable: one-time (regrid) setup loop with a data-dependent conditional write
+      // to a bool mask.
       auto kernel = [&](const IntVect& iv) -> void {
         if (mask(iv) > 0.0) {
           validCells(iv) = false;

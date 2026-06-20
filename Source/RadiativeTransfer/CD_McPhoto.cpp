@@ -968,6 +968,8 @@ McPhoto::computeNumPhysicalPhotons(EBAMRCellData&       a_numPhysPhotonsTotal,
 
       VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
+      // Not vectorizable: per-cell RNG photon draw (drawPhotons -> Random) + integer div/mod. Multi-cut
+      // N/A: regular kernel guards isRegular; cut cells go to the vofit kernel with the per-vof source.
       BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
@@ -1121,6 +1123,9 @@ McPhoto::generateComputationalPhotons(ParticleContainer<Photon>& a_photons,
       // Run the kernels.
       VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
+      // Not vectorizable: per-cell variable-length photon generation (partitionParticleWeights alloc, RNG
+      // position/direction, getAbsorptionCoefficient std::function, List append). Multi-cut N/A: regular
+      // kernel guards isRegular; cut cells go to the vofit kernel (EB-clipped sampling via computeMinValidBox).
       BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
@@ -1237,6 +1242,9 @@ McPhoto::dirtySamplePhotons(ParticleContainer<PointParticle>& a_photons,
       // Run the kernels.
       VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
+      // Not vectorizable: per-cell variable-length photon draw+absorb (partitionParticleWeights alloc, RNG
+      // position/direction, getAbsorptionCoefficient std::function, randomExponential, List append).
+      // Multi-cut N/A: regular kernel guards isRegular; cut cells go to the vofit kernel (EB-clipped sampling).
       BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }

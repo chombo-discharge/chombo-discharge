@@ -136,7 +136,8 @@ EBHelmholtzDirichletEBBC::define()
     // Iteration space for kernel
     VoFIterator vofit(ivs, ebgraph);
 
-    // Kernel
+    // Kernel. Not auto-vectorizable (and not hot): one-time, sparse VoFIterator sweep that builds a
+    // least-squares gradient stencil per cut-cell.
     auto kernel = [&](const VolIndex& vof) -> void {
       const Real areaFrac = ebisbox.bndryArea(vof);
 
@@ -235,6 +236,11 @@ EBHelmholtzDirichletEBBC::applyEBFlux(VoFIterator& a_vofit,
 
   if (!a_homogeneousPhysBC) {
 
+    // Not auto-vectorizable: sparse VoFIterator scatter over cut-cells, per-vof cost dominated by
+    // out-of-line BaseIVFAB/EBCellFAB operator() lookups (and the std::function BC value). The only
+    // loop-invariant, m_boundaryWeights[a_dit], is an inline index the compiler already hoists, and
+    // areaFrac is folded into those weights -- so there is no out-of-line lookup to lift here (cf.
+    // the EBHelmholtzNeumannEBBC EBISBox hoist).
     auto kernel = [&](const VolIndex& vof) -> void {
       Real       value = 0.0;
       const Real B     = a_Bcoef(vof, m_comp);

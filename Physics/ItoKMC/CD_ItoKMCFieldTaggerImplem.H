@@ -80,7 +80,10 @@ ItoKMCFieldTagger<S>::computeElectricField(EBAMRCellData& a_E, EBAMRCellData& a_
   CH_assert(a_gradE[0]->nComp() == SpaceDim);
 
   this->m_timeStepper->computeElectricField(a_E, this->m_phase);
-  DataOps::vectorLength(m_scratch, a_E, this->m_amr->getMultiCutVofIterator(this->m_realm, this->m_phase));
+  DataOps::vectorLength(m_scratch,
+                        a_E,
+                        this->m_amr->getNotCoveredCells(this->m_realm, this->m_phase),
+                        this->m_amr->getMultiCutVofIterator(this->m_realm, this->m_phase));
   this->m_amr->computeGradient(a_gradE, m_scratch, this->m_realm, this->m_phase);
 
   this->m_amr->conservativeAverage(a_gradE, this->m_realm, this->m_phase);
@@ -179,7 +182,8 @@ ItoKMCFieldTagger<S>::computeTagFields() const noexcept
         }
       };
 
-      // Run the kernels
+      // Run the kernels. Not vectorizable: computeTagFields is a virtual call per cell returning a
+      // Vector<Real> (heap allocation). Per-box writes -> no race.
       VoFIterator& vofit = (*this->m_amr->getVofIterator(this->m_realm, this->m_phase)[lvl])[din];
       BoxLoops::loop<D_DECL(1, 1, 1)>(box, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);

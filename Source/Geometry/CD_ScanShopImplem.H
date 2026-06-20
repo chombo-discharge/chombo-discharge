@@ -24,18 +24,24 @@ ScanShop::isRegular(Box a_box, const RealVect& a_probLo, Real a_dx) const
 {
   CH_TIME("ScanShop::isRegular(Box, RealVect, Real)");
 
-  bool ret = true;
-
-  for (BoxIterator bit(a_box); bit.ok(); ++bit) {
-    const RealVect a_point = a_probLo + a_dx * (0.5 * RealVect::Unit + RealVect(bit()));
-    if (m_baseIF->value(a_point) >= -0.5 * a_dx * sqrt(SpaceDim)) {
-      ret = false;
-
-      break;
+  // Short-circuit search over the box: a direct index loop with early return rather than a BoxLoops::loop,
+  // since BoxLoops::loop cannot break early and m_baseIF->value(...) is expensive.
+#if CH_SPACEDIM == 3
+  for (int k = a_box.smallEnd(2); k <= a_box.bigEnd(2); k++) {
+#endif
+    for (int j = a_box.smallEnd(1); j <= a_box.bigEnd(1); j++) {
+      for (int i = a_box.smallEnd(0); i <= a_box.bigEnd(0); i++) {
+        const RealVect point = a_probLo + a_dx * (0.5 * RealVect::Unit + RealVect(IntVect(D_DECL(i, j, k))));
+        if (m_baseIF->value(point) >= -0.5 * a_dx * sqrt(SpaceDim)) {
+          return false;
+        }
+      }
     }
+#if CH_SPACEDIM == 3
   }
+#endif
 
-  return ret;
+  return true;
 }
 
 inline bool
@@ -43,18 +49,24 @@ ScanShop::isCovered(Box a_box, const RealVect& a_probLo, Real a_dx) const
 {
   CH_TIME("ScanShop::isCovered(Box, RealVect, Real)");
 
-  bool ret = true;
-
-  for (BoxIterator bit(a_box); bit.ok(); ++bit) {
-    const RealVect a_point = a_probLo + a_dx * (0.5 * RealVect::Unit + RealVect(bit()));
-    if (m_baseIF->value(a_point) <= 0.5 * a_dx * sqrt(SpaceDim)) {
-      ret = false;
-
-      break;
+  // Short-circuit search over the box: a direct index loop with early return rather than a BoxLoops::loop,
+  // since BoxLoops::loop cannot break early and m_baseIF->value(...) is expensive.
+#if CH_SPACEDIM == 3
+  for (int k = a_box.smallEnd(2); k <= a_box.bigEnd(2); k++) {
+#endif
+    for (int j = a_box.smallEnd(1); j <= a_box.bigEnd(1); j++) {
+      for (int i = a_box.smallEnd(0); i <= a_box.bigEnd(0); i++) {
+        const RealVect point = a_probLo + a_dx * (0.5 * RealVect::Unit + RealVect(IntVect(D_DECL(i, j, k))));
+        if (m_baseIF->value(point) <= 0.5 * a_dx * sqrt(SpaceDim)) {
+          return false;
+        }
+      }
     }
+#if CH_SPACEDIM == 3
   }
+#endif
 
-  return ret;
+  return true;
 }
 
 inline std::vector<std::pair<Box, int>>

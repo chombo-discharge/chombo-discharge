@@ -17,6 +17,7 @@
 
 // Our includes
 #include <CD_CoarseInterpQuadCF.H>
+#include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
 CoarseInterpQuadCF::CoarseInterpQuadCF() noexcept : m_isDefined(false)
@@ -96,9 +97,7 @@ CoarseInterpQuadCF::defineStencils() noexcept
   // Go through the cells and figure out which FD approximation we will use.
   for (int dir = 0; dir < SpaceDim; dir++) {
     if (dir != m_ignoreDir) {
-      for (BoxIterator bit(m_stencilBox); bit.ok(); ++bit) {
-        const IntVect ivCoar = bit();
-
+      BoxLoops::loop<D_DECL(1, 1, 1)>(m_stencilBox, [&](const IntVect& ivCoar) -> void {
         const IntVect ivLoLo = ivCoar - 2 * BASISV(dir);
         const IntVect ivLo   = ivCoar - BASISV(dir);
         const IntVect ivHi   = ivCoar + BASISV(dir);
@@ -129,7 +128,7 @@ CoarseInterpQuadCF::defineStencils() noexcept
         else if (!useLo && useHi) {
           m_firstDerivStencils[dir](ivCoar, 0) = FirstDerivStencil::Forward1;
         }
-      }
+      });
     }
   }
 }
@@ -154,9 +153,7 @@ CoarseInterpQuadCF::defineMixedDerivStencils() noexcept
   // Go through the cells and compute finite difference approximations to the mixed derivative. We do this ala Chombo
   // and average the mixed-derivative stencils on edges of the cell since some of the cells we otherwise would need
   // might be covered by the fine grid.
-  for (BoxIterator bit(m_stencilBox); bit.ok(); ++bit) {
-    const IntVect ivCoar = bit();
-
+  BoxLoops::loop<D_DECL(1, 1, 1)>(m_stencilBox, [&](const IntVect& ivCoar) -> void {
     if (validCells.contains(grow(Box(ivCoar, ivCoar), 1))) {
       m_mixedDerivStencils(ivCoar, 0) = MixedDerivStencil::Standard;
     }
@@ -199,7 +196,7 @@ CoarseInterpQuadCF::defineMixedDerivStencils() noexcept
         derivSten *= 1.0 / numQuadrants;
       }
     }
-  }
+  });
 #endif
 }
 

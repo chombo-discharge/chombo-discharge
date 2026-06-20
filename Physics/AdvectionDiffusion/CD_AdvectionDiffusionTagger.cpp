@@ -78,8 +78,14 @@ AdvectionDiffusionTagger::tagCells(EBAMRTags& a_tags) // NOLINT(readability-conv
 
   // Compute the gradient
   m_amr->computeGradient(vec, sca, m_realm, phase::gas); // vec =  grad(phi)
-  DataOps::vectorLength(sca, vec, m_amr->getMultiCutVofIterator(m_realm, phase::gas));
-  DataOps::setCoveredValue(sca, 0, 0.0); // Set covered cell values to zero.
+  DataOps::vectorLength(sca,
+                        vec,
+                        m_amr->getNotCoveredCells(m_realm, phase::gas),
+                        m_amr->getMultiCutVofIterator(m_realm, phase::gas));
+  DataOps::setCoveredValue(sca,
+                           m_amr->getCoveredCells(m_realm, phase::gas),
+                           0,
+                           0.0); // Set covered cell values to zero.
 
   int foundTags = 0;
 
@@ -129,7 +135,8 @@ AdvectionDiffusionTagger::tagCells(EBAMRTags& a_tags) // NOLINT(readability-conv
         }
       };
 
-      // Execute kernel. Regular cells only.
+      // Execute kernel. Regular cells only. Not vectorizable: data-dependent curvature test + DenseIntVectSet
+      // insertion (tags |= iv). reduction(+ : foundTags) + per-box tags -> no race. One-time tagging.
       BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, taggingKernel);
     }
   }

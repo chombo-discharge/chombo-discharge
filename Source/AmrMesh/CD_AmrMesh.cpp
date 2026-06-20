@@ -3432,6 +3432,74 @@ AmrMesh::getLevelset(const std::string& a_realm, const phase::which_phase a_phas
   return m_realms[a_realm]->getLevelset(a_phase);
 }
 
+const EBAMRCellData&
+AmrMesh::getRegularCells(const std::string& a_realm, const phase::which_phase a_phase) const
+{
+  CH_TIME("AmrMesh::getRegularCells(string, phase::which_phase)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getRegularCells(string, phase::which_phase)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getRegularCells(string, phase::which_phase) - could not find realm '" + a_realm +
+                            "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getRegularCells(a_phase);
+}
+
+const EBAMRCellData&
+AmrMesh::getCoveredCells(const std::string& a_realm, const phase::which_phase a_phase) const
+{
+  CH_TIME("AmrMesh::getCoveredCells(string, phase::which_phase)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getCoveredCells(string, phase::which_phase)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getCoveredCells(string, phase::which_phase) - could not find realm '" + a_realm +
+                            "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getCoveredCells(a_phase);
+}
+
+const EBAMRCellData&
+AmrMesh::getNotCoveredCells(const std::string& a_realm, const phase::which_phase a_phase) const
+{
+  CH_TIME("AmrMesh::getNotCoveredCells(string, phase::which_phase)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getNotCoveredCells(string, phase::which_phase)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getNotCoveredCells(string, phase::which_phase) - could not find realm '" +
+                            a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getNotCoveredCells(a_phase);
+}
+
+const EBAMRCellData&
+AmrMesh::getIrregularCells(const std::string& a_realm, const phase::which_phase a_phase) const
+{
+  CH_TIME("AmrMesh::getIrregularCells(string, phase::which_phase)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getIrregularCells(string, phase::which_phase)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getIrregularCells(string, phase::which_phase) - could not find realm '" +
+                            a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getIrregularCells(a_phase);
+}
+
 EBAMRParticleMesh&
 AmrMesh::getParticleMesh(const std::string& a_realm, const phase::which_phase a_phase) const
 {
