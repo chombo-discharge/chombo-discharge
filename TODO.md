@@ -776,7 +776,12 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
       neighborhood box, emplacing tile coords into the a_tiles set) to BoxLoops::loop<D_DECL(1,1,1)> with a
       lambda; swapped #include <BoxIterator.H> for #include <CD_BoxLoops.H>. Order-independent set insertion ->
       behavior-preserving. discharge-lib builds clean.
-- [ ] `Source/AmrMesh/CD_CoarseInterpQuadCF.cpp` (2)
+- [x] `Source/AmrMesh/CD_CoarseInterpQuadCF.cpp` (2) — DONE. Both raw BoxIterator loops are one-time FD-stencil
+      setup over m_stencilBox with data-dependent formula selection: defineStencils (99, per-direction first/
+      second-deriv stencil choice) and defineMixedDerivStencils (157, 3D-only mixed-deriv). Converted both to
+      BoxLoops::loop<D_DECL(1,1,1)>(m_stencilBox, [&](const IntVect& ivCoar){...}); added #include
+      <CD_BoxLoops.H>. Behavior-preserving (per-cell stencil writes, order-independent). 2D + 3D discharge-lib
+      build clean (3D exercises loop 157).
 - [ ] `Source/AmrMesh/CD_Realm.cpp` (1)
 - [ ] `Source/AmrMesh/CD_EBReflux.cpp` (1)
 - [ ] `Source/AmrMesh/CD_EBMGRestrict.cpp` (1)
