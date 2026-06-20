@@ -700,7 +700,15 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
       kernel, so LEFT IN ORIGINAL isRegular-guarded form (documented in source). Multi-cut N/A throughout
       (center vs centroid; cut cells need EB geometry). NO bugs (all accumulators local or per-box-indexed --
       unlike the DischargeInception stepper's getMaxValueAndLocation race).
-- [ ] `Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp` (19)
+- [x] `Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp` (19) — DONE, documentation only. 4 Box loops + 15 VoF/Face
+      loops. All 4 Box loops are m_physics->... virtual calls per cell, each returning a Vector (heap alloc):
+      advanceReactionNetwork (905, hot reaction kernel), computeCdrDiffusionCoefficients (1502),
+      computeCdrDriftVelocities (2029), getPlotVariables (4736, plot). Inherently non-vectorizable (virtual
+      physics-interface call). The regular kernels process the full box; paired *Irregular helpers (or the
+      in-function VoF kernel) overwrite cut cells with centroid values -> overwrite, no double-count. The 15
+      VoF/Face loops are irregular (not targets). Documented the 4 Box loops. NO bugs: race scan clean -- the
+      three current+= boundary-flux loops (3992/4083/4161) all declare reduction(+ : current), and the
+      max/min go through DataOps::getMaxMinNorm (already mask+multi-cut aware). discharge-lib builds clean.
 - [ ] `Physics/ItoKMC/TimeSteppers/ItoKMCBackgroundEvaluator/CD_ItoKMCBackgroundEvaluatorImplem.H` (5)
 - [ ] `Physics/DischargeInception/CD_DischargeInceptionTagger.cpp` (4)
 - [ ] `Physics/CdrPlasma/CD_CdrPlasmaTagger.cpp` (4)

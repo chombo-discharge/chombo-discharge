@@ -902,6 +902,8 @@ CdrPlasmaStepper::advanceReactionNetworkRegularCells(Vector<FArrayBox*>&       a
 
   // Execute the kernel. This puts the source terms in cdrSrc and rteSrc, but our target data holders are the input data holders
   // with single components. So, copy the result back to these.
+  // Not vectorizable: m_physics->advanceReactionNetwork is a virtual call per cell with per-cell Vector<Real>
+  // state (the hot reaction kernel -- inherently scalar).
   BoxLoops::loop<D_DECL(1, 1, 1)>(a_cellBox, regularKernel);
 
   // Do it for the CDR solvers.
@@ -1499,6 +1501,8 @@ CdrPlasmaStepper::computeCdrDiffusionCellRegular(Vector<FArrayBox*>&       a_cdr
   };
 
   // Launch the kernel over the input box.
+  // Not vectorizable: m_physics->computeCdrDiffusionCoefficients is a virtual call per cell returning a
+  // Vector<Real> (heap allocation).
   BoxLoops::loop<D_DECL(1, 1, 1)>(a_cellBox, regularKernel);
 
   // Linearize back -- we had all the diffusion coefficients stored in the temporary data holder -- now put them in the output data holders.
@@ -2026,6 +2030,8 @@ CdrPlasmaStepper::computeCdrDriftVelocitiesRegular(Vector<FArrayBox*>&       a_c
   };
 
   // Launch the kernel
+  // Not vectorizable: m_physics->computeCdrDriftVelocities is a virtual call per cell returning a
+  // Vector<RealVect> (heap allocation).
   BoxLoops::loop<D_DECL(1, 1, 1)>(a_cellBox, regularKernel);
 }
 
@@ -4732,7 +4738,8 @@ CdrPlasmaStepper::computePhysicsPlotVars(EBAMRCellData& a_plotVars) const noexce
           }
         };
 
-        // Execute the kernels.
+        // Execute the kernels. Not vectorizable: m_physics->getPlotVariables is a virtual call per cell
+        // returning a Vector<Real> (heap allocation). Plot output.
         BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
         BoxLoops::loop(vofit, irregularKernel);
       }
