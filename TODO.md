@@ -722,7 +722,13 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
       codebase -- FieldSolver::computeEnergy, DischargeInception critical-volume -- weights cut cells by kappa).
       Fixed (sumPhi/sumSrc += kappa*...). Affects only the reported diagnostics m_sumOpticalPhi/m_sumOpticalSrc
       (not dynamics or the abort criteria). ItoKMC/JSON test builds clean.
-- [ ] `Physics/DischargeInception/CD_DischargeInceptionTagger.cpp` (4)
+- [x] `Physics/DischargeInception/CD_DischargeInceptionTagger.cpp` (4) — DONE. 2 Box loops + 2 VoF loops.
+      Both Box loops non-vectorizable: tagCells (150) is data-dependent DenseIntVectSet insertion (tags |= iv)
+      + out-of-line getManualRefinementLevel + control flow; computeTracerField (241) calls the m_alphaEff
+      std::function (effective Townsend coefficient) per cell. No race: foundTags uses reduction(max:foundTags)
+      and tags is per-box ((*a_tags[lvl])[din]). MINOR FIX: line 147 used `VoFIterator vofit = ...` (a copy of
+      the iterator + its internal VoF list) where the rest of the codebase uses `VoFIterator&`; changed to a
+      reference (behavior-preserving). discharge-lib builds clean.
 - [ ] `Physics/CdrPlasma/CD_CdrPlasmaTagger.cpp` (4)
 - [ ] `Physics/ItoKMC/CD_ItoKMCTaggerImplem.H` (2)
 - [ ] `Physics/ItoKMC/CD_ItoKMCFieldTaggerImplem.H` (2)
