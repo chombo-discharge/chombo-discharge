@@ -787,8 +787,14 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
       BoxLoops::loop<D_DECL(1,1,1)>(m_stencilBox, [&](const IntVect& ivCoar){...}); added #include
       <CD_BoxLoops.H>. Behavior-preserving (per-cell stencil writes, order-independent). 2D + 3D discharge-lib
       build clean (3D exercises loop 157).
-- [ ] `Source/AmrMesh/CD_Realm.cpp` (1)
-- [ ] `Source/AmrMesh/CD_EBReflux.cpp` (1)
+- [x] `Source/AmrMesh/CD_Realm.cpp` (1) — DONE. The inner box-grow scatter inside flagGrownRegion (a BoxLoops
+      kernel) iterated a variable-size grownBox; converted from BoxIterator to a direct #if-CH_SPACEDIM==3 i/j/k
+      index loop over grownBox.smallEnd/bigEnd bounds (NOT nested BoxLoops). One-time regrid setup.
+      Behavior-preserving. 2D + 3D build clean.
+- [x] `Source/AmrMesh/CD_EBReflux.cpp` (1) — DONE. The defineRegionsCF regular-region loop was a TOP-LEVEL
+      BoxIterator (directly in the OMP box loop, not nested), so converted to a proper
+      BoxLoops::loop<D_DECL(1,1,1)>(dbl[din], regularKernel) (mask>0 && isRegular -> cfivs |= iv). One-time
+      define setup. Behavior-preserving. Build clean.
 - [x] `Source/AmrMesh/CD_EBMGRestrict.cpp` (1) — DONE. The inner refRat^D refinement loop in restrictResidual's
       regularKernel (a fine->coarse gather-sum) converted from BoxIterator to a direct #if-CH_SPACEDIM==3 i/j/k
       index loop over refineBox bounds (NOT a nested BoxLoops). Behavior-preserving. 2D + 3D build clean.
@@ -803,7 +809,10 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
       index loops over refiBox bounds. ALSO fixed the PRE-EXISTING nested BoxLoops::loop in addInvalidCoarseToFine
       (the fineKernel scatter; comment even said "we are running nested box loops here") -> direct i/j/k index
       loop. No nested BoxLoops remain in the file. Behavior-preserving. 2D + 3D build clean.
-- [ ] `Source/Geometry/CD_ScanShopImplem.H` (2)
+- [x] `Source/Geometry/CD_ScanShopImplem.H` (2) — DONE. isRegular/isCovered were short-circuit searches
+      (BoxIterator + break on the first failing/passing cell). BoxLoops::loop cannot break early and
+      m_baseIF->value(...) is expensive, so converted to direct #if-CH_SPACEDIM==3 i/j/k index loops with an
+      early `return false` (preserves the short-circuit). Behavior-preserving. 2D + 3D build clean.
 
 ---
 

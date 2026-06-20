@@ -569,9 +569,17 @@ Realm::defineInnerHaloMask(const int /*a_lmin*/)
               if (validCells(iv, comp)) {
                 const Box grownBox = grow(Box(iv, iv), buffer) & domainCoar;
 
-                for (BoxIterator bit(grownBox); bit.ok(); ++bit) {
-                  coarMask(bit(), comp) = 1.0;
+#if CH_SPACEDIM == 3
+                for (int k = grownBox.smallEnd(2); k <= grownBox.bigEnd(2); k++) {
+#endif
+                  for (int j = grownBox.smallEnd(1); j <= grownBox.bigEnd(1); j++) {
+                    for (int i = grownBox.smallEnd(0); i <= grownBox.bigEnd(0); i++) {
+                      coarMask(IntVect(D_DECL(i, j, k)), comp) = 1.0;
+                    }
+                  }
+#if CH_SPACEDIM == 3
                 }
+#endif
               }
             };
 

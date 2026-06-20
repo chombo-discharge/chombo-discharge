@@ -145,12 +145,12 @@ EBReflux::defineRegionsCF() noexcept
 
         // Not auto-vectorizable: this is a one-time (define) setup loop with a data-dependent branch,
         // an out-of-line ebisBox.isRegular(iv) query, and DenseIntVectSet insertion.
-        for (BoxIterator bit(dbl[din]); bit.ok(); ++bit) {
-          const IntVect iv = bit();
+        auto regularKernel = [&](const IntVect& iv) -> void {
           if (mask(iv, 0) > 0.0 && ebisBox.isRegular(iv)) {
             cfivs |= iv;
           }
-        }
+        };
+        BoxLoops::loop<D_DECL(1, 1, 1)>(dbl[din], regularKernel);
 
         cfivs.recalcMinBox();
         m_regularCoarseFineRegions[din][std::make_pair(dir, sit())] = cfivs;
