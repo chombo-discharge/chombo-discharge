@@ -899,54 +899,7 @@ KMCSolver<R, State, T>::advanceTau(State&                   a_state,
       // Try big time step first.
       curDt = a_dt - curTime;
 
-      bool valid      = false;
-      T    numRejects = 0;
-
-      // Handle a rejected tau-leap substep. Until the rejection budget (m_maxIter) is exhausted we reduce the time step
-      // and retry. Once it is exhausted we fall back to a single exact SSA step over the reaction set, which always
-      // yields a valid state and guarantees forward progress, preventing an unbounded rejection loop.
-      auto handleRejection = [&]() -> void {
-        numRejects++;
-
-        if (numRejects < m_maxIter) {
-          curDt *= 0.5;
-
-          return;
-        }
-
-        // Rejection budget exhausted -- take a single exact SSA step over the reaction set.
-        const std::vector<Real> propensities = this->propensities(a_state, a_reactions);
-
-        Real Asum = 0.0;
-        for (size_t i = 0; i < propensities.size(); i++) {
-          Asum += propensities[i];
-        }
-
-        const Real dtReact = this->getCriticalTimeStep(Asum);
-
-        pout() << "KMCSolver::advanceTau - tau-leap rejected " << numRejects
-               << " times; falling back to a single SSA step" << endl;
-
-        if (dtReact < a_dt - curTime) {
-          State ssaState = a_state;
-
-          this->stepSSA(ssaState, a_reactions, propensities);
-
-          if (!ssaState.isValidState()) {
-            MayDay::Error(
-              "KMCSolver::advanceTau - fallback SSA step produced an invalid state; check reaction definitions");
-          }
-
-          a_state = ssaState;
-          curTime += dtReact;
-        }
-        else {
-          // The next reaction lies beyond the current step -- advance to the end of the step without firing.
-          curTime = a_dt;
-        }
-
-        valid = true;
-      };
+      bool valid = false;
 
       // Substepping so we end up with a valid state.
       while (!valid) {
@@ -989,7 +942,7 @@ KMCSolver<R, State, T>::advanceTau(State&                   a_state,
           curTime += curDt;
         }
         else {
-          handleRejection();
+          curDt *= 0.5;
         }
       }
     }
@@ -1083,56 +1036,7 @@ KMCSolver<R, State, T>::advanceHybrid(
 
     // Try the various advancement algorithms; the loop is for step rejection in case we end up with an invalid state, e.g.
     // a state with a negative number of particles.
-    bool validStep  = false;
-    T    numRejects = 0;
-
-    // Handle a rejected tau-leap substep. Until the rejection budget (m_maxIter) is exhausted we simply reduce the
-    // non-critical time step and retry. Once it is exhausted we fall back to a single exact SSA step over the full
-    // reaction set. A propensity-weighted SSA firing can never exhaust a reactant, so this always yields a valid state
-    // and guarantees forward progress -- this is what prevents an unbounded rejection loop when tau-leaping cannot find
-    // a valid state (e.g. when the offending firing is the unconditional critical reaction rather than the leap).
-    auto handleRejection = [&]() -> void {
-      numRejects++;
-
-      if (numRejects < m_maxIter) {
-        dtNonCrit *= 0.5;
-
-        return;
-      }
-
-      // Rejection budget exhausted -- take a single exact SSA step over the full reaction set.
-      const std::vector<Real> propensities = this->propensities(a_state, a_reactions);
-
-      Real Asum = 0.0;
-      for (size_t i = 0; i < propensities.size(); i++) {
-        Asum += propensities[i];
-      }
-
-      const Real dtReact = this->getCriticalTimeStep(Asum);
-
-      pout() << "KMCSolver::advanceHybrid - tau-leap rejected " << numRejects
-             << " times; falling back to a single SSA step" << endl;
-
-      if (dtReact < a_dt - curTime) {
-        State ssaState = a_state;
-
-        this->stepSSA(ssaState, a_reactions, propensities);
-
-        if (!ssaState.isValidState()) {
-          MayDay::Error(
-            "KMCSolver::advanceHybrid - fallback SSA step produced an invalid state; check reaction definitions");
-        }
-
-        a_state = ssaState;
-        curTime += dtReact;
-      }
-      else {
-        // The next reaction lies beyond the current step -- advance to the end of the step without firing.
-        curTime = a_dt;
-      }
-
-      validStep = true;
-    };
+    bool validStep = false;
 
     while (!validStep) {
 
@@ -1206,7 +1110,7 @@ KMCSolver<R, State, T>::advanceHybrid(
           curTime += curDt;
         }
         else {
-          handleRejection();
+          dtNonCrit *= 0.5;
         }
       }
       else {
@@ -1230,7 +1134,7 @@ KMCSolver<R, State, T>::advanceHybrid(
           curTime += curDt;
         }
         else {
-          handleRejection();
+          dtNonCrit *= 0.5;
         }
       }
     }
