@@ -1808,6 +1808,8 @@ ItoKMCStepper<I, C, R, F>::fillNeutralDensity() noexcept
 
       VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase)[lvl])[din];
 
+      // Not vectorizable: m_physics->getNeutralDensity(pos) is a virtual call per cell. One-time setup.
+      // Multi-cut N/A (center vs centroid position).
       BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
@@ -3127,7 +3129,8 @@ ItoKMCStepper<I, C, R, F>::computeMobilities(Vector<EBCellFAB*>& a_itoMobilities
 
   VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase)[a_level])[a_din];
 
-  // Run the kernels.
+  // Run the kernels. Not vectorizable: m_physics->computeMobilities is a virtual call returning a Vector<Real>
+  // (heap allocation) per cell, then scattered to the per-species data holders.
   BoxLoops::loop<D_DECL(1, 1, 1)>(a_box, regularKernel);
   BoxLoops::loop(vofit, irregularKernel);
 
@@ -3693,7 +3696,11 @@ ItoKMCStepper<I, C, R, F>::computeReactiveCdrParticlesPerCell(EBCellFAB&      a_
     const EBCellFAB& phi    = (*(solver->getPhi())[a_level])[a_din];
     const FArrayBox& phiReg = phi.getFArrayBox();
 
-    // Regular cells kernel.
+    // Regular cells kernel. NOT vectorized: the only non-inlinable blocker is the out-of-line
+    // a_ebisbox.isRegular(iv) guard, but swapping it for the precomputed regular-cell mask still leaves a
+    // conditional store that GCC does NOT if-convert (verified via opt-record: "control flow in loop"). A
+    // branchless form (ppc = mask * max(0, floor(...))) would vectorize but writes 0 into covered cells,
+    // which is not bit-identical (covered ppc values are unused/"bogus" but would change). Left as-is.
     auto regularKernel = [&](const IntVect& iv) -> void {
       if (a_ebisbox.isRegular(iv)) {
         ppcRegular(iv, idx) = std::max(zero, std::floor(phiReg(iv, 0) * vol));
@@ -4214,7 +4221,9 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPe
     }
   };
 
-  // Run the kernels.
+  // Run the kernels. Not vectorizable: the core m_physics->advanceKMC stochastic reaction advance is a
+  // virtual call per cell with per-cell std::vector state -- inherently scalar (this is the hot reaction path
+  // but cannot vectorize).
   VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase)[a_level])[a_din];
 
   BoxLoops::loop<D_DECL(1, 1, 1)>(a_box, regularKernel);

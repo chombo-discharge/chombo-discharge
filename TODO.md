@@ -681,7 +681,26 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
       pairmin). Verified: DischargeInception/Vessel builds + runs to completion under OMP_NUM_THREADS=4 x 2
       MPI ranks, exit 0, no NaN. Every other accumulator loop in the file already had a correct reduction
       clause (incl. Rdot at 3587) -- this was the only missing one.
-- [ ] `Physics/ItoKMC/CD_ItoKMCStepperImplem.H` (22)
+- [x] `Physics/ItoKMC/CD_ItoKMCStepperImplem.H` (22) — DONE. ~12 Box loops + VoF partners, all correctly
+      partitioned isRegular vs cut-cell. Categories (all non-vectorizable):
+      * Virtual m_physics calls per cell: fillNeutralDensity (1811, getNeutralDensity), computeMobilities
+        (3131), computeDiffusion (3411) [+Vector<Real> heap alloc/cell], advanceKMC (4220, the hot stochastic
+        KMC reaction advance -- inherently scalar), reconcileParticles (4567, reconcilePhotoionization +
+        particle merge), writePhysics plot vars (6165, getPlotVariables). Legitimate physics-interface
+        virtual calls.
+      * Inner linked-List<ItoParticle> iteration per cell: computeReactiveItoParticlesPerCell (3608),
+        computeReactiveMeanEnergiesPerCell (3848). (num/totalWeight/totalEnergy are cell-LOCAL accumulators
+        -- no race.)
+      * computeLoads (5713): sum into levelLoads[din.intCode()] (distinct slot per box -> no race) + isRegular
+        guard; one-time regrid.
+      VECTORIZATION CANDIDATE that did NOT pan out: computeReactiveCdrParticlesPerCell (3713) is a pure
+      arithmetic kernel ppc = max(0, floor(phi*vol)) gated only by isRegular. Tried swapping isRegular for the
+      regular-cell mask (bit-identical cell set) -- but opt-record shows GCC still does NOT if-convert the
+      conditional store ("control flow in loop"). A branchless form (ppc = mask*max(0,floor(...))) would
+      vectorize but writes 0 into covered cells (unused/"bogus" but not bit-identical), so reverted to
+      isRegular and documented in source. Multi-cut N/A throughout (center vs centroid; cut cells need EB
+      geometry). NO bugs (all accumulators local or per-box-indexed -- unlike the DischargeInception stepper's
+      getMaxValueAndLocation race). ItoKMC/JSON test builds clean.
 - [ ] `Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp` (19)
 - [ ] `Physics/ItoKMC/TimeSteppers/ItoKMCBackgroundEvaluator/CD_ItoKMCBackgroundEvaluatorImplem.H` (5)
 - [ ] `Physics/DischargeInception/CD_DischargeInceptionTagger.cpp` (4)
