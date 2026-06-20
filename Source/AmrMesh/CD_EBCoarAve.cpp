@@ -464,9 +464,10 @@ EBCoarAve::arithmeticAverage(EBCellFAB&       a_coarData,
   auto regularKernel = [&](const IntVect& iv) -> void {
     coarDataReg(iv, a_coarVar) = 0.0;
 
-    for (BoxIterator bit(refiBox); bit.ok(); ++bit) {
-      coarDataReg(iv, a_coarVar) += fineDataReg(m_refRat * iv + bit(), a_fineVar);
-    }
+    auto fineKernel = [&](const IntVect& bit) -> void {
+      coarDataReg(iv, a_coarVar) += fineDataReg(m_refRat * iv + bit, a_fineVar);
+    };
+    BoxLoops::loop<D_DECL(1, 1, 1)>(refiBox, fineKernel);
 
     coarDataReg(iv, a_coarVar) *= dxFactor;
   };
@@ -529,9 +530,10 @@ EBCoarAve::harmonicAverage(EBCellFAB&       a_coarData,
   auto regularKernel = [&](const IntVect& iv) -> void {
     Real coarVal = 0.0;
 
-    for (BoxIterator bit(refiBox); bit.ok(); ++bit) {
-      coarVal += 1.0 / fineDataReg(m_refRat * iv + bit(), a_fineVar);
-    }
+    auto fineKernel = [&](const IntVect& bit) -> void {
+      coarVal += 1.0 / fineDataReg(m_refRat * iv + bit, a_fineVar);
+    };
+    BoxLoops::loop<D_DECL(1, 1, 1)>(refiBox, fineKernel);
 
     coarDataReg(iv, a_coarVar) = numPerCoar / coarVal;
   };
@@ -597,9 +599,10 @@ EBCoarAve::conservativeAverage(EBCellFAB&       a_coarData,
   auto regularKernel = [&](const IntVect& iv) -> void {
     coarDataReg(iv, a_coarVar) = 0.0;
 
-    for (BoxIterator bit(refiBox); bit.ok(); ++bit) {
-      coarDataReg(iv, a_coarVar) += fineDataReg(m_refRat * iv + bit(), a_fineVar);
-    }
+    auto fineKernel = [&](const IntVect& bit) -> void {
+      coarDataReg(iv, a_coarVar) += fineDataReg(m_refRat * iv + bit, a_fineVar);
+    };
+    BoxLoops::loop<D_DECL(1, 1, 1)>(refiBox, fineKernel);
 
     coarDataReg(iv, a_coarVar) *= dxFactor;
   };

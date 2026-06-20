@@ -765,7 +765,12 @@ Files sorted by occurrence count (all overloads). Triage each call for the `Box`
       BoxIterator and BoxLoops iterate identical lexicographic order and both kernels are order-independent
       (EB-moment writes per-cell; ghost-copy reads the disjoint valid region iv+shift, writes the outside-domain
       boundaryBox). discharge-lib builds clean.
-- [ ] `Source/AmrMesh/CD_EBCoarAve.cpp` (3)
+- [x] `Source/AmrMesh/CD_EBCoarAve.cpp` (3) — DONE. The 3 raw BoxIterator loops were the inner refinement
+      loops inside the cell-averaging regular kernels (arithmetic/harmonic/conservative). Converted each to a
+      nested BoxLoops::loop<D_DECL(1,1,1)>(refiBox, fineKernel) -- matching the EBCoarseFineParticleMesh
+      addInvalidCoarseToFine precedent and the branch convention. (The face-averaging variants in this file use
+      explicit i/j/k loops with face-normal DoLoop guards, which are not raw BoxIterators -- left as-is.)
+      Behavior-preserving: same iteration order, kernel logic unchanged. discharge-lib builds clean.
 - [ ] `Source/AmrMesh/CD_TiledMeshRefine.cpp` (2)
 - [ ] `Source/AmrMesh/CD_CoarseInterpQuadCF.cpp` (2)
 - [ ] `Source/AmrMesh/CD_Realm.cpp` (1)
