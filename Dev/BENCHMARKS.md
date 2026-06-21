@@ -42,6 +42,9 @@ Decision-support data comparing three per-patch particle storages for chombo-dis
 | (4) Build (allocation)              |  4.43 | **0.65** | 1.25 | **vector\<P\>** |
 | (5) Remap (scatter -> 64 buckets)   |  6.36 | **3.34** | 5.65 | **vector\<P\>** |
 | (6) MPI packing (serialize 32 B/p)  |  1.23 | 0.59  | 0.57 | contiguity (vec≈SoA, ~2.1x vs List) |
+| (7) Euler advance `x += v·dt`       |  2.23 | 1.98  | 2.20 / **0.46**‡ | **SoA per-component only** |
+
+‡ Euler advance: SoA `vector<RealVect>` = 2.20 (no better than List!), SoA *per-component* = 0.46.
 
 \* transform List figure is the *compact* list (best case). † SoA `vector<RealVect>`
 = 0.45, SoA *per-component* = 0.31.
@@ -70,6 +73,30 @@ Shuffle count tracks performance exactly. SoA is **1.74x** faster than `vector<P
 and per-component a further **1.43x** — this is the only operation where the column
 split pays off beyond plain contiguity.
 
+## Euler advance `x += v·dt`, in detail (the canonical particle update)
+
+This reads *two* vector fields (x, v) and writes *one* (x) — the common case (velocity
+advance, position advance). The result is the most important refinement of the whole
+suite:
+
+| Layout | ns/p | vs List | vectorized? (assembly) |
+|---|---:|---:|---|
+| List                   | 2.23 | 1.0x | no — scalar, pointer-chased |
+| vector\<P\> AoS        | 1.98 | 1.1x | partially (shuffle-heavy) |
+| **SoA `vector<RealVect>`** | 2.20 | **1.0x** | **NO — fully scalar** (`vmulsd`/`vfmadd*sd`, zero packed) |
+| **SoA per-component**  | 0.46 | **4.8x** | yes — packed FMA |
+
+**Interleaved `vector<RealVect>` SoA gives essentially zero benefit over `List` for the
+canonical particle update.** `advanceSoA` compiles to entirely scalar FP: `pos[i] +=
+vel[i]*dt` goes through `RealVect`'s user-defined `operator+=`/`operator*` on interleaved
+storage, and the compiler does not vectorize it across particles. Only the
+**per-component** layout (plain `Real` arrays) vectorizes — and then it is **4.8x**.
+
+Contrast with the `½|x|²` transform (which writes a *scalar*): there the `RealVect`
+column did vectorize (with shuffles). So the SoA-over-`vector<P>` advantage is **highly
+workload-dependent**, and for genuine vector-in/vector-out updates it materializes
+**only with per-component columns**, not with the per-field `vector<RealVect>` default.
+
 ## Why deposition/interpolation don't benefit (assembly)
 
 `depositSoA`/`depositList` compile to **entirely scalar** FP (`vmulsd`, `vfmadd*sd`,
@@ -92,9 +119,14 @@ local reduction) — not by layout or SIMD.
    column split.** `vector<P>` matches or *beats* `ParticleSoA` on 5 of 6 operations,
    including the allocation-heavy ones (build 6.8x and beats SoA; remap 1.9x and beats
    SoA — SoA loses there to multi-column reallocation churn).
-2. **`ParticleSoA` uniquely wins only the SIMD streaming transform** (1.7x over
-   `vector<P>`; 4x over List with per-component). That is the kernel class
-   `ParticleLoops` targets.
+2. **`ParticleSoA` uniquely wins only on SIMD per-particle field kernels — and only
+   with per-component columns.** For the canonical Euler advance `x += v·dt`, the
+   per-field `vector<RealVect>` SoA is **no faster than `List`** (it stays scalar);
+   only the **per-component** layout vectorizes (4.8x). The `½|x|²` transform (scalar
+   output) is the friendlier case where `vector<RealVect>` already gets ~2.8x. So the
+   SIMD win is real but **conditional on per-component storage** for vector-field
+   updates, which is a heavier design (3 columns per vector field, RealVect view
+   rebuilt on gather, more complex linearization).
 3. **Deposition, interpolation, MPI packing**: contiguity is what matters; `vector<P>`
    and SoA tie, both ~1.2–2.1x over `List`.
 
@@ -104,9 +136,12 @@ local reduction) — not by layout or SIMD.
   patch.** It captures the allocation (6.8x), remap (1.9x), MPI-packing (2x) and
   interpolation (1.2x) wins, keeps `p.field()` ergonomics, and is far simpler than SoA.
 - **Adopt full `ParticleSoA` only if** (a) per-particle field-update / SIMD streaming
-  kernels are hot in the real pipeline (then SoA is 1.7–4x there, per-component best),
-  or (b) **GPU offload** is on the roadmap (SoA is the standard device layout — then it
-  is close to mandatory regardless of these CPU numbers).
+  kernels are hot in the real pipeline AND you go **per-component** for the vector
+  fields (per-field `vector<RealVect>` gives ~nothing for `x += v·dt` — see §Euler
+  advance), or (b) **GPU offload** is on the roadmap (SoA, naturally per-component, is
+  the standard device layout — then it is close to mandatory regardless of these CPU
+  numbers). Note per-component is the heavier variant (more columns, RealVect view
+  reconstructed on gather, more involved linearization).
 - **Load imbalance** is orthogonal: a uniform per-rank speedup still helps the
   bottleneck rank; the lever for imbalance is load balancing, which `vector<P>`/SoA both
   make cheaper (vector more so via faster remap).

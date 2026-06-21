@@ -9,15 +9,18 @@
   @brief  Benchmarks comparing Chombo List<P> with ParticleSoA<P>.
   @author Robert Marskar
   @details
-  Five micro-benchmarks on a single grid patch, all using the identical particle
-  data (position + weight) and identical math, so the measured difference is the
-  storage layout (linked-list Array-of-Structs vs contiguous Struct-of-Arrays):
+  Micro-benchmarks on a single grid patch, all using the identical particle data and
+  identical math, so the measured difference is the storage layout (linked-list
+  Array-of-Structs vs contiguous Struct-of-Arrays). Three storages are compared:
+  List<P>, vector<P> (AoS), and ParticleSoA<P> (with a per-component variant):
 
     1. CIC deposition   (particle weight -> FArrayBox; a scatter)
     2. CIC interpolation(FArrayBox -> particle scalar; a gather)
-    3. streaming transform (per-particle update; SoA path uses ParticleLoops SIMD)
+    3. streaming transform (weight = 0.5|x|^2; SoA path uses ParticleLoops SIMD)
     4. build            (construct the container; allocation cost)
     5. remap            (scatter particles into K destination containers)
+    6. MPI packing      (serialize position + weight into a byte buffer)
+    7. Euler advance    (x += v*dt; the canonical particle update)
 
   Grid: all-regular FArrayBox, 16 valid + 2 ghost cells per coordinate (20^3
   allocated), single component. Particles: 16 per valid cell.
@@ -70,6 +73,25 @@ namespace ChomboDischarge {
     static constexpr auto columns     = std::make_tuple(&BenchParticle::m_position, &BenchParticle::m_weight);
     static constexpr auto positionPtr = &BenchParticle::m_position;
     static constexpr auto weightPtr   = &BenchParticle::m_weight;
+  };
+
+  /** @brief Particle carrying a velocity, for the Euler advance x += v*dt. */
+  struct MoverParticle
+  {
+    RealVect m_position = RealVect::Zero;
+    RealVect m_velocity = RealVect::Zero;
+    Real     m_weight   = 0.0; // required by ParticleSoA (mandatory weight column); unused by the advance
+  };
+
+  /** @brief SoA layout for MoverParticle. */
+  template <>
+  struct ParticleTraits<MoverParticle>
+  {
+    static constexpr auto columns     = std::make_tuple(&MoverParticle::m_position,
+                                                    &MoverParticle::m_velocity,
+                                                    &MoverParticle::m_weight);
+    static constexpr auto positionPtr = &MoverParticle::m_position;
+    static constexpr auto weightPtr   = &MoverParticle::m_weight;
   };
 
 } // namespace ChomboDischarge
@@ -280,6 +302,56 @@ namespace {
     BenchParticle* p = a_v.data();
     ParticleLoops::loop(a_v.size(), [&](std::size_t i) {
       p[i].m_weight = transformOne(p[i].m_position);
+    });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Euler advance: x += v*dt (the canonical particle update; reads two vector
+  // fields, writes one). Same math in all four layouts.
+  // ---------------------------------------------------------------------------
+  using MoverSoA = ParticleSoA<MoverParticle>;
+
+  __attribute__((noinline)) void
+  advanceList(List<MoverParticle>& a_p, const Real a_dt)
+  {
+    for (ListIterator<MoverParticle> lit(a_p); lit.ok(); ++lit) {
+      lit().m_position += lit().m_velocity * a_dt;
+    }
+  }
+
+  __attribute__((noinline)) void
+  advanceVector(std::vector<MoverParticle>& a_v, const Real a_dt)
+  {
+    MoverParticle* p = a_v.data();
+    ParticleLoops::loop(a_v.size(), [&](std::size_t i) {
+      p[i].m_position += p[i].m_velocity * a_dt;
+    });
+  }
+
+  __attribute__((noinline)) void
+  advanceSoA(MoverSoA& a_soa, const Real a_dt)
+  {
+    std::vector<RealVect>&       pos = a_soa.column<&MoverParticle::m_position>();
+    const std::vector<RealVect>& vel = a_soa.column<&MoverParticle::m_velocity>();
+    ParticleLoops::loop(a_soa, [&](std::size_t i) {
+      pos[i] += vel[i] * a_dt;
+    });
+  }
+
+  __attribute__((noinline)) void
+  advancePerComponent(Real*             a_px,
+                      Real*             a_py,
+                      Real*             a_pz,
+                      const Real*       a_vx,
+                      const Real*       a_vy,
+                      const Real*       a_vz,
+                      const std::size_t a_n,
+                      const Real        a_dt)
+  {
+    ParticleLoops::loop(a_n, [&](std::size_t i) {
+      a_px[i] += a_vx[i] * a_dt;
+      a_py[i] += a_vy[i] * a_dt;
+      a_pz[i] += a_vz[i] * a_dt;
     });
   }
 
@@ -645,6 +717,50 @@ main(int argc, char* argv[])
     });
 
     // =====================================================================
+    // (7) EULER ADVANCE  x += v*dt  (canonical particle update)
+    // =====================================================================
+    const Real dt = 0.1;
+
+    std::vector<MoverParticle> moverSrc(nPart);
+    for (std::size_t i = 0; i < nPart; i++) {
+      moverSrc[i].m_position = sortedParticles[i].m_position;
+      moverSrc[i].m_velocity = RealVect(D_DECL(1.0, 0.5, 0.25)); // arbitrary drift
+    }
+
+    List<MoverParticle> moverList;
+    for (const MoverParticle& p : moverSrc) {
+      moverList.append(p);
+    }
+    std::vector<MoverParticle> moverVec = moverSrc;
+    MoverSoA                   moverSoA;
+    moverSoA.reserve(nPart);
+    for (const MoverParticle& p : moverSrc) {
+      moverSoA.append(p);
+    }
+    std::vector<Real> px(nPart), py(nPart), pz(nPart), vx(nPart), vy(nPart), vz(nPart);
+    for (std::size_t i = 0; i < nPart; i++) {
+      px[i] = moverSrc[i].m_position[0];
+      py[i] = moverSrc[i].m_position[1];
+      pz[i] = moverSrc[i].m_position[2];
+      vx[i] = moverSrc[i].m_velocity[0];
+      vy[i] = moverSrc[i].m_velocity[1];
+      vz[i] = moverSrc[i].m_velocity[2];
+    }
+
+    const double aList = timeOp(fastReps, [&]() {
+      advanceList(moverList, dt);
+    });
+    const double aVec  = timeOp(fastReps, [&]() {
+      advanceVector(moverVec, dt);
+    });
+    const double aSoA  = timeOp(fastReps, [&]() {
+      advanceSoA(moverSoA, dt);
+    });
+    const double aPC   = timeOp(fastReps, [&]() {
+      advancePerComponent(px.data(), py.data(), pz.data(), vx.data(), vy.data(), vz.data(), nPart, dt);
+    });
+
+    // =====================================================================
     // Report
     // =====================================================================
     auto row = [&](const char* a_name, const double a_ns) {
@@ -707,6 +823,16 @@ main(int argc, char* argv[])
     row("vector<P> (1 bulk memcpy)", pVec);
     row("SoA       (per-column memcpy)", pSoA);
     pout() << "    vs List: vector<P> " << pList / pVec << "x, SoA " << pList / pSoA << "x" << endl;
+
+    pout() << "  (7) EULER ADVANCE (x += v*dt)" << endl;
+    row("List                   ", aList);
+    row("vector<P> AoS          ", aVec);
+    row("SoA vector<RealVect>   ", aSoA);
+    row("SoA per-component      ", aPC);
+    pout() << "    vs List: vector<P> " << aList / aVec << "x, SoA(RealVect) " << aList / aSoA << "x, per-component "
+           << aList / aPC << "x" << endl;
+    pout() << "    SoA(RealVect) vs vector<P>: " << aVec / aSoA << "x; per-component vs SoA(RealVect): " << aSoA / aPC
+           << "x" << endl;
 
     pout() << "  (sink=" << g_sink << ")" << endl;
   }
