@@ -102,9 +102,27 @@ results shift relative to the cache-resident baseline.
   most likely cause is the glibc `memcpy` **non-temporal-store threshold**: the single
   ~32 MB AoS copy (`vector<P>`) gets streaming NT stores (no read-for-ownership), while
   SoA's split per-column copies (~24 MB + ~8 MB) fall in a regime that uses ordinary
-  stores and pays RFO traffic. Net: for MPI packing, **`vector<P>`'s single bulk copy is
-  the robust winner**; SoA's per-column packing is *not* automatically faster at scale.
-  (Worth confirming directly; flagged as a follow-up.)
+  stores and pays read-for-ownership traffic.
+
+  **Confirmed (non-temporal stores).** Re-running the packing with explicit AVX
+  non-temporal (streaming) stores for the SoA columns closes the gap completely:
+
+  | pack variant (1M particles) | ns/p | vs List |
+  |---|---:|---:|
+  | List (per-particle)          | 3.32 | 1.0x |
+  | vector\<P\> (1 bulk memcpy)  | 1.42 | 2.34x |
+  | vector\<P\> (split 2 memcpy) | 1.66 | 2.0x |
+  | SoA (per-column memcpy)      | 5.99 | **0.55x** |
+  | **SoA (per-column, NT stores)** | **1.45** | **2.29x** |
+
+  Forcing NT stores makes SoA packing **4.1x faster** and brings it to parity with
+  `vector<P>`. The control — splitting the *contiguous AoS* copy into the same two sizes
+  (24 MB + 8 MB) — stays fast (1.66), so the slowdown is **not** "two `memcpy` calls": it
+  is that `glibc`'s `memcpy` did not take the non-temporal path for the SoA per-column
+  copies, so they paid RFO write traffic. Explicit NT stores recover full bandwidth.
+  Conclusion: **SoA packing is not inherently slow — it just needs an NT-aware pack**
+  (or a tuned `memcpy`); with that, SoA packs at `vector<P>` speed. (`vector<P>`'s plain
+  bulk copy gets there for free, which is still a point in its favour.)
 ## Streaming transform, in detail (the one place SoA beats vector\<P\>)
 
 | Layout | ns/p | vs List | deinterleave shuffles in the vectorized loop |
@@ -201,10 +219,12 @@ local reduction) — not by layout or SIMD.
    rebuilt on gather, more complex linearization).
 3. **Deposition, interpolation**: grid-bound and layout-insensitive (`vector<P>` ≈ SoA,
    both ~1.05–1.3x over `List`), at both 64K and 1M.
-4. **MPI packing**: `vector<P>` (single bulk `memcpy`) is the robust winner. SoA's
-   per-column packing *tied* `vector<P>` at 64K but **regressed to slower-than-`List`
-   (0.58x) at 1M** — likely the `memcpy` non-temporal-store threshold. Do not assume
-   SoA packs faster.
+4. **MPI packing**: `vector<P>` (single bulk `memcpy`) is the robust winner for free.
+   SoA's per-column `memcpy` *tied* `vector<P>` at 64K but **regressed to slower-than
+   `List` (0.55x) at 1M** because `glibc` did not take the non-temporal store path —
+   **confirmed**: forcing NT stores makes SoA packing 4.1x faster, back to `vector<P>`
+   parity. So SoA can pack fast, but only with an NT-aware pack; `vector<P>` gets it for
+   free.
 5. **Scale amplifies the contiguity win.** When data exceeds cache (1M particles), the
    memory-bound kernels (transform, Euler advance, scalar interpolation) pull *further*
    ahead of `List`, and SoA `vector<RealVect>` starts beating `List` on the Euler advance
@@ -234,6 +254,6 @@ local reduction) — not by layout or SIMD.
   merge/split, regrid).
 - **Profile a real ItoKMC run** for the particle-time fraction and per-op breakdown —
   the missing input that turns "which layout" into "how much wall-clock."
-- **Confirm the MPI-packing reversal** at scale (SoA per-column copy slower than List at
-  1M). Check whether forcing non-temporal stores / a single combined copy for SoA closes
-  the gap, or whether `vector<P>` bulk packing is simply the right call.
+- ~~Confirm the MPI-packing reversal~~ **DONE**: it is a non-temporal-store effect;
+  explicit NT stores make SoA packing 4.1x faster (parity with `vector<P>`). See the MPI
+  packing detail section.

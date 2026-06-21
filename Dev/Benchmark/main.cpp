@@ -32,7 +32,9 @@
 #include <chrono>
 #include <cmath>
 #include <cstdint>
+#include <cstdlib>
 #include <cstring>
+#include <immintrin.h>
 #include <random>
 #include <vector>
 
@@ -493,6 +495,42 @@ namespace {
     std::memcpy(a_buf + n * sizeof(RealVect), w.data(), n * sizeof(Real));
   }
 
+  /** @brief Copy a_nd doubles src->dst with non-temporal (streaming) stores. dst must be 32-byte aligned. */
+  inline void
+  ntCopyDoubles(double* a_dst, const double* a_src, const std::size_t a_nd) noexcept
+  {
+    std::size_t i = 0;
+    for (; i + 4 <= a_nd; i += 4) {
+      _mm256_stream_pd(a_dst + i, _mm256_loadu_pd(a_src + i)); // a_dst+i is 32-aligned (i multiple of 4)
+    }
+    for (; i < a_nd; i++) {
+      a_dst[i] = a_src[i];
+    }
+    _mm_sfence();
+  }
+
+  /** @brief Pack SoA columns with NON-TEMPORAL stores (tests the memcpy NT-threshold hypothesis). */
+  void
+  packSoANT(unsigned char* a_buf, const SoA& a_soa)
+  {
+    const std::vector<RealVect>& pos = a_soa.positions();
+    const std::vector<Real>&     w   = a_soa.weights();
+    const std::size_t            n   = a_soa.size();
+    double* const                d   = reinterpret_cast<double*>(a_buf);
+    ntCopyDoubles(d, reinterpret_cast<const double*>(pos.data()), n * SpaceDim);
+    ntCopyDoubles(d + n * SpaceDim, reinterpret_cast<const double*>(w.data()), n);
+  }
+
+  /** @brief Control: pack the contiguous AoS in TWO memcpy calls (same sizes as the SoA columns). */
+  void
+  packVectorSplit(unsigned char* a_buf, const std::vector<BenchParticle>& a_v)
+  {
+    const std::size_t    n   = a_v.size();
+    const unsigned char* src = reinterpret_cast<const unsigned char*>(a_v.data());
+    std::memcpy(a_buf, src, n * sizeof(RealVect));
+    std::memcpy(a_buf + n * sizeof(RealVect), src + n * sizeof(RealVect), n * sizeof(Real));
+  }
+
   /** @brief Time the average wall-time (ns) of a_op over a_reps repetitions (one warm-up). */
   template <typename Op>
   double
@@ -523,7 +561,7 @@ main(int argc, char* argv[])
     constexpr int nGhost    = 2;
     constexpr int ppc       = 16;
     constexpr int fastReps  = 200; // deposition / interpolation / transform
-    constexpr int buildReps = 50;  // build / remap (each rep allocates)
+    constexpr int buildReps = 50; // build / remap (each rep allocates)
     constexpr int nBuckets  = 64; // remap destination patches
 
     const Box         valid(IntVect::Zero, (nCell - 1) * IntVect::Unit);
@@ -773,19 +811,47 @@ main(int argc, char* argv[])
     // =====================================================================
     // (6) MPI PACKING  (serialize position + weight into a byte send buffer)
     // =====================================================================
-    std::vector<unsigned char> sendBuf(nPart * s_bytesPerParticle);
-    const double               pList = timeOp(fastReps, [&]() {
-      packList(sendBuf.data(), listSorted);
-      g_sink += sendBuf[0];
+    const std::size_t bufBytes = nPart * s_bytesPerParticle;
+    const std::size_t bufAlloc = ((bufBytes + 63) / 64) * 64; // round up for aligned_alloc
+    unsigned char*    packBuf  = static_cast<unsigned char*>(std::aligned_alloc(64, bufAlloc));
+
+    // Correctness: the split AoS pack and the NT SoA pack must produce identical bytes
+    // to their plain counterparts.
+    {
+      std::vector<unsigned char> refV(bufBytes), refS(bufBytes);
+      packVector(refV.data(), sortedParticles);
+      packVectorSplit(packBuf, sortedParticles);
+      if (std::memcmp(refV.data(), packBuf, bufBytes) != 0) {
+        MayDay::Abort("benchmark: packVectorSplit produced different bytes");
+      }
+      packSoA(refS.data(), soaSorted);
+      packSoANT(packBuf, soaSorted);
+      if (std::memcmp(refS.data(), packBuf, bufBytes) != 0) {
+        MayDay::Abort("benchmark: packSoANT produced different bytes");
+      }
+    }
+
+    const double pList     = timeOp(fastReps, [&]() {
+      packList(packBuf, listSorted);
+      g_sink += packBuf[0];
     });
-    const double               pVec  = timeOp(fastReps, [&]() {
-      packVector(sendBuf.data(), sortedParticles);
-      g_sink += sendBuf[0];
+    const double pVec      = timeOp(fastReps, [&]() {
+      packVector(packBuf, sortedParticles);
+      g_sink += packBuf[0];
     });
-    const double               pSoA  = timeOp(fastReps, [&]() {
-      packSoA(sendBuf.data(), soaSorted);
-      g_sink += sendBuf[0];
+    const double pVecSplit = timeOp(fastReps, [&]() {
+      packVectorSplit(packBuf, sortedParticles);
+      g_sink += packBuf[0];
     });
+    const double pSoA      = timeOp(fastReps, [&]() {
+      packSoA(packBuf, soaSorted);
+      g_sink += packBuf[0];
+    });
+    const double pSoANT    = timeOp(fastReps, [&]() {
+      packSoANT(packBuf, soaSorted);
+      g_sink += packBuf[0];
+    });
+    std::free(packBuf);
 
     // =====================================================================
     // Mover containers (position + velocity), shared by (7) and (8).
@@ -921,10 +987,15 @@ main(int argc, char* argv[])
     pout() << "    vs List: vector<P> " << rList / rVec << "x, SoA " << rList / rSoA << "x" << endl;
 
     pout() << "  (6) MPI PACKING (serialize " << s_bytesPerParticle << " B/particle to send buffer)" << endl;
-    row("List      (per-particle)", pList);
-    row("vector<P> (1 bulk memcpy)", pVec);
-    row("SoA       (per-column memcpy)", pSoA);
-    pout() << "    vs List: vector<P> " << pList / pVec << "x, SoA " << pList / pSoA << "x" << endl;
+    row("List          (per-particle)   ", pList);
+    row("vector<P>     (1 bulk memcpy)  ", pVec);
+    row("vector<P>     (split 2 memcpy) ", pVecSplit);
+    row("SoA           (per-column memcpy)", pSoA);
+    row("SoA           (per-column NT)  ", pSoANT);
+    pout() << "    vs List: vector<P> " << pList / pVec << "x, SoA " << pList / pSoA << "x, SoA-NT " << pList / pSoANT
+           << "x" << endl;
+    pout() << "    split-vs-single vector<P>: " << pVec / pVecSplit << "x; NT-vs-plain SoA: " << pSoA / pSoANT << "x"
+           << endl;
 
     pout() << "  (7) VECTOR-FIELD INTERPOLATION (3-comp FArrayBox -> particle RealVect)" << endl;
     row("List     ", viList);
