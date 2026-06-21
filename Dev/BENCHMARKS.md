@@ -42,7 +42,8 @@ Decision-support data comparing three per-patch particle storages for chombo-dis
 | (4) Build (allocation)              |  4.43 | **0.65** | 1.25 | **vector\<P\>** |
 | (5) Remap (scatter -> 64 buckets)   |  6.36 | **3.34** | 5.65 | **vector\<P\>** |
 | (6) MPI packing (serialize 32 B/p)  |  1.23 | 0.59  | 0.57 | contiguity (vec≈SoA, ~2.1x vs List) |
-| (7) Euler advance `x += v·dt`       |  2.23 | 1.98  | 2.20 / **0.46**‡ | **SoA per-component only** |
+| (7) Vector-field interpolation (3-comp) | 17.88 | 17.94 | 17.07 | ~tie (all within 5%) |
+| (8) Euler advance `x += v·dt`       |  2.23 | 1.98  | 2.20 / **0.46**‡ | **SoA per-component only** |
 
 ‡ Euler advance: SoA `vector<RealVect>` = 2.20 (no better than List!), SoA *per-component* = 0.46.
 
@@ -96,6 +97,33 @@ Contrast with the `½|x|²` transform (which writes a *scalar*): there the `Real
 column did vectorize (with shuffles). So the SoA-over-`vector<P>` advantage is **highly
 workload-dependent**, and for genuine vector-in/vector-out updates it materializes
 **only with per-component columns**, not with the per-field `vector<RealVect>` default.
+
+## Vector-field interpolation, in detail (3-component FArrayBox -> particle RealVect)
+
+A 3-component `FArrayBox` (component-major: each component is a contiguous plane, i.e.
+SoA-for-the-grid) interpolated to a particle `RealVect` via CIC. Per particle this is a
+2x2x2 stencil x 3 components = **24 grid reads** + 24 FMA + 8 CIC weights ("side A"),
+plus one position read and one `RealVect` write ("side B").
+
+| Layout | ns/p | vs List | vs vector\<P\> |
+|---|---:|---:|---:|
+| List      | 17.88 | 1.0x  | — |
+| vector\<P\> | 17.94 | 1.0x | 1.0x |
+| SoA       | 17.07 | 1.05x | 1.00x |
+
+**All three layouts tie (within 5%).** This confirms the static prediction: side A (the
+gather) operates on the `FArrayBox`, which is passed **`const` and is identical for every
+particle storage**, and it dominates. The 3-component field is `20^3 x 3 x 8 B ≈ 192 KB`
+→ L2-resident, so the gather is fast but still the bulk of the work, and **independent of
+the particle container**. Side B (the particle read/write) is a small fraction, so the
+storage layout barely matters.
+
+Note the absolute cost (~18 ns/p) is ~2.5x the scalar interpolation (~7 ns/p) — exactly
+the 3x grid-gather growth (8 -> 24 reads) dominating, while the SoA *relative* advantage
+**shrinks** (1.05x here vs 1.19x for scalar interpolation). Interpolation is a
+data-dependent gather and does not vectorize across particles, so per-component storage
+would not help either. **SoA gives essentially nothing for vector-field interpolation —
+the benefit is hidden behind the const, cache-resident grid gather.**
 
 ## Why deposition/interpolation don't benefit (assembly)
 

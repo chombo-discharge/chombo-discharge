@@ -20,7 +20,8 @@
     4. build            (construct the container; allocation cost)
     5. remap            (scatter particles into K destination containers)
     6. MPI packing      (serialize position + weight into a byte buffer)
-    7. Euler advance    (x += v*dt; the canonical particle update)
+    7. vector-field interpolation (3-component FArrayBox -> particle RealVect)
+    8. Euler advance    (x += v*dt; the canonical particle update)
 
   Grid: all-regular FArrayBox, 16 valid + 2 ghost cells per coordinate (20^3
   allocated), single component. Particles: 16 per valid cell.
@@ -253,6 +254,76 @@ namespace {
     const std::size_t            n   = a_soa.size();
     for (std::size_t i = 0; i < n; i++) {
       w[i] = interpolateOneCIC(a_rho, pos[i], a_lo, a_iDx);
+    }
+  }
+
+  /**
+    @brief CIC interpolation of a SpaceDim-component (vector) FArrayBox to a RealVect at the particle.
+    @details The FArrayBox is component-major (component varies slowest), so the SpaceDim values of a
+    given cell are numPts() apart. This gather is identical for every particle storage (the FArrayBox
+    is shared and const), so it is the layout-independent part of the cost.
+  */
+  inline RealVect
+  interpolateVecFieldCIC(const FArrayBox& a_rho,
+                         const RealVect&  a_x,
+                         const RealVect&  a_probLo,
+                         const RealVect&  a_invDx) noexcept
+  {
+    IntVect  i0;
+    RealVect f;
+    for (int d = 0; d < SpaceDim; d++) {
+      const Real g = (a_x[d] - a_probLo[d]) * a_invDx[d] - 0.5;
+      const int  i = static_cast<int>(std::floor(g));
+      i0[d]        = i;
+      f[d]         = g - static_cast<Real>(i);
+    }
+
+    constexpr int nCorners = 1 << SpaceDim;
+    RealVect      val      = RealVect::Zero;
+    for (int c = 0; c < nCorners; c++) {
+      Real    wcic = 1.0;
+      IntVect iv   = i0;
+      for (int d = 0; d < SpaceDim; d++) {
+        if (c & (1 << d)) {
+          wcic *= f[d];
+          iv[d] += 1;
+        }
+        else {
+          wcic *= (1.0 - f[d]);
+        }
+      }
+      for (int comp = 0; comp < SpaceDim; comp++) {
+        val[comp] += wcic * a_rho(iv, comp);
+      }
+    }
+    return val;
+  }
+
+  void
+  interpVecList(const FArrayBox& a_rho, List<MoverParticle>& a_p, const RealVect& a_lo, const RealVect& a_iDx)
+  {
+    for (ListIterator<MoverParticle> lit(a_p); lit.ok(); ++lit) {
+      lit().m_velocity = interpolateVecFieldCIC(a_rho, lit().m_position, a_lo, a_iDx);
+    }
+  }
+
+  void
+  interpVecVector(const FArrayBox& a_rho, std::vector<MoverParticle>& a_v, const RealVect& a_lo, const RealVect& a_iDx)
+  {
+    const std::size_t n = a_v.size();
+    for (std::size_t i = 0; i < n; i++) {
+      a_v[i].m_velocity = interpolateVecFieldCIC(a_rho, a_v[i].m_position, a_lo, a_iDx);
+    }
+  }
+
+  void
+  interpVecSoA(const FArrayBox& a_rho, ParticleSoA<MoverParticle>& a_soa, const RealVect& a_lo, const RealVect& a_iDx)
+  {
+    const std::vector<RealVect>& pos = a_soa.column<&MoverParticle::m_position>();
+    std::vector<RealVect>&       vel = a_soa.column<&MoverParticle::m_velocity>();
+    const std::size_t            n   = a_soa.size();
+    for (std::size_t i = 0; i < n; i++) {
+      vel[i] = interpolateVecFieldCIC(a_rho, pos[i], a_lo, a_iDx);
     }
   }
 
@@ -717,7 +788,7 @@ main(int argc, char* argv[])
     });
 
     // =====================================================================
-    // (7) EULER ADVANCE  x += v*dt  (canonical particle update)
+    // Mover containers (position + velocity), shared by (7) and (8).
     // =====================================================================
     const Real dt = 0.1;
 
@@ -747,6 +818,37 @@ main(int argc, char* argv[])
       vz[i] = moverSrc[i].m_velocity[2];
     }
 
+    // =====================================================================
+    // (7) VECTOR-FIELD INTERPOLATION  (3-component FArrayBox -> particle RealVect)
+    // Runs BEFORE the advance, while positions are still inside the box.
+    // =====================================================================
+    FArrayBox vfield(grown, SpaceDim);
+    for (int comp = 0; comp < SpaceDim; comp++) {
+      vfield.setVal(static_cast<Real>(comp + 1), comp); // constant per component: CIC must return (1,2,..)
+    }
+    interpVecSoA(vfield, moverSoA, probLo, invDx);
+    {
+      const MoverParticle q = moverSoA.gather(123);
+      for (int comp = 0; comp < SpaceDim; comp++) {
+        if (std::abs(q.m_velocity[comp] - static_cast<Real>(comp + 1)) > 1.E-9) {
+          MayDay::Abort("benchmark: vector interpolation of a constant field is wrong");
+        }
+      }
+    }
+
+    const double viList = timeOp(fastReps, [&]() {
+      interpVecList(vfield, moverList, probLo, invDx);
+    });
+    const double viVec  = timeOp(fastReps, [&]() {
+      interpVecVector(vfield, moverVec, probLo, invDx);
+    });
+    const double viSoA  = timeOp(fastReps, [&]() {
+      interpVecSoA(vfield, moverSoA, probLo, invDx);
+    });
+
+    // =====================================================================
+    // (8) EULER ADVANCE  x += v*dt  (canonical particle update)
+    // =====================================================================
     const double aList = timeOp(fastReps, [&]() {
       advanceList(moverList, dt);
     });
@@ -824,7 +926,13 @@ main(int argc, char* argv[])
     row("SoA       (per-column memcpy)", pSoA);
     pout() << "    vs List: vector<P> " << pList / pVec << "x, SoA " << pList / pSoA << "x" << endl;
 
-    pout() << "  (7) EULER ADVANCE (x += v*dt)" << endl;
+    pout() << "  (7) VECTOR-FIELD INTERPOLATION (3-comp FArrayBox -> particle RealVect)" << endl;
+    row("List     ", viList);
+    row("vector<P>", viVec);
+    row("SoA      ", viSoA);
+    pout() << "    vs List: vector<P> " << viList / viVec << "x, SoA " << viList / viSoA << "x" << endl;
+
+    pout() << "  (8) EULER ADVANCE (x += v*dt)" << endl;
     row("List                   ", aList);
     row("vector<P> AoS          ", aVec);
     row("SoA vector<RealVect>   ", aSoA);
