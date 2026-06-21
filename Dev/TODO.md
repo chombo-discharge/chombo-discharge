@@ -74,15 +74,43 @@ production code under `Source/`, `Physics/`, or `Geometries/` yet. The point of
   `soa.column<&P::velocity>()`, `soa.get<&P::weight>(i)`, `deposit<&P::weight>(...)`.
   Index derived from the member pointer (reorder-safe); return type deduced (no `Ret`
   arg like today).
-- **SoA granularity: per-field** — one `std::vector<RealVect>` per vector column
-  (not split into per-component `x[]/y[]/z[]`).
+- **SoA granularity: PER-COMPONENT** — vector fields are stored as separate `x`/`y`/`z`
+  scalar columns, NOT `RealVect` columns. (Supersedes the earlier "per-field
+  `vector<RealVect>`" choice; driven by the benchmarks — Euler advance 4x, transform
+  5.6x, interleaved `RealVect` stayed scalar — and GPU-readiness. Cost: more columns →
+  slightly worse scatter/remap, accepted.)
+- **Arena backing: single allocation** — all columns are offset slices of one aligned
+  buffer (`CD_ParticleSoAArena.H`). Gives one-allocation build, robust no-intrinsics
+  bulk pack/copy (one `memcpy` / zero-copy send), aligned SIMD. Requires `reserve` /
+  container-reuse (growth without it is ~7x). The per-column-`memcpy` SoA pack is
+  bimodal (~40% of launches 4x slow at L3-scale); the arena removes that variance.
+- **Particle precision: a compile-time `ParticleReal`, independent of `Real`** — particle
+  columns use `ParticleReal` (e.g. `float`) which may differ from the mesh/`Real`
+  precision (`double`). Synergistic with per-component (no `RealVect`, which is hardwired
+  `double`). Benefits: ~half the memory, 8-wide (vs 4-wide) SIMD, faster bandwidth-bound
+  ops + packing.
+- **Per-component expression: raw `ParticleReal` x/y/z scalar columns** (NOT `RealVect`
+  members, which would force `double`). Each scalar member is one column; the existing
+  column machinery works unchanged (no auto-split). Position is designated by `SpaceDim`
+  member pointers (`positionPtrs = std::make_tuple(D_DECL(&P::m_x, ...))`); `position(i)`
+  returns a *promoted* `double` `RealVect` (by value) for cell-lookup / Chombo interop.
+  Cost: dimension-independent struct declaration needs `D_DECL`/`#if CH_SPACEDIM` guards.
+  Alternative deferred: a `ParticleRealVect = std::array<ParticleReal,SpaceDim>` member
+  with container auto-split — pure ergonomic sugar, add later if raw decls get noisy.
+- **Mixed-precision kernels:** compute cell index + CIC weights in `double` (promote the
+  `float` particle position), accumulate into the `double` grid, demote on interpolate.
+  (If float global positions lose sub-cell resolution on large grids, switch to
+  cell-relative coordinates.)
+- **Cell binning: order + CSR offsets, not a separate container** — drop the
+  `BinFab<List<P>>` second representation; the per-patch SoA is canonically cell-sorted
+  (counting sort + `cellStart[]`). See `ARCHITECTURE.md`.
 - **Schema: explicit traits, NOT a macro** — `ParticleTraits<P>` with a `columns`
   member-pointer tuple + `positionPtr`/`weightPtr` + optional `h5Columns`. Indices
   for position/weight/HDF5 are all **derived** from member pointers (no literal
   indices anywhere → reordering `columns` is safe). A `CD_PARTICLE_LAYOUT` macro was
   evaluated and rejected (opaque to tooling); the file was removed.
-- **Storage granularity: per-patch** — `ParticleSoA<P>` = one patch; the AMR
-  container holds `LayoutData<ParticleSoA<P>>` per level. See `ARCHITECTURE.md`.
+- **Storage granularity: per-patch** — one container per patch; the AMR container holds
+  `LayoutData<arena-SoA>` per level. See `ARCHITECTURE.md`.
 
 ## Benchmark findings (see `BENCHMARKS.md`)
 
@@ -96,14 +124,20 @@ reframes the "drop-in vs clean break" question below into "SoA vs vector<P> at a
 
 ## Big open questions (remaining)
 
-1. **Drop-in vs. clean break.** Keep `GenericParticle<M,N>` / `PointParticle` /
-   `Photon` / `ItoParticle` as a thin AoS facade over SoA, or rewrite call sites?
-   (Plus: do we need the tree compilable at every commit, i.e. incremental?)
-2. **Cell-index structure for KMC** (now that storage is per-patch): CSR offsets vs
-   per-cell index vectors vs hybrid for cut cells (see `ARCHITECTURE.md` follow-ons
-   and §8 of `USAGE_PATTERNS.md`).
-3. **Container layering details**: how `LayoutData<ParticleSoA<P>>` wraps Chombo's
-   box/`DataIndex` machinery; whether buffer/mask/cache holders use a lighter SoA.
+1. **Particle metadata:** keep `particleID`/`rankID` (determinism, checkpoint, debug)?
+   As columns?
+2. **Checkpoint format + versioning:** column order/per-component layout/precision is the
+   on-disk ABI → needs a version key (any of those changing = format change).
+3. **Drop-in vs. clean break.** Thin AoS facade over the SoA, or rewrite call sites?
+   (Plus: must the tree stay compilable at every commit?) — leaning clean break.
+4. **Reserve/capacity lifecycle:** reserve-at-regrid heuristic, never shrink, reuse
+   containers so the arena self-sizes (turns the 7x cold-build into a one-time warmup).
+5. **AMR / container layering:** how `LayoutData<arena-SoA>` wraps Chombo's
+   box/`DataIndex` machinery, regrid caching, and the valid/buffer/mask/cache holders
+   (same type or a lighter variant); remap protocol (whole-patch zero-copy vs subset
+   gather-pack).
 
-See `USAGE_PATTERNS.md` (per-feature requirements) and `ARCHITECTURE.md` (per-patch
-layering).
+Decided: per-component (raw `ParticleReal` x/y/z scalars), `ParticleReal` precision +
+mixed-precision kernel policy, arena backing, cell-sorted+CSR (drop `BinFab`), explicit
+traits, member-pointer selector, C++17, per-patch storage. See `ARCHITECTURE.md`
+(LOCKED design decisions) and `BENCHMARKS.md`.
