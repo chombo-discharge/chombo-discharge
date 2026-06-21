@@ -120,9 +120,24 @@ results shift relative to the cache-resident baseline.
   (24 MB + 8 MB) — stays fast (1.66), so the slowdown is **not** "two `memcpy` calls": it
   is that `glibc`'s `memcpy` did not take the non-temporal path for the SoA per-column
   copies, so they paid RFO write traffic. Explicit NT stores recover full bandwidth.
-  Conclusion: **SoA packing is not inherently slow — it just needs an NT-aware pack**
-  (or a tuned `memcpy`); with that, SoA packs at `vector<P>` speed. (`vector<P>`'s plain
-  bulk copy gets there for free, which is still a point in its favour.)
+
+  **Reproducibility — characterized over many launches (decisive).** The per-column SoA
+  pack is **bimodal**: across 8+ process launches it is ~1.4–1.5 ns/p (fast, ~2.3x) on
+  ~60% of launches and ~5.5–6.0 ns/p (slow, ~0.55x) on ~40% — it really does hit the
+  slow path, just not every time (earlier "always slow" / "always fast" impressions were
+  small samples of this distribution). `vector<P>`, SoA-NT, and the arena pack are
+  **stable** at ~1.4 ns/p every launch.
+
+  **Assembly + mechanism.** `packSoA` disassembles to exactly two `call memcpy@plt` (the
+  `R_X86_64_PLT32 memcpy` relocations confirm it) — our code just calls `glibc memcpy`;
+  all the variance is inside libc. This machine's L3 is **32 MB**, and the copies are
+  24 MB (pos) + 8 MB (weight) with a 32 MB destination — i.e. **right at glibc's
+  non-temporal-store threshold** (a fraction of L3). At that size the path choice for the
+  *separate-source* per-column copies flips with per-launch address/alignment (ASLR/
+  allocator), hence bimodal. A single 32 MB contiguous copy (arena / `vector<P>`)
+  reliably crosses the threshold → always NT → stable. So **the arena (or explicit NT)
+  is a robustness fix, not just an optimization** — it removes a ~40%-of-launches 4x
+  packing/copy slowdown. `vector<P>` is stable for free.
 ## Streaming transform, in detail (the one place SoA beats vector\<P\>)
 
 | Layout | ns/p | vs List | deinterleave shuffles in the vectorized loop |
@@ -324,13 +339,14 @@ local reduction) — not by layout or SIMD.
    rebuilt on gather, more complex linearization).
 3. **Deposition, interpolation**: grid-bound and layout-insensitive (`vector<P>` ≈ SoA,
    both ~1.05–1.3x over `List`), at both 64K and 1M.
-4. **MPI packing / container copy**: `vector<P>` is fast for free. SoA's per-column
-   `memcpy` regressed at 1M (`glibc` skipped the non-temporal path). **Fixed two ways,
-   both giving `vector<P>` parity:** explicit NT stores (intrinsics), OR — no
-   intrinsics — an **arena layout** (all columns in one allocation) so the op is a
-   single big `memcpy` that `glibc` auto-streams. Pack: arena 1.00x vs `vector<P>`;
-   copy: 0.86x. So packing/copy are a *solved* problem for SoA, with no intrinsics
-   required, given an arena backing.
+4. **MPI packing / container copy**: `vector<P>` is fast and **stable** for free. SoA's
+   per-column `memcpy` is **bimodal** — confirmed over many launches it hits a 4x slow
+   path ~40% of the time (glibc's NT threshold is borderline at these ~L3-sized copies;
+   the assembly is just two `memcpy` calls, so the variance is libc-internal). **Two
+   fixes, both stable at `vector<P>` parity:** explicit NT stores (intrinsics), OR — no
+   intrinsics — an **arena layout** (one allocation → one big `memcpy` that glibc
+   reliably streams). So for SoA, an arena (or NT pack) is a *robustness* requirement,
+   not just an optimization.
 4b. **Remap is the one residual SoA cost.** Two-pass `reserve` did **not** help (~2%):
    the cost is the inherent per-particle scatter into N columns, not reallocation. SoA
    scatter-remap stays ~1.2x slower than `vector<P>` — **but 2.0x FASTER than today's
