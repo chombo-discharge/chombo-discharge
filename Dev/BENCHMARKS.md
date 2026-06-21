@@ -32,7 +32,7 @@ Decision-support data comparing three per-patch particle storages for chombo-dis
   (build/remap); single-threaded. Absolute ns/particle will vary by machine — read
   the **ratios**, not the absolute values.
 
-## Results (ns/particle; lower is better)
+## Results — baseline grid (65,536 particles; 16^3 valid + 2 ghost; ns/particle, lower is better)
 
 | Operation | List (fragmented) | vector\<P\> AoS | SoA | best |
 |---|---:|---:|---:|---|
@@ -61,6 +61,50 @@ Decision-support data comparing three per-patch particle storages for chombo-dis
 | Deposition  | ~1.0x | ~1.1x |
 | Transform   | 1.6x | 2.8x (per-component **4.0x**) |
 
+## Results — large grid (1,048,576 particles; 32^3 valid + 4 ghost; 40^3 allocated)
+
+Same benchmark, config set via the `constexpr`s at the top of `main()`
+(`nCell=32, nGhost=4, ppc=32, fastReps=50, buildReps=20`). The working sets now exceed
+cache (single-comp field 512 KB, 3-comp field 1.5 MB, columns ~24–56 MB), so several
+results shift relative to the cache-resident baseline.
+
+| Operation | List (fragmented) | vector\<P\> AoS | SoA | SoA vs List |
+|---|---:|---:|---:|---:|
+| (1) Deposition (sorted)            | 12.48 | 12.14 | 10.95 | 1.14x |
+| (2) Interpolation (sorted)         |  8.91 |  7.00 |  6.94 | 1.28x (vs vector\<P\> 1.01x) |
+| (3) Streaming transform `w=½|x|²`  |  2.88*| 1.46  | 0.88 / **0.51**† | 3.3x (per-comp **5.6x**) |
+| (4) Build (allocation)             |  6.33 | **2.10** | 2.65 | vector\<P\> 3.0x; SoA 2.4x |
+| (5) Remap (-> 64 buckets)          | 10.57 | **4.44** | 5.40 | vector\<P\> 2.4x; SoA 2.0x |
+| (6) MPI packing                    |  3.22 | **1.47** | 5.55 | **SoA 0.58x — slower than List!** |
+| (7) Vector-field interp (3-comp)   | 17.92 | 17.86 | 17.08 | 1.05x (vs vector\<P\> 1.00x) |
+| (8) Euler advance `x += v·dt`      |  4.78 | 3.10  | 2.40 / **1.20**‡ | SoA(RealVect) 2.0x; per-comp 4.0x |
+
+\* compact List. † SoA `vector<RealVect>`=0.88, per-component=0.51. ‡ SoA
+`vector<RealVect>`=2.40, per-component=1.20.
+
+### What changes at scale (vs the cache-resident baseline)
+
+- **Memory-bound kernels pull further ahead of `List`.** Once data exceeds cache the
+  cost is DRAM bandwidth, so contiguity matters more. The clearest case is the **Euler
+  advance**: SoA `vector<RealVect>` was *no better than List* at 64K (1.0x, cache-bound)
+  but is **2.0x at 1M** — contiguous columns beat pointer-chased nodes on bandwidth even
+  though the kernel stays scalar. Per-component (SIMD) widens to 4.0x; the streaming
+  transform widens to 5.6x (per-component).
+- **Deposition and vector-field interpolation stay layout-insensitive** (1.05–1.14x) —
+  still scatter- / grid-gather-bound, exactly as at 64K. The larger grid does not change
+  this.
+- **Build/remap**: `vector<P>` still wins and still beats SoA; the build ratio compressed
+  (6.8x -> 3.0x) as everything becomes allocation/bandwidth-bound, while SoA's remap
+  improved (1.1x -> 2.0x).
+- **MPI packing reverses — and this is the surprise.** At 64K, SoA packing tied
+  `vector<P>` (~2.1x over List). At 1M, **SoA packing is 0.58x — slower than `List`**,
+  and 3.8x slower than `vector<P>`. Both do bulk `memcpy` of the same total bytes, so the
+  most likely cause is the glibc `memcpy` **non-temporal-store threshold**: the single
+  ~32 MB AoS copy (`vector<P>`) gets streaming NT stores (no read-for-ownership), while
+  SoA's split per-column copies (~24 MB + ~8 MB) fall in a regime that uses ordinary
+  stores and pays RFO traffic. Net: for MPI packing, **`vector<P>`'s single bulk copy is
+  the robust winner**; SoA's per-column packing is *not* automatically faster at scale.
+  (Worth confirming directly; flagged as a follow-up.)
 ## Streaming transform, in detail (the one place SoA beats vector\<P\>)
 
 | Layout | ns/p | vs List | deinterleave shuffles in the vectorized loop |
@@ -155,8 +199,17 @@ local reduction) — not by layout or SIMD.
    SIMD win is real but **conditional on per-component storage** for vector-field
    updates, which is a heavier design (3 columns per vector field, RealVect view
    rebuilt on gather, more complex linearization).
-3. **Deposition, interpolation, MPI packing**: contiguity is what matters; `vector<P>`
-   and SoA tie, both ~1.2–2.1x over `List`.
+3. **Deposition, interpolation**: grid-bound and layout-insensitive (`vector<P>` ≈ SoA,
+   both ~1.05–1.3x over `List`), at both 64K and 1M.
+4. **MPI packing**: `vector<P>` (single bulk `memcpy`) is the robust winner. SoA's
+   per-column packing *tied* `vector<P>` at 64K but **regressed to slower-than-`List`
+   (0.58x) at 1M** — likely the `memcpy` non-temporal-store threshold. Do not assume
+   SoA packs faster.
+5. **Scale amplifies the contiguity win.** When data exceeds cache (1M particles), the
+   memory-bound kernels (transform, Euler advance, scalar interpolation) pull *further*
+   ahead of `List`, and SoA `vector<RealVect>` starts beating `List` on the Euler advance
+   (1.0x → 2.0x) purely via bandwidth. Real per-patch particle counts in dense
+   avalanches are large, so the scale-amplified numbers are the more representative ones.
 
 ## Recommendation
 

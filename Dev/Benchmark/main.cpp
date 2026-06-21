@@ -524,7 +524,7 @@ main(int argc, char* argv[])
     constexpr int ppc       = 16;
     constexpr int fastReps  = 200; // deposition / interpolation / transform
     constexpr int buildReps = 50;  // build / remap (each rep allocates)
-    constexpr int nBuckets  = 64;  // remap destination patches
+    constexpr int nBuckets  = 64; // remap destination patches
 
     const Box         valid(IntVect::Zero, (nCell - 1) * IntVect::Unit);
     const Box         grown  = grow(valid, nGhost);
