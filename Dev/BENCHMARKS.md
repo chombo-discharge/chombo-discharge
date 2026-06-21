@@ -10,6 +10,44 @@ Decision-support data comparing three per-patch particle storages for chombo-dis
   contiguous column per field. Also a *per-component* variant (`x[]`,`y[]`,`z[]` as
   separate `Real` arrays instead of one interleaved `vector<RealVect>`).
 
+## Re-validation on the merged ParticleSoA (2026-06-21)
+
+The two prototypes (`ParticleSoA` + `ParticleSoAArena`) were merged into one arena-backed
+`ParticleSoA` with **container-owned mandatory columns** (per-component `ParticleReal`
+position, weight, `particleID`, `rankID`) + a user payload. The benchmark was ported to it
+(SoA uses `ParticleSoA<>` / `<MoverPayload>` / `<MergePayload>`; the AoS baselines carry a
+matching `particleID`/`rankID` so bytes/particle are comparable — 48 B AoS vs 44 B SoA
+columns). **Every earlier decision reproduced** (64K particles, 16^3+2, GCC `-O3 -march=native`):
+
+| Section | Result | vs `List` | vs `vector<P>` | Verdict |
+|---|---|---|---|---|
+| (1) deposition | SoA 11.4 ns/p | 1.06x | 1.05x | tie |
+| (2) interpolation | SoA 7.9 ns/p | 1.03x | 0.89x | tie (vector slightly ahead) |
+| (3) transform | **SoA 0.28 ns/p** | **4.26x** | **2.30x** | **SoA wins (per-component AVX)** |
+| (4) build | SoA-reserve 1.46 ns/p | 2.17x | 0.92x | needs reserve to match vector |
+| (5) remap | SoA-2pass 4.72 ns/p | 1.07x | 0.93x | needs two-pass to match vector |
+| (6) MPI pack | arena 0.77 ns/p | 1.50x | ~vector | arena one-memcpy robust |
+| (7) vec interp | SoA 16.5 ns/p | 1.08x | 1.05x | tie |
+| (8) Euler advance | **SoA 0.45 ns/p** | **4.88x** | **4.83x** | **SoA wins (per-component v)** |
+| (9) KD merge | SoA 177 ns/p | 1.65x | 1.03x | tie with vector |
+| (10) container copy | arena 0.78 ns/p | 8.2x | 1.17x | arena one-memcpy wins |
+
+Notes from the port:
+- **Per-component position helps the streaming kernels and hurts nothing measurable**, but
+  random-access whole-particle work (KD merge) must read position via the per-component
+  columns (`positionColumn(d)[i]`), NOT `position(i)` — the latter builds a promoted
+  `RealVect` by value and, called per comparison in `nth_element`, was ~2x slower. The
+  production merge path operates on cell-sorted contiguous ranges, where this is a non-issue.
+- The advance win grew (4.9x vs the earlier ~4x) because velocity is now ALSO per-component
+  (`MoverPayload{vx,vy,vz}`), so position and velocity updates are all unit-stride.
+- The arena removes the bimodal per-column-`memcpy` pack variance: `data()` is one contiguous
+  span, so pack/copy are a single `memcpy` (and a real whole-patch MPI send skips even that).
+- The separate "N-vector vs arena" comparison rows are gone: the merged container IS the
+  arena, so there is one SoA path per section.
+
+The full corrected table for the current run lives in `Dev/Benchmark/pout.0`. The detailed
+per-op analysis below is from the original prototype runs and still applies.
+
 ## Setup
 
 - Source: `Dev/Benchmark/main.cpp`, `Dev/Benchmark/GNUmakefile`.

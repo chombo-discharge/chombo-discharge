@@ -6,34 +6,105 @@
 
 /**
   @file   CD_ParticleSoA.H
-  @brief  Declaration of a Struct-of-Arrays (SoA) particle storage container.
+  @brief  Declaration of ParticleSoA, an arena-backed Struct-of-Arrays particle container.
   @author Robert Marskar
-  @details A Struct-of-Arrays replacement for Chombo's List<P> as the per-patch
-           particle storage. The central idea:
+  @details
+  ParticleSoA is the per-patch particle storage that replaces Chombo's @c List<P>. It is
+  the single source of truth for one grid patch worth of particles; the AMR machinery
+  (the ParticleContainer equivalent) owns a @c LayoutData<ParticleSoA<P>> per level.
 
-           1. The user defines a plain "Array-of-Structs" particle struct, e.g.
-                struct MyParticle { RealVect pos; Real weight; Real lightsaberDamage; };
-              This is the ergonomic single-particle view the rest of the code uses.
+  <h2>The data model (read this first)</h2>
 
-           2. The user specializes ParticleTraits<MyParticle> to describe the SoA
-              columns as a compile-time tuple of pointer-to-member, and to tag which
-              column is the position and which is the weight.
+  The container stores particles column-major (Struct-of-Arrays): one contiguous array per
+  field. ALL columns live in ONE aligned allocation (the "arena"), laid out as offset
+  slices:
 
-           3. ParticleSoA<MyParticle> then stores one contiguous std::vector per
-              column (true SoA), but can still hand back / accept a MyParticle via
-              gather()/append() for code that prefers the per-particle view.
+  @verbatim
+      [ x | pad | y | pad | z | pad | weight | pad | id | pad | rank | pad | payload... ]
+  @endverbatim
 
-           The two mandatory fields are:
-             - position(i) -> RealVect& (the only mandatory vector column)
-             - weight(i)   -> Real&     (the only mandatory scalar column)
-           Everything else (velocity, energy, lightsaberDamage, ...) is generic
-           user-defined columns.
+  Column base pointers are cached, so element access is as cheap as a plain array. Bulk
+  operations over a compact (size == capacity) container are then a SINGLE contiguous span:
+  one allocation to build, one @c memcpy (or a zero-copy @c MPI_Send of data()) to transfer.
+
+  <h2>Mandatory columns are container-owned; the user supplies only a payload</h2>
+
+  Every particle in chombo-discharge has a position, a weight, and metadata (a global id +
+  the owning rank). ParticleSoA OWNS those columns and the user does NOT declare them:
+
+    - position : @c SpaceDim raw scalar columns of type ParticleReal (NOT a RealVect column).
+                 Per-component storage is what lets the field-update kernels vectorize and is
+                 GPU-optimal; raw ParticleReal is what lets ParticleReal differ from Real.
+    - weight   : one ParticleReal column.
+    - particleID / rankID : container-owned bookkeeping columns (ParticleID / RankID). They
+                 travel in MPI linearization but are NOT written to HDF5 (regenerated on
+                 restart).
+
+  The user defines ONLY the extra payload fields (velocity, mobility, energy, ...) as a
+  plain struct, plus a ParticleTraits specialization listing the payload columns. The
+  payload may be empty, so @c ParticleSoA<> is a ready-made point/tracer particle
+  (position + weight + metadata, nothing else).
+
+  <h2>Defining a particle type (the complete recipe)</h2>
+
+  Step 1 -- write a plain struct of the EXTRA (payload) members only. Each member becomes one
+  SoA column and must be byte-copyable (trivially copyable, or RealVect, which is whitelisted
+  -- see detail::IsBlittable). Do NOT add position/weight/id/rank; the container owns those.
+
+    @code
+      struct MyPayload
+      {
+        RealVect velocity = RealVect::Zero;
+        Real     mobility = 0.0;
+        Real     energy   = 0.0;
+      };
+    @endcode
+
+  Step 2 -- specialize ParticleTraits<MyPayload> with the @c columns tuple (one
+  pointer-to-member per payload column; the single source of truth for the layout):
+
+    @code
+      template <>
+      struct ParticleTraits<MyPayload>
+      {
+        static constexpr auto columns = std::make_tuple(&MyPayload::velocity,
+                                                        &MyPayload::mobility,
+                                                        &MyPayload::energy);
+      };
+    @endcode
+
+  Step 3 (optional) -- restrict which PAYLOAD columns go to HDF5 by declaring an
+  @c h5Columns tuple of member pointers. Position and weight are ALWAYS checkpointed;
+  id/rank NEVER are. If @c h5Columns is omitted, every payload column is checkpointed.
+
+    @code
+      static constexpr auto h5Columns = std::make_tuple(&MyPayload::velocity,
+                                                        &MyPayload::energy);
+    @endcode
+
+  That is all -- @c ParticleSoA<MyPayload> now works. Payload fields are selected by member
+  pointer, e.g. @c soa.column<&MyPayload::velocity>(); the column index is DERIVED from the
+  pointer at compile time, so reordering @c columns keeps name-based access correct.
+
+  <h2>Precision</h2>
+  Particle columns use ParticleReal, a compile-time alias that defaults to the mesh @c Real
+  but may be set to @c float (define @c CD_PARTICLE_REAL) for half-memory, 8-wide-SIMD
+  particles against a double-precision grid. position(i) returns a @c RealVect PROMOTED to
+  @c Real for cell lookup / Chombo interop.
+
+  @note ParticleSoA is move-only (copying a patch would deep-copy every column; we forbid it
+        to avoid accidental O(N) copies, matching ParticleContainer).
+  @tparam P      User payload struct (extra columns only); defaults to NoPayload.
+  @tparam Traits Column descriptor for the payload; defaults to ParticleTraits<P>.
 */
 
 #ifndef CD_PARTICLESOA_H
 #define CD_PARTICLESOA_H
 
 // Std includes
+#include <array>
+#include <cstddef>
+#include <cstdlib>
 #include <cstring>
 #include <tuple>
 #include <type_traits>
@@ -42,97 +113,72 @@
 
 // Chombo includes
 #include <REAL.H>
+#include <SPACE.H>
 #include <RealVect.H>
+#include <IntVect.H>
+#include <Box.H>
 
 // Our includes
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Traits class that a user specializes to teach ParticleSoA how to
-         decompose their particle struct into SoA columns.
-  @details
-  <h3>Defining a new particle type (the complete recipe)</h3>
+  @brief Compile-time precision of particle data. Defaults to the mesh Real; define
+         CD_PARTICLE_REAL (e.g. to float) for mixed-precision particles.
+*/
+#ifndef CD_PARTICLE_REAL
+#define CD_PARTICLE_REAL Real
+#endif
 
-  Step 1 -- write a plain struct with public data members. Each member becomes one
-  SoA column. The two mandatory fields are a RealVect position and a Real weight;
-  everything else is up to you. Every member must be byte-copyable (memcpy-able)
-  for MPI/HDF5: trivially-copyable types qualify, and RealVect is whitelisted
-  (see detail::IsBlittable); pointers and types with custom copy semantics do not.
+/** @brief Floating-point type for particle columns (position, weight, payload reals). */
+using ParticleReal = CD_PARTICLE_REAL;
 
-    @code
-      struct MyParticle
-      {
-        RealVect pos      = RealVect::Zero;
-        Real     weight   = 0.0;
-        RealVect velocity = RealVect::Zero;
-        Real     energy   = 0.0;
-      };
-    @endcode
+/** @brief Global particle identifier type (container-owned metadata column). */
+using ParticleID = long long;
 
-  Step 2 -- specialize ParticleTraits<MyParticle> (in the same namespace as this
-  template) with three required members:
+/** @brief Owning-rank identifier type (container-owned metadata column). */
+using RankID = int;
 
-    - `columns`     : a std::make_tuple of pointer-to-member, ONE per SoA column.
-                      This tuple is the single source of truth for the layout.
-    - `positionPtr` : pointer to the RealVect position member.
-    - `weightPtr`   : pointer to the Real weight member.
-
-    @code
-      template <>
-      struct ParticleTraits<MyParticle>
-      {
-        static constexpr auto columns     = std::make_tuple(&MyParticle::pos,
-                                                            &MyParticle::weight,
-                                                            &MyParticle::velocity,
-                                                            &MyParticle::energy);
-        static constexpr auto positionPtr = &MyParticle::pos;
-        static constexpr auto weightPtr   = &MyParticle::weight;
-      };
-    @endcode
-
-  Step 3 (optional) -- restrict what gets written to HDF5 checkpoints. Declare an
-  `h5Columns` tuple of member pointers naming the subset to persist; fields left
-  out are recomputed after restart (and come back default-constructed). If
-  `h5Columns` is omitted, ALL columns are checkpointed.
-
-    @code
-      static constexpr auto h5Columns = std::make_tuple(&MyParticle::pos,
-                                                        &MyParticle::weight,
-                                                        &MyParticle::energy);
-    @endcode
-
-  That is all -- `ParticleSoA<MyParticle>` now works, and call sites select fields
-  by member pointer, e.g. `soa.column<&MyParticle::velocity>()`.
-
-  <h3>Why member pointers instead of indices</h3>
-  Position/weight/HDF5 columns are designated by MEMBER POINTER, never by a
-  hand-written integer index. ParticleSoA derives the column indices from the
-  pointers at compile time, so reordering the `columns` tuple (e.g. to tune memory
-  layout) keeps every name-based access correct -- there is no second list to keep
-  in sync. The one externally visible effect of reordering is that the serialized
-  byte order changes, so treat a layout change as a checkpoint-format change.
-
-  @note The primary template is intentionally left undefined, so using ParticleSoA
-        with a particle type that has no ParticleTraits specialization is a hard
-        compile error rather than a confusing template failure deep inside.
-  @tparam P The user particle struct being described.
+/**
+  @brief Traits class that a user specializes to describe the PAYLOAD columns of a
+         particle type. See ParticleSoA for the full recipe.
+  @note The primary template is intentionally undefined, so using ParticleSoA with a
+        payload type that has no specialization is a clear hard error.
+  @tparam P The user payload struct being described.
 */
 template <typename P>
 struct ParticleTraits;
 
+/** @brief Empty payload: ParticleSoA<> is a position+weight+metadata point particle. */
+struct NoPayload
+{
+};
+
+/** @brief Traits for the empty payload (no payload columns). */
+template <>
+struct ParticleTraits<NoPayload>
+{
+  /** @brief No payload columns. */
+  static constexpr auto columns = std::make_tuple();
+};
+
 namespace detail {
 
-  /**
-    @brief Extract the class type and value type from a pointer-to-member type.
-  */
+  /** @brief Extract the class type and value type from a pointer-to-member type. */
   template <typename M>
   struct MemberPointerTraits;
 
+  template <typename C, typename T>
+  struct MemberPointerTraits<T C::*>
+  {
+    using ClassType = C;
+    using ValueType = T;
+  };
+
   /**
     @brief Trait: true if T may be safely byte-copied (memcpy) for linearization.
-    @details std::is_trivially_copyable is too strict for Chombo's RealVect, which
-    has a user-defined copy constructor (so it is not "trivially copyable") yet is
-    a flat array of Real and is safe to blit. RealVect is whitelisted here.
+    @details std::is_trivially_copyable is too strict for Chombo's RealVect (user-defined
+    copy constructor) which is nonetheless a flat array of Real and safe to blit; it is
+    whitelisted here.
   */
   template <typename T>
   struct IsBlittable : std::integral_constant<bool, std::is_trivially_copyable<T>::value>
@@ -143,17 +189,7 @@ namespace detail {
   {
   };
 
-  template <typename C, typename T>
-  struct MemberPointerTraits<T C::*>
-  {
-    using ClassType = C;
-    using ValueType = T;
-  };
-
-  /**
-    @brief Type-guarded equality of two pointer-to-member. Returns false when the
-           member types differ (so heterogeneous tuples compare cleanly).
-  */
+  /** @brief Type-guarded equality of two pointer-to-member (false for differing types). */
   template <typename A, typename B>
   constexpr bool
   eqMember(A, B) noexcept
@@ -167,13 +203,7 @@ namespace detail {
     return a_lhs == a_rhs;
   }
 
-  /**
-    @brief Compile-time search: index of pointer-to-member a_target within a tuple
-           of pointer-to-member. Returns tuple size if not found.
-    @details This is what makes the layout reorder-safe: a field's column index is
-    DERIVED from its member pointer rather than hand-numbered, so swapping two
-    columns does not silently misroute name-based access.
-  */
+  /** @brief Compile-time index of a member pointer within a tuple (size if absent). */
   template <typename Tup, typename M>
   constexpr std::size_t
   indexOfImpl(const Tup&, M, std::index_sequence<>) noexcept
@@ -193,17 +223,24 @@ namespace detail {
     return indexOfImpl(a_t, a_target, std::make_index_sequence<std::tuple_size<Tup>::value>{});
   }
 
-  /**
-    @brief Build the SoA storage type (a tuple of std::vector<columnType>) from
-           the tuple of pointer-to-member types.
-  */
-  template <typename Tuple>
-  struct SoaStorage;
-
-  template <typename... Ms>
-  struct SoaStorage<std::tuple<Ms...>>
+  /** @brief std::tuple of N copies of T (used to build the SpaceDim position columns). */
+  template <typename T, std::size_t N>
+  struct RepeatTuple
   {
-    using Type = std::tuple<std::vector<typename MemberPointerTraits<Ms>::ValueType>...>;
+    template <std::size_t>
+    using Always = T;
+    template <std::size_t... I>
+    static std::tuple<Always<I>...> make(std::index_sequence<I...>);
+    using Type = decltype(make(std::make_index_sequence<N>{}));
+  };
+
+  /** @brief Map a tuple of pointer-to-member to the tuple of their value types. */
+  template <typename Tuple>
+  struct ValueTuple;
+  template <typename... Ms>
+  struct ValueTuple<std::tuple<Ms...>>
+  {
+    using Type = std::tuple<typename MemberPointerTraits<Ms>::ValueType...>;
   };
 
   /** @brief Variadic constexpr sum of std::size_t values. */
@@ -219,30 +256,22 @@ namespace detail {
     return a_first + sumSizes(a_rest...);
   }
 
-  /**
-    @brief Compile-time sum of sizeof() of every column value type. Used as the
-           per-particle byte count when linearizing for MPI.
-  */
+  /** @brief Compile-time sum of sizeof() over every type in a value tuple. */
   template <typename Tuple>
-  struct LinearSize;
-
-  template <typename... Ms>
-  struct LinearSize<std::tuple<Ms...>>
+  struct SumSizeof;
+  template <typename... Ts>
+  struct SumSizeof<std::tuple<Ts...>>
   {
-    static constexpr std::size_t s_value = sumSizes(sizeof(typename MemberPointerTraits<Ms>::ValueType)...);
+    static constexpr std::size_t s_value = sumSizes(sizeof(Ts)...);
   };
 
-  /**
-    @brief True iff every column value type is byte-copyable / blittable (required for the
-           memcpy-based MPI/HDF5 linearization).
-  */
+  /** @brief True iff every type in a value tuple is byte-copyable (for memcpy linearization). */
   template <typename Tuple>
   struct AllBlittable;
-
-  template <typename... Ms>
-  struct AllBlittable<std::tuple<Ms...>>
+  template <typename... Ts>
+  struct AllBlittable<std::tuple<Ts...>>
   {
-    static constexpr bool s_value = (IsBlittable<typename MemberPointerTraits<Ms>::ValueType>::value && ...);
+    static constexpr bool s_value = (IsBlittable<Ts>::value && ...);
   };
 
   /** @brief Stand-in for std::void_t. */
@@ -255,9 +284,8 @@ namespace detail {
   using Void = typename MakeVoid<Ts...>::Type;
 
   /**
-    @brief Turn a user tuple of HDF5 member pointers into a std::index_sequence of
-           DERIVED column indices (each found via indexOf against the full column
-           tuple). Only the return TYPE is used (via decltype); never called.
+    @brief Turn a tuple of HDF5 payload member pointers into a std::index_sequence of
+           DERIVED payload-column indices (each via indexOf against the payload columns).
   */
   template <typename Traits, std::size_t... I>
   constexpr std::index_sequence<indexOf(Traits::columns, std::get<I>(Traits::h5Columns))...>
@@ -267,14 +295,8 @@ namespace detail {
   }
 
   /**
-    @brief Resolve the HDF5 column subset as an index_sequence.
-    @details If the user's traits declare `static constexpr auto h5Columns =
-    std::make_tuple(&P::a, &P::b, ...)` (member pointers, same single source of
-    truth as `columns`), the indices are derived from those pointers - so
-    reordering `columns` keeps the right fields checkpointed. If no `h5Columns` is
-    declared, this falls back to "all columns". Mirrors GenericParticle's
-    H5size/H5linearOut/H5linearIn (which dropped IDs and could drop scratch),
-    while staying generic and reorder-safe.
+    @brief Resolve the HDF5 PAYLOAD column subset as an index_sequence (indices into the
+           payload columns). Falls back to "all payload columns" if no h5Columns is declared.
   */
   template <typename Traits, typename Fallback, typename = void>
   struct H5ColumnSubset
@@ -284,13 +306,11 @@ namespace detail {
   template <typename Traits, typename Fallback>
   struct H5ColumnSubset<Traits, Fallback, Void<decltype(Traits::h5Columns)>>
   {
-    using H5Tuple = typename std::remove_cv<typename std::remove_reference<decltype(Traits::h5Columns)>::type>::type;
+    using H5Tuple = std::remove_cv_t<std::remove_reference_t<decltype(Traits::h5Columns)>>;
     using Type    = decltype(deriveH5Seq<Traits>(std::make_index_sequence<std::tuple_size<H5Tuple>::value>{}));
   };
 
-  /**
-    @brief memcpy one trivially-copyable value onto a byte buffer and advance it.
-  */
+  /** @brief memcpy one blittable value onto a byte buffer and advance it. */
   template <typename T>
   inline void
   pushBytes(unsigned char*& a_buf, const T& a_value) noexcept
@@ -300,9 +320,7 @@ namespace detail {
     a_buf += sizeof(T);
   }
 
-  /**
-    @brief memcpy one trivially-copyable value off a byte buffer and advance it.
-  */
+  /** @brief memcpy one blittable value off a byte buffer and advance it. */
   template <typename T>
   inline void
   pullBytes(const unsigned char*& a_buf, T& a_value) noexcept
@@ -315,216 +333,203 @@ namespace detail {
 } // namespace detail
 
 /**
-  @brief Struct-of-Arrays (SoA) particle container for a single grid patch.
-  @details
-  One ParticleSoA owns all the particles of one grid patch. It is the SoA
-  replacement for the `List<P>` that today lives inside a `BinFab<P>`; the AMR
-  machinery (`ParticleContainer`) owns a `LayoutData<ParticleSoA<P>>` per level.
+  @brief Arena-backed Struct-of-Arrays particle container for a single grid patch.
+  @details See the file-level documentation for the data model, the container-owned
+  mandatory columns, and the recipe for defining a payload type.
 
-  <h3>Storage model</h3>
-  Instead of one array of particle structs (AoS), the data is stored
-  column-major: one contiguous `std::vector` per particle field ("column"). For a
-  particle with members {pos, weight, velocity} the storage is
-  `{ vector<RealVect> pos; vector<Real> weight; vector<RealVect> velocity; }`.
-  All columns have the same length, equal to size(). This layout lets per-field
-  loops stream contiguous memory and auto-vectorize.
-
-  The user never lists columns by hand here -- the particle type `P` and its
-  ParticleTraits<P> specialization describe them (see ParticleTraits for the full
-  recipe for defining a new particle type).
-
-  <h3>How to access particle data</h3>
-  Two complementary styles, both reorder-safe (a field is named by its member
-  pointer; the column index is derived at compile time):
-
-    1. Column access (preferred, fast). Operate on a whole field at once:
-       @code
-         auto&       w = soa.column<&P::weight>();     // std::vector<Real>&
-         const auto& m = soa.column<&P::mobility>();
-         for (std::size_t i = 0; i < soa.size(); ++i) w[i] *= m[i];
-       @endcode
-       column<&P::field>() returns the std::vector; .data() gives the raw pointer
-       that deposition/interpolation kernels vectorize over. position(i)/weight(i)
-       and positions()/weights() are convenience shortcuts for the two mandatory
-       fields. get<&P::field>(i) returns one particle's field by reference.
-
-    2. Whole-particle (AoS) view, for occasional per-particle work (splitting,
-       MPI pack). gather(i) copies particle i OUT into a `P`; scatter(i, p) writes
-       a `P` back IN. These COPY -- never use them in hot loops; use column access.
+  <h3>Accessing data</h3>
+  - Mandatory fields: position(i) (promoted RealVect, by value), setPosition(i,x),
+    positionColumn(dir) (raw ParticleReal*), weight(i), weightColumn(), particleID(i),
+    rankID(i).
+  - Payload fields: column<&P::field>() (raw pointer to the whole column) and
+    get<&P::field>(i) (one particle's field), both reorder-safe and zero-overhead.
+  - gather(i) copies particle i's payload out into a P (COPY -- keep out of hot loops).
 
   <h3>Mutating the population</h3>
-  append(p) adds a particle; remove(i) deletes particle i by swap-and-pop (O(1),
-  does NOT preserve order -- order is not semantically meaningful). Because
-  remove() swaps the last element into slot i, the canonical "iterate and remove"
-  loop does not advance i on a removal:
+  append(pos, weight, payload) adds a particle (grows geometrically); remove(i) deletes
+  particle i by swap-and-pop (O(1), does NOT preserve order). The canonical remove loop
+  does not advance i on a removal:
     @code
       for (std::size_t i = 0; i < soa.size(); ) {
-        if (predicate(i)) soa.remove(i);   // last element now at i
-        else              ++i;
+        if (predicate(i)) soa.remove(i); else ++i;
       }
     @endcode
-  Note that append()/remove()/resize() invalidate references obtained from
-  column()/get() (same hazard as iterators into a std::vector).
+  append/remove/reserve invalidate raw pointers from column()/positionColumn(). Capacity
+  never shrinks (clear() keeps it); the container is meant to be reused across steps.
+
+  <h3>Cell sorting</h3>
+  sortByCell(box,dx,probLo) counting-sorts the columns into Fortran cell order and builds
+  a CSR offsets array, so cell c owns the contiguous range [cellStart(c), cellStart(c+1)).
+  This replaces a separate BinFab<List>: KMC / per-cell accounting / merge operate on
+  contiguous ranges of the one container. append/remove invalidate the sort (isSorted()).
 
   <h3>Communication & I/O</h3>
-  linearizeParticle()/delinearizeAndAppend() pack/unpack a particle to/from a byte
-  buffer for MPI (all columns). h5LinearizeParticle()/h5DelinearizeAndAppend()
-  do the same for the optional HDF5 column subset (see ParticleTraits::h5Columns).
-  Both are generic -- no per-type linearization code is required.
+  linearizeParticle()/delinearizeAndAppend() pack/unpack ALL columns (incl. id/rank) for
+  MPI. h5LinearizeParticle()/h5DelinearizeAndAppend() handle the HDF5 subset (position +
+  weight + the payload h5Columns; never id/rank). data()/byteSpan() expose the raw arena for
+  a one-memcpy / zero-copy whole-container transfer.
 
-  <h3>Performance contract</h3>
-  - Hot loops should use column access and read the raw pointers from .data().
-  - gather()/scatter() copy a whole particle and must stay out of hot loops.
-  - Field selection (column<&P::f>(), get<&P::f>(), deposit<&P::f>()) is resolved
-    entirely at compile time -- zero runtime overhead vs. a hand-written index.
-
-  @note ParticleSoA is move-only (copying a patch would deep-copy every column;
-        we forbid it to avoid accidental O(N) copies, matching ParticleContainer).
-
-  @tparam P      User particle struct (the AoS single-particle view).
-  @tparam Traits Column descriptor; defaults to ParticleTraits<P>.
+  @tparam P      User payload struct (extra columns only); defaults to NoPayload.
+  @tparam Traits Column descriptor for the payload; defaults to ParticleTraits<P>.
 */
-template <typename P, typename Traits = ParticleTraits<P>>
+template <typename P = NoPayload, typename Traits = ParticleTraits<P>>
 class ParticleSoA
 {
 public:
-  /** @brief The columns descriptor tuple type (tuple of pointer-to-member). */
-  using ColumnsTuple = std::remove_cv_t<std::remove_reference_t<decltype(Traits::columns)>>;
+  /** @brief The payload columns descriptor tuple type (tuple of pointer-to-member). */
+  using PayloadColumns = std::remove_cv_t<std::remove_reference_t<decltype(Traits::columns)>>;
 
-  /** @brief The SoA storage type (tuple of std::vector per column). */
-  using Storage = typename detail::SoaStorage<ColumnsTuple>::Type;
+  /** @brief Number of user-declared payload columns. */
+  static constexpr std::size_t s_numPayloadColumns = std::tuple_size<PayloadColumns>::value;
 
-  /** @brief Number of SoA columns. */
-  static constexpr std::size_t s_numColumns = std::tuple_size<ColumnsTuple>::value;
+  /** @brief Column index of the weight (immediately after the SpaceDim position columns). */
+  static constexpr std::size_t s_weightCol = SpaceDim;
 
-  /** @brief Value type of column K (e.g. Real or RealVect). */
+  /** @brief Column index of the container-owned particleID. */
+  static constexpr std::size_t s_idCol = SpaceDim + 1;
+
+  /** @brief Column index of the container-owned rankID. */
+  static constexpr std::size_t s_rankCol = SpaceDim + 2;
+
+  /** @brief Index of the first payload column. */
+  static constexpr std::size_t s_payloadBegin = SpaceDim + 3;
+
+  /** @brief Total number of columns (SpaceDim position + weight + id + rank + payload). */
+  static constexpr std::size_t s_numColumns = s_payloadBegin + s_numPayloadColumns;
+
+  /** @brief Cache-line alignment for each column (also enables aligned SIMD). */
+  static constexpr std::size_t s_align = 64;
+
+private:
+  /** @brief The SpaceDim position columns, all ParticleReal. */
+  using PositionValues = typename detail::RepeatTuple<ParticleReal, SpaceDim>::Type;
+
+  /** @brief The mandatory column value types: positions, weight, id, rank. */
+  using MandatoryValues = decltype(std::tuple_cat(std::declval<PositionValues>(),
+                                                  std::declval<std::tuple<ParticleReal, ParticleID, RankID>>()));
+
+  /** @brief The payload column value types. */
+  using PayloadValues = typename detail::ValueTuple<PayloadColumns>::Type;
+
+public:
+  /** @brief The value types of every column, in storage order. */
+  using ColumnValueTuple = decltype(std::tuple_cat(std::declval<MandatoryValues>(), std::declval<PayloadValues>()));
+
+  /** @brief Value type of column K. */
   template <std::size_t K>
-  using ColumnType = typename detail::MemberPointerTraits<std::tuple_element_t<K, ColumnsTuple>>::ValueType;
+  using ColumnType = std::tuple_element_t<K, ColumnValueTuple>;
 
-  /**
-    @brief Derive a column index from a pointer-to-member at compile time.
-    @details Used to implement the member-pointer accessors. Reorder-safe; returns
-             s_numColumns if the member is not a registered column.
-    @param[in] a_member Pointer to a particle data member.
-    @return Index of the column backing that member.
-  */
+  /** @brief Derive the column index of a PAYLOAD member pointer (reorder-safe selector). */
   template <typename M>
   static constexpr std::size_t
   columnIndex(const M a_member) noexcept
   {
-    return detail::indexOf(Traits::columns, a_member);
+    return s_payloadBegin + detail::indexOf(Traits::columns, a_member);
   }
 
-  /** @brief Column index of the mandatory position field (DERIVED, not hand-numbered). */
-  static constexpr std::size_t s_positionIndex = detail::indexOf(Traits::columns, Traits::positionPtr);
+  /** @brief The HDF5 payload column subset (indices into the payload columns). */
+  using H5PayloadColumns = typename detail::H5ColumnSubset<Traits, std::make_index_sequence<s_numPayloadColumns>>::Type;
 
-  /** @brief Column index of the mandatory weight field (DERIVED, not hand-numbered). */
-  static constexpr std::size_t s_weightIndex = detail::indexOf(Traits::columns, Traits::weightPtr);
-
-  /**
-    @brief Byte count of one fully-linearized particle (all columns, for MPI).
-    @return Number of bytes one particle occupies in a linearizeParticle() buffer.
-  */
-  static constexpr std::size_t
-  bytesPerParticle() noexcept
-  {
-    return detail::LinearSize<ColumnsTuple>::s_value;
-  }
-
-  /**
-    @brief The subset of columns written to HDF5, as a std::index_sequence.
-    @details Derived from the traits' optional `static constexpr auto h5Columns`
-    member-pointer tuple (reorder-safe). Defaults to "all columns" if absent.
-  */
-  using H5Columns = typename detail::H5ColumnSubset<Traits, std::make_index_sequence<s_numColumns>>::Type;
-
-  // ----- Sanity checks on the user's traits ---------------------------------
-  static_assert(s_numColumns >= 1, "a particle must have at least one column");
-  static_assert(std::is_default_constructible<P>::value,
-                "particle type P must be default-constructible (gather/HDF5 restart build a P)");
-  static_assert(detail::AllBlittable<ColumnsTuple>::s_value,
+  // ----- Sanity checks ------------------------------------------------------
+  static_assert(std::is_default_constructible<P>::value, "payload type P must be default-constructible");
+  static_assert(detail::AllBlittable<ColumnValueTuple>::s_value,
                 "every particle column must be byte-copyable (trivially copyable or RealVect) for MPI/HDF5");
-  static_assert(s_positionIndex < s_numColumns, "ParticleTraits::positionPtr is not a registered column");
-  static_assert(s_weightIndex < s_numColumns, "ParticleTraits::weightPtr is not a registered column");
-  static_assert(std::is_same<ColumnType<s_positionIndex>, RealVect>::value,
-                "ParticleTraits::positionPtr must designate a RealVect member");
-  static_assert(std::is_same<ColumnType<s_weightIndex>, Real>::value,
-                "ParticleTraits::weightPtr must designate a Real member");
 
   /** @brief Construct an empty container. */
   ParticleSoA() = default;
 
-  /** @brief Copy construction is deleted (move-only: avoids accidental O(N) deep copies). */
+  /** @brief Destructor (frees the arena). */
+  ~ParticleSoA()
+  {
+    std::free(m_buffer);
+  }
+
+  /** @brief Copy construction is deleted (move-only). */
   ParticleSoA(const ParticleSoA&) = delete;
 
-  /** @brief Copy assignment is deleted (move-only). */
+  /** @brief Copy assignment is deleted (move-only). @return Reference to this. */
   ParticleSoA&
   operator=(const ParticleSoA&) = delete;
 
-  /** @brief Move constructor. */
-  ParticleSoA(ParticleSoA&&) noexcept = default;
+  /** @brief Move constructor (steals the arena). */
+  ParticleSoA(ParticleSoA&& a_other) noexcept
+  {
+    this->steal(a_other);
+  }
 
-  /** @brief Move assignment operator. @return Reference to this. */
+  /** @brief Move assignment (steals the arena). @return Reference to this. */
   ParticleSoA&
-  operator=(ParticleSoA&&) noexcept = default;
-
-  /** @brief Destructor. */
-  ~ParticleSoA() = default;
+  operator=(ParticleSoA&& a_other) noexcept
+  {
+    if (this != &a_other) {
+      std::free(m_buffer);
+      this->steal(a_other);
+    }
+    return *this;
+  }
 
   /** @brief Number of particles currently stored. */
   std::size_t
   size() const noexcept
   {
-    return std::get<0>(m_columns).size();
+    return m_size;
+  }
+
+  /** @brief Allocated capacity in particles. */
+  std::size_t
+  capacity() const noexcept
+  {
+    return m_capacity;
   }
 
   /** @brief Whether the container holds no particles. */
   bool
   empty() const noexcept
   {
-    return this->size() == 0;
+    return m_size == 0;
   }
 
-  /** @brief Reserve capacity in every column. */
-  void
-  reserve(const std::size_t a_capacity)
-  {
-    this->reserveImpl(a_capacity, std::make_index_sequence<s_numColumns>{});
-  }
-
-  /** @brief Resize every column to a_count particles (new entries value-initialized). */
-  void
-  resize(const std::size_t a_count)
-  {
-    this->resizeImpl(a_count, std::make_index_sequence<s_numColumns>{});
-  }
-
-  /** @brief Drop all particles (keeps capacity). */
+  /** @brief Drop all particles (keeps the arena; invalidates the cell sort). */
   void
   clear() noexcept
   {
-    this->clearImpl(std::make_index_sequence<s_numColumns>{});
+    m_size   = 0;
+    m_sorted = false;
   }
 
   /**
-    @brief Append a single particle (AoS view) to the back of every column.
-    @param[in] a_p Particle to append.
+    @brief Ensure capacity for at least a_capacity particles (reallocates + moves on growth).
+    @param[in] a_capacity Requested capacity.
   */
   void
-  append(const P& a_p)
-  {
-    this->appendImpl(a_p, std::make_index_sequence<s_numColumns>{});
-  }
+  reserve(const std::size_t a_capacity);
 
   /**
-    @brief Gather column slice i back into the AoS particle view.
+    @brief Set the particle count (grows capacity if needed; new slots are uninitialized).
+    @param[in] a_count New particle count.
+  */
+  void
+  resize(const std::size_t a_count);
+
+  /**
+    @brief Append one particle. The metadata columns (id/rank) are set to s_invalidID/-1;
+           assign them via particleID(i)/rankID(i) or let the AMR layer / delinearize set them.
+    @param[in] a_position Particle position.
+    @param[in] a_weight   Particle weight.
+    @param[in] a_payload  Payload fields (defaulted for empty/partial payloads).
+  */
+  void
+  append(const RealVect& a_position, const ParticleReal a_weight, const P& a_payload = P{});
+
+  /**
+    @brief Gather particle i's payload back into the AoS payload view.
     @param[in] a_index Particle index.
-    @return Reconstructed particle.
+    @return The payload struct (mandatory fields are read via the dedicated accessors).
   */
   P
   gather(const std::size_t a_index) const
   {
-    return this->gatherImpl(a_index, std::make_index_sequence<s_numColumns>{});
+    return this->gatherPayload(a_index, std::make_index_sequence<s_numPayloadColumns>{});
   }
 
   /**
@@ -532,43 +537,51 @@ public:
     @param[in] a_index Particle index.
   */
   void
-  remove(const std::size_t a_index)
+  remove(const std::size_t a_index) noexcept
   {
     this->removeImpl(a_index, std::make_index_sequence<s_numColumns>{});
+    m_size--;
+    m_sorted = false;
   }
 
-  /**
-    @brief Access an entire column by member pointer (the public field selector).
-    @details Single-token C++17 form: soa.column<&P::velocity>(). The column index
-    is derived from the member pointer, so it is reorder-safe and zero-overhead.
-    @return Reference to the std::vector backing that column.
-  */
+  /** @brief Typed base pointer of column K (low-level). */
+  template <std::size_t K>
+  ColumnType<K>*
+  columnByIndex() noexcept
+  {
+    return reinterpret_cast<ColumnType<K>*>(m_colPtrs[K]);
+  }
+
+  /** @brief Const typed base pointer of column K (low-level). */
+  template <std::size_t K>
+  const ColumnType<K>*
+  columnByIndex() const noexcept
+  {
+    return reinterpret_cast<const ColumnType<K>*>(m_colPtrs[K]);
+  }
+
+  /** @brief Whole payload column selected by member pointer (raw pointer, vectorizable). */
   template <auto Member>
-  auto&
+  auto*
   column() noexcept
   {
-    return this->columnByIndex<columnIndex(Member)>();
+    return this->template columnByIndex<columnIndex(Member)>();
   }
 
-  /** @brief Const overload of column<&P::field>(). */
+  /** @brief Const whole payload column selected by member pointer. */
   template <auto Member>
-  const auto&
+  const auto*
   column() const noexcept
   {
-    return this->columnByIndex<columnIndex(Member)>();
+    return this->template columnByIndex<columnIndex(Member)>();
   }
 
-  /**
-    @brief Access a field of particle i by member pointer (generalizes position(i)/weight(i)).
-    @details Single-token C++17 form, e.g. soa.get<&P::lightsaberDamage>(i) *= 0.9;
-    @param[in] a_index Particle index.
-    @return Reference to that particle's value for the selected field.
-  */
+  /** @brief One particle's payload field selected by member pointer. */
   template <auto Member>
   auto&
   get(const std::size_t a_index) noexcept
   {
-    return this->columnByIndex<columnIndex(Member)>()[a_index];
+    return this->template columnByIndex<columnIndex(Member)>()[a_index];
   }
 
   /** @brief Const overload of get<&P::field>(i). */
@@ -576,292 +589,434 @@ public:
   const auto&
   get(const std::size_t a_index) const noexcept
   {
-    return this->columnByIndex<columnIndex(Member)>()[a_index];
+    return this->template columnByIndex<columnIndex(Member)>()[a_index];
+  }
+
+  /** @brief Raw position component column dir (ParticleReal*, for SIMD kernels). */
+  ParticleReal*
+  positionColumn(const int a_dir) noexcept
+  {
+    return reinterpret_cast<ParticleReal*>(m_colPtrs[a_dir]);
+  }
+
+  /** @brief Const raw position component column dir. */
+  const ParticleReal*
+  positionColumn(const int a_dir) const noexcept
+  {
+    return reinterpret_cast<const ParticleReal*>(m_colPtrs[a_dir]);
+  }
+
+  /** @brief Raw weight column (ParticleReal*). */
+  ParticleReal*
+  weightColumn() noexcept
+  {
+    return this->template columnByIndex<s_weightCol>();
+  }
+
+  /** @brief Const raw weight column. */
+  const ParticleReal*
+  weightColumn() const noexcept
+  {
+    return this->template columnByIndex<s_weightCol>();
   }
 
   /**
-    @brief Access an entire column by compile-time index (low-level primitive).
-    @details Prefer the member-pointer column<&P::field>() in user code. This is
-    used internally and by generic algorithms that already hold an index.
-    @return Reference to the std::vector backing column K.
-  */
-  template <std::size_t K>
-  std::vector<ColumnType<K>>&
-  columnByIndex() noexcept
-  {
-    return std::get<K>(m_columns);
-  }
-
-  /** @brief Const overload of columnByIndex<K>(). */
-  template <std::size_t K>
-  const std::vector<ColumnType<K>>&
-  columnByIndex() const noexcept
-  {
-    return std::get<K>(m_columns);
-  }
-
-  /**
-    @brief Overwrite particle i from an AoS view (inverse of gather).
-    @details Completes the AoS round-trip gather -> modify -> scatter for code that
-    prefers the per-particle struct. Prefer direct column access in hot loops.
+    @brief Position of particle i, PROMOTED to a Real-precision RealVect (by value).
     @param[in] a_index Particle index.
-    @param[in] a_p     New values for every column of particle i.
+    @return The particle position for cell lookup / Chombo interop.
   */
-  void
-  scatter(const std::size_t a_index, const P& a_p) noexcept
-  {
-    this->scatterImpl(a_index, a_p, std::make_index_sequence<s_numColumns>{});
-  }
-
-  /** @brief The mandatory position column (whole vector). */
-  std::vector<RealVect>&
-  positions() noexcept
-  {
-    return this->columnByIndex<s_positionIndex>();
-  }
-
-  /** @brief The mandatory position column (whole vector). Const overload. */
-  const std::vector<RealVect>&
-  positions() const noexcept
-  {
-    return this->columnByIndex<s_positionIndex>();
-  }
-
-  /** @brief The mandatory weight column (whole vector). */
-  std::vector<Real>&
-  weights() noexcept
-  {
-    return this->columnByIndex<s_weightIndex>();
-  }
-
-  /** @brief The mandatory weight column (whole vector). Const overload. */
-  const std::vector<Real>&
-  weights() const noexcept
-  {
-    return this->columnByIndex<s_weightIndex>();
-  }
-
-  /** @brief Position of particle i (the one mandatory vector accessor). */
-  RealVect&
-  position(const std::size_t a_index) noexcept
-  {
-    return this->columnByIndex<s_positionIndex>()[a_index];
-  }
-
-  /** @brief Const overload of position(i). */
-  const RealVect&
+  RealVect
   position(const std::size_t a_index) const noexcept
   {
-    return this->columnByIndex<s_positionIndex>()[a_index];
-  }
-
-  /** @brief Weight of particle i (the one mandatory scalar accessor). */
-  Real&
-  weight(const std::size_t a_index) noexcept
-  {
-    return this->columnByIndex<s_weightIndex>()[a_index];
-  }
-
-  /** @brief Const overload of weight(i). */
-  const Real&
-  weight(const std::size_t a_index) const noexcept
-  {
-    return this->columnByIndex<s_weightIndex>()[a_index];
+    RealVect x;
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      x[dir] = static_cast<Real>(this->positionColumn(dir)[a_index]);
+    }
+    return x;
   }
 
   /**
-    @brief Linearize particle i into a byte buffer (for MPI send).
+    @brief Set the position of particle i (demoted to ParticleReal if narrower).
+    @param[in] a_index    Particle index.
+    @param[in] a_position New position.
+  */
+  void
+  setPosition(const std::size_t a_index, const RealVect& a_position) noexcept
+  {
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      this->positionColumn(dir)[a_index] = static_cast<ParticleReal>(a_position[dir]);
+    }
+  }
+
+  /** @brief Weight of particle i. */
+  ParticleReal&
+  weight(const std::size_t a_index) noexcept
+  {
+    return this->template columnByIndex<s_weightCol>()[a_index];
+  }
+
+  /** @brief Const weight of particle i. */
+  const ParticleReal&
+  weight(const std::size_t a_index) const noexcept
+  {
+    return this->template columnByIndex<s_weightCol>()[a_index];
+  }
+
+  /** @brief Global id of particle i (container-owned metadata). */
+  ParticleID&
+  particleID(const std::size_t a_index) noexcept
+  {
+    return this->template columnByIndex<s_idCol>()[a_index];
+  }
+
+  /** @brief Const global id of particle i. */
+  const ParticleID&
+  particleID(const std::size_t a_index) const noexcept
+  {
+    return this->template columnByIndex<s_idCol>()[a_index];
+  }
+
+  /** @brief Owning rank of particle i (container-owned metadata). */
+  RankID&
+  rankID(const std::size_t a_index) noexcept
+  {
+    return this->template columnByIndex<s_rankCol>()[a_index];
+  }
+
+  /** @brief Const owning rank of particle i. */
+  const RankID&
+  rankID(const std::size_t a_index) const noexcept
+  {
+    return this->template columnByIndex<s_rankCol>()[a_index];
+  }
+
+  /** @brief Byte count of one fully-linearized particle (all columns, for MPI). */
+  static constexpr std::size_t
+  bytesPerParticle() noexcept
+  {
+    return detail::SumSizeof<ColumnValueTuple>::s_value;
+  }
+
+  /**
+    @brief Linearize particle i into a byte buffer (all columns, for MPI send).
     @param[in,out] a_buffer Buffer with at least bytesPerParticle() bytes.
     @param[in]     a_index  Particle index.
   */
   void
-  linearizeParticle(void* a_buffer, const std::size_t a_index) const noexcept
-  {
-    auto* p = static_cast<unsigned char*>(a_buffer);
-    this->linearizeImpl(p, a_index, std::make_index_sequence<s_numColumns>{});
-  }
+  linearizeParticle(void* a_buffer, const std::size_t a_index) const noexcept;
 
   /**
-    @brief Append a particle delinearized from a byte buffer (for MPI receive).
+    @brief Append a particle delinearized from a byte buffer (all columns, for MPI receive).
     @param[in] a_buffer Buffer with at least bytesPerParticle() bytes.
   */
   void
-  delinearizeAndAppend(const void* a_buffer)
-  {
-    const auto* p = static_cast<const unsigned char*>(a_buffer);
-    this->delinearizeImpl(p, std::make_index_sequence<s_numColumns>{});
-  }
+  delinearizeAndAppend(const void* a_buffer);
 
-  /** @brief Bytes for one HDF5-linearized particle (only the H5Columns subset). */
+  /** @brief Bytes for one HDF5-linearized particle (position + weight + h5 payload subset). */
   static constexpr std::size_t
   h5BytesPerParticle() noexcept
   {
-    return h5SizeImpl(H5Columns{});
+    return (SpaceDim + 1) * sizeof(ParticleReal) + h5PayloadSize(H5PayloadColumns{});
   }
 
   /**
-    @brief Linearize only the HDF5-checkpointed columns of particle i.
-    @details Generic over any subset; mirrors GenericParticle::H5linearOut.
+    @brief Linearize the HDF5-checkpointed columns of particle i (no id/rank).
     @param[in,out] a_buffer Buffer with at least h5BytesPerParticle() bytes.
     @param[in]     a_index  Particle index.
   */
   void
-  h5LinearizeParticle(void* a_buffer, const std::size_t a_index) const noexcept
-  {
-    auto* p = static_cast<unsigned char*>(a_buffer);
-    this->h5LinearizeImpl(p, a_index, H5Columns{});
-  }
+  h5LinearizeParticle(void* a_buffer, const std::size_t a_index) const noexcept;
 
   /**
     @brief Append a particle whose HDF5-checkpointed columns come from a buffer.
-    @details Non-checkpointed columns are left default-constructed (they are
-    recomputed after restart), mirroring GenericParticle::H5linearIn.
+    @details id/rank are set invalid and non-checkpointed payload columns default-constructed.
     @param[in] a_buffer Buffer with at least h5BytesPerParticle() bytes.
   */
   void
-  h5DelinearizeAndAppend(const void* a_buffer)
+  h5DelinearizeAndAppend(const void* a_buffer);
+
+  /** @brief Raw arena pointer (column-major); a compact container's whole data span. */
+  const void*
+  data() const noexcept
   {
-    const auto* p = static_cast<const unsigned char*>(a_buffer);
-    this->h5DelinearizeImpl(p, H5Columns{});
+    return m_buffer;
+  }
+
+  /** @brief Mutable raw arena pointer (e.g. zero-copy MPI receive into the arena). */
+  void*
+  data() noexcept
+  {
+    return m_buffer;
+  }
+
+  /**
+    @brief Byte span of the live data (for a compact container, one contiguous memcpy/MPI_Send).
+    @return Byte span [data(), data()+byteSpan()).
+  */
+  std::size_t
+  byteSpan() const noexcept
+  {
+    if (m_size == 0) {
+      return 0;
+    }
+    return this->byteSpanImpl(std::make_index_sequence<s_numColumns>{});
+  }
+
+  /**
+    @brief Counting-sort the columns into Fortran cell order and build CSR cell offsets.
+    @details After this, cell c owns the contiguous particle range [cellStart(c), cellStart(c+1)).
+    Particles must lie within a_box; out-of-range positions are clamped to the boundary cells.
+    @param[in] a_box    Patch box defining the cells.
+    @param[in] a_dx     Grid spacing per direction.
+    @param[in] a_probLo Physical coordinate of the lower domain corner.
+  */
+  void
+  sortByCell(const Box& a_box, const RealVect& a_dx, const RealVect& a_probLo);
+
+  /** @brief Whether the container is currently cell-sorted (false after append/remove). */
+  bool
+  isSorted() const noexcept
+  {
+    return m_sorted;
+  }
+
+  /** @brief Number of cells in the CSR sort (0 if not sorted). */
+  std::size_t
+  numCells() const noexcept
+  {
+    return m_cellStart.empty() ? 0 : m_cellStart.size() - 1;
+  }
+
+  /** @brief CSR start offset of cell c (valid after sortByCell; requires c <= numCells()). */
+  std::size_t
+  cellStart(const std::size_t a_cell) const noexcept
+  {
+    return m_cellStart[a_cell];
+  }
+
+  /** @brief Number of particles in cell c (valid after sortByCell). */
+  std::size_t
+  particlesInCell(const std::size_t a_cell) const noexcept
+  {
+    return m_cellStart[a_cell + 1] - m_cellStart[a_cell];
   }
 
 protected:
-  /** @brief The SoA storage: one std::vector per column. */
-  Storage m_columns;
+  void*                           m_buffer   = nullptr; ///< The single arena allocation.
+  std::size_t                     m_capacity = 0;       ///< Capacity in particles.
+  std::size_t                     m_size     = 0;       ///< Live particle count.
+  bool                            m_sorted   = false;   ///< Whether m_cellStart is valid.
+  std::array<void*, s_numColumns> m_colPtrs{};          ///< Cached column base pointers into m_buffer.
+  std::vector<std::size_t>        m_cellStart;          ///< CSR cell offsets (size numCells+1 when sorted).
 
-private:
-  template <std::size_t... I>
-  void
-  reserveImpl(const std::size_t a_cap, std::index_sequence<I...>)
+  /** @brief Sentinel for an unassigned global particle id. */
+  static constexpr ParticleID s_invalidID = -1;
+
+  /** @brief Round a_x up to the next multiple of s_align. */
+  static std::size_t
+  alignUp(const std::size_t a_x) noexcept
   {
-    using expander = int[];
-    (void)expander{0, ((void)std::get<I>(m_columns).reserve(a_cap), 0)...};
+    return (a_x + (s_align - 1)) / s_align * s_align;
   }
 
-  template <std::size_t... I>
+  /** @brief Steal another container's arena (move helper). */
   void
-  resizeImpl(const std::size_t a_count, std::index_sequence<I...>)
+  steal(ParticleSoA& a_o) noexcept
   {
-    using expander = int[];
-    (void)expander{0, ((void)std::get<I>(m_columns).resize(a_count), 0)...};
+    m_buffer       = a_o.m_buffer;
+    m_capacity     = a_o.m_capacity;
+    m_size         = a_o.m_size;
+    m_sorted       = a_o.m_sorted;
+    m_colPtrs      = a_o.m_colPtrs;
+    m_cellStart    = std::move(a_o.m_cellStart);
+    a_o.m_buffer   = nullptr;
+    a_o.m_capacity = 0;
+    a_o.m_size     = 0;
+    a_o.m_sorted   = false;
+    a_o.m_colPtrs  = {};
   }
 
-  template <std::size_t... I>
+  /** @brief Grow geometrically if the container is full (called before writing slot m_size). */
   void
-  clearImpl(std::index_sequence<I...>) noexcept
+  growIfFull()
   {
-    using expander = int[];
-    (void)expander{0, ((void)std::get<I>(m_columns).clear(), 0)...};
+    if (m_size == m_capacity) {
+      this->reserve(m_capacity == 0 ? 16 : 2 * m_capacity);
+    }
   }
 
+  /** @brief Compute per-column byte offsets for a given capacity; returns the total bytes. */
+  template <std::size_t... I>
+  std::size_t
+  computeOffsets(const std::size_t                      a_capacity,
+                 std::array<std::size_t, s_numColumns>& a_off,
+                 std::index_sequence<I...>) const noexcept
+  {
+    std::size_t running = 0;
+    using expander      = int[];
+    (void)expander{0, (a_off[I] = running, running += alignUp(a_capacity * sizeof(ColumnType<I>)), 0)...};
+    return running;
+  }
+
+  /** @brief Cache the column base pointers from a fresh buffer + offsets. */
   template <std::size_t... I>
   void
-  appendImpl(const P& a_p, std::index_sequence<I...>)
+  setColPtrs(const std::array<std::size_t, s_numColumns>& a_off, std::index_sequence<I...>) noexcept
   {
-    // Local constexpr copy avoids ODR-using the static member (C++14 would
-    // otherwise demand an out-of-line definition of ParticleTraits::columns).
+    using expander = int[];
+    (void)expander{0, (m_colPtrs[I] = static_cast<char*>(m_buffer) + a_off[I], 0)...};
+  }
+
+  /** @brief Contiguously memcpy every column's live region into a freshly-allocated buffer. */
+  template <std::size_t... I>
+  void
+  moveColumns(void* a_newBuf, const std::array<std::size_t, s_numColumns>& a_off, std::index_sequence<I...>) noexcept
+  {
+    using expander = int[];
+    (void)expander{
+      0,
+      (std::memcpy(static_cast<char*>(a_newBuf) + a_off[I], m_colPtrs[I], m_size * sizeof(ColumnType<I>)), 0)...};
+  }
+
+  /** @brief Allocate a new arena and reallocate/move the columns into it (growth path). */
+  void
+  reallocate(const std::size_t a_capacity);
+
+  /** @brief Reorder every column in place by a_dest (a_dest[i] = new slot of old particle i). */
+  void
+  permute(const std::vector<std::size_t>& a_dest);
+
+  /** @brief Per-column scatter for permute(): newcol[dest[i]] = oldcol[i]. */
+  template <std::size_t K>
+  void
+  scatterColumn(void* a_newBuf, const std::size_t a_off, const std::vector<std::size_t>& a_dest) noexcept
+  {
+    const ColumnType<K>* src = this->template columnByIndex<K>();
+    ColumnType<K>*       dst = reinterpret_cast<ColumnType<K>*>(static_cast<char*>(a_newBuf) + a_off);
+    for (std::size_t i = 0; i < m_size; i++) {
+      dst[a_dest[i]] = src[i];
+    }
+  }
+  template <std::size_t... I>
+  void
+  scatterColumns(void*                                        a_newBuf,
+                 const std::array<std::size_t, s_numColumns>& a_off,
+                 const std::vector<std::size_t>&              a_dest,
+                 std::index_sequence<I...>) noexcept
+  {
+    using expander = int[];
+    (void)expander{0, ((void)this->template scatterColumn<I>(a_newBuf, a_off[I], a_dest), 0)...};
+  }
+
+  /** @brief Write the payload columns of slot m_size from a payload struct. */
+  template <std::size_t... J>
+  void
+  writePayload(const P& a_p, std::index_sequence<J...>) noexcept
+  {
     constexpr auto cols = Traits::columns;
     using expander      = int[];
-    (void)expander{0, ((void)std::get<I>(m_columns).push_back(a_p.*std::get<I>(cols)), 0)...};
+    (void)expander{0,
+                   ((void)(this->template columnByIndex<s_payloadBegin + J>()[m_size] = a_p.*std::get<J>(cols)), 0)...};
   }
 
-  template <std::size_t... I>
+  /** @brief Read the payload columns of slot a_index into a payload struct. */
+  template <std::size_t... J>
   P
-  gatherImpl(const std::size_t a_index, std::index_sequence<I...>) const
+  gatherPayload(const std::size_t a_index, std::index_sequence<J...>) const
   {
     constexpr auto cols = Traits::columns;
     P              p;
     using expander = int[];
-    (void)expander{0, ((void)(p.*std::get<I>(cols) = std::get<I>(m_columns)[a_index]), 0)...};
+    (void)expander{0,
+                   ((void)(p.*std::get<J>(cols) = this->template columnByIndex<s_payloadBegin + J>()[a_index]), 0)...};
     return p;
   }
 
+  /** @brief Swap-and-pop slot a_index in every column. */
   template <std::size_t... I>
   void
-  scatterImpl(const std::size_t a_index, const P& a_p, std::index_sequence<I...>) noexcept
-  {
-    constexpr auto cols = Traits::columns;
-    using expander      = int[];
-    (void)expander{0, ((void)(std::get<I>(m_columns)[a_index] = a_p.*std::get<I>(cols)), 0)...};
-  }
-
-  template <std::size_t... I>
-  void
-  removeImpl(const std::size_t a_index, std::index_sequence<I...>)
+  removeImpl(const std::size_t a_index, std::index_sequence<I...>) noexcept
   {
     using expander = int[];
-    (void)expander{0, ((void)swapPop(std::get<I>(m_columns), a_index), 0)...};
+    (void)expander{
+      0,
+      ((void)(this->template columnByIndex<I>()[a_index] = this->template columnByIndex<I>()[m_size - 1]), 0)...};
   }
 
+  /** @brief Push every column of particle a_index onto a byte buffer (MPI). */
   template <std::size_t... I>
   void
   linearizeImpl(unsigned char* a_buf, const std::size_t a_index, std::index_sequence<I...>) const noexcept
   {
     using expander = int[];
-    (void)expander{0, ((void)detail::pushBytes(a_buf, std::get<I>(m_columns)[a_index]), 0)...};
+    (void)expander{0, ((void)detail::pushBytes(a_buf, this->template columnByIndex<I>()[a_index]), 0)...};
   }
 
+  /** @brief Pull every column of one particle off a byte buffer into slot m_size (MPI). */
   template <std::size_t... I>
   void
-  delinearizeImpl(const unsigned char* a_buf, std::index_sequence<I...>)
+  delinearizeImpl(const unsigned char* a_buf, std::index_sequence<I...>) noexcept
   {
     using expander = int[];
-    (void)expander{0, ((void)appendOneFromBytes<I>(a_buf), 0)...};
+    (void)expander{0, ((void)this->template pullColumn<I>(a_buf), 0)...};
   }
-
   template <std::size_t K>
   void
-  appendOneFromBytes(const unsigned char*& a_buf)
+  pullColumn(const unsigned char*& a_buf) noexcept
   {
-    ColumnType<K> value;
-    detail::pullBytes(a_buf, value);
-    std::get<K>(m_columns).push_back(value);
+    detail::pullBytes(a_buf, this->template columnByIndex<K>()[m_size]);
   }
 
-  template <std::size_t... Is>
+  /** @brief Compile-time byte size of the HDF5 payload subset. */
+  template <std::size_t... J>
   static constexpr std::size_t
-  h5SizeImpl(std::index_sequence<Is...>) noexcept
+  h5PayloadSize(std::index_sequence<J...>) noexcept
   {
-    return detail::sumSizes(sizeof(ColumnType<Is>)...);
+    return detail::sumSizes(sizeof(ColumnType<s_payloadBegin + J>)...);
   }
 
-  template <std::size_t... Is>
+  /** @brief Push the HDF5 payload subset of particle a_index onto a byte buffer. */
+  template <std::size_t... J>
   void
-  h5LinearizeImpl(unsigned char* a_buf, const std::size_t a_index, std::index_sequence<Is...>) const noexcept
+  h5LinearizePayload(unsigned char*& a_buf, const std::size_t a_index, std::index_sequence<J...>) const noexcept
   {
     using expander = int[];
-    (void)expander{0, ((void)detail::pushBytes(a_buf, std::get<Is>(m_columns)[a_index]), 0)...};
+    (void)expander{0,
+                   ((void)detail::pushBytes(a_buf, this->template columnByIndex<s_payloadBegin + J>()[a_index]), 0)...};
   }
 
-  template <std::size_t... Is>
+  /** @brief Pull the HDF5 payload subset off a byte buffer into slot m_size. */
+  template <std::size_t... J>
   void
-  h5DelinearizeImpl(const unsigned char* a_buf, std::index_sequence<Is...>)
+  h5DelinearizePayload(const unsigned char*& a_buf, std::index_sequence<J...>) noexcept
   {
-    constexpr auto cols = Traits::columns;
-    P              p{}; // non-checkpointed columns stay default-constructed
     using expander = int[];
-    (void)expander{0, ((void)readColumnFromBytes(a_buf, p, std::get<Is>(cols)), 0)...};
-    this->append(p);
+    (void)expander{0,
+                   ((void)detail::pullBytes(a_buf, this->template columnByIndex<s_payloadBegin + J>()[m_size]), 0)...};
   }
 
-  template <typename MemberPtr>
-  static void
-  readColumnFromBytes(const unsigned char*& a_buf, P& a_p, MemberPtr a_member)
+  /** @brief Byte span of the live data: max over columns of (offset + used bytes). */
+  template <std::size_t... I>
+  std::size_t
+  byteSpanImpl(std::index_sequence<I...>) const noexcept
   {
-    typename detail::MemberPointerTraits<MemberPtr>::ValueType value;
-    detail::pullBytes(a_buf, value);
-    a_p.*a_member = value;
-  }
-
-  template <typename T>
-  static void
-  swapPop(std::vector<T>& a_vec, const std::size_t a_index) noexcept
-  {
-    a_vec[a_index] = a_vec.back();
-    a_vec.pop_back();
+    std::size_t span = 0;
+    using expander   = int[];
+    (void)expander{0,
+                   (span = (span > (static_cast<std::size_t>(static_cast<const char*>(m_colPtrs[I]) -
+                                                             static_cast<const char*>(m_buffer)) +
+                                    m_size * sizeof(ColumnType<I>)))
+                             ? span
+                             : (static_cast<std::size_t>(static_cast<const char*>(m_colPtrs[I]) -
+                                                         static_cast<const char*>(m_buffer)) +
+                                m_size * sizeof(ColumnType<I>)),
+                    0)...};
+    return span;
   }
 };
 
 #include <CD_NamespaceFooter.H>
+
+#include <CD_ParticleSoAImplem.H>
 
 #endif

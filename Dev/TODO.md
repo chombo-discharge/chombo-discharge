@@ -56,15 +56,22 @@ production code under `Source/`, `Physics/`, or `Geometries/` yet. The point of
 ## Current status
 
 - [x] Surveyed `Source/Particle` + all `ParticleContainer` users → `USAGE_PATTERNS.md`.
-- [x] SoA container `CD_ParticleSoA.H` (traits-driven, member-pointer columns; derived
-      indices; member-pointer field selector; MPI + HDF5-subset linearization;
-      append/remove/gather/scatter/get/column; move-only).
+- [x] **Merged** `ParticleSoA` + `ParticleSoAArena` into ONE arena-backed class
+      (`CD_ParticleSoA.H` declaration + `CD_ParticleSoAImplem.H` implementation). It bakes
+      in the locked design: container-owned mandatory columns (per-component `ParticleReal`
+      position, weight, `particleID`, `rankID`) + a payload-only user struct; `ParticleReal`
+      precision; `position(i)` promotion; never-shrink/self-resizing; counting-sort + CSR
+      `sortByCell`; MPI + HDF5-subset linearization; `data()`/`byteSpan()` one-memcpy
+      transfer; move-only. `CD_ParticleSoAArena.H` deleted.
 - [x] `CD_ParticleLoops.H` — SIMD-decorated particle loop (BoxLoops analogue).
-- [x] `CD_DemoParticle.H` — example particle type.
-- [x] Exposed to real Chombo: types are `Real`/`RealVect`, namespace `ChomboDischarge`.
-      `main.cpp` builds and runs as a chombo-discharge executable via the local
-      `GNUmakefile`, exercising add / iterate+remove / SIMD kernel / center-of-mass
-      merge. Next: deposition on FArrayBoxes, EB intersections, merging on real grids.
+- [x] `CD_DemoParticle.H` — example PAYLOAD type (`DemoPayload`).
+- [x] `main.cpp` builds + runs in 2D and 3D, exercising add / iterate+remove / SIMD kernel /
+      center-of-mass merge / cell-sort / MPI linearize round-trip.
+- [x] Benchmark ported to the merged class and re-run: all decisions reproduce
+      (see `BENCHMARKS.md` "Re-validation on the merged ParticleSoA").
+- [x] `LayoutData<ParticleSoA<P>>` constraints checked: only default-construct + destruct
+      required; move-only is fine (see `ARCHITECTURE.md`).
+- Next: the AMR/container layer (`LayoutData<arena-SoA>` per level, pool-model remap).
 
 ## Decisions (locked)
 

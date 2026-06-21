@@ -6,31 +6,36 @@
 
 /**
   @file   main.cpp
-  @brief  Benchmarks comparing Chombo List<P> with ParticleSoA<P>.
+  @brief  Benchmarks comparing Chombo List<P> and vector<P> (AoS) with ParticleSoA.
   @author Robert Marskar
   @details
-  Micro-benchmarks on a single grid patch, all using the identical particle data and
-  identical math, so the measured difference is the storage layout (linked-list
-  Array-of-Structs vs contiguous Struct-of-Arrays). Three storages are compared:
-  List<P>, vector<P> (AoS), and ParticleSoA<P> (with a per-component variant):
+  Micro-benchmarks on a single grid patch, all using the identical particle data and math,
+  so the measured difference is the storage layout. Three storages are compared: List<P>
+  (linked-list AoS), vector<P> (contiguous AoS), and ParticleSoA (arena-backed SoA, the
+  merged production container).
 
-    1. CIC deposition   (particle weight -> FArrayBox; a scatter)
-    2. CIC interpolation(FArrayBox -> particle scalar; a gather)
-    3. streaming transform (weight = 0.5|x|^2; SoA path uses ParticleLoops SIMD)
-    4. build            (construct the container; allocation cost)
-    5. remap            (scatter particles into K destination containers)
-    6. MPI packing      (serialize position + weight into a byte buffer)
-    7. vector-field interpolation (3-component FArrayBox -> particle RealVect)
-    8. Euler advance    (x += v*dt; the canonical particle update)
-    9. KD-tree merge    (median-split by position, merge nearest pairs; whole-particle access)
-   10. container copy   (copy whole container -> fresh container; the list-to-list case)
+  ParticleSoA OWNS the position (per-component ParticleReal columns), weight, particleID and
+  rankID; the user supplies only the extra payload. So for a byte-fair comparison the AoS
+  baseline structs carry a matching particleID + rankID, and the SoA stores position+weight
+  via accessors + per-component columns, with payloads:
+    - BenchParticle (position+weight)            -> ParticleSoA<>            (empty payload)
+    - MoverParticle (+velocity)                  -> ParticleSoA<MoverPayload> (per-component v)
+    - MergeParticle (~ItoParticle, 7 fields)     -> ParticleSoA<MergePayload>
 
-  Sections 5/6/10 also include no-intrinsics SoA variants (two-pass remap; single-memcpy
-  "arena" pack/copy) testing whether SoA matches vector<P> on bulk ops without NT intrinsics.
+  Sections:
+    1. CIC deposition          (particle weight -> FArrayBox; a scatter)
+    2. CIC interpolation       (FArrayBox -> particle scalar; a gather)
+    3. streaming transform     (weight = 0.5|x|^2; SoA path is per-component via ParticleLoops)
+    4. build                   (construct the container; allocation cost)
+    5. remap                   (scatter particles into K destination containers)
+    6. MPI packing             (serialize a container to a byte buffer)
+    7. vector-field interp     (3-component FArrayBox -> particle velocity)
+    8. Euler advance           (x += v*dt; SoA path is per-component)
+    9. KD-tree merge           (median-split by position, merge nearest; whole-particle access)
+   10. container copy          (copy whole container -> fresh container)
 
-  Grid: all-regular FArrayBox, 16 valid + 2 ghost cells per coordinate (20^3
-  allocated), single component. Particles: 16 per valid cell (32/cell for the merge).
-  All builds are 3D (make DIM=3 ...; the output prints SpaceDim=3).
+  Because ParticleSoA is arena-backed, the SoA bulk paths (pack/copy) are a single memcpy of
+  data() (glibc auto-streams; no intrinsics), and growth needs reserve(). All builds are 3D.
 */
 
 // Std includes
@@ -40,9 +45,9 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
-#include <immintrin.h>
 #include <numeric>
 #include <random>
+#include <utility>
 #include <vector>
 
 // Chombo includes
@@ -55,15 +60,16 @@
 #include <CD_Initialize.H>
 #include <CD_ParticleSoA.H>
 #include <CD_ParticleLoops.H>
-#include <CD_ParticleSoAArena.H>
 
 namespace ChomboDischarge {
 
-  /** @brief Benchmark particle: position + weight. */
+  /** @brief Benchmark particle (AoS baseline): position + weight + container-owned metadata. */
   struct BenchParticle
   {
-    RealVect m_position = RealVect::Zero;
-    Real     m_weight   = 0.0;
+    RealVect   m_position = RealVect::Zero;
+    Real       m_weight   = 0.0;
+    ParticleID m_id       = -1;
+    RankID     m_rank     = -1;
 
     inline const RealVect&
     position() const noexcept
@@ -77,59 +83,60 @@ namespace ChomboDischarge {
     }
   };
 
-  /** @brief SoA layout for BenchParticle. */
-  template <>
-  struct ParticleTraits<BenchParticle>
-  {
-    static constexpr auto columns     = std::make_tuple(&BenchParticle::m_position, &BenchParticle::m_weight);
-    static constexpr auto positionPtr = &BenchParticle::m_position;
-    static constexpr auto weightPtr   = &BenchParticle::m_weight;
-  };
-
-  /** @brief Particle carrying a velocity, for the Euler advance x += v*dt. */
+  /** @brief AoS baseline with an (interleaved) velocity, for the Euler advance x += v*dt. */
   struct MoverParticle
   {
-    RealVect m_position = RealVect::Zero;
-    RealVect m_velocity = RealVect::Zero;
-    Real     m_weight   = 0.0; // required by ParticleSoA (mandatory weight column); unused by the advance
+    RealVect   m_position = RealVect::Zero;
+    RealVect   m_velocity = RealVect::Zero;
+    Real       m_weight   = 0.0;
+    ParticleID m_id       = -1;
+    RankID     m_rank     = -1;
   };
 
-  /** @brief SoA layout for MoverParticle. */
-  template <>
-  struct ParticleTraits<MoverParticle>
+  /** @brief SoA payload for a mover: PER-COMPONENT velocity (unit-stride -> wide SIMD). */
+  struct MoverPayload
   {
-    static constexpr auto columns     = std::make_tuple(&MoverParticle::m_position,
-                                                    &MoverParticle::m_velocity,
-                                                    &MoverParticle::m_weight);
-    static constexpr auto positionPtr = &MoverParticle::m_position;
-    static constexpr auto weightPtr   = &MoverParticle::m_weight;
+    ParticleReal vx = 0.0;
+    ParticleReal vy = 0.0;
+    ParticleReal vz = 0.0;
+  };
+  template <>
+  struct ParticleTraits<MoverPayload>
+  {
+    static constexpr auto columns = std::make_tuple(&MoverPayload::vx, &MoverPayload::vy, &MoverPayload::vz);
   };
 
-  /** @brief A richer particle (~ItoParticle: 3 RealVect + 4 Real) for the merge benchmark. */
+  /** @brief A richer AoS baseline (~ItoParticle: 3 RealVect + 4 Real + metadata) for the merge. */
   struct MergeParticle
   {
-    RealVect m_position  = RealVect::Zero;
-    RealVect m_velocity  = RealVect::Zero;
-    RealVect m_oldPos    = RealVect::Zero;
-    Real     m_weight    = 0.0;
-    Real     m_mobility  = 0.0;
-    Real     m_diffusion = 0.0;
-    Real     m_energy    = 0.0;
+    RealVect   m_position  = RealVect::Zero;
+    RealVect   m_velocity  = RealVect::Zero;
+    RealVect   m_oldPos    = RealVect::Zero;
+    Real       m_weight    = 0.0;
+    Real       m_mobility  = 0.0;
+    Real       m_diffusion = 0.0;
+    Real       m_energy    = 0.0;
+    ParticleID m_id        = -1;
+    RankID     m_rank      = -1;
   };
 
-  /** @brief SoA layout for MergeParticle (7 columns). */
-  template <>
-  struct ParticleTraits<MergeParticle>
+  /** @brief SoA payload for the merge particle (position + weight are container-owned). */
+  struct MergePayload
   {
-    static constexpr auto columns     = std::make_tuple(&MergeParticle::m_position,
-                                                    &MergeParticle::m_velocity,
-                                                    &MergeParticle::m_oldPos,
-                                                    &MergeParticle::m_weight,
-                                                    &MergeParticle::m_mobility,
-                                                    &MergeParticle::m_diffusion,
-                                                    &MergeParticle::m_energy);
-    static constexpr auto positionPtr = &MergeParticle::m_position;
-    static constexpr auto weightPtr   = &MergeParticle::m_weight;
+    RealVect velocity  = RealVect::Zero;
+    RealVect oldPos    = RealVect::Zero;
+    Real     mobility  = 0.0;
+    Real     diffusion = 0.0;
+    Real     energy    = 0.0;
+  };
+  template <>
+  struct ParticleTraits<MergePayload>
+  {
+    static constexpr auto columns = std::make_tuple(&MergePayload::velocity,
+                                                    &MergePayload::oldPos,
+                                                    &MergePayload::mobility,
+                                                    &MergePayload::diffusion,
+                                                    &MergePayload::energy);
   };
 
 } // namespace ChomboDischarge
@@ -138,13 +145,14 @@ using namespace ChomboDischarge;
 
 namespace {
 
-  using SoA      = ParticleSoA<BenchParticle>;
-  using ArenaSoA = ParticleSoAArena<BenchParticle>;
+  using BenchSoA = ParticleSoA<>;
+  using MoverSoA = ParticleSoA<MoverPayload>;
+  using MergeSoA = ParticleSoA<MergePayload>;
 
   volatile std::uint64_t g_sink = 0; // defeats dead-code elimination of build/remap
 
   // ---------------------------------------------------------------------------
-  // Shared per-particle kernels.
+  // Shared per-particle kernels (unchanged math across all storages).
   // ---------------------------------------------------------------------------
 
   /** @brief CIC deposition of one particle weight onto a single-component FArrayBox. */
@@ -217,89 +225,10 @@ namespace {
     return val;
   }
 
-  /** @brief Streaming per-particle update: weight = 0.5 * |position|^2 (reads vector, writes scalar). */
-  inline Real
-  transformOne(const RealVect& a_x) noexcept
-  {
-    return 0.5 * (D_TERM(a_x[0] * a_x[0], +a_x[1] * a_x[1], +a_x[2] * a_x[2]));
-  }
-
-  // ---------------------------------------------------------------------------
-  // Per-storage loops.
-  // ---------------------------------------------------------------------------
-
-  void
-  depositList(FArrayBox&                 a_rho,
-              const List<BenchParticle>& a_p,
-              const RealVect&            a_lo,
-              const RealVect&            a_iDx,
-              const Real                 a_iVol)
-  {
-    for (ListIterator<BenchParticle> lit(a_p); lit.ok(); ++lit) {
-      depositOneCIC(a_rho, lit().position(), lit().weight(), a_lo, a_iDx, a_iVol);
-    }
-  }
-
-  void
-  depositSoA(FArrayBox& a_rho, const SoA& a_soa, const RealVect& a_lo, const RealVect& a_iDx, const Real a_iVol)
-  {
-    const std::vector<RealVect>& pos = a_soa.positions();
-    const std::vector<Real>&     w   = a_soa.weights();
-    const std::size_t            n   = a_soa.size();
-    for (std::size_t i = 0; i < n; i++) {
-      depositOneCIC(a_rho, pos[i], w[i], a_lo, a_iDx, a_iVol);
-    }
-  }
-
-  void
-  depositVector(FArrayBox&                        a_rho,
-                const std::vector<BenchParticle>& a_v,
-                const RealVect&                   a_lo,
-                const RealVect&                   a_iDx,
-                const Real                        a_iVol)
-  {
-    const std::size_t n = a_v.size();
-    for (std::size_t i = 0; i < n; i++) {
-      depositOneCIC(a_rho, a_v[i].m_position, a_v[i].m_weight, a_lo, a_iDx, a_iVol);
-    }
-  }
-
-  void
-  interpolateList(const FArrayBox& a_rho, List<BenchParticle>& a_p, const RealVect& a_lo, const RealVect& a_iDx)
-  {
-    for (ListIterator<BenchParticle> lit(a_p); lit.ok(); ++lit) {
-      lit().m_weight = interpolateOneCIC(a_rho, lit().position(), a_lo, a_iDx);
-    }
-  }
-
-  void
-  interpolateVector(const FArrayBox&            a_rho,
-                    std::vector<BenchParticle>& a_v,
-                    const RealVect&             a_lo,
-                    const RealVect&             a_iDx)
-  {
-    const std::size_t n = a_v.size();
-    for (std::size_t i = 0; i < n; i++) {
-      a_v[i].m_weight = interpolateOneCIC(a_rho, a_v[i].m_position, a_lo, a_iDx);
-    }
-  }
-
-  void
-  interpolateSoA(const FArrayBox& a_rho, SoA& a_soa, const RealVect& a_lo, const RealVect& a_iDx)
-  {
-    const std::vector<RealVect>& pos = a_soa.positions();
-    std::vector<Real>&           w   = a_soa.weights();
-    const std::size_t            n   = a_soa.size();
-    for (std::size_t i = 0; i < n; i++) {
-      w[i] = interpolateOneCIC(a_rho, pos[i], a_lo, a_iDx);
-    }
-  }
-
   /**
-    @brief CIC interpolation of a SpaceDim-component (vector) FArrayBox to a RealVect at the particle.
-    @details The FArrayBox is component-major (component varies slowest), so the SpaceDim values of a
-    given cell are numPts() apart. This gather is identical for every particle storage (the FArrayBox
-    is shared and const), so it is the layout-independent part of the cost.
+    @brief CIC interpolation of a SpaceDim-component (vector) FArrayBox to a RealVect.
+    @details The FArrayBox is component-major (component varies slowest); this gather is
+    identical for every storage (the box is shared and const).
   */
   inline RealVect
   interpolateVecFieldCIC(const FArrayBox& a_rho,
@@ -337,6 +266,125 @@ namespace {
     return val;
   }
 
+  /** @brief Streaming per-particle update: 0.5 * |position|^2. */
+  inline Real
+  transformOne(const RealVect& a_x) noexcept
+  {
+    return 0.5 * (D_TERM(a_x[0] * a_x[0], +a_x[1] * a_x[1], +a_x[2] * a_x[2]));
+  }
+
+  // ---------------------------------------------------------------------------
+  // (1) DEPOSITION
+  // ---------------------------------------------------------------------------
+  void
+  depositList(FArrayBox&                 a_rho,
+              const List<BenchParticle>& a_p,
+              const RealVect&            a_lo,
+              const RealVect&            a_iDx,
+              const Real                 a_iVol)
+  {
+    for (ListIterator<BenchParticle> lit(a_p); lit.ok(); ++lit) {
+      depositOneCIC(a_rho, lit().position(), lit().weight(), a_lo, a_iDx, a_iVol);
+    }
+  }
+
+  void
+  depositVector(FArrayBox&                        a_rho,
+                const std::vector<BenchParticle>& a_v,
+                const RealVect&                   a_lo,
+                const RealVect&                   a_iDx,
+                const Real                        a_iVol)
+  {
+    const std::size_t n = a_v.size();
+    for (std::size_t i = 0; i < n; i++) {
+      depositOneCIC(a_rho, a_v[i].m_position, a_v[i].m_weight, a_lo, a_iDx, a_iVol);
+    }
+  }
+
+  void
+  depositSoA(FArrayBox& a_rho, const BenchSoA& a_soa, const RealVect& a_lo, const RealVect& a_iDx, const Real a_iVol)
+  {
+    const ParticleReal* px = a_soa.positionColumn(0);
+    const ParticleReal* py = a_soa.positionColumn(1);
+    const ParticleReal* pz = a_soa.positionColumn(2);
+    const ParticleReal* w  = a_soa.weightColumn();
+    const std::size_t   n  = a_soa.size();
+    for (std::size_t i = 0; i < n; i++) {
+      depositOneCIC(a_rho, RealVect(D_DECL(px[i], py[i], pz[i])), w[i], a_lo, a_iDx, a_iVol);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // (2) INTERPOLATION
+  // ---------------------------------------------------------------------------
+  void
+  interpolateList(const FArrayBox& a_rho, List<BenchParticle>& a_p, const RealVect& a_lo, const RealVect& a_iDx)
+  {
+    for (ListIterator<BenchParticle> lit(a_p); lit.ok(); ++lit) {
+      lit().m_weight = interpolateOneCIC(a_rho, lit().position(), a_lo, a_iDx);
+    }
+  }
+
+  void
+  interpolateVector(const FArrayBox&            a_rho,
+                    std::vector<BenchParticle>& a_v,
+                    const RealVect&             a_lo,
+                    const RealVect&             a_iDx)
+  {
+    const std::size_t n = a_v.size();
+    for (std::size_t i = 0; i < n; i++) {
+      a_v[i].m_weight = interpolateOneCIC(a_rho, a_v[i].m_position, a_lo, a_iDx);
+    }
+  }
+
+  void
+  interpolateSoA(const FArrayBox& a_rho, BenchSoA& a_soa, const RealVect& a_lo, const RealVect& a_iDx)
+  {
+    const ParticleReal* px = a_soa.positionColumn(0);
+    const ParticleReal* py = a_soa.positionColumn(1);
+    const ParticleReal* pz = a_soa.positionColumn(2);
+    ParticleReal*       w  = a_soa.weightColumn();
+    const std::size_t   n  = a_soa.size();
+    for (std::size_t i = 0; i < n; i++) {
+      w[i] = interpolateOneCIC(a_rho, RealVect(D_DECL(px[i], py[i], pz[i])), a_lo, a_iDx);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // (3) STREAMING TRANSFORM (SoA path is per-component -> wide SIMD)
+  // ---------------------------------------------------------------------------
+  void
+  transformList(List<BenchParticle>& a_p)
+  {
+    for (ListIterator<BenchParticle> lit(a_p); lit.ok(); ++lit) {
+      lit().m_weight = transformOne(lit().position());
+    }
+  }
+
+  __attribute__((noinline)) void
+  transformVector(std::vector<BenchParticle>& a_v)
+  {
+    BenchParticle* p = a_v.data();
+    ParticleLoops::loop(a_v.size(), [&](std::size_t i) {
+      p[i].m_weight = transformOne(p[i].m_position);
+    });
+  }
+
+  __attribute__((noinline)) void
+  transformSoA(BenchSoA& a_soa)
+  {
+    const ParticleReal* x = a_soa.positionColumn(0);
+    const ParticleReal* y = a_soa.positionColumn(1);
+    const ParticleReal* z = a_soa.positionColumn(2);
+    ParticleReal*       w = a_soa.weightColumn();
+    ParticleLoops::loop(a_soa, [&](std::size_t i) {
+      w[i] = 0.5 * (x[i] * x[i] + y[i] * y[i] + z[i] * z[i]);
+    });
+  }
+
+  // ---------------------------------------------------------------------------
+  // (7) VECTOR-FIELD INTERPOLATION
+  // ---------------------------------------------------------------------------
   void
   interpVecList(const FArrayBox& a_rho, List<MoverParticle>& a_p, const RealVect& a_lo, const RealVect& a_iDx)
   {
@@ -355,93 +403,24 @@ namespace {
   }
 
   void
-  interpVecSoA(const FArrayBox& a_rho, ParticleSoA<MoverParticle>& a_soa, const RealVect& a_lo, const RealVect& a_iDx)
+  interpVecSoA(const FArrayBox& a_rho, MoverSoA& a_soa, const RealVect& a_lo, const RealVect& a_iDx)
   {
-    const std::vector<RealVect>& pos = a_soa.column<&MoverParticle::m_position>();
-    std::vector<RealVect>&       vel = a_soa.column<&MoverParticle::m_velocity>();
-    const std::size_t            n   = a_soa.size();
+    const ParticleReal* px = a_soa.positionColumn(0);
+    const ParticleReal* py = a_soa.positionColumn(1);
+    const ParticleReal* pz = a_soa.positionColumn(2);
+    ParticleReal*       vx = a_soa.column<&MoverPayload::vx>();
+    ParticleReal*       vy = a_soa.column<&MoverPayload::vy>();
+    ParticleReal*       vz = a_soa.column<&MoverPayload::vz>();
+    const std::size_t   n  = a_soa.size();
     for (std::size_t i = 0; i < n; i++) {
-      vel[i] = interpolateVecFieldCIC(a_rho, pos[i], a_lo, a_iDx);
+      const RealVect v = interpolateVecFieldCIC(a_rho, RealVect(D_DECL(px[i], py[i], pz[i])), a_lo, a_iDx);
+      D_TERM(vx[i] = v[0];, vy[i] = v[1];, vz[i] = v[2];);
     }
-  }
-
-  void
-  transformList(List<BenchParticle>& a_p)
-  {
-    for (ListIterator<BenchParticle> lit(a_p); lit.ok(); ++lit) {
-      lit().m_weight = transformOne(lit().position());
-    }
-  }
-
-  // noinline so the loop gets its own symbol for assembly inspection; the single
-  // call per 65k-iteration loop is negligible for timing.
-  __attribute__((noinline)) void
-  transformSoA(SoA& a_soa)
-  {
-    const std::vector<RealVect>& pos = a_soa.column<&BenchParticle::m_position>();
-    std::vector<Real>&           w   = a_soa.column<&BenchParticle::m_weight>();
-    ParticleLoops::loop(a_soa, [&](std::size_t i) {
-      w[i] = transformOne(pos[i]);
-    });
-  }
-
-  // Per-component (x[], y[], z[]) layout: the same transform over three SEPARATE
-  // contiguous Real arrays. Unit-stride, no interleaving -> should hit wide AVX.
-  __attribute__((noinline)) void
-  transformPerComponent(const std::vector<Real>& a_x,
-                        const std::vector<Real>& a_y,
-                        const std::vector<Real>& a_z,
-                        std::vector<Real>&       a_w)
-  {
-    const Real* x = a_x.data();
-    const Real* y = a_y.data();
-    const Real* z = a_z.data();
-    Real*       w = a_w.data();
-    ParticleLoops::loop(a_w.size(), [&](std::size_t i) {
-      w[i] = 0.5 * (x[i] * x[i] + y[i] * y[i] + z[i] * z[i]);
-    });
-  }
-
-  // Contiguous AoS: the same transform over a vector<BenchParticle>. Memory is
-  // contiguous (unlike List) but each field is strided by sizeof(BenchParticle),
-  // so SIMD must gather/scatter within the struct.
-  __attribute__((noinline)) void
-  transformVector(std::vector<BenchParticle>& a_v)
-  {
-    BenchParticle* p = a_v.data();
-    ParticleLoops::loop(a_v.size(), [&](std::size_t i) {
-      p[i].m_weight = transformOne(p[i].m_position);
-    });
-  }
-
-  // Arena-backed SoA: same kernels via cached column pointers (tests offset-access cost).
-  void
-  depositArena(FArrayBox& a_rho, const ArenaSoA& a_soa, const RealVect& a_lo, const RealVect& a_iDx, const Real a_iVol)
-  {
-    const RealVect*   pos = a_soa.column<&BenchParticle::m_position>();
-    const Real*       w   = a_soa.column<&BenchParticle::m_weight>();
-    const std::size_t n   = a_soa.size();
-    for (std::size_t i = 0; i < n; i++) {
-      depositOneCIC(a_rho, pos[i], w[i], a_lo, a_iDx, a_iVol);
-    }
-  }
-
-  __attribute__((noinline)) void
-  transformArena(ArenaSoA& a_soa)
-  {
-    const RealVect* pos = a_soa.column<&BenchParticle::m_position>();
-    Real*           w   = a_soa.column<&BenchParticle::m_weight>();
-    ParticleLoops::loop(a_soa.size(), [&](std::size_t i) {
-      w[i] = transformOne(pos[i]);
-    });
   }
 
   // ---------------------------------------------------------------------------
-  // Euler advance: x += v*dt (the canonical particle update; reads two vector
-  // fields, writes one). Same math in all four layouts.
+  // (8) EULER ADVANCE  x += v*dt
   // ---------------------------------------------------------------------------
-  using MoverSoA = ParticleSoA<MoverParticle>;
-
   __attribute__((noinline)) void
   advanceList(List<MoverParticle>& a_p, const Real a_dt)
   {
@@ -462,36 +441,21 @@ namespace {
   __attribute__((noinline)) void
   advanceSoA(MoverSoA& a_soa, const Real a_dt)
   {
-    std::vector<RealVect>&       pos = a_soa.column<&MoverParticle::m_position>();
-    const std::vector<RealVect>& vel = a_soa.column<&MoverParticle::m_velocity>();
+    ParticleReal*       px = a_soa.positionColumn(0);
+    ParticleReal*       py = a_soa.positionColumn(1);
+    ParticleReal*       pz = a_soa.positionColumn(2);
+    const ParticleReal* vx = a_soa.column<&MoverPayload::vx>();
+    const ParticleReal* vy = a_soa.column<&MoverPayload::vy>();
+    const ParticleReal* vz = a_soa.column<&MoverPayload::vz>();
     ParticleLoops::loop(a_soa, [&](std::size_t i) {
-      pos[i] += vel[i] * a_dt;
-    });
-  }
-
-  __attribute__((noinline)) void
-  advancePerComponent(Real*             a_px,
-                      Real*             a_py,
-                      Real*             a_pz,
-                      const Real*       a_vx,
-                      const Real*       a_vy,
-                      const Real*       a_vz,
-                      const std::size_t a_n,
-                      const Real        a_dt)
-  {
-    ParticleLoops::loop(a_n, [&](std::size_t i) {
-      a_px[i] += a_vx[i] * a_dt;
-      a_py[i] += a_vy[i] * a_dt;
-      a_pz[i] += a_vz[i] * a_dt;
+      px[i] += vx[i] * a_dt;
+      py[i] += vy[i] * a_dt;
+      pz[i] += vz[i] * a_dt;
     });
   }
 
   // ---------------------------------------------------------------------------
-  // KD-tree merge: recursively median-split particle INDICES by position (this
-  // reads positions only), then merge each leaf's particles into one conserving
-  // total weight + center of mass (this gathers WHOLE particles). The split phase
-  // favours column storage (position-only); the leaf merge favours AoS (whole
-  // particle). a_get(k) returns the full MergeParticle for index entry k.
+  // (9) KD-tree merge (split by position; leaf merge gathers whole particles).
   // ---------------------------------------------------------------------------
   template <typename Get>
   MergeParticle
@@ -575,13 +539,29 @@ namespace {
     return out;
   }
 
-  ParticleSoA<MergeParticle>
-  mergeSoAKD(ParticleSoA<MergeParticle>& a_soa, const int a_leafSize)
+  /** @brief Reconstruct a whole MergeParticle from the SoA (accessors + payload gather). */
+  inline MergeParticle
+  soaToMerge(const MergeSoA& a_soa, const int a_idx)
+  {
+    const MergePayload pl = a_soa.gather(a_idx);
+    MergeParticle      p;
+    p.m_position  = a_soa.position(a_idx);
+    p.m_weight    = a_soa.weight(a_idx);
+    p.m_velocity  = pl.velocity;
+    p.m_oldPos    = pl.oldPos;
+    p.m_mobility  = pl.mobility;
+    p.m_diffusion = pl.diffusion;
+    p.m_energy    = pl.energy;
+    return p;
+  }
+
+  MergeSoA
+  mergeSoAKD(MergeSoA& a_soa, const int a_leafSize)
   {
     const int        n = static_cast<int>(a_soa.size());
     std::vector<int> idx(n);
     std::iota(idx.begin(), idx.end(), 0);
-    ParticleSoA<MergeParticle> out;
+    MergeSoA out;
     out.reserve(n / a_leafSize + 1);
     kdMerge(
       idx,
@@ -590,12 +570,14 @@ namespace {
       0,
       a_leafSize,
       [&](int a, int d) {
-        return a_soa.position(a)[d];
-      }, // position column only
+        return a_soa.positionColumn(d)[a];
+      }, // per-component position only (no RealVect construction)
       [&](int lo, int hi) {
-        out.append(mergeRange(lo, hi, [&](int k) {
-          return a_soa.gather(idx[k]);
-        })); // gathers all 7 columns
+        const MergeParticle m = mergeRange(lo, hi, [&](int k) {
+          return soaToMerge(a_soa, idx[k]);
+        });
+        const MergePayload  pl{m.m_velocity, m.m_oldPos, m.m_mobility, m.m_diffusion, m.m_energy};
+        out.append(m.m_position, m.m_weight, pl);
       });
     return out;
   }
@@ -613,7 +595,6 @@ namespace {
   // ---------------------------------------------------------------------------
   // Helpers.
   // ---------------------------------------------------------------------------
-
   Real
   totalMass(const FArrayBox& a_rho)
   {
@@ -640,77 +621,49 @@ namespace {
   }
 
   // ---------------------------------------------------------------------------
-  // MPI buffer packing: serialize (position + weight) into a byte send buffer.
+  // MPI packing helpers.
   // ---------------------------------------------------------------------------
-  static_assert(sizeof(BenchParticle) == sizeof(RealVect) + sizeof(Real),
-                "BenchParticle must be padding-free for the AoS bulk memcpy");
-  constexpr std::size_t s_bytesPerParticle = sizeof(RealVect) + sizeof(Real);
-
   /** @brief Pack a List per particle (pointer-chased; the realistic Chombo path). */
   void
   packList(unsigned char* a_buf, const List<BenchParticle>& a_p)
   {
     unsigned char* q = a_buf;
     for (ListIterator<BenchParticle> lit(a_p); lit.ok(); ++lit) {
-      std::memcpy(q, &lit().m_position, sizeof(RealVect));
-      q += sizeof(RealVect);
-      std::memcpy(q, &lit().m_weight, sizeof(Real));
-      q += sizeof(Real);
+      std::memcpy(q, &lit(), sizeof(BenchParticle));
+      q += sizeof(BenchParticle);
     }
   }
 
-  /** @brief Pack a contiguous AoS vector in a single bulk memcpy (buffer is AoS-formatted). */
+  /** @brief Pack a contiguous AoS vector in a single bulk memcpy. */
   void
   packVector(unsigned char* a_buf, const std::vector<BenchParticle>& a_v)
   {
     std::memcpy(a_buf, a_v.data(), a_v.size() * sizeof(BenchParticle));
   }
 
-  /** @brief Pack SoA as per-column bulk memcpies (buffer is column-major). */
-  void
-  packSoA(unsigned char* a_buf, const SoA& a_soa)
-  {
-    const std::vector<RealVect>& pos = a_soa.positions();
-    const std::vector<Real>&     w   = a_soa.weights();
-    const std::size_t            n   = a_soa.size();
-    std::memcpy(a_buf, pos.data(), n * sizeof(RealVect));
-    std::memcpy(a_buf + n * sizeof(RealVect), w.data(), n * sizeof(Real));
-  }
-
-  /** @brief Copy a_nd doubles src->dst with non-temporal (streaming) stores. dst must be 32-byte aligned. */
+  /** @brief Pack one SoA column [colPtr, colPtr + size*sizeof) and advance q. */
+  template <typename SoAT, std::size_t K>
   inline void
-  ntCopyDoubles(double* a_dst, const double* a_src, const std::size_t a_nd) noexcept
+  packOneColumn(unsigned char*& a_q, const SoAT& a_soa)
   {
-    std::size_t i = 0;
-    for (; i + 4 <= a_nd; i += 4) {
-      _mm256_stream_pd(a_dst + i, _mm256_loadu_pd(a_src + i)); // a_dst+i is 32-aligned (i multiple of 4)
-    }
-    for (; i < a_nd; i++) {
-      a_dst[i] = a_src[i];
-    }
-    _mm_sfence();
+    using T                 = typename SoAT::template ColumnType<K>;
+    const std::size_t bytes = a_soa.size() * sizeof(T);
+    std::memcpy(a_q, a_soa.template columnByIndex<K>(), bytes);
+    a_q += bytes;
   }
-
-  /** @brief Pack SoA columns with NON-TEMPORAL stores (tests the memcpy NT-threshold hypothesis). */
-  void
-  packSoANT(unsigned char* a_buf, const SoA& a_soa)
+  template <typename SoAT, std::size_t... K>
+  inline void
+  packPerColumnImpl(unsigned char* a_buf, const SoAT& a_soa, std::index_sequence<K...>)
   {
-    const std::vector<RealVect>& pos = a_soa.positions();
-    const std::vector<Real>&     w   = a_soa.weights();
-    const std::size_t            n   = a_soa.size();
-    double* const                d   = reinterpret_cast<double*>(a_buf);
-    ntCopyDoubles(d, reinterpret_cast<const double*>(pos.data()), n * SpaceDim);
-    ntCopyDoubles(d + n * SpaceDim, reinterpret_cast<const double*>(w.data()), n);
+    unsigned char* q = a_buf;
+    using expander   = int[];
+    (void)expander{0, ((void)packOneColumn<SoAT, K>(q, a_soa), 0)...};
   }
-
-  /** @brief Control: pack the contiguous AoS in TWO memcpy calls (same sizes as the SoA columns). */
+  /** @brief Pack the SoA as N per-column bulk memcpies (the historically bimodal-slow path). */
   void
-  packVectorSplit(unsigned char* a_buf, const std::vector<BenchParticle>& a_v)
+  packSoAPerColumn(unsigned char* a_buf, const BenchSoA& a_soa)
   {
-    const std::size_t    n   = a_v.size();
-    const unsigned char* src = reinterpret_cast<const unsigned char*>(a_v.data());
-    std::memcpy(a_buf, src, n * sizeof(RealVect));
-    std::memcpy(a_buf + n * sizeof(RealVect), src + n * sizeof(RealVect), n * sizeof(Real));
+    packPerColumnImpl(a_buf, a_soa, std::make_index_sequence<BenchSoA::s_numColumns>{});
   }
 
   /** @brief Time the average wall-time (ns) of a_op over a_reps repetitions (one warm-up). */
@@ -738,13 +691,13 @@ main(int argc, char* argv[])
   initialize(argc, argv);
 
   {
-    // ----- Configuration --------------------------------------------------------
+    // ----- Configuration ------------------------------------------------------
     constexpr int nCell     = 16;
     constexpr int nGhost    = 2;
     constexpr int ppc       = 16;
     constexpr int fastReps  = 200; // deposition / interpolation / transform
-    constexpr int buildReps = 50; // build / remap (each rep allocates)
-    constexpr int nBuckets  = 64; // remap destination patches
+    constexpr int buildReps = 50;  // build / remap (each rep allocates)
+    constexpr int nBuckets  = 64;  // remap destination patches
 
     const Box         valid(IntVect::Zero, (nCell - 1) * IntVect::Unit);
     const Box         grown  = grow(valid, nGhost);
@@ -753,7 +706,7 @@ main(int argc, char* argv[])
     const Real        invVol = 1.0;
     const std::size_t nPart  = static_cast<std::size_t>(nCell) * nCell * nCell * ppc;
 
-    // ----- Particles in FArrayBox (Fortran) order, plus a randomized copy --------
+    // ----- Particles in FArrayBox (Fortran) order, plus a randomized copy ------
     std::mt19937                         rng(20260620u);
     std::uniform_real_distribution<Real> u(0.0, 1.0);
 
@@ -763,11 +716,8 @@ main(int argc, char* argv[])
       for (int j = 0; j < nCell; j++) {
         for (int i = 0; i < nCell; i++) {
           for (int p = 0; p < ppc; p++) {
-            const Real    ux = u(rng);
-            const Real    uy = u(rng);
-            const Real    uz = u(rng);
             BenchParticle bp;
-            bp.m_position = probLo + RealVect(D_DECL(i + ux, j + uy, k + uz));
+            bp.m_position = probLo + RealVect(D_DECL(i + u(rng), j + u(rng), k + u(rng)));
             bp.m_weight   = 1.0;
             sortedParticles.push_back(bp);
           }
@@ -777,7 +727,7 @@ main(int argc, char* argv[])
     std::vector<BenchParticle> randomParticles = sortedParticles;
     std::shuffle(randomParticles.begin(), randomParticles.end(), rng);
 
-    // ----- Container builders ---------------------------------------------------
+    // ----- Container builders --------------------------------------------------
     auto buildCompactList = [](const std::vector<BenchParticle>& a_src) {
       List<BenchParticle> lst;
       for (const BenchParticle& p : a_src) {
@@ -796,10 +746,10 @@ main(int argc, char* argv[])
       return lst;
     };
     auto buildSoA = [](const std::vector<BenchParticle>& a_src) {
-      SoA soa;
+      BenchSoA soa;
       soa.reserve(a_src.size());
       for (const BenchParticle& p : a_src) {
-        soa.append(p);
+        soa.append(p.m_position, p.m_weight);
       }
       return soa;
     };
@@ -808,14 +758,8 @@ main(int argc, char* argv[])
     List<BenchParticle> listRandom     = buildCompactList(randomParticles);
     List<BenchParticle> listFragSorted = buildFragmentedList(sortedParticles);
     List<BenchParticle> listFragRandom = buildFragmentedList(randomParticles);
-    SoA                 soaSorted      = buildSoA(sortedParticles);
-    SoA                 soaRandom      = buildSoA(randomParticles);
-
-    ArenaSoA arenaSorted; // arena-backed SoA, compact (reserve-exact)
-    arenaSorted.reserve(nPart);
-    for (const BenchParticle& p : sortedParticles) {
-      arenaSorted.append(p);
-    }
+    BenchSoA            soaSorted      = buildSoA(sortedParticles);
+    BenchSoA            soaRandom      = buildSoA(randomParticles);
 
     FArrayBox rho(grown, 1);
 
@@ -844,23 +788,11 @@ main(int argc, char* argv[])
         a_deposit();
       });
     };
-    const double dListS = timeDeposit([&]() {
-      depositList(rho, listSorted, probLo, invDx, invVol);
-    });
-    const double dListR = timeDeposit([&]() {
-      depositList(rho, listRandom, probLo, invDx, invVol);
-    });
     const double dFragS = timeDeposit([&]() {
       depositList(rho, listFragSorted, probLo, invDx, invVol);
     });
     const double dFragR = timeDeposit([&]() {
       depositList(rho, listFragRandom, probLo, invDx, invVol);
-    });
-    const double dSoAS  = timeDeposit([&]() {
-      depositSoA(rho, soaSorted, probLo, invDx, invVol);
-    });
-    const double dSoAR  = timeDeposit([&]() {
-      depositSoA(rho, soaRandom, probLo, invDx, invVol);
     });
     const double dVecS  = timeDeposit([&]() {
       depositVector(rho, sortedParticles, probLo, invDx, invVol);
@@ -868,12 +800,15 @@ main(int argc, char* argv[])
     const double dVecR  = timeDeposit([&]() {
       depositVector(rho, randomParticles, probLo, invDx, invVol);
     });
-    const double dArena = timeDeposit([&]() {
-      depositArena(rho, arenaSorted, probLo, invDx, invVol);
+    const double dSoAS  = timeDeposit([&]() {
+      depositSoA(rho, soaSorted, probLo, invDx, invVol);
+    });
+    const double dSoAR  = timeDeposit([&]() {
+      depositSoA(rho, soaRandom, probLo, invDx, invVol);
     });
 
     // =====================================================================
-    // (2) INTERPOLATION  (fill rho once, then gather to particle weights)
+    // (2) INTERPOLATION
     // =====================================================================
     rho.setVal(0.0);
     depositSoA(rho, soaSorted, probLo, invDx, invVol); // some non-trivial field to gather
@@ -881,23 +816,11 @@ main(int argc, char* argv[])
     interpolateList(rho, listSorted, probLo, invDx);
     interpolateSoA(rho, soaSorted, probLo, invDx);
 
-    const double iListS = timeOp(fastReps, [&]() {
-      interpolateList(rho, listSorted, probLo, invDx);
-    });
-    const double iListR = timeOp(fastReps, [&]() {
-      interpolateList(rho, listRandom, probLo, invDx);
-    });
     const double iFragS = timeOp(fastReps, [&]() {
       interpolateList(rho, listFragSorted, probLo, invDx);
     });
     const double iFragR = timeOp(fastReps, [&]() {
       interpolateList(rho, listFragRandom, probLo, invDx);
-    });
-    const double iSoAS  = timeOp(fastReps, [&]() {
-      interpolateSoA(rho, soaSorted, probLo, invDx);
-    });
-    const double iSoAR  = timeOp(fastReps, [&]() {
-      interpolateSoA(rho, soaRandom, probLo, invDx);
     });
     const double iVecS  = timeOp(fastReps, [&]() {
       interpolateVector(rho, sortedParticles, probLo, invDx);
@@ -905,20 +828,16 @@ main(int argc, char* argv[])
     const double iVecR  = timeOp(fastReps, [&]() {
       interpolateVector(rho, randomParticles, probLo, invDx);
     });
+    const double iSoAS  = timeOp(fastReps, [&]() {
+      interpolateSoA(rho, soaSorted, probLo, invDx);
+    });
+    const double iSoAR  = timeOp(fastReps, [&]() {
+      interpolateSoA(rho, soaRandom, probLo, invDx);
+    });
 
     // =====================================================================
-    // (3) STREAMING TRANSFORM  (SoA path via ParticleLoops SIMD)
+    // (3) STREAMING TRANSFORM
     // =====================================================================
-    // Per-component (x[], y[], z[]) arrays for the same particles, to test whether a
-    // non-interleaved position layout vectorizes wider than vector<RealVect>.
-    std::vector<Real> xs(nPart), ys(nPart), zs(nPart), ws(nPart);
-    for (std::size_t i = 0; i < nPart; i++) {
-      const RealVect& x = sortedParticles[i].m_position;
-      xs[i]             = x[0];
-      ys[i]             = x[1];
-      zs[i]             = x[2];
-    }
-
     const double tListS = timeOp(fastReps, [&]() {
       transformList(listSorted);
     });
@@ -931,32 +850,18 @@ main(int argc, char* argv[])
     const double tSoAS  = timeOp(fastReps, [&]() {
       transformSoA(soaSorted);
     });
-    const double tPCS   = timeOp(fastReps, [&]() {
-      transformPerComponent(xs, ys, zs, ws);
-    });
-    const double tArena = timeOp(fastReps, [&]() {
-      transformArena(arenaSorted);
-    });
 
     // =====================================================================
-    // (4) BUILD  (construct container from the source array; allocation cost)
+    // (4) BUILD
     // =====================================================================
-    const double bList      = timeOp(buildReps, [&]() {
+    const double bList    = timeOp(buildReps, [&]() {
       List<BenchParticle> l;
       for (const BenchParticle& p : sortedParticles) {
         l.append(p);
       }
       g_sink += l.isEmpty() ? 0u : 1u;
     });
-    const double bSoA       = timeOp(buildReps, [&]() {
-      SoA s;
-      s.reserve(nPart);
-      for (const BenchParticle& p : sortedParticles) {
-        s.append(p);
-      }
-      g_sink += s.size();
-    });
-    const double bVec       = timeOp(buildReps, [&]() {
+    const double bVec     = timeOp(buildReps, [&]() {
       std::vector<BenchParticle> v;
       v.reserve(nPart);
       for (const BenchParticle& p : sortedParticles) {
@@ -964,24 +869,24 @@ main(int argc, char* argv[])
       }
       g_sink += v.size();
     });
-    const double bArena     = timeOp(buildReps, [&]() {
-      ArenaSoA a;
-      a.reserve(nPart);
+    const double bSoA     = timeOp(buildReps, [&]() {
+      BenchSoA s;
+      s.reserve(nPart);
       for (const BenchParticle& p : sortedParticles) {
-        a.append(p);
+        s.append(p.m_position, p.m_weight);
       }
-      g_sink += a.size();
+      g_sink += s.size();
     });
-    const double bArenaGrow = timeOp(buildReps, [&]() {
-      ArenaSoA a; // no reserve -> exercises arena growth (whole-buffer realloc per doubling)
+    const double bSoAGrow = timeOp(buildReps, [&]() {
+      BenchSoA s; // no reserve -> exercises arena growth (whole-buffer realloc per doubling)
       for (const BenchParticle& p : sortedParticles) {
-        a.append(p);
+        s.append(p.m_position, p.m_weight);
       }
-      g_sink += a.size();
+      g_sink += s.size();
     });
 
     // =====================================================================
-    // (5) REMAP  (scatter particles into nBuckets destination containers)
+    // (5) REMAP (scatter particles into nBuckets destination containers)
     // =====================================================================
     std::vector<int> bucketId(nPart);
     for (std::size_t i = 0; i < nPart; i++) {
@@ -998,15 +903,6 @@ main(int argc, char* argv[])
         g_sink += d.isEmpty() ? 0u : 1u;
       }
     });
-    const double rSoA  = timeOp(buildReps, [&]() {
-      std::vector<SoA> dst(nBuckets);
-      for (std::size_t i = 0; i < nPart; i++) {
-        dst[bucketId[i]].append(sortedParticles[i]);
-      }
-      for (const SoA& d : dst) {
-        g_sink += d.size();
-      }
-    });
     const double rVec  = timeOp(buildReps, [&]() {
       std::vector<std::vector<BenchParticle>> dst(nBuckets);
       for (std::size_t i = 0; i < nPart; i++) {
@@ -1016,133 +912,82 @@ main(int argc, char* argv[])
         g_sink += d.size();
       }
     });
-    // Two-pass SoA remap: count per bucket, reserve, then fill (no reallocation churn).
+    const double rSoA  = timeOp(buildReps, [&]() {
+      std::vector<BenchSoA> dst(nBuckets);
+      for (std::size_t i = 0; i < nPart; i++) {
+        dst[bucketId[i]].append(sortedParticles[i].m_position, sortedParticles[i].m_weight);
+      }
+      for (const BenchSoA& d : dst) {
+        g_sink += d.size();
+      }
+    });
+    // Two-pass remap: count per bucket, reserve, then fill (no reallocation churn).
     const double rSoA2 = timeOp(buildReps, [&]() {
       std::vector<std::size_t> counts(nBuckets, 0);
       for (std::size_t i = 0; i < nPart; i++) {
         counts[bucketId[i]]++;
       }
-      std::vector<SoA> dst(nBuckets);
+      std::vector<BenchSoA> dst(nBuckets);
       for (int b = 0; b < nBuckets; b++) {
         dst[b].reserve(counts[b]);
       }
       for (std::size_t i = 0; i < nPart; i++) {
-        dst[bucketId[i]].append(sortedParticles[i]);
+        dst[bucketId[i]].append(sortedParticles[i].m_position, sortedParticles[i].m_weight);
       }
-      for (const SoA& d : dst) {
-        g_sink += d.size();
-      }
-    });
-    // Two-pass arena remap: count, reserve each bucket's arena, then fill.
-    const double rArena = timeOp(buildReps, [&]() {
-      std::vector<std::size_t> counts(nBuckets, 0);
-      for (std::size_t i = 0; i < nPart; i++) {
-        counts[bucketId[i]]++;
-      }
-      std::vector<ArenaSoA> dst(nBuckets);
-      for (int b = 0; b < nBuckets; b++) {
-        dst[b].reserve(counts[b]);
-      }
-      for (std::size_t i = 0; i < nPart; i++) {
-        dst[bucketId[i]].append(sortedParticles[i]);
-      }
-      for (const ArenaSoA& d : dst) {
+      for (const BenchSoA& d : dst) {
         g_sink += d.size();
       }
     });
 
     // =====================================================================
-    // (6) MPI PACKING  (serialize position + weight into a byte send buffer)
+    // (6) MPI PACKING (serialize a whole container to a byte send buffer)
     // =====================================================================
-    const std::size_t bufBytes = nPart * s_bytesPerParticle;
-    const std::size_t bufAlloc = ((bufBytes + 63) / 64) * 64; // round up for aligned_alloc
+    const std::size_t bufBytes = std::max(nPart * sizeof(BenchParticle), soaSorted.byteSpan());
+    const std::size_t bufAlloc = ((bufBytes + 63) / 64) * 64;
     unsigned char*    packBuf  = static_cast<unsigned char*>(std::aligned_alloc(64, bufAlloc));
 
-    // Correctness: the split AoS pack and the NT SoA pack must produce identical bytes
-    // to their plain counterparts.
-    {
-      std::vector<unsigned char> refV(bufBytes), refS(bufBytes);
-      packVector(refV.data(), sortedParticles);
-      packVectorSplit(packBuf, sortedParticles);
-      if (std::memcmp(refV.data(), packBuf, bufBytes) != 0) {
-        MayDay::Abort("benchmark: packVectorSplit produced different bytes");
-      }
-      packSoA(refS.data(), soaSorted);
-      packSoANT(packBuf, soaSorted);
-      if (std::memcmp(refS.data(), packBuf, bufBytes) != 0) {
-        MayDay::Abort("benchmark: packSoANT produced different bytes");
-      }
-    }
-
-    const double pList     = timeOp(fastReps, [&]() {
+    const double pList   = timeOp(fastReps, [&]() {
       packList(packBuf, listSorted);
       g_sink += packBuf[0];
     });
-    const double pVec      = timeOp(fastReps, [&]() {
+    const double pVec    = timeOp(fastReps, [&]() {
       packVector(packBuf, sortedParticles);
       g_sink += packBuf[0];
     });
-    const double pVecSplit = timeOp(fastReps, [&]() {
-      packVectorSplit(packBuf, sortedParticles);
+    const double pSoACol = timeOp(fastReps, [&]() {
+      packSoAPerColumn(packBuf, soaSorted);
       g_sink += packBuf[0];
     });
-    const double pSoA      = timeOp(fastReps, [&]() {
-      packSoA(packBuf, soaSorted);
+    // Arena: the whole compact container is ONE contiguous span -> a single memcpy of data()
+    // (glibc auto-streams; no intrinsics). A real whole-container MPI send skips even this copy.
+    const std::size_t arenaSpan = soaSorted.byteSpan();
+    const double      pArena    = timeOp(fastReps, [&]() {
+      std::memcpy(packBuf, soaSorted.data(), arenaSpan);
       g_sink += packBuf[0];
     });
-    const double pSoANT    = timeOp(fastReps, [&]() {
-      packSoANT(packBuf, soaSorted);
-      g_sink += packBuf[0];
-    });
-    // Arena layout: if all SoA columns lived in ONE contiguous buffer, the pack is a
-    // SINGLE big memcpy -> glibc auto-selects non-temporal stores, no intrinsics. Build
-    // the arena once (untimed; it represents the storage), then time one memcpy.
-    std::vector<unsigned char> arena(bufBytes);
-    std::memcpy(arena.data(), soaSorted.positions().data(), nPart * sizeof(RealVect));
-    std::memcpy(arena.data() + nPart * sizeof(RealVect), soaSorted.weights().data(), nPart * sizeof(Real));
-    const double pArena = timeOp(fastReps, [&]() {
-      std::memcpy(packBuf, arena.data(), bufBytes); // one bulk copy, like vector<P>
-      g_sink += packBuf[0];
-    });
-    // Real arena container: pack = one memcpy of its contiguous buffer (compact). A full
-    // whole-container MPI send could skip this copy entirely (send data() directly).
-    const std::size_t arenaSpan  = arenaSorted.byteSpan();
-    const double      pArenaReal = timeOp(fastReps, [&]() {
-      std::memcpy(packBuf, arenaSorted.data(), arenaSpan);
-      g_sink += packBuf[0];
-    });
-    std::free(packBuf);
 
     // =====================================================================
-    // (10) CONTAINER COPY (the "copy particles from one list to another" case)
-    // Realistic copy = allocate destination + move data.
+    // (10) CONTAINER COPY (copy whole container -> fresh container)
     // =====================================================================
-    const double cList  = timeOp(buildReps, [&]() {
+    const double cList = timeOp(buildReps, [&]() {
       List<BenchParticle> d;
       for (ListIterator<BenchParticle> lit(listSorted); lit.ok(); ++lit) {
         d.append(lit());
       }
       g_sink += d.isEmpty() ? 0u : 1u;
     });
-    const double cVec   = timeOp(buildReps, [&]() {
+    const double cVec  = timeOp(buildReps, [&]() {
       const std::vector<BenchParticle> d(sortedParticles); // bulk copy ctor
       g_sink += d.size();
     });
-    const double cSoA   = timeOp(buildReps, [&]() {
-      SoA   d;
-      auto& dp = d.column<&BenchParticle::m_position>();
-      auto& dw = d.column<&BenchParticle::m_weight>();
-      dp.resize(nPart);
-      dw.resize(nPart);
-      std::memcpy(dp.data(), soaSorted.positions().data(), nPart * sizeof(RealVect)); // per-column
-      std::memcpy(dw.data(), soaSorted.weights().data(), nPart * sizeof(Real));
-      g_sink += d.size();
+    const double cSoA  = timeOp(buildReps, [&]() {
+      BenchSoA d;
+      d.resize(nPart);                                               // allocate the destination arena
+      std::memcpy(d.data(), soaSorted.data(), soaSorted.byteSpan()); // one bulk copy (same offsets)
+      g_sink += static_cast<const unsigned char*>(d.data())[0];      // force the copy (defeat DCE)
     });
-    const double cArena = timeOp(buildReps, [&]() {
-      std::vector<unsigned char> d(bufBytes);
-      std::memcpy(d.data(), arena.data(), bufBytes); // arena SoA: one bulk copy
-      g_sink += d[0];
-    });
+
+    std::free(packBuf);
 
     // =====================================================================
     // Mover containers (position + velocity), shared by (7) and (8).
@@ -1152,7 +997,7 @@ main(int argc, char* argv[])
     std::vector<MoverParticle> moverSrc(nPart);
     for (std::size_t i = 0; i < nPart; i++) {
       moverSrc[i].m_position = sortedParticles[i].m_position;
-      moverSrc[i].m_velocity = RealVect(D_DECL(1.0, 0.5, 0.25)); // arbitrary drift
+      moverSrc[i].m_velocity = RealVect(D_DECL(1.0, 0.5, 0.25));
     }
 
     List<MoverParticle> moverList;
@@ -1163,33 +1008,23 @@ main(int argc, char* argv[])
     MoverSoA                   moverSoA;
     moverSoA.reserve(nPart);
     for (const MoverParticle& p : moverSrc) {
-      moverSoA.append(p);
-    }
-    std::vector<Real> px(nPart), py(nPart), pz(nPart), vx(nPart), vy(nPart), vz(nPart);
-    for (std::size_t i = 0; i < nPart; i++) {
-      px[i] = moverSrc[i].m_position[0];
-      py[i] = moverSrc[i].m_position[1];
-      pz[i] = moverSrc[i].m_position[2];
-      vx[i] = moverSrc[i].m_velocity[0];
-      vy[i] = moverSrc[i].m_velocity[1];
-      vz[i] = moverSrc[i].m_velocity[2];
+      MoverPayload pl;
+      D_TERM(pl.vx = p.m_velocity[0];, pl.vy = p.m_velocity[1];, pl.vz = p.m_velocity[2];);
+      moverSoA.append(p.m_position, p.m_weight, pl);
     }
 
     // =====================================================================
-    // (7) VECTOR-FIELD INTERPOLATION  (3-component FArrayBox -> particle RealVect)
-    // Runs BEFORE the advance, while positions are still inside the box.
+    // (7) VECTOR-FIELD INTERPOLATION (runs while positions are inside the box)
     // =====================================================================
     FArrayBox vfield(grown, SpaceDim);
     for (int comp = 0; comp < SpaceDim; comp++) {
-      vfield.setVal(static_cast<Real>(comp + 1), comp); // constant per component: CIC must return (1,2,..)
+      vfield.setVal(static_cast<Real>(comp + 1), comp); // constant per component: CIC returns (1,2,..)
     }
     interpVecSoA(vfield, moverSoA, probLo, invDx);
     {
-      const MoverParticle q = moverSoA.gather(123);
-      for (int comp = 0; comp < SpaceDim; comp++) {
-        if (std::abs(q.m_velocity[comp] - static_cast<Real>(comp + 1)) > 1.E-9) {
-          MayDay::Abort("benchmark: vector interpolation of a constant field is wrong");
-        }
+      const ParticleReal* vx = moverSoA.column<&MoverPayload::vx>();
+      if (std::abs(vx[123] - 1.0) > 1.E-6) {
+        MayDay::Abort("benchmark: vector interpolation of a constant field is wrong");
       }
     }
 
@@ -1204,7 +1039,7 @@ main(int argc, char* argv[])
     });
 
     // =====================================================================
-    // (8) EULER ADVANCE  x += v*dt  (canonical particle update)
+    // (8) EULER ADVANCE
     // =====================================================================
     const double aList = timeOp(fastReps, [&]() {
       advanceList(moverList, dt);
@@ -1215,12 +1050,9 @@ main(int argc, char* argv[])
     const double aSoA  = timeOp(fastReps, [&]() {
       advanceSoA(moverSoA, dt);
     });
-    const double aPC   = timeOp(fastReps, [&]() {
-      advancePerComponent(px.data(), py.data(), pz.data(), vx.data(), vy.data(), vz.data(), nPart, dt);
-    });
 
     // =====================================================================
-    // (9) KD-TREE MERGE  (32 particles/cell on the 16^3 grid; whole-particle access)
+    // (9) KD-TREE MERGE
     // =====================================================================
     constexpr int     mergePpc  = 32;
     constexpr int     leafSize  = 2; // merge nearest pairs
@@ -1233,11 +1065,8 @@ main(int argc, char* argv[])
       for (int j = 0; j < nCell; j++) {
         for (int i = 0; i < nCell; i++) {
           for (int p = 0; p < mergePpc; p++) {
-            const Real    ux = u(rng);
-            const Real    uy = u(rng);
-            const Real    uz = u(rng);
             MergeParticle mp;
-            mp.m_position = probLo + RealVect(D_DECL(i + ux, j + uy, k + uz));
+            mp.m_position = probLo + RealVect(D_DECL(i + u(rng), j + u(rng), k + u(rng)));
             mp.m_weight   = 1.0 + u(rng); // non-uniform weights
             mergeSrc.push_back(mp);
           }
@@ -1249,10 +1078,11 @@ main(int argc, char* argv[])
     for (const MergeParticle& p : mergeSrc) {
       mergeList.append(p);
     }
-    ParticleSoA<MergeParticle> mergeSoa;
+    MergeSoA mergeSoa;
     mergeSoa.reserve(nMerge);
     for (const MergeParticle& p : mergeSrc) {
-      mergeSoa.append(p);
+      const MergePayload pl{p.m_velocity, p.m_oldPos, p.m_mobility, p.m_diffusion, p.m_energy};
+      mergeSoa.append(p.m_position, p.m_weight, pl);
     }
 
     // Correctness: merging conserves total weight and center of mass.
@@ -1289,7 +1119,7 @@ main(int argc, char* argv[])
       g_sink += out.size();
     });
     const double mSoA  = timeOp(mergeReps, [&]() {
-      const ParticleSoA<MergeParticle> out = mergeSoAKD(mergeSoa, leafSize);
+      const MergeSoA out = mergeSoAKD(mergeSoa, leafSize);
       g_sink += out.size();
     });
 
@@ -1305,6 +1135,8 @@ main(int argc, char* argv[])
     pout() << "  grid       : " << nCell << "^3 valid + " << nGhost << " ghost (" << grown.size(0) << "^3)" << endl;
     pout() << "  particles  : " << nPart << " (" << ppc << "/cell), fastReps=" << fastReps
            << ", buildReps=" << buildReps << endl;
+    pout() << "  bytes/part : AoS struct " << sizeof(BenchParticle) << " B, SoA cols " << BenchSoA::bytesPerParticle()
+           << " B" << endl;
     pout() << "  mass check : expected " << expectMass << ", List " << massList << ", SoA " << massSoA
            << " (List-vs-SoA " << listVsSoA << ")" << endl;
 
@@ -1315,9 +1147,8 @@ main(int argc, char* argv[])
     row("vector<P> AoS   random", dVecR);
     row("SoA             sorted", dSoAS);
     row("SoA             random", dSoAR);
-    row("SoA arena       sorted", dArena);
     pout() << "    SoA vs fragmented List / vs vector<P> (sorted): " << dFragS / dSoAS << "x / " << dVecS / dSoAS << "x"
-           << "; arena vs SoA: " << dSoAS / dArena << "x" << endl;
+           << endl;
 
     pout() << "  (2) INTERPOLATION (gather from grid)" << endl;
     row("List fragmented sorted", iFragS);
@@ -1333,60 +1164,46 @@ main(int argc, char* argv[])
     row("List compact      sorted", tListS);
     row("List fragmented   sorted", tFragS);
     row("vector<P> AoS           ", tVecS);
-    row("SoA vector<RealVect>    ", tSoAS);
-    row("SoA arena (RealVect)    ", tArena);
-    row("SoA per-component x/y/z ", tPCS);
-    pout() << "    vs compact List: vector<P> " << tListS / tVecS << "x, SoA(RealVect) " << tListS / tSoAS
-           << "x, arena " << tListS / tArena << "x, per-component " << tListS / tPCS << "x" << endl;
-    pout() << "    SoA(RealVect) vs vector<P>: " << tVecS / tSoAS
-           << "x; per-component vs SoA(RealVect): " << tSoAS / tPCS << "x" << endl;
+    row("SoA per-component       ", tSoAS);
+    pout() << "    vs compact List: vector<P> " << tListS / tVecS << "x, SoA " << tListS / tSoAS
+           << "x; SoA vs vector<P>: " << tVecS / tSoAS << "x" << endl;
 
     pout() << "  (4) BUILD (allocation)" << endl;
     row("List              ", bList);
     row("vector<P>         ", bVec);
-    row("SoA (N vectors)   ", bSoA);
-    row("SoA arena (reserve)", bArena);
-    row("SoA arena (grow)  ", bArenaGrow);
-    pout() << "    vs List: vector<P> " << bList / bVec << "x, SoA " << bList / bSoA << "x, arena " << bList / bArena
-           << "x, arena-grow " << bList / bArenaGrow << "x" << endl;
+    row("SoA arena (reserve)", bSoA);
+    row("SoA arena (grow)  ", bSoAGrow);
+    pout() << "    vs List: vector<P> " << bList / bVec << "x, SoA " << bList / bSoA << "x, SoA-grow "
+           << bList / bSoAGrow << "x" << endl;
 
     pout() << "  (5) REMAP (scatter into " << nBuckets << " buckets)" << endl;
     row("List              ", rList);
     row("vector<P>         ", rVec);
     row("SoA (naive append)", rSoA);
     row("SoA (two-pass)    ", rSoA2);
-    row("SoA arena (2-pass)", rArena);
-    pout() << "    vs List: vector<P> " << rList / rVec << "x, SoA-2pass " << rList / rSoA2 << "x, arena-2pass "
-           << rList / rArena << "x; arena-2pass vs vector<P>: " << rVec / rArena << "x" << endl;
+    pout() << "    vs List: vector<P> " << rList / rVec << "x, SoA-2pass " << rList / rSoA2
+           << "x; SoA-2pass vs vector<P>: " << rVec / rSoA2 << "x" << endl;
 
-    pout() << "  (6) MPI PACKING (serialize " << s_bytesPerParticle << " B/particle to send buffer)" << endl;
-    row("List          (per-particle)     ", pList);
-    row("vector<P>     (1 bulk memcpy)    ", pVec);
-    row("vector<P>     (split 2 memcpy)   ", pVecSplit);
-    row("SoA           (per-column memcpy)", pSoA);
-    row("SoA           (per-column NT)    ", pSoANT);
-    row("SoA arena     (sim, 1 memcpy)   ", pArena);
-    row("SoA arena     (real container)  ", pArenaReal);
-    pout() << "    vs List: vector<P> " << pList / pVec << "x, SoA " << pList / pSoA << "x, SoA-NT " << pList / pSoANT
-           << "x, arena-real " << pList / pArenaReal << "x" << endl;
-    pout() << "    NT-vs-plain SoA: " << pSoA / pSoANT << "x; arena-real-vs-plain SoA: " << pSoA / pArenaReal << "x"
-           << endl;
+    pout() << "  (6) MPI PACKING (serialize whole container to send buffer)" << endl;
+    row("List      (per-particle)     ", pList);
+    row("vector<P> (1 bulk memcpy)    ", pVec);
+    row("SoA       (per-column memcpy)", pSoACol);
+    row("SoA arena (1 memcpy data())  ", pArena);
+    pout() << "    vs List: vector<P> " << pList / pVec << "x, SoA-percol " << pList / pSoACol << "x, arena "
+           << pList / pArena << "x; arena vs per-column SoA: " << pSoACol / pArena << "x" << endl;
 
-    pout() << "  (7) VECTOR-FIELD INTERPOLATION (3-comp FArrayBox -> particle RealVect)" << endl;
+    pout() << "  (7) VECTOR-FIELD INTERPOLATION (3-comp FArrayBox -> particle velocity)" << endl;
     row("List     ", viList);
     row("vector<P>", viVec);
     row("SoA      ", viSoA);
     pout() << "    vs List: vector<P> " << viList / viVec << "x, SoA " << viList / viSoA << "x" << endl;
 
     pout() << "  (8) EULER ADVANCE (x += v*dt)" << endl;
-    row("List                   ", aList);
-    row("vector<P> AoS          ", aVec);
-    row("SoA vector<RealVect>   ", aSoA);
-    row("SoA per-component      ", aPC);
-    pout() << "    vs List: vector<P> " << aList / aVec << "x, SoA(RealVect) " << aList / aSoA << "x, per-component "
-           << aList / aPC << "x" << endl;
-    pout() << "    SoA(RealVect) vs vector<P>: " << aVec / aSoA << "x; per-component vs SoA(RealVect): " << aSoA / aPC
-           << "x" << endl;
+    row("List              ", aList);
+    row("vector<P> AoS     ", aVec);
+    row("SoA per-component ", aSoA);
+    pout() << "    vs List: vector<P> " << aList / aVec << "x, SoA " << aList / aSoA
+           << "x; SoA vs vector<P>: " << aVec / aSoA << "x" << endl;
 
     pout() << "  (9) KD-TREE MERGE (" << nMerge << " 7-field particles, " << mergePpc << "/cell, leaf=" << leafSize
            << ", reps=" << mergeReps << ")" << endl;
@@ -1403,10 +1220,9 @@ main(int argc, char* argv[])
     pout() << "  (10) CONTAINER COPY (copy whole container -> fresh container)" << endl;
     row("List               ", cList);
     row("vector<P>          ", cVec);
-    row("SoA (per-column)   ", cSoA);
-    row("SoA arena (1 memcpy)", cArena);
-    pout() << "    vs List: vector<P> " << cList / cVec << "x, SoA " << cList / cSoA << "x, SoA-arena "
-           << cList / cArena << "x; SoA-arena vs vector<P>: " << cVec / cArena << "x" << endl;
+    row("SoA arena (1 memcpy)", cSoA);
+    pout() << "    vs List: vector<P> " << cList / cVec << "x, SoA-arena " << cList / cSoA
+           << "x; SoA-arena vs vector<P>: " << cVec / cSoA << "x" << endl;
 
     pout() << "  (sink=" << g_sink << ")" << endl;
   }

@@ -6,12 +6,14 @@
 
 /**
   @file   CD_DemoParticle.H
-  @brief  A demonstration particle type used to exercise ParticleSoA.
+  @brief  A demonstration payload type used to exercise ParticleSoA.
   @author Robert Marskar
-  @details DemoParticle is a drifting computational super-particle carrying a
-  mobility and a derived conductivity field. It serves as a concrete example of the
-  recipe documented on ParticleTraits: a plain struct of byte-copyable members plus
-  a ParticleTraits specialization that names the columns by member pointer.
+  @details DemoPayload is the EXTRA-fields struct of a drifting computational
+  super-particle: a drift velocity, a mobility, and a derived conductivity. Position,
+  weight, and the id/rank metadata are NOT declared here -- ParticleSoA owns those
+  columns. This is a concrete example of the recipe documented on ParticleTraits: a
+  plain struct of byte-copyable members plus a ParticleTraits specialization that names
+  the payload columns by member pointer.
 */
 
 #ifndef CD_DEMOPARTICLE_H
@@ -29,36 +31,29 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Demonstration particle: position, weight, drift velocity, mobility, and a
-         conductivity field filled by SoA kernels.
+  @brief Demonstration payload: drift velocity, mobility, and a conductivity field filled
+         by SoA kernels. (Position + weight + id/rank are container-owned, not declared here.)
 */
-struct DemoParticle
+struct DemoPayload
 {
-  RealVect pos          = RealVect::Zero; ///< Position (mandatory vector field)
-  Real     weight       = 0.0;            ///< Number of physical particles (mandatory scalar; acts as "mass")
   RealVect velocity     = RealVect::Zero; ///< Drift velocity
   Real     mobility     = 0.0;            ///< Mobility coefficient
   Real     conductivity = 0.0;            ///< weight * mobility (filled by a kernel)
 };
 
 /**
-  @brief ParticleTraits specialization describing the SoA layout of DemoParticle.
+  @brief ParticleTraits specialization describing the payload columns of DemoPayload.
 */
 template <>
-struct ParticleTraits<DemoParticle>
+struct ParticleTraits<DemoPayload>
 {
-  /** @brief One pointer-to-member per SoA column (single source of truth for the layout). */
-  static constexpr auto columns = std::make_tuple(&DemoParticle::pos,
-                                                  &DemoParticle::weight,
-                                                  &DemoParticle::velocity,
-                                                  &DemoParticle::mobility,
-                                                  &DemoParticle::conductivity);
+  /** @brief One pointer-to-member per payload column (single source of truth for the layout). */
+  static constexpr auto columns = std::make_tuple(&DemoPayload::velocity,
+                                                  &DemoPayload::mobility,
+                                                  &DemoPayload::conductivity);
 
-  /** @brief Pointer to the mandatory RealVect position member. */
-  static constexpr auto positionPtr = &DemoParticle::pos;
-
-  /** @brief Pointer to the mandatory Real weight member. */
-  static constexpr auto weightPtr = &DemoParticle::weight;
+  /** @brief Persist velocity + mobility to HDF5; conductivity is recomputed on restart. */
+  static constexpr auto h5Columns = std::make_tuple(&DemoPayload::velocity, &DemoPayload::mobility);
 };
 
 #include <CD_NamespaceFooter.H>

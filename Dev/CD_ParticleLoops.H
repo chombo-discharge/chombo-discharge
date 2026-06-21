@@ -15,10 +15,10 @@
   mirrors BoxLoops exactly, with the cell index replaced by the particle index:
 
   @code{.cpp}
-    // columns captured once, OUTSIDE the loop
-    auto&       sigma = soa.column<&P::conductivity>();
-    const auto& w     = soa.weights();
-    const auto& mu    = soa.column<&P::mobility>();
+    // column pointers captured once, OUTSIDE the loop
+    Real*               sigma = soa.column<&P::conductivity>();
+    const ParticleReal* w     = soa.weightColumn();
+    const Real*         mu    = soa.column<&P::mobility>();
 
     ParticleLoops::loop(soa, [&](std::size_t i) { sigma[i] = w[i] * mu[i]; });
   @endcode

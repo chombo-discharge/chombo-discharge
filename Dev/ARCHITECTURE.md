@@ -122,6 +122,13 @@ equivalent owns particles across the AMR hierarchy and ties into Chombo's grid m
 1. **Per-level ownership:** `LayoutData<arena-SoA>` indexed by `DataIndex` over the
    level's `DisjointBoxLayout` — one arena-SoA per locally-owned box, iterated with
    `DataIterator` (the `#pragma omp for` over boxes). Mirrors today's `ParticleData<List>`.
+   *Template constraints check (Chombo `LayoutData<T>`):* `LayoutData` stores `Vector<T*>`,
+   `new T`-default-constructs each element, indexes by reference, and `delete`s them — it
+   **never copies, moves, or assigns `T`** (its own copy ctor/assignment are private). So the
+   only requirements on `T = ParticleSoA<P>` are **default-constructible + destructible**,
+   both satisfied; **move-only is a non-issue**. (Cross-rank exchange will NOT go through
+   `LevelData<T>::copyTo` — which would demand `T::define`/linearization — but through our own
+   `linearizeParticle`-based MPI, so that heavier interface does not apply.)
 2. **Halo/transfer holders use the SAME arena-SoA leaf type** — the buffer (grown grids),
    mask (halo), cache (regrid), and the remap pool are all `LayoutData<arena-SoA>` (the
    send side is a small set of per-destination-rank arena-SoAs). Same columns → zero
