@@ -67,6 +67,24 @@ The parallel data holders that `ParticleContainer` already keeps — valid, buff
 - **Cell binning is a property of the SoA's order + a CSR offsets array — NOT a separate
   container.** Drop today's second representation (`BinFab<List<P>>`) and the
   `organizeByCell/byPatch` copy-conversion entirely.
+- **ALL mandatory fields are container-owned columns; the user struct is payload-only.**
+  The container always allocates `position` (`SpaceDim` raw `ParticleReal` x/y/z columns),
+  `weight` (`ParticleReal`), `particleID`, and `rankID`. The user declares ONLY the extra
+  payload (e.g. `velocity`, `mobility`, `oldPosition`) via a payload struct + its
+  `ParticleTraits`; the payload may be empty, so `ParticleSoA<>` is a ready-made
+  point/tracer particle. Accessors `position(i)`/`weight(i)`/`particleID(i)`/`rankID(i)`.
+  Rationale: the position/weight layout is *already* fixed by the locked decisions (raw
+  per-component `ParticleReal`), so user control over them buys nothing but a chance to
+  misdeclare — baking them in gives a uniform mandatory schema, deletes the
+  `positionPtr`/`weightPtr` traits and the mandatory-field `static_assert`, and makes
+  omission/reordering impossible. NO inheritance (re-adds BinItem-style coupling, breaks
+  standard-layout). Trade-off: position/weight are reached via accessors rather than the
+  payload struct, so `gather`/`scatter`/merge split into "mandatory accessors + payload
+  columns" — at least as clear as today's whole-object access. (Supersedes the earlier
+  "position/weight are user-declared physics fields enforced by traits" choice.)
+- **No checkpoint versioning / capacity never-shrinks / full redesign (no facade).** H5 =
+  the type's `h5Columns` (no cross-type restart compat expected); arenas grow
+  geometrically, never shrink, and are reused across steps (self-sizing).
 
 ## Cell-sorting & KMC: one container, cell-sorted, with CSR offsets
 
@@ -96,20 +114,35 @@ Maintenance:
 - Physically reorder the columns (not just an index permutation) so per-cell access is
   contiguous for the repeated KMC/merge sweeps (a one-time permutation amortizes).
 
-## Open follow-on questions (for later)
+## The AMR / container layer (LOCKED)
 
-1. **Per-component expression:** does the user particle struct declare `RealVect`
-   members that the container auto-splits into `SpaceDim` columns (keeps the `RealVect`
-   AoS view for `gather`/`scatter`), or declare raw `x`/`y`/`z` scalars? (Auto-split is
-   nicer ergonomically, more traits machinery.)
-2. **Particle metadata:** do particles still carry `particleID`/`rankID` (determinism,
-   checkpoint-restart, debugging)? As columns?
-3. **Checkpoint format + versioning:** column order/layout is the on-disk ABI, and
-   per-component changes it — needs a checkpoint version key.
-4. **Reserve/capacity lifecycle:** reserve-at-regrid heuristic (prev count x ~1.3),
-   never shrink, pool/reuse containers across regrids so the arena self-sizes.
-5. **AMR integration:** how `LayoutData<arena-SoA>` plugs into the box/`DataIndex`
-   machinery, regrid caching, and the valid/buffer/mask/cache holders (same type or a
-   lighter variant for holders that never bin or checkpoint).
-6. **Remap protocol:** whole-patch transfer on ownership change (zero-copy `MPI_Send`)
-   vs subset gather-pack for boundary-crossers — two code paths.
+Everything above describes the per-patch arena-SoA *leaf*. The `ParticleContainer`
+equivalent owns particles across the AMR hierarchy and ties into Chombo's grid machinery:
+
+1. **Per-level ownership:** `LayoutData<arena-SoA>` indexed by `DataIndex` over the
+   level's `DisjointBoxLayout` — one arena-SoA per locally-owned box, iterated with
+   `DataIterator` (the `#pragma omp for` over boxes). Mirrors today's `ParticleData<List>`.
+2. **Halo/transfer holders use the SAME arena-SoA leaf type** — the buffer (grown grids),
+   mask (halo), cache (regrid), and the remap pool are all `LayoutData<arena-SoA>` (the
+   send side is a small set of per-destination-rank arena-SoAs). Same columns → zero
+   conversion: `append`/`gather`/`linearizeParticle`/`delinearizeAndAppend` and the
+   zero-copy `data()`/`byteSpan()` whole-pool send all work unchanged. The CSR cell-sort
+   state simply stays empty in transient buffers — NOT worth a second "lighter" type.
+3. **Regrid:** `preRegrid` caches particles off the old layout (into the cache holder);
+   `regrid` rebuilds the `LayoutData` on the new `DisjointBoxLayout` and redistributes to
+   the new owning boxes/ranks.
+4. **Remap protocol (the pool model):** collect all movers into a pool, keep the ones that
+   still belong to a box on this rank (local append into the destination arena-SoA), and
+   scatter the rest by rank. The pool IS an arena-SoA (point 2). Two transfer shapes:
+   **whole-patch ownership change** → zero-copy `MPI_Send(data())`; **individual
+   boundary-crossers** → gather the leaving subset into a per-rank send arena-SoA.
+5. **The leaf does NOT store its Box.** The `DisjointBoxLayout` (`dbl[dataIndex]`) is the
+   single source of truth; geometry-dependent leaf methods (cell-sort key, deposition
+   region) take `box`/`dx`/`probLo` as arguments — the container already holds the
+   `DataIndex` when it iterates, so `leaf.binByCell(box, dx, probLo)` is trivial. Storing
+   the box would duplicate state that desyncs on regrid and would make the leaf awkward as
+   a halo/remap-pool buffer (where "the box" is absent). The arena stays columns-only
+   regardless, so `data()`/`byteSpan()` are unaffected. (Fallback if too many call sites
+   need it: store `m_box`/`m_dx` as plain members *outside* the arena — start pure.)
+
+The mechanics (LayoutData/DataIterator/regrid hooks) mirror today's `ParticleContainer`.

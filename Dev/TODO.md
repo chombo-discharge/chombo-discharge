@@ -104,11 +104,30 @@ production code under `Source/`, `Physics/`, or `Geometries/` yet. The point of
 - **Cell binning: order + CSR offsets, not a separate container** — drop the
   `BinFab<List<P>>` second representation; the per-patch SoA is canonically cell-sorted
   (counting sort + `cellStart[]`). See `ARCHITECTURE.md`.
+- **All mandatory fields are container-owned; the user struct is payload-only** — the
+  container always allocates `position` (SpaceDim raw `ParticleReal` x/y/z), `weight`
+  (`ParticleReal`), `particleID`, and `rankID`. The user declares ONLY the extra payload
+  via a payload struct + `ParticleTraits`; an empty payload is valid, so `ParticleSoA<>`
+  is a ready-made point/tracer particle. Accessors `position(i)`/`weight(i)`/
+  `particleID(i)`/`rankID(i)`; id/rank are in MPI linearization but NOT HDF5 (regenerated
+  on restart). **No inheritance** (re-adds BinItem coupling, breaks standard-layout).
+  Rationale: position/weight layout is already fixed by the locked decisions, so baking
+  them in loses nothing, deletes the `positionPtr`/`weightPtr` traits + the mandatory-field
+  `static_assert`, and makes misdeclaration impossible. Trade-off: position/weight reached
+  via accessors, so gather/scatter/merge = "mandatory accessors + payload columns".
+  (Supersedes the earlier "position/weight are user-declared, enforced by traits" choice.)
+- **No checkpoint versioning** — no cross-particle-type restart compatibility is
+  expected; H5 output = the type's `h5Columns`; write→read round-trips within a build.
+  The only invariant preserved is restart on a *different MPI rank count* (same type),
+  which is orthogonal to the type definition.
+- **Migration: full redesign, no facade / no drop-in.**
+- **Capacity: never-shrink + self-resizing** — geometric growth, `clear()` keeps
+  capacity, containers reused across steps so each arena warms to its high-water mark
+  once. No reserve prediction required.
 - **Schema: explicit traits, NOT a macro** — `ParticleTraits<P>` with a `columns`
-  member-pointer tuple + `positionPtr`/`weightPtr` + optional `h5Columns`. Indices
-  for position/weight/HDF5 are all **derived** from member pointers (no literal
-  indices anywhere → reordering `columns` is safe). A `CD_PARTICLE_LAYOUT` macro was
-  evaluated and rejected (opaque to tooling); the file was removed.
+  member-pointer tuple + `positionPtrs` (SpaceDim) / `weightPtr` + optional `h5Columns`.
+  Indices are all **derived** from member pointers (no literal indices → reordering is
+  safe). A `CD_PARTICLE_LAYOUT` macro was evaluated and rejected; the file was removed.
 - **Storage granularity: per-patch** — one container per patch; the AMR container holds
   `LayoutData<arena-SoA>` per level. See `ARCHITECTURE.md`.
 
@@ -122,22 +141,19 @@ is 1.7x (per-component 4x) faster. So full SoA is justified mainly by hot SIMD
 particle kernels and/or GPU offload; otherwise `vector<P>` is the sweet spot. This
 reframes the "drop-in vs clean break" question below into "SoA vs vector<P> at all".
 
-## Big open questions (remaining)
+## Big open questions
 
-1. **Particle metadata:** keep `particleID`/`rankID` (determinism, checkpoint, debug)?
-   As columns?
-2. **Checkpoint format + versioning:** column order/per-component layout/precision is the
-   on-disk ABI → needs a version key (any of those changing = format change).
-3. **Drop-in vs. clean break.** Thin AoS facade over the SoA, or rewrite call sites?
-   (Plus: must the tree stay compilable at every commit?) — leaning clean break.
-4. **Reserve/capacity lifecycle:** reserve-at-regrid heuristic, never shrink, reuse
-   containers so the arena self-sizes (turns the 7x cold-build into a one-time warmup).
-5. **AMR / container layering:** how `LayoutData<arena-SoA>` wraps Chombo's
-   box/`DataIndex` machinery, regrid caching, and the valid/buffer/mask/cache holders
-   (same type or a lighter variant); remap protocol (whole-patch zero-copy vs subset
-   gather-pack).
+**None — the design is fully locked.** The AMR/container layer is now resolved too (see
+`ARCHITECTURE.md` "The AMR / container layer (LOCKED)"):
+- per-level `LayoutData<arena-SoA>` over the `DisjointBoxLayout`, indexed by `DataIndex`;
+- halo/buffer/mask/cache/remap-pool all use the **same arena-SoA leaf type** (CSR state
+  just stays empty in transient buffers — no lighter variant);
+- regrid: `preRegrid` cache + `regrid` redistribute onto the new `DisjointBoxLayout`;
+- remap = **pool model**: collect movers, keep same-rank locally, scatter the rest;
+  whole-patch transfer → zero-copy `MPI_Send(data())`, boundary-crossers → gather subset;
+- the **leaf does NOT store its Box** — the `DisjointBoxLayout` is the single source of
+  truth; geometry-dependent methods take `box`/`dx`/`probLo` as arguments.
 
-Decided: per-component (raw `ParticleReal` x/y/z scalars), `ParticleReal` precision +
-mixed-precision kernel policy, arena backing, cell-sorted+CSR (drop `BinFab`), explicit
-traits, member-pointer selector, C++17, per-patch storage. See `ARCHITECTURE.md`
-(LOCKED design decisions) and `BENCHMARKS.md`.
+Everything else decided — see `ARCHITECTURE.md` (LOCKED design decisions) and `BENCHMARKS.md`.
+Next step is implementation, starting from the arena-SoA leaf (container-owned mandatory
+columns + payload, `position(i)` promotion, cell-sort/CSR), then the AMR container layer.
