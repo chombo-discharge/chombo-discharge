@@ -84,6 +84,16 @@ production code under `Source/`, `Physics/`, or `Geometries/` yet. The point of
 - **Storage granularity: per-patch** — `ParticleSoA<P>` = one patch; the AMR
   container holds `LayoutData<ParticleSoA<P>>` per level. See `ARCHITECTURE.md`.
 
+## Benchmark findings (see `BENCHMARKS.md`)
+
+`Dev/Benchmark/` compares `List<P>` vs `vector<P>` (AoS) vs `ParticleSoA<P>` on
+deposition, interpolation, streaming transform, build, remap, and MPI packing.
+Headline: **escaping the linked list is the big win, not the SoA column split** —
+`vector<P>` ties or beats SoA everywhere except SIMD streaming transforms, where SoA
+is 1.7x (per-component 4x) faster. So full SoA is justified mainly by hot SIMD
+particle kernels and/or GPU offload; otherwise `vector<P>` is the sweet spot. This
+reframes the "drop-in vs clean break" question below into "SoA vs vector<P> at all".
+
 ## Big open questions (remaining)
 
 1. **Drop-in vs. clean break.** Keep `GenericParticle<M,N>` / `PointParticle` /

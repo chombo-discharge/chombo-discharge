@@ -28,6 +28,7 @@
 #include <chrono>
 #include <cmath>
 #include <cstdint>
+#include <cstring>
 #include <random>
 #include <vector>
 
@@ -190,10 +191,35 @@ namespace {
   }
 
   void
+  depositVector(FArrayBox&                        a_rho,
+                const std::vector<BenchParticle>& a_v,
+                const RealVect&                   a_lo,
+                const RealVect&                   a_iDx,
+                const Real                        a_iVol)
+  {
+    const std::size_t n = a_v.size();
+    for (std::size_t i = 0; i < n; i++) {
+      depositOneCIC(a_rho, a_v[i].m_position, a_v[i].m_weight, a_lo, a_iDx, a_iVol);
+    }
+  }
+
+  void
   interpolateList(const FArrayBox& a_rho, List<BenchParticle>& a_p, const RealVect& a_lo, const RealVect& a_iDx)
   {
     for (ListIterator<BenchParticle> lit(a_p); lit.ok(); ++lit) {
       lit().m_weight = interpolateOneCIC(a_rho, lit().position(), a_lo, a_iDx);
+    }
+  }
+
+  void
+  interpolateVector(const FArrayBox&            a_rho,
+                    std::vector<BenchParticle>& a_v,
+                    const RealVect&             a_lo,
+                    const RealVect&             a_iDx)
+  {
+    const std::size_t n = a_v.size();
+    for (std::size_t i = 0; i < n; i++) {
+      a_v[i].m_weight = interpolateOneCIC(a_rho, a_v[i].m_position, a_lo, a_iDx);
     }
   }
 
@@ -245,6 +271,18 @@ namespace {
     });
   }
 
+  // Contiguous AoS: the same transform over a vector<BenchParticle>. Memory is
+  // contiguous (unlike List) but each field is strided by sizeof(BenchParticle),
+  // so SIMD must gather/scatter within the struct.
+  __attribute__((noinline)) void
+  transformVector(std::vector<BenchParticle>& a_v)
+  {
+    BenchParticle* p = a_v.data();
+    ParticleLoops::loop(a_v.size(), [&](std::size_t i) {
+      p[i].m_weight = transformOne(p[i].m_position);
+    });
+  }
+
   // ---------------------------------------------------------------------------
   // Helpers.
   // ---------------------------------------------------------------------------
@@ -272,6 +310,44 @@ namespace {
       m = std::max(m, std::abs(pa[i] - pb[i]));
     }
     return m;
+  }
+
+  // ---------------------------------------------------------------------------
+  // MPI buffer packing: serialize (position + weight) into a byte send buffer.
+  // ---------------------------------------------------------------------------
+  static_assert(sizeof(BenchParticle) == sizeof(RealVect) + sizeof(Real),
+                "BenchParticle must be padding-free for the AoS bulk memcpy");
+  constexpr std::size_t s_bytesPerParticle = sizeof(RealVect) + sizeof(Real);
+
+  /** @brief Pack a List per particle (pointer-chased; the realistic Chombo path). */
+  void
+  packList(unsigned char* a_buf, const List<BenchParticle>& a_p)
+  {
+    unsigned char* q = a_buf;
+    for (ListIterator<BenchParticle> lit(a_p); lit.ok(); ++lit) {
+      std::memcpy(q, &lit().m_position, sizeof(RealVect));
+      q += sizeof(RealVect);
+      std::memcpy(q, &lit().m_weight, sizeof(Real));
+      q += sizeof(Real);
+    }
+  }
+
+  /** @brief Pack a contiguous AoS vector in a single bulk memcpy (buffer is AoS-formatted). */
+  void
+  packVector(unsigned char* a_buf, const std::vector<BenchParticle>& a_v)
+  {
+    std::memcpy(a_buf, a_v.data(), a_v.size() * sizeof(BenchParticle));
+  }
+
+  /** @brief Pack SoA as per-column bulk memcpies (buffer is column-major). */
+  void
+  packSoA(unsigned char* a_buf, const SoA& a_soa)
+  {
+    const std::vector<RealVect>& pos = a_soa.positions();
+    const std::vector<Real>&     w   = a_soa.weights();
+    const std::size_t            n   = a_soa.size();
+    std::memcpy(a_buf, pos.data(), n * sizeof(RealVect));
+    std::memcpy(a_buf + n * sizeof(RealVect), w.data(), n * sizeof(Real));
   }
 
   /** @brief Time the average wall-time (ns) of a_op over a_reps repetitions (one warm-up). */
@@ -417,6 +493,12 @@ main(int argc, char* argv[])
     const double dSoAR  = timeDeposit([&]() {
       depositSoA(rho, soaRandom, probLo, invDx, invVol);
     });
+    const double dVecS  = timeDeposit([&]() {
+      depositVector(rho, sortedParticles, probLo, invDx, invVol);
+    });
+    const double dVecR  = timeDeposit([&]() {
+      depositVector(rho, randomParticles, probLo, invDx, invVol);
+    });
 
     // =====================================================================
     // (2) INTERPOLATION  (fill rho once, then gather to particle weights)
@@ -445,6 +527,12 @@ main(int argc, char* argv[])
     const double iSoAR  = timeOp(fastReps, [&]() {
       interpolateSoA(rho, soaRandom, probLo, invDx);
     });
+    const double iVecS  = timeOp(fastReps, [&]() {
+      interpolateVector(rho, sortedParticles, probLo, invDx);
+    });
+    const double iVecR  = timeOp(fastReps, [&]() {
+      interpolateVector(rho, randomParticles, probLo, invDx);
+    });
 
     // =====================================================================
     // (3) STREAMING TRANSFORM  (SoA path via ParticleLoops SIMD)
@@ -464,6 +552,9 @@ main(int argc, char* argv[])
     });
     const double tFragS = timeOp(fastReps, [&]() {
       transformList(listFragSorted);
+    });
+    const double tVecS  = timeOp(fastReps, [&]() {
+      transformVector(sortedParticles);
     });
     const double tSoAS  = timeOp(fastReps, [&]() {
       transformSoA(soaSorted);
@@ -489,6 +580,14 @@ main(int argc, char* argv[])
         s.append(p);
       }
       g_sink += s.size();
+    });
+    const double bVec  = timeOp(buildReps, [&]() {
+      std::vector<BenchParticle> v;
+      v.reserve(nPart);
+      for (const BenchParticle& p : sortedParticles) {
+        v.push_back(p);
+      }
+      g_sink += v.size();
     });
 
     // =====================================================================
@@ -518,6 +617,32 @@ main(int argc, char* argv[])
         g_sink += d.size();
       }
     });
+    const double rVec  = timeOp(buildReps, [&]() {
+      std::vector<std::vector<BenchParticle>> dst(nBuckets);
+      for (std::size_t i = 0; i < nPart; i++) {
+        dst[bucketId[i]].push_back(sortedParticles[i]);
+      }
+      for (const std::vector<BenchParticle>& d : dst) {
+        g_sink += d.size();
+      }
+    });
+
+    // =====================================================================
+    // (6) MPI PACKING  (serialize position + weight into a byte send buffer)
+    // =====================================================================
+    std::vector<unsigned char> sendBuf(nPart * s_bytesPerParticle);
+    const double               pList = timeOp(fastReps, [&]() {
+      packList(sendBuf.data(), listSorted);
+      g_sink += sendBuf[0];
+    });
+    const double               pVec  = timeOp(fastReps, [&]() {
+      packVector(sendBuf.data(), sortedParticles);
+      g_sink += sendBuf[0];
+    });
+    const double               pSoA  = timeOp(fastReps, [&]() {
+      packSoA(sendBuf.data(), soaSorted);
+      g_sink += sendBuf[0];
+    });
 
     // =====================================================================
     // Report
@@ -535,43 +660,53 @@ main(int argc, char* argv[])
            << " (List-vs-SoA " << listVsSoA << ")" << endl;
 
     pout() << "  (1) DEPOSITION (scatter to grid)" << endl;
-    row("List compact    sorted", dListS);
-    row("List compact    random", dListR);
     row("List fragmented sorted", dFragS);
     row("List fragmented random", dFragR);
+    row("vector<P> AoS   sorted", dVecS);
+    row("vector<P> AoS   random", dVecR);
     row("SoA             sorted", dSoAS);
     row("SoA             random", dSoAR);
-    pout() << "    SoA speedup vs fragmented List (sorted/random): " << dFragS / dSoAS << "x / " << dFragR / dSoAR
-           << "x" << endl;
+    pout() << "    SoA vs fragmented List / vs vector<P> (sorted): " << dFragS / dSoAS << "x / " << dVecS / dSoAS << "x"
+           << endl;
 
     pout() << "  (2) INTERPOLATION (gather from grid)" << endl;
-    row("List compact    sorted", iListS);
-    row("List compact    random", iListR);
     row("List fragmented sorted", iFragS);
     row("List fragmented random", iFragR);
+    row("vector<P> AoS   sorted", iVecS);
+    row("vector<P> AoS   random", iVecR);
     row("SoA             sorted", iSoAS);
     row("SoA             random", iSoAR);
-    pout() << "    SoA speedup vs fragmented List (sorted/random): " << iFragS / iSoAS << "x / " << iFragR / iSoAR
-           << "x" << endl;
+    pout() << "    SoA vs fragmented List / vs vector<P> (sorted): " << iFragS / iSoAS << "x / " << iVecS / iSoAS << "x"
+           << endl;
 
     pout() << "  (3) STREAMING TRANSFORM (weight = 0.5|x|^2)" << endl;
     row("List compact      sorted", tListS);
     row("List fragmented   sorted", tFragS);
+    row("vector<P> AoS           ", tVecS);
     row("SoA vector<RealVect>    ", tSoAS);
     row("SoA per-component x/y/z ", tPCS);
-    pout() << "    SoA(RealVect) speedup vs compact/fragmented List: " << tListS / tSoAS << "x / " << tFragS / tSoAS
-           << "x" << endl;
-    pout() << "    per-component speedup vs SoA(RealVect)          : " << tSoAS / tPCS << "x" << endl;
+    pout() << "    vs compact List: vector<P> " << tListS / tVecS << "x, SoA(RealVect) " << tListS / tSoAS
+           << "x, per-component " << tListS / tPCS << "x" << endl;
+    pout() << "    SoA(RealVect) vs vector<P>: " << tVecS / tSoAS
+           << "x; per-component vs SoA(RealVect): " << tSoAS / tPCS << "x" << endl;
 
     pout() << "  (4) BUILD (allocation)" << endl;
-    row("List", bList);
-    row("SoA ", bSoA);
-    pout() << "    SoA speedup: " << bList / bSoA << "x" << endl;
+    row("List     ", bList);
+    row("vector<P>", bVec);
+    row("SoA      ", bSoA);
+    pout() << "    vs List: vector<P> " << bList / bVec << "x, SoA " << bList / bSoA << "x" << endl;
 
     pout() << "  (5) REMAP (scatter into " << nBuckets << " buckets)" << endl;
-    row("List", rList);
-    row("SoA ", rSoA);
-    pout() << "    SoA speedup: " << rList / rSoA << "x" << endl;
+    row("List     ", rList);
+    row("vector<P>", rVec);
+    row("SoA      ", rSoA);
+    pout() << "    vs List: vector<P> " << rList / rVec << "x, SoA " << rList / rSoA << "x" << endl;
+
+    pout() << "  (6) MPI PACKING (serialize " << s_bytesPerParticle << " B/particle to send buffer)" << endl;
+    row("List      (per-particle)", pList);
+    row("vector<P> (1 bulk memcpy)", pVec);
+    row("SoA       (per-column memcpy)", pSoA);
+    pout() << "    vs List: vector<P> " << pList / pVec << "x, SoA " << pList / pSoA << "x" << endl;
 
     pout() << "  (sink=" << g_sink << ")" << endl;
   }
