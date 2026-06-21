@@ -55,6 +55,7 @@
 #include <CD_Initialize.H>
 #include <CD_ParticleSoA.H>
 #include <CD_ParticleLoops.H>
+#include <CD_ParticleSoAArena.H>
 
 namespace ChomboDischarge {
 
@@ -137,7 +138,8 @@ using namespace ChomboDischarge;
 
 namespace {
 
-  using SoA = ParticleSoA<BenchParticle>;
+  using SoA      = ParticleSoA<BenchParticle>;
+  using ArenaSoA = ParticleSoAArena<BenchParticle>;
 
   volatile std::uint64_t g_sink = 0; // defeats dead-code elimination of build/remap
 
@@ -409,6 +411,28 @@ namespace {
     BenchParticle* p = a_v.data();
     ParticleLoops::loop(a_v.size(), [&](std::size_t i) {
       p[i].m_weight = transformOne(p[i].m_position);
+    });
+  }
+
+  // Arena-backed SoA: same kernels via cached column pointers (tests offset-access cost).
+  void
+  depositArena(FArrayBox& a_rho, const ArenaSoA& a_soa, const RealVect& a_lo, const RealVect& a_iDx, const Real a_iVol)
+  {
+    const RealVect*   pos = a_soa.column<&BenchParticle::m_position>();
+    const Real*       w   = a_soa.column<&BenchParticle::m_weight>();
+    const std::size_t n   = a_soa.size();
+    for (std::size_t i = 0; i < n; i++) {
+      depositOneCIC(a_rho, pos[i], w[i], a_lo, a_iDx, a_iVol);
+    }
+  }
+
+  __attribute__((noinline)) void
+  transformArena(ArenaSoA& a_soa)
+  {
+    const RealVect* pos = a_soa.column<&BenchParticle::m_position>();
+    Real*           w   = a_soa.column<&BenchParticle::m_weight>();
+    ParticleLoops::loop(a_soa.size(), [&](std::size_t i) {
+      w[i] = transformOne(pos[i]);
     });
   }
 
@@ -719,8 +743,8 @@ main(int argc, char* argv[])
     constexpr int nGhost    = 2;
     constexpr int ppc       = 16;
     constexpr int fastReps  = 200; // deposition / interpolation / transform
-    constexpr int buildReps = 50;  // build / remap (each rep allocates)
-    constexpr int nBuckets  = 64;  // remap destination patches
+    constexpr int buildReps = 50; // build / remap (each rep allocates)
+    constexpr int nBuckets  = 64; // remap destination patches
 
     const Box         valid(IntVect::Zero, (nCell - 1) * IntVect::Unit);
     const Box         grown  = grow(valid, nGhost);
@@ -787,6 +811,12 @@ main(int argc, char* argv[])
     SoA                 soaSorted      = buildSoA(sortedParticles);
     SoA                 soaRandom      = buildSoA(randomParticles);
 
+    ArenaSoA arenaSorted; // arena-backed SoA, compact (reserve-exact)
+    arenaSorted.reserve(nPart);
+    for (const BenchParticle& p : sortedParticles) {
+      arenaSorted.append(p);
+    }
+
     FArrayBox rho(grown, 1);
 
     // =====================================================================
@@ -837,6 +867,9 @@ main(int argc, char* argv[])
     });
     const double dVecR  = timeDeposit([&]() {
       depositVector(rho, randomParticles, probLo, invDx, invVol);
+    });
+    const double dArena = timeDeposit([&]() {
+      depositArena(rho, arenaSorted, probLo, invDx, invVol);
     });
 
     // =====================================================================
@@ -901,18 +934,21 @@ main(int argc, char* argv[])
     const double tPCS   = timeOp(fastReps, [&]() {
       transformPerComponent(xs, ys, zs, ws);
     });
+    const double tArena = timeOp(fastReps, [&]() {
+      transformArena(arenaSorted);
+    });
 
     // =====================================================================
     // (4) BUILD  (construct container from the source array; allocation cost)
     // =====================================================================
-    const double bList = timeOp(buildReps, [&]() {
+    const double bList      = timeOp(buildReps, [&]() {
       List<BenchParticle> l;
       for (const BenchParticle& p : sortedParticles) {
         l.append(p);
       }
       g_sink += l.isEmpty() ? 0u : 1u;
     });
-    const double bSoA  = timeOp(buildReps, [&]() {
+    const double bSoA       = timeOp(buildReps, [&]() {
       SoA s;
       s.reserve(nPart);
       for (const BenchParticle& p : sortedParticles) {
@@ -920,13 +956,28 @@ main(int argc, char* argv[])
       }
       g_sink += s.size();
     });
-    const double bVec  = timeOp(buildReps, [&]() {
+    const double bVec       = timeOp(buildReps, [&]() {
       std::vector<BenchParticle> v;
       v.reserve(nPart);
       for (const BenchParticle& p : sortedParticles) {
         v.push_back(p);
       }
       g_sink += v.size();
+    });
+    const double bArena     = timeOp(buildReps, [&]() {
+      ArenaSoA a;
+      a.reserve(nPart);
+      for (const BenchParticle& p : sortedParticles) {
+        a.append(p);
+      }
+      g_sink += a.size();
+    });
+    const double bArenaGrow = timeOp(buildReps, [&]() {
+      ArenaSoA a; // no reserve -> exercises arena growth (whole-buffer realloc per doubling)
+      for (const BenchParticle& p : sortedParticles) {
+        a.append(p);
+      }
+      g_sink += a.size();
     });
 
     // =====================================================================
@@ -982,6 +1033,23 @@ main(int argc, char* argv[])
         g_sink += d.size();
       }
     });
+    // Two-pass arena remap: count, reserve each bucket's arena, then fill.
+    const double rArena = timeOp(buildReps, [&]() {
+      std::vector<std::size_t> counts(nBuckets, 0);
+      for (std::size_t i = 0; i < nPart; i++) {
+        counts[bucketId[i]]++;
+      }
+      std::vector<ArenaSoA> dst(nBuckets);
+      for (int b = 0; b < nBuckets; b++) {
+        dst[b].reserve(counts[b]);
+      }
+      for (std::size_t i = 0; i < nPart; i++) {
+        dst[bucketId[i]].append(sortedParticles[i]);
+      }
+      for (const ArenaSoA& d : dst) {
+        g_sink += d.size();
+      }
+    });
 
     // =====================================================================
     // (6) MPI PACKING  (serialize position + weight into a byte send buffer)
@@ -1034,6 +1102,13 @@ main(int argc, char* argv[])
     std::memcpy(arena.data() + nPart * sizeof(RealVect), soaSorted.weights().data(), nPart * sizeof(Real));
     const double pArena = timeOp(fastReps, [&]() {
       std::memcpy(packBuf, arena.data(), bufBytes); // one bulk copy, like vector<P>
+      g_sink += packBuf[0];
+    });
+    // Real arena container: pack = one memcpy of its contiguous buffer (compact). A full
+    // whole-container MPI send could skip this copy entirely (send data() directly).
+    const std::size_t arenaSpan  = arenaSorted.byteSpan();
+    const double      pArenaReal = timeOp(fastReps, [&]() {
+      std::memcpy(packBuf, arenaSorted.data(), arenaSpan);
       g_sink += packBuf[0];
     });
     std::free(packBuf);
@@ -1240,8 +1315,9 @@ main(int argc, char* argv[])
     row("vector<P> AoS   random", dVecR);
     row("SoA             sorted", dSoAS);
     row("SoA             random", dSoAR);
+    row("SoA arena       sorted", dArena);
     pout() << "    SoA vs fragmented List / vs vector<P> (sorted): " << dFragS / dSoAS << "x / " << dVecS / dSoAS << "x"
-           << endl;
+           << "; arena vs SoA: " << dSoAS / dArena << "x" << endl;
 
     pout() << "  (2) INTERPOLATION (gather from grid)" << endl;
     row("List fragmented sorted", iFragS);
@@ -1258,25 +1334,30 @@ main(int argc, char* argv[])
     row("List fragmented   sorted", tFragS);
     row("vector<P> AoS           ", tVecS);
     row("SoA vector<RealVect>    ", tSoAS);
+    row("SoA arena (RealVect)    ", tArena);
     row("SoA per-component x/y/z ", tPCS);
     pout() << "    vs compact List: vector<P> " << tListS / tVecS << "x, SoA(RealVect) " << tListS / tSoAS
-           << "x, per-component " << tListS / tPCS << "x" << endl;
+           << "x, arena " << tListS / tArena << "x, per-component " << tListS / tPCS << "x" << endl;
     pout() << "    SoA(RealVect) vs vector<P>: " << tVecS / tSoAS
            << "x; per-component vs SoA(RealVect): " << tSoAS / tPCS << "x" << endl;
 
     pout() << "  (4) BUILD (allocation)" << endl;
-    row("List     ", bList);
-    row("vector<P>", bVec);
-    row("SoA      ", bSoA);
-    pout() << "    vs List: vector<P> " << bList / bVec << "x, SoA " << bList / bSoA << "x" << endl;
+    row("List              ", bList);
+    row("vector<P>         ", bVec);
+    row("SoA (N vectors)   ", bSoA);
+    row("SoA arena (reserve)", bArena);
+    row("SoA arena (grow)  ", bArenaGrow);
+    pout() << "    vs List: vector<P> " << bList / bVec << "x, SoA " << bList / bSoA << "x, arena " << bList / bArena
+           << "x, arena-grow " << bList / bArenaGrow << "x" << endl;
 
     pout() << "  (5) REMAP (scatter into " << nBuckets << " buckets)" << endl;
     row("List              ", rList);
     row("vector<P>         ", rVec);
     row("SoA (naive append)", rSoA);
     row("SoA (two-pass)    ", rSoA2);
-    pout() << "    vs List: vector<P> " << rList / rVec << "x, SoA " << rList / rSoA << "x, SoA-2pass " << rList / rSoA2
-           << "x; SoA-2pass vs vector<P>: " << rVec / rSoA2 << "x" << endl;
+    row("SoA arena (2-pass)", rArena);
+    pout() << "    vs List: vector<P> " << rList / rVec << "x, SoA-2pass " << rList / rSoA2 << "x, arena-2pass "
+           << rList / rArena << "x; arena-2pass vs vector<P>: " << rVec / rArena << "x" << endl;
 
     pout() << "  (6) MPI PACKING (serialize " << s_bytesPerParticle << " B/particle to send buffer)" << endl;
     row("List          (per-particle)     ", pList);
@@ -1284,10 +1365,12 @@ main(int argc, char* argv[])
     row("vector<P>     (split 2 memcpy)   ", pVecSplit);
     row("SoA           (per-column memcpy)", pSoA);
     row("SoA           (per-column NT)    ", pSoANT);
-    row("SoA arena     (1 memcpy, no intr)", pArena);
+    row("SoA arena     (sim, 1 memcpy)   ", pArena);
+    row("SoA arena     (real container)  ", pArenaReal);
     pout() << "    vs List: vector<P> " << pList / pVec << "x, SoA " << pList / pSoA << "x, SoA-NT " << pList / pSoANT
-           << "x, SoA-arena " << pList / pArena << "x" << endl;
-    pout() << "    NT-vs-plain SoA: " << pSoA / pSoANT << "x; arena-vs-plain SoA: " << pSoA / pArena << "x" << endl;
+           << "x, arena-real " << pList / pArenaReal << "x" << endl;
+    pout() << "    NT-vs-plain SoA: " << pSoA / pSoANT << "x; arena-real-vs-plain SoA: " << pSoA / pArenaReal << "x"
+           << endl;
 
     pout() << "  (7) VECTOR-FIELD INTERPOLATION (3-comp FArrayBox -> particle RealVect)" << endl;
     row("List     ", viList);

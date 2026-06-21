@@ -216,6 +216,49 @@ single `std::memcpy` that `glibc` auto-streams; no intrinsics.)
   *improvement* over the status quo, not a regression; it is only slower than the
   hypothetical `vector<P>` alternative.
 
+## Arena-backed SoA (single allocation) — end-to-end vs N-vector SoA (1M particles)
+
+`CD_ParticleSoAArena.H` stores all columns in ONE 64-byte-aligned allocation (column
+base pointers cached). Measured against the N-vector `ParticleSoA` and `vector<P>`:
+
+| Operation | vector\<P\> | SoA (N-vector) | **SoA arena** | note |
+|---|---:|---:|---:|---|
+| Build (reserve)        | 2.11 | 2.60 | **2.29** | arena ≈ one allocation, beats N-vector |
+| Build (NO reserve)     |  —   |  —   | **16.2** | **7x worse** — growth reallocs whole buffer |
+| Deposition (sorted)    | 12.2 | 10.8 | 12.2 | scatter-bound; offset access is free (≈ noise) |
+| Transform `½|x|²`      | 1.18 | 0.93 | **0.72** | arena 1.29x over N-vec SoA — 64B-aligned SIMD |
+| Remap (two-pass)       | 4.37 | 5.23 | 6.15 | arena slightly *worse*; doesn't fix scatter |
+| MPI pack               | 1.35 | 1.5–6.0† | **1.36** | arena reliably = vector\<P\>, no intrinsics |
+
+(ns/particle.) † per-column SoA pack measured ~1.5 (2.1x) in this session but ~6.0
+(0.55x) in an earlier session — see below.
+
+**Findings:**
+- **Build:** arena with `reserve` (2.29) is one allocation and beats N-vector SoA
+  (2.60), near `vector<P>` (2.11). **Without `reserve` it is catastrophic (16.2, 7x
+  worse)** — every doubling reallocates and moves the *whole* buffer. So **arena makes
+  `reserve` mandatory**; with it, build is competitive.
+- **Element access is free:** arena deposition/transform read through cached column
+  pointers and match (transform: beat) the N-vector version — the offset indirection
+  costs nothing measurable.
+- **Transform is *faster* with arena (1.29x):** 64-byte-aligned columns let the
+  compiler use aligned SIMD (no shuffle/peel that the 16-byte `std::vector` data forces).
+  A free bonus of the arena layout (still below per-component's 5.6x).
+- **Pack/copy: arena is reliably at `vector<P>` parity, no intrinsics** — one `memcpy`
+  of the contiguous arena (or zero-copy `MPI_Send` of `data()` for a whole-container
+  transfer). Importantly, the per-column SoA pack is **not reliable**: it was fast
+  (2.1x) in this session but slow (0.55x, the "reversal") in an earlier one, because
+  glibc's NT decision for the split copy is borderline at this size. **The arena removes
+  that variance.**
+- **Remap is not helped** (slightly worse, 6.15 vs 5.23): scatter-into-buckets is
+  per-particle and the arena's `append` indirection adds a touch of overhead. Remap
+  stays the SoA soft spot (~1.2–1.4x vs `vector<P>`, still ~2x faster than `List`).
+
+**Net:** an arena-backed SoA gives one-allocation builds, *faster* aligned-SIMD
+transforms, and *robust* no-intrinsics pack/copy — at the cost of a hard `reserve`
+requirement (growth is 7x) and no remap improvement. It directly addresses the
+copy/pack-without-intrinsics goal; it does not change the remap trade.
+
 ## KD-tree merge, in detail (whole-particle access — the AoS-favouring case?)
 
 Superparticle-style merge: 131,072 **7-field** particles (3 RealVect + 4 Real, ≈
@@ -311,12 +354,14 @@ local reduction) — not by layout or SIMD.
   the standard device layout — then it is close to mandatory regardless of these CPU
   numbers). Note per-component is the heavier variant (more columns, RealVect view
   reconstructed on gather, more involved linearization).
-- **If you choose SoA, use a single-allocation "arena" backing** (columns as offset
-  slices of one buffer). Measured benefits, no intrinsics: build = one allocation;
-  container copy and MPI pack become a single `memcpy` at `vector<P>` parity (and a
-  full-container send can be zero-copy — the arena *is* the wire layout). The remaining
-  gap is scatter-remap (~1.2x vs `vector<P>`, still 2x faster than `List`). Cost of
-  arena: growth/`resize` must reallocate + recompute offsets, so reserve to a capacity.
+- **If you choose SoA, use a single-allocation "arena" backing** (`CD_ParticleSoAArena.H`,
+  columns as offset slices of one buffer). **Measured** (1M, end-to-end): build = one
+  allocation (beats N-vector SoA); pack/copy reliably at `vector<P>` parity with **no
+  intrinsics** (one `memcpy`, or zero-copy `MPI_Send` of `data()` for whole-container
+  sends); and transforms are **1.29x faster** than N-vector SoA via 64-byte-aligned SIMD.
+  Costs: growth without `reserve` is **7x catastrophic** (whole-buffer realloc) → reserve
+  to capacity is mandatory; and remap is *not* improved (still ~1.2–1.4x vs `vector<P>`,
+  ~2x faster than `List`).
 - **Load imbalance** is orthogonal: a uniform per-rank speedup still helps the
   bottleneck rank; the lever for imbalance is load balancing, which `vector<P>`/SoA both
   make cheaper (vector more so via faster remap).
