@@ -234,3 +234,6 @@ local reduction) — not by layout or SIMD.
   merge/split, regrid).
 - **Profile a real ItoKMC run** for the particle-time fraction and per-op breakdown —
   the missing input that turns "which layout" into "how much wall-clock."
+- **Confirm the MPI-packing reversal** at scale (SoA per-column copy slower than List at
+  1M). Check whether forcing non-temporal stores / a single combined copy for SoA closes
+  the gap, or whether `vector<P>` bulk packing is simply the right call.
