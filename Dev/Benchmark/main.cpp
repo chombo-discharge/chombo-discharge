@@ -23,6 +23,10 @@
     7. vector-field interpolation (3-component FArrayBox -> particle RealVect)
     8. Euler advance    (x += v*dt; the canonical particle update)
     9. KD-tree merge    (median-split by position, merge nearest pairs; whole-particle access)
+   10. container copy   (copy whole container -> fresh container; the list-to-list case)
+
+  Sections 5/6/10 also include no-intrinsics SoA variants (two-pass remap; single-memcpy
+  "arena" pack/copy) testing whether SoA matches vector<P> on bulk ops without NT intrinsics.
 
   Grid: all-regular FArrayBox, 16 valid + 2 ghost cells per coordinate (20^3
   allocated), single component. Particles: 16 per valid cell (32/cell for the merge).
@@ -961,6 +965,23 @@ main(int argc, char* argv[])
         g_sink += d.size();
       }
     });
+    // Two-pass SoA remap: count per bucket, reserve, then fill (no reallocation churn).
+    const double rSoA2 = timeOp(buildReps, [&]() {
+      std::vector<std::size_t> counts(nBuckets, 0);
+      for (std::size_t i = 0; i < nPart; i++) {
+        counts[bucketId[i]]++;
+      }
+      std::vector<SoA> dst(nBuckets);
+      for (int b = 0; b < nBuckets; b++) {
+        dst[b].reserve(counts[b]);
+      }
+      for (std::size_t i = 0; i < nPart; i++) {
+        dst[bucketId[i]].append(sortedParticles[i]);
+      }
+      for (const SoA& d : dst) {
+        g_sink += d.size();
+      }
+    });
 
     // =====================================================================
     // (6) MPI PACKING  (serialize position + weight into a byte send buffer)
@@ -1005,7 +1026,48 @@ main(int argc, char* argv[])
       packSoANT(packBuf, soaSorted);
       g_sink += packBuf[0];
     });
+    // Arena layout: if all SoA columns lived in ONE contiguous buffer, the pack is a
+    // SINGLE big memcpy -> glibc auto-selects non-temporal stores, no intrinsics. Build
+    // the arena once (untimed; it represents the storage), then time one memcpy.
+    std::vector<unsigned char> arena(bufBytes);
+    std::memcpy(arena.data(), soaSorted.positions().data(), nPart * sizeof(RealVect));
+    std::memcpy(arena.data() + nPart * sizeof(RealVect), soaSorted.weights().data(), nPart * sizeof(Real));
+    const double pArena = timeOp(fastReps, [&]() {
+      std::memcpy(packBuf, arena.data(), bufBytes); // one bulk copy, like vector<P>
+      g_sink += packBuf[0];
+    });
     std::free(packBuf);
+
+    // =====================================================================
+    // (10) CONTAINER COPY (the "copy particles from one list to another" case)
+    // Realistic copy = allocate destination + move data.
+    // =====================================================================
+    const double cList  = timeOp(buildReps, [&]() {
+      List<BenchParticle> d;
+      for (ListIterator<BenchParticle> lit(listSorted); lit.ok(); ++lit) {
+        d.append(lit());
+      }
+      g_sink += d.isEmpty() ? 0u : 1u;
+    });
+    const double cVec   = timeOp(buildReps, [&]() {
+      const std::vector<BenchParticle> d(sortedParticles); // bulk copy ctor
+      g_sink += d.size();
+    });
+    const double cSoA   = timeOp(buildReps, [&]() {
+      SoA   d;
+      auto& dp = d.column<&BenchParticle::m_position>();
+      auto& dw = d.column<&BenchParticle::m_weight>();
+      dp.resize(nPart);
+      dw.resize(nPart);
+      std::memcpy(dp.data(), soaSorted.positions().data(), nPart * sizeof(RealVect)); // per-column
+      std::memcpy(dw.data(), soaSorted.weights().data(), nPart * sizeof(Real));
+      g_sink += d.size();
+    });
+    const double cArena = timeOp(buildReps, [&]() {
+      std::vector<unsigned char> d(bufBytes);
+      std::memcpy(d.data(), arena.data(), bufBytes); // arena SoA: one bulk copy
+      g_sink += d[0];
+    });
 
     // =====================================================================
     // Mover containers (position + velocity), shared by (7) and (8).
@@ -1209,21 +1271,23 @@ main(int argc, char* argv[])
     pout() << "    vs List: vector<P> " << bList / bVec << "x, SoA " << bList / bSoA << "x" << endl;
 
     pout() << "  (5) REMAP (scatter into " << nBuckets << " buckets)" << endl;
-    row("List     ", rList);
-    row("vector<P>", rVec);
-    row("SoA      ", rSoA);
-    pout() << "    vs List: vector<P> " << rList / rVec << "x, SoA " << rList / rSoA << "x" << endl;
+    row("List              ", rList);
+    row("vector<P>         ", rVec);
+    row("SoA (naive append)", rSoA);
+    row("SoA (two-pass)    ", rSoA2);
+    pout() << "    vs List: vector<P> " << rList / rVec << "x, SoA " << rList / rSoA << "x, SoA-2pass " << rList / rSoA2
+           << "x; SoA-2pass vs vector<P>: " << rVec / rSoA2 << "x" << endl;
 
     pout() << "  (6) MPI PACKING (serialize " << s_bytesPerParticle << " B/particle to send buffer)" << endl;
-    row("List          (per-particle)   ", pList);
-    row("vector<P>     (1 bulk memcpy)  ", pVec);
-    row("vector<P>     (split 2 memcpy) ", pVecSplit);
+    row("List          (per-particle)     ", pList);
+    row("vector<P>     (1 bulk memcpy)    ", pVec);
+    row("vector<P>     (split 2 memcpy)   ", pVecSplit);
     row("SoA           (per-column memcpy)", pSoA);
-    row("SoA           (per-column NT)  ", pSoANT);
+    row("SoA           (per-column NT)    ", pSoANT);
+    row("SoA arena     (1 memcpy, no intr)", pArena);
     pout() << "    vs List: vector<P> " << pList / pVec << "x, SoA " << pList / pSoA << "x, SoA-NT " << pList / pSoANT
-           << "x" << endl;
-    pout() << "    split-vs-single vector<P>: " << pVec / pVecSplit << "x; NT-vs-plain SoA: " << pSoA / pSoANT << "x"
-           << endl;
+           << "x, SoA-arena " << pList / pArena << "x" << endl;
+    pout() << "    NT-vs-plain SoA: " << pSoA / pSoANT << "x; arena-vs-plain SoA: " << pSoA / pArena << "x" << endl;
 
     pout() << "  (7) VECTOR-FIELD INTERPOLATION (3-comp FArrayBox -> particle RealVect)" << endl;
     row("List     ", viList);
@@ -1252,6 +1316,14 @@ main(int argc, char* argv[])
     mrow("SoA            ", mSoA);
     pout() << "    vs List: vector<P> " << mList / mVec << "x, SoA " << mList / mSoA
            << "x; SoA vs vector<P>: " << mVec / mSoA << "x" << endl;
+
+    pout() << "  (10) CONTAINER COPY (copy whole container -> fresh container)" << endl;
+    row("List               ", cList);
+    row("vector<P>          ", cVec);
+    row("SoA (per-column)   ", cSoA);
+    row("SoA arena (1 memcpy)", cArena);
+    pout() << "    vs List: vector<P> " << cList / cVec << "x, SoA " << cList / cSoA << "x, SoA-arena "
+           << cList / cArena << "x; SoA-arena vs vector<P>: " << cVec / cArena << "x" << endl;
 
     pout() << "  (sink=" << g_sink << ")" << endl;
   }

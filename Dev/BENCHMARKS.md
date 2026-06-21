@@ -187,6 +187,35 @@ data-dependent gather and does not vectorize across particles, so per-component 
 would not help either. **SoA gives essentially nothing for vector-field interpolation —
 the benefit is hidden behind the const, cache-resident grid gather.**
 
+## No-intrinsics SoA variants for build / remap / copy / pack (1M particles)
+
+The per-column SoA loses to `vector<P>` on bulk operations because it does N separate
+operations (N allocations, N memcpies) where `vector<P>` does one. Three no-intrinsics
+mitigations were tested at 1M:
+
+| Operation | List | vector\<P\> | SoA (naive) | SoA fix | fix vs vector\<P\> |
+|---|---:|---:|---:|---:|---:|
+| Remap (-> 64 buckets) | 10.79 | 4.40 | 5.45 | **5.33** (two-pass reserve) | 0.82x |
+| MPI packing           |  3.29 | 1.35 | 5.97 | **1.35** (arena, 1 memcpy) | 1.00x |
+| Container copy        | 13.11 | 2.27 | 7.65 | **2.66** (arena, 1 memcpy) | 0.86x |
+
+(ns/particle. "arena" = all columns in one contiguous allocation, so the bulk op is a
+single `std::memcpy` that `glibc` auto-streams; no intrinsics.)
+
+**Findings:**
+- **Packing and copy are fully fixed by an *arena* layout** (single backing allocation):
+  one `memcpy` → `glibc` auto-NT → `vector<P>` parity (1.00x / 0.86x), **no intrinsics**.
+  This is the answer to "fast SoA pack/copy without intrinsics": store the columns in
+  one buffer so the bulk op is one big copy. (Equivalent to the explicit-NT result, but
+  with plain `memcpy`.) For a *full-container* send the arena even enables zero-copy
+  (the arena *is* the wire layout).
+- **Remap is *not* fixed by two-pass `reserve`** (5.45 -> 5.33, ~2%). The cost is not
+  reallocation churn — it is the inherent **per-particle scatter into N columns** (N
+  stores vs one struct store). So SoA scatter-remap stays ~1.2x slower than `vector<P>`.
+  **But it is still 2.0x FASTER than today's `List`** — so adopting SoA is a remap
+  *improvement* over the status quo, not a regression; it is only slower than the
+  hypothetical `vector<P>` alternative.
+
 ## KD-tree merge, in detail (whole-particle access — the AoS-favouring case?)
 
 Superparticle-style merge: 131,072 **7-field** particles (3 RealVect + 4 Real, ≈
@@ -252,12 +281,18 @@ local reduction) — not by layout or SIMD.
    rebuilt on gather, more complex linearization).
 3. **Deposition, interpolation**: grid-bound and layout-insensitive (`vector<P>` ≈ SoA,
    both ~1.05–1.3x over `List`), at both 64K and 1M.
-4. **MPI packing**: `vector<P>` (single bulk `memcpy`) is the robust winner for free.
-   SoA's per-column `memcpy` *tied* `vector<P>` at 64K but **regressed to slower-than
-   `List` (0.55x) at 1M** because `glibc` did not take the non-temporal store path —
-   **confirmed**: forcing NT stores makes SoA packing 4.1x faster, back to `vector<P>`
-   parity. So SoA can pack fast, but only with an NT-aware pack; `vector<P>` gets it for
-   free.
+4. **MPI packing / container copy**: `vector<P>` is fast for free. SoA's per-column
+   `memcpy` regressed at 1M (`glibc` skipped the non-temporal path). **Fixed two ways,
+   both giving `vector<P>` parity:** explicit NT stores (intrinsics), OR — no
+   intrinsics — an **arena layout** (all columns in one allocation) so the op is a
+   single big `memcpy` that `glibc` auto-streams. Pack: arena 1.00x vs `vector<P>`;
+   copy: 0.86x. So packing/copy are a *solved* problem for SoA, with no intrinsics
+   required, given an arena backing.
+4b. **Remap is the one residual SoA cost.** Two-pass `reserve` did **not** help (~2%):
+   the cost is the inherent per-particle scatter into N columns, not reallocation. SoA
+   scatter-remap stays ~1.2x slower than `vector<P>` — **but 2.0x FASTER than today's
+   `List`.** So SoA is a remap *improvement* over the status quo; it is only slower than
+   the `vector<P>` alternative.
 5. **Scale amplifies the contiguity win.** When data exceeds cache (1M particles), the
    memory-bound kernels (transform, Euler advance, scalar interpolation) pull *further*
    ahead of `List`, and SoA `vector<RealVect>` starts beating `List` on the Euler advance
@@ -276,6 +311,12 @@ local reduction) — not by layout or SIMD.
   the standard device layout — then it is close to mandatory regardless of these CPU
   numbers). Note per-component is the heavier variant (more columns, RealVect view
   reconstructed on gather, more involved linearization).
+- **If you choose SoA, use a single-allocation "arena" backing** (columns as offset
+  slices of one buffer). Measured benefits, no intrinsics: build = one allocation;
+  container copy and MPI pack become a single `memcpy` at `vector<P>` parity (and a
+  full-container send can be zero-copy — the arena *is* the wire layout). The remaining
+  gap is scatter-remap (~1.2x vs `vector<P>`, still 2x faster than `List`). Cost of
+  arena: growth/`resize` must reallocate + recompute offsets, so reserve to a capacity.
 - **Load imbalance** is orthogonal: a uniform per-rank speedup still helps the
   bottleneck rank; the lever for imbalance is load balancing, which `vector<P>`/SoA both
   make cheaper (vector more so via faster remap).
