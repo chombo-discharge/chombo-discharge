@@ -22,9 +22,11 @@
     6. MPI packing      (serialize position + weight into a byte buffer)
     7. vector-field interpolation (3-component FArrayBox -> particle RealVect)
     8. Euler advance    (x += v*dt; the canonical particle update)
+    9. KD-tree merge    (median-split by position, merge nearest pairs; whole-particle access)
 
   Grid: all-regular FArrayBox, 16 valid + 2 ghost cells per coordinate (20^3
-  allocated), single component. Particles: 16 per valid cell.
+  allocated), single component. Particles: 16 per valid cell (32/cell for the merge).
+  All builds are 3D (make DIM=3 ...; the output prints SpaceDim=3).
 */
 
 // Std includes
@@ -35,6 +37,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <immintrin.h>
+#include <numeric>
 #include <random>
 #include <vector>
 
@@ -95,6 +98,33 @@ namespace ChomboDischarge {
                                                     &MoverParticle::m_weight);
     static constexpr auto positionPtr = &MoverParticle::m_position;
     static constexpr auto weightPtr   = &MoverParticle::m_weight;
+  };
+
+  /** @brief A richer particle (~ItoParticle: 3 RealVect + 4 Real) for the merge benchmark. */
+  struct MergeParticle
+  {
+    RealVect m_position  = RealVect::Zero;
+    RealVect m_velocity  = RealVect::Zero;
+    RealVect m_oldPos    = RealVect::Zero;
+    Real     m_weight    = 0.0;
+    Real     m_mobility  = 0.0;
+    Real     m_diffusion = 0.0;
+    Real     m_energy    = 0.0;
+  };
+
+  /** @brief SoA layout for MergeParticle (7 columns). */
+  template <>
+  struct ParticleTraits<MergeParticle>
+  {
+    static constexpr auto columns     = std::make_tuple(&MergeParticle::m_position,
+                                                    &MergeParticle::m_velocity,
+                                                    &MergeParticle::m_oldPos,
+                                                    &MergeParticle::m_weight,
+                                                    &MergeParticle::m_mobility,
+                                                    &MergeParticle::m_diffusion,
+                                                    &MergeParticle::m_energy);
+    static constexpr auto positionPtr = &MergeParticle::m_position;
+    static constexpr auto weightPtr   = &MergeParticle::m_weight;
   };
 
 } // namespace ChomboDischarge
@@ -429,6 +459,130 @@ namespace {
   }
 
   // ---------------------------------------------------------------------------
+  // KD-tree merge: recursively median-split particle INDICES by position (this
+  // reads positions only), then merge each leaf's particles into one conserving
+  // total weight + center of mass (this gathers WHOLE particles). The split phase
+  // favours column storage (position-only); the leaf merge favours AoS (whole
+  // particle). a_get(k) returns the full MergeParticle for index entry k.
+  // ---------------------------------------------------------------------------
+  template <typename Get>
+  MergeParticle
+  mergeRange(const int a_lo, const int a_hi, Get&& a_get)
+  {
+    Real     W    = 0.0;
+    RealVect pos  = RealVect::Zero;
+    RealVect vel  = RealVect::Zero;
+    RealVect old  = RealVect::Zero;
+    Real     mob  = 0.0;
+    Real     dif  = 0.0;
+    Real     ener = 0.0;
+    for (int k = a_lo; k < a_hi; k++) {
+      const MergeParticle p = a_get(k);
+      const Real          w = p.m_weight;
+      W += w;
+      pos += w * p.m_position;
+      vel += w * p.m_velocity;
+      old += w * p.m_oldPos;
+      mob += w * p.m_mobility;
+      dif += w * p.m_diffusion;
+      ener += w * p.m_energy;
+    }
+    const Real    inv = 1.0 / W;
+    MergeParticle m;
+    m.m_weight    = W;
+    m.m_position  = pos * inv;
+    m.m_velocity  = vel * inv;
+    m.m_oldPos    = old * inv;
+    m.m_mobility  = mob * inv;
+    m.m_diffusion = dif * inv;
+    m.m_energy    = ener * inv;
+    return m;
+  }
+
+  template <typename PosDim, typename EmitLeaf>
+  void
+  kdMerge(std::vector<int>& a_idx,
+          const int         a_lo,
+          const int         a_hi,
+          const int         a_depth,
+          const int         a_leafSize,
+          PosDim&&          a_posDim,
+          EmitLeaf&&        a_emitLeaf)
+  {
+    if (a_hi - a_lo <= a_leafSize) {
+      a_emitLeaf(a_lo, a_hi);
+      return;
+    }
+    const int dim = a_depth % SpaceDim;
+    const int mid = (a_lo + a_hi) / 2;
+    std::nth_element(a_idx.begin() + a_lo, a_idx.begin() + mid, a_idx.begin() + a_hi, [&](int a, int b) {
+      return a_posDim(a, dim) < a_posDim(b, dim);
+    });
+    kdMerge(a_idx, a_lo, mid, a_depth + 1, a_leafSize, a_posDim, a_emitLeaf);
+    kdMerge(a_idx, mid, a_hi, a_depth + 1, a_leafSize, a_posDim, a_emitLeaf);
+  }
+
+  std::vector<MergeParticle>
+  mergeVectorKD(const std::vector<MergeParticle>& a_v, const int a_leafSize)
+  {
+    const int        n = static_cast<int>(a_v.size());
+    std::vector<int> idx(n);
+    std::iota(idx.begin(), idx.end(), 0);
+    std::vector<MergeParticle> out;
+    out.reserve(n / a_leafSize + 1);
+    kdMerge(
+      idx,
+      0,
+      n,
+      0,
+      a_leafSize,
+      [&](int a, int d) {
+        return a_v[a].m_position[d];
+      },
+      [&](int lo, int hi) {
+        out.push_back(mergeRange(lo, hi, [&](int k) {
+          return a_v[idx[k]];
+        }));
+      });
+    return out;
+  }
+
+  ParticleSoA<MergeParticle>
+  mergeSoAKD(ParticleSoA<MergeParticle>& a_soa, const int a_leafSize)
+  {
+    const int        n = static_cast<int>(a_soa.size());
+    std::vector<int> idx(n);
+    std::iota(idx.begin(), idx.end(), 0);
+    ParticleSoA<MergeParticle> out;
+    out.reserve(n / a_leafSize + 1);
+    kdMerge(
+      idx,
+      0,
+      n,
+      0,
+      a_leafSize,
+      [&](int a, int d) {
+        return a_soa.position(a)[d];
+      }, // position column only
+      [&](int lo, int hi) {
+        out.append(mergeRange(lo, hi, [&](int k) {
+          return a_soa.gather(idx[k]);
+        })); // gathers all 7 columns
+      });
+    return out;
+  }
+
+  std::vector<MergeParticle>
+  mergeListKD(const List<MergeParticle>& a_p, const int a_leafSize)
+  {
+    std::vector<MergeParticle> tmp; // realistic: List is copied into a contiguous buffer for KD work
+    for (ListIterator<MergeParticle> lit(a_p); lit.ok(); ++lit) {
+      tmp.push_back(lit());
+    }
+    return mergeVectorKD(tmp, a_leafSize);
+  }
+
+  // ---------------------------------------------------------------------------
   // Helpers.
   // ---------------------------------------------------------------------------
 
@@ -561,8 +715,8 @@ main(int argc, char* argv[])
     constexpr int nGhost    = 2;
     constexpr int ppc       = 16;
     constexpr int fastReps  = 200; // deposition / interpolation / transform
-    constexpr int buildReps = 50; // build / remap (each rep allocates)
-    constexpr int nBuckets  = 64; // remap destination patches
+    constexpr int buildReps = 50;  // build / remap (each rep allocates)
+    constexpr int nBuckets  = 64;  // remap destination patches
 
     const Box         valid(IntVect::Zero, (nCell - 1) * IntVect::Unit);
     const Box         grown  = grow(valid, nGhost);
@@ -929,6 +1083,80 @@ main(int argc, char* argv[])
     });
 
     // =====================================================================
+    // (9) KD-TREE MERGE  (32 particles/cell on the 16^3 grid; whole-particle access)
+    // =====================================================================
+    constexpr int     mergePpc  = 32;
+    constexpr int     leafSize  = 2; // merge nearest pairs
+    constexpr int     mergeReps = 30;
+    const std::size_t nMerge    = static_cast<std::size_t>(nCell) * nCell * nCell * mergePpc;
+
+    std::vector<MergeParticle> mergeSrc;
+    mergeSrc.reserve(nMerge);
+    for (int k = 0; k < nCell; k++) {
+      for (int j = 0; j < nCell; j++) {
+        for (int i = 0; i < nCell; i++) {
+          for (int p = 0; p < mergePpc; p++) {
+            const Real    ux = u(rng);
+            const Real    uy = u(rng);
+            const Real    uz = u(rng);
+            MergeParticle mp;
+            mp.m_position = probLo + RealVect(D_DECL(i + ux, j + uy, k + uz));
+            mp.m_weight   = 1.0 + u(rng); // non-uniform weights
+            mergeSrc.push_back(mp);
+          }
+        }
+      }
+    }
+
+    List<MergeParticle> mergeList;
+    for (const MergeParticle& p : mergeSrc) {
+      mergeList.append(p);
+    }
+    ParticleSoA<MergeParticle> mergeSoa;
+    mergeSoa.reserve(nMerge);
+    for (const MergeParticle& p : mergeSrc) {
+      mergeSoa.append(p);
+    }
+
+    // Correctness: merging conserves total weight and center of mass.
+    auto weightAndCom = [](const std::vector<MergeParticle>& a_v) {
+      Real     W   = 0.0;
+      RealVect com = RealVect::Zero;
+      for (const MergeParticle& p : a_v) {
+        W += p.m_weight;
+        com += p.m_weight * p.m_position;
+      }
+      com *= (1.0 / W);
+      return std::make_pair(W, com);
+    };
+    {
+      const auto                       before = weightAndCom(mergeSrc);
+      const std::vector<MergeParticle> merged = mergeVectorKD(mergeSrc, leafSize);
+      const auto                       after  = weightAndCom(merged);
+      if (std::abs(after.first - before.first) > 1.E-6 * before.first) {
+        MayDay::Abort("benchmark: KD merge did not conserve weight");
+      }
+      for (int d = 0; d < SpaceDim; d++) {
+        if (std::abs(after.second[d] - before.second[d]) > 1.E-9 * (1.0 + std::abs(before.second[d]))) {
+          MayDay::Abort("benchmark: KD merge did not conserve center of mass");
+        }
+      }
+    }
+
+    const double mList = timeOp(mergeReps, [&]() {
+      const std::vector<MergeParticle> out = mergeListKD(mergeList, leafSize);
+      g_sink += out.size();
+    });
+    const double mVec  = timeOp(mergeReps, [&]() {
+      const std::vector<MergeParticle> out = mergeVectorKD(mergeSrc, leafSize);
+      g_sink += out.size();
+    });
+    const double mSoA  = timeOp(mergeReps, [&]() {
+      const ParticleSoA<MergeParticle> out = mergeSoAKD(mergeSoa, leafSize);
+      g_sink += out.size();
+    });
+
+    // =====================================================================
     // Report
     // =====================================================================
     auto row = [&](const char* a_name, const double a_ns) {
@@ -1012,6 +1240,18 @@ main(int argc, char* argv[])
            << aList / aPC << "x" << endl;
     pout() << "    SoA(RealVect) vs vector<P>: " << aVec / aSoA << "x; per-component vs SoA(RealVect): " << aSoA / aPC
            << "x" << endl;
+
+    pout() << "  (9) KD-TREE MERGE (" << nMerge << " 7-field particles, " << mergePpc << "/cell, leaf=" << leafSize
+           << ", reps=" << mergeReps << ")" << endl;
+    auto mrow = [&](const char* a_name, const double a_ns) {
+      pout() << "    " << a_name << ": " << a_ns / 1.0e6 << " ms, " << a_ns / static_cast<double>(nMerge)
+             << " ns/particle" << endl;
+    };
+    mrow("List (copy+KD) ", mList);
+    mrow("vector<P> AoS  ", mVec);
+    mrow("SoA            ", mSoA);
+    pout() << "    vs List: vector<P> " << mList / mVec << "x, SoA " << mList / mSoA
+           << "x; SoA vs vector<P>: " << mVec / mSoA << "x" << endl;
 
     pout() << "  (sink=" << g_sink << ")" << endl;
   }

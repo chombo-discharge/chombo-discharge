@@ -187,6 +187,33 @@ data-dependent gather and does not vectorize across particles, so per-component 
 would not help either. **SoA gives essentially nothing for vector-field interpolation —
 the benefit is hidden behind the const, cache-resident grid gather.**
 
+## KD-tree merge, in detail (whole-particle access — the AoS-favouring case?)
+
+Superparticle-style merge: 131,072 **7-field** particles (3 RealVect + 4 Real, ≈
+`ItoParticle`; 32/cell on the 16^3 grid). A KD-tree recursively median-splits the
+particle **indices by position** (this reads positions only), then merges each
+nearest-pair leaf into one particle conserving total weight + center of mass (this
+**gathers whole particles**). Verified weight- and COM-conserving.
+
+| Storage | ns/p | vs List | vs vector\<P\> |
+|---|---:|---:|---:|
+| List (copy to vector + KD) | 275 | 1.0x | — |
+| vector\<P\> AoS            | 184 | 1.49x | — |
+| SoA                        | 179 | 1.54x | **1.03x** |
+
+**SoA ties `vector<P>` (1.03x) — it does *not* lose, contrary to the "whole-particle
+access favours AoS" expectation.** Reason: the cost is dominated by the O(N log N)
+median-partitioning (`nth_element`), which reads **position only** → SoA streams just
+the 3 MB position column, while `vector<P>` drags the whole 104-byte particle through
+cache to use 24 bytes of it. That position-only phase *favours* SoA and outweighs the
+leaf-merge phase (the O(N) whole-particle `gather`, which does favour AoS). With fine
+pairwise merging (leaf=2) the partition dominates ~17:1, so SoA stays competitive.
+
+Caveat: this is specific to a **sort/partition-dominated** merge. A merge that is pure
+whole-particle random access (no position-only sort — e.g. fixed-bucket gather/merge)
+would shift toward AoS, since SoA `gather` touches all 7 columns (7 cache lines) vs one
+struct. But for the canonical KD merge, **AoS has no advantage**.
+
 ## Why deposition/interpolation don't benefit (assembly)
 
 `depositSoA`/`depositList` compile to **entirely scalar** FP (`vmulsd`, `vfmadd*sd`,
@@ -206,9 +233,15 @@ local reduction) — not by layout or SIMD.
 ## Key conclusions
 
 1. **The big, cheap win is escaping the linked list (`List` → contiguous), not the SoA
-   column split.** `vector<P>` matches or *beats* `ParticleSoA` on 5 of 6 operations,
-   including the allocation-heavy ones (build 6.8x and beats SoA; remap 1.9x and beats
-   SoA — SoA loses there to multi-column reallocation churn).
+   column split.** `vector<P>` matches or *beats* `ParticleSoA` on the non-SIMD
+   operations. The only place `vector<P>` *structurally* beats SoA is the
+   **allocation-churn** ops (build 6.8x and beats SoA; remap 1.9x and beats SoA — SoA
+   pays for N column buffers instead of one).
+1b. **The whole-particle-access concern did not materialize for KD merge.** SoA *ties*
+   `vector<P>` (1.03x) on the KD-tree merge, because the dominant cost is the
+   position-only median-partition (which favours SoA's single column) — not the
+   whole-particle leaf gather. AoS only wins whole-particle access if the algorithm is
+   gather-dominated *without* a position-only sort.
 2. **`ParticleSoA` uniquely wins only on SIMD per-particle field kernels — and only
    with per-component columns.** For the canonical Euler advance `x += v·dt`, the
    per-field `vector<RealVect>` SoA is **no faster than `List`** (it stays scalar);
