@@ -359,9 +359,6 @@ protected:
     const RealVect cicWidth = 1 * a_widthScale * RealVect::Unit;
     const RealVect tscWidth = 2 * a_widthScale * RealVect::Unit;
 
-    const Box cicBox(-1 * IntVect::Unit, 1 * IntVect::Unit);
-    const Box tscBox(-2 * IntVect::Unit, 2 * IntVect::Unit);
-
     Real ngpFactor = invVol;
     Real cicFactor = invVol;
     Real tscFactor = invVol;
@@ -389,7 +386,6 @@ protected:
                                  a_comp,
                                  a_particles.position(i),
                                  cicWidth,
-                                 cicBox,
                                  cicFactor,
                                  strength,
                                  a_numComp,
@@ -404,7 +400,6 @@ protected:
                                  a_comp,
                                  a_particles.position(i),
                                  tscWidth,
-                                 tscBox,
                                  tscFactor,
                                  strength,
                                  a_numComp,
@@ -551,12 +546,36 @@ protected:
   }
 
   /**
+    @brief Cell box that exactly covers the support of a cloud of the given per-direction width.
+    @details Anchored at the cloud's lower/upper edge cells, so the iterated box contains ONLY the
+    cells the cloud can overlap (cells outside it have zero weight and would be wasted scatter
+    updates). For the standard widths this is 2 cells/dir (CIC) or 3 (TSC), versus the
+    over-provisioned centered 3^D/5^D box; the weight clamp still zeroes any boundary cell, so the
+    deposited field is bit-identical.
+    @param[in] a_position      Particle position.
+    @param[in] a_particleWidth Cloud width per direction (in cells).
+    @return Cell box covering the cloud support.
+  */
+  inline Box
+  cloudBox(const RealVect& a_position, const RealVect& a_particleWidth) const noexcept
+  {
+    RealVect lo;
+    RealVect hi;
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      const Real halfWidth = 0.5 * a_particleWidth[dir] * m_dx[dir];
+      lo[dir]              = a_position[dir] - halfWidth;
+      hi[dir]              = a_position[dir] + halfWidth;
+    }
+    return Box(ParticleOps::getParticleCellIndex(lo, m_probLo, m_dx),
+               ParticleOps::getParticleCellIndex(hi, m_probLo, m_dx));
+  }
+
+  /**
     @brief CIC deposition of one particle.
     @param[in,out] a_rho           Mesh data.
     @param[in]     a_comp          First destination mesh component.
     @param[in]     a_position      Particle position.
     @param[in]     a_particleWidth Particle width (relative to grid resolution).
-    @param[in]     a_particleBox   Box guaranteed to contain the particle cloud.
     @param[in]     a_volumeFactor  Volume factor.
     @param[in]     a_strength      Per-component strength to deposit.
     @param[in]     a_numComp       Number of components.
@@ -567,7 +586,6 @@ protected:
                      const int       a_comp,
                      const RealVect& a_position,
                      const RealVect& a_particleWidth,
-                     const Box&      a_particleBox,
                      const Real&     a_volumeFactor,
                      const Real*     a_strength,
                      const int&      a_numComp,
@@ -579,7 +597,8 @@ protected:
 
     FArrayBox& rho = a_rho.getFArrayBox();
 
-    if (m_ebisbox.isIrregular(particleIV) && a_forceIrregNGP) {
+    // forceIrregNGP first so the common (false) case short-circuits before the EBISBox query.
+    if (a_forceIrregNGP && m_ebisbox.isIrregular(particleIV)) {
       for (int comp = 0; comp < a_numComp; comp++) {
         rho(particleIV, a_comp + comp) += a_strength[comp] * a_volumeFactor;
       }
@@ -601,9 +620,7 @@ protected:
         }
       };
 
-      const Box particleBox = a_particleBox + particleIV;
-
-      BoxLoops::loop<D_DECL(1, 1, 1)>(particleBox, cicKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(this->cloudBox(a_position, a_particleWidth), cicKernel);
     }
   }
 
@@ -613,7 +630,6 @@ protected:
     @param[in]     a_comp          First destination mesh component.
     @param[in]     a_position      Particle position.
     @param[in]     a_particleWidth Particle width (relative to grid resolution).
-    @param[in]     a_particleBox   Box guaranteed to contain the particle cloud.
     @param[in]     a_volumeFactor  Volume factor.
     @param[in]     a_strength      Per-component strength to deposit.
     @param[in]     a_numComp       Number of components.
@@ -624,7 +640,6 @@ protected:
                      const int       a_comp,
                      const RealVect& a_position,
                      const RealVect& a_particleWidth,
-                     const Box&      a_particleBox,
                      const Real&     a_volumeFactor,
                      const Real*     a_strength,
                      const int&      a_numComp,
@@ -636,7 +651,8 @@ protected:
 
     FArrayBox& rho = a_rho.getFArrayBox();
 
-    if (m_ebisbox.isIrregular(particleIV) && a_forceIrregNGP) {
+    // forceIrregNGP first so the common (false) case short-circuits before the EBISBox query.
+    if (a_forceIrregNGP && m_ebisbox.isIrregular(particleIV)) {
       for (int comp = 0; comp < a_numComp; comp++) {
         rho(particleIV, a_comp + comp) += a_strength[comp] * a_volumeFactor;
       }
@@ -667,9 +683,7 @@ protected:
         }
       };
 
-      const Box particleBox = a_particleBox + particleIV;
-
-      BoxLoops::loop<D_DECL(1, 1, 1)>(particleBox, tscKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(this->cloudBox(a_position, a_particleWidth), tscKernel);
     }
   }
 
