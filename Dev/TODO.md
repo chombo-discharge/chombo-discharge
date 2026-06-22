@@ -187,6 +187,15 @@ production code under `Source/`, `Physics/`, or `Geometries/` yet. The point of
       `numCells == box cells`, the CSR ranges partition the leaf, and every particle in cell c's
       range maps (Fortran index) to c; count conserved; add-after-sort clears the flag. 2D+3D,
       single-rank and `mpirun -np 2/4`.
+- [x] **AoS-vs-SoA parity harness** (`Dev/TestRemapDepositParity/`): injects the SAME N=2000
+      particles into production `ParticleContainer<PointParticle>` + `EBAMRParticleMesh` and into
+      `ParticleContainerSoA` + `EBAMRParticleMeshSoA`, remaps both, then checks (A) the per-box
+      particle SETS are bit-for-bit identical after a canonical sort (proves identical remap routing),
+      and (B) the deposited meshes agree (asserted <= 1e-12*wTotal). Result: **max|AoS-SoA| = 0
+      exactly** (bit-identical, not just roundoff) for NGP/Interp, CIC/Interp, CIC/Halo — the per-box
+      particle order also matches, so FP accumulation order is identical. Passes 2D+3D, single-rank
+      and `mpirun -np 2/4`. (TSC excluded: the SoA carries the partition-of-unity fix production
+      lacks; Real=double build so AoS/SoA store positions identically.)
 - **Feature parity reached.** The Dev SoA stack (`ParticleSoA` leaf, `EBParticleMeshSoA`,
       `ParticleContainerSoA`, `EBAMRParticleMeshSoA`) now matches production
       `ParticleContainer`/`EBAMRParticleMesh` functionality: storage/accessors, remap, regrid,
