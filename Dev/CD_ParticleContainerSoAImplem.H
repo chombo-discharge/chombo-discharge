@@ -22,6 +22,10 @@
 #include <utility>
 #include <vector>
 
+// Chombo includes
+#include <CH_Timer.H>
+#include <CH_assert.H>
+
 // Our includes
 #include <CD_ParticleContainerSoA.H>
 #include <CD_NamespaceHeader.H>
@@ -59,6 +63,8 @@ inline typename ParticleContainerSoA<P, Traits>::MoverPool
 ParticleContainerSoA<P, Traits>::gatherToPool(const AMRParticlesSoA<P, Traits>& a_source,
                                               const Vector<DisjointBoxLayout>&  a_sourceGrids)
 {
+  CH_TIME("ParticleContainerSoA::gatherToPool");
+
   m_numOutcastLocal = 0;
 
   MoverPool pool(numProc());
@@ -90,6 +96,8 @@ template <typename P, typename Traits>
 inline void
 ParticleContainerSoA<P, Traits>::distributeFromPool(MoverPool& a_pool)
 {
+  CH_TIME("ParticleContainerSoA::distributeFromPool");
+
   const int myRank   = procID();
   const int numRanks = numProc();
 
@@ -206,6 +214,10 @@ template <typename P, typename Traits>
 inline void
 ParticleContainerSoA<P, Traits>::remap()
 {
+  CH_TIME("ParticleContainerSoA::remap");
+
+  CH_assert(m_isDefined);
+
   MoverPool pool = this->gatherToPool(m_particles, m_grids); // pool a copy of every valid particle
   this->clearParticles();                                    // empty the holders (capacity retained)
   this->distributeFromPool(pool);                            // re-assign each to its owner
@@ -217,6 +229,10 @@ template <typename P, typename Traits>
 inline void
 ParticleContainerSoA<P, Traits>::preRegrid()
 {
+  CH_TIME("ParticleContainerSoA::preRegrid");
+
+  CH_assert(m_isDefined);
+
   // Share the current holders (RefCountedPtr) so regrid() can rebuild m_particles while the old
   // particles stay alive in the cache. Remember the old layout for iterating the cache.
   m_cacheParticles = m_particles;
@@ -232,6 +248,10 @@ ParticleContainerSoA<P, Traits>::regrid(const Vector<DisjointBoxLayout>& a_grids
                                         const int                        a_blockingFactor,
                                         const int                        a_newFinestLevel)
 {
+  CH_TIME("ParticleContainerSoA::regrid");
+
+  CH_assert(m_isDefined);
+
   // ---- adopt the new layout ----
   m_grids          = a_grids;
   m_domains        = a_domains;
@@ -274,6 +294,8 @@ template <typename P, typename Traits>
 inline void
 ParticleContainerSoA<P, Traits>::setupGrownGrids()
 {
+  CH_TIME("ParticleContainerSoA::setupGrownGrids");
+
   m_grownGrids.resize(m_finestLevel + 1);
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl = m_grids[lvl];
@@ -294,6 +316,10 @@ template <typename P, typename Traits>
 inline void
 ParticleContainerSoA<P, Traits>::copyMaskParticles(const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_mask)
 {
+  CH_TIME("ParticleContainerSoA::copyMaskParticles(amr)");
+
+  CH_assert(m_isDefined);
+
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     if (!a_mask[lvl].isNull()) {
       this->copyMaskParticles(lvl, *a_mask[lvl]);
@@ -305,6 +331,10 @@ template <typename P, typename Traits>
 inline void
 ParticleContainerSoA<P, Traits>::copyMaskParticles(const int a_level, const LevelData<BaseFab<bool>>& a_mask)
 {
+  CH_TIME("ParticleContainerSoA::copyMaskParticles(level)");
+
+  CH_assert(m_isDefined);
+
   LevelParticles&       maskLevel = *m_maskParticles[a_level];
   const LevelParticles& srcLevel  = *m_particles[a_level];
 
@@ -335,6 +365,10 @@ template <typename P, typename Traits>
 inline void
 ParticleContainerSoA<P, Traits>::transferMaskParticles(const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_mask)
 {
+  CH_TIME("ParticleContainerSoA::transferMaskParticles(amr)");
+
+  CH_assert(m_isDefined);
+
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     if (!a_mask[lvl].isNull()) {
       this->transferMaskParticles(lvl, *a_mask[lvl]);
@@ -346,6 +380,10 @@ template <typename P, typename Traits>
 inline void
 ParticleContainerSoA<P, Traits>::transferMaskParticles(const int a_level, const LevelData<BaseFab<bool>>& a_mask)
 {
+  CH_TIME("ParticleContainerSoA::transferMaskParticles(level)");
+
+  CH_assert(m_isDefined);
+
   LevelParticles& maskLevel = *m_maskParticles[a_level];
   LevelParticles& srcLevel  = *m_particles[a_level];
 

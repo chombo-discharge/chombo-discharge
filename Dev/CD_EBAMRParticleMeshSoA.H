@@ -42,6 +42,7 @@
 #include <map>
 
 // Chombo includes
+#include <CH_Timer.H>
 #include <RefCountedPtr.H>
 #include <Vector.H>
 #include <Copier.H>
@@ -118,6 +119,12 @@ public:
          const int                                 a_ghost,
          const int                                 a_finestLevel)
   {
+    CH_TIME("EBAMRParticleMeshSoA::define");
+
+    CH_assert(a_eblgs.size() > a_finestLevel);
+    CH_assert(a_refRat.size() > a_finestLevel);
+    CH_assert(a_dx.size() > a_finestLevel);
+
     m_eblgs       = a_eblgs;
     m_refRat      = a_refRat;
     m_dx          = a_dx;
@@ -160,6 +167,8 @@ public:
               const DepositionType             a_interpType,
               const bool                       a_forceIrregNGP) const
   {
+    CH_TIME("EBAMRParticleMeshSoA::interpolate");
+
     CH_assert(m_isDefined);
 
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
@@ -199,6 +208,10 @@ public:
                 const CoarseFineDeposition             a_coarseFineDeposition,
                 const bool                             a_forceIrregNGP)
   {
+    CH_TIME("EBAMRParticleMeshSoA::depositWeight");
+
+    CH_assert(m_isDefined);
+
     const auto patch =
       [&](const EBParticleMeshSoA& a_interp, EBCellFAB& a_rho, const auto& a_soa, const Real a_widthScale) {
         a_interp.depositWeight(a_rho, a_soa, a_depositionType, a_widthScale, a_forceIrregNGP);
@@ -252,6 +265,10 @@ public:
           const CoarseFineDeposition             a_coarseFineDeposition,
           const bool                             a_forceIrregNGP)
   {
+    CH_TIME("EBAMRParticleMeshSoA::deposit");
+
+    CH_assert(m_isDefined);
+
     const auto patch =
       [&](const EBParticleMeshSoA& a_interp, EBCellFAB& a_rho, const auto& a_soa, const Real a_widthScale) {
         a_interp.template deposit<Members...>(a_rho, a_soa, a_depositionType, a_widthScale, a_forceIrregNGP);
@@ -372,6 +389,8 @@ protected:
   void
   defineEBParticleMesh()
   {
+    CH_TIME("EBAMRParticleMeshSoA::defineEBParticleMesh");
+
     m_ebParticleMesh.resize(1 + m_finestLevel);
     m_ebParticleMeshFiCo.resize(1 + m_finestLevel);
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
@@ -413,6 +432,8 @@ protected:
   void
   defineLevelMotion()
   {
+    CH_TIME("EBAMRParticleMeshSoA::defineLevelMotion");
+
     m_levelCopiers.resize(1 + m_finestLevel);
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
       const EBLevelGrid&       eblg = *m_eblgs[lvl];
@@ -428,6 +449,8 @@ protected:
   void
   defineCoarseFineMotion()
   {
+    CH_TIME("EBAMRParticleMeshSoA::defineCoarseFineMotion");
+
     m_coarseFinePM.resize(1 + m_finestLevel);
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
       if (lvl > 0) {
@@ -459,6 +482,8 @@ protected:
                     const int        a_numComp,
                     PatchDeposit     a_patchDeposit) const
   {
+    CH_TIME("EBAMRParticleMeshSoA::depositInterpCore");
+
     CH_assert(m_isDefined);
     CH_assert(a_meshData[0]->nComp() == a_numComp);
 
@@ -503,6 +528,8 @@ protected:
   void
   defineOuterHaloMasks()
   {
+    CH_TIME("EBAMRParticleMeshSoA::defineOuterHaloMasks");
+
     constexpr int comp    = 0;
     constexpr int numComp = 1;
 
@@ -603,6 +630,8 @@ protected:
   void
   depositHaloCore(EBAMRCellData& a_meshData, const Container& a_particles, PatchDeposit a_patchDeposit) const
   {
+    CH_TIME("EBAMRParticleMeshSoA::depositHaloCore");
+
     CH_assert(m_isDefined);
     CH_assert(a_meshData[0]->nComp() == NCOMP);
 
@@ -683,6 +712,8 @@ protected:
                      PatchDeposit     a_patch,
                      PatchDepositNGP  a_patchNGP) const
   {
+    CH_TIME("EBAMRParticleMeshSoA::depositHaloNGPCore");
+
     CH_assert(m_isDefined);
     CH_assert(a_meshData[0]->nComp() == NCOMP);
 
@@ -759,6 +790,8 @@ protected:
   void
   defineTransitionMasks()
   {
+    CH_TIME("EBAMRParticleMeshSoA::defineTransitionMasks");
+
     constexpr int  comp    = 0;
     constexpr int  numComp = 1;
     const Interval interv  = Interval(comp, comp);
@@ -839,6 +872,8 @@ protected:
   void
   transferMaskParticlesTransition(Container& a_particles, const DepositionType a_depositionType) const
   {
+    CH_TIME("EBAMRParticleMeshSoA::transferMaskParticlesTransition");
+
     if (a_depositionType == DepositionType::NGP) {
       return;
     }
@@ -903,6 +938,8 @@ protected:
                         const DepositionType a_depositionType,
                         PatchDeposit         a_patch) const
   {
+    CH_TIME("EBAMRParticleMeshSoA::depositTransitionCore");
+
     CH_assert(m_isDefined);
     CH_assert(a_meshData[0]->nComp() == NCOMP);
 

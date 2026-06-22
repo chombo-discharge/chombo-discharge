@@ -51,6 +51,7 @@
 #include <utility>
 
 // Chombo includes
+#include <CH_Timer.H>
 #include <ProblemDomain.H>
 #include <EBISBox.H>
 #include <EBCellFAB.H>
@@ -109,6 +110,8 @@ public:
          const RealVect&      a_dx,
          const RealVect&      a_probLo)
   {
+    CH_TIME("EBParticleMeshSoA::define");
+
     m_verbose = false;
     m_domain  = a_domain;
     m_region  = a_region;
@@ -139,6 +142,8 @@ public:
                 const Real                    a_widthScale,
                 const bool                    a_forceIrregNGP) const
   {
+    CH_TIME("EBParticleMeshSoA::depositWeight");
+
     this->depositCore(a_meshData,
                       a_comp,
                       a_particles,
@@ -169,6 +174,8 @@ public:
                 const Real                    a_widthScale,
                 const bool                    a_forceIrregNGP) const
   {
+    CH_TIME("EBParticleMeshSoA::depositWeight");
+
     this->depositWeight(a_meshData, 0, a_particles, a_depositionType, a_widthScale, a_forceIrregNGP);
   }
 
@@ -195,6 +202,8 @@ public:
           const Real                    a_widthScale,
           const bool                    a_forceIrregNGP) const
   {
+    CH_TIME("EBParticleMeshSoA::deposit");
+
     static_assert(sizeof...(Members) == 1 || sizeof...(Members) == SpaceDim,
                   "deposit selects either one scalar column or SpaceDim vector-component columns");
 
@@ -230,6 +239,8 @@ public:
           const Real                    a_widthScale,
           const bool                    a_forceIrregNGP) const
   {
+    CH_TIME("EBParticleMeshSoA::deposit");
+
     this->deposit<Members...>(a_meshData, 0, a_particles, a_depositionType, a_widthScale, a_forceIrregNGP);
   }
 
@@ -254,6 +265,8 @@ public:
               const DepositionType    a_interpType,
               const bool              a_forceIrregNGP) const
   {
+    CH_TIME("EBParticleMeshSoA::interpolate");
+
     static_assert(sizeof...(Members) == 1 || sizeof...(Members) == SpaceDim,
                   "interpolate targets either one scalar column or SpaceDim vector-component columns");
 
@@ -289,6 +302,8 @@ public:
               const DepositionType    a_interpType,
               const bool              a_forceIrregNGP) const
   {
+    CH_TIME("EBParticleMeshSoA::interpolate");
+
     this->interpolate<Members...>(a_particles, a_meshData, 0, a_interpType, a_forceIrregNGP);
   }
 
@@ -349,6 +364,8 @@ protected:
               const bool                    a_forceIrregNGP,
               StrengthFn                    a_gather) const
   {
+    CH_TIME("EBParticleMeshSoA::depositCore");
+
     CH_assert(a_meshData.nComp() >= a_comp + a_numComp);
 
     Real invVol = 1.0;
@@ -438,6 +455,8 @@ protected:
                   const bool              a_forceIrregNGP,
                   ScatterFn               a_scatter) const
   {
+    CH_TIME("EBParticleMeshSoA::interpolateCore");
+
     CH_assert(a_meshData.nComp() >= a_comp + a_numComp);
 
     // validBox is where the chosen scheme has enough cells; gatherBox is the read stencil.

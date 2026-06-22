@@ -73,7 +73,9 @@ inline void
 ParticleSoA<P, Traits>::append(const RealVect& a_position, const double a_weight, const P& a_payload)
 {
   this->growIfFull();
-  this->setPosition(m_size, a_position);
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    this->positionColumn(dir)[m_size] = a_position[dir]; // write the reserved slot directly (m_size not yet bumped)
+  }
   this->template columnByIndex<s_weightCol>()[m_size] = a_weight;
   this->template columnByIndex<s_idCol>()[m_size]     = s_invalidID;
   this->template columnByIndex<s_rankCol>()[m_size]   = static_cast<RankID>(-1);
@@ -86,6 +88,8 @@ template <typename P, typename Traits>
 inline void
 ParticleSoA<P, Traits>::linearizeParticle(void* a_buffer, const std::size_t a_index) const noexcept
 {
+  CH_assert(a_index < m_size);
+
   auto* p = static_cast<unsigned char*>(a_buffer);
   this->linearizeImpl(p, a_index, std::make_index_sequence<s_numColumns>{});
 }
@@ -105,6 +109,8 @@ template <typename P, typename Traits>
 inline void
 ParticleSoA<P, Traits>::h5LinearizeParticle(void* a_buffer, const std::size_t a_index) const noexcept
 {
+  CH_assert(a_index < m_size);
+
   auto* p = static_cast<unsigned char*>(a_buffer);
   for (int dir = 0; dir < SpaceDim; dir++) {
     detail::pushBytes(p, this->positionColumn(dir)[a_index]);
@@ -139,6 +145,8 @@ template <typename P, typename Traits>
 inline void
 ParticleSoA<P, Traits>::sortByCell(const Box& a_box, const RealVect& a_dx, const RealVect& a_probLo)
 {
+  // No CH_TIME here: this leaf container is the per-particle hot path; timing of bulk
+  // operations like this one is done by the container/mesh drivers above.
   const std::size_t nCells  = a_box.numPts();
   const IntVect     loEnd   = a_box.smallEnd();
   const IntVect     boxSize = a_box.size();

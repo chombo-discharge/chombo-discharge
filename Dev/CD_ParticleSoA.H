@@ -789,6 +789,8 @@ public:
   P
   gather(const std::size_t a_index) const
   {
+    CH_assert(a_index < m_size);
+
     return this->gatherPayload(a_index, std::make_index_sequence<s_numPayloadColumns>{});
   }
 
@@ -799,6 +801,8 @@ public:
   void
   remove(const std::size_t a_index) noexcept
   {
+    CH_assert(a_index < m_size);
+
     this->removeImpl(a_index, std::make_index_sequence<s_numColumns>{});
     m_size--;
     m_sorted = false;
@@ -869,6 +873,8 @@ public:
   auto&
   get(const std::size_t a_index) noexcept
   {
+    CH_assert(a_index < m_size);
+
     return this->template columnByIndex<columnIndex(Member)>()[a_index];
   }
 
@@ -882,6 +888,8 @@ public:
   const auto&
   get(const std::size_t a_index) const noexcept
   {
+    CH_assert(a_index < m_size);
+
     return this->template columnByIndex<columnIndex(Member)>()[a_index];
   }
 
@@ -942,6 +950,8 @@ public:
   RealVect
   position(const std::size_t a_index) const noexcept
   {
+    CH_assert(a_index < m_size);
+
     RealVect x;
     for (int dir = 0; dir < SpaceDim; dir++) {
       x[dir] = this->positionColumn(dir)[a_index];
@@ -957,6 +967,8 @@ public:
   void
   setPosition(const std::size_t a_index, const RealVect& a_position) noexcept
   {
+    CH_assert(a_index < m_size);
+
     for (int dir = 0; dir < SpaceDim; dir++) {
       this->positionColumn(dir)[a_index] = a_position[dir];
     }
@@ -970,6 +982,8 @@ public:
   double&
   weight(const std::size_t a_index) noexcept
   {
+    CH_assert(a_index < m_size);
+
     return this->template columnByIndex<s_weightCol>()[a_index];
   }
 
@@ -981,6 +995,8 @@ public:
   const double&
   weight(const std::size_t a_index) const noexcept
   {
+    CH_assert(a_index < m_size);
+
     return this->template columnByIndex<s_weightCol>()[a_index];
   }
 
@@ -992,6 +1008,8 @@ public:
   ParticleID&
   particleID(const std::size_t a_index) noexcept
   {
+    CH_assert(a_index < m_size);
+
     return this->template columnByIndex<s_idCol>()[a_index];
   }
 
@@ -1003,6 +1021,8 @@ public:
   const ParticleID&
   particleID(const std::size_t a_index) const noexcept
   {
+    CH_assert(a_index < m_size);
+
     return this->template columnByIndex<s_idCol>()[a_index];
   }
 
@@ -1014,6 +1034,8 @@ public:
   RankID&
   rankID(const std::size_t a_index) noexcept
   {
+    CH_assert(a_index < m_size);
+
     return this->template columnByIndex<s_rankCol>()[a_index];
   }
 
@@ -1025,6 +1047,8 @@ public:
   const RankID&
   rankID(const std::size_t a_index) const noexcept
   {
+    CH_assert(a_index < m_size);
+
     return this->template columnByIndex<s_rankCol>()[a_index];
   }
 
@@ -1179,6 +1203,9 @@ public:
   std::size_t
   cellStart(const std::size_t a_cell) const noexcept
   {
+    CH_assert(m_sorted);
+    CH_assert(a_cell <= this->numCells());
+
     return m_cellStart[a_cell];
   }
 
@@ -1190,6 +1217,9 @@ public:
   std::size_t
   particlesInCell(const std::size_t a_cell) const noexcept
   {
+    CH_assert(m_sorted);
+    CH_assert(a_cell < this->numCells());
+
     return m_cellStart[a_cell + 1] - m_cellStart[a_cell];
   }
 

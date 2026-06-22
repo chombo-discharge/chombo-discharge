@@ -62,6 +62,8 @@
 #include <RefCountedPtr.H>
 #include <Vector.H>
 #include <SPMD.H>
+#include <CH_Timer.H>
+#include <CH_assert.H>
 
 // Our includes
 #include <CD_LevelTiles.H>
@@ -152,6 +154,13 @@ public:
          const int                        a_finestLevel,
          const std::string&               a_realm)
   {
+    CH_TIME("ParticleContainerSoA::define");
+
+    CH_assert(a_grids.size() > a_finestLevel);
+    CH_assert(a_domains.size() > a_finestLevel);
+    CH_assert(a_dx.size() > a_finestLevel);
+    CH_assert(a_refRat.size() > a_finestLevel);
+
     m_grids           = a_grids;
     m_domains         = a_domains;
     m_refRat          = a_refRat;
@@ -318,6 +327,9 @@ public:
   LevelParticles&
   operator[](const int a_lvl)
   {
+    CH_assert(m_isDefined);
+    CH_assert(a_lvl >= 0 && a_lvl <= m_finestLevel);
+
     return *m_particles[a_lvl];
   }
 
@@ -329,6 +341,9 @@ public:
   const LevelParticles&
   operator[](const int a_lvl) const
   {
+    CH_assert(m_isDefined);
+    CH_assert(a_lvl >= 0 && a_lvl <= m_finestLevel);
+
     return *m_particles[a_lvl];
   }
 
@@ -372,6 +387,10 @@ public:
   void
   clearParticles()
   {
+    CH_TIME("ParticleContainerSoA::clearParticles");
+
+    CH_assert(m_isDefined);
+
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
       LevelParticles& level = *m_particles[lvl];
       for (DataIterator dit = m_grids[lvl].dataIterator(); dit.ok(); ++dit) {
@@ -394,6 +413,9 @@ public:
   void
   addParticlesLocal(const int a_lvl, const RealVect& a_pos, const double a_weight, const P& a_payload)
   {
+    CH_assert(m_isDefined);
+    CH_assert(a_lvl >= 0 && a_lvl <= m_finestLevel);
+
     const IntVect            iv    = this->cellIndex(a_lvl, a_pos);
     LevelParticles&          level = *m_particles[a_lvl];
     const DisjointBoxLayout& dbl   = m_grids[a_lvl];
@@ -420,6 +442,10 @@ public:
   unsigned long long
   getNumberOfValidParticlesLocal() const
   {
+    CH_TIME("ParticleContainerSoA::getNumberOfValidParticlesLocal");
+
+    CH_assert(m_isDefined);
+
     unsigned long long n = 0;
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
       const LevelParticles& level = *m_particles[lvl];
@@ -437,6 +463,10 @@ public:
   unsigned long long
   getNumberOfValidParticlesGlobal() const
   {
+    CH_TIME("ParticleContainerSoA::getNumberOfValidParticlesGlobal");
+
+    CH_assert(m_isDefined);
+
     const unsigned long long local = this->getNumberOfValidParticlesLocal();
 #ifdef CH_MPI
     unsigned long long global = 0;
@@ -569,6 +599,10 @@ public:
   void
   clearMaskParticles()
   {
+    CH_TIME("ParticleContainerSoA::clearMaskParticles");
+
+    CH_assert(m_isDefined);
+
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
       LevelParticles& level = *m_maskParticles[lvl];
       for (DataIterator dit = m_grids[lvl].dataIterator(); dit.ok(); ++dit) {
@@ -583,6 +617,10 @@ public:
   void
   clearBufferParticles()
   {
+    CH_TIME("ParticleContainerSoA::clearBufferParticles");
+
+    CH_assert(m_isDefined);
+
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
       LevelParticles& level = *m_bufferParticles[lvl];
       for (DataIterator dit = m_grownGrids[lvl].dataIterator(); dit.ok(); ++dit) {
@@ -611,6 +649,10 @@ public:
   void
   transferParticles(AMRParticlesSoA<P, Traits>& a_source)
   {
+    CH_TIME("ParticleContainerSoA::transferParticles");
+
+    CH_assert(m_isDefined);
+
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
       LevelParticles& src = *a_source[lvl];
       LevelParticles& dst = *m_particles[lvl];
@@ -644,6 +686,10 @@ public:
   void
   organizeParticlesByCell()
   {
+    CH_TIME("ParticleContainerSoA::organizeParticlesByCell");
+
+    CH_assert(m_isDefined);
+
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
       LevelParticles& level = *m_particles[lvl];
       for (DataIterator dit = m_grids[lvl].dataIterator(); dit.ok(); ++dit) {
@@ -662,6 +708,8 @@ public:
   void
   organizeParticlesByPatch()
   {
+    CH_TIME("ParticleContainerSoA::organizeParticlesByPatch");
+
     m_isOrganizedByCell = false;
   }
 
@@ -814,10 +862,25 @@ protected:
   */
   struct Destination
   {
-    int          level;     ///< Owning level (finest tile that contains the particle).
-    unsigned int gridIndex; ///< Owning grid index within that level's LevelTiles.
-    int          rank;      ///< Owning rank.
-    bool         found;     ///< False if the particle is off-domain (owned by no tile).
+    /**
+      @brief Owning level (finest tile that contains the particle).
+    */
+    int level;
+
+    /**
+      @brief Owning grid index within that level's LevelTiles.
+    */
+    unsigned int gridIndex;
+
+    /**
+      @brief Owning rank.
+    */
+    int rank;
+
+    /**
+      @brief False if the particle is off-domain (owned by no tile).
+    */
+    bool found;
   };
 
   /**
