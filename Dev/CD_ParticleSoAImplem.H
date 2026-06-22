@@ -70,7 +70,7 @@ ParticleSoA<P, Traits>::resize(const std::size_t a_count)
 
 template <typename P, typename Traits>
 inline void
-ParticleSoA<P, Traits>::append(const RealVect& a_position, const ParticleReal a_weight, const P& a_payload)
+ParticleSoA<P, Traits>::append(const RealVect& a_position, const double a_weight, const P& a_payload)
 {
   this->growIfFull();
   this->setPosition(m_size, a_position);

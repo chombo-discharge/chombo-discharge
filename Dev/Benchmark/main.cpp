@@ -120,20 +120,20 @@ namespace ChomboDischarge {
     RankID     m_rank      = -1;
   };
 
-  /** @brief SoA payload for the merge particle (position + weight are container-owned). */
+  /** @brief SoA payload for the merge particle, PER-COMPONENT (position + weight container-owned). */
   struct MergePayload
   {
-    RealVect velocity  = RealVect::Zero;
-    RealVect oldPos    = RealVect::Zero;
-    Real     mobility  = 0.0;
-    Real     diffusion = 0.0;
-    Real     energy    = 0.0;
+    ParticleReal D_DECL(vx = 0.0, vy = 0.0, vz = 0.0); // velocity, per-component
+    ParticleReal D_DECL(ox = 0.0, oy = 0.0, oz = 0.0); // oldPos, per-component
+    ParticleReal mobility  = 0.0;
+    ParticleReal diffusion = 0.0;
+    ParticleReal energy    = 0.0;
   };
   template <>
   struct ParticleTraits<MergePayload>
   {
-    static constexpr auto columns = std::make_tuple(&MergePayload::velocity,
-                                                    &MergePayload::oldPos,
+    static constexpr auto columns = std::make_tuple(D_DECL(&MergePayload::vx, &MergePayload::vy, &MergePayload::vz),
+                                                    D_DECL(&MergePayload::ox, &MergePayload::oy, &MergePayload::oz),
                                                     &MergePayload::mobility,
                                                     &MergePayload::diffusion,
                                                     &MergePayload::energy);
@@ -547,8 +547,8 @@ namespace {
     MergeParticle      p;
     p.m_position  = a_soa.position(a_idx);
     p.m_weight    = a_soa.weight(a_idx);
-    p.m_velocity  = pl.velocity;
-    p.m_oldPos    = pl.oldPos;
+    p.m_velocity  = RealVect(D_DECL(pl.vx, pl.vy, pl.vz));
+    p.m_oldPos    = RealVect(D_DECL(pl.ox, pl.oy, pl.oz));
     p.m_mobility  = pl.mobility;
     p.m_diffusion = pl.diffusion;
     p.m_energy    = pl.energy;
@@ -576,7 +576,12 @@ namespace {
         const MergeParticle m = mergeRange(lo, hi, [&](int k) {
           return soaToMerge(a_soa, idx[k]);
         });
-        const MergePayload  pl{m.m_velocity, m.m_oldPos, m.m_mobility, m.m_diffusion, m.m_energy};
+        MergePayload        pl;
+        D_TERM(pl.vx = m.m_velocity[0];, pl.vy = m.m_velocity[1];, pl.vz = m.m_velocity[2];)
+        D_TERM(pl.ox = m.m_oldPos[0];, pl.oy = m.m_oldPos[1];, pl.oz = m.m_oldPos[2];)
+        pl.mobility  = m.m_mobility;
+        pl.diffusion = m.m_diffusion;
+        pl.energy    = m.m_energy;
         out.append(m.m_position, m.m_weight, pl);
       });
     return out;
@@ -1081,7 +1086,12 @@ main(int argc, char* argv[])
     MergeSoA mergeSoa;
     mergeSoa.reserve(nMerge);
     for (const MergeParticle& p : mergeSrc) {
-      const MergePayload pl{p.m_velocity, p.m_oldPos, p.m_mobility, p.m_diffusion, p.m_energy};
+      MergePayload pl;
+      D_TERM(pl.vx = p.m_velocity[0];, pl.vy = p.m_velocity[1];, pl.vz = p.m_velocity[2];)
+      D_TERM(pl.ox = p.m_oldPos[0];, pl.oy = p.m_oldPos[1];, pl.oz = p.m_oldPos[2];)
+      pl.mobility  = p.m_mobility;
+      pl.diffusion = p.m_diffusion;
+      pl.energy    = p.m_energy;
       mergeSoa.append(p.m_position, p.m_weight, pl);
     }
 

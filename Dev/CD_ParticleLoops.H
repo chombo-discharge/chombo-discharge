@@ -16,9 +16,9 @@
 
   @code{.cpp}
     // column pointers captured once, OUTSIDE the loop
-    Real*               sigma = soa.column<&P::conductivity>();
-    const ParticleReal* w     = soa.weightColumn();
-    const Real*         mu    = soa.column<&P::mobility>();
+    ParticleReal* sigma = soa.column<&P::conductivity>();
+    const Real*   w     = soa.weightColumn();
+    const Real*   mu    = soa.column<&P::mobility>();
 
     ParticleLoops::loop(soa, [&](std::size_t i) { sigma[i] = w[i] * mu[i]; });
   @endcode

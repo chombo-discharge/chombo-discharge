@@ -60,7 +60,8 @@ namespace {
     for (std::size_t i = 0; i < a_count; i++) {
       DemoPayload payload;
       payload.mobility = 0.5 * static_cast<Real>(i);
-      payload.velocity = static_cast<Real>(i % 3) * RealVect::Unit;
+      const Real v     = static_cast<Real>(i % 3);
+      D_TERM(payload.vx = v;, payload.vy = v;, payload.vz = v;);
 
       const RealVect pos    = static_cast<Real>(i) * RealVect::Unit;
       const Real     weight = static_cast<Real>(1 + (i % 4)); // weights 1..4
@@ -89,9 +90,9 @@ namespace {
   void
   computeConductivity(DemoSoA& a_soa)
   {
-    const ParticleReal* weight       = a_soa.weightColumn();
-    const Real*         mobility     = a_soa.column<&DemoPayload::mobility>();
-    Real*               conductivity = a_soa.column<&DemoPayload::conductivity>();
+    const double*       weight       = a_soa.weightColumn();
+    const ParticleReal* mobility     = a_soa.column<&DemoPayload::mobility>();
+    ParticleReal*       conductivity = a_soa.column<&DemoPayload::conductivity>();
 
     ParticleLoops::loop(a_soa, [&](std::size_t i) {
       conductivity[i] = weight[i] * mobility[i];
@@ -113,8 +114,9 @@ namespace {
       std::swap(a_i, a_j);
     }
 
-    RealVect* velocity = a_soa.column<&DemoPayload::velocity>();
-    Real*     mobility = a_soa.column<&DemoPayload::mobility>();
+    D_TERM(ParticleReal* vx = a_soa.column<&DemoPayload::vx>();, ParticleReal* vy = a_soa.column<&DemoPayload::vy>();
+           , ParticleReal* vz                                                     = a_soa.column<&DemoPayload::vz>(););
+    ParticleReal* mobility = a_soa.column<&DemoPayload::mobility>();
 
     const Real wi = a_soa.weight(a_i);
     const Real wj = a_soa.weight(a_j);
@@ -123,15 +125,18 @@ namespace {
     const RealVect xi = a_soa.position(a_i);
     const RealVect xj = a_soa.position(a_j);
 
+    const RealVect vi = RealVect(D_DECL(vx[a_i], vy[a_i], vz[a_i]));
+    const RealVect vj = RealVect(D_DECL(vx[a_j], vy[a_j], vz[a_j]));
+
     RealVect mergedPos;
     RealVect mergedVel;
     for (int dir = 0; dir < SpaceDim; dir++) {
       mergedPos[dir] = (wi * xi[dir] + wj * xj[dir]) / W;
-      mergedVel[dir] = (wi * velocity[a_i][dir] + wj * velocity[a_j][dir]) / W;
+      mergedVel[dir] = (wi * vi[dir] + wj * vj[dir]) / W;
     }
 
     a_soa.setPosition(a_i, mergedPos);
-    velocity[a_i]     = mergedVel;
+    D_TERM(vx[a_i] = mergedVel[0];, vy[a_i] = mergedVel[1];, vz[a_i] = mergedVel[2];);
     mobility[a_i]     = (wi * mobility[a_i] + wj * mobility[a_j]) / W;
     a_soa.weight(a_i) = W;
 
@@ -142,8 +147,8 @@ namespace {
   Real
   totalWeight(const DemoSoA& a_soa)
   {
-    const ParticleReal* w   = a_soa.weightColumn();
-    Real                sum = 0.0;
+    const double* w   = a_soa.weightColumn();
+    Real          sum = 0.0;
     for (std::size_t i = 0; i < a_soa.size(); i++) {
       sum += w[i];
     }
@@ -216,11 +221,13 @@ main(int argc, char* argv[])
     // (3) SIMD-friendly field multiply (conductivity = weight * mobility).
     computeConductivity(soa);
     {
-      const ParticleReal* w     = soa.weightColumn();
-      const Real*         mu    = soa.column<&DemoPayload::mobility>();
-      const Real*         sigma = soa.column<&DemoPayload::conductivity>();
+      const double*       w     = soa.weightColumn();
+      const ParticleReal* mu    = soa.column<&DemoPayload::mobility>();
+      const ParticleReal* sigma = soa.column<&DemoPayload::conductivity>();
       for (std::size_t i = 0; i < soa.size(); i++) {
-        require(sigma[i] == w[i] * mu[i], "conductivity kernel result");
+        // Cast the recomputed product to ParticleReal so the comparison is exact in any payload
+        // precision (the kernel stored weight*mobility into a ParticleReal column).
+        require(sigma[i] == static_cast<ParticleReal>(w[i] * mu[i]), "conductivity kernel result");
       }
       pout() << "conductivity kernel  : OK (sigma[0] = " << sigma[0] << ")" << endl;
     }

@@ -55,7 +55,16 @@ XTRACPPFLAGS += $(GEOMETRIES_INCLUDE)
 # EBGeometry submodule needs to be visible.
 XTRACPPFLAGS += -I$(DISCHARGE_HOME)/Submodules/EBGeometry
 
-# Source and Geometries libraries should always be visible. 
+# Particle payload precision (sets ParticleReal via -DCD_PARTICLE_REAL). Analogous to Chombo's
+# PRECISION flag, but it governs ONLY the SoA particle payload columns -- position and weight are
+# always double regardless. Set it on the command line (make PARTICLE_PRECISION=FLOAT) or in
+# Lib/Local/Make.defs.local; it defaults to DOUBLE. The value is resolved lazily (deferred) because
+# this file is included before Make.defs.local, and it is appended only to our own XTRACPPFLAGS --
+# so no modification of Chombo's makefile system is required.
+PARTICLE_PRECISION ?= FLOAT
+XTRACPPFLAGS += -DCD_PARTICLE_REAL=$(if $(filter FLOAT,$(PARTICLE_PRECISION)),float,double)
+
+# Source and Geometries libraries should always be visible.
 XTRALIBFLAGS += $(addprefix -l, $(SOURCE_LIB))$(config)
 XTRALIBFLAGS += $(addprefix -l, $(GEOMETRIES_LIB))$(config)
 XTRALIBFLAGS += -L/$(DISCHARGE_HOME)/Lib

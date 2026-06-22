@@ -31,6 +31,9 @@ makefiles+=Make.defs.local
 #  DEBUG        :(TRUE,FALSE) compile with symbol table or not
 #  OPT          :(TRUE,HIGH,FALSE) optimize, high optimize, or not
 #  PRECISION    :(FLOAT,DOUBLE) size of floating point variables
+#  PARTICLE_PRECISION :(FLOAT,DOUBLE) chombo-discharge-specific (consumed by Lib/Definitions.make,
+#                 not by Chombo): precision of the SoA particle PAYLOAD columns (ParticleReal).
+#                 Particle position and weight are ALWAYS double regardless. Defaults to DOUBLE.
 #  PROFILE      :(TRUE,FALSE) compile for performance profiling or not
 #  CXX          : command to compile/link C++ code
 #  FC           : command to compile Fortran code

@@ -47,34 +47,43 @@ The parallel data holders that `ParticleContainer` already keeps — valid, buff
   offset slices (`CD_ParticleSoAArena.H`). Rationale: one-allocation build, *robust*
   no-intrinsics bulk pack/copy (a single `memcpy`, or zero-copy `MPI_Send(data())`),
   aligned SIMD. Requires `reserve`/container-reuse (growth without it is ~7x).
-- **Vector fields are stored PER-COMPONENT as raw `ParticleReal` `x`/`y`/`z` scalar
-  columns — NOT `RealVect` columns.** Each scalar member is one column (existing column
-  machinery, no auto-split). Position is designated by `SpaceDim` member pointers; the
-  `position(i)` accessor returns a *promoted* `double` `RealVect` by value for cell-lookup
-  / Chombo interop. Rationale: per-component vectorizes the field-update kernels (Euler
-  advance 4x, transform 5.6x; interleaved `RealVect` stayed scalar), is GPU-optimal, and
-  raw scalars are what allow `ParticleReal != Real` (`RealVect` is hardwired `double`).
-  Costs: dimension-independent struct declaration needs `D_DECL`/`#if CH_SPACEDIM`; more
-  columns → slightly worse scatter/remap (~1.2-1.4x vs `vector<P>`, still ~2x over
-  `List`). Deferred sugar: a `ParticleRealVect = std::array<ParticleReal,SpaceDim>` member
-  with container auto-split. Supersedes the earlier per-field `vector<RealVect>` choice.
-- **Particle precision: a compile-time `ParticleReal`, independent of the mesh `Real`.**
-  Particle columns are `ParticleReal` (e.g. `float`) while the grid/`FArrayBox` stays
-  `Real` (`double`). Benefits: ~half memory/bandwidth, 8-wide SIMD, smaller MPI buffers.
-  Mixed-precision kernels: compute cell index + CIC weights in `double` (promote particle
-  position), accumulate into the `double` grid, demote on interpolate. (If `float` global
-  positions lose sub-cell resolution on large grids, switch to cell-relative coords.)
+- **Vector fields are stored PER-COMPONENT as raw `x`/`y`/`z` scalar columns — NOT
+  `RealVect` columns.** Each scalar member is one column (existing column machinery, no
+  auto-split). `RealVect` is NOT a permitted column type (it is not trivially copyable, so
+  a `RealVect` payload member fails the column static_assert); users declare per-component
+  members (`D_DECL`-guarded) and
+  promote to `RealVect` in downstream code. The `position(i)` accessor assembles a
+  `RealVect` by value for cell-lookup / Chombo interop. Rationale: per-component
+  vectorizes the field-update kernels (Euler advance 4x, transform 5.6x; interleaved
+  `RealVect` stayed scalar) and is GPU-optimal. Costs: dimension-independent struct
+  declaration needs `D_DECL`/`#if CH_SPACEDIM`; more columns → slightly worse
+  scatter/remap (~1.2-1.4x vs `vector<P>`, still ~2x over `List`). Supersedes the earlier
+  per-field `vector<RealVect>` choice.
+- **Precision: position and weight are ALWAYS `Real` (double); a compile-time
+  `ParticleReal` governs PAYLOAD columns only.** Position and weight index the grid and
+  are summed/conserved across the whole population, so float roundoff is unacceptable:
+  float32 position on a ~10^6-cell-per-dim grid has a ULP of ~0.1 cell at the far corner,
+  so sub-CFL advective steps round to zero and particles freeze; and per-cell `Σweight` /
+  merge center-of-mass conservation accumulate float error over millions of particles.
+  Double makes both exact for any realistic grid. PAYLOAD columns may use `ParticleReal`
+  (e.g. `float`) for ~half memory/bandwidth and 8-wide SIMD on the local per-particle
+  physics (velocity, mobility, energy) — but position-LIKE payload (e.g. an oldPosition
+  that subtracts from the double position) should be declared `Real` too. Mixed-precision
+  kernels: cell index + CIC weights in `double`, accumulate into the `double` grid, demote
+  on interpolate. (Supersedes the earlier "all particle columns are `ParticleReal`"
+  choice; the heavier cell-relative-coordinate scheme remains the escape hatch only if
+  float-precision *position* memory ever genuinely matters.)
 - **Cell binning is a property of the SoA's order + a CSR offsets array — NOT a separate
   container.** Drop today's second representation (`BinFab<List<P>>`) and the
   `organizeByCell/byPatch` copy-conversion entirely.
 - **ALL mandatory fields are container-owned columns; the user struct is payload-only.**
-  The container always allocates `position` (`SpaceDim` raw `ParticleReal` x/y/z columns),
-  `weight` (`ParticleReal`), `particleID`, and `rankID`. The user declares ONLY the extra
+  The container always allocates `position` (`SpaceDim` raw `Real` x/y/z columns),
+  `weight` (`Real`), `particleID`, and `rankID`. The user declares ONLY the extra
   payload (e.g. `velocity`, `mobility`, `oldPosition`) via a payload struct + its
   `ParticleTraits`; the payload may be empty, so `ParticleSoA<>` is a ready-made
   point/tracer particle. Accessors `position(i)`/`weight(i)`/`particleID(i)`/`rankID(i)`.
-  Rationale: the position/weight layout is *already* fixed by the locked decisions (raw
-  per-component `ParticleReal`), so user control over them buys nothing but a chance to
+  Rationale: the position/weight layout is *already* fixed by the locked decisions
+  (per-component `Real`), so user control over them buys nothing but a chance to
   misdeclare — baking them in gives a uniform mandatory schema, deletes the
   `positionPtr`/`weightPtr` traits and the mandatory-field `static_assert`, and makes
   omission/reordering impossible. NO inheritance (re-adds BinItem-style coupling, breaks
@@ -137,12 +146,16 @@ equivalent owns particles across the AMR hierarchy and ties into Chombo's grid m
    state simply stays empty in transient buffers — NOT worth a second "lighter" type.
 3. **Regrid:** `preRegrid` caches particles off the old layout (into the cache holder);
    `regrid` rebuilds the `LayoutData` on the new `DisjointBoxLayout` and redistributes to
-   the new owning boxes/ranks.
+   the new owning boxes/ranks. The new leaves are freshly default-constructed → **cold
+   arenas (capacity 0)**, so naive append-from-empty would hit the ~7x whole-buffer
+   regrowth penalty (BENCHMARKS.md). We do NOT rely on warm arenas here — we size them
+   **deterministically from known counts**, see point 6.
 4. **Remap protocol (the pool model):** collect all movers into a pool, keep the ones that
    still belong to a box on this rank (local append into the destination arena-SoA), and
    scatter the rest by rank. The pool IS an arena-SoA (point 2). Two transfer shapes:
    **whole-patch ownership change** → zero-copy `MPI_Send(data())`; **individual
-   boundary-crossers** → gather the leaving subset into a per-rank send arena-SoA.
+   boundary-crossers** → gather the leaving subset into a per-rank send arena-SoA. Like
+   regrid, the destination fill is **count → reserve → fill** (point 6).
 5. **The leaf does NOT store its Box.** The `DisjointBoxLayout` (`dbl[dataIndex]`) is the
    single source of truth; geometry-dependent leaf methods (cell-sort key, deposition
    region) take `box`/`dx`/`probLo` as arguments — the container already holds the
@@ -151,5 +164,28 @@ equivalent owns particles across the AMR hierarchy and ties into Chombo's grid m
    a halo/remap-pool buffer (where "the box" is absent). The arena stays columns-only
    regardless, so `data()`/`byteSpan()` are unaffected. (Fallback if too many call sites
    need it: store `m_box`/`m_dx` as plain members *outside* the arena — start pure.)
+6. **Capacity at the container layer: exact `reserve` from known counts, never warmth.**
+   The leaf needs NO new sizing method — `reserve(n)`/`resize(n)` are the primitives. What
+   the AMR layer adds is *driving* them so every bulk fill is **two-pass: count → reserve →
+   fill**, so each (possibly cold) destination arena allocates exactly once:
+   - *Regrid / remap redistribution:* pass 1 computes each cached/incoming particle's
+     destination `DataIndex` and tallies a per-box counter; then `leaf.reserve(count)` each
+     destination; then pass 2 appends (local) / `delinearizeAndAppend` (cross-rank). Counts
+     are known because redistribution has to assign destinations anyway, so warmth is moot.
+   - *Cross-rank receive:* the incoming particle count is known from the message size
+     (`bytesPerParticle`), so `reserve`/`resize` exactly and `MPI_Recv` into `data()`
+     (zero-copy whole-patch path).
+   - *Steady state (no regrid):* leaves are reused across steps; `clear()` keeps capacity,
+     so per-step `append` refills are allocation-free once warmed to the high-water mark.
+   - *Container convenience:* expose a thin `reserve(perPatchCount)` / `reserve(const
+     LayoutData<int>& counts)` that forwards to each leaf, for user bulk-init after regrid
+     (re-drawing particles, known target PPC). Sugar over per-leaf reserve, not new
+     capability.
+   - *Deferred optimization (only if profiling demands):* an **arena free-list** that
+     recycles the old leaves' backing allocations into the new `LayoutData` instead of
+     `free`+re-`malloc` (total particle count is ~conserved across a regrid). It fights
+     `LayoutData`'s own `new T` construction, and exact-reserve already removes the
+     expensive part (repeated whole-buffer moves) — this would only shave the per-box
+     malloc. Not worth the complexity up front.
 
 The mechanics (LayoutData/DataIterator/regrid hooks) mirror today's `ParticleContainer`.
