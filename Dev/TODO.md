@@ -196,6 +196,15 @@ production code under `Source/`, `Physics/`, or `Geometries/` yet. The point of
       particle order also matches, so FP accumulation order is identical. Passes 2D+3D, single-rank
       and `mpirun -np 2/4`. (TSC excluded: the SoA carries the partition-of-unity fix production
       lacks; Real=double build so AoS/SoA store positions identically.)
+- [x] **In-situ BrownianWalker validation** (`Exec/Tests/BrownianWalker/SoAValidation/`): a
+      `ValidatingBrownianWalkerStepper` subclasses the production stepper (library untouched; the app
+      gets `-IDev`), and after each `advance()` mirrors the live bulk `ItoParticle`s (position,weight)
+      into a `ParticleContainerSoA` on the same realm/grids and compares `EBAMRParticleMesh` vs
+      `EBAMRParticleMeshSoA` deposition on the **real RodDielectric cut-cell + AMR geometry**. Result
+      over 10 steps, single-rank and `mpirun -np 2`: **NGP/Interp, CIC/Interp, CIC/Halo are
+      bit-identical (max|AoS-SoA| = 0)**; **CIC/Transition agrees to ~1e-10** (roundoff — its extra
+      coarse-fine reductions + mask-particle reordering differ in FP accumulation order). No
+      NaNs/aborts.
 - **Feature parity reached.** The Dev SoA stack (`ParticleSoA` leaf, `EBParticleMeshSoA`,
       `ParticleContainerSoA`, `EBAMRParticleMeshSoA`) now matches production
       `ParticleContainer`/`EBAMRParticleMesh` functionality: storage/accessors, remap, regrid,
