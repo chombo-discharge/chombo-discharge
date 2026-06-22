@@ -189,3 +189,34 @@ equivalent owns particles across the AMR hierarchy and ties into Chombo's grid m
      malloc. Not worth the complexity up front.
 
 The mechanics (LayoutData/DataIterator/regrid hooks) mirror today's `ParticleContainer`.
+
+**Implementation status — built in stages.** *Stage 1 (DONE, `Dev/CD_ParticleContainerSoA.H`):*
+the storage/ownership/accessor layer — per-level `LayoutData<ParticleSoA<P>>` holders
+(valid/mask/buffer), `operator[](lvl)[dataIndex] → ParticleSoA&`, the production-mirroring accessors,
+valid counts, and local population. This is the surface EBAMRParticleMeshSoA consumes.
+*Stage 2a (DONE, `+ Dev/CD_ParticleContainerSoAImplem.H`):* `remap()` — `define` now takes a
+`blockingFactor` and builds a per-level `LevelTiles` (reused from Source); remap pools every valid
+particle, maps each to the finest tile that owns it, appends same-rank movers into the destination
+leaf, and scatters cross-rank movers with one `MPI_Alltoallv` over the leaf byte linearization;
+off-domain particles become counted outcasts. Tested multi-box/2-level, single-rank and `np 2/4`.
+*Stage 2b (DONE):* `preRegrid()`/`regrid()` — the 2a remap was factored into `gatherToPool` +
+`distributeFromPool`; preRegrid snapshots the holders (shared RefCountedPtrs), regrid rebuilds over
+the new layout and redistributes the cache through the same pool→scatter. Tested with a layout move
+and a level removal, single-rank and `np 2/4`. *Stage 2c (DONE):* `copyMaskParticles`/
+`transferMaskParticles` (filter the valid particles by a per-cell `LevelData<BaseFab<bool>>` mask
+into `m_maskParticles` — copy keeps, transfer moves via the leaf swap-and-pop) and `setupGrownGrids`
+(the buffer holder now lives on grown `BoxLayout`s). Tested single-rank and `np 2/4`; this unblocks
+the EBAMRParticleMesh stage-B halo coarse-fine strategies. *Stage 2d (pending):* container-level
+cell-sort. The split is deliberate: deposition across the
+hierarchy was built and correctness-tested against stage 1 alone (particles hand-placed in the owning
+patches), so the dynamics do not gate the EBAMRParticleMesh port. Stage 2c (halo/buffer filling)
+unlocked the EBAMRParticleMesh halo coarse-fine strategies (stage-B, DONE): `EBAMRParticleMeshSoA`
+builds the refined-coarse (FiCo) leaves + outer-halo/transition masks and supports **all four**
+`CoarseFineDeposition` strategies — `Interp`, `Halo` (re-deposit coarse halo particles on the FiCo
+grid), `HaloNGP` (NGP halo deposit via container `transferParticles`), and `Transition` (deposit
+coarse-side transition particles at fine width on the FiCo grid, spread to both levels via
+`addFiCoDataToFine`/`exchangeAndAddFiCoData`/`restrictAndAddFiCoDataToCoar`). All mass-conserving for
+NGP/CIC/TSC. **Stage-2d (container cell-sort, DONE):** `organizeParticlesByCell` drives the leaf
+`sortByCell`+CSR per patch (no BinFab); `organizeParticlesByPatch` just clears the flag. With this
+the Dev SoA stack reaches **feature parity** with production `ParticleContainer`/`EBAMRParticleMesh`;
+remaining work is OpenMP-over-boxes, performance tuning, and the design-freeze migration into Source.

@@ -87,9 +87,112 @@ production code under `Source/`, `Physics/`, or `Geometries/` yet. The point of
       (TSC deposit is unused in production) — see PORTING_EBParticleMesh.md. Consequence: the Dev
       test asserts bitwise SoA==production for NGP/CIC deposit + all interpolation, and validates
       TSC deposit by partition-of-unity instead (the two paths now differ by design).
-- Next: **EBAMRParticleMesh** → Dev (needs a minimal Dev `ParticleContainer` scaffold), then
-      the full `ParticleContainer` (`LayoutData<arena-SoA>` per level, pool-model remap,
-      count→reserve→fill regrid). See `PORTING_EBParticleMesh.md`.
+- [x] **ParticleContainerSoA stage-1 (storage/accessor layer)** ported to Dev
+      (`CD_ParticleContainerSoA.H`) + tested (`Dev/TestParticleContainerSoA/`). Per-level
+      `LayoutData<ParticleSoA<P>>` holders for valid/mask/buffer; lightweight
+      `define(grids,domains,dx,refRat,probLo,finestLevel,realm)` (drops the remap/regrid-only
+      `ValidMask`/`LevelTiles`/`blockingFactor`; needs no EB geometry); accessors mirroring
+      production (`getParticles`/`getMaskParticles`/`getBufferParticles`/`operator[]`,
+      `getGrids`/`getDx`/`getProbLo`/`getFinestLevel`/`getRealm`, valid-particle counts,
+      `isOrganizedByCell`==false); local population (`addParticlesLocal`, direct `operator[]`
+      append, `clearParticles`). Test builds a 2-level grid by hand (no AmrMesh/EBIS) and checks
+      metadata, counts, leaf round-trip, capacity-preserving clear; passes 2D+3D.
+- [x] **EBAMRParticleMesh stage-A ported to Dev** (`CD_EBAMRParticleMeshSoA.H`) + tested
+      (`Dev/TestEBAMRParticleMesh/`). `define` (per-patch `EBParticleMeshSoA` leaves + level
+      valid+ghost→valid Copiers + `EBCoarseFineParticleMesh`); full multi-level
+      `interpolate<Members...>`; `deposit<Members...>`/`depositWeight` via the
+      `CoarseFineDeposition::Interp` strategy (deposits valid particles, then mesh-side CF transfer
+      with `exchange`+`EBAddOp` and `addFineGhostsToCoarse`/`addInvalidCoarseToFine` — needs only
+      valid particles, so stage-1-compatible). Test: 2-level hierarchy with a fine patch over a
+      sub-region (real CF), constant-field interpolate (all particles read it), and deposit-Interp
+      **mass conservation across the CF boundary** for NGP/CIC/TSC; passes 2D+3D.
+      **Deferred to stage-B (need stage-2 halo filling):** the `Halo`/`HaloNGP`/`Transition` CF
+      strategies (re-deposit halo/mask particles), their outer-halo/transition masks + FiCo
+      particle-mesh objects, and OpenMP-over-boxes; calling an unsupported strategy is a hard error.
+- [x] **ParticleContainerSoA stage-2a (remap)** in `CD_ParticleContainerSoA.H` +
+      `CD_ParticleContainerSoAImplem.H` (new) + tested (`Dev/TestParticleContainerRemap/`).
+      `define` gained a `blockingFactor` and builds a per-level `LevelTiles` (reused from Source;
+      storage-agnostic). `remap()` pool→map→assign: each valid particle is routed to the finest
+      level whose tile owns it (`getMyTiles`/`getOtherTiles` + `getMyGrids`→DataIndex), same-rank
+      movers appended into the destination leaf, cross-rank movers scattered via one `MPI_Alltoallv`
+      of the leaf's `linearizeParticle`/`delinearizeAndAppend` bytes (with (level,gridIndex,count)
+      headers). Particle ids preserved; rankID set to the new owner; off-domain particles dropped
+      and counted (`getNumberOfOutcastParticles{Local,Global}`). Test: multi-box 2-level grid
+      (blockingFactor-sized boxes, round-robin ranks, fine patch over a sub-region); canonicalize →
+      random in-domain move → off-domain move; asserts count conservation, in-box + finest-level
+      ownership (global layout), and outcast accounting. Passes 2D+3D, single-rank **and**
+      `mpirun -np 2/4` (exercises the Alltoallv scatter — first multi-rank test in the suite).
+- [x] **ParticleContainerSoA stage-2b (regrid)** + tested (`Dev/TestParticleContainerRegrid/`).
+      The 2a remap was refactored into `gatherToPool` (read source holders → per-rank,
+      per-destination-patch pool via the current tile maps) + `distributeFromPool` (local appends +
+      MPI Alltoallv into the empty valid holders); `remap()` = gather(m_particles)→clear→distribute.
+      `preRegrid()` snapshots the current holders+layout (shares RefCountedPtrs, so the old
+      particles stay alive while m_particles is rebuilt). `regrid(newGrids,domains,dx,refRat,
+      blockingFactor,newFinest)` adopts the new layout, re-allocates the holders+LevelTiles over it
+      (all levels — lmin optimization deferred), then redistributes the cache via
+      gather(cache)→distribute. Test: populate+canonicalize on layout A, regrid to B (fine patch
+      moved → particles change level/box/rank) and to C (fine level removed); asserts count
+      conservation, zero off-domain loss, an invariant double position-sum, and ownership on the new
+      layout. Passes 2D+3D, single-rank and `mpirun -np 2/4`.
+- [x] **ParticleContainerSoA stage-2c (halo/mask + buffer)** + tested
+      (`Dev/TestParticleContainerHalo/`). `copyMaskParticles(level,mask)` /
+      `transferMaskParticles(level,mask)` (+ per-AMR-level vector overloads) filter the valid
+      particles by a per-cell `LevelData<BaseFab<bool>>` mask into `m_maskParticles` — copy clears
+      the mask holder then COPIES masked particles (valid untouched), transfer MOVES them out via the
+      leaf `remove()` swap-and-pop; ids/rank preserved. `setupGrownGrids()` builds `m_grownGrids`
+      (boxes grown by `refRat[lvl-1]` on finer levels, clipped to the domain — a `BoxLayout`, since
+      grown boxes overlap) and `m_bufferParticles` now lives there; `clearMaskParticles`/
+      `clearBufferParticles`/`getGrownGrids` added; define+regrid set the grown grids up. Test:
+      multi-box 2-level grid, hand-built half-space mask; asserts copy = masked subset with valid
+      untouched, transfer moves the subset out (totals conserved), all mask particles are masked,
+      and the level-1 buffer grids are grown beyond the valid boxes (empty). Passes 2D+3D,
+      single-rank and `mpirun -np 2/4`. (Buffer-particle FILLING is part of stage-B deposit.)
+- [x] **EBAMRParticleMesh stage-B1 (Halo coarse-fine deposition)** in `CD_EBAMRParticleMeshSoA.H`
+      + tested (extended `Dev/TestEBAMRParticleMesh/`). define() now also builds the refined-coarse
+      (FiCo) per-patch leaves (`m_ebParticleMeshFiCo`, dx = fine level's) and the outer-halo masks
+      (`defineOuterHaloMasks`, ported ~verbatim — IntVectSet/NeighborIterator/Copier::ghostDefine,
+      storage-agnostic). `deposit`/`depositWeight` dispatch on the strategy; `CoarseFineDeposition::
+      Halo` (`depositHaloCore<NCOMP>`) deposits valid particles per level, folds fine-ghost mass to
+      coarse, then re-deposits the coarse-side halo particles (copied into the container mask holder
+      via the width-1 mask) on the FiCo grid with widthScale = refRat and adds the FiCo buffer
+      (`EBCoarseFineParticleMesh::getBufferFiCo<NCOMP>()` + `addFiCoDataToFine`) to the fine level;
+      mask cleared after. The patch-deposit functor now carries a widthScale. Test: Halo deposit
+      conserves mass across the CF boundary (166/166) for NGP/CIC/TSC, 2D+3D. (The mask holder layout
+      from stage-2c is correct because eblgFiCo = refine(coarse grid), sharing its DataIndex.)
+- [x] **EBAMRParticleMesh stage-B2 (HaloNGP coarse-fine deposition)** + tested. Added container
+      `transferParticles(holder)` (drain a holder's particles back into the valid holder, ids
+      preserved). `depositHaloNGPCore<NCOMP>`: `transferMaskParticles` MOVES the coarse halo
+      particles out of valid, deposits the non-halo particles with the requested kernel and the halo
+      particles with NGP onto the same level mesh, folds fine-ghost mass to coarse (per-comp), then
+      `transferParticles` returns the halo particles to valid. No FiCo buffer needed (NGP clouds
+      don't spread over the boundary). Test: HaloNGP deposit conserves mass (166/166) for NGP/CIC/TSC
+      AND the valid-particle count is restored afterwards; 2D+3D.
+- [x] **EBAMRParticleMesh stage-B3 (Transition coarse-fine deposition)** + tested. Ported
+      `defineTransitionMasks` (fine-grid CFIVS band transferred to the refined-coarse grid, keyed by
+      width), `getTransitionMaskWidth` (CIC→refRat/2, TSC→refRat), `transferMaskParticlesTransition`
+      (moves coarse particles whose fine-resolution cell is in the transition mask — on the FiCo grid
+      — into the mask holder, done directly since the mask isn't on the valid grids), and
+      `depositTransitionCore<NCOMP>` (NGP short-circuits to Interp; else deposit non-transition
+      particles + fold ghosts, deposit transition particles on the refined-coarse grid at fine width,
+      then `addFiCoDataToFine` + `exchangeAndAddFiCoData` + `restrictAndAddFiCoDataToCoar` to spread
+      to both levels; transfer particles back). **All four CoarseFineDeposition strategies now
+      ported.** Test: Transition conserves mass (166/166) for NGP/CIC/TSC and restores the valid
+      particles; 2D+3D.
+- [x] **ParticleContainerSoA stage-2d (cell sort)** + tested (`Dev/TestParticleContainerCellSort/`).
+      `organizeParticlesByCell()` drives the leaf `sortByCell(box,dx,probLo)` (counting sort into
+      Fortran cell order + CSR offsets) on every valid leaf and sets `isOrganizedByCell()`;
+      `organizeParticlesByPatch()` clears the flag (no data movement — the SoA leaf already holds a
+      patch contiguously, unlike the production BinFab path); `addParticlesLocal`/remap/regrid/
+      transfer invalidate the flag. Test: after organize, every leaf is sorted with
+      `numCells == box cells`, the CSR ranges partition the leaf, and every particle in cell c's
+      range maps (Fortran index) to c; count conserved; add-after-sort clears the flag. 2D+3D,
+      single-rank and `mpirun -np 2/4`.
+- **Feature parity reached.** The Dev SoA stack (`ParticleSoA` leaf, `EBParticleMeshSoA`,
+      `ParticleContainerSoA`, `EBAMRParticleMeshSoA`) now matches production
+      `ParticleContainer`/`EBAMRParticleMesh` functionality: storage/accessors, remap, regrid,
+      halo/mask + grown buffer, cell sort; interpolate + deposit with all four CoarseFineDeposition
+      strategies. Remaining: OpenMP-over-boxes, performance tuning, and the design-freeze migration
+      into `Source/` (replacing the `List<P>` API). See `PORTING_EBParticleMesh.md`.
 
 ## Decisions (locked)
 
