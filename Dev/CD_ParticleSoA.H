@@ -544,6 +544,11 @@ class ParticleSoA
 {
 public:
   /**
+    @name Compile-time layout (indices and sizes)
+  */
+  ///@{
+
+  /**
      @brief The payload columns descriptor tuple type (tuple of pointer-to-member).
   */
   using PayloadColumns = std::remove_cv_t<std::remove_reference_t<decltype(Traits::columns)>>;
@@ -583,6 +588,8 @@ public:
   */
   static constexpr std::size_t s_align = 64;
 
+  ///@}
+
 private:
   /**
      @brief The SpaceDim position columns, all double -- see precision rationale.
@@ -601,6 +608,11 @@ private:
   using PayloadValues = typename detail::ValueTuple<PayloadColumns>::Type;
 
 public:
+  /**
+    @name Compile-time layout (value types)
+  */
+  ///@{
+
   /**
      @brief The value types of every column, in storage order.
   */
@@ -630,10 +642,17 @@ public:
   */
   using H5PayloadColumns = typename detail::H5ColumnSubset<Traits, std::make_index_sequence<s_numPayloadColumns>>::Type;
 
+  ///@}
+
   // ----- Sanity checks ------------------------------------------------------
   static_assert(std::is_default_constructible<P>::value, "payload type P must be default-constructible");
   static_assert(detail::AllTriviallyCopyable<ColumnValueTuple>::s_value,
                 "every particle column must be trivially copyable for MPI/HDF5");
+
+  /**
+    @name Construction and lifetime
+  */
+  ///@{
 
   /**
      @brief Construct an empty container.
@@ -683,6 +702,13 @@ public:
     }
     return *this;
   }
+
+  ///@}
+
+  /**
+    @name Size and capacity
+  */
+  ///@{
 
   /**
     @brief Number of particles currently stored.
@@ -738,6 +764,13 @@ public:
   void
   resize(const std::size_t a_count);
 
+  ///@}
+
+  /**
+    @name Population
+  */
+  ///@{
+
   /**
     @brief Append one particle. The metadata columns (id/rank) are set to s_invalidID/-1;
            assign them via particleID(i)/rankID(i) or let the AMR layer / delinearize set them.
@@ -770,6 +803,13 @@ public:
     m_size--;
     m_sorted = false;
   }
+
+  ///@}
+
+  /**
+    @name Column and field access
+  */
+  ///@{
 
   /**
     @brief Typed base pointer of column K (low-level).
@@ -887,6 +927,13 @@ public:
     return this->template columnByIndex<s_weightCol>();
   }
 
+  ///@}
+
+  /**
+    @name Mandatory-field accessors
+  */
+  ///@{
+
   /**
     @brief Position of particle i as a RealVect (by value, assembled from the scalar columns).
     @param[in] a_index Particle index.
@@ -981,6 +1028,13 @@ public:
     return this->template columnByIndex<s_rankCol>()[a_index];
   }
 
+  ///@}
+
+  /**
+    @name MPI linearization
+  */
+  ///@{
+
   /**
     @brief Byte count of one fully-linearized particle (all columns, for MPI).
     @return Bytes per particle.
@@ -1005,6 +1059,13 @@ public:
   */
   void
   delinearizeAndAppend(const void* a_buffer);
+
+  ///@}
+
+  /**
+    @name HDF5 linearization
+  */
+  ///@{
 
   /**
     @brief Bytes for one HDF5-linearized particle (position + weight + h5 payload subset).
@@ -1031,6 +1092,13 @@ public:
   */
   void
   h5DelinearizeAndAppend(const void* a_buffer);
+
+  ///@}
+
+  /**
+    @name Raw arena and bulk transfer
+  */
+  ///@{
 
   /**
     @brief Raw arena pointer (column-major); a compact container's whole data span.
@@ -1064,6 +1132,13 @@ public:
     }
     return this->byteSpanImpl(std::make_index_sequence<s_numColumns>{});
   }
+
+  ///@}
+
+  /**
+    @name Cell sorting (CSR)
+  */
+  ///@{
 
   /**
     @brief Counting-sort the columns into Fortran cell order and build CSR cell offsets.
@@ -1117,6 +1192,8 @@ public:
   {
     return m_cellStart[a_cell + 1] - m_cellStart[a_cell];
   }
+
+  ///@}
 
 protected:
   /**
