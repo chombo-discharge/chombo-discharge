@@ -24,7 +24,9 @@
 // Our includes
 #include <CD_RtSolver.H>
 #include <CD_EBParticleMesh.H>
+#include <CD_EBParticleMeshSoA.H>
 #include <CD_ParticleContainer.H>
+#include <CD_ParticleContainerSoA.H>
 #include <CD_Photon.H>
 #include <CD_PointParticle.H>
 #include <CD_NamespaceHeader.H>
@@ -122,10 +124,10 @@ public:
     be empty on output)
   */
   virtual void
-  advancePhotonsInstantaneous(ParticleContainer<Photon>& a_bulkPhotons,
-                              ParticleContainer<Photon>& a_ebPhotons,
-                              ParticleContainer<Photon>& a_domainPhotons,
-                              ParticleContainer<Photon>& a_photons);
+  advancePhotonsInstantaneous(ParticleContainerSoA<Photon>& a_bulkPhotons,
+                              ParticleContainerSoA<Photon>& a_ebPhotons,
+                              ParticleContainerSoA<Photon>& a_domainPhotons,
+                              ParticleContainerSoA<Photon>& a_photons);
 
   /**
     @brief Move photons and absorb them on various objects
@@ -138,11 +140,11 @@ public:
     or various objects (EB, domain). a_photons may be non-empty on output, in which case there are still free-flight photons in the solver. 
   */
   virtual void
-  advancePhotonsTransient(ParticleContainer<Photon>& a_bulkPhotons,
-                          ParticleContainer<Photon>& a_ebPhotons,
-                          ParticleContainer<Photon>& a_domainPhotons,
-                          ParticleContainer<Photon>& a_photons,
-                          const Real                 a_dt);
+  advancePhotonsTransient(ParticleContainerSoA<Photon>& a_bulkPhotons,
+                          ParticleContainerSoA<Photon>& a_ebPhotons,
+                          ParticleContainerSoA<Photon>& a_domainPhotons,
+                          ParticleContainerSoA<Photon>& a_photons,
+                          const Real                    a_dt);
 
   /**
     @brief Compute the number of physical photons in each grid cell.
@@ -164,9 +166,9 @@ public:
     @param[in]     a_maxPhotonsPerCell Maximum number of photons generated per cell.
   */
   virtual void
-  generateComputationalPhotons(ParticleContainer<Photon>& a_photons,
-                               const EBAMRCellData&       a_numPhysPhotons,
-                               const size_t               a_maxPhotonsPerCell) const noexcept;
+  generateComputationalPhotons(ParticleContainerSoA<Photon>& a_photons,
+                               const EBAMRCellData&          a_numPhysPhotons,
+                               const size_t                  a_maxPhotonsPerCell) const noexcept;
 
   /**
     @brief Dirty-sampling method for photons. 
@@ -196,7 +198,7 @@ public:
     @param[in] a_photons Computational particles to be remapped.
   */
   virtual void
-  remap(ParticleContainer<Photon>& a_photons);
+  remap(ParticleContainerSoA<Photon>& a_photons);
 
   /**
     @brief Deposit photons on the mesh. 
@@ -206,7 +208,7 @@ public:
   depositPhotons();
 
   /**
-    @brief Deposit photons
+    @brief Deposit AoS photons on the mesh (used for the dirty-sampling PointParticle path).
     @param[out]   a_phi        Deposited mesh density
     @param[in]    a_deposition Deposition method
     @param[in] a_particles Particles
@@ -216,6 +218,19 @@ public:
   depositPhotons(EBAMRCellData&        a_phi,
                  ParticleContainer<P>& a_particles,
                  const DepositionType& a_deposition) const noexcept;
+
+  /**
+    @brief Deposit SoA photons on the mesh.
+    @details Deposits the container's weight column and then runs the shared hybrid divergence tail
+    (non-conservative blend, mass redistribution, average-down, ghost interpolation).
+    @param[out] a_phi        Deposited mesh density
+    @param[in]  a_photons    SoA photon container
+    @param[in]  a_deposition Deposition method
+  */
+  void
+  depositPhotons(EBAMRCellData&                a_phi,
+                 ParticleContainerSoA<Photon>& a_photons,
+                 const DepositionType&         a_deposition) const noexcept;
 
   /**
     @brief Sort container by cell
@@ -334,14 +349,7 @@ public:
     @param[in] a_photons Which container to clear
   */
   virtual void
-  clear(ParticleContainer<Photon>& a_photons);
-
-  /**
-    @brief Clear data holder
-    @param[in] a_photons Which container to clear
-  */
-  virtual void
-  clear(AMRParticles<Photon>& a_photons);
+  clear(ParticleContainerSoA<Photon>& a_photons);
 
   /**
     @brief Write plot file
@@ -403,41 +411,41 @@ public:
     @return Return value
   */
   virtual int
-  countPhotons(const AMRParticles<Photon>& a_photons) const;
+  countPhotons(const ParticleContainerSoA<Photon>& a_photons) const;
 
   /**
     @brief Get m_photons
     @return m_photons
   */
-  virtual ParticleContainer<Photon>&
+  virtual ParticleContainerSoA<Photon>&
   getPhotons();
 
   /**
     @brief Get bulk photons, i.e. photons absorbed on the mesh
     @return m_bulkPhotons
   */
-  virtual ParticleContainer<Photon>&
+  virtual ParticleContainerSoA<Photon>&
   getBulkPhotons();
 
   /**
     @brief Get eb Photons, i.e. photons absorbed on the EB
     @return m_ebPhotons
   */
-  virtual ParticleContainer<Photon>&
+  virtual ParticleContainerSoA<Photon>&
   getEbPhotons();
 
   /**
     @brief Get domain photons, i.e. photons absorbed on domain edges/faces
     @return m_domainPhotonsl
   */
-  virtual ParticleContainer<Photon>&
+  virtual ParticleContainerSoA<Photon>&
   getDomainPhotons();
 
   /**
     @brief Get source photons
     @return m_sourcePhotons
   */
-  virtual ParticleContainer<Photon>&
+  virtual ParticleContainerSoA<Photon>&
   getSourcePhotons();
 
   /**
@@ -617,27 +625,27 @@ protected:
   /**
     @brief All particles
   */
-  ParticleContainer<Photon> m_photons;
+  ParticleContainerSoA<Photon> m_photons;
 
   /**
     @brief Photons absorbed in the volume
   */
-  ParticleContainer<Photon> m_bulkPhotons;
+  ParticleContainerSoA<Photon> m_bulkPhotons;
 
   /**
-    @brief This is a particle container for Photons that crossed EBs. It is filled during the advance step. 
+    @brief This is a particle container for Photons that crossed EBs. It is filled during the advance step.
   */
-  ParticleContainer<Photon> m_ebPhotons;
+  ParticleContainerSoA<Photon> m_ebPhotons;
 
   /**
-    @brief This is a particle container for Photons that crossed boundaries. It is filled during the advance step. 
+    @brief This is a particle container for Photons that crossed boundaries. It is filled during the advance step.
   */
-  ParticleContainer<Photon> m_domainPhotons;
+  ParticleContainerSoA<Photon> m_domainPhotons;
 
   /**
-    @brief This is a particle container that can be used to add Photons directly. 
+    @brief This is a particle container that can be used to add Photons directly.
   */
-  ParticleContainer<Photon> m_sourcePhotons;
+  ParticleContainerSoA<Photon> m_sourcePhotons;
 
   /**
     @brief Draw photons in a cell and volume
@@ -680,6 +688,16 @@ protected:
                            ParticleContainer<P>&      a_particles,
                            const DepositionType       a_deposition,
                            const CoarseFineDeposition a_coarseFineDeposition) const noexcept;
+
+  /**
+    @brief Shared hybrid-divergence tail for the deposition routines.
+    @details On input a_phi holds the conservative (kappa-weighted) deposition. This blends in the
+    non-conservative divergence, redistributes the mass difference (when m_blendConservation is set),
+    and finishes with an average-down and ghost-cell interpolation.
+    @param[in,out] a_phi Mesh density. On input the conservative deposition; on output the hybrid result.
+  */
+  void
+  depositHybridDivergence(EBAMRCellData& a_phi) const noexcept;
 
   /**
     @brief Make the "non-conservative" kappa deposition
@@ -770,9 +788,9 @@ protected:
     @param[in]  a_level   Grid level
   */
   virtual void
-  depositPhotonsNGP(LevelData<EBCellFAB>&            a_output,
-                    const ParticleContainer<Photon>& a_photons,
-                    const int                        a_level) const noexcept;
+  depositPhotonsNGP(LevelData<EBCellFAB>&               a_output,
+                    const ParticleContainerSoA<Photon>& a_photons,
+                    const int                           a_level) const noexcept;
 };
 
 #include <CD_NamespaceFooter.H>

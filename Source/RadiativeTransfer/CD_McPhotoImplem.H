@@ -31,36 +31,8 @@ McPhoto::depositPhotons(EBAMRCellData&        a_phi,
   // a_phi contains only weights, i.e. not divided by kappa
   this->depositKappaConservative<P, Ret, MemberFunc>(a_phi, a_photons, a_deposition, m_coarseFineDeposition);
 
-  // Compute m_depositionNC = sum(kappa*Wc)/sum(kappa)
-  this->depositNonConservative(m_depositionNC, a_phi);
-
-  // Compute hybrid deposition, including mass difference
-  this->depositHybrid(a_phi, m_massDiff, m_depositionNC);
-
-  // Redistribute
-  if (m_blendConservation) {
-    Vector<RefCountedPtr<EBFluxRedistribution>>& redistOps = m_amr->getRedistributionOp(m_realm, m_phase);
-    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      const Real     scale     = 1.0;
-      const Interval variables = Interval(0, 0);
-      const bool     hasCoar   = lvl > 0;
-      const bool     hasFine   = lvl < m_amr->getFinestLevel();
-
-      if (hasCoar) {
-        redistOps[lvl]->redistributeCoar(*a_phi[lvl - 1], *m_massDiff[lvl], scale, variables);
-      }
-
-      redistOps[lvl]->redistributeLevel(*a_phi[lvl], *m_massDiff[lvl], scale, variables);
-
-      if (hasFine) {
-        redistOps[lvl]->redistributeFine(*a_phi[lvl + 1], *m_massDiff[lvl], scale, variables);
-      }
-    }
-  }
-
-  // Average down and interpolate
-  m_amr->conservativeAverage(a_phi, m_realm, m_phase);
-  m_amr->interpGhost(a_phi, m_realm, m_phase);
+  // Blend with the non-conservative divergence, redistribute, average down, and interpolate ghosts.
+  this->depositHybridDivergence(a_phi);
 }
 
 template <class P, class Ret, Ret (P::*MemberFunc)() const>
