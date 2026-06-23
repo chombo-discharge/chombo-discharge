@@ -10,7 +10,7 @@ $(ebaseobject): dependencies
 
 # Build dependencies if they do not exist.
 dependencies:
-	$(MAKE) --directory=$(DISCHARGE_HOME) discharge-source discharge-geometries
+	$(MAKE) --directory=$(DISCHARGE_HOME) discharge-lib
 	$(MAKE) --directory=$(DISCHARGE_HOME) brownianwalker
 
 # Make BrownianWalker headers/library visible.

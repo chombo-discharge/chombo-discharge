@@ -490,6 +490,32 @@ ParticleOps::setData(ParticleContainer<P>& a_particles, const std::function<void
   }
 }
 
+template <typename P, typename Traits>
+inline void
+ParticleOps::setData(ParticleContainerSoA<P, Traits>&                                 a_particles,
+                     const std::function<void(ParticleSoA<P, Traits>&, std::size_t)>& a_functor) noexcept
+{
+  CH_TIME("ParticleOps::setData(ParticleContainerSoA<P>, std::function<void(ParticleSoA<P>&, std::size_t)>)");
+
+  for (int lvl = 0; lvl <= a_particles.getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl = a_particles.getGrids()[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
+
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      ParticleSoA<P, Traits>& leaf = a_particles[lvl][din];
+
+      for (std::size_t i = 0; i < leaf.size(); i++) {
+        a_functor(leaf, i);
+      }
+    }
+  }
+}
+
 template <typename P, Real& (P::*particleScalarField)()>
 inline void
 ParticleOps::setValue(ParticleContainer<P>& a_particles, const Real a_value) noexcept

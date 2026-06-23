@@ -416,14 +416,14 @@ namespace Physics {
 	@details This is used when injecting secondary particles through the EB.
 	@note Stored on the particle realm
       */
-      Vector<ParticleContainer<ItoParticle>> m_secondaryParticles;
+      Vector<RefCountedPtr<ParticleContainerSoA<ItoParticle>>> m_secondaryParticles;
 
       /**
 	@brief List of secondary photons injected through the EB
 	@details This is used when injecting secondary photons through the EB.
 	@note Stored on the particle realm
       */
-      Vector<ParticleContainer<Photon>> m_secondaryPhotons;
+      Vector<RefCountedPtr<ParticleContainerSoA<Photon>>> m_secondaryPhotons;
 
       /**
 	@brief CDR fluxes for CDR BCs.
@@ -847,9 +847,10 @@ namespace Physics {
       */
       virtual void
       intersectParticles(
-        const SpeciesSubset                     a_speciesSubset,
-        const bool                              a_delete,
-        const std::function<void(ItoParticle&)> a_nonDeletionModifier = [](ItoParticle&) -> void {
+        const SpeciesSubset                                               a_speciesSubset,
+        const bool                                                        a_delete,
+        const std::function<void(ParticleSoA<ItoParticle>&, std::size_t)> a_nonDeletionModifier =
+          [](ParticleSoA<ItoParticle>&, std::size_t) -> void {
           return;
         }) noexcept;
 
@@ -864,12 +865,13 @@ namespace Physics {
       */
       virtual void
       intersectParticles(
-        const SpeciesSubset                     a_speciesSubset,
-        const ItoSolver::WhichContainer         a_containerBulk,
-        const ItoSolver::WhichContainer         a_containerEB,
-        const ItoSolver::WhichContainer         a_containerDomain,
-        const bool                              a_delete,
-        const std::function<void(ItoParticle&)> a_nonDeletionModifier = [](ItoParticle&) -> void {
+        const SpeciesSubset                                               a_speciesSubset,
+        const ItoSolver::WhichContainer                                   a_containerBulk,
+        const ItoSolver::WhichContainer                                   a_containerEB,
+        const ItoSolver::WhichContainer                                   a_containerDomain,
+        const bool                                                        a_delete,
+        const std::function<void(ParticleSoA<ItoParticle>&, std::size_t)> a_nonDeletionModifier =
+          [](ParticleSoA<ItoParticle>&, std::size_t) -> void {
           return;
         }) noexcept;
 
@@ -1092,8 +1094,8 @@ namespace Physics {
 	@note User should have updated the mobilities before calling this routine.
       */
       virtual void
-      computeConductivityCell(EBAMRCellData&                                 a_conductivity,
-                              const Vector<ParticleContainer<ItoParticle>*>& a_particles) noexcept;
+      computeConductivityCell(EBAMRCellData&                                    a_conductivity,
+                              const Vector<ParticleContainerSoA<ItoParticle>*>& a_particles) noexcept;
 
       /**
 	@brief Compute grad(phi) and phi for both CDR and Ito species and put the result on the fluid realm. 
@@ -1599,14 +1601,14 @@ namespace Physics {
 	@param[in]  a_dt                   Time step.
       */
       virtual void
-      fillSecondaryEmissionEB(Vector<ParticleContainer<ItoParticle>>&  a_secondaryParticles,
-                              Vector<EBAMRIVData>&                     a_cdrFluxes,
-                              Vector<ParticleContainer<Photon>>&       a_secondaryPhotons,
-                              Vector<ParticleContainer<ItoParticle>*>& a_primaryParticles,
-                              Vector<EBAMRIVData>&                     a_cdrFluxesExtrap,
-                              Vector<ParticleContainer<Photon>*>&      a_primaryPhotons,
-                              const EBAMRCellData&                     a_electricField,
-                              const Real                               a_dt) noexcept;
+      fillSecondaryEmissionEB(Vector<RefCountedPtr<ParticleContainerSoA<ItoParticle>>>& a_secondaryParticles,
+                              Vector<EBAMRIVData>&                                      a_cdrFluxes,
+                              Vector<RefCountedPtr<ParticleContainerSoA<Photon>>>&      a_secondaryPhotons,
+                              Vector<ParticleContainerSoA<ItoParticle>*>&               a_primaryParticles,
+                              Vector<EBAMRIVData>&                                      a_cdrFluxesExtrap,
+                              Vector<ParticleContainerSoA<Photon>*>&                    a_primaryPhotons,
+                              const EBAMRCellData&                                      a_electricField,
+                              const Real                                                a_dt) noexcept;
 
       /**
 	@brief Resolve secondary emission at the EB.
@@ -1629,11 +1631,11 @@ namespace Physics {
 	@param[in]  a_dt                   Time step.      
       */
       virtual void
-      resolveSecondaryEmissionEB(Vector<ParticleContainer<ItoParticle>*>& a_secondaryParticles,
-                                 Vector<ParticleContainer<ItoParticle>*>& a_primaryParticles,
-                                 Vector<EBAMRIVData*>&                    a_cdrFluxes,
-                                 EBAMRIVData&                             a_surfaceChargeDensity,
-                                 const Real                               a_dt) noexcept;
+      resolveSecondaryEmissionEB(Vector<ParticleContainerSoA<ItoParticle>*>& a_secondaryParticles,
+                                 Vector<ParticleContainerSoA<ItoParticle>*>& a_primaryParticles,
+                                 Vector<EBAMRIVData*>&                       a_cdrFluxes,
+                                 EBAMRIVData&                                a_surfaceChargeDensity,
+                                 const Real                                  a_dt) noexcept;
 
       /**
 	@brief Compute a physics-based maximum time step.

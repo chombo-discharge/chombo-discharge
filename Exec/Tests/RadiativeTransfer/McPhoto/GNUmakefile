@@ -8,10 +8,9 @@ include $(CHOMBO_HOME)/mk/Make.example
 $(ebaseobject): dependencies
 .DEFAULT_GOAL=$(ebase)
 
-# Build dependencies. NOTE: bypasses discharge-lib (which builds the not-yet-ported, red ItoKMC
-# module during the SoA particle migration). Restore to discharge-lib once ItoKMC is ported.
+# Build dependencies.
 dependencies:
-	$(MAKE) --directory=$(DISCHARGE_HOME) discharge-source discharge-geometries
+	$(MAKE) --directory=$(DISCHARGE_HOME) discharge-lib
 	$(MAKE) --directory=$(DISCHARGE_HOME) radiativetransfer
 
 # Make advection-diffusion headers and library visible. 

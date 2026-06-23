@@ -336,7 +336,7 @@ public:
     @param[in] a_whichContainer Which ItoSolver container
     @return Particles
   */
-  virtual Vector<ParticleContainer<ItoParticle>*>
+  virtual Vector<ParticleContainerSoA<ItoParticle>*>
   getParticles(const ItoSolver::WhichContainer a_whichContainer);
 
 protected:

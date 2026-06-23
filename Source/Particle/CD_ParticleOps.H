@@ -224,7 +224,19 @@ public:
   setData(ParticleContainer<P>& a_particles, const std::function<void(P&)>& a_functor) noexcept;
 
   /**
-    @brief Set value function. Lets the user set scalar particle quantity. Use with e.g. setValue<P, &P::weight>(particles, 0.0) etc. 
+    @brief Set value function for SoA containers. Lets the user set particle parameters via a (leaf, index) callback.
+    @param[in,out] a_particles Particles
+    @param[in]    a_functor   Callback (leaf, index) for setting particle values via payload columns
+    @tparam P      Payload type of the container.
+    @tparam Traits Column descriptor for the payload.
+  */
+  template <typename P, typename Traits>
+  static inline void
+  setData(ParticleContainerSoA<P, Traits>&                                 a_particles,
+          const std::function<void(ParticleSoA<P, Traits>&, std::size_t)>& a_functor) noexcept;
+
+  /**
+    @brief Set value function. Lets the user set scalar particle quantity. Use with e.g. setValue<P, &P::weight>(particles, 0.0) etc.
     @param[in,out] a_particles Particles
     @param[in]    a_value     Value to set
   */

@@ -510,18 +510,18 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
 }
 
 inline void
-ItoKMCPhysics::reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
-                                  const Vector<FPR>&          a_newNumParticles,
-                                  const Vector<FPR>&          a_oldNumParticles,
-                                  const RealVect              a_electricField,
-                                  const RealVect              a_cellPos,
-                                  const RealVect              a_centroidPos,
-                                  const RealVect              a_lo,
-                                  const RealVect              a_hi,
-                                  const RealVect              a_bndryCentroid,
-                                  const RealVect              a_bndryNormal,
-                                  const Real                  a_dx,
-                                  const Real                  a_kappa) const noexcept
+ItoKMCPhysics::reconcileParticles(Vector<List<ItoSeedParticle>*>& a_particles,
+                                  const Vector<FPR>&              a_newNumParticles,
+                                  const Vector<FPR>&              a_oldNumParticles,
+                                  const RealVect                  a_electricField,
+                                  const RealVect                  a_cellPos,
+                                  const RealVect                  a_centroidPos,
+                                  const RealVect                  a_lo,
+                                  const RealVect                  a_hi,
+                                  const RealVect                  a_bndryCentroid,
+                                  const RealVect                  a_bndryNormal,
+                                  const Real                      a_dx,
+                                  const Real                      a_kappa) const noexcept
 {
   CH_TIMERS("ItoKMCPhysics::reconcileParticles");
   CH_TIMER("ItoKMCPhysics::reconcileParticles::compute_downstream", t1);
@@ -591,7 +591,7 @@ ItoKMCPhysics::reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
         // If the cell already contains particles, partition the new particle weights and increment the existing particles
         const std::vector<long long> particleWeights = ParticleManagement::partitionParticleWeights(diff, numParticles);
 
-        ListIterator<ItoParticle> lit(*a_particles[i]);
+        ListIterator<ItoSeedParticle> lit(*a_particles[i]);
 
         for (int j = 0; lit.ok() && j < particleWeights.size(); ++lit, j++) {
           lit().weight() += 1.0 * particleWeights[j];
@@ -642,7 +642,7 @@ ItoKMCPhysics::reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
           }
           }
 
-          a_particles[i]->add(ItoParticle(1.0 * w, x));
+          a_particles[i]->add(ItoSeedParticle(1.0 * w, x, 0.0));
         }
       }
     }
@@ -655,14 +655,14 @@ ItoKMCPhysics::reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
 }
 
 inline bool
-ItoKMCPhysics::computeUpstreamPosition(RealVect&                a_pos,
-                                       RealVect&                a_lo,
-                                       RealVect&                a_hi,
-                                       const int&               a_Z,
-                                       const List<ItoParticle>& a_particles,
-                                       const RealVect&          a_electricField,
-                                       const RealVect&          a_cellPos,
-                                       const Real&              a_dx) const noexcept
+ItoKMCPhysics::computeUpstreamPosition(RealVect&                    a_pos,
+                                       RealVect&                    a_lo,
+                                       RealVect&                    a_hi,
+                                       const int&                   a_Z,
+                                       const List<ItoSeedParticle>& a_particles,
+                                       const RealVect&              a_electricField,
+                                       const RealVect&              a_cellPos,
+                                       const Real&                  a_dx) const noexcept
 {
   CH_TIME("ItoKMCPhysics::computeUpstreamPosition");
 
@@ -673,7 +673,7 @@ ItoKMCPhysics::computeUpstreamPosition(RealVect&                a_pos,
   a_hi  = +0.5 * RealVect::Unit;
 
   // Quick lambda for turning physical position into unit cell position.
-  auto unitCellPosition = [&](const ItoParticle& p) -> RealVect {
+  auto unitCellPosition = [&](const ItoSeedParticle& p) -> RealVect {
     return (p.position() - a_cellPos) / a_dx;
   };
 
@@ -688,7 +688,7 @@ ItoKMCPhysics::computeUpstreamPosition(RealVect&                a_pos,
 
     Real D = std::numeric_limits<Real>::max();
 
-    for (ListIterator<ItoParticle> lit(a_particles); lit.ok(); ++lit) {
+    for (ListIterator<ItoSeedParticle> lit(a_particles); lit.ok(); ++lit) {
       const RealVect x = unitCellPosition(lit());
       const Real     d = x.dotProduct(v);
 
@@ -713,7 +713,7 @@ ItoKMCPhysics::computeUpstreamPosition(RealVect&                a_pos,
 }
 
 inline void
-ItoKMCPhysics::removeParticles(List<ItoParticle>& a_particles, const long long a_numParticlesToRemove) const
+ItoKMCPhysics::removeParticles(List<ItoSeedParticle>& a_particles, const long long a_numParticlesToRemove) const
 {
   CH_TIME("ItoKMCPhysics::removeParticles");
 
@@ -726,7 +726,7 @@ ItoKMCPhysics::removeParticles(List<ItoParticle>& a_particles, const long long a
   auto getTotalWeight = [&]() -> long long {
     long long W = zero;
 
-    for (ListIterator<ItoParticle> lit(a_particles); lit.ok(); ++lit) {
+    for (ListIterator<ItoSeedParticle> lit(a_particles); lit.ok(); ++lit) {
       W += llround(lit().weight());
 
       if (lit().weight() < 1.0) {
@@ -778,16 +778,16 @@ ItoKMCPhysics::removeParticles(List<ItoParticle>& a_particles, const long long a
 }
 
 inline void
-ItoKMCPhysics::reconcilePhotons(Vector<List<Photon>*>& a_newPhotons,
-                                const Vector<FPR>&     a_numNewPhotons,
-                                const RealVect         a_cellPos,
-                                const RealVect         a_centroidPos,
-                                const RealVect         a_lo,
-                                const RealVect         a_hi,
-                                const RealVect         a_bndryCentroid,
-                                const RealVect         a_bndryNormal,
-                                const Real             a_dx,
-                                const Real             a_kappa) const noexcept
+ItoKMCPhysics::reconcilePhotons(Vector<List<PhotonSeed>*>& a_newPhotons,
+                                const Vector<FPR>&         a_numNewPhotons,
+                                const RealVect             a_cellPos,
+                                const RealVect             a_centroidPos,
+                                const RealVect             a_lo,
+                                const RealVect             a_hi,
+                                const RealVect             a_bndryCentroid,
+                                const RealVect             a_bndryNormal,
+                                const Real                 a_dx,
+                                const Real                 a_kappa) const noexcept
 {
   CH_TIME("ItoKMCPhysics::reconcilePhotons");
 
@@ -804,16 +804,16 @@ ItoKMCPhysics::reconcilePhotons(Vector<List<Photon>*>& a_newPhotons,
         const RealVect x = Random::randomPosition(a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
         const RealVect v = Units::c * Random::getDirection();
 
-        a_newPhotons[i]->add(Photon(x, v, m_rtSpecies[i]->getAbsorptionCoefficient(x), 1.0 * w));
+        a_newPhotons[i]->add(PhotonSeed(x, v, m_rtSpecies[i]->getAbsorptionCoefficient(x), 1.0 * w));
       }
     }
   }
 }
 
 inline void
-ItoKMCPhysics::reconcilePhotoionization(Vector<List<ItoParticle>*>&   a_itoParticles,
-                                        Vector<List<PointParticle>*>& a_cdrParticles,
-                                        const Vector<List<Photon>*>&  a_absorbedPhotons) const noexcept
+ItoKMCPhysics::reconcilePhotoionization(Vector<List<ItoSeedParticle>*>&  a_itoParticles,
+                                        Vector<List<PointParticle>*>&    a_cdrParticles,
+                                        const Vector<List<PhotonSeed>*>& a_absorbedPhotons) const noexcept
 {
   CH_TIME("ItoKMCPhysics::reconcilePhotoionization");
 
@@ -826,7 +826,7 @@ ItoKMCPhysics::reconcilePhotoionization(Vector<List<ItoParticle>*>&   a_itoParti
       std::discrete_distribution<int> d                = m_photoPathways.at(i).first;
       const std::map<int, int>&       localToGlobalMap = m_photoPathways.at(i).second;
 
-      for (ListIterator<Photon> lit(*a_absorbedPhotons[i]); lit.ok(); ++lit) {
+      for (ListIterator<PhotonSeed> lit(*a_absorbedPhotons[i]); lit.ok(); ++lit) {
         const RealVect x = lit().position();
         const Real     w = lit().weight();
 
@@ -842,7 +842,7 @@ ItoKMCPhysics::reconcilePhotoionization(Vector<List<ItoParticle>*>&   a_itoParti
           const int&         localIndex = m_speciesMap.at(t).second;
 
           if (type == SpeciesType::Ito) {
-            a_itoParticles[localIndex]->add(ItoParticle(w, x));
+            a_itoParticles[localIndex]->add(ItoSeedParticle(w, x, 0.0));
           }
           else if (type == SpeciesType::CDR) {
             a_cdrParticles[localIndex]->add(PointParticle(x, w));
@@ -871,7 +871,7 @@ ItoKMCPhysics::isotropicDiffusion(const ItoParticle& a_particle, const Real a_dt
     r[dir] = Random::getNormal01();
   }
 
-  return sqrt(2.0 * a_particle.diffusion() * a_dt) * r;
+  return sqrt(2.0 * a_particle.diffusion * a_dt) * r;
 }
 
 inline RealVect
@@ -879,7 +879,7 @@ ItoKMCPhysics::forwardIsotropicDiffusion(const ItoParticle& a_particle, const Re
 {
   RealVect hop = this->isotropicDiffusion(a_particle, a_dt);
 
-  const RealVect v = a_particle.velocity();
+  const RealVect v = RealVect(D_DECL(a_particle.velocityX, a_particle.velocityY, a_particle.velocityZ));
 
   if (v != RealVect::Zero) {
     const RealVect u = v / v.vectorLength();

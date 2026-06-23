@@ -851,9 +851,9 @@ ItoSolver::transferCoveredParticles(ParticleContainerSoA<ItoParticle>& a_particl
 }
 
 void
-ItoSolver::intersectParticles(const EBIntersection                     a_ebIntersection,
-                              const bool                               a_deleteParticles,
-                              const std::function<void(ItoParticle&)>& a_nonDeletionModifier)
+ItoSolver::intersectParticles(const EBIntersection                                               a_ebIntersection,
+                              const bool                                                         a_deleteParticles,
+                              const std::function<void(ParticleSoA<ItoParticle>&, std::size_t)>& a_nonDeletionModifier)
 {
   CH_TIME("ItoSolver::intersectParticles(EBIntersection, bool)");
   if (m_verbosity > 5) {
@@ -869,12 +869,12 @@ ItoSolver::intersectParticles(const EBIntersection                     a_ebInter
 }
 
 void
-ItoSolver::intersectParticles(const WhichContainer                     a_particles,
-                              const WhichContainer                     a_ebParticles,
-                              const WhichContainer                     a_domainParticles,
-                              const EBIntersection                     a_ebIntersection,
-                              const bool                               a_deleteParticles,
-                              const std::function<void(ItoParticle&)>& a_nonDeletionModifier)
+ItoSolver::intersectParticles(const WhichContainer                                               a_particles,
+                              const WhichContainer                                               a_ebParticles,
+                              const WhichContainer                                               a_domainParticles,
+                              const EBIntersection                                               a_ebIntersection,
+                              const bool                                                         a_deleteParticles,
+                              const std::function<void(ParticleSoA<ItoParticle>&, std::size_t)>& a_nonDeletionModifier)
 {
   CH_TIME("ItoSolver::intersectParticles(WhichContainerx3, EBIntersection, bool)");
   if (m_verbosity > 5) {
@@ -894,12 +894,12 @@ ItoSolver::intersectParticles(const WhichContainer                     a_particl
 }
 
 void
-ItoSolver::intersectParticles(ParticleContainerSoA<ItoParticle>&       a_particles,
-                              ParticleContainerSoA<ItoParticle>&       a_ebParticles,
-                              ParticleContainerSoA<ItoParticle>&       a_domainParticles,
-                              const EBIntersection                     a_ebIntersection,
-                              const bool                               a_deleteParticles,
-                              const std::function<void(ItoParticle&)>& a_nonDeletionModifier)
+ItoSolver::intersectParticles(ParticleContainerSoA<ItoParticle>&                                 a_particles,
+                              ParticleContainerSoA<ItoParticle>&                                 a_ebParticles,
+                              ParticleContainerSoA<ItoParticle>&                                 a_domainParticles,
+                              const EBIntersection                                               a_ebIntersection,
+                              const bool                                                         a_deleteParticles,
+                              const std::function<void(ParticleSoA<ItoParticle>&, std::size_t)>& a_nonDeletionModifier)
 {
   CH_TIME("ItoSolver::intersectParticles(ParticleContainerx3, EBIntersection, bool)");
   if (m_verbosity > 5) {
@@ -912,28 +912,30 @@ ItoSolver::intersectParticles(ParticleContainerSoA<ItoParticle>&       a_particl
 
   constexpr Real tolerance = 0.0;
 
-  // NOTE: The SoA AmrMesh intersection routines do not (yet) take the non-deletion modifier -- SoA support
-  //       for it is deferred to the ItoKMC port (the only consumer that passes a non-trivial modifier).
   switch (a_ebIntersection) {
   case EBIntersection::Raycast: {
     m_amr->intersectParticlesRaycastIF<
-      D_DECL(&ItoParticle::oldPositionX, &ItoParticle::oldPositionY, &ItoParticle::oldPositionZ)>(a_particles,
-                                                                                                  a_ebParticles,
-                                                                                                  a_domainParticles,
-                                                                                                  m_phase,
-                                                                                                  tolerance,
-                                                                                                  a_deleteParticles);
+      D_DECL(&ItoParticle::oldPositionX, &ItoParticle::oldPositionY, &ItoParticle::oldPositionZ)>(
+      a_particles,
+      a_ebParticles,
+      a_domainParticles,
+      m_phase,
+      tolerance,
+      a_deleteParticles,
+      a_nonDeletionModifier);
 
     break;
   }
   case EBIntersection::Bisection: {
     m_amr->intersectParticlesBisectIF<
-      D_DECL(&ItoParticle::oldPositionX, &ItoParticle::oldPositionY, &ItoParticle::oldPositionZ)>(a_particles,
-                                                                                                  a_ebParticles,
-                                                                                                  a_domainParticles,
-                                                                                                  m_phase,
-                                                                                                  m_bisectionStep,
-                                                                                                  a_deleteParticles);
+      D_DECL(&ItoParticle::oldPositionX, &ItoParticle::oldPositionY, &ItoParticle::oldPositionZ)>(
+      a_particles,
+      a_ebParticles,
+      a_domainParticles,
+      m_phase,
+      m_bisectionStep,
+      a_deleteParticles,
+      a_nonDeletionModifier);
 
     break;
   }

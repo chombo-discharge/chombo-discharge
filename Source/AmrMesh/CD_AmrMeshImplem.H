@@ -1888,12 +1888,14 @@ AmrMesh::intersectParticlesBisectIF(ParticleContainer<P>&          a_activeParti
 
 template <auto... OldPosition, typename P, typename Traits>
 void
-AmrMesh::intersectParticlesRaycastIF(ParticleContainerSoA<P, Traits>& a_activeParticles,
-                                     ParticleContainerSoA<P, Traits>& a_ebParticles,
-                                     ParticleContainerSoA<P, Traits>& a_domainParticles,
-                                     const phase::which_phase         a_phase,
-                                     const Real                       a_tolerance,
-                                     const bool                       a_deleteParticles) const noexcept
+AmrMesh::intersectParticlesRaycastIF(
+  ParticleContainerSoA<P, Traits>&                                 a_activeParticles,
+  ParticleContainerSoA<P, Traits>&                                 a_ebParticles,
+  ParticleContainerSoA<P, Traits>&                                 a_domainParticles,
+  const phase::which_phase                                         a_phase,
+  const Real                                                       a_tolerance,
+  const bool                                                       a_deleteParticles,
+  const std::function<void(ParticleSoA<P, Traits>&, std::size_t)>& a_nonDeletionModifier) const noexcept
 {
   CH_TIME("AmrMesh::intersectParticlesRaycastIF(ParticleContainerSoA)");
   if (m_verbosity > 5) {
@@ -2011,6 +2013,7 @@ AmrMesh::intersectParticlesRaycastIF(ParticleContainerSoA<P, Traits>& a_activePa
               }
               else {
                 active.setPosition(i, newPos);
+                a_nonDeletionModifier(active, i);
                 i++;
               }
             }
@@ -2026,6 +2029,7 @@ AmrMesh::intersectParticlesRaycastIF(ParticleContainerSoA<P, Traits>& a_activePa
               }
               else {
                 active.setPosition(i, newPos);
+                a_nonDeletionModifier(active, i);
                 i++;
               }
             }
@@ -2048,12 +2052,14 @@ AmrMesh::intersectParticlesRaycastIF(ParticleContainerSoA<P, Traits>& a_activePa
 
 template <auto... OldPosition, typename P, typename Traits>
 void
-AmrMesh::intersectParticlesBisectIF(ParticleContainerSoA<P, Traits>& a_activeParticles,
-                                    ParticleContainerSoA<P, Traits>& a_ebParticles,
-                                    ParticleContainerSoA<P, Traits>& a_domainParticles,
-                                    const phase::which_phase         a_phase,
-                                    const Real                       a_bisectionStep,
-                                    const bool                       a_deleteParticles) const noexcept
+AmrMesh::intersectParticlesBisectIF(
+  ParticleContainerSoA<P, Traits>&                                 a_activeParticles,
+  ParticleContainerSoA<P, Traits>&                                 a_ebParticles,
+  ParticleContainerSoA<P, Traits>&                                 a_domainParticles,
+  const phase::which_phase                                         a_phase,
+  const Real                                                       a_bisectionStep,
+  const bool                                                       a_deleteParticles,
+  const std::function<void(ParticleSoA<P, Traits>&, std::size_t)>& a_nonDeletionModifier) const noexcept
 {
   CH_TIME("AmrMesh::intersectParticlesBisectIF(ParticleContainerSoA)");
   if (m_verbosity > 5) {
@@ -2174,6 +2180,7 @@ AmrMesh::intersectParticlesBisectIF(ParticleContainerSoA<P, Traits>& a_activePar
               }
               else {
                 active.setPosition(i, newPos);
+                a_nonDeletionModifier(active, i);
                 i++;
               }
             }
@@ -2189,6 +2196,7 @@ AmrMesh::intersectParticlesBisectIF(ParticleContainerSoA<P, Traits>& a_activePar
               }
               else {
                 active.setPosition(i, newPos);
+                a_nonDeletionModifier(active, i);
                 i++;
               }
             }

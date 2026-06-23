@@ -432,9 +432,10 @@ public:
   */
   virtual void
   intersectParticles(
-    const EBIntersection                     a_ebIntersection,
-    const bool                               a_deleteParticles,
-    const std::function<void(ItoParticle&)>& a_nonDeletionModifier = [](ItoParticle&) -> void {
+    const EBIntersection                                               a_ebIntersection,
+    const bool                                                         a_deleteParticles,
+    const std::function<void(ParticleSoA<ItoParticle>&, std::size_t)>& a_nonDeletionModifier =
+      [](ParticleSoA<ItoParticle>&, std::size_t) -> void {
       return;
     });
 
@@ -452,12 +453,13 @@ public:
   */
   virtual void
   intersectParticles(
-    const WhichContainer                     a_particles,
-    const WhichContainer                     a_ebParticles,
-    const WhichContainer                     a_domainParticles,
-    const EBIntersection                     a_ebIntersection,
-    const bool                               a_deleteParticles,
-    const std::function<void(ItoParticle&)>& a_nonDeletionModifier = [](ItoParticle&) -> void {
+    const WhichContainer                                               a_particles,
+    const WhichContainer                                               a_ebParticles,
+    const WhichContainer                                               a_domainParticles,
+    const EBIntersection                                               a_ebIntersection,
+    const bool                                                         a_deleteParticles,
+    const std::function<void(ParticleSoA<ItoParticle>&, std::size_t)>& a_nonDeletionModifier =
+      [](ParticleSoA<ItoParticle>&, std::size_t) -> void {
       return;
     });
 
@@ -474,12 +476,13 @@ public:
   */
   virtual void
   intersectParticles(
-    ParticleContainerSoA<ItoParticle>&       a_particles,
-    ParticleContainerSoA<ItoParticle>&       a_ebParticles,
-    ParticleContainerSoA<ItoParticle>&       a_domainParticles,
-    const EBIntersection                     a_ebIntersection,
-    const bool                               a_deleteParticles,
-    const std::function<void(ItoParticle&)>& a_nonDeletionModifier = [](ItoParticle&) -> void {
+    ParticleContainerSoA<ItoParticle>&                                 a_particles,
+    ParticleContainerSoA<ItoParticle>&                                 a_ebParticles,
+    ParticleContainerSoA<ItoParticle>&                                 a_domainParticles,
+    const EBIntersection                                               a_ebIntersection,
+    const bool                                                         a_deleteParticles,
+    const std::function<void(ParticleSoA<ItoParticle>&, std::size_t)>& a_nonDeletionModifier =
+      [](ParticleSoA<ItoParticle>&, std::size_t) -> void {
       return;
     });
 

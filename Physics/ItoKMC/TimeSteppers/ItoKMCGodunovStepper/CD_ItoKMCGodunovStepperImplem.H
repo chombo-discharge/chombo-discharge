@@ -28,6 +28,96 @@
 
 using namespace Physics::ItoKMC;
 
+namespace {
+  // Deposit a PointParticle container's weight onto a_phi using an Ito solver's configured deposition scheme.
+  // Replaces the pre-SoA ItoSolver::depositParticles<P,Ret,MemberFunc> template (removed in the SoA port) by
+  // routing through AmrMesh's AoS PointParticle deposit.
+  inline void
+  depositPointParticlesLikeSolver(const RefCountedPtr<AmrMesh>&     a_amr,
+                                  const std::string&                a_realm,
+                                  const phase::which_phase          a_phase,
+                                  const RefCountedPtr<ItoSolver>&   a_solver,
+                                  EBAMRCellData&                    a_phi,
+                                  ParticleContainer<PointParticle>& a_particles) noexcept
+  {
+    a_amr->depositParticles<PointParticle, const Real&, &PointParticle::weight>(a_phi,
+                                                                                a_realm,
+                                                                                a_phase,
+                                                                                a_particles,
+                                                                                a_solver->getDeposition(),
+                                                                                a_solver->getCoarseFineDeposition(),
+                                                                                false);
+  }
+
+  // SoA analogue of AmrMesh::transferIrregularParticles: move particles that ended up on the covered side of the
+  // EB (outside every VoF half-space) from a_src to a_dst, placing them on the EB. Swap-and-pop on the SoA leaves.
+  inline void
+  transferIrregularParticlesSoA(const RefCountedPtr<AmrMesh>&      a_amr,
+                                const phase::which_phase           a_phase,
+                                ParticleContainerSoA<ItoParticle>& a_dst,
+                                ParticleContainerSoA<ItoParticle>& a_src) noexcept
+  {
+    const std::string realm = a_dst.getRealm();
+
+    for (int lvl = 0; lvl <= a_amr->getFinestLevel(); lvl++) {
+      const DisjointBoxLayout& dbl    = a_amr->getGrids(realm)[lvl];
+      const DataIterator&      dit    = dbl.dataIterator();
+      const EBISLayout&        ebisl  = a_amr->getEBISLayout(realm, a_phase)[lvl];
+      const RealVect           probLo = a_amr->getProbLo();
+      const Real               dx     = a_amr->getDx()[lvl];
+
+      const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din     = dit[mybox];
+        const Box        cellBox = dbl[din];
+        const EBISBox&   ebisbox = ebisl[din];
+
+        ParticleSoA<ItoParticle>& dst = a_dst[lvl][din];
+        ParticleSoA<ItoParticle>& src = a_src[lvl][din];
+
+        std::size_t i = 0;
+        while (i < src.size()) {
+          const RealVect pos = src.position(i);
+          const IntVect  iv  = ParticleOps::getParticleCellIndex(pos, probLo, dx);
+
+          bool moved = false;
+
+          if (cellBox.contains(iv) && ebisbox.isIrregular(iv)) {
+            bool insideAnyVoF = false;
+
+            const Vector<VolIndex> allVoFs = ebisbox.getVoFs(iv);
+            for (int k = 0; k < allVoFs.size(); k++) {
+              const RealVect normal = ebisbox.normal(allVoFs[k]);
+              const RealVect ebPos  = probLo + Location::position(Location::Cell::Boundary, allVoFs[k], ebisbox, dx);
+
+              if ((pos - ebPos).dotProduct(normal) >= 0.0) {
+                insideAnyVoF = true;
+              }
+            }
+
+            if (!insideAnyVoF) {
+              const VolIndex& vof   = allVoFs[0];
+              const RealVect  ebPos = probLo + Location::position(Location::Cell::Boundary, vof, ebisbox, dx);
+
+              src.setPosition(i, ebPos);
+              dst.appendParticle(src, i);
+              src.remove(i);
+
+              moved = true;
+            }
+          }
+
+          if (!moved) {
+            i++;
+          }
+        }
+      }
+    }
+  }
+} // namespace
+
 template <typename I, typename C, typename R, typename F>
 ItoKMCGodunovStepper<I, C, R, F>::ItoKMCGodunovStepper(RefCountedPtr<ItoKMCPhysics>& a_physics, bool a_parseOptions)
   : ItoKMCStepper<I, C, R, F>(a_physics)
@@ -336,10 +426,10 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   for (auto solverIt = (this->m_rte)->iterator(); solverIt.ok(); ++solverIt) {
     RefCountedPtr<McPhoto> solver = solverIt();
 
-    EBAMRCellData&             phi     = solver->getPhi();
-    ParticleContainer<Photon>& photons = solver->getBulkPhotons();
+    EBAMRCellData&                phi     = solver->getPhi();
+    ParticleContainerSoA<Photon>& photons = solver->getBulkPhotons();
 
-    solver->depositPhotons<Photon, const Real&, &Photon::weight>(phi, photons, DepositionType::NGP);
+    solver->depositPhotons(phi, photons, DepositionType::NGP);
   }
   m_timer.stopEvent("Deposit photons");
 
@@ -367,19 +457,18 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
     //       are put in a separate data container. We want to do this in order to reduce artificial gradients in the particle
     //       densities near the EB. The way we do this is that we flag the particles during the intersection; particles that are flagged
     //       are transferred to a container which is added to the conductivity-related particles. The particles are later removed.
-    auto setFlag = [](ItoParticle& p) -> void {
-      p.tmpReal() = 1.0;
+    const std::function<void(ParticleSoA<ItoParticle>&, std::size_t)> setFlag = [](ParticleSoA<ItoParticle>& leaf,
+                                                                                   const std::size_t i) -> void {
+      leaf.template get<&ItoParticle::tmpReal>(i) = 1.0;
     };
-    auto nonDeletionModifier = [](ItoParticle& p) -> void {
-      p.tmpReal() = -1.0;
-    };
-    auto removeCrit = [](const ItoParticle& p) -> bool {
-      return p.tmpReal() < 0.0;
+    const std::function<void(ParticleSoA<ItoParticle>&, std::size_t)> nonDeletionModifier =
+      [](ParticleSoA<ItoParticle>& leaf, const std::size_t i) -> void {
+      leaf.template get<&ItoParticle::tmpReal>(i) = -1.0;
     };
 
     // Set flag for identifying which particles were intersected by not removed.
     for (auto it = this->m_ito->iterator(); it.ok(); ++it) {
-      ParticleOps::setData<ItoParticle>(it()->getParticles(ItoSolver::WhichContainer::Bulk), setFlag);
+      ParticleOps::setData(it()->getParticles(ItoSolver::WhichContainer::Bulk), setFlag);
     }
 
     // Intersect particles, but don't remove them.
@@ -394,9 +483,9 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
       const int idx = it.index();
       const int Z   = species->getChargeNumber();
 
-      ParticleContainer<PointParticle>& irregParticles = *m_irregularParticles[idx];
-      ParticleContainer<ItoParticle>&   ebParticles    = solver->getParticles(ItoSolver::WhichContainer::EB);
-      ParticleContainer<ItoParticle>&   bulkParticles  = it()->getParticles(ItoSolver::WhichContainer::Bulk);
+      ParticleContainer<PointParticle>&  irregParticles = *m_irregularParticles[idx];
+      ParticleContainerSoA<ItoParticle>& ebParticles    = solver->getParticles(ItoSolver::WhichContainer::EB);
+      ParticleContainerSoA<ItoParticle>& bulkParticles  = it()->getParticles(ItoSolver::WhichContainer::Bulk);
 
       irregParticles.clearParticles();
 
@@ -411,16 +500,14 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
           for (int mybox = 0; mybox < nbox; mybox++) {
             const DataIndex& din = dit[mybox];
 
-            List<PointParticle>&     pointParticles = irregParticles[lvl][din].listItems();
-            const List<ItoParticle>& patchParticles = bulkParticles[lvl][din].listItems();
+            List<PointParticle>&            pointParticles = irregParticles[lvl][din].listItems();
+            const ParticleSoA<ItoParticle>& leaf           = bulkParticles[lvl][din];
 
-            for (ListIterator<ItoParticle> lit(patchParticles); lit.ok(); ++lit) {
-              const ItoParticle& p = lit();
-
-              if (p.tmpReal() < 0.0) {
-                const RealVect& pos      = p.position();
-                const Real&     weight   = p.weight();
-                const Real&     mobility = p.mobility();
+            for (std::size_t i = 0; i < leaf.size(); i++) {
+              if (leaf.template get<&ItoParticle::tmpReal>(i) < 0.0) {
+                const RealVect pos      = leaf.position(i);
+                const Real     weight   = leaf.weight(i);
+                const Real     mobility = leaf.template get<&ItoParticle::mobility>(i);
 
                 pointParticles.add(PointParticle(pos, weight * mobility));
               }
@@ -430,10 +517,33 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
       }
     }
 
-    // Finally, delete the original particles
+    // Finally, delete the original particles that were flagged (tmpReal < 0) via swap-and-pop on the SoA leaves.
     for (auto it = this->m_ito->iterator(); it.ok(); ++it) {
-      ParticleContainer<ItoParticle>& bulkParticles = it()->getParticles(ItoSolver::WhichContainer::Bulk);
-      ParticleOps::removeParticles<ItoParticle>(bulkParticles, removeCrit);
+      ParticleContainerSoA<ItoParticle>& bulkParticles = it()->getParticles(ItoSolver::WhichContainer::Bulk);
+
+      for (int lvl = 0; lvl <= (this->m_amr)->getFinestLevel(); lvl++) {
+        const DisjointBoxLayout& dbl = (this->m_amr)->getGrids((this->m_particleRealm))[lvl];
+        const DataIterator&      dit = dbl.dataIterator();
+
+        const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+        for (int mybox = 0; mybox < nbox; mybox++) {
+          const DataIndex& din = dit[mybox];
+
+          ParticleSoA<ItoParticle>& leaf = bulkParticles[lvl][din];
+
+          std::size_t i = 0;
+          while (i < leaf.size()) {
+            if (leaf.template get<&ItoParticle::tmpReal>(i) < 0.0) {
+              leaf.remove(i);
+            }
+            else {
+              i++;
+            }
+          }
+        }
+      }
     }
   }
   else {
@@ -447,10 +557,10 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   for (auto it = this->m_ito->iterator(); it.ok(); ++it) {
     const RefCountedPtr<ItoSolver>& solver = it();
 
-    ParticleContainer<ItoParticle>& ebParticles   = solver->getParticles(ItoSolver::WhichContainer::EB);
-    ParticleContainer<ItoParticle>& bulkParticles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
+    ParticleContainerSoA<ItoParticle>& ebParticles   = solver->getParticles(ItoSolver::WhichContainer::EB);
+    ParticleContainerSoA<ItoParticle>& bulkParticles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
-    this->m_amr->transferIrregularParticles(ebParticles, bulkParticles, this->m_plasmaPhase);
+    transferIrregularParticlesSoA(this->m_amr, this->m_plasmaPhase, ebParticles, bulkParticles);
   }
   m_timer.stopEvent("EB/Particle intersection");
   // ====== END TRANSPORT STEP ======
@@ -748,7 +858,7 @@ ItoKMCGodunovStepper<I, C, R, F>::setOldPositions() noexcept
       const DisjointBoxLayout& dbl = (this->m_amr)->getGrids((this->m_particleRealm))[lvl];
       const DataIterator&      dit = dbl.dataIterator();
 
-      ParticleData<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk)[lvl];
+      auto& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk)[lvl];
 
       const int nbox = dit.size();
 
@@ -756,12 +866,14 @@ ItoKMCGodunovStepper<I, C, R, F>::setOldPositions() noexcept
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-        List<ItoParticle>& particleList = particles[din].listItems();
+        ParticleSoA<ItoParticle>& leaf = particles[din];
 
-        for (ListIterator<ItoParticle> lit(particleList); lit.ok(); ++lit) {
-          ItoParticle& p = lit();
+        for (std::size_t i = 0; i < leaf.size(); i++) {
+          const RealVect pos = leaf.position(i);
 
-          p.oldPosition() = p.position();
+          D_DECL(leaf.template get<&ItoParticle::oldPositionX>(i) = pos[0],
+                 leaf.template get<&ItoParticle::oldPositionY>(i) = pos[1],
+                 leaf.template get<&ItoParticle::oldPositionZ>(i) = pos[2]);
         }
       }
     }
@@ -897,82 +1009,127 @@ ItoKMCGodunovStepper<I, C, R, F>::depositPointParticles(
 
     switch (a_subset) {
     case SpeciesSubset::All: {
-      solver->depositParticles<PointParticle, const Real&, &PointParticle::weight>(solver->getPhi(), *a_particles[idx]);
+      depositPointParticlesLikeSolver(this->m_amr,
+                                      this->m_particleRealm,
+                                      this->m_plasmaPhase,
+                                      solver,
+                                      solver->getPhi(),
+                                      *a_particles[idx]);
 
       break;
     }
     case SpeciesSubset::AllMobile: {
       if (mobile) {
-        solver->depositParticles<PointParticle, const Real&, &PointParticle::weight>(solver->getPhi(),
-                                                                                     *a_particles[idx]);
+        depositPointParticlesLikeSolver(this->m_amr,
+                                        this->m_particleRealm,
+                                        this->m_plasmaPhase,
+                                        solver,
+                                        solver->getPhi(),
+                                        *a_particles[idx]);
       }
 
       break;
     }
     case SpeciesSubset::AllDiffusive: {
       if (diffusive) {
-        solver->depositParticles<PointParticle, const Real&, &PointParticle::weight>(solver->getPhi(),
-                                                                                     *a_particles[idx]);
+        depositPointParticlesLikeSolver(this->m_amr,
+                                        this->m_particleRealm,
+                                        this->m_plasmaPhase,
+                                        solver,
+                                        solver->getPhi(),
+                                        *a_particles[idx]);
       }
 
       break;
     }
     case SpeciesSubset::AllMobileOrDiffusive: {
       if (mobile || diffusive) {
-        solver->depositParticles<PointParticle, const Real&, &PointParticle::weight>(solver->getPhi(),
-                                                                                     *a_particles[idx]);
+        depositPointParticlesLikeSolver(this->m_amr,
+                                        this->m_particleRealm,
+                                        this->m_plasmaPhase,
+                                        solver,
+                                        solver->getPhi(),
+                                        *a_particles[idx]);
       }
       break;
     }
     case SpeciesSubset::AllMobileAndDiffusive: {
       if (mobile && diffusive) {
-        solver->depositParticles<PointParticle, const Real&, &PointParticle::weight>(solver->getPhi(),
-                                                                                     *a_particles[idx]);
+        depositPointParticlesLikeSolver(this->m_amr,
+                                        this->m_particleRealm,
+                                        this->m_plasmaPhase,
+                                        solver,
+                                        solver->getPhi(),
+                                        *a_particles[idx]);
       }
       break;
     }
     case SpeciesSubset::Charged: {
       if (charged) {
-        solver->depositParticles<PointParticle, const Real&, &PointParticle::weight>(solver->getPhi(),
-                                                                                     *a_particles[idx]);
+        depositPointParticlesLikeSolver(this->m_amr,
+                                        this->m_particleRealm,
+                                        this->m_plasmaPhase,
+                                        solver,
+                                        solver->getPhi(),
+                                        *a_particles[idx]);
       }
       break;
     }
     case SpeciesSubset::ChargedMobile: {
       if (charged && mobile) {
-        solver->depositParticles<PointParticle, const Real&, &PointParticle::weight>(solver->getPhi(),
-                                                                                     *a_particles[idx]);
+        depositPointParticlesLikeSolver(this->m_amr,
+                                        this->m_particleRealm,
+                                        this->m_plasmaPhase,
+                                        solver,
+                                        solver->getPhi(),
+                                        *a_particles[idx]);
       }
       break;
     }
     case SpeciesSubset::ChargedDiffusive: {
       if (charged && diffusive) {
-        solver->depositParticles<PointParticle, const Real&, &PointParticle::weight>(solver->getPhi(),
-                                                                                     *a_particles[idx]);
+        depositPointParticlesLikeSolver(this->m_amr,
+                                        this->m_particleRealm,
+                                        this->m_plasmaPhase,
+                                        solver,
+                                        solver->getPhi(),
+                                        *a_particles[idx]);
       }
 
       break;
     }
     case SpeciesSubset::ChargedMobileOrDiffusive: {
       if (charged && (mobile || diffusive)) {
-        solver->depositParticles<PointParticle, const Real&, &PointParticle::weight>(solver->getPhi(),
-                                                                                     *a_particles[idx]);
+        depositPointParticlesLikeSolver(this->m_amr,
+                                        this->m_particleRealm,
+                                        this->m_plasmaPhase,
+                                        solver,
+                                        solver->getPhi(),
+                                        *a_particles[idx]);
       }
 
       break;
     }
     case SpeciesSubset::ChargedMobileAndDiffusive: {
       if (charged && (mobile && diffusive)) {
-        solver->depositParticles<PointParticle, const Real&, &PointParticle::weight>(solver->getPhi(),
-                                                                                     *a_particles[idx]);
+        depositPointParticlesLikeSolver(this->m_amr,
+                                        this->m_particleRealm,
+                                        this->m_plasmaPhase,
+                                        solver,
+                                        solver->getPhi(),
+                                        *a_particles[idx]);
       }
 
       break;
     }
     case SpeciesSubset::Stationary: {
       if (!mobile && !diffusive) {
-        solver->depositParticles<PointParticle, const Real&, &PointParticle::weight>(solver->getPhi(),
-                                                                                     *a_particles[idx]);
+        depositPointParticlesLikeSolver(this->m_amr,
+                                        this->m_particleRealm,
+                                        this->m_plasmaPhase,
+                                        solver,
+                                        solver->getPhi(),
+                                        *a_particles[idx]);
       }
 
       break;
@@ -1130,8 +1287,12 @@ ItoKMCGodunovStepper<I, C, R, F>::computeCellConductivity(
     if (Z != 0 && solver->isMobile()) {
       // Deposit on the particle realm.
       DataOps::setValue(this->m_particleScratch1, 0.0);
-      solver->depositParticles<PointParticle, const Real&, &PointParticle::weight>(this->m_particleScratch1,
-                                                                                   *a_particles[idx]);
+      depositPointParticlesLikeSolver(this->m_amr,
+                                      this->m_particleRealm,
+                                      this->m_plasmaPhase,
+                                      solver,
+                                      this->m_particleScratch1,
+                                      *a_particles[idx]);
 
       // Copy to fluid realm and add to total conductivity.
       (this->m_amr)->copyData(this->m_fluidScratch1, this->m_particleScratch1);
@@ -1428,7 +1589,7 @@ ItoKMCGodunovStepper<I, C, R, F>::copyConductivityParticles(
     const int Z   = species->getChargeNumber();
 
     if (Z != 0 && solver->isMobile()) {
-      const ParticleContainer<ItoParticle>& solverParticles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
+      const ParticleContainerSoA<ItoParticle>& solverParticles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
       for (int lvl = 0; lvl <= (this->m_amr)->getFinestLevel(); lvl++) {
         const DisjointBoxLayout& dbl = (this->m_amr)->getGrids((this->m_particleRealm))[lvl];
@@ -1440,16 +1601,15 @@ ItoKMCGodunovStepper<I, C, R, F>::copyConductivityParticles(
         for (int mybox = 0; mybox < nbox; mybox++) {
           const DataIndex& din = dit[mybox];
 
-          const List<ItoParticle>& patchParticles = solverParticles[lvl][din].listItems();
+          const ParticleSoA<ItoParticle>& leaf = solverParticles[lvl][din];
 
           List<PointParticle>& pointParticles = (*a_conductivityParticles[idx])[lvl][din].listItems();
           List<PointParticle>& irregParticles = (*m_irregularParticles[idx])[lvl][din].listItems();
 
-          for (ListIterator<ItoParticle> lit(patchParticles); lit.ok(); ++lit) {
-            const ItoParticle& p        = lit();
-            const RealVect&    pos      = p.position();
-            const Real&        weight   = p.weight();
-            const Real&        mobility = p.mobility();
+          for (std::size_t i = 0; i < leaf.size(); i++) {
+            const RealVect pos      = leaf.position(i);
+            const Real     weight   = leaf.weight(i);
+            const Real     mobility = leaf.template get<&ItoParticle::mobility>(i);
 
             pointParticles.add(PointParticle(pos, weight * mobility));
           }
@@ -1614,7 +1774,7 @@ ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
       const DisjointBoxLayout& dbl = (this->m_amr)->getGrids((this->m_particleRealm))[lvl];
       const DataIterator&      dit = dbl.dataIterator();
 
-      ParticleData<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk)[lvl];
+      auto& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk)[lvl];
 
       const int nbox = dit.size();
 
@@ -1622,18 +1782,21 @@ ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-        List<ItoParticle>&   itoParticles   = particles[din].listItems();
-        List<PointParticle>& pointParticles = (*a_rhoDaggerParticles[idx])[lvl][din].listItems();
+        ParticleSoA<ItoParticle>& leaf           = particles[din];
+        List<PointParticle>&      pointParticles = (*a_rhoDaggerParticles[idx])[lvl][din].listItems();
 
-        for (ListIterator<ItoParticle> lit(itoParticles); lit.ok(); ++lit) {
-          ItoParticle&    p      = lit();
-          const Real&     weight = p.weight();
-          const RealVect& pos    = p.position();
+        for (std::size_t i = 0; i < leaf.size(); i++) {
+          const Real     weight = leaf.weight(i);
+          const RealVect pos    = leaf.position(i);
 
-          // Compute a particle hop and store it on the run-time storage.
-          RealVect& hop = p.tmpVect();
+          // Compute a particle hop and store it on the run-time storage. The DiffusionFunction reads payload
+          // columns (diffusion/velocity), so materialize the payload via gather().
+          const ItoParticle p   = leaf.gather(i);
+          const RealVect    hop = diffusive ? diffusionFunction(p, a_dt) : RealVect::Zero;
 
-          hop = diffusive ? diffusionFunction(p, a_dt) : RealVect::Zero;
+          D_DECL(leaf.template get<&ItoParticle::tmpVectX>(i) = static_cast<ParticleReal>(hop[0]),
+                 leaf.template get<&ItoParticle::tmpVectY>(i) = static_cast<ParticleReal>(hop[1]),
+                 leaf.template get<&ItoParticle::tmpVectZ>(i) = static_cast<ParticleReal>(hop[2]));
 
           if (Z != 0) {
             pointParticles.add(PointParticle(pos + hop, weight));
@@ -1707,7 +1870,7 @@ ItoKMCGodunovStepper<I, C, R, F>::stepEulerMaruyamaParticles(const Real a_dt) no
         const DisjointBoxLayout& dbl = (this->m_amr)->getGrids((this->m_particleRealm))[lvl];
         const DataIterator&      dit = dbl.dataIterator();
 
-        ParticleData<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk)[lvl];
+        auto& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk)[lvl];
 
         const int nbox = dit.size();
 
@@ -1715,14 +1878,21 @@ ItoKMCGodunovStepper<I, C, R, F>::stepEulerMaruyamaParticles(const Real a_dt) no
         for (int mybox = 0; mybox < nbox; mybox++) {
           const DataIndex& din = dit[mybox];
 
-          List<ItoParticle>& particleList = particles[din].listItems();
+          ParticleSoA<ItoParticle>& leaf = particles[din];
 
-          for (ListIterator<ItoParticle> lit(particleList); lit.ok(); ++lit) {
-            ItoParticle& p = lit();
-
+          for (std::size_t i = 0; i < leaf.size(); i++) {
             // Add in the diffusion hop and advective contribution.
-            const RealVect& hop = p.tmpVect();
-            p.position()        = p.oldPosition() + f * p.velocity() + g * hop;
+            const RealVect hop    = RealVect(D_DECL(leaf.template get<&ItoParticle::tmpVectX>(i),
+                                                 leaf.template get<&ItoParticle::tmpVectY>(i),
+                                                 leaf.template get<&ItoParticle::tmpVectZ>(i)));
+            const RealVect oldPos = RealVect(D_DECL(leaf.template get<&ItoParticle::oldPositionX>(i),
+                                                    leaf.template get<&ItoParticle::oldPositionY>(i),
+                                                    leaf.template get<&ItoParticle::oldPositionZ>(i)));
+            const RealVect vel    = RealVect(D_DECL(leaf.template get<&ItoParticle::velocityX>(i),
+                                                 leaf.template get<&ItoParticle::velocityY>(i),
+                                                 leaf.template get<&ItoParticle::velocityZ>(i)));
+
+            leaf.setPosition(i, oldPos + f * vel + g * hop);
           }
         }
       }
@@ -1918,8 +2088,8 @@ ItoKMCGodunovStepper<I, C, R, F>::plotParticles() const noexcept
   if (plotParticles) {
 
     for (auto solverIt = (this->m_ito)->iterator(); solverIt.ok(); ++solverIt) {
-      const RefCountedPtr<ItoSolver>&       solver    = solverIt();
-      const ParticleContainer<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
+      const RefCountedPtr<ItoSolver>&          solver    = solverIt();
+      const ParticleContainerSoA<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
       // Create the output folder
       std::string cmd     = "mkdir -p particles/" + solver->getName();

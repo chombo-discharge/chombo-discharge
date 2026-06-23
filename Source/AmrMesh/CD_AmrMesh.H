@@ -1402,18 +1402,22 @@ public:
     @param[in]    a_phase           Phase where the input particles live.
     @param[in]    a_tolerance       Tolerance.
     @param[in]    a_deleteParticles If true, intersected particles are removed from a_activeParticles.
+    @param[in]    a_nonDeletionModifier Callback applied to each intersected-but-not-deleted particle, given its
+    home leaf and slot index (used e.g. to flag the original particle via a payload column).
     @tparam OldPosition Pack of SpaceDim payload member pointers giving the particle's previous-position components.
     @tparam P           Payload type (deduced).
     @tparam Traits      Column descriptor (deduced).
   */
   template <auto... OldPosition, typename P, typename Traits>
   void
-  intersectParticlesRaycastIF(ParticleContainerSoA<P, Traits>& a_activeParticles,
-                              ParticleContainerSoA<P, Traits>& a_ebParticles,
-                              ParticleContainerSoA<P, Traits>& a_domainParticles,
-                              const phase::which_phase         a_phase,
-                              const Real                       a_tolerance,
-                              const bool                       a_deleteParticles) const noexcept;
+  intersectParticlesRaycastIF(
+    ParticleContainerSoA<P, Traits>&                                 a_activeParticles,
+    ParticleContainerSoA<P, Traits>&                                 a_ebParticles,
+    ParticleContainerSoA<P, Traits>&                                 a_domainParticles,
+    const phase::which_phase                                         a_phase,
+    const Real                                                       a_tolerance,
+    const bool                                                       a_deleteParticles,
+    const std::function<void(ParticleSoA<P, Traits>&, std::size_t)>& a_nonDeletionModifier) const noexcept;
 
   /**
     @brief SoA bisection-based particle intersection algorithm.
@@ -1426,18 +1430,22 @@ public:
     @param[in]    a_phase           Phase where the input particles live.
     @param[in]    a_bisectionStep   Length of the bisection step.
     @param[in]    a_deleteParticles If true, intersected particles are removed from a_activeParticles.
+    @param[in]    a_nonDeletionModifier Callback applied to each intersected-but-not-deleted particle, given its
+    home leaf and slot index (used e.g. to flag the original particle via a payload column).
     @tparam OldPosition Pack of SpaceDim payload member pointers giving the particle's previous-position components.
     @tparam P           Payload type (deduced).
     @tparam Traits      Column descriptor (deduced).
   */
   template <auto... OldPosition, typename P, typename Traits>
   void
-  intersectParticlesBisectIF(ParticleContainerSoA<P, Traits>& a_activeParticles,
-                             ParticleContainerSoA<P, Traits>& a_ebParticles,
-                             ParticleContainerSoA<P, Traits>& a_domainParticles,
-                             const phase::which_phase         a_phase,
-                             const Real                       a_bisectionStep,
-                             const bool                       a_deleteParticles) const noexcept;
+  intersectParticlesBisectIF(
+    ParticleContainerSoA<P, Traits>&                                 a_activeParticles,
+    ParticleContainerSoA<P, Traits>&                                 a_ebParticles,
+    ParticleContainerSoA<P, Traits>&                                 a_domainParticles,
+    const phase::which_phase                                         a_phase,
+    const Real                                                       a_bisectionStep,
+    const bool                                                       a_deleteParticles,
+    const std::function<void(ParticleSoA<P, Traits>&, std::size_t)>& a_nonDeletionModifier) const noexcept;
 
   /**
     @brief Interpolate ghost vectors over a realm, using the default ghost cell interpolation method. 
