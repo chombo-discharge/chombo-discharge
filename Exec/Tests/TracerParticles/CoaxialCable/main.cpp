@@ -12,7 +12,7 @@ main(int argc, char* argv[])
 
   auto compgeom    = RefCountedPtr<ComputationalGeometry>(new CoaxialCable());
   auto amr         = RefCountedPtr<AmrMesh>(new AmrMesh());
-  auto timestepper = RefCountedPtr<TimeStepper>(new TracerParticleStepper<TracerParticlePayload>());
+  auto timestepper = RefCountedPtr<TimeStepper>(new TracerParticleStepper<TracerParticle>());
   auto engine      = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr));
 
   engine->setupAndRun();

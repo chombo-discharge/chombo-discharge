@@ -5,13 +5,13 @@
  */
 
 /**
-  @file   CD_TracerParticlePayload.H
+  @file   CD_TracerParticle.H
   @brief  SoA payload for tracer particles (velocity + Runge-Kutta stage scratch)
   @author Robert Marskar
 */
 
-#ifndef CD_TRACERPARTICLEPAYLOAD_H
-#define CD_TRACERPARTICLEPAYLOAD_H
+#ifndef CD_TRACERPARTICLE_H
+#define CD_TRACERPARTICLE_H
 
 // Our includes
 #include <CD_ParticleSoA.H>
@@ -23,7 +23,7 @@
   TracerParticleSolver). xk is the position snapshot x^k; k1/k2/k3 hold the Runge-Kutta stage
   velocities. Weight and position are container-owned columns, NOT payload members.
 */
-struct TracerParticlePayload
+struct TracerParticle
 {
   ParticleReal D_DECL(vx = 0.0, vy = 0.0, vz = 0.0);    ///< Interpolated velocity (per component).
   ParticleReal D_DECL(xkx = 0.0, xky = 0.0, xkz = 0.0); ///< Position snapshot x^k (per component).
@@ -33,17 +33,17 @@ struct TracerParticlePayload
 };
 
 /**
-  @brief ParticleTraits specialization listing the payload columns of TracerParticlePayload.
+  @brief ParticleTraits specialization listing the payload columns of TracerParticle.
 */
 template <>
-struct ParticleTraits<TracerParticlePayload>
+struct ParticleTraits<TracerParticle>
 {
   static constexpr auto columns = std::make_tuple(
-    D_DECL(&TracerParticlePayload::vx, &TracerParticlePayload::vy, &TracerParticlePayload::vz),
-    D_DECL(&TracerParticlePayload::xkx, &TracerParticlePayload::xky, &TracerParticlePayload::xkz),
-    D_DECL(&TracerParticlePayload::k1x, &TracerParticlePayload::k1y, &TracerParticlePayload::k1z),
-    D_DECL(&TracerParticlePayload::k2x, &TracerParticlePayload::k2y, &TracerParticlePayload::k2z),
-    D_DECL(&TracerParticlePayload::k3x, &TracerParticlePayload::k3y, &TracerParticlePayload::k3z));
+    D_DECL(&TracerParticle::vx, &TracerParticle::vy, &TracerParticle::vz),
+    D_DECL(&TracerParticle::xkx, &TracerParticle::xky, &TracerParticle::xkz),
+    D_DECL(&TracerParticle::k1x, &TracerParticle::k1y, &TracerParticle::k1z),
+    D_DECL(&TracerParticle::k2x, &TracerParticle::k2y, &TracerParticle::k2z),
+    D_DECL(&TracerParticle::k3x, &TracerParticle::k3y, &TracerParticle::k3z));
 };
 
 #include <CD_NamespaceFooter.H>

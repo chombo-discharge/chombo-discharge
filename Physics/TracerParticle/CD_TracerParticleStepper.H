@@ -15,7 +15,7 @@
 
 // Our includes
 #include <CD_TracerParticleSolver.H>
-#include <CD_TracerParticlePayload.H>
+#include <CD_TracerParticle.H>
 #include <CD_TracerParticlePhysics.H>
 #include <CD_TimeStepper.H>
 #include <CD_NamespaceHeader.H>
@@ -46,7 +46,7 @@ namespace Physics {
       @brief TimeStepper for advancing tracer particles in a prescribed velocity field on an AMR mesh.
       @details The template parameter @p P is the SoA payload type. In addition to the velocity columns
       required by TracerParticleSolver (D_DECL(vx, vy, vz)), it must provide the Runge-Kutta scratch
-      columns xk/k1/k2/k3 (each per-component). TracerParticlePayload is the canonical choice.
+      columns xk/k1/k2/k3 (each per-component). TracerParticle is the canonical choice.
 
       A built-in velocity field (diagonal or rotational) is set via the input script; user applications
       can override `setVelocity()` to supply an arbitrary field.

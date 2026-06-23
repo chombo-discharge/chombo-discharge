@@ -44,21 +44,21 @@ container-owned columns, while ``P`` declares the *extra* payload columns. The t
 #. It *must* have a ``ParticleTraits<P>`` specialization listing its columns (including ``vx/vy/vz``).
 
 Users are free to provide their own payload provided that it meets these constraints.
-However, we also define a plug-and-play payload for the tracer-particle stepper, see :ref:`Chap:TracerParticlePayload`.
+However, we also define a plug-and-play payload for the tracer-particle stepper, see :ref:`Chap:TracerParticle`.
 
 .. note::
 
    The ``TracerParticleSolver<P>`` API is available at `<https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classTracerParticleSolver.html>`_.
 
-.. _Chap:TracerParticlePayload:
+.. _Chap:TracerParticle:
 
-TracerParticlePayload
----------------------
+TracerParticle
+--------------
 
-``TracerParticlePayload`` is the plug-and-play payload used by the tracer-particle stepper. It declares the
+``TracerParticle`` is the plug-and-play payload used by the tracer-particle stepper. It declares the
 interpolated velocity together with Runge-Kutta stage scratch, all as per-component SoA columns:
 
-.. literalinclude:: ../../../../Source/TracerParticles/CD_TracerParticlePayload.H
+.. literalinclude:: ../../../../Source/TracerParticles/CD_TracerParticle.H
    :language: c++
    :lines: 26-33
    :dedent: 0
