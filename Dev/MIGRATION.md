@@ -16,7 +16,8 @@ doxygen-checked), and keep REUSE/clang-format/doxygen green.
       `ParticleContainerSoA` bulk paths (distributeFromPool, transferParticles) were simplified to use
       the new `catenate()` (O(1) arena-swap when the destination is empty). Audit added
       deepCopy/deepCopyTo/append(bulk)/catenate/swap/shrinkToFit/cellRange + the two-overload append.
-- [ ] **CD_EBParticleMeshSoA.H** (per-patch deposit/interpolate)
+- [x] **CD_EBParticleMeshSoA.H** -> `Source/Particle/` (reviewed; now doxygen-checked, passes as-is).
+      `CD_EBAMRParticleMeshSoA.H`'s quoted include switched to `<...>`.
 - [ ] **CD_ParticleContainerSoA.H** + **CD_ParticleContainerSoAImplem.H** (AMR container)
 - [ ] **CD_EBAMRParticleMeshSoA.H** (AMR deposit/interpolate driver)
 

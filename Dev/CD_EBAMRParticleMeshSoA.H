@@ -64,7 +64,7 @@
 #include <CD_DepositionType.H>
 #include <CD_CoarseFineDeposition.H>
 #include <CD_EBCoarseFineParticleMesh.H>
-#include "CD_EBParticleMeshSoA.H"
+#include <CD_EBParticleMeshSoA.H>
 #include "CD_ParticleContainerSoA.H"
 #include <CD_NamespaceHeader.H>
 
