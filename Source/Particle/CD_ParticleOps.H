@@ -22,6 +22,7 @@
 // Our includes
 #include <CD_EBAMRData.H>
 #include <CD_ParticleMap.H>
+#include <CD_ParticleContainerSoA.H>
 #include <CD_NamespaceHeader.H>
 
 template <typename P>
@@ -159,6 +160,19 @@ public:
   template <typename P>
   static inline void
   copyDestructive(ParticleContainer<P>& a_dst, ParticleContainer<P>& a_src) noexcept;
+
+  /**
+    @brief Move all particles from a_src into a_dst (per leaf), emptying a_src. SoA overload.
+    @details Both containers must be defined over the same grids. Per patch, a_dst's leaf is replaced by
+    a_src's (via clear + catenate -- an O(1) arena swap when a_dst's leaf is empty), and a_src is emptied.
+    @param[in,out] a_dst Destination container (its leaves are overwritten).
+    @param[in,out] a_src Source container (emptied).
+    @tparam P      Payload type.
+    @tparam Traits Column descriptor for the payload.
+  */
+  template <typename P, typename Traits>
+  static inline void
+  copyDestructive(ParticleContainerSoA<P, Traits>& a_dst, ParticleContainerSoA<P, Traits>& a_src) noexcept;
 
   /**
     @brief Perform a sum of some particle quantity

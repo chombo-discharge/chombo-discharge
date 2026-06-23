@@ -61,9 +61,14 @@ compatibility on this branch.
 - [x] **Phase 3 -- TracerParticleStepper -> SoA** (Euler/RK2/RK4 loops -> SoA column access; seeding via
       drawRandomParticles(SoA)). CoaxialCable exec instantiates TracerParticleStepper<TracerParticlePayload>;
       builds + runs (OPT 2D, plot output advancing).
-- [ ] **Phase 4 -- DischargeInceptionStepper -> SoA** (seed/integration loops, gradAlpha interpolation,
-      rewind/reset).
-- [ ] **Retire** AoS `TracerParticle<M,N>` + AoS `TracerParticleSolver` after Phases 2-4.
+- [x] **Phase 4 -- DischargeInceptionStepper -> SoA.** New DischargeInceptionParticle payload (velocity +
+      posSnapshot + velSnapshot + gradAlpha + alphaEff + dt). Added two SoA primitives:
+      ParticleSoA::appendParticle (single-particle transfer; commit 75139d1c) and
+      ParticleOps::copyDestructive(ParticleContainerSoA) (container move). Rewired both seeders, the
+      grad(alpha) interpolation, all five integrators (List transfer -> appendParticle + remove;
+      copyDestructive container move), and rewind/reset. Default P + the execs use the new payload. Vessel
+      test builds + runs (OPT 2D, ends cleanly, no NaN/lost particles).
+- [ ] **Retire** AoS `TracerParticle<M,N>` + AoS `TracerParticleSolver` (now unused; verify + remove).
 
 ## Conventions for each migration
 

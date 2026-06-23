@@ -2140,7 +2140,7 @@ DischargeInceptionStepper<P, F, C>::seedUniformParticles() noexcept
     pout() << "DischargeInceptionStepper::seedUniformParticles" << endl;
   }
 
-  ParticleContainer<P>& amrParticles = m_tracerParticleSolver->getParticles();
+  ParticleContainerSoA<P>& amrParticles = m_tracerParticleSolver->getParticles();
   amrParticles.clearParticles();
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
@@ -2152,7 +2152,7 @@ DischargeInceptionStepper<P, F, C>::seedUniformParticles() noexcept
 
     const Real dx = m_amr->getDx()[lvl];
 
-    ParticleData<P>& levelParticles = amrParticles[lvl];
+    auto& levelParticles = amrParticles[lvl];
 
     const int nbox = dit.size();
 
@@ -2163,48 +2163,44 @@ DischargeInceptionStepper<P, F, C>::seedUniformParticles() noexcept
       const EBISBox&       ebisbox    = ebisl[din];
       const BaseFab<bool>& validCells = validCellsLD[din];
 
-      List<P>& particles = levelParticles[din].listItems();
+      ParticleSoA<P>& leaf = levelParticles[din];
 
       auto regularKernel = [&](const IntVect& iv) -> void {
         if (validCells(iv, 0) && ebisbox.isRegular(iv)) {
-          P p;
-          p.position() = m_amr->getProbLo() + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
-
-          particles.add(p);
+          leaf.append(m_amr->getProbLo() + (0.5 * RealVect::Unit + RealVect(iv)) * dx, 0.0);
         }
       };
 
       auto irregularKernel = [&](const VolIndex& vof) -> void {
         if (validCells(vof.gridIndex())) {
-          P p;
-          p.position() = m_amr->getProbLo() + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
-
-          particles.add(p);
+          leaf.append(m_amr->getProbLo() + Location::position(Location::Cell::Centroid, vof, ebisbox, dx), 0.0);
         }
       };
 
-      // Execute kernels over appropriate regions. Not vectorizable: per-cell List<P> append. Multi-cut
-      // N/A: regular uses cell-CENTER, irregular uses CENTROID position.
+      // Execute kernels over appropriate regions. Not vectorizable: per-cell append. Multi-cut N/A:
+      // regular uses cell-CENTER, irregular uses CENTROID position.
       const Box    cellBox = dbl[din];
       VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
       BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
 
-      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
-        P& p = lit();
-
-        // Set mass to zero and do a backup of the initial position (we need to rewind particles
-        // back later on). The scalar<0> flag is the flag we use for start-stop criteria for the
-        // particle integration.
-        p.weight()           = 0.0;
-        p.template vect<0>() = p.position();
+      // Back up the initial position into the rewind column (weight was set to zero on append).
+      const std::size_t   n             = leaf.size();
+      const double* const pos[SpaceDim] = {
+        D_DECL(leaf.positionColumn(0), leaf.positionColumn(1), leaf.positionColumn(2))};
+      ParticleReal* const x0[SpaceDim] = {
+        D_DECL(leaf.template column<&P::x0x>(), leaf.template column<&P::x0y>(), leaf.template column<&P::x0z>())};
+      for (std::size_t i = 0; i < n; i++) {
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          x0[dir][i] = pos[dir][i];
+        }
       }
     }
   }
 
   // Remove particles inside the EB.
-  m_amr->removeCoveredParticlesIF(amrParticles, m_phase);
+  m_amr->removeCoveredParticlesIF(amrParticles, m_phase, 0.0);
 
   amrParticles.remap();
 }
@@ -2218,7 +2214,7 @@ DischargeInceptionStepper<P, F, C>::seedIonizationParticles(const Real a_voltage
     pout() << "DischargeInceptionStepper::seedIonizationParticles" << endl;
   }
 
-  ParticleContainer<P>& amrParticles = m_tracerParticleSolver->getParticles();
+  ParticleContainerSoA<P>& amrParticles = m_tracerParticleSolver->getParticles();
   amrParticles.clearParticles();
 
   // Scratch storages
@@ -2242,7 +2238,7 @@ DischargeInceptionStepper<P, F, C>::seedIonizationParticles(const Real a_voltage
     const Real     dx     = m_amr->getDx()[lvl];
     const RealVect probLo = m_amr->getProbLo();
 
-    ParticleData<P>& levelParticles = amrParticles[lvl];
+    auto& levelParticles = amrParticles[lvl];
 
     const int nbox = dit.size();
 
@@ -2253,7 +2249,7 @@ DischargeInceptionStepper<P, F, C>::seedIonizationParticles(const Real a_voltage
       const EBISBox&       ebisbox    = ebisl[din];
       const BaseFab<bool>& validCells = validCellsLD[din];
 
-      List<P>& particles = levelParticles[din].listItems();
+      ParticleSoA<P>& leaf = levelParticles[din];
 
       const EBCellFAB& electricField    = (*scratch[lvl])[din];
       const FArrayBox& electricFieldReg = electricField.getFArrayBox();
@@ -2275,11 +2271,7 @@ DischargeInceptionStepper<P, F, C>::seedIonizationParticles(const Real a_voltage
             const Real curEta   = m_eta(E, x);
 
             if (curAlpha > curEta) {
-              P p;
-
-              p.position() = x;
-
-              particles.add(p);
+              leaf.append(x, 0.0);
 
               alphaReg(iv, 0) = curAlpha - curEta;
             }
@@ -2298,11 +2290,7 @@ DischargeInceptionStepper<P, F, C>::seedIonizationParticles(const Real a_voltage
             const Real curEta   = m_eta(E, x);
 
             if (curAlpha > curEta) {
-              P p;
-
-              p.position() = x;
-
-              particles.add(p);
+              leaf.append(x, 0.0);
 
               alpha(vof, 0) = curAlpha - curEta;
             }
@@ -2310,7 +2298,7 @@ DischargeInceptionStepper<P, F, C>::seedIonizationParticles(const Real a_voltage
         };
 
         // Execute kernels over appropriate regions. Not vectorizable: m_alpha/m_eta std::function
-        // coefficients per cell + List<P> append + data-dependent branch. Multi-cut N/A (center vs centroid).
+        // coefficients per cell + per-particle append + data-dependent branch. Multi-cut N/A (center vs centroid).
         const Box    cellBox = dbl[din];
         VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
@@ -2318,12 +2306,17 @@ DischargeInceptionStepper<P, F, C>::seedIonizationParticles(const Real a_voltage
         BoxLoops::loop(vofit, irregularKernel);
       }
 
-      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
-        P& p = lit();
-
-        p.weight()           = 0.0;
-        p.template vect<0>() = p.position();
-        p.template vect<2>() = RealVect::Zero;
+      // Back up the initial position into the rewind column (weight + grad-alpha columns are already
+      // zero from the default-payload append).
+      const std::size_t   n             = leaf.size();
+      const double* const pos[SpaceDim] = {
+        D_DECL(leaf.positionColumn(0), leaf.positionColumn(1), leaf.positionColumn(2))};
+      ParticleReal* const x0[SpaceDim] = {
+        D_DECL(leaf.template column<&P::x0x>(), leaf.template column<&P::x0y>(), leaf.template column<&P::x0z>())};
+      for (std::size_t i = 0; i < n; i++) {
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          x0[dir][i] = pos[dir][i];
+        }
       }
     }
   }
@@ -2433,12 +2426,12 @@ DischargeInceptionStepper<P, F, C>::interpolateGradAlphaToParticles() noexcept
   }
 
   // Interpolate onto the particle weight structure
-  m_amr->interpolateParticles<P, RealVect&, &P::template vect<2>>(m_tracerParticleSolver->getParticles(),
-                                                                  m_realm,
-                                                                  m_phase,
-                                                                  m_gradAlpha,
-                                                                  m_tracerParticleSolver->getInterpolationType(),
-                                                                  true);
+  m_amr->interpolateParticles<D_DECL(&P::gax, &P::gay, &P::gaz)>(m_tracerParticleSolver->getParticles(),
+                                                                 m_realm,
+                                                                 m_phase,
+                                                                 m_gradAlpha,
+                                                                 m_tracerParticleSolver->getInterpolationType(),
+                                                                 true);
 }
 
 template <typename P, typename F, typename C>
@@ -2650,10 +2643,10 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltag
   // Allocate a data holder for holding the processed particles. This
   // will be faster because then we only have to iterate through the
   // particles that are actually still moving.
-  ParticleContainer<P> amrProcessedParticles;
+  ParticleContainerSoA<P> amrProcessedParticles;
   m_amr->allocate(amrProcessedParticles, m_realm);
 
-  ParticleContainer<P>& amrParticles = m_tracerParticleSolver->getParticles();
+  ParticleContainerSoA<P>& amrParticles = m_tracerParticleSolver->getParticles();
 
   m_tracerParticleSolver->remap();
 
@@ -2689,21 +2682,32 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltag
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-        List<P>& solverParticles    = amrParticles[lvl][din].listItems();
-        List<P>& processedParticles = amrProcessedParticles[lvl][din].listItems();
+        ParticleSoA<P>& solverLeaf    = amrParticles[lvl][din];
+        ParticleSoA<P>& processedLeaf = amrProcessedParticles[lvl][din];
 
-        for (ListIterator<P> lit(solverParticles); lit.ok();) {
-          P& p = lit();
+        // Column pointers are captured once: remove() is an in-place swap-pop and setting positions/weights
+        // is in-place, so these stay valid across the loop (only processedLeaf grows, internally).
+        double* const w             = solverLeaf.weightColumn();
+        double* const pos[SpaceDim] = {
+          D_DECL(solverLeaf.positionColumn(0), solverLeaf.positionColumn(1), solverLeaf.positionColumn(2))};
+        const ParticleReal* const vel[SpaceDim] = {D_DECL(solverLeaf.template column<&P::vx>(),
+                                                          solverLeaf.template column<&P::vy>(),
+                                                          solverLeaf.template column<&P::vz>())};
+        const ParticleReal* const ga[SpaceDim]  = {D_DECL(solverLeaf.template column<&P::gax>(),
+                                                         solverLeaf.template column<&P::gay>(),
+                                                         solverLeaf.template column<&P::gaz>())};
 
-          const RealVect x         = p.position();
-          const RealVect vel       = p.velocity();
-          const Real     v         = vel.vectorLength();
+        std::size_t i = 0;
+        while (i < solverLeaf.size()) {
+          const RealVect x(D_DECL(pos[0][i], pos[1][i], pos[2][i]));
+          const RealVect vec(D_DECL(vel[0][i], vel[1][i], vel[2][i]));
+          const Real     v         = vec.vectorLength();
           const Real     E         = v;
           const Real     alpha     = m_alpha(E, x);
           const Real     eta       = m_eta(E, x);
           const Real     alphaEff  = alpha - eta;
           const Real     tol       = 1E-10;
-          const Real     gradAlpha = tol + (p.template vect<2>()).vectorLength();
+          const Real     gradAlpha = tol + RealVect(D_DECL(ga[0][i], ga[1][i], ga[2][i])).vectorLength();
 
           // Select a step size equal to the avalanche length, but never exceed the physical and grid hardcaps
           Real deltaX;
@@ -2714,7 +2718,7 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltag
           deltaX = std::max(deltaX, m_minPhysDx);
 
           const Real     dt     = deltaX / v;
-          const RealVect newPos = p.position() + dt * vel;
+          const RealVect newPos = x + dt * vec;
           const Real     delta  = (newPos - x).vectorLength();
 
           const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
@@ -2723,43 +2727,48 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltag
           Real s = 0.0;
 
           if (alphaEff < 0.0) {
-            processedParticles.transfer(lit);
+            processedLeaf.appendParticle(solverLeaf, i);
+            solverLeaf.remove(i);
           }
           else if (insideEB) {
             // If the particle struck the EB or domain we finish off the integration with a partial step
             const RefCountedPtr<BaseIF>& impFunc = m_amr->getBaseImplicitFunction(m_phase);
 
             if (ParticleOps::ebIntersectionBisect(impFunc, x, newPos, m_minGridDx * dx, s)) {
-              p.weight() = p.weight() + s * delta * alphaEff;
+              w[i] = w[i] + s * delta * alphaEff;
             }
 
-            processedParticles.transfer(lit);
+            processedLeaf.appendParticle(solverLeaf, i);
+            solverLeaf.remove(i);
           }
           else if (outsideDomain) {
             if (ParticleOps::domainIntersection(x, newPos, m_amr->getProbLo(), m_amr->getProbHi(), s)) {
-              p.weight() = p.weight() + s * delta * alphaEff;
+              w[i] = w[i] + s * delta * alphaEff;
             }
 
-            processedParticles.transfer(lit);
+            processedLeaf.appendParticle(solverLeaf, i);
+            solverLeaf.remove(i);
           }
           else {
-            p.position() = newPos;
-            p.weight()   = p.weight() + deltaX * alphaEff;
+            for (int dir = 0; dir < SpaceDim; dir++) {
+              pos[dir][i] = newPos[dir];
+            }
+            w[i] = w[i] + deltaX * alphaEff;
 
-            ++lit;
+            i++;
           }
         }
 
         // Transfer particles that completed their integration.
         if (!m_fullIntegration) {
-          for (ListIterator<P> lit(solverParticles); lit.ok();) {
-            P& p = lit();
-
-            if (p.weight() >= m_inceptionK) {
-              processedParticles.transfer(lit);
+          std::size_t j = 0;
+          while (j < solverLeaf.size()) {
+            if (w[j] >= m_inceptionK) {
+              processedLeaf.appendParticle(solverLeaf, j);
+              solverLeaf.remove(j);
             }
             else {
-              ++lit;
+              j++;
             }
           }
         }
@@ -2785,10 +2794,13 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltag
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-        List<P>& solverParticles = amrParticles[lvl][din].listItems();
+        ParticleSoA<P>&   leaf = amrParticles[lvl][din];
+        const std::size_t n    = leaf.size();
 
-        for (ListIterator<P> lit(solverParticles); lit.ok(); ++lit) {
-          lit().weight() = std::min(m_inceptionK, lit().weight());
+        double* const w = leaf.weightColumn();
+
+        for (std::size_t i = 0; i < n; i++) {
+          w[i] = std::min(m_inceptionK, w[i]);
         }
       }
     }
@@ -2834,10 +2846,10 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_
   // Allocate a data holder for holding the processed particles. This
   // will be faster because then we only have to iterate through the
   // particles that are actually still moving.
-  ParticleContainer<P> amrProcessedParticles;
+  ParticleContainerSoA<P> amrProcessedParticles;
   m_amr->allocate(amrProcessedParticles, m_realm);
 
-  ParticleContainer<P>& amrParticles = m_tracerParticleSolver->getParticles();
+  ParticleContainerSoA<P>& amrParticles = m_tracerParticleSolver->getParticles();
 
   m_tracerParticleSolver->remap();
 
@@ -2873,21 +2885,35 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-        List<P>& solverParticles    = amrParticles[lvl][din].listItems();
-        List<P>& processedParticles = amrProcessedParticles[lvl][din].listItems();
+        ParticleSoA<P>& solverLeaf    = amrParticles[lvl][din];
+        ParticleSoA<P>& processedLeaf = amrProcessedParticles[lvl][din];
 
-        for (ListIterator<P> lit(solverParticles); lit.ok();) {
-          P& p = lit();
+        double* const w             = solverLeaf.weightColumn();
+        double* const pos[SpaceDim] = {
+          D_DECL(solverLeaf.positionColumn(0), solverLeaf.positionColumn(1), solverLeaf.positionColumn(2))};
+        const ParticleReal* const vel[SpaceDim] = {D_DECL(solverLeaf.template column<&P::vx>(),
+                                                          solverLeaf.template column<&P::vy>(),
+                                                          solverLeaf.template column<&P::vz>())};
+        const ParticleReal* const ga[SpaceDim]  = {D_DECL(solverLeaf.template column<&P::gax>(),
+                                                         solverLeaf.template column<&P::gay>(),
+                                                         solverLeaf.template column<&P::gaz>())};
+        ParticleReal* const       vk[SpaceDim]  = {D_DECL(solverLeaf.template column<&P::vkx>(),
+                                                   solverLeaf.template column<&P::vky>(),
+                                                   solverLeaf.template column<&P::vkz>())};
+        ParticleReal* const       alphaEffCol   = solverLeaf.template column<&P::alphaEff>();
+        ParticleReal* const       dtCol         = solverLeaf.template column<&P::dtStep>();
 
-          const RealVect x         = p.position();
-          const RealVect vel       = p.velocity();
-          const Real     v         = vel.vectorLength();
+        std::size_t i = 0;
+        while (i < solverLeaf.size()) {
+          const RealVect x(D_DECL(pos[0][i], pos[1][i], pos[2][i]));
+          const RealVect vec(D_DECL(vel[0][i], vel[1][i], vel[2][i]));
+          const Real     v         = vec.vectorLength();
           const Real     E         = v;
           const Real     alpha     = m_alpha(E, x);
           const Real     eta       = m_eta(E, x);
           const Real     alphaEff  = alpha - eta;
           const Real     tol       = 1E-10;
-          const Real     gradAlpha = tol + (p.template vect<2>()).vectorLength();
+          const Real     gradAlpha = tol + RealVect(D_DECL(ga[0][i], ga[1][i], ga[2][i])).vectorLength();
 
           // Select a step size equal to the avalanche length, but never exceed the physical and grid hardcaps
           Real deltaX;
@@ -2898,7 +2924,7 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_
           deltaX = std::max(deltaX, m_minPhysDx);
 
           const Real     dt     = deltaX / v;
-          const RealVect newPos = p.position() + dt * vel;
+          const RealVect newPos = x + dt * vec;
           const Real     delta  = (newPos - x).vectorLength();
 
           const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
@@ -2908,33 +2934,37 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_
           Real s = 0.0;
 
           if (alphaEff < 0.0) {
-            processedParticles.transfer(lit);
+            processedLeaf.appendParticle(solverLeaf, i);
+            solverLeaf.remove(i);
           }
           else if (insideEB) {
             const RefCountedPtr<BaseIF>& impFunc = m_amr->getBaseImplicitFunction(m_phase);
 
             if (ParticleOps::ebIntersectionBisect(impFunc, x, newPos, m_minGridDx * dx, s)) {
-              p.weight() = p.weight() + s * delta * alphaEff;
+              w[i] = w[i] + s * delta * alphaEff;
             }
 
-            processedParticles.transfer(lit);
+            processedLeaf.appendParticle(solverLeaf, i);
+            solverLeaf.remove(i);
           }
           else if (outsideDomain) {
             if (ParticleOps::domainIntersection(x, newPos, m_amr->getProbLo(), m_amr->getProbHi(), s)) {
-              p.weight() = p.weight() + s * delta * alphaEff;
+              w[i] = w[i] + s * delta * alphaEff;
             }
 
-            processedParticles.transfer(lit);
+            processedLeaf.appendParticle(solverLeaf, i);
+            solverLeaf.remove(i);
           }
           else {
-            // Do an Euler step, storaging alpha(p^k), v(p^k), and the time step size.
-            p.template real<0>() = alphaEff;
-            p.template real<1>() = dt;
-            p.template vect<1>() = vel;
+            // Do an Euler step, storing alpha(p^k), v(p^k), and the time step size.
+            alphaEffCol[i] = alphaEff;
+            dtCol[i]       = dt;
+            for (int dir = 0; dir < SpaceDim; dir++) {
+              vk[dir][i]  = vec[dir];
+              pos[dir][i] = newPos[dir];
+            }
 
-            p.position() = newPos;
-
-            ++lit;
+            i++;
           }
         }
       }
@@ -2957,26 +2987,35 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-        List<P>& solverParticles    = amrParticles[lvl][din].listItems();
-        List<P>& processedParticles = amrProcessedParticles[lvl][din].listItems();
+        ParticleSoA<P>& solverLeaf    = amrParticles[lvl][din];
+        ParticleSoA<P>& processedLeaf = amrProcessedParticles[lvl][din];
 
-        for (ListIterator<P> lit(solverParticles); lit.ok();) {
+        double* const w             = solverLeaf.weightColumn();
+        double* const pos[SpaceDim] = {
+          D_DECL(solverLeaf.positionColumn(0), solverLeaf.positionColumn(1), solverLeaf.positionColumn(2))};
+        const ParticleReal* const vel[SpaceDim] = {D_DECL(solverLeaf.template column<&P::vx>(),
+                                                          solverLeaf.template column<&P::vy>(),
+                                                          solverLeaf.template column<&P::vz>())};
+        const ParticleReal* const vk[SpaceDim]  = {D_DECL(solverLeaf.template column<&P::vkx>(),
+                                                         solverLeaf.template column<&P::vky>(),
+                                                         solverLeaf.template column<&P::vkz>())};
+        const ParticleReal* const alphaEffCol   = solverLeaf.template column<&P::alphaEff>();
+        const ParticleReal* const dtCol         = solverLeaf.template column<&P::dtStep>();
 
-          P& p = lit();
+        std::size_t i = 0;
+        while (i < solverLeaf.size()) {
+          const Real     dt = dtCol[i];
+          const RealVect vkv(D_DECL(vk[0][i], vk[1][i], vk[2][i]));
+          const RealVect vk1(D_DECL(vel[0][i], vel[1][i], vel[2][i]));
+          const RealVect x(D_DECL(pos[0][i], pos[1][i], pos[2][i]));
+          const Real     E = vk1.vectorLength();
 
-          const Real     dt  = p.template real<1>();
-          const RealVect vk  = p.template vect<1>();
-          const RealVect vk1 = p.velocity();
-          const RealVect x   = p.position();
-          const Real     E   = vk1.vectorLength();
-
-          // Note the weird subtraction since p.position() was updated
-          // to p^k + dt * v^k.
-          const RealVect oldPos = p.position() - dt * vk;
-          const RealVect newPos = oldPos + 0.5 * dt * (vk + vk1);
+          // Note the weird subtraction since the position was updated to p^k + dt * v^k.
+          const RealVect oldPos = x - dt * vkv;
+          const RealVect newPos = oldPos + 0.5 * dt * (vkv + vk1);
 
           // Compute new alpha.
-          const Real alphak  = p.template real<0>();
+          const Real alphak  = alphaEffCol[i];
           const Real alphak1 = m_alpha(E, x) - m_eta(E, x);
           const Real delta   = (newPos - oldPos).vectorLength();
 
@@ -2990,42 +3029,47 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_
           Real s = 0.0;
 
           if (negativeAlpha) {
-            processedParticles.transfer(lit);
+            processedLeaf.appendParticle(solverLeaf, i);
+            solverLeaf.remove(i);
           }
           else if (insideEB) {
             const RefCountedPtr<BaseIF>& impFunc = m_amr->getBaseImplicitFunction(m_phase);
 
             if (ParticleOps::ebIntersectionBisect(impFunc, oldPos, newPos, m_minGridDx * dx, s)) {
-              p.weight() = p.weight() + s * delta * alphak;
+              w[i] = w[i] + s * delta * alphak;
             }
 
-            processedParticles.transfer(lit);
+            processedLeaf.appendParticle(solverLeaf, i);
+            solverLeaf.remove(i);
           }
           else if (outsideDomain) {
             if (ParticleOps::domainIntersection(oldPos, newPos, m_amr->getProbLo(), m_amr->getProbHi(), s)) {
-              p.weight() = p.weight() + s * delta * alphak;
+              w[i] = w[i] + s * delta * alphak;
             }
 
-            processedParticles.transfer(lit);
+            processedLeaf.appendParticle(solverLeaf, i);
+            solverLeaf.remove(i);
           }
           else {
-            p.position() = newPos;
-            p.weight()   = p.weight() + 0.5 * delta * (alphak + alphak1);
+            for (int dir = 0; dir < SpaceDim; dir++) {
+              pos[dir][i] = newPos[dir];
+            }
+            w[i] = w[i] + 0.5 * delta * (alphak + alphak1);
 
-            ++lit;
+            i++;
           }
         }
 
         // Transfer particles that completed their integration (if we're doing partial integration)
         if (!m_fullIntegration) {
-          for (ListIterator<P> lit(solverParticles); lit.ok();) {
-            P& p = lit();
-
-            if (p.weight() >= m_inceptionK) {
-              processedParticles.transfer(lit);
+          std::size_t j = 0;
+          while (j < solverLeaf.size()) {
+            if (w[j] >= m_inceptionK) {
+              processedLeaf.appendParticle(solverLeaf, j);
+              solverLeaf.remove(j);
             }
             else {
-              ++lit;
+              j++;
             }
           }
         }
@@ -3052,10 +3096,13 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-        List<P>& solverParticles = amrParticles[lvl][din].listItems();
+        ParticleSoA<P>&   leaf = amrParticles[lvl][din];
+        const std::size_t n    = leaf.size();
 
-        for (ListIterator<P> lit(solverParticles); lit.ok(); ++lit) {
-          lit().weight() = std::min(m_inceptionK, lit().weight());
+        double* const w = leaf.weightColumn();
+
+        for (std::size_t i = 0; i < n; i++) {
+          w[i] = std::min(m_inceptionK, w[i]);
         }
       }
     }
@@ -3268,10 +3315,10 @@ DischargeInceptionStepper<P, F, C>::townsendTrackEuler(const Real& a_voltage) no
   // Allocate a data holder for holding the processed particles. This
   // will be faster because then we only have to iterate through the
   // particles that are actually still moving.
-  ParticleContainer<P> amrProcessedParticles;
+  ParticleContainerSoA<P> amrProcessedParticles;
   m_amr->allocate(amrProcessedParticles, m_realm);
 
-  ParticleContainer<P>& amrParticles = m_tracerParticleSolver->getParticles();
+  ParticleContainerSoA<P>& amrParticles = m_tracerParticleSolver->getParticles();
 
   m_tracerParticleSolver->remap();
 
@@ -3305,19 +3352,25 @@ DischargeInceptionStepper<P, F, C>::townsendTrackEuler(const Real& a_voltage) no
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-        List<P>& solverParticles    = amrParticles[lvl][din].listItems();
-        List<P>& processedParticles = amrProcessedParticles[lvl][din].listItems();
+        ParticleSoA<P>& solverLeaf    = amrParticles[lvl][din];
+        ParticleSoA<P>& processedLeaf = amrProcessedParticles[lvl][din];
 
-        for (ListIterator<P> lit(solverParticles); lit.ok();) {
-          P& p = lit();
+        double* const w             = solverLeaf.weightColumn();
+        double* const pos[SpaceDim] = {
+          D_DECL(solverLeaf.positionColumn(0), solverLeaf.positionColumn(1), solverLeaf.positionColumn(2))};
+        const ParticleReal* const vel[SpaceDim] = {D_DECL(solverLeaf.template column<&P::vx>(),
+                                                          solverLeaf.template column<&P::vy>(),
+                                                          solverLeaf.template column<&P::vz>())};
 
-          const RealVect x      = p.position();
-          const RealVect vel    = p.velocity();
-          const Real     v      = vel.vectorLength();
+        std::size_t i = 0;
+        while (i < solverLeaf.size()) {
+          const RealVect x(D_DECL(pos[0][i], pos[1][i], pos[2][i]));
+          const RealVect vec(D_DECL(vel[0][i], vel[1][i], vel[2][i]));
+          const Real     v      = vec.vectorLength();
           const Real     E      = v;
           const Real     deltaX = m_townsendGridDx * dx;
           const Real     dt     = deltaX / v;
-          const RealVect newPos = p.position() + dt * vel;
+          const RealVect newPos = x + dt * vec;
 
           const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
           const bool insideEB      = this->particleInsideEB(newPos);
@@ -3328,20 +3381,24 @@ DischargeInceptionStepper<P, F, C>::townsendTrackEuler(const Real& a_voltage) no
           const Real alphaEff      = alpha - eta;
           const bool negativeAlpha = alphaEff <= 0.0;
 
-          p.weight() = 0.0;
+          w[i] = 0.0;
 
           if (insideEB) {
-            p.weight() = m_secondaryEmission(E, x);
+            w[i] = m_secondaryEmission(E, x);
 
-            processedParticles.transfer(lit);
+            processedLeaf.appendParticle(solverLeaf, i);
+            solverLeaf.remove(i);
           }
           else if (outsideDomain || negativeAlpha) {
-            processedParticles.transfer(lit);
+            processedLeaf.appendParticle(solverLeaf, i);
+            solverLeaf.remove(i);
           }
           else {
-            p.position() = newPos;
+            for (int dir = 0; dir < SpaceDim; dir++) {
+              pos[dir][i] = newPos[dir];
+            }
 
-            ++lit;
+            i++;
           }
         }
       }
@@ -3388,10 +3445,10 @@ DischargeInceptionStepper<P, F, C>::townsendTrackTrapezoidal(const Real& a_volta
   // Allocate a data holder for holding the processed particles. This
   // will be faster because then we only have to iterate through the
   // particles that are actually still moving.
-  ParticleContainer<P> amrProcessedParticles;
+  ParticleContainerSoA<P> amrProcessedParticles;
   m_amr->allocate(amrProcessedParticles, m_realm);
 
-  ParticleContainer<P>& amrParticles = m_tracerParticleSolver->getParticles();
+  ParticleContainerSoA<P>& amrParticles = m_tracerParticleSolver->getParticles();
 
   m_tracerParticleSolver->remap();
 
@@ -3425,15 +3482,26 @@ DischargeInceptionStepper<P, F, C>::townsendTrackTrapezoidal(const Real& a_volta
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-        List<P>& solverParticles    = amrParticles[lvl][din].listItems();
-        List<P>& processedParticles = amrProcessedParticles[lvl][din].listItems();
+        ParticleSoA<P>& solverLeaf    = amrParticles[lvl][din];
+        ParticleSoA<P>& processedLeaf = amrProcessedParticles[lvl][din];
 
-        for (ListIterator<P> lit(solverParticles); lit.ok();) {
-          P& p = lit();
+        double* const w             = solverLeaf.weightColumn();
+        double* const pos[SpaceDim] = {
+          D_DECL(solverLeaf.positionColumn(0), solverLeaf.positionColumn(1), solverLeaf.positionColumn(2))};
+        const ParticleReal* const vel[SpaceDim] = {D_DECL(solverLeaf.template column<&P::vx>(),
+                                                          solverLeaf.template column<&P::vy>(),
+                                                          solverLeaf.template column<&P::vz>())};
+        ParticleReal* const       vk[SpaceDim]  = {D_DECL(solverLeaf.template column<&P::vkx>(),
+                                                   solverLeaf.template column<&P::vky>(),
+                                                   solverLeaf.template column<&P::vkz>())};
+        ParticleReal* const       alphaEffCol   = solverLeaf.template column<&P::alphaEff>();
+        ParticleReal* const       dtCol         = solverLeaf.template column<&P::dtStep>();
 
-          const RealVect x        = p.position();
-          const RealVect vel      = p.velocity();
-          const Real     v        = vel.vectorLength();
+        std::size_t i = 0;
+        while (i < solverLeaf.size()) {
+          const RealVect x(D_DECL(pos[0][i], pos[1][i], pos[2][i]));
+          const RealVect vec(D_DECL(vel[0][i], vel[1][i], vel[2][i]));
+          const Real     v        = vec.vectorLength();
           const Real     E        = v;
           const Real     alpha    = m_alpha(E, x);
           const Real     eta      = m_eta(E, x);
@@ -3442,31 +3510,35 @@ DischargeInceptionStepper<P, F, C>::townsendTrackTrapezoidal(const Real& a_volta
           // Compute a time step that we will use for the integration.
           const Real     deltaX = m_townsendGridDx * dx;
           const Real     dt     = deltaX / v;
-          const RealVect newPos = p.position() + vel * dt;
+          const RealVect newPos = x + vec * dt;
 
           const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
           const bool insideEB      = this->particleInsideEB(newPos);
 
           if (insideEB) {
-            p.weight() = m_secondaryEmission(E, x);
+            w[i] = m_secondaryEmission(E, x);
 
-            processedParticles.transfer(lit);
+            processedLeaf.appendParticle(solverLeaf, i);
+            solverLeaf.remove(i);
           }
           else if (alphaEff < 0.0) {
-            processedParticles.transfer(lit);
+            processedLeaf.appendParticle(solverLeaf, i);
+            solverLeaf.remove(i);
           }
           else if (outsideDomain) {
-            processedParticles.transfer(lit);
+            processedLeaf.appendParticle(solverLeaf, i);
+            solverLeaf.remove(i);
           }
           else {
-            // Do an Euler step, storaging alpha(p^k), v(p^k), and the time step size.
-            p.template real<0>() = alphaEff;
-            p.template real<1>() = dt;
-            p.template vect<1>() = vel;
+            // Do an Euler step, storing alpha(p^k), v(p^k), and the time step size.
+            alphaEffCol[i] = alphaEff;
+            dtCol[i]       = dt;
+            for (int dir = 0; dir < SpaceDim; dir++) {
+              vk[dir][i]  = vec[dir];
+              pos[dir][i] = newPos[dir];
+            }
 
-            p.position() = newPos;
-
-            ++lit;
+            i++;
           }
         }
       }
@@ -3487,26 +3559,35 @@ DischargeInceptionStepper<P, F, C>::townsendTrackTrapezoidal(const Real& a_volta
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-        List<P>& solverParticles    = amrParticles[lvl][din].listItems();
-        List<P>& processedParticles = amrProcessedParticles[lvl][din].listItems();
+        ParticleSoA<P>& solverLeaf    = amrParticles[lvl][din];
+        ParticleSoA<P>& processedLeaf = amrProcessedParticles[lvl][din];
 
-        for (ListIterator<P> lit(solverParticles); lit.ok();) {
+        double* const w             = solverLeaf.weightColumn();
+        double* const pos[SpaceDim] = {
+          D_DECL(solverLeaf.positionColumn(0), solverLeaf.positionColumn(1), solverLeaf.positionColumn(2))};
+        const ParticleReal* const vel[SpaceDim] = {D_DECL(solverLeaf.template column<&P::vx>(),
+                                                          solverLeaf.template column<&P::vy>(),
+                                                          solverLeaf.template column<&P::vz>())};
+        const ParticleReal* const vk[SpaceDim]  = {D_DECL(solverLeaf.template column<&P::vkx>(),
+                                                         solverLeaf.template column<&P::vky>(),
+                                                         solverLeaf.template column<&P::vkz>())};
+        const ParticleReal* const alphaEffCol   = solverLeaf.template column<&P::alphaEff>();
+        const ParticleReal* const dtCol         = solverLeaf.template column<&P::dtStep>();
 
-          P& p = lit();
+        std::size_t i = 0;
+        while (i < solverLeaf.size()) {
+          const Real     dt = dtCol[i];
+          const RealVect vkv(D_DECL(vk[0][i], vk[1][i], vk[2][i]));
+          const RealVect vk1(D_DECL(vel[0][i], vel[1][i], vel[2][i]));
+          const RealVect x(D_DECL(pos[0][i], pos[1][i], pos[2][i]));
+          const Real     E = vk1.vectorLength();
 
-          const Real     dt  = p.template real<1>();
-          const RealVect vk  = p.template vect<1>();
-          const RealVect vk1 = p.velocity();
-          const RealVect x   = p.position();
-          const Real     E   = vk1.vectorLength();
-
-          // Note the weird subtraction since p.position() was updated
-          // to p^k + dt * v^k.
-          const RealVect oldPos = p.position() - dt * vk;
-          const RealVect newPos = p.position() + 0.5 * dt * (vk1 - vk);
+          // Note the weird subtraction since the position was updated to p^k + dt * v^k.
+          const RealVect oldPos = x - dt * vkv;
+          const RealVect newPos = x + 0.5 * dt * (vk1 - vkv);
 
           // Compute new alpha.
-          const Real alphak  = p.template real<0>();
+          const Real alphak  = alphaEffCol[i];
           const Real alphak1 = m_alpha(E, x) - m_eta(E, x);
 
           // Stop integration for particles that move into regions alpha < 0.0,
@@ -3515,21 +3596,25 @@ DischargeInceptionStepper<P, F, C>::townsendTrackTrapezoidal(const Real& a_volta
           const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
           const bool insideEB      = this->particleInsideEB(newPos);
 
-          // If the particle wound up inside the EB we finish off the integration with a partial Euler step
-          Real s = 0.0;
+          // (negativeAlpha is computed but, as in the original, only outsideDomain/insideEB stop the track.)
+          (void)negativeAlpha;
 
           if (insideEB) {
-            p.weight() = m_secondaryEmission(E, oldPos);
+            w[i] = m_secondaryEmission(E, oldPos);
 
-            processedParticles.transfer(lit);
+            processedLeaf.appendParticle(solverLeaf, i);
+            solverLeaf.remove(i);
           }
           else if (outsideDomain) {
-            processedParticles.transfer(lit);
+            processedLeaf.appendParticle(solverLeaf, i);
+            solverLeaf.remove(i);
           }
           else {
-            p.position() = newPos;
+            for (int dir = 0; dir < SpaceDim; dir++) {
+              pos[dir][i] = newPos[dir];
+            }
 
-            ++lit;
+            i++;
           }
         }
       }
@@ -3668,7 +3753,7 @@ DischargeInceptionStepper<P, F, C>::rewindTracerParticles() noexcept
     pout() << "DischargeInceptionStepper::rewindTracerParticles" << endl;
   }
 
-  ParticleContainer<P>& amrParticles = m_tracerParticleSolver->getParticles();
+  ParticleContainerSoA<P>& amrParticles = m_tracerParticleSolver->getParticles();
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
@@ -3680,10 +3765,17 @@ DischargeInceptionStepper<P, F, C>::rewindTracerParticles() noexcept
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      for (ListIterator<P> lit(amrParticles[lvl][din].listItems()); lit.ok(); ++lit) {
-        P& p = lit();
+      ParticleSoA<P>&   leaf = amrParticles[lvl][din];
+      const std::size_t n    = leaf.size();
 
-        p.position() = p.template vect<0>();
+      double* const pos[SpaceDim] = {D_DECL(leaf.positionColumn(0), leaf.positionColumn(1), leaf.positionColumn(2))};
+      const ParticleReal* const x0[SpaceDim] = {
+        D_DECL(leaf.template column<&P::x0x>(), leaf.template column<&P::x0y>(), leaf.template column<&P::x0z>())};
+
+      for (std::size_t i = 0; i < n; i++) {
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          pos[dir][i] = x0[dir][i]; // rewind to the snapshot position
+        }
       }
     }
   }
@@ -3700,7 +3792,7 @@ DischargeInceptionStepper<P, F, C>::resetTracerParticles() noexcept
     pout() << "DischargeInceptionStepper::resetTracerParticles" << endl;
   }
 
-  ParticleContainer<P>& amrParticles = m_tracerParticleSolver->getParticles();
+  ParticleContainerSoA<P>& amrParticles = m_tracerParticleSolver->getParticles();
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
@@ -3712,10 +3804,13 @@ DischargeInceptionStepper<P, F, C>::resetTracerParticles() noexcept
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      for (ListIterator<P> lit(amrParticles[lvl][din].listItems()); lit.ok(); ++lit) {
-        P& p = lit();
+      ParticleSoA<P>&   leaf = amrParticles[lvl][din];
+      const std::size_t n    = leaf.size();
 
-        p.weight() = 0.0;
+      double* const w = leaf.weightColumn();
+
+      for (std::size_t i = 0; i < n; i++) {
+        w[i] = 0.0;
       }
     }
   }

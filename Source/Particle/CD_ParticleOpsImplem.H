@@ -316,6 +316,30 @@ ParticleOps::copyDestructive(ParticleContainer<P>& a_dst, ParticleContainer<P>& 
   }
 }
 
+template <typename P, typename Traits>
+inline void
+ParticleOps::copyDestructive(ParticleContainerSoA<P, Traits>& a_dst, ParticleContainerSoA<P, Traits>& a_src) noexcept
+{
+  CH_TIME("ParticleOps::copyDestructive(ParticleContainerSoA<P, Traits> x2)");
+
+  CH_assert(a_dst.getRealm() == a_src.getRealm());
+
+  for (int lvl = 0; lvl <= a_dst.getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl = a_dst.getGrids()[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
+
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      a_dst[lvl][din].clear();                   // drop the destination leaf's particles
+      a_dst[lvl][din].catenate(a_src[lvl][din]); // move the source leaf in (O(1) swap; src emptied)
+    }
+  }
+}
+
 template <typename P, const Real& (P::*scalarQuantity)() const>
 inline Real
 ParticleOps::sum(const ParticleContainer<P>& a_particles) noexcept
