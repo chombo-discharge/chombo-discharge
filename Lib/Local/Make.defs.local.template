@@ -47,9 +47,8 @@ makefiles+=Make.defs.local
 
 # Variables for optional features that don't affect filenames:
 
-#  CXXSTD          : Chombo default is C++11.  Set to 14 for C++14, etc.  This
-#                    should not be changed unless you want to experiment with
-#                    different C++ standards.  Only the default is supported.
+#  CXXSTD          : chombo-discharge requires C++17 (minimum) for the SoA
+#                    particle library.  Set to 17 or higher.
 #  USE_64          : if TRUE, use 64bit pointers on systems where 32bits is the default
 #  USE_COMPLEX     : if TRUE, enable the 'Complex' type
 #                    (default is TRUE, disable only if compiler doesn't allow it)
@@ -125,7 +124,7 @@ makefiles+=Make.defs.local
 #OBJMODEL      =
 #XTRACONFIG    =
 ## Optional features
-#CXXSTD        = 11
+#CXXSTD        = 17
 #USE_64        =
 #USE_COMPLEX   =
 USE_PETSC      = FALSE
