@@ -1290,6 +1290,12 @@ Realm::getParticleMesh(const phase::which_phase a_phase)
   return m_realms[a_phase]->getParticleMesh();
 }
 
+EBAMRParticleMeshSoA&
+Realm::getParticleMeshSoA(const phase::which_phase a_phase)
+{
+  return m_realms[a_phase]->getParticleMeshSoA();
+}
+
 EBAMRSurfaceDeposition&
 Realm::getSurfaceDeposition(const phase::which_phase a_phase)
 {

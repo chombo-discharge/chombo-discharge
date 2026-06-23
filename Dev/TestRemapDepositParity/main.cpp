@@ -454,6 +454,23 @@ main(int argc, char* argv[])
              << endl;
     }
 
+    // Check D: interpolate a mesh field onto the particle WEIGHT (EBAMRParticleMeshSoA::interpolateWeight
+    // vs the AoS interpolate<...,&weight>). Done last because it overwrites the weights.
+    for (int d = 0; d < 2; d++) {
+      amrAoS.interpolate<ParityParticle, Real&, &ParityParticle::weight>(pcAoS, field, deps[d], false);
+      amrSoA.interpolateWeight(pcSoA, field, deps[d], false);
+
+      compareField(
+        [](const ParityParticle& p) {
+          return p.weight();
+        },
+        [](const PCSoA::Leaf& leaf, std::size_t i) {
+          return leaf.weight(i);
+        },
+        std::string("interpolateWeight parity [") + depName[d] + "]");
+      pout() << "  interpW  [" << depName[d] << "] weight matched bit-for-bit" << endl;
+    }
+
     pout() << "All AoS-vs-SoA parity checks passed on cut cells (" << SpaceDim << "D, " << numProc() << " rank(s), "
            << nPart << " particles)." << endl;
   }

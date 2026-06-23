@@ -181,6 +181,39 @@ public:
     }
   }
 
+  /**
+    @brief Interpolate a mesh field onto the container-owned weight column, across all levels.
+    @details Per level, per patch: calls EBParticleMeshSoA::interpolateWeight. The mesh is assumed to
+    be valid+ghosted by the caller (no coarse-fine coupling is needed for interpolation). This is the
+    interpolation mirror of depositWeight.
+    @tparam P      Payload type (deduced).
+    @tparam Traits Column descriptor (deduced).
+    @param[in,out] a_particles     Particles whose weight column is overwritten.
+    @param[in]     a_meshData      AMR mesh data (>= 1 component).
+    @param[in]     a_interpType    Interpolation kernel (NGP/CIC/TSC).
+    @param[in]     a_forceIrregNGP Force NGP in cut cells.
+  */
+  template <typename P, typename Traits>
+  void
+  interpolateWeight(ParticleContainerSoA<P, Traits>& a_particles,
+                    const EBAMRCellData&             a_meshData,
+                    const DepositionType             a_interpType,
+                    const bool                       a_forceIrregNGP) const
+  {
+    CH_TIME("EBAMRParticleMeshSoA::interpolateWeight");
+
+    CH_assert(m_isDefined);
+
+    for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+      const DisjointBoxLayout& dbl = m_eblgs[lvl]->getDBL();
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
+        const EBParticleMeshSoA& interp = (*m_ebParticleMesh[lvl])[dit()];
+        const EBCellFAB&         data   = (*a_meshData[lvl])[dit()];
+        interp.interpolateWeight(a_particles[lvl][dit()], data, a_interpType, a_forceIrregNGP);
+      }
+    }
+  }
+
   ///@}
 
   /**

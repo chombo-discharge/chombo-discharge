@@ -34,6 +34,7 @@
 #include <CD_EBGradient.H>
 #include <CD_EBFluxRedistribution.H>
 #include <CD_EBAMRParticleMesh.H>
+#include <CD_EBAMRParticleMeshSoA.H>
 #include <CD_EBAMRSurfaceDeposition.H>
 #include <CD_EBCoarseToFineInterp.H>
 #include <CD_EBGhostCellInterpolator.H>
@@ -350,6 +351,13 @@ public:
   */
   EBAMRParticleMesh&
   getParticleMesh() const;
+
+  /**
+    @brief Get the SoA particle-mesh operator
+    @return SoA particle mesh
+  */
+  EBAMRParticleMeshSoA&
+  getParticleMeshSoA() const;
 
   /**
     @brief Get the surface deposition operator
@@ -674,6 +682,11 @@ protected:
     @brief For doing particle-mesh operations
   */
   mutable EBAMRParticleMesh m_particleMesh;
+
+  /**
+    @brief For doing SoA particle-mesh operations
+  */
+  mutable EBAMRParticleMeshSoA m_particleMeshSoA;
 
   /**
     @brief For doing particle deposition onto surfaces

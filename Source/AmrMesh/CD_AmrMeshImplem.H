@@ -299,6 +299,36 @@ AmrMesh::allocate(ParticleContainer<T>& a_container, const std::string& a_realm)
                      a_realm);
 }
 
+template <typename P, typename Traits>
+void
+AmrMesh::allocate(ParticleContainerSoA<P, Traits>& a_container, const std::string& a_realm) const
+{
+  CH_TIME("AmrMesh::allocate(ParticleContainerSoA<P, Traits>, string)");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::allocate(ParticleContainerSoA<P, Traits>, string)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::allocate(ParticleContainerSoA<P, Traits>, string) - could not find Realm '" +
+                            a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  if (m_maxBoxSize != m_blockingFactor) {
+    MayDay::Abort(
+      "AmrMesh::allocate(ParticleContainerSoA<P, Traits>, string) - only constant box sizes are supported for particle methods");
+  }
+
+  a_container.define(m_realms[a_realm]->getGrids(),
+                     m_realms[a_realm]->getDomains(),
+                     m_realms[a_realm]->getDx(),
+                     m_realms[a_realm]->getRefinementRatios(),
+                     m_probLo,
+                     m_blockingFactor,
+                     m_finestLevel,
+                     a_realm);
+}
+
 template <typename T>
 void
 AmrMesh::allocatePointer(Vector<RefCountedPtr<T>>& a_data) const
@@ -379,6 +409,29 @@ AmrMesh::remapToNewGrids(ParticleContainer<P>& a_particles, const int a_lmin, co
                      a_newFinestLevel);
 }
 
+template <typename P, typename Traits>
+void
+AmrMesh::remapToNewGrids(ParticleContainerSoA<P, Traits>& a_particles,
+                         const int                        a_lmin,
+                         const int                        a_newFinestLevel) const noexcept
+{
+  CH_TIME("AmrMesh::remapToNewGrids(ParticleContainerSoA)");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::remapToNewGrids(ParticleContainerSoA)" << endl;
+  }
+
+  (void)a_lmin; // ParticleContainerSoA::regrid redistributes from the preRegrid cache; no lmin needed.
+
+  const std::string realm = a_particles.getRealm();
+
+  a_particles.regrid(this->getGrids(realm),
+                     this->getDomains(),
+                     this->getDx(),
+                     this->getRefinementRatios(),
+                     m_blockingFactor,
+                     a_newFinestLevel);
+}
+
 template <class P, class Ret, Ret (P::*MemberFunc)() const>
 void
 AmrMesh::depositParticles(EBAMRCellData&              a_meshData,
@@ -423,6 +476,50 @@ AmrMesh::depositParticles(EBAMRIVData&                a_meshData,
   surfaceDeposition.deposit<P, Ret, MemberFunc>(a_meshData, a_particles);
 }
 
+template <typename P, typename Traits>
+void
+AmrMesh::depositWeight(EBAMRCellData&                         a_meshData,
+                       const std::string&                     a_realm,
+                       const phase::which_phase&              a_phase,
+                       const ParticleContainerSoA<P, Traits>& a_particles,
+                       const DepositionType                   a_depositionType,
+                       const CoarseFineDeposition             a_coarseFineDeposition,
+                       const bool                             a_forceIrregNGP)
+{
+  CH_TIME("AmrMesh::depositWeight(ParticleContainerSoA)");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::depositWeight(ParticleContainerSoA)" << endl;
+  }
+
+  EBAMRParticleMeshSoA& particleMesh = this->getParticleMeshSoA(a_realm, a_phase);
+
+  particleMesh.depositWeight(a_meshData, a_particles, a_depositionType, a_coarseFineDeposition, a_forceIrregNGP);
+}
+
+template <auto... Members, typename P, typename Traits>
+void
+AmrMesh::depositParticles(EBAMRCellData&                         a_meshData,
+                          const std::string&                     a_realm,
+                          const phase::which_phase&              a_phase,
+                          const ParticleContainerSoA<P, Traits>& a_particles,
+                          const DepositionType                   a_depositionType,
+                          const CoarseFineDeposition             a_coarseFineDeposition,
+                          const bool                             a_forceIrregNGP)
+{
+  CH_TIME("AmrMesh::depositParticles(ParticleContainerSoA)");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::depositParticles(ParticleContainerSoA)" << endl;
+  }
+
+  EBAMRParticleMeshSoA& particleMesh = this->getParticleMeshSoA(a_realm, a_phase);
+
+  particleMesh.template deposit<Members...>(a_meshData,
+                                            a_particles,
+                                            a_depositionType,
+                                            a_coarseFineDeposition,
+                                            a_forceIrregNGP);
+}
+
 template <class P, class Ret, Ret (P::*MemberFunc)()>
 void
 AmrMesh::interpolateParticles(ParticleContainer<P>&     a_particles,
@@ -443,6 +540,44 @@ AmrMesh::interpolateParticles(ParticleContainer<P>&     a_particles,
   EBAMRParticleMesh& particleMesh = this->getParticleMesh(a_realm, a_phase);
 
   particleMesh.interpolate<P, Ret, MemberFunc>(a_particles, a_meshScalarField, a_interpType, a_forceIrregNGP);
+}
+
+template <typename P, typename Traits>
+void
+AmrMesh::interpolateWeight(ParticleContainerSoA<P, Traits>& a_particles,
+                           const std::string&               a_realm,
+                           const phase::which_phase&        a_phase,
+                           const EBAMRCellData&             a_meshScalarField,
+                           const DepositionType             a_interpType,
+                           const bool                       a_forceIrregNGP) const
+{
+  CH_TIME("AmrMesh::interpolateWeight(ParticleContainerSoA)");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::interpolateWeight(ParticleContainerSoA)" << endl;
+  }
+
+  EBAMRParticleMeshSoA& particleMesh = this->getParticleMeshSoA(a_realm, a_phase);
+
+  particleMesh.interpolateWeight(a_particles, a_meshScalarField, a_interpType, a_forceIrregNGP);
+}
+
+template <auto... Members, typename P, typename Traits>
+void
+AmrMesh::interpolateParticles(ParticleContainerSoA<P, Traits>& a_particles,
+                              const std::string&               a_realm,
+                              const phase::which_phase&        a_phase,
+                              const EBAMRCellData&             a_meshField,
+                              const DepositionType             a_interpType,
+                              const bool                       a_forceIrregNGP) const
+{
+  CH_TIME("AmrMesh::interpolateParticles(ParticleContainerSoA)");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::interpolateParticles(ParticleContainerSoA)" << endl;
+  }
+
+  EBAMRParticleMeshSoA& particleMesh = this->getParticleMeshSoA(a_realm, a_phase);
+
+  particleMesh.template interpolate<Members...>(a_particles, a_meshField, a_interpType, a_forceIrregNGP);
 }
 
 template <class P>

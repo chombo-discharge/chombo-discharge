@@ -307,6 +307,60 @@ public:
     this->interpolate<Members...>(a_particles, a_meshData, 0, a_interpType, a_forceIrregNGP);
   }
 
+  /**
+    @brief Interpolate mesh component a_comp onto the container-owned weight column.
+    @details weight is a mandatory column, not a payload member, so it has its own entry point (the
+    interpolation mirror of depositWeight). Equivalent to interpolate() but scatters into weight().
+    @tparam P      Payload type of the ParticleSoA.
+    @tparam Traits Column descriptor of P.
+    @param[in,out] a_particles     Particles whose weight column is overwritten.
+    @param[in]     a_meshData      Mesh data. Must have at least a_comp+1 components.
+    @param[in]     a_comp          Source mesh component.
+    @param[in]     a_interpType    Interpolation kernel (NGP/CIC/TSC).
+    @param[in]     a_forceIrregNGP Force NGP in cut cells.
+  */
+  template <typename P, typename Traits>
+  void
+  interpolateWeight(ParticleSoA<P, Traits>& a_particles,
+                    const EBCellFAB&        a_meshData,
+                    const int               a_comp,
+                    const DepositionType    a_interpType,
+                    const bool              a_forceIrregNGP) const
+  {
+    CH_TIME("EBParticleMeshSoA::interpolateWeight");
+
+    this->interpolateCore(a_particles,
+                          a_meshData,
+                          a_comp,
+                          1,
+                          a_interpType,
+                          a_forceIrregNGP,
+                          [&](const std::size_t a_i, const Real* a_in) {
+                            a_particles.weight(a_i) = a_in[0];
+                          });
+  }
+
+  /**
+    @brief Interpolate the first mesh component (a_comp == 0) onto the weight column.
+    @tparam P      Payload type of the ParticleSoA.
+    @tparam Traits Column descriptor of P.
+    @param[in,out] a_particles     Particles whose weight column is overwritten.
+    @param[in]     a_meshData      Mesh data.
+    @param[in]     a_interpType    Interpolation kernel (NGP/CIC/TSC).
+    @param[in]     a_forceIrregNGP Force NGP in cut cells.
+  */
+  template <typename P, typename Traits>
+  void
+  interpolateWeight(ParticleSoA<P, Traits>& a_particles,
+                    const EBCellFAB&        a_meshData,
+                    const DepositionType    a_interpType,
+                    const bool              a_forceIrregNGP) const
+  {
+    CH_TIME("EBParticleMeshSoA::interpolateWeight");
+
+    this->interpolateWeight(a_particles, a_meshData, 0, a_interpType, a_forceIrregNGP);
+  }
+
 protected:
   /**
     @brief Computational domain.

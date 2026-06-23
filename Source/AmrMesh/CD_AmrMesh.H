@@ -30,6 +30,7 @@
 #include <CD_DomainFluxIFFAB.H>
 #include <CD_DomainFluxIFFABFactory.H>
 #include <CD_ParticleContainer.H>
+#include <CD_ParticleContainerSoA.H>
 #include <CD_Realm.H>
 #include <CD_CopyStrategy.H>
 #include <CD_LoadBalancing.H>
@@ -226,6 +227,17 @@ public:
   template <typename T>
   void
   allocate(ParticleContainer<T>& a_container, const std::string& a_realm) const;
+
+  /**
+    @brief Allocate a struct-of-arrays particle container on the given realm.
+    @param[out] a_container SoA particle container to be allocated.
+    @param[in]  a_realm     Realm on which the particles will be allocated.
+    @tparam P      Payload type of the container.
+    @tparam Traits Column descriptor for the payload.
+  */
+  template <typename P, typename Traits>
+  void
+  allocate(ParticleContainerSoA<P, Traits>& a_container, const std::string& a_realm) const;
 
   /**
     @brief Allocate pointer but not any memory blocks. 
@@ -1001,6 +1013,96 @@ public:
                        const bool                a_forceIrregNGP = false) const;
 
   /**
+    @brief Deposit the SoA container's weight column on the mesh (all coarse-fine strategies).
+    @param[out] a_meshData             Mesh data. Must have exactly one component.
+    @param[in]  a_realm                Realm where data is registered.
+    @param[in]  a_phase                Phase where data is registered.
+    @param[in]  a_particles            SoA particle container.
+    @param[in]  a_depositionType       Deposition kernel (e.g. CIC).
+    @param[in]  a_coarseFineDeposition Coarse-fine handling.
+    @param[in]  a_forceIrregNGP        Force NGP deposition in cut cells.
+    @tparam P      Payload type of the container.
+    @tparam Traits Column descriptor for the payload.
+  */
+  template <typename P, typename Traits>
+  void
+  depositWeight(EBAMRCellData&                         a_meshData,
+                const std::string&                     a_realm,
+                const phase::which_phase&              a_phase,
+                const ParticleContainerSoA<P, Traits>& a_particles,
+                const DepositionType                   a_depositionType,
+                const CoarseFineDeposition             a_coarseFineDeposition,
+                const bool                             a_forceIrregNGP);
+
+  /**
+    @brief Deposit one or more SoA payload columns on the mesh (all coarse-fine strategies).
+    @details Members selects either one scalar column or SpaceDim vector-component columns, mapped to
+    consecutive mesh components.
+    @param[out] a_meshData             Mesh data.
+    @param[in]  a_realm                Realm where data is registered.
+    @param[in]  a_phase                Phase where data is registered.
+    @param[in]  a_particles            SoA particle container.
+    @param[in]  a_depositionType       Deposition kernel.
+    @param[in]  a_coarseFineDeposition Coarse-fine handling.
+    @param[in]  a_forceIrregNGP        Force NGP deposition in cut cells.
+    @tparam Members Pack of payload data-member pointers selecting the column(s).
+    @tparam P       Payload type (deduced).
+    @tparam Traits  Column descriptor (deduced).
+  */
+  template <auto... Members, typename P, typename Traits>
+  void
+  depositParticles(EBAMRCellData&                         a_meshData,
+                   const std::string&                     a_realm,
+                   const phase::which_phase&              a_phase,
+                   const ParticleContainerSoA<P, Traits>& a_particles,
+                   const DepositionType                   a_depositionType,
+                   const CoarseFineDeposition             a_coarseFineDeposition,
+                   const bool                             a_forceIrregNGP);
+
+  /**
+    @brief Interpolate a mesh scalar field onto the SoA container's weight column.
+    @param[in,out] a_particles     SoA particles whose weight column is overwritten.
+    @param[in]     a_realm         Realm where data is registered.
+    @param[in]     a_phase         Phase where data is registered.
+    @param[in]     a_meshScalarField Scalar field on the mesh.
+    @param[in]     a_interpType    Interpolation kernel.
+    @param[in]     a_forceIrregNGP Force NGP interpolation in cut cells.
+    @tparam P      Payload type of the container.
+    @tparam Traits Column descriptor for the payload.
+  */
+  template <typename P, typename Traits>
+  void
+  interpolateWeight(ParticleContainerSoA<P, Traits>& a_particles,
+                    const std::string&               a_realm,
+                    const phase::which_phase&        a_phase,
+                    const EBAMRCellData&             a_meshScalarField,
+                    const DepositionType             a_interpType,
+                    const bool                       a_forceIrregNGP) const;
+
+  /**
+    @brief Interpolate a mesh field onto one or more SoA payload columns.
+    @details Members selects either one scalar column or SpaceDim vector-component columns, read from
+    consecutive mesh components.
+    @param[in,out] a_particles     SoA particles whose target columns are overwritten.
+    @param[in]     a_realm         Realm where data is registered.
+    @param[in]     a_phase         Phase where data is registered.
+    @param[in]     a_meshField     Field on the mesh.
+    @param[in]     a_interpType    Interpolation kernel.
+    @param[in]     a_forceIrregNGP Force NGP interpolation in cut cells.
+    @tparam Members Pack of payload data-member pointers selecting the target column(s).
+    @tparam P       Payload type (deduced).
+    @tparam Traits  Column descriptor (deduced).
+  */
+  template <auto... Members, typename P, typename Traits>
+  void
+  interpolateParticles(ParticleContainerSoA<P, Traits>& a_particles,
+                       const std::string&               a_realm,
+                       const phase::which_phase&        a_phase,
+                       const EBAMRCellData&             a_meshField,
+                       const DepositionType             a_interpType,
+                       const bool                       a_forceIrregNGP) const;
+
+  /**
     @brief Function which removes particles from the domain if they fall inside the EB.
     @details The template parameter indicate the particle type -- it MUST have a const RealVect& P::position() const function. 
     @details This version uses the implicit function to evaluate whether or not the particles are inside the EB. The particles will be removed from
@@ -1313,6 +1415,21 @@ public:
   template <class P>
   void
   remapToNewGrids(ParticleContainer<P>& a_particles, const int a_lmin, const int a_newFinestLevel) const noexcept;
+
+  /**
+    @brief Regrid a struct-of-arrays particle container to new grids.
+    @note User needs to call ParticleContainerSoA::preRegrid prior to this.
+    @param[in,out] a_particles      SoA particle container to regrid.
+    @param[in]     a_lmin           Coarsest level that did not change.
+    @param[in]     a_newFinestLevel New finest level.
+    @tparam P      Payload type of the container.
+    @tparam Traits Column descriptor for the payload.
+  */
+  template <typename P, typename Traits>
+  void
+  remapToNewGrids(ParticleContainerSoA<P, Traits>& a_particles,
+                  const int                        a_lmin,
+                  const int                        a_newFinestLevel) const noexcept;
 
   /**
     @brief Interpolate data to centroids on realm and phase
@@ -1878,6 +1995,15 @@ public:
   */
   EBAMRParticleMesh&
   getParticleMesh(const std::string& a_realm, const phase::which_phase a_phase) const;
+
+  /**
+    @brief Get the SoA EBAMRParticleMesh operator
+    @param[in] a_realm Realm name
+    @param[in] a_phase Phase (gas or solid)
+    @return SoA particle mesh
+  */
+  EBAMRParticleMeshSoA&
+  getParticleMeshSoA(const std::string& a_realm, const phase::which_phase a_phase) const;
 
   /**
     @brief Get EBAMRSurfaceDeposition surface deposition operator

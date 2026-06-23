@@ -16,6 +16,7 @@
 // Our includes
 #include <CD_PhaseRealm.H>
 #include <CD_EBAMRParticleMesh.H>
+#include <CD_EBAMRParticleMeshSoA.H>
 #include <CD_MultiFluidIndexSpace.H>
 #include <CD_MFLevelGrid.H>
 #include <CD_LevelTiles.H>
@@ -377,6 +378,14 @@ public:
   */
   EBAMRParticleMesh&
   getParticleMesh(const phase::which_phase a_phase);
+
+  /**
+    @brief Get the SoA particle mesh operator
+    @param[in] a_phase Which phase
+    @return SoA particle mesh
+  */
+  EBAMRParticleMeshSoA&
+  getParticleMeshSoA(const phase::which_phase a_phase);
 
   /**
     @brief Get the particle mesh operator

@@ -3517,6 +3517,23 @@ AmrMesh::getParticleMesh(const std::string& a_realm, const phase::which_phase a_
   return m_realms[a_realm]->getParticleMesh(a_phase);
 }
 
+EBAMRParticleMeshSoA&
+AmrMesh::getParticleMeshSoA(const std::string& a_realm, const phase::which_phase a_phase) const
+{
+  CH_TIME("AmrMesh::getParticleMeshSoA(string, phase::which_phase)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getParticleMeshSoA(string, phase::which_phase)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getParticleMeshSoA(string, phase::which_phase) - could not find realm '" +
+                            a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getParticleMeshSoA(a_phase);
+}
+
 EBAMRSurfaceDeposition&
 AmrMesh::getSurfaceDeposition(const std::string& a_realm, const phase::which_phase a_phase) const
 {

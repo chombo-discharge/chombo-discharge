@@ -32,6 +32,32 @@ doxygen-checked), and keep REUSE/clang-format/doxygen green.
       `Exec/Tests/...` once their headers are in Source.
 - [ ] `Dev/Benchmark`, `Dev/main.cpp` -- demo/benchmark scaffolding; migrate or retire last.
 
+## Consumer rewiring: TracerParticle/TracerParticleSolver -> SoA, then DischargeInception
+
+Decisions (locked): (1) per-consumer NAMED payloads (drop the generic `TracerParticle<M,N>`);
+(2) add AmrMesh SoA overloads (don't bypass AmrMesh); (3) retire the AoS `TracerParticle<M,N>` +
+AoS `TracerParticleSolver` once all consumers move (no other users -- only TracerParticles,
+Physics/TracerParticle + CoaxialCable exec, DischargeInception); (4) OK to break HDF5 checkpoint
+compatibility on this branch.
+
+- [x] **Phase 0 -- library prerequisites.**
+      - `interpolateWeight` added to `EBParticleMeshSoA` + `EBAMRParticleMeshSoA` (mirror of
+        `depositWeight`; scatters into the container-owned weight column). Validated bit-for-bit vs
+        the AoS `interpolate<...,&weight>` in `TestRemapDepositParity` (Check D), NGP+CIC, 2D/3D, np1+np2.
+      - AmrMesh SoA overloads: `allocate`/`remapToNewGrids`/`depositWeight`/`depositParticles<Members>`/
+        `interpolateWeight`/`interpolateParticles<Members>` + `getParticleMeshSoA`. `PhaseRealm` now holds
+        `m_particleMeshSoA` (defined alongside `m_particleMesh`); `Realm`/`AmrMesh` expose it. discharge-lib
+        compiles; the templated overloads get full runtime coverage via the tracer solver (Phase 2/3).
+- [ ] **Phase 1 -- named payloads** (per consumer): TracerParticleStepper = velocity + RK scratch
+      (posOld,k1,k2,k3); DischargeInception = velocity + posOld + velOld + gradAlpha + alphaEff + dtDiag.
+- [ ] **Phase 2 -- TracerParticleSolver -> SoA** (in place): ParticleContainerSoA + AmrMesh SoA overloads;
+      deposit->depositWeight; interpolateWeight; interpolateVelocities->interpolate<&P::vx,...>; computeDt
+      SoA loop; plot/checkpoint SoA HDF5.
+- [ ] **Phase 3 -- TracerParticleStepper -> SoA** (RK loops -> SoA columns); CoaxialCable exec validates.
+- [ ] **Phase 4 -- DischargeInceptionStepper -> SoA** (seed/integration loops, gradAlpha interpolation,
+      rewind/reset).
+- [ ] **Retire** AoS `TracerParticle<M,N>` + AoS `TracerParticleSolver` after Phases 2-4.
+
 ## Conventions for each migration
 
 1. `git mv Dev/CD_X.H Source/Particle/CD_X.H` (preserve history).

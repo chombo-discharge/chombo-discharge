@@ -884,6 +884,7 @@ PhaseRealm::defineParticleMesh()
   }
 
   m_particleMesh.define(m_eblg, m_refinementRatios, m_dx, m_probLo, m_numGhostCells, m_finestLevel);
+  m_particleMeshSoA.define(m_eblg, m_refinementRatios, m_dx, m_probLo, m_numGhostCells, m_finestLevel);
   m_surfaceDeposition.define(m_eblg, m_eblgCoFi, m_eblgFiCo, m_refinementRatios, m_dx, m_probLo, m_finestLevel, 1);
 }
 
@@ -1182,6 +1183,16 @@ PhaseRealm::getParticleMesh() const
   }
 
   return m_particleMesh;
+}
+
+EBAMRParticleMeshSoA&
+PhaseRealm::getParticleMeshSoA() const
+{
+  if (!this->queryOperator(s_particle_mesh)) {
+    MayDay::Error("PhaseRealm::getParticleMeshSoA - operator not registered!");
+  }
+
+  return m_particleMeshSoA;
 }
 
 EBAMRSurfaceDeposition&
