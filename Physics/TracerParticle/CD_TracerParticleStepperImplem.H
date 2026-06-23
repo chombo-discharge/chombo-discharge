@@ -459,11 +459,14 @@ TracerParticleStepper<P>::initialParticles()
     return ret;
   };
 
-  // Draw particles (unit weight) directly into the SoA container. drawRandomParticles partitions the
-  // count across MPI ranks and remaps each particle to its owning patch/level/rank.
-  ParticleContainerSoA<P>& solverParticles = m_solver->getParticles();
+  // Draw particles (unit weight) into a free buffer (the List<P> analogue), then hand them to the
+  // container, which routes each particle to its owning patch/level/rank.
+  ParticleSoA<P> drawnParticles;
+  ParticleManagement::drawRandomParticles(drawnParticles, m_numInitialParticles, uniformDistribution);
 
-  ParticleManagement::drawRandomParticles(solverParticles, m_numInitialParticles, uniformDistribution);
+  ParticleContainerSoA<P>& solverParticles = m_solver->getParticles();
+  solverParticles.clearParticles();
+  solverParticles.addParticlesDestructive(drawnParticles);
 
   // Remove particles inside the EB.
   m_amr->removeCoveredParticlesIF(solverParticles, m_phase, 0.0);

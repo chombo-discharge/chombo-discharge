@@ -56,8 +56,8 @@ compatibility on this branch.
 - [x] **Phase 2 -- TracerParticleSolver -> SoA** (in place): ParticleContainerSoA + AmrMesh SoA overloads;
       deposit->depositWeight; interpolateWeight; interpolateVelocities->interpolate<&P::vx,...>; computeDt
       SoA loop; checkpoint via the new SoA DischargeIO; getParticles returns ParticleContainerSoA. Also
-      added removeCoveredParticlesIF(SoA) + ParticleManagement::drawRandomParticles(SoA) (both needed here
-      and by inception).
+      added removeCoveredParticlesIF(SoA); ParticleManagement::drawRandomParticles(ParticleSoA) fills a free
+      buffer (List<P> analogue) and ParticleContainerSoA::addParticlesDestructive(ParticleSoA) routes it.
 - [x] **Phase 3 -- TracerParticleStepper -> SoA** (Euler/RK2/RK4 loops -> SoA column access; seeding via
       drawRandomParticles(SoA)). CoaxialCable exec instantiates TracerParticleStepper<TracerParticlePayload>;
       builds + runs (OPT 2D, plot output advancing).

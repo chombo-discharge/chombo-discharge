@@ -434,31 +434,19 @@ namespace ParticleManagement {
 
   template <typename P, typename Traits, typename T, typename>
   inline void
-  drawRandomParticles(ParticleContainerSoA<P, Traits>& a_particles,
+  drawRandomParticles(ParticleSoA<P, Traits>&          a_particles,
                       const T                          a_numParticles,
                       const std::function<RealVect()>& a_distribution)
   {
-    a_particles.clearParticles();
+    a_particles.clear();
 
+    // Each rank draws its own share (unit weight) into the buffer. Routing to owners happens later when
+    // the buffer is added to a ParticleContainerSoA.
     const T numParticles = partitionParticles(a_numParticles);
 
-    // Stage this rank's draws on its first local leaf (unit weight, default payload); remap() then
-    // routes each particle to the patch/level/rank that owns its position.
-    const Vector<DisjointBoxLayout>& grids = a_particles.getGrids();
-
-    bool staged = false;
-    for (int lvl = 0; lvl < grids.size() && !staged; lvl++) {
-      DataIterator dit = grids[lvl].dataIterator();
-      if (dit.ok()) {
-        ParticleSoA<P, Traits>& leaf = a_particles[lvl][dit()];
-        for (T t = 0; t < numParticles; t++) {
-          leaf.append(a_distribution(), 1.0);
-        }
-        staged = true;
-      }
+    for (T t = 0; t < numParticles; t++) {
+      a_particles.append(a_distribution(), 1.0);
     }
-
-    a_particles.remap();
   }
 
   template <typename P, typename T, typename>

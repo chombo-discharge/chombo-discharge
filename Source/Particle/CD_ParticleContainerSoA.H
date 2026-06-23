@@ -428,6 +428,33 @@ public:
     }
   }
 
+  /**
+    @brief Add a free-standing buffer of particles to the container, routing each to its owner.
+    @details Destructive SoA analogue of ParticleContainer::addParticlesDestructive(List<P>): the buffer
+    (e.g. filled by ParticleManagement::drawRandomParticles(ParticleSoA)) is catenated onto a local leaf
+    -- O(1) when that leaf is empty -- and then remap() routes every particle (including across ranks and
+    levels) to the patch/level/rank that owns its position. a_particles is left empty. Assumes this rank
+    owns at least one box (true whenever level 0 covers the domain).
+    @param[in,out] a_particles Buffer of particles to ingest (emptied on return).
+  */
+  void
+  addParticlesDestructive(ParticleSoA<P, Traits>& a_particles)
+  {
+    CH_TIME("ParticleContainerSoA::addParticlesDestructive");
+
+    CH_assert(m_isDefined);
+
+    for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+      DataIterator dit = m_grids[lvl].dataIterator();
+      if (dit.ok()) {
+        (*m_particles[lvl])[dit()].catenate(a_particles); // move the buffer onto a local leaf
+        break;
+      }
+    }
+
+    this->remap(); // route every staged particle to its owning patch/level/rank
+  }
+
   ///@}
 
   /**

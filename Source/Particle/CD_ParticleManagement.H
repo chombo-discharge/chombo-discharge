@@ -24,7 +24,7 @@
 // Our includes
 #include <CD_KDNode.H>
 #include <CD_CellInfo.H>
-#include <CD_ParticleContainerSoA.H>
+#include <CD_ParticleSoA.H>
 #include <CD_NamespaceHeader.H>
 
 /**
@@ -159,20 +159,22 @@ namespace ParticleManagement {
   drawRandomParticles(List<P>& a_particles, const T a_numParticles, const std::function<RealVect()>& a_distribution);
 
   /**
-    @brief Draw random SoA particles distributed according to a predefined distribution.
-    @details MPI-aware: partitions a_numParticles across ranks (total = a_numParticles). Each rank draws
-    its share of positions (unit weight, default-constructed payload), stages them on its first local
-    leaf, then remap()s the container so each particle ends up on the patch/level/rank that owns it.
-    @param[out] a_particles    SoA container to fill (cleared first).
+    @brief Draw random SoA particles into a free buffer, distributed according to a predefined distribution.
+    @details The SoA analogue of drawRandomParticles(List<P>): fills a free-standing ParticleSoA leaf
+    (the List<P> analogue) rather than an AMR container. MPI-aware -- it partitions a_numParticles across
+    ranks (total = a_numParticles) and each rank draws its own share (unit weight, default payload).
+    Downstream code adds the buffer to a ParticleContainerSoA (e.g. addParticlesDestructive) to route the
+    particles to their owning patch/level/rank.
+    @param[out] a_particles    SoA buffer to fill (cleared first).
     @param[in]  a_numParticles Total number of particles across all ranks.
     @param[in]  a_distribution Distribution functor returning a random position.
-    @tparam P      Payload type of the container.
+    @tparam P      Payload type.
     @tparam Traits Column descriptor for the payload.
     @tparam T      Integral count type.
   */
   template <typename P, typename Traits, typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
   static inline void
-  drawRandomParticles(ParticleContainerSoA<P, Traits>& a_particles,
+  drawRandomParticles(ParticleSoA<P, Traits>&          a_particles,
                       const T                          a_numParticles,
                       const std::function<RealVect()>& a_distribution);
 
