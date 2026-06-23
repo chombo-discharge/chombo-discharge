@@ -1265,6 +1265,54 @@ public:
                                  const phase::which_phase& a_phase) const;
 
   /**
+    @brief Transfer SoA particles inside the EB (implicit-function test) from one container to another: f(x) > a_tolerance*dx.
+    @param[in,out] a_particlesFrom Source SoA container (transferred particles are removed from it).
+    @param[in,out] a_particlesTo   Destination SoA container.
+    @param[in]     a_phase         Phase where the particles live.
+    @param[in]     a_tolerance     Tolerance (multiplied by dx).
+    @tparam P      Payload type of the container.
+    @tparam Traits Column descriptor for the payload.
+    @note Because the implicit functions are global, this works even if the particles aren't mapped to the correct boxes (remapping will be necessary afterwards).
+  */
+  template <typename P, typename Traits>
+  void
+  transferCoveredParticlesIF(ParticleContainerSoA<P, Traits>& a_particlesFrom,
+                             ParticleContainerSoA<P, Traits>& a_particlesTo,
+                             const phase::which_phase&        a_phase,
+                             const Real                       a_tolerance) const;
+
+  /**
+    @brief Transfer SoA particles inside the EB using discrete (EBISBox) information from one container to another.
+    @details Transfers particles in covered cells, or in irregular cells on the wrong side of every VoF's EB face (to within a_tolerance*dx).
+    @param[in,out] a_particlesFrom Source SoA container (transferred particles are removed from it).
+    @param[in,out] a_particlesTo   Destination SoA container.
+    @param[in]     a_phase         Phase where the particles live.
+    @param[in]     a_tolerance     Tolerance (multiplied by dx).
+    @tparam P      Payload type of the container.
+    @tparam Traits Column descriptor for the payload.
+  */
+  template <typename P, typename Traits>
+  void
+  transferCoveredParticlesDiscrete(ParticleContainerSoA<P, Traits>& a_particlesFrom,
+                                   ParticleContainerSoA<P, Traits>& a_particlesTo,
+                                   const phase::which_phase&        a_phase,
+                                   const Real                       a_tolerance) const;
+
+  /**
+    @brief Transfer SoA particles that live in covered cells (voxel test) from one container to another.
+    @param[in,out] a_particlesFrom Source SoA container (transferred particles are removed from it).
+    @param[in,out] a_particlesTo   Destination SoA container.
+    @param[in]     a_phase         Phase where the particles live.
+    @tparam P      Payload type of the container.
+    @tparam Traits Column descriptor for the payload.
+  */
+  template <typename P, typename Traits>
+  void
+  transferCoveredParticlesVoxels(ParticleContainerSoA<P, Traits>& a_particlesFrom,
+                                 ParticleContainerSoA<P, Traits>& a_particlesTo,
+                                 const phase::which_phase&        a_phase) const;
+
+  /**
     @brief Transfer particles that are on the wrong side of the EB to a different container.
     @param[in,out] a_dstParticles     Destination particle container
     @param[in,out] a_srcParticles     Source particle container
@@ -1340,6 +1388,56 @@ public:
     const std::function<void(P&)>& a_nonDeletionModifier = [](P&) -> void {
       return;
     }) const noexcept;
+
+  /**
+    @brief SoA ray-casting particle intersection algorithm.
+    @details Iterates through the active particles and checks if they intersect the EB or the domain faces along
+    their trajectory (oldPosition -> position). Particles that intersect are moved onto the intersection point and
+    placed in a_ebParticles or a_domainParticles. The EB test uses the ray-casting method (assuming the implicit
+    function is a signed distance function). The container-owned position holds the trajectory end point; the start
+    point is read from the payload columns selected by the OldPosition member-pointer pack.
+    @param[in,out] a_activeParticles Particles to be intersected with geometry.
+    @param[out]   a_ebParticles     Particles that intersected the EB (cleared and remapped here).
+    @param[out]   a_domainParticles Particles that intersected the domain faces (cleared and remapped here).
+    @param[in]    a_phase           Phase where the input particles live.
+    @param[in]    a_tolerance       Tolerance.
+    @param[in]    a_deleteParticles If true, intersected particles are removed from a_activeParticles.
+    @tparam OldPosition Pack of SpaceDim payload member pointers giving the particle's previous-position components.
+    @tparam P           Payload type (deduced).
+    @tparam Traits      Column descriptor (deduced).
+  */
+  template <auto... OldPosition, typename P, typename Traits>
+  void
+  intersectParticlesRaycastIF(ParticleContainerSoA<P, Traits>& a_activeParticles,
+                              ParticleContainerSoA<P, Traits>& a_ebParticles,
+                              ParticleContainerSoA<P, Traits>& a_domainParticles,
+                              const phase::which_phase         a_phase,
+                              const Real                       a_tolerance,
+                              const bool                       a_deleteParticles) const noexcept;
+
+  /**
+    @brief SoA bisection-based particle intersection algorithm.
+    @details Identical to intersectParticlesRaycastIF but the EB intersection test uses bisection rather than
+    ray-casting. The container-owned position holds the trajectory end point; the start point is read from the
+    payload columns selected by the OldPosition member-pointer pack.
+    @param[in,out] a_activeParticles Particles to be intersected with geometry.
+    @param[out]   a_ebParticles     Particles that intersected the EB (cleared and remapped here).
+    @param[out]   a_domainParticles Particles that intersected the domain faces (cleared and remapped here).
+    @param[in]    a_phase           Phase where the input particles live.
+    @param[in]    a_bisectionStep   Length of the bisection step.
+    @param[in]    a_deleteParticles If true, intersected particles are removed from a_activeParticles.
+    @tparam OldPosition Pack of SpaceDim payload member pointers giving the particle's previous-position components.
+    @tparam P           Payload type (deduced).
+    @tparam Traits      Column descriptor (deduced).
+  */
+  template <auto... OldPosition, typename P, typename Traits>
+  void
+  intersectParticlesBisectIF(ParticleContainerSoA<P, Traits>& a_activeParticles,
+                             ParticleContainerSoA<P, Traits>& a_ebParticles,
+                             ParticleContainerSoA<P, Traits>& a_domainParticles,
+                             const phase::which_phase         a_phase,
+                             const Real                       a_bisectionStep,
+                             const bool                       a_deleteParticles) const noexcept;
 
   /**
     @brief Interpolate ghost vectors over a realm, using the default ghost cell interpolation method. 

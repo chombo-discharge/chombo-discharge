@@ -1244,6 +1244,218 @@ AmrMesh::transferCoveredParticlesVoxels(ParticleContainer<P>&     a_particlesFro
   }
 }
 
+template <typename P, typename Traits>
+void
+AmrMesh::transferCoveredParticlesIF(ParticleContainerSoA<P, Traits>& a_particlesFrom,
+                                    ParticleContainerSoA<P, Traits>& a_particlesTo,
+                                    const phase::which_phase&        a_phase,
+                                    const Real                       a_tolerance) const
+{
+  CH_TIME("AmrMesh::transferCoveredParticlesIF(ParticleContainerSoA)");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::transferCoveredParticlesIF(ParticleContainerSoA)" << endl;
+  }
+
+  // Figure out the implicit function
+  RefCountedPtr<BaseIF> implicitFunction;
+
+  switch (a_phase) {
+  case phase::gas: {
+    implicitFunction = m_baseif.at(phase::gas);
+
+    break;
+  }
+  case phase::solid: {
+    implicitFunction = m_baseif.at(phase::solid);
+
+    break;
+  }
+  default: {
+    MayDay::Error("AmrMesh::transferCoveredParticlesIF(ParticleContainerSoA) - logic bust");
+  }
+  }
+
+  const std::string realmFrom = a_particlesFrom.getRealm();
+  const std::string realmTo   = a_particlesTo.getRealm();
+
+  CH_assert(realmFrom == realmTo);
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    const DisjointBoxLayout& dbl = this->getGrids(realmFrom)[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
+    const Real               dx  = this->getDx()[lvl];
+    const Real               tol = a_tolerance * dx;
+
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      ParticleSoA<P, Traits>& from = a_particlesFrom[lvl][din];
+      ParticleSoA<P, Traits>& to   = a_particlesTo[lvl][din];
+
+      // swap-and-pop transfer: do NOT advance i after a transfer (a new particle now sits in slot i).
+      std::size_t i = 0;
+      while (i < from.size()) {
+        if (implicitFunction->value(from.position(i)) > tol) {
+          to.appendParticle(from, i);
+          from.remove(i);
+        }
+        else {
+          i++;
+        }
+      }
+    }
+  }
+}
+
+template <typename P, typename Traits>
+void
+AmrMesh::transferCoveredParticlesDiscrete(ParticleContainerSoA<P, Traits>& a_particlesFrom,
+                                          ParticleContainerSoA<P, Traits>& a_particlesTo,
+                                          const phase::which_phase&        a_phase,
+                                          const Real                       a_tolerance) const
+{
+  CH_TIME("AmrMesh::transferCoveredParticlesDiscrete(ParticleContainerSoA)");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::transferCoveredParticlesDiscrete(ParticleContainerSoA)" << endl;
+  }
+
+  const std::string realmFrom = a_particlesFrom.getRealm();
+  const std::string realmTo   = a_particlesTo.getRealm();
+
+  CH_assert(realmFrom == realmTo);
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    const DisjointBoxLayout& dbl   = this->getGrids(realmFrom)[lvl];
+    const DataIterator&      dit   = dbl.dataIterator();
+    const EBISLayout&        ebisl = this->getEBISLayout(realmFrom, a_phase)[lvl];
+    const Real               dx    = this->getDx()[lvl];
+    const Real               tol   = a_tolerance * dx;
+
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din     = dit[mybox];
+      const EBISBox&   ebisBox = ebisl[din];
+      const Box        region  = ebisBox.getRegion();
+
+      const bool isRegular   = ebisBox.isAllRegular();
+      const bool isCovered   = ebisBox.isAllCovered();
+      const bool isIrregular = !isRegular && !isCovered;
+
+      ParticleSoA<P, Traits>& from = a_particlesFrom[lvl][din];
+      ParticleSoA<P, Traits>& to   = a_particlesTo[lvl][din];
+
+      if (isCovered) {
+        to.catenate(from);
+      }
+      else if (isIrregular) {
+        // swap-and-pop transfer: do NOT advance i after a transfer.
+        std::size_t i = 0;
+        while (i < from.size()) {
+          const RealVect pos = from.position(i);
+          const IntVect  iv  = ParticleOps::getParticleCellIndex(pos, m_probLo, dx);
+
+          CH_assert(region.contains(iv));
+
+          if (ebisBox.isCovered(iv)) {
+            to.appendParticle(from, i);
+            from.remove(i);
+          }
+          else if (ebisBox.isIrregular(iv)) {
+            // Inside the valid region if it is on the valid side of at least one of the cell's VoF faces.
+            bool insideAtLeastOneVoF = false;
+
+            const std::vector<VolIndex> vofs = ebisBox.getVoFs(iv).stdVector();
+            for (const auto& vof : vofs) {
+              const RealVect ebCentroid     = m_probLo + Location::position(Location::Cell::Boundary, vof, ebisBox, dx);
+              const RealVect ebNormal       = ebisBox.normal(vof);
+              const Real     faceProjection = ebNormal.dotProduct(pos - ebCentroid);
+
+              if (faceProjection >= -tol) {
+                insideAtLeastOneVoF = true;
+                break;
+              }
+            }
+
+            if (!insideAtLeastOneVoF) {
+              to.appendParticle(from, i);
+              from.remove(i);
+            }
+            else {
+              i++;
+            }
+          }
+          else {
+            i++;
+          }
+        }
+      }
+    }
+  }
+}
+
+template <typename P, typename Traits>
+void
+AmrMesh::transferCoveredParticlesVoxels(ParticleContainerSoA<P, Traits>& a_particlesFrom,
+                                        ParticleContainerSoA<P, Traits>& a_particlesTo,
+                                        const phase::which_phase&        a_phase) const
+{
+  CH_TIME("AmrMesh::transferCoveredParticlesVoxels(ParticleContainerSoA)");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::transferCoveredParticlesVoxels(ParticleContainerSoA)" << endl;
+  }
+
+  const std::string realmFrom = a_particlesFrom.getRealm();
+  const std::string realmTo   = a_particlesTo.getRealm();
+
+  CH_assert(realmFrom == realmTo);
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    const DisjointBoxLayout& dbl   = this->getGrids(realmFrom)[lvl];
+    const DataIterator&      dit   = dbl.dataIterator();
+    const EBISLayout&        ebisl = this->getEBISLayout(realmFrom, a_phase)[lvl];
+    const Real               dx    = this->getDx()[lvl];
+
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din     = dit[mybox];
+      const EBISBox&   ebisBox = ebisl[din];
+      const Box        region  = ebisBox.getRegion();
+
+      const bool isRegular   = ebisBox.isAllRegular();
+      const bool isCovered   = ebisBox.isAllCovered();
+      const bool isIrregular = !isRegular && !isCovered;
+
+      ParticleSoA<P, Traits>& from = a_particlesFrom[lvl][din];
+      ParticleSoA<P, Traits>& to   = a_particlesTo[lvl][din];
+
+      if (isCovered) {
+        to.catenate(from);
+      }
+      else if (isIrregular) {
+        std::size_t i = 0;
+        while (i < from.size()) {
+          const RealVect pos = from.position(i);
+          const IntVect  iv  = ParticleOps::getParticleCellIndex(pos, m_probLo, dx);
+
+          CH_assert(region.contains(iv));
+
+          if (ebisBox.isCovered(iv)) {
+            to.appendParticle(from, i);
+            from.remove(i);
+          }
+          else {
+            i++;
+          }
+        }
+      }
+    }
+  }
+}
+
 template <class P>
 void
 AmrMesh::transferIrregularParticles(ParticleContainer<P>&          a_dstParticles,
@@ -1664,6 +1876,329 @@ AmrMesh::intersectParticlesBisectIF(ParticleContainer<P>&          a_activeParti
         }
         else {
           ++lit;
+        }
+      }
+    }
+  }
+
+  // These need to be remapped.
+  a_ebParticles.remap();
+  a_domainParticles.remap();
+}
+
+template <auto... OldPosition, typename P, typename Traits>
+void
+AmrMesh::intersectParticlesRaycastIF(ParticleContainerSoA<P, Traits>& a_activeParticles,
+                                     ParticleContainerSoA<P, Traits>& a_ebParticles,
+                                     ParticleContainerSoA<P, Traits>& a_domainParticles,
+                                     const phase::which_phase         a_phase,
+                                     const Real                       a_tolerance,
+                                     const bool                       a_deleteParticles) const noexcept
+{
+  CH_TIME("AmrMesh::intersectParticlesRaycastIF(ParticleContainerSoA)");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::intersectParticlesRaycastIF(ParticleContainerSoA)" << endl;
+  }
+
+  static_assert(
+    sizeof...(OldPosition) == SpaceDim,
+    "AmrMesh::intersectParticlesRaycastIF(ParticleContainerSoA) - need exactly SpaceDim oldPosition members");
+
+  CH_assert(a_activeParticles.getRealm() == a_ebParticles.getRealm());
+  CH_assert(a_activeParticles.getRealm() == a_domainParticles.getRealm());
+
+  a_ebParticles.clearParticles();
+  a_domainParticles.clearParticles();
+
+  const std::string whichRealm = a_activeParticles.getRealm();
+
+  // Figure out the implicit function
+  RefCountedPtr<BaseIF> implicitFunction;
+
+  switch (a_phase) {
+  case phase::gas: {
+    implicitFunction = m_baseif.at(phase::gas);
+
+    break;
+  }
+  case phase::solid: {
+    implicitFunction = m_baseif.at(phase::solid);
+
+    break;
+  }
+  default: {
+    MayDay::Error("AmrMesh::intersectParticlesRaycastIF(ParticleContainerSoA) - logic bust");
+
+    break;
+  }
+  }
+
+  // Safety factor to prevent particles falling off the domain if they intersect the high-side of the domain
+  constexpr Real safety = 1.E-12;
+
+  // Level loop -- go through each AMR level
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+
+    // Handle to various grid stuff.
+    const DisjointBoxLayout& dbl = this->getGrids(whichRealm)[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
+
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      ParticleSoA<P, Traits>& active = a_activeParticles[lvl][din];
+      ParticleSoA<P, Traits>& eb     = a_ebParticles[lvl][din];
+      ParticleSoA<P, Traits>& domain = a_domainParticles[lvl][din];
+
+      // swap-and-pop transfer: do NOT advance i after a deletion (a new particle now sits in slot i).
+      std::size_t i = 0;
+      while (i < active.size()) {
+        const RealVect newPos = active.position(i);
+
+        // Assemble the previous position from the payload columns (left-to-right pack expansion).
+        RealVect oldPos;
+        int      odir = 0;
+        ((oldPos[odir++] = active.template get<OldPosition>(i)), ...);
+
+        const RealVect path = newPos - oldPos;
+
+        // Cheap initial tests that allow us to skip some intersections tests.
+        bool checkEB     = false;
+        bool checkDomain = false;
+
+        if (!implicitFunction.isNull()) {
+          checkEB = true;
+        }
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          const bool outsideLo = newPos[dir] < m_probLo[dir];
+          const bool outsideHi = newPos[dir] > m_probHi[dir];
+
+          if (outsideLo || outsideHi) {
+            checkDomain = true;
+          }
+        }
+
+        // Do the intersection tests.
+        if (checkEB || checkDomain) {
+
+          // These are the solution
+          Real sDomain = std::numeric_limits<Real>::max();
+          Real sEB     = std::numeric_limits<Real>::max();
+
+          bool contactDomain = false;
+          bool contactEB     = false;
+
+          if (checkDomain) {
+            contactDomain = ParticleOps::domainIntersection(oldPos, newPos, m_probLo, m_probHi, sDomain);
+          }
+          if (checkEB) {
+            contactEB = ParticleOps::ebIntersectionRaycast(implicitFunction, oldPos, newPos, a_tolerance, sEB);
+          }
+
+          // Particle bumped into something. Move it onto the intersection point and transfer it to the EB/domain
+          // container. When the original is kept we restore its end position after copying the intersection point.
+          if (contactDomain || contactEB) {
+            if (sEB <= sDomain) { // Crashed with EB "first".
+              const RealVect intersectionPos = oldPos + sEB * path;
+
+              active.setPosition(i, intersectionPos);
+              eb.appendParticle(active, i);
+
+              if (a_deleteParticles) {
+                active.remove(i);
+              }
+              else {
+                active.setPosition(i, newPos);
+                i++;
+              }
+            }
+            else { // Crashed with domain "first".
+              const Real     sSafety         = std::max((Real)0.0, sDomain - safety);
+              const RealVect intersectionPos = oldPos + sSafety * path;
+
+              active.setPosition(i, intersectionPos);
+              domain.appendParticle(active, i);
+
+              if (a_deleteParticles) {
+                active.remove(i);
+              }
+              else {
+                active.setPosition(i, newPos);
+                i++;
+              }
+            }
+          }
+          else {
+            i++;
+          }
+        }
+        else {
+          i++;
+        }
+      }
+    }
+  }
+
+  // These need to be remapped.
+  a_ebParticles.remap();
+  a_domainParticles.remap();
+}
+
+template <auto... OldPosition, typename P, typename Traits>
+void
+AmrMesh::intersectParticlesBisectIF(ParticleContainerSoA<P, Traits>& a_activeParticles,
+                                    ParticleContainerSoA<P, Traits>& a_ebParticles,
+                                    ParticleContainerSoA<P, Traits>& a_domainParticles,
+                                    const phase::which_phase         a_phase,
+                                    const Real                       a_bisectionStep,
+                                    const bool                       a_deleteParticles) const noexcept
+{
+  CH_TIME("AmrMesh::intersectParticlesBisectIF(ParticleContainerSoA)");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::intersectParticlesBisectIF(ParticleContainerSoA)" << endl;
+  }
+
+  static_assert(
+    sizeof...(OldPosition) == SpaceDim,
+    "AmrMesh::intersectParticlesBisectIF(ParticleContainerSoA) - need exactly SpaceDim oldPosition members");
+
+  CH_assert(a_activeParticles.getRealm() == a_ebParticles.getRealm());
+  CH_assert(a_activeParticles.getRealm() == a_domainParticles.getRealm());
+
+  // TLDR: This is pretty much a hard-copy of intersectParticlesRaycastIF(ParticleContainerSoA), with the exception
+  //       that the EB intersection test is replaced by a bisection test.
+
+  a_ebParticles.clearParticles();
+  a_domainParticles.clearParticles();
+
+  const std::string whichRealm = a_activeParticles.getRealm();
+
+  // Figure out the implicit function
+  RefCountedPtr<BaseIF> implicitFunction;
+
+  switch (a_phase) {
+  case phase::gas: {
+    implicitFunction = m_baseif.at(phase::gas);
+
+    break;
+  }
+  case phase::solid: {
+    implicitFunction = m_baseif.at(phase::solid);
+
+    break;
+  }
+  default: {
+    MayDay::Error("AmrMesh::intersectParticlesBisectIF(ParticleContainerSoA) - logic bust");
+
+    break;
+  }
+  }
+
+  // Safety factor to prevent particles falling off the domain if they intersect the high-side of the domain
+  constexpr Real safety = 1.E-12;
+
+  // Level loop -- go through each AMR level
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+
+    // Handle to various grid stuff.
+    const DisjointBoxLayout& dbl = this->getGrids(whichRealm)[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
+
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      ParticleSoA<P, Traits>& active = a_activeParticles[lvl][din];
+      ParticleSoA<P, Traits>& eb     = a_ebParticles[lvl][din];
+      ParticleSoA<P, Traits>& domain = a_domainParticles[lvl][din];
+
+      // swap-and-pop transfer: do NOT advance i after a deletion (a new particle now sits in slot i).
+      std::size_t i = 0;
+      while (i < active.size()) {
+        const RealVect newPos = active.position(i);
+
+        // Assemble the previous position from the payload columns (left-to-right pack expansion).
+        RealVect oldPos;
+        int      odir = 0;
+        ((oldPos[odir++] = active.template get<OldPosition>(i)), ...);
+
+        const RealVect path = newPos - oldPos;
+
+        // Cheap initial tests that allow us to skip some intersections tests.
+        bool checkEB     = false;
+        bool checkDomain = false;
+
+        if (!implicitFunction.isNull()) {
+          checkEB = true;
+        }
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          const bool outsideLo = newPos[dir] < m_probLo[dir];
+          const bool outsideHi = newPos[dir] > m_probHi[dir];
+
+          if (outsideLo || outsideHi) {
+            checkDomain = true;
+          }
+        }
+
+        // Do the intersection tests.
+        if (checkEB || checkDomain) {
+
+          // These are the solution
+          Real sDomain = std::numeric_limits<Real>::max();
+          Real sEB     = std::numeric_limits<Real>::max();
+
+          bool contactDomain = false;
+          bool contactEB     = false;
+
+          if (checkDomain) {
+            contactDomain = ParticleOps::domainIntersection(oldPos, newPos, m_probLo, m_probHi, sDomain);
+          }
+          if (checkEB) {
+            contactEB = ParticleOps::ebIntersectionBisect(implicitFunction, oldPos, newPos, a_bisectionStep, sEB);
+          }
+
+          // Particle bumped into something. Move it onto the intersection point and transfer it to the EB/domain
+          // container. When the original is kept we restore its end position after copying the intersection point.
+          if (contactDomain || contactEB) {
+            if (sEB <= sDomain) { // Crashed with EB "first".
+              const RealVect intersectionPos = oldPos + sEB * path;
+
+              active.setPosition(i, intersectionPos);
+              eb.appendParticle(active, i);
+
+              if (a_deleteParticles) {
+                active.remove(i);
+              }
+              else {
+                active.setPosition(i, newPos);
+                i++;
+              }
+            }
+            else { // Crashed with domain "first".
+              const Real     sSafety         = std::max((Real)0.0, sDomain - safety);
+              const RealVect intersectionPos = oldPos + sSafety * path;
+
+              active.setPosition(i, intersectionPos);
+              domain.appendParticle(active, i);
+
+              if (a_deleteParticles) {
+                active.remove(i);
+              }
+              else {
+                active.setPosition(i, newPos);
+                i++;
+              }
+            }
+          }
+          else {
+            i++;
+          }
+        }
+        else {
+          i++;
         }
       }
     }
