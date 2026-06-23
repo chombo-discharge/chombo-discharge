@@ -67,7 +67,7 @@
 
 // Our includes
 #include <CD_LevelTiles.H>
-#include "CD_ParticleSoA.H"
+#include <CD_ParticleSoA.H>
 #include <CD_NamespaceHeader.H>
 
 /**
@@ -641,9 +641,10 @@ public:
 
   /**
     @brief Move all particles from another holder (on the same valid grids) into the valid holder.
-    @details Per level/patch, appends the source leaf's particles into the valid leaf (ids/rank
-    preserved) and clears the source. Used to return halo/mask particles to the valid holder after a
-    HaloNGP deposition. Assumes a_source is defined over this container's valid grids.
+    @details Per level/patch, catenates the source leaf into the valid leaf (a per-column bulk move
+    preserving ids/rank, or an O(1) arena swap when the valid leaf is empty), leaving the source
+    empty. Used to return halo/mask particles to the valid holder after a HaloNGP deposition. Assumes
+    a_source is defined over this container's valid grids.
     @param[in,out] a_source Holder to drain into the valid particles.
   */
   void
@@ -657,15 +658,7 @@ public:
       LevelParticles& src = *a_source[lvl];
       LevelParticles& dst = *m_particles[lvl];
       for (DataIterator dit = m_grids[lvl].dataIterator(); dit.ok(); ++dit) {
-        Leaf& s = src[dit()];
-        Leaf& d = dst[dit()];
-        for (std::size_t i = 0; i < s.size(); i++) {
-          d.append(s.position(i), s.weight(i), s.gather(i));
-          const std::size_t k = d.size() - 1;
-          d.particleID(k)     = s.particleID(i);
-          d.rankID(k)         = s.rankID(i);
-        }
-        s.clear();
+        dst[dit()].catenate(src[dit()]); // bulk move (id/rank preserved); empty dst -> O(1) swap
       }
     }
     m_isOrganizedByCell = false;

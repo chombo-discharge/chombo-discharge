@@ -11,7 +11,11 @@ doxygen-checked), and keep REUSE/clang-format/doxygen green.
       which is not migrated yet; nothing in `Source/` includes ParticleLoops, so it does not yet
       compile from the library -- it is exercised by the Dev demo/benchmark (which carry `-IDev` for
       the not-yet-migrated headers). Compile-from-Source coverage arrives once its dependencies move.
-- [ ] **CD_ParticleSoA.H** + **CD_ParticleSoAImplem.H** (the per-patch SoA leaf; already doxygen-checked)
+- [x] **CD_ParticleSoA.H** + **CD_ParticleSoAImplem.H** -> `Source/Particle/` (reviewed; doxygen-checked).
+      This resolves CD_ParticleLoops.H's forward dependency (both now in Source). The container's
+      `ParticleContainerSoA` bulk paths (distributeFromPool, transferParticles) were simplified to use
+      the new `catenate()` (O(1) arena-swap when the destination is empty). Audit added
+      deepCopy/deepCopyTo/append(bulk)/catenate/swap/shrinkToFit/cellRange + the two-overload append.
 - [ ] **CD_EBParticleMeshSoA.H** (per-patch deposit/interpolate)
 - [ ] **CD_ParticleContainerSoA.H** + **CD_ParticleContainerSoAImplem.H** (AMR container)
 - [ ] **CD_EBAMRParticleMeshSoA.H** (AMR deposit/interpolate driver)

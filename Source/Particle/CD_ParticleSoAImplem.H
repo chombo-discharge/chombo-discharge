@@ -15,6 +15,7 @@
 
 // Std includes
 #include <cmath>
+#include <cstring>
 
 // Our includes
 #include <CD_ParticleSoA.H>
@@ -66,6 +67,71 @@ ParticleSoA<P, Traits>::resize(const std::size_t a_count)
   this->reserve(a_count);
   m_size   = a_count;
   m_sorted = false;
+}
+
+template <typename P, typename Traits>
+inline ParticleSoA<P, Traits>
+ParticleSoA<P, Traits>::deepCopy() const
+{
+  ParticleSoA<P, Traits> dst;
+  dst.reserve(m_capacity); // identical arena layout: reallocate() sets the capacity exactly
+  if (m_size > 0) {
+    std::memcpy(dst.m_buffer, m_buffer, this->byteSpan()); // one contiguous copy of the live region
+  }
+  dst.m_size      = m_size;
+  dst.m_sorted    = m_sorted;
+  dst.m_cellStart = m_cellStart;
+  return dst;
+}
+
+template <typename P, typename Traits>
+inline void
+ParticleSoA<P, Traits>::deepCopyTo(ParticleSoA<P, Traits>& a_dst) const
+{
+  if (this == &a_dst) {
+    return; // copying onto self is a no-op
+  }
+
+  a_dst.clear();         // drop a_dst's particles (keeps its arena) so the grow below moves nothing
+  a_dst.reserve(m_size); // reuse a_dst's allocation if it is already large enough; grow only if not
+  if (m_size > 0) {
+    this->copyLiveColumnsTo(a_dst, std::make_index_sequence<s_numColumns>{});
+  }
+  a_dst.m_size      = m_size;
+  a_dst.m_sorted    = m_sorted;
+  a_dst.m_cellStart = m_cellStart;
+}
+
+template <typename P, typename Traits>
+inline void
+ParticleSoA<P, Traits>::append(const ParticleSoA<P, Traits>& a_other)
+{
+  const std::size_t n = a_other.m_size;
+  if (n == 0) {
+    return;
+  }
+  const std::size_t oldSize = m_size;
+  this->reserve(oldSize + n); // may reallocate this (and a_other, when a_other == this); pointers refreshed below
+  this->appendColumnsFrom(a_other, oldSize, std::make_index_sequence<s_numColumns>{});
+  m_size   = oldSize + n;
+  m_sorted = false;
+}
+
+template <typename P, typename Traits>
+inline void
+ParticleSoA<P, Traits>::shrinkToFit()
+{
+  if (m_capacity <= m_size) {
+    return; // already compact
+  }
+  if (m_size == 0) {
+    std::free(m_buffer);
+    m_buffer   = nullptr;
+    m_capacity = 0;
+    m_colPtrs.fill(nullptr);
+    return;
+  }
+  this->reallocate(m_size);
 }
 
 template <typename P, typename Traits>

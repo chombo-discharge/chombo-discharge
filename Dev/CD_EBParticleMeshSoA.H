@@ -63,7 +63,7 @@
 #include <CD_DepositionType.H>
 #include <CD_ParticleOps.H>
 #include <CD_BoxLoops.H>
-#include "CD_ParticleSoA.H"
+#include <CD_ParticleSoA.H>
 #include <CD_NamespaceHeader.H>
 
 /**

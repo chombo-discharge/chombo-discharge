@@ -56,10 +56,10 @@
 
   Step 1 -- write a plain struct of the EXTRA (payload) members only. Each member becomes one
   SoA column and must be trivially copyable. Do NOT add position/weight/id/rank; the
-  container owns those. Vector fields are stored PER-COMPONENT
+  container already owns those. Vector fields are stored PER-COMPONENT
   as scalar columns -- there is no RealVect column type; declare x/y/z members and promote to
   RealVect in downstream code if needed. Use ParticleReal for local per-particle physics
-  (velocity, mobility, energy) where float is safe; use @c Real for anything position-like or
+  (velocity, mobility, energy) where float is safe; use @c double for anything position-like or
   globally reduced (e.g. an oldPosition, which subtracts from the double position).
 
     @code
@@ -105,8 +105,10 @@
   half-memory, 8-wide-SIMD payload against a double-precision grid. position(i) returns a
   @c RealVect for cell lookup / Chombo interop (the one geometry type at the accessor boundary).
 
-  @note ParticleSoA is move-only (copying a patch would deep-copy every column; we forbid it
-        to avoid accidental O(N) copies, matching ParticleContainer).
+  @note ParticleSoA is move-only: copy construction and copy assignment are deleted so an O(N)
+        per-column copy can never happen implicitly (matching ParticleContainer). When an independent
+        copy is genuinely wanted, use the explicit deepCopy() (returns a new container) or
+        deepCopyTo() (reuses an existing destination's arena).
   @tparam P      User payload struct (extra columns only); defaults to NoPayload.
   @tparam Traits Column descriptor for the payload; defaults to ParticleTraits<P>.
 */
@@ -142,11 +144,11 @@
         ParticleSoA's data-model documentation.
 */
 #ifndef CD_PARTICLE_REAL
-#define CD_PARTICLE_REAL float
+#define CD_PARTICLE_REAL double
 #endif
 
 /**
-   @brief Floating-point type a user may use for payload columns (NOT position/weight).
+   @brief Floating-point type a user may use for payload columns.
 */
 using ParticleReal = CD_PARTICLE_REAL;
 
@@ -527,8 +529,7 @@ namespace detail {
   <h3>Cell sorting</h3>
   sortByCell(box,dx,probLo) counting-sorts the columns into Fortran cell order and builds
   a CSR offsets array, so cell c owns the contiguous range [cellStart(c), cellStart(c+1)).
-  This replaces a separate BinFab<List>: KMC / per-cell accounting / merge operate on
-  contiguous ranges of the one container. append/remove invalidate the sort (isSorted()).
+  Append/remove invalidate the sort (isSorted()).
 
   <h3>Communication & I/O</h3>
   linearizeParticle()/delinearizeAndAppend() pack/unpack ALL columns (incl. id/rank) for
@@ -703,6 +704,46 @@ public:
     return *this;
   }
 
+  /**
+    @brief Explicit deep copy: a new container with a private arena duplicating every particle.
+    @details Copy construction and copy assignment are deleted (they would alias the single arena);
+    call this when an independent copy of all the particles is genuinely wanted (rather than moving
+    them). The cell-sort state (isSorted() + the CSR cell offsets) is preserved, so a cell-sorted
+    container copies as cell-sorted.
+    @return An independent ParticleSoA owning a copy of every particle.
+  */
+  ParticleSoA
+  deepCopy() const;
+
+  /**
+    @brief Deep copy into an existing destination, reusing its arena when possible.
+    @details Like deepCopy() but writes into a_dst instead of returning a new container. a_dst's
+    existing allocation is reused when it is already large enough (grown only if it is too small),
+    which avoids a malloc when copying repeatedly into the same destination. a_dst is overwritten
+    with an independent copy of every particle, and its cell-sort state is set to match this
+    container. Copying onto self is a no-op.
+    @param[in,out] a_dst Destination container, overwritten with a copy of every particle.
+  */
+  void
+  deepCopyTo(ParticleSoA& a_dst) const;
+
+  /**
+    @brief Swap the entire state (arena, size, capacity, sort) with another container in O(1).
+    @details Exchanges the cached column pointers and metadata only -- no particle data is moved.
+    Useful for the build-then-swap idiom and for std::swap.
+    @param[in,out] a_other Container to swap with.
+  */
+  void
+  swap(ParticleSoA& a_other) noexcept
+  {
+    std::swap(m_buffer, a_other.m_buffer);
+    std::swap(m_capacity, a_other.m_capacity);
+    std::swap(m_size, a_other.m_size);
+    std::swap(m_sorted, a_other.m_sorted);
+    std::swap(m_colPtrs, a_other.m_colPtrs);
+    m_cellStart.swap(a_other.m_cellStart);
+  }
+
   ///@}
 
   /**
@@ -764,6 +805,15 @@ public:
   void
   resize(const std::size_t a_count);
 
+  /**
+    @brief Reclaim unused capacity by reallocating the arena down to the current size.
+    @details A no-op when already compact (capacity == size). The arena does not shrink on its own
+    (clear()/remove() keep the capacity for reuse); call this to return memory after a transient
+    spike. Invalidates raw column pointers. The particle order and cell-sort state are preserved.
+  */
+  void
+  shrinkToFit();
+
   ///@}
 
   /**
@@ -772,14 +822,61 @@ public:
   ///@{
 
   /**
-    @brief Append one particle. The metadata columns (id/rank) are set to s_invalidID/-1;
-           assign them via particleID(i)/rankID(i) or let the AMR layer / delinearize set them.
+    @brief Append one particle with a default-constructed payload.
+    @details The metadata columns (id/rank) are set to s_invalidID/-1; assign them via
+    particleID(i)/rankID(i) afterwards, or let the AMR layer / delinearize set them.
     @param[in] a_position Particle position.
     @param[in] a_weight   Particle weight.
-    @param[in] a_payload  Payload fields (defaulted for empty/partial payloads).
   */
   void
-  append(const RealVect& a_position, const double a_weight, const P& a_payload = P{});
+  append(const RealVect& a_position, const double a_weight)
+  {
+    this->append(a_position, a_weight, P{});
+  }
+
+  /**
+    @brief Append one particle with the given payload.
+    @details The metadata columns (id/rank) are set to s_invalidID/-1; assign them via
+    particleID(i)/rankID(i) afterwards, or let the AMR layer / delinearize set them.
+    @param[in] a_position Particle position.
+    @param[in] a_weight   Particle weight.
+    @param[in] a_payload  Payload columns for this particle.
+  */
+  void
+  append(const RealVect& a_position, const double a_weight, const P& a_payload);
+
+  /**
+    @brief Append every particle of another container (bulk catenate; all columns, incl. id/rank).
+    @details Copies a_other's live particles onto the end of this container with a per-column memcpy
+    (one reservation, then column-wise bulk copies). Unlike the single-particle append(), this
+    PRESERVES the particleID/rankID metadata as well as position/weight/payload. Invalidates the cell
+    sort. Appending a container to itself is supported.
+    @param[in] a_other Source container whose particles are appended.
+  */
+  void
+  append(const ParticleSoA& a_other);
+
+  /**
+    @brief Move every particle of another container into this one, leaving a_other empty (catenate).
+    @details The move counterpart of append(const ParticleSoA&): appends all of a_other's particles
+    (all columns, incl. id/rank) and then clears a_other. When this container is empty the two arenas
+    are swapped instead, so the common "drain into an empty destination" case is O(1) with zero copy.
+    Invalidates the cell sort. Catenating a container into itself is a no-op.
+    @param[in,out] a_other Source container, left empty afterwards.
+  */
+  void
+  catenate(ParticleSoA& a_other)
+  {
+    if (this == &a_other || a_other.m_size == 0) {
+      return;
+    }
+    if (m_size == 0) {
+      this->swap(a_other); // zero-copy steal into an empty destination
+      return;
+    }
+    this->append(a_other); // bulk per-column copy
+    a_other.clear();       // move semantics: leave the source empty
+  }
 
   /**
     @brief Gather particle i's payload back into the AoS payload view.
@@ -1223,6 +1320,22 @@ public:
     return m_cellStart[a_cell + 1] - m_cellStart[a_cell];
   }
 
+  /**
+    @brief Half-open particle index range [begin, end) owned by cell c (valid after sortByCell).
+    @details Convenience over cellStart(c)/cellStart(c+1); the cell's particles are the contiguous
+    indices [first, second).
+    @param[in] a_cell Cell index.
+    @return The pair {cellStart(c), cellStart(c+1)}.
+  */
+  std::pair<std::size_t, std::size_t>
+  cellRange(const std::size_t a_cell) const noexcept
+  {
+    CH_assert(m_sorted);
+    CH_assert(a_cell < this->numCells());
+
+    return {m_cellStart[a_cell], m_cellStart[a_cell + 1]};
+  }
+
   ///@}
 
 protected:
@@ -1347,6 +1460,42 @@ protected:
     (void)expander{
       0,
       (std::memcpy(static_cast<char*>(a_newBuf) + a_off[I], m_colPtrs[I], m_size * sizeof(ColumnType<I>)), 0)...};
+  }
+
+  /**
+    @brief Copy this container's m_size live elements of every column into another container.
+    @details Per-column copy (the two arenas may have different capacities, hence different layouts,
+    so a single whole-arena memcpy is not valid). a_dst must already have capacity >= m_size.
+    @tparam I Column indices [0, s_numColumns).
+    @param[in,out] a_dst Destination container (its column pointers are written).
+  */
+  template <std::size_t... I>
+  void
+  copyLiveColumnsTo(ParticleSoA& a_dst, std::index_sequence<I...>) const noexcept
+  {
+    using expander = int[];
+    (void)expander{0, (std::memcpy(a_dst.m_colPtrs[I], m_colPtrs[I], m_size * sizeof(ColumnType<I>)), 0)...};
+  }
+
+  /**
+    @brief Bulk-append another container's live columns at slot a_at of this container's columns.
+    @details Per-column memcpy of a_other's m_size live elements into this container starting at
+    element index a_at. This container must already have capacity >= a_at + a_other.size(). Disjoint
+    source/destination (even when a_other == this, since the new slots lie past the existing ones).
+    @tparam I Column indices [0, s_numColumns).
+    @param[in] a_other Source container.
+    @param[in] a_at    First destination element index (the size before appending).
+  */
+  template <std::size_t... I>
+  void
+  appendColumnsFrom(const ParticleSoA& a_other, const std::size_t a_at, std::index_sequence<I...>) noexcept
+  {
+    using expander = int[];
+    (void)expander{0,
+                   (std::memcpy(static_cast<char*>(m_colPtrs[I]) + a_at * sizeof(ColumnType<I>),
+                                a_other.m_colPtrs[I],
+                                a_other.m_size * sizeof(ColumnType<I>)),
+                    0)...};
   }
 
   /**

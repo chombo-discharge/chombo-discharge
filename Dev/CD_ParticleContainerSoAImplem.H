@@ -101,19 +101,14 @@ ParticleContainerSoA<P, Traits>::distributeFromPool(MoverPool& a_pool)
   const int myRank   = procID();
   const int numRanks = numProc();
 
-  // ---- same-rank movers: append into their (empty) destination leaves ----
+  // ---- same-rank movers: catenate each pooled leaf into its destination leaf ----
+  // The destination valid leaves are empty here (remap clears them; regrid allocates them fresh), so
+  // catenate() takes the O(1) arena-swap fast path -- a zero-copy steal of the pooled leaf.
   for (auto& kv : a_pool[myRank]) {
     const int          lvl  = kv.first.first;
     const unsigned int gidx = kv.first.second;
     const DataIndex    din  = m_levelTiles[lvl]->getMyGrids().at(gidx);
-    Leaf&              tgt  = (*m_particles[lvl])[din];
-    Leaf&              src  = kv.second;
-    for (std::size_t i = 0; i < src.size(); i++) {
-      tgt.append(src.position(i), src.weight(i), src.gather(i));
-      const std::size_t k = tgt.size() - 1;
-      tgt.particleID(k)   = src.particleID(i);
-      tgt.rankID(k)       = src.rankID(i);
-    }
+    (*m_particles[lvl])[din].catenate(kv.second);
   }
 
 #ifdef CH_MPI
