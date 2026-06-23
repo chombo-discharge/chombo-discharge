@@ -58,9 +58,9 @@ TracerParticlePayload
 ``TracerParticlePayload`` is the plug-and-play payload used by the tracer-particle stepper. It declares the
 interpolated velocity together with Runge-Kutta stage scratch, all as per-component SoA columns:
 
-.. literalinclude:: ../../../../Physics/TracerParticle/CD_TracerParticlePayload.H
+.. literalinclude:: ../../../../Source/TracerParticles/CD_TracerParticlePayload.H
    :language: c++
-   :lines: 20-35
+   :lines: 26-33
    :dedent: 0
 
 The velocity columns ``D_DECL(vx, vy, vz)`` are the ones required by the solver; the remaining columns hold
@@ -74,7 +74,7 @@ To initialize the solver, one can use the full constructor
 
 .. literalinclude:: ../../../../Source/TracerParticles/CD_TracerParticleSolver.H
    :language: c++
-   :lines: 57-62
+   :lines: 58-63
    :dedent: 2
 
 Getting the particles
@@ -84,10 +84,10 @@ To obtain the solver particles, simply call
 
 .. literalinclude:: ../../../../Source/TracerParticles/CD_TracerParticleSolver.H
    :language: c++
-   :lines: 281-293
+   :lines: 282-294
    :dedent: 2
 
-This returns the ``ParticleContainer<P>`` holding the particles, see :ref:`Chap:ParticleContainer`. 
+This returns the ``ParticleContainerSoA<P>`` holding the particles. 
 
 Setting :math:`\mathbf{v}`
 --------------------------
@@ -96,7 +96,7 @@ To set the velocity field on the mesh, use
 
 .. literalinclude:: ../../../../Source/TracerParticles/CD_TracerParticleSolver.H
    :language: c++
-   :lines: 147-152
+   :lines: 148-153
    :dedent: 2
 
 This will associate the input velocity ``a_velocityField`` with :math:`\mathbf{v}`.
@@ -108,7 +108,7 @@ To compute :math:`\mathbf{V} = \mathbf{v}\left(\mathbf{X}\right)` for all partic
 
 .. literalinclude:: ../../../../Source/TracerParticles/CD_TracerParticleSolver.H
    :language: c++
-   :lines: 200-204
+   :lines: 201-205
    :dedent: 2
 
 This will interpolate the velocities to the particle positions using the user-defined interpolation method (see :ref:`Chap:TracerInputOptions`).
@@ -117,7 +117,7 @@ If desirable, one can also interpolate a scalar field defined on the mesh onto t
 
 .. literalinclude:: ../../../../Source/TracerParticles/CD_TracerParticleSolver.H
    :language: c++
-   :lines: 193-198
+   :lines: 194-199
    :dedent: 2
 
 The interpolation function is set by the user, see :ref:`Chap:TracerInputOptions`.
@@ -130,7 +130,7 @@ To deposit the particles, call
 
 .. literalinclude:: ../../../../Source/TracerParticles/CD_TracerParticleSolver.H
    :language: c++
-   :lines: 186-191
+   :lines: 187-192
    :dedent: 2
 
 This will deposit the particle weights onto the input data holder.
