@@ -21,7 +21,9 @@ doxygen-checked), and keep REUSE/clang-format/doxygen green.
 - [x] **CD_ParticleContainerSoA.H** + **CD_ParticleContainerSoAImplem.H** -> `Source/Particle/`
       (reviewed; now doxygen-checked, passes as-is). Header's Implem include + CD_EBAMRParticleMeshSoA.H's
       include switched to `<...>`.
-- [ ] **CD_EBAMRParticleMeshSoA.H** (AMR deposit/interpolate driver)
+- [x] **CD_EBAMRParticleMeshSoA.H** -> `Source/Particle/` (reviewed; now doxygen-checked, passes
+      as-is). All its `<...>` dependencies were already in Source. **The SoA library stack is now fully
+      migrated to Source/Particle/; only test/benchmark scaffolding remains in Dev/.**
 
 ## Support / fixtures (decide on migration vs retire)
 
