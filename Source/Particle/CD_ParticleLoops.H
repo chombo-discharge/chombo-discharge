@@ -12,13 +12,13 @@
   ParticleLoops is the particle analogue of BoxLoops: it provides @c loop overloads
   that iterate over the particles of a ParticleSoA and decorate the inner loop with
   @c CD_PRAGMA_SIMD, so elementwise per-particle kernels (hopefully) auto-vectorize.
-  The mirrors BoxLoops exactly, with the cell index replaced by the particle index:
+  This mirrors BoxLoops exactly, with the cell index replaced by the particle index:
 
   @code{.cpp}
     // column pointers captured once, OUTSIDE the loop
-    ParticleReal* sigma = soa.column<&P::conductivity>();
-    const Real*   w     = soa.weightColumn();
-    const Real*   mu    = soa.column<&P::mobility>();
+    ParticleReal*       sigma = soa.column<&P::conductivity>(); // payload column -> ParticleReal*
+    const double*       w     = soa.weightColumn();             // weight is always double
+    const ParticleReal* mu    = soa.column<&P::mobility>();     // payload column
 
     ParticleLoops::loop(soa, [&](std::size_t i) { sigma[i] = w[i] * mu[i]; });
   @endcode
@@ -55,7 +55,7 @@
 
 // Our includes
 #include <CD_Decorations.H>
-#include "CD_ParticleSoA.H"
+#include <CD_ParticleSoA.H>
 #include <CD_NamespaceHeader.H>
 
 /**
@@ -76,6 +76,9 @@ namespace ParticleLoops {
           pointers from a non-const container and read-only pointers from a const one. This mirrors
           BoxLoops::loop(const Box&, ...), where the iteration domain is const and the kernel mutates
           separately-captured FArrayBox data.
+    @tparam P       Payload type of the ParticleSoA.
+    @tparam Traits  Column descriptor for the payload.
+    @tparam Functor Callable type taking a std::size_t particle index.
     @param[in]     a_soa    Particle container to iterate over (read for its size only).
     @param[in,out] a_kernel Callable taking a std::size_t particle index.
   */
