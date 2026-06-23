@@ -245,6 +245,44 @@ public:
   }
 
   /**
+    @brief Deposit a custom per-particle scalar (computed by a_gather) onto mesh component a_comp.
+    @details Generalizes depositWeight() to an arbitrary per-particle value -- e.g. a product of columns
+    such as weight*mobility (conductivity), which is not a single payload column. a_gather is the same
+    (index, out) functor depositCore() uses internally; exactly one component is deposited.
+    @tparam P          Payload type of the ParticleSoA.
+    @tparam Traits     Column descriptor of P.
+    @tparam GatherFunc Callable (std::size_t a_i, Real* a_out) writing the particle's deposited value.
+    @param[in,out] a_meshData       Mesh data (INCREMENTED). Must have at least a_comp+1 components.
+    @param[in]     a_comp           Destination mesh component.
+    @param[in]     a_particles      Particles to deposit.
+    @param[in]     a_depositionType Deposition kernel (NGP/CIC/TSC).
+    @param[in]     a_widthScale     Particle-width multiplier.
+    @param[in]     a_forceIrregNGP  Force NGP in cut cells.
+    @param[in]     a_gather         Per-particle value gatherer.
+  */
+  template <typename P, typename Traits, typename GatherFunc>
+  void
+  depositGathered(EBCellFAB&                    a_meshData,
+                  const int                     a_comp,
+                  const ParticleSoA<P, Traits>& a_particles,
+                  const DepositionType          a_depositionType,
+                  const Real                    a_widthScale,
+                  const bool                    a_forceIrregNGP,
+                  GatherFunc&&                  a_gather) const
+  {
+    CH_TIME("EBParticleMeshSoA::depositGathered");
+
+    this->depositCore(a_meshData,
+                      a_comp,
+                      a_particles,
+                      1,
+                      a_depositionType,
+                      a_widthScale,
+                      a_forceIrregNGP,
+                      std::forward<GatherFunc>(a_gather));
+  }
+
+  /**
     @brief Interpolate mesh components [a_comp, a_comp + nColumns) onto one or more payload columns.
     @details nColumns = sizeof...(Members) (1 = scalar, SpaceDim = vector). Consecutive mesh
     components starting at a_comp are read into the selected columns.

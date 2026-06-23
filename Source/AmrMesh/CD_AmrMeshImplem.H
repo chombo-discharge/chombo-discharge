@@ -496,6 +496,28 @@ AmrMesh::depositWeight(EBAMRCellData&                         a_meshData,
   particleMesh.depositWeight(a_meshData, a_particles, a_depositionType, a_coarseFineDeposition, a_forceIrregNGP);
 }
 
+template <typename P, typename Traits, typename CellGather>
+void
+AmrMesh::depositGathered(EBAMRCellData&                         a_meshData,
+                         const std::string&                     a_realm,
+                         const phase::which_phase&              a_phase,
+                         const ParticleContainerSoA<P, Traits>& a_particles,
+                         const DepositionType                   a_depositionType,
+                         const CoarseFineDeposition             a_coarseFineDeposition,
+                         const bool                             a_forceIrregNGP,
+                         CellGather                             a_cellGather)
+{
+  CH_TIME("AmrMesh::depositGathered(ParticleContainerSoA)");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::depositGathered(ParticleContainerSoA)" << endl;
+  }
+
+  EBAMRParticleMeshSoA& particleMesh = this->getParticleMeshSoA(a_realm, a_phase);
+
+  particleMesh
+    .depositGathered(a_meshData, a_particles, a_depositionType, a_coarseFineDeposition, a_forceIrregNGP, a_cellGather);
+}
+
 template <auto... Members, typename P, typename Traits>
 void
 AmrMesh::depositParticles(EBAMRCellData&                         a_meshData,

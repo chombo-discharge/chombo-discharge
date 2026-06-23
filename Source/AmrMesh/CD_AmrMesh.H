@@ -1035,6 +1035,33 @@ public:
                 const bool                             a_forceIrregNGP);
 
   /**
+    @brief Deposit a custom per-particle scalar (a_cellGather) of an SoA container on the mesh.
+    @details Generalizes depositWeight to a derived per-particle quantity (e.g. weight*mobility), via the
+    EBAMRParticleMeshSoA gatherer-based deposit. Deposits one component.
+    @param[out] a_meshData             Mesh data (one component).
+    @param[in]  a_realm                Realm where data is registered.
+    @param[in]  a_phase                Phase where data is registered.
+    @param[in]  a_particles            SoA particle container.
+    @param[in]  a_depositionType       Deposition kernel (e.g. CIC).
+    @param[in]  a_coarseFineDeposition Coarse-fine handling.
+    @param[in]  a_forceIrregNGP        Force NGP deposition in cut cells.
+    @param[in]  a_cellGather           Per-particle value gatherer (leaf, index) -> Real.
+    @tparam P          Payload type of the container.
+    @tparam Traits     Column descriptor for the payload.
+    @tparam CellGather Callable (const ParticleSoA<P, Traits>&, std::size_t) -> Real.
+  */
+  template <typename P, typename Traits, typename CellGather>
+  void
+  depositGathered(EBAMRCellData&                         a_meshData,
+                  const std::string&                     a_realm,
+                  const phase::which_phase&              a_phase,
+                  const ParticleContainerSoA<P, Traits>& a_particles,
+                  const DepositionType                   a_depositionType,
+                  const CoarseFineDeposition             a_coarseFineDeposition,
+                  const bool                             a_forceIrregNGP,
+                  CellGather                             a_cellGather);
+
+  /**
     @brief Deposit one or more SoA payload columns on the mesh (all coarse-fine strategies).
     @details Members selects either one scalar column or SpaceDim vector-component columns, mapped to
     consecutive mesh components.

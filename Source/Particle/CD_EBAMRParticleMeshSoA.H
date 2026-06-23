@@ -279,6 +279,83 @@ public:
   }
 
   /**
+    @brief Deposit a custom per-particle scalar (computed by a_cellGather) onto the AMR mesh.
+    @details Generalizes depositWeight() to an arbitrary per-particle value (a product of columns such as
+    weight*mobility), dispatching on the coarse-fine strategy exactly like depositWeight(). Deposits one
+    mesh component.
+    @tparam P          Payload type (deduced).
+    @tparam Traits     Column descriptor (deduced).
+    @tparam CellGather Callable (const ParticleSoA<P, Traits>& a_leaf, std::size_t a_i) -> Real.
+    @param[in,out] a_meshData             AMR mesh data (one component; RESET then filled).
+    @param[in]     a_particles            Particles to deposit.
+    @param[in]     a_depositionType       Deposition kernel (NGP/CIC/TSC).
+    @param[in]     a_coarseFineDeposition Coarse-fine handling (Interp / Halo / HaloNGP / Transition).
+    @param[in]     a_forceIrregNGP        Force NGP in cut cells.
+    @param[in]     a_cellGather           Per-particle value gatherer (leaf, index) -> Real.
+  */
+  template <typename P, typename Traits, typename CellGather>
+  void
+  depositGathered(EBAMRCellData&                         a_meshData,
+                  const ParticleContainerSoA<P, Traits>& a_particles,
+                  const DepositionType                   a_depositionType,
+                  const CoarseFineDeposition             a_coarseFineDeposition,
+                  const bool                             a_forceIrregNGP,
+                  CellGather                             a_cellGather)
+  {
+    CH_TIME("EBAMRParticleMeshSoA::depositGathered");
+
+    CH_assert(m_isDefined);
+
+    const auto patch =
+      [&](const EBParticleMeshSoA& a_interp, EBCellFAB& a_rho, const auto& a_soa, const Real a_widthScale) {
+        a_interp.depositGathered(a_rho,
+                                 0,
+                                 a_soa,
+                                 a_depositionType,
+                                 a_widthScale,
+                                 a_forceIrregNGP,
+                                 [&](const std::size_t a_i, Real* a_out) {
+                                   a_out[0] = a_cellGather(a_soa, a_i);
+                                 });
+      };
+    const auto patchNGP =
+      [&](const EBParticleMeshSoA& a_interp, EBCellFAB& a_rho, const auto& a_soa, const Real a_widthScale) {
+        a_interp.depositGathered(a_rho,
+                                 0,
+                                 a_soa,
+                                 DepositionType::NGP,
+                                 a_widthScale,
+                                 a_forceIrregNGP,
+                                 [&](const std::size_t a_i, Real* a_out) {
+                                   a_out[0] = a_cellGather(a_soa, a_i);
+                                 });
+      };
+
+    switch (a_coarseFineDeposition) {
+    case CoarseFineDeposition::Interp: {
+      this->depositInterpCore(a_meshData, a_particles, 1, patch);
+      break;
+    }
+    case CoarseFineDeposition::Halo: {
+      this->template depositHaloCore<1>(a_meshData, a_particles, patch);
+      break;
+    }
+    case CoarseFineDeposition::HaloNGP: {
+      this->template depositHaloNGPCore<1>(a_meshData, a_particles, patch, patchNGP);
+      break;
+    }
+    case CoarseFineDeposition::Transition: {
+      this->template depositTransitionCore<1>(a_meshData, a_particles, a_depositionType, patch);
+      break;
+    }
+    default: {
+      this->errorUnsupported();
+      break;
+    }
+    }
+  }
+
+  /**
     @brief Deposit one or more payload columns onto the AMR mesh.
     @details See depositWeight for the coarse-fine dispatch.
     @tparam Members Pack of payload data-member pointers selecting the column(s) to deposit.
