@@ -1176,16 +1176,42 @@ public:
                                  const Real                a_tolerance = 0.0) const;
 
   /**
+    @brief Remove SoA particles inside the EB using discrete (EBISBox) information: covered cells, or
+           irregular cells on the wrong side of every VoF's EB face (to within a_tolerance*dx).
+    @param[in,out] a_particles SoA particle data.
+    @param[in]     a_phase     Phase where the particles live.
+    @param[in]     a_tolerance Tolerance (multiplied by dx).
+    @tparam P      Payload type of the container.
+    @tparam Traits Column descriptor for the payload.
+  */
+  template <typename P, typename Traits>
+  void
+  removeCoveredParticlesDiscrete(ParticleContainerSoA<P, Traits>& a_particles,
+                                 const phase::which_phase&        a_phase,
+                                 const Real                       a_tolerance) const;
+
+  /**
     @brief Function which removes particles from the domain if they fall inside the EB.
-    @details The template parameter indicate the particle type -- it must have a const RealVect& P::position() function. 
+    @details The template parameter indicate the particle type -- it must have a const RealVect& P::position() function.
     @details This version removes all particles that live in covered cells.
     @param[in,out] a_particles Particle data
-    @param[in]    a_phase     Phase where the particles live. 
-    @note This function will only work if the particles are mapped to the correct EBISBox. 
+    @param[in]    a_phase     Phase where the particles live.
+    @note This function will only work if the particles are mapped to the correct EBISBox.
   */
   template <class P>
   void
   removeCoveredParticlesVoxels(ParticleContainer<P>& a_particles, const phase::which_phase& a_phase) const;
+
+  /**
+    @brief Remove SoA particles that live in covered cells (voxel test).
+    @param[in,out] a_particles SoA particle data.
+    @param[in]     a_phase     Phase where the particles live.
+    @tparam P      Payload type of the container.
+    @tparam Traits Column descriptor for the payload.
+  */
+  template <typename P, typename Traits>
+  void
+  removeCoveredParticlesVoxels(ParticleContainerSoA<P, Traits>& a_particles, const phase::which_phase& a_phase) const;
 
   /**
     @brief Function which transferse particles from one particle container to another if they fall inside the EB.

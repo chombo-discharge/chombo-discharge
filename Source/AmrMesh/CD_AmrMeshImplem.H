@@ -876,6 +876,141 @@ AmrMesh::removeCoveredParticlesVoxels(ParticleContainer<P>& a_particles, const p
   }
 }
 
+template <typename P, typename Traits>
+void
+AmrMesh::removeCoveredParticlesDiscrete(ParticleContainerSoA<P, Traits>& a_particles,
+                                        const phase::which_phase&        a_phase,
+                                        const Real                       a_tolerance) const
+{
+  CH_TIME("AmrMesh::removeCoveredParticlesDiscrete(ParticleContainerSoA)");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::removeCoveredParticlesDiscrete(ParticleContainerSoA)" << endl;
+  }
+
+  const std::string whichRealm = a_particles.getRealm();
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    const DisjointBoxLayout& dbl   = this->getGrids(whichRealm)[lvl];
+    const DataIterator&      dit   = dbl.dataIterator();
+    const EBISLayout&        ebisl = this->getEBISLayout(whichRealm, a_phase)[lvl];
+    const Real               dx    = this->getDx()[lvl];
+    const Real               tol   = a_tolerance * dx;
+
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din     = dit[mybox];
+      const EBISBox&   ebisBox = ebisl[din];
+      const Box        region  = ebisBox.getRegion();
+
+      const bool isRegular   = ebisBox.isAllRegular();
+      const bool isCovered   = ebisBox.isAllCovered();
+      const bool isIrregular = !isRegular && !isCovered;
+
+      ParticleSoA<P, Traits>& leaf = a_particles[lvl][din];
+
+      if (isCovered) {
+        leaf.clear();
+      }
+      else if (isIrregular) {
+        // swap-and-pop removal: do NOT advance i after a removal.
+        std::size_t i = 0;
+        while (i < leaf.size()) {
+          const RealVect pos = leaf.position(i);
+          const IntVect  iv  = ParticleOps::getParticleCellIndex(pos, m_probLo, dx);
+
+          CH_assert(region.contains(iv));
+
+          if (ebisBox.isCovered(iv)) {
+            leaf.remove(i);
+          }
+          else if (ebisBox.isIrregular(iv)) {
+            // Inside the valid region if it is on the valid side of at least one of the cell's VoF faces.
+            bool insideAtLeastOneVoF = false;
+
+            const std::vector<VolIndex> vofs = ebisBox.getVoFs(iv).stdVector();
+            for (const auto& vof : vofs) {
+              const RealVect ebNormal       = ebisBox.normal(vof);
+              const RealVect ebCentroid     = m_probLo + Location::position(Location::Cell::Boundary, vof, ebisBox, dx);
+              const Real     faceProjection = ebNormal.dotProduct(pos - ebCentroid);
+
+              if (faceProjection >= -tol) {
+                insideAtLeastOneVoF = true;
+                break;
+              }
+            }
+
+            if (!insideAtLeastOneVoF) {
+              leaf.remove(i);
+            }
+            else {
+              i++;
+            }
+          }
+          else {
+            i++;
+          }
+        }
+      }
+    }
+  }
+}
+
+template <typename P, typename Traits>
+void
+AmrMesh::removeCoveredParticlesVoxels(ParticleContainerSoA<P, Traits>& a_particles,
+                                      const phase::which_phase&        a_phase) const
+{
+  CH_TIME("AmrMesh::removeCoveredParticlesVoxels(ParticleContainerSoA)");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::removeCoveredParticlesVoxels(ParticleContainerSoA)" << endl;
+  }
+
+  const std::string whichRealm = a_particles.getRealm();
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    const DisjointBoxLayout& dbl   = this->getGrids(whichRealm)[lvl];
+    const DataIterator&      dit   = dbl.dataIterator();
+    const EBISLayout&        ebisl = this->getEBISLayout(whichRealm, a_phase)[lvl];
+    const Real               dx    = this->getDx()[lvl];
+
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din     = dit[mybox];
+      const EBISBox&   ebisBox = ebisl[din];
+      const Box        region  = ebisBox.getRegion();
+
+      const bool isRegular   = ebisBox.isAllRegular();
+      const bool isCovered   = ebisBox.isAllCovered();
+      const bool isIrregular = !isRegular && !isCovered;
+
+      ParticleSoA<P, Traits>& leaf = a_particles[lvl][din];
+
+      if (isCovered) {
+        leaf.clear();
+      }
+      else if (isIrregular) {
+        std::size_t i = 0;
+        while (i < leaf.size()) {
+          const RealVect pos = leaf.position(i);
+          const RealVect rv  = (pos - m_probLo) / dx;
+          const IntVect  iv  = IntVect(D_DECL(floor(rv[0]), floor(rv[1]), floor(rv[2])));
+
+          CH_assert(region.contains(iv));
+
+          if (ebisBox.isCovered(iv)) {
+            leaf.remove(i);
+          }
+          else {
+            i++;
+          }
+        }
+      }
+    }
+  }
+}
+
 template <class P>
 void
 AmrMesh::transferCoveredParticlesIF(ParticleContainer<P>&     a_particlesFrom,
