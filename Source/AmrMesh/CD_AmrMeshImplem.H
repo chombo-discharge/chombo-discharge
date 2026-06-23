@@ -646,6 +646,65 @@ AmrMesh::removeCoveredParticlesIF(ParticleContainer<P>&     a_particles,
   }
 }
 
+template <typename P, typename Traits>
+void
+AmrMesh::removeCoveredParticlesIF(ParticleContainerSoA<P, Traits>& a_particles,
+                                  const phase::which_phase&        a_phase,
+                                  const Real                       a_tolerance) const
+{
+  CH_TIME("AmrMesh::removeCoveredParticlesIF(ParticleContainerSoA)");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::removeCoveredParticlesIF(ParticleContainerSoA)" << endl;
+  }
+
+  // Figure out the implicit function
+  RefCountedPtr<BaseIF> implicitFunction;
+
+  switch (a_phase) {
+  case phase::gas: {
+    implicitFunction = m_baseif.at(phase::gas);
+
+    break;
+  }
+  case phase::solid: {
+    implicitFunction = m_baseif.at(phase::solid);
+
+    break;
+  }
+  default: {
+    MayDay::Error("AmrMesh::removeCoveredParticlesIF(ParticleContainerSoA) - logic bust");
+  }
+  }
+
+  const std::string whichRealm = a_particles.getRealm();
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    const DisjointBoxLayout& dbl = this->getGrids(whichRealm)[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
+    const Real               dx  = this->getDx()[lvl];
+    const Real               tol = a_tolerance * dx;
+
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      ParticleSoA<P, Traits>& leaf = a_particles[lvl][din];
+
+      // swap-and-pop removal: do NOT advance i after a removal (a new particle now sits in slot i).
+      std::size_t i = 0;
+      while (i < leaf.size()) {
+        if (implicitFunction->value(leaf.position(i)) > tol) {
+          leaf.remove(i);
+        }
+        else {
+          i++;
+        }
+      }
+    }
+  }
+}
+
 template <class P>
 void
 AmrMesh::removeCoveredParticlesDiscrete(ParticleContainer<P>&     a_particles,

@@ -1119,6 +1119,20 @@ public:
                            const Real                a_tolerance = 0.0) const;
 
   /**
+    @brief Remove SoA particles that fall inside the EB (implicit-function test): f(x) > a_tolerance*dx.
+    @param[in,out] a_particles SoA particle data.
+    @param[in]     a_phase     Phase where the particles live.
+    @param[in]     a_tolerance Tolerance (multiplied by dx).
+    @tparam P      Payload type of the container.
+    @tparam Traits Column descriptor for the payload.
+  */
+  template <typename P, typename Traits>
+  void
+  removeCoveredParticlesIF(ParticleContainerSoA<P, Traits>& a_particles,
+                           const phase::which_phase&        a_phase,
+                           const Real                       a_tolerance) const;
+
+  /**
     @brief Function which removes particles from the domain if they fall inside the EB.
     @details The template parameter indicate the particle type -- it MUST have a const RealVect& P::position() const function. 
     @details This version uses the discrete information to evaluate whether or not the particles are inside the EB. The particles will be removed from

@@ -24,6 +24,7 @@
 // Our includes
 #include <CD_KDNode.H>
 #include <CD_CellInfo.H>
+#include <CD_ParticleContainerSoA.H>
 #include <CD_NamespaceHeader.H>
 
 /**
@@ -156,6 +157,24 @@ namespace ParticleManagement {
   template <typename P, typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
   static inline void
   drawRandomParticles(List<P>& a_particles, const T a_numParticles, const std::function<RealVect()>& a_distribution);
+
+  /**
+    @brief Draw random SoA particles distributed according to a predefined distribution.
+    @details MPI-aware: partitions a_numParticles across ranks (total = a_numParticles). Each rank draws
+    its share of positions (unit weight, default-constructed payload), stages them on its first local
+    leaf, then remap()s the container so each particle ends up on the patch/level/rank that owns it.
+    @param[out] a_particles    SoA container to fill (cleared first).
+    @param[in]  a_numParticles Total number of particles across all ranks.
+    @param[in]  a_distribution Distribution functor returning a random position.
+    @tparam P      Payload type of the container.
+    @tparam Traits Column descriptor for the payload.
+    @tparam T      Integral count type.
+  */
+  template <typename P, typename Traits, typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
+  static inline void
+  drawRandomParticles(ParticleContainerSoA<P, Traits>& a_particles,
+                      const T                          a_numParticles,
+                      const std::function<RealVect()>& a_distribution);
 
   /**
     @brief Draw particles in a sphere

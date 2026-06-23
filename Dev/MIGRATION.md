@@ -48,12 +48,19 @@ compatibility on this branch.
         `interpolateWeight`/`interpolateParticles<Members>` + `getParticleMeshSoA`. `PhaseRealm` now holds
         `m_particleMeshSoA` (defined alongside `m_particleMesh`); `Realm`/`AmrMesh` expose it. discharge-lib
         compiles; the templated overloads get full runtime coverage via the tracer solver (Phase 2/3).
-- [ ] **Phase 1 -- named payloads** (per consumer): TracerParticleStepper = velocity + RK scratch
-      (posOld,k1,k2,k3); DischargeInception = velocity + posOld + velOld + gradAlpha + alphaEff + dtDiag.
-- [ ] **Phase 2 -- TracerParticleSolver -> SoA** (in place): ParticleContainerSoA + AmrMesh SoA overloads;
+- [x] **Phase 0.5 -- SoA particle HDF5 checkpoint I/O.** DischargeIO::writeCheckParticlesToHDF /
+      readCheckParticlesFromHDF overloads for LayoutData<ParticleSoA> (mirror the AoS ParticleData<P>
+      path using the leaf h5* primitives; records are position+weight+payload-h5-subset, all doubles).
+- [x] **Phase 1 -- named payload** (TracerParticlePayload = velocity vx/vy/vz + RK scratch xk/k1/k2/k3,
+      per-component columns; defined in CD_TracerParticleStepper.H with its ParticleTraits).
+- [x] **Phase 2 -- TracerParticleSolver -> SoA** (in place): ParticleContainerSoA + AmrMesh SoA overloads;
       deposit->depositWeight; interpolateWeight; interpolateVelocities->interpolate<&P::vx,...>; computeDt
-      SoA loop; plot/checkpoint SoA HDF5.
-- [ ] **Phase 3 -- TracerParticleStepper -> SoA** (RK loops -> SoA columns); CoaxialCable exec validates.
+      SoA loop; checkpoint via the new SoA DischargeIO; getParticles returns ParticleContainerSoA. Also
+      added removeCoveredParticlesIF(SoA) + ParticleManagement::drawRandomParticles(SoA) (both needed here
+      and by inception).
+- [x] **Phase 3 -- TracerParticleStepper -> SoA** (Euler/RK2/RK4 loops -> SoA column access; seeding via
+      drawRandomParticles(SoA)). CoaxialCable exec instantiates TracerParticleStepper<TracerParticlePayload>;
+      builds + runs (OPT 2D, plot output advancing).
 - [ ] **Phase 4 -- DischargeInceptionStepper -> SoA** (seed/integration loops, gradAlpha interpolation,
       rewind/reset).
 - [ ] **Retire** AoS `TracerParticle<M,N>` + AoS `TracerParticleSolver` after Phases 2-4.

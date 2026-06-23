@@ -553,6 +553,191 @@ DischargeIO::readCheckParticlesFromHDF(HDF5Handle&        a_handle,
 }
 #endif
 
+#ifdef CH_USE_HDF5
+template <typename P, typename Traits>
+void
+DischargeIO::writeCheckParticlesToHDF(HDF5Handle&                               a_handle,
+                                      const LayoutData<ParticleSoA<P, Traits>>& a_particles,
+                                      const std::string&                        a_dataType)
+{
+  CH_TIMERS("writeParticlesToHDF(SoA)");
+
+  const BoxLayout& grids = a_particles.boxLayout();
+
+  std::vector<unsigned long long> locParticlesPerBox(grids.size(), 0);
+  unsigned long long              numLocalParticles = 0;
+
+  for (DataIterator di(grids); di.ok(); ++di) {
+    const size_t numItems = a_particles[di].size();
+    numLocalParticles += (unsigned long long)numItems;
+    locParticlesPerBox[grids.index(di())] = (unsigned long long)numItems;
+  }
+
+  std::vector<unsigned long long> particlesPerBox(grids.size());
+
+#ifdef CH_MPI
+  int result = MPI_Allreduce(&locParticlesPerBox[0],
+                             &particlesPerBox[0],
+                             locParticlesPerBox.size(),
+                             MPI_UNSIGNED_LONG_LONG,
+                             MPI_SUM,
+                             Chombo_MPI::comm);
+  if (result != MPI_SUCCESS) {
+    MayDay::Error("MPI communication error in ParticleIO (SoA)");
+  }
+#else
+  for (int i = 0; i < grids.size(); i++) {
+    particlesPerBox[i] = (unsigned long long)locParticlesPerBox[i];
+  }
+#endif
+
+  write_hdf_part_header(a_handle, grids, particlesPerBox, a_dataType);
+
+  // The SoA HDF5 record is position + weight + the payload h5 subset, all doubles.
+  const size_t objSize  = ParticleSoA<P, Traits>::h5BytesPerParticle();
+  const size_t numComps = objSize / sizeof(double);
+
+  std::vector<unsigned long long> offsets;
+  unsigned long long              totNumParticles = 0;
+  for (int i = 0; i < grids.size(); i++) {
+    offsets.push_back(numComps * totNumParticles);
+    totNumParticles += particlesPerBox[i];
+  }
+
+  if (totNumParticles == 0) {
+    return;
+  }
+
+  hsize_t     dataSize  = totNumParticles * numComps;
+  hid_t       dataspace = H5Screate_simple(1, &dataSize, nullptr);
+  hid_t       H5T_type  = H5T_NATIVE_DOUBLE;
+  std::string dataname  = a_dataType + ":data";
+
+#ifdef H516
+  hid_t dataset = H5Dcreate(a_handle.groupID(), dataname.c_str(), H5T_type, dataspace, H5P_DEFAULT);
+#else
+  hid_t dataset = H5Dcreate2(a_handle.groupID(),
+                             dataname.c_str(),
+                             H5T_type,
+                             dataspace,
+                             H5P_DEFAULT,
+                             H5P_DEFAULT,
+                             H5P_DEFAULT);
+#endif
+
+  if (numLocalParticles > 0) {
+    const size_t chunkSize = objSize * _CHUNK;
+    char* const  chunkBase = new char[chunkSize];
+    char*        chunk     = chunkBase;
+
+    if (chunkBase == nullptr) {
+      MayDay::Error("WritePart(SoA)::Error: new returned NULL pointer ");
+    }
+
+    for (DataIterator di(grids); di.ok(); ++di) {
+      size_t offset = offsets[grids.index(di())];
+
+      const ParticleSoA<P, Traits>& leaf = a_particles[di];
+      const size_t                  n    = leaf.size();
+
+      for (size_t ip = 0; ip < n; ip++) {
+        leaf.h5LinearizeParticle((void*)chunk, ip);
+        chunk += objSize;
+
+        if ((ip + 1) % _CHUNK == 0) {
+          chunk -= chunkSize;
+          writeDataChunk(offset, dataspace, dataset, H5T_type, chunkSize / sizeof(double), chunk);
+        }
+      }
+
+      const size_t nResidual = n % _CHUNK;
+      if (nResidual > 0) {
+        chunk -= (nResidual * objSize);
+        writeDataChunk(offset, dataspace, dataset, H5T_type, nResidual * objSize / sizeof(double), chunk);
+      }
+
+      chunk = chunkBase;
+    }
+
+    delete[] chunkBase;
+  }
+
+  H5Sclose(dataspace);
+  H5Dclose(dataset);
+}
+#endif
+
+#ifdef CH_USE_HDF5
+template <typename P, typename Traits>
+void
+DischargeIO::readCheckParticlesFromHDF(HDF5Handle&                         a_handle,
+                                       LayoutData<ParticleSoA<P, Traits>>& a_particles,
+                                       const std::string&                  a_dataType)
+{
+  CH_TIMERS("readParticlesFromHDF(SoA)");
+
+  std::vector<unsigned long long> particlesPerBox;
+  Vector<Box>                     grids;
+  read_hdf_part_header(a_handle, grids, particlesPerBox, a_dataType, a_handle.getGroup());
+
+  const BoxLayout& bl = a_particles.boxLayout();
+
+  const size_t objSize  = ParticleSoA<P, Traits>::h5BytesPerParticle();
+  const size_t numComps = objSize / sizeof(double);
+
+  std::vector<unsigned long long> offsets;
+  unsigned long long              totNumParticles = 0;
+  for (int i = 0; i < grids.size(); i++) {
+    offsets.push_back(numComps * totNumParticles);
+    totNumParticles += particlesPerBox[i];
+  }
+
+  if (totNumParticles == 0) {
+    return;
+  }
+
+  hid_t       H5T_type = H5T_NATIVE_DOUBLE;
+  std::string dataname = a_dataType + ":data";
+
+#ifdef H516
+  hid_t dataset = H5Dopen(a_handle.groupID(), dataname.c_str());
+#else
+  hid_t dataset = H5Dopen2(a_handle.groupID(), dataname.c_str(), H5P_DEFAULT);
+#endif
+
+  hid_t dataspace = H5Dget_space(dataset);
+
+  const size_t chunkSize = objSize * _CHUNK;
+  char*        chunk     = new char[chunkSize];
+
+  for (DataIterator di(bl); di.ok(); ++di) {
+    size_t boxData = numComps * particlesPerBox[bl.index(di())];
+    size_t offset  = offsets[bl.index(di())];
+
+    ParticleSoA<P, Traits>& leaf = a_particles[di];
+
+    size_t dataIn = 0;
+    while (dataIn < boxData) {
+      int size = ((boxData - dataIn) >= (chunkSize / sizeof(double))) ? chunkSize / sizeof(double) : boxData - dataIn;
+      readDataChunk(offset, dataspace, dataset, H5T_type, size, chunk);
+
+      for (int ip = 0; ip < size / (int)numComps; ip++) {
+        leaf.h5DelinearizeAndAppend(chunk);
+        chunk += objSize;
+      }
+      dataIn += size;
+      chunk -= size * sizeof(double);
+    }
+  }
+
+  delete[] chunk;
+  chunk = nullptr;
+
+  H5Sclose(dataspace);
+  H5Dclose(dataset);
+}
+#endif
+
 #include <CD_NamespaceFooter.H>
 
 #endif

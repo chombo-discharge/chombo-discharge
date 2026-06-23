@@ -30,6 +30,7 @@
 // Our includes
 #include <CD_EBAMRData.H>
 #include <CD_ParticleContainer.H>
+#include <CD_ParticleSoA.H>
 #include <CD_GenericParticle.H>
 #include <CD_NamespaceHeader.H>
 
@@ -183,6 +184,38 @@ namespace DischargeIO {
   template <class P>
   void
   readCheckParticlesFromHDF(HDF5Handle& a_handle, ParticleData<P>& a_particles, const std::string& a_dataType);
+
+  /**
+    @brief Write checkpointed SoA particles (one level) to HDF5.
+    @details SoA analogue of writeCheckParticlesToHDF(ParticleData<P>): the per-particle HDF5 record is
+    position + weight + the payload h5-column subset (all doubles), via ParticleSoA::h5LinearizeParticle.
+    @param[in,out] a_handle    Handle to HDF5 file.
+    @param[in]     a_particles Per-level SoA particles to checkpoint.
+    @param[in]     a_dataType  String identifier.
+    @tparam P      Payload type of the particles.
+    @tparam Traits Column descriptor for the payload.
+  */
+  template <typename P, typename Traits>
+  void
+  writeCheckParticlesToHDF(HDF5Handle&                               a_handle,
+                           const LayoutData<ParticleSoA<P, Traits>>& a_particles,
+                           const std::string&                        a_dataType);
+
+  /**
+    @brief Read checkpointed SoA particles (one level) from HDF5.
+    @details SoA analogue of readCheckParticlesFromHDF(ParticleData<P>): each record is delinearized and
+    appended via ParticleSoA::h5DelinearizeAndAppend. The destination layout must match the checkpoint.
+    @param[in,out] a_handle    Handle to HDF5 file.
+    @param[in,out] a_particles Per-level SoA particles to fill.
+    @param[in]     a_dataType  String identifier.
+    @tparam P      Payload type of the particles.
+    @tparam Traits Column descriptor for the payload.
+  */
+  template <typename P, typename Traits>
+  void
+  readCheckParticlesFromHDF(HDF5Handle&                         a_handle,
+                            LayoutData<ParticleSoA<P, Traits>>& a_particles,
+                            const std::string&                  a_dataType);
 #endif
 } // namespace DischargeIO
 

@@ -1,6 +1,5 @@
 #include <CD_Driver.H>
 #include <CD_CoaxialCable.H>
-#include <CD_TracerParticle.H>
 #include <CD_TracerParticleStepper.H>
 
 using namespace ChomboDischarge;
@@ -13,7 +12,7 @@ main(int argc, char* argv[])
 
   auto compgeom    = RefCountedPtr<ComputationalGeometry>(new CoaxialCable());
   auto amr         = RefCountedPtr<AmrMesh>(new AmrMesh());
-  auto timestepper = RefCountedPtr<TimeStepper>(new TracerParticleStepper<TracerParticle<0, 4>>());
+  auto timestepper = RefCountedPtr<TimeStepper>(new TracerParticleStepper<TracerParticlePayload>());
   auto engine      = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr));
 
   engine->setupAndRun();

@@ -459,23 +459,14 @@ TracerParticleStepper<P>::initialParticles()
     return ret;
   };
 
-  // Draw particles using the distribution above. Set their weight to one.
-  List<P> initialParticles;
+  // Draw particles (unit weight) directly into the SoA container. drawRandomParticles partitions the
+  // count across MPI ranks and remaps each particle to its owning patch/level/rank.
+  ParticleContainerSoA<P>& solverParticles = m_solver->getParticles();
 
-  ParticleManagement::drawRandomParticles(initialParticles, m_numInitialParticles, uniformDistribution);
-  for (ListIterator<P> lit(initialParticles); lit.ok(); ++lit) {
-    lit().weight() = 1.0;
-  }
-
-  // Put the particles in the solver particle data holder.
-  ParticleContainer<P>& solverParticles = m_solver->getParticles();
-  solverParticles.clearParticles();
-  solverParticles.addParticlesDestructive(initialParticles);
+  ParticleManagement::drawRandomParticles(solverParticles, m_numInitialParticles, uniformDistribution);
 
   // Remove particles inside the EB.
-  pout() << "removing particles" << endl;
-  m_amr->removeCoveredParticlesIF(solverParticles, m_phase);
-  pout() << "done initial particles" << endl;
+  m_amr->removeCoveredParticlesIF(solverParticles, m_phase, 0.0);
 }
 
 template <typename P>
@@ -489,7 +480,7 @@ TracerParticleStepper<P>::advanceParticlesEuler(const Real a_dt)
 
   // TLDR: The new position is just x^(k+1) = x^k + dt*v^k
 
-  ParticleContainer<P>& amrParticles = m_solver->getParticles();
+  ParticleContainerSoA<P>& amrParticles = m_solver->getParticles();
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
@@ -501,18 +492,23 @@ TracerParticleStepper<P>::advanceParticlesEuler(const Real a_dt)
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      List<P>& particles = amrParticles[lvl][din].listItems();
+      ParticleSoA<P>&   leaf = amrParticles[lvl][din];
+      const std::size_t n    = leaf.size();
 
-      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
-        P& p = lit();
+      double* const pos[SpaceDim] = {D_DECL(leaf.positionColumn(0), leaf.positionColumn(1), leaf.positionColumn(2))};
+      const ParticleReal* const vel[SpaceDim] = {
+        D_DECL(leaf.template column<&P::vx>(), leaf.template column<&P::vy>(), leaf.template column<&P::vz>())};
 
-        p.position() += p.velocity() * a_dt;
+      for (std::size_t i = 0; i < n; i++) {
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          pos[dir][i] += vel[dir][i] * a_dt; // x^(k+1) = x^k + dt * v^k
+        }
       }
     }
   }
 
   amrParticles.remap();
-  m_amr->removeCoveredParticlesIF(amrParticles, m_phase);
+  m_amr->removeCoveredParticlesIF(amrParticles, m_phase, 0.0);
 
   m_solver->interpolateVelocities();
 }
@@ -528,9 +524,9 @@ TracerParticleStepper<P>::advanceParticlesRK2(const Real a_dt)
 
   // TLDR: The new positions are x^(k+1) = x^k + 0.5*dt*[ v(x^k) + v(x^*) ] where x^* = x^k + dt*v^k.
 
-  ParticleContainer<P>& amrParticles = m_solver->getParticles();
+  ParticleContainerSoA<P>& amrParticles = m_solver->getParticles();
 
-  // First step. Store old position and velocity and do the Euler advance.
+  // First step. Store old position (xk) and velocity (k1), then do the Euler advance.
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
     const DataIterator&      dit = dbl.dataIterator();
@@ -541,22 +537,30 @@ TracerParticleStepper<P>::advanceParticlesRK2(const Real a_dt)
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      List<P>& particles = amrParticles[lvl][din].listItems();
+      ParticleSoA<P>&   leaf = amrParticles[lvl][din];
+      const std::size_t n    = leaf.size();
 
-      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
-        P& p = lit();
+      double* const pos[SpaceDim] = {D_DECL(leaf.positionColumn(0), leaf.positionColumn(1), leaf.positionColumn(2))};
+      const ParticleReal* const vel[SpaceDim] = {
+        D_DECL(leaf.template column<&P::vx>(), leaf.template column<&P::vy>(), leaf.template column<&P::vz>())};
+      ParticleReal* const xk[SpaceDim] = {
+        D_DECL(leaf.template column<&P::xkx>(), leaf.template column<&P::xky>(), leaf.template column<&P::xkz>())};
+      ParticleReal* const k1[SpaceDim] = {
+        D_DECL(leaf.template column<&P::k1x>(), leaf.template column<&P::k1y>(), leaf.template column<&P::k1z>())};
 
-        p.template vect<0>() = p.position();
-        p.template vect<1>() = p.velocity();
-
-        p.position() += p.velocity() * a_dt;
+      for (std::size_t i = 0; i < n; i++) {
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          xk[dir][i] = pos[dir][i];          // store x^k
+          k1[dir][i] = vel[dir][i];          // store v(x^k)
+          pos[dir][i] += vel[dir][i] * a_dt; // x^* = x^k + dt * v(x^k)
+        }
       }
     }
   }
 
   // Remap and interpolate the velocities again. This puts the velocity v = v(x^*) into the particles
   amrParticles.remap();
-  m_amr->removeCoveredParticlesIF(amrParticles, m_phase);
+  m_amr->removeCoveredParticlesIF(amrParticles, m_phase, 0.0);
   m_solver->interpolateVelocities();
 
   // Do the second RK2 stage.
@@ -570,20 +574,29 @@ TracerParticleStepper<P>::advanceParticlesRK2(const Real a_dt)
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      List<P>& particles = amrParticles[lvl][din].listItems();
+      ParticleSoA<P>&   leaf = amrParticles[lvl][din];
+      const std::size_t n    = leaf.size();
 
-      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
-        P& p = lit();
+      double* const pos[SpaceDim] = {D_DECL(leaf.positionColumn(0), leaf.positionColumn(1), leaf.positionColumn(2))};
+      const ParticleReal* const vel[SpaceDim] = {
+        D_DECL(leaf.template column<&P::vx>(), leaf.template column<&P::vy>(), leaf.template column<&P::vz>())};
+      const ParticleReal* const xk[SpaceDim] = {
+        D_DECL(leaf.template column<&P::xkx>(), leaf.template column<&P::xky>(), leaf.template column<&P::xkz>())};
+      const ParticleReal* const k1[SpaceDim] = {
+        D_DECL(leaf.template column<&P::k1x>(), leaf.template column<&P::k1y>(), leaf.template column<&P::k1z>())};
 
-        // x^k+1     = x^k                  + dt/2     * [v(x^k)               + v(x^*)      ]
-        p.position() = p.template vect<0>() + 0.5 * a_dt * (p.template vect<1>() + p.velocity());
+      for (std::size_t i = 0; i < n; i++) {
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          // x^(k+1) = x^k + dt/2 * [ v(x^k) + v(x^*) ]
+          pos[dir][i] = xk[dir][i] + 0.5 * a_dt * (k1[dir][i] + vel[dir][i]);
+        }
       }
     }
   }
 
   // Remap and interpolate the velocities again
   amrParticles.remap();
-  m_amr->removeCoveredParticlesIF(amrParticles, m_phase);
+  m_amr->removeCoveredParticlesIF(amrParticles, m_phase, 0.0);
   m_solver->interpolateVelocities();
 }
 
@@ -598,10 +611,9 @@ TracerParticleStepper<P>::advanceParticlesRK4(const Real a_dt)
 
   // TLDR: Just the standard RK4 method.
 
-  ParticleContainer<P>& amrParticles = m_solver->getParticles();
+  ParticleContainerSoA<P>& amrParticles = m_solver->getParticles();
 
   const Real dtHalf  = a_dt / 2.0;
-  const Real dtThird = a_dt / 3.0;
   const Real dtSixth = a_dt / 6.0;
 
   // k1 step.
@@ -616,14 +628,23 @@ TracerParticleStepper<P>::advanceParticlesRK4(const Real a_dt)
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-        for (ListIterator<P> lit(amrParticles[lvl][din].listItems()); lit.ok(); ++lit) {
-          P& p = lit();
+        ParticleSoA<P>&   leaf = amrParticles[lvl][din];
+        const std::size_t n    = leaf.size();
 
-          // Store old position.
-          p.template vect<0>() = p.position();
+        double* const pos[SpaceDim] = {D_DECL(leaf.positionColumn(0), leaf.positionColumn(1), leaf.positionColumn(2))};
+        const ParticleReal* const vel[SpaceDim] = {
+          D_DECL(leaf.template column<&P::vx>(), leaf.template column<&P::vy>(), leaf.template column<&P::vz>())};
+        ParticleReal* const xk[SpaceDim] = {
+          D_DECL(leaf.template column<&P::xkx>(), leaf.template column<&P::xky>(), leaf.template column<&P::xkz>())};
+        ParticleReal* const k1[SpaceDim] = {
+          D_DECL(leaf.template column<&P::k1x>(), leaf.template column<&P::k1y>(), leaf.template column<&P::k1z>())};
 
-          p.template vect<1>() = p.velocity();                                 // k1 = v(x^k)
-          p.position()         = p.template vect<0>() + dtHalf * p.velocity(); // x = x^k + 0.5*dt*k1
+        for (std::size_t i = 0; i < n; i++) {
+          for (int dir = 0; dir < SpaceDim; dir++) {
+            xk[dir][i]  = pos[dir][i];                       // store x^k
+            k1[dir][i]  = vel[dir][i];                       // k1 = v(x^k)
+            pos[dir][i] = xk[dir][i] + dtHalf * vel[dir][i]; // x = x^k + 0.5*dt*k1
+          }
         }
       }
     }
@@ -645,11 +666,22 @@ TracerParticleStepper<P>::advanceParticlesRK4(const Real a_dt)
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-        for (ListIterator<P> lit(amrParticles[lvl][din].listItems()); lit.ok(); ++lit) {
-          P& p = lit();
+        ParticleSoA<P>&   leaf = amrParticles[lvl][din];
+        const std::size_t n    = leaf.size();
 
-          p.template vect<2>() = p.velocity();                                 // k2 = v(x^k + 0.5 * k1 * dt)
-          p.position()         = p.template vect<0>() + dtHalf * p.velocity(); // x = x^k + 0.5*dt*k2
+        double* const pos[SpaceDim] = {D_DECL(leaf.positionColumn(0), leaf.positionColumn(1), leaf.positionColumn(2))};
+        const ParticleReal* const vel[SpaceDim] = {
+          D_DECL(leaf.template column<&P::vx>(), leaf.template column<&P::vy>(), leaf.template column<&P::vz>())};
+        const ParticleReal* const xk[SpaceDim] = {
+          D_DECL(leaf.template column<&P::xkx>(), leaf.template column<&P::xky>(), leaf.template column<&P::xkz>())};
+        ParticleReal* const k2[SpaceDim] = {
+          D_DECL(leaf.template column<&P::k2x>(), leaf.template column<&P::k2y>(), leaf.template column<&P::k2z>())};
+
+        for (std::size_t i = 0; i < n; i++) {
+          for (int dir = 0; dir < SpaceDim; dir++) {
+            k2[dir][i]  = vel[dir][i];                       // k2 = v(x^k + 0.5*dt*k1)
+            pos[dir][i] = xk[dir][i] + dtHalf * vel[dir][i]; // x = x^k + 0.5*dt*k2
+          }
         }
       }
     }
@@ -671,11 +703,22 @@ TracerParticleStepper<P>::advanceParticlesRK4(const Real a_dt)
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-        for (ListIterator<P> lit(amrParticles[lvl][din].listItems()); lit.ok(); ++lit) {
-          P& p = lit();
+        ParticleSoA<P>&   leaf = amrParticles[lvl][din];
+        const std::size_t n    = leaf.size();
 
-          p.template vect<3>() = p.velocity();                               // k3 = v(x^k + 0.5 * k2 * dt)
-          p.position()         = p.template vect<0>() + a_dt * p.velocity(); // x^k + k3*a_dt
+        double* const pos[SpaceDim] = {D_DECL(leaf.positionColumn(0), leaf.positionColumn(1), leaf.positionColumn(2))};
+        const ParticleReal* const vel[SpaceDim] = {
+          D_DECL(leaf.template column<&P::vx>(), leaf.template column<&P::vy>(), leaf.template column<&P::vz>())};
+        const ParticleReal* const xk[SpaceDim] = {
+          D_DECL(leaf.template column<&P::xkx>(), leaf.template column<&P::xky>(), leaf.template column<&P::xkz>())};
+        ParticleReal* const k3[SpaceDim] = {
+          D_DECL(leaf.template column<&P::k3x>(), leaf.template column<&P::k3y>(), leaf.template column<&P::k3z>())};
+
+        for (std::size_t i = 0; i < n; i++) {
+          for (int dir = 0; dir < SpaceDim; dir++) {
+            k3[dir][i]  = vel[dir][i];                     // k3 = v(x^k + 0.5*dt*k2)
+            pos[dir][i] = xk[dir][i] + a_dt * vel[dir][i]; // x = x^k + dt*k3
+          }
         }
       }
     }
@@ -697,11 +740,26 @@ TracerParticleStepper<P>::advanceParticlesRK4(const Real a_dt)
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-        for (ListIterator<P> lit(amrParticles[lvl][din].listItems()); lit.ok(); ++lit) {
-          P& p = lit();
+        ParticleSoA<P>&   leaf = amrParticles[lvl][din];
+        const std::size_t n    = leaf.size();
 
-          p.position() = p.template vect<0>() + dtSixth * p.template vect<1>() + dtHalf * p.template vect<2>() +
-                         dtHalf * p.template vect<3>() + dtSixth * p.velocity();
+        double* const pos[SpaceDim] = {D_DECL(leaf.positionColumn(0), leaf.positionColumn(1), leaf.positionColumn(2))};
+        const ParticleReal* const vel[SpaceDim] = {
+          D_DECL(leaf.template column<&P::vx>(), leaf.template column<&P::vy>(), leaf.template column<&P::vz>())};
+        const ParticleReal* const xk[SpaceDim] = {
+          D_DECL(leaf.template column<&P::xkx>(), leaf.template column<&P::xky>(), leaf.template column<&P::xkz>())};
+        const ParticleReal* const k1[SpaceDim] = {
+          D_DECL(leaf.template column<&P::k1x>(), leaf.template column<&P::k1y>(), leaf.template column<&P::k1z>())};
+        const ParticleReal* const k2[SpaceDim] = {
+          D_DECL(leaf.template column<&P::k2x>(), leaf.template column<&P::k2y>(), leaf.template column<&P::k2z>())};
+        const ParticleReal* const k3[SpaceDim] = {
+          D_DECL(leaf.template column<&P::k3x>(), leaf.template column<&P::k3y>(), leaf.template column<&P::k3z>())};
+
+        for (std::size_t i = 0; i < n; i++) {
+          for (int dir = 0; dir < SpaceDim; dir++) {
+            pos[dir][i] = xk[dir][i] + dtSixth * k1[dir][i] + dtHalf * k2[dir][i] + dtHalf * k3[dir][i] +
+                          dtSixth * vel[dir][i];
+          }
         }
       }
     }
@@ -711,7 +769,7 @@ TracerParticleStepper<P>::advanceParticlesRK4(const Real a_dt)
     m_solver->interpolateVelocities();
   }
 
-  m_amr->removeCoveredParticlesIF(amrParticles, m_phase);
+  m_amr->removeCoveredParticlesIF(amrParticles, m_phase, 0.0);
 }
 
 #include <CD_NamespaceFooter.H>
