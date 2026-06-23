@@ -61,7 +61,7 @@ BrownianWalkerSpecies::drawInitParticles()
 
   ParticleManagement::drawGaussianParticles(m_initialParticles, m_numParticles, m_blobCenter, m_blobRadius);
 
-  for (ListIterator<ItoParticle> lit(m_initialParticles); lit.ok(); ++lit) {
+  for (ListIterator<ItoSeedParticle> lit(m_initialParticles); lit.ok(); ++lit) {
     lit().weight() = 1.0;
   }
 }

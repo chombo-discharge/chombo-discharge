@@ -6,7 +6,7 @@
 
 /**
   @file   CD_ItoParticle.H
-  @brief  Declaration of a particle class for Ito diffusion
+  @brief  SoA payload for Ito diffusion particles (drifting Brownian walkers)
   @author Robert Marskar
 */
 
@@ -15,252 +15,140 @@
 
 // Std includes
 #include <string>
-#include <typeinfo>
-#include <cstdio>
-#include <cmath>
+#include <vector>
 
 // Our includes
+#include <CD_ParticleSoA.H>
 #include <CD_GenericParticle.H>
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief A particle class for use with ItoSolvers, i.e. drifting Brownian walkers.
-  @details This class is used to encapsulate the requirements for running an ItoSolver. This computational particle contains position, weight, velocity, as well as a
-  diffusion coefficient, a mobility, energy, and previous particle position. These are stored as follows:
-
-  m_scalars[0] => weight
-  m_scalars[1] => mobility
-  m_scalars[2] => diffusion
-  m_scalars[3] => energy
-  m_scalars[4] => Temp storage. 
-  m_vectors[0] => oldPosition 
-  m_vectors[1] => velocity
-  m_vectors[3] => Temp storage. 
+  @brief SoA payload for ItoSolver particles, i.e. drifting Brownian walkers.
+  @details Per-component scalar columns (D_DECL). mobility/diffusion/energy are the particle transport
+  coefficients and average energy; tmpReal is scratch scalar storage. oldPosition holds the previous
+  particle position (double precision, because it subtracts from the double-precision container position);
+  velocity is the interpolated drift velocity; tmpVect is scratch vector storage. Weight and position are
+  container-owned columns, NOT payload members. Only the velocity columns are checkpointed (position and
+  weight are always checkpointed by the container).
 */
-class ItoParticle : public GenericParticle<5, 3>
+struct ItoParticle
 {
-public:
   /**
-    @brief Naming convention for scalar fields
+    @brief Naming convention for scalar fields (used by ItoKMC plotting).
   */
   static std::vector<std::string> s_realVariables;
 
   /**
-    @brief Naming convention for vector fields
+    @brief Naming convention for vector fields (used by ItoKMC plotting).
   */
   static std::vector<std::string> s_vectVariables;
 
-  /**
-    @brief Default constructor -- user should subsequently set the variables or call define.
-    @note If the user has called setNumRuntimeScalars/Vectors then  will allocate runtime buffers
-  */
-  inline ItoParticle();
+  ParticleReal mobility  = 0.0; ///< Mobility coefficient.
+  ParticleReal diffusion = 0.0; ///< Diffusion coefficient.
+  ParticleReal energy    = 0.0; ///< Average particle energy.
+  ParticleReal tmpReal   = 0.0; ///< Scratch scalar storage.
 
-  /**
-    @brief Constructor. This calls the define function.
-    @param[in] a_weight    Particle weight
-    @param[in] a_position  Particle position
-    @param[in] a_velocity  Particle velocity
-    @param[in] a_diffusion Particle diffusion coefficient
-    @param[in] a_mobility  Particle mobility coefficient
-    @param[in] a_energy    Particle average energy
-    @note If the user has called setNumRuntimeScalars/Vectors then  will allocate runtime buffers
-  */
-  inline ItoParticle(const Real      a_weight,
-                     const RealVect& a_position,
-                     const RealVect& a_velocity  = RealVect::Zero,
-                     const Real      a_diffusion = 0.0,
-                     const Real      a_mobility  = 1.0,
-                     const Real      a_energy    = 0.0);
+  double D_DECL(oldPositionX = 0.0, oldPositionY = 0.0, oldPositionZ = 0.0); ///< Previous position (per component).
+  ParticleReal D_DECL(velocityX = 0.0, velocityY = 0.0, velocityZ = 0.0);    ///< Interpolated velocity (per component).
+  ParticleReal D_DECL(tmpVectX = 0.0, tmpVectY = 0.0, tmpVectZ = 0.0); ///< Scratch vector storage (per component).
+};
 
-  /**
-    @brief Copy constructor. Copies all fields.
-    @param[in] a_other Other particle. 
-  */
-  inline ItoParticle(const ItoParticle& a_other);
+/**
+  @brief ParticleTraits specialization listing the payload columns of ItoParticle.
+  @details Only the velocity columns are written to HDF5 (h5Columns); position and weight are always
+  checkpointed by the container.
+*/
+template <>
+struct ParticleTraits<ItoParticle>
+{
+  static constexpr auto columns = std::make_tuple(
+    &ItoParticle::mobility,
+    &ItoParticle::diffusion,
+    &ItoParticle::energy,
+    &ItoParticle::tmpReal,
+    D_DECL(&ItoParticle::oldPositionX, &ItoParticle::oldPositionY, &ItoParticle::oldPositionZ),
+    D_DECL(&ItoParticle::velocityX, &ItoParticle::velocityY, &ItoParticle::velocityZ),
+    D_DECL(&ItoParticle::tmpVectX, &ItoParticle::tmpVectY, &ItoParticle::tmpVectZ));
 
-  /**
-    @brief Destructor (deallocates runtime memory storage)
-  */
-  inline virtual ~ItoParticle();
+  static constexpr auto h5Columns = std::make_tuple(
+    D_DECL(&ItoParticle::velocityX, &ItoParticle::velocityY, &ItoParticle::velocityZ));
+};
 
+/**
+  @brief Lightweight AoS particle carrying position, weight, and energy.
+  @details Bridge type used where particles must own their own position+weight in AoS form, which the SoA
+  ItoParticle payload (position/weight are container-owned) cannot: species initial particles and the
+  per-cell superparticle-merge scratch. real<0> is the weight, real<1> is the energy; the position is the
+  GenericParticle base position. Velocity/mobility/diffusion are intentionally absent -- they are
+  recomputed (interpolated) after seeding/merging.
+*/
+class ItoSeedParticle : public GenericParticle<2, 0>
+{
+public:
   /**
-    @brief Full define function. 
-    @param[in] a_weight        Particle weight
-    @param[in] a_position      Particle position
-    @param[in] a_velocity      Particle velocity
-    @param[in] a_diffusion     Particle diffusion coefficient
-    @param[in] a_mobility      Particle mobility coefficient
-    @param[in] a_energy Particle average energy
+    @brief Default constructor (zero weight/energy, zero position).
   */
-  inline void
-  define(const Real      a_weight,
-         const RealVect& a_position,
-         const RealVect& a_velocity  = RealVect::Zero,
-         const Real      a_diffusion = 0.0,
-         const Real      a_mobility  = 1.0,
-         const Real      a_energy    = 0.0);
+  ItoSeedParticle() = default;
 
   /**
-    @brief Get particle weight
-    @return m_weight
+    @brief Full constructor.
+    @param[in] a_weight   Particle weight.
+    @param[in] a_position Particle position.
+    @param[in] a_energy   Particle energy.
   */
-  inline Real&
-  weight();
-
-  /** 
-    @brief Get particle weight
-    @return m_weight
-  */
-  inline const Real&
-  weight() const;
-
-  /**
-    @brief Get particle diffusion coefficient
-    @return m_diffusion
-  */
-  inline Real&
-  diffusion();
-
-  /** 
-    @brief Get particle diffusion coefficient
-    @return m_diffusion
-  */
-  inline const Real&
-  diffusion() const;
+  ItoSeedParticle(const Real a_weight, const RealVect& a_position, const Real a_energy)
+  {
+    this->position() = a_position;
+    this->real<0>()  = a_weight;
+    this->real<1>()  = a_energy;
+  }
 
   /**
-    @brief Get mobility coefficient
-    @return m_mobility
+    @brief Destructor.
   */
-  inline Real&
-  mobility();
-
-  /** 
-    @brief Get mobility coefficient
-    @return m_mobility
-  */
-  inline const Real&
-  mobility() const;
+  virtual ~ItoSeedParticle() = default;
 
   /**
-    @brief Get average particle energy
-    @return m_energy
+    @brief Get the particle weight.
+    @return Reference to the weight.
   */
-  inline Real&
-  energy();
-
-  /** 
-    @brief Get average particle energy
-    @return m_energy
-  */
-  inline const Real&
-  energy() const;
+  Real&
+  weight()
+  {
+    return this->real<0>();
+  }
 
   /**
-    @brief Get the old particle position
-    @return m_oldPosition.
+    @brief Get the particle weight.
+    @return Const reference to the weight.
   */
-  inline RealVect&
-  oldPosition();
+  const Real&
+  weight() const
+  {
+    return this->real<0>();
+  }
 
   /**
-    @brief Get the old particle position
-    @return m_oldPosition.
+    @brief Get the particle energy.
+    @return Reference to the energy.
   */
-  inline const RealVect&
-  oldPosition() const;
+  Real&
+  energy()
+  {
+    return this->real<1>();
+  }
 
   /**
-    @brief Get the particle velocity
-    @return m_velocity
+    @brief Get the particle energy.
+    @return Const reference to the energy.
   */
-  inline RealVect&
-  velocity();
-
-  /**
-    @brief Get the particle velocity
-    @return m_velocity
-  */
-  inline const RealVect&
-  velocity() const;
-
-  /**
-    @brief Get the total energy
-    @return Returns m_weight * m_energy
-  */
-  inline Real
-  totalEnergy() const;
-
-  /**
-    @brief Get the particle conductivity
-    @return Returns m_weight * m_mobility
-  */
-  inline Real
-  conductivity() const;
-
-  /**
-    @brief Get the particle diffusivity
-    @return Returns m_weight * m_diffusion
-  */
-  inline Real
-  diffusivity() const;
-
-  /**
-    @brief Return scratch scalar storage
-    @return Return value
-  */
-  inline Real&
-  tmpReal();
-
-  /** 
-    @brief Return scratch scalar storage
-    @return Return value
-  */
-  inline const Real&
-  tmpReal() const;
-
-  /**
-    @brief Return scratch RealVect storage
-    @return Return value
-  */
-  inline RealVect&
-  tmpVect();
-
-  /** 
-    @brief Return scratch RealVect storage
-    @return Return value
-  */
-  inline const RealVect&
-  tmpVect() const;
-
-  /**
-    @brief Function that is used when writing particles to HDF5.
-    @details This ignores the particleID and rankID, so we can directory plug into Chombo's HDF5 APIs.
-    @return Return value
-  */
-  inline virtual int
-  H5size() const;
-
-  /**
-    @brief Linearize the checkpointed Real components onto a buffer workable by HDF5.
-    @details Ignores the particleID and rankID, so we can directly plug into Chombo's HDF5 API.
-    @param[in] a_buffer Pointer to memory block
-  */
-  inline virtual void
-  H5linearOut(void* const a_buffer) const;
-
-  /**
-    @brief Delinearize the buffer onto the checkpointed real components in the particle class.
-    @details Ignores the particleID and rankID, so we can directly plug into Chombo's HDF5 API.
-    @param[in] a_buffer Pointer to memory block
-  */
-  inline virtual void
-  H5linearIn(const void* const a_buffer);
+  const Real&
+  energy() const
+  {
+    return this->real<1>();
+  }
 };
 
 #include <CD_NamespaceFooter.H>
-
-#include <CD_ItoParticleImplem.H>
 
 #endif

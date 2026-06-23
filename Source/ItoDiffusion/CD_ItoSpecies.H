@@ -113,14 +113,14 @@ public:
     @brief Get initial particles -- this is called by ItoSolver when filling the solver with initial particles. 
     @return Returns m_initialParticles
   */
-  List<ItoParticle>&
+  List<ItoSeedParticle>&
   getInitialParticles();
 
   /**
     @brief Get initial particles -- this is called by ItoSolver when filling the solver with initial particles. 
     @return Returns m_initialParticles
   */
-  const List<ItoParticle>&
+  const List<ItoSeedParticle>&
   getInitialParticles() const;
 
 protected:
@@ -152,7 +152,7 @@ protected:
   /**
     @brief Initial particles
   */
-  List<ItoParticle> m_initialParticles;
+  List<ItoSeedParticle> m_initialParticles;
 
   /**
     @brief Initial density, in case the user wants to generate particles from a density distribution

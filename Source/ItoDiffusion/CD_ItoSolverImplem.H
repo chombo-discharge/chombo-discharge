@@ -25,6 +25,7 @@
 #include <CD_ItoSolver.H>
 #include <CD_DataOps.H>
 #include <CD_Random.H>
+#include <CD_EBParticleMeshSoA.H>
 #include <CD_NamespaceHeader.H>
 
 inline RealVect
@@ -46,50 +47,16 @@ ItoSolver::randomGaussian() const
   return r;
 }
 
-template <ItoSolver::WhichContainer C>
+template <typename Gather>
 void
-ItoSolver::addParticles(ListBox<ItoParticle>& a_inputParticles,
-                        const int             a_lvl,
-                        const DataIndex&      a_dit,
-                        const bool            a_destructive)
+ItoSolver::depositGatheredNGP(LevelData<EBCellFAB>&                    a_output,
+                              const ParticleContainerSoA<ItoParticle>& a_particles,
+                              const int                                a_level,
+                              Gather                                   a_gather) const noexcept
 {
-  CH_TIME("ItoSolver::addParticles");
+  CH_TIME("ItoSolver::depositGatheredNGP");
   if (m_verbosity > 5) {
-    pout() << m_name + "::addParticles" << endl;
-  }
-
-  ParticleContainer<ItoParticle>& particles = m_particleContainers.at(C);
-
-  ListBox<ItoParticle>& my_particles = particles[a_lvl][a_dit];
-  if (a_destructive) {
-    my_particles.addItemsDestructive(a_inputParticles.listItems());
-  }
-  else {
-    my_particles.addItems(a_inputParticles.listItems());
-  }
-}
-
-template <class P, class Ret, Ret (P ::*MemberFunc)() const>
-void
-ItoSolver::depositParticles(EBAMRCellData& a_phi, ParticleContainer<P>& a_particles) const
-{
-  CH_TIME("ItoSolver::depositParticles");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::depositParticles" << endl;
-  }
-
-  this->depositParticles<P, Ret, MemberFunc>(a_phi, a_particles, m_deposition, m_coarseFineDeposition);
-}
-
-template <class P, class Ret, Ret (P ::*MemberFunc)() const>
-void
-ItoSolver::depositParticlesNGP(LevelData<EBCellFAB>&       a_output,
-                               const ParticleContainer<P>& a_particles,
-                               const int                   a_level) const noexcept
-{
-  CH_TIME("ItoSolver::depositParticlesNGP");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::depositParticlesNGP" << endl;
+    pout() << m_name + "::depositGatheredNGP" << endl;
   }
 
   CH_assert(a_level >= 0);
@@ -113,63 +80,49 @@ ItoSolver::depositParticlesNGP(LevelData<EBCellFAB>&       a_output,
     const Box      cellBox = dbl[din];
     const EBISBox& ebisbox = ebisl[din];
 
-    EBParticleMesh particleMesh(domain, cellBox, ebisbox, dx * RealVect::Unit, probLo);
+    EBParticleMeshSoA particleMesh(domain, cellBox, ebisbox, dx * RealVect::Unit, probLo);
 
-    EBCellFAB&     output    = a_output[din];
-    const List<P>& particles = a_particles[a_level][din].listItems();
+    EBCellFAB&                      output = a_output[din];
+    const ParticleSoA<ItoParticle>& leaf   = a_particles[a_level][din];
 
-    particleMesh.deposit<P, Ret, MemberFunc>(output, particles, DepositionType::NGP, 1.0, true);
+    // The per-patch deposit INCREMENTS, so start from a clean slate.
+    output.setVal(0.0);
+
+    particleMesh
+      .depositGathered(output, 0, leaf, DepositionType::NGP, 1.0, true, [&](const std::size_t a_i, Real* a_out) {
+        a_out[0] = a_gather(leaf, a_i);
+      });
   }
 }
 
-template <class P, class Ret, Ret (P ::*MemberFunc)() const>
+template <typename Gather>
 void
-ItoSolver::depositParticles(EBAMRCellData&             a_phi,
-                            ParticleContainer<P>&      a_particles,
-                            const DepositionType       a_deposition,
-                            const CoarseFineDeposition a_coarseFineDeposition) const
+ItoSolver::depositGathered(EBAMRCellData&                           a_phi,
+                           const ParticleContainerSoA<ItoParticle>& a_particles,
+                           const DepositionType                     a_deposition,
+                           const CoarseFineDeposition               a_coarseFineDeposition,
+                           Gather                                   a_gather) const
 {
-  CH_TIME("ItoSolver::depositParticles");
+  CH_TIME("ItoSolver::depositGathered");
   if (m_verbosity > 5) {
-    pout() << m_name + "::depositParticles" << endl;
+    pout() << m_name + "::depositGathered" << endl;
   }
 
   CH_assert(a_phi[0]->nComp() == 1);
   CH_assert(!a_particles.isOrganizedByCell());
 
-  // TLDR: First, deposit onto the mesh as usual (as if the EB wasn't there). If the user asks for it, he can redistribute mass in order to
-  //       conserve total mass (if that is important). But the corresponding scheme will be O(1) accurate.
-  this->depositKappaConservative<P, Ret, MemberFunc>(a_phi, a_particles, a_deposition, a_coarseFineDeposition);
+  // Deposit the gathered quantity onto the mesh (resets a_phi internally), then run the shared
+  // redistribution + average-down + ghost-interpolation tail.
+  m_amr->depositGathered(a_phi,
+                         m_realm,
+                         m_phase,
+                         a_particles,
+                         a_deposition,
+                         a_coarseFineDeposition,
+                         m_forceIrregDepositionNGP,
+                         a_gather);
 
-  // Redistribution magic.
-  this->redistributeAMR(a_phi);
-
-  // Average down and interpolate
-  m_amr->conservativeAverage(a_phi, m_realm, m_phase);
-  m_amr->interpGhost(a_phi, m_realm, m_phase);
-}
-
-template <class P, class Ret, Ret (P ::*MemberFunc)() const>
-void
-ItoSolver::depositKappaConservative(EBAMRCellData&             a_phi,
-                                    ParticleContainer<P>&      a_particles,
-                                    const DepositionType       a_deposition,
-                                    const CoarseFineDeposition a_coarseFineDeposition) const
-{
-  CH_TIME("ItoSolver::depositKappaConservative");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::depositKappaConservative" << endl;
-  }
-
-  CH_assert(a_phi[0]->nComp() == 1);
-
-  m_amr->depositParticles<P, Ret, MemberFunc>(a_phi,
-                                              m_realm,
-                                              m_phase,
-                                              a_particles,
-                                              a_deposition,
-                                              a_coarseFineDeposition,
-                                              m_forceIrregDepositionNGP);
+  this->finalizeDeposit(a_phi);
 }
 
 #include <CD_NamespaceFooter.H>
