@@ -887,6 +887,6 @@ protected:
 
 #include <CD_NamespaceFooter.H>
 
-#include "CD_ParticleContainerSoAImplem.H"
+#include <CD_ParticleContainerSoAImplem.H>
 
 #endif

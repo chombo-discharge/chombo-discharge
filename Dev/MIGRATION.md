@@ -18,7 +18,9 @@ doxygen-checked), and keep REUSE/clang-format/doxygen green.
       deepCopy/deepCopyTo/append(bulk)/catenate/swap/shrinkToFit/cellRange + the two-overload append.
 - [x] **CD_EBParticleMeshSoA.H** -> `Source/Particle/` (reviewed; now doxygen-checked, passes as-is).
       `CD_EBAMRParticleMeshSoA.H`'s quoted include switched to `<...>`.
-- [ ] **CD_ParticleContainerSoA.H** + **CD_ParticleContainerSoAImplem.H** (AMR container)
+- [x] **CD_ParticleContainerSoA.H** + **CD_ParticleContainerSoAImplem.H** -> `Source/Particle/`
+      (reviewed; now doxygen-checked, passes as-is). Header's Implem include + CD_EBAMRParticleMeshSoA.H's
+      include switched to `<...>`.
 - [ ] **CD_EBAMRParticleMeshSoA.H** (AMR deposit/interpolate driver)
 
 ## Support / fixtures (decide on migration vs retire)
