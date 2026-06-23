@@ -16,7 +16,6 @@
 // Our includes
 #include <CD_AmrMesh.H>
 #include <CD_ComputationalGeometry.H>
-#include <CD_TracerParticle.H>
 #include <CD_ParticleContainerSoA.H>
 #include <CD_NamespaceHeader.H>
 

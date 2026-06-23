@@ -68,7 +68,10 @@ compatibility on this branch.
       grad(alpha) interpolation, all five integrators (List transfer -> appendParticle + remove;
       copyDestructive container move), and rewind/reset. Default P + the execs use the new payload. Vessel
       test builds + runs (OPT 2D, ends cleanly, no NaN/lost particles).
-- [ ] **Retire** AoS `TracerParticle<M,N>` + AoS `TracerParticleSolver` (now unused; verify + remove).
+- [x] **Retire** AoS `TracerParticle<M,N>`: removed `CD_TracerParticle.H` + `CD_TracerParticleImplem.H`
+      (orphaned after Phases 1-4 -- the solver was rewired in place, not duplicated). Dropped the vestigial
+      include from `CD_TracerParticleSolver.H` and rewrote the `TracerParticles.rst` solver/payload docs to
+      the SoA payload model. **The tracer/inception SoA migration is complete.**
 
 ## Conventions for each migration
 

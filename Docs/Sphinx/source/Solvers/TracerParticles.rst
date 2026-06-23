@@ -35,42 +35,37 @@ The tracer particle solver is templated as
    :lines: 23-37
    :dedent: 0
 
-where ``P`` is the particle type used for the solver.
-The template constraints on ``P`` are
+where ``P`` is the payload type used for the solver.
+The particles are stored Struct-of-Arrays in a ``ParticleContainerSoA``: the position and weight are
+container-owned columns, while ``P`` declares the *extra* payload columns. The template constraints on
+``P`` are
 
-#. It *must* contain a function ``RealVect& position()``
-#. It *must* contain a function ``const Real& weight() const``
-#. It *must* contain a function ``RealVect& velocity()``.
+#. It *must* expose the velocity as ``SpaceDim`` scalar payload columns named ``D_DECL(vx, vy, vz)``.
+#. It *must* have a ``ParticleTraits<P>`` specialization listing its columns (including ``vx/vy/vz``).
 
-Users are free to provide their own particle type provided that it meets these template constraints.
-However, we also define a plug-and-play particle class that meets these requirements, see :ref:`Chap:TracerParticle`.
+Users are free to provide their own payload provided that it meets these constraints.
+However, we also define a plug-and-play payload for the tracer-particle stepper, see :ref:`Chap:TracerParticlePayload`.
 
 .. note::
 
    The ``TracerParticleSolver<P>`` API is available at `<https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classTracerParticleSolver.html>`_.
 
-.. _Chap:TracerParticle:
+.. _Chap:TracerParticlePayload:
 
-TracerParticle
---------------
+TracerParticlePayload
+---------------------
 
-The ``TracerParticle`` type inherits from :ref:`Chap:GenericParticle` particle class and is templated as
+``TracerParticlePayload`` is the plug-and-play payload used by the tracer-particle stepper. It declares the
+interpolated velocity together with Runge-Kutta stage scratch, all as per-component SoA columns:
 
-.. literalinclude:: ../../../../Source/TracerParticles/CD_TracerParticle.H
+.. literalinclude:: ../../../../Physics/TracerParticle/CD_TracerParticlePayload.H
    :language: c++
-   :lines: 26-33
+   :lines: 20-35
    :dedent: 0
 
-The class also defines two more members; the weight and a particle velocity.
-These are accessible as
-
-.. literalinclude:: ../../../../Source/TracerParticles/CD_TracerParticle.H
-   :language: c++
-   :lines: 52-78
-   :dedent: 2
-
-Note that, just as for ``GenericParticle``, the template arguments ``M`` and ``N`` indicates the number of scalars and vectors allocated to the particle, see :ref:`Chap:GenericParticle`.
-These data fields can be used by applications for, e.g., storing integration variables (such as intermediate positions in a Runge-Kutta code).
+The velocity columns ``D_DECL(vx, vy, vz)`` are the ones required by the solver; the remaining columns hold
+intermediate Runge-Kutta integration state. Weight and position are container-owned and are therefore *not*
+payload members.
 
 Initialization
 --------------
