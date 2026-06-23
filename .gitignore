@@ -57,3 +57,7 @@ Docs/*
 !Docs/README.md
 Docs/Sphinx/build
 Docs/**/*.dat
+
+# Local-only SoA particle staging area + its validation harness (kept locally; untracked during review)
+Dev/
+Exec/Tests/BrownianWalker/SoAValidation/
