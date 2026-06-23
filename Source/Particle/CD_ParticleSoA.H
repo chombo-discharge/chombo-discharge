@@ -857,6 +857,17 @@ public:
   append(const ParticleSoA& a_other);
 
   /**
+    @brief Append a single particle (all columns, incl. id/rank) copied from another container.
+    @details The single-particle analogue of append(const ParticleSoA&). Pair it with remove() on the
+    source to move one particle between containers (the SoA equivalent of List<P>::transfer). Invalidates
+    the cell sort. Appending from self is supported.
+    @param[in] a_src   Source container to copy from.
+    @param[in] a_index Index of the particle in a_src to copy.
+  */
+  void
+  appendParticle(const ParticleSoA& a_src, const std::size_t a_index);
+
+  /**
     @brief Move every particle of another container into this one, leaving a_other empty (catenate).
     @details The move counterpart of append(const ParticleSoA&): appends all of a_other's particles
     (all columns, incl. id/rank) and then clears a_other. When this container is empty the two arenas
@@ -1496,6 +1507,27 @@ protected:
                                 a_other.m_colPtrs[I],
                                 a_other.m_size * sizeof(ColumnType<I>)),
                     0)...};
+  }
+
+  /**
+    @brief Copy one particle's every column from a_src[a_srcIdx] into this[a_dstIdx].
+    @details Per-column single-element copy. Both indices must be in range and this must have capacity
+    for a_dstIdx.
+    @tparam I Column indices [0, s_numColumns).
+    @param[in] a_src    Source container.
+    @param[in] a_srcIdx Source particle index.
+    @param[in] a_dstIdx Destination particle index in this container.
+  */
+  template <std::size_t... I>
+  void
+  copyParticleColumns(const ParticleSoA& a_src,
+                      const std::size_t  a_srcIdx,
+                      const std::size_t  a_dstIdx,
+                      std::index_sequence<I...>) noexcept
+  {
+    using expander = int[];
+    (void)expander{0,
+                   (this->template columnByIndex<I>()[a_dstIdx] = a_src.template columnByIndex<I>()[a_srcIdx], 0)...};
   }
 
   /**

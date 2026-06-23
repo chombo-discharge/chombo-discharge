@@ -119,6 +119,19 @@ ParticleSoA<P, Traits>::append(const ParticleSoA<P, Traits>& a_other)
 
 template <typename P, typename Traits>
 inline void
+ParticleSoA<P, Traits>::appendParticle(const ParticleSoA<P, Traits>& a_src, const std::size_t a_index)
+{
+  CH_assert(a_index < a_src.m_size);
+
+  const std::size_t at = m_size;
+  this->reserve(m_size + 1); // may reallocate this (and a_src, when a_src == this); pointers refreshed below
+  this->copyParticleColumns(a_src, a_index, at, std::make_index_sequence<s_numColumns>{});
+  m_size   = at + 1;
+  m_sorted = false;
+}
+
+template <typename P, typename Traits>
+inline void
 ParticleSoA<P, Traits>::shrinkToFit()
 {
   if (m_capacity <= m_size) {

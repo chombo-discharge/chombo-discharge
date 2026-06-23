@@ -319,7 +319,39 @@ main(int argc, char* argv[])
       }
     }
 
-    pout() << "All ParticleSoA deepCopy/deepCopyTo/append/catenate/swap/shrinkToFit/cellRange checks passed ("
+    // ---- (13) appendParticle (single-particle copy) + transfer (appendParticle + remove) ----
+    {
+      PSoA src;
+      fill(src, 8, 0);
+      PSoA dst;
+      fill(dst, 3, 50);
+
+      // Copy src particle 5 onto the end of dst (all columns, incl. id/rank).
+      dst.appendParticle(src, 5);
+      require(dst.size() == 4, "appendParticle grows the destination by one");
+      require(sameParticle(dst, 3, src, 5), "appendParticle copies every column (incl. id/rank)");
+      require(src.size() == 8, "appendParticle does not touch the source");
+
+      // Transfer: appendParticle + swap-pop remove == move one particle between containers.
+      PSoA a;
+      fill(a, 6, 0);
+      PSoA              b;
+      const std::size_t k     = 2;
+      PSoA              snapK = a.deepCopy();
+      b.appendParticle(a, k);
+      a.remove(k);
+      require(a.size() == 5 && b.size() == 1, "transfer moves one particle");
+      require(sameParticle(b, 0, snapK, k), "transferred particle matches the original");
+
+      // Self-append duplicates a particle.
+      PSoA s;
+      fill(s, 4, 7);
+      s.appendParticle(s, 1);
+      require(s.size() == 5 && sameParticle(s, 4, s, 1), "self appendParticle duplicates");
+    }
+
+    pout() << "All ParticleSoA deepCopy/deepCopyTo/append/appendParticle/catenate/swap/shrinkToFit/cellRange "
+              "checks passed ("
            << SpaceDim << "D)." << endl;
   }
 
