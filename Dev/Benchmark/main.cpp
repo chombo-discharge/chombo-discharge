@@ -59,6 +59,7 @@
 // Our includes
 #include <CD_Initialize.H>
 #include <CD_ParticleSoA.H>
+#include <CD_Decorations.H>
 #include <CD_ParticleLoops.H>
 
 namespace ChomboDischarge {
@@ -304,11 +305,11 @@ namespace {
   void
   depositSoA(FArrayBox& a_rho, const BenchSoA& a_soa, const RealVect& a_lo, const RealVect& a_iDx, const Real a_iVol)
   {
-    const ParticleReal* px = a_soa.positionColumn(0);
-    const ParticleReal* py = a_soa.positionColumn(1);
-    const ParticleReal* pz = a_soa.positionColumn(2);
-    const ParticleReal* w  = a_soa.weightColumn();
-    const std::size_t   n  = a_soa.size();
+    const double*     px = a_soa.positionColumn(0);
+    const double*     py = a_soa.positionColumn(1);
+    const double*     pz = a_soa.positionColumn(2);
+    const double*     w  = a_soa.weightColumn();
+    const std::size_t n  = a_soa.size();
     for (std::size_t i = 0; i < n; i++) {
       depositOneCIC(a_rho, RealVect(D_DECL(px[i], py[i], pz[i])), w[i], a_lo, a_iDx, a_iVol);
     }
@@ -340,11 +341,11 @@ namespace {
   void
   interpolateSoA(const FArrayBox& a_rho, BenchSoA& a_soa, const RealVect& a_lo, const RealVect& a_iDx)
   {
-    const ParticleReal* px = a_soa.positionColumn(0);
-    const ParticleReal* py = a_soa.positionColumn(1);
-    const ParticleReal* pz = a_soa.positionColumn(2);
-    ParticleReal*       w  = a_soa.weightColumn();
-    const std::size_t   n  = a_soa.size();
+    const double*     px = a_soa.positionColumn(0);
+    const double*     py = a_soa.positionColumn(1);
+    const double*     pz = a_soa.positionColumn(2);
+    double*           w  = a_soa.weightColumn();
+    const std::size_t n  = a_soa.size();
     for (std::size_t i = 0; i < n; i++) {
       w[i] = interpolateOneCIC(a_rho, RealVect(D_DECL(px[i], py[i], pz[i])), a_lo, a_iDx);
     }
@@ -364,19 +365,21 @@ namespace {
   __attribute__((noinline)) void
   transformVector(std::vector<BenchParticle>& a_v)
   {
-    BenchParticle* p = a_v.data();
-    ParticleLoops::loop(a_v.size(), [&](std::size_t i) {
+    BenchParticle*    p = a_v.data();
+    const std::size_t n = a_v.size();
+    CD_PRAGMA_SIMD
+    for (std::size_t i = 0; i < n; i++) {
       p[i].m_weight = transformOne(p[i].m_position);
-    });
+    }
   }
 
   __attribute__((noinline)) void
   transformSoA(BenchSoA& a_soa)
   {
-    const ParticleReal* x = a_soa.positionColumn(0);
-    const ParticleReal* y = a_soa.positionColumn(1);
-    const ParticleReal* z = a_soa.positionColumn(2);
-    ParticleReal*       w = a_soa.weightColumn();
+    const double* x = a_soa.positionColumn(0);
+    const double* y = a_soa.positionColumn(1);
+    const double* z = a_soa.positionColumn(2);
+    double*       w = a_soa.weightColumn();
     ParticleLoops::loop(a_soa, [&](std::size_t i) {
       w[i] = 0.5 * (x[i] * x[i] + y[i] * y[i] + z[i] * z[i]);
     });
@@ -405,13 +408,13 @@ namespace {
   void
   interpVecSoA(const FArrayBox& a_rho, MoverSoA& a_soa, const RealVect& a_lo, const RealVect& a_iDx)
   {
-    const ParticleReal* px = a_soa.positionColumn(0);
-    const ParticleReal* py = a_soa.positionColumn(1);
-    const ParticleReal* pz = a_soa.positionColumn(2);
-    ParticleReal*       vx = a_soa.column<&MoverPayload::vx>();
-    ParticleReal*       vy = a_soa.column<&MoverPayload::vy>();
-    ParticleReal*       vz = a_soa.column<&MoverPayload::vz>();
-    const std::size_t   n  = a_soa.size();
+    const double*     px = a_soa.positionColumn(0);
+    const double*     py = a_soa.positionColumn(1);
+    const double*     pz = a_soa.positionColumn(2);
+    ParticleReal*     vx = a_soa.column<&MoverPayload::vx>();
+    ParticleReal*     vy = a_soa.column<&MoverPayload::vy>();
+    ParticleReal*     vz = a_soa.column<&MoverPayload::vz>();
+    const std::size_t n  = a_soa.size();
     for (std::size_t i = 0; i < n; i++) {
       const RealVect v = interpolateVecFieldCIC(a_rho, RealVect(D_DECL(px[i], py[i], pz[i])), a_lo, a_iDx);
       D_TERM(vx[i] = v[0];, vy[i] = v[1];, vz[i] = v[2];);
@@ -432,18 +435,20 @@ namespace {
   __attribute__((noinline)) void
   advanceVector(std::vector<MoverParticle>& a_v, const Real a_dt)
   {
-    MoverParticle* p = a_v.data();
-    ParticleLoops::loop(a_v.size(), [&](std::size_t i) {
+    MoverParticle*    p = a_v.data();
+    const std::size_t n = a_v.size();
+    CD_PRAGMA_SIMD
+    for (std::size_t i = 0; i < n; i++) {
       p[i].m_position += p[i].m_velocity * a_dt;
-    });
+    }
   }
 
   __attribute__((noinline)) void
   advanceSoA(MoverSoA& a_soa, const Real a_dt)
   {
-    ParticleReal*       px = a_soa.positionColumn(0);
-    ParticleReal*       py = a_soa.positionColumn(1);
-    ParticleReal*       pz = a_soa.positionColumn(2);
+    double*             px = a_soa.positionColumn(0);
+    double*             py = a_soa.positionColumn(1);
+    double*             pz = a_soa.positionColumn(2);
     const ParticleReal* vx = a_soa.column<&MoverPayload::vx>();
     const ParticleReal* vy = a_soa.column<&MoverPayload::vy>();
     const ParticleReal* vz = a_soa.column<&MoverPayload::vz>();

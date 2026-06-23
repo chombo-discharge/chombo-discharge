@@ -11,8 +11,8 @@
   @details
   ParticleLoops is the particle analogue of BoxLoops: it provides @c loop overloads
   that iterate over the particles of a ParticleSoA and decorate the inner loop with
-  @c CD_PRAGMA_SIMD, so elementwise per-particle kernels auto-vectorize. The pattern
-  mirrors BoxLoops exactly, with the cell index replaced by the particle index:
+  @c CD_PRAGMA_SIMD, so elementwise per-particle kernels (hopefully) auto-vectorize.
+  The mirrors BoxLoops exactly, with the cell index replaced by the particle index:
 
   @code{.cpp}
     // column pointers captured once, OUTSIDE the loop
@@ -30,7 +30,7 @@
   without the compiler emitting runtime aliasing checks ("loop versioning"). ALWAYS_INLINE
   guarantees the kernel is inlined into the loop body.
 
-  <h3>Contract (read carefully)</h3>
+  <h3>Contract</h3>
   - The kernel takes the particle index: @c (std::size_t i). Capture the column
     references/pointers ONCE before the loop (as above) -- do not call
     @c soa.column<>() inside the kernel.
@@ -52,7 +52,6 @@
 
 // Std includes
 #include <cstddef>
-#include <utility>
 
 // Our includes
 #include <CD_Decorations.H>
@@ -65,34 +64,31 @@
 namespace ParticleLoops {
 
   /**
-    @brief Launch a kernel over [0, a_numParticles), decorating the loop with CD_PRAGMA_SIMD.
-    @details The kernel is invoked as @c a_kernel(i) for each particle index i. Force-inlined
-    so the kernel body fuses into the vectorizable loop.
-    @param[in]     a_numParticles Number of particles to iterate over.
-    @param[in,out] a_kernel       Callable taking a std::size_t particle index.
-  */
-  template <typename Functor>
-  ALWAYS_INLINE void
-  loop(const std::size_t a_numParticles, Functor&& a_kernel)
-  {
-    CD_PRAGMA_SIMD
-    for (std::size_t i = 0; i < a_numParticles; i++) {
-      a_kernel(i);
-    }
-  }
+    @brief Launch a kernel over every particle in a ParticleSoA, decorating the loop with CD_PRAGMA_SIMD.
+    @details The kernel is invoked as @c a_kernel(i) for each particle index i in [0, a_soa.size()).
+    The trip count is taken from the container, so it always matches the columns the kernel captured
+    from the same container -- there is intentionally no bare-count overload to pass the wrong size to.
+    Force-inlined so the kernel body fuses into the vectorizable loop.
 
-  /**
-    @brief Convenience overload iterating over every particle in a ParticleSoA.
-    @details Equivalent to loop(a_soa.size(), kernel). The container is only queried for its
-    size; the kernel should capture the columns it needs from the caller's scope.
-    @param[in]     a_soa    Particle container to iterate over.
+    @note a_soa is taken by const reference because loop() itself only reads a_soa.size() -- it never
+          touches particle data. Whether the kernel may WRITE columns is governed entirely by how the
+          caller captured the column pointers: column()/positionColumn()/weightColumn() return mutable
+          pointers from a non-const container and read-only pointers from a const one. This mirrors
+          BoxLoops::loop(const Box&, ...), where the iteration domain is const and the kernel mutates
+          separately-captured FArrayBox data.
+    @param[in]     a_soa    Particle container to iterate over (read for its size only).
     @param[in,out] a_kernel Callable taking a std::size_t particle index.
   */
   template <typename P, typename Traits, typename Functor>
   ALWAYS_INLINE void
   loop(const ParticleSoA<P, Traits>& a_soa, Functor&& a_kernel)
   {
-    ParticleLoops::loop(a_soa.size(), std::forward<Functor>(a_kernel));
+    const std::size_t numParticles = a_soa.size();
+
+    CD_PRAGMA_SIMD
+    for (std::size_t i = 0; i < numParticles; i++) {
+      a_kernel(i);
+    }
   }
 
 } // namespace ParticleLoops
