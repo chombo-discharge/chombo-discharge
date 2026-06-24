@@ -94,7 +94,7 @@ public:
     @param[in] a_particleMerger Particle merger
   */
   virtual void
-  setParticleMerger(const ParticleManagement::ParticleMerger<ItoSeedParticle>& a_particleMerger) noexcept;
+  setParticleMerger(const ParticleManagement::ParticleMerger<ItoParticle>& a_particleMerger) noexcept;
 
   /**
     @brief Get this solver's name 
@@ -832,7 +832,7 @@ public:
     @param[in]    a_ppc       Target number of particles per cell
   */
   virtual void
-  mergeParticles(List<ItoSeedParticle>& a_particles, const CellInfo& a_cellInfo, int a_ppc) const noexcept;
+  mergeParticles(ParticleSoA<ItoParticle>& a_particles, const CellInfo& a_cellInfo, int a_ppc) const noexcept;
 
   /**
     @brief Superparticle merging with KD/BVH trees
@@ -841,9 +841,9 @@ public:
     @param[in]    a_ppc       Target number of particles per cell
   */
   virtual void
-  makeSuperparticlesEqualWeightKD(List<ItoSeedParticle>& a_particles,
-                                  const CellInfo&        a_cellInfo,
-                                  int                    a_ppc) const noexcept;
+  makeSuperparticlesEqualWeightKD(ParticleSoA<ItoParticle>& a_particles,
+                                  const CellInfo&           a_cellInfo,
+                                  int                       a_ppc) const noexcept;
 
   /**
     @brief Superparticle merging with BVH trees. This reinitializes particles within each BVH node.
@@ -852,9 +852,9 @@ public:
     @param[in]    a_ppc       Target number of particles per cell
   */
   virtual void
-  makeSuperparticlesBVHReinitialize(List<ItoSeedParticle>& a_particles,
-                                    const CellInfo&        a_cellInfo,
-                                    int                    a_ppc) const noexcept;
+  makeSuperparticlesBVHReinitialize(ParticleSoA<ItoParticle>& a_particles,
+                                    const CellInfo&           a_cellInfo,
+                                    int                       a_ppc) const noexcept;
 
   /**
     @brief Particle re-initialization algorithm
@@ -863,7 +863,7 @@ public:
     @param[in]    a_ppc       Target number of particles per cell
   */
   virtual void
-  reinitializeParticles(List<ItoSeedParticle>& a_particles, const CellInfo& a_cellInfo, int a_ppc) const noexcept;
+  reinitializeParticles(ParticleSoA<ItoParticle>& a_particles, const CellInfo& a_cellInfo, int a_ppc) const noexcept;
 
   /**
     @brief Remap the bulk particle container.
@@ -1101,7 +1101,7 @@ protected:
   /**
     @brief Particle merger
   */
-  ParticleManagement::ParticleMerger<ItoSeedParticle> m_particleMerger;
+  ParticleManagement::ParticleMerger<ItoParticle> m_particleMerger;
 
   /**
     @brief Number of particles used when restarting a simulation -- this is relevant only when restarting from a "fluid" checkpoint file. 

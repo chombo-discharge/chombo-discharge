@@ -69,13 +69,13 @@ ItoSpecies::setInitialDensity(const std::function<Real(const RealVect& x, const 
   m_initialDensity = a_initialDensity;
 }
 
-List<ItoSeedParticle>&
+ParticleSoA<ItoParticle>&
 ItoSpecies::getInitialParticles()
 {
   return m_initialParticles;
 }
 
-const List<ItoSeedParticle>&
+const ParticleSoA<ItoParticle>&
 ItoSpecies::getInitialParticles() const
 {
   return m_initialParticles;

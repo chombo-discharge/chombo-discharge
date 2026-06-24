@@ -24,6 +24,7 @@
 // Our includes
 #include <CD_EBCoarseToFineInterp.H>
 #include <CD_ItoKMCStepper.H>
+#include <CD_ItoKMCFieldParticle.H>
 #include <CD_ParticleOps.H>
 #include <CD_DataOps.H>
 #include <CD_ParallelOps.H>
@@ -35,81 +36,37 @@
 using namespace Physics::ItoKMC;
 
 namespace {
-  // SoA<->per-cell-list bridge for the ItoKMC reaction kernels. The reaction interface operates on per-cell
-  // AoS scratch lists (ItoSeedParticle/PhotonSeed) extracted from the SoA leaves; results are written back.
-  // Mirrors ItoSolver::makeSuperparticles' extract->process->rebuild pattern. The seed round-trip drops
-  // velocity/mobility/diffusion (recomputed at the next transport step); weight/position/energy (Ito) and
-  // weight/position/velocity/kappa (photons) survive -- which is exactly what the reaction kernels need.
+  // SoA per-cell extract/rebuild bridge for the ItoKMC reaction kernels. The reaction interface operates on
+  // per-cell SoA scratch containers (one small ParticleSoA<P> per grid cell) extracted from the leaves; the
+  // mutated scratches are concatenated back into the leaf. Mirrors ItoSolver::makeSuperparticles. The per-cell
+  // vector is indexed by the box's Fortran cell offset (Box::index), which matches ParticleSoA::sortByCell.
 
-  // Bin an SoA Ito leaf into a per-cell BinFab of ItoSeedParticle (weight, position, energy).
+  // Cell-sort a_leaf and extract each cell into a_cells[Box::index(iv)] (one ParticleSoA<P> per cell).
+  template <typename P, typename Traits>
   inline void
-  itoLeafToBin(BinFab<ItoSeedParticle>&        a_bin,
-               const ParticleSoA<ItoParticle>& a_leaf,
-               const Box&                      a_box,
-               const Real                      a_dx,
-               const RealVect&                 a_probLo) noexcept
+  binLeafToCells(std::vector<ParticleSoA<P, Traits>>& a_cells,
+                 ParticleSoA<P, Traits>&              a_leaf,
+                 const Box&                           a_box,
+                 const Real                           a_dx,
+                 const RealVect&                      a_probLo) noexcept
   {
-    a_bin.define(a_box, a_dx * RealVect::Unit, a_probLo);
+    a_leaf.sortByCell(a_box, a_dx * RealVect::Unit, a_probLo);
 
-    List<ItoSeedParticle> tmp;
-    for (std::size_t i = 0; i < a_leaf.size(); i++) {
-      tmp.add(ItoSeedParticle(a_leaf.weight(i), a_leaf.position(i), a_leaf.template get<&ItoParticle::energy>(i)));
+    a_cells.clear();
+    a_cells.resize(a_box.numPts());
+    for (std::size_t c = 0; c < a_leaf.numCells(); c++) {
+      a_leaf.extractCell(c, a_cells[c]);
     }
-    a_bin.addItems(tmp);
   }
 
-  // Rebuild an SoA Ito leaf from a per-cell BinFab of ItoSeedParticle.
+  // Rebuild a_leaf from the per-cell scratch vector (concatenate all cells, then swap into the leaf).
+  template <typename P, typename Traits>
   inline void
-  itoBinToLeaf(ParticleSoA<ItoParticle>& a_leaf, const BinFab<ItoSeedParticle>& a_bin, const Box& a_box) noexcept
+  rebuildLeafFromCells(ParticleSoA<P, Traits>& a_leaf, const std::vector<ParticleSoA<P, Traits>>& a_cells) noexcept
   {
-    ParticleSoA<ItoParticle> rebuilt;
-    for (BoxIterator bit(a_box); bit.ok(); ++bit) {
-      const List<ItoSeedParticle>& cell = a_bin(bit(), 0);
-      for (ListIterator<ItoSeedParticle> lit(cell); lit.ok(); ++lit) {
-        ItoParticle payload;
-        payload.energy = static_cast<ParticleReal>(lit().energy());
-        rebuilt.append(lit().position(), lit().weight(), payload);
-      }
-    }
-    a_leaf.swap(rebuilt);
-  }
-
-  // Bin an SoA photon leaf into a per-cell BinFab of PhotonSeed (position, velocity, kappa, weight).
-  inline void
-  photonLeafToBin(BinFab<PhotonSeed>&        a_bin,
-                  const ParticleSoA<Photon>& a_leaf,
-                  const Box&                 a_box,
-                  const Real                 a_dx,
-                  const RealVect&            a_probLo) noexcept
-  {
-    a_bin.define(a_box, a_dx * RealVect::Unit, a_probLo);
-
-    List<PhotonSeed> tmp;
-    for (std::size_t i = 0; i < a_leaf.size(); i++) {
-      const RealVect velocity = RealVect(D_DECL(a_leaf.template get<&Photon::velocityX>(i),
-                                                a_leaf.template get<&Photon::velocityY>(i),
-                                                a_leaf.template get<&Photon::velocityZ>(i)));
-
-      tmp.add(PhotonSeed(a_leaf.position(i), velocity, a_leaf.template get<&Photon::kappa>(i), a_leaf.weight(i)));
-    }
-    a_bin.addItems(tmp);
-  }
-
-  // Rebuild an SoA photon leaf from a per-cell BinFab of PhotonSeed.
-  inline void
-  photonBinToLeaf(ParticleSoA<Photon>& a_leaf, const BinFab<PhotonSeed>& a_bin, const Box& a_box) noexcept
-  {
-    ParticleSoA<Photon> rebuilt;
-    for (BoxIterator bit(a_box); bit.ok(); ++bit) {
-      const List<PhotonSeed>& cell = a_bin(bit(), 0);
-      for (ListIterator<PhotonSeed> lit(cell); lit.ok(); ++lit) {
-        Photon payload;
-        payload.kappa = static_cast<ParticleReal>(lit().kappa());
-        D_DECL(payload.velocityX = static_cast<ParticleReal>(lit().velocity()[0]),
-               payload.velocityY = static_cast<ParticleReal>(lit().velocity()[1]),
-               payload.velocityZ = static_cast<ParticleReal>(lit().velocity()[2]));
-        rebuilt.append(lit().position(), lit().weight(), payload);
-      }
+    ParticleSoA<P, Traits> rebuilt;
+    for (const ParticleSoA<P, Traits>& cell : a_cells) {
+      rebuilt.append(cell);
     }
     a_leaf.swap(rebuilt);
   }
@@ -3687,21 +3644,20 @@ ItoKMCStepper<I, C, R, F>::computeReactiveItoParticlesPerCell(EBCellFAB&      a_
     RefCountedPtr<ItoSolver>& solver = solverIt();
     const int                 idx    = solverIt.index();
 
-    // Get the cell-sorted particles. This will issue an error if the user has not
-    // sorted the particles by cell before calling this routine.
-    const ParticleContainerSoA<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
+    ParticleContainerSoA<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
-    // SoA->per-cell bridge: bin this leaf into ItoSeedParticle lists for the per-cell counting kernels.
-    BinFab<ItoSeedParticle> cellParticles;
-    itoLeafToBin(cellParticles, particles[a_level][a_din], a_box, dx, probLo);
+    // SoA per-cell extract: cell-sort this leaf and split it into one ParticleSoA per grid cell.
+    std::vector<ParticleSoA<ItoParticle>> cellParticles;
+    binLeafToCells(cellParticles, particles[a_level][a_din], a_box, dx, probLo);
 
     // Regular cells kernel.
     auto regularKernel = [&](const IntVect& iv) -> void {
       Real num = 0.0;
 
       if (a_ebisbox.isRegular(iv)) {
-        for (ListIterator<ItoSeedParticle> lit(cellParticles(iv, 0)); lit.ok(); ++lit) {
-          num += lit().weight();
+        const ParticleSoA<ItoParticle>& cell = cellParticles[a_box.index(iv)];
+        for (std::size_t i = 0; i < cell.size(); i++) {
+          num += cell.weight(i);
         }
       }
 
@@ -3716,10 +3672,11 @@ ItoKMCStepper<I, C, R, F>::computeReactiveItoParticlesPerCell(EBCellFAB&      a_
 
       Real num = 0.0;
 
-      for (ListIterator<ItoSeedParticle> lit(cellParticles(iv, 0)); lit.ok(); ++lit) {
-        const RealVect& pos = lit().position();
+      const ParticleSoA<ItoParticle>& cell = cellParticles[a_box.index(iv)];
+      for (std::size_t i = 0; i < cell.size(); i++) {
+        const RealVect pos = cell.position(i);
         if ((pos - physCentroid).dotProduct(normal) >= 0.0) {
-          num += lit().weight();
+          num += cell.weight(i);
         }
       }
 
@@ -3917,13 +3874,11 @@ ItoKMCStepper<I, C, R, F>::computeReactiveMeanEnergiesPerCell(EBCellFAB&      a_
     RefCountedPtr<ItoSolver>& solver = solverIt();
     const int                 idx    = solverIt.index();
 
-    // Get the cell-sorted particles. This will issue an error if the user has not
-    // sorted the particles by cell before calling this routine.
-    const ParticleContainerSoA<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
+    ParticleContainerSoA<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
-    // SoA->per-cell bridge: bin this leaf into ItoSeedParticle lists for the per-cell energy kernels.
-    BinFab<ItoSeedParticle> cellParticles;
-    itoLeafToBin(cellParticles, particles[a_level][a_din], a_box, dx, probLo);
+    // SoA per-cell extract: cell-sort this leaf and split it into one ParticleSoA per grid cell.
+    std::vector<ParticleSoA<ItoParticle>> cellParticles;
+    binLeafToCells(cellParticles, particles[a_level][a_din], a_box, dx, probLo);
 
     // Regular grid cells.
     auto regularKernel = [&](const IntVect& iv) -> void {
@@ -3931,9 +3886,11 @@ ItoKMCStepper<I, C, R, F>::computeReactiveMeanEnergiesPerCell(EBCellFAB&      a_
         Real totalWeight = 0.0;
         Real totalEnergy = 0.0;
 
-        for (ListIterator<ItoSeedParticle> lit(cellParticles(iv, 0)); lit.ok(); ++lit) {
-          totalWeight += lit().weight();
-          totalEnergy += lit().weight() * lit().energy();
+        const ParticleSoA<ItoParticle>& cell = cellParticles[a_box.index(iv)];
+        for (std::size_t i = 0; i < cell.size(); i++) {
+          const Real w = cell.weight(i);
+          totalWeight += w;
+          totalEnergy += w * cell.template get<&ItoParticle::energy>(i);
         }
 
         if (totalWeight > 0.0) {
@@ -3954,12 +3911,14 @@ ItoKMCStepper<I, C, R, F>::computeReactiveMeanEnergiesPerCell(EBCellFAB&      a_
       Real totalWeight = 0.0;
       Real totalEnergy = 0.0;
 
-      for (ListIterator<ItoSeedParticle> lit(cellParticles(iv, 0)); lit.ok(); ++lit) {
-        const RealVect& pos = lit().position();
+      const ParticleSoA<ItoParticle>& cell = cellParticles[a_box.index(iv)];
+      for (std::size_t i = 0; i < cell.size(); i++) {
+        const RealVect pos = cell.position(i);
 
         if ((pos - ebCentroid).dotProduct(normal) >= 0.0) {
-          totalWeight += lit().weight();
-          totalEnergy += lit().weight() * lit().energy();
+          const Real w = cell.weight(i);
+          totalWeight += w;
+          totalEnergy += w * cell.template get<&ItoParticle::energy>(i);
         }
       }
 
@@ -4466,28 +4425,22 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
   // Regular electric field cells
   const FArrayBox& electricFieldReg = a_electricField.getFArrayBox();
 
-  // Pointers to cell-centered particle storages. Note that the BinFabs hold a list of particles/photons
-  // on each grid cell. We will manipulate these lists. The Ito/photon BinFabs are local SoA->per-cell
-  // bridges (ItoSeedParticle/PhotonSeed) owned by the storage vectors below; they are rebuilt into the
-  // SoA leaves after the kernels run. The CDR products remain AoS (PointParticle).
-  Vector<BinFab<ItoSeedParticle>*> itoParticlesFAB(numItoSpecies);
-  Vector<BinFab<PointParticle>*>   cdrParticlesFAB(numCdrSpecies);
-  Vector<BinFab<PhotonSeed>*>      sourcePhotonsFAB(numPhotonSpecies);
-  Vector<BinFab<PhotonSeed>*>      bulkPhotonsFAB(numPhotonSpecies);
+  // Per-cell SoA scratch: one ParticleSoA<P> per grid cell, indexed by Box::index(iv). The Ito bulk leaves
+  // and the bulk/source photon leaves are cell-sorted and split into these; the mutated scratches are rebuilt
+  // into the SoA leaves after the kernels run. The CDR photoionization products remain AoS (PointParticle).
+  std::vector<std::vector<ParticleSoA<ItoParticle>>> itoCells(numItoSpecies);
+  std::vector<std::vector<ParticleSoA<Photon>>>      bulkPhotonCells(numPhotonSpecies);
+  std::vector<std::vector<ParticleSoA<Photon>>>      sourcePhotonCells(numPhotonSpecies);
 
-  Vector<RefCountedPtr<BinFab<ItoSeedParticle>>> itoBinStorage(numItoSpecies);
-  Vector<RefCountedPtr<BinFab<PhotonSeed>>>      sourceBinStorage(numPhotonSpecies);
-  Vector<RefCountedPtr<BinFab<PhotonSeed>>>      bulkBinStorage(numPhotonSpecies);
+  Vector<BinFab<PointParticle>*> cdrParticlesFAB(numCdrSpecies);
 
-  // Build the per-cell Ito seed bins from the SoA bulk leaves.
+  // Build the per-cell Ito scratch from the SoA bulk leaves.
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
     const int idx = solverIt.index();
 
     ParticleContainerSoA<ItoParticle>& solverParticles = solverIt()->getParticles(ItoSolver::WhichContainer::Bulk);
 
-    itoBinStorage[idx] = RefCountedPtr<BinFab<ItoSeedParticle>>(new BinFab<ItoSeedParticle>());
-    itoLeafToBin(*itoBinStorage[idx], solverParticles[a_level][a_din], a_box, a_dx, probLo);
-    itoParticlesFAB[idx] = &(*itoBinStorage[idx]);
+    binLeafToCells(itoCells[idx], solverParticles[a_level][a_din], a_box, a_dx, probLo);
   }
 
   // Get a handle to the cell-sorted particles for CDR photoionization products (these remain AoS).
@@ -4499,20 +4452,15 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
     cdrParticlesFAB[idx] = &(pointParticles.getCellParticles(a_level, a_din));
   }
 
-  // Build the per-cell photon seed bins from the SoA bulk/source photon leaves.
+  // Build the per-cell photon scratch from the SoA bulk/source photon leaves.
   for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
     const int idx = solverIt.index();
 
     ParticleContainerSoA<Photon>& solverBulkPhotons   = solverIt()->getBulkPhotons();
     ParticleContainerSoA<Photon>& solverSourcePhotons = solverIt()->getSourcePhotons();
 
-    bulkBinStorage[idx] = RefCountedPtr<BinFab<PhotonSeed>>(new BinFab<PhotonSeed>());
-    photonLeafToBin(*bulkBinStorage[idx], solverBulkPhotons[a_level][a_din], a_box, a_dx, probLo);
-    bulkPhotonsFAB[idx] = &(*bulkBinStorage[idx]);
-
-    sourceBinStorage[idx] = RefCountedPtr<BinFab<PhotonSeed>>(new BinFab<PhotonSeed>());
-    photonLeafToBin(*sourceBinStorage[idx], solverSourcePhotons[a_level][a_din], a_box, a_dx, probLo);
-    sourcePhotonsFAB[idx] = &(*sourceBinStorage[idx]);
+    binLeafToCells(bulkPhotonCells[idx], solverBulkPhotons[a_level][a_din], a_box, a_dx, probLo);
+    binLeafToCells(sourcePhotonCells[idx], solverSourcePhotons[a_level][a_din], a_box, a_dx, probLo);
   }
 
   // The physics interface takes the physical number of particles/photons as arguments
@@ -4523,11 +4471,12 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
   Vector<Physics::ItoKMC::FPR> numNewPhotons(numPhotonSpecies);
 
   // The physics interface also takes the actual particles/photons as argument to its reconciliation routines. This
-  // is the storage we use for these; note that it is repopulated in every grid cell.
-  Vector<List<ItoSeedParticle>*> itoParticles(numItoSpecies);
-  Vector<List<PointParticle>*>   cdrParticles(numCdrSpecies);
-  Vector<List<PhotonSeed>*>      bulkPhotons(numPhotonSpecies);
-  Vector<List<PhotonSeed>*>      sourcePhotons(numPhotonSpecies);
+  // is the storage we use for these; note that it is repopulated in every grid cell (pointing at the per-cell
+  // SoA scratch above). CDR products remain AoS lists.
+  Vector<ParticleSoA<ItoParticle>*> itoParticles(numItoSpecies);
+  Vector<List<PointParticle>*>      cdrParticles(numCdrSpecies);
+  Vector<ParticleSoA<Photon>*>      bulkPhotons(numPhotonSpecies);
+  Vector<ParticleSoA<Photon>*>      sourcePhotons(numPhotonSpecies);
   CH_STOP(t1);
 
   // Regular cells
@@ -4545,7 +4494,7 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
 
       // Populate the per-cell Ito data
       for (int i = 0; i < numItoSpecies; i++) {
-        itoParticles[i]    = &((*itoParticlesFAB[i])(iv, 0));
+        itoParticles[i]    = &itoCells[i][a_box.index(iv)];
         numNewParticles[i] = llround(a_newParticlesPerCell.getSingleValuedFAB()(iv, i));
         numOldParticles[i] = llround(a_oldParticlesPerCell.getSingleValuedFAB()(iv, i));
       }
@@ -4557,8 +4506,8 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
 
       // Populate the per-cell photon data.
       for (int i = 0; i < numPhotonSpecies; i++) {
-        bulkPhotons[i]   = &((*bulkPhotonsFAB[i])(iv, 0));
-        sourcePhotons[i] = &((*sourcePhotonsFAB[i])(iv, 0));
+        bulkPhotons[i]   = &bulkPhotonCells[i][a_box.index(iv)];
+        sourcePhotons[i] = &sourcePhotonCells[i][a_box.index(iv)];
 
         numNewPhotons[i] = llround(a_newPhotonsPerCell.getSingleValuedFAB()(iv, i));
 
@@ -4632,7 +4581,7 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
 
       // Populate the per-cell particle data.
       for (int i = 0; i < numItoSpecies; i++) {
-        itoParticles[i]    = &((*itoParticlesFAB[i])(iv, 0));
+        itoParticles[i]    = &itoCells[i][a_box.index(iv)];
         numNewParticles[i] = llround(a_newParticlesPerCell(vof, i));
         numOldParticles[i] = llround(a_oldParticlesPerCell(vof, i));
       }
@@ -4644,8 +4593,8 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
 
       // Populate the per-cell photon data.
       for (int i = 0; i < numPhotonSpecies; i++) {
-        bulkPhotons[i]   = &((*bulkPhotonsFAB[i])(iv, 0));
-        sourcePhotons[i] = &((*sourcePhotonsFAB[i])(iv, 0));
+        bulkPhotons[i]   = &bulkPhotonCells[i][a_box.index(iv)];
+        sourcePhotons[i] = &sourcePhotonCells[i][a_box.index(iv)];
 
         numNewPhotons[i] = llround(a_newPhotonsPerCell(vof, i));
 
@@ -4711,15 +4660,15 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
   BoxLoops::loop(vofit, irregularKernel);
   CH_STOP(t3);
 
-  // SoA write-back: rebuild the Ito bulk leaves and the source-photon leaves from the mutated per-cell seed
-  // bins (reconcile added/removed/merged Ito particles and generated source photons). The bulk-photon bins
-  // were read-only (photoionization), so they need no write-back.
+  // SoA write-back: rebuild the Ito bulk leaves and the source-photon leaves from the mutated per-cell SoA
+  // scratch (reconcile added/removed/merged Ito particles and generated source photons). The bulk-photon
+  // scratch was read-only (photoionization), so it needs no write-back.
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
     const int idx = solverIt.index();
 
     ParticleContainerSoA<ItoParticle>& solverParticles = solverIt()->getParticles(ItoSolver::WhichContainer::Bulk);
 
-    itoBinToLeaf(solverParticles[a_level][a_din], *itoBinStorage[idx], a_box);
+    rebuildLeafFromCells(solverParticles[a_level][a_din], itoCells[idx]);
   }
 
   for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
@@ -4727,7 +4676,7 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
 
     ParticleContainerSoA<Photon>& solverSourcePhotons = solverIt()->getSourcePhotons();
 
-    photonBinToLeaf(solverSourcePhotons[a_level][a_din], *sourceBinStorage[idx], a_box);
+    rebuildLeafFromCells(solverSourcePhotons[a_level][a_din], sourcePhotonCells[idx]);
   }
 }
 
@@ -4754,15 +4703,15 @@ ItoKMCStepper<I, C, R, F>::reconcilePhotoionization() noexcept
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      // reconcilePhotoionization only APPENDS new Ito/CDR products (reading the absorbed photons), so we pass
-      // fresh empty Ito product lists and the bulk photons extracted into PhotonSeed scratch. The new Ito
-      // products are then appended to the SoA bulk leaves, preserving the existing particles' full payload.
-      Vector<List<ItoSeedParticle>> itoProducts(numItoSpecies);
-      Vector<List<PhotonSeed>>      absorbedPhotons(numPhotonSpecies);
+      // reconcilePhotoionization only APPENDS new Ito/CDR products (reading the absorbed bulk photons), so we
+      // pass fresh empty Ito product containers and point the absorbed-photon args directly at the live bulk
+      // photon leaves (read-only). The new Ito products are then bulk-appended to the SoA bulk leaves,
+      // preserving the existing particles' full payload.
+      Vector<ParticleSoA<ItoParticle>> itoProducts(numItoSpecies);
 
-      Vector<List<ItoSeedParticle>*> itoParticles(numItoSpecies);
-      Vector<List<PointParticle>*>   cdrParticles(numCdrSpecies);
-      Vector<List<PhotonSeed>*>      photonParticles(numPhotonSpecies);
+      Vector<ParticleSoA<ItoParticle>*> itoParticles(numItoSpecies);
+      Vector<List<PointParticle>*>      cdrParticles(numCdrSpecies);
+      Vector<ParticleSoA<Photon>*>      photonParticles(numPhotonSpecies);
 
       for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
         itoParticles[solverIt.index()] = &itoProducts[solverIt.index()];
@@ -4775,18 +4724,7 @@ ItoKMCStepper<I, C, R, F>::reconcilePhotoionization() noexcept
       }
 
       for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
-        const int                  idx  = solverIt.index();
-        const ParticleSoA<Photon>& leaf = solverIt()->getBulkPhotons()[lvl][din];
-
-        for (std::size_t i = 0; i < leaf.size(); i++) {
-          const RealVect velocity = RealVect(D_DECL(leaf.template get<&Photon::velocityX>(i),
-                                                    leaf.template get<&Photon::velocityY>(i),
-                                                    leaf.template get<&Photon::velocityZ>(i)));
-          absorbedPhotons[idx].add(
-            PhotonSeed(leaf.position(i), velocity, leaf.template get<&Photon::kappa>(i), leaf.weight(i)));
-        }
-
-        photonParticles[idx] = &absorbedPhotons[idx];
+        photonParticles[solverIt.index()] = &(solverIt()->getBulkPhotons()[lvl][din]);
       }
 
       m_physics->reconcilePhotoionization(itoParticles, cdrParticles, photonParticles);
@@ -4796,11 +4734,7 @@ ItoKMCStepper<I, C, R, F>::reconcilePhotoionization() noexcept
         const int                 idx  = solverIt.index();
         ParticleSoA<ItoParticle>& leaf = solverIt()->getParticles(ItoSolver::WhichContainer::Bulk)[lvl][din];
 
-        for (ListIterator<ItoSeedParticle> lit(itoProducts[idx]); lit.ok(); ++lit) {
-          ItoParticle payload;
-          payload.energy = static_cast<ParticleReal>(lit().energy());
-          leaf.append(lit().position(), lit().weight(), payload);
-        }
+        leaf.append(itoProducts[idx]);
       }
     }
   }
@@ -5120,32 +5054,21 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(
 
       bool isDielectric = false;
 
-      // SoA->per-cell bridge. Primary seed bins are read from the SoA leaves; secondary seed bins start
-      // empty (defined over the patch box) and are written back into the SoA leaves after the kernel.
-      Vector<BinFab<ItoSeedParticle>*> secondaryParticlesFAB;
-      Vector<BinFab<ItoSeedParticle>*> primaryParticlesFAB;
-
-      Vector<BinFab<PhotonSeed>*> secondaryPhotonsFAB;
-      Vector<BinFab<PhotonSeed>*> primaryPhotonsFAB;
+      // Per-cell SoA scratch (indexed by Box::index(iv)). Primary cells are read from the SoA leaves;
+      // secondary cells start empty and are rebuilt into the SoA leaves after the kernel.
+      std::vector<std::vector<ParticleSoA<ItoParticle>>> primaryItoCells(numItoSpecies);
+      std::vector<std::vector<ParticleSoA<ItoParticle>>> secondaryItoCells(numItoSpecies);
+      std::vector<std::vector<ParticleSoA<Photon>>>      primaryPhotonCells(numPhotonSpecies);
+      std::vector<std::vector<ParticleSoA<Photon>>>      secondaryPhotonCells(numPhotonSpecies);
 
       Vector<BaseIVFAB<Real>*> cdrFluxesFAB;
       Vector<BaseIVFAB<Real>*> cdrFluxesExtrapFAB;
 
-      Vector<RefCountedPtr<BinFab<ItoSeedParticle>>> secondaryItoStore;
-      Vector<RefCountedPtr<BinFab<ItoSeedParticle>>> primaryItoStore;
-      Vector<RefCountedPtr<BinFab<PhotonSeed>>>      secondaryPhotonStore;
-      Vector<RefCountedPtr<BinFab<PhotonSeed>>>      primaryPhotonStore;
-
       for (auto it = m_ito->iterator(); it.ok(); ++it) {
         const int idx = it.index();
 
-        primaryItoStore.push_back(RefCountedPtr<BinFab<ItoSeedParticle>>(new BinFab<ItoSeedParticle>()));
-        itoLeafToBin(*primaryItoStore[idx], (*a_primaryParticles[idx])[lvl][din], box, dx, probLo);
-        primaryParticlesFAB.push_back(&(*primaryItoStore[idx]));
-
-        secondaryItoStore.push_back(RefCountedPtr<BinFab<ItoSeedParticle>>(new BinFab<ItoSeedParticle>()));
-        secondaryItoStore[idx]->define(box, dx * RealVect::Unit, probLo);
-        secondaryParticlesFAB.push_back(&(*secondaryItoStore[idx]));
+        binLeafToCells(primaryItoCells[idx], (*a_primaryParticles[idx])[lvl][din], box, dx, probLo);
+        secondaryItoCells[idx].resize(box.numPts());
       }
 
       for (auto it = m_cdr->iterator(); it.ok(); ++it) {
@@ -5156,13 +5079,8 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(
       for (auto it = m_rte->iterator(); it.ok(); ++it) {
         const int idx = it.index();
 
-        primaryPhotonStore.push_back(RefCountedPtr<BinFab<PhotonSeed>>(new BinFab<PhotonSeed>()));
-        photonLeafToBin(*primaryPhotonStore[idx], (*a_primaryPhotons[idx])[lvl][din], box, dx, probLo);
-        primaryPhotonsFAB.push_back(&(*primaryPhotonStore[idx]));
-
-        secondaryPhotonStore.push_back(RefCountedPtr<BinFab<PhotonSeed>>(new BinFab<PhotonSeed>()));
-        secondaryPhotonStore[idx]->define(box, dx * RealVect::Unit, probLo);
-        secondaryPhotonsFAB.push_back(&(*secondaryPhotonStore[idx]));
+        binLeafToCells(primaryPhotonCells[idx], (*a_primaryPhotons[idx])[lvl][din], box, dx, probLo);
+        secondaryPhotonCells[idx].resize(box.numPts());
       }
 
       // Kernel definition.
@@ -5178,18 +5096,21 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(
           const RealVect physPos       = cellCenter + bndryCentroid * dx;
           const Real     bndryArea     = ebisbox.bndryArea(vof);
 
-          Vector<List<ItoSeedParticle>> secondaryParticles(numItoSpecies);
-          Vector<List<ItoSeedParticle>> primaryParticles(numItoSpecies);
+          const long cellIdx = box.index(iv);
+
+          // Secondary containers start empty; the kernel appends to them. Primary cells are moved in from the
+          // per-cell scratch (read-only input; their leaves are not written back).
+          Vector<ParticleSoA<ItoParticle>> secondaryParticles(numItoSpecies);
+          Vector<ParticleSoA<ItoParticle>> primaryParticles(numItoSpecies);
 
           Vector<Real> cdrFluxes(numCdrSpecies, 0.0);
           Vector<Real> cdrFluxesExtrap(numCdrSpecies, 0.0);
 
-          Vector<List<PhotonSeed>> secondaryPhotons(numPhotonSpecies);
-          Vector<List<PhotonSeed>> primaryPhotons(numPhotonSpecies);
+          Vector<ParticleSoA<Photon>> secondaryPhotons(numPhotonSpecies);
+          Vector<ParticleSoA<Photon>> primaryPhotons(numPhotonSpecies);
 
           for (int i = 0; i < numItoSpecies; i++) {
-            secondaryParticles[i] = (*secondaryParticlesFAB[i])(iv, 0);
-            primaryParticles[i]   = (*primaryParticlesFAB[i])(iv, 0);
+            primaryParticles[i] = std::move(primaryItoCells[i][cellIdx]);
           }
 
           // Populate CDR fluxes
@@ -5199,8 +5120,7 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(
           }
 
           for (int i = 0; i < numPhotonSpecies; i++) {
-            secondaryPhotons[i] = (*secondaryPhotonsFAB[i])(iv, 0);
-            primaryPhotons[i]   = (*primaryPhotonsFAB[i])(iv, 0);
+            primaryPhotons[i] = std::move(primaryPhotonCells[i][cellIdx]);
           }
 
           // Figure out which material we are dealing with.
@@ -5244,9 +5164,9 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(
                                          isDielectric,
                                          matIndex);
 
-          // Fill output data holders.
+          // Fill output data holders (move the per-cell secondary results into the per-cell scratch).
           for (int i = 0; i < numItoSpecies; i++) {
-            (*secondaryParticlesFAB[i])(iv, 0) = secondaryParticles[i];
+            secondaryItoCells[i][cellIdx] = std::move(secondaryParticles[i]);
           }
 
           for (int i = 0; i < numCdrSpecies; i++) {
@@ -5254,7 +5174,7 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(
           }
 
           for (int i = 0; i < numPhotonSpecies; i++) {
-            (*secondaryPhotonsFAB[i])(iv, 0) = secondaryPhotons[i];
+            secondaryPhotonCells[i][cellIdx] = std::move(secondaryPhotons[i]);
           }
         }
       };
@@ -5263,15 +5183,15 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(
       VoFIterator& vofit = (*m_amr->getVofIterator(m_particleRealm, m_plasmaPhase)[lvl])[din];
       BoxLoops::loop(vofit, irregularKernel);
 
-      // SoA write-back: rebuild the secondary Ito/photon leaves for this patch from the filled seed bins.
+      // SoA write-back: rebuild the secondary Ito/photon leaves for this patch from the filled per-cell scratch.
       // Primaries are read-only (the physics interface takes them by const reference), so they are not written.
       for (auto it = m_ito->iterator(); it.ok(); ++it) {
         const int idx = it.index();
-        itoBinToLeaf((*a_secondaryParticles[idx])[lvl][din], *secondaryItoStore[idx], box);
+        rebuildLeafFromCells((*a_secondaryParticles[idx])[lvl][din], secondaryItoCells[idx]);
       }
       for (auto it = m_rte->iterator(); it.ok(); ++it) {
         const int idx = it.index();
-        photonBinToLeaf((*a_secondaryPhotons[idx])[lvl][din], *secondaryPhotonStore[idx], box);
+        rebuildLeafFromCells((*a_secondaryPhotons[idx])[lvl][din], secondaryPhotonCells[idx]);
       }
     }
   }
@@ -6072,11 +5992,9 @@ ItoKMCStepper<I, C, R, F>::computeEdotJSource(const Real a_dt) noexcept
   //       deposition scheme that the user has assgned.
   //
 
-  // Allocate a particle data holder with three scalar storage spaces; these are the weight, V(A), and V(B). We also
-  // need the positions A and B so they're in here as well.
-  using CompParticle = GenericParticle<3, 1>;
-
-  ParticleContainer<CompParticle> computationParticles;
+  // Allocate a transient SoA particle holder. The container owns the weight and position; the payload holds
+  // V(A), V(B), and the per-component "other" position (alt) so we can interpolate the potential at both A and B.
+  ParticleContainerSoA<ItoKMCFieldParticle> computationParticles;
   m_amr->allocate(computationParticles, m_particleRealm);
 
   // Electrostatic potential on appropriate phase. This is defined on the fluid realm
@@ -6100,7 +6018,8 @@ ItoKMCStepper<I, C, R, F>::computeEdotJSource(const Real a_dt) noexcept
 
       const ParticleContainerSoA<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
-      // Copy the ItoParticles to the transient particles we use for computing these things.
+      // Copy the ItoParticles to the transient particles we use for computing these things. The container
+      // position holds B (the current position); the payload "alt" columns hold A (the old position).
       for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
         const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
         const DataIterator&      dit = dbl.dataIterator();
@@ -6111,36 +6030,34 @@ ItoKMCStepper<I, C, R, F>::computeEdotJSource(const Real a_dt) noexcept
         for (int mybox = 0; mybox < nbox; mybox++) {
           const DataIndex& din = dit[mybox];
 
-          List<CompParticle>&             patchCompParticles = computationParticles[lvl][din].listItems();
-          const ParticleSoA<ItoParticle>& leaf               = particles[lvl][din];
+          ParticleSoA<ItoKMCFieldParticle>& comp = computationParticles[lvl][din];
+          const ParticleSoA<ItoParticle>&   leaf = particles[lvl][din];
 
           for (std::size_t i = 0; i < leaf.size(); i++) {
-            CompParticle p;
+            const RealVect posA = RealVect(D_DECL(leaf.template get<&ItoParticle::oldPositionX>(i),
+                                                  leaf.template get<&ItoParticle::oldPositionY>(i),
+                                                  leaf.template get<&ItoParticle::oldPositionZ>(i)));
 
-            // vect<0> holds the starting position. real<0> holds the weight and
-            // real<1> is used for V(A) and real<2> is used for V(B)
-            p.position()         = leaf.position(i);
-            p.template real<0>() = leaf.weight(i);
-            p.template real<1>() = 0.0;
-            p.template real<2>() = 0.0;
-            p.template vect<0>() = RealVect(D_DECL(leaf.template get<&ItoParticle::oldPositionX>(i),
-                                                   leaf.template get<&ItoParticle::oldPositionY>(i),
-                                                   leaf.template get<&ItoParticle::oldPositionZ>(i)));
+            ItoKMCFieldParticle payload;
+            D_DECL(payload.altX = static_cast<ParticleReal>(posA[0]),
+                   payload.altY = static_cast<ParticleReal>(posA[1]),
+                   payload.altZ = static_cast<ParticleReal>(posA[2]));
 
-            patchCompParticles.add(p);
+            comp.append(leaf.position(i), leaf.weight(i), payload);
           }
         }
       }
 
       // Interpolate the potential to the current particle position which gives us V(B) for the particles.
-      m_amr->interpolateParticles<CompParticle, Real&, &CompParticle::template real<1>>(computationParticles,
-                                                                                        m_particleRealm,
-                                                                                        m_plasmaPhase,
-                                                                                        m_particleScratch1,
-                                                                                        solver->getDeposition(),
-                                                                                        false);
+      m_amr->interpolateParticles<&ItoKMCFieldParticle::vB>(computationParticles,
+                                                            m_particleRealm,
+                                                            m_plasmaPhase,
+                                                            m_particleScratch1,
+                                                            solver->getDeposition(),
+                                                            false);
 
-      // Move the particles back to their old positions and interpolate the potential there.
+      // Move the particles back to their old positions (A) and interpolate the potential there. The container
+      // position and the payload "alt" position are swapped so position now holds A and alt holds B.
       for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
         const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
         const DataIterator&      dit = dbl.dataIterator();
@@ -6151,16 +6068,18 @@ ItoKMCStepper<I, C, R, F>::computeEdotJSource(const Real a_dt) noexcept
         for (int mybox = 0; mybox < nbox; mybox++) {
           const DataIndex& din = dit[mybox];
 
-          List<CompParticle>& particles = computationParticles[lvl][din].listItems();
+          ParticleSoA<ItoKMCFieldParticle>& comp = computationParticles[lvl][din];
 
-          for (ListIterator<CompParticle> lit(particles); lit.ok(); ++lit) {
+          for (std::size_t i = 0; i < comp.size(); i++) {
+            const RealVect posB = comp.position(i);
+            const RealVect posA = RealVect(D_DECL(comp.template get<&ItoKMCFieldParticle::altX>(i),
+                                                  comp.template get<&ItoKMCFieldParticle::altY>(i),
+                                                  comp.template get<&ItoKMCFieldParticle::altZ>(i)));
 
-            // Swap positions.
-            const RealVect tmp = lit().position();
-
-            // vect<0> holds the end position.
-            lit().position()         = lit().template vect<0>();
-            lit().template vect<0>() = tmp;
+            comp.setPosition(i, posA);
+            D_DECL(comp.template get<&ItoKMCFieldParticle::altX>(i) = static_cast<ParticleReal>(posB[0]),
+                   comp.template get<&ItoKMCFieldParticle::altY>(i) = static_cast<ParticleReal>(posB[1]),
+                   comp.template get<&ItoKMCFieldParticle::altZ>(i) = static_cast<ParticleReal>(posB[2]));
           }
         }
       }
@@ -6168,13 +6087,14 @@ ItoKMCStepper<I, C, R, F>::computeEdotJSource(const Real a_dt) noexcept
       computationParticles.remap();
 
       // Interpolate the potential to the previous particle position which gives us V(A) for the particles.
-      m_amr->interpolateParticles<CompParticle, Real&, &CompParticle::template real<2>>(computationParticles,
-                                                                                        m_particleRealm,
-                                                                                        m_plasmaPhase,
-                                                                                        m_particleScratch1,
-                                                                                        solver->getDeposition());
+      m_amr->interpolateParticles<&ItoKMCFieldParticle::vA>(computationParticles,
+                                                            m_particleRealm,
+                                                            m_plasmaPhase,
+                                                            m_particleScratch1,
+                                                            solver->getDeposition(),
+                                                            false);
 
-      // Move the particles back again and multiply the weight by Z * (V(A) - V(B))/a_dt
+      // Move the particles back to B again and multiply the weight by (V(B) - V(A)).
       for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
         const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
         const DataIterator&      dit = dbl.dataIterator();
@@ -6185,27 +6105,32 @@ ItoKMCStepper<I, C, R, F>::computeEdotJSource(const Real a_dt) noexcept
         for (int mybox = 0; mybox < nbox; mybox++) {
           const DataIndex& din = dit[mybox];
 
-          List<CompParticle>& particles = computationParticles[lvl][din].listItems();
+          ParticleSoA<ItoKMCFieldParticle>& comp = computationParticles[lvl][din];
 
-          for (ListIterator<CompParticle> lit(particles); lit.ok(); ++lit) {
-            lit().position() = lit().template vect<0>();
+          for (std::size_t i = 0; i < comp.size(); i++) {
+            const RealVect posB = RealVect(D_DECL(comp.template get<&ItoKMCFieldParticle::altX>(i),
+                                                  comp.template get<&ItoKMCFieldParticle::altY>(i),
+                                                  comp.template get<&ItoKMCFieldParticle::altZ>(i)));
 
-            // Compute weight * V(B) - V(A) where V(B) is stored in real<1> and V(A) is stored in real<2>
-            lit().template real<0>() *= (lit().template real<1>() - lit().template real<2>());
+            comp.setPosition(i, posB);
+
+            // Effective weight = weight * (V(B) - V(A)).
+            comp.weight(i) *= (comp.template get<&ItoKMCFieldParticle::vB>(i) -
+                               comp.template get<&ItoKMCFieldParticle::vA>(i));
           }
         }
       }
 
       computationParticles.remap();
 
-      // Deposit the particles
-      m_amr->depositParticles<CompParticle, const Real&, &CompParticle::template real<0>>(
-        m_particleScratch1,
-        m_particleRealm,
-        m_plasmaPhase,
-        computationParticles,
-        solver->getDeposition(),
-        solver->getCoarseFineDeposition());
+      // Deposit the effective (energy-weighted) weight.
+      m_amr->depositWeight(m_particleScratch1,
+                           m_particleRealm,
+                           m_plasmaPhase,
+                           computationParticles,
+                           solver->getDeposition(),
+                           solver->getCoarseFineDeposition(),
+                           false);
 
       // Copy data back onto the fluid realm.
       m_amr->copyData(m_fluidScratch1, m_particleScratch1);

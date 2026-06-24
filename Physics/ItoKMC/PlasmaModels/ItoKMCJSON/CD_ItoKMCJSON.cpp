@@ -1340,12 +1340,12 @@ ItoKMCJSON::initializeParticles()
     case SpeciesType::Ito: {
       const int idx = m_itoSpeciesMap.at(speciesID);
 
-      List<ItoSeedParticle>& solverParticles = m_itoSpecies[idx]->getInitialParticles();
+      ParticleSoA<ItoParticle>& solverParticles = m_itoSpecies[idx]->getInitialParticles();
 
       solverParticles.clear();
 
       for (ListIterator<PointParticle> lit(initialParticles); lit.ok(); ++lit) {
-        solverParticles.add(ItoSeedParticle(lit().weight(), lit().position(), 0.0));
+        solverParticles.append(lit().position(), lit().weight(), ItoParticle{});
       }
 
       break;
@@ -3522,21 +3522,21 @@ ItoKMCJSON::updateReactionRates(std::vector<std::shared_ptr<const KMCReaction>>&
 }
 
 void
-ItoKMCJSON::secondaryEmissionEB(Vector<List<ItoSeedParticle>>& a_secondaryParticles,
-                                Vector<Real>&                  a_secondaryCDRFluxes,
-                                Vector<List<PhotonSeed>>& /*a_secondaryPhotons*/,
-                                const Vector<List<ItoSeedParticle>>& a_primaryParticles,
-                                const Vector<Real>&                  a_primaryCDRFluxes,
-                                const Vector<List<PhotonSeed>>&      a_primaryPhotons,
-                                const RealVect&                      a_E,
-                                const RealVect&                      a_cellCenter,
-                                const RealVect&                      a_cellCentroid,
-                                const RealVect&                      a_bndryCentroid,
-                                const RealVect&                      a_bndryNormal,
-                                const Real                           a_bndryArea,
-                                const Real                           a_dx,
-                                const Real                           a_dt,
-                                const bool                           a_isDielectric,
+ItoKMCJSON::secondaryEmissionEB(Vector<ParticleSoA<ItoParticle>>& a_secondaryParticles,
+                                Vector<Real>&                     a_secondaryCDRFluxes,
+                                Vector<ParticleSoA<Photon>>& /*a_secondaryPhotons*/,
+                                const Vector<ParticleSoA<ItoParticle>>& a_primaryParticles,
+                                const Vector<Real>&                     a_primaryCDRFluxes,
+                                const Vector<ParticleSoA<Photon>>&      a_primaryPhotons,
+                                const RealVect&                         a_E,
+                                const RealVect&                         a_cellCenter,
+                                const RealVect&                         a_cellCentroid,
+                                const RealVect&                         a_bndryCentroid,
+                                const RealVect&                         a_bndryNormal,
+                                const Real                              a_bndryArea,
+                                const Real                              a_dx,
+                                const Real                              a_dt,
+                                const bool                              a_isDielectric,
                                 const int /*a_matIndex*/) const noexcept
 {
   CH_TIME("ItoKMCJSON::secondaryEmissionEB");
@@ -3577,8 +3577,8 @@ ItoKMCJSON::secondaryEmissionEB(Vector<List<ItoSeedParticle>>& a_secondaryPartic
 
       // Figure out the number of particles to sample and then run a multinomial sampling
       size_t N = 0;
-      for (ListIterator<ItoSeedParticle> lit(a_primaryParticles[i]); lit.ok(); ++lit) {
-        N += (size_t)lit().weight();
+      for (std::size_t j = 0; j < a_primaryParticles[i].size(); j++) {
+        N += (size_t)a_primaryParticles[i].weight(j);
       }
 
       const std::vector<size_t> X = this->multinomial(N, distribution);
@@ -3593,7 +3593,7 @@ ItoKMCJSON::secondaryEmissionEB(Vector<List<ItoSeedParticle>>& a_secondaryPartic
             const int Z = m_itoSpecies[p]->getChargeNumber();
 
             if ((Z < 0 && isCathode) || (Z > 0 && isAnode) || Z == 0) {
-              a_secondaryParticles[p].add(ItoSeedParticle(1.0 * static_cast<double>(X[i]), releasePosition, 0.0));
+              a_secondaryParticles[p].append(releasePosition, 1.0 * static_cast<double>(X[i]), ItoParticle{});
             }
           }
         }
@@ -3612,8 +3612,8 @@ ItoKMCJSON::secondaryEmissionEB(Vector<List<ItoSeedParticle>>& a_secondaryPartic
 
       // Figure out the number of particles to sample and then run a multinomial sampling
       size_t N = 0;
-      for (ListIterator<PhotonSeed> lit(a_primaryPhotons[i]); lit.ok(); ++lit) {
-        N += (size_t)lit().weight();
+      for (std::size_t j = 0; j < a_primaryPhotons[i].size(); j++) {
+        N += (size_t)a_primaryPhotons[i].weight(j);
       }
 
       const std::vector<size_t> X = this->multinomial(N, distribution);
@@ -3628,7 +3628,7 @@ ItoKMCJSON::secondaryEmissionEB(Vector<List<ItoSeedParticle>>& a_secondaryPartic
             const int Z = m_itoSpecies[p]->getChargeNumber();
 
             if ((Z < 0 && isCathode) || (Z > 0 && isAnode) || Z == 0) {
-              a_secondaryParticles[p].add(ItoSeedParticle(1.0 * static_cast<double>(X[i]), releasePosition, 0.0));
+              a_secondaryParticles[p].append(releasePosition, 1.0 * static_cast<double>(X[i]), ItoParticle{});
             }
           }
         }
@@ -3654,7 +3654,7 @@ ItoKMCJSON::secondaryEmissionEB(Vector<List<ItoSeedParticle>>& a_secondaryPartic
         if (numEmission > 0LL) {
           const RealVect x = a_cellCenter + a_cellCentroid * a_dx;
 
-          a_secondaryParticles[species].add(ItoSeedParticle(1.0 * static_cast<double>(numEmission), x, 0.0));
+          a_secondaryParticles[species].append(x, 1.0 * static_cast<double>(numEmission), ItoParticle{});
         }
       }
     }

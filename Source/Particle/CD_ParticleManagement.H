@@ -38,9 +38,9 @@ namespace ParticleManagement {
     @param[in] a_cellInfo Cell info
     @param[in] a_numTargetParticles Number of target particles
   */
-  template <class P>
+  template <class P, class Traits = ParticleTraits<P>>
   using ParticleMerger = std::function<
-    void(List<P>& a_particles, const CellInfo& a_cellInfo, const int a_numTargetParticles)>;
+    void(ParticleSoA<P, Traits>& a_particles, const CellInfo& a_cellInfo, const int a_numTargetParticles)>;
 
   /**
     @brief Declaration of a reconciliation function when splitting particles.
@@ -119,13 +119,37 @@ namespace ParticleManagement {
   removePhysicalParticles(List<P>& a_particles, const T a_numPhysPartToRemove) noexcept;
 
   /**
+    @brief Remove physical particles from an SoA container (operates on the container-owned weight column).
+    @param[in,out] a_particles           Input SoA particle container.
+    @param[in]    a_numPhysPartToRemove Number of physical particles to remove.
+    @note May fail if particle weights are not (close to) integers.
+    @tparam P      Payload type.
+    @tparam Traits Column descriptor for the payload.
+    @tparam T      Integral type for the physical-particle count.
+  */
+  template <typename P, typename Traits, typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
+  static inline void
+  removePhysicalParticles(ParticleSoA<P, Traits>& a_particles, const T a_numPhysPartToRemove) noexcept;
+
+  /**
     @brief Remove particles if their weight is below the input weight
-    @param[in,out] a_particles    Input list of particles. Must have a weight function. 
+    @param[in,out] a_particles    Input list of particles. Must have a weight function.
     @param[in]    a_weightThresh Weight threshold for removal
   */
   template <typename P>
   static inline void
   deleteParticles(List<P>& a_particles, const Real a_weightThresh) noexcept;
+
+  /**
+    @brief Remove particles from an SoA container if their weight is below the threshold (swap-and-pop).
+    @param[in,out] a_particles    Input SoA particle container.
+    @param[in]    a_weightThresh Weight threshold for removal.
+    @tparam P      Payload type.
+    @tparam Traits Column descriptor for the payload.
+  */
+  template <typename P, typename Traits>
+  static inline void
+  deleteParticles(ParticleSoA<P, Traits>& a_particles, const Real a_weightThresh) noexcept;
 
   /**
     @brief Partition particle weights among a number of computational particles
@@ -225,6 +249,25 @@ namespace ParticleManagement {
                         const T         a_numParticles,
                         const RealVect& a_center,
                         const Real      a_radius) noexcept;
+
+  /**
+    @brief Draw Gaussian-distributed particles into an SoA container (unit weight; positions only).
+    @details Each rank draws its own a_numParticles share with weight 1; routing to owners happens when
+    the buffer is added to a ParticleContainerSoA.
+    @param[out] a_particles    Output SoA buffer (cleared on entry).
+    @param[in]  a_numParticles Number of particles.
+    @param[in]  a_center       Gaussian blob center.
+    @param[in]  a_radius       Gaussian blob radius.
+    @tparam P      Payload type.
+    @tparam Traits Column descriptor for the payload.
+    @tparam T      Integral count type.
+  */
+  template <typename P, typename Traits, typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
+  static inline void
+  drawGaussianParticles(ParticleSoA<P, Traits>& a_particles,
+                        const T                 a_numParticles,
+                        const RealVect&         a_center,
+                        const Real              a_radius) noexcept;
 
 } // namespace ParticleManagement
 

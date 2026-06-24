@@ -345,6 +345,81 @@ namespace ParticleManagement {
     }
   }
 
+  template <typename P, typename Traits, typename T, typename>
+  inline void
+  removePhysicalParticles(ParticleSoA<P, Traits>& a_particles, const T a_numPhysPartToRemove) noexcept
+  {
+    CH_TIME("ParticleManagement::removePhysicalParticles(SoA)");
+
+    constexpr T zero = (T)0;
+
+    if (a_numPhysPartToRemove < zero) {
+      MayDay::Error("ParticleManagement::removePhysicalParticles(SoA) - 'a_numPhysPartoToRemove < 0'");
+    }
+
+    const std::size_t numComp = a_particles.size();
+
+    if (numComp > 0) {
+      T numRemoved = zero;
+
+      // 1. Compute the minimum particle weight.
+      T minWeight = std::numeric_limits<T>::max();
+      for (std::size_t i = 0; i < numComp; i++) {
+        minWeight = std::min(minWeight, (T)a_particles.weight(i));
+      }
+
+      // 2. Trim particle weights down to minWeight.
+      for (std::size_t i = 0; i < numComp; i++) {
+        const T diff1 = (T)a_particles.weight(i) - minWeight;
+        const T diff2 = a_numPhysPartToRemove - numRemoved;
+
+        CH_assert(diff1 >= zero);
+        CH_assert(diff2 >= zero);
+
+        const T r = std::max(0LL, std::min(diff1, diff2));
+
+        a_particles.weight(i) -= 1.0 * r;
+        numRemoved += r;
+      }
+
+      // 3. "Uniformly" subtract the particle weights.
+      if (a_numPhysPartToRemove - numRemoved > zero) {
+        const T numCompParticles = (T)numComp;
+        const T uniformWeight    = (a_numPhysPartToRemove - numRemoved) / numCompParticles;
+        const T uniformRemainder = (a_numPhysPartToRemove - numRemoved) % numCompParticles;
+
+        if (uniformWeight > zero) {
+          for (std::size_t i = 0; i < numComp; i++) {
+            a_particles.weight(i) -= 1.0 * uniformWeight;
+
+            numRemoved += uniformWeight;
+          }
+        }
+
+        if (uniformRemainder > zero) {
+          T W = 0;
+
+          for (std::size_t i = 0; i < numComp; i++) {
+
+            // Never remove so that weight is negative.
+            const T w = std::min((T)a_particles.weight(i), uniformRemainder - W);
+
+            a_particles.weight(i) -= 1.0 * w;
+
+            W += w;
+            numRemoved += w;
+
+            if (W == uniformRemainder) {
+              break;
+            }
+          }
+        }
+      }
+
+      CH_assert(numRemoved == a_numPhysPartToRemove);
+    }
+  }
+
   template <typename P>
   inline void
   deleteParticles(List<P>& a_particles, const Real a_weightThresh) noexcept
@@ -357,6 +432,24 @@ namespace ParticleManagement {
       }
       else {
         ++lit;
+      }
+    }
+  }
+
+  template <typename P, typename Traits>
+  inline void
+  deleteParticles(ParticleSoA<P, Traits>& a_particles, const Real a_weightThresh) noexcept
+  {
+    CH_TIME("ParticleManagement::deleteParticles(SoA)");
+
+    // Swap-and-pop: do not advance the index after a removal (a new particle now occupies slot i).
+    std::size_t i = 0;
+    while (i < a_particles.size()) {
+      if (a_particles.weight(i) < a_weightThresh) {
+        a_particles.remove(i);
+      }
+      else {
+        i++;
       }
     }
   }
@@ -509,6 +602,24 @@ namespace ParticleManagement {
                         const Real      a_radius) noexcept
   {
     CH_TIME("ParticleManagement::drawGaussianParticles");
+
+    std::normal_distribution<Real> gauss(0.0, a_radius);
+
+    auto ranGauss = [&]() -> RealVect {
+      return a_center + Random::get(gauss) * Random::getDirection();
+    };
+
+    drawRandomParticles(a_particles, a_numParticles, ranGauss);
+  }
+
+  template <typename P, typename Traits, typename T, typename>
+  inline void
+  drawGaussianParticles(ParticleSoA<P, Traits>& a_particles,
+                        const T                 a_numParticles,
+                        const RealVect&         a_center,
+                        const Real              a_radius) noexcept
+  {
+    CH_TIME("ParticleManagement::drawGaussianParticles(SoA)");
 
     std::normal_distribution<Real> gauss(0.0, a_radius);
 

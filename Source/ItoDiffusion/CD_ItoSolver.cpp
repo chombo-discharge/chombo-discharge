@@ -52,7 +52,7 @@ ItoSolver::ItoSolver()
   // Default settings
 
   // Default is to not merge particles
-  m_particleMerger = [](List<ItoSeedParticle>& a_particles, const CellInfo& a_cellInfo, const int a_ppc) {
+  m_particleMerger = [](ParticleSoA<ItoParticle>& a_particles, const CellInfo& a_cellInfo, const int a_ppc) {
 
   };
 }
@@ -87,7 +87,7 @@ ItoSolver::setRealm(const std::string& a_realm)
 }
 
 void
-ItoSolver::setParticleMerger(const ParticleManagement::ParticleMerger<ItoSeedParticle>& a_particleMerger) noexcept
+ItoSolver::setParticleMerger(const ParticleManagement::ParticleMerger<ItoParticle>& a_particleMerger) noexcept
 {
   CH_TIME("ItoSolver::setParticleMerger");
 
@@ -408,21 +408,21 @@ ItoSolver::parseParticleMerger()
 
   pp.get("merge_algorithm", str);
   if (str == "none") {
-    m_particleMerger = [](List<ItoSeedParticle>& a_particles, const CellInfo& a_cellInfo, const int a_ppc) {
+    m_particleMerger = [](ParticleSoA<ItoParticle>& a_particles, const CellInfo& a_cellInfo, const int a_ppc) {
     };
   }
   else if (str == "equal_weight_kd") {
-    m_particleMerger = [this](List<ItoSeedParticle>& a_particles, const CellInfo& a_cellInfo, const int a_ppc) {
+    m_particleMerger = [this](ParticleSoA<ItoParticle>& a_particles, const CellInfo& a_cellInfo, const int a_ppc) {
       this->makeSuperparticlesEqualWeightKD(a_particles, a_cellInfo, a_ppc);
     };
   }
   else if (str == "reinitialize") {
-    m_particleMerger = [this](List<ItoSeedParticle>& a_particles, const CellInfo& a_cellInfo, const int a_ppc) {
+    m_particleMerger = [this](ParticleSoA<ItoParticle>& a_particles, const CellInfo& a_cellInfo, const int a_ppc) {
       this->reinitializeParticles(a_particles, a_cellInfo, a_ppc);
     };
   }
   else if (str == "reinitialize_bvh") {
-    m_particleMerger = [this](List<ItoSeedParticle>& a_particles, const CellInfo& a_cellInfo, const int a_ppc) {
+    m_particleMerger = [this](ParticleSoA<ItoParticle>& a_particles, const CellInfo& a_cellInfo, const int a_ppc) {
       this->makeSuperparticlesBVHReinitialize(a_particles, a_cellInfo, a_ppc);
     };
   }
@@ -568,17 +568,12 @@ ItoSolver::initialData()
   ParticleContainerSoA<ItoParticle>& bulkParticles = m_particleContainers.at(WhichContainer::Bulk);
   bulkParticles.clearParticles();
 
-  // Convert the species' AoS seed particles (position + weight + energy) into an SoA buffer and ingest it.
-  // addParticlesDestructive() routes each particle to its owning patch/level/rank via remap().
-  const List<ItoSeedParticle>& seeds = m_species->getInitialParticles();
-
+  // Copy the species' SoA seed particles into a buffer and ingest it. addParticlesDestructive() routes
+  // each particle to its owning patch/level/rank via remap() and empties the buffer (so the species'
+  // m_initialParticles is left intact for restart).
   ParticleSoA<ItoParticle> buffer;
-  for (ListIterator<ItoSeedParticle> lit(seeds); lit.ok(); ++lit) {
-    ItoParticle payload;
-    payload.energy = lit().energy();
+  buffer.append(m_species->getInitialParticles());
 
-    buffer.append(lit().position(), lit().weight(), payload);
-  }
   bulkParticles.addParticlesDestructive(buffer);
 
   // Generate particles from the initial density distribution.
@@ -3288,24 +3283,22 @@ ItoSolver::makeSuperparticles(const WhichContainer a_container,
 
   CH_assert(leaf.numCells() == static_cast<std::size_t>(cellBox.numPts()));
 
-  // Accumulate the merged particles of every cell here, then swap them into the leaf.
+  // Accumulate the merged particles of every cell here, then swap them into the leaf. The per-cell
+  // scratch is a small SoA container reused across cells (extract -> merge in place -> accumulate).
   ParticleSoA<ItoParticle> merged;
+  ParticleSoA<ItoParticle> scratch;
 
   // BoxIterator visits cells in Fortran (x-fastest) order, matching sortByCell's CSR cell index.
   std::size_t cellIndex = 0;
   for (BoxIterator bit(cellBox); bit.ok(); ++bit, ++cellIndex) {
     const IntVect iv = bit();
 
-    const std::pair<std::size_t, std::size_t> range = leaf.cellRange(cellIndex);
+    // Extract this cell's particles into the SoA scratch (all columns preserved; the merger uses
+    // weight/position/energy).
+    leaf.extractCell(cellIndex, scratch);
 
-    if (range.second == range.first) {
+    if (scratch.size() == 0) {
       continue;
-    }
-
-    // Extract this cell's particles into an AoS seed scratch list (weight, position, energy).
-    List<ItoSeedParticle> scratch;
-    for (std::size_t i = range.first; i < range.second; i++) {
-      scratch.add(ItoSeedParticle(leaf.weight(i), leaf.position(i), leaf.get<&ItoParticle::energy>(i)));
     }
 
     // Merge in this cell using the configured strategy.
@@ -3324,12 +3317,7 @@ ItoSolver::makeSuperparticles(const WhichContainer a_container,
     // Covered cells should not contain particles; if they do, they pass through unchanged.
 
     // Collect the merged particles.
-    for (ListIterator<ItoSeedParticle> lit(scratch); lit.ok(); ++lit) {
-      ItoParticle payload;
-      payload.energy = lit().energy();
-
-      merged.append(lit().position(), lit().weight(), payload);
-    }
+    merged.append(scratch);
   }
 
   // Replace the leaf contents with the merged particles.
@@ -3337,9 +3325,9 @@ ItoSolver::makeSuperparticles(const WhichContainer a_container,
 }
 
 void
-ItoSolver::mergeParticles(List<ItoSeedParticle>& a_particles,
-                          const CellInfo&        a_cellInfo,
-                          const int              a_ppc) const noexcept
+ItoSolver::mergeParticles(ParticleSoA<ItoParticle>& a_particles,
+                          const CellInfo&           a_cellInfo,
+                          const int                 a_ppc) const noexcept
 {
   CH_TIMERS("ItoSolver::mergeParticles");
 
@@ -3347,7 +3335,7 @@ ItoSolver::mergeParticles(List<ItoSeedParticle>& a_particles,
 }
 
 void
-ItoSolver::makeSuperparticlesEqualWeightKD(List<ItoSeedParticle>& a_particles,
+ItoSolver::makeSuperparticlesEqualWeightKD(ParticleSoA<ItoParticle>& a_particles,
                                            const CellInfo& /*a_cellInfo*/,
                                            const int a_ppc) const noexcept
 {
@@ -3366,14 +3354,14 @@ ItoSolver::makeSuperparticlesEqualWeightKD(List<ItoSeedParticle>& a_particles,
   CH_START(t1);
   Real         W = 0.0;
   ParticleList particles;
-  for (ListIterator<ItoSeedParticle> lit(a_particles); lit.ok(); ++lit) {
+  for (std::size_t i = 0; i < a_particles.size(); i++) {
     PType p;
 
-    p.template real<0>() = lit().weight();
-    p.template real<1>() = lit().energy();
-    p.template vect<0>() = lit().position();
+    p.template real<0>() = a_particles.weight(i);
+    p.template real<1>() = a_particles.template get<&ItoParticle::energy>(i);
+    p.template vect<0>() = a_particles.position(i);
 
-    W += lit().weight();
+    W += a_particles.weight(i);
 
     particles.emplace_back(p);
   }
@@ -3417,15 +3405,17 @@ ItoSolver::makeSuperparticlesEqualWeightKD(List<ItoSeedParticle>& a_particles,
     x *= 1. / w;
     e *= 1. / w;
 
-    a_particles.add(ItoSeedParticle(w, x, e));
+    ItoParticle payload;
+    payload.energy = static_cast<ParticleReal>(e);
+    a_particles.append(x, w, payload);
   }
   CH_STOP(t3);
 }
 
 void
-ItoSolver::makeSuperparticlesBVHReinitialize(List<ItoSeedParticle>& a_particles,
-                                             const CellInfo&        a_cellInfo,
-                                             const int              a_ppc) const noexcept
+ItoSolver::makeSuperparticlesBVHReinitialize(ParticleSoA<ItoParticle>& a_particles,
+                                             const CellInfo&           a_cellInfo,
+                                             const int                 a_ppc) const noexcept
 {
   CH_TIMERS("ItoSolver::makeSuperparticlesBVHReinitialize");
   CH_TIMER("ItoSolver::makeSuperparticlesBVHReinitialize::populate_list", t1);
@@ -3442,14 +3432,14 @@ ItoSolver::makeSuperparticlesBVHReinitialize(List<ItoSeedParticle>& a_particles,
   CH_START(t1);
   Real         W = 0.0;
   ParticleList particles;
-  for (ListIterator<ItoSeedParticle> lit(a_particles); lit.ok(); ++lit) {
+  for (std::size_t i = 0; i < a_particles.size(); i++) {
     PType p;
 
-    p.template real<0>() = lit().weight();
-    p.template real<1>() = lit().energy();
-    p.template vect<0>() = lit().position();
+    p.template real<0>() = a_particles.weight(i);
+    p.template real<1>() = a_particles.template get<&ItoParticle::energy>(i);
+    p.template vect<0>() = a_particles.position(i);
 
-    W += lit().weight();
+    W += a_particles.weight(i);
 
     particles.emplace_back(p);
   }
@@ -3494,7 +3484,9 @@ ItoSolver::makeSuperparticlesBVHReinitialize(List<ItoSeedParticle>& a_particles,
       x *= 1. / w;
       e *= 1. / w;
 
-      a_particles.add(ItoSeedParticle(w, x, e));
+      ItoParticle payload;
+      payload.energy = static_cast<ParticleReal>(e);
+      a_particles.append(x, w, payload);
     }
   }
   else {
@@ -3526,16 +3518,18 @@ ItoSolver::makeSuperparticlesBVHReinitialize(List<ItoSeedParticle>& a_particles,
         x[dir] = xMin[dir] + r * (xMax[dir] - xMin[dir]);
       }
 
-      a_particles.add(ItoSeedParticle(w, x, e));
+      ItoParticle payload;
+      payload.energy = static_cast<ParticleReal>(e);
+      a_particles.append(x, w, payload);
     }
   }
   CH_STOP(t3);
 }
 
 void
-ItoSolver::reinitializeParticles(List<ItoSeedParticle>& a_particles,
-                                 const CellInfo&        a_cellInfo,
-                                 const int              a_ppc) const noexcept
+ItoSolver::reinitializeParticles(ParticleSoA<ItoParticle>& a_particles,
+                                 const CellInfo&           a_cellInfo,
+                                 const int                 a_ppc) const noexcept
 {
   CH_TIME("ItoSolver::reinitializeParticles");
 
@@ -3543,10 +3537,9 @@ ItoSolver::reinitializeParticles(List<ItoSeedParticle>& a_particles,
   // with weights as equal as possible. Average energy becomes true average energy (same for all particles).
   long long numPhysicalParticles = 0LL;
   Real      averageEnergy        = 0.0;
-  for (ListIterator<ItoSeedParticle> lit(a_particles); lit.ok(); ++lit) {
-    const ItoSeedParticle& p = lit();
-    const Real             w = p.weight();
-    const Real             e = p.energy();
+  for (std::size_t i = 0; i < a_particles.size(); i++) {
+    const Real w = a_particles.weight(i);
+    const Real e = a_particles.template get<&ItoParticle::energy>(i);
 
     numPhysicalParticles += (long long)w;
     averageEnergy += w * e;
@@ -3575,7 +3568,9 @@ ItoSolver::reinitializeParticles(List<ItoSeedParticle>& a_particles,
     const auto     w = static_cast<double>(wt);
     const RealVect x = Random::randomPosition(cellPos, validLo, validHi, bndryCentroid, bndryNormal, dx, kappa);
 
-    a_particles.add(ItoSeedParticle(w, x, averageEnergy));
+    ItoParticle payload;
+    payload.energy = static_cast<ParticleReal>(averageEnergy);
+    a_particles.append(x, w, payload);
   }
 }
 

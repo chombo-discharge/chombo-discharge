@@ -19,7 +19,6 @@
 
 // Our includes
 #include <CD_ParticleSoA.H>
-#include <CD_GenericParticle.H>
 #include <CD_NamespaceHeader.H>
 
 /**
@@ -72,81 +71,6 @@ struct ParticleTraits<ItoParticle>
 
   static constexpr auto h5Columns = std::make_tuple(
     D_DECL(&ItoParticle::velocityX, &ItoParticle::velocityY, &ItoParticle::velocityZ));
-};
-
-/**
-  @brief Lightweight AoS particle carrying position, weight, and energy.
-  @details Bridge type used where particles must own their own position+weight in AoS form, which the SoA
-  ItoParticle payload (position/weight are container-owned) cannot: species initial particles and the
-  per-cell superparticle-merge scratch. real<0> is the weight, real<1> is the energy; the position is the
-  GenericParticle base position. Velocity/mobility/diffusion are intentionally absent -- they are
-  recomputed (interpolated) after seeding/merging.
-*/
-class ItoSeedParticle : public GenericParticle<2, 0>
-{
-public:
-  /**
-    @brief Default constructor (zero weight/energy, zero position).
-  */
-  ItoSeedParticle() = default;
-
-  /**
-    @brief Full constructor.
-    @param[in] a_weight   Particle weight.
-    @param[in] a_position Particle position.
-    @param[in] a_energy   Particle energy.
-  */
-  ItoSeedParticle(const Real a_weight, const RealVect& a_position, const Real a_energy)
-  {
-    this->position() = a_position;
-    this->real<0>()  = a_weight;
-    this->real<1>()  = a_energy;
-  }
-
-  /**
-    @brief Destructor.
-  */
-  virtual ~ItoSeedParticle() = default;
-
-  /**
-    @brief Get the particle weight.
-    @return Reference to the weight.
-  */
-  Real&
-  weight()
-  {
-    return this->real<0>();
-  }
-
-  /**
-    @brief Get the particle weight.
-    @return Const reference to the weight.
-  */
-  const Real&
-  weight() const
-  {
-    return this->real<0>();
-  }
-
-  /**
-    @brief Get the particle energy.
-    @return Reference to the energy.
-  */
-  Real&
-  energy()
-  {
-    return this->real<1>();
-  }
-
-  /**
-    @brief Get the particle energy.
-    @return Const reference to the energy.
-  */
-  const Real&
-  energy() const
-  {
-    return this->real<1>();
-  }
 };
 
 #include <CD_NamespaceFooter.H>
