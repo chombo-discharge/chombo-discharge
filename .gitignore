@@ -60,3 +60,6 @@ Docs/**/*.dat
 
 # Local-only SoA particle staging area (kept locally; untracked)
 Dev/
+
+# Serena tooling (local; not project code)
+.serena/
