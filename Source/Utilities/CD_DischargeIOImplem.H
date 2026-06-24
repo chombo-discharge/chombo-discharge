@@ -299,6 +299,230 @@ DischargeIO::writeH5Part(const std::string                               a_filen
 #endif
 }
 
+template <typename P, typename Traits>
+void
+DischargeIO::writeH5Part(std::string                                                  a_filename,
+                         const ParticleContainerSoA<P, Traits>&                       a_particles,
+                         std::vector<std::pair<std::string, H5PartScalar<P, Traits>>> a_scalarVars,
+                         std::vector<std::pair<std::string, H5PartVect<P, Traits>>>   a_vectorVars,
+                         RealVect                                                     a_shift,
+                         Real                                                         a_time) noexcept
+{
+#ifdef CH_USE_HDF5
+  CH_TIME("DischargeIO::writeH5Part(SoA)");
+
+  // Figure out the number of particles on each rank
+  const unsigned long long numParticlesLocal  = a_particles.getNumberOfValidParticlesLocal();
+  const unsigned long long numParticlesGlobal = a_particles.getNumberOfValidParticlesGlobal();
+
+  std::vector<unsigned long long> particlesPerRank;
+#ifdef CH_MPI
+  particlesPerRank.resize(numProc(), 0ULL);
+
+  std::vector<int> recv(numProc(), 1);
+  std::vector<int> displ(numProc(), 0);
+  for (int i = 0; i < numProc(); i++) {
+    displ[i] = i;
+  }
+  MPI_Allgatherv(&numParticlesLocal,
+                 1,
+                 MPI_UNSIGNED_LONG_LONG,
+                 &particlesPerRank[0],
+                 &recv[0],
+                 &displ[0],
+                 MPI_UNSIGNED_LONG_LONG,
+                 Chombo_MPI::comm);
+#else
+  particlesPerRank.resize(1);
+  particlesPerRank[0] = numParticlesGlobal;
+#endif
+
+  // Set up file access and create the file.
+  hid_t fileAccess = 0;
+#ifdef CH_MPI
+  fileAccess = H5Pcreate(H5P_FILE_ACCESS);
+  H5Pset_fapl_mpio(fileAccess, Chombo_MPI::comm, MPI_INFO_NULL);
+#endif
+
+  hid_t fileID = H5Fcreate(a_filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, fileAccess);
+#ifdef CH_MPI
+  H5Pclose(fileAccess);
+#endif
+
+  // Define the top group necessary for the H5Part file format
+  hid_t grp = H5Gcreate2(fileID, "Step#0", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+  // Write the time attribute
+  hid_t scal     = H5Screate(H5S_SCALAR);
+  hid_t timeAttr = H5Acreate(grp, "time", H5T_NATIVE_DOUBLE, scal, H5P_DEFAULT, H5P_DEFAULT);
+  H5Awrite(timeAttr, H5T_NATIVE_DOUBLE, &a_time);
+  H5Aclose(timeAttr);
+
+  H5Sclose(scal);
+
+  // Define dataspace dimensions.
+  hsize_t dims[1];
+  dims[0] = numParticlesGlobal;
+
+  hid_t fileSpaceID = H5Screate_simple(1, dims, nullptr);
+
+  // Memory space
+  hsize_t memDims[1];
+  memDims[0]       = numParticlesLocal;
+  hid_t memSpaceID = H5Screate_simple(1, memDims, nullptr);
+
+  // Set hyperslabs for file and memory
+  hsize_t fileStart[1];
+  hsize_t fileCount[1];
+
+  hsize_t memStart[1];
+  hsize_t memCount[1];
+
+  memStart[0]  = 0;
+  fileStart[0] = 0;
+  for (int i = 0; i < procID(); i++) {
+    fileStart[0] += particlesPerRank[i];
+  }
+  fileCount[0] = particlesPerRank[procID()];
+  memCount[0]  = particlesPerRank[procID()];
+
+  H5Sselect_hyperslab(fileSpaceID, H5S_SELECT_SET, fileStart, nullptr, fileCount, nullptr);
+  H5Sselect_hyperslab(memSpaceID, H5S_SELECT_SET, memStart, nullptr, memCount, nullptr);
+
+  // Create the ID and positional data sets
+  hid_t datasetID = H5Dcreate2(grp, "id", H5T_NATIVE_LLONG, fileSpaceID, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  hid_t datasetX  = H5Dcreate2(grp, "x", H5T_NATIVE_DOUBLE, fileSpaceID, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  hid_t datasetY  = H5Dcreate2(grp, "y", H5T_NATIVE_DOUBLE, fileSpaceID, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+#if CH_SPACEDIM == 3
+  hid_t datasetZ = H5Dcreate2(grp, "z", H5T_NATIVE_DOUBLE, fileSpaceID, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+#endif
+
+  std::vector<long long> id;
+  std::vector<double>    x;
+  std::vector<double>    y;
+  std::vector<double>    z;
+
+  for (int lvl = 0; lvl <= a_particles.getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl = a_particles.getGrids()[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
+
+    const int nbox = dit.size();
+
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const ParticleSoA<P, Traits>& leaf = a_particles[lvl][din];
+
+      for (std::size_t i = 0; i < leaf.size(); i++) {
+        const RealVect pos = leaf.position(i);
+
+        id.push_back(static_cast<long long>(leaf.particleID(i)));
+        x.push_back(pos[0] - a_shift[0]);
+        y.push_back(pos[1] - a_shift[1]);
+#if CH_SPACEDIM == 3
+        z.push_back(pos[2] - a_shift[2]);
+#endif
+      }
+    }
+  }
+
+  H5Dwrite(datasetID, H5Dget_type(datasetID), memSpaceID, fileSpaceID, H5P_DEFAULT, id.data());
+  H5Dwrite(datasetX, H5Dget_type(datasetX), memSpaceID, fileSpaceID, H5P_DEFAULT, x.data());
+  H5Dwrite(datasetY, H5Dget_type(datasetY), memSpaceID, fileSpaceID, H5P_DEFAULT, y.data());
+#if CH_SPACEDIM == 3
+  H5Dwrite(datasetZ, H5Dget_type(datasetZ), memSpaceID, fileSpaceID, H5P_DEFAULT, z.data());
+#endif
+
+  H5Dclose(datasetID);
+  H5Dclose(datasetX);
+  H5Dclose(datasetY);
+#if CH_SPACEDIM == 3
+  H5Dclose(datasetZ);
+#endif
+
+  // Write the scalar payload datasets (caller-named; e.g. weight + payload scalar columns).
+  for (const auto& var : a_scalarVars) {
+    hid_t dataset = H5Dcreate2(grp,
+                               var.first.c_str(),
+                               H5T_NATIVE_DOUBLE,
+                               fileSpaceID,
+                               H5P_DEFAULT,
+                               H5P_DEFAULT,
+                               H5P_DEFAULT);
+
+    std::vector<double> ds;
+
+    for (int lvl = 0; lvl <= a_particles.getFinestLevel(); lvl++) {
+      const DisjointBoxLayout& dbl = a_particles.getGrids()[lvl];
+      const DataIterator&      dit = dbl.dataIterator();
+
+      const int nbox = dit.size();
+
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex&              din  = dit[mybox];
+        const ParticleSoA<P, Traits>& leaf = a_particles[lvl][din];
+
+        for (std::size_t i = 0; i < leaf.size(); i++) {
+          ds.push_back(var.second(leaf, i));
+        }
+      }
+    }
+
+    H5Dwrite(dataset, H5Dget_type(dataset), memSpaceID, fileSpaceID, H5P_DEFAULT, ds.data());
+    H5Dclose(dataset);
+  }
+
+  // Write the vector payload datasets as name-x/name-y/name-z.
+  for (const auto& var : a_vectorVars) {
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      std::string varName = var.first;
+      if (dir == 0) {
+        varName += "-x";
+      }
+      else if (dir == 1) {
+        varName += "-y";
+      }
+      else if (dir == 2) {
+        varName += "-z";
+      }
+
+      hid_t dataset = H5Dcreate2(grp,
+                                 varName.c_str(),
+                                 H5T_NATIVE_DOUBLE,
+                                 fileSpaceID,
+                                 H5P_DEFAULT,
+                                 H5P_DEFAULT,
+                                 H5P_DEFAULT);
+
+      std::vector<double> ds;
+
+      for (int lvl = 0; lvl <= a_particles.getFinestLevel(); lvl++) {
+        const DisjointBoxLayout& dbl = a_particles.getGrids()[lvl];
+        const DataIterator&      dit = dbl.dataIterator();
+
+        const int nbox = dit.size();
+
+        for (int mybox = 0; mybox < nbox; mybox++) {
+          const DataIndex&              din  = dit[mybox];
+          const ParticleSoA<P, Traits>& leaf = a_particles[lvl][din];
+
+          for (std::size_t i = 0; i < leaf.size(); i++) {
+            ds.push_back(var.second(leaf, i)[dir]);
+          }
+        }
+      }
+
+      H5Dwrite(dataset, H5Dget_type(dataset), memSpaceID, fileSpaceID, H5P_DEFAULT, ds.data());
+      H5Dclose(dataset);
+    }
+  }
+
+  // Close top group and file
+  H5Gclose(grp);
+  H5Fclose(fileID);
+#endif
+}
+
 #ifdef CH_USE_HDF5
 template <class P>
 void

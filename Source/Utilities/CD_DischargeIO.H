@@ -15,6 +15,9 @@
 
 // Std includes
 #include <string>
+#include <vector>
+#include <utility>
+#include <functional>
 
 // Chombo includes
 #include <REAL.H>
@@ -31,6 +34,7 @@
 #include <CD_EBAMRData.H>
 #include <CD_ParticleContainer.H>
 #include <CD_ParticleSoA.H>
+#include <CD_ParticleContainerSoA.H>
 #include <CD_GenericParticle.H>
 #include <CD_NamespaceHeader.H>
 
@@ -161,6 +165,47 @@ namespace DischargeIO {
               std::vector<std::string>                        a_vectVars,
               RealVect                                        a_shift,
               Real                                            a_time) noexcept;
+
+  /**
+    @brief Accessor returning a scalar payload quantity of SoA particle (a_leaf, a_index) for writeH5Part.
+    @tparam P      Payload type of the container.
+    @tparam Traits Column descriptor for the payload.
+  */
+  template <typename P, typename Traits>
+  using H5PartScalar = std::function<Real(const ParticleSoA<P, Traits>&, std::size_t)>;
+
+  /**
+    @brief Accessor returning a vector payload quantity of SoA particle (a_leaf, a_index) for writeH5Part.
+    @tparam P      Payload type of the container.
+    @tparam Traits Column descriptor for the payload.
+  */
+  template <typename P, typename Traits>
+  using H5PartVect = std::function<RealVect(const ParticleSoA<P, Traits>&, std::size_t)>;
+
+  /**
+    @brief Write an SoA particle container to an H5Part file (quick visualization).
+    @details SoA analogue of the GenericParticle writeH5Part. Position, id, and weight are taken from the
+    container-owned columns; the caller supplies the payload datasets as (name, accessor) pairs so the
+    scalar-vs-vector distinction and naming are explicit (the SoA columns tuple interleaves scalar and
+    vector-component columns, so there is no implicit reals/vects partition to rely on). Each vector
+    dataset is written as name-x/name-y/name-z.
+    @param[in] a_filename    File name.
+    @param[in] a_particles   SoA particle container.
+    @param[in] a_scalarVars  Scalar datasets: (name, accessor) pairs.
+    @param[in] a_vectorVars  Vector datasets: (name, accessor) pairs.
+    @param[in] a_shift       Particle position shift.
+    @param[in] a_time        Physical time.
+    @tparam P      Payload type of the container.
+    @tparam Traits Column descriptor for the payload.
+  */
+  template <typename P, typename Traits>
+  void
+  writeH5Part(std::string                                                  a_filename,
+              const ParticleContainerSoA<P, Traits>&                       a_particles,
+              std::vector<std::pair<std::string, H5PartScalar<P, Traits>>> a_scalarVars,
+              std::vector<std::pair<std::string, H5PartVect<P, Traits>>>   a_vectorVars,
+              RealVect                                                     a_shift,
+              Real                                                         a_time) noexcept;
 
 #ifdef CH_USE_HDF5
   /**
