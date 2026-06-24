@@ -18,7 +18,7 @@
 #include <CD_ComputationalGeometry.H>
 #include <CD_ItoSpecies.H>
 #include <CD_ItoParticle.H>
-#include <CD_ParticleContainerSoA.H>
+#include <CD_ParticleContainer.H>
 #include <CD_EBRepresentation.H>
 #include <CD_EBIntersection.H>
 #include <CD_CellInfo.H>
@@ -149,7 +149,7 @@ public:
     @param[in] a_maxParticlesPerCell Maximum number of computational particles generated per cell. 
   */
   virtual void
-  generateParticlesFromDensity(ParticleContainerSoA<ItoParticle>&           a_particles,
+  generateParticlesFromDensity(ParticleContainer<ItoParticle>&              a_particles,
                                const std::function<Real(const RealVect x)>& a_densityFunc,
                                int                                          a_maxParticlesPerCell) const noexcept;
 
@@ -182,7 +182,7 @@ public:
     @param[in] a_particles Particle container to be emptied. 
   */
   virtual void
-  clear(ParticleContainerSoA<ItoParticle>& a_particles) const;
+  clear(ParticleContainer<ItoParticle>& a_particles) const;
 
   /**
     @brief Deposit conductivities (i.e. mass*mobility / volume)
@@ -191,7 +191,7 @@ public:
     @param[in]  a_particles Particle data
   */
   virtual void
-  depositConductivity(EBAMRCellData& a_phi, ParticleContainerSoA<ItoParticle>& a_particles) const;
+  depositConductivity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles) const;
 
   /**
     @brief Deposit conductivities (i.e. mass*mobility / volume)
@@ -202,10 +202,10 @@ public:
     @param[in]  a_coarseFineDeposition Coarse-fine deposition method. 
   */
   virtual void
-  depositConductivity(EBAMRCellData&                     a_phi,
-                      ParticleContainerSoA<ItoParticle>& a_particles,
-                      DepositionType                     a_deposition,
-                      CoarseFineDeposition               a_coarseFineDeposition) const;
+  depositConductivity(EBAMRCellData&                  a_phi,
+                      ParticleContainer<ItoParticle>& a_particles,
+                      DepositionType                  a_deposition,
+                      CoarseFineDeposition            a_coarseFineDeposition) const;
 
   /**
     @brief Deposit diffusivity (i.e. mass*D/volume)
@@ -215,7 +215,7 @@ public:
     @note Calls the other versions with a_deposition = m_deposition
   */
   virtual void
-  depositDiffusivity(EBAMRCellData& a_phi, ParticleContainerSoA<ItoParticle>& a_particles) const;
+  depositDiffusivity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles) const;
 
   /**
     @brief Deposit diffusivity (i.e. mass*D/volume)
@@ -226,10 +226,10 @@ public:
     @param[in]  a_coarseFineDeposition Coarse-fine deposition method. 
   */
   virtual void
-  depositDiffusivity(EBAMRCellData&                     a_phi,
-                     ParticleContainerSoA<ItoParticle>& a_particles,
-                     DepositionType                     a_deposition,
-                     CoarseFineDeposition               a_coarseFineDeposition) const;
+  depositDiffusivity(EBAMRCellData&                  a_phi,
+                     ParticleContainer<ItoParticle>& a_particles,
+                     DepositionType                  a_deposition,
+                     CoarseFineDeposition            a_coarseFineDeposition) const;
 
   /**
     @brief Deposit energy densities (i.e. mass*energy/volume => total energy per unit volume)
@@ -239,7 +239,7 @@ public:
     @note Calls the other versions with a_deposition = m_deposition
   */
   virtual void
-  depositEnergyDensity(EBAMRCellData& a_phi, ParticleContainerSoA<ItoParticle>& a_particles) const;
+  depositEnergyDensity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles) const;
 
   /**
     @brief Deposit energy densities (i.e. mass*energy/volume => total energy per unit volume)
@@ -250,10 +250,10 @@ public:
     @param[in]  a_coarseFineDeposition Coarse-fine deposition method. 
   */
   virtual void
-  depositEnergyDensity(EBAMRCellData&                     a_phi,
-                       ParticleContainerSoA<ItoParticle>& a_particles,
-                       DepositionType                     a_deposition,
-                       CoarseFineDeposition               a_coarseFineDeposition) const;
+  depositEnergyDensity(EBAMRCellData&                  a_phi,
+                       ParticleContainer<ItoParticle>& a_particles,
+                       DepositionType                  a_deposition,
+                       CoarseFineDeposition            a_coarseFineDeposition) const;
 
   /**
     @brief Compute average mobility. 
@@ -262,7 +262,7 @@ public:
     @param[in]  a_particles Particle data
   */
   virtual void
-  computeAverageMobility(EBAMRCellData& a_phi, ParticleContainerSoA<ItoParticle>& a_particles) const;
+  computeAverageMobility(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles) const;
 
   /**
     @brief Compute average diffusion coefficient. 
@@ -271,7 +271,7 @@ public:
     @param[in]  a_particles Particle data
   */
   virtual void
-  computeAverageDiffusion(EBAMRCellData& a_phi, ParticleContainerSoA<ItoParticle>& a_particles) const;
+  computeAverageDiffusion(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles) const;
 
   /**
     @brief Compute average particle energy.. 
@@ -280,7 +280,7 @@ public:
     @param[in]  a_particles Particle data
   */
   virtual void
-  computeAverageEnergy(EBAMRCellData& a_phi, ParticleContainerSoA<ItoParticle>& a_particles) const;
+  computeAverageEnergy(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles) const;
 
   /**
     @brief Deposit particles onto mesh. 
@@ -306,9 +306,9 @@ public:
     @param[in]  a_level     Grid level.
   */
   void
-  depositWeightNGP(LevelData<EBCellFAB>&                    a_output,
-                   const ParticleContainerSoA<ItoParticle>& a_particles,
-                   int                                      a_level) const noexcept;
+  depositWeightNGP(LevelData<EBCellFAB>&                 a_output,
+                   const ParticleContainer<ItoParticle>& a_particles,
+                   int                                   a_level) const noexcept;
 
   /**
     @brief Do an NGP deposit of a gathered per-particle quantity on a specific grid level. Used for IO.
@@ -320,10 +320,10 @@ public:
   */
   template <typename Gather>
   void
-  depositGatheredNGP(LevelData<EBCellFAB>&                    a_output,
-                     const ParticleContainerSoA<ItoParticle>& a_particles,
-                     int                                      a_level,
-                     Gather                                   a_gather) const noexcept;
+  depositGatheredNGP(LevelData<EBCellFAB>&                 a_output,
+                     const ParticleContainer<ItoParticle>& a_particles,
+                     int                                   a_level,
+                     Gather                                a_gather) const noexcept;
 
   /**
     @brief Deposit the SoA weight column on the mesh (full pipeline: kappa-conservative + redistribution).
@@ -333,10 +333,10 @@ public:
     @param[in]  a_coarseFineDeposition Coarse-fine deposition strategy.
   */
   void
-  depositWeight(EBAMRCellData&                           a_phi,
-                const ParticleContainerSoA<ItoParticle>& a_particles,
-                DepositionType                           a_deposition,
-                CoarseFineDeposition                     a_coarseFineDeposition) const;
+  depositWeight(EBAMRCellData&                        a_phi,
+                const ParticleContainer<ItoParticle>& a_particles,
+                DepositionType                        a_deposition,
+                CoarseFineDeposition                  a_coarseFineDeposition) const;
 
   /**
     @brief Deposit a gathered per-particle quantity on the mesh (full pipeline: kappa-conservative + redistribution).
@@ -349,11 +349,11 @@ public:
   */
   template <typename Gather>
   void
-  depositGathered(EBAMRCellData&                           a_phi,
-                  const ParticleContainerSoA<ItoParticle>& a_particles,
-                  DepositionType                           a_deposition,
-                  CoarseFineDeposition                     a_coarseFineDeposition,
-                  Gather                                   a_gather) const;
+  depositGathered(EBAMRCellData&                        a_phi,
+                  const ParticleContainer<ItoParticle>& a_particles,
+                  DepositionType                        a_deposition,
+                  CoarseFineDeposition                  a_coarseFineDeposition,
+                  Gather                                a_gather) const;
 
   /**
     @brief Remove particles that are inside the EB. 
@@ -381,9 +381,9 @@ public:
     @param[in] a_representation Representation
   */
   virtual void
-  removeCoveredParticles(ParticleContainerSoA<ItoParticle>& a_particles,
-                         EBRepresentation                   a_representation,
-                         Real                               a_tol) const;
+  removeCoveredParticles(ParticleContainer<ItoParticle>& a_particles,
+                         EBRepresentation                a_representation,
+                         Real                            a_tol) const;
 
   /**
     @brief Transfer particles that are covered (within a_tol distance from EB) to another container. 
@@ -415,10 +415,10 @@ public:
     @param[in] a_representation Representation
   */
   virtual void
-  transferCoveredParticles(ParticleContainerSoA<ItoParticle>& a_particlesFrom,
-                           ParticleContainerSoA<ItoParticle>& a_particlesTo,
-                           EBRepresentation                   a_representation,
-                           Real                               a_tol) const;
+  transferCoveredParticles(ParticleContainer<ItoParticle>& a_particlesFrom,
+                           ParticleContainer<ItoParticle>& a_particlesTo,
+                           EBRepresentation                a_representation,
+                           Real                            a_tol) const;
 
   /**
     @brief Do boundary intersection tests.
@@ -475,9 +475,9 @@ public:
   */
   virtual void
   intersectParticles(
-    ParticleContainerSoA<ItoParticle>&                                 a_particles,
-    ParticleContainerSoA<ItoParticle>&                                 a_ebParticles,
-    ParticleContainerSoA<ItoParticle>&                                 a_domainParticles,
+    ParticleContainer<ItoParticle>&                                    a_particles,
+    ParticleContainer<ItoParticle>&                                    a_ebParticles,
+    ParticleContainer<ItoParticle>&                                    a_domainParticles,
     const EBIntersection                                               a_ebIntersection,
     const bool                                                         a_deleteParticles,
     const std::function<void(ParticleSoA<ItoParticle>&, std::size_t)>& a_nonDeletionModifier =
@@ -634,7 +634,7 @@ public:
     @param[in] a_container Which container to fetch.
     @return Particles
   */
-  virtual ParticleContainerSoA<ItoParticle>&
+  virtual ParticleContainer<ItoParticle>&
   getParticles(WhichContainer a_container);
 
   /**
@@ -642,7 +642,7 @@ public:
     @param[in] a_container Which container to fetch.
     @return Particles
   */
-  virtual const ParticleContainerSoA<ItoParticle>&
+  virtual const ParticleContainer<ItoParticle>&
   getParticles(WhichContainer a_container) const;
 
   /**
@@ -1307,7 +1307,7 @@ protected:
   /**
     @brief Various particle containers with identifiers. 
   */
-  std::map<WhichContainer, ParticleContainerSoA<ItoParticle>> m_particleContainers;
+  std::map<WhichContainer, ParticleContainer<ItoParticle>> m_particleContainers;
 
   /**
     @brief Algorithm for EB intersection

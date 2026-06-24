@@ -235,22 +235,22 @@ AmrMesh::alias(Vector<T*>& a_alias, const EBAMRData<S>& a_data) const
 
 template <typename P, typename Traits>
 void
-AmrMesh::allocate(ParticleContainerSoA<P, Traits>& a_container, const std::string& a_realm) const
+AmrMesh::allocate(ParticleContainer<P, Traits>& a_container, const std::string& a_realm) const
 {
-  CH_TIME("AmrMesh::allocate(ParticleContainerSoA<P, Traits>, string)");
+  CH_TIME("AmrMesh::allocate(ParticleContainer<P, Traits>, string)");
   if (m_verbosity > 5) {
-    pout() << "AmrMesh::allocate(ParticleContainerSoA<P, Traits>, string)" << endl;
+    pout() << "AmrMesh::allocate(ParticleContainer<P, Traits>, string)" << endl;
   }
 
   if (!this->queryRealm(a_realm)) {
-    const std::string str = "AmrMesh::allocate(ParticleContainerSoA<P, Traits>, string) - could not find Realm '" +
+    const std::string str = "AmrMesh::allocate(ParticleContainer<P, Traits>, string) - could not find Realm '" +
                             a_realm + "'";
     MayDay::Abort(str.c_str());
   }
 
   if (m_maxBoxSize != m_blockingFactor) {
     MayDay::Abort(
-      "AmrMesh::allocate(ParticleContainerSoA<P, Traits>, string) - only constant box sizes are supported for particle methods");
+      "AmrMesh::allocate(ParticleContainer<P, Traits>, string) - only constant box sizes are supported for particle methods");
   }
 
   a_container.define(m_realms[a_realm]->getGrids(),
@@ -324,16 +324,16 @@ AmrMesh::allocatePointer(EBAMRData<T>& a_data, const std::string& a_realm, const
 
 template <typename P, typename Traits>
 void
-AmrMesh::remapToNewGrids(ParticleContainerSoA<P, Traits>& a_particles,
-                         const int                        a_lmin,
-                         const int                        a_newFinestLevel) const noexcept
+AmrMesh::remapToNewGrids(ParticleContainer<P, Traits>& a_particles,
+                         const int                     a_lmin,
+                         const int                     a_newFinestLevel) const noexcept
 {
-  CH_TIME("AmrMesh::remapToNewGrids(ParticleContainerSoA)");
+  CH_TIME("AmrMesh::remapToNewGrids(ParticleContainer)");
   if (m_verbosity > 5) {
-    pout() << "AmrMesh::remapToNewGrids(ParticleContainerSoA)" << endl;
+    pout() << "AmrMesh::remapToNewGrids(ParticleContainer)" << endl;
   }
 
-  (void)a_lmin; // ParticleContainerSoA::regrid redistributes from the preRegrid cache; no lmin needed.
+  (void)a_lmin; // ParticleContainer::regrid redistributes from the preRegrid cache; no lmin needed.
 
   const std::string realm = a_particles.getRealm();
 
@@ -347,10 +347,10 @@ AmrMesh::remapToNewGrids(ParticleContainerSoA<P, Traits>& a_particles,
 
 template <typename P, typename Traits>
 void
-AmrMesh::depositParticles(EBAMRIVData&                           a_meshData,
-                          const std::string&                     a_realm,
-                          const phase::which_phase&              a_phase,
-                          const ParticleContainerSoA<P, Traits>& a_particles) const noexcept
+AmrMesh::depositParticles(EBAMRIVData&                        a_meshData,
+                          const std::string&                  a_realm,
+                          const phase::which_phase&           a_phase,
+                          const ParticleContainer<P, Traits>& a_particles) const noexcept
 {
   CH_TIME("AmrMesh::depositParticles(surface, SoA)");
   if (m_verbosity > 5) {
@@ -367,41 +367,41 @@ AmrMesh::depositParticles(EBAMRIVData&                           a_meshData,
 
 template <typename P, typename Traits>
 void
-AmrMesh::depositWeight(EBAMRCellData&                         a_meshData,
-                       const std::string&                     a_realm,
-                       const phase::which_phase&              a_phase,
-                       const ParticleContainerSoA<P, Traits>& a_particles,
-                       const DepositionType                   a_depositionType,
-                       const CoarseFineDeposition             a_coarseFineDeposition,
-                       const bool                             a_forceIrregNGP)
+AmrMesh::depositWeight(EBAMRCellData&                      a_meshData,
+                       const std::string&                  a_realm,
+                       const phase::which_phase&           a_phase,
+                       const ParticleContainer<P, Traits>& a_particles,
+                       const DepositionType                a_depositionType,
+                       const CoarseFineDeposition          a_coarseFineDeposition,
+                       const bool                          a_forceIrregNGP)
 {
-  CH_TIME("AmrMesh::depositWeight(ParticleContainerSoA)");
+  CH_TIME("AmrMesh::depositWeight(ParticleContainer)");
   if (m_verbosity > 5) {
-    pout() << "AmrMesh::depositWeight(ParticleContainerSoA)" << endl;
+    pout() << "AmrMesh::depositWeight(ParticleContainer)" << endl;
   }
 
-  EBAMRParticleMeshSoA& particleMesh = this->getParticleMeshSoA(a_realm, a_phase);
+  EBAMRParticleMesh& particleMesh = this->getParticleMeshSoA(a_realm, a_phase);
 
   particleMesh.depositWeight(a_meshData, a_particles, a_depositionType, a_coarseFineDeposition, a_forceIrregNGP);
 }
 
 template <typename P, typename Traits, typename CellGather>
 void
-AmrMesh::depositGathered(EBAMRCellData&                         a_meshData,
-                         const std::string&                     a_realm,
-                         const phase::which_phase&              a_phase,
-                         const ParticleContainerSoA<P, Traits>& a_particles,
-                         const DepositionType                   a_depositionType,
-                         const CoarseFineDeposition             a_coarseFineDeposition,
-                         const bool                             a_forceIrregNGP,
-                         CellGather                             a_cellGather)
+AmrMesh::depositGathered(EBAMRCellData&                      a_meshData,
+                         const std::string&                  a_realm,
+                         const phase::which_phase&           a_phase,
+                         const ParticleContainer<P, Traits>& a_particles,
+                         const DepositionType                a_depositionType,
+                         const CoarseFineDeposition          a_coarseFineDeposition,
+                         const bool                          a_forceIrregNGP,
+                         CellGather                          a_cellGather)
 {
-  CH_TIME("AmrMesh::depositGathered(ParticleContainerSoA)");
+  CH_TIME("AmrMesh::depositGathered(ParticleContainer)");
   if (m_verbosity > 5) {
-    pout() << "AmrMesh::depositGathered(ParticleContainerSoA)" << endl;
+    pout() << "AmrMesh::depositGathered(ParticleContainer)" << endl;
   }
 
-  EBAMRParticleMeshSoA& particleMesh = this->getParticleMeshSoA(a_realm, a_phase);
+  EBAMRParticleMesh& particleMesh = this->getParticleMeshSoA(a_realm, a_phase);
 
   particleMesh
     .depositGathered(a_meshData, a_particles, a_depositionType, a_coarseFineDeposition, a_forceIrregNGP, a_cellGather);
@@ -409,20 +409,20 @@ AmrMesh::depositGathered(EBAMRCellData&                         a_meshData,
 
 template <auto... Members, typename P, typename Traits>
 void
-AmrMesh::depositParticles(EBAMRCellData&                         a_meshData,
-                          const std::string&                     a_realm,
-                          const phase::which_phase&              a_phase,
-                          const ParticleContainerSoA<P, Traits>& a_particles,
-                          const DepositionType                   a_depositionType,
-                          const CoarseFineDeposition             a_coarseFineDeposition,
-                          const bool                             a_forceIrregNGP)
+AmrMesh::depositParticles(EBAMRCellData&                      a_meshData,
+                          const std::string&                  a_realm,
+                          const phase::which_phase&           a_phase,
+                          const ParticleContainer<P, Traits>& a_particles,
+                          const DepositionType                a_depositionType,
+                          const CoarseFineDeposition          a_coarseFineDeposition,
+                          const bool                          a_forceIrregNGP)
 {
-  CH_TIME("AmrMesh::depositParticles(ParticleContainerSoA)");
+  CH_TIME("AmrMesh::depositParticles(ParticleContainer)");
   if (m_verbosity > 5) {
-    pout() << "AmrMesh::depositParticles(ParticleContainerSoA)" << endl;
+    pout() << "AmrMesh::depositParticles(ParticleContainer)" << endl;
   }
 
-  EBAMRParticleMeshSoA& particleMesh = this->getParticleMeshSoA(a_realm, a_phase);
+  EBAMRParticleMesh& particleMesh = this->getParticleMeshSoA(a_realm, a_phase);
 
   particleMesh.template deposit<Members...>(a_meshData,
                                             a_particles,
@@ -433,51 +433,51 @@ AmrMesh::depositParticles(EBAMRCellData&                         a_meshData,
 
 template <typename P, typename Traits>
 void
-AmrMesh::interpolateWeight(ParticleContainerSoA<P, Traits>& a_particles,
-                           const std::string&               a_realm,
-                           const phase::which_phase&        a_phase,
-                           const EBAMRCellData&             a_meshScalarField,
-                           const DepositionType             a_interpType,
-                           const bool                       a_forceIrregNGP) const
+AmrMesh::interpolateWeight(ParticleContainer<P, Traits>& a_particles,
+                           const std::string&            a_realm,
+                           const phase::which_phase&     a_phase,
+                           const EBAMRCellData&          a_meshScalarField,
+                           const DepositionType          a_interpType,
+                           const bool                    a_forceIrregNGP) const
 {
-  CH_TIME("AmrMesh::interpolateWeight(ParticleContainerSoA)");
+  CH_TIME("AmrMesh::interpolateWeight(ParticleContainer)");
   if (m_verbosity > 5) {
-    pout() << "AmrMesh::interpolateWeight(ParticleContainerSoA)" << endl;
+    pout() << "AmrMesh::interpolateWeight(ParticleContainer)" << endl;
   }
 
-  EBAMRParticleMeshSoA& particleMesh = this->getParticleMeshSoA(a_realm, a_phase);
+  EBAMRParticleMesh& particleMesh = this->getParticleMeshSoA(a_realm, a_phase);
 
   particleMesh.interpolateWeight(a_particles, a_meshScalarField, a_interpType, a_forceIrregNGP);
 }
 
 template <auto... Members, typename P, typename Traits>
 void
-AmrMesh::interpolateParticles(ParticleContainerSoA<P, Traits>& a_particles,
-                              const std::string&               a_realm,
-                              const phase::which_phase&        a_phase,
-                              const EBAMRCellData&             a_meshField,
-                              const DepositionType             a_interpType,
-                              const bool                       a_forceIrregNGP) const
+AmrMesh::interpolateParticles(ParticleContainer<P, Traits>& a_particles,
+                              const std::string&            a_realm,
+                              const phase::which_phase&     a_phase,
+                              const EBAMRCellData&          a_meshField,
+                              const DepositionType          a_interpType,
+                              const bool                    a_forceIrregNGP) const
 {
-  CH_TIME("AmrMesh::interpolateParticles(ParticleContainerSoA)");
+  CH_TIME("AmrMesh::interpolateParticles(ParticleContainer)");
   if (m_verbosity > 5) {
-    pout() << "AmrMesh::interpolateParticles(ParticleContainerSoA)" << endl;
+    pout() << "AmrMesh::interpolateParticles(ParticleContainer)" << endl;
   }
 
-  EBAMRParticleMeshSoA& particleMesh = this->getParticleMeshSoA(a_realm, a_phase);
+  EBAMRParticleMesh& particleMesh = this->getParticleMeshSoA(a_realm, a_phase);
 
   particleMesh.template interpolate<Members...>(a_particles, a_meshField, a_interpType, a_forceIrregNGP);
 }
 
 template <typename P, typename Traits>
 void
-AmrMesh::removeCoveredParticlesIF(ParticleContainerSoA<P, Traits>& a_particles,
-                                  const phase::which_phase&        a_phase,
-                                  const Real                       a_tolerance) const
+AmrMesh::removeCoveredParticlesIF(ParticleContainer<P, Traits>& a_particles,
+                                  const phase::which_phase&     a_phase,
+                                  const Real                    a_tolerance) const
 {
-  CH_TIME("AmrMesh::removeCoveredParticlesIF(ParticleContainerSoA)");
+  CH_TIME("AmrMesh::removeCoveredParticlesIF(ParticleContainer)");
   if (m_verbosity > 5) {
-    pout() << "AmrMesh::removeCoveredParticlesIF(ParticleContainerSoA)" << endl;
+    pout() << "AmrMesh::removeCoveredParticlesIF(ParticleContainer)" << endl;
   }
 
   // Figure out the implicit function
@@ -495,7 +495,7 @@ AmrMesh::removeCoveredParticlesIF(ParticleContainerSoA<P, Traits>& a_particles,
     break;
   }
   default: {
-    MayDay::Error("AmrMesh::removeCoveredParticlesIF(ParticleContainerSoA) - logic bust");
+    MayDay::Error("AmrMesh::removeCoveredParticlesIF(ParticleContainer) - logic bust");
   }
   }
 
@@ -530,13 +530,13 @@ AmrMesh::removeCoveredParticlesIF(ParticleContainerSoA<P, Traits>& a_particles,
 
 template <typename P, typename Traits>
 void
-AmrMesh::removeCoveredParticlesDiscrete(ParticleContainerSoA<P, Traits>& a_particles,
-                                        const phase::which_phase&        a_phase,
-                                        const Real                       a_tolerance) const
+AmrMesh::removeCoveredParticlesDiscrete(ParticleContainer<P, Traits>& a_particles,
+                                        const phase::which_phase&     a_phase,
+                                        const Real                    a_tolerance) const
 {
-  CH_TIME("AmrMesh::removeCoveredParticlesDiscrete(ParticleContainerSoA)");
+  CH_TIME("AmrMesh::removeCoveredParticlesDiscrete(ParticleContainer)");
   if (m_verbosity > 5) {
-    pout() << "AmrMesh::removeCoveredParticlesDiscrete(ParticleContainerSoA)" << endl;
+    pout() << "AmrMesh::removeCoveredParticlesDiscrete(ParticleContainer)" << endl;
   }
 
   const std::string whichRealm = a_particles.getRealm();
@@ -610,12 +610,12 @@ AmrMesh::removeCoveredParticlesDiscrete(ParticleContainerSoA<P, Traits>& a_parti
 
 template <typename P, typename Traits>
 void
-AmrMesh::removeCoveredParticlesVoxels(ParticleContainerSoA<P, Traits>& a_particles,
-                                      const phase::which_phase&        a_phase) const
+AmrMesh::removeCoveredParticlesVoxels(ParticleContainer<P, Traits>& a_particles,
+                                      const phase::which_phase&     a_phase) const
 {
-  CH_TIME("AmrMesh::removeCoveredParticlesVoxels(ParticleContainerSoA)");
+  CH_TIME("AmrMesh::removeCoveredParticlesVoxels(ParticleContainer)");
   if (m_verbosity > 5) {
-    pout() << "AmrMesh::removeCoveredParticlesVoxels(ParticleContainerSoA)" << endl;
+    pout() << "AmrMesh::removeCoveredParticlesVoxels(ParticleContainer)" << endl;
   }
 
   const std::string whichRealm = a_particles.getRealm();
@@ -665,14 +665,14 @@ AmrMesh::removeCoveredParticlesVoxels(ParticleContainerSoA<P, Traits>& a_particl
 
 template <typename P, typename Traits>
 void
-AmrMesh::transferCoveredParticlesIF(ParticleContainerSoA<P, Traits>& a_particlesFrom,
-                                    ParticleContainerSoA<P, Traits>& a_particlesTo,
-                                    const phase::which_phase&        a_phase,
-                                    const Real                       a_tolerance) const
+AmrMesh::transferCoveredParticlesIF(ParticleContainer<P, Traits>& a_particlesFrom,
+                                    ParticleContainer<P, Traits>& a_particlesTo,
+                                    const phase::which_phase&     a_phase,
+                                    const Real                    a_tolerance) const
 {
-  CH_TIME("AmrMesh::transferCoveredParticlesIF(ParticleContainerSoA)");
+  CH_TIME("AmrMesh::transferCoveredParticlesIF(ParticleContainer)");
   if (m_verbosity > 5) {
-    pout() << "AmrMesh::transferCoveredParticlesIF(ParticleContainerSoA)" << endl;
+    pout() << "AmrMesh::transferCoveredParticlesIF(ParticleContainer)" << endl;
   }
 
   // Figure out the implicit function
@@ -690,7 +690,7 @@ AmrMesh::transferCoveredParticlesIF(ParticleContainerSoA<P, Traits>& a_particles
     break;
   }
   default: {
-    MayDay::Error("AmrMesh::transferCoveredParticlesIF(ParticleContainerSoA) - logic bust");
+    MayDay::Error("AmrMesh::transferCoveredParticlesIF(ParticleContainer) - logic bust");
   }
   }
 
@@ -730,14 +730,14 @@ AmrMesh::transferCoveredParticlesIF(ParticleContainerSoA<P, Traits>& a_particles
 
 template <typename P, typename Traits>
 void
-AmrMesh::transferCoveredParticlesDiscrete(ParticleContainerSoA<P, Traits>& a_particlesFrom,
-                                          ParticleContainerSoA<P, Traits>& a_particlesTo,
-                                          const phase::which_phase&        a_phase,
-                                          const Real                       a_tolerance) const
+AmrMesh::transferCoveredParticlesDiscrete(ParticleContainer<P, Traits>& a_particlesFrom,
+                                          ParticleContainer<P, Traits>& a_particlesTo,
+                                          const phase::which_phase&     a_phase,
+                                          const Real                    a_tolerance) const
 {
-  CH_TIME("AmrMesh::transferCoveredParticlesDiscrete(ParticleContainerSoA)");
+  CH_TIME("AmrMesh::transferCoveredParticlesDiscrete(ParticleContainer)");
   if (m_verbosity > 5) {
-    pout() << "AmrMesh::transferCoveredParticlesDiscrete(ParticleContainerSoA)" << endl;
+    pout() << "AmrMesh::transferCoveredParticlesDiscrete(ParticleContainer)" << endl;
   }
 
   const std::string realmFrom = a_particlesFrom.getRealm();
@@ -817,13 +817,13 @@ AmrMesh::transferCoveredParticlesDiscrete(ParticleContainerSoA<P, Traits>& a_par
 
 template <typename P, typename Traits>
 void
-AmrMesh::transferCoveredParticlesVoxels(ParticleContainerSoA<P, Traits>& a_particlesFrom,
-                                        ParticleContainerSoA<P, Traits>& a_particlesTo,
-                                        const phase::which_phase&        a_phase) const
+AmrMesh::transferCoveredParticlesVoxels(ParticleContainer<P, Traits>& a_particlesFrom,
+                                        ParticleContainer<P, Traits>& a_particlesTo,
+                                        const phase::which_phase&     a_phase) const
 {
-  CH_TIME("AmrMesh::transferCoveredParticlesVoxels(ParticleContainerSoA)");
+  CH_TIME("AmrMesh::transferCoveredParticlesVoxels(ParticleContainer)");
   if (m_verbosity > 5) {
-    pout() << "AmrMesh::transferCoveredParticlesVoxels(ParticleContainerSoA)" << endl;
+    pout() << "AmrMesh::transferCoveredParticlesVoxels(ParticleContainer)" << endl;
   }
 
   const std::string realmFrom = a_particlesFrom.getRealm();
@@ -878,22 +878,21 @@ AmrMesh::transferCoveredParticlesVoxels(ParticleContainerSoA<P, Traits>& a_parti
 template <auto... OldPosition, typename P, typename Traits>
 void
 AmrMesh::intersectParticlesRaycastIF(
-  ParticleContainerSoA<P, Traits>&                                 a_activeParticles,
-  ParticleContainerSoA<P, Traits>&                                 a_ebParticles,
-  ParticleContainerSoA<P, Traits>&                                 a_domainParticles,
+  ParticleContainer<P, Traits>&                                    a_activeParticles,
+  ParticleContainer<P, Traits>&                                    a_ebParticles,
+  ParticleContainer<P, Traits>&                                    a_domainParticles,
   const phase::which_phase                                         a_phase,
   const Real                                                       a_tolerance,
   const bool                                                       a_deleteParticles,
   const std::function<void(ParticleSoA<P, Traits>&, std::size_t)>& a_nonDeletionModifier) const noexcept
 {
-  CH_TIME("AmrMesh::intersectParticlesRaycastIF(ParticleContainerSoA)");
+  CH_TIME("AmrMesh::intersectParticlesRaycastIF(ParticleContainer)");
   if (m_verbosity > 5) {
-    pout() << "AmrMesh::intersectParticlesRaycastIF(ParticleContainerSoA)" << endl;
+    pout() << "AmrMesh::intersectParticlesRaycastIF(ParticleContainer)" << endl;
   }
 
-  static_assert(
-    sizeof...(OldPosition) == SpaceDim,
-    "AmrMesh::intersectParticlesRaycastIF(ParticleContainerSoA) - need exactly SpaceDim oldPosition members");
+  static_assert(sizeof...(OldPosition) == SpaceDim,
+                "AmrMesh::intersectParticlesRaycastIF(ParticleContainer) - need exactly SpaceDim oldPosition members");
 
   CH_assert(a_activeParticles.getRealm() == a_ebParticles.getRealm());
   CH_assert(a_activeParticles.getRealm() == a_domainParticles.getRealm());
@@ -918,7 +917,7 @@ AmrMesh::intersectParticlesRaycastIF(
     break;
   }
   default: {
-    MayDay::Error("AmrMesh::intersectParticlesRaycastIF(ParticleContainerSoA) - logic bust");
+    MayDay::Error("AmrMesh::intersectParticlesRaycastIF(ParticleContainer) - logic bust");
 
     break;
   }
@@ -1042,27 +1041,26 @@ AmrMesh::intersectParticlesRaycastIF(
 template <auto... OldPosition, typename P, typename Traits>
 void
 AmrMesh::intersectParticlesBisectIF(
-  ParticleContainerSoA<P, Traits>&                                 a_activeParticles,
-  ParticleContainerSoA<P, Traits>&                                 a_ebParticles,
-  ParticleContainerSoA<P, Traits>&                                 a_domainParticles,
+  ParticleContainer<P, Traits>&                                    a_activeParticles,
+  ParticleContainer<P, Traits>&                                    a_ebParticles,
+  ParticleContainer<P, Traits>&                                    a_domainParticles,
   const phase::which_phase                                         a_phase,
   const Real                                                       a_bisectionStep,
   const bool                                                       a_deleteParticles,
   const std::function<void(ParticleSoA<P, Traits>&, std::size_t)>& a_nonDeletionModifier) const noexcept
 {
-  CH_TIME("AmrMesh::intersectParticlesBisectIF(ParticleContainerSoA)");
+  CH_TIME("AmrMesh::intersectParticlesBisectIF(ParticleContainer)");
   if (m_verbosity > 5) {
-    pout() << "AmrMesh::intersectParticlesBisectIF(ParticleContainerSoA)" << endl;
+    pout() << "AmrMesh::intersectParticlesBisectIF(ParticleContainer)" << endl;
   }
 
-  static_assert(
-    sizeof...(OldPosition) == SpaceDim,
-    "AmrMesh::intersectParticlesBisectIF(ParticleContainerSoA) - need exactly SpaceDim oldPosition members");
+  static_assert(sizeof...(OldPosition) == SpaceDim,
+                "AmrMesh::intersectParticlesBisectIF(ParticleContainer) - need exactly SpaceDim oldPosition members");
 
   CH_assert(a_activeParticles.getRealm() == a_ebParticles.getRealm());
   CH_assert(a_activeParticles.getRealm() == a_domainParticles.getRealm());
 
-  // TLDR: This is pretty much a hard-copy of intersectParticlesRaycastIF(ParticleContainerSoA), with the exception
+  // TLDR: This is pretty much a hard-copy of intersectParticlesRaycastIF(ParticleContainer), with the exception
   //       that the EB intersection test is replaced by a bisection test.
 
   a_ebParticles.clearParticles();
@@ -1085,7 +1083,7 @@ AmrMesh::intersectParticlesBisectIF(
     break;
   }
   default: {
-    MayDay::Error("AmrMesh::intersectParticlesBisectIF(ParticleContainerSoA) - logic bust");
+    MayDay::Error("AmrMesh::intersectParticlesBisectIF(ParticleContainer) - logic bust");
 
     break;
   }
@@ -1208,13 +1206,13 @@ AmrMesh::intersectParticlesBisectIF(
 
 template <typename P, typename Traits>
 void
-AmrMesh::transferIrregularParticles(ParticleContainerSoA<P, Traits>& a_dstParticles,
-                                    ParticleContainerSoA<P, Traits>& a_srcParticles,
-                                    const phase::which_phase         a_phase) const noexcept
+AmrMesh::transferIrregularParticles(ParticleContainer<P, Traits>& a_dstParticles,
+                                    ParticleContainer<P, Traits>& a_srcParticles,
+                                    const phase::which_phase      a_phase) const noexcept
 {
-  CH_TIME("AmrMesh::transferIrregularParticles(ParticleContainerSoA)");
+  CH_TIME("AmrMesh::transferIrregularParticles(ParticleContainer)");
   if (m_verbosity > 5) {
-    pout() << "AmrMesh::transferIrregularParticles(ParticleContainerSoA)" << endl;
+    pout() << "AmrMesh::transferIrregularParticles(ParticleContainer)" << endl;
   }
 
   CH_assert(a_dstParticles.getRealm() == a_srcParticles.getRealm());

@@ -36,7 +36,7 @@ The tracer particle solver is templated as
    :dedent: 0
 
 where ``P`` is the payload type used for the solver.
-The particles are stored Struct-of-Arrays in a ``ParticleContainerSoA``: the position and weight are
+The particles are stored Struct-of-Arrays in a ``ParticleContainer``: the position and weight are
 container-owned columns, while ``P`` declares the *extra* payload columns. The template constraints on
 ``P`` are
 
@@ -87,7 +87,7 @@ To obtain the solver particles, simply call
    :lines: 282-294
    :dedent: 2
 
-This returns the ``ParticleContainerSoA<P>`` holding the particles. 
+This returns the ``ParticleContainer<P>`` holding the particles. 
 
 Setting :math:`\mathbf{v}`
 --------------------------

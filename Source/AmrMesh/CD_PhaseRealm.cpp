@@ -1174,7 +1174,7 @@ PhaseRealm::getRedistributionOp() const
   return m_redistributionOp;
 }
 
-EBAMRParticleMeshSoA&
+EBAMRParticleMesh&
 PhaseRealm::getParticleMeshSoA() const
 {
   if (!this->queryOperator(s_particle_mesh)) {

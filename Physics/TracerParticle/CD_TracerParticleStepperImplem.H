@@ -464,7 +464,7 @@ TracerParticleStepper<P>::initialParticles()
   ParticleSoA<P> drawnParticles;
   ParticleManagement::drawRandomParticles(drawnParticles, m_numInitialParticles, uniformDistribution);
 
-  ParticleContainerSoA<P>& solverParticles = m_solver->getParticles();
+  ParticleContainer<P>& solverParticles = m_solver->getParticles();
   solverParticles.clearParticles();
   solverParticles.addParticlesDestructive(drawnParticles);
 
@@ -483,7 +483,7 @@ TracerParticleStepper<P>::advanceParticlesEuler(const Real a_dt)
 
   // TLDR: The new position is just x^(k+1) = x^k + dt*v^k
 
-  ParticleContainerSoA<P>& amrParticles = m_solver->getParticles();
+  ParticleContainer<P>& amrParticles = m_solver->getParticles();
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
@@ -527,7 +527,7 @@ TracerParticleStepper<P>::advanceParticlesRK2(const Real a_dt)
 
   // TLDR: The new positions are x^(k+1) = x^k + 0.5*dt*[ v(x^k) + v(x^*) ] where x^* = x^k + dt*v^k.
 
-  ParticleContainerSoA<P>& amrParticles = m_solver->getParticles();
+  ParticleContainer<P>& amrParticles = m_solver->getParticles();
 
   // First step. Store old position (xk) and velocity (k1), then do the Euler advance.
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
@@ -614,7 +614,7 @@ TracerParticleStepper<P>::advanceParticlesRK4(const Real a_dt)
 
   // TLDR: Just the standard RK4 method.
 
-  ParticleContainerSoA<P>& amrParticles = m_solver->getParticles();
+  ParticleContainer<P>& amrParticles = m_solver->getParticles();
 
   const Real dtHalf  = a_dt / 2.0;
   const Real dtSixth = a_dt / 6.0;

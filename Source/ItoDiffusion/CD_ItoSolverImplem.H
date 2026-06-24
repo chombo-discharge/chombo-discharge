@@ -25,7 +25,7 @@
 #include <CD_ItoSolver.H>
 #include <CD_DataOps.H>
 #include <CD_Random.H>
-#include <CD_EBParticleMeshSoA.H>
+#include <CD_EBParticleMesh.H>
 #include <CD_NamespaceHeader.H>
 
 inline RealVect
@@ -49,10 +49,10 @@ ItoSolver::randomGaussian() const
 
 template <typename Gather>
 void
-ItoSolver::depositGatheredNGP(LevelData<EBCellFAB>&                    a_output,
-                              const ParticleContainerSoA<ItoParticle>& a_particles,
-                              const int                                a_level,
-                              Gather                                   a_gather) const noexcept
+ItoSolver::depositGatheredNGP(LevelData<EBCellFAB>&                 a_output,
+                              const ParticleContainer<ItoParticle>& a_particles,
+                              const int                             a_level,
+                              Gather                                a_gather) const noexcept
 {
   CH_TIME("ItoSolver::depositGatheredNGP");
   if (m_verbosity > 5) {
@@ -80,7 +80,7 @@ ItoSolver::depositGatheredNGP(LevelData<EBCellFAB>&                    a_output,
     const Box      cellBox = dbl[din];
     const EBISBox& ebisbox = ebisl[din];
 
-    EBParticleMeshSoA particleMesh(domain, cellBox, ebisbox, dx * RealVect::Unit, probLo);
+    EBParticleMesh particleMesh(domain, cellBox, ebisbox, dx * RealVect::Unit, probLo);
 
     EBCellFAB&                      output = a_output[din];
     const ParticleSoA<ItoParticle>& leaf   = a_particles[a_level][din];
@@ -97,11 +97,11 @@ ItoSolver::depositGatheredNGP(LevelData<EBCellFAB>&                    a_output,
 
 template <typename Gather>
 void
-ItoSolver::depositGathered(EBAMRCellData&                           a_phi,
-                           const ParticleContainerSoA<ItoParticle>& a_particles,
-                           const DepositionType                     a_deposition,
-                           const CoarseFineDeposition               a_coarseFineDeposition,
-                           Gather                                   a_gather) const
+ItoSolver::depositGathered(EBAMRCellData&                        a_phi,
+                           const ParticleContainer<ItoParticle>& a_particles,
+                           const DepositionType                  a_deposition,
+                           const CoarseFineDeposition            a_coarseFineDeposition,
+                           Gather                                a_gather) const
 {
   CH_TIME("ItoSolver::depositGathered");
   if (m_verbosity > 5) {

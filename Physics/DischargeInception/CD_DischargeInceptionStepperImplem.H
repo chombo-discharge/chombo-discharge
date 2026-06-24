@@ -2140,7 +2140,7 @@ DischargeInceptionStepper<P, F, C>::seedUniformParticles() noexcept
     pout() << "DischargeInceptionStepper::seedUniformParticles" << endl;
   }
 
-  ParticleContainerSoA<P>& amrParticles = m_tracerParticleSolver->getParticles();
+  ParticleContainer<P>& amrParticles = m_tracerParticleSolver->getParticles();
   amrParticles.clearParticles();
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
@@ -2214,7 +2214,7 @@ DischargeInceptionStepper<P, F, C>::seedIonizationParticles(const Real a_voltage
     pout() << "DischargeInceptionStepper::seedIonizationParticles" << endl;
   }
 
-  ParticleContainerSoA<P>& amrParticles = m_tracerParticleSolver->getParticles();
+  ParticleContainer<P>& amrParticles = m_tracerParticleSolver->getParticles();
   amrParticles.clearParticles();
 
   // Scratch storages
@@ -2643,10 +2643,10 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltag
   // Allocate a data holder for holding the processed particles. This
   // will be faster because then we only have to iterate through the
   // particles that are actually still moving.
-  ParticleContainerSoA<P> amrProcessedParticles;
+  ParticleContainer<P> amrProcessedParticles;
   m_amr->allocate(amrProcessedParticles, m_realm);
 
-  ParticleContainerSoA<P>& amrParticles = m_tracerParticleSolver->getParticles();
+  ParticleContainer<P>& amrParticles = m_tracerParticleSolver->getParticles();
 
   m_tracerParticleSolver->remap();
 
@@ -2846,10 +2846,10 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_
   // Allocate a data holder for holding the processed particles. This
   // will be faster because then we only have to iterate through the
   // particles that are actually still moving.
-  ParticleContainerSoA<P> amrProcessedParticles;
+  ParticleContainer<P> amrProcessedParticles;
   m_amr->allocate(amrProcessedParticles, m_realm);
 
-  ParticleContainerSoA<P>& amrParticles = m_tracerParticleSolver->getParticles();
+  ParticleContainer<P>& amrParticles = m_tracerParticleSolver->getParticles();
 
   m_tracerParticleSolver->remap();
 
@@ -3315,10 +3315,10 @@ DischargeInceptionStepper<P, F, C>::townsendTrackEuler(const Real& a_voltage) no
   // Allocate a data holder for holding the processed particles. This
   // will be faster because then we only have to iterate through the
   // particles that are actually still moving.
-  ParticleContainerSoA<P> amrProcessedParticles;
+  ParticleContainer<P> amrProcessedParticles;
   m_amr->allocate(amrProcessedParticles, m_realm);
 
-  ParticleContainerSoA<P>& amrParticles = m_tracerParticleSolver->getParticles();
+  ParticleContainer<P>& amrParticles = m_tracerParticleSolver->getParticles();
 
   m_tracerParticleSolver->remap();
 
@@ -3445,10 +3445,10 @@ DischargeInceptionStepper<P, F, C>::townsendTrackTrapezoidal(const Real& a_volta
   // Allocate a data holder for holding the processed particles. This
   // will be faster because then we only have to iterate through the
   // particles that are actually still moving.
-  ParticleContainerSoA<P> amrProcessedParticles;
+  ParticleContainer<P> amrProcessedParticles;
   m_amr->allocate(amrProcessedParticles, m_realm);
 
-  ParticleContainerSoA<P>& amrParticles = m_tracerParticleSolver->getParticles();
+  ParticleContainer<P>& amrParticles = m_tracerParticleSolver->getParticles();
 
   m_tracerParticleSolver->remap();
 
@@ -3753,7 +3753,7 @@ DischargeInceptionStepper<P, F, C>::rewindTracerParticles() noexcept
     pout() << "DischargeInceptionStepper::rewindTracerParticles" << endl;
   }
 
-  ParticleContainerSoA<P>& amrParticles = m_tracerParticleSolver->getParticles();
+  ParticleContainer<P>& amrParticles = m_tracerParticleSolver->getParticles();
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
@@ -3792,7 +3792,7 @@ DischargeInceptionStepper<P, F, C>::resetTracerParticles() noexcept
     pout() << "DischargeInceptionStepper::resetTracerParticles" << endl;
   }
 
-  ParticleContainerSoA<P>& amrParticles = m_tracerParticleSolver->getParticles();
+  ParticleContainer<P>& amrParticles = m_tracerParticleSolver->getParticles();
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];

@@ -1266,7 +1266,7 @@ CdrSolver::initialDataParticles()
   if (ParallelOps::sum(numParticles) > 0LL) {
 
     // Make an SoA ParticleContainer and redistribute particles over the AMR hierarchy.
-    ParticleContainerSoA<NoPayload> particles;
+    ParticleContainer<NoPayload> particles;
     m_amr->allocate(particles, m_realm);
 
     ParticleSoA<NoPayload> buffer;
@@ -1296,8 +1296,8 @@ CdrSolver::initialDataParticles()
         const EBISBox& ebisbox = ebisl[din];
 
         // Make the deposition object and put the particles on the grid.
-        constexpr bool    forceIrregNGP = true;
-        EBParticleMeshSoA interp(domain, cellBox, ebisbox, dx, probLo);
+        constexpr bool forceIrregNGP = true;
+        EBParticleMesh interp(domain, cellBox, ebisbox, dx, probLo);
 
         interp.depositWeight((*m_phi[lvl])[din], particles[lvl][din], DepositionType::NGP, 1.0, forceIrregNGP);
       }

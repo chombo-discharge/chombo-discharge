@@ -28,7 +28,7 @@
 template <typename P, typename Traits>
 void
 DischargeIO::writeH5Part(std::string                                                  a_filename,
-                         const ParticleContainerSoA<P, Traits>&                       a_particles,
+                         const ParticleContainer<P, Traits>&                          a_particles,
                          std::vector<std::pair<std::string, H5PartScalar<P, Traits>>> a_scalarVars,
                          std::vector<std::pair<std::string, H5PartVect<P, Traits>>>   a_vectorVars,
                          RealVect                                                     a_shift,

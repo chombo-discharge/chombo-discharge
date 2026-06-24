@@ -73,7 +73,7 @@ protected:
     const Vector<DisjointBoxLayout>& grids       = m_amr->getGrids(m_realm);
     const int                        finestLevel = m_amr->getFinestLevel();
 
-    ParticleContainerSoA<ItoParticle>& soa = m_solver->getParticles(ItoSolver::WhichContainer::Bulk);
+    ParticleContainer<ItoParticle>& soa = m_solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
     EBAMRCellData mesh;
     m_amr->allocate(mesh, m_realm, m_phase, 1);

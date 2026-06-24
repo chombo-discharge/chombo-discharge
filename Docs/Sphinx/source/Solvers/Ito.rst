@@ -54,7 +54,7 @@ This class can advance a set of computational particles (see :ref:`Chap:ItoParti
 #. Interpolate velocities and diffusion coefficients to the particle positions.
 #. Manage superparticle splitting and merging.
 
-Internally, ``ItoSolver`` stores its particles in various ``ParticleContainerSoA<ItoParticle>`` containers.
+Internally, ``ItoSolver`` stores its particles in various ``ParticleContainer<ItoParticle>`` containers.
 Although the particle velocities and diffusion coefficients can be manually assigned, they can also be interpolated from the mesh.
 ``ItoSolver`` stores the following properties on the mesh:
 

@@ -33,7 +33,7 @@
 // Our includes
 #include <CD_EBAMRData.H>
 #include <CD_ParticleSoA.H>
-#include <CD_ParticleContainerSoA.H>
+#include <CD_ParticleContainer.H>
 #include <CD_NamespaceHeader.H>
 
 /**
@@ -176,7 +176,7 @@ namespace DischargeIO {
   template <typename P, typename Traits>
   void
   writeH5Part(std::string                                                  a_filename,
-              const ParticleContainerSoA<P, Traits>&                       a_particles,
+              const ParticleContainer<P, Traits>&                          a_particles,
               std::vector<std::pair<std::string, H5PartScalar<P, Traits>>> a_scalarVars,
               std::vector<std::pair<std::string, H5PartVect<P, Traits>>>   a_vectorVars,
               RealVect                                                     a_shift,

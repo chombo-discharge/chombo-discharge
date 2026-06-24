@@ -534,7 +534,7 @@ namespace ParticleManagement {
     a_particles.clear();
 
     // Each rank draws its own share (unit weight) into the buffer. Routing to owners happens later when
-    // the buffer is added to a ParticleContainerSoA.
+    // the buffer is added to a ParticleContainer.
     const T numParticles = partitionParticles(a_numParticles);
 
     for (T t = 0; t < numParticles; t++) {

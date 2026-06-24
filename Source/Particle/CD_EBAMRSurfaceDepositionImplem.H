@@ -29,12 +29,11 @@
 
 template <typename P, typename Traits>
 void
-EBAMRSurfaceDeposition::deposit(EBAMRIVData&                           a_meshData,
-                                const ParticleContainerSoA<P, Traits>& a_particles) const noexcept
+EBAMRSurfaceDeposition::deposit(EBAMRIVData& a_meshData, const ParticleContainer<P, Traits>& a_particles) const noexcept
 {
   CH_TIME("EBAMRSurfaceDeposition::deposit(SoA)");
   if (m_verbose) {
-    pout() << "EBAMRSurfaceDeposition::deposit(ParticleContainerSoA)" << endl;
+    pout() << "EBAMRSurfaceDeposition::deposit(ParticleContainer)" << endl;
   }
 
   CH_assert(a_meshData.getRealm() == a_particles.getRealm());

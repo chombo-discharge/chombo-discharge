@@ -3500,7 +3500,7 @@ AmrMesh::getIrregularCells(const std::string& a_realm, const phase::which_phase 
   return m_realms[a_realm]->getIrregularCells(a_phase);
 }
 
-EBAMRParticleMeshSoA&
+EBAMRParticleMesh&
 AmrMesh::getParticleMeshSoA(const std::string& a_realm, const phase::which_phase a_phase) const
 {
   CH_TIME("AmrMesh::getParticleMeshSoA(string, phase::which_phase)");

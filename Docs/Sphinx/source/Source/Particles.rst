@@ -72,12 +72,12 @@ __________________________
 The container-owned position and weight columns are always written to HDF5 checkpoint files.
 For particles that do not need to checkpoint all payload columns, the ``ParticleTraits<P>`` specialization may declare an ``h5Columns`` tuple that lists the payload-column subset to export, which reduces the checkpoint file size.
 
-.. _Chap:ParticleContainerSoA:
+.. _Chap:ParticleContainer:
 
-ParticleContainerSoA
+ParticleContainer
 --------------------
 
-The ``ParticleContainerSoA<P, Traits>`` is a template class that
+The ``ParticleContainer<P, Traits>`` is a template class that
 
 #. Stores computational particles of type ``P`` over an AMR hierarchy (one ``ParticleSoA<P, Traits>`` leaf per grid patch).
 #. Provides infrastructure for remapping particles.
@@ -96,7 +96,7 @@ At the lowest level the particles in one grid patch are stored in a ``ParticleSo
 AMRParticlesSoA<P>
 __________________
 
-On each grid level, ``ParticleContainerSoA<P, Traits>`` stores the leaves in a ``LayoutData<ParticleSoA<P, Traits>>`` (one leaf per patch).
+On each grid level, ``ParticleContainer<P, Traits>`` stores the leaves in a ``LayoutData<ParticleSoA<P, Traits>>`` (one leaf per patch).
 The AMR view ``AMRParticlesSoA<P, Traits>`` is a vector of these per-level holders:
 
 .. code-block:: c++
@@ -105,20 +105,20 @@ The AMR view ``AMRParticlesSoA<P, Traits>`` is a vector of these per-level holde
    using AMRParticlesSoA = Vector<RefCountedPtr<LayoutData<ParticleSoA<P, Traits>>>>;
 
 Again, the ``Vector`` indicates the AMR level and the ``LayoutData`` is a distributed data holder that holds the leaves on each AMR level.
-``AMRParticlesSoA<P, Traits>`` always lives within ``ParticleContainerSoA<P, Traits>`` and is the class member that actually holds the particles.
+``AMRParticlesSoA<P, Traits>`` always lives within ``ParticleContainer<P, Traits>`` and is the class member that actually holds the particles.
 
 Basic usage
 -----------
 
-Here, we give some examples of basic usage of ``ParticleContainerSoA``.
-For the full API, see the ``ParticleContainerSoA`` C++ API `<https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classParticleContainerSoA.html>`_.
+Here, we give some examples of basic usage of ``ParticleContainer``.
+For the full API, see the ``ParticleContainer`` C++ API `<https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classParticleContainer.html>`_.
 
 Getting the particles
 _____________________
 
-To get the per-level holders from a ``ParticleContainerSoA<P, Traits>`` one can call ``getParticles()``:
+To get the per-level holders from a ``ParticleContainer<P, Traits>`` one can call ``getParticles()``:
 
-.. literalinclude:: ../../../../Source/Particle/CD_ParticleContainerSoA.H
+.. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
    :lines: 262-270
    :language: c++
    :dedent: 2
@@ -128,20 +128,20 @@ Alternatively, one can fetch the distributed leaves of a specified grid level wi
 .. code-block:: c++
 
    int lvl;
-   ParticleContainerSoA<P> myParticleContainer;
+   ParticleContainer<P> myParticleContainer;
 
    LayoutData<ParticleSoA<P>>& levelParticles = myParticleContainer[lvl];
 
 Iterating over particles
 ________________________
 
-To do something with the particles in a ``ParticleContainerSoA<P, Traits>``, one iterates over the grid levels and patches, gets the ``ParticleSoA`` leaf for each patch, and loops over the particle indices.
+To do something with the particles in a ``ParticleContainer<P, Traits>``, one iterates over the grid levels and patches, gets the ``ParticleSoA`` leaf for each patch, and loops over the particle indices.
 
 The code bit below shows a typical example of how the particles can be moved, and then remapped onto the correct grid patches and ranks if they fall off their original one.
 
 .. code-block:: c++
 
-   ParticleContainerSoA<P> myParticleContainer;
+   ParticleContainer<P> myParticleContainer;
 
    // Iterate over grid levels
    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
@@ -173,11 +173,11 @@ Sorting particles
 Sorting by cell
 _______________
 
-The particles in a leaf can be sorted by cell by calling ``ParticleContainerSoA<P>::organizeParticlesByCell()``:
+The particles in a leaf can be sorted by cell by calling ``ParticleContainer<P>::organizeParticlesByCell()``:
 
 .. code-block:: c++
 
-   ParticleContainerSoA<P> myParticleContainer;
+   ParticleContainer<P> myParticleContainer;
 
    myParticleContainer.organizeParticlesByCell();
 
@@ -190,7 +190,7 @@ Iteration over cell-sorted particles visits the cells in Fortran order (matching
 
 .. code-block:: c++
 
-   ParticleContainerSoA<P> myParticleContainer;
+   ParticleContainer<P> myParticleContainer;
    myParticleContainer.organizeParticlesByCell();
 
    // Iterate over all AMR levels
@@ -223,7 +223,7 @@ To return to patch-ordered particles:
 
 .. code-block:: c++
 
-   ParticleContainerSoA<P> myParticleContainer;
+   ParticleContainer<P> myParticleContainer;
 
    myParticleContainer.organizeParticlesByPatch();
 
@@ -235,7 +235,7 @@ To return to patch-ordered particles:
 Allocating particles
 --------------------
 
-``AmrMesh`` has a simple function for allocating a ``ParticleContainerSoA<P, Traits>``:
+``AmrMesh`` has a simple function for allocating a ``ParticleContainer<P, Traits>``:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
    :lines: 212-221
@@ -250,9 +250,9 @@ Particle mapping
 ----------------
 
 Particles that move off their original grid patch must be remapped in order to ensure that they are assigned to the correct grid.
-The remapping function for ``ParticleContainerSoA<P, Traits>`` is
+The remapping function for ``ParticleContainer<P, Traits>`` is
 
-.. literalinclude:: ../../../../Source/Particle/CD_ParticleContainerSoA.H
+.. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
    :lines: 540-549
    :language: c++
    :dedent: 2
@@ -261,7 +261,7 @@ This is simply used as follows:
 
 .. code-block::
 
-   ParticleContainerSoA<P> myParticles;
+   ParticleContainer<P> myParticles;
 
    myParticles.remap();
 
@@ -278,21 +278,21 @@ Particles whose cell is owned by no patch on any level (off-domain) are dropped 
 Regridding
 ----------
 
-As with mesh data, ``ParticleContainerSoA<P, Traits>`` requires storing the old-grid particles before assigning them on the new grids.
+As with mesh data, ``ParticleContainer<P, Traits>`` requires storing the old-grid particles before assigning them on the new grids.
 This is done as follows:
 
 1. *Before* creating the new grids, each MPI rank caches its current particles by calling
 
-   .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainerSoA.H
+   .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
       :lines: 551-558
       :language: c++
       :dedent: 2
 
    This snapshots the particles off their current grids.
 
-2. When ``ParticleContainerSoA<P, Traits>`` regrids, the cached particles are redistributed onto the new layout by calling the regrid function:
+2. When ``ParticleContainer<P, Traits>`` regrids, the cached particles are redistributed onto the new layout by calling the regrid function:
 
-   .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainerSoA.H
+   .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
       :lines: 560-580
       :language: c++
       :dedent: 2
@@ -307,17 +307,17 @@ This is done as follows:
 Masked particles
 ----------------
 
-``ParticleContainerSoA<P, Traits>`` also supports the concept of *masked particles*, where one can fetch a subset of particles that live only in specified grid cells.
+``ParticleContainer<P, Traits>`` also supports the concept of *masked particles*, where one can fetch a subset of particles that live only in specified grid cells.
 Typically, this "specified region" is the refinement boundary, but the functionality is generic and might prove useful also in other cases.
 This functionality is unlikely to be used directly by users of chombo-discharge, but it is nonetheless fruitful to understand the concept in order to more easily fathom how deposition across refinement boundaries proceed.
 
 When *masked particles* are used, the user provides a boolean mask over the AMR hierarchy and obtains the subset of particles that live in regions where the mask evaluates to true.
 This functionality is for example used for some of the particle deposition methods in ``chombo-discharge`` where we deposit particles that live near the refinement boundary with special deposition functions.
 
-To fill the masked particles, ``ParticleContainerSoA<P, Traits>`` has member functions for copying the particles into internal data containers which the user can later fetch.
+To fill the masked particles, ``ParticleContainer<P, Traits>`` has member functions for copying the particles into internal data containers which the user can later fetch.
 The function signature for this is
 
-.. literalinclude:: ../../../../Source/Particle/CD_ParticleContainerSoA.H
+.. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
    :lines: 589-594
    :language: c++
    :dedent: 2
@@ -325,7 +325,7 @@ The function signature for this is
 The argument ``a_mask`` holds a bool at each cell in the AMR hierarchy.
 Particles that live in cells where ``a_mask`` is true will be copied to an internal holder which can be retrieved through
 
-.. literalinclude:: ../../../../Source/Particle/CD_ParticleContainerSoA.H
+.. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
    :lines: 282-290
    :language: c++
    :dedent: 2
@@ -333,7 +333,7 @@ Particles that live in cells where ``a_mask`` is true will be copied to an inter
 In the above functions the mask particles are *copied*, and the original particles are left untouched.
 After the user is done with the particles, they should be released through
 
-.. literalinclude:: ../../../../Source/Particle/CD_ParticleContainerSoA.H
+.. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
    :lines: 623-627
    :language: c++
    :dedent: 2
@@ -343,7 +343,7 @@ An example pseudocode for working with masked particles is given below:
 .. code-block:: c++
 
    AmrMask myMask;
-   ParticleContainerSoA<P> myParticles;
+   ParticleContainer<P> myParticles;
 
    // Copy mask particles
    myParticles.copyMaskParticles(myMask);
@@ -359,7 +359,7 @@ An example pseudocode for working with masked particles is given below:
 Boundary interaction
 --------------------
 
-``ParticleContainerSoA<P, Traits>`` is EB-agnostic and has no information about the embedded boundary and only partial information about the domain boundary.
+``ParticleContainer<P, Traits>`` is EB-agnostic and has no information about the embedded boundary and only partial information about the domain boundary.
 This means the following:
 
 #. Particles remap just as if the embedded boundary was not there.
@@ -391,7 +391,7 @@ See :ref:`Chap:AmrMesh` for details on how to obtain the distance function.
 Domain edges
 ____________
 
-By default, the ``ParticleContainerSoA`` remapping function will discard particles that fall outside of the domain.
+By default, the ``ParticleContainer`` remapping function will discard particles that fall outside of the domain.
 The user can also check if this happens by checking if the particle position is outside the computational domain:
 
 .. code-block:: c++

@@ -29,7 +29,7 @@
 #include <CD_EBReflux.H>
 #include <CD_DomainFluxIFFAB.H>
 #include <CD_DomainFluxIFFABFactory.H>
-#include <CD_ParticleContainerSoA.H>
+#include <CD_ParticleContainer.H>
 #include <CD_Realm.H>
 #include <CD_CopyStrategy.H>
 #include <CD_LoadBalancing.H>
@@ -218,7 +218,7 @@ public:
   */
   template <typename P, typename Traits>
   void
-  allocate(ParticleContainerSoA<P, Traits>& a_container, const std::string& a_realm) const;
+  allocate(ParticleContainer<P, Traits>& a_container, const std::string& a_realm) const;
 
   /**
     @brief Allocate pointer but not any memory blocks. 
@@ -947,10 +947,10 @@ public:
   */
   template <typename P, typename Traits>
   void
-  depositParticles(EBAMRIVData&                           a_meshData,
-                   const std::string&                     a_realm,
-                   const phase::which_phase&              a_phase,
-                   const ParticleContainerSoA<P, Traits>& a_particles) const noexcept;
+  depositParticles(EBAMRIVData&                        a_meshData,
+                   const std::string&                  a_realm,
+                   const phase::which_phase&           a_phase,
+                   const ParticleContainer<P, Traits>& a_particles) const noexcept;
 
   /**
     @brief Deposit the SoA container's weight column on the mesh (all coarse-fine strategies).
@@ -966,18 +966,18 @@ public:
   */
   template <typename P, typename Traits>
   void
-  depositWeight(EBAMRCellData&                         a_meshData,
-                const std::string&                     a_realm,
-                const phase::which_phase&              a_phase,
-                const ParticleContainerSoA<P, Traits>& a_particles,
-                const DepositionType                   a_depositionType,
-                const CoarseFineDeposition             a_coarseFineDeposition,
-                const bool                             a_forceIrregNGP);
+  depositWeight(EBAMRCellData&                      a_meshData,
+                const std::string&                  a_realm,
+                const phase::which_phase&           a_phase,
+                const ParticleContainer<P, Traits>& a_particles,
+                const DepositionType                a_depositionType,
+                const CoarseFineDeposition          a_coarseFineDeposition,
+                const bool                          a_forceIrregNGP);
 
   /**
     @brief Deposit a custom per-particle scalar (a_cellGather) of an SoA container on the mesh.
     @details Generalizes depositWeight to a derived per-particle quantity (e.g. weight*mobility), via the
-    EBAMRParticleMeshSoA gatherer-based deposit. Deposits one component.
+    EBAMRParticleMesh gatherer-based deposit. Deposits one component.
     @param[out] a_meshData             Mesh data (one component).
     @param[in]  a_realm                Realm where data is registered.
     @param[in]  a_phase                Phase where data is registered.
@@ -992,14 +992,14 @@ public:
   */
   template <typename P, typename Traits, typename CellGather>
   void
-  depositGathered(EBAMRCellData&                         a_meshData,
-                  const std::string&                     a_realm,
-                  const phase::which_phase&              a_phase,
-                  const ParticleContainerSoA<P, Traits>& a_particles,
-                  const DepositionType                   a_depositionType,
-                  const CoarseFineDeposition             a_coarseFineDeposition,
-                  const bool                             a_forceIrregNGP,
-                  CellGather                             a_cellGather);
+  depositGathered(EBAMRCellData&                      a_meshData,
+                  const std::string&                  a_realm,
+                  const phase::which_phase&           a_phase,
+                  const ParticleContainer<P, Traits>& a_particles,
+                  const DepositionType                a_depositionType,
+                  const CoarseFineDeposition          a_coarseFineDeposition,
+                  const bool                          a_forceIrregNGP,
+                  CellGather                          a_cellGather);
 
   /**
     @brief Deposit one or more SoA payload columns on the mesh (all coarse-fine strategies).
@@ -1018,13 +1018,13 @@ public:
   */
   template <auto... Members, typename P, typename Traits>
   void
-  depositParticles(EBAMRCellData&                         a_meshData,
-                   const std::string&                     a_realm,
-                   const phase::which_phase&              a_phase,
-                   const ParticleContainerSoA<P, Traits>& a_particles,
-                   const DepositionType                   a_depositionType,
-                   const CoarseFineDeposition             a_coarseFineDeposition,
-                   const bool                             a_forceIrregNGP);
+  depositParticles(EBAMRCellData&                      a_meshData,
+                   const std::string&                  a_realm,
+                   const phase::which_phase&           a_phase,
+                   const ParticleContainer<P, Traits>& a_particles,
+                   const DepositionType                a_depositionType,
+                   const CoarseFineDeposition          a_coarseFineDeposition,
+                   const bool                          a_forceIrregNGP);
 
   /**
     @brief Interpolate a mesh scalar field onto the SoA container's weight column.
@@ -1039,12 +1039,12 @@ public:
   */
   template <typename P, typename Traits>
   void
-  interpolateWeight(ParticleContainerSoA<P, Traits>& a_particles,
-                    const std::string&               a_realm,
-                    const phase::which_phase&        a_phase,
-                    const EBAMRCellData&             a_meshScalarField,
-                    const DepositionType             a_interpType,
-                    const bool                       a_forceIrregNGP) const;
+  interpolateWeight(ParticleContainer<P, Traits>& a_particles,
+                    const std::string&            a_realm,
+                    const phase::which_phase&     a_phase,
+                    const EBAMRCellData&          a_meshScalarField,
+                    const DepositionType          a_interpType,
+                    const bool                    a_forceIrregNGP) const;
 
   /**
     @brief Interpolate a mesh field onto one or more SoA payload columns.
@@ -1062,12 +1062,12 @@ public:
   */
   template <auto... Members, typename P, typename Traits>
   void
-  interpolateParticles(ParticleContainerSoA<P, Traits>& a_particles,
-                       const std::string&               a_realm,
-                       const phase::which_phase&        a_phase,
-                       const EBAMRCellData&             a_meshField,
-                       const DepositionType             a_interpType,
-                       const bool                       a_forceIrregNGP) const;
+  interpolateParticles(ParticleContainer<P, Traits>& a_particles,
+                       const std::string&            a_realm,
+                       const phase::which_phase&     a_phase,
+                       const EBAMRCellData&          a_meshField,
+                       const DepositionType          a_interpType,
+                       const bool                    a_forceIrregNGP) const;
 
   /**
     @brief Remove SoA particles that fall inside the EB (implicit-function test): f(x) > a_tolerance*dx.
@@ -1079,9 +1079,9 @@ public:
   */
   template <typename P, typename Traits>
   void
-  removeCoveredParticlesIF(ParticleContainerSoA<P, Traits>& a_particles,
-                           const phase::which_phase&        a_phase,
-                           const Real                       a_tolerance) const;
+  removeCoveredParticlesIF(ParticleContainer<P, Traits>& a_particles,
+                           const phase::which_phase&     a_phase,
+                           const Real                    a_tolerance) const;
 
   /**
     @brief Remove SoA particles inside the EB using discrete (EBISBox) information: covered cells, or
@@ -1094,9 +1094,9 @@ public:
   */
   template <typename P, typename Traits>
   void
-  removeCoveredParticlesDiscrete(ParticleContainerSoA<P, Traits>& a_particles,
-                                 const phase::which_phase&        a_phase,
-                                 const Real                       a_tolerance) const;
+  removeCoveredParticlesDiscrete(ParticleContainer<P, Traits>& a_particles,
+                                 const phase::which_phase&     a_phase,
+                                 const Real                    a_tolerance) const;
 
   /**
     @brief Remove SoA particles that live in covered cells (voxel test).
@@ -1107,7 +1107,7 @@ public:
   */
   template <typename P, typename Traits>
   void
-  removeCoveredParticlesVoxels(ParticleContainerSoA<P, Traits>& a_particles, const phase::which_phase& a_phase) const;
+  removeCoveredParticlesVoxels(ParticleContainer<P, Traits>& a_particles, const phase::which_phase& a_phase) const;
 
   /**
     @brief Transfer SoA particles inside the EB (implicit-function test) from one container to another: f(x) > a_tolerance*dx.
@@ -1121,10 +1121,10 @@ public:
   */
   template <typename P, typename Traits>
   void
-  transferCoveredParticlesIF(ParticleContainerSoA<P, Traits>& a_particlesFrom,
-                             ParticleContainerSoA<P, Traits>& a_particlesTo,
-                             const phase::which_phase&        a_phase,
-                             const Real                       a_tolerance) const;
+  transferCoveredParticlesIF(ParticleContainer<P, Traits>& a_particlesFrom,
+                             ParticleContainer<P, Traits>& a_particlesTo,
+                             const phase::which_phase&     a_phase,
+                             const Real                    a_tolerance) const;
 
   /**
     @brief Transfer SoA particles inside the EB using discrete (EBISBox) information from one container to another.
@@ -1138,10 +1138,10 @@ public:
   */
   template <typename P, typename Traits>
   void
-  transferCoveredParticlesDiscrete(ParticleContainerSoA<P, Traits>& a_particlesFrom,
-                                   ParticleContainerSoA<P, Traits>& a_particlesTo,
-                                   const phase::which_phase&        a_phase,
-                                   const Real                       a_tolerance) const;
+  transferCoveredParticlesDiscrete(ParticleContainer<P, Traits>& a_particlesFrom,
+                                   ParticleContainer<P, Traits>& a_particlesTo,
+                                   const phase::which_phase&     a_phase,
+                                   const Real                    a_tolerance) const;
 
   /**
     @brief Transfer SoA particles that live in covered cells (voxel test) from one container to another.
@@ -1153,9 +1153,9 @@ public:
   */
   template <typename P, typename Traits>
   void
-  transferCoveredParticlesVoxels(ParticleContainerSoA<P, Traits>& a_particlesFrom,
-                                 ParticleContainerSoA<P, Traits>& a_particlesTo,
-                                 const phase::which_phase&        a_phase) const;
+  transferCoveredParticlesVoxels(ParticleContainer<P, Traits>& a_particlesFrom,
+                                 ParticleContainer<P, Traits>& a_particlesTo,
+                                 const phase::which_phase&     a_phase) const;
 
   /**
     @brief Transfer SoA particles that are on the covered side of the EB to a different container.
@@ -1169,9 +1169,9 @@ public:
   */
   template <typename P, typename Traits>
   void
-  transferIrregularParticles(ParticleContainerSoA<P, Traits>& a_dstParticles,
-                             ParticleContainerSoA<P, Traits>& a_srcParticles,
-                             const phase::which_phase         a_phase) const noexcept;
+  transferIrregularParticles(ParticleContainer<P, Traits>& a_dstParticles,
+                             ParticleContainer<P, Traits>& a_srcParticles,
+                             const phase::which_phase      a_phase) const noexcept;
 
   /**
     @brief SoA ray-casting particle intersection algorithm.
@@ -1195,9 +1195,9 @@ public:
   template <auto... OldPosition, typename P, typename Traits>
   void
   intersectParticlesRaycastIF(
-    ParticleContainerSoA<P, Traits>&                                 a_activeParticles,
-    ParticleContainerSoA<P, Traits>&                                 a_ebParticles,
-    ParticleContainerSoA<P, Traits>&                                 a_domainParticles,
+    ParticleContainer<P, Traits>&                                    a_activeParticles,
+    ParticleContainer<P, Traits>&                                    a_ebParticles,
+    ParticleContainer<P, Traits>&                                    a_domainParticles,
     const phase::which_phase                                         a_phase,
     const Real                                                       a_tolerance,
     const bool                                                       a_deleteParticles,
@@ -1223,9 +1223,9 @@ public:
   template <auto... OldPosition, typename P, typename Traits>
   void
   intersectParticlesBisectIF(
-    ParticleContainerSoA<P, Traits>&                                 a_activeParticles,
-    ParticleContainerSoA<P, Traits>&                                 a_ebParticles,
-    ParticleContainerSoA<P, Traits>&                                 a_domainParticles,
+    ParticleContainer<P, Traits>&                                    a_activeParticles,
+    ParticleContainer<P, Traits>&                                    a_ebParticles,
+    ParticleContainer<P, Traits>&                                    a_domainParticles,
     const phase::which_phase                                         a_phase,
     const Real                                                       a_bisectionStep,
     const bool                                                       a_deleteParticles,
@@ -1364,7 +1364,7 @@ public:
 
   /**
     @brief Regrid a struct-of-arrays particle container to new grids.
-    @note User needs to call ParticleContainerSoA::preRegrid prior to this.
+    @note User needs to call ParticleContainer::preRegrid prior to this.
     @param[in,out] a_particles      SoA particle container to regrid.
     @param[in]     a_lmin           Coarsest level that did not change.
     @param[in]     a_newFinestLevel New finest level.
@@ -1373,9 +1373,9 @@ public:
   */
   template <typename P, typename Traits>
   void
-  remapToNewGrids(ParticleContainerSoA<P, Traits>& a_particles,
-                  const int                        a_lmin,
-                  const int                        a_newFinestLevel) const noexcept;
+  remapToNewGrids(ParticleContainer<P, Traits>& a_particles,
+                  const int                     a_lmin,
+                  const int                     a_newFinestLevel) const noexcept;
 
   /**
     @brief Interpolate data to centroids on realm and phase
@@ -1939,7 +1939,7 @@ public:
     @param[in] a_phase Phase (gas or solid)
     @return SoA particle mesh
   */
-  EBAMRParticleMeshSoA&
+  EBAMRParticleMesh&
   getParticleMeshSoA(const std::string& a_realm, const phase::which_phase a_phase) const;
 
   /**

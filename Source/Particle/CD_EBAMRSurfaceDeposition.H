@@ -20,7 +20,7 @@
 
 // Our includes
 #include <CD_EBAMRData.H>
-#include <CD_ParticleContainerSoA.H>
+#include <CD_ParticleContainer.H>
 #include <CD_NamespaceHeader.H>
 
 /**
@@ -93,7 +93,7 @@ public:
   */
   template <typename P, typename Traits>
   void
-  deposit(EBAMRIVData& a_meshData, const ParticleContainerSoA<P, Traits>& a_particles) const noexcept;
+  deposit(EBAMRIVData& a_meshData, const ParticleContainer<P, Traits>& a_particles) const noexcept;
 
 protected:
   /**

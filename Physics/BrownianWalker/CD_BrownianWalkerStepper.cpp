@@ -470,7 +470,7 @@ BrownianWalkerStepper::advance(const Real a_dt)
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
     const DataIterator&      dit = dbl.dataIterator();
 
-    ParticleContainerSoA<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::Bulk);
+    ParticleContainer<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
     const int nbox = dit.size();
 
@@ -748,7 +748,7 @@ BrownianWalkerStepper::loadBalanceBoxesParticles(Vector<Vector<int>>&           
   //       particles needs to be remapped twice (once here, and once in BrownianWalkerStepper::regrid). So, this method is usually slower
   //       than the other one when the number of particles is large.
 
-  ParticleContainerSoA<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::Bulk);
+  ParticleContainer<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
   // Regrid the particles onto the new mesh (SoA regrid rebuilds over the new layout from the preRegrid cache).
   particles.regrid(a_grids,
@@ -827,7 +827,7 @@ BrownianWalkerStepper::getCheckpointLoads(const std::string& a_realm, const int 
 
   loads.resize(boxArray.size(), 0L);
 
-  const ParticleContainerSoA<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::Bulk);
+  const ParticleContainer<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
   const int nbox = dit.size();
 

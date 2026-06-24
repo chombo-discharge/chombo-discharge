@@ -187,7 +187,7 @@ namespace ParticleManagement {
     @details The SoA analogue of drawRandomParticles(List<P>): fills a free-standing ParticleSoA leaf
     (the List<P> analogue) rather than an AMR container. MPI-aware -- it partitions a_numParticles across
     ranks (total = a_numParticles) and each rank draws its own share (unit weight, default payload).
-    Downstream code adds the buffer to a ParticleContainerSoA (e.g. addParticlesDestructive) to route the
+    Downstream code adds the buffer to a ParticleContainer (e.g. addParticlesDestructive) to route the
     particles to their owning patch/level/rank.
     @param[out] a_particles    SoA buffer to fill (cleared first).
     @param[in]  a_numParticles Total number of particles across all ranks.
@@ -253,7 +253,7 @@ namespace ParticleManagement {
   /**
     @brief Draw Gaussian-distributed particles into an SoA container (unit weight; positions only).
     @details Each rank draws its own a_numParticles share with weight 1; routing to owners happens when
-    the buffer is added to a ParticleContainerSoA.
+    the buffer is added to a ParticleContainer.
     @param[out] a_particles    Output SoA buffer (cleared on entry).
     @param[in]  a_numParticles Number of particles.
     @param[in]  a_center       Gaussian blob center.
@@ -272,7 +272,7 @@ namespace ParticleManagement {
   /**
     @brief Draw box-distributed particles into an SoA container (unit weight; positions only).
     @details SoA analogue of drawBoxParticles(List<P>): each rank draws its own a_numParticles share with
-    weight 1; routing to owners happens when the buffer is added to a ParticleContainerSoA.
+    weight 1; routing to owners happens when the buffer is added to a ParticleContainer.
     @param[out] a_particles    Output SoA buffer (cleared on entry).
     @param[in]  a_numParticles Number of particles.
     @param[in]  a_loCorner     Low corner of box.
@@ -291,7 +291,7 @@ namespace ParticleManagement {
   /**
     @brief Draw sphere-distributed particles into an SoA container (unit weight; positions only).
     @details SoA analogue of drawSphereParticles(List<P>): each rank draws its own a_numParticles share with
-    weight 1; routing to owners happens when the buffer is added to a ParticleContainerSoA.
+    weight 1; routing to owners happens when the buffer is added to a ParticleContainer.
     @param[out] a_particles    Output SoA buffer (cleared on entry).
     @param[in]  a_numParticles Number of particles.
     @param[in]  a_center       Sphere center.

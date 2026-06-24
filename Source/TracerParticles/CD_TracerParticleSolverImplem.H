@@ -662,7 +662,7 @@ TracerParticleSolver<P>::computeDt() const
 }
 
 template <typename P>
-inline ParticleContainerSoA<P>&
+inline ParticleContainer<P>&
 TracerParticleSolver<P>::getParticles()
 {
   CH_TIME("TracerParticleSolver::getParticles()");
@@ -674,7 +674,7 @@ TracerParticleSolver<P>::getParticles()
 }
 
 template <typename P>
-inline const ParticleContainerSoA<P>&
+inline const ParticleContainer<P>&
 TracerParticleSolver<P>::getParticles() const
 {
   CH_TIME("TracerParticleSolver::getParticles()");

@@ -387,10 +387,10 @@ ItoLayout<T>::getMobilityFunctions()
 }
 
 template <class T>
-Vector<ParticleContainerSoA<ItoParticle>*>
+Vector<ParticleContainer<ItoParticle>*>
 ItoLayout<T>::getParticles(const ItoSolver::WhichContainer a_container)
 {
-  Vector<ParticleContainerSoA<ItoParticle>*> ret(m_solvers.size(), nullptr);
+  Vector<ParticleContainer<ItoParticle>*> ret(m_solvers.size(), nullptr);
   for (ItoIterator<T> iter = this->iterator(); iter.ok(); ++iter) {
     ret[iter.index()] = &(iter()->getParticles(a_container));
   }

@@ -5,11 +5,11 @@
  */
 
 /**
-  @file   CD_ParticleContainerSoA.H
+  @file   CD_ParticleContainer.H
   @brief  Dev staging: AMR-hierarchy owner of per-patch ParticleSoA leaves (storage layer).
   @author Robert Marskar
   @details
-  ParticleContainerSoA is the SoA replacement for Source/Particle/CD_ParticleContainer.H. It owns
+  ParticleContainer is the SoA replacement for Source/Particle/CD_ParticleContainer.H. It owns
   particles across the AMR hierarchy: one @c LayoutData<ParticleSoA<P>> per level, indexed by
   @c DataIndex over that level's @c DisjointBoxLayout (mirroring Chombo's ParticleData<List<P>>).
 
@@ -35,8 +35,8 @@
   @tparam Traits Column descriptor for the payload; defaults to ParticleTraits<P>.
 */
 
-#ifndef CD_PARTICLECONTAINERSOA_H
-#define CD_PARTICLECONTAINERSOA_H
+#ifndef CD_PARTICLECONTAINER_H
+#define CD_PARTICLECONTAINER_H
 
 // Std includes
 #include <cmath>
@@ -85,7 +85,7 @@ using AMRParticlesSoA = Vector<RefCountedPtr<LayoutData<ParticleSoA<P, Traits>>>
   @tparam Traits Column descriptor for the payload; defaults to ParticleTraits<P>.
 */
 template <typename P = NoPayload, typename Traits = ParticleTraits<P>>
-class ParticleContainerSoA
+class ParticleContainer
 {
 public:
   /** @brief The per-patch leaf type owned at every (level, box). */
@@ -102,7 +102,7 @@ public:
   /**
     @brief Construct an empty, undefined container. Call define() before use.
   */
-  ParticleContainerSoA()
+  ParticleContainer()
     : m_probLo(RealVect::Zero),
       m_blockingFactor(0),
       m_finestLevel(-1),
@@ -114,19 +114,19 @@ public:
   /**
     @brief Destructor.
   */
-  ~ParticleContainerSoA() = default;
+  ~ParticleContainer() = default;
 
   /**
     @brief Copy construction is deleted (holders are shared RefCountedPtr -- a copy would alias).
   */
-  ParticleContainerSoA(const ParticleContainerSoA&) = delete;
+  ParticleContainer(const ParticleContainer&) = delete;
 
   /**
     @brief Copy assignment is deleted (move-only ownership).
     @return Reference to this.
   */
-  ParticleContainerSoA&
-  operator=(const ParticleContainerSoA&) = delete;
+  ParticleContainer&
+  operator=(const ParticleContainer&) = delete;
 
   /**
     @brief Allocate the per-level holders and the per-level tile-ownership maps over the AMR grids.
@@ -154,7 +154,7 @@ public:
          const int                        a_finestLevel,
          const std::string&               a_realm)
   {
-    CH_TIME("ParticleContainerSoA::define");
+    CH_TIME("ParticleContainer::define");
 
     CH_assert(a_grids.size() > a_finestLevel);
     CH_assert(a_domains.size() > a_finestLevel);
@@ -387,7 +387,7 @@ public:
   void
   clearParticles()
   {
-    CH_TIME("ParticleContainerSoA::clearParticles");
+    CH_TIME("ParticleContainer::clearParticles");
 
     CH_assert(m_isDefined);
 
@@ -440,7 +440,7 @@ public:
   void
   addParticlesDestructive(ParticleSoA<P, Traits>& a_particles)
   {
-    CH_TIME("ParticleContainerSoA::addParticlesDestructive");
+    CH_TIME("ParticleContainer::addParticlesDestructive");
 
     CH_assert(m_isDefined);
 
@@ -469,7 +469,7 @@ public:
   unsigned long long
   getNumberOfValidParticlesLocal() const
   {
-    CH_TIME("ParticleContainerSoA::getNumberOfValidParticlesLocal");
+    CH_TIME("ParticleContainer::getNumberOfValidParticlesLocal");
 
     CH_assert(m_isDefined);
 
@@ -490,7 +490,7 @@ public:
   unsigned long long
   getNumberOfValidParticlesGlobal() const
   {
-    CH_TIME("ParticleContainerSoA::getNumberOfValidParticlesGlobal");
+    CH_TIME("ParticleContainer::getNumberOfValidParticlesGlobal");
 
     CH_assert(m_isDefined);
 
@@ -626,7 +626,7 @@ public:
   void
   clearMaskParticles()
   {
-    CH_TIME("ParticleContainerSoA::clearMaskParticles");
+    CH_TIME("ParticleContainer::clearMaskParticles");
 
     CH_assert(m_isDefined);
 
@@ -644,7 +644,7 @@ public:
   void
   clearBufferParticles()
   {
-    CH_TIME("ParticleContainerSoA::clearBufferParticles");
+    CH_TIME("ParticleContainer::clearBufferParticles");
 
     CH_assert(m_isDefined);
 
@@ -677,7 +677,7 @@ public:
   void
   transferParticles(AMRParticlesSoA<P, Traits>& a_source)
   {
-    CH_TIME("ParticleContainerSoA::transferParticles");
+    CH_TIME("ParticleContainer::transferParticles");
 
     CH_assert(m_isDefined);
 
@@ -706,7 +706,7 @@ public:
   void
   organizeParticlesByCell()
   {
-    CH_TIME("ParticleContainerSoA::organizeParticlesByCell");
+    CH_TIME("ParticleContainer::organizeParticlesByCell");
 
     CH_assert(m_isDefined);
 
@@ -728,7 +728,7 @@ public:
   void
   organizeParticlesByPatch()
   {
-    CH_TIME("ParticleContainerSoA::organizeParticlesByPatch");
+    CH_TIME("ParticleContainer::organizeParticlesByPatch");
 
     m_isOrganizedByCell = false;
   }
@@ -914,6 +914,6 @@ protected:
 
 #include <CD_NamespaceFooter.H>
 
-#include <CD_ParticleContainerSoAImplem.H>
+#include <CD_ParticleContainerImplem.H>
 
 #endif

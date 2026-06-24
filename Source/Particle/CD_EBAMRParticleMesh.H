@@ -5,16 +5,16 @@
  */
 
 /**
-  @file   CD_EBAMRParticleMeshSoA.H
+  @file   CD_EBAMRParticleMesh.H
   @brief  Dev staging: ParticleSoA/AMR port of EBAMRParticleMesh (deposit/interpolate across levels).
   @author Robert Marskar
   @details
-  EBAMRParticleMeshSoA is the AMR driver that deposits/interpolates the particles of a
-  ParticleContainerSoA across the grid hierarchy, calling the per-patch EBParticleMeshSoA leaf on
+  EBAMRParticleMesh is the AMR driver that deposits/interpolates the particles of a
+  ParticleContainer across the grid hierarchy, calling the per-patch EBParticleMesh leaf on
   each box. It is the SoA port of Source/Particle/CD_EBAMRParticleMesh.H.
 
   <h2>Scope</h2>
-    - define(): per-level @c LayoutData<EBParticleMeshSoA> leaves (valid grids + refined-coarse FiCo
+    - define(): per-level @c LayoutData<EBParticleMesh> leaves (valid grids + refined-coarse FiCo
       grids), the level valid+ghost->valid Copiers, the @c EBCoarseFineParticleMesh operators, and
       the outer-halo masks;
     - interpolate<Members...>(): full, per-level/per-patch (mesh assumed valid+ghosted by caller);
@@ -34,8 +34,8 @@
   @note Per project rule, NO default arguments -- callers specify every argument.
 */
 
-#ifndef CD_EBAMRPARTICLEMESHSOA_H
-#define CD_EBAMRPARTICLEMESHSOA_H
+#ifndef CD_EBAMRPARTICLEMESH_H
+#define CD_EBAMRPARTICLEMESH_H
 
 // Std includes
 #include <cstddef>
@@ -64,14 +64,14 @@
 #include <CD_DepositionType.H>
 #include <CD_CoarseFineDeposition.H>
 #include <CD_EBCoarseFineParticleMesh.H>
-#include <CD_EBParticleMeshSoA.H>
-#include <CD_ParticleContainerSoA.H>
+#include <CD_EBParticleMesh.H>
+#include <CD_ParticleContainer.H>
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief AMR driver that deposits/interpolates ParticleContainerSoA particles across the hierarchy.
+  @brief AMR driver that deposits/interpolates ParticleContainer particles across the hierarchy.
 */
-class EBAMRParticleMeshSoA
+class EBAMRParticleMesh
 {
 public:
   /**
@@ -82,25 +82,25 @@ public:
   /**
     @brief Default constructor. Leaves the object undefined; call define().
   */
-  EBAMRParticleMeshSoA() : m_ghost(0), m_finestLevel(-1), m_isDefined(false)
+  EBAMRParticleMesh() : m_ghost(0), m_finestLevel(-1), m_isDefined(false)
   {}
 
   /**
     @brief Destructor.
   */
-  ~EBAMRParticleMeshSoA() = default;
+  ~EBAMRParticleMesh() = default;
 
   /**
     @brief Copy construction is deleted (shared RefCountedPtr state).
   */
-  EBAMRParticleMeshSoA(const EBAMRParticleMeshSoA&) = delete;
+  EBAMRParticleMesh(const EBAMRParticleMesh&) = delete;
 
   /**
     @brief Copy assignment is deleted.
     @return Reference to this.
   */
-  EBAMRParticleMeshSoA&
-  operator=(const EBAMRParticleMeshSoA&) = delete;
+  EBAMRParticleMesh&
+  operator=(const EBAMRParticleMesh&) = delete;
 
   /**
     @brief Define the per-level leaves and the coarse-fine mesh operators (stage-A subset).
@@ -119,7 +119,7 @@ public:
          const int                                 a_ghost,
          const int                                 a_finestLevel)
   {
-    CH_TIME("EBAMRParticleMeshSoA::define");
+    CH_TIME("EBAMRParticleMesh::define");
 
     CH_assert(a_eblgs.size() > a_finestLevel);
     CH_assert(a_refRat.size() > a_finestLevel);
@@ -150,7 +150,7 @@ public:
 
   /**
     @brief Interpolate a mesh field onto one or more payload columns, across all levels.
-    @details Per level, per patch: calls EBParticleMeshSoA::interpolate. The mesh is assumed to be
+    @details Per level, per patch: calls EBParticleMesh::interpolate. The mesh is assumed to be
     valid+ghosted by the caller (no coarse-fine coupling is needed for interpolation).
     @tparam Members Pack of payload data-member pointers selecting the target column(s).
     @tparam P       Payload type (deduced).
@@ -162,20 +162,20 @@ public:
   */
   template <auto... Members, typename P, typename Traits>
   void
-  interpolate(ParticleContainerSoA<P, Traits>& a_particles,
-              const EBAMRCellData&             a_meshData,
-              const DepositionType             a_interpType,
-              const bool                       a_forceIrregNGP) const
+  interpolate(ParticleContainer<P, Traits>& a_particles,
+              const EBAMRCellData&          a_meshData,
+              const DepositionType          a_interpType,
+              const bool                    a_forceIrregNGP) const
   {
-    CH_TIME("EBAMRParticleMeshSoA::interpolate");
+    CH_TIME("EBAMRParticleMesh::interpolate");
 
     CH_assert(m_isDefined);
 
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
       const DisjointBoxLayout& dbl = m_eblgs[lvl]->getDBL();
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-        const EBParticleMeshSoA& interp = (*m_ebParticleMesh[lvl])[dit()];
-        const EBCellFAB&         data   = (*a_meshData[lvl])[dit()];
+        const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[dit()];
+        const EBCellFAB&      data   = (*a_meshData[lvl])[dit()];
         interp.template interpolate<Members...>(a_particles[lvl][dit()], data, a_interpType, a_forceIrregNGP);
       }
     }
@@ -183,7 +183,7 @@ public:
 
   /**
     @brief Interpolate a mesh field onto the container-owned weight column, across all levels.
-    @details Per level, per patch: calls EBParticleMeshSoA::interpolateWeight. The mesh is assumed to
+    @details Per level, per patch: calls EBParticleMesh::interpolateWeight. The mesh is assumed to
     be valid+ghosted by the caller (no coarse-fine coupling is needed for interpolation). This is the
     interpolation mirror of depositWeight.
     @tparam P      Payload type (deduced).
@@ -195,20 +195,20 @@ public:
   */
   template <typename P, typename Traits>
   void
-  interpolateWeight(ParticleContainerSoA<P, Traits>& a_particles,
-                    const EBAMRCellData&             a_meshData,
-                    const DepositionType             a_interpType,
-                    const bool                       a_forceIrregNGP) const
+  interpolateWeight(ParticleContainer<P, Traits>& a_particles,
+                    const EBAMRCellData&          a_meshData,
+                    const DepositionType          a_interpType,
+                    const bool                    a_forceIrregNGP) const
   {
-    CH_TIME("EBAMRParticleMeshSoA::interpolateWeight");
+    CH_TIME("EBAMRParticleMesh::interpolateWeight");
 
     CH_assert(m_isDefined);
 
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
       const DisjointBoxLayout& dbl = m_eblgs[lvl]->getDBL();
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-        const EBParticleMeshSoA& interp = (*m_ebParticleMesh[lvl])[dit()];
-        const EBCellFAB&         data   = (*a_meshData[lvl])[dit()];
+        const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[dit()];
+        const EBCellFAB&      data   = (*a_meshData[lvl])[dit()];
         interp.interpolateWeight(a_particles[lvl][dit()], data, a_interpType, a_forceIrregNGP);
       }
     }
@@ -235,22 +235,22 @@ public:
   */
   template <typename P, typename Traits>
   void
-  depositWeight(EBAMRCellData&                         a_meshData,
-                const ParticleContainerSoA<P, Traits>& a_particles,
-                const DepositionType                   a_depositionType,
-                const CoarseFineDeposition             a_coarseFineDeposition,
-                const bool                             a_forceIrregNGP)
+  depositWeight(EBAMRCellData&                      a_meshData,
+                const ParticleContainer<P, Traits>& a_particles,
+                const DepositionType                a_depositionType,
+                const CoarseFineDeposition          a_coarseFineDeposition,
+                const bool                          a_forceIrregNGP)
   {
-    CH_TIME("EBAMRParticleMeshSoA::depositWeight");
+    CH_TIME("EBAMRParticleMesh::depositWeight");
 
     CH_assert(m_isDefined);
 
     const auto patch =
-      [&](const EBParticleMeshSoA& a_interp, EBCellFAB& a_rho, const auto& a_soa, const Real a_widthScale) {
+      [&](const EBParticleMesh& a_interp, EBCellFAB& a_rho, const auto& a_soa, const Real a_widthScale) {
         a_interp.depositWeight(a_rho, a_soa, a_depositionType, a_widthScale, a_forceIrregNGP);
       };
     const auto patchNGP =
-      [&](const EBParticleMeshSoA& a_interp, EBCellFAB& a_rho, const auto& a_soa, const Real a_widthScale) {
+      [&](const EBParticleMesh& a_interp, EBCellFAB& a_rho, const auto& a_soa, const Real a_widthScale) {
         a_interp.depositWeight(a_rho, a_soa, DepositionType::NGP, a_widthScale, a_forceIrregNGP);
       };
 
@@ -295,19 +295,19 @@ public:
   */
   template <typename P, typename Traits, typename CellGather>
   void
-  depositGathered(EBAMRCellData&                         a_meshData,
-                  const ParticleContainerSoA<P, Traits>& a_particles,
-                  const DepositionType                   a_depositionType,
-                  const CoarseFineDeposition             a_coarseFineDeposition,
-                  const bool                             a_forceIrregNGP,
-                  CellGather                             a_cellGather)
+  depositGathered(EBAMRCellData&                      a_meshData,
+                  const ParticleContainer<P, Traits>& a_particles,
+                  const DepositionType                a_depositionType,
+                  const CoarseFineDeposition          a_coarseFineDeposition,
+                  const bool                          a_forceIrregNGP,
+                  CellGather                          a_cellGather)
   {
-    CH_TIME("EBAMRParticleMeshSoA::depositGathered");
+    CH_TIME("EBAMRParticleMesh::depositGathered");
 
     CH_assert(m_isDefined);
 
     const auto patch =
-      [&](const EBParticleMeshSoA& a_interp, EBCellFAB& a_rho, const auto& a_soa, const Real a_widthScale) {
+      [&](const EBParticleMesh& a_interp, EBCellFAB& a_rho, const auto& a_soa, const Real a_widthScale) {
         a_interp.depositGathered(a_rho,
                                  0,
                                  a_soa,
@@ -319,7 +319,7 @@ public:
                                  });
       };
     const auto patchNGP =
-      [&](const EBParticleMeshSoA& a_interp, EBCellFAB& a_rho, const auto& a_soa, const Real a_widthScale) {
+      [&](const EBParticleMesh& a_interp, EBCellFAB& a_rho, const auto& a_soa, const Real a_widthScale) {
         a_interp.depositGathered(a_rho,
                                  0,
                                  a_soa,
@@ -369,22 +369,22 @@ public:
   */
   template <auto... Members, typename P, typename Traits>
   void
-  deposit(EBAMRCellData&                         a_meshData,
-          const ParticleContainerSoA<P, Traits>& a_particles,
-          const DepositionType                   a_depositionType,
-          const CoarseFineDeposition             a_coarseFineDeposition,
-          const bool                             a_forceIrregNGP)
+  deposit(EBAMRCellData&                      a_meshData,
+          const ParticleContainer<P, Traits>& a_particles,
+          const DepositionType                a_depositionType,
+          const CoarseFineDeposition          a_coarseFineDeposition,
+          const bool                          a_forceIrregNGP)
   {
-    CH_TIME("EBAMRParticleMeshSoA::deposit");
+    CH_TIME("EBAMRParticleMesh::deposit");
 
     CH_assert(m_isDefined);
 
     const auto patch =
-      [&](const EBParticleMeshSoA& a_interp, EBCellFAB& a_rho, const auto& a_soa, const Real a_widthScale) {
+      [&](const EBParticleMesh& a_interp, EBCellFAB& a_rho, const auto& a_soa, const Real a_widthScale) {
         a_interp.template deposit<Members...>(a_rho, a_soa, a_depositionType, a_widthScale, a_forceIrregNGP);
       };
     const auto patchNGP =
-      [&](const EBParticleMeshSoA& a_interp, EBCellFAB& a_rho, const auto& a_soa, const Real a_widthScale) {
+      [&](const EBParticleMesh& a_interp, EBCellFAB& a_rho, const auto& a_soa, const Real a_widthScale) {
         a_interp.template deposit<Members...>(a_rho, a_soa, DepositionType::NGP, a_widthScale, a_forceIrregNGP);
       };
 
@@ -456,7 +456,7 @@ protected:
   /**
     @brief Per-level per-patch deposition/interpolation leaves.
   */
-  Vector<RefCountedPtr<LayoutData<EBParticleMeshSoA>>> m_ebParticleMesh;
+  Vector<RefCountedPtr<LayoutData<EBParticleMesh>>> m_ebParticleMesh;
 
   /**
     @brief Per-level valid+ghost -> valid Copiers (fold ghost-deposited mass into the owner patch).
@@ -471,7 +471,7 @@ protected:
   /**
     @brief Per-level per-patch leaves on the refined-coarse (FiCo) grid (null on level 0).
   */
-  Vector<RefCountedPtr<LayoutData<EBParticleMeshSoA>>> m_ebParticleMeshFiCo;
+  Vector<RefCountedPtr<LayoutData<EBParticleMesh>>> m_ebParticleMeshFiCo;
 
   /**
     @brief Outer-halo masks keyed by halo width: per-level coarse cells just outside the fine patch.
@@ -489,17 +489,17 @@ protected:
   void
   errorUnsupported() const
   {
-    MayDay::Error("EBAMRParticleMeshSoA: only CoarseFineDeposition::Interp and ::Halo are supported "
+    MayDay::Error("EBAMRParticleMesh: only CoarseFineDeposition::Interp and ::Halo are supported "
                   "(HaloNGP/Transition are deferred to stage-B2/B3)");
   }
 
   /**
-    @brief Build the per-level per-patch EBParticleMeshSoA leaves (valid grids + refined-coarse grids).
+    @brief Build the per-level per-patch EBParticleMesh leaves (valid grids + refined-coarse grids).
   */
   void
   defineEBParticleMesh()
   {
-    CH_TIME("EBAMRParticleMeshSoA::defineEBParticleMesh");
+    CH_TIME("EBAMRParticleMesh::defineEBParticleMesh");
 
     m_ebParticleMesh.resize(1 + m_finestLevel);
     m_ebParticleMeshFiCo.resize(1 + m_finestLevel);
@@ -508,7 +508,7 @@ protected:
       const DisjointBoxLayout& dbl    = m_eblgs[lvl]->getDBL();
       const EBISLayout&        ebisl  = m_eblgs[lvl]->getEBISL();
 
-      m_ebParticleMesh[lvl] = RefCountedPtr<LayoutData<EBParticleMeshSoA>>(new LayoutData<EBParticleMeshSoA>(dbl));
+      m_ebParticleMesh[lvl] = RefCountedPtr<LayoutData<EBParticleMesh>>(new LayoutData<EBParticleMesh>(dbl));
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
         (*m_ebParticleMesh[lvl])[dit()].define(domain, dbl[dit()], ebisl[dit()], m_dx[lvl] * RealVect::Unit, m_probLo);
       }
@@ -520,8 +520,7 @@ protected:
         const DisjointBoxLayout& dblFiCo    = eblgFiCo.getDBL();
         const EBISLayout&        ebislFiCo  = eblgFiCo.getEBISL();
 
-        m_ebParticleMeshFiCo[lvl] = RefCountedPtr<LayoutData<EBParticleMeshSoA>>(
-          new LayoutData<EBParticleMeshSoA>(dblFiCo));
+        m_ebParticleMeshFiCo[lvl] = RefCountedPtr<LayoutData<EBParticleMesh>>(new LayoutData<EBParticleMesh>(dblFiCo));
         for (DataIterator dit = dblFiCo.dataIterator(); dit.ok(); ++dit) {
           (*m_ebParticleMeshFiCo[lvl])[dit()].define(domainFiCo,
                                                      dblFiCo[dit()],
@@ -531,7 +530,7 @@ protected:
         }
       }
       else {
-        m_ebParticleMeshFiCo[lvl] = RefCountedPtr<LayoutData<EBParticleMeshSoA>>(nullptr);
+        m_ebParticleMeshFiCo[lvl] = RefCountedPtr<LayoutData<EBParticleMesh>>(nullptr);
       }
     }
   }
@@ -542,7 +541,7 @@ protected:
   void
   defineLevelMotion()
   {
-    CH_TIME("EBAMRParticleMeshSoA::defineLevelMotion");
+    CH_TIME("EBAMRParticleMesh::defineLevelMotion");
 
     m_levelCopiers.resize(1 + m_finestLevel);
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
@@ -559,7 +558,7 @@ protected:
   void
   defineCoarseFineMotion()
   {
-    CH_TIME("EBAMRParticleMeshSoA::defineCoarseFineMotion");
+    CH_TIME("EBAMRParticleMesh::defineCoarseFineMotion");
 
     m_coarseFinePM.resize(1 + m_finestLevel);
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
@@ -578,8 +577,8 @@ protected:
     @details Resets the mesh, deposits each level's valid particles (via a_patchDeposit), folds
     ghost-deposited mass into the owner patch (level Copier + EBAddOp), then moves the over-boundary
     mass between levels with the coarse-fine operators. Uses only valid particles.
-    @tparam Container    ParticleContainerSoA type (deduced).
-    @tparam PatchDeposit Callable (const EBParticleMeshSoA&, EBCellFAB&, const ParticleSoA&, Real widthScale).
+    @tparam Container    ParticleContainer type (deduced).
+    @tparam PatchDeposit Callable (const EBParticleMesh&, EBCellFAB&, const ParticleSoA&, Real widthScale).
     @param[in,out] a_meshData     AMR mesh data (RESET then filled).
     @param[in]     a_particles    Particle container.
     @param[in]     a_numComp      Number of mesh components written.
@@ -592,7 +591,7 @@ protected:
                     const int        a_numComp,
                     PatchDeposit     a_patchDeposit) const
   {
-    CH_TIME("EBAMRParticleMeshSoA::depositInterpCore");
+    CH_TIME("EBAMRParticleMesh::depositInterpCore");
 
     CH_assert(m_isDefined);
     CH_assert(a_meshData[0]->nComp() == a_numComp);
@@ -605,8 +604,8 @@ protected:
 
       // 1. Deposit this level's valid particles.
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-        const EBParticleMeshSoA& interp = (*m_ebParticleMesh[lvl])[dit()];
-        EBCellFAB&               rho    = (*a_meshData[lvl])[dit()];
+        const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[dit()];
+        EBCellFAB&            rho    = (*a_meshData[lvl])[dit()];
         a_patchDeposit(interp, rho, a_particles[lvl][dit()], 1.0);
       }
 
@@ -638,7 +637,7 @@ protected:
   void
   defineOuterHaloMasks()
   {
-    CH_TIME("EBAMRParticleMeshSoA::defineOuterHaloMasks");
+    CH_TIME("EBAMRParticleMesh::defineOuterHaloMasks");
 
     constexpr int comp    = 0;
     constexpr int numComp = 1;
@@ -730,8 +729,8 @@ protected:
     (selected by the width-1 outer-halo mask, copied into the container mask holder) on the
     refined-coarse grid with widthScale = refinement ratio, and adds that to the fine level.
     @tparam NCOMP        Number of mesh components (compile-time; selects the FiCo buffer).
-    @tparam Container    ParticleContainerSoA type (deduced).
-    @tparam PatchDeposit Callable (const EBParticleMeshSoA&, EBCellFAB&, const ParticleSoA&, Real widthScale).
+    @tparam Container    ParticleContainer type (deduced).
+    @tparam PatchDeposit Callable (const EBParticleMesh&, EBCellFAB&, const ParticleSoA&, Real widthScale).
     @param[in,out] a_meshData     AMR mesh data (RESET then filled).
     @param[in]     a_particles    Particle container (its mask holder is filled then cleared).
     @param[in]     a_patchDeposit Per-patch deposition functor.
@@ -740,7 +739,7 @@ protected:
   void
   depositHaloCore(EBAMRCellData& a_meshData, const Container& a_particles, PatchDeposit a_patchDeposit) const
   {
-    CH_TIME("EBAMRParticleMeshSoA::depositHaloCore");
+    CH_TIME("EBAMRParticleMesh::depositHaloCore");
 
     CH_assert(m_isDefined);
     CH_assert(a_meshData[0]->nComp() == NCOMP);
@@ -758,8 +757,8 @@ protected:
 
       // 1. Deposit this level's valid particles.
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-        const EBParticleMeshSoA& interp = (*m_ebParticleMesh[lvl])[dit()];
-        EBCellFAB&               rho    = (*a_meshData[lvl])[dit()];
+        const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[dit()];
+        EBCellFAB&            rho    = (*a_meshData[lvl])[dit()];
         a_patchDeposit(interp, rho, a_particles[lvl][dit()], 1.0);
       }
 
@@ -782,7 +781,7 @@ protected:
         for (DataIterator dit = dblFiCo.dataIterator(); dit.ok(); ++dit) {
           EBCellFAB& dataFiCo = bufferFiCo[dit()];
           dataFiCo.setVal(0.0);
-          const EBParticleMeshSoA& interp = (*m_ebParticleMeshFiCo[lvl])[dit()];
+          const EBParticleMesh& interp = (*m_ebParticleMeshFiCo[lvl])[dit()];
           a_patchDeposit(interp, dataFiCo, (*coarHalo)[dit()], widthScale);
         }
 
@@ -807,7 +806,7 @@ protected:
     back to the valid holder. NGP keeps the near-boundary clouds from spreading over the refinement
     boundary, so no refined-coarse buffer is needed.
     @tparam NCOMP           Number of mesh components (compile-time).
-    @tparam Container       ParticleContainerSoA type (deduced).
+    @tparam Container       ParticleContainer type (deduced).
     @tparam PatchDeposit    Per-patch deposit with the requested kernel.
     @tparam PatchDepositNGP Per-patch deposit forced to NGP.
     @param[in,out] a_meshData     AMR mesh data (RESET then filled).
@@ -822,7 +821,7 @@ protected:
                      PatchDeposit     a_patch,
                      PatchDepositNGP  a_patchNGP) const
   {
-    CH_TIME("EBAMRParticleMeshSoA::depositHaloNGPCore");
+    CH_TIME("EBAMRParticleMesh::depositHaloNGPCore");
 
     CH_assert(m_isDefined);
     CH_assert(a_meshData[0]->nComp() == NCOMP);
@@ -840,8 +839,8 @@ protected:
 
       // 1. Deposit the non-halo particles with the requested kernel, the halo particles with NGP.
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-        const EBParticleMeshSoA& interp = (*m_ebParticleMesh[lvl])[dit()];
-        EBCellFAB&               rho    = (*a_meshData[lvl])[dit()];
+        const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[dit()];
+        EBCellFAB&            rho    = (*a_meshData[lvl])[dit()];
         a_patch(interp, rho, a_particles[lvl][dit()], 1.0);
         a_patchNGP(interp, rho, (*a_particles.getMaskParticles()[lvl])[dit()], 1.0);
       }
@@ -882,10 +881,10 @@ protected:
       maskWidth = a_refRat;
     }
     else {
-      MayDay::Abort("EBAMRParticleMeshSoA::getTransitionMaskWidth - logic bust");
+      MayDay::Abort("EBAMRParticleMesh::getTransitionMaskWidth - logic bust");
     }
     if (maskWidth > m_ghost) {
-      MayDay::Abort("EBAMRParticleMeshSoA::getTransitionMaskWidth - not enough ghost cells");
+      MayDay::Abort("EBAMRParticleMesh::getTransitionMaskWidth - not enough ghost cells");
     }
     return maskWidth;
   }
@@ -900,7 +899,7 @@ protected:
   void
   defineTransitionMasks()
   {
-    CH_TIME("EBAMRParticleMeshSoA::defineTransitionMasks");
+    CH_TIME("EBAMRParticleMesh::defineTransitionMasks");
 
     constexpr int  comp    = 0;
     constexpr int  numComp = 1;
@@ -974,7 +973,7 @@ protected:
     @details The transition mask lives on the refined-coarse grid, so this is done directly here
     (the container's transferMaskParticles works on the valid grids). Coarse particles whose
     fine-resolution cell is marked are moved (swap-and-pop) from the valid to the mask holder.
-    @tparam Container ParticleContainerSoA type (deduced).
+    @tparam Container ParticleContainer type (deduced).
     @param[in,out] a_particles      Particle container.
     @param[in]     a_depositionType Deposition kernel (selects the mask width; NGP is a no-op).
   */
@@ -982,7 +981,7 @@ protected:
   void
   transferMaskParticlesTransition(Container& a_particles, const DepositionType a_depositionType) const
   {
-    CH_TIME("EBAMRParticleMeshSoA::transferMaskParticlesTransition");
+    CH_TIME("EBAMRParticleMesh::transferMaskParticlesTransition");
 
     if (a_depositionType == DepositionType::NGP) {
       return;
@@ -1034,7 +1033,7 @@ protected:
     exchangeAndAddFiCoData) and the coarse level (restrictAndAddFiCoDataToCoar); finally returns the
     transition particles to the valid holder.
     @tparam NCOMP        Number of mesh components (compile-time).
-    @tparam Container    ParticleContainerSoA type (deduced).
+    @tparam Container    ParticleContainer type (deduced).
     @tparam PatchDeposit Per-patch deposit with the requested kernel.
     @param[in,out] a_meshData       AMR mesh data (RESET then filled).
     @param[in]     a_particles      Particle container.
@@ -1048,7 +1047,7 @@ protected:
                         const DepositionType a_depositionType,
                         PatchDeposit         a_patch) const
   {
-    CH_TIME("EBAMRParticleMeshSoA::depositTransitionCore");
+    CH_TIME("EBAMRParticleMesh::depositTransitionCore");
 
     CH_assert(m_isDefined);
     CH_assert(a_meshData[0]->nComp() == NCOMP);
@@ -1067,8 +1066,8 @@ protected:
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
       const DisjointBoxLayout& dbl = m_eblgs[lvl]->getDBL();
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-        const EBParticleMeshSoA& interp = (*m_ebParticleMesh[lvl])[dit()];
-        EBCellFAB&               rho    = (*a_meshData[lvl])[dit()];
+        const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[dit()];
+        EBCellFAB&            rho    = (*a_meshData[lvl])[dit()];
         a_patch(interp, rho, a_particles[lvl][dit()], 1.0);
       }
     }
@@ -1099,7 +1098,7 @@ protected:
 
         const BaseFab<bool>& mask = (*m_transitionMasks.at(maskWidth)[lvl])[dit()];
         if (mask.isUsable()) {
-          const EBParticleMeshSoA& interp = (*m_ebParticleMeshFiCo[lvl + 1])[dit()];
+          const EBParticleMesh& interp = (*m_ebParticleMeshFiCo[lvl + 1])[dit()];
           a_patch(interp, dataFiCo, (*a_particles.getMaskParticles()[lvl])[dit()], 1.0);
         }
       }

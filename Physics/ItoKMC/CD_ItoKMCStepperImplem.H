@@ -615,7 +615,7 @@ ItoKMCStepper<I, C, R, F>::allocateInternals() noexcept
   for (int i = 0; i < numCdrSpecies; i++) {
     m_amr->allocate(m_cdrMobilities[i], m_fluidRealm, m_plasmaPhase, 1);
 
-    m_cdrPhotoiProducts[i] = RefCountedPtr<ParticleContainerSoA<NoPayload>>(new ParticleContainerSoA<NoPayload>());
+    m_cdrPhotoiProducts[i] = RefCountedPtr<ParticleContainer<NoPayload>>(new ParticleContainer<NoPayload>());
     m_amr->allocate(*m_cdrPhotoiProducts[i], m_particleRealm);
   }
 
@@ -639,12 +639,12 @@ ItoKMCStepper<I, C, R, F>::allocateInternals() noexcept
   m_cdrFluxesExtrap.resize(numCdrSpecies);
 
   for (int i = 0; i < numItoSpecies; i++) {
-    m_secondaryParticles[i] = RefCountedPtr<ParticleContainerSoA<ItoParticle>>(new ParticleContainerSoA<ItoParticle>());
+    m_secondaryParticles[i] = RefCountedPtr<ParticleContainer<ItoParticle>>(new ParticleContainer<ItoParticle>());
     m_amr->allocate(*m_secondaryParticles[i], m_particleRealm);
   }
 
   for (int i = 0; i < numPhotonSpecies; i++) {
-    m_secondaryPhotons[i] = RefCountedPtr<ParticleContainerSoA<Photon>>(new ParticleContainerSoA<Photon>());
+    m_secondaryPhotons[i] = RefCountedPtr<ParticleContainer<Photon>>(new ParticleContainer<Photon>());
     m_amr->allocate(*m_secondaryPhotons[i], m_particleRealm);
   }
 
@@ -1170,7 +1170,7 @@ ItoKMCStepper<I, C, R, F>::writeNumberOfParticlesPerPatch(LevelData<EBCellFAB>& 
   DataOps::setValue(*m_particleScratch1[a_level], 0.0, a_icomp);
 
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-    const ParticleContainerSoA<ItoParticle>& particles = solverIt()->getParticles(ItoSolver::WhichContainer::Bulk);
+    const ParticleContainer<ItoParticle>& particles = solverIt()->getParticles(ItoSolver::WhichContainer::Bulk);
 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
@@ -1665,8 +1665,8 @@ ItoKMCStepper<I, C, R, F>::preRegrid(const int a_lmin, const int a_oldFinestLeve
     for (int i = 0; i < lbSolvers.size(); i++) {
       m_amr->allocate(m_loadBalancePPC[i], m_particleRealm, m_plasmaPhase, 1);
 
-      EBAMRCellData&                           compPPC   = m_loadBalancePPC[i];
-      const ParticleContainerSoA<ItoParticle>& particles = lbSolvers[i]->getParticles(ItoSolver::WhichContainer::Bulk);
+      EBAMRCellData&                        compPPC   = m_loadBalancePPC[i];
+      const ParticleContainer<ItoParticle>& particles = lbSolvers[i]->getParticles(ItoSolver::WhichContainer::Bulk);
 
       ParticleOps::getComputationalParticlesPerCell(compPPC, particles);
     }
@@ -2004,9 +2004,8 @@ ItoKMCStepper<I, C, R, F>::computeConductivityCell(EBAMRCellData& a_conductivity
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoKMCStepper<I, C, R, F>::computeConductivityCell(
-  EBAMRCellData&                                    a_conductivity,
-  const Vector<ParticleContainerSoA<ItoParticle>*>& a_particles) noexcept
+ItoKMCStepper<I, C, R, F>::computeConductivityCell(EBAMRCellData&                                 a_conductivity,
+                                                   const Vector<ParticleContainer<ItoParticle>*>& a_particles) noexcept
 {
   CH_TIME("ItoKMCStepper::computeConductivityCell(EBAMRCellData, Particles)");
   if (m_verbosity > 5) {
@@ -3535,7 +3534,7 @@ ItoKMCStepper<I, C, R, F>::getPhysicalParticlesPerCell(EBAMRCellData& a_ppc) con
 
     EBAMRCellData ppc = m_amr->slice(a_ppc, Interval(idx, idx));
 
-    const ParticleContainerSoA<ItoParticle>& particles = it()->getParticles(ItoSolver::WhichContainer::Bulk);
+    const ParticleContainer<ItoParticle>& particles = it()->getParticles(ItoSolver::WhichContainer::Bulk);
 
     ParticleOps::getPhysicalParticlesPerCell(ppc, particles);
   }
@@ -3617,7 +3616,7 @@ ItoKMCStepper<I, C, R, F>::computeReactiveItoParticlesPerCell(EBCellFAB&      a_
     RefCountedPtr<ItoSolver>& solver = solverIt();
     const int                 idx    = solverIt.index();
 
-    ParticleContainerSoA<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
+    ParticleContainer<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
     // SoA per-cell extract: cell-sort this leaf and split it into one ParticleSoA per grid cell.
     std::vector<ParticleSoA<ItoParticle>> cellParticles;
@@ -3847,7 +3846,7 @@ ItoKMCStepper<I, C, R, F>::computeReactiveMeanEnergiesPerCell(EBCellFAB&      a_
     RefCountedPtr<ItoSolver>& solver = solverIt();
     const int                 idx    = solverIt.index();
 
-    ParticleContainerSoA<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
+    ParticleContainer<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
     // SoA per-cell extract: cell-sort this leaf and split it into one ParticleSoA per grid cell.
     std::vector<ParticleSoA<ItoParticle>> cellParticles;
@@ -4411,7 +4410,7 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
     const int idx = solverIt.index();
 
-    ParticleContainerSoA<ItoParticle>& solverParticles = solverIt()->getParticles(ItoSolver::WhichContainer::Bulk);
+    ParticleContainer<ItoParticle>& solverParticles = solverIt()->getParticles(ItoSolver::WhichContainer::Bulk);
 
     binLeafToCells(itoCells[idx], solverParticles[a_level][a_din], a_box, a_dx, probLo);
   }
@@ -4427,8 +4426,8 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
   for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
     const int idx = solverIt.index();
 
-    ParticleContainerSoA<Photon>& solverBulkPhotons   = solverIt()->getBulkPhotons();
-    ParticleContainerSoA<Photon>& solverSourcePhotons = solverIt()->getSourcePhotons();
+    ParticleContainer<Photon>& solverBulkPhotons   = solverIt()->getBulkPhotons();
+    ParticleContainer<Photon>& solverSourcePhotons = solverIt()->getSourcePhotons();
 
     binLeafToCells(bulkPhotonCells[idx], solverBulkPhotons[a_level][a_din], a_box, a_dx, probLo);
     binLeafToCells(sourcePhotonCells[idx], solverSourcePhotons[a_level][a_din], a_box, a_dx, probLo);
@@ -4637,7 +4636,7 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
     const int idx = solverIt.index();
 
-    ParticleContainerSoA<ItoParticle>& solverParticles = solverIt()->getParticles(ItoSolver::WhichContainer::Bulk);
+    ParticleContainer<ItoParticle>& solverParticles = solverIt()->getParticles(ItoSolver::WhichContainer::Bulk);
 
     rebuildLeafFromCells(solverParticles[a_level][a_din], itoCells[idx]);
   }
@@ -4645,7 +4644,7 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
   for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
     const int idx = solverIt.index();
 
-    ParticleContainerSoA<Photon>& solverSourcePhotons = solverIt()->getSourcePhotons();
+    ParticleContainer<Photon>& solverSourcePhotons = solverIt()->getSourcePhotons();
 
     rebuildLeafFromCells(solverSourcePhotons[a_level][a_din], sourcePhotonCells[idx]);
   }
@@ -4901,9 +4900,9 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(const Real a_dt) noexcept
   }
 
   // Particles that left the domain
-  Vector<ParticleContainerSoA<ItoParticle>*> primaryParticles;
+  Vector<ParticleContainer<ItoParticle>*> primaryParticles;
   for (auto it = m_ito->iterator(); it.ok(); ++it) {
-    ParticleContainerSoA<ItoParticle>& intersectedParticles = it()->getParticles(ItoSolver::WhichContainer::EB);
+    ParticleContainer<ItoParticle>& intersectedParticles = it()->getParticles(ItoSolver::WhichContainer::EB);
 
     primaryParticles.push_back(&intersectedParticles);
   }
@@ -4929,9 +4928,9 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(const Real a_dt) noexcept
   }
 
   // Photons that left the domain
-  Vector<ParticleContainerSoA<Photon>*> primaryPhotons;
+  Vector<ParticleContainer<Photon>*> primaryPhotons;
   for (auto it = m_rte->iterator(); it.ok(); ++it) {
-    ParticleContainerSoA<Photon>& intersectedPhotons = it()->getEbPhotons();
+    ParticleContainer<Photon>& intersectedPhotons = it()->getEbPhotons();
 
     primaryPhotons.push_back(&intersectedPhotons);
   }
@@ -4950,14 +4949,14 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(const Real a_dt) noexcept
 template <typename I, typename C, typename R, typename F>
 void
 ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(
-  Vector<RefCountedPtr<ParticleContainerSoA<ItoParticle>>>& a_secondaryParticles,
-  Vector<EBAMRIVData>&                                      a_cdrFluxes,
-  Vector<RefCountedPtr<ParticleContainerSoA<Photon>>>&      a_secondaryPhotons,
-  Vector<ParticleContainerSoA<ItoParticle>*>&               a_primaryParticles,
-  Vector<EBAMRIVData>&                                      a_cdrFluxesExtrap,
-  Vector<ParticleContainerSoA<Photon>*>&                    a_primaryPhotons,
-  const EBAMRCellData&                                      a_electricField,
-  const Real                                                a_dt) noexcept
+  Vector<RefCountedPtr<ParticleContainer<ItoParticle>>>& a_secondaryParticles,
+  Vector<EBAMRIVData>&                                   a_cdrFluxes,
+  Vector<RefCountedPtr<ParticleContainer<Photon>>>&      a_secondaryPhotons,
+  Vector<ParticleContainer<ItoParticle>*>&               a_primaryParticles,
+  Vector<EBAMRIVData>&                                   a_cdrFluxesExtrap,
+  Vector<ParticleContainer<Photon>*>&                    a_primaryPhotons,
+  const EBAMRCellData&                                   a_electricField,
+  const Real                                             a_dt) noexcept
 {
   CH_TIME("ItoKMCStepper::fillSecondaryEmissionEB(full)");
   if (m_verbosity > 5) {
@@ -5193,8 +5192,8 @@ ItoKMCStepper<I, C, R, F>::resolveSecondaryEmissionEB(const Real a_dt) noexcept
     pout() << m_name + "::resolveSecondaryEmissionEB(short)" << endl;
   }
 
-  Vector<ParticleContainerSoA<ItoParticle>*> secondaryParticles;
-  Vector<ParticleContainerSoA<ItoParticle>*> primaryParticles;
+  Vector<ParticleContainer<ItoParticle>*> secondaryParticles;
+  Vector<ParticleContainer<ItoParticle>*> primaryParticles;
 
   for (auto it = m_ito->iterator(); it.ok(); ++it) {
     const int idx = it.index();
@@ -5229,11 +5228,11 @@ ItoKMCStepper<I, C, R, F>::resolveSecondaryEmissionEB(const Real a_dt) noexcept
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoKMCStepper<I, C, R, F>::resolveSecondaryEmissionEB(Vector<ParticleContainerSoA<ItoParticle>*>& a_secondaryParticles,
-                                                      Vector<ParticleContainerSoA<ItoParticle>*>& a_primaryParticles,
-                                                      Vector<EBAMRIVData*>&                       a_cdrFluxes,
-                                                      EBAMRIVData& a_surfaceChargeDensity,
-                                                      const Real   a_dt) noexcept
+ItoKMCStepper<I, C, R, F>::resolveSecondaryEmissionEB(Vector<ParticleContainer<ItoParticle>*>& a_secondaryParticles,
+                                                      Vector<ParticleContainer<ItoParticle>*>& a_primaryParticles,
+                                                      Vector<EBAMRIVData*>&                    a_cdrFluxes,
+                                                      EBAMRIVData&                             a_surfaceChargeDensity,
+                                                      const Real                               a_dt) noexcept
 {
   CH_TIME("ItoKMCStepper::resolveSecondaryEmissionEB(full)");
   if (m_verbosity > 5) {
@@ -5288,7 +5287,7 @@ ItoKMCStepper<I, C, R, F>::resolveSecondaryEmissionEB(Vector<ParticleContainerSo
     }
 
     // Add the secondary particles into the solvers and remove the primary particles.
-    ParticleContainerSoA<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
+    ParticleContainer<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
     particles.transferParticles(a_secondaryParticles[idx]->getParticles());
 
     a_primaryParticles[idx]->clearParticles();
@@ -5453,7 +5452,7 @@ ItoKMCStepper<I, C, R, F>::computeQplus() const noexcept
     const int Z = species->getChargeNumber();
 
     if (Z > 0) {
-      const ParticleContainerSoA<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
+      const ParticleContainer<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
       totalCharge += Z * ParticleOps::sum(particles);
     }
@@ -5497,7 +5496,7 @@ ItoKMCStepper<I, C, R, F>::computeQminu() const noexcept
     const int Z = species->getChargeNumber();
 
     if (Z < 0) {
-      const ParticleContainerSoA<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
+      const ParticleContainer<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
       totalCharge += Z * ParticleOps::sum(particles);
     }
@@ -5552,11 +5551,11 @@ ItoKMCStepper<I, C, R, F>::advancePhotons(const Real a_dt) noexcept
     // To reiterate: photons are the photons that live in the solver and are moved around. bulkPhotons
     // are the solvers that were absorbed on the mesh, bbPhotons are the photons that collided with the EB
     // and domainPhotons are photons that moved out of the domain.
-    ParticleContainerSoA<Photon>& photons       = solver->getPhotons();
-    ParticleContainerSoA<Photon>& bulkPhotons   = solver->getBulkPhotons();
-    ParticleContainerSoA<Photon>& ebPhotons     = solver->getEbPhotons();
-    ParticleContainerSoA<Photon>& domainPhotons = solver->getDomainPhotons();
-    ParticleContainerSoA<Photon>& sourcePhotons = solver->getSourcePhotons();
+    ParticleContainer<Photon>& photons       = solver->getPhotons();
+    ParticleContainer<Photon>& bulkPhotons   = solver->getBulkPhotons();
+    ParticleContainer<Photon>& ebPhotons     = solver->getEbPhotons();
+    ParticleContainer<Photon>& domainPhotons = solver->getDomainPhotons();
+    ParticleContainer<Photon>& sourcePhotons = solver->getSourcePhotons();
 
     solver->clear(bulkPhotons);
     solver->clear(ebPhotons);
@@ -5970,7 +5969,7 @@ ItoKMCStepper<I, C, R, F>::computeEdotJSource(const Real a_dt) noexcept
 
   // Allocate a transient SoA particle holder. The container owns the weight and position; the payload holds
   // V(A), V(B), and the per-component "other" position (alt) so we can interpolate the potential at both A and B.
-  ParticleContainerSoA<ItoKMCFieldParticle> computationParticles;
+  ParticleContainer<ItoKMCFieldParticle> computationParticles;
   m_amr->allocate(computationParticles, m_particleRealm);
 
   // Electrostatic potential on appropriate phase. This is defined on the fluid realm
@@ -5992,7 +5991,7 @@ ItoKMCStepper<I, C, R, F>::computeEdotJSource(const Real a_dt) noexcept
 
     if (Z != 0 && (mobile || diffusive)) {
 
-      const ParticleContainerSoA<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
+      const ParticleContainer<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
       // Copy the ItoParticles to the transient particles we use for computing these things. The container
       // position holds B (the current position); the payload "alt" columns hold A (the old position).

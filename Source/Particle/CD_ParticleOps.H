@@ -22,7 +22,7 @@
 // Our includes
 #include <CD_EBAMRData.H>
 #include <CD_ParticleMap.H>
-#include <CD_ParticleContainerSoA.H>
+#include <CD_ParticleContainer.H>
 #include <CD_NamespaceHeader.H>
 
 /**
@@ -61,7 +61,7 @@ public:
   */
   template <typename P, typename Traits>
   static inline void
-  getPhysicalParticlesPerCell(EBAMRCellData& a_ppc, const ParticleContainerSoA<P, Traits>& a_src) noexcept;
+  getPhysicalParticlesPerCell(EBAMRCellData& a_ppc, const ParticleContainer<P, Traits>& a_src) noexcept;
 
   /**
     @brief Get the number of computational particles per cell (SoA overload).
@@ -72,7 +72,7 @@ public:
   */
   template <typename P, typename Traits>
   static inline void
-  getComputationalParticlesPerCell(EBAMRCellData& a_ppc, const ParticleContainerSoA<P, Traits>& a_src) noexcept;
+  getComputationalParticlesPerCell(EBAMRCellData& a_ppc, const ParticleContainer<P, Traits>& a_src) noexcept;
 
   /**
     @brief Get the grid cell where the particle lives
@@ -152,7 +152,7 @@ public:
   */
   template <typename P, typename Traits>
   static inline void
-  copyDestructive(ParticleContainerSoA<P, Traits>& a_dst, ParticleContainerSoA<P, Traits>& a_src) noexcept;
+  copyDestructive(ParticleContainer<P, Traits>& a_dst, ParticleContainer<P, Traits>& a_src) noexcept;
 
   /**
     @brief Global sum of the container-owned weight column (SoA overload).
@@ -163,7 +163,7 @@ public:
   */
   template <typename P, typename Traits>
   static inline Real
-  sum(const ParticleContainerSoA<P, Traits>& a_particles) noexcept;
+  sum(const ParticleContainer<P, Traits>& a_particles) noexcept;
 
   /**
     @brief Set value function for SoA containers. Lets the user set particle parameters via a (leaf, index) callback.
@@ -174,7 +174,7 @@ public:
   */
   template <typename P, typename Traits>
   static inline void
-  setData(ParticleContainerSoA<P, Traits>&                                 a_particles,
+  setData(ParticleContainer<P, Traits>&                                    a_particles,
           const std::function<void(ParticleSoA<P, Traits>&, std::size_t)>& a_functor) noexcept;
 };
 

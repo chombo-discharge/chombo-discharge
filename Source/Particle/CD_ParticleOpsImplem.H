@@ -49,7 +49,7 @@ ParticleOps::getParticleCellIndex(const RealVect& a_particlePosition,
 
 template <typename P, typename Traits>
 inline void
-ParticleOps::getPhysicalParticlesPerCell(EBAMRCellData& a_ppc, const ParticleContainerSoA<P, Traits>& a_src) noexcept
+ParticleOps::getPhysicalParticlesPerCell(EBAMRCellData& a_ppc, const ParticleContainer<P, Traits>& a_src) noexcept
 {
   CH_TIME("ParticleOps::getPhysicalParticlesPerCell(SoA)");
 
@@ -81,8 +81,7 @@ ParticleOps::getPhysicalParticlesPerCell(EBAMRCellData& a_ppc, const ParticleCon
 
 template <typename P, typename Traits>
 inline void
-ParticleOps::getComputationalParticlesPerCell(EBAMRCellData&                         a_ppc,
-                                              const ParticleContainerSoA<P, Traits>& a_src) noexcept
+ParticleOps::getComputationalParticlesPerCell(EBAMRCellData& a_ppc, const ParticleContainer<P, Traits>& a_src) noexcept
 {
   CH_TIME("ParticleOps::getComputationalParticlesPerCell(SoA)");
 
@@ -264,9 +263,9 @@ ParticleOps::ebIntersectionRaycast(const RefCountedPtr<BaseIF>& a_impFunc,
 
 template <typename P, typename Traits>
 inline void
-ParticleOps::copyDestructive(ParticleContainerSoA<P, Traits>& a_dst, ParticleContainerSoA<P, Traits>& a_src) noexcept
+ParticleOps::copyDestructive(ParticleContainer<P, Traits>& a_dst, ParticleContainer<P, Traits>& a_src) noexcept
 {
-  CH_TIME("ParticleOps::copyDestructive(ParticleContainerSoA<P, Traits> x2)");
+  CH_TIME("ParticleOps::copyDestructive(ParticleContainer<P, Traits> x2)");
 
   CH_assert(a_dst.getRealm() == a_src.getRealm());
 
@@ -288,9 +287,9 @@ ParticleOps::copyDestructive(ParticleContainerSoA<P, Traits>& a_dst, ParticleCon
 
 template <typename P, typename Traits>
 inline Real
-ParticleOps::sum(const ParticleContainerSoA<P, Traits>& a_particles) noexcept
+ParticleOps::sum(const ParticleContainer<P, Traits>& a_particles) noexcept
 {
-  CH_TIME("ParticleOps::sum(ParticleContainerSoA<P>)");
+  CH_TIME("ParticleOps::sum(ParticleContainer<P>)");
 
   Real particleSum = 0.0;
 
@@ -316,10 +315,10 @@ ParticleOps::sum(const ParticleContainerSoA<P, Traits>& a_particles) noexcept
 
 template <typename P, typename Traits>
 inline void
-ParticleOps::setData(ParticleContainerSoA<P, Traits>&                                 a_particles,
+ParticleOps::setData(ParticleContainer<P, Traits>&                                    a_particles,
                      const std::function<void(ParticleSoA<P, Traits>&, std::size_t)>& a_functor) noexcept
 {
-  CH_TIME("ParticleOps::setData(ParticleContainerSoA<P>, std::function<void(ParticleSoA<P>&, std::size_t)>)");
+  CH_TIME("ParticleOps::setData(ParticleContainer<P>, std::function<void(ParticleSoA<P>&, std::size_t)>)");
 
   for (int lvl = 0; lvl <= a_particles.getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = a_particles.getGrids()[lvl];

@@ -16,7 +16,7 @@
 // Our includes
 #include <CD_AmrMesh.H>
 #include <CD_ComputationalGeometry.H>
-#include <CD_ParticleContainerSoA.H>
+#include <CD_ParticleContainer.H>
 #include <CD_NamespaceHeader.H>
 
 /**
@@ -27,7 +27,7 @@
   This is a single-phase solver -- i.e. the particles only live on one of the phases. Extensions to multiphase
   is certainly possible. 
 
-  The particles are stored Struct-of-Arrays (ParticleContainerSoA). P is the user PAYLOAD type; the
+  The particles are stored Struct-of-Arrays (ParticleContainer). P is the user PAYLOAD type; the
   position and weight are container-owned columns (not payload members). The template requirements on
   the payload type P are:
   1) It must expose the velocity as SpaceDim scalar payload columns named D_DECL(vx, vy, vz), so the
@@ -283,14 +283,14 @@ public:
     @brief Get all particles.
     @return m_particles
   */
-  virtual ParticleContainerSoA<P>&
+  virtual ParticleContainer<P>&
   getParticles();
 
   /**
     @brief Get all particles. Const version.
     @return m_particles
   */
-  virtual const ParticleContainerSoA<P>&
+  virtual const ParticleContainer<P>&
   getParticles() const;
 
   /**
@@ -410,7 +410,7 @@ protected:
   /**
     @brief Computational particles.
   */
-  ParticleContainerSoA<P> m_particles;
+  ParticleContainer<P> m_particles;
 
   /**
     @brief Parse deposition method

@@ -32,7 +32,7 @@
 #include <CD_EBMultigridInterpolator.H>
 #include <CD_EBGradient.H>
 #include <CD_EBFluxRedistribution.H>
-#include <CD_EBAMRParticleMeshSoA.H>
+#include <CD_EBAMRParticleMesh.H>
 #include <CD_EBAMRSurfaceDeposition.H>
 #include <CD_EBCoarseToFineInterp.H>
 #include <CD_EBGhostCellInterpolator.H>
@@ -347,7 +347,7 @@ public:
     @brief Get the SoA particle-mesh operator
     @return SoA particle mesh
   */
-  EBAMRParticleMeshSoA&
+  EBAMRParticleMesh&
   getParticleMeshSoA() const;
 
   /**
@@ -672,7 +672,7 @@ protected:
   /**
     @brief For doing SoA particle-mesh operations
   */
-  mutable EBAMRParticleMeshSoA m_particleMeshSoA;
+  mutable EBAMRParticleMesh m_particleMeshSoA;
 
   /**
     @brief For doing particle deposition onto surfaces

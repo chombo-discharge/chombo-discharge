@@ -5,13 +5,13 @@
  */
 
 /**
-  @file   CD_ParticleContainerSoAImplem.H
-  @brief  Implementation of CD_ParticleContainerSoA.H
+  @file   CD_ParticleContainerImplem.H
+  @brief  Implementation of CD_ParticleContainer.H
   @author Robert Marskar
 */
 
-#ifndef CD_PARTICLECONTAINERSOAIMPLEM_H
-#define CD_PARTICLECONTAINERSOAIMPLEM_H
+#ifndef CD_PARTICLECONTAINERIMPLEM_H
+#define CD_PARTICLECONTAINERIMPLEM_H
 
 // Std includes
 #include <cmath>
@@ -27,12 +27,12 @@
 #include <CH_assert.H>
 
 // Our includes
-#include <CD_ParticleContainerSoA.H>
+#include <CD_ParticleContainer.H>
 #include <CD_NamespaceHeader.H>
 
 template <typename P, typename Traits>
-inline typename ParticleContainerSoA<P, Traits>::Destination
-ParticleContainerSoA<P, Traits>::findDestination(const RealVect& a_pos) const
+inline typename ParticleContainer<P, Traits>::Destination
+ParticleContainer<P, Traits>::findDestination(const RealVect& a_pos) const
 {
   // Finest level whose tile contains the particle wins.
   for (int lvl = m_finestLevel; lvl >= 0; lvl--) {
@@ -59,11 +59,11 @@ ParticleContainerSoA<P, Traits>::findDestination(const RealVect& a_pos) const
 }
 
 template <typename P, typename Traits>
-inline typename ParticleContainerSoA<P, Traits>::MoverPool
-ParticleContainerSoA<P, Traits>::gatherToPool(const AMRParticlesSoA<P, Traits>& a_source,
-                                              const Vector<DisjointBoxLayout>&  a_sourceGrids)
+inline typename ParticleContainer<P, Traits>::MoverPool
+ParticleContainer<P, Traits>::gatherToPool(const AMRParticlesSoA<P, Traits>& a_source,
+                                           const Vector<DisjointBoxLayout>&  a_sourceGrids)
 {
-  CH_TIME("ParticleContainerSoA::gatherToPool");
+  CH_TIME("ParticleContainer::gatherToPool");
 
   m_numOutcastLocal = 0;
 
@@ -94,9 +94,9 @@ ParticleContainerSoA<P, Traits>::gatherToPool(const AMRParticlesSoA<P, Traits>& 
 
 template <typename P, typename Traits>
 inline void
-ParticleContainerSoA<P, Traits>::distributeFromPool(MoverPool& a_pool)
+ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool)
 {
-  CH_TIME("ParticleContainerSoA::distributeFromPool");
+  CH_TIME("ParticleContainer::distributeFromPool");
 
   const int myRank   = procID();
   const int numRanks = numProc();
@@ -207,9 +207,9 @@ ParticleContainerSoA<P, Traits>::distributeFromPool(MoverPool& a_pool)
 
 template <typename P, typename Traits>
 inline void
-ParticleContainerSoA<P, Traits>::remap()
+ParticleContainer<P, Traits>::remap()
 {
-  CH_TIME("ParticleContainerSoA::remap");
+  CH_TIME("ParticleContainer::remap");
 
   CH_assert(m_isDefined);
 
@@ -222,9 +222,9 @@ ParticleContainerSoA<P, Traits>::remap()
 
 template <typename P, typename Traits>
 inline void
-ParticleContainerSoA<P, Traits>::preRegrid()
+ParticleContainer<P, Traits>::preRegrid()
 {
-  CH_TIME("ParticleContainerSoA::preRegrid");
+  CH_TIME("ParticleContainer::preRegrid");
 
   CH_assert(m_isDefined);
 
@@ -236,14 +236,14 @@ ParticleContainerSoA<P, Traits>::preRegrid()
 
 template <typename P, typename Traits>
 inline void
-ParticleContainerSoA<P, Traits>::regrid(const Vector<DisjointBoxLayout>& a_grids,
-                                        const Vector<ProblemDomain>&     a_domains,
-                                        const Vector<Real>&              a_dx,
-                                        const Vector<int>&               a_refRat,
-                                        const int                        a_blockingFactor,
-                                        const int                        a_newFinestLevel)
+ParticleContainer<P, Traits>::regrid(const Vector<DisjointBoxLayout>& a_grids,
+                                     const Vector<ProblemDomain>&     a_domains,
+                                     const Vector<Real>&              a_dx,
+                                     const Vector<int>&               a_refRat,
+                                     const int                        a_blockingFactor,
+                                     const int                        a_newFinestLevel)
 {
-  CH_TIME("ParticleContainerSoA::regrid");
+  CH_TIME("ParticleContainer::regrid");
 
   CH_assert(m_isDefined);
 
@@ -287,9 +287,9 @@ ParticleContainerSoA<P, Traits>::regrid(const Vector<DisjointBoxLayout>& a_grids
 
 template <typename P, typename Traits>
 inline void
-ParticleContainerSoA<P, Traits>::setupGrownGrids()
+ParticleContainer<P, Traits>::setupGrownGrids()
 {
-  CH_TIME("ParticleContainerSoA::setupGrownGrids");
+  CH_TIME("ParticleContainer::setupGrownGrids");
 
   m_grownGrids.resize(m_finestLevel + 1);
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
@@ -309,9 +309,9 @@ ParticleContainerSoA<P, Traits>::setupGrownGrids()
 
 template <typename P, typename Traits>
 inline void
-ParticleContainerSoA<P, Traits>::copyMaskParticles(const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_mask)
+ParticleContainer<P, Traits>::copyMaskParticles(const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_mask)
 {
-  CH_TIME("ParticleContainerSoA::copyMaskParticles(amr)");
+  CH_TIME("ParticleContainer::copyMaskParticles(amr)");
 
   CH_assert(m_isDefined);
 
@@ -324,9 +324,9 @@ ParticleContainerSoA<P, Traits>::copyMaskParticles(const Vector<RefCountedPtr<Le
 
 template <typename P, typename Traits>
 inline void
-ParticleContainerSoA<P, Traits>::copyMaskParticles(const int a_level, const LevelData<BaseFab<bool>>& a_mask)
+ParticleContainer<P, Traits>::copyMaskParticles(const int a_level, const LevelData<BaseFab<bool>>& a_mask)
 {
-  CH_TIME("ParticleContainerSoA::copyMaskParticles(level)");
+  CH_TIME("ParticleContainer::copyMaskParticles(level)");
 
   CH_assert(m_isDefined);
 
@@ -358,9 +358,9 @@ ParticleContainerSoA<P, Traits>::copyMaskParticles(const int a_level, const Leve
 
 template <typename P, typename Traits>
 inline void
-ParticleContainerSoA<P, Traits>::transferMaskParticles(const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_mask)
+ParticleContainer<P, Traits>::transferMaskParticles(const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_mask)
 {
-  CH_TIME("ParticleContainerSoA::transferMaskParticles(amr)");
+  CH_TIME("ParticleContainer::transferMaskParticles(amr)");
 
   CH_assert(m_isDefined);
 
@@ -373,9 +373,9 @@ ParticleContainerSoA<P, Traits>::transferMaskParticles(const Vector<RefCountedPt
 
 template <typename P, typename Traits>
 inline void
-ParticleContainerSoA<P, Traits>::transferMaskParticles(const int a_level, const LevelData<BaseFab<bool>>& a_mask)
+ParticleContainer<P, Traits>::transferMaskParticles(const int a_level, const LevelData<BaseFab<bool>>& a_mask)
 {
-  CH_TIME("ParticleContainerSoA::transferMaskParticles(level)");
+  CH_TIME("ParticleContainer::transferMaskParticles(level)");
 
   CH_assert(m_isDefined);
 

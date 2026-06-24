@@ -5,7 +5,7 @@
  */
 
 /**
-  @file   CD_EBParticleMeshSoA.H
+  @file   CD_EBParticleMesh.H
   @brief  Dev staging: ParticleSoA port of EBParticleMesh (single-patch deposit/interpolate).
   @author Robert Marskar
   @details
@@ -42,8 +42,8 @@
   @note depositParticleTSC fixes a partition-of-unity bug present in production (see the kernel).
 */
 
-#ifndef CD_EBPARTICLEMESHSOA_H
-#define CD_EBPARTICLEMESHSOA_H
+#ifndef CD_EBPARTICLEMESH_H
+#define CD_EBPARTICLEMESH_H
 
 // Std includes
 #include <cstddef>
@@ -69,13 +69,13 @@
 /**
   @brief Dev port of EBParticleMesh that deposits/interpolates ParticleSoA leaves on one patch.
 */
-class EBParticleMeshSoA
+class EBParticleMesh
 {
 public:
   /**
     @brief Default constructor. Must subsequently call define.
   */
-  EBParticleMeshSoA() : m_verbose(false)
+  EBParticleMesh() : m_verbose(false)
   {}
 
   /**
@@ -86,11 +86,11 @@ public:
     @param[in] a_dx      Grid resolution.
     @param[in] a_probLo  Lower-left corner of the computational domain.
   */
-  EBParticleMeshSoA(const ProblemDomain& a_domain,
-                    const Box&           a_region,
-                    const EBISBox&       a_ebisbox,
-                    const RealVect&      a_dx,
-                    const RealVect&      a_probLo)
+  EBParticleMesh(const ProblemDomain& a_domain,
+                 const Box&           a_region,
+                 const EBISBox&       a_ebisbox,
+                 const RealVect&      a_dx,
+                 const RealVect&      a_probLo)
   {
     this->define(a_domain, a_region, a_ebisbox, a_dx, a_probLo);
   }
@@ -110,7 +110,7 @@ public:
          const RealVect&      a_dx,
          const RealVect&      a_probLo)
   {
-    CH_TIME("EBParticleMeshSoA::define");
+    CH_TIME("EBParticleMesh::define");
 
     m_verbose = false;
     m_domain  = a_domain;
@@ -142,7 +142,7 @@ public:
                 const Real                    a_widthScale,
                 const bool                    a_forceIrregNGP) const
   {
-    CH_TIME("EBParticleMeshSoA::depositWeight");
+    CH_TIME("EBParticleMesh::depositWeight");
 
     this->depositCore(a_meshData,
                       a_comp,
@@ -174,7 +174,7 @@ public:
                 const Real                    a_widthScale,
                 const bool                    a_forceIrregNGP) const
   {
-    CH_TIME("EBParticleMeshSoA::depositWeight");
+    CH_TIME("EBParticleMesh::depositWeight");
 
     this->depositWeight(a_meshData, 0, a_particles, a_depositionType, a_widthScale, a_forceIrregNGP);
   }
@@ -202,7 +202,7 @@ public:
           const Real                    a_widthScale,
           const bool                    a_forceIrregNGP) const
   {
-    CH_TIME("EBParticleMeshSoA::deposit");
+    CH_TIME("EBParticleMesh::deposit");
 
     static_assert(sizeof...(Members) == 1 || sizeof...(Members) == SpaceDim,
                   "deposit selects either one scalar column or SpaceDim vector-component columns");
@@ -239,7 +239,7 @@ public:
           const Real                    a_widthScale,
           const bool                    a_forceIrregNGP) const
   {
-    CH_TIME("EBParticleMeshSoA::deposit");
+    CH_TIME("EBParticleMesh::deposit");
 
     this->deposit<Members...>(a_meshData, 0, a_particles, a_depositionType, a_widthScale, a_forceIrregNGP);
   }
@@ -270,7 +270,7 @@ public:
                   const bool                    a_forceIrregNGP,
                   GatherFunc&&                  a_gather) const
   {
-    CH_TIME("EBParticleMeshSoA::depositGathered");
+    CH_TIME("EBParticleMesh::depositGathered");
 
     this->depositCore(a_meshData,
                       a_comp,
@@ -303,7 +303,7 @@ public:
               const DepositionType    a_interpType,
               const bool              a_forceIrregNGP) const
   {
-    CH_TIME("EBParticleMeshSoA::interpolate");
+    CH_TIME("EBParticleMesh::interpolate");
 
     static_assert(sizeof...(Members) == 1 || sizeof...(Members) == SpaceDim,
                   "interpolate targets either one scalar column or SpaceDim vector-component columns");
@@ -340,7 +340,7 @@ public:
               const DepositionType    a_interpType,
               const bool              a_forceIrregNGP) const
   {
-    CH_TIME("EBParticleMeshSoA::interpolate");
+    CH_TIME("EBParticleMesh::interpolate");
 
     this->interpolate<Members...>(a_particles, a_meshData, 0, a_interpType, a_forceIrregNGP);
   }
@@ -365,7 +365,7 @@ public:
                     const DepositionType    a_interpType,
                     const bool              a_forceIrregNGP) const
   {
-    CH_TIME("EBParticleMeshSoA::interpolateWeight");
+    CH_TIME("EBParticleMesh::interpolateWeight");
 
     this->interpolateCore(a_particles,
                           a_meshData,
@@ -394,7 +394,7 @@ public:
                     const DepositionType    a_interpType,
                     const bool              a_forceIrregNGP) const
   {
-    CH_TIME("EBParticleMeshSoA::interpolateWeight");
+    CH_TIME("EBParticleMesh::interpolateWeight");
 
     this->interpolateWeight(a_particles, a_meshData, 0, a_interpType, a_forceIrregNGP);
   }
@@ -456,7 +456,7 @@ protected:
               const bool                    a_forceIrregNGP,
               StrengthFn                    a_gather) const
   {
-    CH_TIME("EBParticleMeshSoA::depositCore");
+    CH_TIME("EBParticleMesh::depositCore");
 
     CH_assert(a_meshData.nComp() >= a_comp + a_numComp);
 
@@ -517,7 +517,7 @@ protected:
       break;
     }
     default: {
-      MayDay::Abort("EBParticleMeshSoA::depositCore -- logic bust");
+      MayDay::Abort("EBParticleMesh::depositCore -- logic bust");
       break;
     }
     }
@@ -547,7 +547,7 @@ protected:
                   const bool              a_forceIrregNGP,
                   ScatterFn               a_scatter) const
   {
-    CH_TIME("EBParticleMeshSoA::interpolateCore");
+    CH_TIME("EBParticleMesh::interpolateCore");
 
     CH_assert(a_meshData.nComp() >= a_comp + a_numComp);
 
@@ -571,7 +571,7 @@ protected:
       break;
     }
     default: {
-      MayDay::Error("EBParticleMeshSoA::interpolateCore - logic bust");
+      MayDay::Error("EBParticleMesh::interpolateCore - logic bust");
     }
     }
 
@@ -616,7 +616,7 @@ protected:
       break;
     }
     default: {
-      MayDay::Abort("EBParticleMeshSoA::interpolateCore -- logic bust");
+      MayDay::Abort("EBParticleMesh::interpolateCore -- logic bust");
       break;
     }
     }

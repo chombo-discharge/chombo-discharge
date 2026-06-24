@@ -94,7 +94,7 @@ McPhoto::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_s
       const size_t maxPhotonsPerPacket = m_maxPhotonsGeneratedPerCell / m_numSamplingPackets;
       const size_t remainder           = m_maxPhotonsGeneratedPerCell % m_numSamplingPackets;
 
-      ParticleContainerSoA<Photon> scratchPhotons;
+      ParticleContainer<Photon> scratchPhotons;
       m_amr->allocate(scratchPhotons, m_realm);
 
       for (int i = 0; i < m_numSamplingPackets; i++) {
@@ -125,7 +125,7 @@ McPhoto::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_s
     const size_t maxPhotonsPerPacket = m_maxPhotonsGeneratedPerCell / m_numSamplingPackets;
     const size_t remainder           = m_maxPhotonsGeneratedPerCell % m_numSamplingPackets;
 
-    ParticleContainerSoA<NoPayload> pointParticles;
+    ParticleContainer<NoPayload> pointParticles;
     m_amr->allocate(pointParticles, m_realm);
 
     for (int i = 0; i < m_numSamplingPackets; i++) {
@@ -498,11 +498,11 @@ McPhoto::clear()
 }
 
 void
-McPhoto::clear(ParticleContainerSoA<Photon>& a_photons)
+McPhoto::clear(ParticleContainer<Photon>& a_photons)
 {
-  CH_TIME("McPhoto::clear(ParticleContainerSoA)");
+  CH_TIME("McPhoto::clear(ParticleContainer)");
   if (m_verbosity > 5) {
-    pout() << m_name + "::clear(ParticleContainerSoA)" << endl;
+    pout() << m_name + "::clear(ParticleContainer)" << endl;
   }
 
   a_photons.clearParticles();
@@ -1005,9 +1005,9 @@ McPhoto::drawPhotons(const Real a_source, const Real a_volume, const Real a_dt) 
 }
 
 void
-McPhoto::generateComputationalPhotons(ParticleContainerSoA<Photon>& a_photons,
-                                      const EBAMRCellData&          a_numPhysPhotons,
-                                      const size_t                  a_maxPhotonsPerCell) const noexcept
+McPhoto::generateComputationalPhotons(ParticleContainer<Photon>& a_photons,
+                                      const EBAMRCellData&       a_numPhysPhotons,
+                                      const size_t               a_maxPhotonsPerCell) const noexcept
 {
   CH_TIME("McPhoto::generateComputationalPhotons");
   if (m_verbosity > 5) {
@@ -1131,10 +1131,10 @@ McPhoto::generateComputationalPhotons(ParticleContainerSoA<Photon>& a_photons,
 }
 
 void
-McPhoto::dirtySamplePhotons(ParticleContainerSoA<NoPayload>& a_photons,
-                            EBAMRCellData&                   a_phi,
-                            const EBAMRCellData&             a_numPhysicalPhotons,
-                            const size_t                     a_maxPhotonsPerCell) const noexcept
+McPhoto::dirtySamplePhotons(ParticleContainer<NoPayload>& a_photons,
+                            EBAMRCellData&                a_phi,
+                            const EBAMRCellData&          a_numPhysicalPhotons,
+                            const size_t                  a_maxPhotonsPerCell) const noexcept
 {
   CH_TIME("McPhoto::dirtySamplePhotons");
   if (m_verbosity > 5) {
@@ -1270,7 +1270,7 @@ McPhoto::dirtySamplePhotons(ParticleContainerSoA<NoPayload>& a_photons,
         const Box      cellBox = dbl[din];
         const EBISBox& ebisbox = ebisl[din];
 
-        EBParticleMeshSoA particleMesh(domain, cellBox, ebisbox, dx * RealVect::Unit, probLo);
+        EBParticleMesh particleMesh(domain, cellBox, ebisbox, dx * RealVect::Unit, probLo);
 
         EBCellFAB&                    output  = (*a_phi[lvl])[din];
         const ParticleSoA<NoPayload>& photons = a_photons[lvl][din];
@@ -1299,13 +1299,13 @@ McPhoto::depositPhotons()
 }
 
 void
-McPhoto::depositPhotons(EBAMRCellData&                a_phi,
-                        ParticleContainerSoA<Photon>& a_photons,
-                        const DepositionType&         a_deposition) const noexcept
+McPhoto::depositPhotons(EBAMRCellData&             a_phi,
+                        ParticleContainer<Photon>& a_photons,
+                        const DepositionType&      a_deposition) const noexcept
 {
-  CH_TIME("McPhoto::depositPhotons(ParticleContainerSoA)");
+  CH_TIME("McPhoto::depositPhotons(ParticleContainer)");
   if (m_verbosity > 5) {
-    pout() << m_name + "::depositPhotons(ParticleContainerSoA)" << endl;
+    pout() << m_name + "::depositPhotons(ParticleContainer)" << endl;
   }
 
   CH_assert(a_phi[0]->nComp() == 1);
@@ -1422,9 +1422,9 @@ McPhoto::depositHybrid(EBAMRCellData&     a_depositionH,
 }
 
 void
-McPhoto::depositPhotonsNGP(LevelData<EBCellFAB>&               a_output,
-                           const ParticleContainerSoA<Photon>& a_photons,
-                           const int                           a_level) const noexcept
+McPhoto::depositPhotonsNGP(LevelData<EBCellFAB>&            a_output,
+                           const ParticleContainer<Photon>& a_photons,
+                           const int                        a_level) const noexcept
 {
   CH_TIME("McPhoto::depositPhotonsNGP");
   if (m_verbosity > 5) {
@@ -1452,7 +1452,7 @@ McPhoto::depositPhotonsNGP(LevelData<EBCellFAB>&               a_output,
     const Box      cellBox = dbl[din];
     const EBISBox& ebisbox = ebisl[din];
 
-    EBParticleMeshSoA particleMesh(domain, cellBox, ebisbox, dx * RealVect::Unit, probLo);
+    EBParticleMesh particleMesh(domain, cellBox, ebisbox, dx * RealVect::Unit, probLo);
 
     EBCellFAB&                 output = a_output[din];
     const ParticleSoA<Photon>& leaf   = a_photons[a_level][din];
@@ -1466,10 +1466,10 @@ McPhoto::depositPhotonsNGP(LevelData<EBCellFAB>&               a_output,
 }
 
 void
-McPhoto::advancePhotonsInstantaneous(ParticleContainerSoA<Photon>& a_bulkPhotons,
-                                     ParticleContainerSoA<Photon>& a_ebPhotons,
-                                     ParticleContainerSoA<Photon>& a_domainPhotons,
-                                     ParticleContainerSoA<Photon>& a_photons)
+McPhoto::advancePhotonsInstantaneous(ParticleContainer<Photon>& a_bulkPhotons,
+                                     ParticleContainer<Photon>& a_ebPhotons,
+                                     ParticleContainer<Photon>& a_domainPhotons,
+                                     ParticleContainer<Photon>& a_photons)
 {
   CH_TIMERS("McPhoto::advancePhotonsInstantaneous");
   CH_TIMER("McPhoto::advancePhotonsInstantaneous::amr_loop", t1);
@@ -1633,11 +1633,11 @@ McPhoto::advancePhotonsInstantaneous(ParticleContainerSoA<Photon>& a_bulkPhotons
 }
 
 void
-McPhoto::advancePhotonsTransient(ParticleContainerSoA<Photon>& a_bulkPhotons,
-                                 ParticleContainerSoA<Photon>& a_ebPhotons,
-                                 ParticleContainerSoA<Photon>& a_domainPhotons,
-                                 ParticleContainerSoA<Photon>& a_photons,
-                                 const Real                    a_dt)
+McPhoto::advancePhotonsTransient(ParticleContainer<Photon>& a_bulkPhotons,
+                                 ParticleContainer<Photon>& a_ebPhotons,
+                                 ParticleContainer<Photon>& a_domainPhotons,
+                                 ParticleContainer<Photon>& a_photons,
+                                 const Real                 a_dt)
 {
   CH_TIME("McPhoto::advancePhotonsTransient");
   if (m_verbosity > 5) {
@@ -1828,18 +1828,18 @@ McPhoto::remap()
 }
 
 void
-McPhoto::remap(ParticleContainerSoA<Photon>& a_photons)
+McPhoto::remap(ParticleContainer<Photon>& a_photons)
 {
-  CH_TIME("McPhoto::remap(ParticleContainerSoA<Photon>)");
+  CH_TIME("McPhoto::remap(ParticleContainer<Photon>)");
   if (m_verbosity > 5) {
-    pout() << m_name + "::remap(ParticleContainerSoA<Photon>)" << endl;
+    pout() << m_name + "::remap(ParticleContainer<Photon>)" << endl;
   }
 
   a_photons.remap();
 }
 
 int
-McPhoto::countPhotons(const ParticleContainerSoA<Photon>& a_photons) const
+McPhoto::countPhotons(const ParticleContainer<Photon>& a_photons) const
 {
   CH_TIME("McPhoto::countPhotons");
   if (m_verbosity > 5) {
@@ -1968,7 +1968,7 @@ McPhoto::writePlotData(LevelData<EBCellFAB>& a_output,
   CH_STOP(t2);
 }
 
-ParticleContainerSoA<Photon>&
+ParticleContainer<Photon>&
 McPhoto::getPhotons()
 {
   CH_TIME("McPhoto::getPhotons");
@@ -1979,7 +1979,7 @@ McPhoto::getPhotons()
   return m_photons;
 }
 
-ParticleContainerSoA<Photon>&
+ParticleContainer<Photon>&
 McPhoto::getBulkPhotons()
 {
   CH_TIME("McPhoto::getBulkPhotons");
@@ -1990,7 +1990,7 @@ McPhoto::getBulkPhotons()
   return m_bulkPhotons;
 }
 
-ParticleContainerSoA<Photon>&
+ParticleContainer<Photon>&
 McPhoto::getEbPhotons()
 {
   CH_TIME("McPhoto::getEbPhotons");
@@ -2001,7 +2001,7 @@ McPhoto::getEbPhotons()
   return m_ebPhotons;
 }
 
-ParticleContainerSoA<Photon>&
+ParticleContainer<Photon>&
 McPhoto::getDomainPhotons()
 {
   CH_TIME("McPhoto::getDomainPhotons");
@@ -2012,7 +2012,7 @@ McPhoto::getDomainPhotons()
   return m_domainPhotons;
 }
 
-ParticleContainerSoA<Photon>&
+ParticleContainer<Photon>&
 McPhoto::getSourcePhotons()
 {
   CH_TIME("McPhoto::getSourcePhotons");
