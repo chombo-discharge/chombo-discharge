@@ -2107,9 +2107,46 @@ ItoKMCGodunovStepper<I, C, R, F>::plotParticles() const noexcept
       char              fileChar[1000];
       sprintf(fileChar, "%s.step%07d.%dd.h5part", prefix.c_str(), this->m_timeStep, SpaceDim);
 
+      // Bridge the SoA payload into an AoS GenericParticle<5,3> container for the H5Part writer (which is
+      // AoS-only). The slot order matches ItoParticle::s_realVariables/s_vectVariables: real<0..4> =
+      // weight, mobility, diffusion, energy, tmpReal; vect<0..2> = oldPosition, velocity, tmpVect.
+      ParticleContainer<GenericParticle<5, 3>> aosParticles;
+      this->m_amr->allocate(aosParticles, this->m_particleRealm);
+
+      for (int lvl = 0; lvl <= this->m_amr->getFinestLevel(); lvl++) {
+        const DisjointBoxLayout& dbl = this->m_amr->getGrids(this->m_particleRealm)[lvl];
+
+        for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
+          const ParticleSoA<ItoParticle>& leaf = particles[lvl][dit()];
+          List<GenericParticle<5, 3>>&    list = aosParticles[lvl][dit()].listItems();
+
+          for (std::size_t i = 0; i < leaf.size(); i++) {
+            GenericParticle<5, 3> p;
+
+            p.position()         = leaf.position(i);
+            p.template real<0>() = leaf.weight(i);
+            p.template real<1>() = leaf.template get<&ItoParticle::mobility>(i);
+            p.template real<2>() = leaf.template get<&ItoParticle::diffusion>(i);
+            p.template real<3>() = leaf.template get<&ItoParticle::energy>(i);
+            p.template real<4>() = leaf.template get<&ItoParticle::tmpReal>(i);
+            p.template vect<0>() = RealVect(D_DECL(leaf.template get<&ItoParticle::oldPositionX>(i),
+                                                   leaf.template get<&ItoParticle::oldPositionY>(i),
+                                                   leaf.template get<&ItoParticle::oldPositionZ>(i)));
+            p.template vect<1>() = RealVect(D_DECL(leaf.template get<&ItoParticle::velocityX>(i),
+                                                   leaf.template get<&ItoParticle::velocityY>(i),
+                                                   leaf.template get<&ItoParticle::velocityZ>(i)));
+            p.template vect<2>() = RealVect(D_DECL(leaf.template get<&ItoParticle::tmpVectX>(i),
+                                                   leaf.template get<&ItoParticle::tmpVectY>(i),
+                                                   leaf.template get<&ItoParticle::tmpVectZ>(i)));
+
+            list.add(p);
+          }
+        }
+      }
+
       // Plot the particles
       DischargeIO::writeH5Part(std::string(fileChar),
-                               (const ParticleContainer<GenericParticle<5, 3>>&)particles,
+                               aosParticles,
                                ItoParticle::s_realVariables,
                                ItoParticle::s_vectVariables,
                                this->m_amr->getProbLo(),
