@@ -71,35 +71,6 @@ namespace {
     a_leaf.swap(rebuilt);
   }
 
-  // Deposit the weight of an SoA Ito container onto an EB surface (EBAMRIVData). The SoA surface-deposition
-  // stack does not exist yet, so we bridge through a temporary AoS PointParticle container (position+weight)
-  // and reuse AmrMesh's AoS surface deposition.
-  inline void
-  depositItoWeightToSurface(const RefCountedPtr<AmrMesh>&            a_amr,
-                            const std::string&                       a_realm,
-                            const phase::which_phase                 a_phase,
-                            const ParticleContainerSoA<ItoParticle>& a_src,
-                            EBAMRIVData&                             a_meshData) noexcept
-  {
-    ParticleContainer<PointParticle> tmp;
-    a_amr->allocate(tmp, a_realm);
-
-    for (int lvl = 0; lvl <= a_src.getFinestLevel(); lvl++) {
-      const DisjointBoxLayout& dbl = a_src.getGrids()[lvl];
-
-      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-        const ParticleSoA<ItoParticle>& leaf = a_src[lvl][dit()];
-        List<PointParticle>&            list = tmp[lvl][dit()].listItems();
-
-        for (std::size_t i = 0; i < leaf.size(); i++) {
-          list.add(PointParticle(leaf.position(i), leaf.weight(i)));
-        }
-      }
-    }
-
-    a_amr->depositParticles<PointParticle, const Real&, &PointParticle::weight>(a_meshData, a_realm, a_phase, tmp);
-  }
-
 } // namespace
 
 template <typename I, typename C, typename R, typename F>
@@ -5293,7 +5264,7 @@ ItoKMCStepper<I, C, R, F>::resolveSecondaryEmissionEB(Vector<ParticleContainerSo
     if (Z != 0) {
 
       // Add charge from primary particles
-      depositItoWeightToSurface(m_amr, m_particleRealm, m_plasmaPhase, *a_primaryParticles[idx], m_particleScratchEB);
+      m_amr->depositParticles(m_particleScratchEB, m_particleRealm, m_plasmaPhase, *a_primaryParticles[idx]);
 
       m_amr->copyData(m_fluidScratchEB, m_particleScratchEB);
       DataOps::incr(a_surfaceChargeDensity,
@@ -5302,7 +5273,7 @@ ItoKMCStepper<I, C, R, F>::resolveSecondaryEmissionEB(Vector<ParticleContainerSo
                     m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase));
 
       // Subtract charge from secondary particles
-      depositItoWeightToSurface(m_amr, m_particleRealm, m_plasmaPhase, *a_secondaryParticles[idx], m_particleScratchEB);
+      m_amr->depositParticles(m_particleScratchEB, m_particleRealm, m_plasmaPhase, *a_secondaryParticles[idx]);
 
       m_amr->copyData(m_fluidScratchEB, m_particleScratchEB);
       DataOps::incr(a_surfaceChargeDensity,

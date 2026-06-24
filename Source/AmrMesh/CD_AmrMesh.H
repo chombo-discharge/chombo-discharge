@@ -993,6 +993,23 @@ public:
                    const ParticleContainer<P>& a_particles) const noexcept;
 
   /**
+    @brief Deposit the weight column of an SoA particle container onto the surface (EB).
+    @details SoA overload of the surface deposit; deposits the container-owned weight column.
+    @param[out] a_meshData  Mesh data. MUST have exactly one component.
+    @param[in]  a_realm     Realm where data is registered.
+    @param[in]  a_phase     Phase where data is registered.
+    @param[in]  a_particles SoA particle container.
+    @tparam P      Payload type of the container.
+    @tparam Traits Column descriptor for the payload.
+  */
+  template <typename P, typename Traits>
+  void
+  depositParticles(EBAMRIVData&                           a_meshData,
+                   const std::string&                     a_realm,
+                   const phase::which_phase&              a_phase,
+                   const ParticleContainerSoA<P, Traits>& a_particles) const noexcept;
+
+  /**
     @brief Interpolate mesh data onto a particle position.
     @details P is the particle type, Ret is the returned value of the particle member function, and must be a Real& or a
     RealVect&. MemFunc is a pointer to a member function of P. E.g., interpolate<P, Real&, &P::weight>.        

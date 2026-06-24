@@ -21,6 +21,7 @@
 // Our includes
 #include <CD_EBAMRData.H>
 #include <CD_ParticleContainer.H>
+#include <CD_ParticleContainerSoA.H>
 #include <CD_NamespaceHeader.H>
 
 /**
@@ -92,6 +93,19 @@ public:
   template <class P, class Ret, Ret (P::*MemberFunc)() const>
   void
   deposit(EBAMRIVData& a_meshData, const ParticleContainer<P>& a_particles) const noexcept;
+
+  /**
+    @brief Deposit the container-owned weight column of an SoA particle container onto the surface.
+    @details SoA overload of deposit; deposits the weight column (surface charge always deposits weight).
+    @param[in,out] a_meshData  Mesh data. Must be defined on cut-cells only.
+    @param[in]     a_particles SoA particles to deposit.
+    @tparam P      Payload type of the container.
+    @tparam Traits Column descriptor for the payload.
+    @note Throws an error if a particle is located on a grid cell that is NOT an irregular cell.
+  */
+  template <typename P, typename Traits>
+  void
+  deposit(EBAMRIVData& a_meshData, const ParticleContainerSoA<P, Traits>& a_particles) const noexcept;
 
 protected:
   /**

@@ -478,6 +478,26 @@ AmrMesh::depositParticles(EBAMRIVData&                a_meshData,
 
 template <typename P, typename Traits>
 void
+AmrMesh::depositParticles(EBAMRIVData&                           a_meshData,
+                          const std::string&                     a_realm,
+                          const phase::which_phase&              a_phase,
+                          const ParticleContainerSoA<P, Traits>& a_particles) const noexcept
+{
+  CH_TIME("AmrMesh::depositParticles(surface, SoA)");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::depositParticles(surface, SoA)" << endl;
+  }
+
+  CH_assert(a_meshData[0]->nComp() == 1);
+  CH_assert(a_meshData.getRealm() == a_particles.getRealm());
+
+  EBAMRSurfaceDeposition& surfaceDeposition = this->getSurfaceDeposition(a_realm, a_phase);
+
+  surfaceDeposition.deposit<P, Traits>(a_meshData, a_particles);
+}
+
+template <typename P, typename Traits>
+void
 AmrMesh::depositWeight(EBAMRCellData&                         a_meshData,
                        const std::string&                     a_realm,
                        const phase::which_phase&              a_phase,
