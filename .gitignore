@@ -58,18 +58,5 @@ Docs/*
 Docs/Sphinx/build
 Docs/**/*.dat
 
-# Local-only SoA particle staging area + its validation harness (kept locally; untracked during review)
+# Local-only SoA particle staging area (kept locally; untracked)
 Dev/
-# SoAValidation is now a tracked test; ignore only its build artefacts
-Exec/Tests/BrownianWalker/SoAValidation/main*.ex
-Exec/Tests/BrownianWalker/SoAValidation/plt/
-Exec/Tests/BrownianWalker/SoAValidation/chk/
-Exec/Tests/BrownianWalker/SoAValidation/crash/
-Exec/Tests/BrownianWalker/SoAValidation/geo/
-Exec/Tests/BrownianWalker/SoAValidation/regrid/
-Exec/Tests/BrownianWalker/SoAValidation/restart/
-Exec/Tests/BrownianWalker/SoAValidation/mpi/
-Exec/Tests/BrownianWalker/SoAValidation/o/
-Exec/Tests/BrownianWalker/SoAValidation/d/
-Exec/Tests/BrownianWalker/SoAValidation/f/
-Exec/Tests/BrownianWalker/SoAValidation/p/
