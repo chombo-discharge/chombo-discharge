@@ -260,91 +260,6 @@ namespace ParticleManagement {
     return leaves;
   }
 
-  template <typename P, typename T, typename>
-  inline void
-  removePhysicalParticles(List<P>& a_particles, const T a_numPhysPartToRemove) noexcept
-  {
-    CH_TIME("ParticleManagement::removePhysicalParticles");
-
-    constexpr T zero = (T)0;
-
-    // Obviously an error that the user should catch.
-    if (a_numPhysPartToRemove < zero) {
-      MayDay::Error("ParticleManagement::removePhysicalParticles - 'a_numPhysPartoToRemove < 0'");
-    }
-
-    if (a_particles.length() > 0) {
-      ListIterator<P> lit(a_particles);
-
-      T numRemoved = zero;
-
-      // 1. Compute the minimum particle weight.
-      T minWeight = std::numeric_limits<T>::max();
-      for (lit.begin(); lit.ok(); ++lit) {
-        minWeight = std::min(minWeight, (T)lit().weight());
-      }
-
-      // 2. Trim particle weights down to minWeight.
-      for (lit.begin(); lit.ok(); ++lit) {
-        const T diff1 = (T)lit().weight() - minWeight;
-        const T diff2 = a_numPhysPartToRemove - numRemoved;
-
-        CH_assert(diff1 >= zero);
-        CH_assert(diff2 >= zero);
-
-        const T r = std::max(0LL, std::min(diff1, diff2));
-
-        lit().weight() -= 1.0 * r;
-        numRemoved += r;
-      }
-
-      // 3. "Uniformly" subtract the particle weights.
-      if (a_numPhysPartToRemove - numRemoved > zero) {
-        const T numCompParticles = (T)a_particles.length();
-        const T uniformWeight    = (a_numPhysPartToRemove - numRemoved) / numCompParticles;
-        const T uniformRemainder = (a_numPhysPartToRemove - numRemoved) % numCompParticles;
-
-        // Uniformly remove weight from each particle.
-        if (uniformWeight > zero) {
-          for (lit.begin(); lit.ok(); ++lit) {
-            lit().weight() -= 1.0 * uniformWeight;
-
-            numRemoved += uniformWeight;
-          }
-        }
-
-        // May have to remove remainder from multiple particles because their weights might be less
-        // then the actual remainder.
-        if (uniformRemainder > zero) {
-          T W = 0;
-
-          for (lit.begin(); lit.ok(); ++lit) {
-
-            // Never remove so that weight is negative.
-            const T w = std::min((T)lit().weight(), uniformRemainder - W);
-
-            lit().weight() -= 1.0 * w;
-
-            W += w;
-            numRemoved += w;
-
-            if (W == uniformRemainder) {
-              break;
-            }
-          }
-        }
-      }
-
-      // Debug code.
-      CH_assert(numRemoved == a_numPhysPartToRemove);
-#ifdef NDEBUG
-      for (lit.begin(); lit.ok(); ++lit) {
-        CH_assert(lit().weight() >= 0.0);
-      }
-#endif
-    }
-  }
-
   template <typename P, typename Traits, typename T, typename>
   inline void
   removePhysicalParticles(ParticleSoA<P, Traits>& a_particles, const T a_numPhysPartToRemove) noexcept
@@ -420,22 +335,6 @@ namespace ParticleManagement {
     }
   }
 
-  template <typename P>
-  inline void
-  deleteParticles(List<P>& a_particles, const Real a_weightThresh) noexcept
-  {
-    CH_TIME("ParticleManagement::deleteParticles");
-
-    for (ListIterator<P> lit(a_particles); lit.ok();) {
-      if (lit().weight() < a_weightThresh) {
-        a_particles.remove(lit);
-      }
-      else {
-        ++lit;
-      }
-    }
-  }
-
   template <typename P, typename Traits>
   inline void
   deleteParticles(ParticleSoA<P, Traits>& a_particles, const Real a_weightThresh) noexcept
@@ -508,23 +407,6 @@ namespace ParticleManagement {
 #endif
   }
 
-  template <typename P, typename T, typename>
-  inline void
-  drawRandomParticles(List<P>& a_particles, const T a_numParticles, const std::function<RealVect()>& a_distribution)
-  {
-
-    a_particles.clear();
-
-    const T numParticles = partitionParticles(a_numParticles);
-
-    for (T t = 0; t < numParticles; t++) {
-      P p;
-      p.position() = a_distribution();
-
-      a_particles.add(p);
-    }
-  }
-
   template <typename P, typename Traits, typename T, typename>
   inline void
   drawRandomParticles(ParticleSoA<P, Traits>&          a_particles,
@@ -540,76 +422,6 @@ namespace ParticleManagement {
     for (T t = 0; t < numParticles; t++) {
       a_particles.append(a_distribution(), 1.0);
     }
-  }
-
-  template <typename P, typename T, typename>
-  inline void
-  drawSphereParticles(List<P>&        a_particles,
-                      const T         a_numParticles,
-                      const RealVect& a_center,
-                      const Real      a_radius) noexcept
-  {
-    CH_TIME("ParticleManagement::drawSphereParticles");
-
-    a_particles.clear();
-
-    const T numParticles = partitionParticles(a_numParticles);
-
-    for (T t = 0; t < numParticles; t++) {
-      P p;
-
-      RealVect& x = p.position();
-
-      x = std::numeric_limits<Real>::max() * RealVect::Unit;
-
-      while (x.vectorLength() > a_radius) {
-        for (int d = 0; d < SpaceDim; d++) {
-          x[d] = a_radius * Random::getUniformReal11();
-        }
-      }
-
-      x += a_center;
-
-      a_particles.add(p);
-    }
-  }
-
-  template <typename P, typename T, typename>
-  inline void
-  drawBoxParticles(List<P>&        a_particles,
-                   const T         a_numParticles,
-                   const RealVect& a_loCorner,
-                   const RealVect& a_hiCorner) noexcept
-  {
-    CH_TIME("ParticleManagement::drawBoxParticles");
-
-    CH_assert(a_hiCorner >= a_loCorner);
-
-    auto ranBox = [&]() -> RealVect {
-      return RealVect(D_DECL(a_loCorner[0] + (a_hiCorner[0] - a_loCorner[0]) * Random::getUniformReal01(),
-                             a_loCorner[1] + (a_hiCorner[1] - a_loCorner[1]) * Random::getUniformReal01(),
-                             a_loCorner[2] + (a_hiCorner[2] - a_loCorner[2]) * Random::getUniformReal01()));
-    };
-
-    drawRandomParticles(a_particles, a_numParticles, ranBox);
-  }
-
-  template <typename P, typename T, typename>
-  inline void
-  drawGaussianParticles(List<P>&        a_particles,
-                        const T         a_numParticles,
-                        const RealVect& a_center,
-                        const Real      a_radius) noexcept
-  {
-    CH_TIME("ParticleManagement::drawGaussianParticles");
-
-    std::normal_distribution<Real> gauss(0.0, a_radius);
-
-    auto ranGauss = [&]() -> RealVect {
-      return a_center + Random::get(gauss) * Random::getDirection();
-    };
-
-    drawRandomParticles(a_particles, a_numParticles, ranGauss);
   }
 
   template <typename P, typename Traits, typename T, typename>

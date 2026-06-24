@@ -159,8 +159,8 @@ namespace DischargeIO {
 
   /**
     @brief Write an SoA particle container to an H5Part file (quick visualization).
-    @details SoA analogue of the GenericParticle writeH5Part. Position, id, and weight are taken from the
-    container-owned columns; the caller supplies the payload datasets as (name, accessor) pairs so the
+    @details Position, id, and weight are taken from the container-owned columns; the caller supplies the
+    payload datasets as (name, accessor) pairs so the
     scalar-vs-vector distinction and naming are explicit (the SoA columns tuple interleaves scalar and
     vector-component columns, so there is no implicit reals/vects partition to rely on). Each vector
     dataset is written as name-x/name-y/name-z.

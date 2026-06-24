@@ -109,16 +109,6 @@ namespace ParticleManagement {
     }) noexcept;
 
   /**
-    @brief Remove physical particles from the input particles.
-    @param[in,out] a_particles           Input list of particles. Must have a weight function. 
-    @param[in]    a_numPhysPartToRemove Number of physical particles to remove
-    @note May fail if particle weights are not (close to) integers. 
-  */
-  template <typename P, typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
-  static inline void
-  removePhysicalParticles(List<P>& a_particles, const T a_numPhysPartToRemove) noexcept;
-
-  /**
     @brief Remove physical particles from an SoA container (operates on the container-owned weight column).
     @param[in,out] a_particles           Input SoA particle container.
     @param[in]    a_numPhysPartToRemove Number of physical particles to remove.
@@ -130,15 +120,6 @@ namespace ParticleManagement {
   template <typename P, typename Traits, typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
   static inline void
   removePhysicalParticles(ParticleSoA<P, Traits>& a_particles, const T a_numPhysPartToRemove) noexcept;
-
-  /**
-    @brief Remove particles if their weight is below the input weight
-    @param[in,out] a_particles    Input list of particles. Must have a weight function.
-    @param[in]    a_weightThresh Weight threshold for removal
-  */
-  template <typename P>
-  static inline void
-  deleteParticles(List<P>& a_particles, const Real a_weightThresh) noexcept;
 
   /**
     @brief Remove particles from an SoA container if their weight is below the threshold (swap-and-pop).
@@ -171,22 +152,10 @@ namespace ParticleManagement {
   partitionParticles(const T a_numParticles);
 
   /**
-    @brief Draw a specified number of random particles distributed according to a predefined distribution. 
-    @details The implementation will partition a_numParticles among the ranks so the total number of particles drawn is a_numParticles.
-    P is the particle type (must derived from BinItem) and T is an integer type. 
-    @param[out] a_particles    Output particles (different for each rank)
-    @param[in]  a_numParticles Number of particles
-    @param[in]  a_distribution Particle distribution. Must return a random position when calling the function. 
-  */
-  template <typename P, typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
-  static inline void
-  drawRandomParticles(List<P>& a_particles, const T a_numParticles, const std::function<RealVect()>& a_distribution);
-
-  /**
     @brief Draw random SoA particles into a free buffer, distributed according to a predefined distribution.
-    @details The SoA analogue of drawRandomParticles(List<P>): fills a free-standing ParticleSoA leaf
-    (the List<P> analogue) rather than an AMR container. MPI-aware -- it partitions a_numParticles across
-    ranks (total = a_numParticles) and each rank draws its own share (unit weight, default payload).
+    @details Fills a free-standing ParticleSoA leaf (a buffer) rather than an AMR container. MPI-aware --
+    it partitions a_numParticles across ranks (total = a_numParticles) and each rank draws its own share
+    (unit weight, default payload).
     Downstream code adds the buffer to a ParticleContainer (e.g. addParticlesDestructive) to route the
     particles to their owning patch/level/rank.
     @param[out] a_particles    SoA buffer to fill (cleared first).
@@ -201,54 +170,6 @@ namespace ParticleManagement {
   drawRandomParticles(ParticleSoA<P, Traits>&          a_particles,
                       const T                          a_numParticles,
                       const std::function<RealVect()>& a_distribution);
-
-  /**
-    @brief Draw particles in a sphere
-    @details The implementation will partition a_numParticles among the ranks so the total number of particles drawn is a_numParticles.
-    P is the particle type (must have a RealVect& position() function) and T is an integer type. 
-    @param[out] a_particles    Output particles (different for each rank)
-    @param[in]  a_numParticles Number of particles
-    @param[in]  a_center       Sphere center
-    @param[in]  a_radius       Sphere radius
-  */
-  template <typename P, typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
-  static inline void
-  drawSphereParticles(List<P>&        a_particles,
-                      const T         a_numParticles,
-                      const RealVect& a_center,
-                      const Real      a_radius) noexcept;
-
-  /**
-    @brief Draw particles in a box
-    @details The implementation will partition a_numParticles among the ranks so the total number of particles drawn is a_numParticles.
-    P is the particle type (must have a RealVect& position() function) and T is an integer type. 
-    @param[out] a_particles    Output particles (different for each rank)
-    @param[in]  a_numParticles Number of particles
-    @param[in]  a_loCorner     Low corner of box
-    @param[in]  a_hiCorner     High corner of box
-  */
-  template <typename P, typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
-  static inline void
-  drawBoxParticles(List<P>&        a_particles,
-                   const T         a_numParticles,
-                   const RealVect& a_loCorner,
-                   const RealVect& a_hiCorner) noexcept;
-
-  /**
-    @brief Draw particles from a Gaussian distribution
-    @details The implementation will partition a_numParticles among the ranks so the total number of particles drawn is a_numParticles.
-    P is the particle type (must have a RealVect& position() function) and T is an integer type. 
-    @param[out] a_particles    Output particles (different for each rank)
-    @param[in]  a_numParticles Number of particles
-    @param[in]  a_center       Gaussian blob Center
-    @param[in]  a_radius       Gaussian blob radius
-  */
-  template <typename P, typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
-  static inline void
-  drawGaussianParticles(List<P>&        a_particles,
-                        const T         a_numParticles,
-                        const RealVect& a_center,
-                        const Real      a_radius) noexcept;
 
   /**
     @brief Draw Gaussian-distributed particles into an SoA container (unit weight; positions only).
@@ -271,8 +192,8 @@ namespace ParticleManagement {
 
   /**
     @brief Draw box-distributed particles into an SoA container (unit weight; positions only).
-    @details SoA analogue of drawBoxParticles(List<P>): each rank draws its own a_numParticles share with
-    weight 1; routing to owners happens when the buffer is added to a ParticleContainer.
+    @details Each rank draws its own a_numParticles share with weight 1; routing to owners happens when
+    the buffer is added to a ParticleContainer.
     @param[out] a_particles    Output SoA buffer (cleared on entry).
     @param[in]  a_numParticles Number of particles.
     @param[in]  a_loCorner     Low corner of box.
@@ -290,8 +211,8 @@ namespace ParticleManagement {
 
   /**
     @brief Draw sphere-distributed particles into an SoA container (unit weight; positions only).
-    @details SoA analogue of drawSphereParticles(List<P>): each rank draws its own a_numParticles share with
-    weight 1; routing to owners happens when the buffer is added to a ParticleContainer.
+    @details Each rank draws its own a_numParticles share with weight 1; routing to owners happens when
+    the buffer is added to a ParticleContainer.
     @param[out] a_particles    Output SoA buffer (cleared on entry).
     @param[in]  a_numParticles Number of particles.
     @param[in]  a_center       Sphere center.

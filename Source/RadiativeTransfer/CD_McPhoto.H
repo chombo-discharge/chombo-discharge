@@ -16,11 +16,6 @@
 // Std includes
 #include <random>
 
-// Chombo includes
-#include <Particle.H>
-#include <ParticleData.H>
-#include <BinItem.H>
-
 // Our includes
 #include <CD_RtSolver.H>
 #include <CD_EBParticleMesh.H>
