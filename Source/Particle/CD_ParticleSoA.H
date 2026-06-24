@@ -1347,6 +1347,30 @@ public:
     return {m_cellStart[a_cell], m_cellStart[a_cell + 1]};
   }
 
+  /**
+    @brief Extract cell c's particles (the CSR range [cellStart(c), cellStart(c+1))) into a_out.
+    @details a_out is cleared first, then this cell's particles are appended (all columns, including
+    id/rank). Requires the container to be cell-sorted. This is the building block of the per-cell
+    extract->process->rebuild idiom that replaces the AoS BinFab<List<P>> per-cell pattern: extract a
+    cell into a reusable scratch container, mutate it (append/remove), accumulate it into an output
+    container via append(const ParticleSoA&), and finally swap() the output into the leaf. See
+    ItoSolver::makeSuperparticles for the canonical use.
+    @param[in]  a_cell Cell index.
+    @param[out] a_out  Destination scratch container (cleared on entry; reuse it across cells).
+  */
+  void
+  extractCell(const std::size_t a_cell, ParticleSoA& a_out) const
+  {
+    CH_assert(m_sorted);
+
+    a_out.clear();
+
+    const std::pair<std::size_t, std::size_t> range = this->cellRange(a_cell);
+    for (std::size_t i = range.first; i < range.second; i++) {
+      a_out.appendParticle(*this, i);
+    }
+  }
+
   ///@}
 
 protected:

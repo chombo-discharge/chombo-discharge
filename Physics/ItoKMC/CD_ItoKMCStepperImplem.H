@@ -143,91 +143,6 @@ namespace {
     a_amr->depositParticles<PointParticle, const Real&, &PointParticle::weight>(a_meshData, a_realm, a_phase, tmp);
   }
 
-  // Physical Ito particles per cell (sum of weights), deposited NGP by cell index. SoA analogue of
-  // ParticleOps::getPhysicalParticlesPerCell.
-  inline void
-  soaItoPhysicalPPC(EBAMRCellData& a_ppc, const ParticleContainerSoA<ItoParticle>& a_src) noexcept
-  {
-    const RealVect probLo = a_src.getProbLo();
-
-    for (int lvl = 0; lvl <= a_src.getFinestLevel(); lvl++) {
-      const DisjointBoxLayout& dbl = a_src.getGrids()[lvl];
-      const DataIterator&      dit = dbl.dataIterator();
-      const RealVect           dx  = a_src.getDx()[lvl];
-
-      const int nbox = dit.size();
-
-#pragma omp parallel for schedule(runtime)
-      for (int mybox = 0; mybox < nbox; mybox++) {
-        const DataIndex&                din  = dit[mybox];
-        const ParticleSoA<ItoParticle>& leaf = a_src[lvl][din];
-
-        FArrayBox& ppc = (*a_ppc[lvl])[din].getFArrayBox();
-        ppc.setVal(0.0);
-
-        for (std::size_t i = 0; i < leaf.size(); i++) {
-          const IntVect iv = ParticleOps::getParticleGridCell(leaf.position(i), probLo, dx);
-          ppc(iv, 0) += leaf.weight(i);
-        }
-      }
-    }
-  }
-
-  // Global sum of the weight column over all valid Ito particles. SoA analogue of
-  // ParticleOps::sum<P, &P::weight>.
-  inline Real
-  soaItoWeightSum(const ParticleContainerSoA<ItoParticle>& a_src) noexcept
-  {
-    Real particleSum = 0.0;
-
-    for (int lvl = 0; lvl <= a_src.getFinestLevel(); lvl++) {
-      const DisjointBoxLayout& dbl = a_src.getGrids()[lvl];
-      const DataIterator&      dit = dbl.dataIterator();
-
-      const int nbox = dit.size();
-
-#pragma omp parallel for schedule(runtime) reduction(+ : particleSum)
-      for (int mybox = 0; mybox < nbox; mybox++) {
-        const DataIndex&                din  = dit[mybox];
-        const ParticleSoA<ItoParticle>& leaf = a_src[lvl][din];
-
-        for (std::size_t i = 0; i < leaf.size(); i++) {
-          particleSum += leaf.weight(i);
-        }
-      }
-    }
-
-    return ParallelOps::sum(particleSum);
-  }
-
-  // Computational Ito particles per cell (count). SoA analogue of ParticleOps::getComputationalParticlesPerCell.
-  inline void
-  soaItoComputationalPPC(EBAMRCellData& a_ppc, const ParticleContainerSoA<ItoParticle>& a_src) noexcept
-  {
-    const RealVect probLo = a_src.getProbLo();
-
-    for (int lvl = 0; lvl <= a_src.getFinestLevel(); lvl++) {
-      const DisjointBoxLayout& dbl = a_src.getGrids()[lvl];
-      const DataIterator&      dit = dbl.dataIterator();
-      const RealVect           dx  = a_src.getDx()[lvl];
-
-      const int nbox = dit.size();
-
-#pragma omp parallel for schedule(runtime)
-      for (int mybox = 0; mybox < nbox; mybox++) {
-        const DataIndex&                din  = dit[mybox];
-        const ParticleSoA<ItoParticle>& leaf = a_src[lvl][din];
-
-        FArrayBox& ppc = (*a_ppc[lvl])[din].getFArrayBox();
-        ppc.setVal(0.0);
-
-        for (std::size_t i = 0; i < leaf.size(); i++) {
-          const IntVect iv = ParticleOps::getParticleGridCell(leaf.position(i), probLo, dx);
-          ppc(iv, 0) += 1.0;
-        }
-      }
-    }
-  }
 } // namespace
 
 template <typename I, typename C, typename R, typename F>
@@ -1823,7 +1738,7 @@ ItoKMCStepper<I, C, R, F>::preRegrid(const int a_lmin, const int a_oldFinestLeve
       EBAMRCellData&                           compPPC   = m_loadBalancePPC[i];
       const ParticleContainerSoA<ItoParticle>& particles = lbSolvers[i]->getParticles(ItoSolver::WhichContainer::Bulk);
 
-      soaItoComputationalPPC(compPPC, particles);
+      ParticleOps::getComputationalParticlesPerCell(compPPC, particles);
     }
   }
 
@@ -3692,7 +3607,7 @@ ItoKMCStepper<I, C, R, F>::getPhysicalParticlesPerCell(EBAMRCellData& a_ppc) con
 
     const ParticleContainerSoA<ItoParticle>& particles = it()->getParticles(ItoSolver::WhichContainer::Bulk);
 
-    soaItoPhysicalPPC(ppc, particles);
+    ParticleOps::getPhysicalParticlesPerCell(ppc, particles);
   }
 }
 
@@ -5644,7 +5559,7 @@ ItoKMCStepper<I, C, R, F>::computeQplus() const noexcept
     if (Z > 0) {
       const ParticleContainerSoA<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
-      totalCharge += Z * soaItoWeightSum(particles);
+      totalCharge += Z * ParticleOps::sum(particles);
     }
   }
 
@@ -5688,7 +5603,7 @@ ItoKMCStepper<I, C, R, F>::computeQminu() const noexcept
     if (Z < 0) {
       const ParticleContainerSoA<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
-      totalCharge += Z * soaItoWeightSum(particles);
+      totalCharge += Z * ParticleOps::sum(particles);
     }
   }
 

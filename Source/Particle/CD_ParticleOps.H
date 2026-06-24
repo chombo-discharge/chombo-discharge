@@ -77,6 +77,29 @@ public:
   getComputationalParticlesPerCell(EBAMRCellData& a_ppc, const ParticleContainer<P>& a_src) noexcept;
 
   /**
+    @brief Get the number of physical particles per cell (SoA overload).
+    @details Sums the container-owned weight column into a_ppc, deposited NGP by grid cell.
+    @param[out] a_ppc Physical particles per cell.
+    @param[in]  a_src SoA particle source container.
+    @tparam P      Payload type.
+    @tparam Traits Column descriptor for the payload.
+  */
+  template <typename P, typename Traits>
+  static inline void
+  getPhysicalParticlesPerCell(EBAMRCellData& a_ppc, const ParticleContainerSoA<P, Traits>& a_src) noexcept;
+
+  /**
+    @brief Get the number of computational particles per cell (SoA overload).
+    @param[out] a_ppc Computational particles per cell.
+    @param[in]  a_src SoA particle source container.
+    @tparam P      Payload type.
+    @tparam Traits Column descriptor for the payload.
+  */
+  template <typename P, typename Traits>
+  static inline void
+  getComputationalParticlesPerCell(EBAMRCellData& a_ppc, const ParticleContainerSoA<P, Traits>& a_src) noexcept;
+
+  /**
     @brief Get the grid cell where the particle lives
     @param[in] a_particlePosition Physical particle position
     @param[in] a_probLo           Lower-left physical corner of simulation domain 
@@ -192,6 +215,17 @@ public:
   template <typename P, Real (P::*scalarQuantity)()>
   static inline Real
   sum(const ParticleContainer<P>& a_particles) noexcept;
+
+  /**
+    @brief Global sum of the container-owned weight column (SoA overload).
+    @param[in] a_particles SoA particles.
+    @return Global (MPI-reduced) sum of all valid particle weights.
+    @tparam P      Payload type.
+    @tparam Traits Column descriptor for the payload.
+  */
+  template <typename P, typename Traits>
+  static inline Real
+  sum(const ParticleContainerSoA<P, Traits>& a_particles) noexcept;
 
   /**
     @brief Remove particles if they fulfill certain removal criterion

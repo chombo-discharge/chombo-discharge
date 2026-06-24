@@ -1330,6 +1330,22 @@ public:
     }) const noexcept;
 
   /**
+    @brief Transfer SoA particles that are on the covered side of the EB to a different container.
+    @details Per patch, a particle in an irregular cell is moved to a_dstParticles (placed on the EB) when
+    it lies outside every VoF half-space of its cell. Uses swap-and-pop on the SoA leaves.
+    @param[in,out] a_dstParticles Destination SoA container.
+    @param[in,out] a_srcParticles Source SoA container (transferred particles are removed from it).
+    @param[in]    a_phase        Phase where the particles live.
+    @tparam P      Payload type of the container.
+    @tparam Traits Column descriptor for the payload.
+  */
+  template <typename P, typename Traits>
+  void
+  transferIrregularParticles(ParticleContainerSoA<P, Traits>& a_dstParticles,
+                             ParticleContainerSoA<P, Traits>& a_srcParticles,
+                             const phase::which_phase         a_phase) const noexcept;
+
+  /**
     @brief Particle intersection algorithm based on ray-casting.
     @details This routine will iterate through all the particles and check if they intersect the geometry. The template
     parameter indicates the particle type -- it MUST have const RealVec& position() const and  const RealVect& oldPosition() const 

@@ -2217,6 +2217,78 @@ AmrMesh::intersectParticlesBisectIF(
   a_domainParticles.remap();
 }
 
+template <typename P, typename Traits>
+void
+AmrMesh::transferIrregularParticles(ParticleContainerSoA<P, Traits>& a_dstParticles,
+                                    ParticleContainerSoA<P, Traits>& a_srcParticles,
+                                    const phase::which_phase         a_phase) const noexcept
+{
+  CH_TIME("AmrMesh::transferIrregularParticles(ParticleContainerSoA)");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::transferIrregularParticles(ParticleContainerSoA)" << endl;
+  }
+
+  CH_assert(a_dstParticles.getRealm() == a_srcParticles.getRealm());
+
+  const std::string realm = a_dstParticles.getRealm();
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    const DisjointBoxLayout& dbl   = this->getGrids(realm)[lvl];
+    const DataIterator&      dit   = dbl.dataIterator();
+    const EBISLayout&        ebisl = this->getEBISLayout(realm, a_phase)[lvl];
+    const Real               dx    = m_dx[lvl];
+
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din     = dit[mybox];
+      const Box        cellBox = dbl[din];
+      const EBISBox&   ebisbox = ebisl[din];
+
+      ParticleSoA<P, Traits>& dst = a_dstParticles[lvl][din];
+      ParticleSoA<P, Traits>& src = a_srcParticles[lvl][din];
+
+      // swap-and-pop transfer: do NOT advance i after a transfer (a new particle now sits in slot i).
+      std::size_t i = 0;
+      while (i < src.size()) {
+        const RealVect pos = src.position(i);
+        const IntVect  iv  = ParticleOps::getParticleCellIndex(pos, m_probLo, dx);
+
+        bool moved = false;
+
+        if (cellBox.contains(iv) && ebisbox.isIrregular(iv)) {
+          bool insideAnyVoF = false;
+
+          const Vector<VolIndex> allVoFs = ebisbox.getVoFs(iv);
+          for (int k = 0; k < allVoFs.size(); k++) {
+            const RealVect normal = ebisbox.normal(allVoFs[k]);
+            const RealVect ebPos  = m_probLo + Location::position(Location::Cell::Boundary, allVoFs[k], ebisbox, dx);
+
+            if ((pos - ebPos).dotProduct(normal) >= 0.0) {
+              insideAnyVoF = true;
+            }
+          }
+
+          if (!insideAnyVoF) {
+            const VolIndex& vof   = allVoFs[0];
+            const RealVect  ebPos = m_probLo + Location::position(Location::Cell::Boundary, vof, ebisbox, dx);
+
+            src.setPosition(i, ebPos);
+            dst.appendParticle(src, i);
+            src.remove(i);
+
+            moved = true;
+          }
+        }
+
+        if (!moved) {
+          i++;
+        }
+      }
+    }
+  }
+}
+
 #include <CD_NamespaceFooter.H>
 
 #endif

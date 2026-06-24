@@ -118,6 +118,71 @@ ParticleOps::getComputationalParticlesPerCell(EBAMRCellData& a_ppc, const Partic
   }
 }
 
+template <typename P, typename Traits>
+inline void
+ParticleOps::getPhysicalParticlesPerCell(EBAMRCellData& a_ppc, const ParticleContainerSoA<P, Traits>& a_src) noexcept
+{
+  CH_TIME("ParticleOps::getPhysicalParticlesPerCell(SoA)");
+
+  const RealVect probLo = a_src.getProbLo();
+
+  for (int lvl = 0; lvl <= a_src.getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl = a_src.getGrids()[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
+    const RealVect           dx  = a_src.getDx()[lvl];
+
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex&              din  = dit[mybox];
+      const ParticleSoA<P, Traits>& leaf = a_src[lvl][din];
+
+      FArrayBox& ppc = (*a_ppc[lvl])[din].getFArrayBox();
+      ppc.setVal(0.0);
+
+      for (std::size_t i = 0; i < leaf.size(); i++) {
+        const IntVect iv = ParticleOps::getParticleGridCell(leaf.position(i), probLo, dx);
+
+        ppc(iv, 0) += leaf.weight(i);
+      }
+    }
+  }
+}
+
+template <typename P, typename Traits>
+inline void
+ParticleOps::getComputationalParticlesPerCell(EBAMRCellData&                         a_ppc,
+                                              const ParticleContainerSoA<P, Traits>& a_src) noexcept
+{
+  CH_TIME("ParticleOps::getComputationalParticlesPerCell(SoA)");
+
+  const RealVect probLo = a_src.getProbLo();
+
+  for (int lvl = 0; lvl <= a_src.getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl = a_src.getGrids()[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
+    const RealVect           dx  = a_src.getDx()[lvl];
+
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex&              din  = dit[mybox];
+      const ParticleSoA<P, Traits>& leaf = a_src[lvl][din];
+
+      FArrayBox& ppc = (*a_ppc[lvl])[din].getFArrayBox();
+      ppc.setVal(0.0);
+
+      for (std::size_t i = 0; i < leaf.size(); i++) {
+        const IntVect iv = ParticleOps::getParticleGridCell(leaf.position(i), probLo, dx);
+
+        ppc(iv, 0) += 1.0;
+      }
+    }
+  }
+}
+
 inline IntVect
 ParticleOps::getParticleGridCell(const RealVect& a_particlePosition,
                                  const RealVect& a_probLo,
@@ -391,6 +456,34 @@ ParticleOps::sum(const ParticleContainer<P>& a_particles) noexcept
 
       for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
         particleSum += (lit().*scalarQuantity)();
+      }
+    }
+  }
+
+  return ParallelOps::sum(particleSum);
+}
+
+template <typename P, typename Traits>
+inline Real
+ParticleOps::sum(const ParticleContainerSoA<P, Traits>& a_particles) noexcept
+{
+  CH_TIME("ParticleOps::sum(ParticleContainerSoA<P>)");
+
+  Real particleSum = 0.0;
+
+  for (int lvl = 0; lvl <= a_particles.getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl = a_particles.getGrids()[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
+
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime) reduction(+ : particleSum)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex&              din  = dit[mybox];
+      const ParticleSoA<P, Traits>& leaf = a_particles[lvl][din];
+
+      for (std::size_t i = 0; i < leaf.size(); i++) {
+        particleSum += leaf.weight(i);
       }
     }
   }

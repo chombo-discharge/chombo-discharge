@@ -49,73 +49,6 @@ namespace {
                                                                                 false);
   }
 
-  // SoA analogue of AmrMesh::transferIrregularParticles: move particles that ended up on the covered side of the
-  // EB (outside every VoF half-space) from a_src to a_dst, placing them on the EB. Swap-and-pop on the SoA leaves.
-  inline void
-  transferIrregularParticlesSoA(const RefCountedPtr<AmrMesh>&      a_amr,
-                                const phase::which_phase           a_phase,
-                                ParticleContainerSoA<ItoParticle>& a_dst,
-                                ParticleContainerSoA<ItoParticle>& a_src) noexcept
-  {
-    const std::string realm = a_dst.getRealm();
-
-    for (int lvl = 0; lvl <= a_amr->getFinestLevel(); lvl++) {
-      const DisjointBoxLayout& dbl    = a_amr->getGrids(realm)[lvl];
-      const DataIterator&      dit    = dbl.dataIterator();
-      const EBISLayout&        ebisl  = a_amr->getEBISLayout(realm, a_phase)[lvl];
-      const RealVect           probLo = a_amr->getProbLo();
-      const Real               dx     = a_amr->getDx()[lvl];
-
-      const int nbox = dit.size();
-
-#pragma omp parallel for schedule(runtime)
-      for (int mybox = 0; mybox < nbox; mybox++) {
-        const DataIndex& din     = dit[mybox];
-        const Box        cellBox = dbl[din];
-        const EBISBox&   ebisbox = ebisl[din];
-
-        ParticleSoA<ItoParticle>& dst = a_dst[lvl][din];
-        ParticleSoA<ItoParticle>& src = a_src[lvl][din];
-
-        std::size_t i = 0;
-        while (i < src.size()) {
-          const RealVect pos = src.position(i);
-          const IntVect  iv  = ParticleOps::getParticleCellIndex(pos, probLo, dx);
-
-          bool moved = false;
-
-          if (cellBox.contains(iv) && ebisbox.isIrregular(iv)) {
-            bool insideAnyVoF = false;
-
-            const Vector<VolIndex> allVoFs = ebisbox.getVoFs(iv);
-            for (int k = 0; k < allVoFs.size(); k++) {
-              const RealVect normal = ebisbox.normal(allVoFs[k]);
-              const RealVect ebPos  = probLo + Location::position(Location::Cell::Boundary, allVoFs[k], ebisbox, dx);
-
-              if ((pos - ebPos).dotProduct(normal) >= 0.0) {
-                insideAnyVoF = true;
-              }
-            }
-
-            if (!insideAnyVoF) {
-              const VolIndex& vof   = allVoFs[0];
-              const RealVect  ebPos = probLo + Location::position(Location::Cell::Boundary, vof, ebisbox, dx);
-
-              src.setPosition(i, ebPos);
-              dst.appendParticle(src, i);
-              src.remove(i);
-
-              moved = true;
-            }
-          }
-
-          if (!moved) {
-            i++;
-          }
-        }
-      }
-    }
-  }
 } // namespace
 
 template <typename I, typename C, typename R, typename F>
@@ -560,7 +493,7 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
     ParticleContainerSoA<ItoParticle>& ebParticles   = solver->getParticles(ItoSolver::WhichContainer::EB);
     ParticleContainerSoA<ItoParticle>& bulkParticles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
-    transferIrregularParticlesSoA(this->m_amr, this->m_plasmaPhase, ebParticles, bulkParticles);
+    this->m_amr->transferIrregularParticles(ebParticles, bulkParticles, this->m_plasmaPhase);
   }
   m_timer.stopEvent("EB/Particle intersection");
   // ====== END TRANSPORT STEP ======
