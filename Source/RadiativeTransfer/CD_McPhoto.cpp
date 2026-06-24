@@ -26,7 +26,6 @@
 #include <CD_McPhoto.H>
 #include <CD_DataOps.H>
 #include <CD_Units.H>
-#include <CD_PointParticle.H>
 #include <CD_ParticleOps.H>
 #include <CD_Random.H>
 #include <CD_DischargeIO.H>
@@ -126,7 +125,7 @@ McPhoto::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_s
     const size_t maxPhotonsPerPacket = m_maxPhotonsGeneratedPerCell / m_numSamplingPackets;
     const size_t remainder           = m_maxPhotonsGeneratedPerCell % m_numSamplingPackets;
 
-    ParticleContainer<PointParticle> pointParticles;
+    ParticleContainerSoA<NoPayload> pointParticles;
     m_amr->allocate(pointParticles, m_realm);
 
     for (int i = 0; i < m_numSamplingPackets; i++) {
@@ -1132,10 +1131,10 @@ McPhoto::generateComputationalPhotons(ParticleContainerSoA<Photon>& a_photons,
 }
 
 void
-McPhoto::dirtySamplePhotons(ParticleContainer<PointParticle>& a_photons,
-                            EBAMRCellData&                    a_phi,
-                            const EBAMRCellData&              a_numPhysicalPhotons,
-                            const size_t                      a_maxPhotonsPerCell) const noexcept
+McPhoto::dirtySamplePhotons(ParticleContainerSoA<NoPayload>& a_photons,
+                            EBAMRCellData&                   a_phi,
+                            const EBAMRCellData&             a_numPhysicalPhotons,
+                            const size_t                     a_maxPhotonsPerCell) const noexcept
 {
   CH_TIME("McPhoto::dirtySamplePhotons");
   if (m_verbosity > 5) {
@@ -1164,7 +1163,7 @@ McPhoto::dirtySamplePhotons(ParticleContainer<PointParticle>& a_photons,
       const FArrayBox&     numPhysPhotonsReg = numPhysPhotons.getFArrayBox();
       const BaseFab<bool>& validCells        = (*m_amr->getValidCells(m_realm)[lvl])[din];
 
-      List<PointParticle>& photons = a_photons[lvl][din].listItems();
+      ParticleSoA<NoPayload>& photons = a_photons[lvl][din];
 
       // Regular cells. Note that we make superphotons if we have to. Also, only draw photons in valid cells,
       // grids that are covered by finer grids don't draw photons.
@@ -1190,7 +1189,7 @@ McPhoto::dirtySamplePhotons(ParticleContainer<PointParticle>& a_photons,
               const Real     travelDistance = ChomboDischarge::McPhoto::randomExponential(kappa);
               const RealVect finalPos       = pos + travelDistance * direction;
 
-              photons.add(PointParticle(finalPos, (Real)photonWeight));
+              photons.append(finalPos, (Real)photonWeight);
             }
           }
         }
@@ -1232,7 +1231,7 @@ McPhoto::dirtySamplePhotons(ParticleContainer<PointParticle>& a_photons,
               const Real     travelDistance = ChomboDischarge::McPhoto::randomExponential(kappa);
               const RealVect finalPos       = pos + travelDistance * direction;
 
-              photons.add(PointParticle(finalPos, weight));
+              photons.append(finalPos, weight);
             }
           }
         }
@@ -1271,21 +1270,18 @@ McPhoto::dirtySamplePhotons(ParticleContainer<PointParticle>& a_photons,
         const Box      cellBox = dbl[din];
         const EBISBox& ebisbox = ebisl[din];
 
-        EBParticleMesh particleMesh(domain, cellBox, ebisbox, dx * RealVect::Unit, probLo);
+        EBParticleMeshSoA particleMesh(domain, cellBox, ebisbox, dx * RealVect::Unit, probLo);
 
-        EBCellFAB&                 output  = (*a_phi[lvl])[din];
-        const List<PointParticle>& photons = a_photons[lvl][din].listItems();
+        EBCellFAB&                    output  = (*a_phi[lvl])[din];
+        const ParticleSoA<NoPayload>& photons = a_photons[lvl][din];
 
-        particleMesh.deposit<PointParticle, const Real&, &PointParticle::weight>(output,
-                                                                                 photons,
-                                                                                 DepositionType::NGP,
-                                                                                 1.0,
-                                                                                 true);
+        particleMesh.depositWeight(output, photons, DepositionType::NGP, 1.0, true);
       }
     }
   }
   else {
-    this->depositPhotons<PointParticle, const Real&, &PointParticle::weight>(a_phi, a_photons, m_deposition);
+    m_amr->depositWeight(a_phi, m_realm, m_phase, a_photons, m_deposition, m_coarseFineDeposition, false);
+    this->depositHybridDivergence(a_phi);
   }
 
   a_photons.clearParticles();

@@ -706,7 +706,7 @@ CdrPlasmaJSON::initializePlasmaSpecies()
 
     // Get the initial data.
     const std::function<Real(const RealVect, const Real)> initFunc = this->parsePlasmaSpeciesInitialData(species);
-    const List<PointParticle>& initParticles                       = this->parsePlasmaSpeciesInitialParticles(species);
+    ParticleSoA<NoPayload> initParticles                           = this->parsePlasmaSpeciesInitialParticles(species);
 
     // Initialize the species.
     const int transportIdx = static_cast<int>(m_cdrSpecies.size());
@@ -720,7 +720,7 @@ CdrPlasmaJSON::initializePlasmaSpecies()
     m_cdrSpecies.push_back(RefCountedPtr<CdrSpecies>(new CdrSpeciesJSON(name, Z, diffusive, mobile, initFunc)));
     m_cdrSpeciesJSON.push_back(species);
 
-    m_cdrSpecies[m_cdrSpecies.size() - 1]->getInitialParticles() = initParticles;
+    m_cdrSpecies[m_cdrSpecies.size() - 1]->getInitialParticles() = std::move(initParticles);
 
     if (species.contains("mass")) {
       const json& m = species["mass"];
@@ -1056,7 +1056,7 @@ CdrPlasmaJSON::parsePlasmaSpeciesInitialData(const json& a_json) const
   return initFunc;
 }
 
-List<PointParticle>
+ParticleSoA<NoPayload>
 CdrPlasmaJSON::parsePlasmaSpeciesInitialParticles(const json& a_json) const
 {
   CH_TIME("CdrPlasmaJSON::parsePlasmaSpeciesInitialParticles()");
@@ -1064,7 +1064,7 @@ CdrPlasmaJSON::parsePlasmaSpeciesInitialParticles(const json& a_json) const
     pout() << "CdrPlasmaJSON::parsePlasmaSpeciesInitialParticles()" << endl;
   }
 
-  List<PointParticle> initParticles;
+  ParticleSoA<NoPayload> initParticles;
 
   const std::string species   = a_json["name"].get<std::string>();
   const std::string baseError = "CdrPlasmaJSON::parsePlasmaSpeciesInitialParticles for species '" + species + "' ";
@@ -1087,7 +1087,7 @@ CdrPlasmaJSON::parsePlasmaSpeciesInitialParticles(const json& a_json) const
 	ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + err);
       }
 
-      initParticles.join(m_cdrSpecies[m_cdrSpeciesMap.at(copySpecies)]->getInitialParticles());
+      initParticles.append(m_cdrSpecies[m_cdrSpeciesMap.at(copySpecies)]->getInitialParticles());
     }
 
     // Uniformly distributed particles.
@@ -1119,10 +1119,10 @@ CdrPlasmaJSON::parsePlasmaSpeciesInitialParticles(const json& a_json) const
 
       // Draw the particles and add them to initParticles
       if (numCompPart > 0) {
-        List<PointParticle> uniformParticles;
+        ParticleSoA<NoPayload> uniformParticles;
         ParticleManagement::drawBoxParticles(uniformParticles, numCompPart, loCorner, hiCorner);
-        for (ListIterator<PointParticle> lit(uniformParticles); lit.ok(); ++lit) {
-          lit().weight() = weight;
+        for (std::size_t i = 0; i < uniformParticles.size(); i++) {
+          uniformParticles.weight(i) = weight;
         }
 
         initParticles.catenate(uniformParticles);
@@ -1156,10 +1156,10 @@ CdrPlasmaJSON::parsePlasmaSpeciesInitialParticles(const json& a_json) const
 
       // Draw the particles and add them to initParticles
       if (numCompPart > 0) {
-        List<PointParticle> sphereParticles;
+        ParticleSoA<NoPayload> sphereParticles;
         ParticleManagement::drawSphereParticles(sphereParticles, numCompPart, center, radius);
-        for (ListIterator<PointParticle> lit(sphereParticles); lit.ok(); ++lit) {
-          lit().weight() = weight;
+        for (std::size_t i = 0; i < sphereParticles.size(); i++) {
+          sphereParticles.weight(i) = weight;
         }
 
         initParticles.catenate(sphereParticles);

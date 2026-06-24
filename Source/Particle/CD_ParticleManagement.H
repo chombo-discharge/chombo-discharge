@@ -269,6 +269,44 @@ namespace ParticleManagement {
                         const RealVect&         a_center,
                         const Real              a_radius) noexcept;
 
+  /**
+    @brief Draw box-distributed particles into an SoA container (unit weight; positions only).
+    @details SoA analogue of drawBoxParticles(List<P>): each rank draws its own a_numParticles share with
+    weight 1; routing to owners happens when the buffer is added to a ParticleContainerSoA.
+    @param[out] a_particles    Output SoA buffer (cleared on entry).
+    @param[in]  a_numParticles Number of particles.
+    @param[in]  a_loCorner     Low corner of box.
+    @param[in]  a_hiCorner     High corner of box.
+    @tparam P      Payload type.
+    @tparam Traits Column descriptor for the payload.
+    @tparam T      Integral count type.
+  */
+  template <typename P, typename Traits, typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
+  static inline void
+  drawBoxParticles(ParticleSoA<P, Traits>& a_particles,
+                   const T                 a_numParticles,
+                   const RealVect&         a_loCorner,
+                   const RealVect&         a_hiCorner) noexcept;
+
+  /**
+    @brief Draw sphere-distributed particles into an SoA container (unit weight; positions only).
+    @details SoA analogue of drawSphereParticles(List<P>): each rank draws its own a_numParticles share with
+    weight 1; routing to owners happens when the buffer is added to a ParticleContainerSoA.
+    @param[out] a_particles    Output SoA buffer (cleared on entry).
+    @param[in]  a_numParticles Number of particles.
+    @param[in]  a_center       Sphere center.
+    @param[in]  a_radius       Sphere radius.
+    @tparam P      Payload type.
+    @tparam Traits Column descriptor for the payload.
+    @tparam T      Integral count type.
+  */
+  template <typename P, typename Traits, typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
+  static inline void
+  drawSphereParticles(ParticleSoA<P, Traits>& a_particles,
+                      const T                 a_numParticles,
+                      const RealVect&         a_center,
+                      const Real              a_radius) noexcept;
+
 } // namespace ParticleManagement
 
 #include <CD_NamespaceFooter.H>

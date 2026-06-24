@@ -79,7 +79,7 @@ CdrSpecies::isMobile() const
   return m_isMobile;
 }
 
-const List<PointParticle>&
+const ParticleSoA<NoPayload>&
 CdrSpecies::getInitialParticles() const
 {
   CH_TIME("CdrSpecies::getInitialParticles()");
@@ -87,7 +87,7 @@ CdrSpecies::getInitialParticles() const
   return m_initialParticles;
 }
 
-List<PointParticle>&
+ParticleSoA<NoPayload>&
 CdrSpecies::getInitialParticles()
 {
   CH_TIME("CdrSpecies::getInitialParticles()");

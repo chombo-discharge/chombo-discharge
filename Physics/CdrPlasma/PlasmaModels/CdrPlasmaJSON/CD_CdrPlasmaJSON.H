@@ -1007,7 +1007,7 @@ namespace Physics {
          @param[in] a_json JSON field, usually (always?) describing one of the objects in the 'plasma species' field.
         @return Return value
       */
-      virtual List<PointParticle>
+      virtual ParticleSoA<NoPayload>
       parsePlasmaSpeciesInitialParticles(const json& a_json) const;
 
       /**

@@ -1260,16 +1260,19 @@ CdrSolver::initialDataParticles()
   //       the particle API to see the details of the ParticleContainer<T> type and
   //       deposition methods.
 
-  const List<PointParticle>& initialParticles = m_species->getInitialParticles();
+  const ParticleSoA<NoPayload>& initialParticles = m_species->getInitialParticles();
 
-  const auto numParticles = (long long)initialParticles.length();
+  const auto numParticles = (long long)initialParticles.size();
 
   if (ParallelOps::sum(numParticles) > 0LL) {
 
-    // Make a ParticleContainer<T> and redistribute particles over the AMR hierarchy.
-    ParticleContainer<PointParticle> particles;
+    // Make an SoA ParticleContainer and redistribute particles over the AMR hierarchy.
+    ParticleContainerSoA<NoPayload> particles;
     m_amr->allocate(particles, m_realm);
-    particles.addParticles(m_species->getInitialParticles());
+
+    ParticleSoA<NoPayload> buffer;
+    buffer.append(initialParticles);
+    particles.addParticlesDestructive(buffer);
 
     // This function will be called BEFORE initialDataFunction, we it is safe to set m_phi to zero
     DataOps::setValue(m_phi, 0.0);
@@ -1294,14 +1297,10 @@ CdrSolver::initialDataParticles()
         const EBISBox& ebisbox = ebisl[din];
 
         // Make the deposition object and put the particles on the grid.
-        constexpr bool forceIrregNGP = true;
-        EBParticleMesh interp(domain, cellBox, ebisbox, dx, probLo);
+        constexpr bool    forceIrregNGP = true;
+        EBParticleMeshSoA interp(domain, cellBox, ebisbox, dx, probLo);
 
-        interp.deposit<PointParticle, const Real&, &PointParticle::weight>((*m_phi[lvl])[din],
-                                                                           particles[lvl][din].listItems(),
-                                                                           DepositionType::NGP,
-                                                                           1.0,
-                                                                           forceIrregNGP);
+        interp.depositWeight((*m_phi[lvl])[din], particles[lvl][din], DepositionType::NGP, 1.0, forceIrregNGP);
       }
     }
   }

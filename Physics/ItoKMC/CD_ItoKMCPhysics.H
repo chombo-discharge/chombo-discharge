@@ -28,7 +28,7 @@
 #include <CD_RtSpecies.H>
 #include <CD_Photon.H>
 #include <CD_ItoParticle.H>
-#include <CD_PointParticle.H>
+#include <CD_ParticleSoA.H>
 #include <CD_ItoKMCPhotoReaction.H>
 #include <CD_ItoKMCSurfaceReactionSet.H>
 #include <CD_KMCDualState.H>
@@ -398,7 +398,7 @@ namespace Physics {
       */
       inline void
       reconcilePhotoionization(Vector<ParticleSoA<ItoParticle>*>&  a_itoParticles,
-                               Vector<List<PointParticle>*>&       a_cdrParticles,
+                               Vector<ParticleSoA<NoPayload>*>&    a_cdrParticles,
                                const Vector<ParticleSoA<Photon>*>& a_absorbedPhotons) const noexcept;
 
     protected:

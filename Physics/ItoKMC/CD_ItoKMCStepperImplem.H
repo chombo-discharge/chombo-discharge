@@ -614,7 +614,9 @@ ItoKMCStepper<I, C, R, F>::allocateInternals() noexcept
   m_cdrPhotoiProducts.resize(numCdrSpecies);
   for (int i = 0; i < numCdrSpecies; i++) {
     m_amr->allocate(m_cdrMobilities[i], m_fluidRealm, m_plasmaPhase, 1);
-    m_amr->allocate(m_cdrPhotoiProducts[i], m_particleRealm);
+
+    m_cdrPhotoiProducts[i] = RefCountedPtr<ParticleContainerSoA<NoPayload>>(new ParticleContainerSoA<NoPayload>());
+    m_amr->allocate(*m_cdrPhotoiProducts[i], m_particleRealm);
   }
 
   // Storage for the density gradients
@@ -1691,7 +1693,7 @@ ItoKMCStepper<I, C, R, F>::preRegrid(const int a_lmin, const int a_oldFinestLeve
 
   for (int i = 0; i < numCdrSpecies; i++) {
     m_cdrMobilities[i].clear();
-    m_cdrPhotoiProducts[i].clearParticles();
+    m_cdrPhotoiProducts[i]->clearParticles();
   }
 
   for (int i = 0; i < numItoSpecies; i++) {
@@ -4003,8 +4005,8 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_electri
   // and then add the result back into the CDR solvers.
   CH_START(t4);
   for (int i = 0; i < m_cdrPhotoiProducts.size(); i++) {
-    m_cdrPhotoiProducts[i].clearParticles();
-    m_cdrPhotoiProducts[i].organizeParticlesByCell();
+    m_cdrPhotoiProducts[i]->clearParticles();
+    m_cdrPhotoiProducts[i]->organizeParticlesByCell();
   }
 
   // Reconcile the results -- for the discrete solvers we add/remove particles/photons and for the CDR solvers we update
@@ -4017,14 +4019,15 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_electri
   // the resulting products need to end up on in the correct data component in m_fluidCdrPPC.
   CH_START(t5);
   for (int i = 0; i < m_cdrPhotoiProducts.size(); i++) {
-    m_cdrPhotoiProducts[i].organizeParticlesByPatch();
+    m_cdrPhotoiProducts[i]->organizeParticlesByPatch();
 
-    m_amr->depositParticles<PointParticle, const Real&, &PointParticle::weight>(m_particleScratch1,
-                                                                                m_particleRealm,
-                                                                                m_plasmaPhase,
-                                                                                m_cdrPhotoiProducts[i],
-                                                                                DepositionType::NGP,
-                                                                                CoarseFineDeposition::Halo);
+    m_amr->depositWeight(m_particleScratch1,
+                         m_particleRealm,
+                         m_plasmaPhase,
+                         *m_cdrPhotoiProducts[i],
+                         DepositionType::NGP,
+                         CoarseFineDeposition::Halo,
+                         false);
 
     m_amr->copyData(m_fluidScratch1, m_particleScratch1);
     DataOps::volumeScale(m_fluidScratch1, m_amr->getDx());
@@ -4033,7 +4036,7 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_electri
 
     DataOps::incr(fluidCdrPPC, m_fluidScratch1, 1.0);
 
-    m_cdrPhotoiProducts[i].clearParticles();
+    m_cdrPhotoiProducts[i]->clearParticles();
   }
 
   this->reconcileCdrDensities(m_fluidCdrPPC, m_fluidOldCdrPPC, a_dt);
@@ -4398,12 +4401,11 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
 
   // Per-cell SoA scratch: one ParticleSoA<P> per grid cell, indexed by Box::index(iv). The Ito bulk leaves
   // and the bulk/source photon leaves are cell-sorted and split into these; the mutated scratches are rebuilt
-  // into the SoA leaves after the kernels run. The CDR photoionization products remain AoS (PointParticle).
+  // into the SoA leaves after the kernels run. The CDR photoionization products use ParticleSoA<NoPayload>.
   std::vector<std::vector<ParticleSoA<ItoParticle>>> itoCells(numItoSpecies);
   std::vector<std::vector<ParticleSoA<Photon>>>      bulkPhotonCells(numPhotonSpecies);
   std::vector<std::vector<ParticleSoA<Photon>>>      sourcePhotonCells(numPhotonSpecies);
-
-  Vector<BinFab<PointParticle>*> cdrParticlesFAB(numCdrSpecies);
+  std::vector<std::vector<ParticleSoA<NoPayload>>>   cdrCells(numCdrSpecies);
 
   // Build the per-cell Ito scratch from the SoA bulk leaves.
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
@@ -4414,13 +4416,11 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
     binLeafToCells(itoCells[idx], solverParticles[a_level][a_din], a_box, a_dx, probLo);
   }
 
-  // Get a handle to the cell-sorted particles for CDR photoionization products (these remain AoS).
+  // Build the per-cell CDR photoionization-product scratch from the SoA leaves.
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
     const int idx = solverIt.index();
 
-    ParticleContainer<PointParticle>& pointParticles = m_cdrPhotoiProducts[idx];
-
-    cdrParticlesFAB[idx] = &(pointParticles.getCellParticles(a_level, a_din));
+    binLeafToCells(cdrCells[idx], (*m_cdrPhotoiProducts[idx])[a_level][a_din], a_box, a_dx, probLo);
   }
 
   // Build the per-cell photon scratch from the SoA bulk/source photon leaves.
@@ -4445,7 +4445,7 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
   // is the storage we use for these; note that it is repopulated in every grid cell (pointing at the per-cell
   // SoA scratch above). CDR products remain AoS lists.
   Vector<ParticleSoA<ItoParticle>*> itoParticles(numItoSpecies);
-  Vector<List<PointParticle>*>      cdrParticles(numCdrSpecies);
+  Vector<ParticleSoA<NoPayload>*>   cdrParticles(numCdrSpecies);
   Vector<ParticleSoA<Photon>*>      bulkPhotons(numPhotonSpecies);
   Vector<ParticleSoA<Photon>*>      sourcePhotons(numPhotonSpecies);
   CH_STOP(t1);
@@ -4472,7 +4472,7 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
 
       // Populate the per-cell CDR data
       for (int i = 0; i < numCdrSpecies; i++) {
-        cdrParticles[i] = &((*cdrParticlesFAB[i])(iv, 0));
+        cdrParticles[i] = &cdrCells[i][a_box.index(iv)];
       }
 
       // Populate the per-cell photon data.
@@ -4559,7 +4559,7 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
 
       // Populate the per-cell CDR data
       for (int i = 0; i < numCdrSpecies; i++) {
-        cdrParticles[i] = &((*cdrParticlesFAB[i])(iv, 0));
+        cdrParticles[i] = &cdrCells[i][a_box.index(iv)];
       }
 
       // Populate the per-cell photon data.
@@ -4649,6 +4649,13 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
 
     rebuildLeafFromCells(solverSourcePhotons[a_level][a_din], sourcePhotonCells[idx]);
   }
+
+  // Rebuild the CDR photoionization-product leaves from the mutated per-cell scratch.
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
+    const int idx = solverIt.index();
+
+    rebuildLeafFromCells((*m_cdrPhotoiProducts[idx])[a_level][a_din], cdrCells[idx]);
+  }
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -4681,7 +4688,7 @@ ItoKMCStepper<I, C, R, F>::reconcilePhotoionization() noexcept
       Vector<ParticleSoA<ItoParticle>> itoProducts(numItoSpecies);
 
       Vector<ParticleSoA<ItoParticle>*> itoParticles(numItoSpecies);
-      Vector<List<PointParticle>*>      cdrParticles(numCdrSpecies);
+      Vector<ParticleSoA<NoPayload>*>   cdrParticles(numCdrSpecies);
       Vector<ParticleSoA<Photon>*>      photonParticles(numPhotonSpecies);
 
       for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
@@ -4689,9 +4696,7 @@ ItoKMCStepper<I, C, R, F>::reconcilePhotoionization() noexcept
       }
 
       for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
-        ParticleContainer<PointParticle>& particles = m_cdrPhotoiProducts[solverIt.index()];
-
-        cdrParticles[solverIt.index()] = &(particles[lvl][din].listItems());
+        cdrParticles[solverIt.index()] = &((*m_cdrPhotoiProducts[solverIt.index()])[lvl][din]);
       }
 
       for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {

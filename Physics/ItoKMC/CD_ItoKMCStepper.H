@@ -21,7 +21,7 @@
 #include <CD_ItoKMCPhysics.H>
 #include <CD_ItoLayout.H>
 #include <CD_CdrLayout.H>
-#include <CD_PointParticle.H>
+#include <CD_ParticleContainerSoA.H>
 #include <CD_RtLayout.H>
 #include <CD_McPhoto.H>
 #include <CD_FieldSolver.H>
@@ -654,7 +654,7 @@ namespace Physics {
 	@note This is agglomerated with Ito particle photoionization functionality, and is
 	therefore defined on the particle realm. 
       */
-      mutable Vector<ParticleContainer<PointParticle>> m_cdrPhotoiProducts;
+      mutable Vector<RefCountedPtr<ParticleContainerSoA<NoPayload>>> m_cdrPhotoiProducts;
 
       /**
 	@brief Solver indices used when load-balancing the particle solvers.

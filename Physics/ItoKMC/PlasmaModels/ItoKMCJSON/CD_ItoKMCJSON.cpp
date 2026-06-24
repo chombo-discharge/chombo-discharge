@@ -1121,7 +1121,7 @@ ItoKMCJSON::initializeParticles()
   for (const auto& species : m_json["plasma species"]) {
     const std::string speciesID = species["id"].get<std::string>();
 
-    List<PointParticle> initialParticles;
+    ParticleSoA<NoPayload> initialParticles;
 
     if (species.contains("initial particles")) {
 
@@ -1152,10 +1152,10 @@ ItoKMCJSON::initializeParticles()
 
 #ifdef CH_MPI
           if (procID() == 0) {
-            initialParticles.add(PointParticle(position, 1.0 * static_cast<double>(weight)));
+            initialParticles.append(position, 1.0 * static_cast<double>(weight));
           }
 #else
-          initialParticles.add(PointParticle(position, 1.0 * weight));
+          initialParticles.append(position, 1.0 * weight);
 #endif
         }
         else if (whichField == "uniform distribution") {
@@ -1190,12 +1190,12 @@ ItoKMCJSON::initializeParticles()
           const unsigned long long particleWeight = jsonEntry["weight"].get<unsigned long long>();
 
           if (numParticles > 0) {
-            List<PointParticle> particles;
+            ParticleSoA<NoPayload> particles;
 
             ParticleManagement::drawBoxParticles(particles, numParticles, loCorner, hiCorner);
 
-            for (ListIterator<PointParticle> lit(particles); lit.ok(); ++lit) {
-              lit().weight() = 1.0 * static_cast<double>(particleWeight);
+            for (std::size_t i = 0; i < particles.size(); i++) {
+              particles.weight(i) = 1.0 * static_cast<double>(particleWeight);
             }
 
             initialParticles.catenate(particles);
@@ -1231,12 +1231,12 @@ ItoKMCJSON::initializeParticles()
           }
 
           if (numParticles > 0) {
-            List<PointParticle> particles;
+            ParticleSoA<NoPayload> particles;
 
             ParticleManagement::drawSphereParticles(particles, numParticles, center, radius);
 
-            for (ListIterator<PointParticle> lit(particles); lit.ok(); ++lit) {
-              lit().weight() = 1.0 * static_cast<double>(particleWeight);
+            for (std::size_t i = 0; i < particles.size(); i++) {
+              particles.weight(i) = 1.0 * static_cast<double>(particleWeight);
             }
 
             initialParticles.catenate(particles);
@@ -1272,12 +1272,12 @@ ItoKMCJSON::initializeParticles()
           }
 
           if (numParticles > 0) {
-            List<PointParticle> particles;
+            ParticleSoA<NoPayload> particles;
 
             ParticleManagement::drawGaussianParticles(particles, numParticles, center, radius);
 
-            for (ListIterator<PointParticle> lit(particles); lit.ok(); ++lit) {
-              lit().weight() = 1.0 * static_cast<double>(particleWeight);
+            for (std::size_t i = 0; i < particles.size(); i++) {
+              particles.weight(i) = 1.0 * static_cast<double>(particleWeight);
             }
 
             initialParticles.catenate(particles);
@@ -1316,7 +1316,7 @@ ItoKMCJSON::initializeParticles()
             wcol = jsonEntry["w column"].get<unsigned int>();
           }
 
-          List<PointParticle> particles = DataParser::readPointParticlesASCII(f, xcol, ycol, zcol, wcol);
+          ParticleSoA<NoPayload> particles = DataParser::readPointParticlesASCII(f, xcol, ycol, zcol, wcol);
 
 #ifdef CH_MPI
           if (procID() == 0) {
@@ -1344,8 +1344,8 @@ ItoKMCJSON::initializeParticles()
 
       solverParticles.clear();
 
-      for (ListIterator<PointParticle> lit(initialParticles); lit.ok(); ++lit) {
-        solverParticles.append(lit().position(), lit().weight(), ItoParticle{});
+      for (std::size_t i = 0; i < initialParticles.size(); i++) {
+        solverParticles.append(initialParticles.position(i), initialParticles.weight(i), ItoParticle{});
       }
 
       break;
@@ -1353,7 +1353,7 @@ ItoKMCJSON::initializeParticles()
     case SpeciesType::CDR: {
       const int idx = m_cdrSpeciesMap.at(speciesID);
 
-      List<PointParticle>& solverParticles = m_cdrSpecies[idx]->getInitialParticles();
+      ParticleSoA<NoPayload>& solverParticles = m_cdrSpecies[idx]->getInitialParticles();
 
       solverParticles.clear();
 
@@ -1382,8 +1382,6 @@ ItoKMCJSON::initializeDensities()
 
   for (const auto& species : m_json["plasma species"]) {
     const std::string speciesID = species["id"].get<std::string>();
-
-    List<PointParticle> initialParticles;
 
     // Put the particles in the solvers.
     const SpeciesType& speciesType = m_plasmaSpeciesTypes.at(speciesID);

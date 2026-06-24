@@ -28,7 +28,6 @@
 #include <CD_ParticleContainer.H>
 #include <CD_ParticleContainerSoA.H>
 #include <CD_Photon.H>
-#include <CD_PointParticle.H>
 #include <CD_NamespaceHeader.H>
 
 /**
@@ -182,10 +181,10 @@ public:
     @param[in] a_maxPhotonsPerCell Maximum number of photons generated per cell.
   */
   virtual void
-  dirtySamplePhotons(ParticleContainer<PointParticle>& a_photons,
-                     EBAMRCellData&                    a_phi,
-                     const EBAMRCellData&              a_numPhysicalPhotons,
-                     const size_t                      a_maxPhotonsPerCell) const noexcept;
+  dirtySamplePhotons(ParticleContainerSoA<NoPayload>& a_photons,
+                     EBAMRCellData&                   a_phi,
+                     const EBAMRCellData&             a_numPhysicalPhotons,
+                     const size_t                     a_maxPhotonsPerCell) const noexcept;
 
   /**
     @brief Remap computational particles. This remaps m_photons
@@ -208,7 +207,7 @@ public:
   depositPhotons();
 
   /**
-    @brief Deposit AoS photons on the mesh (used for the dirty-sampling PointParticle path).
+    @brief Deposit AoS photons on the mesh (legacy generic AoS path; slated for removal with the AoS stack).
     @param[out]   a_phi        Deposited mesh density
     @param[in]    a_deposition Deposition method
     @param[in] a_particles Particles

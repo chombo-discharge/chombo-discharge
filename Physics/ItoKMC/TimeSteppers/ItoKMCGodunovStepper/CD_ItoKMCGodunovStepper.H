@@ -16,7 +16,7 @@
 // Our includes
 #include <CD_ItoKMCStepper.H>
 #include <CD_Timer.H>
-#include <CD_PointParticle.H>
+#include <CD_ParticleContainerSoA.H>
 #include <CD_NamespaceHeader.H>
 
 namespace Physics {
@@ -233,18 +233,18 @@ namespace Physics {
 	@brief Storage for simplified particles that gave us sigma^k
 	@note Needed for regrids
       */
-      Vector<RefCountedPtr<ParticleContainer<PointParticle>>> m_conductivityParticles;
+      Vector<RefCountedPtr<ParticleContainerSoA<NoPayload>>> m_conductivityParticles;
 
       /**
 	@brief Storage for particles that fell inside the EB but should still contribute to the conductivity
       */
-      Vector<RefCountedPtr<ParticleContainer<PointParticle>>> m_irregularParticles;
+      Vector<RefCountedPtr<ParticleContainerSoA<NoPayload>>> m_irregularParticles;
 
       /**
 	@brief Storage for particles that gave rho^dagger
 	@note Needed for regrids
       */
-      Vector<RefCountedPtr<ParticleContainer<PointParticle>>> m_rhoDaggerParticles;
+      Vector<RefCountedPtr<ParticleContainerSoA<NoPayload>>> m_rhoDaggerParticles;
 
       /**
 	@brief Storage for CDR densities used during the semi-implicit solve. 
@@ -326,8 +326,8 @@ namespace Physics {
 	@param[in]    a_subset    Particle subset to remap.
       */
       virtual void
-      remapPointParticles(Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_particles,
-                          const SpeciesSubset                                      a_subset) noexcept;
+      remapPointParticles(Vector<RefCountedPtr<ParticleContainerSoA<NoPayload>>>& a_particles,
+                          const SpeciesSubset                                     a_subset) noexcept;
 
       /**
 	@brief Deposit the input point particles on the mesh
@@ -336,8 +336,8 @@ namespace Physics {
 	@note This deposits into the ItoSolver m_phi data. 
       */
       virtual void
-      depositPointParticles(const Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_particles,
-                            const SpeciesSubset                                            a_subset) noexcept;
+      depositPointParticles(const Vector<RefCountedPtr<ParticleContainerSoA<NoPayload>>>& a_particles,
+                            const SpeciesSubset                                           a_subset) noexcept;
 
       /**
 	@brief Clear the input particle data holders
@@ -345,8 +345,8 @@ namespace Physics {
 	@param[in]    a_subset    Particle subset to remap. 
       */
       virtual void
-      clearPointParticles(const Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_particles,
-                          const SpeciesSubset                                            a_subset) noexcept;
+      clearPointParticles(const Vector<RefCountedPtr<ParticleContainerSoA<NoPayload>>>& a_particles,
+                          const SpeciesSubset                                           a_subset) noexcept;
 
       /**
 	@brief Compute all conductivities (cell, face, and EB) from the input point particles
@@ -355,7 +355,7 @@ namespace Physics {
 	@note Also adds in the conductive contribution from the CDR solvers. 
       */
       virtual void
-      computeConductivities(const Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_particles) noexcept;
+      computeConductivities(const Vector<RefCountedPtr<ParticleContainerSoA<NoPayload>>>& a_particles) noexcept;
 
       /**
 	@brief Compute the cell-centered conductivity
@@ -364,8 +364,8 @@ namespace Physics {
 	@note Also adds in the conductive contribution from the CDR solvers. 
       */
       virtual void
-      computeCellConductivity(EBAMRCellData&                                                 a_conductivityCell,
-                              const Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_particles) noexcept;
+      computeCellConductivity(EBAMRCellData&                                                a_conductivityCell,
+                              const Vector<RefCountedPtr<ParticleContainerSoA<NoPayload>>>& a_particles) noexcept;
 
       /**
 	@brief Compute the cell-centered conductivity
@@ -403,9 +403,9 @@ namespace Physics {
 	@param[in]    a_tolerance      EB tolerance
       */
       virtual void
-      removeCoveredPointParticles(Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_particles,
-                                  const EBRepresentation                                   a_representation,
-                                  const Real                                               a_tolerance) const noexcept;
+      removeCoveredPointParticles(Vector<RefCountedPtr<ParticleContainerSoA<NoPayload>>>& a_particles,
+                                  const EBRepresentation                                  a_representation,
+                                  const Real                                              a_tolerance) const noexcept;
 
       /**
 	@brief Copy particles from the ItoSolver into PointParticles whose weight are ItoParticle::m_weight * ItoParticle::m_mobility
@@ -413,7 +413,7 @@ namespace Physics {
       */
       virtual void
       copyConductivityParticles(
-        Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_conductivityParticles) noexcept;
+        Vector<RefCountedPtr<ParticleContainerSoA<NoPayload>>>& a_conductivityParticles) noexcept;
 
       /**
 	@brief Advance the particles using the Euler-Maruyama scheme
@@ -430,8 +430,8 @@ namespace Physics {
 	"rho dagger" particles which correspond to the position of the charged particles after the diffusionhop. 
       */
       virtual void
-      diffuseParticlesEulerMaruyama(Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_rhoDaggerParticles,
-                                    const Real                                               a_dt) noexcept;
+      diffuseParticlesEulerMaruyama(Vector<RefCountedPtr<ParticleContainerSoA<NoPayload>>>& a_rhoDaggerParticles,
+                                    const Real                                              a_dt) noexcept;
 
       /**
 	@brief Compute the diffusion term for the CDR equations as well as the resulting CDR-contributions to 

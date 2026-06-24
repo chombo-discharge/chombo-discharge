@@ -813,7 +813,7 @@ ItoKMCPhysics::reconcilePhotons(Vector<ParticleSoA<Photon>*>& a_newPhotons,
 
 inline void
 ItoKMCPhysics::reconcilePhotoionization(Vector<ParticleSoA<ItoParticle>*>&  a_itoParticles,
-                                        Vector<List<PointParticle>*>&       a_cdrParticles,
+                                        Vector<ParticleSoA<NoPayload>*>&    a_cdrParticles,
                                         const Vector<ParticleSoA<Photon>*>& a_absorbedPhotons) const noexcept
 {
   CH_TIME("ItoKMCPhysics::reconcilePhotoionization");
@@ -848,7 +848,7 @@ ItoKMCPhysics::reconcilePhotoionization(Vector<ParticleSoA<ItoParticle>*>&  a_it
             a_itoParticles[localIndex]->append(x, w, ItoParticle{});
           }
           else if (type == SpeciesType::CDR) {
-            a_cdrParticles[localIndex]->add(PointParticle(x, w));
+            a_cdrParticles[localIndex]->append(x, w);
           }
           else {
             MayDay::Error("CD_ItoKMCPhysics.H - logic bust in reconcilePhotoionization");

@@ -17,7 +17,7 @@
 #include <List.H>
 
 // Our includes
-#include <CD_PointParticle.H>
+#include <CD_ParticleSoA.H>
 #include <CD_LookupTable.H>
 #include <CD_Triangle.H>
 #include <CD_NamespaceHeader.H>
@@ -80,7 +80,7 @@ namespace DataParser {
     @param[in] a_ignoreChars Characters indicating comments in the file. Lines starting with these characters are ignored. 
     @return Return value
   */
-  List<PointParticle>
+  ParticleSoA<NoPayload>
   readPointParticlesASCII(const std::string&       a_fileName,
                           const unsigned int       a_xColumn     = 0,
                           const unsigned int       a_yColumn     = 1,
