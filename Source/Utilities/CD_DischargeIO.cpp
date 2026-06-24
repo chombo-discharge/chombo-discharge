@@ -17,6 +17,7 @@
 #include <CH_HDF5.H>
 #include <EBAMRIO.H>
 #include <PolyGeom.H>
+#include <ParmParse.H>
 
 // Our includes
 #include <CD_DischargeIO.H>

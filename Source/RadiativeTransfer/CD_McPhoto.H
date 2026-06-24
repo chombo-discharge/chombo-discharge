@@ -23,9 +23,7 @@
 
 // Our includes
 #include <CD_RtSolver.H>
-#include <CD_EBParticleMesh.H>
 #include <CD_EBParticleMeshSoA.H>
-#include <CD_ParticleContainer.H>
 #include <CD_ParticleContainerSoA.H>
 #include <CD_Photon.H>
 #include <CD_NamespaceHeader.H>
@@ -205,18 +203,6 @@ public:
   */
   virtual void
   depositPhotons();
-
-  /**
-    @brief Deposit AoS photons on the mesh (legacy generic AoS path; slated for removal with the AoS stack).
-    @param[out]   a_phi        Deposited mesh density
-    @param[in]    a_deposition Deposition method
-    @param[in] a_particles Particles
-  */
-  template <class P, class Ret, Ret (P::*MemberFunc)() const>
-  void
-  depositPhotons(EBAMRCellData&        a_phi,
-                 ParticleContainer<P>& a_particles,
-                 const DepositionType& a_deposition) const noexcept;
 
   /**
     @brief Deposit SoA photons on the mesh.
@@ -675,20 +661,6 @@ protected:
   randomExponential(const Real a_rate) noexcept;
 
   /**
-    @brief This computes the "conservative" deposition, multiplied by kappa
-    @param[out] a_phi       Mesh density. 
-    @param[in] a_particles  Particles to be deposited
-    @param[in] a_deposition Deposition method
-    @param[in] a_coarseFineDeposition Coarse-fine deposition strategy.
-  */
-  template <class P, class Ret, Ret (P::*MemberFunc)() const>
-  void
-  depositKappaConservative(EBAMRCellData&             a_phi,
-                           ParticleContainer<P>&      a_particles,
-                           const DepositionType       a_deposition,
-                           const CoarseFineDeposition a_coarseFineDeposition) const noexcept;
-
-  /**
     @brief Shared hybrid-divergence tail for the deposition routines.
     @details On input a_phi holds the conservative (kappa-weighted) deposition. This blends in the
     non-conservative divergence, redistributes the mass difference (when m_blendConservation is set),
@@ -793,7 +765,5 @@ protected:
 };
 
 #include <CD_NamespaceFooter.H>
-
-#include <CD_McPhotoImplem.H>
 
 #endif

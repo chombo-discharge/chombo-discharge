@@ -20,7 +20,6 @@
 
 // Our includes
 #include <CD_EBAMRData.H>
-#include <CD_ParticleContainer.H>
 #include <CD_ParticleContainerSoA.H>
 #include <CD_NamespaceHeader.H>
 
@@ -82,17 +81,6 @@ public:
          const RealVect&                           a_probLo,
          const int                                 a_finestLevel,
          const int                                 a_radius) noexcept;
-
-  /**
-    @brief Deposition function which deposites the particles on the surface. 
-    @details P is the particle type, Ret is a Real or a const Real&, and MemberFunc is a member function of P.
-    @param[in,out] a_meshData Mesh data. Must defined on cut-cells only.
-    @param[in] a_particles Particles to deposit
-    @note This will throw an error if a particle is located on a grid cell that is NOT an irregular cell
-  */
-  template <class P, class Ret, Ret (P::*MemberFunc)() const>
-  void
-  deposit(EBAMRIVData& a_meshData, const ParticleContainer<P>& a_particles) const noexcept;
 
   /**
     @brief Deposit the container-owned weight column of an SoA particle container onto the surface.

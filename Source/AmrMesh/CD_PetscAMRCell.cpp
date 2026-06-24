@@ -14,7 +14,6 @@
 
 // Our includes
 #include <CD_PetscAMRCell.H>
-#include <CD_GenericParticle.H>
 #include <CD_NamespaceHeader.H>
 
 PetscAMRCell::PetscAMRCell() noexcept

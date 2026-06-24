@@ -18,7 +18,6 @@
 #include <CD_ComputationalGeometry.H>
 #include <CD_ItoSpecies.H>
 #include <CD_ItoParticle.H>
-#include <CD_EBParticleMesh.H>
 #include <CD_ParticleContainerSoA.H>
 #include <CD_EBRepresentation.H>
 #include <CD_EBIntersection.H>
