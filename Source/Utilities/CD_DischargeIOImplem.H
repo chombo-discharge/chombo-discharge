@@ -289,14 +289,17 @@ DischargeIO::writeCheckParticlesToHDF(HDF5Handle&                               
 
   write_hdf_part_header(a_handle, grids, particlesPerBox, a_dataType);
 
-  // The SoA HDF5 record is position + weight + the payload h5 subset, all doubles.
-  const size_t objSize  = ParticleSoA<P, Traits>::h5BytesPerParticle();
-  const size_t numComps = objSize / sizeof(double);
+  // The SoA HDF5 record (position + weight + the payload h5 subset) is stored as raw bytes
+  // (H5T_NATIVE_CHAR). Payload columns may be ParticleReal (float), so the per-particle byte size need
+  // NOT be a multiple of sizeof(double); a double-typed dataset would truncate the extent
+  // (numComps = objSize/sizeof(double)) and overflow the hyperslab on write/read. Byte-based storage is
+  // exact for any payload and any SpaceDim.
+  const size_t objSize = ParticleSoA<P, Traits>::h5BytesPerParticle();
 
   std::vector<unsigned long long> offsets;
   unsigned long long              totNumParticles = 0;
   for (int i = 0; i < grids.size(); i++) {
-    offsets.push_back(numComps * totNumParticles);
+    offsets.push_back(objSize * totNumParticles);
     totNumParticles += particlesPerBox[i];
   }
 
@@ -304,9 +307,9 @@ DischargeIO::writeCheckParticlesToHDF(HDF5Handle&                               
     return;
   }
 
-  hsize_t     dataSize  = totNumParticles * numComps;
+  hsize_t     dataSize  = totNumParticles * objSize;
   hid_t       dataspace = H5Screate_simple(1, &dataSize, nullptr);
-  hid_t       H5T_type  = H5T_NATIVE_DOUBLE;
+  hid_t       H5T_type  = H5T_NATIVE_CHAR;
   std::string dataname  = a_dataType + ":data";
 
 #ifdef H516
@@ -342,14 +345,14 @@ DischargeIO::writeCheckParticlesToHDF(HDF5Handle&                               
 
         if ((ip + 1) % _CHUNK == 0) {
           chunk -= chunkSize;
-          writeDataChunk(offset, dataspace, dataset, H5T_type, chunkSize / sizeof(double), chunk);
+          writeDataChunk(offset, dataspace, dataset, H5T_type, chunkSize, chunk);
         }
       }
 
       const size_t nResidual = n % _CHUNK;
       if (nResidual > 0) {
         chunk -= (nResidual * objSize);
-        writeDataChunk(offset, dataspace, dataset, H5T_type, nResidual * objSize / sizeof(double), chunk);
+        writeDataChunk(offset, dataspace, dataset, H5T_type, nResidual * objSize, chunk);
       }
 
       chunk = chunkBase;
@@ -378,13 +381,14 @@ DischargeIO::readCheckParticlesFromHDF(HDF5Handle&                         a_han
 
   const BoxLayout& bl = a_particles.boxLayout();
 
-  const size_t objSize  = ParticleSoA<P, Traits>::h5BytesPerParticle();
-  const size_t numComps = objSize / sizeof(double);
+  // Byte-based storage (matches writeCheckParticlesToHDF): the per-particle record may not be a multiple
+  // of sizeof(double) (ParticleReal payload columns), so everything is counted in bytes (H5T_NATIVE_CHAR).
+  const size_t objSize = ParticleSoA<P, Traits>::h5BytesPerParticle();
 
   std::vector<unsigned long long> offsets;
   unsigned long long              totNumParticles = 0;
   for (int i = 0; i < grids.size(); i++) {
-    offsets.push_back(numComps * totNumParticles);
+    offsets.push_back(objSize * totNumParticles);
     totNumParticles += particlesPerBox[i];
   }
 
@@ -392,7 +396,7 @@ DischargeIO::readCheckParticlesFromHDF(HDF5Handle&                         a_han
     return;
   }
 
-  hid_t       H5T_type = H5T_NATIVE_DOUBLE;
+  hid_t       H5T_type = H5T_NATIVE_CHAR;
   std::string dataname = a_dataType + ":data";
 
 #ifdef H516
@@ -407,22 +411,22 @@ DischargeIO::readCheckParticlesFromHDF(HDF5Handle&                         a_han
   char*        chunk     = new char[chunkSize];
 
   for (DataIterator di(bl); di.ok(); ++di) {
-    size_t boxData = numComps * particlesPerBox[bl.index(di())];
-    size_t offset  = offsets[bl.index(di())];
+    size_t boxData = objSize * particlesPerBox[bl.index(di())]; // bytes
+    size_t offset  = offsets[bl.index(di())];                   // bytes
 
     ParticleSoA<P, Traits>& leaf = a_particles[di];
 
     size_t dataIn = 0;
     while (dataIn < boxData) {
-      int size = ((boxData - dataIn) >= (chunkSize / sizeof(double))) ? chunkSize / sizeof(double) : boxData - dataIn;
+      int size = ((boxData - dataIn) >= chunkSize) ? chunkSize : boxData - dataIn; // bytes
       readDataChunk(offset, dataspace, dataset, H5T_type, size, chunk);
 
-      for (int ip = 0; ip < size / (int)numComps; ip++) {
+      for (int ip = 0; ip < size / (int)objSize; ip++) {
         leaf.h5DelinearizeAndAppend(chunk);
         chunk += objSize;
       }
       dataIn += size;
-      chunk -= size * sizeof(double);
+      chunk -= size;
     }
   }
 
