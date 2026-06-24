@@ -1255,10 +1255,9 @@ CdrSolver::initialDataParticles()
     pout() << m_name + "::initialDataParticles" << endl;
   }
 
-  // TLDR: This function deposits a list of initial particles on the mesh using
-  //       an NGP scheme, ignoring conservation in cut-cells. Please refers to
-  //       the particle API to see the details of the ParticleContainer<T> type and
-  //       deposition methods.
+  // TLDR: This function deposits the initial particles on the mesh using an NGP
+  //       scheme, ignoring conservation in cut-cells. Please refer to the particle
+  //       API to see the details of the ParticleSoA type and deposition methods.
 
   const ParticleSoA<NoPayload>& initialParticles = m_species->getInitialParticles();
 

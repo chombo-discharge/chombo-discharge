@@ -29,7 +29,6 @@
 #include <CD_EBReflux.H>
 #include <CD_DomainFluxIFFAB.H>
 #include <CD_DomainFluxIFFABFactory.H>
-#include <CD_ParticleContainer.H>
 #include <CD_ParticleContainerSoA.H>
 #include <CD_Realm.H>
 #include <CD_CopyStrategy.H>
@@ -209,24 +208,6 @@ public:
   template <typename T, typename S>
   void
   alias(Vector<T*>& a_alias, const EBAMRData<S>& a_data) const;
-
-  /**
-    @brief Template class for generic allocation of particle data. 
-    @param[out] a_particles Particle data holder. 
-    @param[out] a_realm     Realm on which the particles will be allocated. 
-  */
-  template <typename T>
-  void
-  allocate(Vector<RefCountedPtr<ParticleData<T>>>& a_particles, const std::string& a_realm) const;
-
-  /**
-    @brief Template class for generic allocation of particle containers. 
-    @param[out] a_container Particle container to be allocated
-    @param[out] a_realm     Realm on which the particles will be allocated. 
-  */
-  template <typename T>
-  void
-  allocate(ParticleContainer<T>& a_container, const std::string& a_realm) const;
 
   /**
     @brief Allocate a struct-of-arrays particle container on the given realm.
@@ -955,44 +936,6 @@ public:
   conservativeAverage(EBAMRIVData& a_data, const std::string& a_realm, const phase::which_phase a_phase) const;
 
   /**
-    @brief Deposit scalar particle quantities on the mesh.
-    @details P is the particle type, Ret is the returned value of the particle member function, and must be a Real or a
-    RealVect. MemFunc is a pointer to a member function of P. E.g., depositParticles<P, const RealVect&, &P::position>.    
-    @param[out] a_meshData             Mesh data. Must have exactly one component. 
-    @param[in]  a_realm                Realm where data is registered.
-    @param[in]  a_phase                Phase where data is registered.
-    @param[in]  a_particles            Particle container. Must be in "usable state" for deposition.
-    @param[in]  a_depositionType       Specification of deposition kernel (e.g., CIC)
-    @param[in]  a_coarseFineDeposition Specification of handling of coarse-fine boundaries.
-    @param[in]  a_forceIrregNGP        Force NGP deposition in irregular cells or not. 
-  */
-  template <class P, typename Ret, Ret (P::*MemberFunc)() const>
-  void
-  depositParticles(EBAMRCellData&              a_meshData,
-                   const std::string&          a_realm,
-                   const phase::which_phase&   a_phase,
-                   const ParticleContainer<P>& a_particles,
-                   const DepositionType        a_depositionType,
-                   const CoarseFineDeposition  a_coarseFineDeposition,
-                   const bool                  a_forceIrregNGP = false);
-
-  /**
-    @brief Deposit scalar particle quantities on the mesh.
-    @details P is the particle type, Ret is the returned value of the particle member function, and must be a Real or a
-    const Real&. MemFunc is a pointer to a member function of P. E.g., depositParticles<P, const Real&, &P::weight>.        
-    @param[out] a_meshData   Mesh data. MUST have exactly one component. 
-    @param[in]  a_realm      Realm where data is registered.
-    @param[in]  a_phase      Phase where data is registered.
-    @param[in]  a_particles  Particle container. Must be in "usable state" for deposition.
-  */
-  template <class P, typename Ret, Ret (P::*MemberFunc)() const>
-  void
-  depositParticles(EBAMRIVData&                a_meshData,
-                   const std::string&          a_realm,
-                   const phase::which_phase&   a_phase,
-                   const ParticleContainer<P>& a_particles) const noexcept;
-
-  /**
     @brief Deposit the weight column of an SoA particle container onto the surface (EB).
     @details SoA overload of the surface deposit; deposits the container-owned weight column.
     @param[out] a_meshData  Mesh data. MUST have exactly one component.
@@ -1008,26 +951,6 @@ public:
                    const std::string&                     a_realm,
                    const phase::which_phase&              a_phase,
                    const ParticleContainerSoA<P, Traits>& a_particles) const noexcept;
-
-  /**
-    @brief Interpolate mesh data onto a particle position.
-    @details P is the particle type, Ret is the returned value of the particle member function, and must be a Real& or a
-    RealVect&. MemFunc is a pointer to a member function of P. E.g., interpolate<P, Real&, &P::weight>.        
-    @param[in,out] a_particles            Particles to be interpolated. 
-    @param[in]    a_realm                Realm where data is registered.
-    @param[in]    a_phase                Phase where data is registered.
-    @param[in]    a_meshScalarField      Scalar field on the mesh 
-    @param[in]    a_interpType           Interpolation type. 
-    @param[in]    a_forceIrregNGP        Force NGP interpolation in cut-cells. 
-  */
-  template <class P, class Ret, Ret (P::*MemberFunc)()>
-  void
-  interpolateParticles(ParticleContainer<P>&     a_particles,
-                       const std::string&        a_realm,
-                       const phase::which_phase& a_phase,
-                       const EBAMRCellData&      a_meshScalarField,
-                       const DepositionType      a_interpType,
-                       const bool                a_forceIrregNGP = false) const;
 
   /**
     @brief Deposit the SoA container's weight column on the mesh (all coarse-fine strategies).
@@ -1147,22 +1070,6 @@ public:
                        const bool                       a_forceIrregNGP) const;
 
   /**
-    @brief Function which removes particles from the domain if they fall inside the EB.
-    @details The template parameter indicate the particle type -- it MUST have a const RealVect& P::position() const function. 
-    @details This version uses the implicit function to evaluate whether or not the particles are inside the EB. The particles will be removed from
-    the container if f(x) > a_tolerance*dx. 
-    @param[in,out] a_particles Particle data
-    @param[in]    a_phase     Phase where the particles live. 
-    @param[in]    a_tolerance Tolerance. 
-    @note Because the implicit functions are global, this function will work even if the particles aren't mapped to the correct EBISBox.
-  */
-  template <class P>
-  void
-  removeCoveredParticlesIF(ParticleContainer<P>&     a_particles,
-                           const phase::which_phase& a_phase,
-                           const Real                a_tolerance = 0.0) const;
-
-  /**
     @brief Remove SoA particles that fall inside the EB (implicit-function test): f(x) > a_tolerance*dx.
     @param[in,out] a_particles SoA particle data.
     @param[in]     a_phase     Phase where the particles live.
@@ -1175,22 +1082,6 @@ public:
   removeCoveredParticlesIF(ParticleContainerSoA<P, Traits>& a_particles,
                            const phase::which_phase&        a_phase,
                            const Real                       a_tolerance) const;
-
-  /**
-    @brief Function which removes particles from the domain if they fall inside the EB.
-    @details The template parameter indicate the particle type -- it MUST have a const RealVect& P::position() const function. 
-    @details This version uses the discrete information to evaluate whether or not the particles are inside the EB. The particles will be removed from
-    the container if they lie within a covered cell OR if they lie in an irregular cell but on the "wrong" side of the EB face (to within precision tolerance*dx)
-    @param[in,out] a_particles Particle data
-    @param[in]    a_phase     Phase where the particles live. 
-    @param[in]    a_tolerance Tolerance when to remove particles
-    @note This function will only work if the particles are mapped to the correct EBISBox. 
-  */
-  template <class P>
-  void
-  removeCoveredParticlesDiscrete(ParticleContainer<P>&     a_particles,
-                                 const phase::which_phase& a_phase,
-                                 const Real                a_tolerance = 0.0) const;
 
   /**
     @brief Remove SoA particles inside the EB using discrete (EBISBox) information: covered cells, or
@@ -1208,18 +1099,6 @@ public:
                                  const Real                       a_tolerance) const;
 
   /**
-    @brief Function which removes particles from the domain if they fall inside the EB.
-    @details The template parameter indicate the particle type -- it must have a const RealVect& P::position() function.
-    @details This version removes all particles that live in covered cells.
-    @param[in,out] a_particles Particle data
-    @param[in]    a_phase     Phase where the particles live.
-    @note This function will only work if the particles are mapped to the correct EBISBox.
-  */
-  template <class P>
-  void
-  removeCoveredParticlesVoxels(ParticleContainer<P>& a_particles, const phase::which_phase& a_phase) const;
-
-  /**
     @brief Remove SoA particles that live in covered cells (voxel test).
     @param[in,out] a_particles SoA particle data.
     @param[in]     a_phase     Phase where the particles live.
@@ -1229,57 +1108,6 @@ public:
   template <typename P, typename Traits>
   void
   removeCoveredParticlesVoxels(ParticleContainerSoA<P, Traits>& a_particles, const phase::which_phase& a_phase) const;
-
-  /**
-    @brief Function which transferse particles from one particle container to another if they fall inside the EB.
-    @details The template parameter indicate the particle type -- it MUST have a const RealVect& P::position() const function. 
-    @details This version uses the implicit function to evaluate whether or not the particles are inside the EB. The particles will be transferred from
-    the container if f(x) > a_tolerance*dx.
-    @param[in,out] a_particlesFrom Container to transfer from
-    @param[in,out] a_particlesTo   Container to transfer to
-    @param[in]    a_phase         Phase where the particles live. 
-    @param[in]    a_tolerance     Tolerance (Note: relative to grid resolution)
-    @note Because the implicit functions are global, this function will work even if the particles aren't mapped to the correct boxes (but remapping will be necessary)
-  */
-  template <class P>
-  void
-  transferCoveredParticlesIF(ParticleContainer<P>&     a_particlesFrom,
-                             ParticleContainer<P>&     a_particlesTo,
-                             const phase::which_phase& a_phase,
-                             const Real                a_tolerance = 0.0) const;
-
-  /**
-    @brief Function which transferse particles from one particle container to another if they fall inside the EB.
-    @details The template parameter indicate the particle type -- it MUST have a const RealVect& P::position() const function. 
-    @details This version uses the discrete information to evaluate whether or not the particles are inside the EB. The particles will be transferred from
-    the container if they lie within a covered cell OR if they lie in an irregular cell but on the "wrong" side of the EB face (to within precision tolerance*dx)
-    @param[in,out] a_particlesFrom Container to transfer from
-    @param[in,out] a_particlesTo   Container to transfer to
-    @param[in]    a_phase         Phase where the particles live. 
-    @param[in]    a_tolerance     Tolerance. 
-    @note This function will only work if the particles are mapped to the correct EBISBox. 
-  */
-  template <class P>
-  void
-  transferCoveredParticlesDiscrete(ParticleContainer<P>&     a_particlesFrom,
-                                   ParticleContainer<P>&     a_particlesTo,
-                                   const phase::which_phase& a_phase,
-                                   const Real                a_tolerance = 0.0) const;
-
-  /**
-    @brief Function which transferse particles from one particle container to another if they fall inside the EB.
-    @details The template parameter indicate the particle type -- it MUST have a const RealVect& P::position() const function. 
-    @details This version transfers all particles that live in covered cells.
-    @param[in,out] a_particlesFrom Container to transfer from
-    @param[in,out] a_particlesTo   Container to transfer to
-    @param[in]    a_phase         Phase where the particles live. 
-    @note This function will only work if the particles are mapped to the correct EBISBox. 
-  */
-  template <class P>
-  void
-  transferCoveredParticlesVoxels(ParticleContainer<P>&     a_particlesFrom,
-                                 ParticleContainer<P>&     a_particlesTo,
-                                 const phase::which_phase& a_phase) const;
 
   /**
     @brief Transfer SoA particles inside the EB (implicit-function test) from one container to another: f(x) > a_tolerance*dx.
@@ -1330,23 +1158,6 @@ public:
                                  const phase::which_phase&        a_phase) const;
 
   /**
-    @brief Transfer particles that are on the wrong side of the EB to a different container.
-    @param[in,out] a_dstParticles     Destination particle container
-    @param[in,out] a_srcParticles     Source particle container
-    @param[in]    a_phase            Phase where the particles should live
-    @param[in]    a_transferModifier Optional input argument for letting the user manipulate particles that were transferred
-  */
-  template <class P>
-  void
-  transferIrregularParticles(
-    ParticleContainer<P>&          a_dstParticles,
-    ParticleContainer<P>&          a_srcParticles,
-    const phase::which_phase       a_phase,
-    const std::function<void(P&)>& a_transferModifier = [](P&) -> void {
-      return;
-    }) const noexcept;
-
-  /**
     @brief Transfer SoA particles that are on the covered side of the EB to a different container.
     @details Per patch, a particle in an irregular cell is moved to a_dstParticles (placed on the EB) when
     it lies outside every VoF half-space of its cell. Uses swap-and-pop on the SoA leaves.
@@ -1361,66 +1172,6 @@ public:
   transferIrregularParticles(ParticleContainerSoA<P, Traits>& a_dstParticles,
                              ParticleContainerSoA<P, Traits>& a_srcParticles,
                              const phase::which_phase         a_phase) const noexcept;
-
-  /**
-    @brief Particle intersection algorithm based on ray-casting.
-    @details This routine will iterate through all the particles and check if they intersect the geometry. The template
-    parameter indicates the particle type -- it MUST have const RealVec& position() const and  const RealVect& oldPosition() const 
-    functions that determine the start and stop position of the particle trajectory. This routine uses a ray-casting method
-    to check for intersections with the EB (the domain side is much easier). If the particles are closer to the EB than
-    a_tolerance, they are absorbed and placed on the EB. Their position are updated and they are placed in the 
-    a_ebParticles argument. This routine uses a ray-casting method where it computes the distance from the EB
-    (assuming that the implicit function is a signed distance function). Particles are then moved that
-    distance along their trajectory and we then update the new distance to the EB. This is done recursively until the particles
-    have either moved the entire length or been absorbed by the EB or domain side. 
-    @param[in,out] a_activeParticles     Particles to be intersected with geometry
-    @param[out]   a_ebParticles         Particles that intersected with the EB
-    @param[out]   a_domainParticles     Particles that intersected with the domain faces
-    @param[in]    a_phase               Phase where the input particles live
-    @param[in]    a_deleteParticles     If true, particles will be removed from a_activeParticles if they intersect the geometry.
-    @param[in]    a_nonDeletionModifier Optional input argument for letting the user manipulate particles that were intersected but not deleted
-    @param[in] a_tolerance Tolerance
-  */
-  template <class P>
-  void
-  intersectParticlesRaycastIF(
-    ParticleContainer<P>&          a_activeParticles,
-    ParticleContainer<P>&          a_ebParticles,
-    ParticleContainer<P>&          a_domainParticles,
-    const phase::which_phase       a_phase,
-    const Real                     a_tolerance,
-    const bool                     a_deleteParticles,
-    const std::function<void(P&)>& a_nonDeletionModifier = [](P&) -> void {
-      return;
-    }) const noexcept;
-
-  /**
-    @brief Particle intersection algorithm based on bisection. 
-    @details This routine will iterate through all the particles and check if they intersect the geometry. The template
-    parameter indicates the particle type -- it MUST have const RealVec& position() const and  const RealVect& oldPosition() const 
-    functions that determine the start and stop position of the particle trajectory. This routine uses a bisection method
-    to check for intersections with the EB (the domain side is much easier). Their position are updated and they are placed
-    in the a_ebParticles argument. 
-    @param[in,out] a_activeParticles     Particles to be intersected with geometry
-    @param[out]   a_ebParticles         Particles that intersected with the EB
-    @param[out]   a_domainParticles     Particles that intersected with the domain faces
-    @param[in]    a_phase               Phase where the input particles live
-    @param[in]    a_bisectionStep       Length of the bisection step
-    @param[in]    a_deleteParticles     If true, particles will be removed from a_activeParticles if they intersect the geometry.
-    @param[in]    a_nonDeletionModifier Optional input argument for letting the user manipulate particles that were intersected but not deleted
-  */
-  template <class P>
-  void
-  intersectParticlesBisectIF(
-    ParticleContainer<P>&          a_activeParticles,
-    ParticleContainer<P>&          a_ebParticles,
-    ParticleContainer<P>&          a_domainParticles,
-    const phase::which_phase       a_phase,
-    const Real                     a_bisectionStep,
-    const bool                     a_deleteParticles,
-    const std::function<void(P&)>& a_nonDeletionModifier = [](P&) -> void {
-      return;
-    }) const noexcept;
 
   /**
     @brief SoA ray-casting particle intersection algorithm.
@@ -1610,17 +1361,6 @@ public:
                    const int                        a_oldFinestLevel,
                    const int                        a_newFinestLevel,
                    const EBCoarseToFineInterp::Type a_type);
-
-  /**
-    @brief Regrid particle to new grids. 
-    @note User needs to call ParticleContainer<P>::preRegrid prior to this.
-    @param[in]  a_lmin           Coarsest level that did not change (but distribution may have changed). 
-    @param[in]  a_newFinestLevel New finest level. 
-    @param[in] a_particles Description
-  */
-  template <class P>
-  void
-  remapToNewGrids(ParticleContainer<P>& a_particles, const int a_lmin, const int a_newFinestLevel) const noexcept;
 
   /**
     @brief Regrid a struct-of-arrays particle container to new grids.
@@ -2192,15 +1932,6 @@ public:
   */
   const EBAMRCellData&
   getIrregularCells(const std::string& a_realm, const phase::which_phase a_phase) const;
-
-  /**
-    @brief Get EBAMRParticleMesh operator
-    @param[in] a_realm Realm name
-    @param[in] a_phase Phase (gas or solid)    
-    @return Particle mesh
-  */
-  EBAMRParticleMesh&
-  getParticleMesh(const std::string& a_realm, const phase::which_phase a_phase) const;
 
   /**
     @brief Get the SoA EBAMRParticleMesh operator

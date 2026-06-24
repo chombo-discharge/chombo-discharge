@@ -29,11 +29,9 @@
 #include <CD_EBReflux.H>
 #include <CD_DomainFluxIFFAB.H>
 #include <CD_DomainFluxIFFABFactory.H>
-#include <CD_ParticleContainer.H>
 #include <CD_EBMultigridInterpolator.H>
 #include <CD_EBGradient.H>
 #include <CD_EBFluxRedistribution.H>
-#include <CD_EBAMRParticleMesh.H>
 #include <CD_EBAMRParticleMeshSoA.H>
 #include <CD_EBAMRSurfaceDeposition.H>
 #include <CD_EBCoarseToFineInterp.H>
@@ -344,13 +342,6 @@ public:
   */
   const Vector<RefCountedPtr<EBGradient>>&
   getGradientOp() const;
-
-  /**
-    @brief Get particle-mesh operator
-    @return Particle mesh
-  */
-  EBAMRParticleMesh&
-  getParticleMesh() const;
 
   /**
     @brief Get the SoA particle-mesh operator
@@ -677,11 +668,6 @@ protected:
     @brief Gradient operator
   */
   mutable Vector<RefCountedPtr<EBGradient>> m_gradientOp;
-
-  /**
-    @brief For doing particle-mesh operations
-  */
-  mutable EBAMRParticleMesh m_particleMesh;
 
   /**
     @brief For doing SoA particle-mesh operations

@@ -23,14 +23,14 @@ ItoParticle
 -----------
 
 The ``ItoParticle`` is used as the underlying particle type for running the Ito drift-diffusion solvers.
-It derives from :ref:`Chap:GenericParticle` as follows:
+It is a Struct-of-Arrays payload (see :ref:`Chap:ParticleSoA`) whose columns are
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoParticle.H
    :language: c++
-   :lines: 40
-   :dedent: 0
+   :lines: 45-52
+   :dedent: 2
 
-From the signature one can see that ``ItoParticle`` contains a number of extra class ``Real`` and ``RealVect`` class members.
+In addition to the container-owned position and weight, ``ItoParticle`` stores the payload columns above.
 These extra fields are used for storing the following information in the particle:
 
 #. Particle weight, mobility, diffusion coefficient, energy (not currently used), and a holder for a scratch storage. 
@@ -54,7 +54,7 @@ This class can advance a set of computational particles (see :ref:`Chap:ItoParti
 #. Interpolate velocities and diffusion coefficients to the particle positions.
 #. Manage superparticle splitting and merging.
 
-Internally, ``ItoSolver`` stores its particles in various ``ParticleContainer<ItoParticle>`` containers.
+Internally, ``ItoSolver`` stores its particles in various ``ParticleContainerSoA<ItoParticle>`` containers.
 Although the particle velocities and diffusion coefficients can be manually assigned, they can also be interpolated from the mesh.
 ``ItoSolver`` stores the following properties on the mesh:
 
@@ -172,7 +172,7 @@ The most general version is given below:
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 333-347
+   :lines: 335-339
    :dedent: 2
 
 This version permits the user to select any particle container ``a_particles`` and deposit them onto some pre-allocated mesh storage ``a_phi``.
@@ -295,7 +295,7 @@ The most relevant function is
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 414-429
+   :lines: 418-422
    :dedent: 2
 
 Here, ``EbIntersection`` is a just an enum for putting logic into how the intersection is computed.
@@ -399,7 +399,7 @@ In addition, the user must first supply a particle merging function:
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 92-97
+   :lines: 96-97
    :dedent: 2
 
 In the code above, ``ParticleManagement::ParticleMerger<P>`` is an alias:

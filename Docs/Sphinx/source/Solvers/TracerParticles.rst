@@ -32,7 +32,7 @@ The tracer particle solver is templated as
 
 .. literalinclude:: ../../../../Source/TracerParticles/CD_TracerParticleSolver.H
    :language: c++
-   :lines: 23-37
+   :lines: 37-38
    :dedent: 0
 
 where ``P`` is the payload type used for the solver.
