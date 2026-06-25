@@ -141,12 +141,11 @@ ParticleOps::domainIntersection(const RealVect& a_oldPos,
 
   for (int dir = 0; dir < SpaceDim; dir++) {
     for (SideIterator sit; sit.ok(); ++sit) {
+      // Normal vector pointing OUT of the domain on side sit and direction dir.
       const Side::LoHiSide side      = sit();
-      const RealVect       wallPoint = (side == Side::Lo) ? a_probLo : a_probHi; // A point on the domain side
-      const RealVect       n0        = sign(side) *
-                          RealVect(
-                            BASISV(dir)); // Normal vector pointing OUT of the domain on side sit and direction dir.
-      const Real normPath = PolyGeom::dot(n0, path); // Component of the path that is normal to the domain edge/face.
+      const RealVect       wallPoint = (side == Side::Lo) ? a_probLo : a_probHi;
+      const RealVect       n0        = sign(side) * RealVect(BASISV(dir));
+      const Real           normPath  = PolyGeom::dot(n0, path);
 
       // If normPath > 0 then the particle trajectory points towards the domain edge/face and we can have an intersection.
       if (normPath > 0.0) {
@@ -157,6 +156,7 @@ ParticleOps::domainIntersection(const RealVect& a_oldPos,
         const Real s = PolyGeom::dot(wallPoint - a_oldPos, n0) / normPath;
         if (s >= 0.0 && s <= 1.0) {
           crossedDomainBoundary = true;
+
           if (s < a_s) {
             a_s = s;
           }
@@ -190,17 +190,19 @@ ParticleOps::ebIntersectionBisect(const RefCountedPtr<BaseIF>& a_impFunc,
   // Check each interval
   RealVect curPos = a_oldPos;
   for (int istep = 0; istep < nsteps; istep++) {
-    const Real fa = a_impFunc->value(curPos); // Value of the implicit function at the start of the bisection interval
-    const Real fb = a_impFunc->value(curPos +
-                                     dxStep); // Value of the implicit function at the end of the bisection interval
+    // fa: Value of the implicit function at the start of the bisection interval
+    // fb: Value of the implicit function at the end of the bisection interval
+    const Real fa = a_impFunc->value(curPos);
+    const Real fb = a_impFunc->value(curPos + dxStep);
 
     if (fa * fb <= 0.0) {
 
       // If this triggered we happen to know that f(pos+dxStep) > 0.0 and f(pos) < 0.0 and so we must have a root on the interval. We now compute the precise location
       // where the particle crossed the EB. For that we use a Brent root finder on the interval [pos, pos+dxStep]. This is a 1D problem.
       const RealVect intersectionPos = PolyUtils::brentRootFinder(a_impFunc, curPos, curPos + dxStep);
-      a_s                            = (intersectionPos - a_oldPos).vectorLength() / pathLen;
-      crossedEB                      = true;
+
+      a_s       = (intersectionPos - a_oldPos).vectorLength() / pathLen;
+      crossedEB = true;
 
       break;
     }
@@ -249,6 +251,7 @@ ParticleOps::ebIntersectionRaycast(const RefCountedPtr<BaseIF>& a_impFunc,
       if (d < a_tolerance) { // We collided.
         a_s = (xa - a_oldPos).vectorLength() / D;
         ret = true;
+
         break;
       }
       else { // We did not collide.
