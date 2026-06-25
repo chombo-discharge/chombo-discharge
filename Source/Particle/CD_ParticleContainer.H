@@ -143,16 +143,20 @@ public:
                                 blockingFactor-sized boxes for the tile ownership to be exact.
     @param[in] a_finestLevel    Finest AMR level index.
     @param[in] a_realm          Realm label (diagnostics only).
+    @param[in] a_validCells     Optional alias to the realm's valid-cell mask (true = cell not covered
+                                by a finer level), enabling remap()'s stayer fast path. Pass nullptr to
+                                always re-pool every particle. Not owned; must outlive this container.
   */
   void
-  define(const Vector<DisjointBoxLayout>& a_grids,
-         const Vector<ProblemDomain>&     a_domains,
-         const Vector<Real>&              a_dx,
-         const Vector<int>&               a_refRat,
-         const RealVect&                  a_probLo,
-         const int                        a_blockingFactor,
-         const int                        a_finestLevel,
-         const std::string&               a_realm)
+  define(const Vector<DisjointBoxLayout>&                       a_grids,
+         const Vector<ProblemDomain>&                           a_domains,
+         const Vector<Real>&                                    a_dx,
+         const Vector<int>&                                     a_refRat,
+         const RealVect&                                        a_probLo,
+         const int                                              a_blockingFactor,
+         const int                                              a_finestLevel,
+         const std::string&                                     a_realm,
+         const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>* a_validCells)
   {
     CH_TIME("ParticleContainer::define");
 
@@ -168,6 +172,7 @@ public:
     m_blockingFactor  = a_blockingFactor;
     m_finestLevel     = a_finestLevel;
     m_realm           = a_realm;
+    m_validCells      = a_validCells;
     m_numOutcastLocal = 0;
 
     m_dx.resize(a_finestLevel + 1);
@@ -765,6 +770,19 @@ protected:
   gatherToPool(const AMRParticlesSoA<P, Traits>& a_source, const Vector<DisjointBoxLayout>& a_sourceGrids);
 
   /**
+    @brief Mask fast path for remap(): pool ONLY the movers, leaving stayers in place.
+    @details Scans m_particles in place; a particle still inside its box AND in a cell flagged valid by
+    m_validCells (not covered by a finer level) is a stayer and is left untouched. Every other particle
+    is a mover: it is copied into the returned pool (ids preserved, rankID set to the new owner) and
+    swap-popped out of its leaf. Off-domain movers are counted into m_numOutcastLocal (reset here).
+    Requires m_validCells to be non-null and sized to m_finestLevel+1 (the caller checks this).
+    @return The per-rank mover pool; stayers remain in m_particles (so distributeFromPool must append,
+    not assume empty destinations, and remap() must NOT clearParticles() on this path).
+  */
+  MoverPool
+  gatherMoversToPool();
+
+  /**
     @brief Assign a mover pool into the (assumed empty) valid holders: local appends + MPI scatter.
     @param[in,out] a_pool Per-rank mover pool produced by gatherToPool (consumed).
   */
@@ -820,6 +838,15 @@ protected:
     @brief Realm label (diagnostics only).
   */
   std::string m_realm;
+
+  /**
+    @brief Optional alias to the realm's valid-cell mask (true = cell not covered by a finer level).
+    @details Used by remap() to leave "stayer" particles in place: a particle still inside its box and
+    in a cell not covered by a finer grid cannot change owner, so it need not be re-pooled. Null (or a
+    stale size) makes remap() fall back to re-pooling every particle. Aliases a stable Realm member that
+    is rebuilt each regrid; set at define(), never owned here.
+  */
+  const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>* m_validCells = nullptr;
 
   /**
     @brief Whether define() has been called.

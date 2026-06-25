@@ -260,7 +260,8 @@ AmrMesh::allocate(ParticleContainer<P, Traits>& a_container, const std::string& 
                      m_probLo,
                      m_blockingFactor,
                      m_finestLevel,
-                     a_realm);
+                     a_realm,
+                     &m_realms[a_realm]->getValidCells()); // alias for remap()'s stayer fast path
 }
 
 template <typename T>

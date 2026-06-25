@@ -130,6 +130,109 @@ ParticleContainer<P, Traits>::gatherToPool(const AMRParticlesSoA<P, Traits>& a_s
 }
 
 template <typename P, typename Traits>
+inline typename ParticleContainer<P, Traits>::MoverPool
+ParticleContainer<P, Traits>::gatherMoversToPool()
+{
+  CH_TIME("ParticleContainer::gatherMoversToPool");
+
+  CH_assert(m_validCells != nullptr);
+
+  MoverPool          pool(numProc());
+  unsigned long long numOutcast = 0;
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    LevelParticles&                 level     = *m_particles[lvl];
+    const LevelData<BaseFab<bool>>* maskLevel = (*m_validCells)[lvl].isNull() ? nullptr : &(*(*m_validCells)[lvl]);
+    const DataIterator&             dit       = m_grids[lvl].dataIterator();
+    const int                       nbox      = dit.size();
+
+    // Partition one leaf in place: keep stayers (still inside their box AND in a cell flagged valid =
+    // not covered by a finer level), pool the movers and swap-pop them out. a_mask == nullptr forces
+    // every particle to be treated as a mover (no usable mask for this leaf). Returns outcast movers.
+    // findDestination()/cellIndex() are const reads, so this is safe to call from many threads as long
+    // as each leaf is touched by a single thread (the omp-for partitions boxes disjointly).
+    auto partitionLeaf = [this, lvl](MoverPool&                        a_target,
+                                     [[maybe_unused]] const DataIndex& a_din,
+                                     Leaf&                             a_leaf,
+                                     const BaseFab<bool>*              a_mask) -> unsigned long long {
+      unsigned long long outcast = 0;
+      const Box          maskBox = (a_mask != nullptr) ? a_mask->box() : Box();
+      std::size_t        i       = 0;
+      while (i < a_leaf.size()) {
+        const RealVect pos = a_leaf.position(i);
+        if (a_mask != nullptr) {
+          const IntVect iv = this->cellIndex(lvl, pos);
+          if (maskBox.contains(iv) && (*a_mask)(iv, 0)) {
+            // Stayer: in its own box and not under a finer grid, so it cannot have changed owner.
+            // Debug self-check of that invariant -- the destination the gather-all path would compute
+            // must be exactly this (level, grid, rank). If this ever fires, the skip is unsound.
+#ifndef NDEBUG
+            const Destination chk = this->findDestination(pos);
+            CH_assert(chk.found && chk.level == lvl && chk.rank == procID() &&
+                      m_levelTiles[lvl]->getMyGrids().at(chk.gridIndex) == a_din);
+#endif
+            i++;
+            continue;
+          }
+        }
+        const Destination dst = this->findDestination(pos); // mover: route it
+        if (dst.found) {
+          Leaf& bin = a_target[dst.rank][PoolKey(dst.level, dst.gridIndex)];
+          bin.append(pos, a_leaf.weight(i), a_leaf.gather(i));
+          const std::size_t k = bin.size() - 1;
+          bin.particleID(k)   = a_leaf.particleID(i); // preserve id
+          bin.rankID(k)       = dst.rank;             // new owner
+        }
+        else {
+          outcast++;
+        }
+        a_leaf.remove(i); // swap-pop; do NOT advance i (a new particle now occupies slot i)
+      }
+      return outcast;
+    };
+
+#ifdef _OPENMP
+#pragma omp parallel reduction(+ : numOutcast)
+    {
+      MoverPool threadPool(numProc());
+
+#pragma omp for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex&     din  = dit[mybox];
+        const BaseFab<bool>* mask = (maskLevel != nullptr) ? &(*maskLevel)[din] : nullptr;
+        if (mask != nullptr && !mask->isUsable()) {
+          mask = nullptr;
+        }
+        numOutcast += partitionLeaf(threadPool, din, level[din], mask);
+      }
+
+#pragma omp critical(ParticleContainer_gatherMerge)
+      {
+        for (int r = 0; r < numProc(); r++) {
+          for (auto& kv : threadPool[r]) {
+            pool[r][kv.first].catenate(kv.second);
+          }
+        }
+      }
+    }
+#else
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex&     din  = dit[mybox];
+      const BaseFab<bool>* mask = (maskLevel != nullptr) ? &(*maskLevel)[din] : nullptr;
+      if (mask != nullptr && !mask->isUsable()) {
+        mask = nullptr;
+      }
+      numOutcast += partitionLeaf(pool, din, level[din], mask);
+    }
+#endif
+  }
+
+  m_numOutcastLocal = numOutcast;
+
+  return pool;
+}
+
+template <typename P, typename Traits>
 inline void
 ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool)
 {
@@ -139,8 +242,10 @@ ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool)
   const int numRanks = numProc();
 
   // ---- same-rank movers: catenate each pooled leaf into its destination leaf ----
-  // The destination valid leaves are empty here (remap clears them; regrid allocates them fresh), so
-  // catenate() takes the O(1) arena-swap fast path -- a zero-copy steal of the pooled leaf.
+  // On the gather-all path the destination leaves are empty (remap clears them; regrid allocates them
+  // fresh) so catenate() takes the O(1) arena-swap fast path. On the mask fast path the destinations
+  // still hold their stayers, so catenate() appends (O(movers)); a mover never returns to its own
+  // origin leaf, so there is no self-append.
   for (auto& kv : a_pool[myRank]) {
     const int          lvl  = kv.first.first;
     const unsigned int gidx = kv.first.second;
@@ -300,9 +405,20 @@ ParticleContainer<P, Traits>::remap()
 
   CH_assert(m_isDefined);
 
-  MoverPool pool = this->gatherToPool(m_particles, m_grids); // pool a copy of every valid particle
-  this->clearParticles();                                    // empty the holders (capacity retained)
-  this->distributeFromPool(pool);                            // re-assign each to its owner
+  if (m_validCells != nullptr && static_cast<int>(m_validCells->size()) >= m_finestLevel + 1) {
+    // Mask fast path: a particle still in its box and not under a finer grid cannot change owner, so we
+    // leave those "stayers" in place and pool only the movers. Destinations therefore keep their stayers
+    // -- do NOT clearParticles() here; distributeFromPool() appends the movers onto the existing leaves.
+    MoverPool pool = this->gatherMoversToPool();
+    this->distributeFromPool(pool);
+  }
+  else {
+    // Fallback: re-pool every valid particle (used when no mask is available, e.g. addParticlesDestructive
+    // staging, or before the realm's valid-cell mask has been built).
+    MoverPool pool = this->gatherToPool(m_particles, m_grids);
+    this->clearParticles();
+    this->distributeFromPool(pool);
+  }
 
   m_isOrganizedByCell = false;
 }
