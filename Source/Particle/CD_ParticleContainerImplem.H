@@ -37,24 +37,30 @@ ParticleContainer<P, Traits>::findDestination(const RealVect& a_pos) const
   // Finest level whose tile contains the particle wins.
   for (int lvl = m_finestLevel; lvl >= 0; lvl--) {
     IntVect tile;
+
     for (int dir = 0; dir < SpaceDim; dir++) {
       tile[dir] = static_cast<int>(std::floor((a_pos[dir] - m_probLo[dir]) / (m_blockingFactor * m_dx[lvl][dir])));
     }
+
     const LevelTiles& tiles = *m_levelTiles[lvl];
 
     const auto& myTiles = tiles.getMyTiles();
     const auto  mit     = myTiles.find(tile);
+
     if (mit != myTiles.end()) {
       return Destination{lvl, mit->second, procID(), true};
     }
+
 #ifdef CH_MPI
     const auto& otherTiles = tiles.getOtherTiles();
     const auto  oit        = otherTiles.find(tile);
+
     if (oit != otherTiles.end()) {
       return Destination{lvl, oit->second.first, static_cast<int>(oit->second.second), true};
     }
 #endif
   }
+
   return Destination{-1, 0u, -1, false};
 }
 
@@ -73,19 +79,26 @@ ParticleContainer<P, Traits>::gatherToPool(const AMRParticlesSoA<P, Traits>& a_s
   // safe to call concurrently; each thread bins into its own thread-local pool.
   auto binLeaf = [this](MoverPool& a_target, const Leaf& a_leaf) -> unsigned long long {
     unsigned long long outcast = 0;
+
     for (std::size_t i = 0; i < a_leaf.size(); i++) {
       const RealVect    pos = a_leaf.position(i);
       const Destination dst = this->findDestination(pos);
+
       if (!dst.found) {
         outcast++;
         continue;
       }
+
       Leaf& bin = a_target[dst.rank][PoolKey(dst.level, dst.gridIndex)];
+
       bin.append(pos, a_leaf.weight(i), a_leaf.gather(i));
+
       const std::size_t k = bin.size() - 1;
-      bin.particleID(k)   = a_leaf.particleID(i); // preserve id
-      bin.rankID(k)       = dst.rank;             // new owner
+
+      bin.particleID(k) = a_leaf.particleID(i); // preserve id
+      bin.rankID(k)     = dst.rank;             // new owner
     }
+
     return outcast;
   };
 
@@ -156,12 +169,16 @@ ParticleContainer<P, Traits>::gatherMoversToPool()
                                      Leaf&                             a_leaf,
                                      const BaseFab<bool>*              a_mask) -> unsigned long long {
       unsigned long long outcast = 0;
-      const Box          maskBox = (a_mask != nullptr) ? a_mask->box() : Box();
-      std::size_t        i       = 0;
+
+      const Box maskBox = (a_mask != nullptr) ? a_mask->box() : Box();
+
+      std::size_t i = 0;
+
       while (i < a_leaf.size()) {
         const RealVect pos = a_leaf.position(i);
         if (a_mask != nullptr) {
           const IntVect iv = this->cellIndex(lvl, pos);
+
           if (maskBox.contains(iv) && (*a_mask)(iv, 0)) {
             // Stayer: in its own box and not under a finer grid, so it cannot have changed owner.
             // Debug self-check of that invariant -- the destination the gather-all path would compute
@@ -172,22 +189,30 @@ ParticleContainer<P, Traits>::gatherMoversToPool()
                       m_levelTiles[lvl]->getMyGrids().at(chk.gridIndex) == a_din);
 #endif
             i++;
+
             continue;
           }
         }
+
         const Destination dst = this->findDestination(pos); // mover: route it
+
         if (dst.found) {
           Leaf& bin = a_target[dst.rank][PoolKey(dst.level, dst.gridIndex)];
+
           bin.append(pos, a_leaf.weight(i), a_leaf.gather(i));
+
           const std::size_t k = bin.size() - 1;
-          bin.particleID(k)   = a_leaf.particleID(i); // preserve id
-          bin.rankID(k)       = dst.rank;             // new owner
+
+          bin.particleID(k) = a_leaf.particleID(i); // preserve id
+          bin.rankID(k)     = dst.rank;             // new owner
         }
         else {
           outcast++;
         }
+
         a_leaf.remove(i); // swap-pop; do NOT advance i (a new particle now occupies slot i)
       }
+
       return outcast;
     };
 
@@ -200,9 +225,11 @@ ParticleContainer<P, Traits>::gatherMoversToPool()
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex&     din  = dit[mybox];
         const BaseFab<bool>* mask = (maskLevel != nullptr) ? &(*maskLevel)[din] : nullptr;
+
         if (mask != nullptr && !mask->isUsable()) {
           mask = nullptr;
         }
+
         numOutcast += partitionLeaf(threadPool, din, level[din], mask);
       }
 
@@ -219,9 +246,11 @@ ParticleContainer<P, Traits>::gatherMoversToPool()
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex&     din  = dit[mybox];
       const BaseFab<bool>* mask = (maskLevel != nullptr) ? &(*maskLevel)[din] : nullptr;
+
       if (mask != nullptr && !mask->isUsable()) {
         mask = nullptr;
       }
+
       numOutcast += partitionLeaf(pool, din, level[din], mask);
     }
 #endif
@@ -250,6 +279,7 @@ ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool)
     const int          lvl  = kv.first.first;
     const unsigned int gidx = kv.first.second;
     const DataIndex    din  = m_levelTiles[lvl]->getMyGrids().at(gidx);
+
     (*m_particles[lvl])[din].catenate(kv.second);
   }
 
@@ -268,22 +298,30 @@ ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool)
     if (r == myRank) {
       continue;
     }
+
     std::vector<char>& buf = sendBuf[r];
+
     for (auto& kv : a_pool[r]) {
-      Leaf&               src   = kv.second;
+      Leaf& src = kv.second;
+
       const std::uint32_t lvl   = static_cast<std::uint32_t>(kv.first.first);
       const std::uint32_t gidx  = static_cast<std::uint32_t>(kv.first.second);
       const std::uint64_t count = static_cast<std::uint64_t>(src.size());
+      const std::size_t   off   = buf.size();
 
-      const std::size_t off = buf.size();
       buf.resize(off + headerLen + count * pp);
+
       char* p = buf.data() + off;
+
       std::memcpy(p, &lvl, sizeof(std::uint32_t));
       p += sizeof(std::uint32_t);
+
       std::memcpy(p, &gidx, sizeof(std::uint32_t));
       p += sizeof(std::uint32_t);
+
       std::memcpy(p, &count, sizeof(std::uint64_t));
       p += sizeof(std::uint64_t);
+
       for (std::size_t i = 0; i < src.size(); i++) {
         src.linearizeParticle(p, i);
         p += pp;
@@ -294,29 +332,36 @@ ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool)
   // Exchange byte counts, then the byte buffers.
   std::vector<int> sendCounts(numRanks, 0);
   std::vector<int> recvCounts(numRanks, 0);
+
   for (int r = 0; r < numRanks; r++) {
     sendCounts[r] = static_cast<int>(sendBuf[r].size());
   }
+
   MPI_Alltoall(sendCounts.data(), 1, MPI_INT, recvCounts.data(), 1, MPI_INT, Chombo_MPI::comm);
 
   std::vector<int> sdispl(numRanks, 0);
   std::vector<int> rdispl(numRanks, 0);
-  int              stot = 0;
-  int              rtot = 0;
+
+  int stot = 0;
+  int rtot = 0;
+
   for (int r = 0; r < numRanks; r++) {
     sdispl[r] = stot;
     stot += sendCounts[r];
+
     rdispl[r] = rtot;
     rtot += recvCounts[r];
   }
 
   std::vector<char> sflat(stot);
   std::vector<char> rflat(rtot);
+
   for (int r = 0; r < numRanks; r++) {
     if (sendCounts[r] > 0) {
       std::memcpy(sflat.data() + sdispl[r], sendBuf[r].data(), static_cast<std::size_t>(sendCounts[r]));
     }
   }
+
   MPI_Alltoallv(sflat.data(),
                 sendCounts.data(),
                 sdispl.data(),
@@ -349,19 +394,24 @@ ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool)
   {
     const char* p   = rflat.data();
     const char* end = p + rtot;
+
     while (p < end) {
       std::uint32_t lvl;
       std::uint32_t gidx;
       std::uint64_t count;
+
       std::memcpy(&lvl, p, sizeof(std::uint32_t));
       p += sizeof(std::uint32_t);
+
       std::memcpy(&gidx, p, sizeof(std::uint32_t));
       p += sizeof(std::uint32_t);
+
       std::memcpy(&count, p, sizeof(std::uint64_t));
       p += sizeof(std::uint64_t);
 
       const PoolKey key(static_cast<int>(lvl), gidx);
       const auto    it = keyToGroup.find(key);
+
       if (it == keyToGroup.end()) {
         keyToGroup.emplace(key, groups.size());
         groups.push_back(DestGroup{static_cast<int>(lvl), gidx, count, {RecvChunk{p, count}}});
@@ -371,6 +421,7 @@ ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool)
         g.total += count;
         g.chunks.push_back(RecvChunk{p, count});
       }
+
       p += count * pp;
     }
   }
@@ -382,11 +433,13 @@ ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool)
   for (int d = 0; d < numGroups; d++) {
     const DestGroup& g   = groups[d];
     const DataIndex  din = m_levelTiles[g.level]->getMyGrids().at(g.gridIndex);
-    Leaf&            tgt = (*m_particles[g.level])[din];
+
+    Leaf& tgt = (*m_particles[g.level])[din];
 
     tgt.reserve(tgt.size() + g.total); // one allocation; avoids geometric regrow during the appends
     for (const RecvChunk& chunk : g.chunks) {
       const char* q = chunk.payload;
+
       for (std::uint64_t c = 0; c < chunk.count; c++) {
         tgt.delinearizeAndAppend(q);
         q += pp;
@@ -410,12 +463,14 @@ ParticleContainer<P, Traits>::remap()
     // leave those "stayers" in place and pool only the movers. Destinations therefore keep their stayers
     // -- do NOT clearParticles() here; distributeFromPool() appends the movers onto the existing leaves.
     MoverPool pool = this->gatherMoversToPool();
+
     this->distributeFromPool(pool);
   }
   else {
     // Fallback: re-pool every valid particle (used when no mask is available, e.g. addParticlesDestructive
     // staging, or before the realm's valid-cell mask has been built).
     MoverPool pool = this->gatherToPool(m_particles, m_grids);
+
     this->clearParticles();
     this->distributeFromPool(pool);
   }
@@ -466,13 +521,17 @@ ParticleContainer<P, Traits>::regrid(const Vector<DisjointBoxLayout>& a_grids,
   m_particles.resize(a_newFinestLevel + 1);
   m_maskParticles.resize(a_newFinestLevel + 1);
   m_levelTiles.resize(a_newFinestLevel + 1);
+
   for (int lvl = 0; lvl <= a_newFinestLevel; lvl++) {
     m_particles[lvl]     = RefCountedPtr<LevelParticles>(new LevelParticles(a_grids[lvl]));
     m_maskParticles[lvl] = RefCountedPtr<LevelParticles>(new LevelParticles(a_grids[lvl]));
     m_levelTiles[lvl]    = RefCountedPtr<LevelTiles>(new LevelTiles(a_grids[lvl], a_blockingFactor));
   }
+
   this->setupGrownGrids();
+
   m_bufferParticles.resize(a_newFinestLevel + 1);
+
   for (int lvl = 0; lvl <= a_newFinestLevel; lvl++) {
     m_bufferParticles[lvl] = RefCountedPtr<LevelParticles>(new LevelParticles(m_grownGrids[lvl]));
   }
@@ -499,6 +558,7 @@ ParticleContainer<P, Traits>::setupGrownGrids()
     const DisjointBoxLayout& dbl = m_grids[lvl];
 
     Vector<Box> boxes = dbl.boxArray();
+
     if (lvl > 0) {
       const Box domainBox = m_domains[lvl].domainBox();
       for (int i = 0; i < boxes.size(); i++) {
@@ -506,6 +566,7 @@ ParticleContainer<P, Traits>::setupGrownGrids()
         boxes[i] &= domainBox;
       }
     }
+
     m_grownGrids[lvl] = BoxLayout(boxes, dbl.procIDs());
   }
 }
@@ -536,9 +597,11 @@ ParticleContainer<P, Traits>::copyMaskParticles(const int a_level, const LevelDa
   LevelParticles&       maskLevel = *m_maskParticles[a_level];
   const LevelParticles& srcLevel  = *m_particles[a_level];
 
-  const DisjointBoxLayout& dbl  = m_grids[a_level];
-  const DataIterator&      dit  = dbl.dataIterator();
-  const int                nbox = dit.size();
+  const DisjointBoxLayout& dbl = m_grids[a_level];
+  const DataIterator&      dit = dbl.dataIterator();
+
+  const int nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
@@ -553,13 +616,17 @@ ParticleContainer<P, Traits>::copyMaskParticles(const int a_level, const LevelDa
 
     const Leaf& src = srcLevel[din];
     Leaf&       dst = maskLevel[din];
+
     for (std::size_t i = 0; i < src.size(); i++) {
       const IntVect iv = this->cellIndex(a_level, src.position(i));
+
       if (maskBox.contains(iv) && mask(iv, 0)) {
         dst.append(src.position(i), src.weight(i), src.gather(i));
+
         const std::size_t k = dst.size() - 1;
-        dst.particleID(k)   = src.particleID(i);
-        dst.rankID(k)       = src.rankID(i);
+
+        dst.particleID(k) = src.particleID(i);
+        dst.rankID(k)     = src.rankID(i);
       }
     }
   }
@@ -591,9 +658,11 @@ ParticleContainer<P, Traits>::transferMaskParticles(const int a_level, const Lev
   LevelParticles& maskLevel = *m_maskParticles[a_level];
   LevelParticles& srcLevel  = *m_particles[a_level];
 
-  const DisjointBoxLayout& dbl  = m_grids[a_level];
-  const DataIterator&      dit  = dbl.dataIterator();
-  const int                nbox = dit.size();
+  const DisjointBoxLayout& dbl = m_grids[a_level];
+  const DataIterator&      dit = dbl.dataIterator();
+
+  const int nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
@@ -610,11 +679,15 @@ ParticleContainer<P, Traits>::transferMaskParticles(const int a_level, const Lev
     std::size_t i = 0;
     while (i < src.size()) {
       const IntVect iv = this->cellIndex(a_level, src.position(i));
+
       if (maskBox.contains(iv) && mask(iv, 0)) {
         dst.append(src.position(i), src.weight(i), src.gather(i));
+
         const std::size_t k = dst.size() - 1;
-        dst.particleID(k)   = src.particleID(i);
-        dst.rankID(k)       = src.rankID(i);
+
+        dst.particleID(k) = src.particleID(i);
+        dst.rankID(k)     = src.rankID(i);
+
         src.remove(i); // swap-and-pop; the swapped-in particle now occupies index i
       }
       else {
