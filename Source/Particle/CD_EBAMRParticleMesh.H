@@ -170,14 +170,17 @@ public:
     CH_assert(m_isDefined);
 
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-      const DisjointBoxLayout& dbl  = m_eblgs[lvl]->getDBL();
-      const DataIterator&      dit  = dbl.dataIterator();
-      const int                nbox = dit.size();
+      const DisjointBoxLayout& dbl = m_eblgs[lvl]->getDBL();
+      const DataIterator&      dit = dbl.dataIterator();
+
+      const int nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime)
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex&      din    = dit[mybox];
         const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[din];
         const EBCellFAB&      data   = (*a_meshData[lvl])[din];
+
         interp.template interpolate<Members...>(a_particles[lvl][din], data, a_interpType, a_forceIrregNGP);
       }
     }
@@ -207,14 +210,17 @@ public:
     CH_assert(m_isDefined);
 
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-      const DisjointBoxLayout& dbl  = m_eblgs[lvl]->getDBL();
-      const DataIterator&      dit  = dbl.dataIterator();
-      const int                nbox = dit.size();
+      const DisjointBoxLayout& dbl = m_eblgs[lvl]->getDBL();
+      const DataIterator&      dit = dbl.dataIterator();
+
+      const int nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime)
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex&      din    = dit[mybox];
         const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[din];
         const EBCellFAB&      data   = (*a_meshData[lvl])[din];
+
         interp.interpolateWeight(a_particles[lvl][din], data, a_interpType, a_forceIrregNGP);
       }
     }
@@ -263,22 +269,27 @@ public:
     switch (a_coarseFineDeposition) {
     case CoarseFineDeposition::Interp: {
       this->depositInterpCore(a_meshData, a_particles, 1, patch);
+
       break;
     }
     case CoarseFineDeposition::Halo: {
       this->template depositHaloCore<1>(a_meshData, a_particles, patch);
+
       break;
     }
     case CoarseFineDeposition::HaloNGP: {
       this->template depositHaloNGPCore<1>(a_meshData, a_particles, patch, patchNGP);
+
       break;
     }
     case CoarseFineDeposition::Transition: {
       this->template depositTransitionCore<1>(a_meshData, a_particles, a_depositionType, patch);
+
       break;
     }
     default: {
       this->errorUnsupported();
+
       break;
     }
     }
@@ -340,22 +351,27 @@ public:
     switch (a_coarseFineDeposition) {
     case CoarseFineDeposition::Interp: {
       this->depositInterpCore(a_meshData, a_particles, 1, patch);
+
       break;
     }
     case CoarseFineDeposition::Halo: {
       this->template depositHaloCore<1>(a_meshData, a_particles, patch);
+
       break;
     }
     case CoarseFineDeposition::HaloNGP: {
       this->template depositHaloNGPCore<1>(a_meshData, a_particles, patch, patchNGP);
+
       break;
     }
     case CoarseFineDeposition::Transition: {
       this->template depositTransitionCore<1>(a_meshData, a_particles, a_depositionType, patch);
+
       break;
     }
     default: {
       this->errorUnsupported();
+
       break;
     }
     }
@@ -397,14 +413,17 @@ public:
     switch (a_coarseFineDeposition) {
     case CoarseFineDeposition::Interp: {
       this->depositInterpCore(a_meshData, a_particles, static_cast<int>(sizeof...(Members)), patch);
+
       break;
     }
     case CoarseFineDeposition::Halo: {
       this->template depositHaloCore<static_cast<int>(sizeof...(Members))>(a_meshData, a_particles, patch);
+
       break;
     }
     case CoarseFineDeposition::HaloNGP: {
       this->template depositHaloNGPCore<static_cast<int>(sizeof...(Members))>(a_meshData, a_particles, patch, patchNGP);
+
       break;
     }
     case CoarseFineDeposition::Transition: {
@@ -416,6 +435,7 @@ public:
     }
     default: {
       this->errorUnsupported();
+
       break;
     }
     }
@@ -508,17 +528,21 @@ protected:
 
     m_ebParticleMesh.resize(1 + m_finestLevel);
     m_ebParticleMeshFiCo.resize(1 + m_finestLevel);
+
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
       const ProblemDomain&     domain = m_eblgs[lvl]->getDomain();
       const DisjointBoxLayout& dbl    = m_eblgs[lvl]->getDBL();
       const EBISLayout&        ebisl  = m_eblgs[lvl]->getEBISL();
+      const DataIterator&      dit    = dbl.dataIterator();
 
-      m_ebParticleMesh[lvl]    = RefCountedPtr<LayoutData<EBParticleMesh>>(new LayoutData<EBParticleMesh>(dbl));
-      const DataIterator& dit  = dbl.dataIterator();
-      const int           nbox = dit.size();
+      m_ebParticleMesh[lvl] = RefCountedPtr<LayoutData<EBParticleMesh>>(new LayoutData<EBParticleMesh>(dbl));
+
+      const int nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime)
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
+
         (*m_ebParticleMesh[lvl])[din].define(domain, dbl[din], ebisl[din], m_dx[lvl] * RealVect::Unit, m_probLo);
       }
 
@@ -528,13 +552,15 @@ protected:
         const ProblemDomain&     domainFiCo = eblgFiCo.getDomain();
         const DisjointBoxLayout& dblFiCo    = eblgFiCo.getDBL();
         const EBISLayout&        ebislFiCo  = eblgFiCo.getEBISL();
+        const DataIterator&      ditFiCo    = dblFiCo.dataIterator();
+        const int                nboxFiCo   = ditFiCo.size();
 
         m_ebParticleMeshFiCo[lvl] = RefCountedPtr<LayoutData<EBParticleMesh>>(new LayoutData<EBParticleMesh>(dblFiCo));
-        const DataIterator& ditFiCo  = dblFiCo.dataIterator();
-        const int           nboxFiCo = ditFiCo.size();
+
 #pragma omp parallel for schedule(runtime)
         for (int mybox = 0; mybox < nboxFiCo; mybox++) {
           const DataIndex& din = ditFiCo[mybox];
+
           (*m_ebParticleMeshFiCo[lvl])[din].define(domainFiCo,
                                                    dblFiCo[din],
                                                    ebislFiCo[din],
@@ -560,6 +586,7 @@ protected:
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
       const EBLevelGrid&       eblg = *m_eblgs[lvl];
       const DisjointBoxLayout& dbl  = eblg.getDBL();
+
       m_levelCopiers[lvl].define(dbl, dbl, eblg.getDomain(), m_ghost * IntVect::Unit, true);
       m_levelCopiers[lvl].reverse();
     }
@@ -574,6 +601,7 @@ protected:
     CH_TIME("EBAMRParticleMesh::defineCoarseFineMotion");
 
     m_coarseFinePM.resize(1 + m_finestLevel);
+
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
       if (lvl > 0) {
         m_coarseFinePM[lvl] = RefCountedPtr<EBCoarseFineParticleMesh>(
@@ -614,15 +642,18 @@ protected:
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
       const DisjointBoxLayout& dbl     = m_eblgs[lvl]->getDBL();
       const bool               hasCoar = (lvl > 0);
+      const DataIterator&      dit     = dbl.dataIterator();
 
       // 1. Deposit this level's valid particles.
-      const DataIterator& dit  = dbl.dataIterator();
-      const int           nbox = dit.size();
+      const int nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime)
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex&      din    = dit[mybox];
         const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[din];
-        EBCellFAB&            rho    = (*a_meshData[lvl])[din];
+
+        EBCellFAB& rho = (*a_meshData[lvl])[din];
+
         a_patchDeposit(interp, rho, a_particles[lvl][din], 1.0);
       }
 
@@ -634,6 +665,7 @@ protected:
         for (int comp = 0; comp < a_numComp; comp++) {
           LevelData<EBCellFAB> coarAlias;
           LevelData<EBCellFAB> fineAlias;
+
           aliasLevelData<EBCellFAB>(coarAlias, &(*a_meshData[lvl - 1]), Interval(comp, comp));
           aliasLevelData<EBCellFAB>(fineAlias, &(*a_meshData[lvl]), Interval(comp, comp));
 
@@ -674,13 +706,17 @@ protected:
 
         mask[lvl] = RefCountedPtr<LevelData<BaseFab<bool>>>(
           new LevelData<BaseFab<bool>>(grids, numComp, IntVect::Zero));
+
         LevelData<BaseFab<bool>>& levelMask = *mask[lvl];
         {
-          const DataIterator& dit  = grids.dataIterator();
-          const int           nbox = dit.size();
+          const DataIterator& dit = grids.dataIterator();
+
+          const int nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime)
           for (int mybox = 0; mybox < nbox; mybox++) {
             const DataIndex& din = dit[mybox];
+
             levelMask[din].setVal(false);
           }
         }
@@ -690,6 +726,7 @@ protected:
         {
           const DataIterator& dit  = gridsCoFi.dataIterator();
           const int           nbox = dit.size();
+
           // serial: accumulates into the shared IntVectSet halo (not indexed by box).
           for (int mybox = 0; mybox < nbox; mybox++) {
             const DataIndex& din      = dit[mybox];
