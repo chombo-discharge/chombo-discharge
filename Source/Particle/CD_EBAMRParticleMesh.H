@@ -6,32 +6,8 @@
 
 /**
   @file   CD_EBAMRParticleMesh.H
-  @brief  Dev staging: ParticleSoA/AMR port of EBAMRParticleMesh (deposit/interpolate across levels).
+  @brief  Declaration of an AMR driver that deposits/interpolates ParticleContainer particles.
   @author Robert Marskar
-  @details
-  EBAMRParticleMesh is the AMR driver that deposits/interpolates the particles of a
-  ParticleContainer across the grid hierarchy, calling the per-patch EBParticleMesh leaf on
-  each box. It is the SoA port of Source/Particle/CD_EBAMRParticleMesh.H.
-
-  <h2>Scope</h2>
-    - define(): per-level @c LayoutData<EBParticleMesh> leaves (valid grids + refined-coarse FiCo
-      grids), the level valid+ghost->valid Copiers, the @c EBCoarseFineParticleMesh operators, and
-      the outer-halo masks;
-    - interpolate<Members...>(): full, per-level/per-patch (mesh assumed valid+ghosted by caller);
-    - deposit<Members...>() / depositWeight() with all four @c CoarseFineDeposition strategies:
-      @c Interp (move over-boundary mass with the mesh operators), @c Halo (re-deposit the coarse
-      halo particles on the refined-coarse grid via the container mask holder + FiCo buffer),
-      @c HaloNGP (deposit the halo particles with NGP so their clouds do not spread over the
-      boundary), and @c Transition (deposit the coarse-side transition particles on the refined-coarse
-      grid with the fine-grid width, distributing to both levels). Halo/HaloNGP/Transition need
-      ghost >= 1; all conserve mass across the refinement boundary.
-
-  @note OpenMP-over-boxes is deferred (the per-level loops are plain).
-
-  Named with the "SoA" suffix so it coexists with the production EBAMRParticleMesh (linked via
-  libSource) until design-freeze. See Dev/PORTING_EBParticleMesh.md.
-
-  @note Per project rule, NO default arguments -- callers specify every argument.
 */
 
 #ifndef CD_EBAMRPARTICLEMESH_H
@@ -70,6 +46,28 @@
 
 /**
   @brief AMR driver that deposits/interpolates ParticleContainer particles across the hierarchy.
+  @details
+  EBAMRParticleMesh deposits the particles of a ParticleContainer onto AMR mesh data and interpolates
+  mesh data back onto particle columns, by driving the per-patch EBParticleMesh leaf on every box of
+  every level. define() builds the per-level leaves (on the valid grids and the refined-coarse grids),
+  the level valid+ghost -> valid Copiers, the EBCoarseFineParticleMesh operators, and the halo/transition
+  masks; it must be called before any deposit or interpolate.
+
+  <h3>Interpolation</h3>
+  interpolate() and interpolateWeight() are purely per-level/per-patch: the mesh is assumed to be
+  valid+ghosted by the caller, so no coarse-fine coupling is needed.
+
+  <h3>Deposition</h3>
+  deposit(), depositWeight(), and depositGathered() conserve mass across refinement boundaries, and
+  select how the coarse-fine overlap is handled through @c CoarseFineDeposition:
+  - <b>Interp</b>     -- move the over-boundary mass between levels with the coarse-fine mesh operators.
+  - <b>Halo</b>       -- re-deposit the coarse-side halo particles on the refined-coarse grid (via the
+                         container's mask holder and the FiCo buffer) and add them to the fine level.
+  - <b>HaloNGP</b>    -- deposit the near-boundary halo particles with NGP so their clouds do not spread
+                         across the boundary (no refined-coarse buffer is needed).
+  - <b>Transition</b> -- deposit the coarse-side transition particles on the refined-coarse grid at the
+                         fine-grid width, distributing the result to both levels.
+  Halo, HaloNGP, and Transition require at least one ghost cell.
 */
 class EBAMRParticleMesh
 {
@@ -103,7 +101,7 @@ public:
   operator=(const EBAMRParticleMesh&) = delete;
 
   /**
-    @brief Define the per-level leaves and the coarse-fine mesh operators (stage-A subset).
+    @brief Define the per-level leaves, coarse-fine mesh operators, and halo/transition masks.
     @param[in] a_eblgs       Per-level EB level grids.
     @param[in] a_refRat      Per-level refinement ratio (entry l is the ratio between level l and l+1).
     @param[in] a_dx          Per-level (isotropic) grid spacing.
@@ -232,7 +230,7 @@ public:
   /**
     @brief Deposit the container-owned weight onto the AMR mesh.
     @details Dispatches on the coarse-fine strategy (Interp / Halo / HaloNGP / Transition); see the
-    file-level documentation. Halo/HaloNGP/Transition need ghost >= 1.
+    class documentation. Halo/HaloNGP/Transition need ghost >= 1.
     @tparam P      Payload type (deduced).
     @tparam Traits Column descriptor (deduced).
     @param[in,out] a_meshData             AMR mesh data (one component; RESET then filled).
@@ -492,13 +490,12 @@ protected:
   std::map<int, Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>> m_transitionMasks;
 
   /**
-    @brief Abort if the requested coarse-fine strategy is not supported yet (HaloNGP/Transition).
+    @brief Abort on an unrecognized coarse-fine deposition strategy.
   */
   void
   errorUnsupported() const
   {
-    MayDay::Error("EBAMRParticleMesh: only CoarseFineDeposition::Interp and ::Halo are supported "
-                  "(HaloNGP/Transition are deferred to stage-B2/B3)");
+    MayDay::Error("EBAMRParticleMesh: unsupported CoarseFineDeposition strategy");
   }
 
   /**
