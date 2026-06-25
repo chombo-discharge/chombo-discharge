@@ -115,7 +115,7 @@ public:
     m_verbose = false;
     m_domain  = a_domain;
     m_region  = a_region;
-    m_ebisbox = a_ebisbox;
+    m_ebisbox = &a_ebisbox; // alias, NOT a copy -- see m_ebisbox declaration
     m_probLo  = a_probLo;
     m_dx      = a_dx;
   }
@@ -416,9 +416,17 @@ protected:
   Box m_region;
 
   /**
-    @brief EBIS box.
+    @brief Non-owning alias to the caller's EBIS box.
+    @details Deliberately a pointer, not a value. EBParticleMesh is constructed per grid patch in the
+    deposition/interpolation hot loops, so storing the EBISBox by value would copy-assign its
+    EBGraph/EBData PIMPL handles on every construction. EBISBox is PIMPL (EBGraph/EBData each hold a
+    RefCountedPtr to their *Implem), so that copy is shallow -- but RefCountedPtr::operator= is guarded
+    by a single global OpenMP critical section (RCPAssign) (plus atomic refcount traffic on the shared,
+    e.g. all-regular, *Implem). In OpenMP builds that serialises the per-patch loop on that global lock;
+    aliasing the EBISBox (which is owned by the EBISLayout and outlives this transient helper) avoids
+    the copy entirely. In pure-MPI builds the difference is negligible, but the alias is strictly cheaper.
   */
-  EBISBox m_ebisbox;
+  const EBISBox* m_ebisbox = nullptr;
 
   /**
     @brief Grid resolution.
@@ -709,7 +717,7 @@ protected:
     FArrayBox& rho = a_rho.getFArrayBox();
 
     // forceIrregNGP first so the common (false) case short-circuits before the EBISBox query.
-    if (a_forceIrregNGP && m_ebisbox.isIrregular(particleIV)) {
+    if (a_forceIrregNGP && m_ebisbox->isIrregular(particleIV)) {
       for (int comp = 0; comp < a_numComp; comp++) {
         rho(particleIV, a_comp + comp) += a_strength[comp] * a_volumeFactor;
       }
@@ -763,7 +771,7 @@ protected:
     FArrayBox& rho = a_rho.getFArrayBox();
 
     // forceIrregNGP first so the common (false) case short-circuits before the EBISBox query.
-    if (a_forceIrregNGP && m_ebisbox.isIrregular(particleIV)) {
+    if (a_forceIrregNGP && m_ebisbox->isIrregular(particleIV)) {
       for (int comp = 0; comp < a_numComp; comp++) {
         rho(particleIV, a_comp + comp) += a_strength[comp] * a_volumeFactor;
       }
@@ -815,7 +823,7 @@ protected:
   {
     const IntVect    particleIV = ParticleOps::getParticleCellIndex(a_position, m_probLo, m_dx);
     const FArrayBox& meshData   = a_meshData.getFArrayBox();
-    const Real       factor     = m_ebisbox.isCovered(particleIV) ? 0.0 : 1.0;
+    const Real       factor     = m_ebisbox->isCovered(particleIV) ? 0.0 : 1.0;
 
     for (int comp = 0; comp < a_numComp; comp++) {
       a_particleField[comp] = factor * meshData(particleIV, a_comp + comp);
@@ -854,12 +862,12 @@ protected:
       a_particleField[comp] = 0.0;
     }
 
-    if ((m_ebisbox.isIrregular(particleIV) && a_forceIrregNGP) || !(a_validBox.contains(particleIV))) {
+    if ((m_ebisbox->isIrregular(particleIV) && a_forceIrregNGP) || !(a_validBox.contains(particleIV))) {
       for (int comp = 0; comp < a_numComp; comp++) {
         a_particleField[comp] = meshData(particleIV, a_comp + comp);
       }
     }
-    else if (!(m_ebisbox.isCovered(particleIV))) {
+    else if (!(m_ebisbox->isCovered(particleIV))) {
       auto cicKernel = [&](const IntVect& iv) -> void {
         Real weight = 1.0;
 
@@ -912,12 +920,12 @@ protected:
       a_particleField[comp] = 0.0;
     }
 
-    if ((m_ebisbox.isIrregular(particleIV) && a_forceIrregNGP) || !(a_validBox.contains(particleIV))) {
+    if ((m_ebisbox->isIrregular(particleIV) && a_forceIrregNGP) || !(a_validBox.contains(particleIV))) {
       for (int comp = 0; comp < a_numComp; comp++) {
         a_particleField[comp] = meshData(particleIV, a_comp + comp);
       }
     }
-    else if (!(m_ebisbox.isCovered(particleIV))) {
+    else if (!(m_ebisbox->isCovered(particleIV))) {
       auto tscKernel = [&](const IntVect& iv) -> void {
         Real weight = 1.0;
 

@@ -318,7 +318,7 @@ To fill the masked particles, ``ParticleContainer<P, Traits>`` has member functi
 The function signature for this is
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 589-594
+   :lines: 598-599
    :language: c++
    :dedent: 2
 
@@ -326,7 +326,7 @@ The argument ``a_mask`` holds a bool at each cell in the AMR hierarchy.
 Particles that live in cells where ``a_mask`` is true will be copied to an internal holder which can be retrieved through
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 282-290
+   :lines: 291-295
    :language: c++
    :dedent: 2
 
@@ -334,7 +334,7 @@ In the above functions the mask particles are *copied*, and the original particl
 After the user is done with the particles, they should be released through
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 623-627
+   :lines: 615-616
    :language: c++
    :dedent: 2
 
