@@ -42,6 +42,7 @@
 
 // Our includes
 #include <CD_LevelTiles.H>
+#include <CD_ParallelOps.H>
 #include <CD_ParticleSoA.H>
 #include <CD_NamespaceHeader.H>
 
@@ -442,45 +443,12 @@ public:
       const DisjointBoxLayout& dbl   = m_grids[lvl];
       const DataIterator&      dit   = dbl.dataIterator();
       const int                nbox  = dit.size();
+
 #pragma omp parallel for schedule(runtime)
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
+
         level[din].clear();
-      }
-    }
-  }
-
-  /**
-    @brief Append one particle into the locally-owned patch that contains its cell.
-    @details Finds the box on this rank that contains the particle's cell on level a_lvl and appends to
-    that patch's leaf. If no local box owns the cell (it belongs to another rank or lies outside the
-    domain) the call is a no-op: this routine never routes across ranks. Use it to populate particles a
-    rank already owns, or call remap() afterwards to route arbitrary positions to their owners.
-    @param[in] a_lvl     Level index.
-    @param[in] a_pos     Particle position.
-    @param[in] a_weight  Particle weight.
-    @param[in] a_payload Payload fields.
-  */
-  void
-  addParticlesLocal(const int a_lvl, const RealVect& a_pos, const double a_weight, const P& a_payload)
-  {
-    CH_assert(m_isDefined);
-    CH_assert(a_lvl >= 0 && a_lvl <= m_finestLevel);
-
-    const IntVect            iv    = this->cellIndex(a_lvl, a_pos);
-    LevelParticles&          level = *m_particles[a_lvl];
-    const DisjointBoxLayout& dbl   = m_grids[a_lvl];
-    m_isOrganizedByCell            = false; // adding particles invalidates any cell sort
-
-    const DataIterator& dit  = dbl.dataIterator();
-    const int           nbox = dit.size();
-    // Serial: this loop returns out of the function on the first owning box, so it must NOT be an
-    // OpenMP parallel-for (a return from inside a parallel region is illegal).
-    for (int mybox = 0; mybox < nbox; mybox++) {
-      const DataIndex& din = dit[mybox];
-      if (dbl[din].contains(iv)) {
-        level[din].append(a_pos, a_weight, a_payload);
-        return;
       }
     }
   }
@@ -541,12 +509,15 @@ public:
       const DisjointBoxLayout& dbl   = m_grids[lvl];
       const DataIterator&      dit   = dbl.dataIterator();
       const int                nbox  = dit.size();
+
 #pragma omp parallel for schedule(runtime) reduction(+ : n)
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
+
         n += static_cast<unsigned long long>(level[din].size());
       }
     }
+
     return n;
   }
 
@@ -561,14 +532,7 @@ public:
 
     CH_assert(m_isDefined);
 
-    const unsigned long long local = this->getNumberOfValidParticlesLocal();
-#ifdef CH_MPI
-    unsigned long long global = 0;
-    MPI_Allreduce(&local, &global, 1, MPI_UNSIGNED_LONG_LONG, MPI_SUM, Chombo_MPI::comm);
-    return global;
-#else
-    return local;
-#endif
+    return ParallelOps::sum(this->getNumberOfValidParticlesLocal());
   }
 
   /**
@@ -588,13 +552,7 @@ public:
   unsigned long long
   getNumberOfOutcastParticlesGlobal() const
   {
-#ifdef CH_MPI
-    unsigned long long global = 0;
-    MPI_Allreduce(&m_numOutcastLocal, &global, 1, MPI_UNSIGNED_LONG_LONG, MPI_SUM, Chombo_MPI::comm);
-    return global;
-#else
-    return m_numOutcastLocal;
-#endif
+    return ParallelOps::sum(m_numOutcastLocal);
   }
 
   ///@}
@@ -701,10 +659,13 @@ public:
       LevelParticles&          level = *m_maskParticles[lvl];
       const DisjointBoxLayout& dbl   = m_grids[lvl];
       const DataIterator&      dit   = dbl.dataIterator();
-      const int                nbox  = dit.size();
+
+      const int nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime)
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
+
         level[din].clear();
       }
     }
@@ -724,10 +685,13 @@ public:
       LevelParticles&     level = *m_bufferParticles[lvl];
       const BoxLayout&    dbl   = m_grownGrids[lvl];
       const DataIterator& dit   = dbl.dataIterator();
-      const int           nbox  = dit.size();
+
+      const int nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime)
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
+
         level[din].clear();
       }
     }
@@ -759,17 +723,22 @@ public:
     CH_assert(m_isDefined);
 
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-      LevelParticles&          src  = *a_source[lvl];
-      LevelParticles&          dst  = *m_particles[lvl];
-      const DisjointBoxLayout& dbl  = m_grids[lvl];
-      const DataIterator&      dit  = dbl.dataIterator();
-      const int                nbox = dit.size();
+      LevelParticles& src = *a_source[lvl];
+      LevelParticles& dst = *m_particles[lvl];
+
+      const DisjointBoxLayout& dbl = m_grids[lvl];
+      const DataIterator&      dit = dbl.dataIterator();
+
+      const int nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime)
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
+
         dst[din].catenate(src[din]); // bulk move (id/rank preserved); empty dst -> O(1) swap
       }
     }
+
     m_isOrganizedByCell = false;
   }
 
@@ -793,16 +762,21 @@ public:
     CH_assert(m_isDefined);
 
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-      LevelParticles&          level = *m_particles[lvl];
-      const DisjointBoxLayout& dbl   = m_grids[lvl];
-      const DataIterator&      dit   = dbl.dataIterator();
-      const int                nbox  = dit.size();
+      LevelParticles& level = *m_particles[lvl];
+
+      const DisjointBoxLayout& dbl = m_grids[lvl];
+      const DataIterator&      dit = dbl.dataIterator();
+
+      const int nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime)
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
+
         level[din].sortByCell(dbl[din], m_dx[lvl], m_probLo);
       }
     }
+
     m_isOrganizedByCell = true;
   }
 
