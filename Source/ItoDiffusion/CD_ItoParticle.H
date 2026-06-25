@@ -75,7 +75,9 @@ struct ItoParticle
 template <>
 struct ParticleTraits<ItoParticle>
 {
-  /// @brief Payload column member-pointers, listed one field group at a time (SpaceDim entries per vector group).
+  /**
+     @brief Payload column member-pointers, listed one field group at a time (SpaceDim entries per vector group).
+  */
   static constexpr auto columns = std::make_tuple(
     &ItoParticle::mobility,
     &ItoParticle::diffusion,
@@ -85,7 +87,9 @@ struct ParticleTraits<ItoParticle>
     D_DECL(&ItoParticle::velocityX, &ItoParticle::velocityY, &ItoParticle::velocityZ),
     D_DECL(&ItoParticle::tmpVectX, &ItoParticle::tmpVectY, &ItoParticle::tmpVectZ));
 
-  /// @brief Subset of payload columns written to HDF5 checkpoints: the per-component velocity.
+  /**
+     @brief Subset of payload columns written to HDF5 checkpoints: the per-component velocity.
+  */
   static constexpr auto h5Columns = std::make_tuple(
     D_DECL(&ItoParticle::velocityX, &ItoParticle::velocityY, &ItoParticle::velocityZ));
 };
