@@ -263,10 +263,14 @@ DischargeIO::writeCheckParticlesToHDF(HDF5Handle&                               
   std::vector<unsigned long long> locParticlesPerBox(grids.size(), 0);
   unsigned long long              numLocalParticles = 0;
 
-  for (DataIterator di(grids); di.ok(); ++di) {
-    const size_t numItems = a_particles[di].size();
+  // serial: accumulates into the running counter numLocalParticles
+  const DataIterator& dit  = grids.dataIterator();
+  const int           nbox = dit.size();
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din      = dit[mybox];
+    const size_t     numItems = a_particles[din].size();
     numLocalParticles += (unsigned long long)numItems;
-    locParticlesPerBox[grids.index(di())] = (unsigned long long)numItems;
+    locParticlesPerBox[grids.index(din)] = (unsigned long long)numItems;
   }
 
   std::vector<unsigned long long> particlesPerBox(grids.size());
@@ -333,10 +337,14 @@ DischargeIO::writeCheckParticlesToHDF(HDF5Handle&                               
       MayDay::Error("WritePart(SoA)::Error: new returned NULL pointer ");
     }
 
-    for (DataIterator di(grids); di.ok(); ++di) {
-      size_t offset = offsets[grids.index(di())];
+    // serial: writes into the shared HDF5 dataset at running per-box offsets and shares the chunk buffer
+    const DataIterator& dit  = grids.dataIterator();
+    const int           nbox = dit.size();
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din    = dit[mybox];
+      size_t           offset = offsets[grids.index(din)];
 
-      const ParticleSoA<P, Traits>& leaf = a_particles[di];
+      const ParticleSoA<P, Traits>& leaf = a_particles[din];
       const size_t                  n    = leaf.size();
 
       for (size_t ip = 0; ip < n; ip++) {
@@ -410,11 +418,15 @@ DischargeIO::readCheckParticlesFromHDF(HDF5Handle&                         a_han
   const size_t chunkSize = objSize * _CHUNK;
   char*        chunk     = new char[chunkSize];
 
-  for (DataIterator di(bl); di.ok(); ++di) {
-    size_t boxData = objSize * particlesPerBox[bl.index(di())]; // bytes
-    size_t offset  = offsets[bl.index(di())];                   // bytes
+  // serial: reads from the shared HDF5 dataset at per-box offsets and shares the chunk buffer
+  const DataIterator& dit  = bl.dataIterator();
+  const int           nbox = dit.size();
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din     = dit[mybox];
+    size_t           boxData = objSize * particlesPerBox[bl.index(din)]; // bytes
+    size_t           offset  = offsets[bl.index(din)];                   // bytes
 
-    ParticleSoA<P, Traits>& leaf = a_particles[di];
+    ParticleSoA<P, Traits>& leaf = a_particles[din];
 
     size_t dataIn = 0;
     while (dataIn < boxData) {

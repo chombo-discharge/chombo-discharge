@@ -536,17 +536,23 @@ ParticleContainer<P, Traits>::copyMaskParticles(const int a_level, const LevelDa
   LevelParticles&       maskLevel = *m_maskParticles[a_level];
   const LevelParticles& srcLevel  = *m_particles[a_level];
 
-  for (DataIterator dit = m_grids[a_level].dataIterator(); dit.ok(); ++dit) {
-    maskLevel[dit()].clear();
+  const DisjointBoxLayout& dbl  = m_grids[a_level];
+  const DataIterator&      dit  = dbl.dataIterator();
+  const int                nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
 
-    const BaseFab<bool>& mask = a_mask[dit()];
+    maskLevel[din].clear();
+
+    const BaseFab<bool>& mask = a_mask[din];
     if (!mask.isUsable()) {
       continue;
     }
     const Box maskBox = mask.box();
 
-    const Leaf& src = srcLevel[dit()];
-    Leaf&       dst = maskLevel[dit()];
+    const Leaf& src = srcLevel[din];
+    Leaf&       dst = maskLevel[din];
     for (std::size_t i = 0; i < src.size(); i++) {
       const IntVect iv = this->cellIndex(a_level, src.position(i));
       if (maskBox.contains(iv) && mask(iv, 0)) {
@@ -585,15 +591,21 @@ ParticleContainer<P, Traits>::transferMaskParticles(const int a_level, const Lev
   LevelParticles& maskLevel = *m_maskParticles[a_level];
   LevelParticles& srcLevel  = *m_particles[a_level];
 
-  for (DataIterator dit = m_grids[a_level].dataIterator(); dit.ok(); ++dit) {
-    const BaseFab<bool>& mask = a_mask[dit()];
+  const DisjointBoxLayout& dbl  = m_grids[a_level];
+  const DataIterator&      dit  = dbl.dataIterator();
+  const int                nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const BaseFab<bool>& mask = a_mask[din];
     if (!mask.isUsable()) {
       continue;
     }
     const Box maskBox = mask.box();
 
-    Leaf& src = srcLevel[dit()];
-    Leaf& dst = maskLevel[dit()];
+    Leaf& src = srcLevel[din];
+    Leaf& dst = maskLevel[din];
 
     std::size_t i = 0;
     while (i < src.size()) {
