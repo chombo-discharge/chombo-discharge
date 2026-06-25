@@ -37,6 +37,7 @@
 #include <CD_EBAMRData.H>
 #include <CD_EBAddOp.H>
 #include <CD_DataOps.H>
+#include <CD_OpenMP.H>
 #include <CD_DepositionType.H>
 #include <CD_CoarseFineDeposition.H>
 #include <CD_EBCoarseFineParticleMesh.H>
@@ -727,7 +728,7 @@ protected:
           const DataIterator& dit  = gridsCoFi.dataIterator();
           const int           nbox = dit.size();
 
-          // serial: accumulates into the shared IntVectSet halo (not indexed by box).
+#pragma omp parallel for schedule(runtime) reduction(+ : halo)
           for (int mybox = 0; mybox < nbox; mybox++) {
             const DataIndex& din      = dit[mybox];
             const Box        coFiBox  = gridsCoFi[din];
@@ -749,29 +750,35 @@ protected:
         {
           const DataIterator& dit  = gridsFine.dataIterator();
           const int           nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime)
           for (int mybox = 0; mybox < nbox; mybox++) {
             const DataIndex& din = dit[mybox];
+
             coFiMask[din].setVal(0.0);
           }
         }
         {
           const DataIterator& dit  = grids.dataIterator();
           const int           nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime)
           for (int mybox = 0; mybox < nbox; mybox++) {
             const DataIndex& din = dit[mybox];
+
             coarMask[din].setVal(0.0);
           }
         }
         {
           const DataIterator& dit  = gridsFine.dataIterator();
           const int           nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime)
           for (int mybox = 0; mybox < nbox; mybox++) {
             const DataIndex& din     = dit[mybox];
             const Box        region  = coFiMask[din].box();
             const IntVectSet curHalo = halo & region;
+
             for (IVSIterator ivsit(curHalo); ivsit.ok(); ++ivsit) {
               coFiMask[din](ivsit(), comp) = 1.0;
             }
@@ -785,12 +792,14 @@ protected:
         // Make the boolean mask; undefine empty BaseFabs (so copyMaskParticles skips them).
         const DataIterator& dit  = grids.dataIterator();
         const int           nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime)
         for (int mybox = 0; mybox < nbox; mybox++) {
           const DataIndex& din      = dit[mybox];
           const Box        box      = grids[din];
-          BaseFab<bool>&   boolMask = levelMask[din];
           const FArrayBox& realMask = coarMask[din];
+
+          BaseFab<bool>& boolMask = levelMask[din];
 
           bool emptyMask = true;
           for (BoxIterator bit(box); bit.ok(); ++bit) {
@@ -846,11 +855,14 @@ protected:
       // 1. Deposit this level's valid particles.
       const DataIterator& dit  = dbl.dataIterator();
       const int           nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime)
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex&      din    = dit[mybox];
         const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[din];
-        EBCellFAB&            rho    = (*a_meshData[lvl])[din];
+
+        EBCellFAB& rho = (*a_meshData[lvl])[din];
+
         a_patchDeposit(interp, rho, a_particles[lvl][din], 1.0);
       }
 
@@ -868,24 +880,30 @@ protected:
         const Real               widthScale = static_cast<Real>(m_refRat[lvl - 1]);
         const EBLevelGrid&       eblgFiCo   = m_coarseFinePM[lvl]->getEblgFiCo();
         const DisjointBoxLayout& dblFiCo    = eblgFiCo.getDBL();
-        LevelData<EBCellFAB>&    bufferFiCo = m_coarseFinePM[lvl]->template getBufferFiCo<NCOMP>();
 
-        const DataIterator& ditFiCo  = dblFiCo.dataIterator();
-        const int           nboxFiCo = ditFiCo.size();
+        LevelData<EBCellFAB>& bufferFiCo = m_coarseFinePM[lvl]->template getBufferFiCo<NCOMP>();
+
+        const DataIterator& ditFiCo = dblFiCo.dataIterator();
+
+        const int nboxFiCo = ditFiCo.size();
 #pragma omp parallel for schedule(runtime)
         for (int mybox = 0; mybox < nboxFiCo; mybox++) {
-          const DataIndex& din      = ditFiCo[mybox];
-          EBCellFAB&       dataFiCo = bufferFiCo[din];
-          dataFiCo.setVal(0.0);
+          const DataIndex&      din    = ditFiCo[mybox];
           const EBParticleMesh& interp = (*m_ebParticleMeshFiCo[lvl])[din];
+
+          EBCellFAB& dataFiCo = bufferFiCo[din];
+
+          dataFiCo.setVal(0.0);
           a_patchDeposit(interp, dataFiCo, (*coarHalo)[din], widthScale);
         }
 
         for (int comp = 0; comp < NCOMP; comp++) {
           LevelData<EBCellFAB> meshAlias;
           LevelData<EBCellFAB> bufAlias;
+
           aliasLevelData<EBCellFAB>(meshAlias, &(*a_meshData[lvl]), Interval(comp, comp));
           aliasLevelData<EBCellFAB>(bufAlias, &bufferFiCo, Interval(comp, comp));
+
           m_coarseFinePM[lvl]->addFiCoDataToFine(meshAlias, bufAlias);
         }
       }
@@ -927,6 +945,7 @@ protected:
     // Move the coarse-side halo particles (width 1) out of the valid holder into the mask holder.
     constexpr int coarseMaskWidth = 1;
     Container&    particles       = const_cast<Container&>(a_particles);
+
     particles.transferMaskParticles(m_outerHaloMasks.at(coarseMaskWidth));
 
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
@@ -936,11 +955,14 @@ protected:
       // 1. Deposit the non-halo particles with the requested kernel, the halo particles with NGP.
       const DataIterator& dit  = dbl.dataIterator();
       const int           nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime)
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex&      din    = dit[mybox];
         const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[din];
-        EBCellFAB&            rho    = (*a_meshData[lvl])[din];
+
+        EBCellFAB& rho = (*a_meshData[lvl])[din];
+
         a_patch(interp, rho, a_particles[lvl][din], 1.0);
         a_patchNGP(interp, rho, (*a_particles.getMaskParticles()[lvl])[din], 1.0);
       }
@@ -953,8 +975,10 @@ protected:
         for (int comp = 0; comp < NCOMP; comp++) {
           LevelData<EBCellFAB> coarAlias;
           LevelData<EBCellFAB> fineAlias;
+
           aliasLevelData<EBCellFAB>(coarAlias, &(*a_meshData[lvl - 1]), Interval(comp, comp));
           aliasLevelData<EBCellFAB>(fineAlias, &(*a_meshData[lvl]), Interval(comp, comp));
+
           m_coarseFinePM[lvl]->addFineGhostsToCoarse(coarAlias, fineAlias);
         }
       }
@@ -1018,6 +1042,7 @@ protected:
 
         mask[lvl] = RefCountedPtr<LevelData<BaseFab<bool>>>(
           new LevelData<BaseFab<bool>>(gridsFiCo, numComp, IntVect::Zero));
+
         LevelData<BaseFab<bool>>& levelMask = *mask[lvl];
         LevelData<FArrayBox>      cfivsFine(gridsFine, numComp, ighost * IntVect::Unit);
         LevelData<FArrayBox>      cfivsFiCo(gridsFiCo, numComp, IntVect::Zero);
@@ -1025,9 +1050,11 @@ protected:
         {
           const DataIterator& dit  = gridsFiCo.dataIterator();
           const int           nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime)
           for (int mybox = 0; mybox < nbox; mybox++) {
             const DataIndex& din = dit[mybox];
+
             levelMask[din].setVal(false);
             cfivsFiCo[din].setVal(0.0);
           }
@@ -1037,6 +1064,7 @@ protected:
         {
           const DataIterator& dit  = gridsFine.dataIterator();
           const int           nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime)
           for (int mybox = 0; mybox < nbox; mybox++) {
             const DataIndex& din      = dit[mybox];
@@ -1059,12 +1087,14 @@ protected:
 
         const DataIterator& dit  = gridsFiCo.dataIterator();
         const int           nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime)
         for (int mybox = 0; mybox < nbox; mybox++) {
           const DataIndex& din      = dit[mybox];
           const Box        cellBox  = gridsFiCo[din];
-          BaseFab<bool>&   boolMask = levelMask[din];
           const FArrayBox& realMask = cfivsFiCo[din];
+
+          BaseFab<bool>& boolMask = levelMask[din];
 
           bool emptyMask = true;
           for (BoxIterator bit(cellBox); bit.ok(); ++bit) {
@@ -1110,13 +1140,16 @@ protected:
 
       const DataIterator& dit  = dbl.dataIterator();
       const int           nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime)
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex&     din  = dit[mybox];
         const BaseFab<bool>& mask = (*m_transitionMasks.at(maskWidth)[lvl])[din];
+
         if (!mask.isUsable()) {
           continue;
         }
+
         const Box maskBox = mask.box();
 
         auto& valid    = a_particles[lvl][din];
@@ -1131,9 +1164,12 @@ protected:
           }
           if (maskBox.contains(iv) && mask(iv, 0)) {
             maskLeaf.append(pos, valid.weight(i), valid.gather(i));
-            const std::size_t k    = maskLeaf.size() - 1;
+
+            const std::size_t k = maskLeaf.size() - 1;
+
             maskLeaf.particleID(k) = valid.particleID(i);
             maskLeaf.rankID(k)     = valid.rankID(i);
+
             valid.remove(i);
           }
           else {
@@ -1174,6 +1210,7 @@ protected:
 
     if (a_depositionType == DepositionType::NGP) {
       this->depositInterpCore(a_meshData, a_particles, NCOMP, a_patch);
+
       return;
     }
 
@@ -1187,11 +1224,14 @@ protected:
       const DisjointBoxLayout& dbl  = m_eblgs[lvl]->getDBL();
       const DataIterator&      dit  = dbl.dataIterator();
       const int                nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime)
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex&      din    = dit[mybox];
         const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[din];
-        EBCellFAB&            rho    = (*a_meshData[lvl])[din];
+
+        EBCellFAB& rho = (*a_meshData[lvl])[din];
+
         a_patch(interp, rho, a_particles[lvl][din], 1.0);
       }
     }
@@ -1203,8 +1243,10 @@ protected:
         for (int comp = 0; comp < NCOMP; comp++) {
           LevelData<EBCellFAB> coarAlias;
           LevelData<EBCellFAB> fineAlias;
+
           aliasLevelData<EBCellFAB>(coarAlias, &(*a_meshData[lvl - 1]), Interval(comp, comp));
           aliasLevelData<EBCellFAB>(fineAlias, &(*a_meshData[lvl]), Interval(comp, comp));
+
           m_coarseFinePM[lvl]->addFineGhostsToCoarse(coarAlias, fineAlias);
         }
       }
@@ -1218,15 +1260,19 @@ protected:
 
       const DataIterator& ditFiCo  = dblFiCo.dataIterator();
       const int           nboxFiCo = ditFiCo.size();
+
 #pragma omp parallel for schedule(runtime)
       for (int mybox = 0; mybox < nboxFiCo; mybox++) {
-        const DataIndex& din      = ditFiCo[mybox];
-        EBCellFAB&       dataFiCo = bufferFiCo[din];
+        const DataIndex& din = ditFiCo[mybox];
+
+        EBCellFAB& dataFiCo = bufferFiCo[din];
+
         dataFiCo.setVal(0.0);
 
         const BaseFab<bool>& mask = (*m_transitionMasks.at(maskWidth)[lvl])[din];
         if (mask.isUsable()) {
           const EBParticleMesh& interp = (*m_ebParticleMeshFiCo[lvl + 1])[din];
+
           a_patch(interp, dataFiCo, (*a_particles.getMaskParticles()[lvl])[din], 1.0);
         }
       }
@@ -1235,6 +1281,7 @@ protected:
     // 3b/c/d. Distribute the refined-coarse buffer to the fine level and (restricted) to the coarse level.
     for (int lvl = 0; lvl < m_finestLevel; lvl++) {
       LevelData<EBCellFAB>& bufferFiCo = m_coarseFinePM[lvl + 1]->template getBufferFiCo<NCOMP>();
+
       m_coarseFinePM[lvl + 1]->addFiCoDataToFine(*a_meshData[lvl + 1], bufferFiCo);
       m_coarseFinePM[lvl + 1]->exchangeAndAddFiCoData(bufferFiCo);
       m_coarseFinePM[lvl + 1]->restrictAndAddFiCoDataToCoar(*a_meshData[lvl],
