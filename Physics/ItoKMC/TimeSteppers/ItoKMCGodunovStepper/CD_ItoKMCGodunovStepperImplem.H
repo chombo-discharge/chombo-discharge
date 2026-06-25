@@ -21,6 +21,7 @@
 #include <CD_Timer.H>
 #include <CD_ParallelOps.H>
 #include <CD_DataOps.H>
+#include <CD_ParticleLoops.H>
 #include <CD_Units.H>
 #include <CD_Photon.H>
 #include <CD_DischargeIO.H>
@@ -798,13 +799,14 @@ ItoKMCGodunovStepper<I, C, R, F>::setOldPositions() noexcept
 
         ParticleSoA<ItoParticle>& leaf = particles[din];
 
-        for (std::size_t i = 0; i < leaf.size(); i++) {
-          const RealVect pos = leaf.position(i);
+        double* const pos[SpaceDim] = {D_DECL(leaf.positionColumn(0), leaf.positionColumn(1), leaf.positionColumn(2))};
+        double* const oldPos[SpaceDim] = {D_DECL(leaf.template column<&ItoParticle::oldPositionX>(),
+                                                 leaf.template column<&ItoParticle::oldPositionY>(),
+                                                 leaf.template column<&ItoParticle::oldPositionZ>())};
 
-          D_DECL(leaf.template get<&ItoParticle::oldPositionX>(i) = pos[0],
-                 leaf.template get<&ItoParticle::oldPositionY>(i) = pos[1],
-                 leaf.template get<&ItoParticle::oldPositionZ>(i) = pos[2]);
-        }
+        ParticleLoops::loop(leaf, [&](const std::size_t i) {
+          D_DECL(oldPos[0][i] = pos[0][i], oldPos[1][i] = pos[1][i], oldPos[2][i] = pos[2][i]);
+        });
       }
     }
   }
@@ -1808,20 +1810,24 @@ ItoKMCGodunovStepper<I, C, R, F>::stepEulerMaruyamaParticles(const Real a_dt) no
 
           ParticleSoA<ItoParticle>& leaf = particles[din];
 
-          for (std::size_t i = 0; i < leaf.size(); i++) {
-            // Add in the diffusion hop and advective contribution.
-            const RealVect hop    = RealVect(D_DECL(leaf.template get<&ItoParticle::tmpVectX>(i),
-                                                 leaf.template get<&ItoParticle::tmpVectY>(i),
-                                                 leaf.template get<&ItoParticle::tmpVectZ>(i)));
-            const RealVect oldPos = RealVect(D_DECL(leaf.template get<&ItoParticle::oldPositionX>(i),
-                                                    leaf.template get<&ItoParticle::oldPositionY>(i),
-                                                    leaf.template get<&ItoParticle::oldPositionZ>(i)));
-            const RealVect vel    = RealVect(D_DECL(leaf.template get<&ItoParticle::velocityX>(i),
-                                                 leaf.template get<&ItoParticle::velocityY>(i),
-                                                 leaf.template get<&ItoParticle::velocityZ>(i)));
+          double* const pos[SpaceDim] = {
+            D_DECL(leaf.positionColumn(0), leaf.positionColumn(1), leaf.positionColumn(2))};
+          double* const       oldPos[SpaceDim] = {D_DECL(leaf.template column<&ItoParticle::oldPositionX>(),
+                                                   leaf.template column<&ItoParticle::oldPositionY>(),
+                                                   leaf.template column<&ItoParticle::oldPositionZ>())};
+          ParticleReal* const vel[SpaceDim]    = {D_DECL(leaf.template column<&ItoParticle::velocityX>(),
+                                                      leaf.template column<&ItoParticle::velocityY>(),
+                                                      leaf.template column<&ItoParticle::velocityZ>())};
+          ParticleReal* const hop[SpaceDim]    = {D_DECL(leaf.template column<&ItoParticle::tmpVectX>(),
+                                                      leaf.template column<&ItoParticle::tmpVectY>(),
+                                                      leaf.template column<&ItoParticle::tmpVectZ>())};
 
-            leaf.setPosition(i, oldPos + f * vel + g * hop);
-          }
+          ParticleLoops::loop(leaf, [&](const std::size_t i) {
+            // Add in the diffusion hop and advective contribution.
+            for (int dir = 0; dir < SpaceDim; dir++) {
+              pos[dir][i] = oldPos[dir][i] + f * vel[dir][i] + g * hop[dir][i];
+            }
+          });
         }
       }
     }

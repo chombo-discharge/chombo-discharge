@@ -27,6 +27,7 @@
 // Our includes
 #include <CD_Units.H>
 #include <CD_OpenMP.H>
+#include <CD_ParticleLoops.H>
 #include <CD_DischargeInceptionSpecies.H>
 #include <CD_DischargeInceptionStepper.H>
 #include <CD_PolyUtils.H>
@@ -2186,16 +2187,15 @@ DischargeInceptionStepper<P, F, C>::seedUniformParticles() noexcept
       BoxLoops::loop(vofit, irregularKernel);
 
       // Back up the initial position into the rewind column (weight was set to zero on append).
-      const std::size_t   n             = leaf.size();
       const double* const pos[SpaceDim] = {
         D_DECL(leaf.positionColumn(0), leaf.positionColumn(1), leaf.positionColumn(2))};
       ParticleReal* const x0[SpaceDim] = {
         D_DECL(leaf.template column<&P::x0x>(), leaf.template column<&P::x0y>(), leaf.template column<&P::x0z>())};
-      for (std::size_t i = 0; i < n; i++) {
+      ParticleLoops::loop(leaf, [&](const std::size_t i) {
         for (int dir = 0; dir < SpaceDim; dir++) {
           x0[dir][i] = pos[dir][i];
         }
-      }
+      });
     }
   }
 
@@ -2308,16 +2308,15 @@ DischargeInceptionStepper<P, F, C>::seedIonizationParticles(const Real a_voltage
 
       // Back up the initial position into the rewind column (weight + grad-alpha columns are already
       // zero from the default-payload append).
-      const std::size_t   n             = leaf.size();
       const double* const pos[SpaceDim] = {
         D_DECL(leaf.positionColumn(0), leaf.positionColumn(1), leaf.positionColumn(2))};
       ParticleReal* const x0[SpaceDim] = {
         D_DECL(leaf.template column<&P::x0x>(), leaf.template column<&P::x0y>(), leaf.template column<&P::x0z>())};
-      for (std::size_t i = 0; i < n; i++) {
+      ParticleLoops::loop(leaf, [&](const std::size_t i) {
         for (int dir = 0; dir < SpaceDim; dir++) {
           x0[dir][i] = pos[dir][i];
         }
-      }
+      });
     }
   }
 
@@ -2794,14 +2793,13 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltag
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-        ParticleSoA<P>&   leaf = amrParticles[lvl][din];
-        const std::size_t n    = leaf.size();
+        ParticleSoA<P>& leaf = amrParticles[lvl][din];
 
         double* const w = leaf.weightColumn();
 
-        for (std::size_t i = 0; i < n; i++) {
+        ParticleLoops::loop(leaf, [&](const std::size_t i) {
           w[i] = std::min(m_inceptionK, w[i]);
-        }
+        });
       }
     }
   }
@@ -3096,14 +3094,13 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-        ParticleSoA<P>&   leaf = amrParticles[lvl][din];
-        const std::size_t n    = leaf.size();
+        ParticleSoA<P>& leaf = amrParticles[lvl][din];
 
         double* const w = leaf.weightColumn();
 
-        for (std::size_t i = 0; i < n; i++) {
+        ParticleLoops::loop(leaf, [&](const std::size_t i) {
           w[i] = std::min(m_inceptionK, w[i]);
-        }
+        });
       }
     }
   }
@@ -3765,18 +3762,17 @@ DischargeInceptionStepper<P, F, C>::rewindTracerParticles() noexcept
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      ParticleSoA<P>&   leaf = amrParticles[lvl][din];
-      const std::size_t n    = leaf.size();
+      ParticleSoA<P>& leaf = amrParticles[lvl][din];
 
       double* const pos[SpaceDim] = {D_DECL(leaf.positionColumn(0), leaf.positionColumn(1), leaf.positionColumn(2))};
       const ParticleReal* const x0[SpaceDim] = {
         D_DECL(leaf.template column<&P::x0x>(), leaf.template column<&P::x0y>(), leaf.template column<&P::x0z>())};
 
-      for (std::size_t i = 0; i < n; i++) {
+      ParticleLoops::loop(leaf, [&](const std::size_t i) {
         for (int dir = 0; dir < SpaceDim; dir++) {
           pos[dir][i] = x0[dir][i]; // rewind to the snapshot position
         }
-      }
+      });
     }
   }
 
@@ -3804,14 +3800,13 @@ DischargeInceptionStepper<P, F, C>::resetTracerParticles() noexcept
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      ParticleSoA<P>&   leaf = amrParticles[lvl][din];
-      const std::size_t n    = leaf.size();
+      ParticleSoA<P>& leaf = amrParticles[lvl][din];
 
       double* const w = leaf.weightColumn();
 
-      for (std::size_t i = 0; i < n; i++) {
+      ParticleLoops::loop(leaf, [&](const std::size_t i) {
         w[i] = 0.0;
-      }
+      });
     }
   }
 }

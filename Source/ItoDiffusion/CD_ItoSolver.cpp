@@ -27,6 +27,7 @@
 #include <CD_DataOps.H>
 #include <CD_ParallelOps.H>
 #include <CD_ParticleOps.H>
+#include <CD_ParticleLoops.H>
 #include <CD_DischargeIO.H>
 #include <CD_ParticleManagement.H>
 #include <CD_EBParticleMesh.H>
@@ -2230,12 +2231,11 @@ ItoSolver::setParticleMobility(const Real a_mobility)
 
       ParticleSoA<ItoParticle>& leaf = particles[lvl][din];
 
-      const std::size_t n        = leaf.size();
-      ParticleReal*     mobility = leaf.column<&ItoParticle::mobility>();
+      ParticleReal* mobility = leaf.column<&ItoParticle::mobility>();
 
-      for (std::size_t i = 0; i < n; i++) {
+      ParticleLoops::loop(leaf, [&](const std::size_t i) {
         mobility[i] = a_mobility;
-      }
+      });
     }
   }
 }
@@ -2261,12 +2261,11 @@ ItoSolver::setParticleDiffusion(const Real a_diffCo)
 
       ParticleSoA<ItoParticle>& leaf = particles[lvl][din];
 
-      const std::size_t n         = leaf.size();
-      ParticleReal*     diffusion = leaf.column<&ItoParticle::diffusion>();
+      ParticleReal* diffusion = leaf.column<&ItoParticle::diffusion>();
 
-      for (std::size_t i = 0; i < n; i++) {
+      ParticleLoops::loop(leaf, [&](const std::size_t i) {
         diffusion[i] = a_diffCo;
-      }
+      });
     }
   }
 }
@@ -2327,17 +2326,16 @@ ItoSolver::interpolateVelocities(const int a_lvl, const DataIndex& a_dit)
       m_forceIrregInterpolationNGP);
 
     // Set the particle velocities to velo_func * mobility.
-    const std::size_t   n           = leaf.size();
     const ParticleReal* mobility    = leaf.column<&ItoParticle::mobility>();
     ParticleReal*       v[SpaceDim] = {D_DECL(leaf.column<&ItoParticle::velocityX>(),
                                         leaf.column<&ItoParticle::velocityY>(),
                                         leaf.column<&ItoParticle::velocityZ>())};
 
-    for (std::size_t i = 0; i < n; i++) {
+    ParticleLoops::loop(leaf, [&](const std::size_t i) {
       for (int dir = 0; dir < SpaceDim; dir++) {
         v[dir][i] *= mobility[i];
       }
-    }
+    });
   }
 }
 
@@ -2489,13 +2487,12 @@ ItoSolver::interpolateMobilitiesVelocity(const int        a_lvl,
   meshInterp.interpolate<&ItoParticle::mobility>(leaf, muV, m_deposition, m_forceIrregInterpolationNGP);
 
   // We now have tmpReal = |V(Xp)| and mobility = |mu*V|(Xp). Set mobility(Xp) = |mu*V|(Xp)/|V|(Xp).
-  const std::size_t   n        = leaf.size();
   ParticleReal*       mobility = leaf.column<&ItoParticle::mobility>();
   const ParticleReal* tmpReal  = leaf.column<&ItoParticle::tmpReal>();
 
-  for (std::size_t i = 0; i < n; i++) {
+  ParticleLoops::loop(leaf, [&](const std::size_t i) {
     mobility[i] *= 1.0 / tmpReal[i];
-  }
+  });
 }
 
 void

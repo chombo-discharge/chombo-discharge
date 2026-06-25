@@ -37,9 +37,9 @@
   - Elementwise read/transform ONLY. Do NOT append(), remove(), or resize() the
     container inside the loop -- the trip count is fixed and such mutation is a data
     hazard. Structural changes belong in ordinary index loops.
-  - Not for reductions. @c ivdep does not guarantee a correct/vectorized reduction;
-    write sums/min/max in a plain loop (a dedicated reduce() overload can be added
-    later if needed).
+  - loop() is not for reductions. @c ivdep does not guarantee a correct/vectorized
+    reduction; use the reduce() overload, which folds the accumulator sequentially
+    (no SIMD pragma) and is correct for sums/min/max.
   - This is the INNER (per-patch, per-particle) loop. Outer OpenMP-over-patches
     parallelism is separate, exactly as BoxLoops sits inside the omp-over-boxes region.
 
@@ -92,6 +92,42 @@ namespace ParticleLoops {
     for (std::size_t i = 0; i < numParticles; i++) {
       a_kernel(i);
     }
+  }
+
+  /**
+    @brief Fold a kernel over every particle in a ParticleSoA, accumulating a reduction value.
+    @details The accumulator is threaded sequentially through the particles: for each particle index
+    i in [0, a_soa.size()) the accumulator is updated as @c acc = a_kernel(acc, i), and the final value
+    is returned. This is the reduction analogue of loop(): because @c CD_PRAGMA_SIMD (ivdep) does not
+    guarantee a correct floating-point reduction, this loop is intentionally a plain sequential fold with
+    NO SIMD decoration. As with loop(), capture the column pointers ONCE before the call and read them by
+    index inside the kernel -- do not call @c a_soa.column<>() inside the kernel, and do not mutate the
+    container's structure (append/remove/resize).
+
+    @note Sequential and order-deterministic, so it is correct for non-associative reductions (e.g.
+          floating-point sums where bitwise reproducibility matters) as well as min/max. The trip count is
+          taken from the container so it always matches the columns the kernel captured from it.
+    @tparam P       Payload type of the ParticleSoA.
+    @tparam Traits  Column descriptor for the payload.
+    @tparam T       Accumulator type.
+    @tparam Functor Callable type taking (T accumulator, std::size_t particle index) and returning T.
+    @param[in]     a_soa     Particle container to iterate over (read for its size only).
+    @param[in]     a_initial Initial accumulator value.
+    @param[in,out] a_kernel  Callable taking (T accumulator, std::size_t particle index) and returning the
+                             updated accumulator.
+    @return The accumulator after folding over every particle.
+  */
+  template <typename P, typename Traits, typename T, typename Functor>
+  ALWAYS_INLINE T
+  reduce(const ParticleSoA<P, Traits>& a_soa, T a_initial, Functor&& a_kernel)
+  {
+    const std::size_t numParticles = a_soa.size();
+
+    for (std::size_t i = 0; i < numParticles; i++) {
+      a_initial = a_kernel(a_initial, i);
+    }
+
+    return a_initial;
   }
 
 } // namespace ParticleLoops

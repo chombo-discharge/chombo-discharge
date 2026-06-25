@@ -26,6 +26,7 @@
 #include <CD_ItoKMCStepper.H>
 #include <CD_ItoKMCFieldParticle.H>
 #include <CD_ParticleOps.H>
+#include <CD_ParticleLoops.H>
 #include <CD_DataOps.H>
 #include <CD_ParallelOps.H>
 #include <CD_Units.H>
@@ -6045,17 +6046,19 @@ ItoKMCStepper<I, C, R, F>::computeEdotJSource(const Real a_dt) noexcept
 
           ParticleSoA<ItoKMCFieldParticle>& comp = computationParticles[lvl][din];
 
-          for (std::size_t i = 0; i < comp.size(); i++) {
-            const RealVect posB = comp.position(i);
-            const RealVect posA = RealVect(D_DECL(comp.template get<&ItoKMCFieldParticle::altX>(i),
-                                                  comp.template get<&ItoKMCFieldParticle::altY>(i),
-                                                  comp.template get<&ItoKMCFieldParticle::altZ>(i)));
+          double* const pos[SpaceDim] = {
+            D_DECL(comp.positionColumn(0), comp.positionColumn(1), comp.positionColumn(2))};
+          ParticleReal* const alt[SpaceDim] = {D_DECL(comp.template column<&ItoKMCFieldParticle::altX>(),
+                                                      comp.template column<&ItoKMCFieldParticle::altY>(),
+                                                      comp.template column<&ItoKMCFieldParticle::altZ>())};
 
-            comp.setPosition(i, posA);
-            D_DECL(comp.template get<&ItoKMCFieldParticle::altX>(i) = static_cast<ParticleReal>(posB[0]),
-                   comp.template get<&ItoKMCFieldParticle::altY>(i) = static_cast<ParticleReal>(posB[1]),
-                   comp.template get<&ItoKMCFieldParticle::altZ>(i) = static_cast<ParticleReal>(posB[2]));
-          }
+          ParticleLoops::loop(comp, [&](const std::size_t i) {
+            for (int dir = 0; dir < SpaceDim; dir++) {
+              const double posB = pos[dir][i];
+              pos[dir][i]       = alt[dir][i];
+              alt[dir][i]       = static_cast<ParticleReal>(posB);
+            }
+          });
         }
       }
 
@@ -6082,17 +6085,23 @@ ItoKMCStepper<I, C, R, F>::computeEdotJSource(const Real a_dt) noexcept
 
           ParticleSoA<ItoKMCFieldParticle>& comp = computationParticles[lvl][din];
 
-          for (std::size_t i = 0; i < comp.size(); i++) {
-            const RealVect posB = RealVect(D_DECL(comp.template get<&ItoKMCFieldParticle::altX>(i),
-                                                  comp.template get<&ItoKMCFieldParticle::altY>(i),
-                                                  comp.template get<&ItoKMCFieldParticle::altZ>(i)));
+          double* const pos[SpaceDim] = {
+            D_DECL(comp.positionColumn(0), comp.positionColumn(1), comp.positionColumn(2))};
+          const ParticleReal* const alt[SpaceDim] = {D_DECL(comp.template column<&ItoKMCFieldParticle::altX>(),
+                                                            comp.template column<&ItoKMCFieldParticle::altY>(),
+                                                            comp.template column<&ItoKMCFieldParticle::altZ>())};
+          double* const             w             = comp.weightColumn();
+          const ParticleReal* const vA            = comp.template column<&ItoKMCFieldParticle::vA>();
+          const ParticleReal* const vB            = comp.template column<&ItoKMCFieldParticle::vB>();
 
-            comp.setPosition(i, posB);
+          ParticleLoops::loop(comp, [&](const std::size_t i) {
+            for (int dir = 0; dir < SpaceDim; dir++) {
+              pos[dir][i] = alt[dir][i];
+            }
 
             // Effective weight = weight * (V(B) - V(A)).
-            comp.weight(i) *= (comp.template get<&ItoKMCFieldParticle::vB>(i) -
-                               comp.template get<&ItoKMCFieldParticle::vA>(i));
-          }
+            w[i] *= (vB[i] - vA[i]);
+          });
         }
       }
 

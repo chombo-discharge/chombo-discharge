@@ -18,6 +18,7 @@
 #include <CD_BrownianWalkerStepper.H>
 #include <CD_BrownianWalkerSpecies.H>
 #include <CD_Random.H>
+#include <CD_ParticleLoops.H>
 #include <CD_ParallelOps.H>
 #include <CD_EBCoarseToFineInterp.H>
 #include <CD_NamespaceHeader.H>
@@ -491,15 +492,14 @@ BrownianWalkerStepper::advance(const Real a_dt)
         const ParticleReal* v[SpaceDim]      = {D_DECL(leaf.column<&ItoParticle::velocityX>(),
                                                   leaf.column<&ItoParticle::velocityY>(),
                                                   leaf.column<&ItoParticle::velocityZ>())};
+        double* const pos[SpaceDim] = {D_DECL(leaf.positionColumn(0), leaf.positionColumn(1), leaf.positionColumn(2))};
 
-        for (std::size_t i = 0; i < n; i++) {
-          RealVect pos = leaf.position(i);
+        ParticleLoops::loop(leaf, [&](const std::size_t i) {
           for (int dir = 0; dir < SpaceDim; dir++) {
-            oldPos[dir][i] = pos[dir];
-            pos[dir] += static_cast<Real>(v[dir][i]) * a_dt;
+            oldPos[dir][i] = pos[dir][i];
+            pos[dir][i] += static_cast<Real>(v[dir][i]) * a_dt;
           }
-          leaf.setPosition(i, pos);
-        }
+        });
       }
 
       // Diffusion hop

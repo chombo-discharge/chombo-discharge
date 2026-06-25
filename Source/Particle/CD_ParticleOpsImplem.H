@@ -22,6 +22,7 @@
 
 // Our includes
 #include <CD_ParticleOps.H>
+#include <CD_ParticleLoops.H>
 #include <CD_ParallelOps.H>
 #include <CD_PolyUtils.H>
 #include <CD_Random.H>
@@ -304,9 +305,13 @@ ParticleOps::sum(const ParticleContainer<P, Traits>& a_particles) noexcept
       const DataIndex&              din  = dit[mybox];
       const ParticleSoA<P, Traits>& leaf = a_particles[lvl][din];
 
-      for (std::size_t i = 0; i < leaf.size(); i++) {
-        particleSum += leaf.weight(i);
-      }
+      const double* w = leaf.weightColumn(); // weight column captured once, OUTSIDE the loop
+
+      // Seed the fold with the running (thread-private) accumulator rather than 0.0 so the
+      // summation order is identical to a plain 'particleSum += w[i]' loop across this thread's boxes.
+      particleSum = ParticleLoops::reduce(leaf, particleSum, [&](Real acc, std::size_t i) {
+        return acc + w[i];
+      });
     }
   }
 

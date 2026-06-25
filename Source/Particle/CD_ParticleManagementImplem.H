@@ -22,6 +22,7 @@
 
 // Our includes
 #include <CD_Random.H>
+#include <CD_ParticleLoops.H>
 #include <CD_ParticleManagement.H>
 #include <CD_NamespaceHeader.H>
 
@@ -304,11 +305,15 @@ namespace ParticleManagement {
         const T uniformRemainder = (a_numPhysPartToRemove - numRemoved) % numCompParticles;
 
         if (uniformWeight > zero) {
-          for (std::size_t i = 0; i < numComp; i++) {
-            a_particles.weight(i) -= 1.0 * uniformWeight;
+          // uniformWeight is constant over the loop, so the running accumulation equals
+          // uniformWeight * numComp -- hoist it out so the body is a pure elementwise update.
+          double* const w = a_particles.weightColumn();
 
-            numRemoved += uniformWeight;
-          }
+          ParticleLoops::loop(a_particles, [&](const std::size_t i) {
+            w[i] -= 1.0 * uniformWeight;
+          });
+
+          numRemoved += uniformWeight * static_cast<T>(numComp);
         }
 
         if (uniformRemainder > zero) {
