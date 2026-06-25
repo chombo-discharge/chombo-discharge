@@ -65,29 +65,66 @@ ParticleContainer<P, Traits>::gatherToPool(const AMRParticlesSoA<P, Traits>& a_s
 {
   CH_TIME("ParticleContainer::gatherToPool");
 
-  m_numOutcastLocal = 0;
-
   MoverPool pool(numProc());
+
+  // Bin every particle of one leaf into a destination pool, returning the number of off-domain
+  // (outcast) particles. Shared by the serial and OpenMP paths so the binning logic lives once.
+  // findDestination() is const and reads only the (immutable-during-gather) tile maps, so it is
+  // safe to call concurrently; each thread bins into its own thread-local pool.
+  auto binLeaf = [this](MoverPool& a_target, const Leaf& a_leaf) -> unsigned long long {
+    unsigned long long outcast = 0;
+    for (std::size_t i = 0; i < a_leaf.size(); i++) {
+      const RealVect    pos = a_leaf.position(i);
+      const Destination dst = this->findDestination(pos);
+      if (!dst.found) {
+        outcast++;
+        continue;
+      }
+      Leaf& bin = a_target[dst.rank][PoolKey(dst.level, dst.gridIndex)];
+      bin.append(pos, a_leaf.weight(i), a_leaf.gather(i));
+      const std::size_t k = bin.size() - 1;
+      bin.particleID(k)   = a_leaf.particleID(i); // preserve id
+      bin.rankID(k)       = dst.rank;             // new owner
+    }
+    return outcast;
+  };
+
+  unsigned long long numOutcast = 0;
 
   for (int lvl = 0; lvl < a_source.size(); lvl++) {
     const LevelParticles& level = *a_source[lvl];
-    for (DataIterator dit = a_sourceGrids[lvl].dataIterator(); dit.ok(); ++dit) {
-      const Leaf& leaf = level[dit()];
-      for (std::size_t i = 0; i < leaf.size(); i++) {
-        const RealVect    pos = leaf.position(i);
-        const Destination dst = this->findDestination(pos);
-        if (!dst.found) {
-          m_numOutcastLocal++;
-          continue;
+    const DataIterator&   dit   = a_sourceGrids[lvl].dataIterator();
+    const int             nbox  = dit.size();
+
+#ifdef _OPENMP
+#pragma omp parallel reduction(+ : numOutcast)
+    {
+      MoverPool threadPool(numProc()); // thread-local; no locking while binning
+
+#pragma omp for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        numOutcast += binLeaf(threadPool, level[dit[mybox]]);
+      }
+
+      // Merge the thread-local pool into the shared pool. First writer to a (rank,key) slot gets the
+      // O(1) arena swap inside catenate(); later writers append.
+#pragma omp critical(ParticleContainer_gatherMerge)
+      {
+        for (int r = 0; r < numProc(); r++) {
+          for (auto& kv : threadPool[r]) {
+            pool[r][kv.first].catenate(kv.second);
+          }
         }
-        Leaf& bin = pool[dst.rank][PoolKey(dst.level, dst.gridIndex)];
-        bin.append(pos, leaf.weight(i), leaf.gather(i));
-        const std::size_t k = bin.size() - 1;
-        bin.particleID(k)   = leaf.particleID(i); // preserve id
-        bin.rankID(k)       = dst.rank;           // new owner
       }
     }
+#else
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      numOutcast += binLeaf(pool, level[dit[mybox]]);
+    }
+#endif
   }
+
+  m_numOutcastLocal = numOutcast;
 
   return pool;
 }
@@ -117,6 +154,11 @@ ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool)
   constexpr std::size_t headerLen = 2 * sizeof(std::uint32_t) + sizeof(std::uint64_t);
 
   std::vector<std::vector<char>> sendBuf(numRanks);
+  // Each destination rank's buffer and pool map are disjoint, and linearizeParticle is a const read,
+  // so packing different ranks in parallel is race-free.
+#ifdef _OPENMP
+#pragma omp parallel for schedule(runtime)
+#endif
   for (int r = 0; r < numRanks; r++) {
     if (r == myRank) {
       continue;
@@ -180,26 +222,71 @@ ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool)
                 MPI_BYTE,
                 Chombo_MPI::comm);
 
-  // Unpack received movers into their destination leaves.
-  const char* p   = rflat.data();
-  const char* end = p + rtot;
-  while (p < end) {
-    std::uint32_t lvl;
-    std::uint32_t gidx;
+  // ---- unpack: group received chunks by destination leaf, then append in parallel ----
+  // Pass 1 (serial, header-only walk): record each chunk's payload pointer + count, grouped by its
+  // destination (level, gridIndex). Pass 2 appends in parallel with one destination leaf per thread,
+  // so no two threads ever touch the same leaf (delinearizeAndAppend mutates the leaf arena).
+  struct RecvChunk
+  {
+    const char*   payload; // first particle of the chunk within rflat
     std::uint64_t count;
-    std::memcpy(&lvl, p, sizeof(std::uint32_t));
-    p += sizeof(std::uint32_t);
-    std::memcpy(&gidx, p, sizeof(std::uint32_t));
-    p += sizeof(std::uint32_t);
-    std::memcpy(&count, p, sizeof(std::uint64_t));
-    p += sizeof(std::uint64_t);
+  };
+  struct DestGroup
+  {
+    int                    level;
+    unsigned int           gridIndex;
+    std::uint64_t          total;
+    std::vector<RecvChunk> chunks;
+  };
 
-    const DataIndex din = m_levelTiles[lvl]->getMyGrids().at(gidx);
-    Leaf&           tgt = (*m_particles[lvl])[din];
-    for (std::uint64_t c = 0; c < count; c++) {
-      tgt.delinearizeAndAppend(p);
-      p += pp;
-      tgt.rankID(tgt.size() - 1) = myRank; // owner is the receiving rank
+  std::vector<DestGroup>         groups;
+  std::map<PoolKey, std::size_t> keyToGroup;
+  {
+    const char* p   = rflat.data();
+    const char* end = p + rtot;
+    while (p < end) {
+      std::uint32_t lvl;
+      std::uint32_t gidx;
+      std::uint64_t count;
+      std::memcpy(&lvl, p, sizeof(std::uint32_t));
+      p += sizeof(std::uint32_t);
+      std::memcpy(&gidx, p, sizeof(std::uint32_t));
+      p += sizeof(std::uint32_t);
+      std::memcpy(&count, p, sizeof(std::uint64_t));
+      p += sizeof(std::uint64_t);
+
+      const PoolKey key(static_cast<int>(lvl), gidx);
+      const auto    it = keyToGroup.find(key);
+      if (it == keyToGroup.end()) {
+        keyToGroup.emplace(key, groups.size());
+        groups.push_back(DestGroup{static_cast<int>(lvl), gidx, count, {RecvChunk{p, count}}});
+      }
+      else {
+        DestGroup& g = groups[it->second];
+        g.total += count;
+        g.chunks.push_back(RecvChunk{p, count});
+      }
+      p += count * pp;
+    }
+  }
+
+  const int numGroups = static_cast<int>(groups.size());
+#ifdef _OPENMP
+#pragma omp parallel for schedule(runtime)
+#endif
+  for (int d = 0; d < numGroups; d++) {
+    const DestGroup& g   = groups[d];
+    const DataIndex  din = m_levelTiles[g.level]->getMyGrids().at(g.gridIndex);
+    Leaf&            tgt = (*m_particles[g.level])[din];
+
+    tgt.reserve(tgt.size() + g.total); // one allocation; avoids geometric regrow during the appends
+    for (const RecvChunk& chunk : g.chunks) {
+      const char* q = chunk.payload;
+      for (std::uint64_t c = 0; c < chunk.count; c++) {
+        tgt.delinearizeAndAppend(q);
+        q += pp;
+        tgt.rankID(tgt.size() - 1) = myRank; // owner is the receiving rank
+      }
     }
   }
 #endif
