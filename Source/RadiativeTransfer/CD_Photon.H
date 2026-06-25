@@ -20,15 +20,20 @@
 /**
   @brief SoA payload for Monte Carlo radiative-transfer photons.
   @details kappa is the mean absorption coefficient (inverse mean free path); velocity is the photon
-  propagation velocity (per component, D_DECL). Weight and position are container-owned columns, NOT
-  payload members. All payload columns (kappa and velocity) are checkpointed; position and weight are
-  always checkpointed by the container, so no h5Columns subset is declared.
+  propagation velocity (one member per spatial dimension; the z-component exists only when
+  CH_SPACEDIM == 3). Weight and position are container-owned columns, NOT payload members. All payload
+  columns (kappa and velocity) are checkpointed; position and weight are always checkpointed by the
+  container, so no h5Columns subset is declared.
 */
 struct Photon
 {
   ParticleReal kappa = 0.0; ///< Mean absorption coefficient (inverse mean free path).
 
-  ParticleReal D_DECL(velocityX = 0.0, velocityY = 0.0, velocityZ = 0.0); ///< Velocity (per component).
+  ParticleReal velocityX = 0.0; ///< Velocity, x-component.
+  ParticleReal velocityY = 0.0; ///< Velocity, y-component.
+#if CH_SPACEDIM == 3
+  ParticleReal velocityZ = 0.0; ///< Velocity, z-component.
+#endif
 };
 
 /**
@@ -37,6 +42,7 @@ struct Photon
 template <>
 struct ParticleTraits<Photon>
 {
+  /// @brief Payload column member-pointers: kappa followed by the per-component velocity.
   static constexpr auto columns = std::make_tuple(&Photon::kappa,
                                                   D_DECL(&Photon::velocityX, &Photon::velocityY, &Photon::velocityZ));
 };

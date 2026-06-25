@@ -20,8 +20,9 @@
 /**
   @brief SoA payload for the transient particles used by ItoKMCStepper::computeEdotJSource.
   @details The energy increase as a particle moves from position A to position B is q*(V(B)-V(A)). vA and vB
-  hold the interpolated electrostatic potential at the two positions; alt holds the per-component "other"
-  position (A or B) so the single position-based interpolation routine can be reused at both locations.
+  hold the interpolated electrostatic potential at the two positions; alt holds the "other"
+  position (A or B), one member per spatial dimension (the z-component exists only when CH_SPACEDIM == 3),
+  so the single position-based interpolation routine can be reused at both locations.
   Weight and position are container-owned columns, NOT payload members.
 */
 struct ItoKMCFieldParticle
@@ -29,7 +30,11 @@ struct ItoKMCFieldParticle
   ParticleReal vA = 0.0; ///< Electrostatic potential at position A.
   ParticleReal vB = 0.0; ///< Electrostatic potential at position B.
 
-  ParticleReal D_DECL(altX = 0.0, altY = 0.0, altZ = 0.0); ///< Alternate (other) position (per component).
+  ParticleReal altX = 0.0; ///< Alternate (other) position, x-component.
+  ParticleReal altY = 0.0; ///< Alternate (other) position, y-component.
+#if CH_SPACEDIM == 3
+  ParticleReal altZ = 0.0; ///< Alternate (other) position, z-component.
+#endif
 };
 
 /**
@@ -38,6 +43,7 @@ struct ItoKMCFieldParticle
 template <>
 struct ParticleTraits<ItoKMCFieldParticle>
 {
+  /// @brief Payload column member-pointers: vA, vB, then the per-component alternate position.
   static constexpr auto columns = std::make_tuple(
     &ItoKMCFieldParticle::vA,
     &ItoKMCFieldParticle::vB,

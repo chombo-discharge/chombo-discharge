@@ -96,7 +96,8 @@ protected:
     @param[in]  a_pos      Relative position inside cell
     @param[in]  a_vof      Cut-cell
     @param[in]  a_domain   Domain
-    @param[in]  a_ebisBox  EBISBox
+    @param[in]  a_ebisbox  EBISBox
+    @return True if a stencil could be computed, false otherwise.
   */
   static bool
   computeInterpStencil3D(VoFStencil&          a_stencil,
