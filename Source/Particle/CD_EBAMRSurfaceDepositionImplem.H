@@ -31,9 +31,9 @@ template <typename P, typename Traits>
 void
 EBAMRSurfaceDeposition::deposit(EBAMRIVData& a_meshData, const ParticleContainer<P, Traits>& a_particles) const noexcept
 {
-  CH_TIME("EBAMRSurfaceDeposition::deposit(SoA)");
+  CH_TIME("EBAMRSurfaceDeposition::deposit");
   if (m_verbose) {
-    pout() << "EBAMRSurfaceDeposition::deposit(ParticleContainer)" << endl;
+    pout() << "EBAMRSurfaceDeposition::deposit" << endl;
   }
 
   CH_assert(a_meshData.getRealm() == a_particles.getRealm());
@@ -45,6 +45,7 @@ EBAMRSurfaceDeposition::deposit(EBAMRIVData& a_meshData, const ParticleContainer
     const DataIterator&      dit   = dbl.dataIterator();
 
     const int nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime)
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
@@ -63,7 +64,7 @@ EBAMRSurfaceDeposition::deposit(EBAMRIVData& a_meshData, const ParticleContainer
 
         // If this fails the particle is not in a valid cell.
         if (!(cellBox.contains(iv))) {
-          MayDay::Error("CD_EBAMRSurfaceDeposition::deposit(SoA) -- particle is not inside the box");
+          MayDay::Error("CD_EBAMRSurfaceDeposition::deposit -- particle is not inside the box");
         }
 
         if (ebisbox.isIrregular(iv)) {
