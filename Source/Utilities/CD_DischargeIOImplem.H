@@ -340,6 +340,7 @@ DischargeIO::writeCheckParticlesToHDF(HDF5Handle&                               
     // serial: writes into the shared HDF5 dataset at running per-box offsets and shares the chunk buffer
     const DataIterator& dit  = grids.dataIterator();
     const int           nbox = dit.size();
+
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din    = dit[mybox];
       size_t           offset = offsets[grids.index(din)];
