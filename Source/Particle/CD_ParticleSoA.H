@@ -859,8 +859,8 @@ public:
   /**
     @brief Append a single particle (all columns, incl. id/rank) copied from another container.
     @details The single-particle analogue of append(const ParticleSoA&). Pair it with remove() on the
-    source to move one particle between containers (the SoA equivalent of List<P>::transfer). Invalidates
-    the cell sort. Appending from self is supported.
+    source to move one particle between containers. Invalidates the cell sort. Appending from self is
+    supported.
     @param[in] a_src   Source container to copy from.
     @param[in] a_index Index of the particle in a_src to copy.
   */
