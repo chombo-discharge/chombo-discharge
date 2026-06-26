@@ -399,12 +399,12 @@ TracerParticleSolver<P>::interpolateVelocities()
     pout() << m_name + "::interpolateVelocities()" << endl;
   }
 
-  m_amr->interpolateParticles<D_DECL(&P::vx, &P::vy, &P::vz)>(m_particles,
-                                                              m_realm,
-                                                              m_phase,
-                                                              m_velocityField,
-                                                              m_interpolation,
-                                                              true);
+  m_amr->interpolateParticles<D_DECL(&P::v_x, &P::v_y, &P::v_z)>(m_particles,
+                                                                 m_realm,
+                                                                 m_phase,
+                                                                 m_velocityField,
+                                                                 m_interpolation,
+                                                                 true);
 }
 
 template <typename P>
@@ -645,7 +645,7 @@ TracerParticleSolver<P>::computeDt() const
       const ParticleSoA<P>&     leaf        = m_particles[lvl][din];
       const std::size_t         n           = leaf.size();
       const ParticleReal* const v[SpaceDim] = {
-        D_DECL(leaf.template column<&P::vx>(), leaf.template column<&P::vy>(), leaf.template column<&P::vz>())};
+        D_DECL(leaf.template column<&P::v_x>(), leaf.template column<&P::v_y>(), leaf.template column<&P::v_z>())};
 
       for (std::size_t i = 0; i < n; i++) {
         for (int dir = 0; dir < SpaceDim; dir++) {

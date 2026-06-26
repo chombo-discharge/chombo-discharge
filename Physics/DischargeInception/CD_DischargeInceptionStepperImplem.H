@@ -2190,7 +2190,7 @@ DischargeInceptionStepper<P, F, C>::seedUniformParticles() noexcept
       const double* const pos[SpaceDim] = {
         D_DECL(leaf.positionColumn(0), leaf.positionColumn(1), leaf.positionColumn(2))};
       ParticleReal* const x0[SpaceDim] = {
-        D_DECL(leaf.template column<&P::x0x>(), leaf.template column<&P::x0y>(), leaf.template column<&P::x0z>())};
+        D_DECL(leaf.template column<&P::x0_x>(), leaf.template column<&P::x0_y>(), leaf.template column<&P::x0_z>())};
       ParticleLoops::loop(leaf, [&](const std::size_t i) {
         for (int dir = 0; dir < SpaceDim; dir++) {
           x0[dir][i] = pos[dir][i];
@@ -2311,7 +2311,7 @@ DischargeInceptionStepper<P, F, C>::seedIonizationParticles(const Real a_voltage
       const double* const pos[SpaceDim] = {
         D_DECL(leaf.positionColumn(0), leaf.positionColumn(1), leaf.positionColumn(2))};
       ParticleReal* const x0[SpaceDim] = {
-        D_DECL(leaf.template column<&P::x0x>(), leaf.template column<&P::x0y>(), leaf.template column<&P::x0z>())};
+        D_DECL(leaf.template column<&P::x0_x>(), leaf.template column<&P::x0_y>(), leaf.template column<&P::x0_z>())};
       ParticleLoops::loop(leaf, [&](const std::size_t i) {
         for (int dir = 0; dir < SpaceDim; dir++) {
           x0[dir][i] = pos[dir][i];
@@ -2425,12 +2425,12 @@ DischargeInceptionStepper<P, F, C>::interpolateGradAlphaToParticles() noexcept
   }
 
   // Interpolate onto the particle weight structure
-  m_amr->interpolateParticles<D_DECL(&P::gax, &P::gay, &P::gaz)>(m_tracerParticleSolver->getParticles(),
-                                                                 m_realm,
-                                                                 m_phase,
-                                                                 m_gradAlpha,
-                                                                 m_tracerParticleSolver->getInterpolationType(),
-                                                                 true);
+  m_amr->interpolateParticles<D_DECL(&P::ga_x, &P::ga_y, &P::ga_z)>(m_tracerParticleSolver->getParticles(),
+                                                                    m_realm,
+                                                                    m_phase,
+                                                                    m_gradAlpha,
+                                                                    m_tracerParticleSolver->getInterpolationType(),
+                                                                    true);
 }
 
 template <typename P, typename F, typename C>
@@ -2689,12 +2689,12 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltag
         double* const w             = solverLeaf.weightColumn();
         double* const pos[SpaceDim] = {
           D_DECL(solverLeaf.positionColumn(0), solverLeaf.positionColumn(1), solverLeaf.positionColumn(2))};
-        const ParticleReal* const vel[SpaceDim] = {D_DECL(solverLeaf.template column<&P::vx>(),
-                                                          solverLeaf.template column<&P::vy>(),
-                                                          solverLeaf.template column<&P::vz>())};
-        const ParticleReal* const ga[SpaceDim]  = {D_DECL(solverLeaf.template column<&P::gax>(),
-                                                         solverLeaf.template column<&P::gay>(),
-                                                         solverLeaf.template column<&P::gaz>())};
+        const ParticleReal* const vel[SpaceDim] = {D_DECL(solverLeaf.template column<&P::v_x>(),
+                                                          solverLeaf.template column<&P::v_y>(),
+                                                          solverLeaf.template column<&P::v_z>())};
+        const ParticleReal* const ga[SpaceDim]  = {D_DECL(solverLeaf.template column<&P::ga_x>(),
+                                                         solverLeaf.template column<&P::ga_y>(),
+                                                         solverLeaf.template column<&P::ga_z>())};
 
         std::size_t i = 0;
         while (i < solverLeaf.size()) {
@@ -2889,15 +2889,15 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_
         double* const w             = solverLeaf.weightColumn();
         double* const pos[SpaceDim] = {
           D_DECL(solverLeaf.positionColumn(0), solverLeaf.positionColumn(1), solverLeaf.positionColumn(2))};
-        const ParticleReal* const vel[SpaceDim] = {D_DECL(solverLeaf.template column<&P::vx>(),
-                                                          solverLeaf.template column<&P::vy>(),
-                                                          solverLeaf.template column<&P::vz>())};
-        const ParticleReal* const ga[SpaceDim]  = {D_DECL(solverLeaf.template column<&P::gax>(),
-                                                         solverLeaf.template column<&P::gay>(),
-                                                         solverLeaf.template column<&P::gaz>())};
-        ParticleReal* const       vk[SpaceDim]  = {D_DECL(solverLeaf.template column<&P::vkx>(),
-                                                   solverLeaf.template column<&P::vky>(),
-                                                   solverLeaf.template column<&P::vkz>())};
+        const ParticleReal* const vel[SpaceDim] = {D_DECL(solverLeaf.template column<&P::v_x>(),
+                                                          solverLeaf.template column<&P::v_y>(),
+                                                          solverLeaf.template column<&P::v_z>())};
+        const ParticleReal* const ga[SpaceDim]  = {D_DECL(solverLeaf.template column<&P::ga_x>(),
+                                                         solverLeaf.template column<&P::ga_y>(),
+                                                         solverLeaf.template column<&P::ga_z>())};
+        ParticleReal* const       vk[SpaceDim]  = {D_DECL(solverLeaf.template column<&P::vk_x>(),
+                                                   solverLeaf.template column<&P::vk_y>(),
+                                                   solverLeaf.template column<&P::vk_z>())};
         ParticleReal* const       alphaEffCol   = solverLeaf.template column<&P::alphaEff>();
         ParticleReal* const       dtCol         = solverLeaf.template column<&P::dtStep>();
 
@@ -2991,12 +2991,12 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_
         double* const w             = solverLeaf.weightColumn();
         double* const pos[SpaceDim] = {
           D_DECL(solverLeaf.positionColumn(0), solverLeaf.positionColumn(1), solverLeaf.positionColumn(2))};
-        const ParticleReal* const vel[SpaceDim] = {D_DECL(solverLeaf.template column<&P::vx>(),
-                                                          solverLeaf.template column<&P::vy>(),
-                                                          solverLeaf.template column<&P::vz>())};
-        const ParticleReal* const vk[SpaceDim]  = {D_DECL(solverLeaf.template column<&P::vkx>(),
-                                                         solverLeaf.template column<&P::vky>(),
-                                                         solverLeaf.template column<&P::vkz>())};
+        const ParticleReal* const vel[SpaceDim] = {D_DECL(solverLeaf.template column<&P::v_x>(),
+                                                          solverLeaf.template column<&P::v_y>(),
+                                                          solverLeaf.template column<&P::v_z>())};
+        const ParticleReal* const vk[SpaceDim]  = {D_DECL(solverLeaf.template column<&P::vk_x>(),
+                                                         solverLeaf.template column<&P::vk_y>(),
+                                                         solverLeaf.template column<&P::vk_z>())};
         const ParticleReal* const alphaEffCol   = solverLeaf.template column<&P::alphaEff>();
         const ParticleReal* const dtCol         = solverLeaf.template column<&P::dtStep>();
 
@@ -3355,9 +3355,9 @@ DischargeInceptionStepper<P, F, C>::townsendTrackEuler(const Real& a_voltage) no
         double* const w             = solverLeaf.weightColumn();
         double* const pos[SpaceDim] = {
           D_DECL(solverLeaf.positionColumn(0), solverLeaf.positionColumn(1), solverLeaf.positionColumn(2))};
-        const ParticleReal* const vel[SpaceDim] = {D_DECL(solverLeaf.template column<&P::vx>(),
-                                                          solverLeaf.template column<&P::vy>(),
-                                                          solverLeaf.template column<&P::vz>())};
+        const ParticleReal* const vel[SpaceDim] = {D_DECL(solverLeaf.template column<&P::v_x>(),
+                                                          solverLeaf.template column<&P::v_y>(),
+                                                          solverLeaf.template column<&P::v_z>())};
 
         std::size_t i = 0;
         while (i < solverLeaf.size()) {
@@ -3485,12 +3485,12 @@ DischargeInceptionStepper<P, F, C>::townsendTrackTrapezoidal(const Real& a_volta
         double* const w             = solverLeaf.weightColumn();
         double* const pos[SpaceDim] = {
           D_DECL(solverLeaf.positionColumn(0), solverLeaf.positionColumn(1), solverLeaf.positionColumn(2))};
-        const ParticleReal* const vel[SpaceDim] = {D_DECL(solverLeaf.template column<&P::vx>(),
-                                                          solverLeaf.template column<&P::vy>(),
-                                                          solverLeaf.template column<&P::vz>())};
-        ParticleReal* const       vk[SpaceDim]  = {D_DECL(solverLeaf.template column<&P::vkx>(),
-                                                   solverLeaf.template column<&P::vky>(),
-                                                   solverLeaf.template column<&P::vkz>())};
+        const ParticleReal* const vel[SpaceDim] = {D_DECL(solverLeaf.template column<&P::v_x>(),
+                                                          solverLeaf.template column<&P::v_y>(),
+                                                          solverLeaf.template column<&P::v_z>())};
+        ParticleReal* const       vk[SpaceDim]  = {D_DECL(solverLeaf.template column<&P::vk_x>(),
+                                                   solverLeaf.template column<&P::vk_y>(),
+                                                   solverLeaf.template column<&P::vk_z>())};
         ParticleReal* const       alphaEffCol   = solverLeaf.template column<&P::alphaEff>();
         ParticleReal* const       dtCol         = solverLeaf.template column<&P::dtStep>();
 
@@ -3562,12 +3562,12 @@ DischargeInceptionStepper<P, F, C>::townsendTrackTrapezoidal(const Real& a_volta
         double* const w             = solverLeaf.weightColumn();
         double* const pos[SpaceDim] = {
           D_DECL(solverLeaf.positionColumn(0), solverLeaf.positionColumn(1), solverLeaf.positionColumn(2))};
-        const ParticleReal* const vel[SpaceDim] = {D_DECL(solverLeaf.template column<&P::vx>(),
-                                                          solverLeaf.template column<&P::vy>(),
-                                                          solverLeaf.template column<&P::vz>())};
-        const ParticleReal* const vk[SpaceDim]  = {D_DECL(solverLeaf.template column<&P::vkx>(),
-                                                         solverLeaf.template column<&P::vky>(),
-                                                         solverLeaf.template column<&P::vkz>())};
+        const ParticleReal* const vel[SpaceDim] = {D_DECL(solverLeaf.template column<&P::v_x>(),
+                                                          solverLeaf.template column<&P::v_y>(),
+                                                          solverLeaf.template column<&P::v_z>())};
+        const ParticleReal* const vk[SpaceDim]  = {D_DECL(solverLeaf.template column<&P::vk_x>(),
+                                                         solverLeaf.template column<&P::vk_y>(),
+                                                         solverLeaf.template column<&P::vk_z>())};
         const ParticleReal* const alphaEffCol   = solverLeaf.template column<&P::alphaEff>();
         const ParticleReal* const dtCol         = solverLeaf.template column<&P::dtStep>();
 
@@ -3766,7 +3766,7 @@ DischargeInceptionStepper<P, F, C>::rewindTracerParticles() noexcept
 
       double* const pos[SpaceDim] = {D_DECL(leaf.positionColumn(0), leaf.positionColumn(1), leaf.positionColumn(2))};
       const ParticleReal* const x0[SpaceDim] = {
-        D_DECL(leaf.template column<&P::x0x>(), leaf.template column<&P::x0y>(), leaf.template column<&P::x0z>())};
+        D_DECL(leaf.template column<&P::x0_x>(), leaf.template column<&P::x0_y>(), leaf.template column<&P::x0_z>())};
 
       ParticleLoops::loop(leaf, [&](const std::size_t i) {
         for (int dir = 0; dir < SpaceDim; dir++) {

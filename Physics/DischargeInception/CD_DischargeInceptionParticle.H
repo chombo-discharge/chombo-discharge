@@ -20,7 +20,7 @@
 /**
   @brief SoA payload for the discharge-inception integrators.
   @details Per-component scalar columns (one member per spatial dimension; the z-component exists only when
-  CH_SPACEDIM == 3). vx/vy/vz hold the interpolated electron velocity (required by TracerParticleSolver).
+  CH_SPACEDIM == 3). v_x/v_y/v_z hold the interpolated electron velocity (required by TracerParticleSolver).
   x0 is the position snapshot used to rewind particles after an integration; vk is the velocity snapshot
   from the previous Runge-Kutta stage; ga is the interpolated grad(alpha) field. alphaEff and dtStep cache
   the effective ionization coefficient and step size from the predictor stage. Weight (the inception
@@ -28,28 +28,28 @@
 */
 struct DischargeInceptionParticle
 {
-  ParticleReal vx = 0.0; ///< Interpolated velocity, x-component.
-  ParticleReal vy = 0.0; ///< Interpolated velocity, y-component.
+  ParticleReal v_x = 0.0; ///< Interpolated velocity, x-component.
+  ParticleReal v_y = 0.0; ///< Interpolated velocity, y-component.
 #if CH_SPACEDIM == 3
-  ParticleReal vz = 0.0; ///< Interpolated velocity, z-component.
+  ParticleReal v_z = 0.0; ///< Interpolated velocity, z-component.
 #endif
 
-  ParticleReal x0x = 0.0; ///< Position snapshot for rewind, x-component.
-  ParticleReal x0y = 0.0; ///< Position snapshot for rewind, y-component.
+  ParticleReal x0_x = 0.0; ///< Position snapshot for rewind, x-component.
+  ParticleReal x0_y = 0.0; ///< Position snapshot for rewind, y-component.
 #if CH_SPACEDIM == 3
-  ParticleReal x0z = 0.0; ///< Position snapshot for rewind, z-component.
+  ParticleReal x0_z = 0.0; ///< Position snapshot for rewind, z-component.
 #endif
 
-  ParticleReal vkx = 0.0; ///< Previous-stage velocity snapshot, x-component.
-  ParticleReal vky = 0.0; ///< Previous-stage velocity snapshot, y-component.
+  ParticleReal vk_x = 0.0; ///< Previous-stage velocity snapshot, x-component.
+  ParticleReal vk_y = 0.0; ///< Previous-stage velocity snapshot, y-component.
 #if CH_SPACEDIM == 3
-  ParticleReal vkz = 0.0; ///< Previous-stage velocity snapshot, z-component.
+  ParticleReal vk_z = 0.0; ///< Previous-stage velocity snapshot, z-component.
 #endif
 
-  ParticleReal gax = 0.0; ///< Interpolated grad(alpha), x-component.
-  ParticleReal gay = 0.0; ///< Interpolated grad(alpha), y-component.
+  ParticleReal ga_x = 0.0; ///< Interpolated grad(alpha), x-component.
+  ParticleReal ga_y = 0.0; ///< Interpolated grad(alpha), y-component.
 #if CH_SPACEDIM == 3
-  ParticleReal gaz = 0.0; ///< Interpolated grad(alpha), z-component.
+  ParticleReal ga_z = 0.0; ///< Interpolated grad(alpha), z-component.
 #endif
 
   ParticleReal alphaEff = 0.0; ///< Cached effective ionization coefficient.
@@ -64,10 +64,10 @@ struct ParticleTraits<DischargeInceptionParticle>
 {
   /// @brief Payload column member-pointers, listed one field group at a time (SpaceDim entries per group).
   static constexpr auto columns = std::make_tuple(
-    D_DECL(&DischargeInceptionParticle::vx, &DischargeInceptionParticle::vy, &DischargeInceptionParticle::vz),
-    D_DECL(&DischargeInceptionParticle::x0x, &DischargeInceptionParticle::x0y, &DischargeInceptionParticle::x0z),
-    D_DECL(&DischargeInceptionParticle::vkx, &DischargeInceptionParticle::vky, &DischargeInceptionParticle::vkz),
-    D_DECL(&DischargeInceptionParticle::gax, &DischargeInceptionParticle::gay, &DischargeInceptionParticle::gaz),
+    D_DECL(&DischargeInceptionParticle::v_x, &DischargeInceptionParticle::v_y, &DischargeInceptionParticle::v_z),
+    D_DECL(&DischargeInceptionParticle::x0_x, &DischargeInceptionParticle::x0_y, &DischargeInceptionParticle::x0_z),
+    D_DECL(&DischargeInceptionParticle::vk_x, &DischargeInceptionParticle::vk_y, &DischargeInceptionParticle::vk_z),
+    D_DECL(&DischargeInceptionParticle::ga_x, &DischargeInceptionParticle::ga_y, &DischargeInceptionParticle::ga_z),
     &DischargeInceptionParticle::alphaEff,
     &DischargeInceptionParticle::dtStep);
 };

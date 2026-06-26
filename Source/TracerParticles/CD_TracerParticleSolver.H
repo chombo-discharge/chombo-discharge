@@ -30,9 +30,9 @@
   The particles are stored Struct-of-Arrays (ParticleContainer). P is the user PAYLOAD type; the
   position and weight are container-owned columns (not payload members). The template requirements on
   the payload type P are:
-  1) It must expose the velocity as SpaceDim scalar payload columns named D_DECL(vx, vy, vz), so the
+  1) It must expose the velocity as SpaceDim scalar payload columns named D_DECL(v_x, v_y, v_z), so the
      solver can interpolate the mesh velocity field into them and compute the advective time step.
-  2) It must have a ParticleTraits<P> specialization listing its columns (including vx/vy/vz).
+  2) It must have a ParticleTraits<P> specialization listing its columns (including v_x/v_y/v_z).
 */
 template <typename P>
 class TracerParticleSolver
