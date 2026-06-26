@@ -1,0 +1,33 @@
+<map id="Physics/ItoKMC/CD_ItoKMCFieldParticle.H" name="Physics/ItoKMC/CD_ItoKMCFieldParticle.H">
+<area shape="rect" id="Node000001" title="SoA payload for the transient E&#45;dot&#45;J energy computation in ItoKMCStepper." alt="" coords="401,5,632,45"/>
+<area shape="rect" id="Node000002" href="$CD__ItoKMCStepperImplem_8H.html" title="Implementation of CD_ItoKMCStepper.H." alt="" coords="392,93,641,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="519,59,519,93,514,93,514,59"/>
+<area shape="rect" id="Node000003" href="$CD__ItoKMCStepper_8H.html" title="Declaration of the Physics::ItoKMC::ItoKMCStepper abstract TimeStepper." alt="" coords="385,181,648,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="510,147,513,181,507,181,505,147"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="522,167,522,134,527,133,528,167"/>
+<area shape="rect" id="Node000004" href="$CD__ItoKMCTagger_8H.html" title="Declaration of the Physics::ItoKMC::ItoKMCTagger abstract CellTagger." alt="" coords="255,269,509,295"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="488,216,402,271,399,267,485,212"/>
+<area shape="rect" id="Node000010" href="$CD__ItoKMCGodunovStepper_8H.html" title="Declaration of a class which uses a semi&#45;implicit Godunov method for Ito plasma equations." alt="" coords="681,255,897,309"/>
+<area shape="poly" id="edge13_Node000003_Node000010" title=" " alt="" coords="567,208,707,252,705,257,566,213"/>
+<area shape="rect" id="Node000005" href="$CD__ItoKMCFieldTagger_8H.html" title="Declaration of the Physics::ItoKMC::ItoKMCFieldTagger abstract CellTagger." alt="" coords="5,365,236,405"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="340,302,171,367,169,362,338,297"/>
+<area shape="rect" id="Node000009" href="$CD__ItoKMCTaggerImplem_8H.html" title="Implementation of CD_ItoKMCTagger.H." alt="" coords="261,365,503,405"/>
+<area shape="poly" id="edge11_Node000004_Node000009" title=" " alt="" coords="377,308,377,364,372,365,371,308"/>
+<area shape="rect" id="Node000006" href="$CD__ItoKMCFieldTaggerImplem_8H.html" title="Implementation of CD_ItoKMCFieldTagger.H." alt="" coords="5,467,236,507"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="115,418,116,467,111,467,110,418"/>
+<area shape="rect" id="Node000007" href="$CD__ItoKMCStreamerTagger_8H.html" title="Declaration of the Physics::ItoKMC::ItoKMCStreamerTagger CellTagger." alt="" coords="260,460,461,515"/>
+<area shape="poly" id="edge8_Node000005_Node000007" title=" " alt="" coords="179,407,299,457,297,462,177,412"/>
+<area shape="poly" id="edge7_Node000006_Node000005" title=" " alt="" coords="126,454,125,405,131,405,132,454"/>
+<area shape="rect" id="Node000008" href="$CD__ItoKMCStreamerTaggerImplem_8H.html" title="Implementation of CD_ItoKMCStreamerTagger.H." alt="" coords="239,563,482,617"/>
+<area shape="poly" id="edge9_Node000007_Node000008" title=" " alt="" coords="355,528,355,563,350,563,349,528"/>
+<area shape="poly" id="edge10_Node000008_Node000007" title=" " alt="" coords="367,549,366,515,371,515,372,549"/>
+<area shape="poly" id="edge12_Node000009_Node000004" title=" " alt="" coords="388,351,385,295,391,295,393,351"/>
+<area shape="rect" id="Node000011" href="$CD__ItoKMCBackgroundEvaluator_8H.html" title="Declaration of the Physics::ItoKMC::ItoKMCBackgroundEvaluator TimeStepper." alt="" coords="527,357,778,412"/>
+<area shape="poly" id="edge14_Node000010_Node000011" title=" " alt="" coords="744,320,690,359,687,355,741,315"/>
+<area shape="rect" id="Node000013" href="$CD__ItoKMCGodunovStepperImplem_8H.html" title="Implementation of CD_ItoKMCGodunovStepper.H." alt="" coords="802,357,1050,412"/>
+<area shape="poly" id="edge17_Node000010_Node000013" title=" " alt="" coords="829,315,884,355,880,359,826,320"/>
+<area shape="rect" id="Node000012" href="$CD__ItoKMCBackgroundEvaluatorImplem_8H.html" title="Implementation of CD_ItoKMCBackgroundEvaluator.H." alt="" coords="501,460,804,515"/>
+<area shape="poly" id="edge15_Node000011_Node000012" title=" " alt="" coords="647,426,647,460,642,460,641,426"/>
+<area shape="poly" id="edge16_Node000012_Node000011" title=" " alt="" coords="659,447,658,412,663,412,664,446"/>
+<area shape="poly" id="edge18_Node000013_Node000010" title=" " alt="" coords="886,351,831,312,834,307,889,347"/>
+</map>

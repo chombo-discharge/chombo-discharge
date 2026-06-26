@@ -107,9 +107,13 @@ Collaboration diagram for Physics::DischargeInception::DischargeInceptionSpecies
 <div class="dyncontent">
 <div class="center"><img src="classPhysics_1_1DischargeInception_1_1DischargeInceptionSpecies__coll__graph.png" border="0" usemap="#aPhysics_1_1DischargeInception_1_1DischargeInceptionSpecies_coll__map" alt="Collaboration graph"/></div>
 <map name="aPhysics_1_1DischargeInception_1_1DischargeInceptionSpecies_coll__map" id="aPhysics_1_1DischargeInception_1_1DischargeInceptionSpecies_coll__map">
-<area shape="rect" title="CdrSpecies subclass for use with DischargeInceptionStepper." alt="" coords="5,79,211,119"/>
-<area shape="rect" href="classCdrSpecies.html" title="Abstract class that describes the scalar quantity that is advected in CdrSolver." alt="" coords="61,5,155,31"/>
-<area shape="poly" title=" " alt="" coords="111,44,111,79,105,79,105,44"/>
+<area shape="rect" title="CdrSpecies subclass for use with DischargeInceptionStepper." alt="" coords="5,256,211,296"/>
+<area shape="rect" href="classCdrSpecies.html" title="Abstract class that describes the scalar quantity that is advected in CdrSolver." alt="" coords="61,181,155,207"/>
+<area shape="poly" title=" " alt="" coords="111,220,111,256,105,256,105,220"/>
+<area shape="rect" href="classParticleSoA.html" title=" " alt="" coords="11,93,205,119"/>
+<area shape="poly" title=" " alt="" coords="111,133,111,181,105,181,105,133"/>
+<area shape="rect" href="classParticleSoA.html" title="Arena&#45;backed Struct&#45;of&#45;Arrays particle container for a single grid patch." alt="" coords="20,5,196,31"/>
+<area shape="poly" title=" " alt="" coords="111,45,111,93,105,93,105,45"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -149,12 +153,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a20380aa670d0e524786823824149f120 inherit pub_methods_classCdrSpecies" id="r_a20380aa670d0e524786823824149f120"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSpecies.html#a20380aa670d0e524786823824149f120">isMobile</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
 <tr class="memdesc:a20380aa670d0e524786823824149f120 inherit pub_methods_classCdrSpecies"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mobile species or not.  <br /></td></tr>
 <tr class="separator:a20380aa670d0e524786823824149f120 inherit pub_methods_classCdrSpecies"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae5af1d4d18a15223d173db9b59fc214f inherit pub_methods_classCdrSpecies" id="r_ae5af1d4d18a15223d173db9b59fc214f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">List</a>&lt; <a class="el" href="classPointParticle.html">PointParticle</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSpecies.html#ae5af1d4d18a15223d173db9b59fc214f">getInitialParticles</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:ae5af1d4d18a15223d173db9b59fc214f inherit pub_methods_classCdrSpecies"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get initial particles.  <br /></td></tr>
-<tr class="separator:ae5af1d4d18a15223d173db9b59fc214f inherit pub_methods_classCdrSpecies"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8cd826fa457cef60015ed89b37c809fc inherit pub_methods_classCdrSpecies" id="r_a8cd826fa457cef60015ed89b37c809fc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">List</a>&lt; <a class="el" href="classPointParticle.html">PointParticle</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSpecies.html#a8cd826fa457cef60015ed89b37c809fc">getInitialParticles</a> ()</td></tr>
-<tr class="memdesc:a8cd826fa457cef60015ed89b37c809fc inherit pub_methods_classCdrSpecies"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get initial particles.  <br /></td></tr>
-<tr class="separator:a8cd826fa457cef60015ed89b37c809fc inherit pub_methods_classCdrSpecies"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4ba9108f45f92fb5602b687a2ee552a1 inherit pub_methods_classCdrSpecies" id="r_a4ba9108f45f92fb5602b687a2ee552a1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structNoPayload.html">NoPayload</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSpecies.html#a4ba9108f45f92fb5602b687a2ee552a1">getInitialParticles</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:a4ba9108f45f92fb5602b687a2ee552a1 inherit pub_methods_classCdrSpecies"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get initial particles.  <br /></td></tr>
+<tr class="separator:a4ba9108f45f92fb5602b687a2ee552a1 inherit pub_methods_classCdrSpecies"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1c713af444ffcbc64e9bedc6a611bc18 inherit pub_methods_classCdrSpecies" id="r_a1c713af444ffcbc64e9bedc6a611bc18"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structNoPayload.html">NoPayload</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSpecies.html#a1c713af444ffcbc64e9bedc6a611bc18">getInitialParticles</a> ()</td></tr>
+<tr class="memdesc:a1c713af444ffcbc64e9bedc6a611bc18 inherit pub_methods_classCdrSpecies"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get initial particles.  <br /></td></tr>
+<tr class="separator:a1c713af444ffcbc64e9bedc6a611bc18 inherit pub_methods_classCdrSpecies"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -179,10 +183,10 @@ Protected Attributes</h2></td></tr>
 <a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_isMobile</b></td></tr>
 <tr class="memdesc:a3c3ed3a4a2d4c98322cbb10e035cec41 inherit pro_attribs_classCdrSpecies"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mobile <a class="el" href="classCdrSpecies.html" title="Abstract class that describes the scalar quantity that is advected in CdrSolver.">CdrSpecies</a> or not. <br /></td></tr>
 <tr class="separator:a3c3ed3a4a2d4c98322cbb10e035cec41 inherit pro_attribs_classCdrSpecies"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa93bd28d5d12a01a15d4e5b98cf7064f inherit pro_attribs_classCdrSpecies" id="r_aa93bd28d5d12a01a15d4e5b98cf7064f"><td class="memItemLeft" align="right" valign="top">
-<a class="el" href="classTracerParticleSolver.html">List</a>&lt; <a class="el" href="classPointParticle.html">PointParticle</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_initialParticles</b></td></tr>
-<tr class="memdesc:aa93bd28d5d12a01a15d4e5b98cf7064f inherit pro_attribs_classCdrSpecies"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initial particles. <br /></td></tr>
-<tr class="separator:aa93bd28d5d12a01a15d4e5b98cf7064f inherit pro_attribs_classCdrSpecies"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a52aa0b0b653e0d22ea9bfd87e334593d inherit pro_attribs_classCdrSpecies" id="r_a52aa0b0b653e0d22ea9bfd87e334593d"><td class="memItemLeft" align="right" valign="top">
+<a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structNoPayload.html">NoPayload</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_initialParticles</b></td></tr>
+<tr class="memdesc:a52aa0b0b653e0d22ea9bfd87e334593d inherit pro_attribs_classCdrSpecies"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initial particles. <br /></td></tr>
+<tr class="separator:a52aa0b0b653e0d22ea9bfd87e334593d inherit pro_attribs_classCdrSpecies"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p><a class="el" href="classCdrSpecies.html" title="Abstract class that describes the scalar quantity that is advected in CdrSolver.">CdrSpecies</a> subclass for use with <a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html" title="TimeStepper for evaluating the streamer inception criterion in static or transient electric fields.">DischargeInceptionStepper</a>. </p>

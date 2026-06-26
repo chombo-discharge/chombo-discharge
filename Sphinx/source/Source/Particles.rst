@@ -3,7 +3,7 @@
 Particles
 =========
 
-``chombo-discharge`` supports computational particles using native ``Chombo`` particle data.
+``chombo-discharge`` stores computational particles in a Struct-of-Arrays (SoA) layout.
 The source code for the particle functionality resides in :file:`$DISCHARGE_HOME/Source/Particle`.
 Particle support contains the following basic features:
 
@@ -11,164 +11,101 @@ Particle support contains the following basic features:
 * Particle distribution and remapping with MPI.
 * Rudimentary particle output to H5Part files.
 
-Particle support is generally speaking templated, so that users can define new particle types that contain a desired set of variables.
-Typically, these will are derived from :ref:`Chap:GenericParticle`, which is discussed below.
+Particle support is templated on a small user-defined *payload* struct, so that users can define new particle types that contain a desired set of variables.
+The particle position, weight, and bookkeeping IDs are always owned by the container; the payload only adds the *extra* per-particle variables.
 
-.. _Chap:GenericParticle:
+.. _Chap:ParticleSoA:
 
-GenericParticle
----------------
+ParticleSoA
+-----------
 
-``GenericParticle`` is a default particle usable by the ``Chombo`` particle library.
-The particle type is essentially a template
+``ParticleSoA<P, Traits>`` is the per-patch Struct-of-Arrays leaf that holds the particles of one grid patch.
+Rather than storing an array of particle objects, it stores one contiguous *column* per variable.
+The columns fall into two groups:
 
-.. literalinclude:: ../../../../Source/Particle/CD_GenericParticle.H
-   :lines: 68-76
+* **Container-owned columns**, present for every particle type: the position (``SpaceDim`` scalar columns), the ``weight``, and the bookkeeping ``particleID``/``rankID``. These are *not* declared by the user.
+* **Payload columns**, supplied by the user as a plain struct ``P`` whose data members become extra columns.
+
+The payload is described by a ``ParticleTraits<P>`` specialization that lists the payload columns as a tuple of member pointers (and, optionally, an ``h5Columns`` subset that restricts which columns are written to HDF5 checkpoints).
+A representative payload (the tracer-particle velocity + Runge-Kutta scratch) looks like
+
+.. literalinclude:: ../../../../Source/TracerParticles/CD_TracerParticle.H
+   :lines: 20-73
    :language: c++
 
-where ``M`` and ``N`` are the number of ``Real`` and ``RealVect`` variables for the particle.
-The ``GenericParticle`` always stores the position of the particle, which is available through ``GenericParticle<M,N>::position``.
+Per-component vectors are declared as individual scalar columns (there is no ``RealVect`` column type); the ``D_DECL`` macro expands to the ``SpaceDim`` components.
+The empty payload ``NoPayload`` is provided for particles that only need position and weight.
 
-To fetch the ``Real`` and ``RealVect`` variables, :ref:`Chap:GenericParticle` has member functions
+The most common ``ParticleSoA<P, Traits>`` member functions are:
 
-.. literalinclude:: ../../../../Source/Particle/CD_GenericParticle.H
-   :lines: 165-173,184-193
-   :language: c++
-   :dedent: 2
+* ``size()`` -- the number of particles in the leaf.
+* ``position(i)`` / ``setPosition(i, x)`` -- get/set the position of particle ``i``.
+* ``weight(i)`` -- reference to the weight of particle ``i``.
+* ``get<&P::member>(i)`` -- reference to a payload column entry of particle ``i``.
+* ``column<&P::member>()`` -- raw base pointer to a whole payload column.
+* ``append(pos, weight)`` or ``append(pos, weight, payload)`` -- add a particle.
+* ``remove(i)`` -- delete particle ``i`` (O(1) swap-and-pop; does not preserve order).
+* ``gather(i)`` -- assemble particle ``i``'s payload back into a ``P`` value.
+* ``swap`` / ``catenate`` -- swap arenas with, or move all particles from, another leaf.
 
-If using ``GenericParticle`` directly, the correct C++ way of fetching one of these variables is
+A typical loop over the particles in a leaf uses an integer index and column access:
 
 .. code-block:: c++
-		
-   GenericParticle<2,2> p;
 
-   Real& s = p.template real<0>();
+   ParticleSoA<MyPayload> leaf;
 
-Note that one must include the ``template`` keyword.
+   for (std::size_t i = 0; i < leaf.size(); i++) {
+      const RealVect x = leaf.position(i);
+      const Real     w = leaf.weight(i);
 
-:ref:`Chap:GenericParticle` can also store the local (per MPI rank) particle ID and the MPI rank ID on the particle.
-These are available through member functions ``particleID()`` and ``rankID``.
+      // Access a payload column entry:
+      Real& vx = leaf.get<&MyPayload::vx>(i);
+   }
 
 .. tip::
 
-   The ``GenericParticle`` C++ API is found at `<https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classGenericParticle.html>`_.
+   The ``ParticleSoA`` C++ API is found at `<https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classParticleSoA.html>`_.
 
-Linearization functions
-_______________________
+Checkpoint and HDF5 export
+__________________________
 
-:ref:`Chap:GenericParticle` has linearization functions communicating particles with MPI, as well as for supplying output to HDF5 checkpoint files.
-By default, :ref:`Chap:GenericParticle` will communicate all particle properties (including rank ID and particle ID), and include all ``Real`` member values in the HDF5 checkpoint files.
-For particles that do not need to checkpoint all particle properties when writing HDF5 checkpoint files, it may be beneficial to reduce the file size by only exporting the necessary particle properties (e.g., the position and particle weight). 
-
-Custom particles
-----------------
-
-To create a simple custom particle class with more sane signatures, one can inherit from ``GenericParticle`` and specify new function signatures that return the appropriate fields.
-An example of this is given in the code-block below, where we define ``KineticParticle`` to be a particle that contains the th5ree additional fields on top of ``GenericParticle`` (weight, velocity, and acceleration).
-
-.. code-block:: c++
-	   
-   class KineticParticle : public GenericParticle<1,2>
-   {
-   public:
-      inline
-      Real& weight() {
-         return this->real<0>();
-      }
-      
-      inline
-      RealVect& velocity() {
-         return this->vect<0>();
-      }
-
-      inline
-      RealVect& acceleration() {
-         return this->vect<1>();
-      }            
-   };
-
-There are many particles in ``chombo-discharge``, see the ``GenericParticle`` C++ API for more information. 
+The container-owned position and weight columns are always written to HDF5 checkpoint files.
+For particles that do not need to checkpoint all payload columns, the ``ParticleTraits<P>`` specialization may declare an ``h5Columns`` tuple that lists the payload-column subset to export, which reduces the checkpoint file size.
 
 .. _Chap:ParticleContainer:
 
 ParticleContainer
-------------------
+--------------------
 
-The ``ParticleContainer<P>`` is a template class that
+The ``ParticleContainer<P, Traits>`` is a template class that
 
-#. Stores computational particles of type ``P`` over an AMR hierarchy.
+#. Stores computational particles of type ``P`` over an AMR hierarchy (one ``ParticleSoA<P, Traits>`` leaf per grid patch).
 #. Provides infrastructure for remapping particles.
-#. Provides functionality for getting a list of particles within a specified grid patch.
+#. Provides functionality for getting the particles within a specified grid patch.
 #. Provides functionality that is required during regrids.
-#. Other types of functionality, like grouping particles into grid cells, set and get functions for assigning particle variables, etcl.
-
-``ParticleContainer<P>`` uses the ``Chombo`` structure ``ParticleData<P>`` under the hood, and therefore has template constraints on ``P``.
-The simplest way to use ``ParticleContainer`` for a new type of particle is to let ``P`` inherit from :ref:`Chap:GenericParticle`, which will fulfill all template constraints.
+#. Other types of functionality, like grouping particles into grid cells, and mask/halo particle extraction.
 
 Data structures
 ---------------
 
-List<P> and ListBox<P>
-______________________
+ParticleSoA<P> leaves
+_____________________
 
-At the lowest level the particles are always stored in a linked list ``List<P>``.
-The class can be simply be through of as a regular list of ``P`` with non-random access. 
+At the lowest level the particles in one grid patch are stored in a ``ParticleSoA<P, Traits>`` (see :ref:`Chap:ParticleSoA`), which holds the particles column-by-column with no ordering unless the leaf has been cell-sorted.
 
-The ``ListBox<P>`` consists of a ``List<P>`` *and* a ``Box``.
-The latter specifies the grid patch that the particles are assigned to.
+AMRParticlesSoA<P>
+__________________
 
-To get the list of particles from a ``ListBox<P>``:
-
-.. code-block::
-
-   ListBox<P> myListBox;
-   
-   List<P>& myList = myListBox.listItems();
-
-
-ListIterator<P>
-_______________
-
-In order to iterate over particles, use an iterator ``ListIterator<P>`` (which is not random access):
+On each grid level, ``ParticleContainer<P, Traits>`` stores the leaves in a ``LayoutData<ParticleSoA<P, Traits>>`` (one leaf per patch).
+The AMR view ``AMRParticlesSoA<P, Traits>`` is a vector of these per-level holders:
 
 .. code-block:: c++
 
-   List<P> myParticles;
-   for (ListIterator<P> lit(myParticles); lit.ok(); ++lit){
-      P& p = lit();
-      
-      // ... do something with this particle
-   }
+   template <typename P, typename Traits>
+   using AMRParticlesSoA = Vector<RefCountedPtr<LayoutData<ParticleSoA<P, Traits>>>>;
 
-ParticleData<P>
-_______________
-
-On each grid level, ``ParticleContainer<P>`` stores the particles in a ``Chombo`` class ``ParticleData``. 
-
-.. code-block:: c++
-
-   template <class P>
-   ParticleData<P>
-
-where ``P`` is the particle type.
-``ParticleData<P>`` can be thought of as a ``LevelData<ListBox<P>>``, although it actually inherits from ``LayoutData<ListBox<P>>``.
-Each grid patch contains a ``ListBox<P>`` of particles.
-
-
-AMRParticles<P>
-_______________
-
-``AMRParticles<P>`` is our AMR version of ``ParticleData<P>``.
-It is a simply a typedef of a vector of pointers to ``ParticleData<P>`` on each level:
-
-.. code-block:: c++
-
-   template <class P>
-   using AMRParticles = Vector<RefCountedPtr<ParticleData<P>>>;
-
-Again, the ``Vector`` indicates the AMR level and the ``ParticleData<P>`` is a distributed data holder that holds the particles on each AMR level.
-
-``AMRParticles<P>`` always lives within ``ParticleContainer<P>``, and is the class member of ``ParticleContainer<P>`` that actually holds the particles.
+Again, the ``Vector`` indicates the AMR level and the ``LayoutData`` is a distributed data holder that holds the leaves on each AMR level.
+``AMRParticlesSoA<P, Traits>`` always lives within ``ParticleContainer<P, Traits>`` and is the class member that actually holds the particles.
 
 Basic usage
 -----------
@@ -179,29 +116,28 @@ For the full API, see the ``ParticleContainer`` C++ API `<https://chombo-dischar
 Getting the particles
 _____________________
 
-To get the particles from a ``ParticleContainer<P>`` one can call ``AMRParticles<P>& ParticleContainer<P>::getParticles()`` which will provide the particles:
+To get the per-level holders from a ``ParticleContainer<P, Traits>`` one can call ``getParticles()``:
 
-.. code-block:: c++
+.. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
+   :lines: 305-313
+   :language: c++
+   :dedent: 2
 
-   ParticleContainer<P> myParticleContainer;
-   
-   AMRParticles<P>& myParticles = myParticleContainer.getParticles();
-
-Alternatively, one can fetch directly from a specified grid level as follows:
+Alternatively, one can fetch the distributed leaves of a specified grid level with ``operator[]``:
 
 .. code-block:: c++
 
    int lvl;
    ParticleContainer<P> myParticleContainer;
-   
-   ParticleData<P>& levelParticles = myParticleContainer[lvl];
+
+   LayoutData<ParticleSoA<P>>& levelParticles = myParticleContainer[lvl];
 
 Iterating over particles
 ________________________
 
-To do something basic with the particle in a ``ParticleContainer<P>``, one will typically iterate over the particles in all grid levels and patches.
+To do something with the particles in a ``ParticleContainer<P, Traits>``, one iterates over the grid levels and patches, gets the ``ParticleSoA`` leaf for each patch, and loops over the particle indices.
 
-The code bit below shows a typical example of how the particles can be moved, and then remapped onto the correct grid patches and ranks if they fall off their original one. 
+The code bit below shows a typical example of how the particles can be moved, and then remapped onto the correct grid patches and ranks if they fall off their original one.
 
 .. code-block:: c++
 
@@ -210,25 +146,21 @@ The code bit below shows a typical example of how the particles can be moved, an
    // Iterate over grid levels
    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
 
-      // Get the grid on this level. 
+      // Get the grid on this level.
       const DisjointBoxLayout& dbl = m_amr->getGrids(myParticleContainer.getRealm())[lvl];
-
-      // Get the distributed particles on this level
-      ParticleData<P>& levelParticles = myParticleContainer[lvl]
 
       // Iterate over grid patches on this level
       for (DataIterator dit(dbl); dit.ok(); ++dit){
 
-         // Get the particles in the current patch.
-	 List<P>& patchParticles = levelParticles[dit()].listItems();
+         // Get the SoA leaf in the current patch.
+         ParticleSoA<P>& leaf = myParticleContainer[lvl][dit()];
 
-	 // Iterate over the particles in the current patch.
-	 for (ListIterator<P> lit(patchParticles); lit.ok(); ++lit){
-	    P& p = lit();
+         // Iterate over the particles in the current patch.
+         for (std::size_t i = 0; i < leaf.size(); i++){
 
-	    // Move the particle
-	    p.position() = ...
-	 }
+            // Move the particle
+            leaf.setPosition(i, ...);
+         }
       }
    }
 
@@ -241,109 +173,92 @@ Sorting particles
 Sorting by cell
 _______________
 
-The particles can also be sorted by cell by calling ``void ParticleContainer<P>::sortParticleByCell()``, like so:
+The particles in a leaf can be sorted by cell by calling ``ParticleContainer<P>::organizeParticlesByCell()``:
 
 .. code-block:: c++
 
    ParticleContainer<P> myParticleContainer;
 
-   myParticleContainer.sortParticlesByCell();
+   myParticleContainer.organizeParticlesByCell();
 
-Internally in ``ParticleContainer<P>``, this will place the particles in another container which can be iterated over on a per-cell basis.
-This is different from ``List<P>`` and ``ListBox<P>`` above, which contained particles stored on a per-patch basis with no internal ordering of the particles.
+Internally this performs a counting sort of each leaf's columns into Fortran (x-fastest) cell order and builds a compressed-sparse-row (CSR) offset array.
+After the sort, the particles of cell ``c`` occupy the contiguous index range ``[cellStart(c), cellStart(c+1))``.
+Unlike the AoS-era per-cell containers, the cell-sort does not move the particles into a separate structure -- it merely reorders the SoA columns in place.
 
-The per-cell particle container is a ``Vector<RefCountedPtr<LayoutData<BinFab<P>>>>`` type where again the ``Vector`` holds the particles on each AMR level and the ``LayoutData<BinFab>`` holds one ``BinFab`` on each grid patch.
-The ``BinFab`` is also a template, and it holds a ``List<P>`` in each grid cell.
-Thus, this data structure stores the particles per cell rather than per patch.
-Due to the horrific template depth, this container is typedef'ed as ``AMRCellParticles<P>``.
-
-To get cell-sorted particles one can call
+The relevant ``ParticleSoA<P, Traits>`` query functions are ``isSorted()``, ``numCells()``, ``cellStart(c)``, ``particlesInCell(c)``, and ``cellRange(c)`` (which returns the ``{begin, end}`` index pair).
+Iteration over cell-sorted particles visits the cells in Fortran order (matching the CSR cell index) and then the contiguous index range of each cell:
 
 .. code-block:: c++
 
-   AMRCellParticles<P>& cellSortedParticles = myParticleContainer.getCellParticles();
-
-Iteration over cell-sorted particles is mostly the same as for patch-sorted particles, except that we also need to explicitly iterate over the grid cells in each grid patch:
-
-.. code-block:: c++
-
-   const int comp = 0;
+   ParticleContainer<P> myParticleContainer;
+   myParticleContainer.organizeParticlesByCell();
 
    // Iterate over all AMR levels
    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
 
-      // Get the grids on this level
       const DisjointBoxLayout& dbl = m_amr->getGrids(myParticleContainer.getRealm())[lvl];
 
       // Iterate over grid patches on this level
       for (DataIterator dit(dbl); dit.ok(); ++dit){
 
-         // Get the Cartesian box for the current grid aptch
-         const Box cellBox = dbl[dit()];
+         const Box       cellBox = dbl[dit()];
+         ParticleSoA<P>& leaf    = myParticleContainer[lvl][dit()];
 
-	 // Get the particles in the current grid patch.
-	 BinFab<P>& cellSortedBoxParticles = (*cellSortedParticles[lvl])[dit()];
+         // Visit cells in Fortran order, matching the CSR cell index.
+         std::size_t cellIndex = 0;
+         for (BoxIterator bit(cellBox); bit.ok(); ++bit, ++cellIndex){
+            const std::pair<std::size_t, std::size_t> range = leaf.cellRange(cellIndex);
 
-	 // Iterate over all cells in the current box
-	 for (BoxIterator bit(cellBox); bit.ok(); ++bit){
-	    const IntVect iv = bit();
-
-	    // Get the particles in the current grid cell.
-	    List<P>& cellParticles = cellSortedBoxParticles(iv, comp);
-
-	    // Do something with cellParticles
-	    for (ListIterator<P> lit(cellParticles); lit.ok(); ++lit){
-	       P& p = lit();
-	    }
-	 }
+            for (std::size_t i = range.first; i < range.second; i++){
+               // Do something with particle i in cell bit().
+            }
+         }
       }
    }
 
 Sorting by patch
 ________________
 
-If the particles need to return to patch-sorted particles:
+To return to patch-ordered particles:
 
 .. code-block:: c++
 
    ParticleContainer<P> myParticleContainer;
 
-   myParticleContainer.sortParticlesByPatch();
+   myParticleContainer.organizeParticlesByPatch();
 
 .. important::
-   
-   If particles are sorted by cell, calling ``ParticleContainer<P>`` member functions that fetch particles by patch will issue an error.
-   This is done by design since the patch-sorted particles have been moved to a different container.
-   Note that remapping particles also requires that the particles are patch-sorted.
-   Calling ``remap()`` with cell-sorted particles will issue a run-time error. 
+
+   The CSR cell ranges are only valid while the leaf is sorted.
+   ``append`` and ``remove`` invalidate the sort, and ``remap()`` requires patch-ordered particles.
 
 Allocating particles
 --------------------
 
-``AmrMesh`` has a very simple function for allocating a ``ParticleContainer<P>``:
+``AmrMesh`` has a simple function for allocating a ``ParticleContainer<P, Traits>``:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 221-228
+   :lines: 212-221
    :language: c++
-   :dedent: 2   
+   :dedent: 2
 
-which will allocate a ``ParticleContainer`` on the realm ``a_realm``.
+which will allocate the container on the realm ``a_realm``.
 
-.. _Chap:ParticleMapping:   
-   
+.. _Chap:ParticleMapping:
+
 Particle mapping
 ----------------
 
 Particles that move off their original grid patch must be remapped in order to ensure that they are assigned to the correct grid.
-The remapping function for ``ParticleContainer<P>`` is
+The remapping function for ``ParticleContainer<P, Traits>`` is
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 459-463
+   :lines: 565-574
    :language: c++
-   :dedent: 2   		
+   :dedent: 2
 
 This is simply used as follows:
-   
+
 .. code-block::
 
    ParticleContainer<P> myParticles;
@@ -352,34 +267,33 @@ This is simply used as follows:
 
 During remapping, the following steps are performed for each MPI rank:
 
-#. Collect all particles from this rank onto thread-local particles (if using OpenMP).
-#. Iterate through those particles and locate their position in the AMR hierarchy (level, grid index, and owning MPI rank).
-#. The particles that will move off each MPI rank are put in separate data containers.
-#. Assign local particles first, i.e., particles that moved off a grid patch into another grid patch owned by the same rank.
-#. Scatter the particles with MPI.
-#. Assign the scattered particles to each MPI rank.
+#. Collect all valid particles from this rank.
+#. Map each particle to its destination in the AMR hierarchy (level, grid index, and owning MPI rank).
+#. Append the particles that stay on this rank to their destination leaf.
+#. Scatter the particles that move to another rank with MPI.
+#. Assign the scattered particles on each receiving rank.
+
+Particles whose cell is owned by no patch on any level (off-domain) are dropped and counted.
 
 Regridding
 ----------
 
-As with mesh data, ``ParticleContainer<P>`` requires storing the old-grid data before assigning data on the new grids.
-This is relatively simple to achieve, and is done as follows:
+As with mesh data, ``ParticleContainer<P, Traits>`` requires storing the old-grid particles before assigning them on the new grids.
+This is done as follows:
 
-1. *Before* creating the new grids, each MPI rank collects *all* particles on a single ``List<P>`` by calling
+1. *Before* creating the new grids, each MPI rank caches its current particles by calling
 
    .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-      :lines: 153-158
+      :lines: 576-583
       :language: c++
-      :dedent: 2   		   
-      
-   This will pull the particles off their current grids and collect them in a single list (on a per-rank basis).
-   
-2. When ``ParticleContainer<P>`` regrids, each rank adds his ``List<P>`` back into the internal particle containers.
+      :dedent: 2
 
-   This is done by calling the ``ParticleContainer<P>`` regrid function:
+   This snapshots the particles off their current grids.
+
+2. When ``ParticleContainer<P, Traits>`` regrids, the cached particles are redistributed onto the new layout by calling the regrid function:
 
    .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-      :lines: 132-151
+      :lines: 585-605
       :language: c++
       :dedent: 2
 
@@ -393,34 +307,34 @@ This is relatively simple to achieve, and is done as follows:
 Masked particles
 ----------------
 
-``ParticleContainer<P>`` also supports the concept of *masked particles*, where one can fetch a subset of particles that live only in specified grid cells.
+``ParticleContainer<P, Traits>`` also supports the concept of *masked particles*, where one can fetch a subset of particles that live only in specified grid cells.
 Typically, this "specified region" is the refinement boundary, but the functionality is generic and might prove useful also in other cases.
 This functionality is unlikely to be used directly by users of chombo-discharge, but it is nonetheless fruitful to understand the concept in order to more easily fathom how deposition across refinement boundaries proceed.
 
-When *masked particles* are used, the user can provide a boolean mask over the AMR hierarchy and obtain the subset of particles that live in regions where the mask evaluates to true.
+When *masked particles* are used, the user provides a boolean mask over the AMR hierarchy and obtains the subset of particles that live in regions where the mask evaluates to true.
 This functionality is for example used for some of the particle deposition methods in ``chombo-discharge`` where we deposit particles that live near the refinement boundary with special deposition functions.
 
-To fill the masked particles, ``ParticleContainer<P>`` has members functions for copying the particles into internal data containers which the user can later fetch.
-The function signatures for this is
+To fill the masked particles, ``ParticleContainer<P, Traits>`` has member functions for copying the particles into internal data containers which the user can later fetch.
+The function signature for this is
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 166-172
+   :lines: 618-619
    :language: c++
    :dedent: 2
 
 The argument ``a_mask`` holds a bool at each cell in the AMR hierarchy.
-Particles that live in cells where ``a_mask`` is true will be copied to an internal data holder in ``ParticleContainer<P>`` which can be retrieved through a call
+Particles that live in cells where ``a_mask`` is true will be copied to an internal holder which can be retrieved through
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 284-289
+   :lines: 325-333
    :language: c++
    :dedent: 2
 
 In the above functions the mask particles are *copied*, and the original particles are left untouched.
-After the user is done with the particles, they should be deleted through the function
+After the user is done with the particles, they should be released through
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 216-220
+   :lines: 651-652
    :language: c++
    :dedent: 2
 
@@ -435,24 +349,22 @@ An example pseudocode for working with masked particles is given below:
    myParticles.copyMaskParticles(myMask);
 
    // Do something with the mask particles
-   AMRParticles<P>& maskParticles = myParticleContainer.getMaskParticles();
+   AMRParticlesSoA<P>& maskParticles = myParticles.getMaskParticles();
 
    // Release the mask particles
    myParticles.clearMaskParticles();
 
-
-
 .. _Chap:ParticleEB:
-   
+
 Boundary interaction
 --------------------
 
-``ParticleContainer<P>`` is EB-agnostic and has no information about the embedded boundary and only partial information about the domain boundary.
+``ParticleContainer<P, Traits>`` is EB-agnostic and has no information about the embedded boundary and only partial information about the domain boundary.
 This means the following:
 
 #. Particles remap just as if the embedded boundary was not there.
 #. Particles that completely fall off the domain are deleted when calling the remapping function.
-   
+
 Interaction with the EB is done via the implicit function or discrete information, as well as modifications in the interpolation and deposition steps.
 
 Signed distance function
@@ -462,32 +374,29 @@ When signed distance functions are used, one can always query how far a particle
 
 .. code-block:: c++
 
-   List<P>& particles;
-   BaseIF distanceFunction;
+   ParticleSoA<P>& leaf;
+   BaseIF          distanceFunction;
 
-   for (ListIterator<P> lit(particles); lit.ok(); ++lit){
-      const P& p          = lit();
-      const RealVect& pos = p.position();
+   for (std::size_t i = 0; i < leaf.size(); i++){
+      const RealVect pos = leaf.position(i);
 
       const Real distanceToBoundary = distanceFunction.value(pos);
    }
 
 If the particle is inside the EB then the signed distance function will be positive, and the particle can then be removed from the simulation.
 The distance function can also be used to detect collisions between particles and the EB.
-E.g, the intersection point can be computed and the particle can be deposited on the boundary, or bounced off it. 
+E.g, the intersection point can be computed and the particle can be deposited on the boundary, or bounced off it.
 See :ref:`Chap:AmrMesh` for details on how to obtain the distance function.
 
 Domain edges
 ____________
 
 By default, the ``ParticleContainer`` remapping function will discard particles that fall outside of the domain.
-The user can also check if this happen by checking if the particle position is outside the computational domain:
+The user can also check if this happens by checking if the particle position is outside the computational domain:
 
 .. code-block:: c++
 
-   GenericParticle<0,0> p;
-
-   const RealVect pos    = p.position();
+   const RealVect pos    = leaf.position(i);
    const RealVect probLo = m_amr->getProbLo();
    const RealVect probHi = m_amr->getProbHi();
 
@@ -504,7 +413,7 @@ Particle intersection
 _____________________
 
 It is occasionally useful to catch particles that hit an EB or crossed a domain side.
-Assuming that the particle type ``P`` also has a member function that stores the starting position of the particle, one can compute the intersection point between the particle trajectory and the EB or domain sides.
+Provided that the payload stores the *previous* position of the particle (one scalar column per component), one can compute the intersection point between the particle trajectory and the EB or domain sides.
 Currently, :ref:`Chap:AmrMesh` supports two methods for computing this
 
 * Using a bisection algorithm with a user-specified step.
@@ -515,29 +424,25 @@ The ray-casting algorithm will check if the particle can move from :math:`\mathb
 This step is selected from the signed distance from the particle position to the EB such that it uses a large step if the particle is far away from the EB.
 Conversely, if the particle is close to the EB a small step will be used.
 
-The algorithm that intersect the particles are a part of :ref:`Chap:AmrMesh`, and are called as follows:
+The algorithms that intersect the particles are part of :ref:`Chap:AmrMesh`, and the ray-casting variant is called as follows:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 1115-1173
+   :lines: 1195-1204
    :language: c++
-   :dedent: 2   
+   :dedent: 2
 
-The above two functions take as input/output arguments the particles to be iterated through (``a_activeParticles``).
-When calling the intersection functions, the intersected particles are put into EB-intersected particels (``a_ebParticles``) and domain-intersected particles (``a_domainParticles``).
+The container-owned position holds the trajectory end point, while the start point is read from the payload columns selected by the ``OldPosition`` member-pointer pack (``SpaceDim`` members, one per component).
+The intersected particles are put into the EB-intersected particles (``a_ebParticles``) and domain-intersected particles (``a_domainParticles``).
 The user can choose whether or not to remove intersected particles from ``a_activeParticles`` by adjusting ``a_deleteParticles``.
-The final argument lets the user supply a lambda that modifies particles that were intersected.
+The final argument lets the user supply a callback ``(ParticleSoA&, std::size_t)`` that modifies particles that were intersected but not deleted (for example to flag the original particle via a payload column).
 
-.. important::
-
-   The intersection functions require that ``P`` has a member function ``oldPosition`` which supplies the starting position of the particle.
-   
 Both the bisection and ray-casting algorithm have weaknesses.
-The bisection algorithm algorithm requires a user-supplied step in order to operate efficiently, while the ray-casting algorithm is very slow when the particle is close to the EB and moves tangentially along it.
-Future versions of ``chombo-discharge`` will likely include more sophisticated algorithms. 
+The bisection algorithm requires a user-supplied step in order to operate efficiently, while the ray-casting algorithm is very slow when the particle is close to the EB and moves tangentially along it.
+Future versions of ``chombo-discharge`` will likely include more sophisticated algorithms.
 
 .. tip::
 
-   ``AmrMesh`` also stores the implicit function on the mesh, which could also be used to resolved particle collisions with the EB/domain.
+   ``AmrMesh`` also stores the implicit function on the mesh, which could also be used to resolve particle collisions with the EB/domain.
 
 .. _Chap:ParticleMesh:
 
@@ -553,23 +458,25 @@ There are two main operations involved:
 Particle deposition
 ___________________
 
-To deposit particles on the mesh, the user can call the templated function ``AmrMesh::depositParticles`` which have a signatures
+To deposit the particle weight on the mesh, the user can call ``AmrMesh::depositWeight``:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 945-981
+   :lines: 967-975
    :language: c++
    :dedent: 2
 
-Here, the template parameter ``P`` is the particle type and the template parameter ``MemberFunc`` is a C++ pointer-to-member-function that returns ``Ret``, which must either be a ``Real`` or a ``RealVect``.
-In addition, the function will accept ``const Real&`` or ``const RealVect&``.
-The pointer-to-member ``MemberFunc`` indicates the variable to be deposited on the mesh, and must have return type ``Ret``.
-This function pointer does not need to return a member in the particle class, but it must be marked ``const``.
+The input arguments are the output mesh data holder (must have exactly one component), the realm and phase where the particles live, the SoA particle container (``a_particles``), the deposition method, the coarse-fine handling, and a flag that enforces nearest grid-point deposition in cut-cells.
+The last flag is motivated by the fact that some applications might require hard mass conservation, and the user can then ensure that mass is never deposited into covered grid cells.
 
-Next, the input arguments to ``depositParticles`` are the output mesh data holder (must have exactly one or ``SpaceDim`` components), the realm and phase where the particles live, and the particles themselves (``a_particles``).
-Finally, the flag ``a_forceIrregNGP`` permits the user to enforce nearest grid-point deposition in cut-cells.
-This option is motivated by the fact that some applications might require hard mass conservation, and the user can then ensure that mass is never deposited into covered grid cells.
+To deposit a *derived* per-particle quantity (e.g. weight times a payload column), use ``AmrMesh::depositGathered`` with a gatherer callback, or ``AmrMesh::depositParticles<Members...>`` to deposit one or more payload columns directly.
+Surface (EB) deposition of the weight column onto an ``EBAMRIVData`` is available through an overload of ``AmrMesh::depositParticles``:
 
-The input argument ``a_depositionType`` indicates the deposition method, while ``a_coarseFineDeposition`` deposition modifications near refinement boundaries.
+.. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
+   :lines: 948-953
+   :language: c++
+   :dedent: 2
+
+The input argument ``a_depositionType`` indicates the deposition method, while ``a_coarseFineDeposition`` selects deposition modifications near refinement boundaries.
 These are discussed below.
 
 Base deposition
@@ -586,13 +493,13 @@ The base deposition scheme is specified by an enum ``DepositionType`` with valid
 Coarse-fine deposition
 ^^^^^^^^^^^^^^^^^^^^^^
 
-The input argument ``a_coarseFineDeposition`` determines how deposition near the coarse-fine deposition is handled.
+The input argument ``a_coarseFineDeposition`` determines how deposition near the coarse-fine boundary is handled.
 Refinement boundaries introduce additional complications in the deposition scheme due to
 
 #. Fine-grid particles whose deposition clouds hang over the refinement boundary and onto the coarse level.
 #. Coarse-grid particles whose deposition clouds stick underneath the fine-level.
 
-In addition, there can be complicated near physical boundaries, such as domain or embedded boundaries.
+In addition, there can be complications near physical boundaries, such as domain or embedded boundaries.
 
 .. _Fig:ParticleDeposition:
 .. figure:: /_static/figures/ParticleDeposition.png
@@ -604,7 +511,7 @@ In addition, there can be complicated near physical boundaries, such as domain o
 ``chombo-discharge`` support various ways of handling deposition across the refinement boundary.
 In all of these methods, the mass on the fine grid particles whose deposition clouds hang over the refinement boundaries is simply added to the coarse grid.
 The main modifications to the deposition scheme is performed for the coarse-grid particles that live around the refinement boundary (see :numref:`Fig:HaloMask`).
-For the coarse-grid particles the following processes then occur:   
+For the coarse-grid particles the following processes then occur:
 
 .. _Fig:HaloMask:
 .. figure:: /_static/figures/HaloMask.png
@@ -623,12 +530,12 @@ The following coarse-fine deposition methods are currently supported:
   For example, see the indicated coarse-grid particle cloud in the left panel :numref:`Fig:ParticleDeposition`.
   While this particle has a width given by the coarse-grid cell size, it will deposit into the coarse grid cells underneath the fine grid.
   The mass that ends up in these cells is interpolated to the fine grid, which in this case will inject mass into two layers of fine-grid cells.
-  
+
 * ``CoarseFineDeposition::Halo``
-  This method extracts the coarse-grid particles that live on the refinement boundary and deposit them with their original width on both the coarse and fine levels. 
+  This method extracts the coarse-grid particles that live on the refinement boundary and deposit them with their original width on both the coarse and fine levels.
   This is done by first depositing the particles on the coarse level, and then transferring them to the fine level and redepositing them there with the original particle width.
-  Taking the left panel in :numref:`Fig:ParticleDeposition` as an example, the green particle will then deposit into the coarse-grid cell as well as the first layer of fine-grid cells. 
-     
+  Taking the left panel in :numref:`Fig:ParticleDeposition` as an example, the green particle will then deposit into the coarse-grid cell as well as the first layer of fine-grid cells.
+
 * ``CoarseFineDeposition::HaloNGP``
   Similar to ``CoarseFineDeposition::Halo`` discussed above, this method also extracts the coarse-grid particles on the coarse side of the refinement boundary.
   However, rather than using the original deposition scheme, these particles are deposited with an NGP scheme.
@@ -642,84 +549,35 @@ The following coarse-fine deposition methods are currently supported:
 
    Most coarse-fine particle deposition schemes exhibit some artifacts around the refinement boundary, especially when the particle width exceeds the grid cell size (e.g., for TSC).
    The ``CoarseFineDeposition::Transition`` method is the one that we recommend, especially when used with CIC, as it eliminates spurious gradients across the refinement boundary.
-  
+
 
 Particle interpolation
 ______________________
 
-To interpolate mesh data onto a particle property, the user can call the ``AmrMesh`` member functions
+To interpolate mesh data onto a payload column, the user can call ``AmrMesh::interpolateParticles``:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 983-1001
+   :lines: 1063-1070
    :language: c++
    :dedent: 2
 
-The function signature for particle interpolation is pretty much the same as for particle deposition, with the exception of the interpolated field.
-The template parameter ``P`` still indicates the particle type, but the user can interpolate onto either a scalar particle variable or a vector variable.
-For example, in order to interpolate the particle acceleration, the particle class (let's call it ``MyParticleClass``) will typically have a member function ``RealVect& acceleration()``, and in this case one can interpolate the acceleration by
+The template parameter ``Members`` is a pack of payload member pointers selecting the target column(s): a single scalar column, or ``SpaceDim`` columns for a vector quantity.
+For example, to interpolate a vector velocity stored as ``vx``/``vy``/``vz`` payload columns,
 
 .. code-block:: c++
 
    RefCountedPtr<AmrMesh> amr;
 
-   amr->interpolateParticles<MyParticleClass, RealVect&, &MyParticleClass::acceleration>(...)
+   amr->interpolateParticles<D_DECL(&MyPayload::vx, &MyPayload::vy, &MyPayload::vz)>(...);
+
+The companion ``AmrMesh::interpolateWeight`` interpolates a scalar mesh field onto the container-owned weight column.
 
 .. note::
 
-   If the user interpolates onto a scalar variable, the mesh variable must have exactly one component.
-   Likewise, if interpolating a vector variable, the mesh variable must have ``SpaceDim`` components.
+   If interpolating onto a scalar column, the mesh variable must have exactly one component.
+   Likewise, if interpolating a vector quantity (``SpaceDim`` columns), the mesh variable must have ``SpaceDim`` components.
 
-Example
-_______
-
-Assume that we have some particle class ``KineticParticle`` defined as
-
-.. code-block:: c++
-	   
-   class KineticParticle : public GenericParticle<1,2>
-   {
-   public:
-      inline
-      Real& weight() {
-         return this->real<0>();
-      }
-      
-      inline
-      RealVect& velocity() {
-         return this->vect<0>();
-      }
-
-      inline
-      RealVect& acceleration() {
-         return this->vect<1>();
-      }
-
-      inline
-      RealVect momentum() const {
-         return this->weight() * this->velocity();
-      }
-   };
-
-To deposit the weight, velocity, and momentum on the grid we would call
-
-.. code-block:: c++
-
-   RefCountedPtr<AmrMesh> amr;
-
-   amr->depositParticles<KineticParticle, const Real&,     &KineticParticle::mass >(...);
-   amr->depositParticles<KineticParticle, const RealVect&, &KineticParticle::velocity>(...);
-   amr->depositParticles<KineticParticle, const RealVect&, &KineticParticle::momentum>(...);
-
-Likewise, to interpolate onto these fields we can call
-
-.. code-block:: c++
-
-   RefCountedPtr<AmrMesh> amr;
-
-   amr->interpolateParticles<KineticParticle, Real&,     &KineticParticle::mass >(...);
-   amr->interpolateParticles<KineticParticle, RealVect&, &KineticParticle::velocity>(...);
-
-.. _Chap:ParticleVisualization:   
+.. _Chap:ParticleVisualization:
 
 Particle visualization
 ----------------------
@@ -732,13 +590,14 @@ Simple particle visualization can be performed by writing ``H5Part`` compatible 
 This is done through the function ``writeH5Part`` in the ``DischargeIO`` namespace, with the following signature:
 
 .. literalinclude:: ../../../../Source/Utilities/CD_DischargeIO.H
-   :lines: 141-163
+   :lines: 176-183
    :language: c++
    :dedent: 2
 
 This routine permits particles to be written (in parallel, when using MPI) into a file readable by VisIt.
-The optional arguments ``a_realVars`` and ``a_vectVars`` permit the user to set the output variable names for the ``M`` scalar variables and the ``N`` vector variables.
-The argument ``a_shift`` will simply shift the particle positions in the output HDF5 file. 
+The container-owned position, id, and weight are written automatically.
+The ``a_scalarVars`` and ``a_vectorVars`` arguments are lists of ``(name, accessor)`` pairs, where each accessor is a callable ``(const ParticleSoA<P>&, std::size_t) -> Real`` (scalar) or ``-> RealVect`` (vector); this lets the caller name and select exactly which payload quantities to export (each vector dataset is written as ``name-x``/``name-y``/``name-z``).
+The argument ``a_shift`` will simply shift the particle positions in the output HDF5 file.
 
 .. _Chap:SuperParticles:
 
@@ -746,8 +605,15 @@ Superparticles
 --------------
 
 Often, merging or splitting of particles is required.
-In the most general case, users can simply interact directly with the particle list to modify the particles, which can be done either on a per-patch basis or within individual grid cells. 
-In each case one starts with a list ``List<P>`` that needs to be modified.
+The recommended pattern operates on one cell at a time: cell-sort the leaf, extract a cell's particles into a small scratch ``ParticleSoA``, merge/split them, and rebuild the leaf.
+``ParticleSoA<P>::extractCell`` performs the per-cell extraction
+
+.. literalinclude:: ../../../../Source/Particle/CD_ParticleSoA.H
+   :lines: 1361-1362
+   :language: c++
+
+and the merged result is accumulated into an output ``ParticleSoA`` (via ``append``) which finally replaces the leaf with ``swap``.
+A complete worked example is ``ItoSolver::makeSuperparticles`` in :file:`$DISCHARGE_HOME/Source/ItoDiffusion/CD_ItoSolver.cpp`.
 
 ``chombo-discharge`` has rather elementary support for handling superparticles.
 Currently, we only support reinitialization of particles, or agglomeration of particles using kD-trees, as discussed below.
@@ -758,7 +624,7 @@ ________
 ``chombo-discharge`` has functionality for spatially partitioning particles using kD-trees, which can be used as a basis for particle merging and splitting.
 kD-trees operate by partitioning a set of input primitives into spatially coherent subsets.
 At each level in the tree recursion one chooses an axis for partitioning one subset into two new subsets, and the recursion continues until the partitioning is complete.
-:numref:`Fig:PartitionKD` shows an example where a set of initial particles are partitioned using such a tree. 
+:numref:`Fig:PartitionKD` shows an example where a set of initial particles are partitioned using such a tree.
 
 .. _Fig:PartitionKD:
 .. figure:: /_static/figures/PartitionKD.png
@@ -767,24 +633,16 @@ At each level in the tree recursion one chooses an axis for partitioning one sub
 
    Example of a kD-tree partitioning of particles in a single cell.
 
-.. tip:: 
+.. tip::
 
-   The source code for the kD-tree functionality is given in :file:`$DISCHARGE_HOME/Source/Particle/CD_SuperParticles.H`.       
+   The source code for the kD-tree functionality is given in :file:`$DISCHARGE_HOME/Source/Particle/CD_KDNode.H`.
 
-The kD-tree partitioner requires a user-supplied criterion for particle partitioning.
-Only the partitioner ``PartitionEqualWeight`` is currently supported, and this partitioner will divide the original subset into two new subsets such that the particle weights in the two halves differs by at most one physical particle.
-This partitioner is implemented as
-
-.. code-block:: c++
-
-  template <class P, Real& (P::*weight)(), const RealVect& (P::*position)() const>
-  typename KDNode<P>::Partitioner PartitionEqualWeight;
-
-Here, ``P`` is the particle type, and this class *must* have function members ``Real& P::weight()`` and ``const RealVect& P::position()`` which return the particle weight and position.
+The kD-tree partitioner partitions a lightweight, communication-free particle type (``NonCommParticle``) carrying the position, weight, and any quantities to be preserved across a merge.
+Only the partitioner ``partitionAndSplitEqualWeightKD`` is currently supported, and this partitioner will divide the original subset into two new subsets such that the particle weights in the two halves differ by at most one physical particle.
 
 .. warning::
-   
-   ``PartitionEqualWeight`` will usually split particles to ensure that the weight in the two subsets are the same (thus creating new particles). 
+
+   ``partitionAndSplitEqualWeightKD`` will usually split particles to ensure that the weight in the two subsets are the same (thus creating new particles).
    In this case any other members in the particle type are copied over into the new particles.
 
 The particles in each leaf of the kD-tree can then be merged into new particles.

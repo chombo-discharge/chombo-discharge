@@ -7,7 +7,7 @@ var searchData=
   ['timer_4',['Timer',['../classTimer.html',1,'']]],
   ['timestepper_5',['TimeStepper',['../classTimeStepper.html',1,'']]],
   ['torussdf_6',['TorusSdf',['../classTorusSdf.html',1,'']]],
-  ['tracerparticle_7',['TracerParticle',['../classTracerParticle.html',1,'']]],
+  ['tracerparticle_7',['TracerParticle',['../structTracerParticle.html',1,'']]],
   ['tracerparticlesolver_8',['TracerParticleSolver',['../classTracerParticleSolver.html',1,'']]],
   ['tracerparticlestepper_9',['TracerParticleStepper',['../classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html',1,'Physics::TracerParticle']]],
   ['triangle_10',['Triangle',['../classTriangle.html',1,'']]],

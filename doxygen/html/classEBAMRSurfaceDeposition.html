@@ -106,10 +106,10 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aa58649d909e05dd7ce9b52b7f4d0026d" id="r_aa58649d909e05dd7ce9b52b7f4d0026d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRSurfaceDeposition.html#aa58649d909e05dd7ce9b52b7f4d0026d">define</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBLevelGrid</a> &gt; &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_ebGrids</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBLevelGrid</a> &gt; &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_ebGridsCoarsenedFine</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBLevelGrid</a> &gt; &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_ebGridsRefinedCoar</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">int</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_refRat</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_dx</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_probLo</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_finestLevel</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_radius</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:aa58649d909e05dd7ce9b52b7f4d0026d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define function. Puts objects in usable state.  <br /></td></tr>
 <tr class="separator:aa58649d909e05dd7ce9b52b7f4d0026d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3c0de2e620484866102b0a4ed3a59247" id="r_a3c0de2e620484866102b0a4ed3a59247"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">Ret</a> , <a class="el" href="classTracerParticleSolver.html">Ret</a>(P::*)() <a class="el" href="classTracerParticleSolver.html">const</a> MemberFunc&gt; </td></tr>
-<tr class="memitem:a3c0de2e620484866102b0a4ed3a59247"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classEBAMRSurfaceDeposition.html#a3c0de2e620484866102b0a4ed3a59247">deposit</a> (<a class="el" href="classTracerParticleSolver.html">EBAMRIVData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_meshData</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_particles</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:a3c0de2e620484866102b0a4ed3a59247"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposition function which deposites the particles on the surface.  <br /></td></tr>
-<tr class="separator:a3c0de2e620484866102b0a4ed3a59247"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac2b43678028e76d9cd175eeff6f7e4bc" id="r_ac2b43678028e76d9cd175eeff6f7e4bc"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; </td></tr>
+<tr class="memitem:ac2b43678028e76d9cd175eeff6f7e4bc"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classEBAMRSurfaceDeposition.html#ac2b43678028e76d9cd175eeff6f7e4bc">deposit</a> (<a class="el" href="classTracerParticleSolver.html">EBAMRIVData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_meshData</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_particles</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:ac2b43678028e76d9cd175eeff6f7e4bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit the container-owned weight column of an SoA particle container onto the surface.  <br /></td></tr>
+<tr class="separator:ac2b43678028e76d9cd175eeff6f7e4bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
@@ -455,13 +455,13 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a3c0de2e620484866102b0a4ed3a59247" name="a3c0de2e620484866102b0a4ed3a59247"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3c0de2e620484866102b0a4ed3a59247">&#9670;&#160;</a></span>deposit()</h2>
+<a id="ac2b43678028e76d9cd175eeff6f7e4bc" name="ac2b43678028e76d9cd175eeff6f7e4bc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac2b43678028e76d9cd175eeff6f7e4bc">&#9670;&#160;</a></span>deposit()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">Ret</a> , <a class="el" href="classTracerParticleSolver.html">Ret</a>(P::*)() <a class="el" href="classTracerParticleSolver.html">const</a> MemberFunc&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -475,7 +475,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a> &gt; &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_particles</em>&#160;</td>
         </tr>
         <tr>
@@ -491,15 +491,22 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
 </table>
 </div><div class="memdoc">
 
-<p>Deposition function which deposites the particles on the surface. </p>
-<p>P is the particle type, Ret is a Real or a const Real&amp;, and MemberFunc is a member function of P. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Deposit the container-owned weight column of an SoA particle container onto the surface. </p>
+<p>SoA overload of deposit; deposits the weight column (surface charge always deposits weight). </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_meshData</td><td>Mesh data. Must defined on cut-cells only. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_particles</td><td>Particles to deposit </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_meshData</td><td>Mesh data. Must be defined on cut-cells only. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_particles</td><td>SoA particles to deposit. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section note"><dt>Note</dt><dd>This will throw an error if a particle is located on a grid cell that is NOT an irregular cell </dd></dl>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">P</td><td>Payload type of the container. </td></tr>
+    <tr><td class="paramname">Traits</td><td>Column descriptor for the payload. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>Throws an error if a particle is located on a grid cell that is NOT an irregular cell. </dd></dl>
 
 </div>
 </div>

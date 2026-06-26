@@ -107,13 +107,13 @@ Collaboration diagram for McPhoto:</div>
 <div class="dyncontent">
 <div class="center"><img src="classMcPhoto__coll__graph.png" border="0" usemap="#aMcPhoto_coll__map" alt="Collaboration graph"/></div>
 <map name="aMcPhoto_coll__map" id="aMcPhoto_coll__map">
-<area shape="rect" title="Radiative transfer equation solver using Monte&#45;Carlo simulation." alt="" coords="49,255,127,280"/>
-<area shape="rect" href="classRtSolver.html" title="Abstract RTE solver class for doing various kinds of radiative transfer equations...." alt="" coords="5,101,83,126"/>
-<area shape="poly" title=" " alt="" coords="54,138,87,254,82,255,48,140"/>
-<area shape="rect" href="classParticleContainer.html" title=" " alt="" coords="107,93,251,133"/>
-<area shape="poly" title=" " alt="" coords="163,147,97,256,93,253,158,144"/>
-<area shape="rect" href="classParticleContainer.html" title="Templated class for holding particles on an AMR hierarchy with particle remapping." alt="" coords="93,5,264,31"/>
-<area shape="poly" title=" " alt="" coords="181,44,181,93,176,93,176,44"/>
+<area shape="rect" title="Radiative transfer equation solver using Monte&#45;Carlo simulation." alt="" coords="49,269,127,295"/>
+<area shape="rect" href="classRtSolver.html" title="Abstract RTE solver class for doing various kinds of radiative transfer equations...." alt="" coords="5,115,83,141"/>
+<area shape="poly" title=" " alt="" coords="54,153,87,268,82,270,48,154"/>
+<area shape="rect" href="classParticleContainer.html" title=" " alt="" coords="107,108,251,148"/>
+<area shape="poly" title=" " alt="" coords="163,161,97,270,93,268,158,159"/>
+<area shape="rect" href="classParticleContainer.html" title="AMR&#45;hierarchy container of computational particles, stored per patch in Struct&#45;of&#45;Arrays form." alt="" coords="107,5,251,45"/>
+<area shape="poly" title=" " alt="" coords="181,59,181,108,176,108,176,59"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -159,35 +159,34 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aef6d651972be5b22b0dfc778a834b9d8" id="r_aef6d651972be5b22b0dfc778a834b9d8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#aef6d651972be5b22b0dfc778a834b9d8">isInstantaneous</a> ()</td></tr>
 <tr class="memdesc:aef6d651972be5b22b0dfc778a834b9d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Instantaneous solver or not.  <br /></td></tr>
 <tr class="separator:aef6d651972be5b22b0dfc778a834b9d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac417c104ce1b2ded82dba7d55910237b" id="r_ac417c104ce1b2ded82dba7d55910237b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#ac417c104ce1b2ded82dba7d55910237b">advancePhotonsInstantaneous</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_bulkPhotons</a>, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_ebPhotons</a>, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_domainPhotons</a>, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_photons</a>)</td></tr>
+<tr class="memitem:ac417c104ce1b2ded82dba7d55910237b" id="r_ac417c104ce1b2ded82dba7d55910237b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#ac417c104ce1b2ded82dba7d55910237b">advancePhotonsInstantaneous</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_bulkPhotons</a>, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_ebPhotons</a>, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_domainPhotons</a>, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_photons</a>)</td></tr>
 <tr class="memdesc:ac417c104ce1b2ded82dba7d55910237b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Move photons and absorb them on various objects.  <br /></td></tr>
 <tr class="separator:ac417c104ce1b2ded82dba7d55910237b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a801909315b9d81eaaec819a6ebd25fdd" id="r_a801909315b9d81eaaec819a6ebd25fdd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a801909315b9d81eaaec819a6ebd25fdd">advancePhotonsTransient</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_bulkPhotons</a>, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_ebPhotons</a>, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_domainPhotons</a>, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_photons</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_dt</a>)</td></tr>
+<tr class="memitem:a801909315b9d81eaaec819a6ebd25fdd" id="r_a801909315b9d81eaaec819a6ebd25fdd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a801909315b9d81eaaec819a6ebd25fdd">advancePhotonsTransient</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_bulkPhotons</a>, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_ebPhotons</a>, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_domainPhotons</a>, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_photons</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_dt</a>)</td></tr>
 <tr class="memdesc:a801909315b9d81eaaec819a6ebd25fdd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Move photons and absorb them on various objects.  <br /></td></tr>
 <tr class="separator:a801909315b9d81eaaec819a6ebd25fdd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6711fd52f84cff45c11eb31ec4fe49f5" id="r_a6711fd52f84cff45c11eb31ec4fe49f5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a6711fd52f84cff45c11eb31ec4fe49f5">computeNumPhysicalPhotons</a> (<a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_numPhysPhotonsTotal</a>, <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_numPhysPhotonsPacket</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_source</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_dt</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:a6711fd52f84cff45c11eb31ec4fe49f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the number of physical photons in each grid cell.  <br /></td></tr>
 <tr class="separator:a6711fd52f84cff45c11eb31ec4fe49f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae078305361eaa69552b37b26d0bff567" id="r_ae078305361eaa69552b37b26d0bff567"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#ae078305361eaa69552b37b26d0bff567">generateComputationalPhotons</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_photons</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_numPhysPhotons</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">size_t</a> <a class="el" href="classTracerParticleSolver.html">a_maxPhotonsPerCell</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:ae078305361eaa69552b37b26d0bff567" id="r_ae078305361eaa69552b37b26d0bff567"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#ae078305361eaa69552b37b26d0bff567">generateComputationalPhotons</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_photons</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_numPhysPhotons</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">size_t</a> <a class="el" href="classTracerParticleSolver.html">a_maxPhotonsPerCell</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:ae078305361eaa69552b37b26d0bff567"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generate computational photons.  <br /></td></tr>
 <tr class="separator:ae078305361eaa69552b37b26d0bff567"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a53e8ff8f986e801623a1c11094251738" id="r_a53e8ff8f986e801623a1c11094251738"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a53e8ff8f986e801623a1c11094251738">dirtySamplePhotons</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPointParticle.html">PointParticle</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_photons</a>, <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_phi</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_numPhysicalPhotons</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">size_t</a> <a class="el" href="classTracerParticleSolver.html">a_maxPhotonsPerCell</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:a53e8ff8f986e801623a1c11094251738"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dirty-sampling method for photons.  <br /></td></tr>
-<tr class="separator:a53e8ff8f986e801623a1c11094251738"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aab8d8ef425e38721bbf0c6cebcd04093" id="r_aab8d8ef425e38721bbf0c6cebcd04093"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#aab8d8ef425e38721bbf0c6cebcd04093">dirtySamplePhotons</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structNoPayload.html">NoPayload</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_photons</a>, <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_phi</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_numPhysicalPhotons</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">size_t</a> <a class="el" href="classTracerParticleSolver.html">a_maxPhotonsPerCell</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:aab8d8ef425e38721bbf0c6cebcd04093"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dirty-sampling method for photons.  <br /></td></tr>
+<tr class="separator:aab8d8ef425e38721bbf0c6cebcd04093"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a83b71abb5f05186cdf9e1ca7392c5378" id="r_a83b71abb5f05186cdf9e1ca7392c5378"><td class="memItemLeft" align="right" valign="top"><a id="a83b71abb5f05186cdf9e1ca7392c5378" name="a83b71abb5f05186cdf9e1ca7392c5378"></a>
 <a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>remap</b> ()</td></tr>
 <tr class="memdesc:a83b71abb5f05186cdf9e1ca7392c5378"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remap computational particles. This remaps m_photons. <br /></td></tr>
 <tr class="separator:a83b71abb5f05186cdf9e1ca7392c5378"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af6b0622e5f17ddd23066af62eb9253a8" id="r_af6b0622e5f17ddd23066af62eb9253a8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#af6b0622e5f17ddd23066af62eb9253a8">remap</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_photons</a>)</td></tr>
+<tr class="memitem:af6b0622e5f17ddd23066af62eb9253a8" id="r_af6b0622e5f17ddd23066af62eb9253a8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#af6b0622e5f17ddd23066af62eb9253a8">remap</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_photons</a>)</td></tr>
 <tr class="memdesc:af6b0622e5f17ddd23066af62eb9253a8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remap computational particles.  <br /></td></tr>
 <tr class="separator:af6b0622e5f17ddd23066af62eb9253a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab43303c3391364188cf423c8b9e1d4ae" id="r_ab43303c3391364188cf423c8b9e1d4ae"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#ab43303c3391364188cf423c8b9e1d4ae">depositPhotons</a> ()</td></tr>
 <tr class="memdesc:ab43303c3391364188cf423c8b9e1d4ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit photons on the mesh.  <br /></td></tr>
 <tr class="separator:ab43303c3391364188cf423c8b9e1d4ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9a8bb3676937e8dbf2e7b43fe560dc19" id="r_a9a8bb3676937e8dbf2e7b43fe560dc19"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">Ret</a> , <a class="el" href="classTracerParticleSolver.html">Ret</a>(P::*)() <a class="el" href="classTracerParticleSolver.html">const</a> MemberFunc&gt; </td></tr>
-<tr class="memitem:a9a8bb3676937e8dbf2e7b43fe560dc19"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a9a8bb3676937e8dbf2e7b43fe560dc19">depositPhotons</a> (<a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_phi</a>, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_particles</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_deposition</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:a9a8bb3676937e8dbf2e7b43fe560dc19"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit photons.  <br /></td></tr>
-<tr class="separator:a9a8bb3676937e8dbf2e7b43fe560dc19"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afabd1882df7ab89fba85f17131163914" id="r_afabd1882df7ab89fba85f17131163914"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#afabd1882df7ab89fba85f17131163914">depositPhotons</a> (<a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_phi</a>, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_photons</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_deposition</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:afabd1882df7ab89fba85f17131163914"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit SoA photons on the mesh.  <br /></td></tr>
+<tr class="separator:afabd1882df7ab89fba85f17131163914"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ada8ed4f1b1f0f9e242d4caa01f45655d" id="r_ada8ed4f1b1f0f9e242d4caa01f45655d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#ada8ed4f1b1f0f9e242d4caa01f45655d">sortPhotonsByCell</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMcPhoto.html#a3e74abc2e95a4dd5ff480a4cad3288f6">WhichContainer</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_which</a>)</td></tr>
 <tr class="memdesc:ada8ed4f1b1f0f9e242d4caa01f45655d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sort container by cell.  <br /></td></tr>
 <tr class="separator:ada8ed4f1b1f0f9e242d4caa01f45655d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -234,12 +233,9 @@ Public Member Functions</h2></td></tr>
 <a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>clear</b> ()</td></tr>
 <tr class="memdesc:a975bec96d7ff8efde492701bc14eaa9e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Clear data holder. <br /></td></tr>
 <tr class="separator:a975bec96d7ff8efde492701bc14eaa9e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a127c4d8657913d9b614285db793113a8" id="r_a127c4d8657913d9b614285db793113a8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a127c4d8657913d9b614285db793113a8">clear</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_photons</a>)</td></tr>
+<tr class="memitem:a127c4d8657913d9b614285db793113a8" id="r_a127c4d8657913d9b614285db793113a8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a127c4d8657913d9b614285db793113a8">clear</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_photons</a>)</td></tr>
 <tr class="memdesc:a127c4d8657913d9b614285db793113a8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Clear data holder.  <br /></td></tr>
 <tr class="separator:a127c4d8657913d9b614285db793113a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a99078095f8e9ba1d8d7140dc4b3753d7" id="r_a99078095f8e9ba1d8d7140dc4b3753d7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a99078095f8e9ba1d8d7140dc4b3753d7">clear</a> (<a class="el" href="CD__ParticleContainer_8H.html#ab57ee0582213ddd8962c5922528275a3">AMRParticles</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_photons</a>)</td></tr>
-<tr class="memdesc:a99078095f8e9ba1d8d7140dc4b3753d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Clear data holder.  <br /></td></tr>
-<tr class="separator:a99078095f8e9ba1d8d7140dc4b3753d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab228cfc01dd6fe62c7148471b9f8daae" id="r_ab228cfc01dd6fe62c7148471b9f8daae"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#ab228cfc01dd6fe62c7148471b9f8daae">writePlotFile</a> () <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
 <tr class="memdesc:ab228cfc01dd6fe62c7148471b9f8daae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot file.  <br /></td></tr>
 <tr class="separator:ab228cfc01dd6fe62c7148471b9f8daae"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -252,22 +248,22 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a0b37ce1c18fb0aa1d63349c33d3f4bd6" id="r_a0b37ce1c18fb0aa1d63349c33d3f4bd6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a0b37ce1c18fb0aa1d63349c33d3f4bd6">getNumberOfPlotVariables</a> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
 <tr class="memdesc:a0b37ce1c18fb0aa1d63349c33d3f4bd6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get number of output variables.  <br /></td></tr>
 <tr class="separator:a0b37ce1c18fb0aa1d63349c33d3f4bd6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae0d1a83e6a7edf5458b13905fb7c4013" id="r_ae0d1a83e6a7edf5458b13905fb7c4013"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#ae0d1a83e6a7edf5458b13905fb7c4013">countPhotons</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__ParticleContainer_8H.html#ab57ee0582213ddd8962c5922528275a3">AMRParticles</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_photons</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:ae0d1a83e6a7edf5458b13905fb7c4013"><td class="mdescLeft">&#160;</td><td class="mdescRight">Count number of photons in particle list.  <br /></td></tr>
-<tr class="separator:ae0d1a83e6a7edf5458b13905fb7c4013"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8ca6f124b1c8c0bac0f2bd9651fdcb06" id="r_a8ca6f124b1c8c0bac0f2bd9651fdcb06"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a8ca6f124b1c8c0bac0f2bd9651fdcb06">getPhotons</a> ()</td></tr>
+<tr class="memitem:acfdb9370b7f5961c0aead14ed232eb3b" id="r_acfdb9370b7f5961c0aead14ed232eb3b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#acfdb9370b7f5961c0aead14ed232eb3b">countPhotons</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_photons</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:acfdb9370b7f5961c0aead14ed232eb3b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Count number of photons in particle list.  <br /></td></tr>
+<tr class="separator:acfdb9370b7f5961c0aead14ed232eb3b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8ca6f124b1c8c0bac0f2bd9651fdcb06" id="r_a8ca6f124b1c8c0bac0f2bd9651fdcb06"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a8ca6f124b1c8c0bac0f2bd9651fdcb06">getPhotons</a> ()</td></tr>
 <tr class="memdesc:a8ca6f124b1c8c0bac0f2bd9651fdcb06"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get m_photons.  <br /></td></tr>
 <tr class="separator:a8ca6f124b1c8c0bac0f2bd9651fdcb06"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a93df1c4647ee06ab86c6d195ba93bacf" id="r_a93df1c4647ee06ab86c6d195ba93bacf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a93df1c4647ee06ab86c6d195ba93bacf">getBulkPhotons</a> ()</td></tr>
+<tr class="memitem:a93df1c4647ee06ab86c6d195ba93bacf" id="r_a93df1c4647ee06ab86c6d195ba93bacf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a93df1c4647ee06ab86c6d195ba93bacf">getBulkPhotons</a> ()</td></tr>
 <tr class="memdesc:a93df1c4647ee06ab86c6d195ba93bacf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get bulk photons, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">i.e</a>. photons absorbed on the mesh.  <br /></td></tr>
 <tr class="separator:a93df1c4647ee06ab86c6d195ba93bacf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a46aa79d8d7cac384ebfa5577c36636e2" id="r_a46aa79d8d7cac384ebfa5577c36636e2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a46aa79d8d7cac384ebfa5577c36636e2">getEbPhotons</a> ()</td></tr>
+<tr class="memitem:a46aa79d8d7cac384ebfa5577c36636e2" id="r_a46aa79d8d7cac384ebfa5577c36636e2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a46aa79d8d7cac384ebfa5577c36636e2">getEbPhotons</a> ()</td></tr>
 <tr class="memdesc:a46aa79d8d7cac384ebfa5577c36636e2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get eb Photons, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">i.e</a>. photons absorbed on the EB.  <br /></td></tr>
 <tr class="separator:a46aa79d8d7cac384ebfa5577c36636e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2f0a848edbd68c9177d792dc42b45bdc" id="r_a2f0a848edbd68c9177d792dc42b45bdc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a2f0a848edbd68c9177d792dc42b45bdc">getDomainPhotons</a> ()</td></tr>
+<tr class="memitem:a2f0a848edbd68c9177d792dc42b45bdc" id="r_a2f0a848edbd68c9177d792dc42b45bdc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a2f0a848edbd68c9177d792dc42b45bdc">getDomainPhotons</a> ()</td></tr>
 <tr class="memdesc:a2f0a848edbd68c9177d792dc42b45bdc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get domain photons, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">i.e</a>. photons absorbed on domain edges/faces.  <br /></td></tr>
 <tr class="separator:a2f0a848edbd68c9177d792dc42b45bdc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a92c8a2364df70e13445d4f05d26a7955" id="r_a92c8a2364df70e13445d4f05d26a7955"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a92c8a2364df70e13445d4f05d26a7955">getSourcePhotons</a> ()</td></tr>
+<tr class="memitem:a92c8a2364df70e13445d4f05d26a7955" id="r_a92c8a2364df70e13445d4f05d26a7955"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a92c8a2364df70e13445d4f05d26a7955">getSourcePhotons</a> ()</td></tr>
 <tr class="memdesc:a92c8a2364df70e13445d4f05d26a7955"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get source photons.  <br /></td></tr>
 <tr class="separator:a92c8a2364df70e13445d4f05d26a7955"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad6b49636701b47b7387f4efae225e8ac" id="r_ad6b49636701b47b7387f4efae225e8ac"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#ad6b49636701b47b7387f4efae225e8ac">getMaxPhotonsPerCell</a> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
@@ -390,10 +386,9 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:a22ac8d5d0ff805aa90bb48465742137e" id="r_a22ac8d5d0ff805aa90bb48465742137e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a22ac8d5d0ff805aa90bb48465742137e">drawPhotons</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_source</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_volume</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_dt</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:a22ac8d5d0ff805aa90bb48465742137e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw photons in a cell and volume.  <br /></td></tr>
 <tr class="separator:a22ac8d5d0ff805aa90bb48465742137e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab0c2deba0fb666679c4d7ac54a33977b" id="r_ab0c2deba0fb666679c4d7ac54a33977b"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">Ret</a> , <a class="el" href="classTracerParticleSolver.html">Ret</a>(P::*)() <a class="el" href="classTracerParticleSolver.html">const</a> MemberFunc&gt; </td></tr>
-<tr class="memitem:ab0c2deba0fb666679c4d7ac54a33977b"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#ab0c2deba0fb666679c4d7ac54a33977b">depositKappaConservative</a> (<a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_phi</a>, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_particles</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> <a class="el" href="classTracerParticleSolver.html">a_deposition</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a> <a class="el" href="classTracerParticleSolver.html">a_coarseFineDeposition</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:ab0c2deba0fb666679c4d7ac54a33977b"><td class="mdescLeft">&#160;</td><td class="mdescRight">This computes the "conservative" deposition, multiplied by kappa.  <br /></td></tr>
-<tr class="separator:ab0c2deba0fb666679c4d7ac54a33977b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4a7b596b600325893c7495ddff055a51" id="r_a4a7b596b600325893c7495ddff055a51"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a4a7b596b600325893c7495ddff055a51">depositHybridDivergence</a> (<a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_phi</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a4a7b596b600325893c7495ddff055a51"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shared hybrid-divergence tail for the deposition routines.  <br /></td></tr>
+<tr class="separator:a4a7b596b600325893c7495ddff055a51"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a020f7d583686b3cc75e40b61a68e0c98" id="r_a020f7d583686b3cc75e40b61a68e0c98"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a020f7d583686b3cc75e40b61a68e0c98">depositNonConservative</a> (<a class="el" href="classTracerParticleSolver.html">EBAMRIVData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_depositionNC</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_depositionKappaC</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:a020f7d583686b3cc75e40b61a68e0c98"><td class="mdescLeft">&#160;</td><td class="mdescRight">Make the "non-conservative" kappa deposition.  <br /></td></tr>
 <tr class="separator:a020f7d583686b3cc75e40b61a68e0c98"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -439,7 +434,7 @@ Protected Member Functions</h2></td></tr>
 <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>parsePlotVariables</b> ()</td></tr>
 <tr class="memdesc:ad0e8145b5850c2739886793bb6ec36a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse plot variables. <br /></td></tr>
 <tr class="separator:ad0e8145b5850c2739886793bb6ec36a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae890b9d798f66ccfa025f8eb8643fec1" id="r_ae890b9d798f66ccfa025f8eb8643fec1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#ae890b9d798f66ccfa025f8eb8643fec1">depositPhotonsNGP</a> (<a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_output</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_photons</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_level</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:ae890b9d798f66ccfa025f8eb8643fec1" id="r_ae890b9d798f66ccfa025f8eb8643fec1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#ae890b9d798f66ccfa025f8eb8643fec1">depositPhotonsNGP</a> (<a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_output</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_photons</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_level</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:ae890b9d798f66ccfa025f8eb8643fec1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do an NGP deposit on a specific grid level. Used for IO.  <br /></td></tr>
 <tr class="separator:ae890b9d798f66ccfa025f8eb8643fec1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_methods_classRtSolver"><td colspan="2" onclick="javascript:toggleInherit('pro_methods_classRtSolver')"><img src="closed.png" alt="-"/>&#160;Protected Member Functions inherited from <a class="el" href="classRtSolver.html">RtSolver</a></td></tr>
@@ -527,7 +522,7 @@ Protected Attributes</h2></td></tr>
 <tr class="separator:a78c0d9b07c6c51aedc2814ff496d2503"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac7892c714fd5c277552ff7d98c2f3d58" id="r_ac7892c714fd5c277552ff7d98c2f3d58"><td class="memItemLeft" align="right" valign="top"><a id="ac7892c714fd5c277552ff7d98c2f3d58" name="ac7892c714fd5c277552ff7d98c2f3d58"></a>
 <a class="el" href="classMcPhoto.html#aae3fa6a4a0215c0da8e81c496e1deeb8">PhotonGeneration</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_photoGenerationMethod</b></td></tr>
-<tr class="memdesc:ac7892c714fd5c277552ff7d98c2f3d58"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classPhoton.html" title="Particle class for usage with Monte Carlo radiative transfer.">Photon</a> generation type. <br /></td></tr>
+<tr class="memdesc:ac7892c714fd5c277552ff7d98c2f3d58"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="structPhoton.html" title="SoA payload for Monte Carlo radiative-transfer photons.">Photon</a> generation type. <br /></td></tr>
 <tr class="separator:ac7892c714fd5c277552ff7d98c2f3d58"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1cd95a7a887f25440c6325332dcd96cb" id="r_a1cd95a7a887f25440c6325332dcd96cb"><td class="memItemLeft" align="right" valign="top"><a id="a1cd95a7a887f25440c6325332dcd96cb" name="a1cd95a7a887f25440c6325332dcd96cb"></a>
 <a class="el" href="classMcPhoto.html#aafc14c0be90113c59f60e677bb268150">SourceType</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_sourceType</b></td></tr>
@@ -558,23 +553,23 @@ Protected Attributes</h2></td></tr>
 <tr class="memdesc:a81f7329fb83c8feed0d01dcfa6778b55"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scratch storage for holding the mass difference when using hybrid deposition. <br /></td></tr>
 <tr class="separator:a81f7329fb83c8feed0d01dcfa6778b55"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab05c505a4ff40163d9803c89b0a2df26" id="r_ab05c505a4ff40163d9803c89b0a2df26"><td class="memItemLeft" align="right" valign="top"><a id="ab05c505a4ff40163d9803c89b0a2df26" name="ab05c505a4ff40163d9803c89b0a2df26"></a>
-<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_photons</b></td></tr>
+<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_photons</b></td></tr>
 <tr class="memdesc:ab05c505a4ff40163d9803c89b0a2df26"><td class="mdescLeft">&#160;</td><td class="mdescRight">All particles. <br /></td></tr>
 <tr class="separator:ab05c505a4ff40163d9803c89b0a2df26"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a743c50fe97ea70605d7ad5290cf48634" id="r_a743c50fe97ea70605d7ad5290cf48634"><td class="memItemLeft" align="right" valign="top"><a id="a743c50fe97ea70605d7ad5290cf48634" name="a743c50fe97ea70605d7ad5290cf48634"></a>
-<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_bulkPhotons</b></td></tr>
+<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_bulkPhotons</b></td></tr>
 <tr class="memdesc:a743c50fe97ea70605d7ad5290cf48634"><td class="mdescLeft">&#160;</td><td class="mdescRight">Photons absorbed in the volume. <br /></td></tr>
 <tr class="separator:a743c50fe97ea70605d7ad5290cf48634"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa08f15207aca3b7c894c22ae99e65915" id="r_aa08f15207aca3b7c894c22ae99e65915"><td class="memItemLeft" align="right" valign="top"><a id="aa08f15207aca3b7c894c22ae99e65915" name="aa08f15207aca3b7c894c22ae99e65915"></a>
-<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_ebPhotons</b></td></tr>
+<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_ebPhotons</b></td></tr>
 <tr class="memdesc:aa08f15207aca3b7c894c22ae99e65915"><td class="mdescLeft">&#160;</td><td class="mdescRight">This is a particle container for Photons that crossed EBs. It is filled during the advance step. <br /></td></tr>
 <tr class="separator:aa08f15207aca3b7c894c22ae99e65915"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a04ced5d2dc78f66bd19f3cf3b0863f43" id="r_a04ced5d2dc78f66bd19f3cf3b0863f43"><td class="memItemLeft" align="right" valign="top"><a id="a04ced5d2dc78f66bd19f3cf3b0863f43" name="a04ced5d2dc78f66bd19f3cf3b0863f43"></a>
-<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_domainPhotons</b></td></tr>
+<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_domainPhotons</b></td></tr>
 <tr class="memdesc:a04ced5d2dc78f66bd19f3cf3b0863f43"><td class="mdescLeft">&#160;</td><td class="mdescRight">This is a particle container for Photons that crossed boundaries. It is filled during the advance step. <br /></td></tr>
 <tr class="separator:a04ced5d2dc78f66bd19f3cf3b0863f43"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0f3270e4d54ad00fbd5e7d98b8704ec4" id="r_a0f3270e4d54ad00fbd5e7d98b8704ec4"><td class="memItemLeft" align="right" valign="top"><a id="a0f3270e4d54ad00fbd5e7d98b8704ec4" name="a0f3270e4d54ad00fbd5e7d98b8704ec4"></a>
-<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_sourcePhotons</b></td></tr>
+<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_sourcePhotons</b></td></tr>
 <tr class="memdesc:a0f3270e4d54ad00fbd5e7d98b8704ec4"><td class="mdescLeft">&#160;</td><td class="mdescRight">This is a particle container that can be used to add Photons directly. <br /></td></tr>
 <tr class="separator:a0f3270e4d54ad00fbd5e7d98b8704ec4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_attribs_classRtSolver"><td colspan="2" onclick="javascript:toggleInherit('pro_attribs_classRtSolver')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="classRtSolver.html">RtSolver</a></td></tr>
@@ -806,7 +801,7 @@ Additional Inherited Members</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time step </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_phi</td><td><a class="el" href="classPhoton.html" title="Particle class for usage with Monte Carlo radiative transfer.">Photon</a> density on the mesh </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_phi</td><td><a class="el" href="structPhoton.html" title="SoA payload for Monte Carlo radiative-transfer photons.">Photon</a> density on the mesh </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_source</td><td>Source term, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">i.e</a>. number of photons produced per unit time. The photons will be generated based on what the user specifies in the input parameters for this class. <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">I.e</a>., whether or not a_source will generate stochastic or deterministic photons, and scaled based on what a_source actually contains (number of photons, number/volume, number/second, number/(volume*second)). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_zeroPhi</td><td>Dead parameter not used in this implementation. </td></tr>
   </table>
@@ -831,25 +826,25 @@ Additional Inherited Members</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> McPhoto::advancePhotonsInstantaneous </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_bulkPhotons</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_ebPhotons</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_domainPhotons</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_photons</em>&#160;</td>
         </tr>
         <tr>
@@ -891,25 +886,25 @@ Additional Inherited Members</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> McPhoto::advancePhotonsTransient </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_bulkPhotons</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_ebPhotons</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_domainPhotons</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_photons</em>, </td>
         </tr>
         <tr>
@@ -975,42 +970,8 @@ Additional Inherited Members</h2></td></tr>
 
 </div>
 </div>
-<a id="a99078095f8e9ba1d8d7140dc4b3753d7" name="a99078095f8e9ba1d8d7140dc4b3753d7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a99078095f8e9ba1d8d7140dc4b3753d7">&#9670;&#160;</a></span>clear() <span class="overload">[1/3]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> McPhoto::clear </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="CD__ParticleContainer_8H.html#ab57ee0582213ddd8962c5922528275a3">AMRParticles</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_photons</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Clear data holder. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_photons</td><td>Which container to clear </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
 <a id="a72d5f0f977eccadc439c0a31c8b8ede1" name="a72d5f0f977eccadc439c0a31c8b8ede1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a72d5f0f977eccadc439c0a31c8b8ede1">&#9670;&#160;</a></span>clear() <span class="overload">[2/3]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a72d5f0f977eccadc439c0a31c8b8ede1">&#9670;&#160;</a></span>clear() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1044,7 +1005,7 @@ Additional Inherited Members</h2></td></tr>
 </div>
 </div>
 <a id="a127c4d8657913d9b614285db793113a8" name="a127c4d8657913d9b614285db793113a8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a127c4d8657913d9b614285db793113a8">&#9670;&#160;</a></span>clear() <span class="overload">[3/3]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a127c4d8657913d9b614285db793113a8">&#9670;&#160;</a></span>clear() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1055,7 +1016,7 @@ Additional Inherited Members</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> McPhoto::clear </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_photons</em></td><td>)</td>
           <td></td>
         </tr>
@@ -1384,8 +1345,8 @@ Additional Inherited Members</h2></td></tr>
 
 </div>
 </div>
-<a id="ae0d1a83e6a7edf5458b13905fb7c4013" name="ae0d1a83e6a7edf5458b13905fb7c4013"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae0d1a83e6a7edf5458b13905fb7c4013">&#9670;&#160;</a></span>countPhotons()</h2>
+<a id="acfdb9370b7f5961c0aead14ed232eb3b" name="acfdb9370b7f5961c0aead14ed232eb3b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acfdb9370b7f5961c0aead14ed232eb3b">&#9670;&#160;</a></span>countPhotons()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1396,7 +1357,7 @@ Additional Inherited Members</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="classTracerParticleSolver.html">int</a> McPhoto::countPhotons </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__ParticleContainer_8H.html#ab57ee0582213ddd8962c5922528275a3">AMRParticles</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_photons</em></td><td>)</td>
           <td> const</td>
         </tr>
@@ -1500,45 +1461,21 @@ Additional Inherited Members</h2></td></tr>
 
 </div>
 </div>
-<a id="ab0c2deba0fb666679c4d7ac54a33977b" name="ab0c2deba0fb666679c4d7ac54a33977b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab0c2deba0fb666679c4d7ac54a33977b">&#9670;&#160;</a></span>depositKappaConservative()</h2>
+<a id="a4a7b596b600325893c7495ddff055a51" name="a4a7b596b600325893c7495ddff055a51"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4a7b596b600325893c7495ddff055a51">&#9670;&#160;</a></span>depositHybridDivergence()</h2>
 
 <div class="memitem">
 <div class="memproto">
-<div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">Ret</a> , <a class="el" href="classTracerParticleSolver.html">Ret</a>(P::*)() <a class="el" href="classTracerParticleSolver.html">const</a> MemberFunc&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> McPhoto::depositKappaConservative </td>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> McPhoto::depositHybridDivergence </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_phi</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a> &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_particles</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a>&#160;</td>
-          <td class="paramname"><em>a_deposition</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a>&#160;</td>
-          <td class="paramname"><em>a_coarseFineDeposition</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
+          <td class="paramname"><em>a_phi</em></td><td>)</td>
+          <td> const</td>
         </tr>
       </table>
   </td>
@@ -1548,13 +1485,10 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
 </table>
 </div><div class="memdoc">
 
-<p>This computes the "conservative" deposition, multiplied by kappa. </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>Shared hybrid-divergence tail for the deposition routines. </p>
+<p>On input a_phi holds the conservative (kappa-weighted) deposition. This blends in the non-conservative divergence, redistributes the mass difference (when m_blendConservation is set), and finishes with an average-down and ghost-cell interpolation. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_phi</td><td>Mesh density. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_particles</td><td>Particles to be deposited </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_deposition</td><td>Deposition method </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarseFineDeposition</td><td>Coarse-fine deposition strategy. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_phi</td><td>Mesh density. On input the conservative deposition; on output the hybrid result. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1634,13 +1568,11 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
 
 </div>
 </div>
-<a id="a9a8bb3676937e8dbf2e7b43fe560dc19" name="a9a8bb3676937e8dbf2e7b43fe560dc19"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9a8bb3676937e8dbf2e7b43fe560dc19">&#9670;&#160;</a></span>depositPhotons() <span class="overload">[2/2]</span></h2>
+<a id="afabd1882df7ab89fba85f17131163914" name="afabd1882df7ab89fba85f17131163914"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afabd1882df7ab89fba85f17131163914">&#9670;&#160;</a></span>depositPhotons() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
-<div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">Ret</a> , <a class="el" href="classTracerParticleSolver.html">Ret</a>(P::*)() <a class="el" href="classTracerParticleSolver.html">const</a> MemberFunc&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -1654,8 +1586,8 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a> &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_particles</em>, </td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_photons</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1676,12 +1608,12 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
 </table>
 </div><div class="memdoc">
 
-<p>Deposit photons. </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>Deposit SoA photons on the mesh. </p>
+<p>Deposits the container's weight column and then runs the shared hybrid divergence tail (non-conservative blend, mass redistribution, average-down, ghost interpolation). </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">a_phi</td><td>Deposited mesh density </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_photons</td><td>SoA photon container </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_deposition</td><td>Deposition method </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_particles</td><td>Particles </td></tr>
   </table>
   </dd>
 </dl>
@@ -1706,7 +1638,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_photons</em>, </td>
         </tr>
         <tr>
@@ -1740,8 +1672,8 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
 
 </div>
 </div>
-<a id="a53e8ff8f986e801623a1c11094251738" name="a53e8ff8f986e801623a1c11094251738"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a53e8ff8f986e801623a1c11094251738">&#9670;&#160;</a></span>dirtySamplePhotons()</h2>
+<a id="aab8d8ef425e38721bbf0c6cebcd04093" name="aab8d8ef425e38721bbf0c6cebcd04093"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aab8d8ef425e38721bbf0c6cebcd04093">&#9670;&#160;</a></span>dirtySamplePhotons()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1752,7 +1684,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
         <tr>
           <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> McPhoto::dirtySamplePhotons </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPointParticle.html">PointParticle</a> &gt; &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structNoPayload.html">NoPayload</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_photons</em>, </td>
         </tr>
         <tr>
@@ -1910,7 +1842,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
         <tr>
           <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> McPhoto::generateComputationalPhotons </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_photons</em>, </td>
         </tr>
         <tr>
@@ -1960,7 +1892,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp; McPhoto::getBulkPhotons </td>
+          <td class="memname"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &amp; McPhoto::getBulkPhotons </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -1988,7 +1920,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp; McPhoto::getDomainPhotons </td>
+          <td class="memname"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &amp; McPhoto::getDomainPhotons </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -2016,7 +1948,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp; McPhoto::getEbPhotons </td>
+          <td class="memname"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &amp; McPhoto::getEbPhotons </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -2130,7 +2062,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp; McPhoto::getPhotons </td>
+          <td class="memname"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &amp; McPhoto::getPhotons </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -2188,7 +2120,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp; McPhoto::getSourcePhotons </td>
+          <td class="memname"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &amp; McPhoto::getSourcePhotons </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -2551,7 +2483,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
         <tr>
           <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> McPhoto::remap </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_photons</em></td><td>)</td>
           <td></td>
         </tr>
@@ -2735,7 +2667,6 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>Source/RadiativeTransfer/<a class="el" href="CD__McPhoto_8H_source.html">CD_McPhoto.H</a></li>
 <li>Source/RadiativeTransfer/<a class="el" href="CD__McPhoto_8cpp.html">CD_McPhoto.cpp</a></li>
-<li>Source/RadiativeTransfer/<a class="el" href="CD__McPhotoImplem_8H_source.html">CD_McPhotoImplem.H</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->

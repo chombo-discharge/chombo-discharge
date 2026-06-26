@@ -486,9 +486,9 @@ See the <a class="reference external" href="https://chombo-discharge.github.io/c
 <section id="photon-particle">
 <h3>Photon particle<a class="headerlink" href="#photon-particle" title="Permalink to this heading"></a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">Photon</span></code> particle is a simple encapsulation of a computational photon which is used by <code class="docutils literal notranslate"><span class="pre">McPhoto</span></code>.
-It derives from <code class="docutils literal notranslate"><span class="pre">GenericParticle&lt;2,1&gt;</span></code> and stores (in addition to the particle position):</p>
+It is a Structure-of-Arrays (SoA) payload <code class="docutils literal notranslate"><span class="pre">struct</span></code> used with <code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;Photon&gt;</span></code>.
+The particle position and weight are container-owned columns, while the <code class="docutils literal notranslate"><span class="pre">Photon</span></code> payload itself stores:</p>
 <ul class="simple">
-<li><p>The particle weight.</p></li>
 <li><p>The particle mean absorption coefficient.</p></li>
 <li><p>The particle velocity/direction.</p></li>
 </ul>

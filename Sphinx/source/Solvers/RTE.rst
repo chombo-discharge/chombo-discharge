@@ -248,16 +248,16 @@ Various functions are in place for obtaining these particles:
 
 .. literalinclude:: ../../../../Source/RadiativeTransfer/CD_McPhoto.H
    :language: c++
-   :lines: 408-441
+   :lines: 396-429
    :dedent: 2
 
 Photon particle
 _______________
 
 The ``Photon`` particle is a simple encapsulation of a computational photon which is used by ``McPhoto``.
-It derives from ``GenericParticle<2,1>`` and stores (in addition to the particle position):
+It is a Structure-of-Arrays (SoA) payload ``struct`` used with ``ParticleContainer<Photon>``.
+The particle position and weight are container-owned columns, while the ``Photon`` payload itself stores:
 
-* The particle weight.
 * The particle mean absorption coefficient.
 * The particle velocity/direction.
 
@@ -276,7 +276,7 @@ There are several ways users can generate computational photons that are to be t
 
    .. literalinclude:: ../../../../Source/RadiativeTransfer/CD_McPhoto.H
       :language: c++
-      :lines: 436-441
+      :lines: 424-429
       :dedent: 2
 
    The source photons can then be filled and added to the other photons.
@@ -285,7 +285,7 @@ There are several ways users can generate computational photons that are to be t
 
    .. literalinclude:: ../../../../Source/RadiativeTransfer/CD_McPhoto.H
       :language: c++
-      :lines: 408-413
+      :lines: 396-401
       :dedent: 2
 
    Photons can then be added directly.

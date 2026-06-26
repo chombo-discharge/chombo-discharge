@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['neighborhood_0',['Neighborhood',['../classLeastSquares.html#a95cae3346677597383d7e249e3573fbf',1,'LeastSquares']]],
-  ['node_1',['Node',['../classSignedDistanceBVH.html#a8acfa25dfc21c7d4b367f2d2c935728a',1,'SignedDistanceBVH']]],
-  ['numberdensityfunction_2',['NumberDensityFunction',['../classPhysics_1_1CdrPlasma_1_1NeutralSpeciesJSON.html#a5e3410a2f161a7caa164982b88165643',1,'Physics::CdrPlasma::NeutralSpeciesJSON']]]
+  ['leaf_0',['Leaf',['../classParticleContainer.html#a87b7cf2ff4c56fb0ee98ebca42fdd839',1,'ParticleContainer']]],
+  ['levelparticles_1',['LevelParticles',['../classParticleContainer.html#ac062ccbae3ee7ce005703a85ec15e1a5',1,'ParticleContainer']]]
 ];

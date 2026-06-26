@@ -1,5 +1,7 @@
 var searchData=
 [
-  ['k_0',['k',['../classSphereArray.html#acf2a1be1aea8652c52a8bf1693f93e16',1,'SphereArray::K'],['../classTriangleCollection.html#a98297b7febe918ac49520ef2454f9011',1,'TriangleCollection::K']]],
-  ['kb_1',['kb',['../namespaceUnits.html#a0237c7c446f131e27ea2c9482b7f2a3b',1,'Units']]]
+  ['h5columns_0',['h5Columns',['../structParticleTraits_3_01ItoParticle_01_4.html#a171e779162705ca96866f71f72516967',1,'ParticleTraits&lt; ItoParticle &gt;']]],
+  ['hashi_1',['hasHi',['../structEBHelmholtzOp_1_1DomainBndryBoxes.html#a8e34cb80d4c685b836326711327576fb',1,'EBHelmholtzOp::DomainBndryBoxes']]],
+  ['haslo_2',['hasLo',['../structEBHelmholtzOp_1_1DomainBndryBoxes.html#a693fc6530ec8bc8205bcfab070b3b8b7',1,'EBHelmholtzOp::DomainBndryBoxes']]],
+  ['hibox_3',['hiBox',['../structEBHelmholtzOp_1_1DomainBndryBoxes.html#a6595f29de3dd95b9cf33d6c6db8c5af6',1,'EBHelmholtzOp::DomainBndryBoxes']]]
 ];

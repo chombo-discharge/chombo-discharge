@@ -1,0 +1,7 @@
+<map id="ItoSpecies" name="ItoSpecies">
+<area shape="rect" id="Node000001" title="Class that acts as user interface for parsing initial data and mobility/diffusion kernels into ItoSol..." alt="" coords="56,181,145,207"/>
+<area shape="rect" id="Node000002" href="$classParticleSoA.html" title=" " alt="" coords="5,93,196,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="103,133,103,181,98,181,98,133"/>
+<area shape="rect" id="Node000003" href="$classParticleSoA.html" title="Arena&#45;backed Struct&#45;of&#45;Arrays particle container for a single grid patch." alt="" coords="13,5,189,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="103,45,103,93,98,93,98,45"/>
+</map>

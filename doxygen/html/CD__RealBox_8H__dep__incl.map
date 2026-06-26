@@ -4,8 +4,8 @@
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="5258,59,5241,135,5227,180,5210,223,5179,271,5174,268,5205,220,5222,178,5236,134,5253,58"/>
 <area shape="rect" id="Node000024" href="$CD__ComputationalGeometry_8H.html" title="Declaration of base class for defining geometries." alt="" coords="3591,93,3794,133"/>
 <area shape="poly" id="edge18_Node000001_Node000024" title=" " alt="" coords="5175,34,3794,109,3794,104,5175,29"/>
-<area shape="rect" id="Node000152" href="$CD__RealBox_8cpp.html" title="Implementation of CD_RealBox.H." alt="" coords="5298,93,5442,133"/>
-<area shape="poly" id="edge69_Node000001_Node000152" title=" " alt="" coords="5297,52,5347,91,5344,95,5294,56"/>
+<area shape="rect" id="Node000151" href="$CD__RealBox_8cpp.html" title="Implementation of CD_RealBox.H." alt="" coords="5298,93,5442,133"/>
+<area shape="poly" id="edge69_Node000001_Node000151" title=" " alt="" coords="5297,52,5347,91,5344,95,5294,56"/>
 <area shape="rect" id="Node000003" href="$CD__AdvectionDiffusionTagger_8H.html" title="Declaration of the Physics::AdvectionDiffusion::AdvectionDiffusionTagger class." alt="" coords="5305,357,5536,397"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="5232,311,5365,355,5363,360,5230,316"/>
 <area shape="rect" id="Node000005" href="$CD__BrownianWalkerTagger_8H.html" title="Declaration of the Physics::BrownianWalker::BrownianWalkerTagger class." alt="" coords="5561,357,5774,397"/>
@@ -95,12 +95,12 @@
 <area shape="poly" id="edge66_Node000024_Node000123" title=" " alt="" coords="3808,114,4240,121,4809,134,5319,153,5490,165,5544,172,5574,179,5602,197,5626,221,5659,268,5655,271,5622,224,5599,201,5572,184,5544,177,5490,171,5319,159,4809,140,4239,126,3808,119"/>
 <area shape="rect" id="Node000132" href="$CD__RtSolver_8H.html" title="Abstract parent class for various radiative transfer solvers." alt="" coords="5765,269,5949,309"/>
 <area shape="poly" id="edge67_Node000024_Node000132" title=" " alt="" coords="3808,113,4229,120,4791,133,5313,152,5503,165,5616,179,5676,197,5734,220,5826,267,5824,272,5732,225,5674,202,5615,184,5503,170,5313,158,4791,138,4229,126,3808,119"/>
-<area shape="rect" id="Node000145" href="$CD__TracerParticleSolver_8H.html" title="Declaration of a solver class that advances tracer particles." alt="" coords="5973,269,6167,309"/>
-<area shape="poly" id="edge68_Node000024_Node000145" title=" " alt="" coords="3808,112,4206,115,4749,125,5029,133,5291,145,5517,160,5688,179,5780,197,5872,220,6019,267,6017,272,5870,225,5779,202,5687,184,5516,165,5291,150,5029,139,4749,130,4206,121,3808,118"/>
-<area shape="rect" id="Node000147" href="$CD__PhaseRealm_8H.html" title="Declaration of the PhaseRealm class." alt="" coords="4289,189,4547,214"/>
-<area shape="poly" id="edge59_Node000024_Node000147" title=" " alt="" coords="3808,125,4270,179,4330,186,4329,191,4270,184,3808,130"/>
-<area shape="rect" id="Node000151" href="$CD__ComputationalGeometry_8cpp.html" title="Implementation of CD_ComputationalGeometry.H." alt="" coords="4571,181,4785,221"/>
-<area shape="poly" id="edge65_Node000024_Node000151" title=" " alt="" coords="3808,118,4145,140,4351,157,4558,179,4570,180,4570,185,4558,184,4351,163,4145,146,3808,123"/>
+<area shape="rect" id="Node000144" href="$CD__TracerParticleSolver_8H.html" title="Declaration of a solver class that advances tracer particles." alt="" coords="5973,269,6167,309"/>
+<area shape="poly" id="edge68_Node000024_Node000144" title=" " alt="" coords="3808,112,4206,115,4749,125,5029,133,5291,145,5517,160,5688,179,5780,197,5872,220,6019,267,6017,272,5870,225,5779,202,5687,184,5516,165,5291,150,5029,139,4749,130,4206,121,3808,118"/>
+<area shape="rect" id="Node000146" href="$CD__PhaseRealm_8H.html" title="Declaration of the PhaseRealm class." alt="" coords="4289,189,4547,214"/>
+<area shape="poly" id="edge59_Node000024_Node000146" title=" " alt="" coords="3808,125,4270,179,4330,186,4329,191,4270,184,3808,130"/>
+<area shape="rect" id="Node000150" href="$CD__ComputationalGeometry_8cpp.html" title="Implementation of CD_ComputationalGeometry.H." alt="" coords="4571,181,4785,221"/>
+<area shape="poly" id="edge65_Node000024_Node000150" title=" " alt="" coords="3808,118,4145,140,4351,157,4558,179,4570,180,4570,185,4558,184,4351,163,4145,146,3808,123"/>
 <area shape="poly" id="edge41_Node000066_Node000007" title=" " alt="" coords="4176,411,4171,445,4166,445,4171,411"/>
 <area shape="poly" id="edge46_Node000076_Node000002" title=" " alt="" coords="5371,221,5218,272,5217,267,5370,216"/>
 <area shape="poly" id="edge43_Node000076_Node000003" title=" " alt="" coords="5369,222,5335,242,5320,255,5308,271,5302,289,5308,308,5333,335,5365,355,5362,359,5330,340,5304,311,5297,289,5304,268,5316,251,5332,237,5366,217"/>
@@ -112,7 +112,7 @@
 <area shape="poly" id="edge53_Node000076_Node000116" title=" " alt="" coords="5285,217,5185,224,4927,236,4726,239,4525,246,4408,256,4269,272,4258,274,4257,268,4268,267,4407,251,4525,241,4726,233,4927,230,5185,219,5285,211"/>
 <area shape="poly" id="edge55_Node000076_Node000123" title=" " alt="" coords="5465,216,5613,267,5611,272,5464,221"/>
 <area shape="poly" id="edge57_Node000076_Node000132" title=" " alt="" coords="5491,214,5765,267,5764,273,5490,219"/>
-<area shape="poly" id="edge58_Node000076_Node000145" title=" " alt="" coords="5536,213,5735,236,5961,267,5973,269,5972,274,5960,272,5734,242,5535,218"/>
+<area shape="poly" id="edge58_Node000076_Node000144" title=" " alt="" coords="5536,213,5735,236,5961,267,5973,269,5972,274,5960,272,5734,242,5535,218"/>
 <area shape="poly" id="edge48_Node000079_Node000003" title=" " alt="" coords="5422,323,5423,357,5417,357,5416,323"/>
 <area shape="poly" id="edge52_Node000101_Node000022" title=" " alt="" coords="4405,315,4412,364,4407,364,4400,316"/>
 <area shape="poly" id="edge51_Node000101_Node000066" title=" " alt="" coords="4358,310,4228,360,4226,355,4356,305"/>

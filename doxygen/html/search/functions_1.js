@@ -7,8 +7,8 @@ var searchData=
   ['brentrootfinder_4',['brentRootFinder',['../namespacePolyUtils.html#a554dcb29bb180400d8d3f7a9c4db57a5',1,'PolyUtils']]],
   ['brentsolve_5',['brentSolve',['../namespacePolyUtils.html#a54737623b93191fb61fc6962e181f912',1,'PolyUtils']]],
   ['brownianwalkerspecies_6',['BrownianWalkerSpecies',['../classPhysics_1_1BrownianWalker_1_1BrownianWalkerSpecies.html#a897d4bfb25160ac87ac149da20004e30',1,'Physics::BrownianWalker::BrownianWalkerSpecies']]],
-  ['brownianwalkerstepper_7',['brownianwalkerstepper',['../classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#a36367e4360ca3b4352537d8c0eadb4ff',1,'Physics::BrownianWalker::BrownianWalkerStepper::BrownianWalkerStepper(RefCountedPtr&lt; ItoSolver &gt; &amp;a_solver)'],['../classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#a465b2e67cd54ec4f7c82a71602244bcb',1,'Physics::BrownianWalker::BrownianWalkerStepper::BrownianWalkerStepper()']]],
-  ['brownianwalkertagger_8',['brownianwalkertagger',['../classPhysics_1_1BrownianWalker_1_1BrownianWalkerTagger.html#a9388d96da89ad770046b0aa1485c82dd',1,'Physics::BrownianWalker::BrownianWalkerTagger::BrownianWalkerTagger()=delete'],['../classPhysics_1_1BrownianWalker_1_1BrownianWalkerTagger.html#a2884fa2202e0f12efc7822ff89281abf',1,'Physics::BrownianWalker::BrownianWalkerTagger::BrownianWalkerTagger(RefCountedPtr&lt; ItoSolver &gt; &amp;a_solver, RefCountedPtr&lt; AmrMesh &gt; &amp;a_amr)']]],
+  ['brownianwalkerstepper_7',['brownianwalkerstepper',['../classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#a465b2e67cd54ec4f7c82a71602244bcb',1,'Physics::BrownianWalker::BrownianWalkerStepper::BrownianWalkerStepper()'],['../classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#a36367e4360ca3b4352537d8c0eadb4ff',1,'Physics::BrownianWalker::BrownianWalkerStepper::BrownianWalkerStepper(RefCountedPtr&lt; ItoSolver &gt; &amp;a_solver)']]],
+  ['brownianwalkertagger_8',['brownianwalkertagger',['../classPhysics_1_1BrownianWalker_1_1BrownianWalkerTagger.html#a2884fa2202e0f12efc7822ff89281abf',1,'Physics::BrownianWalker::BrownianWalkerTagger::BrownianWalkerTagger(RefCountedPtr&lt; ItoSolver &gt; &amp;a_solver, RefCountedPtr&lt; AmrMesh &gt; &amp;a_amr)'],['../classPhysics_1_1BrownianWalker_1_1BrownianWalkerTagger.html#a9388d96da89ad770046b0aa1485c82dd',1,'Physics::BrownianWalker::BrownianWalkerTagger::BrownianWalkerTagger()=delete']]],
   ['buildaveragestencils_9',['buildAverageStencils',['../classMFHelmholtzJumpBC.html#a9ba91978ea71bee0702b50d007a73718',1,'MFHelmholtzJumpBC']]],
   ['buildcoarselevel_10',['buildCoarseLevel',['../classScanShop.html#a912623ff8876423afcdb1a6b9469ffe6',1,'ScanShop']]],
   ['buildcopier_11',['buildcopier',['../classEBHelmholtzOp.html#af13fb5c0506f1974be7a6fc2c4d22f43',1,'EBHelmholtzOp::buildCopier()'],['../classMFHelmholtzOp.html#af5b0772c63a865bfa7d073c179ae78b3',1,'MFHelmholtzOp::buildCopier()']]],
@@ -18,5 +18,8 @@ var searchData=
   ['buildgasgeometry_15',['buildGasGeometry',['../classComputationalGeometry.html#ab756f82ea473094f13ee0945694139fb',1,'ComputationalGeometry']]],
   ['buildgeometries_16',['buildGeometries',['../classComputationalGeometry.html#a01a9788004e72269e1b6a1421090bd0d',1,'ComputationalGeometry']]],
   ['buildgrids_17',['buildGrids',['../classAmrMesh.html#a69e4f0db7383a8a926a9bcb59defb67e',1,'AmrMesh']]],
-  ['buildsolidgeometry_18',['buildSolidGeometry',['../classComputationalGeometry.html#a51f7fcdeb1c6337ece3e050a531b7bee',1,'ComputationalGeometry']]]
+  ['buildsolidgeometry_18',['buildSolidGeometry',['../classComputationalGeometry.html#a51f7fcdeb1c6337ece3e050a531b7bee',1,'ComputationalGeometry']]],
+  ['bytespan_19',['byteSpan',['../classParticleSoA.html#adfa210dce5d7e74830bed05dabff3539',1,'ParticleSoA']]],
+  ['bytespanimpl_20',['byteSpanImpl',['../classParticleSoA.html#a5fccb05869961d7b7c7ffce07f56f07d',1,'ParticleSoA']]],
+  ['bytesperparticle_21',['bytesPerParticle',['../classParticleSoA.html#a3cf1907caad24d059361a8627b25cee6',1,'ParticleSoA']]]
 ];

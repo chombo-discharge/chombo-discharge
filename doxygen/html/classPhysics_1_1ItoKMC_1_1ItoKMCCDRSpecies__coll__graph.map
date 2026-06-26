@@ -1,5 +1,9 @@
 <map id="Physics::ItoKMC::ItoKMCCDRSpecies" name="Physics::ItoKMC::ItoKMCCDRSpecies">
-<area shape="rect" id="Node000001" title="Simple CdrSpecies class for usage with ItoKMC." alt="" coords="5,79,264,104"/>
-<area shape="rect" id="Node000002" href="$classCdrSpecies.html" title="Abstract class that describes the scalar quantity that is advected in CdrSolver." alt="" coords="87,5,182,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="137,44,137,79,132,79,132,44"/>
+<area shape="rect" id="Node000001" title="Simple CdrSpecies class for usage with ItoKMC." alt="" coords="5,256,264,281"/>
+<area shape="rect" id="Node000002" href="$classCdrSpecies.html" title="Abstract class that describes the scalar quantity that is advected in CdrSolver." alt="" coords="87,181,182,207"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="137,221,137,256,132,256,132,221"/>
+<area shape="rect" id="Node000003" href="$classParticleSoA.html" title=" " alt="" coords="37,93,232,119"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="137,133,137,181,132,181,132,133"/>
+<area shape="rect" id="Node000004" href="$classParticleSoA.html" title="Arena&#45;backed Struct&#45;of&#45;Arrays particle container for a single grid patch." alt="" coords="47,5,223,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="137,45,137,93,132,93,132,45"/>
 </map>

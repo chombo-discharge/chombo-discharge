@@ -1,5 +1,7 @@
-<map id="ParticleContainer&lt; P &gt;" name="ParticleContainer&lt; P &gt;">
-<area shape="rect" id="Node000001" title="Templated class for holding particles on an AMR hierarchy with particle remapping." alt="" coords="5,5,176,31"/>
-<area shape="rect" id="Node000002" href="$classParticleContainer.html" title=" " alt="" coords="19,93,163,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="93,44,93,93,88,93,88,44"/>
+<map id="ParticleContainer&lt; P, Traits &gt;" name="ParticleContainer&lt; P, Traits &gt;">
+<area shape="rect" id="Node000001" title="AMR&#45;hierarchy container of computational particles, stored per patch in Struct&#45;of&#45;Arrays form." alt="" coords="96,5,240,45"/>
+<area shape="rect" id="Node000002" href="$classParticleContainer.html" title=" " alt="" coords="5,108,149,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="144,57,96,110,92,106,140,54"/>
+<area shape="rect" id="Node000003" href="$classParticleContainer.html" title=" " alt="" coords="173,115,344,141"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="202,53,217,68,253,114,249,117,213,71,198,57"/>
 </map>

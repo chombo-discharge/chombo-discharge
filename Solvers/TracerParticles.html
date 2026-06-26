@@ -172,32 +172,20 @@ Such particles are useful, for example, for numerical integration along field li
 <section id="tracerparticlesolver">
 <span id="chap-tracerparticlesolver"></span><h2>TracerParticleSolver<a class="headerlink" href="#tracerparticlesolver" title="Permalink to this heading"></a></h2>
 <p>The tracer particle solver is templated as</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Base class for a tracer particle solver. This solver can advance particles in a pre-defined velocity field.</span>
-<span class="cm">  @details The user can set the velocity field through public member functions. This class is templated so the user can </span>
-<span class="cm">  switch tracer particle implementations.</span>
-
-<span class="cm">  This is a single-phase solver -- i.e. the particles only live on one of the phases. Extensions to multiphase</span>
-<span class="cm">  is certainly possible. </span>
-
-<span class="cm">  The template requirements on the particle type P are: </span>
-<span class="cm">  1) It must contain a function RealVect&amp; position() (derived from BinItem)</span>
-<span class="cm">  2) It must contain a function const Real&amp; weight() const.</span>
-<span class="cm">  3) It must contain a function RealVect&amp; velocity().</span>
-<span class="cm">*/</span>
-<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">P</span><span class="o">&gt;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">P</span><span class="o">&gt;</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">TracerParticleSolver</span>
 </pre></div>
 </div>
-<p>where <code class="docutils literal notranslate"><span class="pre">P</span></code> is the particle type used for the solver.
-The template constraints on <code class="docutils literal notranslate"><span class="pre">P</span></code> are</p>
+<p>where <code class="docutils literal notranslate"><span class="pre">P</span></code> is the payload type used for the solver.
+The particles are stored Struct-of-Arrays in a <code class="docutils literal notranslate"><span class="pre">ParticleContainer</span></code>: the position and weight are
+container-owned columns, while <code class="docutils literal notranslate"><span class="pre">P</span></code> declares the <em>extra</em> payload columns. The template constraints on
+<code class="docutils literal notranslate"><span class="pre">P</span></code> are</p>
 <ol class="arabic simple">
-<li><p>It <em>must</em> contain a function <code class="docutils literal notranslate"><span class="pre">RealVect&amp;</span> <span class="pre">position()</span></code></p></li>
-<li><p>It <em>must</em> contain a function <code class="docutils literal notranslate"><span class="pre">const</span> <span class="pre">Real&amp;</span> <span class="pre">weight()</span> <span class="pre">const</span></code></p></li>
-<li><p>It <em>must</em> contain a function <code class="docutils literal notranslate"><span class="pre">RealVect&amp;</span> <span class="pre">velocity()</span></code>.</p></li>
+<li><p>It <em>must</em> expose the velocity as <code class="docutils literal notranslate"><span class="pre">SpaceDim</span></code> scalar payload columns named <code class="docutils literal notranslate"><span class="pre">D_DECL(v_x,</span> <span class="pre">v_y,</span> <span class="pre">v_z)</span></code>.</p></li>
+<li><p>It <em>must</em> have a <code class="docutils literal notranslate"><span class="pre">ParticleTraits&lt;P&gt;</span></code> specialization listing its columns (including <code class="docutils literal notranslate"><span class="pre">v_x/v_y/v_z</span></code>).</p></li>
 </ol>
-<p>Users are free to provide their own particle type provided that it meets these template constraints.
-However, we also define a plug-and-play particle class that meets these requirements, see <a class="reference internal" href="#chap-tracerparticle"><span class="std std-ref">TracerParticle</span></a>.</p>
+<p>Users are free to provide their own payload provided that it meets these constraints.
+However, we also define a plug-and-play payload for the tracer-particle stepper, see <a class="reference internal" href="#chap-tracerparticle"><span class="std std-ref">TracerParticle</span></a>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">TracerParticleSolver&lt;P&gt;</span></code> API is available at <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classTracerParticleSolver.html">https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classTracerParticleSolver.html</a>.</p>
@@ -205,50 +193,45 @@ However, we also define a plug-and-play particle class that meets these requirem
 </section>
 <section id="tracerparticle">
 <span id="chap-tracerparticle"></span><h2>TracerParticle<a class="headerlink" href="#tracerparticle" title="Permalink to this heading"></a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">TracerParticle</span></code> type inherits from <a class="reference internal" href="../Source/Particles.html#chap-genericparticle"><span class="std std-ref">GenericParticle</span></a> particle class and is templated as</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief A tracer particle class. This is templated for holding extra storage (useful for kernels). </span>
-<span class="cm">  @details The template parameters M and N determine extra storage allocated to the particle. M determines</span>
-<span class="cm">  the number of allocated scalars (Reals) and N determines the number of allocated vectors (RealVects). These</span>
-<span class="cm">  quantities are communicated when remapping particles. </span>
-<span class="cm">*/</span>
-<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">M</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">TracerParticle</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">GenericParticle</span><span class="o">&lt;</span><span class="n">M</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
+<p><code class="docutils literal notranslate"><span class="pre">TracerParticle</span></code> is the plug-and-play payload used by the tracer-particle stepper. It declares the
+interpolated velocity together with Runge-Kutta stage scratch, all as per-component SoA columns:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span><span class="w"> </span><span class="nc">TracerParticle</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="n">ParticleReal</span><span class="w"> </span><span class="n">v_x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="c1">///&lt; Interpolated velocity, x-component.</span>
+<span class="w">  </span><span class="n">ParticleReal</span><span class="w"> </span><span class="n">v_y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="c1">///&lt; Interpolated velocity, y-component.</span>
+<span class="cp">#if CH_SPACEDIM == 3</span>
+<span class="w">  </span><span class="n">ParticleReal</span><span class="w"> </span><span class="n">v_z</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="c1">///&lt; Interpolated velocity, z-component.</span>
+<span class="cp">#endif</span>
+
+<span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">xk_x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="c1">///&lt; Position snapshot x^k, x-component (double: position-like).</span>
+<span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">xk_y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="c1">///&lt; Position snapshot x^k, y-component (double: position-like).</span>
+<span class="cp">#if CH_SPACEDIM == 3</span>
+<span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">xk_z</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="c1">///&lt; Position snapshot x^k, z-component (double: position-like).</span>
+<span class="cp">#endif</span>
+
+<span class="w">  </span><span class="n">ParticleReal</span><span class="w"> </span><span class="n">k1_x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="c1">///&lt; Runge-Kutta stage k1, x-component.</span>
+<span class="w">  </span><span class="n">ParticleReal</span><span class="w"> </span><span class="n">k1_y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="c1">///&lt; Runge-Kutta stage k1, y-component.</span>
+<span class="cp">#if CH_SPACEDIM == 3</span>
+<span class="w">  </span><span class="n">ParticleReal</span><span class="w"> </span><span class="n">k1_z</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="c1">///&lt; Runge-Kutta stage k1, z-component.</span>
+<span class="cp">#endif</span>
+
+<span class="w">  </span><span class="n">ParticleReal</span><span class="w"> </span><span class="n">k2_x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="c1">///&lt; Runge-Kutta stage k2, x-component.</span>
+<span class="w">  </span><span class="n">ParticleReal</span><span class="w"> </span><span class="n">k2_y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="c1">///&lt; Runge-Kutta stage k2, y-component.</span>
+<span class="cp">#if CH_SPACEDIM == 3</span>
+<span class="w">  </span><span class="n">ParticleReal</span><span class="w"> </span><span class="n">k2_z</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="c1">///&lt; Runge-Kutta stage k2, z-component.</span>
+<span class="cp">#endif</span>
+
+<span class="w">  </span><span class="n">ParticleReal</span><span class="w"> </span><span class="n">k3_x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="c1">///&lt; Runge-Kutta stage k3, x-component.</span>
+<span class="w">  </span><span class="n">ParticleReal</span><span class="w"> </span><span class="n">k3_y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="c1">///&lt; Runge-Kutta stage k3, y-component.</span>
+<span class="cp">#if CH_SPACEDIM == 3</span>
+<span class="w">  </span><span class="n">ParticleReal</span><span class="w"> </span><span class="n">k3_z</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="c1">///&lt; Runge-Kutta stage k3, z-component.</span>
+<span class="cp">#endif</span>
+<span class="p">};</span>
 </pre></div>
 </div>
-<p>The class also defines two more members; the weight and a particle velocity.
-These are accessible as</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Get the particle &quot;weight&quot;</span>
-<span class="cm">  @return m_weight</span>
-<span class="cm">*/</span>
-<span class="kr">inline</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span>
-<span class="nf">weight</span><span class="p">();</span>
-
-<span class="cm">/**</span>
-<span class="cm">  @brief Get the particle &quot;weight&quot;</span>
-<span class="cm">  @return m_weight</span>
-<span class="cm">*/</span>
-<span class="kr">inline</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span>
-<span class="nf">weight</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
-
-<span class="cm">/**</span>
-<span class="cm">  @brief Get the particle velocity. </span>
-<span class="cm">  @return m_velocity</span>
-<span class="cm">*/</span>
-<span class="kr">inline</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span>
-<span class="nf">velocity</span><span class="p">();</span>
-
-<span class="cm">/**</span>
-<span class="cm">  @brief Get the particle velocity.</span>
-<span class="cm">  @return m_velocity</span>
-<span class="cm">*/</span>
-<span class="kr">inline</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span>
-<span class="nf">velocity</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
-</pre></div>
-</div>
-<p>Note that, just as for <code class="docutils literal notranslate"><span class="pre">GenericParticle</span></code>, the template arguments <code class="docutils literal notranslate"><span class="pre">M</span></code> and <code class="docutils literal notranslate"><span class="pre">N</span></code> indicates the number of scalars and vectors allocated to the particle, see <a class="reference internal" href="../Source/Particles.html#chap-genericparticle"><span class="std std-ref">GenericParticle</span></a>.
-These data fields can be used by applications for, e.g., storing integration variables (such as intermediate positions in a Runge-Kutta code).</p>
+<p>The velocity columns <code class="docutils literal notranslate"><span class="pre">D_DECL(v_x,</span> <span class="pre">v_y,</span> <span class="pre">v_z)</span></code> are the ones required by the solver; the remaining columns hold
+intermediate Runge-Kutta integration state. Weight and position are container-owned and are therefore <em>not</em>
+payload members.</p>
 </section>
 <section id="initialization">
 <h2>Initialization<a class="headerlink" href="#initialization" title="Permalink to this heading"></a></h2>
@@ -273,14 +256,14 @@ These data fields can be used by applications for, e.g., storing integration var
 <span class="n">getParticles</span><span class="p">();</span>
 
 <span class="cm">/**</span>
-<span class="cm">  @brief Get all particles. Const version. </span>
+<span class="cm">  @brief Get all particles. Const version.</span>
 <span class="cm">  @return m_particles</span>
 <span class="cm">*/</span>
 <span class="k">virtual</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span>
 <span class="n">getParticles</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 </pre></div>
 </div>
-<p>This returns the <code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P&gt;</span></code> holding the particles, see <a class="reference internal" href="../Source/Particles.html#chap-particlecontainer"><span class="std std-ref">ParticleContainer</span></a>.</p>
+<p>This returns the <code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P&gt;</span></code> holding the particles.</p>
 </section>
 <section id="setting-mathbf-v">
 <h2>Setting <span class="math notranslate nohighlight">\(\mathbf{v}\)</span><a class="headerlink" href="#setting-mathbf-v" title="Permalink to this heading"></a></h2>

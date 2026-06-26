@@ -1,11 +1,9 @@
 <map id="Source/RadiativeTransfer/CD_McPhoto.H" name="Source/RadiativeTransfer/CD_McPhoto.H">
-<area shape="rect" id="Node000001" title="Declaration of a radiative transfer solver which uses Monte Carlo sampling of computational or real p..." alt="" coords="527,5,711,45"/>
+<area shape="rect" id="Node000001" title="Declaration of a radiative transfer solver which uses Monte Carlo sampling of computational or real p..." alt="" coords="299,5,483,45"/>
 <area shape="rect" id="Node000002" href="$CD__ItoKMCStepper_8H.html" title="Declaration of the Physics::ItoKMC::ItoKMCStepper abstract TimeStepper." alt="" coords="136,101,399,126"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="530,51,315,103,314,98,528,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="354,56,286,103,283,98,351,51"/>
 <area shape="rect" id="Node000014" href="$CD__McPhoto_8cpp.html" title="Implementation of CD_McPhoto.H." alt="" coords="423,93,607,133"/>
-<area shape="poly" id="edge19_Node000001_Node000014" title=" " alt="" coords="587,56,540,95,537,91,584,52"/>
-<area shape="rect" id="Node000015" href="$CD__McPhotoImplem_8H.html" title="Implementation of CD_McPhoto.H." alt="" coords="631,93,815,133"/>
-<area shape="poly" id="edge20_Node000001_Node000015" title=" " alt="" coords="647,53,694,91,691,95,643,57"/>
+<area shape="poly" id="edge19_Node000001_Node000014" title=" " alt="" coords="432,51,489,91,486,95,429,55"/>
 <area shape="rect" id="Node000003" href="$CD__ItoKMCStepperImplem_8H.html" title="Implementation of CD_ItoKMCStepper.H." alt="" coords="5,189,255,229"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="234,135,152,191,149,186,231,131"/>
 <area shape="rect" id="Node000004" href="$CD__ItoKMCTagger_8H.html" title="Declaration of the Physics::ItoKMC::ItoKMCTagger abstract CellTagger." alt="" coords="279,196,533,221"/>
@@ -34,5 +32,4 @@
 <area shape="poly" id="edge15_Node000011_Node000012" title=" " alt="" coords="671,352,671,387,666,387,665,352"/>
 <area shape="poly" id="edge16_Node000012_Node000011" title=" " alt="" coords="683,373,682,339,687,339,688,373"/>
 <area shape="poly" id="edge18_Node000013_Node000010" title=" " alt="" coords="910,278,855,238,858,234,913,273"/>
-<area shape="poly" id="edge21_Node000015_Node000001" title=" " alt="" coords="696,86,648,48,652,44,699,82"/>
 </map>

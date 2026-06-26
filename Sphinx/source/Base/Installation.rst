@@ -218,7 +218,7 @@ The main variables that the user needs to set are
 * ``FC = <Fortran compiler>``
 * ``MPI = TRUE/FALSE`` — enables or disables MPI.
 * ``MPICXX = <MPI C++ compiler>``
-* ``CXXSTD = 14`` — C++ standard. ``chombo-discharge`` requires at least C++14.
+* ``CXXSTD = 17`` — C++ standard. ``chombo-discharge`` requires at least C++17.
 * ``USE_EB = TRUE`` — enables embedded boundary support. This is required.
 * ``USE_MF = TRUE`` — enables multifluid support. This is required.
 * ``USE_MT = TRUE/FALSE`` — enables ``Chombo`` memory tracking.
@@ -272,6 +272,14 @@ When compiled with OpenMP, all loops over grid patches use:
 
    Memory tracking is not supported together with OpenMP.
    When using OpenMP, set ``USE_MT = FALSE``.
+
+.. warning::
+
+   OpenMP support (including hybrid OpenMP+MPI) is **experimental** and not yet validated for
+   production. Several threaded code paths -- including some inside ``Chombo`` itself, which are
+   only activated when it is compiled with ``OPENMPCC = TRUE`` -- contain data races that can
+   cause intermittent heap corruption and crashes at higher thread counts. For production runs,
+   use pure MPI (``OPENMPCC = FALSE``); OpenMP and OpenMP+MPI are intended for experimentation only.
 
 PETSC
 _____

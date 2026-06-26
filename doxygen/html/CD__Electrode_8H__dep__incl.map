@@ -4,8 +4,8 @@
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="3504,32,693,112,693,107,3503,27"/>
 <area shape="rect" id="Node000049" href="$CD__ComputationalGeometry_8H.html" title="Declaration of base class for defining geometries." alt="" coords="3495,93,3698,133"/>
 <area shape="poly" id="edge22_Node000001_Node000049" title=" " alt="" coords="3599,59,3599,93,3594,93,3594,59"/>
-<area shape="rect" id="Node000159" href="$CD__Electrode_8cpp.html" title="Implementation of CD_Electrode.H." alt="" coords="3723,93,3881,133"/>
-<area shape="poly" id="edge74_Node000001_Node000159" title=" " alt="" coords="3655,48,3758,91,3756,96,3653,53"/>
+<area shape="rect" id="Node000158" href="$CD__Electrode_8cpp.html" title="Implementation of CD_Electrode.H." alt="" coords="3723,93,3881,133"/>
+<area shape="poly" id="edge74_Node000001_Node000158" title=" " alt="" coords="3655,48,3758,91,3756,96,3653,53"/>
 <area shape="rect" id="Node000003" href="$CD__ElectrostaticEbBc_8cpp.html" title="Implementation of CD_ElectrostaticEbBc.H." alt="" coords="277,189,469,229"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="545,141,420,191,418,186,543,136"/>
 <area shape="rect" id="Node000004" href="$CD__FieldSolver_8H.html" title="Contains declaration of a base electrostatics solver class." alt="" coords="2669,291,2828,331"/>
@@ -99,12 +99,12 @@
 <area shape="poly" id="edge71_Node000049_Node000130" title=" " alt="" coords="3482,118,2855,123,1978,134,1552,143,1189,154,934,167,860,175,829,184,820,196,817,209,820,221,829,234,848,242,888,251,1020,265,1204,277,1418,287,1862,300,2188,306,2188,312,1862,305,1418,292,1203,282,1020,270,887,256,846,248,826,238,815,224,812,209,815,194,826,179,859,170,933,162,1189,148,1551,137,1978,129,2855,117,3482,113"/>
 <area shape="rect" id="Node000139" href="$CD__RtSolver_8H.html" title="Abstract parent class for various radiative transfer solvers." alt="" coords="2886,291,3070,331"/>
 <area shape="poly" id="edge72_Node000049_Node000139" title=" " alt="" coords="3481,116,3242,117,2958,125,2825,134,2711,146,2626,162,2598,172,2581,183,2506,258,2500,266,2515,265,2556,262,2623,259,2718,264,2841,281,2886,290,2885,295,2840,287,2717,269,2623,265,2556,267,2515,271,2495,269,2502,255,2578,179,2595,168,2624,157,2710,141,2824,129,2958,120,3242,112,3481,111"/>
-<area shape="rect" id="Node000152" href="$CD__TracerParticleSolver_8H.html" title="Declaration of a solver class that advances tracer particles." alt="" coords="4612,291,4805,331"/>
-<area shape="poly" id="edge73_Node000049_Node000152" title=" " alt="" coords="3712,130,4793,142,5452,155,5671,166,5735,172,5764,179,5774,194,5777,209,5774,223,5764,238,5745,251,5713,262,5621,279,5497,293,5353,302,5051,311,4806,313,4806,308,5051,306,5353,297,5496,287,5620,274,5712,256,5742,246,5760,234,5769,221,5772,209,5769,196,5760,184,5734,177,5670,171,5452,161,4793,147,3712,135"/>
-<area shape="rect" id="Node000154" href="$CD__PhaseRealm_8H.html" title="Declaration of the PhaseRealm class." alt="" coords="2591,196,2848,221"/>
-<area shape="poly" id="edge64_Node000049_Node000154" title=" " alt="" coords="3482,124,3199,147,3030,163,2861,184,2775,199,2774,193,2860,179,3029,158,3198,141,3481,119"/>
-<area shape="rect" id="Node000158" href="$CD__ComputationalGeometry_8cpp.html" title="Implementation of CD_ComputationalGeometry.H." alt="" coords="2872,189,3087,229"/>
-<area shape="poly" id="edge70_Node000049_Node000158" title=" " alt="" coords="3481,131,3305,154,3106,184,3067,191,3066,186,3106,179,3304,148,3481,125"/>
+<area shape="rect" id="Node000151" href="$CD__TracerParticleSolver_8H.html" title="Declaration of a solver class that advances tracer particles." alt="" coords="4612,291,4805,331"/>
+<area shape="poly" id="edge73_Node000049_Node000151" title=" " alt="" coords="3712,130,4793,142,5452,155,5671,166,5735,172,5764,179,5774,194,5777,209,5774,223,5764,238,5745,251,5713,262,5621,279,5497,293,5353,302,5051,311,4806,313,4806,308,5051,306,5353,297,5496,287,5620,274,5712,256,5742,246,5760,234,5769,221,5772,209,5769,196,5760,184,5734,177,5670,171,5452,161,4793,147,3712,135"/>
+<area shape="rect" id="Node000153" href="$CD__PhaseRealm_8H.html" title="Declaration of the PhaseRealm class." alt="" coords="2591,196,2848,221"/>
+<area shape="poly" id="edge64_Node000049_Node000153" title=" " alt="" coords="3482,124,3199,147,3030,163,2861,184,2775,199,2774,193,2860,179,3029,158,3198,141,3481,119"/>
+<area shape="rect" id="Node000157" href="$CD__ComputationalGeometry_8cpp.html" title="Implementation of CD_ComputationalGeometry.H." alt="" coords="2872,189,3087,229"/>
+<area shape="poly" id="edge70_Node000049_Node000157" title=" " alt="" coords="3481,131,3305,154,3106,184,3067,191,3066,186,3106,179,3304,148,3481,125"/>
 <area shape="poly" id="edge58_Node000091_Node000004" title=" " alt="" coords="3204,226,2875,287,2829,296,2828,291,2873,281,3203,221"/>
 <area shape="poly" id="edge46_Node000091_Node000005" title=" " alt="" coords="3285,235,3285,386,3279,386,3279,235"/>
 <area shape="poly" id="edge47_Node000091_Node000098" title=" " alt="" coords="3350,221,3414,233,3579,256,3651,265,3743,281,3775,289,3773,294,3741,287,3650,270,3578,261,3414,239,3349,227"/>
@@ -113,7 +113,7 @@
 <area shape="poly" id="edge52_Node000091_Node000118" title=" " alt="" coords="3329,223,3537,296,3535,301,3327,228"/>
 <area shape="poly" id="edge59_Node000091_Node000130" title=" " alt="" coords="3195,226,3100,239,2666,281,2334,308,2334,302,2665,276,3099,233,3194,221"/>
 <area shape="poly" id="edge61_Node000091_Node000139" title=" " alt="" coords="3235,228,3036,294,3034,289,3233,223"/>
-<area shape="poly" id="edge62_Node000091_Node000152" title=" " alt="" coords="3344,222,3414,233,3594,250,3747,257,3882,257,4008,253,4134,250,4269,252,4421,261,4601,281,4640,289,4639,294,4600,287,4421,266,4268,257,4134,256,4008,259,3882,262,3747,262,3594,255,3414,239,3343,227"/>
+<area shape="poly" id="edge62_Node000091_Node000151" title=" " alt="" coords="3344,222,3414,233,3594,250,3747,257,3882,257,4008,253,4134,250,4269,252,4421,261,4601,281,4640,289,4639,294,4600,287,4421,266,4268,257,4134,256,4008,259,3882,262,3747,262,3594,255,3414,239,3343,227"/>
 <area shape="poly" id="edge48_Node000098_Node000102" title=" " alt="" coords="3837,345,3825,394,3820,393,3832,344"/>
 <area shape="poly" id="edge50_Node000104_Node000021" title=" " alt="" coords="4388,337,4368,341,3730,477,3729,472,4367,336,4387,332"/>
 <area shape="poly" id="edge53_Node000118_Node000005" title=" " alt="" coords="3521,331,3341,389,3339,384,3519,326"/>
@@ -122,5 +122,5 @@
 <area shape="poly" id="edge56_Node000118_Node000026" title=" " alt="" coords="3579,337,3584,383,3579,407,3566,429,3539,443,3490,455,3347,473,3176,485,3016,492,3016,487,3175,480,3347,468,3489,449,3537,438,3563,425,3574,405,3578,383,3573,337"/>
 <area shape="poly" id="edge57_Node000118_Node000102" title=" " alt="" coords="3613,326,3789,391,3787,396,3611,331"/>
 <area shape="poly" id="edge60_Node000130_Node000026" title=" " alt="" coords="2262,345,2267,387,2276,408,2289,425,2311,435,2352,445,2471,462,2616,475,2753,484,2753,489,2615,480,2471,467,2351,450,2309,440,2286,429,2271,410,2262,389,2256,345"/>
-<area shape="poly" id="edge63_Node000152_Node000021" title=" " alt="" coords="4621,337,4601,341,4369,385,4137,424,3761,480,3761,474,4136,419,4368,380,4600,336,4620,332"/>
+<area shape="poly" id="edge63_Node000151_Node000021" title=" " alt="" coords="4621,337,4601,341,4369,385,4137,424,3761,480,3761,474,4136,419,4368,380,4600,336,4620,332"/>
 </map>

@@ -368,7 +368,7 @@ See <a class="reference internal" href="#chap-buildconfig"><span class="std std-
 <li><p><code class="docutils literal notranslate"><span class="pre">FC</span> <span class="pre">=</span> <span class="pre">&lt;Fortran</span> <span class="pre">compiler&gt;</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">MPI</span> <span class="pre">=</span> <span class="pre">TRUE/FALSE</span></code> — enables or disables MPI.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">MPICXX</span> <span class="pre">=</span> <span class="pre">&lt;MPI</span> <span class="pre">C++</span> <span class="pre">compiler&gt;</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">CXXSTD</span> <span class="pre">=</span> <span class="pre">14</span></code> — C++ standard. <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> requires at least C++14.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CXXSTD</span> <span class="pre">=</span> <span class="pre">17</span></code> — C++ standard. <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> requires at least C++17.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">USE_EB</span> <span class="pre">=</span> <span class="pre">TRUE</span></code> — enables embedded boundary support. This is required.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">USE_MF</span> <span class="pre">=</span> <span class="pre">TRUE</span></code> — enables multifluid support. This is required.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">USE_MT</span> <span class="pre">=</span> <span class="pre">TRUE/FALSE</span></code> — enables <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> memory tracking.
@@ -418,6 +418,14 @@ When compiled with OpenMP, all loops over grid patches use:</p>
 <p class="admonition-title">Warning</p>
 <p>Memory tracking is not supported together with OpenMP.
 When using OpenMP, set <code class="docutils literal notranslate"><span class="pre">USE_MT</span> <span class="pre">=</span> <span class="pre">FALSE</span></code>.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>OpenMP support (including hybrid OpenMP+MPI) is <strong>experimental</strong> and not yet validated for
+production. Several threaded code paths – including some inside <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> itself, which are
+only activated when it is compiled with <code class="docutils literal notranslate"><span class="pre">OPENMPCC</span> <span class="pre">=</span> <span class="pre">TRUE</span></code> – contain data races that can
+cause intermittent heap corruption and crashes at higher thread counts. For production runs,
+use pure MPI (<code class="docutils literal notranslate"><span class="pre">OPENMPCC</span> <span class="pre">=</span> <span class="pre">FALSE</span></code>); OpenMP and OpenMP+MPI are intended for experimentation only.</p>
 </div>
 </section>
 <section id="petsc">

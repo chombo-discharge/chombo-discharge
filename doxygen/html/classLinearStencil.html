@@ -104,6 +104,9 @@ Static Protected Member Functions</h2></td></tr>
 <tr class="memitem:a38fd40f378cdc36bd151c83dad6a312e" id="r_a38fd40f378cdc36bd151c83dad6a312e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">static</a> <a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLinearStencil.html#a38fd40f378cdc36bd151c83dad6a312e">computeInterpStencil2D</a> (<a class="el" href="classTracerParticleSolver.html">VoFStencil</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_stencil</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_pos</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">VolIndex</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_vof</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_domain</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBISBox</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_ebisbox</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_noInterpDir</a>=2)</td></tr>
 <tr class="memdesc:a38fd40f378cdc36bd151c83dad6a312e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute a bilinear interpolation stencil.  <br /></td></tr>
 <tr class="separator:a38fd40f378cdc36bd151c83dad6a312e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa3214a6bf272b0d03996b759fdcdb1c2" id="r_aa3214a6bf272b0d03996b759fdcdb1c2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">static</a> <a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLinearStencil.html#aa3214a6bf272b0d03996b759fdcdb1c2">computeInterpStencil3D</a> (<a class="el" href="classTracerParticleSolver.html">VoFStencil</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_stencil</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_pos</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">VolIndex</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_vof</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_domain</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBISBox</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_ebisbox</a>)</td></tr>
+<tr class="memdesc:aa3214a6bf272b0d03996b759fdcdb1c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute a trilinear interpolation stencil.  <br /></td></tr>
+<tr class="separator:aa3214a6bf272b0d03996b759fdcdb1c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-static-attribs" name="pro-static-attribs"></a>
 Static Protected Attributes</h2></td></tr>
@@ -271,6 +274,73 @@ Static Protected Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="aa3214a6bf272b0d03996b759fdcdb1c2" name="aa3214a6bf272b0d03996b759fdcdb1c2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa3214a6bf272b0d03996b759fdcdb1c2">&#9670;&#160;</a></span>computeInterpStencil3D()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">bool</a> LinearStencil::computeInterpStencil3D </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">VoFStencil</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_stencil</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_pos</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">VolIndex</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_vof</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_domain</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBISBox</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_ebisbox</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Compute a trilinear interpolation stencil. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_stencil</td><td>Interpolation stencil </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_pos</td><td>Relative position inside cell </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_vof</td><td>Cut-cell </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_domain</td><td>Domain </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ebisbox</td><td>EBISBox </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if a stencil could be computed, false otherwise. </dd></dl>
 
 </div>
 </div>
