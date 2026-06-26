@@ -856,6 +856,21 @@ public:
                                     int                       a_ppc) const noexcept;
 
   /**
+    @brief Superparticle merging by space-filling-curve nearest-neighbour clustering.
+    @details Reaches the target particle count without forcing equal weights: when there are more than a_ppc
+    particles they are sorted along a Hilbert curve and the nearest adjacent pair is merged repeatedly down to
+    a_ppc (tight spatial grouping, unequal weights); when there are fewer than a_ppc the highest-weight
+    particles are split (co-located halving) up to a_ppc. Velocity/mobility are discarded (recomputed after).
+    @param[in,out] a_particles Particles to be merged/split.
+    @param[in]    a_cellInfo  Arithmetic information about the current grid cell.
+    @param[in]    a_ppc       Target number of particles per cell.
+  */
+  virtual void
+  makeSuperparticlesSfcNearestNeighbor(ParticleSoA<ItoParticle>& a_particles,
+                                       const CellInfo&           a_cellInfo,
+                                       int                       a_ppc) const noexcept;
+
+  /**
     @brief Particle re-initialization algorithm
     @param[in,out] a_particles Particles to be merged/split
     @param[in]    a_cellInfo  Arithmetic information about the current grid cell.

@@ -169,19 +169,20 @@ protected:
           Vector<T>&                                                      a_loads,
           const std::function<uint64_t(const std::array<uint32_t, DIM>)>& a_sfcEncoder) noexcept;
 
+public:
   /**
-    @brief Helper function for computing a Morton code using 21 bits per direction. 
-    @param[in] a_coords 
-    @return Return value
+    @brief Compute a Morton (Z-order) code from integer coordinates, using 21 bits per direction.
+    @param[in] a_coords Integer coordinates (each < 2^21).
+    @return The interleaved Morton index.
   */
   template <int DIM>
   static uint64_t
   mortonIndex(const std::array<uint32_t, DIM> a_coords) noexcept;
 
   /**
-    @brief Helper function for computing a Hilbert index
-    @return Return value
-    @param[in,out] a_coords Description
+    @brief Compute a Hilbert-curve index from integer coordinates, using 21 bits per direction.
+    @param[in] a_coords Integer coordinates (each < 2^21).
+    @return The Hilbert index.
   */
   template <int DIM>
   static uint64_t

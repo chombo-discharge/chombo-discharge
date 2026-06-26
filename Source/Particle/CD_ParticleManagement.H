@@ -89,6 +89,27 @@ namespace ParticleManagement {
                            std::vector<std::pair<const P*, const P*>>& a_leaves) noexcept;
 
   /**
+    @brief Merge an already spatially-ordered particle list down to a target count by repeatedly combining
+    the nearest adjacent pair.
+    @details The particles are assumed to be in a spatially coherent order (e.g. sorted along a space-filling
+    curve by the caller), so adjacency in the list approximates spatial proximity. The closest adjacent pair
+    (by @c position()) is combined repeatedly until @c a_target particles remain. Combining the second
+    particle into the first is delegated to @c a_combine (the caller decides the payload semantics, e.g. a
+    weight-weighted centroid and energy). This does NOT split, so it cannot increase the count -- it is a
+    no-op when the list already has @c a_target or fewer particles (the caller handles the split direction).
+    Operates in place on per-thread scratch (allocation-free after warmup); on return @c a_particles holds the
+    surviving merged particles.
+    @param[in,out] a_particles Spatially-ordered particle list; overwritten with the merged result.
+    @param[in]     a_target    Desired number of particles.
+    @param[in]     a_combine   Callback that combines the second particle into the first.
+  */
+  template <class P, const RealVect& (P::*position)() const>
+  inline void
+  mergeAdjacentNearest(std::vector<P>&                          a_particles,
+                       const std::size_t                        a_target,
+                       const std::function<void(P&, const P&)>& a_combine) noexcept;
+
+  /**
     @brief Remove physical particles from an SoA container (operates on the container-owned weight column).
     @param[in,out] a_particles           Input SoA particle container.
     @param[in]    a_numPhysPartToRemove Number of physical particles to remove.

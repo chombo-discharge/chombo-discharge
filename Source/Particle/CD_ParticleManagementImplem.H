@@ -15,6 +15,8 @@
 
 // Std includes
 #include <algorithm>
+#include <cstdint>
+#include <functional>
 #include <limits>
 #include <utility>
 #include <type_traits>
@@ -256,6 +258,109 @@ namespace ParticleManagement {
       const P* const base = s_cur.data() + r.lo;
       a_leaves.emplace_back(base, base + (r.hi - r.lo));
     }
+  }
+
+  template <class P, const RealVect& (P::*position)() const>
+  inline void
+  mergeAdjacentNearest(std::vector<P>&                          a_particles,
+                       const std::size_t                        a_target,
+                       const std::function<void(P&, const P&)>& a_combine) noexcept
+  {
+    CH_TIME("ParticleManagement::mergeAdjacentNearest");
+
+    const std::size_t n = a_particles.size();
+    if (a_target == 0 || n <= a_target) {
+      return;
+    }
+
+    auto dist2 = [&a_particles](const std::size_t i, const std::size_t j) -> Real {
+      const RealVect& pi = (a_particles[i].*position)();
+      const RealVect& pj = (a_particles[j].*position)();
+      Real            s  = 0.0;
+      for (int d = 0; d < SpaceDim; d++) {
+        const Real dd = pi[d] - pj[d];
+        s += dd * dd;
+      }
+      return s;
+    };
+
+    // Index-based doubly-linked chain over the (spatially-ordered) list + liveness + version tags. No
+    // pointers and no per-call allocation after warmup.
+    thread_local std::vector<int>      prev, next;
+    thread_local std::vector<uint8_t>  alive;
+    thread_local std::vector<uint32_t> ver;
+    prev.assign(n, -1);
+    next.assign(n, -1);
+    alive.assign(n, 1);
+    ver.assign(n, 0);
+    for (std::size_t i = 0; i < n; i++) {
+      prev[i] = (i == 0) ? -1 : static_cast<int>(i - 1);
+      next[i] = (i + 1 == n) ? -1 : static_cast<int>(i + 1);
+    }
+
+    struct Edge
+    {
+      Real     d;
+      int      a;
+      int      b;
+      uint32_t va;
+      uint32_t vb;
+    };
+    const auto cmp = [](const Edge& x, const Edge& y) {
+      return x.d > y.d;
+    }; // min-heap
+    thread_local std::vector<Edge> heap;
+    heap.clear();
+    for (std::size_t i = 0; i + 1 < n; i++) {
+      heap.push_back({dist2(i, i + 1), static_cast<int>(i), static_cast<int>(i + 1), 0, 0});
+    }
+    std::make_heap(heap.begin(), heap.end(), cmp);
+
+    std::size_t count = n;
+    while (count > a_target && !heap.empty()) {
+      std::pop_heap(heap.begin(), heap.end(), cmp);
+      const Edge edge = heap.back();
+      heap.pop_back();
+
+      const int a = edge.a;
+      const int b = edge.b;
+      if (!alive[a] || !alive[b] || ver[a] != edge.va || ver[b] != edge.vb || next[a] != b) {
+        continue; // stale entry
+      }
+
+      // Combine b into a; a's centroid (and one neighbour) changes, so bump a's version.
+      a_combine(a_particles[a], a_particles[b]);
+      alive[b]     = 0;
+      const int nb = next[b];
+      next[a]      = nb;
+      if (nb >= 0) {
+        prev[nb] = a;
+      }
+      count--;
+      ver[a]++;
+
+      if (prev[a] >= 0) {
+        heap.push_back(
+          {dist2(static_cast<std::size_t>(prev[a]), static_cast<std::size_t>(a)), prev[a], a, ver[prev[a]], ver[a]});
+        std::push_heap(heap.begin(), heap.end(), cmp);
+      }
+      if (next[a] >= 0) {
+        heap.push_back(
+          {dist2(static_cast<std::size_t>(a), static_cast<std::size_t>(next[a])), a, next[a], ver[a], ver[next[a]]});
+        std::push_heap(heap.begin(), heap.end(), cmp);
+      }
+    }
+
+    // Compact the survivors back into a_particles (preserving chain order).
+    thread_local std::vector<P> survivors;
+    survivors.clear();
+    survivors.reserve(count);
+    for (std::size_t i = 0; i < n; i++) {
+      if (alive[i]) {
+        survivors.push_back(a_particles[i]);
+      }
+    }
+    a_particles.swap(survivors);
   }
 
   template <typename P, typename Traits, typename T, typename>
