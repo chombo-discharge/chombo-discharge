@@ -34,10 +34,10 @@ struct DischargeInceptionParticle
   ParticleReal v_z = 0.0; ///< Interpolated velocity, z-component.
 #endif
 
-  ParticleReal x0_x = 0.0; ///< Position snapshot for rewind, x-component.
-  ParticleReal x0_y = 0.0; ///< Position snapshot for rewind, y-component.
+  double x0_x = 0.0; ///< Position snapshot for rewind, x-component (double: position-like).
+  double x0_y = 0.0; ///< Position snapshot for rewind, y-component (double: position-like).
 #if CH_SPACEDIM == 3
-  ParticleReal x0_z = 0.0; ///< Position snapshot for rewind, z-component.
+  double x0_z = 0.0; ///< Position snapshot for rewind, z-component (double: position-like).
 #endif
 
   ParticleReal vk_x = 0.0; ///< Previous-stage velocity snapshot, x-component.

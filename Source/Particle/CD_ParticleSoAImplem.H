@@ -17,6 +17,9 @@
 #include <cmath>
 #include <cstring>
 
+// Chombo includes
+#include <MayDay.H>
+
 // Our includes
 #include <CD_ParticleSoA.H>
 #include <CD_NamespaceHeader.H>
@@ -28,6 +31,9 @@ ParticleSoA<P, Traits>::reallocate(const std::size_t a_capacity)
   std::array<std::size_t, s_numColumns> off{};
   const std::size_t total  = this->computeOffsets(a_capacity, off, std::make_index_sequence<s_numColumns>{});
   void* const       newBuf = std::aligned_alloc(s_align, alignUp(total));
+  if (newBuf == nullptr) {
+    MayDay::Abort("ParticleSoA::reallocate - std::aligned_alloc returned null (out of memory)");
+  }
   if (m_size > 0) {
     this->moveColumns(newBuf, off, std::make_index_sequence<s_numColumns>{});
   }
@@ -44,6 +50,9 @@ ParticleSoA<P, Traits>::permute(const std::vector<std::size_t>& a_dest)
   std::array<std::size_t, s_numColumns> off{};
   const std::size_t total  = this->computeOffsets(m_capacity, off, std::make_index_sequence<s_numColumns>{});
   void* const       newBuf = std::aligned_alloc(s_align, alignUp(total));
+  if (newBuf == nullptr) {
+    MayDay::Abort("ParticleSoA::permute - std::aligned_alloc returned null (out of memory)");
+  }
   this->scatterColumns(newBuf, off, a_dest, std::make_index_sequence<s_numColumns>{});
   std::free(m_buffer);
   m_buffer = newBuf;

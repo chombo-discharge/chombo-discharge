@@ -30,10 +30,10 @@ struct ItoKMCFieldParticle
   ParticleReal phiA = 0.0; ///< Electrostatic potential at position A.
   ParticleReal phiB = 0.0; ///< Electrostatic potential at position B.
 
-  ParticleReal x0_x = 0.0; ///< Alternate (other) position, x-component.
-  ParticleReal x0_y = 0.0; ///< Alternate (other) position, y-component.
+  double x0_x = 0.0; ///< Alternate (other) position, x-component (double: position-like).
+  double x0_y = 0.0; ///< Alternate (other) position, y-component (double: position-like).
 #if CH_SPACEDIM == 3
-  ParticleReal x0_z = 0.0; ///< Alternate (other) position, z-component.
+  double x0_z = 0.0; ///< Alternate (other) position, z-component (double: position-like).
 #endif
 };
 

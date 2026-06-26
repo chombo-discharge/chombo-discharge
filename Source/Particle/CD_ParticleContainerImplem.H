@@ -18,6 +18,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <limits>
 #include <map>
 #include <utility>
 #include <vector>
@@ -334,6 +335,7 @@ ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool)
   std::vector<int> recvCounts(numRanks, 0);
 
   for (int r = 0; r < numRanks; r++) {
+    CH_assert(sendBuf[r].size() <= static_cast<std::size_t>(std::numeric_limits<int>::max()));
     sendCounts[r] = static_cast<int>(sendBuf[r].size());
   }
 

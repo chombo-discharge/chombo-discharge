@@ -191,7 +191,7 @@ ItoSolver::parseTruncation()
 void
 ItoSolver::parsePlotVariables()
 {
-  CH_TIME("McPhoto::parsePlotVariables");
+  CH_TIME("ItoSolver::parsePlotVariables");
   if (m_verbosity > 5) {
     pout() << m_name + "::parsePlotVariables" << endl;
   }
@@ -236,7 +236,7 @@ ItoSolver::parsePlotVariables()
       m_plotParticlesSource = true;
     }
     else if (str[i] == "covered_part") {
-      m_plotParticlesSource = true;
+      m_plotParticlesCovered = true;
     }
     else if (str[i] == "energy_density") {
       m_plotEnergyDensity = true;
@@ -1523,6 +1523,13 @@ ItoSolver::writePlotData(LevelData<EBCellFAB>& a_output,
   }
   if (m_plotParticlesSource) {
     this->depositWeightNGP(scratch, m_particleContainers.at(WhichContainer::Source), a_level);
+
+    m_amr->copyData(a_output, scratch, a_level, a_outputRealm, m_realm, Interval(a_comp, a_comp), Interval(0, 0));
+
+    a_comp++;
+  }
+  if (m_plotParticlesCovered) {
+    this->depositWeightNGP(scratch, m_particleContainers.at(WhichContainer::Covered), a_level);
 
     m_amr->copyData(a_output, scratch, a_level, a_outputRealm, m_realm, Interval(a_comp, a_comp), Interval(0, 0));
 

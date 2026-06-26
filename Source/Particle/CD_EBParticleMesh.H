@@ -6,18 +6,17 @@
 
 /**
   @file   CD_EBParticleMesh.H
-  @brief  Dev staging: ParticleSoA port of EBParticleMesh (single-patch deposit/interpolate).
+  @brief  Single-patch ParticleSoA deposit/interpolate onto an embedded-boundary mesh.
   @author Robert Marskar
   @details
-  This is the Dev-folder port of Source/Particle/CD_EBParticleMesh.H onto the ParticleSoA
-  leaf. The per-particle EB/cut-cell kernels (the depositParticleXXX / interpolateParticleXXX
-  helpers) are adapted from production -- they are storage-agnostic (position + Real* field +
-  numComp) and gain only a destination-component offset. Only the public loops change:
+  Deposits and interpolates ParticleSoA<P, Traits> leaves on a single grid patch. The
+  per-particle EB/cut-cell kernels (the depositParticleXXX / interpolateParticleXXX helpers)
+  are storage-agnostic (position + Real* field + numComp) and take a destination-component
+  offset. The public loops:
 
-    - storage: List<P> -> ParticleSoA<P, Traits>;
-    - field selector: pointer-to-member-FUNCTION (&P::weight) -> a variadic pack of
-      ParticleSoA payload data-member pointers (deposit<&Payload::vx, ...>), plus a dedicated
-      depositWeight() for the container-owned weight column;
+    - select payload fields with a variadic pack of ParticleSoA payload data-member pointers
+      (deposit<&Payload::vx, ...>), plus a dedicated depositWeight() for the container-owned
+      weight column;
     - vector fields are per-component (non-contiguous) columns: the loop marshals each
       particle's components to/from a stack Real[] scratch the workers consume, promoting
       (deposit) / demoting (interpolate) between the column type and Real.
@@ -34,12 +33,10 @@
   the same as deposit() -- both are thin wrappers that hand depositCore a strength gatherer --
   it just gathers from weightColumn() instead of payload columns.
 
-  See Dev/PORTING_EBParticleMesh.md. Named with the "SoA" suffix so it coexists with the
-  production EBParticleMesh (linked via libSource) until design-freeze.
-
   @note Per project rule, NO default arguments -- callers specify every argument (the "first
         components" behaviour is provided by an overload, not a default).
-  @note depositParticleTSC fixes a partition-of-unity bug present in production (see the kernel).
+  @note depositParticleTSC fixes a partition-of-unity bug present in the original AoS kernels
+        (see the kernel).
 */
 
 #ifndef CD_EBPARTICLEMESH_H
@@ -67,7 +64,8 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Dev port of EBParticleMesh that deposits/interpolates ParticleSoA leaves on one patch.
+  @brief Deposits/interpolates ParticleSoA leaves on a single patch, with embedded-boundary
+         (cut-cell) awareness.
 */
 class EBParticleMesh
 {
@@ -790,10 +788,9 @@ protected:
           const Real factor = (alpha < beta) ? 1.0 : 0.0;
 
           // factor gates the ENTIRE overlap integral so out-of-support cells contribute zero.
-          // This FIXES a partition-of-unity bug in production depositParticleTSC
-          // (Source/Particle/CD_EBParticleMeshImplem.H), where factor multiplies only the first
-          // term and the cloud over-deposits ~2.33x per dimension. Production is intentionally
-          // left unpatched for now (TSC deposit is unused there); see PORTING_EBParticleMesh.md.
+          // This fixes a partition-of-unity bug in the original AoS depositParticleTSC, where
+          // factor multiplied only the first term and the cloud over-deposited ~2.33x per
+          // dimension.
           weight *= factor * ((beta - alpha) - (beta * std::abs(beta) - alpha * std::abs(alpha)) / L);
         }
 

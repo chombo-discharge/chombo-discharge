@@ -712,7 +712,7 @@ public:
     container copies as cell-sorted.
     @return An independent ParticleSoA owning a copy of every particle.
   */
-  ParticleSoA
+  [[nodiscard]] ParticleSoA
   deepCopy() const;
 
   /**

@@ -32,10 +32,10 @@ struct TracerParticle
   ParticleReal v_z = 0.0; ///< Interpolated velocity, z-component.
 #endif
 
-  ParticleReal xk_x = 0.0; ///< Position snapshot x^k, x-component.
-  ParticleReal xk_y = 0.0; ///< Position snapshot x^k, y-component.
+  double xk_x = 0.0; ///< Position snapshot x^k, x-component (double: position-like).
+  double xk_y = 0.0; ///< Position snapshot x^k, y-component (double: position-like).
 #if CH_SPACEDIM == 3
-  ParticleReal xk_z = 0.0; ///< Position snapshot x^k, z-component.
+  double xk_z = 0.0; ///< Position snapshot x^k, z-component (double: position-like).
 #endif
 
   ParticleReal k1_x = 0.0; ///< Runge-Kutta stage k1, x-component.
