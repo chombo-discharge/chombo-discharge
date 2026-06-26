@@ -57,8 +57,14 @@ BrownianWalkerSpecies::drawInitParticles()
 {
   CH_TIME("BrownianWalkerSpecies::drawInitParticles");
 
-  // Draw Gaussian particles (the SoA overload assigns unit weight).
+  // Draw Gaussian particles and set weights to 1
   ParticleManagement::drawGaussianParticles(m_initialParticles, m_numParticles, m_blobCenter, m_blobRadius);
+
+  double* w = m_initialParticles.weightColumn();
+
+  ParticleLoops::loop(m_initialParticles, [&](std::size_t i) {
+    w[i] = 1.0;
+  });
 }
 
 #include <CD_NamespaceFooter.H>
