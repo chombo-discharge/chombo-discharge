@@ -486,11 +486,13 @@ BrownianWalkerStepper::advance(const Real a_dt)
 
       // Euler step.
       if (m_solver->isMobile()) {
-        double*             oldPos[SpaceDim] = {D_DECL(leaf.column<&ItoParticle::old_x>(),
+        double* oldPos[SpaceDim] = {D_DECL(leaf.column<&ItoParticle::old_x>(),
                                            leaf.column<&ItoParticle::old_y>(),
                                            leaf.column<&ItoParticle::old_z>())};
-        const ParticleReal* v[SpaceDim]      = {
+
+        const ParticleReal* v[SpaceDim] = {
           D_DECL(leaf.column<&ItoParticle::vx>(), leaf.column<&ItoParticle::vy>(), leaf.column<&ItoParticle::vz>())};
+
         double* const pos[SpaceDim] = {D_DECL(leaf.positionColumn(0), leaf.positionColumn(1), leaf.positionColumn(2))};
 
         ParticleLoops::loop(leaf, [&](const std::size_t i) {
