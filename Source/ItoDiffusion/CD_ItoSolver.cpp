@@ -3352,6 +3352,7 @@ ItoSolver::makeSuperparticlesEqualWeightKD(ParticleSoA<ItoParticle>& a_particles
   CH_START(t1);
   Real         W = 0.0;
   ParticleList particles;
+  particles.reserve(a_particles.size());
   for (std::size_t i = 0; i < a_particles.size(); i++) {
     PType p;
 
@@ -3430,6 +3431,7 @@ ItoSolver::makeSuperparticlesBVHReinitialize(ParticleSoA<ItoParticle>& a_particl
   CH_START(t1);
   Real         W = 0.0;
   ParticleList particles;
+  particles.reserve(a_particles.size());
   for (std::size_t i = 0; i < a_particles.size(); i++) {
     PType p;
 

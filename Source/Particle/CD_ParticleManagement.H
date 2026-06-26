@@ -86,10 +86,10 @@ namespace ParticleManagement {
     @brief Recursively build a KD-tree following the "equal weight" principle when partitioning nodes.
     @param[in,out] a_inputParticles Input particles. These are destroyed on output.
     @param[in] a_maxLeaves Maximum number of leaves in the tree.
+    @param[in] a_particleReconcile Optional reconciliation function when splitting a particle into two new particles.
     @return Returns leaf nodes containing the particles
     @details If the number of leaves is a factor of two, leaves exist on the same level and the weight in each node will differ by
-    @param[in] a_particleReconcile Description
-    at most one physical particle. The template parameters are 
+    at most one physical particle. The template parameters are
 
        P            -> Particle type exposing the weight()/position() member functions below
        P::*weight   -> Member function returning a mutable reference to the particle weight
