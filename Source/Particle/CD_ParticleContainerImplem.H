@@ -344,16 +344,21 @@ ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool)
   std::vector<int> sdispl(numRanks, 0);
   std::vector<int> rdispl(numRanks, 0);
 
-  int stot = 0;
-  int rtot = 0;
+  std::int64_t stot = 0;
+  std::int64_t rtot = 0;
 
   for (int r = 0; r < numRanks; r++) {
-    sdispl[r] = stot;
+    sdispl[r] = static_cast<int>(stot);
     stot += sendCounts[r];
 
-    rdispl[r] = rtot;
+    rdispl[r] = static_cast<int>(rtot);
     rtot += recvCounts[r];
   }
+
+  // The accumulators are int64 so the cross-rank sum cannot overflow; MPI displacement arrays are
+  // int, so assert the totals fit before allocating the flat buffers and calling MPI_Alltoallv.
+  CH_assert(stot <= static_cast<std::int64_t>(std::numeric_limits<int>::max()));
+  CH_assert(rtot <= static_cast<std::int64_t>(std::numeric_limits<int>::max()));
 
   std::vector<char> sflat(stot);
   std::vector<char> rflat(rtot);

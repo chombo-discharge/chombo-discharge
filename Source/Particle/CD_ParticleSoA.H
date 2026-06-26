@@ -122,6 +122,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
+#include <limits>
 #include <tuple>
 #include <type_traits>
 #include <utility>
@@ -1445,7 +1446,13 @@ protected:
   growIfFull()
   {
     if (m_size == m_capacity) {
-      this->reserve(m_capacity == 0 ? 16 : 2 * m_capacity);
+      // Saturating geometric growth: 2 * m_capacity overflows std::size_t once m_capacity exceeds
+      // SIZE_MAX/2, and reserve()'s "a_capacity <= m_capacity" guard would then silently no-op.
+      const std::size_t newCap = (m_capacity == 0) ? 16
+                                                   : (m_capacity <= std::numeric_limits<std::size_t>::max() / 2
+                                                        ? 2 * m_capacity
+                                                        : std::numeric_limits<std::size_t>::max());
+      this->reserve(newCap);
     }
   }
 

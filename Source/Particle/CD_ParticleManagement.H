@@ -61,16 +61,19 @@ namespace ParticleManagement {
     particle closest to this plane may be split, and the weights of the resulting particles are assigned such that the
     total weight of the two halves differ by at most one. The template parameters are 
 
-       P            -> Particle type
-       P::*weight   -> Function pointer to particle weight
-       P::*position -> Function pointer to particle position.
+       P            -> Particle type exposing the weight()/position() member functions below
+       P::*weight   -> Member function returning a mutable reference to the particle weight
+       P::*position -> Member function returning a const reference to the particle position.
 
-    A possible call signature is e.g. recursivePartitionAndSplitEqualWeightKD<P, &P::weight, &P::position>.
+    P must therefore be an AoS-style particle type with weight()/position() member functions (e.g.
+    NonCommParticle), called as partitionAndSplitEqualWeightKD<P, &P::weight, &P::position>. The SoA
+    payload types (ItoParticle, TracerParticle, ...) have no such member functions; their columns
+    must first be packed into such an intermediary, as ItoSolver::makeSuperparticlesEqualWeightKD does.
 
     The user can input a particle reconciliation function that manipulates the particle properties of the split particles. By default,
     the split particles will use the copy constructor and thus inherit class members from p0, with the exception of the particle weights.
     The reconcile function lets the user manipulate other particle properties, e.g. ones that are not properly captured by the particle copy
-    constructor, or that need some other form of reconciliation. 
+    constructor, or that need some other form of reconciliation.
   */
   template <class P, Real& (P::*weight)(), const RealVect& (P::*position)() const>
   static inline void
@@ -88,16 +91,19 @@ namespace ParticleManagement {
     @param[in] a_particleReconcile Description
     at most one physical particle. The template parameters are 
 
-       P            -> Particle type
-       P::*weight   -> Function pointer to particle weight
-       P::*position -> Function pointer to particle position.
+       P            -> Particle type exposing the weight()/position() member functions below
+       P::*weight   -> Member function returning a mutable reference to the particle weight
+       P::*position -> Member function returning a const reference to the particle position.
 
-    A possible call signature is e.g. recursivePartitionAndSplitEqualWeightKD<P, &P::weight, &P::position>.
+    P must therefore be an AoS-style particle type with weight()/position() member functions (e.g.
+    NonCommParticle), called as recursivePartitionAndSplitEqualWeightKD<P, &P::weight, &P::position>.
+    The SoA payload types (ItoParticle, TracerParticle, ...) have no such member functions; their
+    columns must first be packed into such an intermediary, as ItoSolver::makeSuperparticlesEqualWeightKD does.
 
     The user can input a particle reconciliation function that manipulates the particle properties of the split particles. By default,
     the split particles will use the copy constructor and thus inherit class members from p0, with the exception of the particle weights.
     The reconcile function lets the user manipulate other particle properties, e.g. ones that are not properly captured by the particle copy
-    constructor, or that need some other form of reconciliation. 
+    constructor, or that need some other form of reconciliation.
 
   */
   template <class P, Real& (P::*weight)(), const RealVect& (P::*position)() const>

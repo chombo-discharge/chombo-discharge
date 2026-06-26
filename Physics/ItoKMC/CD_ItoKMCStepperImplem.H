@@ -66,6 +66,15 @@ namespace {
   rebuildLeafFromCells(ParticleSoA<P, Traits>& a_leaf, const std::vector<ParticleSoA<P, Traits>>& a_cells) noexcept
   {
     ParticleSoA<P, Traits> rebuilt;
+
+    // Pre-reserve the known total so the append loop allocates once instead of growing
+    // geometrically (O(log N) reallocations) on every reaction-kernel step.
+    std::size_t total = 0;
+    for (const ParticleSoA<P, Traits>& cell : a_cells) {
+      total += cell.size();
+    }
+    rebuilt.reserve(total);
+
     for (const ParticleSoA<P, Traits>& cell : a_cells) {
       rebuilt.append(cell);
     }
