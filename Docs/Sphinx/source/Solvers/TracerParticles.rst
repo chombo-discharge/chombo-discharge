@@ -40,8 +40,8 @@ The particles are stored Struct-of-Arrays in a ``ParticleContainer``: the positi
 container-owned columns, while ``P`` declares the *extra* payload columns. The template constraints on
 ``P`` are
 
-#. It *must* expose the velocity as ``SpaceDim`` scalar payload columns named ``D_DECL(vx, vy, vz)``.
-#. It *must* have a ``ParticleTraits<P>`` specialization listing its columns (including ``vx/vy/vz``).
+#. It *must* expose the velocity as ``SpaceDim`` scalar payload columns named ``D_DECL(v_x, v_y, v_z)``.
+#. It *must* have a ``ParticleTraits<P>`` specialization listing its columns (including ``v_x/v_y/v_z``).
 
 Users are free to provide their own payload provided that it meets these constraints.
 However, we also define a plug-and-play payload for the tracer-particle stepper, see :ref:`Chap:TracerParticle`.
@@ -60,10 +60,10 @@ interpolated velocity together with Runge-Kutta stage scratch, all as per-compon
 
 .. literalinclude:: ../../../../Source/TracerParticles/CD_TracerParticle.H
    :language: c++
-   :lines: 26-33
+   :lines: 27-58
    :dedent: 0
 
-The velocity columns ``D_DECL(vx, vy, vz)`` are the ones required by the solver; the remaining columns hold
+The velocity columns ``D_DECL(v_x, v_y, v_z)`` are the ones required by the solver; the remaining columns hold
 intermediate Runge-Kutta integration state. Weight and position are container-owned and are therefore *not*
 payload members.
 

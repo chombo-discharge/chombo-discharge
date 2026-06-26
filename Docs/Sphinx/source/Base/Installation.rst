@@ -218,7 +218,7 @@ The main variables that the user needs to set are
 * ``FC = <Fortran compiler>``
 * ``MPI = TRUE/FALSE`` — enables or disables MPI.
 * ``MPICXX = <MPI C++ compiler>``
-* ``CXXSTD = 14`` — C++ standard. ``chombo-discharge`` requires at least C++14.
+* ``CXXSTD = 17`` — C++ standard. ``chombo-discharge`` requires at least C++17.
 * ``USE_EB = TRUE`` — enables embedded boundary support. This is required.
 * ``USE_MF = TRUE`` — enables multifluid support. This is required.
 * ``USE_MT = TRUE/FALSE`` — enables ``Chombo`` memory tracking.

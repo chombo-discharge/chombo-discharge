@@ -30,7 +30,7 @@ The payload is described by a ``ParticleTraits<P>`` specialization that lists th
 A representative payload (the tracer-particle velocity + Runge-Kutta scratch) looks like
 
 .. literalinclude:: ../../../../Source/TracerParticles/CD_TracerParticle.H
-   :lines: 26-46
+   :lines: 20-73
    :language: c++
 
 Per-component vectors are declared as individual scalar columns (there is no ``RealVect`` column type); the ``D_DECL`` macro expands to the ``SpaceDim`` components.
@@ -119,7 +119,7 @@ _____________________
 To get the per-level holders from a ``ParticleContainer<P, Traits>`` one can call ``getParticles()``:
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 262-270
+   :lines: 305-313
    :language: c++
    :dedent: 2
 
@@ -253,7 +253,7 @@ Particles that move off their original grid patch must be remapped in order to e
 The remapping function for ``ParticleContainer<P, Traits>`` is
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 540-549
+   :lines: 565-574
    :language: c++
    :dedent: 2
 
@@ -284,7 +284,7 @@ This is done as follows:
 1. *Before* creating the new grids, each MPI rank caches its current particles by calling
 
    .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-      :lines: 551-558
+      :lines: 576-583
       :language: c++
       :dedent: 2
 
@@ -293,7 +293,7 @@ This is done as follows:
 2. When ``ParticleContainer<P, Traits>`` regrids, the cached particles are redistributed onto the new layout by calling the regrid function:
 
    .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-      :lines: 560-580
+      :lines: 585-605
       :language: c++
       :dedent: 2
 
@@ -318,7 +318,7 @@ To fill the masked particles, ``ParticleContainer<P, Traits>`` has member functi
 The function signature for this is
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 598-599
+   :lines: 618-619
    :language: c++
    :dedent: 2
 
@@ -326,7 +326,7 @@ The argument ``a_mask`` holds a bool at each cell in the AMR hierarchy.
 Particles that live in cells where ``a_mask`` is true will be copied to an internal holder which can be retrieved through
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 291-295
+   :lines: 325-333
    :language: c++
    :dedent: 2
 
@@ -334,7 +334,7 @@ In the above functions the mask particles are *copied*, and the original particl
 After the user is done with the particles, they should be released through
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 615-616
+   :lines: 651-652
    :language: c++
    :dedent: 2
 
@@ -468,7 +468,7 @@ To deposit the particle weight on the mesh, the user can call ``AmrMesh::deposit
 The input arguments are the output mesh data holder (must have exactly one component), the realm and phase where the particles live, the SoA particle container (``a_particles``), the deposition method, the coarse-fine handling, and a flag that enforces nearest grid-point deposition in cut-cells.
 The last flag is motivated by the fact that some applications might require hard mass conservation, and the user can then ensure that mass is never deposited into covered grid cells.
 
-To deposit a *derived* per-particle quantity (e.g. weight times a payload column), use ``AmrMesh::depositGathered`` with a gatherer callback, or ``AmrMesh::deposit<Members...>`` to deposit one or more payload columns directly.
+To deposit a *derived* per-particle quantity (e.g. weight times a payload column), use ``AmrMesh::depositGathered`` with a gatherer callback, or ``AmrMesh::depositParticles<Members...>`` to deposit one or more payload columns directly.
 Surface (EB) deposition of the weight column onto an ``EBAMRIVData`` is available through an overload of ``AmrMesh::depositParticles``:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
@@ -609,7 +609,7 @@ The recommended pattern operates on one cell at a time: cell-sort the leaf, extr
 ``ParticleSoA<P>::extractCell`` performs the per-cell extraction
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleSoA.H
-   :lines: 1362
+   :lines: 1361-1362
    :language: c++
 
 and the merged result is accumulated into an output ``ParticleSoA`` (via ``append``) which finally replaces the leaf with ``swap``.
@@ -635,14 +635,14 @@ At each level in the tree recursion one chooses an axis for partitioning one sub
 
 .. tip::
 
-   The source code for the kD-tree functionality is given in :file:`$DISCHARGE_HOME/Source/Particle/CD_SuperParticles.H`.
+   The source code for the kD-tree functionality is given in :file:`$DISCHARGE_HOME/Source/Particle/CD_KDNode.H`.
 
 The kD-tree partitioner partitions a lightweight, communication-free particle type (``NonCommParticle``) carrying the position, weight, and any quantities to be preserved across a merge.
-Only the partitioner ``PartitionEqualWeight`` is currently supported, and this partitioner will divide the original subset into two new subsets such that the particle weights in the two halves differ by at most one physical particle.
+Only the partitioner ``partitionAndSplitEqualWeightKD`` is currently supported, and this partitioner will divide the original subset into two new subsets such that the particle weights in the two halves differ by at most one physical particle.
 
 .. warning::
 
-   ``PartitionEqualWeight`` will usually split particles to ensure that the weight in the two subsets are the same (thus creating new particles).
+   ``partitionAndSplitEqualWeightKD`` will usually split particles to ensure that the weight in the two subsets are the same (thus creating new particles).
    In this case any other members in the particle type are copied over into the new particles.
 
 The particles in each leaf of the kD-tree can then be merged into new particles.
