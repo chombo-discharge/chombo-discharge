@@ -29,10 +29,10 @@ struct Photon
 {
   ParticleReal kappa = 0.0; ///< Mean absorption coefficient (inverse mean free path).
 
-  ParticleReal velocityX = 0.0; ///< Velocity, x-component.
-  ParticleReal velocityY = 0.0; ///< Velocity, y-component.
+  ParticleReal v_x = 0.0; ///< Velocity, x-component.
+  ParticleReal v_y = 0.0; ///< Velocity, y-component.
 #if CH_SPACEDIM == 3
-  ParticleReal velocityZ = 0.0; ///< Velocity, z-component.
+  ParticleReal v_z = 0.0; ///< Velocity, z-component.
 #endif
 };
 
@@ -43,8 +43,7 @@ template <>
 struct ParticleTraits<Photon>
 {
   /// @brief Payload column member-pointers: kappa followed by the per-component velocity.
-  static constexpr auto columns = std::make_tuple(&Photon::kappa,
-                                                  D_DECL(&Photon::velocityX, &Photon::velocityY, &Photon::velocityZ));
+  static constexpr auto columns = std::make_tuple(&Photon::kappa, D_DECL(&Photon::v_x, &Photon::v_y, &Photon::v_z));
 };
 
 #include <CD_NamespaceFooter.H>

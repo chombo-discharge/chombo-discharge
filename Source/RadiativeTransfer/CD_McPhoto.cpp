@@ -1527,9 +1527,9 @@ McPhoto::advancePhotonsInstantaneous(ParticleContainer<Photon>& a_bulkPhotons,
         const RealVect oldPos   = allPhotons.position(i);
         const Real     weight   = allPhotons.weight(i);
         const Real     kappa    = allPhotons.template get<&Photon::kappa>(i);
-        const RealVect velocity = RealVect(D_DECL(allPhotons.template get<&Photon::velocityX>(i),
-                                                  allPhotons.template get<&Photon::velocityY>(i),
-                                                  allPhotons.template get<&Photon::velocityZ>(i)));
+        const RealVect velocity = RealVect(D_DECL(allPhotons.template get<&Photon::v_x>(i),
+                                                  allPhotons.template get<&Photon::v_y>(i),
+                                                  allPhotons.template get<&Photon::v_z>(i)));
 
         // Draw a new random absorption position
         CH_assert(velocity.vectorLength() > 0.0);
@@ -1695,9 +1695,9 @@ McPhoto::advancePhotonsTransient(ParticleContainer<Photon>& a_bulkPhotons,
         const RealVect oldPos = allPhotons.position(i);
         const Real     weight = allPhotons.weight(i);
         const Real     kappa  = allPhotons.template get<&Photon::kappa>(i);
-        const RealVect v      = RealVect(D_DECL(allPhotons.template get<&Photon::velocityX>(i),
-                                           allPhotons.template get<&Photon::velocityY>(i),
-                                           allPhotons.template get<&Photon::velocityZ>(i)));
+        const RealVect v      = RealVect(D_DECL(allPhotons.template get<&Photon::v_x>(i),
+                                           allPhotons.template get<&Photon::v_y>(i),
+                                           allPhotons.template get<&Photon::v_z>(i)));
 
         // Move the Photon
         const RealVect newPos  = oldPos + v * a_dt;
