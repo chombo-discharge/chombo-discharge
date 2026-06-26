@@ -61,8 +61,20 @@ XTRACPPFLAGS += -I$(DISCHARGE_HOME)/Submodules/EBGeometry
 # Lib/Local/Make.defs.local; it defaults to DOUBLE. The value is resolved lazily (deferred) because
 # this file is included before Make.defs.local, and it is appended only to our own XTRACPPFLAGS --
 # so no modification of Chombo's makefile system is required.
-PARTICLE_PRECISION ?= FLOAT
+PARTICLE_PRECISION ?= DOUBLE
 XTRACPPFLAGS += -DCD_PARTICLE_REAL=$(if $(filter FLOAT,$(PARTICLE_PRECISION)),float,double)
+
+# Fold the payload precision into Chombo's configuration string so that FLOAT and DOUBLE builds land
+# in DISTINCT object trees (o/<config>/, lib<name><config>.a, main<config>.ex). Without this both
+# precisions share a single config, and Chombo's dependency tracking -- which keys only on source and
+# header files, never on -D flag VALUES -- never rebuilds when PARTICLE_PRECISION changes: the switch
+# is silently ignored, or (in a partial rebuild) mixes objects with different sizeof(ParticleReal)
+# into one ODR-violating binary. Tagging both precisions (rather than leaving the default untagged)
+# guarantees neither reuses a legacy untagged tree of unknown precision; a switch then rebuilds
+# cleanly and reuses each tree on switch-back. Like XTRACPPFLAGS above the append is deferred
+# (XTRACONFIG is undefined at this point, so += makes it a recursive variable), so $(PARTICLE_PRECISION)
+# is expanded later by Make.defs.config -- AFTER Make.defs.local has been read.
+XTRACONFIG += $(if $(filter FLOAT,$(PARTICLE_PRECISION)),.PARTREALFLOAT,.PARTREALDOUBLE)
 
 # Source and Geometries libraries should always be visible.
 XTRALIBFLAGS += $(addprefix -l, $(SOURCE_LIB))$(config)
