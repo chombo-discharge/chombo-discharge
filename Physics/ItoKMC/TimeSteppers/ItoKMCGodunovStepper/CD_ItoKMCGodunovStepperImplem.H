@@ -390,11 +390,11 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
     //       are transferred to a container which is added to the conductivity-related particles. The particles are later removed.
     const std::function<void(ParticleSoA<ItoParticle>&, std::size_t)> setFlag = [](ParticleSoA<ItoParticle>& leaf,
                                                                                    const std::size_t i) -> void {
-      leaf.template get<&ItoParticle::tmpReal>(i) = 1.0;
+      leaf.template get<&ItoParticle::scratch>(i) = 1.0;
     };
     const std::function<void(ParticleSoA<ItoParticle>&, std::size_t)> nonDeletionModifier =
       [](ParticleSoA<ItoParticle>& leaf, const std::size_t i) -> void {
-      leaf.template get<&ItoParticle::tmpReal>(i) = -1.0;
+      leaf.template get<&ItoParticle::scratch>(i) = -1.0;
     };
 
     // Set flag for identifying which particles were intersected by not removed.
@@ -435,7 +435,7 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
             const ParticleSoA<ItoParticle>& leaf           = bulkParticles[lvl][din];
 
             for (std::size_t i = 0; i < leaf.size(); i++) {
-              if (leaf.template get<&ItoParticle::tmpReal>(i) < 0.0) {
+              if (leaf.template get<&ItoParticle::scratch>(i) < 0.0) {
                 const RealVect pos      = leaf.position(i);
                 const Real     weight   = leaf.weight(i);
                 const Real     mobility = leaf.template get<&ItoParticle::mobility>(i);
@@ -448,7 +448,7 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
       }
     }
 
-    // Finally, delete the original particles that were flagged (tmpReal < 0) via swap-and-pop on the SoA leaves.
+    // Finally, delete the original particles that were flagged (scratch < 0) via swap-and-pop on the SoA leaves.
     for (auto it = this->m_ito->iterator(); it.ok(); ++it) {
       ParticleContainer<ItoParticle>& bulkParticles = it()->getParticles(ItoSolver::WhichContainer::Bulk);
 
@@ -466,7 +466,7 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
 
           std::size_t i = 0;
           while (i < leaf.size()) {
-            if (leaf.template get<&ItoParticle::tmpReal>(i) < 0.0) {
+            if (leaf.template get<&ItoParticle::scratch>(i) < 0.0) {
               leaf.remove(i);
             }
             else {
@@ -800,9 +800,9 @@ ItoKMCGodunovStepper<I, C, R, F>::setOldPositions() noexcept
         ParticleSoA<ItoParticle>& leaf = particles[din];
 
         double* const pos[SpaceDim] = {D_DECL(leaf.positionColumn(0), leaf.positionColumn(1), leaf.positionColumn(2))};
-        double* const oldPos[SpaceDim] = {D_DECL(leaf.template column<&ItoParticle::oldPositionX>(),
-                                                 leaf.template column<&ItoParticle::oldPositionY>(),
-                                                 leaf.template column<&ItoParticle::oldPositionZ>())};
+        double* const oldPos[SpaceDim] = {D_DECL(leaf.template column<&ItoParticle::old_x>(),
+                                                 leaf.template column<&ItoParticle::old_y>(),
+                                                 leaf.template column<&ItoParticle::old_z>())};
 
         ParticleLoops::loop(leaf, [&](const std::size_t i) {
           D_DECL(oldPos[0][i] = pos[0][i], oldPos[1][i] = pos[1][i], oldPos[2][i] = pos[2][i]);
@@ -1724,9 +1724,9 @@ ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
           const ItoParticle p   = leaf.gather(i);
           const RealVect    hop = diffusive ? diffusionFunction(p, a_dt) : RealVect::Zero;
 
-          D_DECL(leaf.template get<&ItoParticle::tmpVectX>(i) = static_cast<ParticleReal>(hop[0]),
-                 leaf.template get<&ItoParticle::tmpVectY>(i) = static_cast<ParticleReal>(hop[1]),
-                 leaf.template get<&ItoParticle::tmpVectZ>(i) = static_cast<ParticleReal>(hop[2]));
+          D_DECL(leaf.template get<&ItoParticle::scratch_x>(i) = static_cast<ParticleReal>(hop[0]),
+                 leaf.template get<&ItoParticle::scratch_y>(i) = static_cast<ParticleReal>(hop[1]),
+                 leaf.template get<&ItoParticle::scratch_z>(i) = static_cast<ParticleReal>(hop[2]));
 
           if (Z != 0) {
             pointParticles.append(pos + hop, weight);
@@ -1812,15 +1812,15 @@ ItoKMCGodunovStepper<I, C, R, F>::stepEulerMaruyamaParticles(const Real a_dt) no
 
           double* const pos[SpaceDim] = {
             D_DECL(leaf.positionColumn(0), leaf.positionColumn(1), leaf.positionColumn(2))};
-          double* const       oldPos[SpaceDim] = {D_DECL(leaf.template column<&ItoParticle::oldPositionX>(),
-                                                   leaf.template column<&ItoParticle::oldPositionY>(),
-                                                   leaf.template column<&ItoParticle::oldPositionZ>())};
-          ParticleReal* const vel[SpaceDim]    = {D_DECL(leaf.template column<&ItoParticle::velocityX>(),
-                                                      leaf.template column<&ItoParticle::velocityY>(),
-                                                      leaf.template column<&ItoParticle::velocityZ>())};
-          ParticleReal* const hop[SpaceDim]    = {D_DECL(leaf.template column<&ItoParticle::tmpVectX>(),
-                                                      leaf.template column<&ItoParticle::tmpVectY>(),
-                                                      leaf.template column<&ItoParticle::tmpVectZ>())};
+          double* const       oldPos[SpaceDim] = {D_DECL(leaf.template column<&ItoParticle::old_x>(),
+                                                   leaf.template column<&ItoParticle::old_y>(),
+                                                   leaf.template column<&ItoParticle::old_z>())};
+          ParticleReal* const vel[SpaceDim]    = {D_DECL(leaf.template column<&ItoParticle::vx>(),
+                                                      leaf.template column<&ItoParticle::vy>(),
+                                                      leaf.template column<&ItoParticle::vz>())};
+          ParticleReal* const hop[SpaceDim]    = {D_DECL(leaf.template column<&ItoParticle::scratch_x>(),
+                                                      leaf.template column<&ItoParticle::scratch_y>(),
+                                                      leaf.template column<&ItoParticle::scratch_z>())};
 
           ParticleLoops::loop(leaf, [&](const std::size_t i) {
             // Add in the diffusion hop and advective contribution.
@@ -2042,7 +2042,7 @@ ItoKMCGodunovStepper<I, C, R, F>::plotParticles() const noexcept
       sprintf(fileChar, "%s.step%07d.%dd.h5part", prefix.c_str(), this->m_timeStep, SpaceDim);
 
       // Scalar datasets: container weight + the ItoParticle scalar payload columns, named by
-      // ItoParticle::s_realVariables = {weight, mobility, diffusion, energy, tmpReal}.
+      // ItoParticle::s_realVariables = {weight, mobility, diffusion, energy, scratch}.
       using Leaf = ParticleSoA<ItoParticle>;
       const std::vector<std::pair<std::string, std::function<Real(const Leaf&, std::size_t)>>> scalarVars = {
         {ItoParticle::s_realVariables[0],
@@ -2062,27 +2062,24 @@ ItoKMCGodunovStepper<I, C, R, F>::plotParticles() const noexcept
            return l.get<&ItoParticle::energy>(i);
          }},
         {ItoParticle::s_realVariables[4], [](const Leaf& l, std::size_t i) {
-           return l.get<&ItoParticle::tmpReal>(i);
+           return l.get<&ItoParticle::scratch>(i);
          }}};
 
-      // Vector datasets, named by ItoParticle::s_vectVariables = {oldPos, velocity, tmpVect}.
+      // Vector datasets, named by ItoParticle::s_vectVariables = {old, v, scratch}.
       const std::vector<std::pair<std::string, std::function<RealVect(const Leaf&, std::size_t)>>> vectorVars = {
         {ItoParticle::s_vectVariables[0],
          [](const Leaf& l, std::size_t i) {
-           return RealVect(D_DECL(l.get<&ItoParticle::oldPositionX>(i),
-                                  l.get<&ItoParticle::oldPositionY>(i),
-                                  l.get<&ItoParticle::oldPositionZ>(i)));
+           return RealVect(
+             D_DECL(l.get<&ItoParticle::old_x>(i), l.get<&ItoParticle::old_y>(i), l.get<&ItoParticle::old_z>(i)));
          }},
         {ItoParticle::s_vectVariables[1],
          [](const Leaf& l, std::size_t i) {
-           return RealVect(D_DECL(l.get<&ItoParticle::velocityX>(i),
-                                  l.get<&ItoParticle::velocityY>(i),
-                                  l.get<&ItoParticle::velocityZ>(i)));
+           return RealVect(D_DECL(l.get<&ItoParticle::vx>(i), l.get<&ItoParticle::vy>(i), l.get<&ItoParticle::vz>(i)));
          }},
         {ItoParticle::s_vectVariables[2], [](const Leaf& l, std::size_t i) {
-           return RealVect(D_DECL(l.get<&ItoParticle::tmpVectX>(i),
-                                  l.get<&ItoParticle::tmpVectY>(i),
-                                  l.get<&ItoParticle::tmpVectZ>(i)));
+           return RealVect(D_DECL(l.get<&ItoParticle::scratch_x>(i),
+                                  l.get<&ItoParticle::scratch_y>(i),
+                                  l.get<&ItoParticle::scratch_z>(i)));
          }}};
 
       // Plot the particles directly from the live SoA container.

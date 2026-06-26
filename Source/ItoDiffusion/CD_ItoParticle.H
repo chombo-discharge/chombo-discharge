@@ -23,8 +23,8 @@
 
 /**
   @brief SoA payload for ItoSolver particles, i.e. drifting Brownian walkers.
-  @details mobility/diffusion/energy are the particle transport coefficients and average energy; tmpReal is
-  scratch scalar storage. oldPosition holds the previous particle position (double precision, because it
+  @details mobility/diffusion/energy are the particle transport coefficients and average energy; scratch is
+  scratch scalar storage. old_x/old_y/old_z holds the previous particle position (double precision, because it
   subtracts from the double-precision container position); velocity is the interpolated drift velocity;
   tmpVect is scratch vector storage. The vector quantities carry one member per spatial dimension (the
   z-component exists only when CH_SPACEDIM == 3). Weight and position are container-owned columns, NOT
@@ -46,24 +46,24 @@ struct ItoParticle
   ParticleReal mobility  = 0.0; ///< Mobility coefficient.
   ParticleReal diffusion = 0.0; ///< Diffusion coefficient.
   ParticleReal energy    = 0.0; ///< Average particle energy.
-  ParticleReal tmpReal   = 0.0; ///< Scratch scalar storage.
+  ParticleReal scratch   = 0.0; ///< Scratch scalar storage.
 
-  double oldPositionX = 0.0; ///< Previous position, x-component.
-  double oldPositionY = 0.0; ///< Previous position, y-component.
+  double old_x = 0.0; ///< Previous position, x-component.
+  double old_y = 0.0; ///< Previous position, y-component.
 #if CH_SPACEDIM == 3
-  double oldPositionZ = 0.0; ///< Previous position, z-component.
+  double old_z = 0.0; ///< Previous position, z-component.
 #endif
 
-  ParticleReal velocityX = 0.0; ///< Interpolated velocity, x-component.
-  ParticleReal velocityY = 0.0; ///< Interpolated velocity, y-component.
+  ParticleReal vx = 0.0; ///< Interpolated velocity, x-component.
+  ParticleReal vy = 0.0; ///< Interpolated velocity, y-component.
 #if CH_SPACEDIM == 3
-  ParticleReal velocityZ = 0.0; ///< Interpolated velocity, z-component.
+  ParticleReal vz = 0.0; ///< Interpolated velocity, z-component.
 #endif
 
-  ParticleReal tmpVectX = 0.0; ///< Scratch vector storage, x-component.
-  ParticleReal tmpVectY = 0.0; ///< Scratch vector storage, y-component.
+  ParticleReal scratch_x = 0.0; ///< Scratch vector storage, x-component.
+  ParticleReal scratch_y = 0.0; ///< Scratch vector storage, y-component.
 #if CH_SPACEDIM == 3
-  ParticleReal tmpVectZ = 0.0; ///< Scratch vector storage, z-component.
+  ParticleReal scratch_z = 0.0; ///< Scratch vector storage, z-component.
 #endif
 };
 
@@ -82,16 +82,15 @@ struct ParticleTraits<ItoParticle>
     &ItoParticle::mobility,
     &ItoParticle::diffusion,
     &ItoParticle::energy,
-    &ItoParticle::tmpReal,
-    D_DECL(&ItoParticle::oldPositionX, &ItoParticle::oldPositionY, &ItoParticle::oldPositionZ),
-    D_DECL(&ItoParticle::velocityX, &ItoParticle::velocityY, &ItoParticle::velocityZ),
-    D_DECL(&ItoParticle::tmpVectX, &ItoParticle::tmpVectY, &ItoParticle::tmpVectZ));
+    &ItoParticle::scratch,
+    D_DECL(&ItoParticle::old_x, &ItoParticle::old_y, &ItoParticle::old_z),
+    D_DECL(&ItoParticle::vx, &ItoParticle::vy, &ItoParticle::vz),
+    D_DECL(&ItoParticle::scratch_x, &ItoParticle::scratch_y, &ItoParticle::scratch_z));
 
   /**
      @brief Subset of payload columns written to HDF5 checkpoints: the per-component velocity.
   */
-  static constexpr auto h5Columns = std::make_tuple(
-    D_DECL(&ItoParticle::velocityX, &ItoParticle::velocityY, &ItoParticle::velocityZ));
+  static constexpr auto h5Columns = std::make_tuple(D_DECL(&ItoParticle::vx, &ItoParticle::vy, &ItoParticle::vz));
 };
 
 #include <CD_NamespaceFooter.H>

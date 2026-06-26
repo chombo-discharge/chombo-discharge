@@ -911,8 +911,7 @@ ItoSolver::intersectParticles(ParticleContainer<ItoParticle>&                   
 
   switch (a_ebIntersection) {
   case EBIntersection::Raycast: {
-    m_amr->intersectParticlesRaycastIF<
-      D_DECL(&ItoParticle::oldPositionX, &ItoParticle::oldPositionY, &ItoParticle::oldPositionZ)>(
+    m_amr->intersectParticlesRaycastIF<D_DECL(&ItoParticle::old_x, &ItoParticle::old_y, &ItoParticle::old_z)>(
       a_particles,
       a_ebParticles,
       a_domainParticles,
@@ -924,8 +923,7 @@ ItoSolver::intersectParticles(ParticleContainer<ItoParticle>&                   
     break;
   }
   case EBIntersection::Bisection: {
-    m_amr->intersectParticlesBisectIF<
-      D_DECL(&ItoParticle::oldPositionX, &ItoParticle::oldPositionY, &ItoParticle::oldPositionZ)>(
+    m_amr->intersectParticlesBisectIF<D_DECL(&ItoParticle::old_x, &ItoParticle::old_y, &ItoParticle::old_z)>(
       a_particles,
       a_ebParticles,
       a_domainParticles,
@@ -2319,17 +2317,15 @@ ItoSolver::interpolateVelocities(const int a_lvl, const DataIndex& a_dit)
     // Interpolate the velocity function onto the particle velocity columns.
     EBParticleMesh meshInterp(domain, cellBox, ebisbox, dx * RealVect::Unit, probLo);
 
-    meshInterp.interpolate<D_DECL(&ItoParticle::velocityX, &ItoParticle::velocityY, &ItoParticle::velocityZ)>(
-      leaf,
-      velo_func,
-      m_deposition,
-      m_forceIrregInterpolationNGP);
+    meshInterp.interpolate<D_DECL(&ItoParticle::vx, &ItoParticle::vy, &ItoParticle::vz)>(leaf,
+                                                                                         velo_func,
+                                                                                         m_deposition,
+                                                                                         m_forceIrregInterpolationNGP);
 
     // Set the particle velocities to velo_func * mobility.
     const ParticleReal* mobility    = leaf.column<&ItoParticle::mobility>();
-    ParticleReal*       v[SpaceDim] = {D_DECL(leaf.column<&ItoParticle::velocityX>(),
-                                        leaf.column<&ItoParticle::velocityY>(),
-                                        leaf.column<&ItoParticle::velocityZ>())};
+    ParticleReal*       v[SpaceDim] = {
+      D_DECL(leaf.column<&ItoParticle::vx>(), leaf.column<&ItoParticle::vy>(), leaf.column<&ItoParticle::vz>())};
 
     ParticleLoops::loop(leaf, [&](const std::size_t i) {
       for (int dir = 0; dir < SpaceDim; dir++) {
@@ -2481,17 +2477,17 @@ ItoSolver::interpolateMobilitiesVelocity(const int        a_lvl,
   muV.clone(a_velocityMagnitude);
   muV *= mobilityFunction;
 
-  // First, interpolate |V| to the particle position, stored in the tmpReal column.
-  meshInterp.interpolate<&ItoParticle::tmpReal>(leaf, a_velocityMagnitude, m_deposition, m_forceIrregInterpolationNGP);
+  // First, interpolate |V| to the particle position, stored in the scratch column.
+  meshInterp.interpolate<&ItoParticle::scratch>(leaf, a_velocityMagnitude, m_deposition, m_forceIrregInterpolationNGP);
 
   meshInterp.interpolate<&ItoParticle::mobility>(leaf, muV, m_deposition, m_forceIrregInterpolationNGP);
 
-  // We now have tmpReal = |V(Xp)| and mobility = |mu*V|(Xp). Set mobility(Xp) = |mu*V|(Xp)/|V|(Xp).
+  // We now have scratch = |V(Xp)| and mobility = |mu*V|(Xp). Set mobility(Xp) = |mu*V|(Xp)/|V|(Xp).
   ParticleReal*       mobility = leaf.column<&ItoParticle::mobility>();
-  const ParticleReal* tmpReal  = leaf.column<&ItoParticle::tmpReal>();
+  const ParticleReal* scratch  = leaf.column<&ItoParticle::scratch>();
 
   ParticleLoops::loop(leaf, [&](const std::size_t i) {
-    mobility[i] *= 1.0 / tmpReal[i];
+    mobility[i] *= 1.0 / scratch[i];
   });
 }
 
@@ -2715,10 +2711,9 @@ ItoSolver::computeDt(const int a_lvl, const DataIndex& a_dit) const
   const ParticleSoA<ItoParticle>&       leaf      = particles[a_lvl][a_dit];
 
   const std::size_t   n           = leaf.size();
-  const ParticleReal* v[SpaceDim] = {D_DECL(leaf.column<&ItoParticle::velocityX>(),
-                                            leaf.column<&ItoParticle::velocityY>(),
-                                            leaf.column<&ItoParticle::velocityZ>())};
-  const ParticleReal* D           = leaf.column<&ItoParticle::diffusion>();
+  const ParticleReal* v[SpaceDim] = {
+    D_DECL(leaf.column<&ItoParticle::vx>(), leaf.column<&ItoParticle::vy>(), leaf.column<&ItoParticle::vz>())};
+  const ParticleReal* D = leaf.column<&ItoParticle::diffusion>();
 
   if (m_isMobile && !m_isDiffusive) {
 
@@ -2854,10 +2849,9 @@ ItoSolver::computeHopDt(const Real a_maxCellsToMove, const int a_lvl, const Data
   const ParticleSoA<ItoParticle>&       leaf      = particles[a_lvl][a_dit];
 
   const std::size_t   n           = leaf.size();
-  const ParticleReal* v[SpaceDim] = {D_DECL(leaf.column<&ItoParticle::velocityX>(),
-                                            leaf.column<&ItoParticle::velocityY>(),
-                                            leaf.column<&ItoParticle::velocityZ>())};
-  const ParticleReal* D           = leaf.column<&ItoParticle::diffusion>();
+  const ParticleReal* v[SpaceDim] = {
+    D_DECL(leaf.column<&ItoParticle::vx>(), leaf.column<&ItoParticle::vy>(), leaf.column<&ItoParticle::vz>())};
+  const ParticleReal* D = leaf.column<&ItoParticle::diffusion>();
 
   // Helper that returns the largest velocity component magnitude of particle i.
   auto vMaxOf = [&](const std::size_t a_i) -> Real {
@@ -2999,9 +2993,8 @@ ItoSolver::computeAdvectiveDt(const int a_lvl, const DataIndex& a_dit) const
     const ParticleSoA<ItoParticle>&       leaf      = particles[a_lvl][a_dit];
 
     const std::size_t   n           = leaf.size();
-    const ParticleReal* v[SpaceDim] = {D_DECL(leaf.column<&ItoParticle::velocityX>(),
-                                              leaf.column<&ItoParticle::velocityY>(),
-                                              leaf.column<&ItoParticle::velocityZ>())};
+    const ParticleReal* v[SpaceDim] = {
+      D_DECL(leaf.column<&ItoParticle::vx>(), leaf.column<&ItoParticle::vy>(), leaf.column<&ItoParticle::vz>())};
 
     for (std::size_t i = 0; i < n; i++) {
       // Get maximum velocity component magnitude.

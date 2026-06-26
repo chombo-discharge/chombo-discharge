@@ -6010,9 +6010,9 @@ ItoKMCStepper<I, C, R, F>::computeEdotJSource(const Real a_dt) noexcept
           const ParticleSoA<ItoParticle>&   leaf = particles[lvl][din];
 
           for (std::size_t i = 0; i < leaf.size(); i++) {
-            const RealVect posA = RealVect(D_DECL(leaf.template get<&ItoParticle::oldPositionX>(i),
-                                                  leaf.template get<&ItoParticle::oldPositionY>(i),
-                                                  leaf.template get<&ItoParticle::oldPositionZ>(i)));
+            const RealVect posA = RealVect(D_DECL(leaf.template get<&ItoParticle::old_x>(i),
+                                                  leaf.template get<&ItoParticle::old_y>(i),
+                                                  leaf.template get<&ItoParticle::old_z>(i)));
 
             ItoKMCFieldParticle payload;
             D_DECL(payload.altX = static_cast<ParticleReal>(posA[0]),

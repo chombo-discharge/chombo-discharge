@@ -882,7 +882,7 @@ ItoKMCPhysics::forwardIsotropicDiffusion(const ItoParticle& a_particle, const Re
 {
   RealVect hop = this->isotropicDiffusion(a_particle, a_dt);
 
-  const RealVect v = RealVect(D_DECL(a_particle.velocityX, a_particle.velocityY, a_particle.velocityZ));
+  const RealVect v = RealVect(D_DECL(a_particle.vx, a_particle.vy, a_particle.vz));
 
   if (v != RealVect::Zero) {
     const RealVect u = v / v.vectorLength();

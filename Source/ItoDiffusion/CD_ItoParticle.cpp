@@ -14,7 +14,7 @@
 #include <CD_ItoParticle.H>
 #include <CD_NamespaceHeader.H>
 
-std::vector<std::string> ItoParticle::s_realVariables = {"weight", "mobility", "diffusion", "energy", "tmpReal"};
-std::vector<std::string> ItoParticle::s_vectVariables = {"oldPos", "velocity", "tmpVect"};
+std::vector<std::string> ItoParticle::s_realVariables = {"weight", "mobility", "diffusion", "energy", "scratch"};
+std::vector<std::string> ItoParticle::s_vectVariables = {"old", "v", "scratch"};
 
 #include <CD_NamespaceFooter.H>
