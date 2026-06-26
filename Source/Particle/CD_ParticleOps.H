@@ -22,10 +22,8 @@
 // Our includes
 #include <CD_EBAMRData.H>
 #include <CD_ParticleMap.H>
+#include <CD_ParticleContainer.H>
 #include <CD_NamespaceHeader.H>
-
-template <typename P>
-class ParticleContainer;
 
 /**
   @brief A shallow static class for doing various kinds of particle-related operations.
@@ -54,26 +52,27 @@ public:
   getParticleCellIndex(const RealVect& a_particlePosition, const RealVect& a_probLo, const RealVect& a_dx) noexcept;
 
   /**
-    @brief Get the number of physical particles per cell
-    @param[out] a_ppc Physical particles per cell
-    @param[in]  a_src Particle source container. 
-    @details The second template parameter is a pointer to a member function in P that provides the number of physical particles for the computational
-    particles. If P has a function const Real& P::weight() const, we can call this as
-
-    ParticleOps::getPhysicalParticlesPerCell<P, &P::weight>(...)
+    @brief Get the number of physical particles per cell (SoA overload).
+    @details Sums the container-owned weight column into a_ppc, deposited NGP by grid cell.
+    @param[out] a_ppc Physical particles per cell.
+    @param[in]  a_src SoA particle source container.
+    @tparam P      Payload type.
+    @tparam Traits Column descriptor for the payload.
   */
-  template <typename P, const Real& (P::*weight)() const>
+  template <typename P, typename Traits>
   static inline void
-  getPhysicalParticlesPerCell(EBAMRCellData& a_ppc, const ParticleContainer<P>& a_src) noexcept;
+  getPhysicalParticlesPerCell(EBAMRCellData& a_ppc, const ParticleContainer<P, Traits>& a_src) noexcept;
 
   /**
-    @brief Get the number of computational particles per cell
-    @param[out] a_ppc Physical particles per cell
-    @param[in]  a_src Particle source container. 
+    @brief Get the number of computational particles per cell (SoA overload).
+    @param[out] a_ppc Computational particles per cell.
+    @param[in]  a_src SoA particle source container.
+    @tparam P      Payload type.
+    @tparam Traits Column descriptor for the payload.
   */
-  template <typename P>
+  template <typename P, typename Traits>
   static inline void
-  getComputationalParticlesPerCell(EBAMRCellData& a_ppc, const ParticleContainer<P>& a_src) noexcept;
+  getComputationalParticlesPerCell(EBAMRCellData& a_ppc, const ParticleContainer<P, Traits>& a_src) noexcept;
 
   /**
     @brief Get the grid cell where the particle lives
@@ -143,106 +142,40 @@ public:
                         Real&                        a_s);
 
   /**
-    @brief Copy all the particles from the a_src to a_dst
-    @param[out] a_dst Copy of original particles. 
-    @param[out] a_src Source particles
+    @brief Move all particles from a_src into a_dst (per leaf), emptying a_src. SoA overload.
+    @details Both containers must be defined over the same grids. Per patch, a_dst's leaf is replaced by
+    a_src's (via clear + catenate -- an O(1) arena swap when a_dst's leaf is empty), and a_src is emptied.
+    @param[in,out] a_dst Destination container (its leaves are overwritten).
+    @param[in,out] a_src Source container (emptied).
+    @tparam P      Payload type.
+    @tparam Traits Column descriptor for the payload.
   */
-  template <typename P>
+  template <typename P, typename Traits>
   static inline void
-  copy(ParticleContainer<P>& a_dst, const ParticleContainer<P>& a_src) noexcept;
+  copyDestructive(ParticleContainer<P, Traits>& a_dst, ParticleContainer<P, Traits>& a_src) noexcept;
 
   /**
-    @brief Copy all the particles from the a_src to a_dst. This destroys the source particles
-    @param[out] a_dst Copy of original particles. 
-    @param[out] a_src Source particles
+    @brief Global sum of the container-owned weight column (SoA overload).
+    @param[in] a_particles SoA particles.
+    @return Global (MPI-reduced) sum of all valid particle weights.
+    @tparam P      Payload type.
+    @tparam Traits Column descriptor for the payload.
   */
-  template <typename P>
-  static inline void
-  copyDestructive(ParticleContainer<P>& a_dst, ParticleContainer<P>& a_src) noexcept;
-
-  /**
-    @brief Perform a sum of some particle quantity
-    @param[in] a_particles Particles
-    @return Global sum
-  */
-  template <typename P, const Real& (P::*scalarQuantity)() const>
+  template <typename P, typename Traits>
   static inline Real
-  sum(const ParticleContainer<P>& a_particles) noexcept;
+  sum(const ParticleContainer<P, Traits>& a_particles) noexcept;
 
   /**
-    @brief Perform a sum of some particle quantity
-    @param[in] a_particles Particles
-    @note Just like the other version, except that this one doesn't take a member function. 
-    @return Global sum
-  */
-  template <typename P, Real (P::*scalarQuantity)()>
-  static inline Real
-  sum(const ParticleContainer<P>& a_particles) noexcept;
-
-  /**
-    @brief Remove particles if they fulfill certain removal criterion
-    @param[in,out] a_particles       Particles
-    @param[in]    a_removeCriterion Removal criterion.
-  */
-  template <typename P>
-  static inline void
-  removeParticles(ParticleContainer<P>& a_particles, const std::function<bool(const P&)>& a_removeCriterion) noexcept;
-
-  /**
-    @brief Transfer particles if they fulfill a certain removal criterion. Takes particles from a_srcParticles and puts them in a_dstParticles
-    @param[in,out] a_dstParticles    Destination particle data holder
-    @param[in,out] a_srcParticles    Source particle data holder
-    @param[in] a_transferCrit Transfer crit
-  */
-  template <typename P>
-  static inline void
-  transferParticles(ParticleContainer<P>&                a_dstParticles,
-                    ParticleContainer<P>&                a_srcParticles,
-                    const std::function<bool(const P&)>& a_transferCrit) noexcept;
-
-  /**
-    @brief Set value function. Lets the user set particle parameters. 
+    @brief Set value function for SoA containers. Lets the user set particle parameters via a (leaf, index) callback.
     @param[in,out] a_particles Particles
-    @param[in]    a_functor   Lambda for setting particle values
+    @param[in]    a_functor   Callback (leaf, index) for setting particle values via payload columns
+    @tparam P      Payload type of the container.
+    @tparam Traits Column descriptor for the payload.
   */
-  template <typename P>
+  template <typename P, typename Traits>
   static inline void
-  setData(ParticleContainer<P>& a_particles, const std::function<void(P&)>& a_functor) noexcept;
-
-  /**
-    @brief Set value function. Lets the user set scalar particle quantity. Use with e.g. setValue<P, &P::weight>(particles, 0.0) etc. 
-    @param[in,out] a_particles Particles
-    @param[in]    a_value     Value to set
-  */
-  template <typename P, Real& (P::*particleScalarField)()>
-  static inline void
-  setValue(ParticleContainer<P>& a_particles, const Real a_value) noexcept;
-
-  /**
-    @brief Set value function. Lets the user set scalar particle quantity. Use with e.g. setValue<P, &P::velocity>(particles, RealVect::Unit) etc. 
-    @param[in,out] a_particles Particles
-    @param[in]    a_value     Value to set
-  */
-  template <typename P, RealVect& (P::*particleVectorField)()>
-  static inline void
-  setValue(ParticleContainer<P>& a_particles, const RealVect& a_value) noexcept;
-
-#ifdef CH_MPI
-  /**
-    @brief Scatter particles across MPI ranks
-    @details This will scatter the particles from a_sentParticles onto a_receivedParticles. Each entry in a_sentParticles is the particles 
-    sent form this rank to the other ranks (including itself), so the size of this vector must be equal to the number of MPI ranks. The particles
-    are collected on a_receivedParticles. Note that the pair<unsigned int, unsigned int> will usually indicate the grid level and grid index that
-    the particles will eventually be assigned to. 
-    @param[in,out] a_receivedParticles Received particles on this rank
-    @param[in,out] a_sentParticles Particles sent from this rank to all the other ranks. 
-  */
-  template <typename P>
-  static inline void
-  scatterParticles(ParticleMap<List<P>>&              a_receivedParticles,
-                   std::vector<ParticleMap<List<P>>>& a_sentParticles) noexcept;
-
-#endif
+  setData(ParticleContainer<P, Traits>&                                    a_particles,
+          const std::function<void(ParticleSoA<P, Traits>&, std::size_t)>& a_functor) noexcept;
 };
 
 #include <CD_NamespaceFooter.H>

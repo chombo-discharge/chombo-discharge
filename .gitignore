@@ -57,3 +57,9 @@ Docs/*
 !Docs/README.md
 Docs/Sphinx/build
 Docs/**/*.dat
+
+# Local-only SoA particle staging area (kept locally; untracked)
+Dev/
+
+# Serena tooling (local; not project code)
+.serena/

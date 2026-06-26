@@ -18,6 +18,7 @@
 #include <CD_BrownianWalkerStepper.H>
 #include <CD_BrownianWalkerSpecies.H>
 #include <CD_Random.H>
+#include <CD_ParticleLoops.H>
 #include <CD_ParallelOps.H>
 #include <CD_EBCoarseToFineInterp.H>
 #include <CD_NamespaceHeader.H>
@@ -379,11 +380,10 @@ BrownianWalkerStepper::preRegrid(const int a_lbase, const int a_oldFinestLevel)
   m_amr->allocate(m_regridPPC, m_realm, m_phase, 1);
 
   // Deposit mass to scratch data holder. Then make sure the number of particles per cell
-  m_solver->depositParticles<ItoParticle, const Real&, &ItoParticle::weight>(
-    m_regridPPC,
-    m_solver->getParticles(ItoSolver::WhichContainer::Bulk),
-    DepositionType::NGP,
-    CoarseFineDeposition::Interp);
+  m_solver->depositWeight(m_regridPPC,
+                          m_solver->getParticles(ItoSolver::WhichContainer::Bulk),
+                          DepositionType::NGP,
+                          CoarseFineDeposition::Interp);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const Real dx = m_amr->getDx()[lvl];
@@ -471,7 +471,7 @@ BrownianWalkerStepper::advance(const Real a_dt)
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
     const DataIterator&      dit = dbl.dataIterator();
 
-    ParticleData<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::Bulk)[lvl];
+    ParticleContainer<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
     const int nbox = dit.size();
 
@@ -480,24 +480,38 @@ BrownianWalkerStepper::advance(const Real a_dt)
       const DataIndex& din = dit[mybox];
 
       // Particles that we iterate through.
-      List<ItoParticle>& particleList = particles[din].listItems();
+      ParticleSoA<ItoParticle>& leaf = particles[lvl][din];
+
+      const std::size_t n = leaf.size();
 
       // Euler step.
       if (m_solver->isMobile()) {
-        for (ListIterator<ItoParticle> lit(particleList); lit; ++lit) {
-          ItoParticle& p  = lit();
-          p.oldPosition() = p.position();
-          p.position() += p.velocity() * a_dt;
-        }
+        double* oldPos[SpaceDim] = {D_DECL(leaf.column<&ItoParticle::old_x>(),
+                                           leaf.column<&ItoParticle::old_y>(),
+                                           leaf.column<&ItoParticle::old_z>())};
+
+        const ParticleReal* v[SpaceDim] = {
+          D_DECL(leaf.column<&ItoParticle::vx>(), leaf.column<&ItoParticle::vy>(), leaf.column<&ItoParticle::vz>())};
+
+        double* const pos[SpaceDim] = {D_DECL(leaf.positionColumn(0), leaf.positionColumn(1), leaf.positionColumn(2))};
+
+        ParticleLoops::loop(leaf, [&](const std::size_t i) {
+          for (int dir = 0; dir < SpaceDim; dir++) {
+            oldPos[dir][i] = pos[dir][i];
+            pos[dir][i] += static_cast<Real>(v[dir][i]) * a_dt;
+          }
+        });
       }
 
       // Diffusion hop
       if (m_solver->isDiffusive()) {
-        for (ListIterator<ItoParticle> lit(particleList); lit; ++lit) {
-          ItoParticle&   p   = lit();
+        const ParticleReal* D = leaf.column<&ItoParticle::diffusion>();
+
+        for (std::size_t i = 0; i < n; i++) {
           const RealVect ran = Random::getNormal01() * Random::getDirection();
-          const RealVect hop = ran * sqrt(2.0 * p.diffusion() * a_dt);
-          p.position() += hop;
+          const RealVect hop = ran * sqrt(2.0 * static_cast<Real>(D[i]) * a_dt);
+
+          leaf.setPosition(i, leaf.position(i) + hop);
         }
       }
     }
@@ -737,14 +751,12 @@ BrownianWalkerStepper::loadBalanceBoxesParticles(Vector<Vector<int>>&           
 
   ParticleContainer<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
-  // Regrid the particles onto the new mesh.
+  // Regrid the particles onto the new mesh (SoA regrid rebuilds over the new layout from the preRegrid cache).
   particles.regrid(a_grids,
                    m_amr->getDomains(),
                    m_amr->getDx(),
                    m_amr->getRefinementRatios(),
-                   m_amr->getValidCells(particles.getRealm()),
-                   m_amr->getLevelTiles(particles.getRealm()),
-                   a_lmin,
+                   m_amr->getBlockingFactor(),
                    a_finestLevel);
 
   a_procs.resize(1 + a_finestLevel);
@@ -781,9 +793,7 @@ BrownianWalkerStepper::loadBalanceBoxesParticles(Vector<Vector<int>>&           
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      const List<ItoParticle>& patchParticles = particles[lvl][din].listItems();
-
-      loads[din.intCode()] = long(patchParticles.length());
+      loads[din.intCode()] = long(particles[lvl][din].size());
     }
 
     // If running with MPI, loads must be gathered on all ranks.
@@ -798,8 +808,8 @@ BrownianWalkerStepper::loadBalanceBoxesParticles(Vector<Vector<int>>&           
     a_procs[lvl] = ranks;
   }
 
-  // Put particles back
-  particles.preRegrid(a_lmin);
+  // Put particles back (re-cache for the subsequent regrid).
+  particles.preRegrid();
 }
 
 Vector<long int>
@@ -826,9 +836,7 @@ BrownianWalkerStepper::getCheckpointLoads(const std::string& a_realm, const int 
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
-    const List<ItoParticle>& patchParticles = particles[a_level][din].listItems();
-
-    loads[din.intCode()] = patchParticles.length();
+    loads[din.intCode()] = long(particles[a_level][din].size());
   }
 
   // If running with MPI, loads must be gathered on all ranks.

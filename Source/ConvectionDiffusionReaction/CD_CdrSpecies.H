@@ -18,7 +18,7 @@
 #include <RealVect.H>
 
 // Our includes
-#include <CD_PointParticle.H>
+#include <CD_ParticleSoA.H>
 #include <CD_NamespaceHeader.H>
 
 /**
@@ -90,14 +90,14 @@ public:
     @brief Get initial particles
     @return Initial particles
   */
-  virtual const List<PointParticle>&
+  virtual const ParticleSoA<NoPayload>&
   getInitialParticles() const;
 
   /**
     @brief Get initial particles
     @return Initial particles
   */
-  List<PointParticle>&
+  ParticleSoA<NoPayload>&
   getInitialParticles();
 
 protected:
@@ -124,7 +124,7 @@ protected:
   /**
     @brief Initial particles
   */
-  List<PointParticle> m_initialParticles;
+  ParticleSoA<NoPayload> m_initialParticles;
 };
 
 #include <CD_NamespaceFooter.H>

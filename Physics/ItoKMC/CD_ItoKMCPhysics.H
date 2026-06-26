@@ -28,7 +28,7 @@
 #include <CD_RtSpecies.H>
 #include <CD_Photon.H>
 #include <CD_ItoParticle.H>
-#include <CD_PointParticle.H>
+#include <CD_ParticleSoA.H>
 #include <CD_ItoKMCPhotoReaction.H>
 #include <CD_ItoKMCSurfaceReactionSet.H>
 #include <CD_KMCDualState.H>
@@ -289,22 +289,22 @@ namespace Physics {
         @param[in] a_E E
       */
       virtual void
-      secondaryEmissionEB(Vector<List<ItoParticle>>&       a_secondaryParticles,
-                          Vector<Real>&                    a_cdrFluxes,
-                          Vector<List<Photon>>&            a_secondaryPhotons,
-                          const Vector<List<ItoParticle>>& a_primaryParticles,
-                          const Vector<Real>&              a_cdrFluxesExtrap,
-                          const Vector<List<Photon>>&      a_primaryPhotons,
-                          const RealVect&                  a_E,
-                          const RealVect&                  a_physicalCellCenter,
-                          const RealVect&                  a_cellCentroid,
-                          const RealVect&                  a_bndryCentroid,
-                          const RealVect&                  a_bndryNormal,
-                          const Real                       a_bndryArea,
-                          const Real                       a_dx,
-                          const Real                       a_dt,
-                          const bool                       a_isDielectric,
-                          const int                        a_matIndex) const noexcept = 0;
+      secondaryEmissionEB(Vector<ParticleSoA<ItoParticle>>&       a_secondaryParticles,
+                          Vector<Real>&                           a_cdrFluxes,
+                          Vector<ParticleSoA<Photon>>&            a_secondaryPhotons,
+                          const Vector<ParticleSoA<ItoParticle>>& a_primaryParticles,
+                          const Vector<Real>&                     a_cdrFluxesExtrap,
+                          const Vector<ParticleSoA<Photon>>&      a_primaryPhotons,
+                          const RealVect&                         a_E,
+                          const RealVect&                         a_physicalCellCenter,
+                          const RealVect&                         a_cellCentroid,
+                          const RealVect&                         a_bndryCentroid,
+                          const RealVect&                         a_bndryNormal,
+                          const Real                              a_bndryArea,
+                          const Real                              a_dx,
+                          const Real                              a_dt,
+                          const bool                              a_isDielectric,
+                          const int                               a_matIndex) const noexcept = 0;
 
       /**
 	@brief Advance the reaction network using the KMC algorithm.
@@ -349,18 +349,18 @@ namespace Physics {
         @param[in] a_hi Hi
       */
       inline void
-      reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
-                         const Vector<FPR>&          a_newNumParticles,
-                         const Vector<FPR>&          a_oldNumParticles,
-                         const RealVect              a_electricField,
-                         const RealVect              a_cellPos,
-                         const RealVect              a_centroidPos,
-                         const RealVect              a_lo,
-                         const RealVect              a_hi,
-                         const RealVect              a_bndryCentroid,
-                         const RealVect              a_bndryNormal,
-                         const Real                  a_dx,
-                         const Real                  a_kappa) const noexcept;
+      reconcileParticles(Vector<ParticleSoA<ItoParticle>*>& a_particles,
+                         const Vector<FPR>&                 a_newNumParticles,
+                         const Vector<FPR>&                 a_oldNumParticles,
+                         const RealVect                     a_electricField,
+                         const RealVect                     a_cellPos,
+                         const RealVect                     a_centroidPos,
+                         const RealVect                     a_lo,
+                         const RealVect                     a_hi,
+                         const RealVect                     a_bndryCentroid,
+                         const RealVect                     a_bndryNormal,
+                         const Real                         a_dx,
+                         const Real                         a_kappa) const noexcept;
 
       /**
 	@brief Generate new photons. 
@@ -378,16 +378,16 @@ namespace Physics {
         @param[in] a_hi Hi
       */
       inline void
-      reconcilePhotons(Vector<List<Photon>*>& a_newPhotons,
-                       const Vector<FPR>&     a_numNewPhotons,
-                       const RealVect         a_cellPos,
-                       const RealVect         a_centroidPos,
-                       const RealVect         a_lo,
-                       const RealVect         a_hi,
-                       const RealVect         a_bndryCentroid,
-                       const RealVect         a_bndryNormal,
-                       const Real             a_dx,
-                       const Real             a_kappa) const noexcept;
+      reconcilePhotons(Vector<ParticleSoA<Photon>*>& a_newPhotons,
+                       const Vector<FPR>&            a_numNewPhotons,
+                       const RealVect                a_cellPos,
+                       const RealVect                a_centroidPos,
+                       const RealVect                a_lo,
+                       const RealVect                a_hi,
+                       const RealVect                a_bndryCentroid,
+                       const RealVect                a_bndryNormal,
+                       const Real                    a_dx,
+                       const Real                    a_kappa) const noexcept;
 
       /**
 	@brief Reconcile photoionization reactions.
@@ -397,9 +397,9 @@ namespace Physics {
         @param[in] a_itoParticles Ito particles
       */
       inline void
-      reconcilePhotoionization(Vector<List<ItoParticle>*>&   a_itoParticles,
-                               Vector<List<PointParticle>*>& a_cdrParticles,
-                               const Vector<List<Photon>*>&  a_absorbedPhotons) const noexcept;
+      reconcilePhotoionization(Vector<ParticleSoA<ItoParticle>*>&  a_itoParticles,
+                               Vector<ParticleSoA<NoPayload>*>&    a_cdrParticles,
+                               const Vector<ParticleSoA<Photon>*>& a_absorbedPhotons) const noexcept;
 
     protected:
       /**
@@ -649,7 +649,7 @@ namespace Physics {
 	@param[in]    a_numToRemove Number of physical particles to remove from the input list
       */
       inline void
-      removeParticles(List<ItoParticle>& a_particles, const long long a_numToRemove) const;
+      removeParticles(ParticleSoA<ItoParticle>& a_particles, const long long a_numToRemove) const;
 
       /**
 	@brief Compute the upstream position in a grid cell. Returns false if an upstream position was undefinable.
@@ -668,14 +668,14 @@ namespace Physics {
         @return Computed upstream position
       */
       inline bool
-      computeUpstreamPosition(RealVect&                a_pos,
-                              RealVect&                a_lo,
-                              RealVect&                a_hi,
-                              const int&               a_Z,
-                              const List<ItoParticle>& a_particles,
-                              const RealVect&          a_electricField,
-                              const RealVect&          a_cellPos,
-                              const Real&              a_dx) const noexcept;
+      computeUpstreamPosition(RealVect&                       a_pos,
+                              RealVect&                       a_lo,
+                              RealVect&                       a_hi,
+                              const int&                      a_Z,
+                              const ParticleSoA<ItoParticle>& a_particles,
+                              const RealVect&                 a_electricField,
+                              const RealVect&                 a_cellPos,
+                              const Real&                     a_dx) const noexcept;
 
       /**
         @brief No diffusion function for a particle

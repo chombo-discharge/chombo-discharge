@@ -224,22 +224,22 @@ namespace Physics {
         @param[in] a_E E
       */
       virtual void
-      secondaryEmissionEB(Vector<List<ItoParticle>>&       a_secondaryParticles,
-                          Vector<Real>&                    a_secondaryCDRFluxes,
-                          Vector<List<Photon>>&            a_secondaryPhotons,
-                          const Vector<List<ItoParticle>>& a_primaryParticles,
-                          const Vector<Real>&              a_primaryCDRFluxes,
-                          const Vector<List<Photon>>&      a_primaryPhotons,
-                          const RealVect&                  a_E,
-                          const RealVect&                  a_cellCenter,
-                          const RealVect&                  a_cellCentroid,
-                          const RealVect&                  a_bndryCentroid,
-                          const RealVect&                  a_bndryNormal,
-                          const Real                       a_bndryArea,
-                          const Real                       a_dx,
-                          const Real                       a_dt,
-                          const bool                       a_isDielectric,
-                          const int                        a_matIndex) const noexcept override;
+      secondaryEmissionEB(Vector<ParticleSoA<ItoParticle>>&       a_secondaryParticles,
+                          Vector<Real>&                           a_secondaryCDRFluxes,
+                          Vector<ParticleSoA<Photon>>&            a_secondaryPhotons,
+                          const Vector<ParticleSoA<ItoParticle>>& a_primaryParticles,
+                          const Vector<Real>&                     a_primaryCDRFluxes,
+                          const Vector<ParticleSoA<Photon>>&      a_primaryPhotons,
+                          const RealVect&                         a_E,
+                          const RealVect&                         a_cellCenter,
+                          const RealVect&                         a_cellCentroid,
+                          const RealVect&                         a_bndryCentroid,
+                          const RealVect&                         a_bndryNormal,
+                          const Real                              a_bndryArea,
+                          const Real                              a_dx,
+                          const Real                              a_dt,
+                          const bool                              a_isDielectric,
+                          const int                               a_matIndex) const noexcept override;
 
     protected:
       /**

@@ -16,7 +16,6 @@
 // Our includes
 #include <CD_AmrMesh.H>
 #include <CD_ComputationalGeometry.H>
-#include <CD_TracerParticle.H>
 #include <CD_ParticleContainer.H>
 #include <CD_NamespaceHeader.H>
 
@@ -28,10 +27,12 @@
   This is a single-phase solver -- i.e. the particles only live on one of the phases. Extensions to multiphase
   is certainly possible. 
 
-  The template requirements on the particle type P are: 
-  1) It must contain a function RealVect& position() (derived from BinItem)
-  2) It must contain a function const Real& weight() const.
-  3) It must contain a function RealVect& velocity().
+  The particles are stored Struct-of-Arrays (ParticleContainer). P is the user PAYLOAD type; the
+  position and weight are container-owned columns (not payload members). The template requirements on
+  the payload type P are:
+  1) It must expose the velocity as SpaceDim scalar payload columns named D_DECL(v_x, v_y, v_z), so the
+     solver can interpolate the mesh velocity field into them and compute the advective time step.
+  2) It must have a ParticleTraits<P> specialization listing its columns (including v_x/v_y/v_z).
 */
 template <typename P>
 class TracerParticleSolver
@@ -286,7 +287,7 @@ public:
   getParticles();
 
   /**
-    @brief Get all particles. Const version. 
+    @brief Get all particles. Const version.
     @return m_particles
   */
   virtual const ParticleContainer<P>&
@@ -407,7 +408,7 @@ protected:
   EBAMRCellData m_velocityField;
 
   /**
-    @brief Computational particles. 
+    @brief Computational particles.
   */
   ParticleContainer<P> m_particles;
 
@@ -428,20 +429,6 @@ protected:
   */
   void
   parseVerbosity();
-
-  /**
-    @brief Generic particle deposition method for putting a scalar field onto the mesh.
-    @param[out] a_phi                  Deposited quantity.
-    @param[out] a_particles            Particles to be deposited. 
-    @param[in]  a_baseDeposition       Base deposition method.
-    @param[in]  a_coarseFineDeposition Coarse-fine deposition strategy.
-  */
-  template <class T, class Ret, Ret (T::*MemberFunc)() const>
-  void
-  depositParticles(EBAMRCellData&              a_phi,
-                   const ParticleContainer<T>& a_particles,
-                   const DepositionType        a_baseDeposition,
-                   const CoarseFineDeposition  a_coarseFineDeposition) const noexcept;
 
   /**
     @brief Write data to output. Convenience function.

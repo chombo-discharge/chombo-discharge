@@ -27,19 +27,14 @@
 #include <CD_EBAMRSurfaceDeposition.H>
 #include <CD_NamespaceHeader.H>
 
-template <class P, class Ret, Ret (P::*MemberFunc)() const>
+template <typename P, typename Traits>
 void
-EBAMRSurfaceDeposition::deposit(EBAMRIVData& a_meshData, const ParticleContainer<P>& a_particles) const noexcept
+EBAMRSurfaceDeposition::deposit(EBAMRIVData& a_meshData, const ParticleContainer<P, Traits>& a_particles) const noexcept
 {
   CH_TIME("EBAMRSurfaceDeposition::deposit");
   if (m_verbose) {
-    pout() << "EBAMRSurfaceDeposition::deposit<P, const Real& P::*func const>" << endl;
+    pout() << "EBAMRSurfaceDeposition::deposit" << endl;
   }
-
-  using NoRef = typename std::remove_reference<Ret>::type;
-  using Base  = typename std::remove_cv<NoRef>::type;
-
-  static_assert(std::is_same<Base, Real>::value, "Ret should be Real or const Real&");
 
   CH_assert(a_meshData.getRealm() == a_particles.getRealm());
 
@@ -50,6 +45,7 @@ EBAMRSurfaceDeposition::deposit(EBAMRIVData& a_meshData, const ParticleContainer
     const DataIterator&      dit   = dbl.dataIterator();
 
     const int nbox = dit.size();
+
 #pragma omp parallel for schedule(runtime)
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
@@ -58,15 +54,13 @@ EBAMRSurfaceDeposition::deposit(EBAMRIVData& a_meshData, const ParticleContainer
       const EBISBox&               ebisbox  = ebisl[din];
       const BaseIVFAB<VoFStencil>& stencils = (*m_depositionStencils[lvl])[din];
 
-      BaseIVFAB<Real>& meshData  = (*m_data[lvl])[din];
-      const List<P>&   particles = a_particles[lvl][din].listItems();
+      BaseIVFAB<Real>&              meshData = (*m_data[lvl])[din];
+      const ParticleSoA<P, Traits>& leaf     = a_particles[lvl][din];
 
       meshData.setVal(0.0);
 
-      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
-        const P& p = lit();
-
-        const IntVect iv = ParticleOps::getParticleCellIndex(p.position(), m_probLo, m_dx[lvl]);
+      for (std::size_t i = 0; i < leaf.size(); i++) {
+        const IntVect iv = ParticleOps::getParticleCellIndex(leaf.position(i), m_probLo, m_dx[lvl]);
 
         // If this fails the particle is not in a valid cell.
         if (!(cellBox.contains(iv))) {
@@ -76,10 +70,10 @@ EBAMRSurfaceDeposition::deposit(EBAMRIVData& a_meshData, const ParticleContainer
         if (ebisbox.isIrregular(iv)) {
           const VoFStencil& stencil = stencils(VolIndex(iv, 0), 0);
 
-          for (int i = 0; i < stencil.size(); i++) {
-            const VolIndex& stencilVoF       = stencil.vof(i);
-            const Real&     stencilWeight    = stencil.weight(i);
-            const Real      depositionWeight = stencilWeight * (p.*MemberFunc)();
+          for (int k = 0; k < stencil.size(); k++) {
+            const VolIndex& stencilVoF       = stencil.vof(k);
+            const Real&     stencilWeight    = stencil.weight(k);
+            const Real      depositionWeight = stencilWeight * leaf.weight(i);
 
             meshData(stencilVoF, 0) += depositionWeight;
           }

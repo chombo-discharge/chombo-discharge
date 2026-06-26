@@ -63,7 +63,7 @@ The discharge inception model is implemented in :file:`$DISCHARGE_HOME/Physics/D
 
 .. literalinclude:: ../../../../Physics/DischargeInception/CD_DischargeInceptionStepper.H
    :language: c++
-   :lines: 73-93
+   :lines: 73-94
    :dedent: 4
 	   
 The template template parameters indicate which types of solvers to used within the compound algorithm.
@@ -215,7 +215,7 @@ The relevant user API for setting the above variables are listed below.
 
 .. literalinclude:: ../../../../Physics/DischargeInception/CD_DischargeInceptionStepper.H
    :language: c++
-   :lines: 310-407
+   :lines: 311-408
    :dedent: 6
 
 .. tip::
@@ -473,7 +473,6 @@ The user can also include the following data in the HDF5 output files, by settin
 * ``emission`` - Field emission.
 * ``poisson``  - Poisson solver.
 * ``tracer``   - Tracer particle solver.
-* ``cdr``      - CDR solver.
 * ``ions``     - Ion solver.
 
 .. important::

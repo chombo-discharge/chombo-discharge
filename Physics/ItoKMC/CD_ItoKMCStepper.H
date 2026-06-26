@@ -21,7 +21,7 @@
 #include <CD_ItoKMCPhysics.H>
 #include <CD_ItoLayout.H>
 #include <CD_CdrLayout.H>
-#include <CD_PointParticle.H>
+#include <CD_ParticleContainer.H>
 #include <CD_RtLayout.H>
 #include <CD_McPhoto.H>
 #include <CD_FieldSolver.H>
@@ -416,14 +416,14 @@ namespace Physics {
 	@details This is used when injecting secondary particles through the EB.
 	@note Stored on the particle realm
       */
-      Vector<ParticleContainer<ItoParticle>> m_secondaryParticles;
+      Vector<RefCountedPtr<ParticleContainer<ItoParticle>>> m_secondaryParticles;
 
       /**
 	@brief List of secondary photons injected through the EB
 	@details This is used when injecting secondary photons through the EB.
 	@note Stored on the particle realm
       */
-      Vector<ParticleContainer<Photon>> m_secondaryPhotons;
+      Vector<RefCountedPtr<ParticleContainer<Photon>>> m_secondaryPhotons;
 
       /**
 	@brief CDR fluxes for CDR BCs.
@@ -654,7 +654,7 @@ namespace Physics {
 	@note This is agglomerated with Ito particle photoionization functionality, and is
 	therefore defined on the particle realm. 
       */
-      mutable Vector<ParticleContainer<PointParticle>> m_cdrPhotoiProducts;
+      mutable Vector<RefCountedPtr<ParticleContainer<NoPayload>>> m_cdrPhotoiProducts;
 
       /**
 	@brief Solver indices used when load-balancing the particle solvers.
@@ -847,9 +847,10 @@ namespace Physics {
       */
       virtual void
       intersectParticles(
-        const SpeciesSubset                     a_speciesSubset,
-        const bool                              a_delete,
-        const std::function<void(ItoParticle&)> a_nonDeletionModifier = [](ItoParticle&) -> void {
+        const SpeciesSubset                                               a_speciesSubset,
+        const bool                                                        a_delete,
+        const std::function<void(ParticleSoA<ItoParticle>&, std::size_t)> a_nonDeletionModifier =
+          [](ParticleSoA<ItoParticle>&, std::size_t) -> void {
           return;
         }) noexcept;
 
@@ -864,12 +865,13 @@ namespace Physics {
       */
       virtual void
       intersectParticles(
-        const SpeciesSubset                     a_speciesSubset,
-        const ItoSolver::WhichContainer         a_containerBulk,
-        const ItoSolver::WhichContainer         a_containerEB,
-        const ItoSolver::WhichContainer         a_containerDomain,
-        const bool                              a_delete,
-        const std::function<void(ItoParticle&)> a_nonDeletionModifier = [](ItoParticle&) -> void {
+        const SpeciesSubset                                               a_speciesSubset,
+        const ItoSolver::WhichContainer                                   a_containerBulk,
+        const ItoSolver::WhichContainer                                   a_containerEB,
+        const ItoSolver::WhichContainer                                   a_containerDomain,
+        const bool                                                        a_delete,
+        const std::function<void(ParticleSoA<ItoParticle>&, std::size_t)> a_nonDeletionModifier =
+          [](ParticleSoA<ItoParticle>&, std::size_t) -> void {
           return;
         }) noexcept;
 
@@ -1599,14 +1601,14 @@ namespace Physics {
 	@param[in]  a_dt                   Time step.
       */
       virtual void
-      fillSecondaryEmissionEB(Vector<ParticleContainer<ItoParticle>>&  a_secondaryParticles,
-                              Vector<EBAMRIVData>&                     a_cdrFluxes,
-                              Vector<ParticleContainer<Photon>>&       a_secondaryPhotons,
-                              Vector<ParticleContainer<ItoParticle>*>& a_primaryParticles,
-                              Vector<EBAMRIVData>&                     a_cdrFluxesExtrap,
-                              Vector<ParticleContainer<Photon>*>&      a_primaryPhotons,
-                              const EBAMRCellData&                     a_electricField,
-                              const Real                               a_dt) noexcept;
+      fillSecondaryEmissionEB(Vector<RefCountedPtr<ParticleContainer<ItoParticle>>>& a_secondaryParticles,
+                              Vector<EBAMRIVData>&                                   a_cdrFluxes,
+                              Vector<RefCountedPtr<ParticleContainer<Photon>>>&      a_secondaryPhotons,
+                              Vector<ParticleContainer<ItoParticle>*>&               a_primaryParticles,
+                              Vector<EBAMRIVData>&                                   a_cdrFluxesExtrap,
+                              Vector<ParticleContainer<Photon>*>&                    a_primaryPhotons,
+                              const EBAMRCellData&                                   a_electricField,
+                              const Real                                             a_dt) noexcept;
 
       /**
 	@brief Resolve secondary emission at the EB.

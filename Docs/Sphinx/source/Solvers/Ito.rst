@@ -23,17 +23,16 @@ ItoParticle
 -----------
 
 The ``ItoParticle`` is used as the underlying particle type for running the Ito drift-diffusion solvers.
-It derives from :ref:`Chap:GenericParticle` as follows:
+It is a Struct-of-Arrays payload (see :ref:`Chap:ParticleSoA`) whose columns are
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoParticle.H
    :language: c++
-   :lines: 40
-   :dedent: 0
+   :lines: 46-67
 
-From the signature one can see that ``ItoParticle`` contains a number of extra class ``Real`` and ``RealVect`` class members.
+In addition to the container-owned position and weight, ``ItoParticle`` stores the payload columns above.
 These extra fields are used for storing the following information in the particle:
 
-#. Particle weight, mobility, diffusion coefficient, energy (not currently used), and a holder for a scratch storage. 
+#. Mobility, diffusion coefficient, energy (not currently used), and a holder for a scratch scalar storage.
 #. The previous particle position, the velocity, and a holder for a ``RealVect`` scratch storage.
 
 .. tip::
@@ -94,7 +93,7 @@ ______________________
 
 Initial data for the ``ItoSolver`` is provided through ``ItoSpecies`` by providing it with the following:
 
-#. Initial particles specified from a list (``List<ItoParticle>``) of particles.
+#. Initial particles specified from a container (``ParticleSoA<ItoParticle>``) of particles.
 #. Provide a density description from which initial particles are stochastically sampled within each grid cell.
 
 In particular, there are two data members that must be populated:
@@ -145,7 +144,7 @@ The particles are available from the solver through the function
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 631-637
+   :lines: 632-638
    :dedent: 2
 
 Usually, ``ItoSolver`` will perform a drift-diffusion advance and the user will then check if some of the particles crossed into the EB.
@@ -158,7 +157,7 @@ Remapping particles
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 864-875
+   :lines: 867-878
    :dedent: 2
 
 The bottom function lets the user remap any ``ParticleContainer<ItoParticle>`` that lives in the solver.
@@ -172,11 +171,11 @@ The most general version is given below:
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 333-347
+   :lines: 341-356
    :dedent: 2
 
-This version permits the user to select any particle container ``a_particles`` and deposit them onto some pre-allocated mesh storage ``a_phi``.
-Note that the template type ``P`` does not need to be ``ItoParticle``, although this is the most common use case.
+This version permits the user to deposit an arbitrary per-particle quantity from a particle container ``a_particles`` onto some pre-allocated mesh storage ``a_phi``.
+The quantity to be deposited is supplied through the ``a_gather`` callable, which returns a ``Real`` value for each particle in the SoA container.
 
 .. important::
 
@@ -187,7 +186,7 @@ A simpler version that deposits the bulk particles as a density on the mesh is
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 293-299
+   :lines: 293-300
    :dedent: 2
 
 The particles are deposited into the class member ``m_phi``, which stores the particle density on the mesh. 
@@ -195,7 +194,7 @@ This data can then be fetched with
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 654-659
+   :lines: 655-660
    :dedent: 2
    
 For the full list of available deposition functions, see the ``ItoSolver`` C++ API `<https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classItoSolver.html>`_.
@@ -215,7 +214,7 @@ Functionality for the above deposited quantities exist as the following function
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 204-217,228-240
+   :lines: 196-208,220-232
    :dedent: 2
 
 .. _Chap:ItoInterpolation:
@@ -243,7 +242,7 @@ Complete interpolation of the particle velocity consists of calling two function
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 749-755,731-737
+   :lines: 750-755,732-738
    :dedent: 2
 
 Here, the calling sequence is such that the mobilities must be interpolated first, and then the velocity fields. 
@@ -282,7 +281,7 @@ The function signatures is
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 763-768
+   :lines: 764-769
    :dedent: 2
 
 Particle intersections
@@ -295,11 +294,11 @@ The most relevant function is
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 414-429
+   :lines: 432-439
    :dedent: 2
 
-Here, ``EbIntersection`` is a just an enum for putting logic into how the intersection is computed.
-Valid options are ``EbIntersection::Bisection`` and ``EbIntersection::Raycast``.
+Here, ``EBIntersection`` is a just an enum for putting logic into how the intersection is computed.
+Valid options are ``EBIntersection::Bisection`` and ``EBIntersection::Raycast``.
 These algorithms are discussed in :ref:`Chap:ParticleEB`.
 The flag ``a_deleteParticles`` specifies if the original particles should be deleted when populating the other particle containers (again, see :ref:`Chap:ParticleEB`).
 
@@ -322,7 +321,7 @@ This routine is implemented as
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 986-991
+   :lines: 989-994
    :dedent: 2
 
 which returns a CFL-like condition
@@ -338,7 +337,7 @@ The signatures for the diffusion time step are similar to the ones for drift:
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 1010-1015
+   :lines: 1013-1018
    :dedent: 2
 
 which returns a CFL-like condition
@@ -356,7 +355,7 @@ A combination of the advection and diffusion time step routines also exists as
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 899-909
+   :lines: 902-912
    :dedent: 2
 
 This time step limitation is inspired by fully explicit and non-split fluid models, and is calculated as
@@ -375,7 +374,7 @@ The function for splitting and merging the particles is in all cases
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 791-797
+   :lines: 792-798
    :dedent: 2
 
 Calling this function will merge/split the particles.
@@ -399,15 +398,15 @@ In addition, the user must first supply a particle merging function:
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 92-97
+   :lines: 91-96
    :dedent: 2
 
 In the code above, ``ParticleManagement::ParticleMerger<P>`` is an alias:
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleManagement.H
    :language: c++
-   :lines: 34-42
-   :dedent: 2  
+   :lines: 35-43
+   :dedent: 2
 
 .. tip::
    
@@ -417,17 +416,30 @@ Example transport kernel
 ------------------------
 
 Transport kernels for the particles within ``ItoSolver`` will typically be imposed externally by the user through a ``TimeStepper`` subclass that advances the particles.
-For completeness, we here include a simple transport kernel for the ``ItoSolver`` which simply consists of a drift-diffusion kick:
+For completeness, we here include a simple transport kernel for the ``ItoSolver`` which simply consists of a drift-diffusion kick.
+``ItoParticle`` is a Struct-of-Arrays payload (see :ref:`Chap:Particles`), so the kernel operates on a ``ParticleSoA<ItoParticle>`` leaf and addresses each particle by index; the position is a container-owned column accessed through ``position(i)``/``setPosition(i, ...)``, while the interpolated velocity, diffusion coefficient, and old position are payload columns accessed through ``get<...>(i)``.
+The loop below is the per-patch inner kernel and is run inside the usual level/patch iteration (see :ref:`Chap:Particles`):
 
 .. code-block:: c++
 
-   List<ItoParticle> particles;
-   
-   for (ListIterator<ItoParticle>& lit(particles); lit.ok(); ++lit) {
-      ItoParticle& p = lit();
+   // One grid patch. The velocity columns (vx/vy/vz) have already been filled
+   // by ItoSolver::interpolateVelocities().
+   ParticleSoA<ItoParticle>& leaf = particles[lvl][dit()];
 
-      p.oldPosition() = p.position();
-      p.position()   += p.velocity() * a_dt + sqrt(2.0*p.diffusion()*a_dt) * this->randomGaussian();
+   for (std::size_t i = 0; i < leaf.size(); i++) {
+      const RealVect      x = leaf.position(i);
+      const RealVect      v = RealVect(D_DECL(leaf.get<&ItoParticle::vx>(i),
+                                              leaf.get<&ItoParticle::vy>(i),
+                                              leaf.get<&ItoParticle::vz>(i)));
+      const ParticleReal& D = leaf.get<&ItoParticle::diffusion>(i);
+
+      // Store the old position in the payload's old-position columns.
+      D_TERM(leaf.get<&ItoParticle::old_x>(i) = x[0];,
+             leaf.get<&ItoParticle::old_y>(i) = x[1];,
+             leaf.get<&ItoParticle::old_z>(i) = x[2];);
+
+      // Drift-diffusion kick.
+      leaf.setPosition(i, x + v * a_dt + sqrt(2.0 * D * a_dt) * this->randomGaussian());
    }
 
 The function ``randomGaussian`` implements a diffusion hopping and returns a 2D/3D dimensional vector with values drawn from a normal distribution with standard width of one and mean value of zero.

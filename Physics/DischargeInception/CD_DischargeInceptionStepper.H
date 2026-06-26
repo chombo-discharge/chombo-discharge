@@ -20,7 +20,7 @@
 // Our includes
 #include <CD_TimeStepper.H>
 #include <CD_TracerParticleSolver.H>
-#include <CD_TracerParticle.H>
+#include <CD_DischargeInceptionParticle.H>
 #include <CD_FieldSolver.H>
 #include <CD_FieldSolverGMG.H>
 #include <CD_CdrSolver.H>
@@ -77,8 +77,9 @@ namespace Physics {
        through the electric field and integrating the effective ionization coefficient along those paths.
 
        The class is templated on three solver types:
-       - @p P: Tracer particle type (default TracerParticle<2,3>). Each particle carries the inception
-       integral K and additional per-particle state.
+       - @p P: SoA tracer payload type (default DischargeInceptionParticle). The container-owned weight
+       carries the inception integral K; the payload carries velocity + integrator state (snapshots,
+       grad(alpha), cached alphaEff/dt).
        - @p F: Field solver type (default FieldSolverGMG). Solves the Poisson equation for the electric
        potential, decomposed into homogeneous (V=1 on live electrodes, no charges) and inhomogeneous
        (V=0 on all electrodes, space/surface charges) contributions that are superimposed at run time.
@@ -89,7 +90,7 @@ namespace Physics {
        critical volume/area. In transient mode the voltage follows a user-supplied curve and the
        inception probability is accumulated over time together with ion transport.
     */
-    template <typename P = TracerParticle<2, 3>, typename F = FieldSolverGMG, typename C = CdrCTU>
+    template <typename P = DischargeInceptionParticle, typename F = FieldSolverGMG, typename C = CdrCTU>
     class DischargeInceptionStepper : public TimeStepper
     {
     public:

@@ -18,7 +18,6 @@
 #include <CD_ComputationalGeometry.H>
 #include <CD_ItoSpecies.H>
 #include <CD_ItoParticle.H>
-#include <CD_EBParticleMesh.H>
 #include <CD_ParticleContainer.H>
 #include <CD_EBRepresentation.H>
 #include <CD_EBIntersection.H>
@@ -186,13 +185,6 @@ public:
   clear(ParticleContainer<ItoParticle>& a_particles) const;
 
   /**
-    @brief Clear particles -- this will deleted all the particles in the input container. 
-    @param[in] a_particles Particle container to be emptied. 
-  */
-  virtual void
-  clear(AMRParticles<ItoParticle>& a_particles) const;
-
-  /**
     @brief Deposit conductivities (i.e. mass*mobility / volume)
     @details This deposits mass*mobility (not multiplied by charge)
     @param[out] a_phi       Mesh data
@@ -308,43 +300,60 @@ public:
   depositParticles(WhichContainer a_container);
 
   /**
-    @brief Do an NGP deposit on a specific grid level. Used for IO.
-    @param[out] a_output Contains NGP deposition of particles. Ignores cut-cells.
-    @param[in] a_particles Particles
-    @param[in] a_level Grid level
+    @brief Do an NGP deposit of the SoA weight column on a specific grid level. Used for IO.
+    @param[out] a_output    Contains NGP deposition of particle weights. Ignores cut-cells.
+    @param[in]  a_particles SoA particles.
+    @param[in]  a_level     Grid level.
   */
-  template <class P, class Ret, Ret (P ::*MemberFunc)() const>
   void
-  depositParticlesNGP(LevelData<EBCellFAB>&       a_output,
-                      const ParticleContainer<P>& a_particles,
-                      int                         a_level) const noexcept;
+  depositWeightNGP(LevelData<EBCellFAB>&                 a_output,
+                   const ParticleContainer<ItoParticle>& a_particles,
+                   int                                   a_level) const noexcept;
 
   /**
-    @brief Generic deposition function which deposits a particle field onto the mesh using a specified deposition method. 
-    @details The template parameters indicate the particle type and quantity to be deposited. The second template parameter must be a pointer to a member function in 
-    the particle class with signature 'const Real& P::function() const'. E.g. 'const Real& P::mass() const' which is the default quantity to be deposited. 
-    @param[out] a_phi                  Mesh data -- must have exactly one component. 
-    @param[in]  a_particles            Particles to be deposited
+    @brief Do an NGP deposit of a gathered per-particle quantity on a specific grid level. Used for IO.
+    @param[out] a_output    Contains NGP deposition of the gathered quantity. Ignores cut-cells.
+    @param[in]  a_particles SoA particles.
+    @param[in]  a_level     Grid level.
+    @param[in]  a_gather    Per-particle value gatherer (leaf, index) -> Real.
+    @tparam     Gather      Callable (const ParticleSoA<ItoParticle>&, std::size_t) -> Real.
   */
-  template <class P, class Ret, Ret (P ::*MemberFunc)() const>
+  template <typename Gather>
   void
-  depositParticles(EBAMRCellData& a_phi, ParticleContainer<P>& a_particles) const;
+  depositGatheredNGP(LevelData<EBCellFAB>&                 a_output,
+                     const ParticleContainer<ItoParticle>& a_particles,
+                     int                                   a_level,
+                     Gather                                a_gather) const noexcept;
 
   /**
-    @brief Generic deposition function which deposits a particle field onto the mesh using a specified deposition method. 
-    @details The template parameters indicate the particle type and quantity to be deposited. The second template parameter must be a pointer to a member function in 
-    the particle class with signature 'const Real& P::function() const'. E.g. 'const Real& P::mass() const' which is the default quantity to be deposited. 
-    @param[out] a_phi                  Mesh data -- must have exactly one component. 
-    @param[in]  a_particles            Particles to be deposited
-    @param[in]  a_deposition           Deposition method
-    @param[in]  a_coarseFineDeposition Coarse-fine deposition strategy
+    @brief Deposit the SoA weight column on the mesh (full pipeline: kappa-conservative + redistribution).
+    @param[out] a_phi                  Mesh data -- must have exactly one component.
+    @param[in]  a_particles            SoA particles to be deposited.
+    @param[in]  a_deposition           Deposition method.
+    @param[in]  a_coarseFineDeposition Coarse-fine deposition strategy.
   */
-  template <class P, class Ret, Ret (P ::*MemberFunc)() const>
   void
-  depositParticles(EBAMRCellData&        a_phi,
-                   ParticleContainer<P>& a_particles,
-                   DepositionType        a_deposition,
-                   CoarseFineDeposition  a_coarseFineDeposition) const;
+  depositWeight(EBAMRCellData&                        a_phi,
+                const ParticleContainer<ItoParticle>& a_particles,
+                DepositionType                        a_deposition,
+                CoarseFineDeposition                  a_coarseFineDeposition) const;
+
+  /**
+    @brief Deposit a gathered per-particle quantity on the mesh (full pipeline: kappa-conservative + redistribution).
+    @param[out] a_phi                  Mesh data -- must have exactly one component.
+    @param[in]  a_particles            SoA particles to be deposited.
+    @param[in]  a_deposition           Deposition method.
+    @param[in]  a_coarseFineDeposition Coarse-fine deposition strategy.
+    @param[in]  a_gather               Per-particle value gatherer (leaf, index) -> Real.
+    @tparam     Gather                 Callable (const ParticleSoA<ItoParticle>&, std::size_t) -> Real.
+  */
+  template <typename Gather>
+  void
+  depositGathered(EBAMRCellData&                        a_phi,
+                  const ParticleContainer<ItoParticle>& a_particles,
+                  DepositionType                        a_deposition,
+                  CoarseFineDeposition                  a_coarseFineDeposition,
+                  Gather                                a_gather) const;
 
   /**
     @brief Remove particles that are inside the EB. 
@@ -422,9 +431,10 @@ public:
   */
   virtual void
   intersectParticles(
-    const EBIntersection                     a_ebIntersection,
-    const bool                               a_deleteParticles,
-    const std::function<void(ItoParticle&)>& a_nonDeletionModifier = [](ItoParticle&) -> void {
+    const EBIntersection                                               a_ebIntersection,
+    const bool                                                         a_deleteParticles,
+    const std::function<void(ParticleSoA<ItoParticle>&, std::size_t)>& a_nonDeletionModifier =
+      [](ParticleSoA<ItoParticle>&, std::size_t) -> void {
       return;
     });
 
@@ -442,12 +452,13 @@ public:
   */
   virtual void
   intersectParticles(
-    const WhichContainer                     a_particles,
-    const WhichContainer                     a_ebParticles,
-    const WhichContainer                     a_domainParticles,
-    const EBIntersection                     a_ebIntersection,
-    const bool                               a_deleteParticles,
-    const std::function<void(ItoParticle&)>& a_nonDeletionModifier = [](ItoParticle&) -> void {
+    const WhichContainer                                               a_particles,
+    const WhichContainer                                               a_ebParticles,
+    const WhichContainer                                               a_domainParticles,
+    const EBIntersection                                               a_ebIntersection,
+    const bool                                                         a_deleteParticles,
+    const std::function<void(ParticleSoA<ItoParticle>&, std::size_t)>& a_nonDeletionModifier =
+      [](ParticleSoA<ItoParticle>&, std::size_t) -> void {
       return;
     });
 
@@ -464,12 +475,13 @@ public:
   */
   virtual void
   intersectParticles(
-    ParticleContainer<ItoParticle>&          a_particles,
-    ParticleContainer<ItoParticle>&          a_ebParticles,
-    ParticleContainer<ItoParticle>&          a_domainParticles,
-    const EBIntersection                     a_ebIntersection,
-    const bool                               a_deleteParticles,
-    const std::function<void(ItoParticle&)>& a_nonDeletionModifier = [](ItoParticle&) -> void {
+    ParticleContainer<ItoParticle>&                                    a_particles,
+    ParticleContainer<ItoParticle>&                                    a_ebParticles,
+    ParticleContainer<ItoParticle>&                                    a_domainParticles,
+    const EBIntersection                                               a_ebIntersection,
+    const bool                                                         a_deleteParticles,
+    const std::function<void(ParticleSoA<ItoParticle>&, std::size_t)>& a_nonDeletionModifier =
+      [](ParticleSoA<ItoParticle>&, std::size_t) -> void {
       return;
     });
 
@@ -602,17 +614,6 @@ public:
   */
   virtual void
   preRegrid(int a_lbase, int a_oldFinestLevel);
-
-  /**
-    @brief Add particles to a contain. This adds into a specific grid level and patch. The user can delete the input particles. 
-    @param[in,out] a_inputParticles Input particles -- can be destroyed if a_destructive=true
-    @param[in]    a_lvl            Grid level
-    @param[in]    a_dit            Grid index
-    @param[in]    a_destructive    If true, delete the input particles. 
-  */
-  template <ItoSolver::WhichContainer C = WhichContainer::Bulk>
-  void
-  addParticles(ListBox<ItoParticle>& a_inputParticles, int a_lvl, const DataIndex& a_dit, bool a_destructive);
 
   /**
     @brief Check if solver is mobile
@@ -830,7 +831,7 @@ public:
     @param[in]    a_ppc       Target number of particles per cell
   */
   virtual void
-  mergeParticles(List<ItoParticle>& a_particles, const CellInfo& a_cellInfo, int a_ppc) const noexcept;
+  mergeParticles(ParticleSoA<ItoParticle>& a_particles, const CellInfo& a_cellInfo, int a_ppc) const noexcept;
 
   /**
     @brief Superparticle merging with KD/BVH trees
@@ -839,7 +840,9 @@ public:
     @param[in]    a_ppc       Target number of particles per cell
   */
   virtual void
-  makeSuperparticlesEqualWeightKD(List<ItoParticle>& a_particles, const CellInfo& a_cellInfo, int a_ppc) const noexcept;
+  makeSuperparticlesEqualWeightKD(ParticleSoA<ItoParticle>& a_particles,
+                                  const CellInfo&           a_cellInfo,
+                                  int                       a_ppc) const noexcept;
 
   /**
     @brief Superparticle merging with BVH trees. This reinitializes particles within each BVH node.
@@ -848,9 +851,9 @@ public:
     @param[in]    a_ppc       Target number of particles per cell
   */
   virtual void
-  makeSuperparticlesBVHReinitialize(List<ItoParticle>& a_particles,
-                                    const CellInfo&    a_cellInfo,
-                                    int                a_ppc) const noexcept;
+  makeSuperparticlesBVHReinitialize(ParticleSoA<ItoParticle>& a_particles,
+                                    const CellInfo&           a_cellInfo,
+                                    int                       a_ppc) const noexcept;
 
   /**
     @brief Particle re-initialization algorithm
@@ -859,7 +862,7 @@ public:
     @param[in]    a_ppc       Target number of particles per cell
   */
   virtual void
-  reinitializeParticles(List<ItoParticle>& a_particles, const CellInfo& a_cellInfo, int a_ppc) const noexcept;
+  reinitializeParticles(ParticleSoA<ItoParticle>& a_particles, const CellInfo& a_cellInfo, int a_ppc) const noexcept;
 
   /**
     @brief Remap the bulk particle container.
@@ -1435,20 +1438,13 @@ protected:
   drawNewParticles(const LevelData<EBCellFAB>& a_particlesPerCell, int a_level, int a_newPPC);
 
   /**
-    @brief Compute the cell-centered deposition -- this is the main deposition function.
-    @details The template parameters indicate the particle type and quantity to be deposited. The second template parameter must be a pointer to a member function in 
-    the particle class with signature 'const Real& P::function() const'. E.g. 'const Real& P::mass() const' which is the default quantity to be deposited. 
-    @param[out] a_phi                  Cell-centered mesh data. Must have exactly one component. 
-    @param[in]  a_particles            Particles to be deposited. 
-    @param[in]  a_deposition           Deposition type
-    @param[in]  a_coarseFineDeposition Coarse-fine deposition strategy
+    @brief Apply the redistribution + average-down + ghost-interpolation tail shared by all deposits.
+    @details The SoA deposit pipeline first deposits onto the mesh (kappa-conservative), then calls this to
+    redistribute mass (if enabled), average down, and interpolate ghost cells.
+    @param[in,out] a_phi Cell-centered mesh data (one component).
   */
-  template <class P, class Ret, Ret (P ::*MemberFunc)() const>
   void
-  depositKappaConservative(EBAMRCellData&        a_phi,
-                           ParticleContainer<P>& a_particles,
-                           DepositionType        a_deposition,
-                           CoarseFineDeposition  a_coarseFineDeposition) const;
+  finalizeDeposit(EBAMRCellData& a_phi) const;
 
   /**
     @brief Redistribute mass in an AMR context. 

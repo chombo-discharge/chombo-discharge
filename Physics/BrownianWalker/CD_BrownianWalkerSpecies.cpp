@@ -57,13 +57,14 @@ BrownianWalkerSpecies::drawInitParticles()
 {
   CH_TIME("BrownianWalkerSpecies::drawInitParticles");
 
-  // Draw Gaussian particles and set weight to one.
-
+  // Draw Gaussian particles and set weights to 1
   ParticleManagement::drawGaussianParticles(m_initialParticles, m_numParticles, m_blobCenter, m_blobRadius);
 
-  for (ListIterator<ItoParticle> lit(m_initialParticles); lit.ok(); ++lit) {
-    lit().weight() = 1.0;
-  }
+  double* w = m_initialParticles.weightColumn();
+
+  ParticleLoops::loop(m_initialParticles, [&](std::size_t i) {
+    w[i] = 1.0;
+  });
 }
 
 #include <CD_NamespaceFooter.H>

@@ -22,6 +22,7 @@
 
 // Our includes
 #include <CD_Random.H>
+#include <CD_ParticleLoops.H>
 #include <CD_ParticleManagement.H>
 #include <CD_NamespaceHeader.H>
 
@@ -260,33 +261,32 @@ namespace ParticleManagement {
     return leaves;
   }
 
-  template <typename P, typename T, typename>
+  template <typename P, typename Traits, typename T, typename>
   inline void
-  removePhysicalParticles(List<P>& a_particles, const T a_numPhysPartToRemove) noexcept
+  removePhysicalParticles(ParticleSoA<P, Traits>& a_particles, const T a_numPhysPartToRemove) noexcept
   {
-    CH_TIME("ParticleManagement::removePhysicalParticles");
+    CH_TIME("ParticleManagement::removePhysicalParticles(SoA)");
 
     constexpr T zero = (T)0;
 
-    // Obviously an error that the user should catch.
     if (a_numPhysPartToRemove < zero) {
-      MayDay::Error("ParticleManagement::removePhysicalParticles - 'a_numPhysPartoToRemove < 0'");
+      MayDay::Error("ParticleManagement::removePhysicalParticles(SoA) - 'a_numPhysPartoToRemove < 0'");
     }
 
-    if (a_particles.length() > 0) {
-      ListIterator<P> lit(a_particles);
+    const std::size_t numComp = a_particles.size();
 
+    if (numComp > 0) {
       T numRemoved = zero;
 
       // 1. Compute the minimum particle weight.
       T minWeight = std::numeric_limits<T>::max();
-      for (lit.begin(); lit.ok(); ++lit) {
-        minWeight = std::min(minWeight, (T)lit().weight());
+      for (std::size_t i = 0; i < numComp; i++) {
+        minWeight = std::min(minWeight, (T)a_particles.weight(i));
       }
 
       // 2. Trim particle weights down to minWeight.
-      for (lit.begin(); lit.ok(); ++lit) {
-        const T diff1 = (T)lit().weight() - minWeight;
+      for (std::size_t i = 0; i < numComp; i++) {
+        const T diff1 = (T)a_particles.weight(i) - minWeight;
         const T diff2 = a_numPhysPartToRemove - numRemoved;
 
         CH_assert(diff1 >= zero);
@@ -294,36 +294,37 @@ namespace ParticleManagement {
 
         const T r = std::max(0LL, std::min(diff1, diff2));
 
-        lit().weight() -= 1.0 * r;
+        a_particles.weight(i) -= 1.0 * r;
         numRemoved += r;
       }
 
       // 3. "Uniformly" subtract the particle weights.
       if (a_numPhysPartToRemove - numRemoved > zero) {
-        const T numCompParticles = (T)a_particles.length();
+        const T numCompParticles = (T)numComp;
         const T uniformWeight    = (a_numPhysPartToRemove - numRemoved) / numCompParticles;
         const T uniformRemainder = (a_numPhysPartToRemove - numRemoved) % numCompParticles;
 
-        // Uniformly remove weight from each particle.
         if (uniformWeight > zero) {
-          for (lit.begin(); lit.ok(); ++lit) {
-            lit().weight() -= 1.0 * uniformWeight;
+          // uniformWeight is constant over the loop, so the running accumulation equals
+          // uniformWeight * numComp -- hoist it out so the body is a pure elementwise update.
+          double* const w = a_particles.weightColumn();
 
-            numRemoved += uniformWeight;
-          }
+          ParticleLoops::loop(a_particles, [&](const std::size_t i) {
+            w[i] -= 1.0 * uniformWeight;
+          });
+
+          numRemoved += uniformWeight * static_cast<T>(numComp);
         }
 
-        // May have to remove remainder from multiple particles because their weights might be less
-        // then the actual remainder.
         if (uniformRemainder > zero) {
           T W = 0;
 
-          for (lit.begin(); lit.ok(); ++lit) {
+          for (std::size_t i = 0; i < numComp; i++) {
 
             // Never remove so that weight is negative.
-            const T w = std::min((T)lit().weight(), uniformRemainder - W);
+            const T w = std::min((T)a_particles.weight(i), uniformRemainder - W);
 
-            lit().weight() -= 1.0 * w;
+            a_particles.weight(i) -= 1.0 * w;
 
             W += w;
             numRemoved += w;
@@ -335,28 +336,24 @@ namespace ParticleManagement {
         }
       }
 
-      // Debug code.
       CH_assert(numRemoved == a_numPhysPartToRemove);
-#ifdef NDEBUG
-      for (lit.begin(); lit.ok(); ++lit) {
-        CH_assert(lit().weight() >= 0.0);
-      }
-#endif
     }
   }
 
-  template <typename P>
+  template <typename P, typename Traits>
   inline void
-  deleteParticles(List<P>& a_particles, const Real a_weightThresh) noexcept
+  deleteParticles(ParticleSoA<P, Traits>& a_particles, const Real a_weightThresh) noexcept
   {
-    CH_TIME("ParticleManagement::deleteParticles");
+    CH_TIME("ParticleManagement::deleteParticles(SoA)");
 
-    for (ListIterator<P> lit(a_particles); lit.ok();) {
-      if (lit().weight() < a_weightThresh) {
-        a_particles.remove(lit);
+    // Swap-and-pop: do not advance the index after a removal (a new particle now occupies slot i).
+    std::size_t i = 0;
+    while (i < a_particles.size()) {
+      if (a_particles.weight(i) < a_weightThresh) {
+        a_particles.remove(i);
       }
       else {
-        ++lit;
+        i++;
       }
     }
   }
@@ -415,63 +412,49 @@ namespace ParticleManagement {
 #endif
   }
 
-  template <typename P, typename T, typename>
+  template <typename P, typename Traits, typename T, typename>
   inline void
-  drawRandomParticles(List<P>& a_particles, const T a_numParticles, const std::function<RealVect()>& a_distribution)
+  drawRandomParticles(ParticleSoA<P, Traits>&          a_particles,
+                      const T                          a_numParticles,
+                      const std::function<RealVect()>& a_distribution)
   {
-
     a_particles.clear();
 
+    // Each rank draws its own share (unit weight) into the buffer. Routing to owners happens later when
+    // the buffer is added to a ParticleContainer.
     const T numParticles = partitionParticles(a_numParticles);
 
     for (T t = 0; t < numParticles; t++) {
-      P p;
-      p.position() = a_distribution();
-
-      a_particles.add(p);
+      a_particles.append(a_distribution(), 1.0);
     }
   }
 
-  template <typename P, typename T, typename>
+  template <typename P, typename Traits, typename T, typename>
   inline void
-  drawSphereParticles(List<P>&        a_particles,
-                      const T         a_numParticles,
-                      const RealVect& a_center,
-                      const Real      a_radius) noexcept
+  drawGaussianParticles(ParticleSoA<P, Traits>& a_particles,
+                        const T                 a_numParticles,
+                        const RealVect&         a_center,
+                        const Real              a_radius) noexcept
   {
-    CH_TIME("ParticleManagement::drawSphereParticles");
+    CH_TIME("ParticleManagement::drawGaussianParticles(SoA)");
 
-    a_particles.clear();
+    std::normal_distribution<Real> gauss(0.0, a_radius);
 
-    const T numParticles = partitionParticles(a_numParticles);
+    auto ranGauss = [&]() -> RealVect {
+      return a_center + Random::get(gauss) * Random::getDirection();
+    };
 
-    for (T t = 0; t < numParticles; t++) {
-      P p;
-
-      RealVect& x = p.position();
-
-      x = std::numeric_limits<Real>::max() * RealVect::Unit;
-
-      while (x.vectorLength() > a_radius) {
-        for (int d = 0; d < SpaceDim; d++) {
-          x[d] = a_radius * Random::getUniformReal11();
-        }
-      }
-
-      x += a_center;
-
-      a_particles.add(p);
-    }
+    drawRandomParticles(a_particles, a_numParticles, ranGauss);
   }
 
-  template <typename P, typename T, typename>
+  template <typename P, typename Traits, typename T, typename>
   inline void
-  drawBoxParticles(List<P>&        a_particles,
-                   const T         a_numParticles,
-                   const RealVect& a_loCorner,
-                   const RealVect& a_hiCorner) noexcept
+  drawBoxParticles(ParticleSoA<P, Traits>& a_particles,
+                   const T                 a_numParticles,
+                   const RealVect&         a_loCorner,
+                   const RealVect&         a_hiCorner) noexcept
   {
-    CH_TIME("ParticleManagement::drawBoxParticles");
+    CH_TIME("ParticleManagement::drawBoxParticles(SoA)");
 
     CH_assert(a_hiCorner >= a_loCorner);
 
@@ -484,22 +467,28 @@ namespace ParticleManagement {
     drawRandomParticles(a_particles, a_numParticles, ranBox);
   }
 
-  template <typename P, typename T, typename>
+  template <typename P, typename Traits, typename T, typename>
   inline void
-  drawGaussianParticles(List<P>&        a_particles,
-                        const T         a_numParticles,
-                        const RealVect& a_center,
-                        const Real      a_radius) noexcept
+  drawSphereParticles(ParticleSoA<P, Traits>& a_particles,
+                      const T                 a_numParticles,
+                      const RealVect&         a_center,
+                      const Real              a_radius) noexcept
   {
-    CH_TIME("ParticleManagement::drawGaussianParticles");
+    CH_TIME("ParticleManagement::drawSphereParticles(SoA)");
 
-    std::normal_distribution<Real> gauss(0.0, a_radius);
+    auto ranSphere = [&]() -> RealVect {
+      RealVect x = std::numeric_limits<Real>::max() * RealVect::Unit;
 
-    auto ranGauss = [&]() -> RealVect {
-      return a_center + Random::get(gauss) * Random::getDirection();
+      while (x.vectorLength() > a_radius) {
+        for (int d = 0; d < SpaceDim; d++) {
+          x[d] = a_radius * Random::getUniformReal11();
+        }
+      }
+
+      return x + a_center;
     };
 
-    drawRandomParticles(a_particles, a_numParticles, ranGauss);
+    drawRandomParticles(a_particles, a_numParticles, ranSphere);
   }
 } // namespace ParticleManagement
 

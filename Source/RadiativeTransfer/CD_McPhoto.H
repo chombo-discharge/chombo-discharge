@@ -16,17 +16,11 @@
 // Std includes
 #include <random>
 
-// Chombo includes
-#include <Particle.H>
-#include <ParticleData.H>
-#include <BinItem.H>
-
 // Our includes
 #include <CD_RtSolver.H>
 #include <CD_EBParticleMesh.H>
 #include <CD_ParticleContainer.H>
 #include <CD_Photon.H>
-#include <CD_PointParticle.H>
 #include <CD_NamespaceHeader.H>
 
 /**
@@ -180,10 +174,10 @@ public:
     @param[in] a_maxPhotonsPerCell Maximum number of photons generated per cell.
   */
   virtual void
-  dirtySamplePhotons(ParticleContainer<PointParticle>& a_photons,
-                     EBAMRCellData&                    a_phi,
-                     const EBAMRCellData&              a_numPhysicalPhotons,
-                     const size_t                      a_maxPhotonsPerCell) const noexcept;
+  dirtySamplePhotons(ParticleContainer<NoPayload>& a_photons,
+                     EBAMRCellData&                a_phi,
+                     const EBAMRCellData&          a_numPhysicalPhotons,
+                     const size_t                  a_maxPhotonsPerCell) const noexcept;
 
   /**
     @brief Remap computational particles. This remaps m_photons
@@ -206,16 +200,17 @@ public:
   depositPhotons();
 
   /**
-    @brief Deposit photons
-    @param[out]   a_phi        Deposited mesh density
-    @param[in]    a_deposition Deposition method
-    @param[in] a_particles Particles
+    @brief Deposit SoA photons on the mesh.
+    @details Deposits the container's weight column and then runs the shared hybrid divergence tail
+    (non-conservative blend, mass redistribution, average-down, ghost interpolation).
+    @param[out] a_phi        Deposited mesh density
+    @param[in]  a_photons    SoA photon container
+    @param[in]  a_deposition Deposition method
   */
-  template <class P, class Ret, Ret (P::*MemberFunc)() const>
   void
-  depositPhotons(EBAMRCellData&        a_phi,
-                 ParticleContainer<P>& a_particles,
-                 const DepositionType& a_deposition) const noexcept;
+  depositPhotons(EBAMRCellData&             a_phi,
+                 ParticleContainer<Photon>& a_photons,
+                 const DepositionType&      a_deposition) const noexcept;
 
   /**
     @brief Sort container by cell
@@ -337,13 +332,6 @@ public:
   clear(ParticleContainer<Photon>& a_photons);
 
   /**
-    @brief Clear data holder
-    @param[in] a_photons Which container to clear
-  */
-  virtual void
-  clear(AMRParticles<Photon>& a_photons);
-
-  /**
     @brief Write plot file
     @note Currently calls an error because it is not implemented. 
   */
@@ -403,7 +391,7 @@ public:
     @return Return value
   */
   virtual int
-  countPhotons(const AMRParticles<Photon>& a_photons) const;
+  countPhotons(const ParticleContainer<Photon>& a_photons) const;
 
   /**
     @brief Get m_photons
@@ -625,17 +613,17 @@ protected:
   ParticleContainer<Photon> m_bulkPhotons;
 
   /**
-    @brief This is a particle container for Photons that crossed EBs. It is filled during the advance step. 
+    @brief This is a particle container for Photons that crossed EBs. It is filled during the advance step.
   */
   ParticleContainer<Photon> m_ebPhotons;
 
   /**
-    @brief This is a particle container for Photons that crossed boundaries. It is filled during the advance step. 
+    @brief This is a particle container for Photons that crossed boundaries. It is filled during the advance step.
   */
   ParticleContainer<Photon> m_domainPhotons;
 
   /**
-    @brief This is a particle container that can be used to add Photons directly. 
+    @brief This is a particle container that can be used to add Photons directly.
   */
   ParticleContainer<Photon> m_sourcePhotons;
 
@@ -668,18 +656,14 @@ protected:
   randomExponential(const Real a_rate) noexcept;
 
   /**
-    @brief This computes the "conservative" deposition, multiplied by kappa
-    @param[out] a_phi       Mesh density. 
-    @param[in] a_particles  Particles to be deposited
-    @param[in] a_deposition Deposition method
-    @param[in] a_coarseFineDeposition Coarse-fine deposition strategy.
+    @brief Shared hybrid-divergence tail for the deposition routines.
+    @details On input a_phi holds the conservative (kappa-weighted) deposition. This blends in the
+    non-conservative divergence, redistributes the mass difference (when m_blendConservation is set),
+    and finishes with an average-down and ghost-cell interpolation.
+    @param[in,out] a_phi Mesh density. On input the conservative deposition; on output the hybrid result.
   */
-  template <class P, class Ret, Ret (P::*MemberFunc)() const>
   void
-  depositKappaConservative(EBAMRCellData&             a_phi,
-                           ParticleContainer<P>&      a_particles,
-                           const DepositionType       a_deposition,
-                           const CoarseFineDeposition a_coarseFineDeposition) const noexcept;
+  depositHybridDivergence(EBAMRCellData& a_phi) const noexcept;
 
   /**
     @brief Make the "non-conservative" kappa deposition
@@ -776,7 +760,5 @@ protected:
 };
 
 #include <CD_NamespaceFooter.H>
-
-#include <CD_McPhotoImplem.H>
 
 #endif

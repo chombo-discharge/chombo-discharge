@@ -25,53 +25,17 @@
 #include <CD_DischargeIO.H>
 #include <CD_NamespaceHeader.H>
 
-template <size_t M, size_t N>
+template <typename P, typename Traits>
 void
-DischargeIO::writeH5Part(const std::string                               a_filename,
-                         const ParticleContainer<GenericParticle<M, N>>& a_particles,
-                         const std::vector<std::string>                  a_realVars,
-                         const std::vector<std::string>                  a_vectVars,
-                         const RealVect                                  a_shift,
-                         const Real                                      a_time) noexcept
+DischargeIO::writeH5Part(std::string                                                  a_filename,
+                         const ParticleContainer<P, Traits>&                          a_particles,
+                         std::vector<std::pair<std::string, H5PartScalar<P, Traits>>> a_scalarVars,
+                         std::vector<std::pair<std::string, H5PartVect<P, Traits>>>   a_vectorVars,
+                         RealVect                                                     a_shift,
+                         Real                                                         a_time) noexcept
 {
 #ifdef CH_USE_HDF5
-  CH_TIME("DischargeIO::writeH5Part");
-
-  CH_assert(a_realVars.size() == 0 || a_realVars.size() == M);
-  CH_assert(a_vectVars.size() == 0 || a_vectVars.size() == N);
-
-  std::vector<std::string> realVariables(M);
-  std::vector<std::string> vectVariables(N);
-
-  if (a_realVars.size() == M) {
-    realVariables = a_realVars;
-
-    for (int i = 0; i < M; i++) {
-      if (realVariables[i] == "") {
-        realVariables[i] = "real-" + std::to_string(i);
-      }
-    }
-  }
-  else {
-    for (int i = 0; i < M; i++) {
-      realVariables[i] = "real-" + std::to_string(i);
-    }
-  }
-
-  if (a_vectVars.size() == N) {
-    vectVariables = a_vectVars;
-
-    for (int i = 0; i < N; i++) {
-      if (vectVariables[i] == "") {
-        vectVariables[i] = "vect-" + std::to_string(i);
-      }
-    }
-  }
-  else {
-    for (int i = 0; i < N; i++) {
-      vectVariables[i] = "vect-" + std::to_string(i);
-    }
-  }
+  CH_TIME("DischargeIO::writeH5Part(SoA)");
 
   // Figure out the number of particles on each rank
   const unsigned long long numParticlesLocal  = a_particles.getNumberOfValidParticlesLocal();
@@ -159,14 +123,12 @@ DischargeIO::writeH5Part(const std::string                               a_filen
   hid_t datasetZ = H5Dcreate2(grp, "z", H5T_NATIVE_DOUBLE, fileSpaceID, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 #endif
 
-  // Write ID data set
   std::vector<long long> id;
   std::vector<double>    x;
   std::vector<double>    y;
   std::vector<double>    z;
 
   for (int lvl = 0; lvl <= a_particles.getFinestLevel(); lvl++) {
-
     const DisjointBoxLayout& dbl = a_particles.getGrids()[lvl];
     const DataIterator&      dit = dbl.dataIterator();
 
@@ -175,14 +137,16 @@ DischargeIO::writeH5Part(const std::string                               a_filen
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      const List<GenericParticle<M, N>>& particles = a_particles[lvl][din].listItems();
+      const ParticleSoA<P, Traits>& leaf = a_particles[lvl][din];
 
-      for (ListIterator<GenericParticle<M, N>> lit(particles); lit.ok(); ++lit) {
-        id.push_back(static_cast<long long>(lit().particleID()));
-        x.push_back(lit().position()[0] - a_shift[0]);
-        y.push_back(lit().position()[1] - a_shift[1]);
+      for (std::size_t i = 0; i < leaf.size(); i++) {
+        const RealVect pos = leaf.position(i);
+
+        id.push_back(static_cast<long long>(leaf.particleID(i)));
+        x.push_back(pos[0] - a_shift[0]);
+        y.push_back(pos[1] - a_shift[1]);
 #if CH_SPACEDIM == 3
-        z.push_back(lit().position()[2] - a_shift[2]);
+        z.push_back(pos[2] - a_shift[2]);
 #endif
       }
     }
@@ -195,12 +159,6 @@ DischargeIO::writeH5Part(const std::string                               a_filen
   H5Dwrite(datasetZ, H5Dget_type(datasetZ), memSpaceID, fileSpaceID, H5P_DEFAULT, z.data());
 #endif
 
-  id.resize(0);
-  x.resize(0);
-  y.resize(0);
-  z.resize(0);
-
-  // Close the ID and positional data sets
   H5Dclose(datasetID);
   H5Dclose(datasetX);
   H5Dclose(datasetY);
@@ -208,10 +166,10 @@ DischargeIO::writeH5Part(const std::string                               a_filen
   H5Dclose(datasetZ);
 #endif
 
-  // Write the M real-variables
-  for (int curVar = 0; curVar < M; curVar++) {
+  // Write the scalar payload datasets (caller-named; e.g. weight + payload scalar columns).
+  for (const auto& var : a_scalarVars) {
     hid_t dataset = H5Dcreate2(grp,
-                               realVariables[curVar].c_str(),
+                               var.first.c_str(),
                                H5T_NATIVE_DOUBLE,
                                fileSpaceID,
                                H5P_DEFAULT,
@@ -221,40 +179,37 @@ DischargeIO::writeH5Part(const std::string                               a_filen
     std::vector<double> ds;
 
     for (int lvl = 0; lvl <= a_particles.getFinestLevel(); lvl++) {
-
       const DisjointBoxLayout& dbl = a_particles.getGrids()[lvl];
       const DataIterator&      dit = dbl.dataIterator();
 
       const int nbox = dit.size();
 
       for (int mybox = 0; mybox < nbox; mybox++) {
-        const DataIndex& din = dit[mybox];
+        const DataIndex&              din  = dit[mybox];
+        const ParticleSoA<P, Traits>& leaf = a_particles[lvl][din];
 
-        const List<GenericParticle<M, N>>& particles = a_particles[lvl][din].listItems();
-
-        for (ListIterator<GenericParticle<M, N>> lit(particles); lit.ok(); ++lit) {
-          ds.push_back(lit().getReals()[curVar]);
+        for (std::size_t i = 0; i < leaf.size(); i++) {
+          ds.push_back(var.second(leaf, i));
         }
       }
     }
 
-    // Write and close dataset
-    H5Dwrite(dataset, H5Dget_type(dataset), memSpaceID, fileSpaceID, H5P_DEFAULT, &ds[0]);
+    H5Dwrite(dataset, H5Dget_type(dataset), memSpaceID, fileSpaceID, H5P_DEFAULT, ds.data());
     H5Dclose(dataset);
   }
 
-  // Write the N vector variables
-  for (int curVar = 0; curVar < N; curVar++) {
+  // Write the vector payload datasets as name-x/name-y/name-z.
+  for (const auto& var : a_vectorVars) {
     for (int dir = 0; dir < SpaceDim; dir++) {
-      std::string varName;
+      std::string varName = var.first;
       if (dir == 0) {
-        varName = vectVariables[curVar] + "-x";
+        varName += "-x";
       }
       else if (dir == 1) {
-        varName = vectVariables[curVar] + "-y";
+        varName += "-y";
       }
       else if (dir == 2) {
-        varName = vectVariables[curVar] + "-z";
+        varName += "-z";
       }
 
       hid_t dataset = H5Dcreate2(grp,
@@ -268,27 +223,22 @@ DischargeIO::writeH5Part(const std::string                               a_filen
       std::vector<double> ds;
 
       for (int lvl = 0; lvl <= a_particles.getFinestLevel(); lvl++) {
-
         const DisjointBoxLayout& dbl = a_particles.getGrids()[lvl];
         const DataIterator&      dit = dbl.dataIterator();
 
         const int nbox = dit.size();
 
         for (int mybox = 0; mybox < nbox; mybox++) {
-          const DataIndex& din = dit[mybox];
+          const DataIndex&              din  = dit[mybox];
+          const ParticleSoA<P, Traits>& leaf = a_particles[lvl][din];
 
-          const List<GenericParticle<M, N>>& particles = a_particles[lvl][din].listItems();
-
-          for (ListIterator<GenericParticle<M, N>> lit(particles); lit.ok(); ++lit) {
-            const RealVect var = lit().getVects()[curVar];
-
-            ds.push_back(var[dir]);
+          for (std::size_t i = 0; i < leaf.size(); i++) {
+            ds.push_back(var.second(leaf, i)[dir]);
           }
         }
       }
 
-      // Write and close dataset
-      H5Dwrite(dataset, H5Dget_type(dataset), memSpaceID, fileSpaceID, H5P_DEFAULT, &ds[0]);
+      H5Dwrite(dataset, H5Dget_type(dataset), memSpaceID, fileSpaceID, H5P_DEFAULT, ds.data());
       H5Dclose(dataset);
     }
   }
@@ -300,32 +250,30 @@ DischargeIO::writeH5Part(const std::string                               a_filen
 }
 
 #ifdef CH_USE_HDF5
-template <class P>
+template <typename P, typename Traits>
 void
-DischargeIO::writeCheckParticlesToHDF(HDF5Handle&            a_handle,
-                                      const ParticleData<P>& a_particles,
-                                      const std::string&     a_dataType)
+DischargeIO::writeCheckParticlesToHDF(HDF5Handle&                               a_handle,
+                                      const LayoutData<ParticleSoA<P, Traits>>& a_particles,
+                                      const std::string&                        a_dataType)
 {
-  // timer
-  CH_TIMERS("writeParticlesToHDF");
+  CH_TIMERS("writeParticlesToHDF(SoA)");
 
-  // grids
-  const BoxLayout& grids = a_particles.getBoxes();
+  const BoxLayout& grids = a_particles.boxLayout();
 
-  // loc part per box
-  vector<unsigned long long> locParticlesPerBox(grids.size(), 0);
+  std::vector<unsigned long long> locParticlesPerBox(grids.size(), 0);
+  unsigned long long              numLocalParticles = 0;
 
-  // loc and tot number of particles
-  unsigned long long numLocalParticles = 0;
-
-  // count number of particles per box
-  for (DataIterator di(grids); di.ok(); ++di) {
-    const size_t numItems = a_particles[di].numItems();
+  // serial: accumulates into the running counter numLocalParticles
+  const DataIterator& dit  = grids.dataIterator();
+  const int           nbox = dit.size();
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din      = dit[mybox];
+    const size_t     numItems = a_particles[din].size();
     numLocalParticles += (unsigned long long)numItems;
-    locParticlesPerBox[grids.index(di())] = (unsigned long long)numItems;
+    locParticlesPerBox[grids.index(din)] = (unsigned long long)numItems;
   }
 
-  vector<unsigned long long> particlesPerBox(grids.size());
+  std::vector<unsigned long long> particlesPerBox(grids.size());
 
 #ifdef CH_MPI
   int result = MPI_Allreduce(&locParticlesPerBox[0],
@@ -335,54 +283,39 @@ DischargeIO::writeCheckParticlesToHDF(HDF5Handle&            a_handle,
                              MPI_SUM,
                              Chombo_MPI::comm);
   if (result != MPI_SUCCESS) {
-    MayDay::Error("MPI communication error in ParticleIO");
+    MayDay::Error("MPI communication error in ParticleIO (SoA)");
   }
-
 #else
-
   for (int i = 0; i < grids.size(); i++) {
     particlesPerBox[i] = (unsigned long long)locParticlesPerBox[i];
   }
-
 #endif
 
   write_hdf_part_header(a_handle, grids, particlesPerBox, a_dataType);
 
-  // size of individual objects
-  size_t objSize = P().H5size();
+  // The SoA HDF5 record (position + weight + the payload h5 subset) is stored as raw bytes
+  // (H5T_NATIVE_CHAR). Payload columns may be ParticleReal (float), so the per-particle byte size need
+  // NOT be a multiple of sizeof(double); a double-typed dataset would truncate the extent
+  // (numComps = objSize/sizeof(double)) and overflow the hyperslab on write/read. Byte-based storage is
+  // exact for any payload and any SpaceDim.
+  const size_t objSize = ParticleSoA<P, Traits>::h5BytesPerParticle();
 
-  // the number of components per particle
-  size_t numComps = objSize / sizeof(Real);
-
-  // compute offsets and tot number of particles; order matters
-  vector<unsigned long long> offsets;
-  unsigned long long         totNumParticles = 0;
+  std::vector<unsigned long long> offsets;
+  unsigned long long              totNumParticles = 0;
   for (int i = 0; i < grids.size(); i++) {
-    offsets.push_back(numComps * totNumParticles);
+    offsets.push_back(objSize * totNumParticles);
     totNumParticles += particlesPerBox[i];
   }
 
-  // now store particle info
   if (totNumParticles == 0) {
     return;
   }
 
-  CH_TIMER("writeParticlesToHDF::checkpoint", t_cp);
-  CH_START(t_cp);
+  hsize_t     dataSize  = totNumParticles * objSize;
+  hid_t       dataspace = H5Screate_simple(1, &dataSize, nullptr);
+  hid_t       H5T_type  = H5T_NATIVE_CHAR;
+  std::string dataname  = a_dataType + ":data";
 
-  // data size
-  hsize_t dataSize = totNumParticles * numComps;
-
-  // a single dataspace
-  hid_t dataspace = H5Screate_simple(1, &dataSize, nullptr);
-
-  // create data type
-  hid_t H5T_type = H5T_NATIVE_DOUBLE;
-
-  //
-  std::string dataname = a_dataType + ":data";
-
-  // open dataset
 #ifdef H516
   hid_t dataset = H5Dcreate(a_handle.groupID(), dataname.c_str(), H5T_type, dataspace, H5P_DEFAULT);
 #else
@@ -396,111 +329,85 @@ DischargeIO::writeCheckParticlesToHDF(HDF5Handle&            a_handle,
 #endif
 
   if (numLocalParticles > 0) {
-    // allocate data buffer where to linearize the particle data
     const size_t chunkSize = objSize * _CHUNK;
     char* const  chunkBase = new char[chunkSize];
     char*        chunk     = chunkBase;
 
     if (chunkBase == nullptr) {
-      MayDay::Error("WritePart::Error: new returned NULL pointer ");
+      MayDay::Error("WritePart(SoA)::Error: new returned NULL pointer ");
     }
 
-    for (DataIterator di(grids); di.ok(); ++di) {
-      size_t offset = offsets[grids.index(di())];
+    // serial: writes into the shared HDF5 dataset at running per-box offsets and shares the chunk buffer
+    const DataIterator& dit  = grids.dataIterator();
+    const int           nbox = dit.size();
 
-      // particle counter
-      int ip = 0;
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din    = dit[mybox];
+      size_t           offset = offsets[grids.index(din)];
 
-      // linearize particle data
-      const List<P>& pList = a_particles[di].listItems();
+      const ParticleSoA<P, Traits>& leaf = a_particles[din];
+      const size_t                  n    = leaf.size();
 
-      for (ListIterator<P> li(pList); li.ok(); ++li) {
-        pList[li].H5linearOut((void*)chunk);
+      for (size_t ip = 0; ip < n; ip++) {
+        leaf.h5LinearizeParticle((void*)chunk, ip);
         chunk += objSize;
 
-        if (++ip % _CHUNK == 0) {
-          // rewind pointer position, write buffered data
+        if ((ip + 1) % _CHUNK == 0) {
           chunk -= chunkSize;
-          writeDataChunk(offset, dataspace, dataset, H5T_type, chunkSize / sizeof(Real), chunk);
+          writeDataChunk(offset, dataspace, dataset, H5T_type, chunkSize, chunk);
         }
       }
 
-      // write our residual particles
-      const size_t nResidual = pList.length() % _CHUNK;
+      const size_t nResidual = n % _CHUNK;
       if (nResidual > 0) {
-        // rewind pointer position and write buffered data
         chunk -= (nResidual * objSize);
-        writeDataChunk(offset, dataspace, dataset, H5T_type, nResidual * objSize / sizeof(Real), chunk);
+        writeDataChunk(offset, dataspace, dataset, H5T_type, nResidual * objSize, chunk);
       }
 
       chunk = chunkBase;
     }
 
-    // free buffer
     delete[] chunkBase;
   }
 
-  // done
   H5Sclose(dataspace);
   H5Dclose(dataset);
-
-  // stop timer
-  CH_STOP(t_cp);
 }
 #endif
 
 #ifdef CH_USE_HDF5
-template <class P>
+template <typename P, typename Traits>
 void
-DischargeIO::readCheckParticlesFromHDF(HDF5Handle&        a_handle,
-                                       ParticleData<P>&   a_particles,
-                                       const std::string& a_dataType)
+DischargeIO::readCheckParticlesFromHDF(HDF5Handle&                         a_handle,
+                                       LayoutData<ParticleSoA<P, Traits>>& a_particles,
+                                       const std::string&                  a_dataType)
 {
-  // timer
-  CH_TIMERS("readParticlesFromHDF");
+  CH_TIMERS("readParticlesFromHDF(SoA)");
 
-  // number of particles on each box
-  vector<unsigned long long> particlesPerBox;
-
-  // grids
-  Vector<Box> grids;
+  std::vector<unsigned long long> particlesPerBox;
+  Vector<Box>                     grids;
   read_hdf_part_header(a_handle, grids, particlesPerBox, a_dataType, a_handle.getGroup());
 
-  // load balancing should be handled outside
-  const BoxLayout& bl = a_particles.getBoxes();
+  const BoxLayout& bl = a_particles.boxLayout();
 
-  // size of individual objects
-  size_t objSize = P().H5size();
+  // Byte-based storage (matches writeCheckParticlesToHDF): the per-particle record may not be a multiple
+  // of sizeof(double) (ParticleReal payload columns), so everything is counted in bytes (H5T_NATIVE_CHAR).
+  const size_t objSize = ParticleSoA<P, Traits>::h5BytesPerParticle();
 
-  // the number of components per particle
-  size_t numComps = objSize / sizeof(Real);
-
-  // compute offsets and tot number of particles; order matters
-  vector<unsigned long long> offsets;
-  unsigned long long         totNumParticles = 0;
+  std::vector<unsigned long long> offsets;
+  unsigned long long              totNumParticles = 0;
   for (int i = 0; i < grids.size(); i++) {
-    offsets.push_back(numComps * totNumParticles);
+    offsets.push_back(objSize * totNumParticles);
     totNumParticles += particlesPerBox[i];
   }
 
-  // now read in particle data
   if (totNumParticles == 0) {
     return;
   }
 
-  CH_TIMER("readParticlesFromHDF::checkpoint", t_cp);
-  CH_START(t_cp);
-
-  // P object
-  P p;
-
-  // data type
-  hid_t H5T_type = H5T_NATIVE_DOUBLE;
-
-  //
+  hid_t       H5T_type = H5T_NATIVE_CHAR;
   std::string dataname = a_dataType + ":data";
 
-  // one single dataset
 #ifdef H516
   hid_t dataset = H5Dopen(a_handle.groupID(), dataname.c_str());
 #else
@@ -509,47 +416,38 @@ DischargeIO::readCheckParticlesFromHDF(HDF5Handle&        a_handle,
 
   hid_t dataspace = H5Dget_space(dataset);
 
-  // read in data relative to this proc in small chunks
   const size_t chunkSize = objSize * _CHUNK;
+  char*        chunk     = new char[chunkSize];
 
-  // allocate data buffer to read in linearized particle data chunks
-  char* chunk = new char[chunkSize];
+  // serial: reads from the shared HDF5 dataset at per-box offsets and shares the chunk buffer
+  const DataIterator& dit  = bl.dataIterator();
+  const int           nbox = dit.size();
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din     = dit[mybox];
+    size_t           boxData = objSize * particlesPerBox[bl.index(din)]; // bytes
+    size_t           offset  = offsets[bl.index(din)];                   // bytes
 
-  for (DataIterator di(bl); di.ok(); ++di) {
-    size_t boxData = numComps * particlesPerBox[bl.index(di())];
-    size_t offset  = offsets[bl.index(di())];
-
-    List<P>& items = a_particles[di].listItems();
+    ParticleSoA<P, Traits>& leaf = a_particles[din];
 
     size_t dataIn = 0;
     while (dataIn < boxData) {
-      // read data chunk of the right size
-      int size = ((boxData - dataIn) >= (chunkSize / sizeof(Real))) ? chunkSize / sizeof(Real) : boxData - dataIn;
+      int size = ((boxData - dataIn) >= chunkSize) ? chunkSize : boxData - dataIn; // bytes
       readDataChunk(offset, dataspace, dataset, H5T_type, size, chunk);
 
-      // list to store the particle data from the HDF5 file
-      for (int ip = 0; ip < size / numComps; ip++) {
-        p.H5linearIn(chunk);
+      for (int ip = 0; ip < size / (int)objSize; ip++) {
+        leaf.h5DelinearizeAndAppend(chunk);
         chunk += objSize;
-
-        // assign to data holder
-        items.add(p);
       }
       dataIn += size;
-      chunk -= size * sizeof(Real);
+      chunk -= size;
     }
   }
 
-  // free allocated memory
   delete[] chunk;
-  chunk = NULL;
+  chunk = nullptr;
 
-  // done with this component
   H5Sclose(dataspace);
   H5Dclose(dataset);
-
-  // stop timer
-  CH_STOP(t_cp);
 }
 #endif
 

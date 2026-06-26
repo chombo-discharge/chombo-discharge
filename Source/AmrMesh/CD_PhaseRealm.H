@@ -29,7 +29,6 @@
 #include <CD_EBReflux.H>
 #include <CD_DomainFluxIFFAB.H>
 #include <CD_DomainFluxIFFABFactory.H>
-#include <CD_ParticleContainer.H>
 #include <CD_EBMultigridInterpolator.H>
 #include <CD_EBGradient.H>
 #include <CD_EBFluxRedistribution.H>

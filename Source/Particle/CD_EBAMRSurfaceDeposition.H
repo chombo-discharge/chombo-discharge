@@ -83,15 +83,17 @@ public:
          const int                                 a_radius) noexcept;
 
   /**
-    @brief Deposition function which deposites the particles on the surface. 
-    @details P is the particle type, Ret is a Real or a const Real&, and MemberFunc is a member function of P.
-    @param[in,out] a_meshData Mesh data. Must defined on cut-cells only.
-    @param[in] a_particles Particles to deposit
-    @note This will throw an error if a particle is located on a grid cell that is NOT an irregular cell
+    @brief Deposit the container-owned weight column of an SoA particle container onto the surface.
+    @details SoA overload of deposit; deposits the weight column (surface charge always deposits weight).
+    @param[in,out] a_meshData  Mesh data. Must be defined on cut-cells only.
+    @param[in]     a_particles SoA particles to deposit.
+    @tparam P      Payload type of the container.
+    @tparam Traits Column descriptor for the payload.
+    @note Throws an error if a particle is located on a grid cell that is NOT an irregular cell.
   */
-  template <class P, class Ret, Ret (P::*MemberFunc)() const>
+  template <typename P, typename Traits>
   void
-  deposit(EBAMRIVData& a_meshData, const ParticleContainer<P>& a_particles) const noexcept;
+  deposit(EBAMRIVData& a_meshData, const ParticleContainer<P, Traits>& a_particles) const noexcept;
 
 protected:
   /**

@@ -22,6 +22,7 @@
 
 // Our includes
 #include <CD_ParticleOps.H>
+#include <CD_ParticleLoops.H>
 #include <CD_ParallelOps.H>
 #include <CD_PolyUtils.H>
 #include <CD_Random.H>
@@ -47,11 +48,11 @@ ParticleOps::getParticleCellIndex(const RealVect& a_particlePosition,
                         std::floor((a_particlePosition[2] - a_probLo[2]) / a_dx[2])));
 }
 
-template <typename P, const Real& (P::*weight)() const>
+template <typename P, typename Traits>
 inline void
-ParticleOps::getPhysicalParticlesPerCell(EBAMRCellData& a_ppc, const ParticleContainer<P>& a_src) noexcept
+ParticleOps::getPhysicalParticlesPerCell(EBAMRCellData& a_ppc, const ParticleContainer<P, Traits>& a_src) noexcept
 {
-  CH_TIME("ParticleOps::getPhysicalParticlesPerCell");
+  CH_TIME("ParticleOps::getPhysicalParticlesPerCell(SoA)");
 
   const RealVect probLo = a_src.getProbLo();
 
@@ -64,30 +65,26 @@ ParticleOps::getPhysicalParticlesPerCell(EBAMRCellData& a_ppc, const ParticleCon
 
 #pragma omp parallel for schedule(runtime)
     for (int mybox = 0; mybox < nbox; mybox++) {
-      const DataIndex& din = dit[mybox];
-
-      const List<P>& particles = a_src[lvl][din].listItems();
+      const DataIndex&              din  = dit[mybox];
+      const ParticleSoA<P, Traits>& leaf = a_src[lvl][din];
 
       FArrayBox& ppc = (*a_ppc[lvl])[din].getFArrayBox();
       ppc.setVal(0.0);
 
-      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
-        const P&       p  = lit();
-        const RealVect x  = p.position();
-        const Real     w  = (p.*weight)();
-        const IntVect  iv = ParticleOps::getParticleGridCell(x, probLo, dx);
+      for (std::size_t i = 0; i < leaf.size(); i++) {
+        const IntVect iv = ParticleOps::getParticleGridCell(leaf.position(i), probLo, dx);
 
-        ppc(iv, 0) += w;
+        ppc(iv, 0) += leaf.weight(i);
       }
     }
   }
 }
 
-template <typename P>
+template <typename P, typename Traits>
 inline void
-ParticleOps::getComputationalParticlesPerCell(EBAMRCellData& a_ppc, const ParticleContainer<P>& a_src) noexcept
+ParticleOps::getComputationalParticlesPerCell(EBAMRCellData& a_ppc, const ParticleContainer<P, Traits>& a_src) noexcept
 {
-  CH_TIME("ParticleOps::getComputationalParticlesPerCell");
+  CH_TIME("ParticleOps::getComputationalParticlesPerCell(SoA)");
 
   const RealVect probLo = a_src.getProbLo();
 
@@ -100,17 +97,14 @@ ParticleOps::getComputationalParticlesPerCell(EBAMRCellData& a_ppc, const Partic
 
 #pragma omp parallel for schedule(runtime)
     for (int mybox = 0; mybox < nbox; mybox++) {
-      const DataIndex& din = dit[mybox];
-
-      const List<P>& particles = a_src[lvl][din].listItems();
+      const DataIndex&              din  = dit[mybox];
+      const ParticleSoA<P, Traits>& leaf = a_src[lvl][din];
 
       FArrayBox& ppc = (*a_ppc[lvl])[din].getFArrayBox();
       ppc.setVal(0.0);
 
-      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
-        const P&       p  = lit();
-        const RealVect x  = p.position();
-        const IntVect  iv = ParticleOps::getParticleGridCell(x, probLo, dx);
+      for (std::size_t i = 0; i < leaf.size(); i++) {
+        const IntVect iv = ParticleOps::getParticleGridCell(leaf.position(i), probLo, dx);
 
         ppc(iv, 0) += 1.0;
       }
@@ -147,12 +141,11 @@ ParticleOps::domainIntersection(const RealVect& a_oldPos,
 
   for (int dir = 0; dir < SpaceDim; dir++) {
     for (SideIterator sit; sit.ok(); ++sit) {
+      // Normal vector pointing OUT of the domain on side sit and direction dir.
       const Side::LoHiSide side      = sit();
-      const RealVect       wallPoint = (side == Side::Lo) ? a_probLo : a_probHi; // A point on the domain side
-      const RealVect       n0        = sign(side) *
-                          RealVect(
-                            BASISV(dir)); // Normal vector pointing OUT of the domain on side sit and direction dir.
-      const Real normPath = PolyGeom::dot(n0, path); // Component of the path that is normal to the domain edge/face.
+      const RealVect       wallPoint = (side == Side::Lo) ? a_probLo : a_probHi;
+      const RealVect       n0        = sign(side) * RealVect(BASISV(dir));
+      const Real           normPath  = PolyGeom::dot(n0, path);
 
       // If normPath > 0 then the particle trajectory points towards the domain edge/face and we can have an intersection.
       if (normPath > 0.0) {
@@ -163,6 +156,7 @@ ParticleOps::domainIntersection(const RealVect& a_oldPos,
         const Real s = PolyGeom::dot(wallPoint - a_oldPos, n0) / normPath;
         if (s >= 0.0 && s <= 1.0) {
           crossedDomainBoundary = true;
+
           if (s < a_s) {
             a_s = s;
           }
@@ -196,17 +190,19 @@ ParticleOps::ebIntersectionBisect(const RefCountedPtr<BaseIF>& a_impFunc,
   // Check each interval
   RealVect curPos = a_oldPos;
   for (int istep = 0; istep < nsteps; istep++) {
-    const Real fa = a_impFunc->value(curPos); // Value of the implicit function at the start of the bisection interval
-    const Real fb = a_impFunc->value(curPos +
-                                     dxStep); // Value of the implicit function at the end of the bisection interval
+    // fa: Value of the implicit function at the start of the bisection interval
+    // fb: Value of the implicit function at the end of the bisection interval
+    const Real fa = a_impFunc->value(curPos);
+    const Real fb = a_impFunc->value(curPos + dxStep);
 
     if (fa * fb <= 0.0) {
 
       // If this triggered we happen to know that f(pos+dxStep) > 0.0 and f(pos) < 0.0 and so we must have a root on the interval. We now compute the precise location
       // where the particle crossed the EB. For that we use a Brent root finder on the interval [pos, pos+dxStep]. This is a 1D problem.
       const RealVect intersectionPos = PolyUtils::brentRootFinder(a_impFunc, curPos, curPos + dxStep);
-      a_s                            = (intersectionPos - a_oldPos).vectorLength() / pathLen;
-      crossedEB                      = true;
+
+      a_s       = (intersectionPos - a_oldPos).vectorLength() / pathLen;
+      crossedEB = true;
 
       break;
     }
@@ -255,6 +251,7 @@ ParticleOps::ebIntersectionRaycast(const RefCountedPtr<BaseIF>& a_impFunc,
       if (d < a_tolerance) { // We collided.
         a_s = (xa - a_oldPos).vectorLength() / D;
         ret = true;
+
         break;
       }
       else { // We did not collide.
@@ -268,11 +265,11 @@ ParticleOps::ebIntersectionRaycast(const RefCountedPtr<BaseIF>& a_impFunc,
   return ret;
 }
 
-template <typename P>
+template <typename P, typename Traits>
 inline void
-ParticleOps::copy(ParticleContainer<P>& a_dst, const ParticleContainer<P>& a_src) noexcept
+ParticleOps::copyDestructive(ParticleContainer<P, Traits>& a_dst, ParticleContainer<P, Traits>& a_src) noexcept
 {
-  CH_TIME("ParticleOps::copy(ParticleContainer<P> x2)");
+  CH_TIME("ParticleOps::copyDestructive(ParticleContainer<P, Traits> x2)");
 
   CH_assert(a_dst.getRealm() == a_src.getRealm());
 
@@ -286,39 +283,15 @@ ParticleOps::copy(ParticleContainer<P>& a_dst, const ParticleContainer<P>& a_src
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      a_dst[lvl][din].listItems() = a_src[lvl][din].listItems();
+      a_dst[lvl][din].clear();                   // drop the destination leaf's particles
+      a_dst[lvl][din].catenate(a_src[lvl][din]); // move the source leaf in (O(1) swap; src emptied)
     }
   }
 }
 
-template <typename P>
-inline void
-ParticleOps::copyDestructive(ParticleContainer<P>& a_dst, ParticleContainer<P>& a_src) noexcept
-{
-  CH_TIME("ParticleOps::copyDestructive(ParticleContainer<P> x2)");
-
-  CH_assert(a_dst.getRealm() == a_src.getRealm());
-
-  for (int lvl = 0; lvl <= a_dst.getFinestLevel(); lvl++) {
-    const DisjointBoxLayout& dbl = a_dst.getGrids()[lvl];
-    const DataIterator&      dit = dbl.dataIterator();
-
-    const int nbox = dit.size();
-
-#pragma omp parallel for schedule(runtime)
-    for (int mybox = 0; mybox < nbox; mybox++) {
-      const DataIndex& din = dit[mybox];
-
-      a_dst[lvl][din].listItems() = a_src[lvl][din].listItems();
-
-      a_src[lvl][din].listItems().clear();
-    }
-  }
-}
-
-template <typename P, const Real& (P::*scalarQuantity)() const>
+template <typename P, typename Traits>
 inline Real
-ParticleOps::sum(const ParticleContainer<P>& a_particles) noexcept
+ParticleOps::sum(const ParticleContainer<P, Traits>& a_particles) noexcept
 {
   CH_TIME("ParticleOps::sum(ParticleContainer<P>)");
 
@@ -332,54 +305,28 @@ ParticleOps::sum(const ParticleContainer<P>& a_particles) noexcept
 
 #pragma omp parallel for schedule(runtime) reduction(+ : particleSum)
     for (int mybox = 0; mybox < nbox; mybox++) {
-      const DataIndex& din = dit[mybox];
+      const DataIndex&              din  = dit[mybox];
+      const ParticleSoA<P, Traits>& leaf = a_particles[lvl][din];
 
-      const List<P>& particles = a_particles[lvl][din].listItems();
+      const double* w = leaf.weightColumn(); // weight column captured once, OUTSIDE the loop
 
-      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
-        particleSum += (lit().*scalarQuantity)();
-      }
+      // Seed the fold with the running (thread-private) accumulator rather than 0.0 so the
+      // summation order is identical to a plain 'particleSum += w[i]' loop across this thread's boxes.
+      particleSum = ParticleLoops::reduce(leaf, particleSum, [&](Real acc, std::size_t i) {
+        return acc + w[i];
+      });
     }
   }
 
   return ParallelOps::sum(particleSum);
 }
 
-template <typename P, Real (P::*scalarQuantity)()>
-inline Real
-ParticleOps::sum(const ParticleContainer<P>& a_particles) noexcept
-{
-  CH_TIME("ParticleOps::sum(ParticleContainer<P>)");
-
-  Real particleSum = 0.0;
-
-  for (int lvl = 0; lvl <= a_particles.getFinestLevel(); lvl++) {
-    const DisjointBoxLayout& dbl = a_particles.getGrids()[lvl];
-    const DataIterator&      dit = dbl.dataIterator();
-
-    const int nbox = dit.size();
-
-#pragma omp parallel for schedule(runtime) reduction(+ : particleSum)
-    for (int mybox = 0; mybox < nbox; mybox++) {
-      const DataIndex& din = dit[mybox];
-
-      const List<P>& particles = a_particles[lvl][din].listItems();
-
-      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
-        particleSum += (lit().*scalarQuantity)();
-      }
-    }
-  }
-
-  return ParallelOps::sum(particleSum);
-}
-
-template <typename P>
+template <typename P, typename Traits>
 inline void
-ParticleOps::removeParticles(ParticleContainer<P>&                a_particles,
-                             const std::function<bool(const P&)>& a_removeCriterion) noexcept
+ParticleOps::setData(ParticleContainer<P, Traits>&                                    a_particles,
+                     const std::function<void(ParticleSoA<P, Traits>&, std::size_t)>& a_functor) noexcept
 {
-  CH_TIME("ParticleOps::removeParticles(ParticleContainer<P>, std::function<bool(const P&)>)");
+  CH_TIME("ParticleOps::setData(ParticleContainer<P>, std::function<void(ParticleSoA<P>&, std::size_t)>)");
 
   for (int lvl = 0; lvl <= a_particles.getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = a_particles.getGrids()[lvl];
@@ -391,308 +338,14 @@ ParticleOps::removeParticles(ParticleContainer<P>&                a_particles,
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      List<P>& particles = a_particles[lvl][din].listItems();
+      ParticleSoA<P, Traits>& leaf = a_particles[lvl][din];
 
-      for (ListIterator<P> lit(particles); lit.ok();) {
-        if (a_removeCriterion(lit())) {
-          particles.remove(lit);
-        }
-        else {
-          ++lit;
-        }
+      for (std::size_t i = 0; i < leaf.size(); i++) {
+        a_functor(leaf, i);
       }
     }
   }
 }
-
-template <typename P>
-inline void
-ParticleOps::transferParticles(ParticleContainer<P>&                a_dstParticles,
-                               ParticleContainer<P>&                a_srcParticles,
-                               const std::function<bool(const P&)>& a_transferCrit) noexcept
-{
-  CH_TIME("ParticleOps::transferParticles(ParticleContainer<P>, ParticleContainer<P>& std::function<bool(const P&)>)");
-
-  CH_assert(a_dstParticles.getRealm() == a_srcParticles.getRealm());
-  CH_assert(a_dstParticles.getFinestLevel() == a_srcParticles.getFinestLevel());
-
-  for (int lvl = 0; lvl <= a_srcParticles.getFinestLevel(); lvl++) {
-    const DisjointBoxLayout& dbl = a_srcParticles.getGrids()[lvl];
-    const DataIterator&      dit = dbl.dataIterator();
-
-    const int nbox = dit.size();
-
-#pragma omp parallel for schedule(runtime)
-    for (int mybox = 0; mybox < nbox; mybox++) {
-      const DataIndex& din = dit[mybox];
-
-      List<P>& dstParticles = a_dstParticles[lvl][din].listItems();
-      List<P>& srcParticles = a_srcParticles[lvl][din].listItems();
-
-      for (ListIterator<P> lit(srcParticles); lit.ok();) {
-        if (a_transferCrit(lit())) {
-          dstParticles.transfer(lit);
-        }
-        else {
-          ++lit;
-        }
-      }
-    }
-  }
-}
-
-template <typename P>
-inline void
-ParticleOps::setData(ParticleContainer<P>& a_particles, const std::function<void(P&)>& a_functor) noexcept
-{
-  CH_TIME("ParticleOps::setData(ParticleContainer<P>, std::function<void(P&)>)");
-
-  for (int lvl = 0; lvl <= a_particles.getFinestLevel(); lvl++) {
-    const DisjointBoxLayout& dbl = a_particles.getGrids()[lvl];
-    const DataIterator&      dit = dbl.dataIterator();
-
-    const int nbox = dit.size();
-
-#pragma omp parallel for schedule(runtime)
-    for (int mybox = 0; mybox < nbox; mybox++) {
-      const DataIndex& din = dit[mybox];
-
-      List<P>& particles = a_particles[lvl][din].listItems();
-
-      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
-        a_functor(lit());
-      }
-    }
-  }
-}
-
-template <typename P, Real& (P::*particleScalarField)()>
-inline void
-ParticleOps::setValue(ParticleContainer<P>& a_particles, const Real a_value) noexcept
-{
-  CH_TIME("ParticleOps::setValue(ParticleContainer<P>, Real");
-
-  for (int lvl = 0; lvl <= a_particles.getFinestLevel(); lvl++) {
-    const DisjointBoxLayout& dbl = a_particles.getGrids()[lvl];
-    const DataIterator&      dit = dbl.dataIterator();
-
-    const int nbox = dit.size();
-
-#pragma omp parallel for schedule(runtime)
-    for (int mybox = 0; mybox < nbox; mybox++) {
-      const DataIndex& din = dit[mybox];
-
-      List<P>& particles = a_particles[lvl][din].listItems();
-
-      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
-        P& p = lit();
-
-        (p.*particleScalarField)() = a_value;
-      }
-    }
-  }
-}
-
-template <typename P, RealVect& (P::*particleVectorField)()>
-inline void
-ParticleOps::setValue(ParticleContainer<P>& a_particles, const RealVect& a_value) noexcept
-{
-  CH_TIME("ParticleOps::setValue(ParticleContainer<P>, RealVect");
-
-  for (int lvl = 0; lvl <= a_particles.getFinestLevel(); lvl++) {
-    const DisjointBoxLayout& dbl = a_particles.getGrids()[lvl];
-    const DataIterator&      dit = dbl.dataIterator();
-
-    const int nbox = dit.size();
-
-#pragma omp parallel for schedule(runtime)
-    for (int mybox = 0; mybox < nbox; mybox++) {
-      const DataIndex& din = dit[mybox];
-
-      List<P>& particles = a_particles[lvl][din].listItems();
-
-      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
-        P& p = lit();
-
-        (p.*particleVectorField)() = a_value;
-      }
-    }
-  }
-}
-
-#ifdef CH_MPI
-template <typename P>
-inline void
-ParticleOps::scatterParticles(ParticleMap<List<P>>&              a_receivedParticles,
-                              std::vector<ParticleMap<List<P>>>& a_sentParticles) noexcept
-{
-  CH_TIME("ParticleOps::scatterParticles");
-
-  const int numRanks = numProc();
-
-  int mpiErr;
-
-  CH_assert(a_sentParticles.size() == numProc());
-
-  const size_t linearSize = P().size();
-
-  std::vector<uint64_t> sendSizes(numProc(), 0);
-  std::vector<uint64_t> recvSizes(numProc(), 0);
-
-  // Figure out the size sent from this rank to other ranks.
-  for (int irank = 0; irank < numRanks; irank++) {
-    sendSizes[irank] = 0;
-
-    // Figure out the message size sent from this rank.
-    const ParticleMap<List<P>>& particlesToRank = a_sentParticles[irank];
-
-    // Size of particles along.
-    for (const auto& m : particlesToRank) {
-      sendSizes[irank] += (uint64_t)m.second.length();
-    }
-    sendSizes[irank] *= linearSize;
-
-    // Send size = #particles * linearSize + level index (uint32_t) + grid index(uint32_t) + list length (size_t)
-    sendSizes[irank] += particlesToRank.size() * (2 * sizeof(uint32_t) + sizeof(size_t));
-  }
-
-  // Collectively exchange send & receive sizes
-  mpiErr = MPI_Alltoall(&sendSizes[0], 1, MPI_UINT64_T, &recvSizes[0], 1, MPI_UINT64_T, Chombo_MPI::comm);
-  if (mpiErr != MPI_SUCCESS) {
-    MayDay::Error("ParticleOps::scatterParticles - MPI communication error in MPI_AlltoAll(1)");
-  }
-
-  // Sanity check
-  if (recvSizes[procID()] != 0) {
-    MayDay::Error("ParticleOps::scatterParticles - 'recvSizes[procID()] != 0' failed");
-  }
-
-  // Lambda for computing message displacements
-  auto computeDisplacements = [](const std::vector<uint64_t>& counts) -> std::vector<uint64_t> {
-    std::vector<uint64_t> displacements(counts.size(), 0);
-
-    for (size_t i = 1; i < counts.size(); i++) {
-      displacements[i] = displacements[i - 1] + counts[i - 1];
-    }
-
-    return displacements;
-  };
-
-  const std::vector<uint64_t> sendDisplacements = computeDisplacements(sendSizes);
-  const std::vector<uint64_t> recvDisplacements = computeDisplacements(recvSizes);
-
-  const uint64_t totalSend = sendDisplacements.back() + sendSizes.back();
-  const uint64_t totalRecv = recvDisplacements.back() + recvSizes.back();
-
-  std::vector<char> sendBuffer(totalSend);
-  std::vector<char> recvBuffer(totalRecv);
-
-  // Pack data sent from this rank into buffers
-  for (int irank = 0; irank < numRanks; irank++) {
-    if (sendSizes[irank] == 0) {
-      continue;
-    }
-
-    char* data = sendBuffer.data() + sendDisplacements[irank];
-
-    // Linearize each entry in the map onto the send buffer. We encode this by (level, index, list length, List<P>)
-    for (const auto& cur : a_sentParticles[irank]) {
-
-      // and grid index
-      *((uint32_t*)data) = cur.first.first;
-      data += sizeof(uint32_t);
-      *((uint32_t*)data) = cur.first.second;
-      data += sizeof(uint32_t);
-
-      // List length aka number of particles
-      *((size_t*)data) = cur.second.length();
-      data += sizeof(size_t);
-
-      // Linearize the particle list
-      for (ListIterator<P> lit(cur.second); lit.ok(); ++lit) {
-        const P& p = lit();
-
-        p.linearOut((void*)data);
-        data += linearSize;
-      }
-    }
-  }
-
-  // MPI requires stuff as int -- make sure that we can convert properly
-  auto uint64ToInt = [](const std::vector<uint64_t>& v64) -> std::vector<int> {
-    std::vector<int> v(v64.size());
-
-    for (size_t i = 0; i < v64.size(); ++i) {
-      CH_assert(v64[i] <= static_cast<uint64_t>(std::numeric_limits<int>::max()));
-
-      v[i] = static_cast<int>(v64[i]);
-    }
-
-    return v;
-  };
-
-  std::vector<int> sendCounts = uint64ToInt(sendSizes);
-  std::vector<int> recvCounts = uint64ToInt(recvSizes);
-  std::vector<int> sendDispl  = uint64ToInt(sendDisplacements);
-  std::vector<int> recvDispl  = uint64ToInt(recvDisplacements);
-
-  mpiErr = MPI_Alltoallv(sendBuffer.data(),
-                         sendCounts.data(),
-                         sendDispl.data(),
-                         MPI_CHAR,
-                         recvBuffer.data(),
-                         recvCounts.data(),
-                         recvDispl.data(),
-                         MPI_CHAR,
-                         Chombo_MPI::comm);
-
-  if (mpiErr != MPI_SUCCESS) {
-    MayDay::Error("ParticleOps::scatterParticles - MPI communication error in MPI_AlltoAll(2)");
-  }
-
-  // Clear the send buffers.
-  for (int irank = 0; irank < numRanks; irank++) {
-    a_sentParticles[irank].clear();
-  }
-
-  // Unpack data
-  for (int irank = 0; irank < numRanks; irank++) {
-    if (recvSizes[irank] == 0) {
-      continue;
-    }
-    else {
-      char* data = recvBuffer.data() + recvDisplacements[irank];
-
-      uint64_t in = 0;
-
-      while (in < recvSizes[irank]) {
-
-        // Level and grid index
-        uint32_t lvl = *((uint32_t*)data);
-        data += sizeof(uint32_t);
-
-        uint32_t idx = *((uint32_t*)data);
-        data += sizeof(uint32_t);
-
-        // List length aka number of particles
-        size_t numParticles = *((size_t*)data);
-        data += sizeof(size_t);
-
-        for (size_t ipart = 0; ipart < numParticles; ipart++) {
-          P p;
-
-          p.linearIn(static_cast<void*>(data));
-          data += linearSize;
-
-          a_receivedParticles[std::pair<uint32_t, uint32_t>(lvl, idx)].add(p);
-        }
-
-        in += 2 * sizeof(uint32_t) + sizeof(size_t) + numParticles * linearSize;
-      }
-    }
-  }
-}
-#endif
 
 #include <CD_NamespaceFooter.H>
 

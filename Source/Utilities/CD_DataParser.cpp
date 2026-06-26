@@ -145,7 +145,7 @@ DataParser::fractionalFileReadASCII(const std::string&       a_fileName,
   return returnTable;
 }
 
-List<PointParticle>
+ParticleSoA<NoPayload>
 DataParser::readPointParticlesASCII(const std::string& a_fileName,
                                     const unsigned int a_xColumn,
                                     const unsigned int a_yColumn,
@@ -159,7 +159,7 @@ DataParser::readPointParticlesASCII(const std::string& a_fileName,
   std::ifstream inputFile(a_fileName);
   std::string   line;
 
-  List<PointParticle> particles;
+  ParticleSoA<NoPayload> particles;
 
   while (std::getline(inputFile, line)) {
 
@@ -208,7 +208,7 @@ DataParser::readPointParticlesASCII(const std::string& a_fileName,
 #endif
           weight = values[a_wColumn];
 
-          particles.add(PointParticle(pos, weight));
+          particles.append(pos, weight);
         }
       }
     }

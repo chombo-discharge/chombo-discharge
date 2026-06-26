@@ -6,187 +6,72 @@
 
 /**
   @file   CD_TracerParticle.H
-  @brief  Declaration of a tracer particle class.
+  @brief  SoA payload for tracer particles (velocity + Runge-Kutta stage scratch)
   @author Robert Marskar
 */
 
 #ifndef CD_TRACERPARTICLE_H
 #define CD_TRACERPARTICLE_H
 
-// Std includes
-#include <string>
-#include <typeinfo>
-#include <cstdio>
-#include <cmath>
-
 // Our includes
-#include <CD_GenericParticle.H>
+#include <CD_ParticleSoA.H>
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief A tracer particle class. This is templated for holding extra storage (useful for kernels). 
-  @details The template parameters M and N determine extra storage allocated to the particle. M determines
-  the number of allocated scalars (Reals) and N determines the number of allocated vectors (RealVects). These
-  quantities are communicated when remapping particles. 
+  @brief SoA payload for tracer particles: interpolated velocity plus Runge-Kutta stage scratch.
+  @details Per-component scalar columns (one member per spatial dimension; the z-component exists only when
+  CH_SPACEDIM == 3). v_x/v_y/v_z hold the interpolated velocity (required by TracerParticleSolver). xk is the
+  position snapshot x^k; k1/k2/k3 hold the Runge-Kutta stage velocities. Weight and position are
+  container-owned columns, NOT payload members.
 */
-template <size_t M, size_t N>
-class TracerParticle : public GenericParticle<M, N>
+struct TracerParticle
 {
-public:
-  /**
-    @brief Default constructor -- initializes everything to zero. 
-  */
-  inline TracerParticle();
+  ParticleReal v_x = 0.0; ///< Interpolated velocity, x-component.
+  ParticleReal v_y = 0.0; ///< Interpolated velocity, y-component.
+#if CH_SPACEDIM == 3
+  ParticleReal v_z = 0.0; ///< Interpolated velocity, z-component.
+#endif
 
-  /**
-    @brief Copy constructor. Copies all fields.
-    @param[in] a_other Other particle. 
-  */
-  inline TracerParticle(const TracerParticle<M, N>& a_other);
+  double xk_x = 0.0; ///< Position snapshot x^k, x-component (double: position-like).
+  double xk_y = 0.0; ///< Position snapshot x^k, y-component (double: position-like).
+#if CH_SPACEDIM == 3
+  double xk_z = 0.0; ///< Position snapshot x^k, z-component (double: position-like).
+#endif
 
-  /**
-    @brief Destructor (deallocates runtime memory storage)
-  */
-  inline virtual ~TracerParticle();
+  ParticleReal k1_x = 0.0; ///< Runge-Kutta stage k1, x-component.
+  ParticleReal k1_y = 0.0; ///< Runge-Kutta stage k1, y-component.
+#if CH_SPACEDIM == 3
+  ParticleReal k1_z = 0.0; ///< Runge-Kutta stage k1, z-component.
+#endif
 
-  /**
-    @brief Get the particle "weight"
-    @return m_weight
-  */
-  inline Real&
-  weight();
+  ParticleReal k2_x = 0.0; ///< Runge-Kutta stage k2, x-component.
+  ParticleReal k2_y = 0.0; ///< Runge-Kutta stage k2, y-component.
+#if CH_SPACEDIM == 3
+  ParticleReal k2_z = 0.0; ///< Runge-Kutta stage k2, z-component.
+#endif
 
-  /**
-    @brief Get the particle "weight"
-    @return m_weight
-  */
-  inline const Real&
-  weight() const;
-
-  /**
-    @brief Get the particle velocity. 
-    @return m_velocity
-  */
-  inline RealVect&
-  velocity();
-
-  /**
-    @brief Get the particle velocity.
-    @return m_velocity
-  */
-  inline const RealVect&
-  velocity() const;
-
-  /**
-    @brief Returns the size, in number of bytes, of a flat representation of the data in this object.
-    @return Size in bytes.
-  */
-  inline virtual int
-  size() const override;
-
-  /**
-    @brief Write a linear binary representation of the internal data. Assumes that
-    sufficient memory for the buffer has already been allocated by the caller. 
-    @param[in] a_buffer Pointer to memory block
-  */
-  inline virtual void
-  linearOut(void* const a_buffer) const override;
-
-  /**
-    @brief Read a linear binary representation of the internal data. Assumes that the buffer has the correct data.
-    @param[in] a_buffer Pointer to memory block
-  */
-  inline virtual void
-  linearIn(const void* const a_buffer) override;
-
-  /**
-    @brief Function that is used when writing particles to HDF5.
-    @details This ignores the particleID and rankID, so we can directory plug into Chombo's HDF5 APIs.
-    @return Size in bytes of the HDF5 representation.
-  */
-  inline virtual int
-  H5size() const;
-
-  /**
-    @brief Linearize the Real components onto a buffer workable by HDF5.
-    @details Ignores the particleID and rankID, so we can directly plug into Chombo's HDF5 API.
-    @param[in] a_buffer Pointer to memory block
-  */
-  inline virtual void
-  H5linearOut(void* const a_buffer) const;
-
-  /**
-    @brief Delinearize the buffer onto the real components in the particle class.
-    @details Ignores the particleID and rankID, so we can directly plug into Chombo's HDF5 API.
-    @param[in] a_buffer Pointer to memory block
-  */
-  inline virtual void
-  H5linearIn(const void* const a_buffer);
-
-  /**
-    @brief Get one of the scalars. 
-    @details Template parameter is the position in the m_scalars array. This is templated so that compilers may throw
-    compile-time errors if trying to fetch elements out of range. 
-    @return m_scalars[K]
-  */
-  template <size_t K>
-  inline Real&
-  real();
-
-  /**
-    @brief Get one of the scalars. 
-    @details Template parameter is the position in the m_scalars array. This is templated so that compilers may throw
-    compile-time errors if trying to fetch elements out of range. 
-    @return m_scalars[K]
-  */
-  template <size_t K>
-  inline const Real&
-  real() const;
-
-  /**
-    @brief Get one of the RealVects.
-    @details Template parameter is the position in the m_vectors array. This is templated so that compilers may throw
-    compile-time errors if trying to fetch elements out of range. 
-    @return m_vectors[K]
-  */
-  template <size_t K>
-  inline RealVect&
-  vect();
-
-  /**
-    @brief Get one of the RealVects.
-    @details Template parameter is the position in the m_vectors array. This is templated so that compilers may throw
-    compile-time errors if trying to fetch elements out of range. 
-    @return m_vectors[K]
-  */
-  template <size_t K>
-  inline const RealVect&
-  vect() const;
-
-protected:
-  /**
-    @brief Particle "weight".
-  */
-  Real m_weight;
-
-  /**
-    @brief Particle velocity
-  */
-  RealVect m_velocity;
+  ParticleReal k3_x = 0.0; ///< Runge-Kutta stage k3, x-component.
+  ParticleReal k3_y = 0.0; ///< Runge-Kutta stage k3, y-component.
+#if CH_SPACEDIM == 3
+  ParticleReal k3_z = 0.0; ///< Runge-Kutta stage k3, z-component.
+#endif
 };
 
 /**
-  @brief Particle printing function.
-  @param[in,out] ostr Output stream.
-  @param[in]     p    Particle to output.
-  @return Reference to the output stream.
+  @brief ParticleTraits specialization listing the payload columns of TracerParticle.
 */
-template <size_t M, size_t N>
-inline std::ostream&
-operator<<(std::ostream& ostr, const TracerParticle<M, N>& p);
+template <>
+struct ParticleTraits<TracerParticle>
+{
+  /// @brief Payload column member-pointers, listed one field group at a time (SpaceDim entries per group).
+  static constexpr auto columns = std::make_tuple(
+    D_DECL(&TracerParticle::v_x, &TracerParticle::v_y, &TracerParticle::v_z),
+    D_DECL(&TracerParticle::xk_x, &TracerParticle::xk_y, &TracerParticle::xk_z),
+    D_DECL(&TracerParticle::k1_x, &TracerParticle::k1_y, &TracerParticle::k1_z),
+    D_DECL(&TracerParticle::k2_x, &TracerParticle::k2_y, &TracerParticle::k2_z),
+    D_DECL(&TracerParticle::k3_x, &TracerParticle::k3_y, &TracerParticle::k3_z));
+};
 
 #include <CD_NamespaceFooter.H>
-
-#include <CD_TracerParticleImplem.H>
 
 #endif

@@ -21,12 +21,34 @@
 #include <CD_Timer.H>
 #include <CD_ParallelOps.H>
 #include <CD_DataOps.H>
+#include <CD_ParticleLoops.H>
 #include <CD_Units.H>
 #include <CD_Photon.H>
 #include <CD_DischargeIO.H>
 #include <CD_NamespaceHeader.H>
 
 using namespace Physics::ItoKMC;
+
+namespace {
+  // Deposit an SoA particle container's weight onto a_phi using an Ito solver's configured deposition scheme.
+  inline void
+  depositPointParticlesLikeSolver(const RefCountedPtr<AmrMesh>&   a_amr,
+                                  const std::string&              a_realm,
+                                  const phase::which_phase        a_phase,
+                                  const RefCountedPtr<ItoSolver>& a_solver,
+                                  EBAMRCellData&                  a_phi,
+                                  ParticleContainer<NoPayload>&   a_particles) noexcept
+  {
+    a_amr->depositWeight(a_phi,
+                         a_realm,
+                         a_phase,
+                         a_particles,
+                         a_solver->getDeposition(),
+                         a_solver->getCoarseFineDeposition(),
+                         false);
+  }
+
+} // namespace
 
 template <typename I, typename C, typename R, typename F>
 ItoKMCGodunovStepper<I, C, R, F>::ItoKMCGodunovStepper(RefCountedPtr<ItoKMCPhysics>& a_physics, bool a_parseOptions)
@@ -95,10 +117,9 @@ ItoKMCGodunovStepper<I, C, R, F>::allocate() noexcept
   for (auto solverIt = (this->m_ito)->iterator(); solverIt.ok(); ++solverIt) {
     const int idx = solverIt.index();
 
-    m_conductivityParticles[idx] = RefCountedPtr<ParticleContainer<PointParticle>>(
-      new ParticleContainer<PointParticle>());
-    m_irregularParticles[idx] = RefCountedPtr<ParticleContainer<PointParticle>>(new ParticleContainer<PointParticle>());
-    m_rhoDaggerParticles[idx] = RefCountedPtr<ParticleContainer<PointParticle>>(new ParticleContainer<PointParticle>());
+    m_conductivityParticles[idx] = RefCountedPtr<ParticleContainer<NoPayload>>(new ParticleContainer<NoPayload>());
+    m_irregularParticles[idx]    = RefCountedPtr<ParticleContainer<NoPayload>>(new ParticleContainer<NoPayload>());
+    m_rhoDaggerParticles[idx]    = RefCountedPtr<ParticleContainer<NoPayload>>(new ParticleContainer<NoPayload>());
 
     (this->m_amr)->allocate(*m_conductivityParticles[idx], this->m_particleRealm);
     (this->m_amr)->allocate(*m_irregularParticles[idx], this->m_particleRealm);
@@ -339,7 +360,7 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
     EBAMRCellData&             phi     = solver->getPhi();
     ParticleContainer<Photon>& photons = solver->getBulkPhotons();
 
-    solver->depositPhotons<Photon, const Real&, &Photon::weight>(phi, photons, DepositionType::NGP);
+    solver->depositPhotons(phi, photons, DepositionType::NGP);
   }
   m_timer.stopEvent("Deposit photons");
 
@@ -367,19 +388,18 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
     //       are put in a separate data container. We want to do this in order to reduce artificial gradients in the particle
     //       densities near the EB. The way we do this is that we flag the particles during the intersection; particles that are flagged
     //       are transferred to a container which is added to the conductivity-related particles. The particles are later removed.
-    auto setFlag = [](ItoParticle& p) -> void {
-      p.tmpReal() = 1.0;
+    const std::function<void(ParticleSoA<ItoParticle>&, std::size_t)> setFlag = [](ParticleSoA<ItoParticle>& leaf,
+                                                                                   const std::size_t i) -> void {
+      leaf.template get<&ItoParticle::scratch>(i) = 1.0;
     };
-    auto nonDeletionModifier = [](ItoParticle& p) -> void {
-      p.tmpReal() = -1.0;
-    };
-    auto removeCrit = [](const ItoParticle& p) -> bool {
-      return p.tmpReal() < 0.0;
+    const std::function<void(ParticleSoA<ItoParticle>&, std::size_t)> nonDeletionModifier =
+      [](ParticleSoA<ItoParticle>& leaf, const std::size_t i) -> void {
+      leaf.template get<&ItoParticle::scratch>(i) = -1.0;
     };
 
     // Set flag for identifying which particles were intersected by not removed.
     for (auto it = this->m_ito->iterator(); it.ok(); ++it) {
-      ParticleOps::setData<ItoParticle>(it()->getParticles(ItoSolver::WhichContainer::Bulk), setFlag);
+      ParticleOps::setData(it()->getParticles(ItoSolver::WhichContainer::Bulk), setFlag);
     }
 
     // Intersect particles, but don't remove them.
@@ -394,9 +414,9 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
       const int idx = it.index();
       const int Z   = species->getChargeNumber();
 
-      ParticleContainer<PointParticle>& irregParticles = *m_irregularParticles[idx];
-      ParticleContainer<ItoParticle>&   ebParticles    = solver->getParticles(ItoSolver::WhichContainer::EB);
-      ParticleContainer<ItoParticle>&   bulkParticles  = it()->getParticles(ItoSolver::WhichContainer::Bulk);
+      ParticleContainer<NoPayload>&   irregParticles = *m_irregularParticles[idx];
+      ParticleContainer<ItoParticle>& ebParticles    = solver->getParticles(ItoSolver::WhichContainer::EB);
+      ParticleContainer<ItoParticle>& bulkParticles  = it()->getParticles(ItoSolver::WhichContainer::Bulk);
 
       irregParticles.clearParticles();
 
@@ -411,18 +431,16 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
           for (int mybox = 0; mybox < nbox; mybox++) {
             const DataIndex& din = dit[mybox];
 
-            List<PointParticle>&     pointParticles = irregParticles[lvl][din].listItems();
-            const List<ItoParticle>& patchParticles = bulkParticles[lvl][din].listItems();
+            ParticleSoA<NoPayload>&         pointParticles = irregParticles[lvl][din];
+            const ParticleSoA<ItoParticle>& leaf           = bulkParticles[lvl][din];
 
-            for (ListIterator<ItoParticle> lit(patchParticles); lit.ok(); ++lit) {
-              const ItoParticle& p = lit();
+            for (std::size_t i = 0; i < leaf.size(); i++) {
+              if (leaf.template get<&ItoParticle::scratch>(i) < 0.0) {
+                const RealVect pos      = leaf.position(i);
+                const Real     weight   = leaf.weight(i);
+                const Real     mobility = leaf.template get<&ItoParticle::mobility>(i);
 
-              if (p.tmpReal() < 0.0) {
-                const RealVect& pos      = p.position();
-                const Real&     weight   = p.weight();
-                const Real&     mobility = p.mobility();
-
-                pointParticles.add(PointParticle(pos, weight * mobility));
+                pointParticles.append(pos, weight * mobility);
               }
             }
           }
@@ -430,10 +448,33 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
       }
     }
 
-    // Finally, delete the original particles
+    // Finally, delete the original particles that were flagged (scratch < 0) via swap-and-pop on the SoA leaves.
     for (auto it = this->m_ito->iterator(); it.ok(); ++it) {
       ParticleContainer<ItoParticle>& bulkParticles = it()->getParticles(ItoSolver::WhichContainer::Bulk);
-      ParticleOps::removeParticles<ItoParticle>(bulkParticles, removeCrit);
+
+      for (int lvl = 0; lvl <= (this->m_amr)->getFinestLevel(); lvl++) {
+        const DisjointBoxLayout& dbl = (this->m_amr)->getGrids((this->m_particleRealm))[lvl];
+        const DataIterator&      dit = dbl.dataIterator();
+
+        const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+        for (int mybox = 0; mybox < nbox; mybox++) {
+          const DataIndex& din = dit[mybox];
+
+          ParticleSoA<ItoParticle>& leaf = bulkParticles[lvl][din];
+
+          std::size_t i = 0;
+          while (i < leaf.size()) {
+            if (leaf.template get<&ItoParticle::scratch>(i) < 0.0) {
+              leaf.remove(i);
+            }
+            else {
+              i++;
+            }
+          }
+        }
+      }
     }
   }
   else {
@@ -568,9 +609,9 @@ ItoKMCGodunovStepper<I, C, R, F>::preRegrid(const int a_lmin, const int a_oldFin
   for (auto solverIt = (this->m_ito)->iterator(); solverIt.ok(); ++solverIt) {
     const int idx = solverIt.index();
 
-    m_conductivityParticles[idx]->preRegrid(a_lmin);
-    m_irregularParticles[idx]->preRegrid(a_lmin);
-    m_rhoDaggerParticles[idx]->preRegrid(a_lmin);
+    m_conductivityParticles[idx]->preRegrid();
+    m_irregularParticles[idx]->preRegrid();
+    m_rhoDaggerParticles[idx]->preRegrid();
   }
 
   this->m_amr->allocate(m_scratchSemiImplicitRhoCDR, this->m_fluidRealm, this->m_plasmaPhase, 1);
@@ -748,7 +789,7 @@ ItoKMCGodunovStepper<I, C, R, F>::setOldPositions() noexcept
       const DisjointBoxLayout& dbl = (this->m_amr)->getGrids((this->m_particleRealm))[lvl];
       const DataIterator&      dit = dbl.dataIterator();
 
-      ParticleData<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk)[lvl];
+      auto& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk)[lvl];
 
       const int nbox = dit.size();
 
@@ -756,13 +797,16 @@ ItoKMCGodunovStepper<I, C, R, F>::setOldPositions() noexcept
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-        List<ItoParticle>& particleList = particles[din].listItems();
+        ParticleSoA<ItoParticle>& leaf = particles[din];
 
-        for (ListIterator<ItoParticle> lit(particleList); lit.ok(); ++lit) {
-          ItoParticle& p = lit();
+        double* const pos[SpaceDim] = {D_DECL(leaf.positionColumn(0), leaf.positionColumn(1), leaf.positionColumn(2))};
+        double* const oldPos[SpaceDim] = {D_DECL(leaf.template column<&ItoParticle::old_x>(),
+                                                 leaf.template column<&ItoParticle::old_y>(),
+                                                 leaf.template column<&ItoParticle::old_z>())};
 
-          p.oldPosition() = p.position();
-        }
+        ParticleLoops::loop(leaf, [&](const std::size_t i) {
+          D_DECL(oldPos[0][i] = pos[0][i], oldPos[1][i] = pos[1][i], oldPos[2][i] = pos[2][i]);
+        });
       }
     }
   }
@@ -770,9 +814,8 @@ ItoKMCGodunovStepper<I, C, R, F>::setOldPositions() noexcept
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoKMCGodunovStepper<I, C, R, F>::remapPointParticles(
-  Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_particles,
-  const SpeciesSubset                                      a_subset) noexcept
+ItoKMCGodunovStepper<I, C, R, F>::remapPointParticles(Vector<RefCountedPtr<ParticleContainer<NoPayload>>>& a_particles,
+                                                      const SpeciesSubset a_subset) noexcept
 {
   CH_TIME("ItoKMCGodunovStepper::remapPointParticles");
   if (this->m_verbosity > 5) {
@@ -877,8 +920,8 @@ ItoKMCGodunovStepper<I, C, R, F>::remapPointParticles(
 template <typename I, typename C, typename R, typename F>
 void
 ItoKMCGodunovStepper<I, C, R, F>::depositPointParticles(
-  const Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_particles,
-  const SpeciesSubset                                            a_subset) noexcept
+  const Vector<RefCountedPtr<ParticleContainer<NoPayload>>>& a_particles,
+  const SpeciesSubset                                        a_subset) noexcept
 {
   CH_TIME("ItoKMCGodunovStepper::depositPointParticles");
   if (this->m_verbosity > 5) {
@@ -897,82 +940,127 @@ ItoKMCGodunovStepper<I, C, R, F>::depositPointParticles(
 
     switch (a_subset) {
     case SpeciesSubset::All: {
-      solver->depositParticles<PointParticle, const Real&, &PointParticle::weight>(solver->getPhi(), *a_particles[idx]);
+      depositPointParticlesLikeSolver(this->m_amr,
+                                      this->m_particleRealm,
+                                      this->m_plasmaPhase,
+                                      solver,
+                                      solver->getPhi(),
+                                      *a_particles[idx]);
 
       break;
     }
     case SpeciesSubset::AllMobile: {
       if (mobile) {
-        solver->depositParticles<PointParticle, const Real&, &PointParticle::weight>(solver->getPhi(),
-                                                                                     *a_particles[idx]);
+        depositPointParticlesLikeSolver(this->m_amr,
+                                        this->m_particleRealm,
+                                        this->m_plasmaPhase,
+                                        solver,
+                                        solver->getPhi(),
+                                        *a_particles[idx]);
       }
 
       break;
     }
     case SpeciesSubset::AllDiffusive: {
       if (diffusive) {
-        solver->depositParticles<PointParticle, const Real&, &PointParticle::weight>(solver->getPhi(),
-                                                                                     *a_particles[idx]);
+        depositPointParticlesLikeSolver(this->m_amr,
+                                        this->m_particleRealm,
+                                        this->m_plasmaPhase,
+                                        solver,
+                                        solver->getPhi(),
+                                        *a_particles[idx]);
       }
 
       break;
     }
     case SpeciesSubset::AllMobileOrDiffusive: {
       if (mobile || diffusive) {
-        solver->depositParticles<PointParticle, const Real&, &PointParticle::weight>(solver->getPhi(),
-                                                                                     *a_particles[idx]);
+        depositPointParticlesLikeSolver(this->m_amr,
+                                        this->m_particleRealm,
+                                        this->m_plasmaPhase,
+                                        solver,
+                                        solver->getPhi(),
+                                        *a_particles[idx]);
       }
       break;
     }
     case SpeciesSubset::AllMobileAndDiffusive: {
       if (mobile && diffusive) {
-        solver->depositParticles<PointParticle, const Real&, &PointParticle::weight>(solver->getPhi(),
-                                                                                     *a_particles[idx]);
+        depositPointParticlesLikeSolver(this->m_amr,
+                                        this->m_particleRealm,
+                                        this->m_plasmaPhase,
+                                        solver,
+                                        solver->getPhi(),
+                                        *a_particles[idx]);
       }
       break;
     }
     case SpeciesSubset::Charged: {
       if (charged) {
-        solver->depositParticles<PointParticle, const Real&, &PointParticle::weight>(solver->getPhi(),
-                                                                                     *a_particles[idx]);
+        depositPointParticlesLikeSolver(this->m_amr,
+                                        this->m_particleRealm,
+                                        this->m_plasmaPhase,
+                                        solver,
+                                        solver->getPhi(),
+                                        *a_particles[idx]);
       }
       break;
     }
     case SpeciesSubset::ChargedMobile: {
       if (charged && mobile) {
-        solver->depositParticles<PointParticle, const Real&, &PointParticle::weight>(solver->getPhi(),
-                                                                                     *a_particles[idx]);
+        depositPointParticlesLikeSolver(this->m_amr,
+                                        this->m_particleRealm,
+                                        this->m_plasmaPhase,
+                                        solver,
+                                        solver->getPhi(),
+                                        *a_particles[idx]);
       }
       break;
     }
     case SpeciesSubset::ChargedDiffusive: {
       if (charged && diffusive) {
-        solver->depositParticles<PointParticle, const Real&, &PointParticle::weight>(solver->getPhi(),
-                                                                                     *a_particles[idx]);
+        depositPointParticlesLikeSolver(this->m_amr,
+                                        this->m_particleRealm,
+                                        this->m_plasmaPhase,
+                                        solver,
+                                        solver->getPhi(),
+                                        *a_particles[idx]);
       }
 
       break;
     }
     case SpeciesSubset::ChargedMobileOrDiffusive: {
       if (charged && (mobile || diffusive)) {
-        solver->depositParticles<PointParticle, const Real&, &PointParticle::weight>(solver->getPhi(),
-                                                                                     *a_particles[idx]);
+        depositPointParticlesLikeSolver(this->m_amr,
+                                        this->m_particleRealm,
+                                        this->m_plasmaPhase,
+                                        solver,
+                                        solver->getPhi(),
+                                        *a_particles[idx]);
       }
 
       break;
     }
     case SpeciesSubset::ChargedMobileAndDiffusive: {
       if (charged && (mobile && diffusive)) {
-        solver->depositParticles<PointParticle, const Real&, &PointParticle::weight>(solver->getPhi(),
-                                                                                     *a_particles[idx]);
+        depositPointParticlesLikeSolver(this->m_amr,
+                                        this->m_particleRealm,
+                                        this->m_plasmaPhase,
+                                        solver,
+                                        solver->getPhi(),
+                                        *a_particles[idx]);
       }
 
       break;
     }
     case SpeciesSubset::Stationary: {
       if (!mobile && !diffusive) {
-        solver->depositParticles<PointParticle, const Real&, &PointParticle::weight>(solver->getPhi(),
-                                                                                     *a_particles[idx]);
+        depositPointParticlesLikeSolver(this->m_amr,
+                                        this->m_particleRealm,
+                                        this->m_plasmaPhase,
+                                        solver,
+                                        solver->getPhi(),
+                                        *a_particles[idx]);
       }
 
       break;
@@ -989,8 +1077,8 @@ ItoKMCGodunovStepper<I, C, R, F>::depositPointParticles(
 template <typename I, typename C, typename R, typename F>
 void
 ItoKMCGodunovStepper<I, C, R, F>::clearPointParticles(
-  const Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_particles,
-  const SpeciesSubset                                            a_subset) noexcept
+  const Vector<RefCountedPtr<ParticleContainer<NoPayload>>>& a_particles,
+  const SpeciesSubset                                        a_subset) noexcept
 {
   CH_TIME("ItoKMCGodunovStepper::clearPointParticles");
   if (this->m_verbosity > 5) {
@@ -1095,7 +1183,7 @@ ItoKMCGodunovStepper<I, C, R, F>::clearPointParticles(
 template <typename I, typename C, typename R, typename F>
 void
 ItoKMCGodunovStepper<I, C, R, F>::computeConductivities(
-  const Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_particles) noexcept
+  const Vector<RefCountedPtr<ParticleContainer<NoPayload>>>& a_particles) noexcept
 {
   CH_TIME("ItoKMCGodunovStepper::computeConductivities");
   if (this->m_verbosity > 5) {
@@ -1109,12 +1197,12 @@ ItoKMCGodunovStepper<I, C, R, F>::computeConductivities(
 template <typename I, typename C, typename R, typename F>
 void
 ItoKMCGodunovStepper<I, C, R, F>::computeCellConductivity(
-  EBAMRCellData&                                                 a_conductivityCell,
-  const Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_particles) noexcept
+  EBAMRCellData&                                             a_conductivityCell,
+  const Vector<RefCountedPtr<ParticleContainer<NoPayload>>>& a_particles) noexcept
 {
-  CH_TIME("ItoKMCGodunovStepper::computeCellConductivity(EBAMRCellData, PointParticle");
+  CH_TIME("ItoKMCGodunovStepper::computeCellConductivity(EBAMRCellData, ParticleContainer)");
   if (this->m_verbosity > 5) {
-    pout() << this->m_name + "::computeCellConductivity(EBAMRCellData, PointParticle)" << endl;
+    pout() << this->m_name + "::computeCellConductivity(EBAMRCellData, ParticleContainer)" << endl;
   }
 
   DataOps::setValue(a_conductivityCell, 0.0);
@@ -1130,8 +1218,12 @@ ItoKMCGodunovStepper<I, C, R, F>::computeCellConductivity(
     if (Z != 0 && solver->isMobile()) {
       // Deposit on the particle realm.
       DataOps::setValue(this->m_particleScratch1, 0.0);
-      solver->depositParticles<PointParticle, const Real&, &PointParticle::weight>(this->m_particleScratch1,
-                                                                                   *a_particles[idx]);
+      depositPointParticlesLikeSolver(this->m_amr,
+                                      this->m_particleRealm,
+                                      this->m_plasmaPhase,
+                                      solver,
+                                      this->m_particleScratch1,
+                                      *a_particles[idx]);
 
       // Copy to fluid realm and add to total conductivity.
       (this->m_amr)->copyData(this->m_fluidScratch1, this->m_particleScratch1);
@@ -1286,14 +1378,13 @@ ItoKMCGodunovStepper<I, C, R, F>::computeSemiImplicitRho() noexcept
         DataOps::setValue(fluidScratch, 0.0);
 
         (this->m_amr)
-          ->template depositParticles<PointParticle, const Real&, &PointParticle::weight>(
-            particleScratch,
-            this->m_particleRealm,
-            phase::solid,
-            *m_rhoDaggerParticles[solverIt.index()],
-            DepositionType::CIC,
-            CoarseFineDeposition::Halo,
-            true);
+          ->depositWeight(particleScratch,
+                          this->m_particleRealm,
+                          phase::solid,
+                          *m_rhoDaggerParticles[solverIt.index()],
+                          DepositionType::CIC,
+                          CoarseFineDeposition::Halo,
+                          true);
 
         (this->m_amr)->copyData(fluidScratch, particleScratch);
 
@@ -1370,9 +1461,9 @@ ItoKMCGodunovStepper<I, C, R, F>::setupSemiImplicitPoisson(const Real a_dt) noex
 template <typename I, typename C, typename R, typename F>
 void
 ItoKMCGodunovStepper<I, C, R, F>::removeCoveredPointParticles(
-  Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_particles,
-  const EBRepresentation                                   a_representation,
-  const Real                                               a_tolerance) const noexcept
+  Vector<RefCountedPtr<ParticleContainer<NoPayload>>>& a_particles,
+  const EBRepresentation                               a_representation,
+  const Real                                           a_tolerance) const noexcept
 {
   CH_TIME("ItoKMCGodunovStepper::removeCoveredPointParticles");
   if (this->m_verbosity > 5) {
@@ -1381,7 +1472,7 @@ ItoKMCGodunovStepper<I, C, R, F>::removeCoveredPointParticles(
 
   for (int i = 0; i < a_particles.size(); i++) {
     if (a_particles[i] != nullptr) {
-      ParticleContainer<PointParticle>& particles = *a_particles[i];
+      ParticleContainer<NoPayload>& particles = *a_particles[i];
 
       switch (a_representation) {
       case EBRepresentation::Discrete: {
@@ -1410,7 +1501,7 @@ ItoKMCGodunovStepper<I, C, R, F>::removeCoveredPointParticles(
 template <typename I, typename C, typename R, typename F>
 void
 ItoKMCGodunovStepper<I, C, R, F>::copyConductivityParticles(
-  Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_conductivityParticles) noexcept
+  Vector<RefCountedPtr<ParticleContainer<NoPayload>>>& a_conductivityParticles) noexcept
 {
   CH_TIME("ItoKMCGodunovStepper::copyConductivityParticles");
   if (this->m_verbosity > 5) {
@@ -1440,18 +1531,17 @@ ItoKMCGodunovStepper<I, C, R, F>::copyConductivityParticles(
         for (int mybox = 0; mybox < nbox; mybox++) {
           const DataIndex& din = dit[mybox];
 
-          const List<ItoParticle>& patchParticles = solverParticles[lvl][din].listItems();
+          const ParticleSoA<ItoParticle>& leaf = solverParticles[lvl][din];
 
-          List<PointParticle>& pointParticles = (*a_conductivityParticles[idx])[lvl][din].listItems();
-          List<PointParticle>& irregParticles = (*m_irregularParticles[idx])[lvl][din].listItems();
+          ParticleSoA<NoPayload>& pointParticles = (*a_conductivityParticles[idx])[lvl][din];
+          ParticleSoA<NoPayload>& irregParticles = (*m_irregularParticles[idx])[lvl][din];
 
-          for (ListIterator<ItoParticle> lit(patchParticles); lit.ok(); ++lit) {
-            const ItoParticle& p        = lit();
-            const RealVect&    pos      = p.position();
-            const Real&        weight   = p.weight();
-            const Real&        mobility = p.mobility();
+          for (std::size_t i = 0; i < leaf.size(); i++) {
+            const RealVect pos      = leaf.position(i);
+            const Real     weight   = leaf.weight(i);
+            const Real     mobility = leaf.template get<&ItoParticle::mobility>(i);
 
-            pointParticles.add(PointParticle(pos, weight * mobility));
+            pointParticles.append(pos, weight * mobility);
           }
 
           pointParticles.catenate(irregParticles);
@@ -1588,8 +1678,8 @@ ItoKMCGodunovStepper<I, C, R, F>::advanceEulerMaruyama(const Real a_dt) noexcept
 template <typename I, typename C, typename R, typename F>
 void
 ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
-  Vector<RefCountedPtr<ParticleContainer<PointParticle>>>& a_rhoDaggerParticles,
-  const Real                                               a_dt) noexcept
+  Vector<RefCountedPtr<ParticleContainer<NoPayload>>>& a_rhoDaggerParticles,
+  const Real                                           a_dt) noexcept
 {
   CH_TIME("ItoKMCGodunovStepper::diffuseParticlesEulerMaruyama");
   if (this->m_verbosity > 5) {
@@ -1614,7 +1704,7 @@ ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
       const DisjointBoxLayout& dbl = (this->m_amr)->getGrids((this->m_particleRealm))[lvl];
       const DataIterator&      dit = dbl.dataIterator();
 
-      ParticleData<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk)[lvl];
+      auto& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk)[lvl];
 
       const int nbox = dit.size();
 
@@ -1622,21 +1712,24 @@ ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-        List<ItoParticle>&   itoParticles   = particles[din].listItems();
-        List<PointParticle>& pointParticles = (*a_rhoDaggerParticles[idx])[lvl][din].listItems();
+        ParticleSoA<ItoParticle>& leaf           = particles[din];
+        ParticleSoA<NoPayload>&   pointParticles = (*a_rhoDaggerParticles[idx])[lvl][din];
 
-        for (ListIterator<ItoParticle> lit(itoParticles); lit.ok(); ++lit) {
-          ItoParticle&    p      = lit();
-          const Real&     weight = p.weight();
-          const RealVect& pos    = p.position();
+        for (std::size_t i = 0; i < leaf.size(); i++) {
+          const Real     weight = leaf.weight(i);
+          const RealVect pos    = leaf.position(i);
 
-          // Compute a particle hop and store it on the run-time storage.
-          RealVect& hop = p.tmpVect();
+          // Compute a particle hop and store it on the run-time storage. The DiffusionFunction reads payload
+          // columns (diffusion/velocity), so materialize the payload via gather().
+          const ItoParticle p   = leaf.gather(i);
+          const RealVect    hop = diffusive ? diffusionFunction(p, a_dt) : RealVect::Zero;
 
-          hop = diffusive ? diffusionFunction(p, a_dt) : RealVect::Zero;
+          D_DECL(leaf.template get<&ItoParticle::scratch_x>(i) = static_cast<ParticleReal>(hop[0]),
+                 leaf.template get<&ItoParticle::scratch_y>(i) = static_cast<ParticleReal>(hop[1]),
+                 leaf.template get<&ItoParticle::scratch_z>(i) = static_cast<ParticleReal>(hop[2]));
 
           if (Z != 0) {
-            pointParticles.add(PointParticle(pos + hop, weight));
+            pointParticles.append(pos + hop, weight);
           }
         }
       }
@@ -1707,7 +1800,7 @@ ItoKMCGodunovStepper<I, C, R, F>::stepEulerMaruyamaParticles(const Real a_dt) no
         const DisjointBoxLayout& dbl = (this->m_amr)->getGrids((this->m_particleRealm))[lvl];
         const DataIterator&      dit = dbl.dataIterator();
 
-        ParticleData<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk)[lvl];
+        auto& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk)[lvl];
 
         const int nbox = dit.size();
 
@@ -1715,15 +1808,26 @@ ItoKMCGodunovStepper<I, C, R, F>::stepEulerMaruyamaParticles(const Real a_dt) no
         for (int mybox = 0; mybox < nbox; mybox++) {
           const DataIndex& din = dit[mybox];
 
-          List<ItoParticle>& particleList = particles[din].listItems();
+          ParticleSoA<ItoParticle>& leaf = particles[din];
 
-          for (ListIterator<ItoParticle> lit(particleList); lit.ok(); ++lit) {
-            ItoParticle& p = lit();
+          double* const pos[SpaceDim] = {
+            D_DECL(leaf.positionColumn(0), leaf.positionColumn(1), leaf.positionColumn(2))};
+          double* const       oldPos[SpaceDim] = {D_DECL(leaf.template column<&ItoParticle::old_x>(),
+                                                   leaf.template column<&ItoParticle::old_y>(),
+                                                   leaf.template column<&ItoParticle::old_z>())};
+          ParticleReal* const vel[SpaceDim]    = {D_DECL(leaf.template column<&ItoParticle::vx>(),
+                                                      leaf.template column<&ItoParticle::vy>(),
+                                                      leaf.template column<&ItoParticle::vz>())};
+          ParticleReal* const hop[SpaceDim]    = {D_DECL(leaf.template column<&ItoParticle::scratch_x>(),
+                                                      leaf.template column<&ItoParticle::scratch_y>(),
+                                                      leaf.template column<&ItoParticle::scratch_z>())};
 
+          ParticleLoops::loop(leaf, [&](const std::size_t i) {
             // Add in the diffusion hop and advective contribution.
-            const RealVect& hop = p.tmpVect();
-            p.position()        = p.oldPosition() + f * p.velocity() + g * hop;
-          }
+            for (int dir = 0; dir < SpaceDim; dir++) {
+              pos[dir][i] = oldPos[dir][i] + f * vel[dir][i] + g * hop[dir][i];
+            }
+          });
         }
       }
     }
@@ -1823,8 +1927,8 @@ ItoKMCGodunovStepper<I, C, R, F>::writeCheckpointData(HDF5Handle& a_handle, cons
       const std::string identifierSigma = "ItoKMCGodunovStepper::conductivityParticles_" + std::to_string(i);
       const std::string identifierRho   = "ItoKMCGodunovStepper::spaceChargeParticles_" + std::to_string(i);
 
-      const ParticleContainer<PointParticle>& conductivityParticles = *m_conductivityParticles[i];
-      const ParticleContainer<PointParticle>& rhoDaggerParticles    = *m_rhoDaggerParticles[i];
+      const ParticleContainer<NoPayload>& conductivityParticles = *m_conductivityParticles[i];
+      const ParticleContainer<NoPayload>& rhoDaggerParticles    = *m_rhoDaggerParticles[i];
 
       DischargeIO::writeCheckParticlesToHDF(a_handle, conductivityParticles[a_lvl], identifierSigma);
       DischargeIO::writeCheckParticlesToHDF(a_handle, rhoDaggerParticles[a_lvl], identifierRho);
@@ -1857,8 +1961,8 @@ ItoKMCGodunovStepper<I, C, R, F>::readCheckpointData(HDF5Handle& a_handle, const
       const std::string identifierSigma = "ItoKMCGodunovStepper::conductivityParticles_" + std::to_string(i);
       const std::string identifierRho   = "ItoKMCGodunovStepper::spaceChargeParticles_" + std::to_string(i);
 
-      ParticleContainer<PointParticle>& conductivityParticles = *m_conductivityParticles[i];
-      ParticleContainer<PointParticle>& rhoDaggerParticles    = *m_rhoDaggerParticles[i];
+      ParticleContainer<NoPayload>& conductivityParticles = *m_conductivityParticles[i];
+      ParticleContainer<NoPayload>& rhoDaggerParticles    = *m_rhoDaggerParticles[i];
 
       DischargeIO::readCheckParticlesFromHDF(a_handle, conductivityParticles[a_lvl], identifierSigma);
       DischargeIO::readCheckParticlesFromHDF(a_handle, rhoDaggerParticles[a_lvl], identifierRho);
@@ -1937,11 +2041,52 @@ ItoKMCGodunovStepper<I, C, R, F>::plotParticles() const noexcept
       char              fileChar[1000];
       sprintf(fileChar, "%s.step%07d.%dd.h5part", prefix.c_str(), this->m_timeStep, SpaceDim);
 
-      // Plot the particles
+      // Scalar datasets: container weight + the ItoParticle scalar payload columns, named by
+      // ItoParticle::s_realVariables = {weight, mobility, diffusion, energy, scratch}.
+      using Leaf = ParticleSoA<ItoParticle>;
+      const std::vector<std::pair<std::string, std::function<Real(const Leaf&, std::size_t)>>> scalarVars = {
+        {ItoParticle::s_realVariables[0],
+         [](const Leaf& l, std::size_t i) {
+           return l.weight(i);
+         }},
+        {ItoParticle::s_realVariables[1],
+         [](const Leaf& l, std::size_t i) {
+           return l.get<&ItoParticle::mobility>(i);
+         }},
+        {ItoParticle::s_realVariables[2],
+         [](const Leaf& l, std::size_t i) {
+           return l.get<&ItoParticle::diffusion>(i);
+         }},
+        {ItoParticle::s_realVariables[3],
+         [](const Leaf& l, std::size_t i) {
+           return l.get<&ItoParticle::energy>(i);
+         }},
+        {ItoParticle::s_realVariables[4], [](const Leaf& l, std::size_t i) {
+           return l.get<&ItoParticle::scratch>(i);
+         }}};
+
+      // Vector datasets, named by ItoParticle::s_vectVariables = {old, v, scratch}.
+      const std::vector<std::pair<std::string, std::function<RealVect(const Leaf&, std::size_t)>>> vectorVars = {
+        {ItoParticle::s_vectVariables[0],
+         [](const Leaf& l, std::size_t i) {
+           return RealVect(
+             D_DECL(l.get<&ItoParticle::old_x>(i), l.get<&ItoParticle::old_y>(i), l.get<&ItoParticle::old_z>(i)));
+         }},
+        {ItoParticle::s_vectVariables[1],
+         [](const Leaf& l, std::size_t i) {
+           return RealVect(D_DECL(l.get<&ItoParticle::vx>(i), l.get<&ItoParticle::vy>(i), l.get<&ItoParticle::vz>(i)));
+         }},
+        {ItoParticle::s_vectVariables[2], [](const Leaf& l, std::size_t i) {
+           return RealVect(D_DECL(l.get<&ItoParticle::scratch_x>(i),
+                                  l.get<&ItoParticle::scratch_y>(i),
+                                  l.get<&ItoParticle::scratch_z>(i)));
+         }}};
+
+      // Plot the particles directly from the live SoA container.
       DischargeIO::writeH5Part(std::string(fileChar),
-                               (const ParticleContainer<GenericParticle<5, 3>>&)particles,
-                               ItoParticle::s_realVariables,
-                               ItoParticle::s_vectVariables,
+                               particles,
+                               scalarVars,
+                               vectorVars,
                                this->m_amr->getProbLo(),
                                this->m_time);
     }

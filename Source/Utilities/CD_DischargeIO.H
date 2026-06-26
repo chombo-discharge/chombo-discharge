@@ -15,6 +15,9 @@
 
 // Std includes
 #include <string>
+#include <vector>
+#include <utility>
+#include <functional>
 
 // Chombo includes
 #include <REAL.H>
@@ -29,8 +32,8 @@
 
 // Our includes
 #include <CD_EBAMRData.H>
+#include <CD_ParticleSoA.H>
 #include <CD_ParticleContainer.H>
-#include <CD_GenericParticle.H>
 #include <CD_NamespaceHeader.H>
 
 /**
@@ -139,50 +142,78 @@ namespace DischargeIO {
 #endif
 
   /**
-    @brief Write a particle container to an H5Part file. Good for quick and dirty visualization of particles
-    @details Use case is pretty straightforward but the user might need to cast particle types. E.g. call
-
-    writeH5Part<M,N>(a_filename, (const ParticleContainer<GenericParticle<M,N>>&) a_particles, ...)
-
-    Template substitution is not straightforward for this one. 
-    @param[in] a_filename  File name
-    @param[in] a_particles Particles. Particle type must derive from GenericParticle<M, N>
-    @param[in] a_realVars  Variable names for the M real variables
-    @param[in] a_vectVars  Variable names for the N vector variables
-    @param[in] a_shift     Particle position shift
-    @param[in] a_time      Physical time
+    @brief Accessor returning a scalar payload quantity of SoA particle (a_leaf, a_index) for writeH5Part.
+    @tparam P      Payload type of the container.
+    @tparam Traits Column descriptor for the payload.
   */
-  template <size_t M, size_t N>
+  template <typename P, typename Traits>
+  using H5PartScalar = std::function<Real(const ParticleSoA<P, Traits>&, std::size_t)>;
+
+  /**
+    @brief Accessor returning a vector payload quantity of SoA particle (a_leaf, a_index) for writeH5Part.
+    @tparam P      Payload type of the container.
+    @tparam Traits Column descriptor for the payload.
+  */
+  template <typename P, typename Traits>
+  using H5PartVect = std::function<RealVect(const ParticleSoA<P, Traits>&, std::size_t)>;
+
+  /**
+    @brief Write an SoA particle container to an H5Part file (quick visualization).
+    @details Position, id, and weight are taken from the container-owned columns; the caller supplies the
+    payload datasets as (name, accessor) pairs so the
+    scalar-vs-vector distinction and naming are explicit (the SoA columns tuple interleaves scalar and
+    vector-component columns, so there is no implicit reals/vects partition to rely on). Each vector
+    dataset is written as name-x/name-y/name-z.
+    @param[in] a_filename    File name.
+    @param[in] a_particles   SoA particle container.
+    @param[in] a_scalarVars  Scalar datasets: (name, accessor) pairs.
+    @param[in] a_vectorVars  Vector datasets: (name, accessor) pairs.
+    @param[in] a_shift       Particle position shift.
+    @param[in] a_time        Physical time.
+    @tparam P      Payload type of the container.
+    @tparam Traits Column descriptor for the payload.
+  */
+  template <typename P, typename Traits>
   void
-  writeH5Part(std::string                                     a_filename,
-              const ParticleContainer<GenericParticle<M, N>>& a_particles,
-              std::vector<std::string>                        a_realVars,
-              std::vector<std::string>                        a_vectVars,
-              RealVect                                        a_shift,
-              Real                                            a_time) noexcept;
+  writeH5Part(std::string                                                  a_filename,
+              const ParticleContainer<P, Traits>&                          a_particles,
+              std::vector<std::pair<std::string, H5PartScalar<P, Traits>>> a_scalarVars,
+              std::vector<std::pair<std::string, H5PartVect<P, Traits>>>   a_vectorVars,
+              RealVect                                                     a_shift,
+              Real                                                         a_time) noexcept;
 
 #ifdef CH_USE_HDF5
   /**
-    @brief Write checkpointed particles to HDF5
-    @param[in, out] a_handle Handle to HDF5 files
-    @param[in] a_particles Particles to checkpoint
-    @param[in] a_dataType String identifier
-    @note This is basically a bootleg of Chombo's HDF5 API, but replacing P::size() by P::H5size()
+    @brief Write checkpointed SoA particles (one level) to HDF5.
+    @details SoA analogue of writeCheckParticlesToHDF(ParticleData<P>): the per-particle HDF5 record is
+    position + weight + the payload h5-column subset (all doubles), via ParticleSoA::h5LinearizeParticle.
+    @param[in,out] a_handle    Handle to HDF5 file.
+    @param[in]     a_particles Per-level SoA particles to checkpoint.
+    @param[in]     a_dataType  String identifier.
+    @tparam P      Payload type of the particles.
+    @tparam Traits Column descriptor for the payload.
   */
-  template <class P>
+  template <typename P, typename Traits>
   void
-  writeCheckParticlesToHDF(HDF5Handle& a_handle, const ParticleData<P>& a_particles, const std::string& a_dataType);
+  writeCheckParticlesToHDF(HDF5Handle&                               a_handle,
+                           const LayoutData<ParticleSoA<P, Traits>>& a_particles,
+                           const std::string&                        a_dataType);
 
   /**
-    @brief Write checkpointed particles to HDF5
-    @param[in, out] a_handle Handle to HDF5 files
-    @param[in] a_particles Particles to checkpoint
-    @param[in] a_dataType String identifier
-    @note This is basically a bootleg of Chombo's HDF5 API, but replacing P::size() by P::H5size()    
+    @brief Read checkpointed SoA particles (one level) from HDF5.
+    @details SoA analogue of readCheckParticlesFromHDF(ParticleData<P>): each record is delinearized and
+    appended via ParticleSoA::h5DelinearizeAndAppend. The destination layout must match the checkpoint.
+    @param[in,out] a_handle    Handle to HDF5 file.
+    @param[in,out] a_particles Per-level SoA particles to fill.
+    @param[in]     a_dataType  String identifier.
+    @tparam P      Payload type of the particles.
+    @tparam Traits Column descriptor for the payload.
   */
-  template <class P>
+  template <typename P, typename Traits>
   void
-  readCheckParticlesFromHDF(HDF5Handle& a_handle, ParticleData<P>& a_particles, const std::string& a_dataType);
+  readCheckParticlesFromHDF(HDF5Handle&                         a_handle,
+                            LayoutData<ParticleSoA<P, Traits>>& a_particles,
+                            const std::string&                  a_dataType);
 #endif
 } // namespace DischargeIO
 

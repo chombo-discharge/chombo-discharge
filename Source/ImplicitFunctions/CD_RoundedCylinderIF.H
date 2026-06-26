@@ -104,6 +104,7 @@ protected:
 
   /**
     @brief Make BaseIF
+    @return Newly created implicit function for the rounded cylinder.
   */
 #if CH_SPACEDIM == 2
   BaseIF*
