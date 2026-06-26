@@ -635,14 +635,15 @@ At each level in the tree recursion one chooses an axis for partitioning one sub
 
 .. tip::
 
-   The source code for the kD-tree functionality is given in :file:`$DISCHARGE_HOME/Source/Particle/CD_KDNode.H`.
+   The source code for the kD-tree partitioner is given in :file:`$DISCHARGE_HOME/Source/Particle/CD_ParticleManagement.H` (``ParticleManagement::buildEqualWeightKDLeaves``).
 
-The kD-tree partitioner partitions a lightweight, communication-free particle type (``NonCommParticle``) carrying the position, weight, and any quantities to be preserved across a merge.
-Only the partitioner ``partitionAndSplitEqualWeightKD`` is currently supported, and this partitioner will divide the original subset into two new subsets such that the particle weights in the two halves differ by at most one physical particle.
+The kD-tree partitioner operates on a lightweight, communication-free particle type (``NonCommParticle``) carrying the position, weight, and any quantities to be preserved across a merge.
+The partitioner ``buildEqualWeightKDLeaves`` recursively bisects the input particles into spatially coherent leaves whose weights are as equal as possible -- at each bisection the two halves differ by at most one physical particle.
+It returns the leaf particle ranges directly; the tree is built in a flat, reusable scratch buffer rather than as linked node objects.
 
 .. warning::
 
-   ``partitionAndSplitEqualWeightKD`` will usually split particles to ensure that the weight in the two subsets are the same (thus creating new particles).
+   ``buildEqualWeightKDLeaves`` will usually split particles to ensure that the weight in the two subsets are the same (thus creating new particles).
    In this case any other members in the particle type are copied over into the new particles.
 
 The particles in each leaf of the kD-tree can then be merged into new particles.

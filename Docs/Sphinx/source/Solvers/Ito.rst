@@ -157,7 +157,7 @@ Remapping particles
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 867-878
+   :lines: 882-893
    :dedent: 2
 
 The bottom function lets the user remap any ``ParticleContainer<ItoParticle>`` that lives in the solver.
@@ -321,7 +321,7 @@ This routine is implemented as
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 989-994
+   :lines: 1004-1009
    :dedent: 2
 
 which returns a CFL-like condition
@@ -337,7 +337,7 @@ The signatures for the diffusion time step are similar to the ones for drift:
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 1013-1018
+   :lines: 1028-1033
    :dedent: 2
 
 which returns a CFL-like condition
@@ -355,7 +355,7 @@ A combination of the advection and diffusion time step routines also exists as
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 902-912
+   :lines: 917-927
    :dedent: 2
 
 This time step limitation is inspired by fully explicit and non-split fluid models, and is calculated as
@@ -390,7 +390,8 @@ In order to specify the merging algorithm the user must set the ``ItoSolver.merg
 * ``none`` - No particle merging/splitting is performed.
 * ``equal_weight_kd`` Use a kD-tree with bounding volume hierarchies to partition and split/merge the particles. This conserves the particle center-of-mass.
 * ``reinitialize`` Re-initialize the particles in each grid cell, ensuring that weights are as uniform as possible.
-* ``reinitialize_bvh`` Re-initialize the particles in each node of a kD tree. Weights are as uniform as possible. 
+* ``reinitialize_bvh`` Re-initialize the particles in each node of a kD tree. Weights are as uniform as possible.
+* ``sfc_nn`` Reach the target particle count by space-filling-curve nearest-neighbour clustering: when there are more particles than the target the nearest neighbours (along a Hilbert curve) are merged until the target count is reached, and when there are fewer the highest-weight particles are split. This gives spatially tight groups but does not equalize the weights.
 * ``external`` Use an externally injected particle merging algorithm. In order to use this feature the user must supply one through
 
 The user can set the merging algorithm through the input script (see :ref:`Chap:ItoInput`), or supply one externally by setting the merge algorithm to ``external``.
