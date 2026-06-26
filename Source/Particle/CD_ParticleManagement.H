@@ -14,7 +14,8 @@
 #define CD_PARTICLEMANAGEMENT_H
 
 // Std includes
-#include <memory>
+#include <functional>
+#include <utility>
 #include <vector>
 
 // Chombo includes
@@ -22,7 +23,6 @@
 #include <MayDay.H>
 
 // Our includes
-#include <CD_KDNode.H>
 #include <CD_CellInfo.H>
 #include <CD_ParticleSoA.H>
 #include <CD_NamespaceHeader.H>
@@ -53,66 +53,40 @@ namespace ParticleManagement {
   using BinaryParticleReconcile = std::function<void(P& p1, P& p2, const P& p0)>;
 
   /**
-    @brief Partition and split a KD-node with particles so that the weights are approximately the same. 
+    @brief Build an equal-weight KD partition of a list of particles and return the leaf particle ranges.
+    @details Partitions the input particles into at most @c a_maxLeaves spatial groups ("leaves") whose total
+    weights are as equal as possible (they differ by at most one physical particle between sibling nodes). At
+    each split the particles are partitioned along the longest bounding-box axis at the weight-median; the
+    median particle may itself be split so the two halves balance, in which case @c a_particleReconcile fixes
+    up the daughters' non-weight members. This is the partitioning primitive behind super-particle merging:
+    the caller reduces each returned leaf range to a single merged particle.
 
-    @param[in,out] a_node Node to split. This MUST be a leaf node and it MUST be possible to split it. 
-    @param[in] a_particleReconcile Optional reconciliation function when splitting a particle into two new particles.
-    @details This will partition particles on two sides of a plane parallel to one of the coordinate axis. The middle
-    particle closest to this plane may be split, and the weights of the resulting particles are assigned such that the
-    total weight of the two halves differ by at most one. The template parameters are 
+    Implementation note: the tree is built in a flat, reusable per-thread scratch arena (two ping-ponged
+    contiguous particle buffers + a flat range list), so there is no per-node heap allocation, no pointer
+    chasing, and the scratch is reused across calls on the same thread.
 
+    Template parameters:
        P            -> Particle type exposing the weight()/position() member functions below
        P::*weight   -> Member function returning a mutable reference to the particle weight
        P::*position -> Member function returning a const reference to the particle position.
 
-    P must therefore be an AoS-style particle type with weight()/position() member functions (e.g.
-    NonCommParticle), called as partitionAndSplitEqualWeightKD<P, &P::weight, &P::position>. The SoA
-    payload types (ItoParticle, TracerParticle, ...) have no such member functions; their columns
-    must first be packed into such an intermediary, as ItoSolver::makeSuperparticlesEqualWeightKD does.
+    P must be an AoS-style particle type with weight()/position() member functions (e.g. NonCommParticle).
+    SoA payload types (ItoParticle, ...) have no such methods; pack their columns into such an intermediary
+    first (as ItoSolver::makeSuperparticlesEqualWeightKD does).
 
-    The user can input a particle reconciliation function that manipulates the particle properties of the split particles. By default,
-    the split particles will use the copy constructor and thus inherit class members from p0, with the exception of the particle weights.
-    The reconcile function lets the user manipulate other particle properties, e.g. ones that are not properly captured by the particle copy
-    constructor, or that need some other form of reconciliation.
+    @param[in]  a_particles         Input particles (copied into internal scratch; not modified).
+    @param[in]  a_maxLeaves         Maximum number of leaf nodes (the per-cell target particle count).
+    @param[in]  a_particleReconcile Reconciliation callback applied to the two daughters when the median is split.
+    @param[out] a_leaves            Filled with one {begin,end} pointer pair per leaf.
+    @warning The returned ranges alias an internal thread-local buffer that is overwritten on the next call to
+             this function on the same thread. Consume them (reduce each leaf) before calling again.
   */
   template <class P, Real& (P::*weight)(), const RealVect& (P::*position)() const>
-  static inline void
-  partitionAndSplitEqualWeightKD(
-    KDNode<P>&                       a_node,
-    const BinaryParticleReconcile<P> a_particleReconcile = [](P& p1, P& p2, const P& p0) -> void {
-    }) noexcept;
-
-  /**
-    @brief Recursively build a KD-tree following the "equal weight" principle when partitioning nodes.
-    @param[in,out] a_inputParticles Input particles. These are destroyed on output.
-    @param[in] a_maxLeaves Maximum number of leaves in the tree.
-    @param[in] a_particleReconcile Optional reconciliation function when splitting a particle into two new particles.
-    @return Returns leaf nodes containing the particles
-    @details If the number of leaves is a factor of two, leaves exist on the same level and the weight in each node will differ by
-    at most one physical particle. The template parameters are
-
-       P            -> Particle type exposing the weight()/position() member functions below
-       P::*weight   -> Member function returning a mutable reference to the particle weight
-       P::*position -> Member function returning a const reference to the particle position.
-
-    P must therefore be an AoS-style particle type with weight()/position() member functions (e.g.
-    NonCommParticle), called as recursivePartitionAndSplitEqualWeightKD<P, &P::weight, &P::position>.
-    The SoA payload types (ItoParticle, TracerParticle, ...) have no such member functions; their
-    columns must first be packed into such an intermediary, as ItoSolver::makeSuperparticlesEqualWeightKD does.
-
-    The user can input a particle reconciliation function that manipulates the particle properties of the split particles. By default,
-    the split particles will use the copy constructor and thus inherit class members from p0, with the exception of the particle weights.
-    The reconcile function lets the user manipulate other particle properties, e.g. ones that are not properly captured by the particle copy
-    constructor, or that need some other form of reconciliation.
-
-  */
-  template <class P, Real& (P::*weight)(), const RealVect& (P::*position)() const>
-  static inline std::vector<std::shared_ptr<KDNode<P>>>
-  recursivePartitionAndSplitEqualWeightKD(
-    typename KDNode<P>::ParticleList& a_inputParticles,
-    const int                         a_maxLeaves,
-    const BinaryParticleReconcile<P>  a_particleReconcile = [](P& p1, P& p2, const P& p0) -> void {
-    }) noexcept;
+  inline void
+  buildEqualWeightKDLeaves(const std::vector<P>&                       a_particles,
+                           const int                                   a_maxLeaves,
+                           const BinaryParticleReconcile<P>&           a_particleReconcile,
+                           std::vector<std::pair<const P*, const P*>>& a_leaves) noexcept;
 
   /**
     @brief Remove physical particles from an SoA container (operates on the container-owned weight column).
