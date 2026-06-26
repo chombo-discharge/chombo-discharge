@@ -71,10 +71,18 @@ XTRACPPFLAGS += -DCD_PARTICLE_REAL=$(if $(filter FLOAT,$(PARTICLE_PRECISION)),fl
 # is silently ignored, or (in a partial rebuild) mixes objects with different sizeof(ParticleReal)
 # into one ODR-violating binary. Tagging both precisions (rather than leaving the default untagged)
 # guarantees neither reuses a legacy untagged tree of unknown precision; a switch then rebuilds
-# cleanly and reuses each tree on switch-back. Like XTRACPPFLAGS above the append is deferred
-# (XTRACONFIG is undefined at this point, so += makes it a recursive variable), so $(PARTICLE_PRECISION)
-# is expanded later by Make.defs.config -- AFTER Make.defs.local has been read.
+# cleanly and reuses each tree on switch-back.
+#
+# The append must be IDEMPOTENT: Chombo exports XTRACONFIG (mk/Make.rules), so recursive $(MAKE)
+# sub-builds -- e.g. an app's `dependencies' rule building discharge-lib -- inherit it through the
+# environment. A plain `+=' would then re-append our token at every recursion level, yielding config
+# strings like ...PARTREALDOUBLE.PARTREALDOUBLE and breaking library/object lookup. The findstring
+# guard appends only when our token is absent, so nested makes keep the single token they inherited.
+# At the top level XTRACONFIG is empty here, so the (deferred) append runs exactly once and
+# $(PARTICLE_PRECISION) is resolved later by Make.defs.config -- AFTER Make.defs.local has been read.
+ifeq (,$(findstring .PARTREAL,$(XTRACONFIG)))
 XTRACONFIG += $(if $(filter FLOAT,$(PARTICLE_PRECISION)),.PARTREALFLOAT,.PARTREALDOUBLE)
+endif
 
 # Source and Geometries libraries should always be visible.
 XTRALIBFLAGS += $(addprefix -l, $(SOURCE_LIB))$(config)
