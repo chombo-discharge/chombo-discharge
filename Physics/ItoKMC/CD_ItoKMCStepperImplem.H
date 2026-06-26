@@ -6015,9 +6015,9 @@ ItoKMCStepper<I, C, R, F>::computeEdotJSource(const Real a_dt) noexcept
                                                   leaf.template get<&ItoParticle::old_z>(i)));
 
             ItoKMCFieldParticle payload;
-            D_DECL(payload.altX = static_cast<ParticleReal>(posA[0]),
-                   payload.altY = static_cast<ParticleReal>(posA[1]),
-                   payload.altZ = static_cast<ParticleReal>(posA[2]));
+            D_DECL(payload.x0_x = static_cast<ParticleReal>(posA[0]),
+                   payload.x0_y = static_cast<ParticleReal>(posA[1]),
+                   payload.x0_z = static_cast<ParticleReal>(posA[2]));
 
             comp.append(leaf.position(i), leaf.weight(i), payload);
           }
@@ -6025,12 +6025,12 @@ ItoKMCStepper<I, C, R, F>::computeEdotJSource(const Real a_dt) noexcept
       }
 
       // Interpolate the potential to the current particle position which gives us V(B) for the particles.
-      m_amr->interpolateParticles<&ItoKMCFieldParticle::vB>(computationParticles,
-                                                            m_particleRealm,
-                                                            m_plasmaPhase,
-                                                            m_particleScratch1,
-                                                            solver->getDeposition(),
-                                                            false);
+      m_amr->interpolateParticles<&ItoKMCFieldParticle::phiB>(computationParticles,
+                                                              m_particleRealm,
+                                                              m_plasmaPhase,
+                                                              m_particleScratch1,
+                                                              solver->getDeposition(),
+                                                              false);
 
       // Move the particles back to their old positions (A) and interpolate the potential there. The container
       // position and the payload "alt" position are swapped so position now holds A and alt holds B.
@@ -6048,9 +6048,9 @@ ItoKMCStepper<I, C, R, F>::computeEdotJSource(const Real a_dt) noexcept
 
           double* const pos[SpaceDim] = {
             D_DECL(comp.positionColumn(0), comp.positionColumn(1), comp.positionColumn(2))};
-          ParticleReal* const alt[SpaceDim] = {D_DECL(comp.template column<&ItoKMCFieldParticle::altX>(),
-                                                      comp.template column<&ItoKMCFieldParticle::altY>(),
-                                                      comp.template column<&ItoKMCFieldParticle::altZ>())};
+          ParticleReal* const alt[SpaceDim] = {D_DECL(comp.template column<&ItoKMCFieldParticle::x0_x>(),
+                                                      comp.template column<&ItoKMCFieldParticle::x0_y>(),
+                                                      comp.template column<&ItoKMCFieldParticle::x0_z>())};
 
           ParticleLoops::loop(comp, [&](const std::size_t i) {
             for (int dir = 0; dir < SpaceDim; dir++) {
@@ -6065,12 +6065,12 @@ ItoKMCStepper<I, C, R, F>::computeEdotJSource(const Real a_dt) noexcept
       computationParticles.remap();
 
       // Interpolate the potential to the previous particle position which gives us V(A) for the particles.
-      m_amr->interpolateParticles<&ItoKMCFieldParticle::vA>(computationParticles,
-                                                            m_particleRealm,
-                                                            m_plasmaPhase,
-                                                            m_particleScratch1,
-                                                            solver->getDeposition(),
-                                                            false);
+      m_amr->interpolateParticles<&ItoKMCFieldParticle::phiA>(computationParticles,
+                                                              m_particleRealm,
+                                                              m_plasmaPhase,
+                                                              m_particleScratch1,
+                                                              solver->getDeposition(),
+                                                              false);
 
       // Move the particles back to B again and multiply the weight by (V(B) - V(A)).
       for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
@@ -6087,12 +6087,12 @@ ItoKMCStepper<I, C, R, F>::computeEdotJSource(const Real a_dt) noexcept
 
           double* const pos[SpaceDim] = {
             D_DECL(comp.positionColumn(0), comp.positionColumn(1), comp.positionColumn(2))};
-          const ParticleReal* const alt[SpaceDim] = {D_DECL(comp.template column<&ItoKMCFieldParticle::altX>(),
-                                                            comp.template column<&ItoKMCFieldParticle::altY>(),
-                                                            comp.template column<&ItoKMCFieldParticle::altZ>())};
+          const ParticleReal* const alt[SpaceDim] = {D_DECL(comp.template column<&ItoKMCFieldParticle::x0_x>(),
+                                                            comp.template column<&ItoKMCFieldParticle::x0_y>(),
+                                                            comp.template column<&ItoKMCFieldParticle::x0_z>())};
           double* const             w             = comp.weightColumn();
-          const ParticleReal* const vA            = comp.template column<&ItoKMCFieldParticle::vA>();
-          const ParticleReal* const vB            = comp.template column<&ItoKMCFieldParticle::vB>();
+          const ParticleReal* const phiA          = comp.template column<&ItoKMCFieldParticle::phiA>();
+          const ParticleReal* const phiB          = comp.template column<&ItoKMCFieldParticle::phiB>();
 
           ParticleLoops::loop(comp, [&](const std::size_t i) {
             for (int dir = 0; dir < SpaceDim; dir++) {
@@ -6100,7 +6100,7 @@ ItoKMCStepper<I, C, R, F>::computeEdotJSource(const Real a_dt) noexcept
             }
 
             // Effective weight = weight * (V(B) - V(A)).
-            w[i] *= (vB[i] - vA[i]);
+            w[i] *= (phiB[i] - phiA[i]);
           });
         }
       }
