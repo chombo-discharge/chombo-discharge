@@ -344,11 +344,11 @@ public:
   getGradientOp() const;
 
   /**
-    @brief Get the SoA particle-mesh operator
-    @return SoA particle mesh
+    @brief Get particle-mesh operator
+    @return Particle mesh
   */
   EBAMRParticleMesh&
-  getParticleMeshSoA() const;
+  getParticleMesh() const;
 
   /**
     @brief Get the surface deposition operator
@@ -670,9 +670,9 @@ protected:
   mutable Vector<RefCountedPtr<EBGradient>> m_gradientOp;
 
   /**
-    @brief For doing SoA particle-mesh operations
+    @brief For doing particle-mesh operations
   */
-  mutable EBAMRParticleMesh m_particleMeshSoA;
+  mutable EBAMRParticleMesh m_particleMesh;
 
   /**
     @brief For doing particle deposition onto surfaces

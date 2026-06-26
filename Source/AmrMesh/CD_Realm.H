@@ -371,12 +371,12 @@ public:
   getMultigridInterpolator(const phase::which_phase a_phase);
 
   /**
-    @brief Get the SoA particle mesh operator
+    @brief Get the particle mesh operator
     @param[in] a_phase Which phase
-    @return SoA particle mesh
+    @return Particle mesh
   */
   EBAMRParticleMesh&
-  getParticleMeshSoA(const phase::which_phase a_phase);
+  getParticleMesh(const phase::which_phase a_phase);
 
   /**
     @brief Get the particle mesh operator

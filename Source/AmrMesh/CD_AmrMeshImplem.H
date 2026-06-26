@@ -381,7 +381,7 @@ AmrMesh::depositWeight(EBAMRCellData&                      a_meshData,
     pout() << "AmrMesh::depositWeight(ParticleContainer)" << endl;
   }
 
-  EBAMRParticleMesh& particleMesh = this->getParticleMeshSoA(a_realm, a_phase);
+  EBAMRParticleMesh& particleMesh = this->getParticleMesh(a_realm, a_phase);
 
   particleMesh.depositWeight(a_meshData, a_particles, a_depositionType, a_coarseFineDeposition, a_forceIrregNGP);
 }
@@ -402,7 +402,7 @@ AmrMesh::depositGathered(EBAMRCellData&                      a_meshData,
     pout() << "AmrMesh::depositGathered(ParticleContainer)" << endl;
   }
 
-  EBAMRParticleMesh& particleMesh = this->getParticleMeshSoA(a_realm, a_phase);
+  EBAMRParticleMesh& particleMesh = this->getParticleMesh(a_realm, a_phase);
 
   particleMesh
     .depositGathered(a_meshData, a_particles, a_depositionType, a_coarseFineDeposition, a_forceIrregNGP, a_cellGather);
@@ -423,7 +423,7 @@ AmrMesh::depositParticles(EBAMRCellData&                      a_meshData,
     pout() << "AmrMesh::depositParticles(ParticleContainer)" << endl;
   }
 
-  EBAMRParticleMesh& particleMesh = this->getParticleMeshSoA(a_realm, a_phase);
+  EBAMRParticleMesh& particleMesh = this->getParticleMesh(a_realm, a_phase);
 
   particleMesh.template deposit<Members...>(a_meshData,
                                             a_particles,
@@ -446,7 +446,7 @@ AmrMesh::interpolateWeight(ParticleContainer<P, Traits>& a_particles,
     pout() << "AmrMesh::interpolateWeight(ParticleContainer)" << endl;
   }
 
-  EBAMRParticleMesh& particleMesh = this->getParticleMeshSoA(a_realm, a_phase);
+  EBAMRParticleMesh& particleMesh = this->getParticleMesh(a_realm, a_phase);
 
   particleMesh.interpolateWeight(a_particles, a_meshScalarField, a_interpType, a_forceIrregNGP);
 }
@@ -465,7 +465,7 @@ AmrMesh::interpolateParticles(ParticleContainer<P, Traits>& a_particles,
     pout() << "AmrMesh::interpolateParticles(ParticleContainer)" << endl;
   }
 
-  EBAMRParticleMesh& particleMesh = this->getParticleMeshSoA(a_realm, a_phase);
+  EBAMRParticleMesh& particleMesh = this->getParticleMesh(a_realm, a_phase);
 
   particleMesh.template interpolate<Members...>(a_particles, a_meshField, a_interpType, a_forceIrregNGP);
 }

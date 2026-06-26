@@ -1285,9 +1285,9 @@ Realm::getCoarseAverage(const phase::which_phase a_phase)
 }
 
 EBAMRParticleMesh&
-Realm::getParticleMeshSoA(const phase::which_phase a_phase)
+Realm::getParticleMesh(const phase::which_phase a_phase)
 {
-  return m_realms[a_phase]->getParticleMeshSoA();
+  return m_realms[a_phase]->getParticleMesh();
 }
 
 EBAMRSurfaceDeposition&

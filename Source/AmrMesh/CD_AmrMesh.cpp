@@ -3501,20 +3501,20 @@ AmrMesh::getIrregularCells(const std::string& a_realm, const phase::which_phase 
 }
 
 EBAMRParticleMesh&
-AmrMesh::getParticleMeshSoA(const std::string& a_realm, const phase::which_phase a_phase) const
+AmrMesh::getParticleMesh(const std::string& a_realm, const phase::which_phase a_phase) const
 {
-  CH_TIME("AmrMesh::getParticleMeshSoA(string, phase::which_phase)");
+  CH_TIME("AmrMesh::getParticleMesh(string, phase::which_phase)");
   if (m_verbosity > 1) {
-    pout() << "AmrMesh::getParticleMeshSoA(string, phase::which_phase)" << endl;
+    pout() << "AmrMesh::getParticleMesh(string, phase::which_phase)" << endl;
   }
 
   if (!this->queryRealm(a_realm)) {
-    const std::string str = "AmrMesh::getParticleMeshSoA(string, phase::which_phase) - could not find realm '" +
-                            a_realm + "'";
+    const std::string str = "AmrMesh::getParticleMesh(string, phase::which_phase) - could not find realm '" + a_realm +
+                            "'";
     MayDay::Abort(str.c_str());
   }
 
-  return m_realms[a_realm]->getParticleMeshSoA(a_phase);
+  return m_realms[a_realm]->getParticleMesh(a_phase);
 }
 
 EBAMRSurfaceDeposition&

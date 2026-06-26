@@ -1934,13 +1934,13 @@ public:
   getIrregularCells(const std::string& a_realm, const phase::which_phase a_phase) const;
 
   /**
-    @brief Get the SoA EBAMRParticleMesh operator
+    @brief Get EBAMRParticleMesh operator
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)
-    @return SoA particle mesh
+    @return Particle mesh
   */
   EBAMRParticleMesh&
-  getParticleMeshSoA(const std::string& a_realm, const phase::which_phase a_phase) const;
+  getParticleMesh(const std::string& a_realm, const phase::which_phase a_phase) const;
 
   /**
     @brief Get EBAMRSurfaceDeposition surface deposition operator
