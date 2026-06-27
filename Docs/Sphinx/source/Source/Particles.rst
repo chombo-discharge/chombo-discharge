@@ -609,7 +609,7 @@ The recommended pattern operates on one cell at a time: cell-sort the leaf, extr
 ``ParticleSoA<P>::extractCell`` performs the per-cell extraction
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleSoA.H
-   :lines: 1361-1362
+   :lines: 1362-1363
    :language: c++
 
 and the merged result is accumulated into an output ``ParticleSoA`` (via ``append``) which finally replaces the leaf with ``swap``.

@@ -71,7 +71,7 @@ The three functions below must then be implemented:
 
 .. literalinclude:: ../../../../Source/CellTagger/CD_CellTagger.H
    :language: c++
-   :lines: 89-111
+   :lines: 89-114
    :emphasize-lines: 5-6, 12-13, 22-23
 
 The interpretation of these functions is exactly the same as for :ref:`Chap:TimeStepper`, and we refer to the :ref:`Chap:TimeStepper` documentation for a detailed explanation.

@@ -337,7 +337,7 @@ The signatures for the diffusion time step are similar to the ones for drift:
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 1028-1033
+   :lines: 1028-1036
    :dedent: 2
 
 which returns a CFL-like condition
