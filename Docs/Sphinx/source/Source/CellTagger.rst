@@ -17,12 +17,12 @@ Refinement flags live in a data holder called ``EBAMRTags``, which is a typedef:
 
    typedef Vector<RefCountedPtr<LayoutData<DenseIntVectSet> > > EBAMRTags;
 
-See :ref:`Chap:Basics` for an explanation of how the individual templates.
+See :ref:`Chap:Basics` for an explanation of how the individual template arguments work.
 Briefly, the outer vector in ``EBAMRTags`` indicates the grid level, whereas ``LayoutData`` is a data holder on each grid level and indexes the grid patches.
-That is, ``LayoutData<DenseIntVectSet`` is a distribution of ``DenseIntVectSet`` on a level, whereas ``DenseIntVectSet`` is a data holder that stores the refinement flags on a grid patch.
-For performance reasons, ``DenseIntVectSet`` onlys store refinement cells on a per-patch basis.
+That is, ``LayoutData<DenseIntVectSet>`` is a distribution of ``DenseIntVectSet`` on a level, whereas ``DenseIntVectSet`` is a data holder that stores the refinement flags on a grid patch.
+For performance reasons, ``DenseIntVectSet`` only stores refinement cells on a per-patch basis.
 It is not possible to add a grid cell to a ``DenseIntVectSet`` if it falls outside the grid patch.
-Note that ``EBAMRTags`` is *not* set up for communication, and so it is not possible to fill ghost cells regions from other patches.
+Note that ``EBAMRTags`` is *not* set up for communication, and so it is not possible to fill ghost cell regions from other patches.
 The refinement flags themselves are owned by :ref:`Chap:Driver`, and are used to generate new grids that cover all the cell tags.
 
 A part of the current C++ header file for ``CellTagger`` is included below, where we highlight the functions that must be implemented in order to create a new refinement method.
@@ -105,7 +105,7 @@ More boxes can be specified by following the same convention, e.g., ``tag_box2_l
 Adding a buffer
 ---------------
 
-By default, each MPI rank can only tag grid cells where it owns data, which has has been enforced due to performance and communication reasons.
+By default, each MPI rank can only tag grid cells where it owns data, which has been enforced due to performance and communication reasons.
 Under the hood, the ``DenseIntVectSet`` is an array of boolean values on a patch which is very fast and simple to communicate with MPI. 
 Adding a grid cell for refinement which lies outside the patch will lead to memory corruptions.
 Frequently, however, it is necessary to add *buffer regions* to ensure that an area-of-interest around the tagged region is also refined.

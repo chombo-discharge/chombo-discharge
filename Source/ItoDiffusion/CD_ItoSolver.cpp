@@ -466,7 +466,6 @@ ItoSolver::parseParticleMerger()
     // Sums the total number of physical particles in the cell, then redistributes them into at most a_ppc
     // computational particles with as-equal-as-possible integer weights, placed at random cell positions.
     // All output particles carry the same weight-averaged energy. Requires integer-valued weights.
-    const RealVect probLo = m_amr->getProbLo();
 
     // Sum physical particle count and compute weight-averaged energy across the cell.
     const std::function<std::pair<long long, Real>(const ParticleSoA<ItoParticle>&)> aggregate =
@@ -496,7 +495,11 @@ ItoSolver::parseParticleMerger()
       a.append(x, static_cast<double>(wt), payload);
     };
 
-    m_particleMerger = ParticleManagement::makeReinitializeMerger<Real, ItoParticle>(aggregate, emit, probLo);
+    m_particleMerger = ParticleManagement::makeReinitializeMerger<Real, ItoParticle>(aggregate,
+                                                                                     emit,
+                                                                                     [this]() noexcept {
+                                                                                       return m_amr->getProbLo();
+                                                                                     });
   }
   else if (str == "reinitialize_bvh") {
     // Same KD partition as equal_weight_kd, but leaf positions are reinitialized: cut-cells use the

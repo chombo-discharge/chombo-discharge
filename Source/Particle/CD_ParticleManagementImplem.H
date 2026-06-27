@@ -569,7 +569,7 @@ namespace ParticleManagement {
   makeReinitializeMerger(
     std::function<std::pair<long long, Context>(const ParticleSoA<P, Traits>&)>              a_aggregate,
     std::function<void(ParticleSoA<P, Traits>&, const RealVect&, long long, const Context&)> a_emit,
-    RealVect                                                                                 a_probLo) noexcept
+    std::function<RealVect()>                                                                a_probLo) noexcept
   {
     return [=](ParticleSoA<P, Traits>& a_particles, const CellInfo& a_cellInfo, int a_ppc) noexcept {
       CH_TIME("ParticleManagement::makeReinitializeMerger");
@@ -588,7 +588,7 @@ namespace ParticleManagement {
 
       const Real      dx            = a_cellInfo.getDx();
       const Real      kappa         = a_cellInfo.getVolFrac();
-      const RealVect  cellPos       = a_probLo + dx * (a_cellInfo.getGridIndex() + 0.5 * RealVect::Unit);
+      const RealVect  cellPos       = a_probLo() + dx * (a_cellInfo.getGridIndex() + 0.5 * RealVect::Unit);
       const RealVect& validLo       = a_cellInfo.getValidLo();
       const RealVect& validHi       = a_cellInfo.getValidHi();
       const RealVect& bndryCentroid = a_cellInfo.getBndryCentroid();

@@ -224,8 +224,9 @@ namespace ParticleManagement {
                            Returns total physical particle count and a context consumed by @c a_emit.
     @param[in] a_emit      Per-particle emit: `(ParticleSoA<P,Traits>&, const RealVect& pos,
                            long long weight, const Context&) -> void`.  Appends exactly one particle.
-    @param[in] a_probLo    Domain lower-left corner (from AmrMesh::getProbLo), captured at factory-call
-                           time.  Used to compute the cell-centre position from the CellInfo grid index.
+    @param[in] a_probLo    Lazy supplier of the domain lower-left corner (from AmrMesh::getProbLo).
+                           Called on every merge invocation; capture the solver's AmrMesh reference
+                           so the call is deferred until after AMR setup completes.
     @return A ParticleMerger<P, Traits> ready to be stored in e.g. ItoSolver::m_particleMerger.
   */
   template <class Context, class P, class Traits = ParticleTraits<P>>
@@ -233,7 +234,7 @@ namespace ParticleManagement {
   makeReinitializeMerger(
     std::function<std::pair<long long, Context>(const ParticleSoA<P, Traits>&)>              a_aggregate,
     std::function<void(ParticleSoA<P, Traits>&, const RealVect&, long long, const Context&)> a_emit,
-    RealVect                                                                                 a_probLo) noexcept;
+    std::function<RealVect()>                                                                a_probLo) noexcept;
 
   /**
     @brief Remove physical particles from an SoA container (operates on the container-owned weight column).

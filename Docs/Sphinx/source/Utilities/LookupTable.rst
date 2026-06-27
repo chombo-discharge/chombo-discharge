@@ -17,7 +17,7 @@ The class is templated as
    :language: c++
    :lines: 30-31
 
-where the template parameter ``N`` indicates the number of dependent variables (``N=1`` yields a compile-time error).
+where the template parameter ``N`` indicates the number of dependent variables (``N=0`` yields a compile-time error).
 Internally, the data is stored as an ``std::vector<std::array<T, N + 1> >`` where the vector entries are rows and the ``std::array<T, N + 1>`` are the column entries in that row.
 
 .. tip::
@@ -56,7 +56,7 @@ For example, to add two rows of data to a table with two dependent variables:
    myTable.addData(4.0, 5.0, 6.0);
    myTable.addData(1.0, 2.0, 3.0);   
 
-This will insert two new rows at the end up the table.
+This will insert two new rows at the end of the table.
 
 .. important::
 

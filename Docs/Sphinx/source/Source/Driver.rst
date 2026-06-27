@@ -18,7 +18,7 @@ The constructor for this class is
    :dedent: 2
 
 Here, the ``Driver`` class takes as input a user-provided geometry ``a_computationalGeometry``, a user-provided physics module ``a_timestepper``, and the AMR infrastructure ``a_amrMesh``.
-The ``Driver`` class does not *require* an instance of :ref:`Chap:CellTagger`, which is the responsible for flagging cells for refinement.
+The ``Driver`` class does not *require* an instance of :ref:`Chap:CellTagger`, which is responsible for flagging cells for refinement.
 If users decide to omit a cell tagger as in the above constructor, regridding functionality is completely turned off and only the initially generated grids will be used throughout the entire simulation.
 
 .. tip::
@@ -33,7 +33,7 @@ If users decide to omit a cell tagger as in the above constructor, regridding fu
 Simulation setup
 ----------------
 
-For setting up an running simulations, only a single routine is used:
+For setting up and running simulations, only a single routine is used:
 
 .. code-block:: c++
 
@@ -55,7 +55,7 @@ If a simulation starts from the first time step, the ``Driver`` class will perfo
 #. Ask the :ref:`Chap:TimeStepper` to set up relevant solvers and fill them with initial data.
 #. Perform the number of initial regrids that the user asks for.
    After the regrid, the solvers are re-filled with initial data. I.e., initial data is always regenerated on the finest grid and is not interpolated from coarse grid.
-#. Let :ref:`Chap:TimeStepper` perform a *post-initialization* routine. Whether or not this post-initialization does anything depends on the physics module begin used.
+#. Let :ref:`Chap:TimeStepper` perform a *post-initialization* routine. Whether or not this post-initialization does anything depends on the physics module being used.
 
 Restarting simulations
 ______________________
@@ -164,6 +164,6 @@ Below, we include the current template options file for the ``Driver`` class.
    :emphasize-lines: 4,8-13,17-18,20-21,24-27,29-33
    :caption: Template input options for the ``Driver`` class. Runtime adjustable options are highlighted.
 
-We point out that the ``output_directory`` directory variable is *only* for the HDF5 plot files, whereas other files like ``pout.*`` are put in the directory in which the executable was ran.
+We point out that the ``output_directory`` directory variable is *only* for the HDF5 plot files, whereas other files like ``pout.*`` are put in the directory in which the executable was run.
 
 From the user perspective, the most commonly adjusted parameters concern the I/O operations (plot and checkpoint intervals), and geometric refinement parameters.

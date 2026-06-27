@@ -25,7 +25,7 @@ Optional packages are
 
 * A serial or parallel version of HDF5, which is used for writing plot and checkpoint files.
 * An MPI installation, which is used for parallelization.
-* VisIt (`<https://visit-dav.github.io/visit-website>`_), which used for visualization and analysis.
+* VisIt (`<https://visit-dav.github.io/visit-website>`_), which is used for visualization and analysis.
 
 
 Cloning ``chombo-discharge``
@@ -325,7 +325,7 @@ If the prerequisites are in place, compilation of ``chombo-discharge`` is usuall
 However, due to dependencies on ``Chombo`` and HDF5, compilation can sometimes be an issue.
 Our experience is that if ``Chombo`` compiles, so does ``chombo-discharge``.
 
-If experiencing issues, try remove the ``chombo-discharge`` installation first by running
+If experiencing issues, try to remove the ``chombo-discharge`` installation first by running
 
 .. code-block:: bash
 

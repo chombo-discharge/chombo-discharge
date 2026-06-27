@@ -5,7 +5,7 @@ AmrMesh
 
 ``AmrMesh`` handles virtually the entire AMR and cut-cell infrastructure in ``chombo-discharge``, and has the following responsibility:
 
-#. Generate grids form a set of cell tags (potentially more than one set of grids).
+#. Generate grids from a set of cell tags (potentially more than one set of grids).
 #. Load balance the grids if necessary.
 #. Instantiate the cut-cell information on grids.
 #. Provide a mask which tells the user if a cell is covered by a finer grid.
@@ -18,7 +18,7 @@ AmrMesh
    * Infrastructure for particle-mesh operators.
    * ... and many others.
 
-In addition to these, ``AmrMesh`` contains function for actually allocating data with user-defined centering (e.g., cell, face, EB) on a specified :ref:`Chap:Realm`.
+In addition to these, ``AmrMesh`` contains functions for actually allocating data with user-defined centering (e.g., cell, face, EB) on a specified :ref:`Chap:Realm`.
 It also has responsibility for allocating particle containers.
 
 One thing that ``AmrMesh`` is *not*, is a numerical discretization holder for PDEs, which is a responsibility that is generally deferred to solvers.
@@ -35,8 +35,8 @@ The behavior of :ref:`Chap:AmrMesh` is modified through its available input para
 Class options
 -------------
 
-Various class options are available for adjusting the behavior of the ``Driver`` class.
-Below, we include the current template options file for the ``Driver`` class.
+Various class options are available for adjusting the behavior of the ``AmrMesh`` class.
+Below, we include the current template options file for the ``AmrMesh`` class.
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.options
    :emphasize-lines: 9-15,21-26
@@ -59,7 +59,7 @@ Domain decomposition
 
 With Cartesian AMR, each grid level is decomposed into grid blocks of constant size, or sizes that potentially vary between some min/max size along each dimension.
 In ``chombo-discharge`` this is encapsulated by ``AmrMesh.blocking_factor``, which is the smallest grid box that can be generated when meshing the domain.
-Likewise, ``AmrMesh.max_box_size`` is the maximum box size that can be produced, but usage of a constant box size is common an increased requirement in ``chombo-discharge``.
+Likewise, ``AmrMesh.max_box_size`` is the maximum box size that can be produced, but usage of a constant box size is a common and increased requirement in ``chombo-discharge``.
 
 .. tip::
 
@@ -73,9 +73,9 @@ We want to point out that mixed refinement factors are supported.
 
 .. tip::
 
-   If ``AmrMesh.max_amr_depth`` is greater than the number of refinement ratios specified in ``AmrMesh.ref_rat``, ``chombo-discharge`` will automatically fill in the remaining refinement ratios (padding with the last entry). I.e., one obtains factor 2 refinement every if ``AmrMesh.ref_rat = 2``.
+   If ``AmrMesh.max_amr_depth`` is greater than the number of refinement ratios specified in ``AmrMesh.ref_rat``, ``chombo-discharge`` will automatically fill in the remaining refinement ratios (padding with the last entry). I.e., one obtains factor 2 refinement everywhere if ``AmrMesh.ref_rat = 2``.
 
-Two gridding algorithms are supported, called Tiled mesh refinement the classical Berger-Rigoutsos refinement algorithm.
+Two gridding algorithms are supported, called Tiled mesh refinement and the classical Berger-Rigoutsos refinement algorithm.
 These are discussed in :ref:`Chap:MeshGeneration`, and the user can specify which one to use by setting ``AmrMesh.grid_algorithm`` accordingly.
 In general, the tiled algorithm is exceedingly more performant at larger scales.
 

@@ -52,7 +52,7 @@ The residual ions will drift towards cathode surfaces and generate secondary ion
 
 The discharge inception model can be run in two modes:
 
-* A stationary mode, where one only calculations :math:`K\left(\mathbf{x}\right)` for a range of voltages, see :ref:`Chap:StationaryMode`.
+* A stationary mode, where one only calculates :math:`K\left(\mathbf{x}\right)` for a range of voltages, see :ref:`Chap:StationaryMode`.
 * In transient mode, where :math:`K\left(\mathbf{x}\right)` is computed dynamically according to a user-supplied voltage shape.
   This mode can also be used to evaluate the inception probability for a given voltage curve, see :ref:`Chap:TransientMode`.
 
@@ -66,7 +66,7 @@ The discharge inception model is implemented in :file:`$DISCHARGE_HOME/Physics/D
    :lines: 73-94
    :dedent: 4
 	   
-The template template parameters indicate which types of solvers to used within the compound algorithm.
+The template parameters indicate which types of solvers to use within the compound algorithm.
 The template parameters indicate the following: 
 
 * ``typename P`` is the tracer particle solver (see :ref:`Chap:TracerParticleSolver`) for reconstructing the inception integral.
@@ -455,7 +455,7 @@ The user can control refinement buffers and criterion through the following inpu
 Solver configuration
 ====================
 
-The ``DischargeInceptionStepper`` class come with user-configurable input options which are given below.
+The ``DischargeInceptionStepper`` class comes with user-configurable input options which are given below.
 
 .. literalinclude:: ../../../../Physics/DischargeInception/CD_DischargeInceptionStepper.options
    :language: text
@@ -500,7 +500,7 @@ To see available setup options, use
 Example programs
 ================
 
-Example programs that use the discharge inception model are given in
+Example programs that use the discharge inception model are given below.
 
 High-voltage vessel
 -------------------

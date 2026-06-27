@@ -148,15 +148,15 @@ _________________
 
 ``chombo-discharge`` simulations take their input from a single simulation input file (possibly appended with overriding options on the command line).
 Simulations may consist of several hundred possible switches for altering the behavior of a simulation, and all physics models in ``chombo-discharge`` are therefore equipped with Python setup tools that collect all such options into a single file when setting up a new application.
-Generally, these input parameters are fetched from the options file of component that is used in a simulation. 
+Generally, these input parameters are fetched from the options file of the component that is used in a simulation. 
 Simulation options usually consist of a prefix, a suffix, and a configuration value.
-For example, the configuration options that adjusts the number of time steps that will be run in a simulation is
+For example, the configuration option that adjusts the number of time steps that will be run in a simulation is
 
 .. code-block:: none
 
    Driver.max_steps = 100
 
-Likewise, for controlling how often plot are written:
+Likewise, for controlling how often plots are written:
 
 .. code-block:: none
 
@@ -171,13 +171,13 @@ You may also pass input parameters through the command line. For example, runnin
 will set the ``Driver.max_steps`` parameter to 10.
 Command-line parameters override definitions in the input file.
 Moreover, parameters parsed through the command line become static parameters, i.e., they are not run-time configurable (see :ref:`Chap:RuntimeConfig`).
-Also note that if you define a parameter multiple times in the input file, the last definition is canon. 		
+Also note that if you define a parameter multiple times in the input file, the last definition is canonical. 		
 
 Simulation outputs
 __________________
 
 Mesh data from ``chombo-discharge`` simulations is by default written to HDF5 files, and if HDF5 is disabled ``chombo-discharge`` will not write any plot or checkpoint files. 
-In addition to plot files, MPI ranks can output simulation meta-information to separate files so that the simulation progress can be individually for each rank. 
+In addition to plot files, MPI ranks can output simulation meta-information to separate files so that the simulation progress can be monitored individually for each rank. 
 
 ``chombo-discharge`` comes with controls for adjusting output.
 Through the :ref:`Chap:Driver` class the user may adjust the option ``Driver.output_directory`` to specify where output files will be placed.

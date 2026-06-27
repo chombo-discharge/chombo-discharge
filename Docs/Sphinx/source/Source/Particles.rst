@@ -309,7 +309,7 @@ Masked particles
 
 ``ParticleContainer<P, Traits>`` also supports the concept of *masked particles*, where one can fetch a subset of particles that live only in specified grid cells.
 Typically, this "specified region" is the refinement boundary, but the functionality is generic and might prove useful also in other cases.
-This functionality is unlikely to be used directly by users of chombo-discharge, but it is nonetheless fruitful to understand the concept in order to more easily fathom how deposition across refinement boundaries proceed.
+This functionality is unlikely to be used directly by users of chombo-discharge, but it is nonetheless fruitful to understand the concept in order to more easily fathom how deposition across refinement boundaries proceeds.
 
 When *masked particles* are used, the user provides a boolean mask over the AMR hierarchy and obtains the subset of particles that live in regions where the mask evaluates to true.
 This functionality is for example used for some of the particle deposition methods in ``chombo-discharge`` where we deposit particles that live near the refinement boundary with special deposition functions.
@@ -334,7 +334,7 @@ In the above functions the mask particles are *copied*, and the original particl
 After the user is done with the particles, they should be released through
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 651-652
+   :lines: 648-652
    :language: c++
    :dedent: 2
 
@@ -508,9 +508,9 @@ In addition, there can be complications near physical boundaries, such as domain
 
    Sketch of deposition schemes near refinement boundaries and cut-cells.
 
-``chombo-discharge`` support various ways of handling deposition across the refinement boundary.
+``chombo-discharge`` supports various ways of handling deposition across the refinement boundary.
 In all of these methods, the mass on the fine grid particles whose deposition clouds hang over the refinement boundaries is simply added to the coarse grid.
-The main modifications to the deposition scheme is performed for the coarse-grid particles that live around the refinement boundary (see :numref:`Fig:HaloMask`).
+The main modifications to the deposition scheme are performed for the coarse-grid particles that live around the refinement boundary (see :numref:`Fig:HaloMask`).
 For the coarse-grid particles the following processes then occur:
 
 .. _Fig:HaloMask:
@@ -609,7 +609,7 @@ The recommended pattern operates on one cell at a time: cell-sort the leaf, extr
 ``ParticleSoA<P>::extractCell`` performs the per-cell extraction
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleSoA.H
-   :lines: 1362-1363
+   :lines: 1362-1373
    :language: c++
 
 and the merged result is accumulated into an output ``ParticleSoA`` (via ``append``) which finally replaces the leaf with ``swap``.
