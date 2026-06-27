@@ -492,9 +492,13 @@ namespace ParticleManagement {
             break;
           }
 
-          Packed half = particles[hi];
-          (particles[hi].*packWeight)() *= 0.5;
-          (half.*packWeight)() *= 0.5;
+          // Use floor/ceil rather than *= 0.5 so that integer weights remain integers after
+          // the split. weight * 0.5 on an odd integer (e.g. 3 -> 1.5) produces a fractional
+          // weight that later breaks removePhysicalParticles, which assumes integer weights.
+          const Real hw   = std::floor((particles[hi].*packWeight)() * 0.5);
+          Packed     half = particles[hi];
+          (particles[hi].*packWeight)() -= hw;
+          (half.*packWeight)() = hw;
           particles.push_back(half);
         }
       }
