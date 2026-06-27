@@ -14,8 +14,9 @@
 #define CD_LEVELTILES_H
 
 // Std includes
+#include <cstddef>
+#include <unordered_map>
 #include <vector>
-#include <map>
 
 // Chombo includes
 #include <IntVect.H>
@@ -40,30 +41,26 @@ public:
   using BoxIDs = std::pair<unsigned int, unsigned int>;
 
   /**
-    @brief For lexicographically comparing tiles.
+    @brief Hash functor for using IntVect tiles as unordered_map keys.
+    @details Hashes all SpaceDim components (FNV-1a), with no bit-truncation, so tiles outside the
+    registered range (e.g. far-outcast particles) cannot alias a registered tile.
   */
-  struct TileComparator
+  struct TileHasher
   {
     /**
-      @brief Comparator operator.
-      @param[in] a First tile
-      @param[in] b Second tile
-      @return True if a > b lexicographically
+      @brief Hash operator.
+      @param[in] a_tile Tile to hash.
+      @return Hash value.
     */
-    bool
-    operator()(const IntVect& a, const IntVect& b) const
+    std::size_t
+    operator()(const IntVect& a_tile) const noexcept
     {
-      D_TERM6(if (a[0] > b[0]) return true; else if (a[0] < b[0]) return false;, if (a[1] > b[1]) return true;
-              else if (a[1] < b[1]) return false;
-              , if (a[2] > b[2]) return true;
-              else if (a[2] < b[2]) return false;
-              , if (a[3] > b[3]) return true;
-              else if (a[3] < b[3]) return false;
-              , if (a[4] > b[4]) return true;
-              else if (a[4] < b[4]) return false;
-              , if (a[5] > b[5]) return true;
-              else if (a[5] < b[5]) return false;);
-      return false;
+      std::size_t hash = 1469598103934665603ULL;
+      for (int dir = 0; dir < SpaceDim; dir++) {
+        hash ^= static_cast<std::size_t>(static_cast<unsigned int>(a_tile[dir]));
+        hash *= 1099511628211ULL;
+      }
+      return hash;
     }
   };
 
@@ -93,24 +90,24 @@ public:
   define(const DisjointBoxLayout& a_dbl, const int a_minBlockSize) noexcept;
 
   /**
-    @brief Get the tiles own by this rank
+    @brief Get the tiles owned by this rank
     @return m_myTiles
   */
-  virtual const std::map<IntVect, unsigned int, TileComparator>&
+  virtual const std::unordered_map<IntVect, unsigned int, TileHasher>&
   getMyTiles() const noexcept;
 
   /**
-    @brief Get the tiles own by this rank
+    @brief Get the tiles owned by other ranks
     @return m_otherTiles
   */
-  virtual const std::map<IntVect, BoxIDs, TileComparator>&
+  virtual const std::unordered_map<IntVect, BoxIDs, TileHasher>&
   getOtherTiles() const noexcept;
 
   /**
-    @brief Get the tiles own by this rank
-    @return m_myGridIndices
+    @brief Get the mapping of grid index to DataIndex
+    @return m_myGrids
   */
-  virtual const std::map<unsigned int, DataIndex>&
+  virtual const std::unordered_map<unsigned int, DataIndex>&
   getMyGrids() const noexcept;
 
 protected:
@@ -122,17 +119,17 @@ protected:
   /**
     @brief "Tiles" owned by this rank
   */
-  std::map<IntVect, unsigned int, TileComparator> m_myTiles;
+  std::unordered_map<IntVect, unsigned int, TileHasher> m_myTiles;
 
   /**
-    @brief Grids owned by other ranks. 
+    @brief Grids owned by other ranks.
   */
-  std::map<IntVect, BoxIDs, TileComparator> m_otherTiles;
+  std::unordered_map<IntVect, BoxIDs, TileHasher> m_otherTiles;
 
   /**
     @brief Mapping of grid index to DataIndex
   */
-  std::map<unsigned int, DataIndex> m_myGrids;
+  std::unordered_map<unsigned int, DataIndex> m_myGrids;
 };
 
 #include <CD_NamespaceFooter.H>

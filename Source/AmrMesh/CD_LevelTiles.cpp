@@ -83,7 +83,7 @@ LevelTiles::define(const DisjointBoxLayout& a_dbl, const int a_minBlockSize) noe
   m_isDefined = true;
 }
 
-const std::map<IntVect, unsigned int, LevelTiles::TileComparator>&
+const std::unordered_map<IntVect, unsigned int, LevelTiles::TileHasher>&
 LevelTiles::getMyTiles() const noexcept
 {
   CH_assert(m_isDefined);
@@ -95,7 +95,7 @@ LevelTiles::getMyTiles() const noexcept
   return m_myTiles;
 }
 
-const std::map<IntVect, LevelTiles::BoxIDs, LevelTiles::TileComparator>&
+const std::unordered_map<IntVect, LevelTiles::BoxIDs, LevelTiles::TileHasher>&
 LevelTiles::getOtherTiles() const noexcept
 {
   CH_assert(m_isDefined);
@@ -103,7 +103,7 @@ LevelTiles::getOtherTiles() const noexcept
   return m_otherTiles;
 }
 
-const std::map<unsigned int, DataIndex>&
+const std::unordered_map<unsigned int, DataIndex>&
 LevelTiles::getMyGrids() const noexcept
 {
   CH_assert(m_isDefined);
