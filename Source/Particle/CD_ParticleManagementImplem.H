@@ -15,6 +15,7 @@
 
 // Std includes
 #include <algorithm>
+#include <array>
 #include <cstdint>
 #include <functional>
 #include <limits>
@@ -27,6 +28,7 @@
 // Our includes
 #include <CD_Random.H>
 #include <CD_ParticleLoops.H>
+#include <CD_LoadBalancing.H>
 #include <CD_ParticleManagement.H>
 #include <CD_NamespaceHeader.H>
 
@@ -361,6 +363,113 @@ namespace ParticleManagement {
       }
     }
     a_particles.swap(survivors);
+  }
+
+  template <class Packed,
+            Real& (Packed::*packWeight)(),
+            const RealVect& (Packed::*packPosition)() const,
+            class P,
+            class Traits>
+  inline ParticleMerger<P, Traits>
+  makeSfcNearestNeighborMerger(std::function<Packed(const ParticleSoA<P, Traits>&, std::size_t)> a_gather,
+                               std::function<void(Packed&, const Packed&)>                       a_combine,
+                               std::function<void(ParticleSoA<P, Traits>&, const Packed&)>       a_scatter) noexcept
+  {
+    return [=](ParticleSoA<P, Traits>& a_particles, const CellInfo& /*a_cellInfo*/, int a_ppc) noexcept {
+      CH_TIMERS("ParticleManagement::makeSfcNearestNeighborMerger");
+      CH_TIMER("ParticleManagement::makeSfcNearestNeighborMerger::populate", t1);
+      CH_TIMER("ParticleManagement::makeSfcNearestNeighborMerger::sort_merge", t2);
+      CH_TIMER("ParticleManagement::makeSfcNearestNeighborMerger::emit", t3);
+
+      CH_START(t1);
+      thread_local std::vector<Packed> particles;
+      particles.clear();
+      particles.reserve(a_particles.size());
+      Real W = 0.0;
+      for (std::size_t i = 0; i < a_particles.size(); i++) {
+        Packed p = a_gather(a_particles, i);
+        W += (p.*packWeight)();
+        particles.emplace_back(std::move(p));
+      }
+      CH_STOP(t1);
+
+      if (W < 2.0 || a_ppc <= 0) {
+        return;
+      }
+
+      const std::size_t target = static_cast<std::size_t>(a_ppc);
+
+      CH_START(t2);
+      if (particles.size() > target) {
+        RealVect loCorner = +std::numeric_limits<Real>::max() * RealVect::Unit;
+        RealVect hiCorner = -std::numeric_limits<Real>::max() * RealVect::Unit;
+        for (const Packed& p : particles) {
+          const RealVect& x = (p.*packPosition)();
+          for (int dir = 0; dir < SpaceDim; dir++) {
+            loCorner[dir] = std::min(loCorner[dir], x[dir]);
+            hiCorner[dir] = std::max(hiCorner[dir], x[dir]);
+          }
+        }
+
+        RealVect invExtent = RealVect::Zero;
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          invExtent[dir] = (hiCorner[dir] > loCorner[dir]) ? 1.0 / (hiCorner[dir] - loCorner[dir]) : 0.0;
+        }
+
+        constexpr uint32_t                                         maxCoord = (1U << 21) - 1U;
+        thread_local std::vector<std::pair<uint64_t, std::size_t>> keyed;
+        keyed.clear();
+        keyed.reserve(particles.size());
+        for (std::size_t i = 0; i < particles.size(); i++) {
+          const RealVect&                x = (particles[i].*packPosition)();
+          std::array<uint32_t, SpaceDim> coords;
+          for (int dir = 0; dir < SpaceDim; dir++) {
+            Real t      = (x[dir] - loCorner[dir]) * invExtent[dir];
+            t           = std::max(0.0, std::min(1.0, t));
+            coords[dir] = static_cast<uint32_t>(t * maxCoord);
+          }
+          keyed.emplace_back(LoadBalancing::hilbertIndex<SpaceDim>(coords), i);
+        }
+        std::sort(keyed.begin(), keyed.end(), [](const auto& a, const auto& b) {
+          return a.first < b.first;
+        });
+
+        thread_local std::vector<Packed> sorted;
+        sorted.clear();
+        sorted.reserve(particles.size());
+        for (const auto& k : keyed) {
+          sorted.push_back(particles[k.second]);
+        }
+        particles.swap(sorted);
+
+        mergeAdjacentNearest<Packed, packPosition>(particles, target, a_combine);
+      }
+      else if (particles.size() < target) {
+        while (particles.size() < target) {
+          std::size_t hi = 0;
+          for (std::size_t i = 1; i < particles.size(); i++) {
+            if ((particles[i].*packWeight)() > (particles[hi].*packWeight)()) {
+              hi = i;
+            }
+          }
+          if ((particles[hi].*packWeight)() < 2.0) {
+            break;
+          }
+          Packed half = particles[hi];
+          (particles[hi].*packWeight)() *= 0.5;
+          (half.*packWeight)() *= 0.5;
+          particles.push_back(half);
+        }
+      }
+      CH_STOP(t2);
+
+      CH_START(t3);
+      a_particles.clear();
+      for (const Packed& p : particles) {
+        a_scatter(a_particles, p);
+      }
+      CH_STOP(t3);
+    };
   }
 
   template <typename P, typename Traits, typename T, typename>

@@ -110,6 +110,51 @@ namespace ParticleManagement {
                        const std::function<void(P&, const P&)>& a_combine) noexcept;
 
   /**
+    @brief Create a space-filling-curve nearest-neighbor super-particle merger as a reusable ParticleMerger.
+    @details Returns a merger functor that reduces (or grows) the particle set in a single SoA cell to the
+    target count without forcing equal weights.
+
+    When the cell contains more particles than the target:
+      1. The intermediate list is sorted along a 21-bit Hilbert curve computed from particle positions.
+      2. `mergeAdjacentNearest` merges the closest adjacent pair repeatedly until the target count is
+         reached, delegating payload arithmetic to @c a_combine.
+
+    When the cell contains fewer particles than the target: the heaviest particle (by @c packWeight) is
+    repeatedly split into two co-located halves (weight divided by two, all other fields copied) until the
+    target is reached or no particle has weight >= 2.
+
+    The three user-supplied lambdas encode the particle-type-specific semantics:
+      - @c a_gather packs one SoA slot into the lightweight intermediate type @c Packed.
+      - @c a_combine merges the second @c Packed particle into the first (weight-weighted centroid is the
+        typical choice, but the caller decides).
+      - @c a_scatter appends one surviving @c Packed particle back to the (already-cleared) SoA.
+
+    Implementation note: thread-local scratch vectors are reused across cells so there is no per-cell heap
+    allocation after the first call on a given thread.
+
+    @tparam Packed      Lightweight AoS intermediate type (e.g. NonCommParticle<M,N>). Must be copyable.
+    @tparam packWeight  Member-function pointer `Real& (Packed::*)()` giving mutable access to the weight.
+                        Used only for the split path.
+    @tparam packPosition Member-function pointer `const RealVect& (Packed::*)() const` giving the position.
+                        Used for Hilbert-key computation and forwarded to mergeAdjacentNearest.
+    @tparam P           SoA payload type.
+    @tparam Traits      Column descriptor for @c P (defaults to ParticleTraits<P>).
+    @param[in] a_gather   Per-slot gather: `(const ParticleSoA<P,Traits>&, std::size_t) -> Packed`.
+    @param[in] a_combine  In-place merge: `(Packed& first, const Packed& second) -> void`.
+    @param[in] a_scatter  Append one merged particle: `(ParticleSoA<P,Traits>&, const Packed&) -> void`.
+    @return A ParticleMerger<P, Traits> ready to be stored in e.g. ItoSolver::m_particleMerger.
+  */
+  template <class Packed,
+            Real& (Packed::*packWeight)(),
+            const RealVect& (Packed::*packPosition)() const,
+            class P,
+            class Traits = ParticleTraits<P>>
+  inline ParticleMerger<P, Traits>
+  makeSfcNearestNeighborMerger(std::function<Packed(const ParticleSoA<P, Traits>&, std::size_t)> a_gather,
+                               std::function<void(Packed&, const Packed&)>                       a_combine,
+                               std::function<void(ParticleSoA<P, Traits>&, const Packed&)>       a_scatter) noexcept;
+
+  /**
     @brief Remove physical particles from an SoA container (operates on the container-owned weight column).
     @param[in,out] a_particles           Input SoA particle container.
     @param[in]    a_numPhysPartToRemove Number of physical particles to remove.

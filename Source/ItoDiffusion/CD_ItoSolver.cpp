@@ -30,7 +30,6 @@
 #include <CD_ParticleLoops.H>
 #include <CD_DischargeIO.H>
 #include <CD_ParticleManagement.H>
-#include <CD_LoadBalancing.H>
 #include <CD_EBParticleMesh.H>
 #include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
@@ -51,8 +50,6 @@ ItoSolver::ItoSolver()
     m_plotDeposition(DepositionType::CIC)
 {
   CH_TIME("ItoSolver::ItoSolver");
-
-  // Default settings
 
   // Default is to not merge particles
   m_particleMerger = [](ParticleSoA<ItoParticle>& a_particles, const CellInfo& a_cellInfo, const int a_ppc) {
@@ -430,9 +427,36 @@ ItoSolver::parseParticleMerger()
     };
   }
   else if (str == "sfc_nn") {
-    m_particleMerger = [this](ParticleSoA<ItoParticle>& a_particles, const CellInfo& a_cellInfo, const int a_ppc) {
-      this->makeSuperparticlesSfcNearestNeighbor(a_particles, a_cellInfo, a_ppc);
+    using PType = NonCommParticle<2, 1>; // real<0>=weight, real<1>=energy, vect<0>=position
+
+    const std::function<PType(const ParticleSoA<ItoParticle>&, std::size_t)> gather =
+      [](const ParticleSoA<ItoParticle>& a, const std::size_t i) -> PType {
+      PType p;
+      p.template real<0>() = a.weight(i);
+      p.template real<1>() = a.template get<&ItoParticle::energy>(i);
+      p.template vect<0>() = a.position(i);
+      return p;
     };
+
+    const std::function<void(PType&, const PType&)> combine = [](PType& a, const PType& b) -> void {
+      const Real wa        = a.template real<0>();
+      const Real wb        = b.template real<0>();
+      const Real w         = wa + wb;
+      const Real inv       = (w > 0.0) ? 1.0 / w : 0.0;
+      a.template vect<0>() = (wa * a.template vect<0>() + wb * b.template vect<0>()) * inv;
+      a.template real<1>() = (wa * a.template real<1>() + wb * b.template real<1>()) * inv;
+      a.template real<0>() = w;
+    };
+
+    const std::function<void(ParticleSoA<ItoParticle>&, const PType&)> scatter = [](ParticleSoA<ItoParticle>& a,
+                                                                                    const PType& p) -> void {
+      ItoParticle payload;
+      payload.energy = static_cast<ParticleReal>(p.template real<1>());
+      a.append(p.template vect<0>(), p.template real<0>(), payload);
+    };
+
+    m_particleMerger = ParticleManagement::
+      makeSfcNearestNeighborMerger<PType, &PType::template real<0>, &PType::template vect<0>>(gather, combine, scatter);
   }
   else if (str == "external") {
     // Do nothing, because the user will set the merger algorithm through setParticleMerger
@@ -3535,127 +3559,6 @@ ItoSolver::makeSuperparticlesBVHReinitialize(ParticleSoA<ItoParticle>& a_particl
       payload.energy = static_cast<ParticleReal>(e);
       a_particles.append(x, w, payload);
     }
-  }
-  CH_STOP(t3);
-}
-
-void
-ItoSolver::makeSuperparticlesSfcNearestNeighbor(ParticleSoA<ItoParticle>& a_particles,
-                                                const CellInfo& /*a_cellInfo*/,
-                                                const int a_ppc) const noexcept
-{
-  CH_TIMERS("ItoSolver::makeSuperparticlesSfcNearestNeighbor");
-  CH_TIMER("ItoSolver::makeSuperparticlesSfcNearestNeighbor::populate_list", t1);
-  CH_TIMER("ItoSolver::makeSuperparticlesSfcNearestNeighbor::sort_merge", t2);
-  CH_TIMER("ItoSolver::makeSuperparticlesSfcNearestNeighbor::emit", t3);
-
-  using PType = NonCommParticle<2, 1>; // real<0>=weight, real<1>=energy, vect<0>=position
-
-  // 1. Populate the lightweight AoS list (reused across cells).
-  CH_START(t1);
-  thread_local std::vector<PType> particles;
-  particles.clear();
-  particles.reserve(a_particles.size());
-  Real W = 0.0;
-  for (std::size_t i = 0; i < a_particles.size(); i++) {
-    PType p;
-    p.template real<0>() = a_particles.weight(i);
-    p.template real<1>() = a_particles.template get<&ItoParticle::energy>(i);
-    p.template vect<0>() = a_particles.position(i);
-    W += a_particles.weight(i);
-    particles.emplace_back(p);
-  }
-  CH_STOP(t1);
-
-  if (W < 2.0) {
-    return;
-  }
-
-  const std::size_t target = static_cast<std::size_t>(a_ppc);
-
-  CH_START(t2);
-  if (particles.size() > target) {
-    // Too many particles: Hilbert-sort, then merge nearest neighbours down to the target count.
-    RealVect loCorner = +std::numeric_limits<Real>::max() * RealVect::Unit;
-    RealVect hiCorner = -std::numeric_limits<Real>::max() * RealVect::Unit;
-    for (const PType& p : particles) {
-      const RealVect& x = p.template vect<0>();
-      for (int dir = 0; dir < SpaceDim; dir++) {
-        loCorner[dir] = std::min(loCorner[dir], x[dir]);
-        hiCorner[dir] = std::max(hiCorner[dir], x[dir]);
-      }
-    }
-    RealVect invExtent = RealVect::Zero;
-    for (int dir = 0; dir < SpaceDim; dir++) {
-      invExtent[dir] = (hiCorner[dir] > loCorner[dir]) ? 1.0 / (hiCorner[dir] - loCorner[dir]) : 0.0;
-    }
-
-    constexpr uint32_t                                         maxCoord = (1U << 21) - 1U;
-    thread_local std::vector<std::pair<uint64_t, std::size_t>> keyed;
-    keyed.clear();
-    keyed.reserve(particles.size());
-    for (std::size_t i = 0; i < particles.size(); i++) {
-      const RealVect&                x = particles[i].template vect<0>();
-      std::array<uint32_t, SpaceDim> coords;
-      for (int dir = 0; dir < SpaceDim; dir++) {
-        Real t      = (x[dir] - loCorner[dir]) * invExtent[dir];
-        t           = std::max(0.0, std::min(1.0, t));
-        coords[dir] = static_cast<uint32_t>(t * maxCoord);
-      }
-      keyed.emplace_back(LoadBalancing::hilbertIndex<SpaceDim>(coords), i);
-    }
-    std::sort(keyed.begin(), keyed.end(), [](const auto& a, const auto& b) {
-      return a.first < b.first;
-    });
-
-    thread_local std::vector<PType> sorted;
-    sorted.clear();
-    sorted.reserve(particles.size());
-    for (const auto& k : keyed) {
-      sorted.push_back(particles[k.second]);
-    }
-    particles.swap(sorted);
-
-    // Combine two particles into a weight-weighted superparticle (position centroid + energy average).
-    const std::function<void(PType&, const PType&)> combine = [](PType& a, const PType& b) -> void {
-      const Real wa        = a.template real<0>();
-      const Real wb        = b.template real<0>();
-      const Real w         = wa + wb;
-      const Real inv       = (w > 0.0) ? 1.0 / w : 0.0;
-      a.template vect<0>() = (wa * a.template vect<0>() + wb * b.template vect<0>()) * inv;
-      a.template real<1>() = (wa * a.template real<1>() + wb * b.template real<1>()) * inv;
-      a.template real<0>() = w;
-    };
-
-    ParticleManagement::mergeAdjacentNearest<PType, &PType::template vect<0>>(particles, target, combine);
-  }
-  else if (particles.size() < target) {
-    // Too few particles: split the highest-weight ones (co-located halving) up to the target count.
-    while (particles.size() < target) {
-      std::size_t hi = 0;
-      for (std::size_t i = 1; i < particles.size(); i++) {
-        if (particles[i].template real<0>() > particles[hi].template real<0>()) {
-          hi = i;
-        }
-      }
-      if (particles[hi].template real<0>() < 2.0) {
-        break; // cannot split a (near-)unit-weight computational particle
-      }
-      PType half = particles[hi];
-      half.template real<0>() *= 0.5;
-      particles[hi].template real<0>() *= 0.5;
-      particles.push_back(half);
-    }
-  }
-  CH_STOP(t2);
-
-  // 3. Emit the resulting particles into the SoA container.
-  CH_START(t3);
-  a_particles.clear();
-  for (const PType& p : particles) {
-    ItoParticle payload;
-    payload.energy = static_cast<ParticleReal>(p.template real<1>());
-    a_particles.append(p.template vect<0>(), p.template real<0>(), payload);
   }
   CH_STOP(t3);
 }
