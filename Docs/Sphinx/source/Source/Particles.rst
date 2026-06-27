@@ -119,7 +119,7 @@ _____________________
 To get the per-level holders from a ``ParticleContainer<P, Traits>`` one can call ``getParticles()``:
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 305-313
+   :lines: 311-319
    :language: c++
    :dedent: 2
 
@@ -253,7 +253,7 @@ Particles that move off their original grid patch must be remapped in order to e
 The remapping function for ``ParticleContainer<P, Traits>`` is
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 565-574
+   :lines: 571-580
    :language: c++
    :dedent: 2
 
@@ -288,7 +288,7 @@ This is done as follows:
 1. *Before* creating the new grids, each MPI rank caches its current particles by calling
 
    .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-      :lines: 576-583
+      :lines: 582-589
       :language: c++
       :dedent: 2
 
@@ -297,7 +297,7 @@ This is done as follows:
 2. When ``ParticleContainer<P, Traits>`` regrids, the cached particles are redistributed onto the new layout by calling the regrid function:
 
    .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-      :lines: 585-605
+      :lines: 591-614
       :language: c++
       :dedent: 2
 
@@ -322,7 +322,7 @@ To fill the masked particles, ``ParticleContainer<P, Traits>`` has member functi
 The function signature for this is
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 618-619
+   :lines: 627-628
    :language: c++
    :dedent: 2
 
@@ -330,7 +330,7 @@ The argument ``a_mask`` holds a bool at each cell in the AMR hierarchy.
 Particles that live in cells where ``a_mask`` is true will be copied to an internal holder which can be retrieved through
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 325-333
+   :lines: 331-339
    :language: c++
    :dedent: 2
 
@@ -338,7 +338,7 @@ In the above functions the mask particles are *copied*, and the original particl
 After the user is done with the particles, they should be released through
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 648-652
+   :lines: 657-661
    :language: c++
    :dedent: 2
 
