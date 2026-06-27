@@ -43,11 +43,15 @@ public:
     @brief Constructor
     @param[in] a_coarsestDomain Coarsest grid domain
     @param[in] a_refRatios      Refinement ratios
-    @param[in] a_tileSize       Tile size
+    @param[in] a_tileSize       Tile size (= minimum block size, in cells)
+    @param[in] a_maxBoxSize     Maximum box size (in cells). Tiles are merged into boxes no larger than
+                                this per direction. Must be a multiple of a_tileSize. When equal to
+                                a_tileSize the output is one box per tile (legacy behaviour).
   */
   TiledMeshRefine(const ProblemDomain& a_coarsestDomain,
                   const Vector<int>&   a_refRatios,
-                  const IntVect&       a_tileSize) noexcept;
+                  const IntVect&       a_tileSize,
+                  const IntVect&       a_maxBoxSize) noexcept;
 
   /**
     @brief Destructor (does nothing)
@@ -86,9 +90,14 @@ protected:
   Vector<int> m_refRatios;
 
   /**
-    @brief Tile size
+    @brief Tile size (= minimum block size, in cells)
   */
   IntVect m_tileSize;
+
+  /**
+    @brief Maximum box size (in cells). Merge cap; a multiple of m_tileSize.
+  */
+  IntVect m_maxBoxSize;
 
   /**
     @brief Make tiles on the current level from tags and tile coarsening from finer levels
@@ -109,12 +118,28 @@ protected:
 
   /**
     @brief Turn tiles into boxes
+    @details When m_maxBoxSize == m_tileSize this emits one box per tile (legacy behaviour). Otherwise
+    it merges adjacent tiles into fewer, larger, possibly anisotropic boxes via mergeTiles.
     @param[out] a_boxes  Grid boxes generated from the tiles
     @param[in]  a_tiles  Tiles to convert
     @param[in]  a_domain Problem domain
   */
   virtual void
   makeBoxesFromTiles(Vector<Box>& a_boxes, const TileSet& a_tiles, const ProblemDomain& a_domain) const noexcept;
+
+  /**
+    @brief Merge a set of tiles into variable-sized (possibly anisotropic) boxes.
+    @details KD / Berger-Rigoutsos recursive longest-axis bisection over the tile grid. Each emitted box
+    is a union of aligned tiles, fully tagged, and no larger than m_maxBoxSize per direction. The result
+    is a pure, deterministic function of the (globally identical) tile set and a fixed longest-axis/cut
+    rule, so every rank computes the same boxes. Covers exactly the same cells as the one-box-per-tile
+    output, with far fewer boxes.
+    @param[out] a_boxes  Grid boxes generated from the tiles
+    @param[in]  a_tiles  Tiles to merge
+    @param[in]  a_domain Problem domain (supplies the cell-space origin)
+  */
+  virtual void
+  mergeTiles(Vector<Box>& a_boxes, const TileSet& a_tiles, const ProblemDomain& a_domain) const noexcept;
 };
 
 #include <CD_NamespaceFooter.H>

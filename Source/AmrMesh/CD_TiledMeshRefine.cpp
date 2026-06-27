@@ -11,7 +11,9 @@
 */
 
 // Std includes
+#include <algorithm>
 #include <set>
+#include <vector>
 
 // Chombo includes
 #include <CH_Timer.H>
@@ -25,10 +27,16 @@
 
 TiledMeshRefine::TiledMeshRefine(const ProblemDomain& a_coarsestDomain,
                                  const Vector<int>&   a_refRatios,
-                                 const IntVect&       a_tileSize) noexcept
-  : m_refRatios(a_refRatios), m_tileSize(a_tileSize)
+                                 const IntVect&       a_tileSize,
+                                 const IntVect&       a_maxBoxSize) noexcept
+  : m_refRatios(a_refRatios), m_tileSize(a_tileSize), m_maxBoxSize(a_maxBoxSize)
 {
   CH_TIME("TiledMeshRefine::TiledMeshRefine");
+
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    CH_assert(a_maxBoxSize[dir] >= a_tileSize[dir]);
+    CH_assert(a_maxBoxSize[dir] % a_tileSize[dir] == 0);
+  }
 
   m_amrDomains.resize(0);
 
@@ -208,6 +216,19 @@ TiledMeshRefine::makeBoxesFromTiles(Vector<Box>&         a_boxes,
 {
   CH_TIME("TiledMeshRefine::makeBoxesFromTiles");
 
+  // When the cap equals the tile size there is nothing to merge -> one box per tile (legacy behaviour).
+  bool merge = false;
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    if (m_maxBoxSize[dir] > m_tileSize[dir]) {
+      merge = true;
+    }
+  }
+
+  if (merge) {
+    this->mergeTiles(a_boxes, a_tileSet, a_domain);
+    return;
+  }
+
   a_boxes.resize(0);
 
   const IntVect probLo = a_domain.domainBox().smallEnd();
@@ -219,9 +240,155 @@ TiledMeshRefine::makeBoxesFromTiles(Vector<Box>&         a_boxes,
     }
     const IntVect boxHi = boxLo + m_tileSize - IntVect::Unit;
 
-    const Box box(boxLo, boxHi);
-
     a_boxes.push_back(Box(boxLo, boxHi));
+  }
+}
+
+void
+TiledMeshRefine::mergeTiles(Vector<Box>& a_boxes, const TileSet& a_tiles, const ProblemDomain& a_domain) const noexcept
+{
+  CH_TIME("TiledMeshRefine::mergeTiles");
+
+  a_boxes.resize(0);
+
+  if (a_tiles.empty()) {
+    return;
+  }
+
+  // Cap in TILE units (the constructor guarantees m_maxBoxSize % m_tileSize == 0).
+  IntVect maxTile;
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    maxTile[dir] = m_maxBoxSize[dir] / m_tileSize[dir];
+  }
+
+  // Flatten the (sorted, globally identical) tile set into a contiguous buffer we can partition in place.
+  std::vector<IntVect> tiles;
+  tiles.reserve(a_tiles.size());
+  for (const Tile& t : a_tiles) {
+    tiles.emplace_back(D_DECL(t[0], t[1], t[2]));
+  }
+
+  IntVect* const T = tiles.data();
+
+  // Bounding box (in tile coordinates) of a contiguous range [b, e).
+  auto bbox = [&](const std::size_t b, const std::size_t e, IntVect& lo, IntVect& hi) {
+    lo = T[b];
+    hi = T[b];
+    for (std::size_t i = b + 1; i < e; i++) {
+      for (int d = 0; d < SpaceDim; d++) {
+        lo[d] = std::min(lo[d], T[i][d]);
+        hi[d] = std::max(hi[d], T[i][d]);
+      }
+    }
+  };
+
+  struct Work
+  {
+    std::size_t b, e;
+    IntVect     lo, hi;
+  };
+
+  std::vector<Work> stack;
+  stack.reserve(64);
+  {
+    IntVect lo, hi;
+    bbox(0, tiles.size(), lo, hi);
+    stack.push_back({0, tiles.size(), lo, hi});
+  }
+
+  const IntVect probLo = a_domain.domainBox().smallEnd();
+
+  std::vector<int> hist; // reused per node
+
+  while (!stack.empty()) {
+    const Work w = stack.back();
+    stack.pop_back();
+
+    const std::size_t cnt = w.e - w.b;
+
+    long long vol  = 1;
+    bool      fits = true;
+    for (int d = 0; d < SpaceDim; d++) {
+      const int ext = w.hi[d] - w.lo[d] + 1;
+      vol *= ext;
+      if (ext > maxTile[d]) {
+        fits = false;
+      }
+    }
+
+    if (fits && vol == static_cast<long long>(cnt)) {
+      // Fully tagged and within the cap -> emit one (anisotropic) box in cell coordinates.
+      const IntVect boxLo = probLo + w.lo * m_tileSize;
+      const IntVect boxHi = probLo + (w.hi + IntVect::Unit) * m_tileSize - IntVect::Unit;
+      a_boxes.push_back(Box(boxLo, boxHi));
+      continue;
+    }
+
+    // ---- choose split direction + cut plane (split into [lo, cut) and [cut, hi]) ----
+    int dir = 0;
+    int cut = 0;
+
+    // Over the cap in some direction? Split the most-over direction at a max-tile multiple.
+    int overDir = -1;
+    for (int d = 0; d < SpaceDim; d++) {
+      if (w.hi[d] - w.lo[d] + 1 > maxTile[d]) {
+        if (overDir < 0 || (w.hi[d] - w.lo[d]) > (w.hi[overDir] - w.lo[overDir])) {
+          overDir = d;
+        }
+      }
+    }
+
+    if (overDir >= 0) {
+      dir = overDir;
+      cut = w.lo[dir] + maxTile[dir]; // align cap-cuts to the tile-grid origin
+    }
+    else {
+      // Longest extent (tie -> lowest index).
+      for (int d = 1; d < SpaceDim; d++) {
+        if ((w.hi[d] - w.lo[d]) > (w.hi[dir] - w.lo[dir])) {
+          dir = d;
+        }
+      }
+      const int ext = w.hi[dir] - w.lo[dir] + 1;
+      hist.assign(ext, 0);
+      for (std::size_t i = w.b; i < w.e; i++) {
+        hist[T[i][dir] - w.lo[dir]]++;
+      }
+
+      // Prefer a zero-tag gap nearest the middle (deterministic outward scan); else cut at the middle.
+      const int mid  = ext / 2;
+      int       best = -1;
+      for (int delta = 0; delta < ext && best < 0; delta++) {
+        const int kLo = mid - delta;
+        const int kHi = mid + delta;
+        if (kLo > 0 && kLo < ext && hist[kLo] == 0) {
+          best = kLo;
+        }
+        else if (kHi > 0 && kHi < ext && hist[kHi] == 0) {
+          best = kHi;
+        }
+      }
+      cut = (best >= 0) ? (w.lo[dir] + best) : (w.lo[dir] + std::max(1, mid));
+    }
+
+    // Partition [b, e) by coord[dir] < cut.
+    IntVect* const    beg  = T + w.b;
+    IntVect* const    end  = T + w.e;
+    IntVect* const    m    = std::partition(beg, end, [dir, cut](const IntVect& t) {
+      return t[dir] < cut;
+    });
+    const std::size_t mIdx = static_cast<std::size_t>(m - T);
+
+    if (mIdx > w.b) {
+      IntVect lo, hi;
+      bbox(w.b, mIdx, lo, hi);
+      stack.push_back({w.b, mIdx, lo, hi});
+    }
+    if (mIdx < w.e) {
+      IntVect lo, hi;
+      bbox(mIdx, w.e, lo, hi);
+      stack.push_back({mIdx, w.e, lo, hi});
+    }
   }
 }
 

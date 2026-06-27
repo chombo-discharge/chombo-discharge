@@ -1195,7 +1195,10 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
       break;
     }
     case GridGenerationMethod::Tiled: {
-      TiledMeshRefine meshRefine(m_domains[0], m_refinementRatios, m_minBlockSize * IntVect::Unit);
+      TiledMeshRefine meshRefine(m_domains[0],
+                                 m_refinementRatios,
+                                 m_minBlockSize * IntVect::Unit,
+                                 m_maxBoxSize * IntVect::Unit);
 
       newFinestLevel = meshRefine.regrid(newBoxes, a_tags);
       newBoxes[0]    = oldBoxes[0];
@@ -2918,6 +2921,18 @@ AmrMesh::sanityCheck() const
   CH_assert(m_maxBoxSize >= 8 && m_maxBoxSize % m_minBlockSize == 0);
   CH_assert(m_fillRatioBR > 0. && m_fillRatioBR <= 1.0);
   CH_assert(m_bufferSizeBR > 0);
+
+  // The coarsest domain must be a whole number of minimum-size blocks in every direction. Refined
+  // domains inherit this, and every grid box is then a union of aligned min_block_size tiles. Chombo's
+  // domainSplit hard-errors otherwise; front-run it with a clear message.
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    if (m_numCells[dir] % m_minBlockSize != 0) {
+      const std::string msg = "AmrMesh::sanityCheck -- coarsest_domain[" + std::to_string(dir) +
+                              "] = " + std::to_string(m_numCells[dir]) +
+                              " is not a multiple of min_block_size = " + std::to_string(m_minBlockSize);
+      MayDay::Abort(msg.c_str());
+    }
+  }
 
   bool badRes = false;
 
