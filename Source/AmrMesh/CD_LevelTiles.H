@@ -26,9 +26,12 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Class for storing the AMR hierarchy as a collection of tiles. 
-  @details This class only makes sense in terms of a grid which uses constant-size grid, which is a restriction we happily accept when using particles. This class
-  decomposes the AMR hierarchy into such tiles, each tile being the cells spanned by the minBlockSize^SpaceDim grid patch. 
+  @brief Class for storing the AMR hierarchy as a collection of tiles.
+  @details This class decomposes the AMR hierarchy into uniform tiles, each tile being the cells spanned by a
+  minBlockSize^SpaceDim grid patch, and maps each tile to the grid box that contains it. Boxes may be larger than
+  one tile (variable-sized/anisotropic boxes that are unions of aligned minBlockSize tiles): such a box is
+  registered under every tile it covers, so the tile->box map stays uniform and a point->tile->box lookup is O(1).
+  When minBlockSize == maxBoxSize every box is exactly one tile (the one-tile-per-box fast path).
 */
 class LevelTiles
 {
