@@ -408,10 +408,13 @@ ItoSolver::parseParticleMerger()
 
   pp.get("merge_algorithm", str);
   if (str == "none") {
+    // No merging: the merger is a no-op and particles are left unchanged.
     m_particleMerger = [](ParticleSoA<ItoParticle>& a_particles, const CellInfo& a_cellInfo, const int a_ppc) {
     };
   }
   else if (str == "equal_weight_kd") {
+    // Recursively partition particles into at most a_ppc equal-weight KD leaves, then reduce each leaf
+    // to one particle at the weighted-centroid position. Requires particle weights >= 1 to split.
     using PType = NonCommParticle<2, 1>; // real<0>=weight, real<1>=energy, vect<0>=position
 
     // Pack ItoParticle fields into the lightweight intermediate type.
@@ -460,6 +463,9 @@ ItoSolver::parseParticleMerger()
                                                                                          scatterLeaf);
   }
   else if (str == "reinitialize") {
+    // Sums the total number of physical particles in the cell, then redistributes them into at most a_ppc
+    // computational particles with as-equal-as-possible integer weights, placed at random cell positions.
+    // All output particles carry the same weight-averaged energy. Requires integer-valued weights.
     const RealVect probLo = m_amr->getProbLo();
 
     // Sum physical particle count and compute weight-averaged energy across the cell.
@@ -493,6 +499,9 @@ ItoSolver::parseParticleMerger()
     m_particleMerger = ParticleManagement::makeReinitializeMerger<Real, ItoParticle>(aggregate, emit, probLo);
   }
   else if (str == "reinitialize_bvh") {
+    // Same KD partition as equal_weight_kd, but leaf positions are reinitialized: cut-cells use the
+    // weighted centroid (to stay inside the EB), full cells draw a random point in the leaf bounding box.
+    // Requires particle weights >= 1 to split.
     using PType = NonCommParticle<2, 1>; // real<0>=weight, real<1>=energy, vect<0>=position
 
     // Pack ItoParticle fields into the lightweight intermediate type.
@@ -572,6 +581,8 @@ ItoSolver::parseParticleMerger()
                                                                                          scatterLeaf);
   }
   else if (str == "sfc_nn") {
+    // Sorts particles along a Hilbert curve, then merges adjacent pairs until the count reaches a_ppc.
+    // Produces better spatial locality than the KD methods and does not require integer weights.
     using PType = NonCommParticle<2, 1>; // real<0>=weight, real<1>=energy, vect<0>=position
 
     // Pack ItoParticle fields into the lightweight intermediate type.
