@@ -615,8 +615,8 @@ The recommended pattern operates on one cell at a time: cell-sort the leaf, extr
 and the merged result is accumulated into an output ``ParticleSoA`` (via ``append``) which finally replaces the leaf with ``swap``.
 A complete worked example is ``ItoSolver::makeSuperparticles`` in :file:`$DISCHARGE_HOME/Source/ItoDiffusion/CD_ItoSolver.cpp`.
 
-``chombo-discharge`` has rather elementary support for handling superparticles.
-Currently, we only support reinitialization of particles, or agglomeration of particles using kD-trees, as discussed below.
+``chombo-discharge`` supports four merger strategies, all implemented as factory functions in ``ParticleManagement`` that return a ``ParticleMerger<P, Traits>`` functor.
+Each factory accepts user-supplied lambdas for the particle-type-specific gather, reduce, and scatter steps, so the same algorithm can be reused with any ``ParticleSoA`` payload type.
 
 kD-trees
 ________
@@ -657,3 +657,84 @@ Since the weight in the nodes of the tree differ by at most one, the resulting c
    kD-tree partitioning of particles into new particles whose weight differ by at most one.
    Left: Original particles with weights between 1 and 100.
    Right: Merged particles.
+
+KD-tree merging (``equal_weight_kd``)
+______________________________________
+
+``ParticleManagement::makeEqualWeightKDMerger`` wraps ``buildEqualWeightKDLeaves`` into a ``ParticleMerger`` functor.
+The caller provides three lambdas:
+
+* A *gather* function that packs one SoA slot into a ``NonCommParticle``.
+* A *reconcile* function (``BinaryParticleReconcile``) that propagates payload fields to both daughter particles when the median particle is split across a KD boundary.
+* A *scatter-leaf* function that receives the raw ``[first, last)`` pointer range of one leaf and appends exactly one merged particle to the SoA.
+
+.. literalinclude:: ../../../../Source/Particle/CD_ParticleManagement.H
+   :language: c++
+   :lines: 191-200
+   :dedent: 2
+
+In the weighted-centroid variant (``equal_weight_kd`` in ``ItoSolver``), the scatter-leaf computes the weight-averaged position and energy over all particles in the leaf.
+Particle weights need not be integers, but ``buildEqualWeightKDLeaves`` may create new particles at the KD boundaries (see warning above), so the total computational-particle count may exceed the target by a small amount during the build before being reduced.
+
+KD-tree with reinitialization (``reinitialize_bvh``)
+______________________________________________________
+
+The ``reinitialize_bvh`` variant uses the same ``makeEqualWeightKDMerger`` factory and the same KD partition, but replaces the centroid scatter with a position-reinitialising scatter:
+
+* **Cut-cells** (``volFrac < 1``): the weighted centroid is used to keep the merged particle inside the embedded boundary.
+* **Full cells**: a random point is drawn uniformly from the bounding box of the leaf, reinitialising the spatial distribution within each KD partition rather than collapsing it to a single point.
+
+This avoids accumulating all merged particles at a cluster of centroid positions in full cells, at the cost of discarding the fine-scale spatial information within each leaf.
+
+.. note::
+
+   In the full-cell branch, energy is accumulated over the leaf but is *not* normalised by weight -- the stored value is the total (not average) energy of the leaf.
+   This is intentional and matches the original ``ItoSolver`` behaviour.
+
+Reinitialization (``reinitialize``)
+_____________________________________
+
+``ParticleManagement::makeReinitializeMerger`` discards all spatial information and rebuilds the cell from scratch.
+
+.. literalinclude:: ../../../../Source/Particle/CD_ParticleManagement.H
+   :language: c++
+   :lines: 231-236
+   :dedent: 2
+
+The returned functor proceeds as follows:
+
+1. Calls *aggregate* once on the input SoA to obtain the total physical-particle count and a caller-defined context (e.g. the weight-averaged energy).
+2. Passes the physical count to ``partitionParticleWeights``, which divides it into at most ``ppc`` integer weights differing by at most one.
+3. For each weight, draws a random position in the cell via ``Random::randomPosition`` (cut-cell aware) and calls *emit* to append the new particle.
+
+All output particles share the same aggregated context, so per-particle information (e.g. individual energies) is lost.
+This method requires that particle weights are (close to) integers.
+
+.. tip::
+
+   ``makeReinitializeMerger`` captures ``probLo`` at parse time.
+   The cell-centre position is computed internally as ``probLo + dx * (gridIndex + 0.5)``, so no grid pointer needs to be retained in the returned functor.
+
+SFC nearest-neighbour merging (``sfc_nn``)
+___________________________________________
+
+``ParticleManagement::makeSfcNearestNeighborMerger`` sorts particles along a Hilbert space-filling curve and merges adjacent pairs until the count is at most ``ppc``.
+
+.. literalinclude:: ../../../../Source/Particle/CD_ParticleManagement.H
+   :language: c++
+   :lines: 147-155
+   :dedent: 2
+
+The caller provides three lambdas:
+
+* A *gather* function that packs one SoA slot into a ``NonCommParticle``.
+* A *combine* function that merges two adjacent intermediates in place (typically a weighted average of position and energy).
+* A *scatter* function that unpacks one merged intermediate back into the SoA.
+
+Unlike the KD-tree methods, SFC merging does not require integer weights.
+Particle counts below ``ppc`` are handled by splitting the heaviest particle: its weight is halved and a copy is appended, repeating until the target is reached (only if the heaviest particle has weight ≥ 2).
+The Hilbert ordering ensures that merged pairs are spatially close, which better preserves spatial correlations than random pairing and typically produces smoother merged distributions than the KD centroid.
+
+.. tip::
+
+   The source code for all merger factories is in :file:`$DISCHARGE_HOME/Source/Particle/CD_ParticleManagement.H`.
