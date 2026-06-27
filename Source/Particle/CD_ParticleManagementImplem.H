@@ -472,6 +472,92 @@ namespace ParticleManagement {
     };
   }
 
+  template <class Packed,
+            Real& (Packed::*packWeight)(),
+            const RealVect& (Packed::*packPosition)() const,
+            class P,
+            class Traits>
+  inline ParticleMerger<P, Traits>
+  makeEqualWeightKDMerger(
+    std::function<Packed(const ParticleSoA<P, Traits>&, std::size_t)>                           a_gather,
+    BinaryParticleReconcile<Packed>                                                             a_reconcile,
+    std::function<void(ParticleSoA<P, Traits>&, const Packed*, const Packed*, const CellInfo&)> a_scatterLeaf) noexcept
+  {
+    return [=](ParticleSoA<P, Traits>& a_particles, const CellInfo& a_cellInfo, int a_ppc) noexcept {
+      CH_TIMERS("ParticleManagement::makeEqualWeightKDMerger");
+      CH_TIMER("ParticleManagement::makeEqualWeightKDMerger::populate", t1);
+      CH_TIMER("ParticleManagement::makeEqualWeightKDMerger::build_kd", t2);
+      CH_TIMER("ParticleManagement::makeEqualWeightKDMerger::scatter", t3);
+
+      CH_START(t1);
+      thread_local std::vector<Packed> particles;
+      particles.clear();
+      particles.reserve(a_particles.size());
+      Real W = 0.0;
+      for (std::size_t i = 0; i < a_particles.size(); i++) {
+        Packed p = a_gather(a_particles, i);
+        W += (p.*packWeight)();
+        particles.emplace_back(std::move(p));
+      }
+      CH_STOP(t1);
+
+      if (W < 2.0 || a_ppc <= 0) {
+        return;
+      }
+
+      CH_START(t2);
+      thread_local std::vector<std::pair<const Packed*, const Packed*>> leaves;
+      buildEqualWeightKDLeaves<Packed, packWeight, packPosition>(particles, a_ppc, a_reconcile, leaves);
+      CH_STOP(t2);
+
+      CH_START(t3);
+      a_particles.clear();
+      for (const auto& leaf : leaves) {
+        a_scatterLeaf(a_particles, leaf.first, leaf.second, a_cellInfo);
+      }
+      CH_STOP(t3);
+    };
+  }
+
+  template <class Context, class P, class Traits>
+  inline ParticleMerger<P, Traits>
+  makeReinitializeMerger(
+    std::function<std::pair<long long, Context>(const ParticleSoA<P, Traits>&)>              a_aggregate,
+    std::function<void(ParticleSoA<P, Traits>&, const RealVect&, long long, const Context&)> a_emit,
+    RealVect                                                                                 a_probLo) noexcept
+  {
+    return [=](ParticleSoA<P, Traits>& a_particles, const CellInfo& a_cellInfo, int a_ppc) noexcept {
+      CH_TIME("ParticleManagement::makeReinitializeMerger");
+
+      if (a_ppc <= 0) {
+        return;
+      }
+
+      const auto [numPhysical, context] = a_aggregate(a_particles);
+
+      if (numPhysical <= 0LL) {
+        return;
+      }
+
+      const std::vector<long long> weights = partitionParticleWeights(numPhysical, (long long)a_ppc);
+
+      const Real      dx            = a_cellInfo.getDx();
+      const Real      kappa         = a_cellInfo.getVolFrac();
+      const RealVect  cellPos       = a_probLo + dx * (a_cellInfo.getGridIndex() + 0.5 * RealVect::Unit);
+      const RealVect& validLo       = a_cellInfo.getValidLo();
+      const RealVect& validHi       = a_cellInfo.getValidHi();
+      const RealVect& bndryCentroid = a_cellInfo.getBndryCentroid();
+      const RealVect& bndryNormal   = a_cellInfo.getBndryNormal();
+
+      a_particles.clear();
+
+      for (const long long wt : weights) {
+        const RealVect x = Random::randomPosition(cellPos, validLo, validHi, bndryCentroid, bndryNormal, dx, kappa);
+        a_emit(a_particles, x, wt, context);
+      }
+    };
+  }
+
   template <typename P, typename Traits, typename T, typename>
   inline void
   removePhysicalParticles(ParticleSoA<P, Traits>& a_particles, const T a_numPhysPartToRemove) noexcept

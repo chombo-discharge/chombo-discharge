@@ -155,6 +155,87 @@ namespace ParticleManagement {
                                std::function<void(ParticleSoA<P, Traits>&, const Packed&)>       a_scatter) noexcept;
 
   /**
+    @brief Create an equal-weight KD-tree super-particle merger as a reusable ParticleMerger.
+    @details Returns a merger functor that partitions the particle set in a single SoA cell into at most
+    @c a_numTargetParticles equal-weight KD leaves and reduces each leaf to one output particle.
+
+    The algorithm:
+      1. Packs each SoA slot into a lightweight intermediate (@c Packed) via @c a_gather and accumulates
+         total weight @c W.
+      2. Returns early if @c W < 2 or the target is non-positive.
+      3. Calls buildEqualWeightKDLeaves to partition the packed list into at most @c a_numTargetParticles
+         leaves, using @c a_reconcile to fix up daughter particles whenever the median is split.
+      4. Clears the SoA container, then reduces each leaf by calling @c a_scatterLeaf once per leaf.
+
+    @c a_scatterLeaf receives the raw [first, last) pointer range of the leaf (pointers into the internal
+    KD scratch buffer, valid only until the next call) and the current CellInfo, so it can implement either
+    a weighted-centroid reduction or a spatially-reinitialised reduction (e.g. random point in the leaf
+    bounding box for non-cut-cells).
+
+    Thread-local scratch vectors are reused across cells — no per-cell heap allocation after warmup.
+
+    @tparam Packed       Lightweight AoS intermediate type (e.g. NonCommParticle<M,N>). Must be copyable.
+    @tparam packWeight   Member-function pointer `Real& (Packed::*)()` giving mutable access to the weight.
+                         Forwarded to buildEqualWeightKDLeaves for median splitting.
+    @tparam packPosition Member-function pointer `const RealVect& (Packed::*)() const` giving the position.
+                         Forwarded to buildEqualWeightKDLeaves for bounding-box splitting.
+    @tparam P            SoA payload type.
+    @tparam Traits       Column descriptor for @c P (defaults to ParticleTraits<P>).
+    @param[in] a_gather      Per-slot gather: `(const ParticleSoA<P,Traits>&, std::size_t) -> Packed`.
+    @param[in] a_reconcile   Daughter reconciliation: `(Packed& p1, Packed& p2, const Packed& p0) -> void`.
+    @param[in] a_scatterLeaf Leaf reducer: `(ParticleSoA<P,Traits>&, const Packed* first,
+                             const Packed* last, const CellInfo&) -> void`.  Appends exactly one merged
+                             particle per call.
+    @return A ParticleMerger<P, Traits> ready to be stored in e.g. ItoSolver::m_particleMerger.
+  */
+  template <class Packed,
+            Real& (Packed::*packWeight)(),
+            const RealVect& (Packed::*packPosition)() const,
+            class P,
+            class Traits = ParticleTraits<P>>
+  inline ParticleMerger<P, Traits>
+  makeEqualWeightKDMerger(
+    std::function<Packed(const ParticleSoA<P, Traits>&, std::size_t)>                           a_gather,
+    BinaryParticleReconcile<Packed>                                                             a_reconcile,
+    std::function<void(ParticleSoA<P, Traits>&, const Packed*, const Packed*, const CellInfo&)> a_scatterLeaf) noexcept;
+
+  /**
+    @brief Create a reinitialize super-particle merger as a reusable ParticleMerger.
+    @details Returns a merger functor that collapses all physical particles in a cell into at most
+    @c a_numTargetParticles new computational particles, placing them at random positions within the cell.
+
+    The algorithm:
+      1. Calls @c a_aggregate once on the input SoA to obtain the total physical-particle count and an
+         arbitrary caller-defined context (e.g. the weight-averaged energy for ItoParticle).
+      2. Returns early if the physical count is non-positive or the target is non-positive.
+      3. Calls partitionParticleWeights to divide the physical count into at most @c a_numTargetParticles
+         integer weights.
+      4. Clears the SoA; for each weight draws a random position in the cell via
+         Random::randomPosition and calls @c a_emit once.
+
+    The cell position is computed as @c a_probLo + dx * (gridIndex + 0.5), matching the formula used
+    in ItoSolver::reinitializeParticles.
+
+    @tparam Context  Arbitrary aggregated payload type (e.g. @c Real for average energy).  Must be
+                     copyable and default-constructible.
+    @tparam P        SoA payload type.
+    @tparam Traits   Column descriptor for @c P (defaults to ParticleTraits<P>).
+    @param[in] a_aggregate Aggregate functor: `(const ParticleSoA<P,Traits>&) -> pair<long long, Context>`.
+                           Returns total physical particle count and a context consumed by @c a_emit.
+    @param[in] a_emit      Per-particle emit: `(ParticleSoA<P,Traits>&, const RealVect& pos,
+                           long long weight, const Context&) -> void`.  Appends exactly one particle.
+    @param[in] a_probLo    Domain lower-left corner (from AmrMesh::getProbLo), captured at factory-call
+                           time.  Used to compute the cell-centre position from the CellInfo grid index.
+    @return A ParticleMerger<P, Traits> ready to be stored in e.g. ItoSolver::m_particleMerger.
+  */
+  template <class Context, class P, class Traits = ParticleTraits<P>>
+  inline ParticleMerger<P, Traits>
+  makeReinitializeMerger(
+    std::function<std::pair<long long, Context>(const ParticleSoA<P, Traits>&)>              a_aggregate,
+    std::function<void(ParticleSoA<P, Traits>&, const RealVect&, long long, const Context&)> a_emit,
+    RealVect                                                                                 a_probLo) noexcept;
+
+  /**
     @brief Remove physical particles from an SoA container (operates on the container-owned weight column).
     @param[in,out] a_particles           Input SoA particle container.
     @param[in]    a_numPhysPartToRemove Number of physical particles to remove.

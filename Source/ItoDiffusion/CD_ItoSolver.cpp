@@ -412,19 +412,132 @@ ItoSolver::parseParticleMerger()
     };
   }
   else if (str == "equal_weight_kd") {
-    m_particleMerger = [this](ParticleSoA<ItoParticle>& a_particles, const CellInfo& a_cellInfo, const int a_ppc) {
-      this->makeSuperparticlesEqualWeightKD(a_particles, a_cellInfo, a_ppc);
+    using PType = NonCommParticle<2, 1>; // real<0>=weight, real<1>=energy, vect<0>=position
+
+    const std::function<PType(const ParticleSoA<ItoParticle>&, std::size_t)> gather =
+      [](const ParticleSoA<ItoParticle>& a, const std::size_t i) -> PType {
+      PType p;
+      p.template real<0>() = a.weight(i);
+      p.template real<1>() = a.template get<&ItoParticle::energy>(i);
+      p.template vect<0>() = a.position(i);
+      return p;
     };
+
+    const ParticleManagement::BinaryParticleReconcile<PType> reconcile =
+      [](PType& p1, PType& p2, const PType& p0) -> void {
+      p1.template real<1>() = p0.template real<1>();
+      p2.template real<1>() = p0.template real<1>();
+    };
+
+    const std::function<void(ParticleSoA<ItoParticle>&, const PType*, const PType*, const CellInfo&)> scatterLeaf =
+      [](ParticleSoA<ItoParticle>& a, const PType* first, const PType* last, const CellInfo&) -> void {
+      Real     w = 0.0;
+      Real     e = 0.0;
+      RealVect x = RealVect::Zero;
+      for (const PType* p = first; p != last; ++p) {
+        w += p->template real<0>();
+        x += p->template real<0>() * p->template vect<0>();
+        e += p->template real<0>() * p->template real<1>();
+      }
+      x *= 1.0 / w;
+      e *= 1.0 / w;
+      ItoParticle payload;
+      payload.energy = static_cast<ParticleReal>(e);
+      a.append(x, w, payload);
+    };
+
+    m_particleMerger = ParticleManagement::
+      makeEqualWeightKDMerger<PType, &PType::template real<0>, &PType::template vect<0>>(gather,
+                                                                                         reconcile,
+                                                                                         scatterLeaf);
   }
   else if (str == "reinitialize") {
-    m_particleMerger = [this](ParticleSoA<ItoParticle>& a_particles, const CellInfo& a_cellInfo, const int a_ppc) {
-      this->reinitializeParticles(a_particles, a_cellInfo, a_ppc);
+    const RealVect probLo = m_amr->getProbLo();
+
+    const std::function<std::pair<long long, Real>(const ParticleSoA<ItoParticle>&)> aggregate =
+      [](const ParticleSoA<ItoParticle>& a) -> std::pair<long long, Real> {
+      long long numPhysical = 0LL;
+      Real      E           = 0.0;
+      for (std::size_t i = 0; i < a.size(); i++) {
+        const Real w = a.weight(i);
+        numPhysical += (long long)w;
+        E += w * a.template get<&ItoParticle::energy>(i);
+      }
+      const Real avgE = (numPhysical > 0) ? E / static_cast<double>(numPhysical) : 0.0;
+      return {numPhysical, avgE};
     };
+
+    const std::function<void(ParticleSoA<ItoParticle>&, const RealVect&, long long, const Real&)> emit =
+      [](ParticleSoA<ItoParticle>& a, const RealVect& x, const long long wt, const Real& avgE) -> void {
+      ItoParticle payload;
+      payload.energy = static_cast<ParticleReal>(avgE);
+      a.append(x, static_cast<double>(wt), payload);
+    };
+
+    m_particleMerger = ParticleManagement::makeReinitializeMerger<Real, ItoParticle>(aggregate, emit, probLo);
   }
   else if (str == "reinitialize_bvh") {
-    m_particleMerger = [this](ParticleSoA<ItoParticle>& a_particles, const CellInfo& a_cellInfo, const int a_ppc) {
-      this->makeSuperparticlesBVHReinitialize(a_particles, a_cellInfo, a_ppc);
+    using PType = NonCommParticle<2, 1>; // real<0>=weight, real<1>=energy, vect<0>=position
+
+    const std::function<PType(const ParticleSoA<ItoParticle>&, std::size_t)> gather =
+      [](const ParticleSoA<ItoParticle>& a, const std::size_t i) -> PType {
+      PType p;
+      p.template real<0>() = a.weight(i);
+      p.template real<1>() = a.template get<&ItoParticle::energy>(i);
+      p.template vect<0>() = a.position(i);
+      return p;
     };
+
+    const ParticleManagement::BinaryParticleReconcile<PType> reconcile =
+      [](PType& p1, PType& p2, const PType& p0) -> void {
+      p1.template real<1>() = p0.template real<1>();
+      p2.template real<1>() = p0.template real<1>();
+    };
+
+    const std::function<void(ParticleSoA<ItoParticle>&, const PType*, const PType*, const CellInfo&)> scatterLeaf =
+      [](ParticleSoA<ItoParticle>& a, const PType* first, const PType* last, const CellInfo& cellInfo) -> void {
+      Real w = 0.0;
+      Real e = 0.0;
+
+      if (cellInfo.getVolFrac() < 1.0) {
+        RealVect x = RealVect::Zero;
+        for (const PType* p = first; p != last; ++p) {
+          w += p->template real<0>();
+          x += p->template real<0>() * p->template vect<0>();
+          e += p->template real<0>() * p->template real<1>();
+        }
+        x *= 1.0 / w;
+        e *= 1.0 / w;
+        ItoParticle payload;
+        payload.energy = static_cast<ParticleReal>(e);
+        a.append(x, w, payload);
+      }
+      else {
+        RealVect xMin = +std::numeric_limits<Real>::max() * RealVect::Unit;
+        RealVect xMax = -std::numeric_limits<Real>::max() * RealVect::Unit;
+        for (const PType* p = first; p != last; ++p) {
+          w += p->template real<0>();
+          e += p->template real<0>() * p->template real<1>();
+          const RealVect x = p->template vect<0>();
+          for (int dir = 0; dir < SpaceDim; dir++) {
+            xMin[dir] = std::min(xMin[dir], x[dir]);
+            xMax[dir] = std::max(xMax[dir], x[dir]);
+          }
+        }
+        RealVect x;
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          x[dir] = xMin[dir] + Random::getUniformReal01() * (xMax[dir] - xMin[dir]);
+        }
+        ItoParticle payload;
+        payload.energy = static_cast<ParticleReal>(e);
+        a.append(x, w, payload);
+      }
+    };
+
+    m_particleMerger = ParticleManagement::
+      makeEqualWeightKDMerger<PType, &PType::template real<0>, &PType::template vect<0>>(gather,
+                                                                                         reconcile,
+                                                                                         scatterLeaf);
   }
   else if (str == "sfc_nn") {
     using PType = NonCommParticle<2, 1>; // real<0>=weight, real<1>=energy, vect<0>=position
@@ -3360,255 +3473,6 @@ ItoSolver::mergeParticles(ParticleSoA<ItoParticle>& a_particles,
   CH_TIMERS("ItoSolver::mergeParticles");
 
   m_particleMerger(a_particles, a_cellInfo, a_ppc);
-}
-
-void
-ItoSolver::makeSuperparticlesEqualWeightKD(ParticleSoA<ItoParticle>& a_particles,
-                                           const CellInfo& /*a_cellInfo*/,
-                                           const int a_ppc) const noexcept
-{
-  CH_TIMERS("ItoSolver::makeSuperparticlesEqualWeightKD");
-  CH_TIMER("ItoSolver::makeSuperparticlesEqualWeightKD::populate_list", t1);
-  CH_TIMER("ItoSolver::makeSuperparticlesEqualWeightKD::build_kd", t2);
-  CH_TIMER("ItoSolver::makeSuperparticlesEqualWeightKD::merge_particles", t3);
-
-  // We use a cheaper particle type with a lower memory footprint when merging particles. The
-  // NonCommParticle is a bare-bones particle type without MPI capabilities.
-  using PType = NonCommParticle<2, 1>;
-
-  // 1. Make the input list into a vector of particles with a smaller memory footprint. The buffer is reused
-  //    across cells (thread-local, cleared not freed) so the per-cell populate does not reallocate.
-  CH_START(t1);
-  thread_local std::vector<PType> particles;
-  particles.clear();
-  particles.reserve(a_particles.size());
-  Real W = 0.0;
-  for (std::size_t i = 0; i < a_particles.size(); i++) {
-    PType p;
-
-    p.template real<0>() = a_particles.weight(i);
-    p.template real<1>() = a_particles.template get<&ItoParticle::energy>(i);
-    p.template vect<0>() = a_particles.position(i);
-
-    W += a_particles.weight(i);
-
-    particles.emplace_back(p);
-  }
-  CH_STOP(t1);
-
-  // In this case there is nothing to merge or split!
-  if (W < 2.0) {
-    return;
-  }
-
-  // Particle reconciler when splitting one particle into two particles. The weight is handled automatically
-  // within the particle merge.
-  const ParticleManagement::BinaryParticleReconcile<PType> particleReconcile =
-    [](PType& p1, PType& p2, const PType& p0) -> void {
-    p1.template real<1>() = p0.template real<1>();
-    p2.template real<1>() = p0.template real<1>();
-  };
-
-  // 2. Build the equal-weight KD partition (flat reusable scratch -- no per-node allocation).
-  CH_START(t2);
-  thread_local std::vector<std::pair<const PType*, const PType*>> leaves;
-  ParticleManagement::buildEqualWeightKDLeaves<PType, &PType::template real<0>, &PType::template vect<0>>(
-    particles,
-    a_ppc,
-    particleReconcile,
-    leaves);
-  CH_STOP(t2);
-
-  // 3. Merge leaves into new particles (weighted centroid).
-  CH_START(t3);
-  a_particles.clear();
-
-  for (const auto& leaf : leaves) {
-    Real     w = 0.0;
-    Real     e = 0.0;
-    RealVect x = RealVect::Zero;
-
-    for (const PType* p = leaf.first; p != leaf.second; ++p) {
-      w += p->template real<0>();
-      x += p->template real<0>() * p->template vect<0>();
-      e += p->template real<0>() * p->template real<1>();
-    }
-
-    x *= 1. / w;
-    e *= 1. / w;
-
-    ItoParticle payload;
-    payload.energy = static_cast<ParticleReal>(e);
-    a_particles.append(x, w, payload);
-  }
-  CH_STOP(t3);
-}
-
-void
-ItoSolver::makeSuperparticlesBVHReinitialize(ParticleSoA<ItoParticle>& a_particles,
-                                             const CellInfo&           a_cellInfo,
-                                             const int                 a_ppc) const noexcept
-{
-  CH_TIMERS("ItoSolver::makeSuperparticlesBVHReinitialize");
-  CH_TIMER("ItoSolver::makeSuperparticlesBVHReinitialize::populate_list", t1);
-  CH_TIMER("ItoSolver::makeSuperparticlesBVHReinitialize::build_kd", t2);
-  CH_TIMER("ItoSolver::makeSuperparticlesBVHReinitialize::merge_particles", t3);
-
-  // We use a cheaper particle type with a lower memory footprint when merging particles. The
-  // NonCommParticle is a bare-bones particle type without MPI capabilities.
-  using PType = NonCommParticle<2, 1>;
-
-  // 1. Make the input list into a vector of particles with a smaller memory footprint. The buffer is reused
-  //    across cells (thread-local, cleared not freed) so the per-cell populate does not reallocate.
-  CH_START(t1);
-  thread_local std::vector<PType> particles;
-  particles.clear();
-  particles.reserve(a_particles.size());
-  Real W = 0.0;
-  for (std::size_t i = 0; i < a_particles.size(); i++) {
-    PType p;
-
-    p.template real<0>() = a_particles.weight(i);
-    p.template real<1>() = a_particles.template get<&ItoParticle::energy>(i);
-    p.template vect<0>() = a_particles.position(i);
-
-    W += a_particles.weight(i);
-
-    particles.emplace_back(p);
-  }
-  CH_STOP(t1);
-
-  // In this case there is nothing to merge or split!
-  if (W < 2.0) {
-    return;
-  }
-
-  // Particle reconciler when splitting one particle into two particles. The weight is handled automatically
-  // within the particle merge.
-  const ParticleManagement::BinaryParticleReconcile<PType> particleReconcile =
-    [](PType& p1, PType& p2, const PType& p0) -> void {
-    p1.template real<1>() = p0.template real<1>();
-    p2.template real<1>() = p0.template real<1>();
-  };
-
-  // 2. Build the equal-weight KD partition (flat reusable scratch -- no per-node allocation).
-  CH_START(t2);
-  thread_local std::vector<std::pair<const PType*, const PType*>> leaves;
-  ParticleManagement::buildEqualWeightKDLeaves<PType, &PType::template real<0>, &PType::template vect<0>>(
-    particles,
-    a_ppc,
-    particleReconcile,
-    leaves);
-  CH_STOP(t2);
-
-  // 3. Merge leaves into new particles.
-  CH_START(t3);
-  a_particles.clear();
-
-  // If this is a cut-cell we merge as we would normally do. Otherwise we might create particles outside the EB.
-  if (a_cellInfo.getVolFrac() < 1.0) {
-    for (const auto& leaf : leaves) {
-      Real     w = 0.0;
-      Real     e = 0.0;
-      RealVect x = RealVect::Zero;
-
-      for (const PType* p = leaf.first; p != leaf.second; ++p) {
-        w += p->template real<0>();
-        x += p->template real<0>() * p->template vect<0>();
-        e += p->template real<0>() * p->template real<1>();
-      }
-
-      x *= 1. / w;
-      e *= 1. / w;
-
-      ItoParticle payload;
-      payload.energy = static_cast<ParticleReal>(e);
-      a_particles.append(x, w, payload);
-    }
-  }
-  else {
-    for (const auto& leaf : leaves) {
-      Real w = 0.0;
-      Real e = 0.0;
-
-      RealVect xMin = +std::numeric_limits<Real>::max() * RealVect::Unit;
-      RealVect xMax = -std::numeric_limits<Real>::max() * RealVect::Unit;
-
-      for (const PType* p = leaf.first; p != leaf.second; ++p) {
-        w += p->template real<0>();
-        e += p->template real<0>() * p->template real<1>();
-
-        // Figure out the bounding box of this leaf.
-        const RealVect x = p->template vect<0>();
-
-        for (int dir = 0; dir < SpaceDim; dir++) {
-          xMin[dir] = std::min(xMin[dir], x[dir]);
-          xMax[dir] = std::max(xMax[dir], x[dir]);
-        }
-      }
-
-      RealVect x;
-
-      for (int dir = 0; dir < SpaceDim; dir++) {
-        const Real r = Random::getUniformReal01();
-
-        x[dir] = xMin[dir] + r * (xMax[dir] - xMin[dir]);
-      }
-
-      ItoParticle payload;
-      payload.energy = static_cast<ParticleReal>(e);
-      a_particles.append(x, w, payload);
-    }
-  }
-  CH_STOP(t3);
-}
-
-void
-ItoSolver::reinitializeParticles(ParticleSoA<ItoParticle>& a_particles,
-                                 const CellInfo&           a_cellInfo,
-                                 const int                 a_ppc) const noexcept
-{
-  CH_TIME("ItoSolver::reinitializeParticles");
-
-  // Compute number of physical particles and partition them into a_ppc computational particles
-  // with weights as equal as possible. Average energy becomes true average energy (same for all particles).
-  long long numPhysicalParticles = 0LL;
-  Real      averageEnergy        = 0.0;
-  for (std::size_t i = 0; i < a_particles.size(); i++) {
-    const Real w = a_particles.weight(i);
-    const Real e = a_particles.template get<&ItoParticle::energy>(i);
-
-    numPhysicalParticles += (long long)w;
-    averageEnergy += w * e;
-  }
-
-  if (numPhysicalParticles > 0) {
-    averageEnergy *= 1.0 / static_cast<double>(numPhysicalParticles);
-  }
-
-  const std::vector<long long> weights = ParticleManagement::partitionParticleWeights(numPhysicalParticles,
-                                                                                      (long long)a_ppc);
-
-  // randomPosition wants the physical corners.
-  const Real      dx            = a_cellInfo.getDx();
-  const Real      kappa         = a_cellInfo.getVolFrac();
-  const RealVect  probLo        = m_amr->getProbLo();
-  const RealVect  cellPos       = probLo + dx * (a_cellInfo.getGridIndex() + 0.5 * RealVect::Unit);
-  const RealVect& validLo       = a_cellInfo.getValidLo();
-  const RealVect& validHi       = a_cellInfo.getValidHi();
-  const RealVect& bndryCentroid = a_cellInfo.getBndryCentroid();
-  const RealVect& bndryNormal   = a_cellInfo.getBndryNormal();
-
-  a_particles.clear();
-
-  for (const auto& wt : weights) {
-    const auto     w = static_cast<double>(wt);
-    const RealVect x = Random::randomPosition(cellPos, validLo, validHi, bndryCentroid, bndryNormal, dx, kappa);
-
-    ItoParticle payload;
-    payload.energy = static_cast<ParticleReal>(averageEnergy);
-    a_particles.append(x, w, payload);
-  }
 }
 
 void
