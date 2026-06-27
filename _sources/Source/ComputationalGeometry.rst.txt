@@ -5,7 +5,7 @@ ComputationalGeometry
 
 ``ComputationalGeometry`` is the class that implements geometries in ``chombo-discharge``.
 In principle, geometries consist of electrodes and dielectrics but there are many problems where the actual nature of the EB is irrelevant (such as fluid flow).
-For other problems, such as ones involving electric fields, the classification into electrodes and dielectric are obviously important.
+For other problems, such as ones involving electric fields, the classification into electrodes and dielectrics are obviously important.
 
 .. tip::
 
@@ -74,16 +74,16 @@ The constructor for the electrode class is given in :numref:`List:Electrode`.
 
 .. _List:Electrode:
 .. literalinclude:: ../../../../Source/Geometry/CD_Electrode.H
-   :caption: Constructor for the the ``Electrode`` object.
+   :caption: Constructor for the ``Electrode`` object.
    :lines: 34-41
    :language: c++
    :dedent: 2
 
-In the code block above, ``a_baseIF`` argument is the implicit function for the electrode object, and the ``a_live`` argument is used by some solvers in order to determine if the electrode is at a live voltage or not.
+In the code block above, the ``a_baseIF`` argument is the implicit function for the electrode object, and the ``a_live`` argument is used by some solvers in order to determine if the electrode is at a live voltage or not.
 For example, if ``a_live`` is set to false, :ref:`Chap:FieldSolver` will fetch this value and determine that the electrode is at ground. 
-Otherwise, if ``a_live`` is set to true then :ref:`Chap:FieldSolver` will determine that the electrode is at live voltage, and the ``a_fraction`` argument is an optional argument that allows the user to set the potential to a specified fraction of the live voltage.
+Otherwise, if ``a_live`` is set to true then :ref:`Chap:FieldSolver` will determine that the electrode is at live voltage, and the ``a_voltageFraction`` argument is an optional argument that allows the user to set the potential to a specified fraction of the live voltage.
 This is also used throughout other physics modules in ``chombo-discharge``.
-The user can also set a specified fraction of the live voltage but setting the ``a_voltageFraction`` parameter to a relative fraction of the applied voltage.
+The user can also set a specified fraction of the live voltage by setting the ``a_voltageFraction`` parameter to a relative fraction of the applied voltage.
 
 .. tip::
 
@@ -99,14 +99,14 @@ This class is lightweight and consists of a tuple that holds a level-set functio
 The constructors for this class are
 
 .. literalinclude:: ../../../../Source/Geometry/CD_Dielectric.H
-   :caption: Constructors for the the ``Dielectric`` object.
+   :caption: Constructors for the ``Dielectric`` object.
    :language: c++
    :lines: 37-51
    :dedent: 2
 
-where the ``a_baseIF`` argument is the level-set function and the second argument sets a the permittivity.
+where the ``a_baseIF`` argument is the level-set function and the second argument sets the permittivity.
 In the constructor, the relative permittivity can be set to a constant (first constructor) or to a spatially varying value (second constructor).
-Several solvers will then use the permittivities were specified by the user.
+Several solvers will then use the permittivities as specified by the user.
 
 .. tip::
 

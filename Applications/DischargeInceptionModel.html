@@ -227,7 +227,7 @@ See <a class="reference external" href="https://chombo-discharge.github.io/chomb
 The residual ions will drift towards cathode surfaces and generate secondary ionization with a user-supplied efficiency <span class="math notranslate nohighlight">\(\gamma=\gamma\left(E,\mathbf{x}\right)\)</span>.</p>
 <p>The discharge inception model can be run in two modes:</p>
 <ul class="simple">
-<li><p>A stationary mode, where one only calculations <span class="math notranslate nohighlight">\(K\left(\mathbf{x}\right)\)</span> for a range of voltages, see <a class="reference internal" href="#chap-stationarymode"><span class="std std-ref">Stationary mode</span></a>.</p></li>
+<li><p>A stationary mode, where one only calculates <span class="math notranslate nohighlight">\(K\left(\mathbf{x}\right)\)</span> for a range of voltages, see <a class="reference internal" href="#chap-stationarymode"><span class="std std-ref">Stationary mode</span></a>.</p></li>
 <li><p>In transient mode, where <span class="math notranslate nohighlight">\(K\left(\mathbf{x}\right)\)</span> is computed dynamically according to a user-supplied voltage shape.
 This mode can also be used to evaluate the inception probability for a given voltage curve, see <a class="reference internal" href="#chap-transientmode"><span class="std std-ref">Transient mode</span></a>.</p></li>
 </ul>
@@ -259,7 +259,7 @@ This mode can also be used to evaluate the inception probability for a given vol
 <span class="k">class</span><span class="w"> </span><span class="nc">DischargeInceptionStepper</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">TimeStepper</span>
 </pre></div>
 </div>
-<p>The template template parameters indicate which types of solvers to used within the compound algorithm.
+<p>The template parameters indicate which types of solvers to use within the compound algorithm.
 The template parameters indicate the following:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">typename</span> <span class="pre">P</span></code> is the tracer particle solver (see <a class="reference internal" href="../Solvers/TracerParticles.html#chap-tracerparticlesolver"><span class="std std-ref">TracerParticleSolver</span></a>) for reconstructing the inception integral.</p></li>
@@ -626,7 +626,7 @@ It may be beneficial to run the program twice, first using <code class="docutils
 </section>
 <section id="solver-configuration">
 <span id="chap-dischargeinceptionconfiguration"></span><h2>Solver configuration<a class="headerlink" href="#solver-configuration" title="Permalink to this heading"></a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">DischargeInceptionStepper</span></code> class come with user-configurable input options which are given below.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">DischargeInceptionStepper</span></code> class comes with user-configurable input options which are given below.</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span># ====================================================================================================
 # DischargeInceptionStepper class options
 # ====================================================================================================
@@ -716,7 +716,7 @@ The application will then be installed to $DISCHARGE_HOME/MyApplications/MyDisch
 </section>
 <section id="example-programs">
 <h2>Example programs<a class="headerlink" href="#example-programs" title="Permalink to this heading"></a></h2>
-<p>Example programs that use the discharge inception model are given in</p>
+<p>Example programs that use the discharge inception model are given below.</p>
 <section id="high-voltage-vessel">
 <h3>High-voltage vessel<a class="headerlink" href="#high-voltage-vessel" title="Permalink to this heading"></a></h3>
 <ul class="simple">

@@ -169,7 +169,7 @@
 <section id="cartesian-amr">
 <h2>Cartesian AMR<a class="headerlink" href="#cartesian-amr" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> uses Cartesian patch-based structured adaptive mesh refinement (AMR) provided by <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> <span id="id1">[<a class="reference internal" href="../ZZReferences.html#id82" title="P Colella, D T Graves, T J Ligocki, G Miller, D Modiano, P O Schwartz, B Van Straalen, J Pilliod, D Trebotich, M Barad, B Keen, A Nonaka, and C Shen. EBChombo software package for cartesian grid, embedded boundary applications. Technical Report, Lawrence Berkeley National Laboratory, 2004.">Colella <em>et al.</em>, 2004</a>]</span>.
-In patch-based AMR the domain is subdivided into a collection of hierarchically nested grid levels, see <a class="reference internal" href="#fig-patchbasedamr"><span class="std std-numref">Fig. 2</span></a>, where each grid level consist of a set of rectangular grid blocks.
+In patch-based AMR the domain is subdivided into a collection of hierarchically nested grid levels, see <a class="reference internal" href="#fig-patchbasedamr"><span class="std std-numref">Fig. 2</span></a>, where each grid level consists of a set of rectangular grid blocks.
 I.e., a <em>grid level</em> is composed of a union of grid patches sharing the same grid resolution, with the additional requirement that the patches on a grid level are <em>non-overlapping</em>.
 With AMR, such levels can be hierarchically nested; finer grid levels exist on top of coarser ones.
 In patch-based AMR there are only a few fundamental requirements on how such grids are constructed.
@@ -190,9 +190,9 @@ The fine-grid level lives on top of the coarse level, and consists of two patche
 </section>
 <section id="embedded-boundaries">
 <h2>Embedded boundaries<a class="headerlink" href="#embedded-boundaries" title="Permalink to this heading"></a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">chombo-discharges</span></code> uses an embedded boundary (EB) formulation for describing complex geometries.
+<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> uses an embedded boundary (EB) formulation for describing complex geometries.
 With EBs, the Cartesian grid is directly intersected by the geometry.
-This is fundamentally different from unstructured grid where one generates a volume mesh that conforms to the surface mesh of the input geometry.
+This is fundamentally different from unstructured grids where one generates a volume mesh that conforms to the surface mesh of the input geometry.
 Since EBs are directly intersected by the geometry, there is no fundamental need for a surface mesh for describing the geometry.
 Moreover, Cartesian EBs have a data layout which remains (almost) fully structured.
 The connectivity of neighboring grid cells is still trivially found by fundamental strides along the data rows/columns, which allows extending the efficiency of patch-based AMR to complex geometries.
@@ -212,7 +212,7 @@ Note that there is no fundamental difference between single-cut and multi-cut gr
 This distinction exists primarily due to the fact that if all grid cells were single-cut cells the entire EB data structure would fit in a Cartesian grid block (say, of <span class="math notranslate nohighlight">\(N_x \times N_y \times N_z\)</span> grid cells).
 However, because of multi-cells, EB data structures are not purely Cartesian.
 Data structures need to live on more complex graphs that describe the multi-cells and, furthermore, describe the cell connectivity between cut-cell volumes.
-Without multi-cells it would be impossible to describe most complex geometries, and it is extremely difficult to obtain performant geometric multigrid methods which instrinsically rely on this type of coarsening.</p>
+Without multi-cells it would be impossible to describe most complex geometries, and it is extremely difficult to obtain performant geometric multigrid methods which intrinsically rely on this type of coarsening.</p>
 <figure class="align-center" id="id8">
 <span id="fig-multicells"></span><a class="reference internal image-reference" href="../_images/MultiCells.png"><img alt="../_images/MultiCells.png" src="../_images/MultiCells.png" style="width: 50%;" /></a>
 <figcaption>
@@ -227,8 +227,7 @@ Right: Coarsened grid where one grid cell is multi-valued.</span><a class="heade
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> uses (approximations to) signed distance functions (SDFs) for describing geometries.
 Signed distance fields are functions <span class="math notranslate nohighlight">\(f: \mathbb{R}^3\rightarrow \mathbb{R}\)</span> that describe the distance from the object.
 These functions are also <em>implicit functions</em>, i.e., <span class="math notranslate nohighlight">\(f\left(\mathbf{x}\right)=0\)</span> describes the surface of the object, <span class="math notranslate nohighlight">\(f\left(\mathbf{x}\right) &gt; 0\)</span> describes a point inside the object and <span class="math notranslate nohighlight">\(f\left(\mathbf{x}\right) &lt; 0\)</span> describes a point outside the object.</p>
-<p>Many EB applications only use the implicit function formulation, but <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> requires (an approximation to) the signed distance field for the following reasons:
-There are two reasons for this:</p>
+<p>Many EB applications only use the implicit function formulation, but <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> requires (an approximation to) the signed distance field for the following reasons:</p>
 <ol class="arabic simple">
 <li><p>The SDF can be used for robustly load balancing the geometry generation with orders of magnitude speedup over naive approaches.</p></li>
 <li><p>The SDF is useful for resolving particle collisions with boundaries, and permit mesh-less ray-tracing of computational particles.</p></li>
@@ -248,7 +247,7 @@ Fundamentally, all geometric objects are described using <code class="docutils l
 For example, to describe the union between two SDFs <span class="math notranslate nohighlight">\(d_1\left(\mathbf{x}\right)\)</span> and <span class="math notranslate nohighlight">\(d_2\left(\mathbf{x}\right)\)</span>:</p>
 <div class="math notranslate nohighlight">
 \[d\left(\mathbf{x}\right) = \textrm{min}\left(d_1\left(\mathbf{x}\right), d_2\left(\mathbf{x}\right)\right)\]</div>
-<p>Note that the resulting is an implicit function but is <em>not</em> an SDF.
+<p>Note that the result is an implicit function but is <em>not</em> an SDF.
 However, the union typically approximates the signed distance field quite well near the surface.
 <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> natively supports many ways of performing CSG.</p>
 </section>
@@ -330,12 +329,12 @@ However, implicit functions like <span class="math notranslate nohighlight">\(d\
 <p>Both algorithms work by taking a set of flagged cells on each grid level and generating new boxes that cover the flags.
 Only <em>properly nested</em> grids are generated, in which case two grid levels <span class="math notranslate nohighlight">\(l-1\)</span> and <span class="math notranslate nohighlight">\(l+1\)</span> are separated by a non-zero number of grid cells on level <span class="math notranslate nohighlight">\(l\)</span>.
 This requirement is not fundamentally required for quadtree and octree grids, but is nevertheless usually imposed.
-For patch based AMR, the rationale for this requirement is that stencils on level <span class="math notranslate nohighlight">\(l+1\)</span> should should only reach into grid cells on levels <span class="math notranslate nohighlight">\(l\)</span> and <span class="math notranslate nohighlight">\(l+1\)</span>, which greatly simplifies the definition of numerical stencils on each level.
+For patch based AMR, the rationale for this requirement is that stencils on level <span class="math notranslate nohighlight">\(l+1\)</span> should only reach into grid cells on levels <span class="math notranslate nohighlight">\(l\)</span> and <span class="math notranslate nohighlight">\(l+1\)</span>, which greatly simplifies the definition of numerical stencils on each level.
 For example, ghost cells on level <span class="math notranslate nohighlight">\(l+1\)</span> can then be interpolated from data only on levels <span class="math notranslate nohighlight">\(l\)</span> and <span class="math notranslate nohighlight">\(l+1\)</span>.</p>
 <section id="berger-rigoutsos-algorithm">
 <h3>Berger-Rigoutsos algorithm<a class="headerlink" href="#berger-rigoutsos-algorithm" title="Permalink to this heading"></a></h3>
-<p>The Berger-Rigoustous grid algorithm is implemented in <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> and can be called by <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.
-The classical Berger-Rigoustous algorithm is inherently serial in the sense that is collects the flagged cells onto each MPI rank and then generates the boxes, see <span id="id5">[<a class="reference internal" href="../ZZReferences.html#id38" title="Marsha Berger and Isidore Rigoutsos. An Algorithm for Point Clustering and Grid Generation. IEEE Transactions on Systems, Man and Cybernetics, 1991. doi:10.1109/21.120081.">Berger and Rigoutsos, 1991</a>]</span> for implementation details.
+<p>The Berger-Rigoutsos grid algorithm is implemented in <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> and can be called by <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.
+The classical Berger-Rigoutsos algorithm is inherently serial in the sense that it collects the flagged cells onto each MPI rank and then generates the boxes, see <span id="id5">[<a class="reference internal" href="../ZZReferences.html#id38" title="Marsha Berger and Isidore Rigoutsos. An Algorithm for Point Clustering and Grid Generation. IEEE Transactions on Systems, Man and Cybernetics, 1991. doi:10.1109/21.120081.">Berger and Rigoutsos, 1991</a>]</span> for implementation details.
 Typically, it is not used at large scale in 3D due to its memory consumption.</p>
 <figure class="align-center" id="id11">
 <span id="brmeshrefine"></span><a class="reference internal image-reference" href="../_images/BRMeshRefine.png"><img alt="../_images/BRMeshRefine.png" src="../_images/BRMeshRefine.png" style="width: 25%;" /></a>
@@ -373,7 +372,7 @@ In the second case, the <a class="reference internal" href="Driver.html#chap-dri
 Given two normal vectors <span class="math notranslate nohighlight">\(\mathbf{n}\)</span> and <span class="math notranslate nohighlight">\(\mathbf{n}^\prime\)</span>, the cell is refined if</p>
 <div class="math notranslate nohighlight">
 \[\mathbf{n}\cdot\mathbf{n}^\prime \geq \cos\theta_c,\]</div>
-<p>where <span class="math notranslate nohighlight">\(\theta_c\)</span> is a threshold angle for grid refinent.</p>
+<p>where <span class="math notranslate nohighlight">\(\theta_c\)</span> is a threshold angle for grid refinement.</p>
 <p>The other two cases are more complicated, and are covered by the <a class="reference internal" href="CellTagger.html#chap-celltagger"><span class="std std-ref">CellTagger</span></a> classes.</p>
 </section>
 </section>

@@ -155,7 +155,7 @@
 <span id="chap-computationalgeometry"></span><h1>ComputationalGeometry<a class="headerlink" href="#computationalgeometry" title="Permalink to this heading"></a></h1>
 <p><code class="docutils literal notranslate"><span class="pre">ComputationalGeometry</span></code> is the class that implements geometries in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.
 In principle, geometries consist of electrodes and dielectrics but there are many problems where the actual nature of the EB is irrelevant (such as fluid flow).
-For other problems, such as ones involving electric fields, the classification into electrodes and dielectric are obviously important.</p>
+For other problems, such as ones involving electric fields, the classification into electrodes and dielectrics are obviously important.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p>Here is the <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classComputationalGeometry.html">ComputationalGeometry C++ API</a>.</p>
@@ -236,7 +236,7 @@ Specifically, if <span class="math notranslate nohighlight">\(g_1, g_2, \ldots\)
 Internally, this class is lightweight and consists only of a tuple that holds an implicit function and an associated boolean value that tells whether or not the level-set function is at a live voltage or not.
 The constructor for the electrode class is given in <a class="reference internal" href="#list-electrode"><span class="std std-numref">Listing 3</span></a>.</p>
 <div class="literal-block-wrapper docutils container" id="id2">
-<span id="list-electrode"></span><div class="code-block-caption"><span class="caption-number">Listing 3 </span><span class="caption-text">Constructor for the the <code class="docutils literal notranslate"><span class="pre">Electrode</span></code> object.</span><a class="headerlink" href="#id2" title="Permalink to this code"></a></div>
+<span id="list-electrode"></span><div class="code-block-caption"><span class="caption-number">Listing 3 </span><span class="caption-text">Constructor for the <code class="docutils literal notranslate"><span class="pre">Electrode</span></code> object.</span><a class="headerlink" href="#id2" title="Permalink to this code"></a></div>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm">  @brief Constructor. </span>
 <span class="cm">  @param[in] a_baseIF          Implicit function for the electrode</span>
@@ -248,11 +248,11 @@ The constructor for the electrode class is given in <a class="reference internal
 </pre></div>
 </div>
 </div>
-<p>In the code block above, <code class="docutils literal notranslate"><span class="pre">a_baseIF</span></code> argument is the implicit function for the electrode object, and the <code class="docutils literal notranslate"><span class="pre">a_live</span></code> argument is used by some solvers in order to determine if the electrode is at a live voltage or not.
+<p>In the code block above, the <code class="docutils literal notranslate"><span class="pre">a_baseIF</span></code> argument is the implicit function for the electrode object, and the <code class="docutils literal notranslate"><span class="pre">a_live</span></code> argument is used by some solvers in order to determine if the electrode is at a live voltage or not.
 For example, if <code class="docutils literal notranslate"><span class="pre">a_live</span></code> is set to false, <a class="reference internal" href="../Solvers/Electrostatics.html#chap-fieldsolver"><span class="std std-ref">FieldSolver</span></a> will fetch this value and determine that the electrode is at ground.
-Otherwise, if <code class="docutils literal notranslate"><span class="pre">a_live</span></code> is set to true then <a class="reference internal" href="../Solvers/Electrostatics.html#chap-fieldsolver"><span class="std std-ref">FieldSolver</span></a> will determine that the electrode is at live voltage, and the <code class="docutils literal notranslate"><span class="pre">a_fraction</span></code> argument is an optional argument that allows the user to set the potential to a specified fraction of the live voltage.
+Otherwise, if <code class="docutils literal notranslate"><span class="pre">a_live</span></code> is set to true then <a class="reference internal" href="../Solvers/Electrostatics.html#chap-fieldsolver"><span class="std std-ref">FieldSolver</span></a> will determine that the electrode is at live voltage, and the <code class="docutils literal notranslate"><span class="pre">a_voltageFraction</span></code> argument is an optional argument that allows the user to set the potential to a specified fraction of the live voltage.
 This is also used throughout other physics modules in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.
-The user can also set a specified fraction of the live voltage but setting the <code class="docutils literal notranslate"><span class="pre">a_voltageFraction</span></code> parameter to a relative fraction of the applied voltage.</p>
+The user can also set a specified fraction of the live voltage by setting the <code class="docutils literal notranslate"><span class="pre">a_voltageFraction</span></code> parameter to a relative fraction of the applied voltage.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p>Here is the <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classElectrode.html">Electrode C++ API</a></p>
@@ -264,7 +264,7 @@ The user can also set a specified fraction of the live voltage but setting the <
 This class is lightweight and consists of a tuple that holds a level-set function and the relative associated permittivity (just like <code class="docutils literal notranslate"><span class="pre">Electrode</span></code> holds an implicit function and a relative voltage).
 The constructors for this class are</p>
 <div class="literal-block-wrapper docutils container" id="id3">
-<div class="code-block-caption"><span class="caption-number">Listing 4 </span><span class="caption-text">Constructors for the the <code class="docutils literal notranslate"><span class="pre">Dielectric</span></code> object.</span><a class="headerlink" href="#id3" title="Permalink to this code"></a></div>
+<div class="code-block-caption"><span class="caption-number">Listing 4 </span><span class="caption-text">Constructors for the <code class="docutils literal notranslate"><span class="pre">Dielectric</span></code> object.</span><a class="headerlink" href="#id3" title="Permalink to this code"></a></div>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm">  @brief Full constructor which uses constant permittivity.</span>
 <span class="cm">  @param[in] a_baseIF       Implicit function</span>
@@ -283,9 +283,9 @@ The constructors for this class are</p>
 </pre></div>
 </div>
 </div>
-<p>where the <code class="docutils literal notranslate"><span class="pre">a_baseIF</span></code> argument is the level-set function and the second argument sets a the permittivity.
+<p>where the <code class="docutils literal notranslate"><span class="pre">a_baseIF</span></code> argument is the level-set function and the second argument sets the permittivity.
 In the constructor, the relative permittivity can be set to a constant (first constructor) or to a spatially varying value (second constructor).
-Several solvers will then use the permittivities were specified by the user.</p>
+Several solvers will then use the permittivities as specified by the user.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p>Here is the  <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classDielectric.html">Dielectric C++ API</a></p>

@@ -156,7 +156,7 @@
              
   <section id="code-standard">
 <span id="chap-codestandard"></span><h1>Code standard<a class="headerlink" href="#code-standard" title="Permalink to this heading"></a></h1>
-<p>When submitting new code to <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>, the following guidelines below show be followed.</p>
+<p>When submitting new code to <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>, the following guidelines below should be followed.</p>
 <section id="c-standard">
 <h2>C++ standard<a class="headerlink" href="#c-standard" title="Permalink to this heading"></a></h2>
 <p>We are currently at <code class="docutils literal notranslate"><span class="pre">C++17</span></code>.</p>
@@ -164,13 +164,13 @@
 <section id="namespace">
 <h2>Namespace<a class="headerlink" href="#namespace" title="Permalink to this heading"></a></h2>
 <p>All code in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is embedded in a namespace <code class="docutils literal notranslate"><span class="pre">ChomboDischarge</span></code>.
-Embedding into a namespace is done by including header file <code class="file docutils literal notranslate"><span class="pre">CD_NamespaceHeader.H</span></code> that contain the necessary definitions.
+Embedding into a namespace is done by including header file <code class="file docutils literal notranslate"><span class="pre">CD_NamespaceHeader.H</span></code> that contains the necessary definitions.
 This is done by including after any other file includes.
 In addition, files must include <code class="file docutils literal notranslate"><span class="pre">CD_NamespaceFooter.H</span></code> at the end.</p>
 </section>
 <section id="file-names">
 <h2>File names<a class="headerlink" href="#file-names" title="Permalink to this heading"></a></h2>
-<p>Each file should contain only one class definition, and the file name must be name of the class prepended by <code class="docutils literal notranslate"><span class="pre">CD_</span></code>.
+<p>Each file should contain only one class definition, and the file name must be the name of the class prepended by <code class="docutils literal notranslate"><span class="pre">CD_</span></code>.
 For example, if you are contributing a class <code class="docutils literal notranslate"><span class="pre">MyClass</span></code> the header files for this class must be named <code class="file docutils literal notranslate"><span class="pre">CD_MyClass.H</span></code> and the implementation file must be named <code class="file docutils literal notranslate"><span class="pre">CD_MyClass.cpp</span></code>.
 If your code contains templates or inlined functions, these should be defined in files appended by <code class="docutils literal notranslate"><span class="pre">Implem</span></code>, e.g. <code class="file docutils literal notranslate"><span class="pre">CD_MyClassImplem.H</span></code>.</p>
 </section>
@@ -197,7 +197,7 @@ I.e. for a file <code class="file docutils literal notranslate"><span class="pre
 </section>
 <section id="file-inclusions">
 <h2>File inclusions<a class="headerlink" href="#file-inclusions" title="Permalink to this heading"></a></h2>
-<p>File inclusions should use the follow standards for C++, <code class="docutils literal notranslate"><span class="pre">Chombo</span></code>, and <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code></p>
+<p>File inclusions should use the following standards for C++, <code class="docutils literal notranslate"><span class="pre">Chombo</span></code>, and <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code></p>
 <ol class="arabic simple">
 <li><p><em>C++</em>. Use brackets, e.g. <code class="docutils literal notranslate"><span class="pre">#include</span> <span class="pre">&lt;memory&gt;</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">Chombo</span></code>. Use brackets, e.g. <code class="docutils literal notranslate"><span class="pre">#include</span> <span class="pre">&lt;LevelData.H&gt;</span></code>.</p></li>

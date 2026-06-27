@@ -580,7 +580,7 @@ Below, we include the current header file for <code class="docutils literal notr
 The routines are used by <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> in the simulation setup step, both for fresh simulation setups as well as restarts.</p>
 <section id="registerrealms">
 <span id="chap-registerrealms"></span><h3>registerRealms<a class="headerlink" href="#registerrealms" title="Permalink to this heading"></a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> permits things to happen on different sets of grids where the the grids themselves cover the same physical region, but where MPI ownership of grids might change between grid sets (see <a class="reference internal" href="Realm.html#chap-realm"><span class="std std-ref">Realm</span></a> for details).
+<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> permits things to happen on different sets of grids where the grids themselves cover the same physical region, but where MPI ownership of grids might change between grid sets (see <a class="reference internal" href="Realm.html#chap-realm"><span class="std std-ref">Realm</span></a> for details).
 To register a <a class="reference internal" href="Realm.html#chap-realm"><span class="std std-ref">Realm</span></a>, users will have <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> register realms in the <code class="docutils literal notranslate"><span class="pre">registerRealms()</span></code> routine, as follows:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">myTimeStepper::registerRealms</span><span class="p">(){</span>
 <span class="w">   </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">registerRealm</span><span class="p">(</span><span class="n">Realm</span><span class="o">::</span><span class="n">Primal</span><span class="p">);</span>
@@ -728,7 +728,7 @@ In addition, source terms are set to zero, as are boundary fluxes.</p>
 <section id="postinitialize">
 <h3>postInitialize<a class="headerlink" href="#postinitialize" title="Permalink to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">postInitialize</span></code> is a special routine that is called <em>after</em> <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> has filled the solvers with initial data <em>and</em> <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> is done with all the initial regrids.
-While most data initialization steps can, however, be done in <code class="docutils literal notranslate"><span class="pre">initialData</span></code>, the function is put there as an open door to the programmer for performing certain post-initialization functions that do not not need be performed in <code class="docutils literal notranslate"><span class="pre">initialData</span></code> (which is called once per initial regrid).
+While most data initialization steps can, however, be done in <code class="docutils literal notranslate"><span class="pre">initialData</span></code>, the function is put there as an open door to the programmer for performing certain post-initialization functions that do not need to be performed in <code class="docutils literal notranslate"><span class="pre">initialData</span></code> (which is called once per initial regrid).
 For example, the <a class="reference internal" href="../Applications/DischargeInceptionModel.html#chap-dischargeinceptionmodel"><span class="std std-ref">Discharge inception model</span></a> uses this function to compute several relevant quantities after the electric has been obtained in <code class="docutils literal notranslate"><span class="pre">initialData</span></code>.</p>
 </section>
 <section id="postcheckpointsetup">
@@ -740,7 +740,7 @@ Several gas discharge models use this function to compute the electric field fro
 </section>
 <section id="i-o-routines">
 <h2>I/O routines<a class="headerlink" href="#i-o-routines" title="Permalink to this heading"></a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> contains I/O routines primarily serves two purposes:</p>
+<p><code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> contains I/O routines that primarily serve two purposes:</p>
 <ol class="arabic simple">
 <li><p>To provide data for HDF5 plot files, used for post-processing analysis.</p></li>
 <li><p>To read and write data from HDF5 checkpoint files, which are used to restart simulations from a specified time step.</p></li>
@@ -811,7 +811,7 @@ The function signature is</p>
 <span class="nf">writePlotData</span><span class="p">(</span><span class="n">LevelData</span><span class="o">&lt;</span><span class="n">EBCellFAB</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_output</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_icomp</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_outputRealm</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_level</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 </pre></div>
 </div>
-<p>In this function, <code class="docutils literal notranslate"><span class="pre">a_output</span></code> is pre-allocated block of memory that <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> will write its components to (beginning at <code class="docutils literal notranslate"><span class="pre">a_icomp</span></code>).
+<p>In this function, <code class="docutils literal notranslate"><span class="pre">a_output</span></code> is a pre-allocated block of memory that <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> will write its components to (beginning at <code class="docutils literal notranslate"><span class="pre">a_icomp</span></code>).
 Note that if <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> writes <span class="math notranslate nohighlight">\(N\)</span> components, the implementation must increment <code class="docutils literal notranslate"><span class="pre">a_icomp</span></code> by <span class="math notranslate nohighlight">\(N\)</span>.
 Usually, solvers will have their own <code class="docutils literal notranslate"><span class="pre">writePlotData</span></code> routines which lets <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> simply call the solver functions.
 An example is given below for the <a class="reference internal" href="../Applications/AdvectionDiffusionModel.html#chap-advectiondiffusionmodel"><span class="std std-ref">Advection-diffusion model</span></a>:</p>
@@ -997,7 +997,7 @@ The function signature is</p>
 <p>As mentioned in the documentation for this method, the function takes a trial time step <code class="docutils literal notranslate"><span class="pre">a_dt</span></code> which is the physical time step.
 This time step is the one computed by <code class="docutils literal notranslate"><span class="pre">computeDt</span></code>.
 It is, however, quite possible to advance the equations of motion over a time that does not equal <code class="docutils literal notranslate"><span class="pre">a_dt</span></code>, which is generally the case for adaptive time stepping methods.</p>
-<p>The implementation of the <code class="docutils literal notranslate"><span class="pre">advance</span></code> method is usually the most time-consuming part of implementation a new <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code>, and the implementation of this routine can become substantially complicated.
+<p>The implementation of the <code class="docutils literal notranslate"><span class="pre">advance</span></code> method is usually the most time-consuming part of implementing a new <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code>, and the implementation of this routine can become substantially complicated.
 For simpler problems this routine is relatively straightforward to implement, however, also in a way that involves AMR and cut-cells.</p>
 <div class="literal-block-wrapper docutils container" id="id11">
 <span id="list-advectiondiffusionstepperadvance"></span><div class="code-block-caption"><span class="caption-number">Listing 16 </span><span class="caption-text">Implementation of the <code class="docutils literal notranslate"><span class="pre">advance</span></code> routine for a simple advection-diffusion problem.</span><a class="headerlink" href="#id11" title="Permalink to this code"></a></div>
@@ -1172,7 +1172,7 @@ For an explanation to how regridding occurs in <code class="docutils literal not
 In particular, when regrids occur the old grids are eventually destroyed so it is necessary to cache the old-grid simulation states so that we have something to interpolate from when transferring the state to the new grids.</p>
 <section id="preregrid">
 <h3>preRegrid<a class="headerlink" href="#preregrid" title="Permalink to this heading"></a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">preRegrid</span></code> should any necessary pre-regrid operations that are necessary in order to call the <code class="docutils literal notranslate"><span class="pre">regrid</span></code>.
+<p><code class="docutils literal notranslate"><span class="pre">preRegrid</span></code> should perform any necessary pre-regrid operations that are necessary in order to call the <code class="docutils literal notranslate"><span class="pre">regrid</span></code>.
 This will virtually always include caching the old-grid simulation state, both for the solvers and also for internal data in <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code>
 Solvers usually know how to do this, and in some cases this function can be deceptively simple, as illustrated by the implementation of this function in <a class="reference internal" href="../Applications/AdvectionDiffusionModel.html#chap-advectiondiffusionmodel"><span class="std std-ref">Advection-diffusion model</span></a>:</p>
 <div class="literal-block-wrapper docutils container" id="id13">
@@ -1242,7 +1242,7 @@ This functionality is implemented through two routines:</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">loadBalanceThisRealm</span></code> which checks if a specific <a class="reference internal" href="Realm.html#chap-realm"><span class="std std-ref">Realm</span></a> should be load balanced.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">loadBalanceBoxes</span></code> which load balances the boxes on the specified <a class="reference internal" href="Realm.html#chap-realm"><span class="std std-ref">Realm</span></a>.</p></li>
 </ol>
-<p>Note that these functions are not pure functions, and it is perfect fine to use their default implementation, in which case each MPI rank gets approximately the same number of grid patches.</p>
+<p>Note that these functions are not pure functions, and it is perfectly fine to use their default implementation, in which case each MPI rank gets approximately the same number of grid patches.</p>
 <section id="loadbalancethisrealm">
 <h3>loadBalanceThisRealm<a class="headerlink" href="#loadbalancethisrealm" title="Permalink to this heading"></a></h3>
 <p>The function signature for this function is</p>

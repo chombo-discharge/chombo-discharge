@@ -196,7 +196,7 @@ For unimolecular reactions of the type</p>
 <div class="math notranslate nohighlight">
 \[X_A + X_B + \ldots \xrightarrow{k} \emptyset\]</div>
 <p>with <span class="math notranslate nohighlight">\(A \neq B \neq \ldots\)</span> the propensity function is <span class="math notranslate nohighlight">\(k X_A X_B \ldots\)</span>.
-For bimolecular of the type</p>
+For bimolecular reactions of the type</p>
 <div class="math notranslate nohighlight">
 \[2X_A \xrightarrow{k} \emptyset\]</div>
 <p>the propensity is <span class="math notranslate nohighlight">\(k \frac{1}{2} X_A(X_A-1)\)</span> because there are <span class="math notranslate nohighlight">\(\frac{1}{2}X_A(X_A-1)\)</span> unique pairs of molecules of type A.
@@ -221,7 +221,7 @@ The hybrid algorithm is taken from <span id="id2">Cao <em>et al.</em> [<a class=
 The type of reaction that fires is determined from</p>
 <div class="math notranslate nohighlight">
 \[r_c = \textrm{smallest integer satisfying } \sum_{r^\prime = 1}^{r_c} a_{r^\prime} &gt; u_2A,\]</div>
-<p>where and <span class="math notranslate nohighlight">\(u_2\)</span> is another uniformly distributed random variable between <span class="math notranslate nohighlight">\(0\)</span> and <span class="math notranslate nohighlight">\(1\)</span>.
+<p>where <span class="math notranslate nohighlight">\(u_2\)</span> is another uniformly distributed random variable between <span class="math notranslate nohighlight">\(0\)</span> and <span class="math notranslate nohighlight">\(1\)</span>.
 The state is then advanced as</p>
 <div class="math notranslate nohighlight">
 \[\vec{X}(t+T) = \vec{X}(t) + \vec{\nu}_{r_c}.\]</div>
@@ -283,8 +283,8 @@ Let these time steps be given by <span class="math notranslate nohighlight">\(\D
 Determine the reaction type using the SSA algorithm.</p>
 <p>Next, advance the state using tau leaping for the non-critical reaction.</p>
 </li>
-<li><p>Otherwise: No crical reactions fire.
-Advance the state using tau-leapnig for the non-critical reactions only.
+<li><p>Otherwise: No critical reactions fire.
+Advance the state using tau-leaping for the non-critical reactions only.
 An exception is made if <span class="math notranslate nohighlight">\(A\Delta\tau\)</span> is smaller than some specified threshold in which case we switch to SSA advancement (which is more efficient in this limit).</p></li>
 </ol>
 </li>
@@ -545,7 +545,7 @@ X + \emptyset &amp;\xrightarrow{k_a} \emptyset\end{split}\]</div>
 </section>
 <section id="c2-schlogl-model">
 <h3>C2: Schlögl model<a class="headerlink" href="#c2-schlogl-model" title="Permalink to this heading"></a></h3>
-<p>Solution the Schlögl model are given in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Convergence/KineticMonteCarlo/C2</span></code>.
+<p>Solutions to the Schlögl model are given in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Convergence/KineticMonteCarlo/C2</span></code>.
 For the Schlögl model we solve for a single population <span class="math notranslate nohighlight">\(X\)</span> with the reactions</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}B_1 + 2X &amp;\xrightarrow{c_1} 3X, \\
@@ -553,7 +553,7 @@ For the Schlögl model we solve for a single population <span class="math notran
 B2  &amp;\xrightarrow{c_3} X, \\
 X  &amp;\xrightarrow{c_4} B2.\end{split}\]</div>
 <p>The states <span class="math notranslate nohighlight">\(B_1\)</span> and <span class="math notranslate nohighlight">\(B_2\)</span> are buffered states with populations that do not change during the reactions.
-Figure <a class="reference internal" href="#fig-kineticmontecarloc1"><span class="std std-numref">Fig. 23</span></a> shows the Kinetic Monte Carlo solutions for rates</p>
+Figure <a class="reference internal" href="#fig-kineticmontecarloc2"><span class="std std-numref">Fig. 24</span></a> shows the Kinetic Monte Carlo solutions for rates</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}c_1 &amp;= 3\times 10^{-7}, \\
 c_2 &amp;= 10^{-4}, \\

@@ -172,9 +172,9 @@ The data lies on top of a coarse-grid data, i.e., data simultaneously exists on 
 This data type is encapsulated by <code class="docutils literal notranslate"><span class="pre">EBAMRData&lt;T&gt;</span></code>.</span><a class="headerlink" href="#id2" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
-<p>The reason for having class encapsulation of mesh data is due to <a class="reference internal" href="Realm.html#chap-realm"><span class="std std-ref">Realm</span></a>, so that we can only keep track on which <code class="docutils literal notranslate"><span class="pre">Realm</span></code> the mesh data is defined.
+<p>The reason for having class encapsulation of mesh data is due to <a class="reference internal" href="Realm.html#chap-realm"><span class="std std-ref">Realm</span></a>, so that we can only keep track of which <code class="docutils literal notranslate"><span class="pre">Realm</span></code> the mesh data is defined.
 Users will interact with <code class="docutils literal notranslate"><span class="pre">EBAMRData&lt;T&gt;</span></code> through application code, or interacting with the core AMR functionality in <a class="reference internal" href="AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> (such as computing gradients, interpolating ghost cells etc.).
-<a class="reference internal" href="AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> has functionality for constructing most <code class="docutils literal notranslate"><span class="pre">EBAMRData&lt;T&gt;</span></code> types on a <code class="docutils literal notranslate"><span class="pre">Realm</span></code>, and <code class="docutils literal notranslate"><span class="pre">EBAMRData&lt;T&gt;</span></code> itself it typically not used anywhere elsewhere within <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.</p>
+<a class="reference internal" href="AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> has functionality for constructing most <code class="docutils literal notranslate"><span class="pre">EBAMRData&lt;T&gt;</span></code> types on a <code class="docutils literal notranslate"><span class="pre">Realm</span></code>, and <code class="docutils literal notranslate"><span class="pre">EBAMRData&lt;T&gt;</span></code> itself is typically not used anywhere else within <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.</p>
 <p>A number of explicit template specifications exist and are frequently used.
 These are outlined below:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="n">EBAMRData</span><span class="o">&lt;</span><span class="n">EBCellFAB</span><span class="o">&gt;</span><span class="w">        </span><span class="n">EBAMRCellData</span><span class="p">;</span><span class="w">  </span><span class="c1">// Cell-centered single-phase data</span>
@@ -202,7 +202,7 @@ In the same way, <code class="docutils literal notranslate"><span class="pre">EB
 <span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">allocate</span><span class="p">(</span><span class="n">myData</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;myRealm&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">gas</span><span class="p">,</span><span class="w"> </span><span class="n">numComps</span><span class="p">);</span>
 </pre></div>
 </div>
-<p>Here, <code class="docutils literal notranslate"><span class="pre">numCOmps</span></code> determine the number of data components.
+<p>Here, <code class="docutils literal notranslate"><span class="pre">numComps</span></code> determines the number of data components.
 Note that it <em>does</em> matter on which <code class="docutils literal notranslate"><span class="pre">Realm</span></code> and on which <code class="docutils literal notranslate"><span class="pre">phase</span></code> the data is defined.
 See <a class="reference internal" href="Realm.html#chap-realm"><span class="std std-ref">Realm</span></a> for details.</p>
 <p>The user <em>can</em> specify a number of ghost cells for his/hers application code directly in the <code class="docutils literal notranslate"><span class="pre">AmrMesh::allocate</span></code> routine, like so:</p>
@@ -321,8 +321,8 @@ We currently support the following coarsening algorithms:</p>
 This implies that the total mass on the coarse-grid cell is identical to the total mass in the fine-grid cells from which one coarsened.</p></li>
 <li><p>Harmonic, in which the coarse-grid value is the harmonic average of the fine-grid cell values.</p></li>
 </ul>
-<p>These functions are available for both cell-centered data, cut-cell data, and face-centered data.
-Multiply signatures for this functionality exists, see the code-block below.</p>
+<p>These functions are available for cell-centered data, cut-cell data, and face-centered data.
+Multiple signatures for this functionality exist, see the code-block below.</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm">  @brief Average multifluid data over a specified realm</span>
 <span class="cm">  @param[in,out] a_data    Data to be coarsened.</span>
@@ -402,7 +402,7 @@ If one needs data on a grid level where no data already exists, it is possible t
 <p class="admonition-title">Important</p>
 <p>This type of interpolation is distinctly different from the ghost cell interpolation, as it affects data across the whole grid patch.</p>
 </div>
-<p>The interpolation function that fill fine-grid data from a coarse grid has the following signature:</p>
+<p>The interpolation function that fills fine-grid data from a coarse grid has the following signature:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm">  @brief Interpolate data to new grids</span>
 <span class="cm">  @details This is called when requiring data to be interpolated to new grids. Takes old data as argument</span>
@@ -433,9 +433,9 @@ We currently support the following interpolation methods:</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">Type::ConservativePWC</span></code>, which is a piecewise-constant interpolation that is also conservative (i.e., volume-weighted).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">Type::ConservativeMinMod</span></code>, which is a conservative interpolation method that uses the minmod limiter.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">Type::ConservativeMonotonizedCentral</span></code>, which is a conservative interpolation method that uses the van Leer limiter.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Type::Superbee</span></code>, which is a conservative interpolation method that uses the superbeed limiter.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Type::Superbee</span></code>, which is a conservative interpolation method that uses the superbee limiter.</p></li>
 </ul>
-<p>Note that there is “correct” interpolation method, but we note that we typically use a conservative minmod limiter in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.</p>
+<p>Note that there is no “correct” interpolation method, but we note that we typically use a conservative minmod limiter in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.</p>
 </section>
 <section id="computing-gradients">
 <span id="chap-gradients"></span><h2>Computing gradients<a class="headerlink" href="#computing-gradients" title="Permalink to this heading"></a></h2>
@@ -463,7 +463,7 @@ Once this neighborhood of cells is obtained, we compute the gradient using the p
 <p><span class="caption-number">Fig. 10 </span><span class="caption-text">Example of stencils for computing gradients near embedded boundaries.
 The red stencil shows a regular 5-point stencil for computing the gradient on the coarse side of the refinement boundary; it reaches into the coarsened data beneath the fine level.
 The green stencil shows a similar 5-point stencil on the fine side of the refinement boundary; the stencil reaches over the refinement boundary and into one ghost cell.
-The blue stencils shows a much more complex stencil which is computed using a least squares reconstruction procedure.</span><a class="headerlink" href="#id3" title="Permalink to this image"></a></p>
+The blue stencil shows a much more complex stencil which is computed using a least squares reconstruction procedure.</span><a class="headerlink" href="#id3" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
 <p>To compute gradients of a scalar, one can simply call <code class="docutils literal notranslate"><span class="pre">AmrMesh::computeGradient(...)</span></code> functions:</p>

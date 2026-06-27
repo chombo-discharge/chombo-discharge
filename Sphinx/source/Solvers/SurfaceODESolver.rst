@@ -96,11 +96,11 @@ Note that one can always call ``SurfaceODESolver<N>::getPhi()`` to iterate over 
 Regridding
 ----------
 
-When regridding the ``SurfaceODESolver<N>``, one must first call call
+When regridding the ``SurfaceODESolver<N>``, one must first call
 
 .. literalinclude:: ../../../../Source/SurfaceODESolver/CD_SurfaceODESolver.H
    :language: c++
-   :lines: 281-289
+   :lines: 282-289
    :dedent: 2
 
 This must be done *before* :ref:`Chap:AmrMesh` creates the new grids, and will store :math:`\vec{\phi}` on the old mesh.
@@ -129,14 +129,14 @@ which gives
    
    \vec{\phi}_{\mathbf{i}_{\textrm{fine}}} = r^{D-1}\frac{\alpha_{\mathbf{i}_{\textrm{coar}}}}{\sum_{\mathbf{i}_{\textrm{fine}}}\alpha_{\mathbf{i}_{\textrm{fine}}}}\vec{\phi}_{\mathbf{i}_{\textrm{coar}}},
 
-where :math:`\mathbf{i}_{\textrm{fine}}` is set of cut-cells that occur when refining the coarse-grid cut-cell :math:`\mathbf{i}_{\textrm{coar}}` and :math:`r` is the refinement factor between the two grid levels. 
+where :math:`\mathbf{i}_{\textrm{fine}}` is the set of cut-cells that occur when refining the coarse-grid cut-cell :math:`\mathbf{i}_{\textrm{coar}}` and :math:`r` is the refinement factor between the two grid levels. 
 In this case :math:`\vec{\phi}` is strictly conserved.
 Users can switch between these two methods by specifying the proper configuration option in the configuration file.
 
 Input options
 -------------
 
-Several input options are available for configuring the run-time configuration of ``MeshODESolver``, which are listed below
+Several input options are available for configuring the run-time configuration of ``SurfaceODESolver``, which are listed below
 
 .. literalinclude:: ../../../../Source/SurfaceODESolver/CD_SurfaceODESolver.options
    :caption: Input options for the ``SurfaceODESolver<N>`` class.

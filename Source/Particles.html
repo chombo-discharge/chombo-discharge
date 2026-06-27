@@ -114,6 +114,10 @@
 <li class="toctree-l2"><a class="reference internal" href="#particle-visualization">Particle visualization</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#superparticles">Superparticles</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#kd-trees">kD-trees</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kd-tree-merging-equal-weight-kd">KD-tree merging (<code class="docutils literal notranslate"><span class="pre">equal_weight_kd</span></code>)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kd-tree-with-reinitialization-reinitialize-bvh">KD-tree with reinitialization (<code class="docutils literal notranslate"><span class="pre">reinitialize_bvh</span></code>)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#reinitialization-reinitialize">Reinitialization (<code class="docutils literal notranslate"><span class="pre">reinitialize</span></code>)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sfc-nearest-neighbour-merging-sfc-nn">SFC nearest-neighbour merging (<code class="docutils literal notranslate"><span class="pre">sfc_nn</span></code>)</a></li>
 </ul>
 </li>
 </ul>
@@ -554,7 +558,7 @@ Failure to do so will lead to loss of all particles.</p>
 <span id="chap-maskedparticles"></span><h2>Masked particles<a class="headerlink" href="#masked-particles" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P,</span> <span class="pre">Traits&gt;</span></code> also supports the concept of <em>masked particles</em>, where one can fetch a subset of particles that live only in specified grid cells.
 Typically, this “specified region” is the refinement boundary, but the functionality is generic and might prove useful also in other cases.
-This functionality is unlikely to be used directly by users of chombo-discharge, but it is nonetheless fruitful to understand the concept in order to more easily fathom how deposition across refinement boundaries proceed.</p>
+This functionality is unlikely to be used directly by users of chombo-discharge, but it is nonetheless fruitful to understand the concept in order to more easily fathom how deposition across refinement boundaries proceeds.</p>
 <p>When <em>masked particles</em> are used, the user provides a boolean mask over the AMR hierarchy and obtains the subset of particles that live in regions where the mask evaluates to true.
 This functionality is for example used for some of the particle deposition methods in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> where we deposit particles that live near the refinement boundary with special deposition functions.</p>
 <p>To fill the masked particles, <code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P,</span> <span class="pre">Traits&gt;</span></code> has member functions for copying the particles into internal data containers which the user can later fetch.
@@ -578,7 +582,10 @@ Particles that live in cells where <code class="docutils literal notranslate"><s
 </div>
 <p>In the above functions the mask particles are <em>copied</em>, and the original particles are left untouched.
 After the user is done with the particles, they should be released through</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
+<span class="cm">  @brief Drop all mask/halo particles on every level (keeps capacity).</span>
+<span class="cm">*/</span>
+<span class="kt">void</span>
 <span class="n">clearMaskParticles</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -741,9 +748,9 @@ Refinement boundaries introduce additional complications in the deposition schem
 <p><span class="caption-number">Fig. 11 </span><span class="caption-text">Sketch of deposition schemes near refinement boundaries and cut-cells.</span><a class="headerlink" href="#id1" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
-<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> support various ways of handling deposition across the refinement boundary.
+<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> supports various ways of handling deposition across the refinement boundary.
 In all of these methods, the mass on the fine grid particles whose deposition clouds hang over the refinement boundaries is simply added to the coarse grid.
-The main modifications to the deposition scheme is performed for the coarse-grid particles that live around the refinement boundary (see <a class="reference internal" href="#fig-halomask"><span class="std std-numref">Fig. 12</span></a>).
+The main modifications to the deposition scheme are performed for the coarse-grid particles that live around the refinement boundary (see <a class="reference internal" href="#fig-halomask"><span class="std std-numref">Fig. 12</span></a>).
 For the coarse-grid particles the following processes then occur:</p>
 <figure class="align-center" id="id2">
 <span id="fig-halomask"></span><a class="reference internal image-reference" href="../_images/HaloMask.png"><img alt="../_images/HaloMask.png" src="../_images/HaloMask.png" style="width: 40%;" /></a>
@@ -833,14 +840,24 @@ The argument <code class="docutils literal notranslate"><span class="pre">a_shif
 <p>Often, merging or splitting of particles is required.
 The recommended pattern operates on one cell at a time: cell-sort the leaf, extract a cell’s particles into a small scratch <code class="docutils literal notranslate"><span class="pre">ParticleSoA</span></code>, merge/split them, and rebuild the leaf.
 <code class="docutils literal notranslate"><span class="pre">ParticleSoA&lt;P&gt;::extractCell</span></code> performs the per-cell extraction</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="w">  </span><span class="o">*/</span>
-<span class="w">  </span><span class="kt">void</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="w">  </span><span class="kt">void</span>
+<span class="w">  </span><span class="nf">extractCell</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">a_cell</span><span class="p">,</span><span class="w"> </span><span class="n">ParticleSoA</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_out</span><span class="p">)</span><span class="w"> </span><span class="k">const</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">CH_assert</span><span class="p">(</span><span class="n">m_sorted</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">a_out</span><span class="p">.</span><span class="n">clear</span><span class="p">();</span>
+
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">range</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">this</span><span class="o">-&gt;</span><span class="n">cellRange</span><span class="p">(</span><span class="n">a_cell</span><span class="p">);</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">range</span><span class="p">.</span><span class="n">first</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">range</span><span class="p">.</span><span class="n">second</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="n">a_out</span><span class="p">.</span><span class="n">appendParticle</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
 </pre></div>
 </div>
 <p>and the merged result is accumulated into an output <code class="docutils literal notranslate"><span class="pre">ParticleSoA</span></code> (via <code class="docutils literal notranslate"><span class="pre">append</span></code>) which finally replaces the leaf with <code class="docutils literal notranslate"><span class="pre">swap</span></code>.
 A complete worked example is <code class="docutils literal notranslate"><span class="pre">ItoSolver::makeSuperparticles</span></code> in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Source/ItoDiffusion/CD_ItoSolver.cpp</span></code>.</p>
-<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> has rather elementary support for handling superparticles.
-Currently, we only support reinitialization of particles, or agglomeration of particles using kD-trees, as discussed below.</p>
+<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> supports four merger strategies, all implemented as factory functions in <code class="docutils literal notranslate"><span class="pre">ParticleManagement</span></code> that return a <code class="docutils literal notranslate"><span class="pre">ParticleMerger&lt;P,</span> <span class="pre">Traits&gt;</span></code> functor.
+Each factory accepts user-supplied lambdas for the particle-type-specific gather, reduce, and scatter steps, so the same algorithm can be reused with any <code class="docutils literal notranslate"><span class="pre">ParticleSoA</span></code> payload type.</p>
 <section id="kd-trees">
 <h3>kD-trees<a class="headerlink" href="#kd-trees" title="Permalink to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> has functionality for spatially partitioning particles using kD-trees, which can be used as a basis for particle merging and splitting.
@@ -855,13 +872,14 @@ At each level in the tree recursion one chooses an axis for partitioning one sub
 </figure>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p>The source code for the kD-tree functionality is given in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Source/Particle/CD_KDNode.H</span></code>.</p>
+<p>The source code for the kD-tree partitioner is given in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Source/Particle/CD_ParticleManagement.H</span></code> (<code class="docutils literal notranslate"><span class="pre">ParticleManagement::buildEqualWeightKDLeaves</span></code>).</p>
 </div>
-<p>The kD-tree partitioner partitions a lightweight, communication-free particle type (<code class="docutils literal notranslate"><span class="pre">NonCommParticle</span></code>) carrying the position, weight, and any quantities to be preserved across a merge.
-Only the partitioner <code class="docutils literal notranslate"><span class="pre">partitionAndSplitEqualWeightKD</span></code> is currently supported, and this partitioner will divide the original subset into two new subsets such that the particle weights in the two halves differ by at most one physical particle.</p>
+<p>The kD-tree partitioner operates on a lightweight, communication-free particle type (<code class="docutils literal notranslate"><span class="pre">NonCommParticle</span></code>) carrying the position, weight, and any quantities to be preserved across a merge.
+The partitioner <code class="docutils literal notranslate"><span class="pre">buildEqualWeightKDLeaves</span></code> recursively bisects the input particles into spatially coherent leaves whose weights are as equal as possible – at each bisection the two halves differ by at most one physical particle.
+It returns the leaf particle ranges directly; the tree is built in a flat, reusable scratch buffer rather than as linked node objects.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p><code class="docutils literal notranslate"><span class="pre">partitionAndSplitEqualWeightKD</span></code> will usually split particles to ensure that the weight in the two subsets are the same (thus creating new particles).
+<p><code class="docutils literal notranslate"><span class="pre">buildEqualWeightKDLeaves</span></code> will usually split particles to ensure that the weight in the two subsets are the same (thus creating new particles).
 In this case any other members in the particle type are copied over into the new particles.</p>
 </div>
 <p>The particles in each leaf of the kD-tree can then be merged into new particles.
@@ -874,6 +892,97 @@ Left: Original particles with weights between 1 and 100.
 Right: Merged particles.</span><a class="headerlink" href="#id4" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
+</section>
+<section id="kd-tree-merging-equal-weight-kd">
+<h3>KD-tree merging (<code class="docutils literal notranslate"><span class="pre">equal_weight_kd</span></code>)<a class="headerlink" href="#kd-tree-merging-equal-weight-kd" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">ParticleManagement::makeEqualWeightKDMerger</span></code> wraps <code class="docutils literal notranslate"><span class="pre">buildEqualWeightKDLeaves</span></code> into a <code class="docutils literal notranslate"><span class="pre">ParticleMerger</span></code> functor.
+The caller provides three lambdas:</p>
+<ul class="simple">
+<li><p>A <em>gather</em> function that packs one SoA slot into a <code class="docutils literal notranslate"><span class="pre">NonCommParticle</span></code>.</p></li>
+<li><p>A <em>reconcile</em> function (<code class="docutils literal notranslate"><span class="pre">BinaryParticleReconcile</span></code>) that propagates payload fields to both daughter particles when the median particle is split across a KD boundary.</p></li>
+<li><p>A <em>scatter-leaf</em> function that receives the raw <code class="docutils literal notranslate"><span class="pre">[first,</span> <span class="pre">last)</span></code> pointer range of one leaf and appends exactly one merged particle to the SoA.</p></li>
+</ul>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Packed</span><span class="p">,</span>
+<span class="w">          </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">Packed</span><span class="o">::*</span><span class="n">packWeight</span><span class="p">)(),</span>
+<span class="w">          </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">Packed</span><span class="o">::*</span><span class="n">packPosition</span><span class="p">)()</span><span class="w"> </span><span class="k">const</span><span class="p">,</span>
+<span class="w">          </span><span class="k">class</span><span class="w"> </span><span class="nc">P</span><span class="p">,</span>
+<span class="w">          </span><span class="k">class</span><span class="w"> </span><span class="nc">Traits</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ParticleTraits</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&gt;</span>
+<span class="kr">inline</span><span class="w"> </span><span class="n">ParticleMerger</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">Traits</span><span class="o">&gt;</span>
+<span class="n">makeEqualWeightKDMerger</span><span class="p">(</span>
+<span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Packed</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">ParticleSoA</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">Traits</span><span class="o">&gt;&amp;</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="p">)</span><span class="o">&gt;</span><span class="w">                           </span><span class="n">a_gather</span><span class="p">,</span>
+<span class="w">  </span><span class="n">BinaryParticleReconcile</span><span class="o">&lt;</span><span class="n">Packed</span><span class="o">&gt;</span><span class="w">                                                             </span><span class="n">a_reconcile</span><span class="p">,</span>
+<span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="kt">void</span><span class="p">(</span><span class="n">ParticleSoA</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">Traits</span><span class="o">&gt;&amp;</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Packed</span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Packed</span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">CellInfo</span><span class="o">&amp;</span><span class="p">)</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_scatterLeaf</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>In the weighted-centroid variant (<code class="docutils literal notranslate"><span class="pre">equal_weight_kd</span></code> in <code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code>), the scatter-leaf computes the weight-averaged position and energy over all particles in the leaf.
+Particle weights need not be integers, but <code class="docutils literal notranslate"><span class="pre">buildEqualWeightKDLeaves</span></code> may create new particles at the KD boundaries (see warning above), so the total computational-particle count may exceed the target by a small amount during the build before being reduced.</p>
+</section>
+<section id="kd-tree-with-reinitialization-reinitialize-bvh">
+<h3>KD-tree with reinitialization (<code class="docutils literal notranslate"><span class="pre">reinitialize_bvh</span></code>)<a class="headerlink" href="#kd-tree-with-reinitialization-reinitialize-bvh" title="Permalink to this heading"></a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">reinitialize_bvh</span></code> variant uses the same <code class="docutils literal notranslate"><span class="pre">makeEqualWeightKDMerger</span></code> factory and the same KD partition, but replaces the centroid scatter with a position-reinitialising scatter:</p>
+<ul class="simple">
+<li><p><strong>Cut-cells</strong> (<code class="docutils literal notranslate"><span class="pre">volFrac</span> <span class="pre">&lt;</span> <span class="pre">1</span></code>): the weighted centroid is used to keep the merged particle inside the embedded boundary.</p></li>
+<li><p><strong>Full cells</strong>: a random point is drawn uniformly from the bounding box of the leaf, reinitialising the spatial distribution within each KD partition rather than collapsing it to a single point.</p></li>
+</ul>
+<p>This avoids accumulating all merged particles at a cluster of centroid positions in full cells, at the cost of discarding the fine-scale spatial information within each leaf.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In the full-cell branch, energy is accumulated over the leaf but is <em>not</em> normalised by weight – the stored value is the total (not average) energy of the leaf.
+This is intentional and matches the original <code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> behaviour.</p>
+</div>
+</section>
+<section id="reinitialization-reinitialize">
+<h3>Reinitialization (<code class="docutils literal notranslate"><span class="pre">reinitialize</span></code>)<a class="headerlink" href="#reinitialization-reinitialize" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">ParticleManagement::makeReinitializeMerger</span></code> discards all spatial information and rebuilds the cell from scratch.</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="o">*/</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Context</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">P</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">Traits</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ParticleTraits</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&gt;</span>
+<span class="kr">inline</span><span class="w"> </span><span class="n">ParticleMerger</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">Traits</span><span class="o">&gt;</span>
+<span class="n">makeReinitializeMerger</span><span class="p">(</span>
+<span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="p">,</span><span class="w"> </span><span class="n">Context</span><span class="o">&gt;</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">ParticleSoA</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">Traits</span><span class="o">&gt;&amp;</span><span class="p">)</span><span class="o">&gt;</span><span class="w">              </span><span class="n">a_aggregate</span><span class="p">,</span>
+<span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="kt">void</span><span class="p">(</span><span class="n">ParticleSoA</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">Traits</span><span class="o">&gt;&amp;</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="p">,</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Context</span><span class="o">&amp;</span><span class="p">)</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_emit</span><span class="p">,</span>
+</pre></div>
+</div>
+<p>The returned functor proceeds as follows:</p>
+<ol class="arabic simple">
+<li><p>Calls <em>aggregate</em> once on the input SoA to obtain the total physical-particle count and a caller-defined context (e.g. the weight-averaged energy).</p></li>
+<li><p>Passes the physical count to <code class="docutils literal notranslate"><span class="pre">partitionParticleWeights</span></code>, which divides it into at most <code class="docutils literal notranslate"><span class="pre">ppc</span></code> integer weights differing by at most one.</p></li>
+<li><p>For each weight, draws a random position in the cell via <code class="docutils literal notranslate"><span class="pre">Random::randomPosition</span></code> (cut-cell aware) and calls <em>emit</em> to append the new particle.</p></li>
+</ol>
+<p>All output particles share the same aggregated context, so per-particle information (e.g. individual energies) is lost.
+This method requires that particle weights are (close to) integers.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p><code class="docutils literal notranslate"><span class="pre">makeReinitializeMerger</span></code> captures <code class="docutils literal notranslate"><span class="pre">probLo</span></code> at parse time.
+The cell-centre position is computed internally as <code class="docutils literal notranslate"><span class="pre">probLo</span> <span class="pre">+</span> <span class="pre">dx</span> <span class="pre">*</span> <span class="pre">(gridIndex</span> <span class="pre">+</span> <span class="pre">0.5)</span></code>, so no grid pointer needs to be retained in the returned functor.</p>
+</div>
+</section>
+<section id="sfc-nearest-neighbour-merging-sfc-nn">
+<h3>SFC nearest-neighbour merging (<code class="docutils literal notranslate"><span class="pre">sfc_nn</span></code>)<a class="headerlink" href="#sfc-nearest-neighbour-merging-sfc-nn" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">ParticleManagement::makeSfcNearestNeighborMerger</span></code> sorts particles along a Hilbert space-filling curve and merges adjacent pairs until the count is at most <code class="docutils literal notranslate"><span class="pre">ppc</span></code>.</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Packed</span><span class="p">,</span>
+<span class="w">          </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">Packed</span><span class="o">::*</span><span class="n">packWeight</span><span class="p">)(),</span>
+<span class="w">          </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">Packed</span><span class="o">::*</span><span class="n">packPosition</span><span class="p">)()</span><span class="w"> </span><span class="k">const</span><span class="p">,</span>
+<span class="w">          </span><span class="k">class</span><span class="w"> </span><span class="nc">P</span><span class="p">,</span>
+<span class="w">          </span><span class="k">class</span><span class="w"> </span><span class="nc">Traits</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ParticleTraits</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&gt;</span>
+<span class="kr">inline</span><span class="w"> </span><span class="n">ParticleMerger</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">Traits</span><span class="o">&gt;</span>
+<span class="n">makeSfcNearestNeighborMerger</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Packed</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">ParticleSoA</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">Traits</span><span class="o">&gt;&amp;</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="p">)</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_gather</span><span class="p">,</span>
+<span class="w">                             </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="kt">void</span><span class="p">(</span><span class="n">Packed</span><span class="o">&amp;</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Packed</span><span class="o">&amp;</span><span class="p">)</span><span class="o">&gt;</span><span class="w">                       </span><span class="n">a_combine</span><span class="p">,</span>
+<span class="w">                             </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="kt">void</span><span class="p">(</span><span class="n">ParticleSoA</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">Traits</span><span class="o">&gt;&amp;</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Packed</span><span class="o">&amp;</span><span class="p">)</span><span class="o">&gt;</span><span class="w">       </span><span class="n">a_scatter</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The caller provides three lambdas:</p>
+<ul class="simple">
+<li><p>A <em>gather</em> function that packs one SoA slot into a <code class="docutils literal notranslate"><span class="pre">NonCommParticle</span></code>.</p></li>
+<li><p>A <em>combine</em> function that merges two adjacent intermediates in place (typically a weighted average of position and energy).</p></li>
+<li><p>A <em>scatter</em> function that unpacks one merged intermediate back into the SoA.</p></li>
+</ul>
+<p>Unlike the KD-tree methods, SFC merging does not require integer weights.
+Particle counts below <code class="docutils literal notranslate"><span class="pre">ppc</span></code> are handled by splitting the heaviest particle: its weight is halved and a copy is appended, repeating until the target is reached (only if the heaviest particle has weight <span class="math notranslate nohighlight">\(\geq 2\)</span>).
+The Hilbert ordering ensures that merged pairs are spatially close, which better preserves spatial correlations than random pairing and typically produces smoother merged distributions than the KD centroid.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>The source code for all merger factories is in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Source/Particle/CD_ParticleManagement.H</span></code>.</p>
+</div>
 </section>
 </section>
 </section>

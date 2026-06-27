@@ -147,7 +147,7 @@
   <section id="data-parsing">
 <span id="chap-dataparser"></span><h1>Data parsing<a class="headerlink" href="#data-parsing" title="Permalink to this heading"></a></h1>
 <p>Routines for reading simple column data into <a class="reference internal" href="LookupTable.html#chap-lookuptable"><span class="std std-ref">LookupTable1D</span></a> are available.
-This is typically used, e.g., when parsing transport coefficients or other types of data requires by a computer simulation.</p>
+This is typically used, e.g., when parsing transport coefficients or other types of data required by a computer simulation.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">DataParser</span></code> C++ API is found at <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/namespaceDataParser.html">https://chombo-discharge.github.io/chombo-discharge/doxygen/html/namespaceDataParser.html</a>.</p>
@@ -161,7 +161,7 @@ This is typically used, e.g., when parsing transport coefficients or other types
 2.0 3.0
 </pre></div>
 </div>
-<p>It is also possible to restrict which rows that are read, by specifying string identifiers on the line preceding the data and on the line immediately after the data.</p>
+<p>It is also possible to restrict which rows are read, by specifying string identifiers on the line preceding the data and on the line immediately after the data.</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
 <p>After parsing into a <a class="reference internal" href="LookupTable.html#chap-lookuptable"><span class="std std-ref">LookupTable1D</span></a>, the user must regularize the table in order to use the interpolation functions.
@@ -171,46 +171,6 @@ See <a class="reference internal" href="LookupTable.html#chap-lookuptableregular
 <li><p>Read particle data, where the particle data is in a <span class="math notranslate nohighlight">\((x,y,z,w)\)</span> file format, where <span class="math notranslate nohighlight">\(w\)</span> is the particle weight.</p>
 <p>The function signatures for reading this type of data are:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Simple file parser which reads a file and puts the data into two columns (a lookup table). </span>
-<span class="cm">  @details This will read ASCII row/column data into a LookupTable1D (which is a simple x-y data structure). The user can specify which columns</span>
-<span class="cm">  to use as the x and y coordinates in the LookupTable1D. If the user ask for a column that does not exist in the input file, the data will not be read</span>
-<span class="cm">  into the LookupTable1D. </span>
-<span class="cm">  @param[in] a_fileName    Input file name. Must be an ASCII file organized into rows and columns. </span>
-<span class="cm">  @param[in] a_xColumn     Which column to use as the x-column. </span>
-<span class="cm">  @param[in] a_yColumn     Which column to use as the y-column. </span>
-<span class="cm">  @param[in] a_ignoreChars Characters indicating comments in the file. Lines starting with these characters are ignored. </span>
-<span class="cm">  @note xColumn = 0 is the FIRST column, xColumn=1 is the SECOND column and so on. </span>
-<span class="cm">  @return Return value</span>
-<span class="cm">*/</span>
-<span class="n">LookupTable1D</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="o">&gt;</span>
-<span class="n">simpleFileReadASCII</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w">       </span><span class="n">a_fileName</span><span class="p">,</span>
-<span class="w">                    </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                </span><span class="n">a_xColumn</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
-<span class="w">                    </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                </span><span class="n">a_yColumn</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
-<span class="w">                    </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">char</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_ignoreChars</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="sc">&#39;#&#39;</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;/&#39;</span><span class="p">});</span>
-
-<span class="cm">/**</span>
-<span class="cm">  @brief Simple ASCII file parser which reads a file and puts the data into two columns (a lookup table)</span>
-<span class="cm">  @details This version can read a partial file. It will ignore all lines until the a_startRead string is</span>
-<span class="cm">  encountered. After that, it will read files as usual, skipping lines that begin with comments. Empty lines</span>
-<span class="cm">  are NOT skipped, since an empty line typically identifies the end of a field from e.g. BOLSIG outputs. Instead</span>
-<span class="cm">  to stop reading when an empty line is encountered, one can use a_stopRead=&quot;&quot;. </span>
-<span class="cm">  @param[in] a_fileName    Input file name. Must be an ASCII file organized into rows and columns. </span>
-<span class="cm">  @param[in] a_startRead   Identifier where we start parsing lines into the table</span>
-<span class="cm">  @param[in] a_stopRead    Identifier where we stop parsing lines into the table</span>
-<span class="cm">  @param[in] a_xColumn     Which column to use as the x-column. </span>
-<span class="cm">  @param[in] a_yColumn     Which column to use as the y-column. </span>
-<span class="cm">  @param[in] a_ignoreChars Characters indicating comments in the file. Lines starting with these characters are ignored. </span>
-<span class="cm">  @return Return value</span>
-<span class="cm">*/</span>
-<span class="n">LookupTable1D</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="o">&gt;</span>
-<span class="n">fractionalFileReadASCII</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w">       </span><span class="n">a_fileName</span><span class="p">,</span>
-<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w">       </span><span class="n">a_startRead</span><span class="p">,</span>
-<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w">       </span><span class="n">a_stopRead</span><span class="p">,</span>
-<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                </span><span class="n">a_xColumn</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
-<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                </span><span class="n">a_yColumn</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
-<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">char</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_ignoreChars</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="sc">&#39;#&#39;</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;/&#39;</span><span class="p">});</span>
-
-<span class="cm">/**</span>
 <span class="cm">  @brief Simple file parser which will read particles (position/weight) from an ASCII file. </span>
 <span class="cm">  @details Particles should be arranged as rows, e.g. in the form</span>
 <span class="cm">  x   y   z   w</span>

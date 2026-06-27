@@ -236,7 +236,7 @@
 <span id="chap-itokmc"></span><h1>Îto-KMC plasma model<a class="headerlink" href="#ito-kmc-plasma-model" title="Permalink to this heading"></a></h1>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>This section is not very well documented. The following featurse are definitely missing:</p>
+<p>This section is not very well documented. The following features are definitely missing:</p>
 <ul class="simple">
 <li><p>Use of hybrid models (PPC-fluid specifications)</p></li>
 <li><p>How the physics time step is restricted</p></li>
@@ -286,7 +286,8 @@ Currently, the time step can be restricted through several means:</p>
 </ol>
 <p>In addition, the user can specify the maximum permitted growth or reduction in the time step.</p>
 <p>These limits are given by the following input variables:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ItoKMCGodunovStepper.min_particle_advection_cfl               = 0.0                ## Advective time step CFL restriction
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ItoKMCGodunovStepper.physics_dt_factor                        = 1.0                ## Physics-based time step factor
+ItoKMCGodunovStepper.min_particle_advection_cfl               = 0.0                ## Advective time step CFL restriction
 ItoKMCGodunovStepper.max_particle_advection_cfl               = 1.0                ## Advective time step CFL restriction
 ItoKMCGodunovStepper.min_particle_diffusion_cfl               = 0.0                ## Diffusive time step CFL restriction
 ItoKMCGodunovStepper.max_particle_diffusion_cfl               = 1.E99              ## Diffusive time step CFL restriction
@@ -298,8 +299,6 @@ ItoKMCGodunovStepper.min_dt                                   = 0.0             
 ItoKMCGodunovStepper.max_dt                                   = 1.E99              ## Maximum permitted time step
 ItoKMCGodunovStepper.max_growth_dt                            = 1.E99              ## Maximum permitted time step increase (dt * factor)
 ItoKMCGodunovStepper.max_shrink_dt                            = 1.E99              ## Maximum permissible time step reduction (dt/factor)
-ItoKMCGodunovStepper.extend_conductivity                      = true               ## Permit particles to live outside the EB to avoid bad gradients near EB
-ItoKMCGodunovStepper.cond_filter_num                          = 0                  ## Number of filterings for conductivity
 </pre></div>
 </div>
 </section>
@@ -1082,7 +1081,7 @@ The difference between <code class="docutils literal notranslate"><span class="p
 It is sufficient to populate the <code class="docutils literal notranslate"><span class="pre">ItoKMCPhysics</span></code> species vectors <code class="docutils literal notranslate"><span class="pre">m_cdrSpecies</span></code> and <code class="docutils literal notranslate"><span class="pre">m_itoSpecies</span></code> if one only wants to initialize the solvers.
 See <a class="reference internal" href="#chap-itokmcphysics"><span class="std std-ref">ItoKMCPhysics</span></a> for their C++ definition.
 In addition to actually populating the vectors, users will typically also include initial conditions for the species.
-The interfaces permit initial particles and density functions for both both solver types.
+The interfaces permit initial particles and density functions for both solver types.
 Additionally, one must define all species associated with radiative transfer solvers.</p>
 </section>
 <section id="plasma-reactions">
@@ -1108,7 +1107,7 @@ Note that if the reaction was <span class="math notranslate nohighlight">\(A + A
 \[a_2 = \frac{1}{2}c_2X_A\left(X_A-1\right)\]</div>
 <p>since there are <span class="math notranslate nohighlight">\(\frac{1}{2}X_A\left(X_A-1\right)\)</span> distinct pairs of particles of type <span class="math notranslate nohighlight">\(A\)</span>.
 Likewise, the fluid rate coefficient would be <span class="math notranslate nohighlight">\(k_2 = c_2\Delta V/2\)</span>.</p>
-<p>The distinction between KMC and fluid rates is an important one; the reaction representation used in the Îto-KMC model only operates with the KMC rates <span class="math notranslate nohighlight">\(c_j\)</span>, and it is us to the user to ensure that these are consistent with the fluid limit.
+<p>The distinction between KMC and fluid rates is an important one; the reaction representation used in the Îto-KMC model only operates with the KMC rates <span class="math notranslate nohighlight">\(c_j\)</span>, and it is up to the user to ensure that these are consistent with the fluid limit.
 Internally, these reactions are implemented through the dual state KMC implementation, see <a class="reference internal" href="../Solvers/KineticMonteCarlo.html#chap-kineticmontecarlo"><span class="std std-ref">Kinetic Monte Carlo</span></a>.
 During the reaction advance the user only needs to update the <span class="math notranslate nohighlight">\(c_j\)</span> coefficients (typically done via an interface implementation); the calculation of the propensity is automatic and follows the standard KMC rules (e.g., the KMC solver accounts for the number of distinct pairs of particles).
 This must be done in the routine <code class="docutils literal notranslate"><span class="pre">updateReactionRates(...)</span></code>, see <a class="reference internal" href="#chap-itokmcphysics"><span class="std std-ref">ItoKMCPhysics</span></a> for the complete specification.</p>
@@ -1139,7 +1138,7 @@ There are two ways of doing this:</p>
 This can imply a large computational cost since one will have to track all photons that are generated.</p></li>
 </ol>
 <p>The former method is normally the preferred way as it can lead to reductions in computational complexity and particle noise, but for flexibility <code class="docutils literal notranslate"><span class="pre">ItoKMCPhysics</span></code> supports both of these.
-The latter method can be of relevance if users wants precise descriptions of photons that trigger both photoionizing reactions and surface reactions (e.g., secondary electron emission).</p>
+The latter method can be of relevance if users want precise descriptions of photons that trigger both photoionizing reactions and surface reactions (e.g., secondary electron emission).</p>
 <p>An alternative is to split the photon type <span class="math notranslate nohighlight">\(\gamma\)</span> into volumetrically absorbed and surface absorbed photon species <span class="math notranslate nohighlight">\(\gamma_v\)</span> and <span class="math notranslate nohighlight">\(\gamma_s\)</span>.
 In this case one may pre-scale the photon-generating reactions by the photo-reaction probabilities <span class="math notranslate nohighlight">\(\xi\)</span> (for volume absorption) and <span class="math notranslate nohighlight">\(\zeta\)</span> (for surface absorption) as follows:</p>
 <div class="math notranslate nohighlight">
@@ -1181,7 +1180,7 @@ By default, the above is evaluated for all reactions, but the user can specify a
 <h3>Caveats<a class="headerlink" href="#caveats" title="Permalink to this heading"></a></h3>
 <p>There are some caveats with using the time step limitation given above.
 For example, if there are no electrons in the simulation region, the above method will (correctly) return a very large time step based on the behavior of the other species.
-But one may very have <em>detachment</em> of electrons enabled, and the combination of a detachment event and a large time step is quite unfortunate.
+But one may very well have <em>detachment</em> of electrons enabled, and the combination of a detachment event and a large time step is quite unfortunate.
 Because of this, the above constraint is also applied on proxy-states of <span class="math notranslate nohighlight">\(\vec{X}\)</span> that have been completely exhausted through critical reactions, which provides a much more reasonable time step.</p>
 <p>A second factor involved in the time step calculation above is that one may have regions where <span class="math notranslate nohighlight">\(X_i\)</span> is very small, but where <span class="math notranslate nohighlight">\(\sum_r \nu_{ri} a_r\)</span> is very high.
 Outside of electron avalanching regions, detachment may completely dominate the time step calculation and cause a much smaller time step than necessary.
@@ -1723,7 +1722,7 @@ Note that the temperature is mostly relevant for transport coefficients (e.g., r
 The temperature can be specified through the <code class="docutils literal notranslate"><span class="pre">temperature</span></code> field for each species, and various forms of specifying this is available.</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p>If the specifies temperature is <em>not</em> specified by the user, it will be set equal to the background gas temperature.</p>
+<p>If the specified temperature is <em>not</em> specified by the user, it will be set equal to the background gas temperature.</p>
 </div>
 <section id="background-gas">
 <h5>Background gas<a class="headerlink" href="#background-gas" title="Permalink to this heading"></a></h5>
@@ -1852,7 +1851,7 @@ The field consists of an array of JSON entries, where each array entry represent
 <span class="w"> </span><span class="p">]</span>
 </pre></div>
 </div>
-<p>The various supported ways of additional initial particles are discussed below.</p>
+<p>The various supported ways of adding initial particles are discussed below.</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
 <p>If a solver is specified as a CDR solver, the initial particles are deposited as densities on the mesh using an NGP scheme.</p>
@@ -2146,7 +2145,7 @@ For example:</p>
 <div class="math notranslate nohighlight">
 \[\kappa = \left(\chi_{\textrm{min}}p_i\right)\left(\frac{\chi_{\textrm{max}}}{\chi_{\textrm{min}}}\right)^u,\]</div>
 <p>where <span class="math notranslate nohighlight">\(p_i\)</span> is the partial pressure of some species <span class="math notranslate nohighlight">\(i\)</span>, and <span class="math notranslate nohighlight">\(p_i\chi_{\textrm{min}}\)</span> and <span class="math notranslate nohighlight">\(p_i\chi_{\textrm{max}}\)</span> are minimum and maximum absorption lengths, and <span class="math notranslate nohighlight">\(u\)</span> is a random number between 0 and 1.
-Note that that this is just a simpler way of using the <code class="docutils literal notranslate"><span class="pre">stochastic</span> <span class="pre">A</span></code> specifier above.
+Note that this is just a simpler way of using the <code class="docutils literal notranslate"><span class="pre">stochastic</span> <span class="pre">A</span></code> specifier above.
 The user must specify <span class="math notranslate nohighlight">\(\chi_{\textrm{min}}\)</span>, <span class="math notranslate nohighlight">\(\chi_{\textrm{max}}\)</span>, and the background species used when computing <span class="math notranslate nohighlight">\(p_i\)</span>.
 This is done through fields <code class="docutils literal notranslate"><span class="pre">chi</span> <span class="pre">min</span></code>, <code class="docutils literal notranslate"><span class="pre">chi</span> <span class="pre">max</span></code>, and <code class="docutils literal notranslate"><span class="pre">neutral</span></code>.
 For example:</p>
@@ -2207,14 +2206,14 @@ For example:</p>
 </pre></div>
 </div>
 <p>which is equivalent to the reaction <span class="math notranslate nohighlight">\(\text{e} + \text{N}_2 \rightarrow \text{e} + \text{e} + \text{N}_2^+\)</span>.
-Each species must be separated by whitespace and a addition operator.
+Each species must be separated by whitespace and an addition operator.
 For example, the specification <code class="docutils literal notranslate"><span class="pre">A</span> <span class="pre">+</span> <span class="pre">B</span> <span class="pre">+</span> <span class="pre">C</span></code> will be interpreted as a reaction <span class="math notranslate nohighlight">\(\text{A} + \text{B} + \text{C}\)</span> but the specification <code class="docutils literal notranslate"><span class="pre">A+B</span> <span class="pre">+</span> <span class="pre">C</span></code> will be interpreted as a reaction between one species <code class="docutils literal notranslate"><span class="pre">A+B</span></code> and another species <code class="docutils literal notranslate"><span class="pre">C</span></code> .</p>
 <p>Internally, both the left- and right-hand sides are checked against background and plasma species.
 The program will perform a run-time exit if the species are not defined in these lists.
-Note that the right-hand side can additional contain photon species.</p>
+Note that the right-hand side can additionally contain photon species.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p>Products not not defined as a species can be enclosed by parenthesis <code class="docutils literal notranslate"><span class="pre">(</span></code> and <code class="docutils literal notranslate"><span class="pre">)</span></code>.</p>
+<p>Products not defined as a species can be enclosed by parenthesis <code class="docutils literal notranslate"><span class="pre">(</span></code> and <code class="docutils literal notranslate"><span class="pre">)</span></code>.</p>
 </div>
 <p>The reaction string generally expects all species on each side of the reaction to be defined.
 It is, however, occasionally useful to include products which are <em>not</em> defined.
@@ -2371,7 +2370,7 @@ An example JSON specification is</p>
 </section>
 <section id="efficiency">
 <h4>Efficiency<a class="headerlink" href="#efficiency" title="Permalink to this heading"></a></h4>
-<p>Reactions efficiencies can be modified in the same way as one do with the <code class="docutils literal notranslate"><span class="pre">scale</span></code> field, e.g. modify the rate constant as</p>
+<p>Reaction efficiencies can be modified in the same way as one does with the <code class="docutils literal notranslate"><span class="pre">scale</span></code> field, e.g. modify the rate constant as</p>
 <div class="math notranslate nohighlight">
 \[k \rightarrow \nu k,\]</div>
 <p>where <span class="math notranslate nohighlight">\(\nu\)</span> is the reaction efficiency.
@@ -2603,7 +2602,7 @@ To enable a time step calculation, specify the <code class="docutils literal not
 Currently, new particles may be placed on the centroid, uniformly distributed in the grid cell, or placed randomly in the downstream region of some user-defined species.
 The method is specified through the <code class="docutils literal notranslate"><span class="pre">method</span></code> specifier, which must either be <code class="docutils literal notranslate"><span class="pre">centroid</span></code>, <code class="docutils literal notranslate"><span class="pre">random</span></code>, or <code class="docutils literal notranslate"><span class="pre">downstream</span></code>.
 If specifying <code class="docutils literal notranslate"><span class="pre">downstream</span></code>, one must also include a species specifier (which must correspond to one of the plasma species).
-The following three specifies are all valid:</p>
+The following three specifiers are all valid:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;particle placement&quot;</span><span class="p">:</span>
 <span class="p">{</span>
 <span class="w">   </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;centroid&quot;</span>
@@ -2706,14 +2705,14 @@ An example JSON specification that enables secondary electron emission due to ph
 <span class="p">]</span>
 </pre></div>
 </div>
-<p>The <code class="docutils literal notranslate"><span class="pre">reaction</span></code> field specifies which reaction is triggered: The left hand side is the primary (outgoing) species and the left hand side must contain the secondary emissions.
+<p>The <code class="docutils literal notranslate"><span class="pre">reaction</span></code> field specifies which reaction is triggered: The left hand side is the primary (outgoing) species and the right hand side must contain the secondary emissions.
 The left-hand side can consist of either photons (e.g., <code class="docutils literal notranslate"><span class="pre">Y</span></code>) or particle (e.g., <code class="docutils literal notranslate"><span class="pre">O2+</span></code>) species.
 The efficiency field specifies the efficiency of the reaction.
 When multiple reactions are specified, we randomly sample the reaction according to a discrete distribution with probabilities</p>
 <div class="math notranslate nohighlight">
 \[p(i) = \frac{\nu_i}{\sum_i \nu_i},\]</div>
 <p>where <span class="math notranslate nohighlight">\(\nu_i\)</span> are the efficiencies.
-Note that the efficiencies do not need to sum to one, and if only a single reaction is specified the efficiency specifier has not real effect.
+Note that the efficiencies do not need to sum to one, and if only a single reaction is specified the efficiency specifier has no real effect.
 The above reactions include the null reaction in order to ensure that the correct secondary emission probability is reached, where the <code class="docutils literal notranslate"><span class="pre">(null)</span></code> specifier implies that no secondary emission takes place.
 In the above example the probability of secondary electron emission is 0.1, while the probability of a null-reaction (outgoing particle is absorbed without any associated emission) is 0.9.
 The above example can be compressed by using a wildcard and an <code class="docutils literal notranslate"><span class="pre">efficiencies</span></code> array as follows:</p>

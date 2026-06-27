@@ -1,8 +1,8 @@
 var searchData=
 [
   ['wallclock_0',['wallClock',['../classTimer.html#ac06833b7d94a33ef1fd0320ec2b28e13',1,'Timer']]],
-  ['wedgeif_1',['wedgeif',['../classWedgeIF.html',1,'WedgeIF'],['../classWedgeIF.html#a8565b5d6b8e12aca8f7d2a7f844dc46c',1,'WedgeIF::WedgeIF(const int a_dir, const Real a_angle, const Real a_curv, const RealVect &amp;a_point, const bool a_inside)'],['../classWedgeIF.html#aa09146af261646a3e3eff37c924758d4',1,'WedgeIF::WedgeIF(const WedgeIF &amp;a_inputIF)']]],
-  ['weight_2',['weight',['../classParticleSoA.html#a316b4916ed9d45f484ba5bb55dca4e46',1,'ParticleSoA::weight(const std::size_t a_index) const noexcept'],['../classParticleSoA.html#a3bd7669006ab6c1ba9c286be324177bf',1,'ParticleSoA::weight(const std::size_t a_index) noexcept'],['../classKDNode.html#aa0ac0f0c7518e0619ab0951296d49091',1,'KDNode::weight() noexcept'],['../classKDNode.html#a2da03f92d96ef9d81c588937910fb475',1,'KDNode::weight() const noexcept']]],
+  ['wedgeif_1',['wedgeif',['../classWedgeIF.html#a8565b5d6b8e12aca8f7d2a7f844dc46c',1,'WedgeIF::WedgeIF(const int a_dir, const Real a_angle, const Real a_curv, const RealVect &amp;a_point, const bool a_inside)'],['../classWedgeIF.html#aa09146af261646a3e3eff37c924758d4',1,'WedgeIF::WedgeIF(const WedgeIF &amp;a_inputIF)'],['../classWedgeIF.html',1,'WedgeIF']]],
+  ['weight_2',['weight',['../classParticleSoA.html#a3bd7669006ab6c1ba9c286be324177bf',1,'ParticleSoA::weight(const std::size_t a_index) noexcept'],['../classParticleSoA.html#a316b4916ed9d45f484ba5bb55dca4e46',1,'ParticleSoA::weight(const std::size_t a_index) const noexcept']]],
   ['weightcolumn_3',['weightcolumn',['../classParticleSoA.html#a1a500f16561d53697a27535c3aedab85',1,'ParticleSoA::weightColumn() noexcept'],['../classParticleSoA.html#af5187ee50dca6f90694da4d7b3bb66c6',1,'ParticleSoA::weightColumn() const noexcept']]],
   ['weightedupwind_4',['weightedUpwind',['../classCdrSolver.html#aa15c976354d426dd11bb9d2de8066c3a',1,'CdrSolver']]],
   ['which_5fphase_5',['which_phase',['../namespacephase.html#a23c76f548a5eb1955ed8c929c541108b',1,'phase']]],

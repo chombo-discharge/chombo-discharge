@@ -197,7 +197,7 @@ The code for the electrostatics solver is given in <code class="file docutils li
 <section id="fieldsolver">
 <span id="chap-fieldsolver"></span><h2>FieldSolver<a class="headerlink" href="#fieldsolver" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code> is an abstract class for electrostatic solves in an EB context and contains most routines required for setting up and solving electrostatic problems.
-<code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code> can solve over three phases, gas, dielectric, and electrode, and thus it is uses <code class="docutils literal notranslate"><span class="pre">MFAMRCellData</span></code> functionality where data is defined over multiple phases (see <a class="reference internal" href="../Source/MeshData.html#chap-meshdata"><span class="std std-ref">Mesh data</span></a>).</p>
+<code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code> can solve over three phases, gas, dielectric, and electrode, and thus it uses <code class="docutils literal notranslate"><span class="pre">MFAMRCellData</span></code> functionality where data is defined over multiple phases (see <a class="reference internal" href="../Source/MeshData.html#chap-meshdata"><span class="std std-ref">Mesh data</span></a>).</p>
 <p>Note that in order to separate the electrostatic solver interface from the implementation, <code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code> is a pure class without knowledge of numerical discretizations.
 Currently, our only supported subclass is <a class="reference internal" href="#chap-fieldsolvergmg"><span class="std std-ref">FieldSolverGMG</span></a>, which supplies a finite-volume discretization that is solved with geometric multigrid.</p>
 <div class="admonition tip">
@@ -252,7 +252,7 @@ A simple example that returns a linearly varying voltage is given below:</p>
 <section id="domain-boundary-conditions">
 <span id="chap-poissondomainbc"></span><h2>Domain boundary conditions<a class="headerlink" href="#domain-boundary-conditions" title="Permalink to this heading"></a></h2>
 <p>Domain boundary conditions for the solver must be set by the user through an input script, whereas the boundary conditions on internal surfaces are Dirichlet by default.
-Note that on multifluid-boundaries the boundary condition is enforced by the conventional matching boundary condition that follows from Gauss` law.</p>
+Note that on multifluid-boundaries the boundary condition is enforced by the conventional matching boundary condition that follows from Gauss’ law.</p>
 <section id="general-format">
 <h3>General format<a class="headerlink" href="#general-format" title="Permalink to this heading"></a></h3>
 <p>The most general form of setting domain boundary conditions for <code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code> is to specify a boundary condition <em>type</em> (e.g., Dirichlet) together with a function specifying the value.
@@ -317,7 +317,7 @@ For example, using</p>
 FieldSolverGMG.bc.y.high = dirichlet 1.0
 </pre></div>
 </div>
-<p>will the set voltage on the lower y-plane to ground and the voltage on the upper y-plane to the live voltage.
+<p>will set the voltage on the lower y-plane to ground and the voltage on the upper y-plane to the live voltage.
 Specifically, on the upper y-plane this specification will generate a potential boundary condition function of the type</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">auto</span><span class="w"> </span><span class="n">func</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_pos</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="k">return</span><span class="w"> </span><span class="mf">1.0</span><span class="p">};</span>
 <span class="n">dirichletFraction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span>
@@ -520,7 +520,7 @@ This is encapsulated by the pure member function</p>
 <span class="nf">solve</span><span class="p">(</span><span class="n">MFAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_phi</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">MFAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_rho</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRIVData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_sigma</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">a_zerophi</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 </pre></div>
 </div>
-<p>where <code class="docutils literal notranslate"><span class="pre">a_phi</span></code> is the resulting potential that was computing with the space charge density <code class="docutils literal notranslate"><span class="pre">a_rho</span></code>, and surface charge density <code class="docutils literal notranslate"><span class="pre">a_sigma</span></code>.</p>
+<p>where <code class="docutils literal notranslate"><span class="pre">a_phi</span></code> is the resulting potential that was computed with the space charge density <code class="docutils literal notranslate"><span class="pre">a_rho</span></code>, and surface charge density <code class="docutils literal notranslate"><span class="pre">a_sigma</span></code>.</p>
 </section>
 <section id="fieldsolvergmg">
 <span id="chap-fieldsolvergmg"></span><h2>FieldSolverGMG<a class="headerlink" href="#fieldsolvergmg" title="Permalink to this heading"></a></h2>
@@ -591,7 +591,7 @@ If you want to use numerical mock-ups of dielectric-dielectric interfaces, you c
 </section>
 <section id="algorithmic-adjustments">
 <h3>Algorithmic adjustments<a class="headerlink" href="#algorithmic-adjustments" title="Permalink to this heading"></a></h3>
-<p>By default, the Helmholtz operator uses a diagonally weighting of the operator using the volume fraction as weight.
+<p>By default, the Helmholtz operator uses a diagonal weighting of the operator using the volume fraction as weight.
 This means that the quantity that is passed into <code class="docutils literal notranslate"><span class="pre">AMRMultiGrid</span></code> should be weighted by the volume fraction to avoid the small-cell problem of EB grids.
 The flag <code class="docutils literal notranslate"><span class="pre">kappa_source</span></code> indicates whether or not we should multiply the right-hand side by the volume fraction before passing it into the solver routine.
 If this flag is set to <code class="docutils literal notranslate"><span class="pre">false</span></code>, it is an indication that the user has taken responsibility to perform this weighting prior to calling <code class="docutils literal notranslate"><span class="pre">FieldSolver::solve(...)</span></code>.
@@ -697,10 +697,10 @@ Recall that the polarization (in frequency space) is</p>
 <div class="math notranslate nohighlight">
 \[\mathbf{P}(\omega) = \epsilon_0\chi(\omega)\mathbf{E}(\omega),\]</div>
 <p>where <span class="math notranslate nohighlight">\(\chi(\omega)\)</span> is the dielectric susceptibility.</p>
-<p>There are two forms that <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> can support frequency dependent permittivities; through convolution or through auxiliary differential equations (ADEs).</p>
+<p>There are two forms through which <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> can support frequency-dependent permittivities: through convolution or through auxiliary differential equations (ADEs).</p>
 <section id="convolution-approach">
 <h3>Convolution approach<a class="headerlink" href="#convolution-approach" title="Permalink to this heading"></a></h3>
-<p>In the time domain, the displacement field is.</p>
+<p>In the time domain, the displacement field is:</p>
 <div class="math notranslate nohighlight">
 \[\mathbf{D}(t_k) = \epsilon_0\mathbf{E}(t_k) + \epsilon_0\int_0^{t_k} \chi(t)\mathbf{E}(t_k-t)\text{d}t.\]</div>
 <p>There are various forms of discretizing the integral.
@@ -740,7 +740,7 @@ The displacement field <span class="math notranslate nohighlight">\(\mathbf{D}^k
 <div class="math notranslate nohighlight">
 \[\nabla\cdot\left[\left(1 + C_0^k\right)\mathbf{E}^k\right] = \frac{\rho}{\epsilon_0} - \frac{1}{\epsilon_0}\nabla\cdot\sum_{m&gt;0} C_m^k\mathbf{P}^{k-m}.\]</div>
 <p>Unlike the convolution approach, this only requires storing terms required for the ADE description.
-This depends both on the order of the ADE, as well as it’s discretization.
+This depends both on the order of the ADE, as well as its discretization.
 Normally, the ADE is a low-order PDE and a few terms are sufficient.</p>
 </section>
 </section>

@@ -281,13 +281,13 @@ It is often useful to verify this by reporting the bindings as follows:</p>
 <h3>Simulation inputs<a class="headerlink" href="#simulation-inputs" title="Permalink to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> simulations take their input from a single simulation input file (possibly appended with overriding options on the command line).
 Simulations may consist of several hundred possible switches for altering the behavior of a simulation, and all physics models in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> are therefore equipped with Python setup tools that collect all such options into a single file when setting up a new application.
-Generally, these input parameters are fetched from the options file of component that is used in a simulation.
+Generally, these input parameters are fetched from the options file of the component that is used in a simulation.
 Simulation options usually consist of a prefix, a suffix, and a configuration value.
-For example, the configuration options that adjusts the number of time steps that will be run in a simulation is</p>
+For example, the configuration option that adjusts the number of time steps that will be run in a simulation is</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Driver.max_steps = 100
 </pre></div>
 </div>
-<p>Likewise, for controlling how often plot are written:</p>
+<p>Likewise, for controlling how often plots are written:</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Driver.plot_interval = 5
 </pre></div>
 </div>
@@ -298,12 +298,12 @@ For example, the configuration options that adjusts the number of time steps tha
 <p>will set the <code class="docutils literal notranslate"><span class="pre">Driver.max_steps</span></code> parameter to 10.
 Command-line parameters override definitions in the input file.
 Moreover, parameters parsed through the command line become static parameters, i.e., they are not run-time configurable (see <a class="reference internal" href="#chap-runtimeconfig"><span class="std std-ref">Run-time configurations</span></a>).
-Also note that if you define a parameter multiple times in the input file, the last definition is canon.</p>
+Also note that if you define a parameter multiple times in the input file, the last definition is canonical.</p>
 </section>
 <section id="simulation-outputs">
 <h3>Simulation outputs<a class="headerlink" href="#simulation-outputs" title="Permalink to this heading"></a></h3>
 <p>Mesh data from <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> simulations is by default written to HDF5 files, and if HDF5 is disabled <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> will not write any plot or checkpoint files.
-In addition to plot files, MPI ranks can output simulation meta-information to separate files so that the simulation progress can be individually for each rank.</p>
+In addition to plot files, MPI ranks can output simulation meta-information to separate files so that the simulation progress can be monitored individually for each rank.</p>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> comes with controls for adjusting output.
 Through the <a class="reference internal" href="../Source/Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> class the user may adjust the option <code class="docutils literal notranslate"><span class="pre">Driver.output_directory</span></code> to specify where output files will be placed.
 This directory is relative to the location where the application is run.

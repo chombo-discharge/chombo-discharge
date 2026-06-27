@@ -40,7 +40,7 @@ Thus, :math:`\Phi` does not satisfy a discrete maximum principle.
 
    Location of fluxes for finite volume discretization.
 
-The finite volume update require fluxes on the face centroids rather than the centers.
+The finite volume update requires fluxes on the face centroids rather than the centers.
 These are constructed by first computing the fluxes to second order on the face centers, and then interpolating them to the face centroids.
 For example, the flux :math:`F_3` in the figure above is
 
@@ -54,7 +54,7 @@ The other fluxes, such as :math:`F_2` requires interpolation of face-centered fl
 Boundary conditions
 ___________________
 
-The finite volume discretization of the Helmholtz equation require fluxes through the EB and domain faces. 
+The finite volume discretization of the Helmholtz equation requires fluxes through the EB and domain faces. 
 Below, we discuss how these are implemented.
 
 .. note::
@@ -77,7 +77,7 @@ If the EB intersects the domain side, we interpolate face-centered fluxes to fac
 
 On the embedded boundaries the flux is more complicated to compute, and requires us to compute an approximation to the normal gradient :math:`\partial_n\Phi` at the boundary.
 Our approach is to approximate this flux by expanding the solution as a polynomial using a specified number of grid cells.
-By using more grid cells than there are unknown in the Taylor series, we formulate an over-determined system of equations up to some specified order.
+By using more grid cells than there are unknowns in the Taylor series, we formulate an over-determined system of equations up to some specified order.
 As a first approximation we include only those cells in the quadrant or half-space defined by the normal vector, see :numref:`Fig:GradientReconstruction`. 
 If we can not find enough equations, several fallback options are in place to ensure that we obtain a sufficient number of equations.
 
@@ -122,7 +122,7 @@ Robin boundary conditions are in the form
    A\partial_n\Phi + B\Phi = C,
 
 where :math:`A`, :math:`B`, and :math:`C` are constants.
-This boundary conditions is enforced through the flux
+This boundary condition is enforced through the flux
 
 .. math::
 
@@ -197,8 +197,8 @@ Users can select between the various smoothers in solvers that use multigrid.
 
 .. tip::
 
-   Red-black Gauss-Seidel usually provide the best convergence rates.
-   The multi-colored kernels are twice as expensive as red-black Gauss-Seidel relaxation in 2D, and four times as expensive in 3D, and then to only marginally improve convergence rates.
+   Red-black Gauss-Seidel usually provides the best convergence rates.
+   The multi-colored kernels are twice as expensive as red-black Gauss-Seidel relaxation in 2D, and four times as expensive in 3D, and tend to only marginally improve convergence rates.
 
 
 Multiphase Helmholtz equation
@@ -212,7 +212,7 @@ The most common case is that involving discontinuous coefficients across the EB,
    \beta\nabla\cdot\left[b\left(\mathbf{x}\right)\nabla\Phi\left(\mathbf{x}\right)\right] = \rho.
 
 where :math:`b\left(\mathbf{x}\right)` is only piecewise constant.
-This is the natural boundary conditions on a dielectric surface, for example.
+This is the natural boundary condition on a dielectric surface, for example.
 
 .. _Chap:JumpCondition:
 

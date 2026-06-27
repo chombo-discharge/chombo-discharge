@@ -167,12 +167,12 @@ The <code class="docutils literal notranslate"><span class="pre">CellTagger</spa
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">LayoutData</span><span class="o">&lt;</span><span class="n">DenseIntVectSet</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">EBAMRTags</span><span class="p">;</span>
 </pre></div>
 </div>
-<p>See <a class="reference internal" href="ChomboBasics.html#chap-basics"><span class="std std-ref">Chombo-3 basics</span></a> for an explanation of how the individual templates.
+<p>See <a class="reference internal" href="ChomboBasics.html#chap-basics"><span class="std std-ref">Chombo-3 basics</span></a> for an explanation of how the individual template arguments work.
 Briefly, the outer vector in <code class="docutils literal notranslate"><span class="pre">EBAMRTags</span></code> indicates the grid level, whereas <code class="docutils literal notranslate"><span class="pre">LayoutData</span></code> is a data holder on each grid level and indexes the grid patches.
-That is, <code class="docutils literal notranslate"><span class="pre">LayoutData&lt;DenseIntVectSet</span></code> is a distribution of <code class="docutils literal notranslate"><span class="pre">DenseIntVectSet</span></code> on a level, whereas <code class="docutils literal notranslate"><span class="pre">DenseIntVectSet</span></code> is a data holder that stores the refinement flags on a grid patch.
-For performance reasons, <code class="docutils literal notranslate"><span class="pre">DenseIntVectSet</span></code> onlys store refinement cells on a per-patch basis.
+That is, <code class="docutils literal notranslate"><span class="pre">LayoutData&lt;DenseIntVectSet&gt;</span></code> is a distribution of <code class="docutils literal notranslate"><span class="pre">DenseIntVectSet</span></code> on a level, whereas <code class="docutils literal notranslate"><span class="pre">DenseIntVectSet</span></code> is a data holder that stores the refinement flags on a grid patch.
+For performance reasons, <code class="docutils literal notranslate"><span class="pre">DenseIntVectSet</span></code> only stores refinement cells on a per-patch basis.
 It is not possible to add a grid cell to a <code class="docutils literal notranslate"><span class="pre">DenseIntVectSet</span></code> if it falls outside the grid patch.
-Note that <code class="docutils literal notranslate"><span class="pre">EBAMRTags</span></code> is <em>not</em> set up for communication, and so it is not possible to fill ghost cells regions from other patches.
+Note that <code class="docutils literal notranslate"><span class="pre">EBAMRTags</span></code> is <em>not</em> set up for communication, and so it is not possible to fill ghost cell regions from other patches.
 The refinement flags themselves are owned by <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a>, and are used to generate new grids that cover all the cell tags.</p>
 <p>A part of the current C++ header file for <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code> is included below, where we highlight the functions that must be implemented in order to create a new refinement method.</p>
 <div class="literal-block-wrapper docutils container" id="id1">
@@ -254,8 +254,11 @@ The three functions below must then be implemented:</p>
 <span class="cm">    @param[in] a_level Grid level</span>
 <span class="cm">  */</span>
 <span class="hll"><span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
-</span><span class="hll"><span class="w">  </span><span class="n">writePlotData</span><span class="p">(</span><span class="n">LevelData</span><span class="o">&lt;</span><span class="n">EBCellFAB</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_output</span><span class="p">,</span>
-</span></pre></div>
+</span><span class="hll"><span class="w">  </span><span class="nf">writePlotData</span><span class="p">(</span><span class="n">LevelData</span><span class="o">&lt;</span><span class="n">EBCellFAB</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_output</span><span class="p">,</span>
+</span><span class="w">                </span><span class="kt">int</span><span class="o">&amp;</span><span class="w">                  </span><span class="n">a_icomp</span><span class="p">,</span>
+<span class="w">                </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w">    </span><span class="n">a_outputRealm</span><span class="p">,</span>
+<span class="w">                </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">             </span><span class="n">a_level</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+</pre></div>
 </div>
 <p>The interpretation of these functions is exactly the same as for <a class="reference internal" href="TimeStepper.html#chap-timestepper"><span class="std std-ref">TimeStepper</span></a>, and we refer to the <a class="reference internal" href="TimeStepper.html#chap-timestepper"><span class="std std-ref">TimeStepper</span></a> documentation for a detailed explanation.</p>
 </section>
@@ -299,7 +302,7 @@ More boxes can be specified by following the same convention, e.g., <code class=
 </section>
 <section id="adding-a-buffer">
 <h2>Adding a buffer<a class="headerlink" href="#adding-a-buffer" title="Permalink to this heading"></a></h2>
-<p>By default, each MPI rank can only tag grid cells where it owns data, which has has been enforced due to performance and communication reasons.
+<p>By default, each MPI rank can only tag grid cells where it owns data, which has been enforced due to performance and communication reasons.
 Under the hood, the <code class="docutils literal notranslate"><span class="pre">DenseIntVectSet</span></code> is an array of boolean values on a patch which is very fast and simple to communicate with MPI.
 Adding a grid cell for refinement which lies outside the patch will lead to memory corruptions.
 Frequently, however, it is necessary to add <em>buffer regions</em> to ensure that an area-of-interest around the tagged region is also refined.

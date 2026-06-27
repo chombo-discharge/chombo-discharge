@@ -177,7 +177,7 @@ The primary purpose of the <code class="docutils literal notranslate"><span clas
 </pre></div>
 </div>
 <p>Here, the <code class="docutils literal notranslate"><span class="pre">Driver</span></code> class takes as input a user-provided geometry <code class="docutils literal notranslate"><span class="pre">a_computationalGeometry</span></code>, a user-provided physics module <code class="docutils literal notranslate"><span class="pre">a_timestepper</span></code>, and the AMR infrastructure <code class="docutils literal notranslate"><span class="pre">a_amrMesh</span></code>.
-The <code class="docutils literal notranslate"><span class="pre">Driver</span></code> class does not <em>require</em> an instance of <a class="reference internal" href="CellTagger.html#chap-celltagger"><span class="std std-ref">CellTagger</span></a>, which is the responsible for flagging cells for refinement.
+The <code class="docutils literal notranslate"><span class="pre">Driver</span></code> class does not <em>require</em> an instance of <a class="reference internal" href="CellTagger.html#chap-celltagger"><span class="std std-ref">CellTagger</span></a>, which is responsible for flagging cells for refinement.
 If users decide to omit a cell tagger as in the above constructor, regridding functionality is completely turned off and only the initially generated grids will be used throughout the entire simulation.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
@@ -189,7 +189,7 @@ If users decide to omit a cell tagger as in the above constructor, regridding fu
 </div>
 <section id="simulation-setup">
 <h2>Simulation setup<a class="headerlink" href="#simulation-setup" title="Permalink to this heading"></a></h2>
-<p>For setting up an running simulations, only a single routine is used:</p>
+<p>For setting up and running simulations, only a single routine is used:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">setupAndRun</span><span class="p">();</span>
 </pre></div>
 </div>
@@ -207,7 +207,7 @@ Also note that it is possible to restrict the maximum level that can be generate
 <li><p>Ask the <a class="reference internal" href="TimeStepper.html#chap-timestepper"><span class="std std-ref">TimeStepper</span></a> to set up relevant solvers and fill them with initial data.</p></li>
 <li><p>Perform the number of initial regrids that the user asks for.
 After the regrid, the solvers are re-filled with initial data. I.e., initial data is always regenerated on the finest grid and is not interpolated from coarse grid.</p></li>
-<li><p>Let <a class="reference internal" href="TimeStepper.html#chap-timestepper"><span class="std std-ref">TimeStepper</span></a> perform a <em>post-initialization</em> routine. Whether or not this post-initialization does anything depends on the physics module begin used.</p></li>
+<li><p>Let <a class="reference internal" href="TimeStepper.html#chap-timestepper"><span class="std std-ref">TimeStepper</span></a> perform a <em>post-initialization</em> routine. Whether or not this post-initialization does anything depends on the physics module being used.</p></li>
 </ol>
 </section>
 <section id="restarting-simulations">
@@ -341,7 +341,7 @@ Below, we include the current template options file for the <code class="docutil
 </span></pre></div>
 </div>
 </div>
-<p>We point out that the <code class="docutils literal notranslate"><span class="pre">output_directory</span></code> directory variable is <em>only</em> for the HDF5 plot files, whereas other files like <code class="docutils literal notranslate"><span class="pre">pout.*</span></code> are put in the directory in which the executable was ran.</p>
+<p>We point out that the <code class="docutils literal notranslate"><span class="pre">output_directory</span></code> directory variable is <em>only</em> for the HDF5 plot files, whereas other files like <code class="docutils literal notranslate"><span class="pre">pout.*</span></code> are put in the directory in which the executable was run.</p>
 <p>From the user perspective, the most commonly adjusted parameters concern the I/O operations (plot and checkpoint intervals), and geometric refinement parameters.</p>
 </section>
 </section>

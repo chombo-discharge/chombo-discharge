@@ -153,8 +153,8 @@
              
   <section id="random-numbers">
 <span id="chap-random"></span><h1>Random numbers<a class="headerlink" href="#random-numbers" title="Permalink to this heading"></a></h1>
-<p><code class="docutils literal notranslate"><span class="pre">Random</span></code> is a static class for generating pseudo-random numbers, and exist so that all random number operations can be aggregated into a single class.
-Internally, <code class="docutils literal notranslate"><span class="pre">Random</span></code> use a Mersenne-Twister random number generation supplied by <code class="docutils literal notranslate"><span class="pre">std::random</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">Random</span></code> is a static class for generating pseudo-random numbers, and exists so that all random number operations can be aggregated into a single class.
+Internally, <code class="docutils literal notranslate"><span class="pre">Random</span></code> uses a Mersenne-Twister random number generator supplied by <code class="docutils literal notranslate"><span class="pre">std::random</span></code>.</p>
 <p>To use the <code class="docutils literal notranslate"><span class="pre">Random</span></code> class, simply include <code class="docutils literal notranslate"><span class="pre">&lt;CD_Random.H&gt;</span></code>, e.g.,</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_Random.H&gt;</span>
 </pre></div>
@@ -242,7 +242,7 @@ For example:</p>
 <p>By default, the random number generator is seeded using the MPI rank.
 It is necessary to seed MPI ranks using different seeds to avoid them producing the same number sequences.
 If using MPI+OpenMP, additional steps are taken to ensure that each OpenMP thread obtains a unique random number generator.</p>
-<p><code class="docutils literal notranslate"><span class="pre">Driver</span></code> (see <a class="reference internal" href="../Source/Driver.html#chap-driver"><span class="std std-ref">Driver</span></a>) will seed the random number generator, and user can override the seed by setting <code class="docutils literal notranslate"><span class="pre">Random.seed</span> <span class="pre">=</span> <span class="pre">&lt;number&gt;</span></code> in the input script.
+<p><code class="docutils literal notranslate"><span class="pre">Driver</span></code> (see <a class="reference internal" href="../Source/Driver.html#chap-driver"><span class="std std-ref">Driver</span></a>) will seed the random number generator, and the user can override the seed by setting <code class="docutils literal notranslate"><span class="pre">Random.seed</span> <span class="pre">=</span> <span class="pre">&lt;number&gt;</span></code> in the input script.
 If the user sets <code class="docutils literal notranslate"><span class="pre">&lt;number&gt;</span> <span class="pre">&lt;</span> <span class="pre">0</span></code> then a random seed will be produced based on the elapsed CPU clock time.
 If running with MPI, this seed is obtained by only one of the MPI ranks, and this seed is then broadcast to all the other ranks.
 The other ranks will then increment the seed by their own MPI rank number so that each MPI rank gets a unique seed.</p>

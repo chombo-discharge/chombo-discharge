@@ -3,13 +3,13 @@
 Brownian walker
 ***************
 
-The Brownian walker model runs a single microscropic drift-diffusion using the :ref:`Chap:ItoSolver`, where the underlying transport kernel is
+The Brownian walker model runs a single microscopic drift-diffusion using the :ref:`Chap:ItoSolver`, where the underlying transport kernel is
 
 .. math::
    
    d\mathbf{X} = \mathbf{V}dt + \sqrt{2Ddt}\mathbf{W}
 
-where :math:`\mathbf{X}` is the spatial position of a particle :math:`\mathbf{V}` is the drift velocity and :math:`D` is the diffusion coefficient *in the continuum limit*.
+where :math:`\mathbf{X}` is the spatial position of a particle, :math:`\mathbf{V}` is the drift velocity and :math:`D` is the diffusion coefficient *in the continuum limit*.
 
 .. tip::
 

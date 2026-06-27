@@ -167,6 +167,7 @@ This model has no functionality for cell-refinement based on the solutions, so r
 <span class="cm">*/</span>
 <span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MeshODEStepper</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">TimeStepper</span>
+<span class="p">{</span>
 </pre></div>
 </div>
 <p>Here, <code class="docutils literal notranslate"><span class="pre">N</span></code> is the number of variables that will be stored on the mesh.</p>
@@ -176,16 +177,16 @@ This model has no functionality for cell-refinement based on the solutions, so r
 <div class="math notranslate nohighlight">
 \[\partial_t\phi(t) = \cos\left(2\pi f t\right),\]</div>
 <p>where <span class="math notranslate nohighlight">\(f\)</span> is a user-supplied frequency.
-The user can also set the initial value for <span class="math notranslate nohighlight">\(\phi\)</span> through the configuration options for <code class="docutils literal notranslate"><span class="pre">MeshODEStepper&lt;N&gt;</span></code>, see <a class="reference internal" href="#chap-meshodestepperconfiguration"><span class="std std-ref">Solver configuration</span></a></p>
+The user can also set the initial value for <span class="math notranslate nohighlight">\(\phi\)</span> through the configuration options for <code class="docutils literal notranslate"><span class="pre">MeshODEStepper&lt;N&gt;</span></code>, see <a class="reference internal" href="#chap-meshodestepperconfiguration"><span class="std std-ref">Solver configuration</span></a>.</p>
 </section>
 <section id="time-advancement">
 <h2>Time advancement<a class="headerlink" href="#time-advancement" title="Permalink to this heading"></a></h2>
-<p>Integration over a time step is done using either a second (Heun’s method) or fourth order Runge-Kutta method (classical RK4).
+<p>Integration over a time step is done using either a second-order (Heun’s method) or fourth-order Runge-Kutta method (classical RK4).
 The user can choose between the methods through the configuration options, see <a class="reference internal" href="#chap-meshodestepperconfiguration"><span class="std std-ref">Solver configuration</span></a>.</p>
 </section>
 <section id="setting-up-a-new-problem">
 <h2>Setting up a new problem<a class="headerlink" href="#setting-up-a-new-problem" title="Permalink to this heading"></a></h2>
-<p>To set up a new problem, using the Python setup tools in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/MeshODEStepper</span></code> is the simplest way.
+<p>To set up a new problem, using the Python setup tools in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/MeshODE</span></code> is the simplest way.
 A full description is available in the <code class="docutils literal notranslate"><span class="pre">README.md</span></code> contained in the folder:</p>
 <div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span class="gh"># Physics/MeshODE</span>
 This physics module solves for an ODE problem of a single scalar quantity. 

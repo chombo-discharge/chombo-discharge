@@ -99,10 +99,26 @@ Typedefs</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a79e3fbf7527373f821428eb6a82d2d99" id="r_a79e3fbf7527373f821428eb6a82d2d99"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;(P::*)() weight, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;(P::*)() <a class="el" href="classTracerParticleSolver.html">const</a> position&gt; </td></tr>
-<tr class="memitem:a79e3fbf7527373f821428eb6a82d2d99"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::shared_ptr</a>&lt; <a class="el" href="classKDNode.html">KDNode</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a> &gt; &gt; &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#a79e3fbf7527373f821428eb6a82d2d99">recursivePartitionAndSplitEqualWeightKD</a> (<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classKDNode.html">KDNode</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a> &gt;::ParticleList &amp;<a class="el" href="classTracerParticleSolver.html">a_inputParticles</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_maxLeaves</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="namespaceParticleManagement.html#a355c356fabec1650406a887b59c2068f">BinaryParticleReconcile</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a> &gt; <a class="el" href="classTracerParticleSolver.html">a_particleReconcile</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:a79e3fbf7527373f821428eb6a82d2d99"><td class="mdescLeft">&#160;</td><td class="mdescRight">Recursively build a KD-tree following the "equal weight" principle when partitioning nodes.  <br /></td></tr>
-<tr class="separator:a79e3fbf7527373f821428eb6a82d2d99"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae45f641dfffc20953f7d202b3bbdee10" id="r_ae45f641dfffc20953f7d202b3bbdee10"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;(P::*)() weight, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;(P::*)() <a class="el" href="classTracerParticleSolver.html">const</a> position&gt; </td></tr>
+<tr class="memitem:ae45f641dfffc20953f7d202b3bbdee10"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#ae45f641dfffc20953f7d202b3bbdee10">buildEqualWeightKDLeaves</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_particles</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_maxLeaves</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="namespaceParticleManagement.html#a355c356fabec1650406a887b59c2068f">BinaryParticleReconcile</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_particleReconcile</a>, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt; <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">P</a> *, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">P</a> * &gt; &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_leaves</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:ae45f641dfffc20953f7d202b3bbdee10"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build an equal-weight KD partition of a list of particles and return the leaf particle ranges.  <br /></td></tr>
+<tr class="separator:ae45f641dfffc20953f7d202b3bbdee10"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad70134a1661f2195054d82a45bf757d4" id="r_ad70134a1661f2195054d82a45bf757d4"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;(P::*)() <a class="el" href="classTracerParticleSolver.html">const</a> position&gt; </td></tr>
+<tr class="memitem:ad70134a1661f2195054d82a45bf757d4"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#ad70134a1661f2195054d82a45bf757d4">mergeAdjacentNearest</a> (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_particles</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::size_t</a> <a class="el" href="classTracerParticleSolver.html">a_target</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">void</a>(<a class="el" href="classTracerParticleSolver.html">P</a> &amp;, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">P</a> &amp;)&gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_combine</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:ad70134a1661f2195054d82a45bf757d4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Merge an already spatially-ordered particle list down to a target count by repeatedly combining the nearest adjacent pair.  <br /></td></tr>
+<tr class="separator:ad70134a1661f2195054d82a45bf757d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6ed160136e38c95de7c4ddd1831606f0" id="r_a6ed160136e38c95de7c4ddd1831606f0"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">Packed</a> , <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;(Packed::*)() packWeight, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;(Packed::*)() <a class="el" href="classTracerParticleSolver.html">const</a> packPosition, <a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">Traits</a>  = ParticleTraits&lt;P&gt;&gt; </td></tr>
+<tr class="memitem:a6ed160136e38c95de7c4ddd1831606f0"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="namespaceParticleManagement.html#a0653357f8d5608240706c875758d1262">ParticleMerger</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#a6ed160136e38c95de7c4ddd1831606f0">makeSfcNearestNeighborMerger</a> (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">Packed</a>(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::size_t</a>)&gt; <a class="el" href="classTracerParticleSolver.html">a_gather</a>, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">void</a>(<a class="el" href="classTracerParticleSolver.html">Packed</a> &amp;, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Packed</a> &amp;)&gt; <a class="el" href="classTracerParticleSolver.html">a_combine</a>, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">void</a>(<a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Packed</a> &amp;)&gt; <a class="el" href="classTracerParticleSolver.html">a_scatter</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a6ed160136e38c95de7c4ddd1831606f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a space-filling-curve nearest-neighbor super-particle merger as a reusable ParticleMerger.  <br /></td></tr>
+<tr class="separator:a6ed160136e38c95de7c4ddd1831606f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad67e840020de9b17223682bf08f13637" id="r_ad67e840020de9b17223682bf08f13637"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">Packed</a> , <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;(Packed::*)() packWeight, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;(Packed::*)() <a class="el" href="classTracerParticleSolver.html">const</a> packPosition, <a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">Traits</a>  = ParticleTraits&lt;P&gt;&gt; </td></tr>
+<tr class="memitem:ad67e840020de9b17223682bf08f13637"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="namespaceParticleManagement.html#a0653357f8d5608240706c875758d1262">ParticleMerger</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#ad67e840020de9b17223682bf08f13637">makeEqualWeightKDMerger</a> (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">Packed</a>(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::size_t</a>)&gt; <a class="el" href="classTracerParticleSolver.html">a_gather</a>, <a class="el" href="namespaceParticleManagement.html#a355c356fabec1650406a887b59c2068f">BinaryParticleReconcile</a>&lt; <a class="el" href="classTracerParticleSolver.html">Packed</a> &gt; <a class="el" href="classTracerParticleSolver.html">a_reconcile</a>, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">void</a>(<a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Packed</a> *, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Packed</a> *, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classCellInfo.html">CellInfo</a> &amp;)&gt; <a class="el" href="classTracerParticleSolver.html">a_scatterLeaf</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:ad67e840020de9b17223682bf08f13637"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an equal-weight KD-tree super-particle merger as a reusable ParticleMerger.  <br /></td></tr>
+<tr class="separator:ad67e840020de9b17223682bf08f13637"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a648524eadc9dc97d1f1652fc4b3606d5" id="r_a648524eadc9dc97d1f1652fc4b3606d5"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">Context</a> , <a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">Traits</a>  = ParticleTraits&lt;P&gt;&gt; </td></tr>
+<tr class="memitem:a648524eadc9dc97d1f1652fc4b3606d5"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="namespaceParticleManagement.html#a0653357f8d5608240706c875758d1262">ParticleMerger</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#a648524eadc9dc97d1f1652fc4b3606d5">makeReinitializeMerger</a> (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt; <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a>, <a class="el" href="classTracerParticleSolver.html">Context</a> &gt;(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;)&gt; <a class="el" href="classTracerParticleSolver.html">a_aggregate</a>, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">void</a>(<a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;, <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Context</a> &amp;)&gt; <a class="el" href="classTracerParticleSolver.html">a_emit</a>, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">RealVect</a>()&gt; <a class="el" href="classTracerParticleSolver.html">a_probLo</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a648524eadc9dc97d1f1652fc4b3606d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a reinitialize super-particle merger as a reusable ParticleMerger.  <br /></td></tr>
+<tr class="separator:a648524eadc9dc97d1f1652fc4b3606d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3101a3eb71695c1270e934df28b8af22" id="r_a3101a3eb71695c1270e934df28b8af22"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">T</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> &gt; </td></tr>
 <tr class="memitem:a3101a3eb71695c1270e934df28b8af22"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#a3101a3eb71695c1270e934df28b8af22">removePhysicalParticles</a> (<a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_particles</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">T</a> <a class="el" href="classTracerParticleSolver.html">a_numPhysPartToRemove</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:a3101a3eb71695c1270e934df28b8af22"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove physical particles from an SoA container (operates on the container-owned weight column).  <br /></td></tr>
@@ -185,6 +201,72 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
 </div>
 </div>
 <h2 class="groupheader">Function Documentation</h2>
+<a id="ae45f641dfffc20953f7d202b3bbdee10" name="ae45f641dfffc20953f7d202b3bbdee10"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae45f641dfffc20953f7d202b3bbdee10">&#9670;&#160;</a></span>buildEqualWeightKDLeaves()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;(P::*)() weight, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;(P::*)() <a class="el" href="classTracerParticleSolver.html">const</a> position&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> ParticleManagement::buildEqualWeightKDLeaves </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_particles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramname"><em>a_maxLeaves</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="namespaceParticleManagement.html#a355c356fabec1650406a887b59c2068f">BinaryParticleReconcile</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_particleReconcile</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt; <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">P</a> *, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">P</a> * &gt; &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_leaves</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Build an equal-weight KD partition of a list of particles and return the leaf particle ranges. </p>
+<p>Partitions the input particles into at most <code>a_maxLeaves</code> spatial groups ("leaves") whose total weights are as equal as possible (they differ by at most one physical particle between sibling nodes). At each split the particles are partitioned along the longest bounding-box axis at the weight-median; the median particle may itself be split so the two halves balance, in which case <code>a_particleReconcile</code> fixes up the daughters' non-weight members. This is the partitioning primitive behind super-particle merging: the caller reduces each returned leaf range to a single merged particle.</p>
+<p>Implementation note: the tree is built in a flat, reusable per-thread scratch arena (two ping-ponged contiguous particle buffers + a flat range list), so there is no per-node heap allocation, no pointer chasing, and the scratch is reused across calls on the same thread.</p>
+<p>Template parameters: P -&gt; Particle type exposing the weight()/position() member functions below P::*weight -&gt; Member function returning a mutable reference to the particle weight P::*position -&gt; Member function returning a const reference to the particle position.</p>
+<p>P must be an AoS-style particle type with weight()/position() member functions (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">e.g</a>. <a class="el" href="classNonCommParticle.html" title="A generic non-communicated particle class.">NonCommParticle</a>). SoA payload types (<a class="el" href="structItoParticle.html" title="SoA payload for ItoSolver particles, i.e. drifting Brownian walkers.">ItoParticle</a>, ...) have no such methods; pack their columns into such an intermediary first (as ItoSolver::makeSuperparticlesEqualWeightKD does).</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_particles</td><td>Input particles (copied into internal scratch; not modified). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_maxLeaves</td><td>Maximum number of leaf nodes (the per-cell target particle count). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_particleReconcile</td><td>Reconciliation callback applied to the two daughters when the median is split. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_leaves</td><td>Filled with one {begin,end} pointer pair per leaf. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section warning"><dt>Warning</dt><dd>The returned ranges alias an internal thread-local buffer that is overwritten on the next call to this function on the same thread. Consume them (reduce each leaf) before calling again. </dd></dl>
+
+</div>
+</div>
 <a id="adc14deeefa8aa650656960f7ffa4e5d0" name="adc14deeefa8aa650656960f7ffa4e5d0"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#adc14deeefa8aa650656960f7ffa4e5d0">&#9670;&#160;</a></span>deleteParticles()</h2>
 
@@ -508,6 +590,282 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 
 </div>
 </div>
+<a id="ad67e840020de9b17223682bf08f13637" name="ad67e840020de9b17223682bf08f13637"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad67e840020de9b17223682bf08f13637">&#9670;&#160;</a></span>makeEqualWeightKDMerger()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">Packed</a> , <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;(Packed::*)() packWeight, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;(Packed::*)() <a class="el" href="classTracerParticleSolver.html">const</a> packPosition, <a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">Traits</a>  = ParticleTraits&lt;P&gt;&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespaceParticleManagement.html#a0653357f8d5608240706c875758d1262">ParticleMerger</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; ParticleManagement::makeEqualWeightKDMerger </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">Packed</a>(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::size_t</a>)&gt;&#160;</td>
+          <td class="paramname"><em>a_gather</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespaceParticleManagement.html#a355c356fabec1650406a887b59c2068f">BinaryParticleReconcile</a>&lt; <a class="el" href="classTracerParticleSolver.html">Packed</a> &gt;&#160;</td>
+          <td class="paramname"><em>a_reconcile</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">void</a>(<a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Packed</a> *, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Packed</a> *, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classCellInfo.html">CellInfo</a> &amp;)&gt;&#160;</td>
+          <td class="paramname"><em>a_scatterLeaf</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Create an equal-weight KD-tree super-particle merger as a reusable ParticleMerger. </p>
+<p>Returns a merger functor that partitions the particle set in a single SoA cell into at most <code>a_numTargetParticles</code> equal-weight KD leaves and reduces each leaf to one output particle.</p>
+<p>The algorithm:</p><ol type="1">
+<li>Packs each SoA slot into a lightweight intermediate (<code>Packed</code>) via <code>a_gather</code> and accumulates total weight <code>W</code>.</li>
+<li>Returns early if <code>W</code> &lt; 2 or the target is non-positive.</li>
+<li>Calls buildEqualWeightKDLeaves to partition the packed list into at most <code>a_numTargetParticles</code> leaves, using <code>a_reconcile</code> to fix up daughter particles whenever the median is split.</li>
+<li>Clears the SoA container, then reduces each leaf by calling <code>a_scatterLeaf</code> once per leaf.</li>
+</ol>
+<p><code>a_scatterLeaf</code> receives the raw [first, last) pointer range of the leaf (pointers into the internal KD scratch buffer, valid only until the next call) and the current <a class="el" href="classCellInfo.html" title="Class for the cell-information that is often queried when merging particles inside a cell.">CellInfo</a>, so it can implement either a weighted-centroid reduction or a spatially-reinitialised reduction (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">e.g</a>. random point in the leaf bounding box for non-cut-cells).</p>
+<p>Thread-local scratch vectors are reused across cells — no per-cell heap allocation after warmup.</p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Packed</td><td>Lightweight AoS intermediate type (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">e.g</a>. NonCommParticle&lt;M,N&gt;). Must be copyable. </td></tr>
+    <tr><td class="paramname">packWeight</td><td>Member-function pointer <code>Real&amp; (Packed::*)()</code> giving mutable access to the weight. Forwarded to buildEqualWeightKDLeaves for median splitting. </td></tr>
+    <tr><td class="paramname">packPosition</td><td>Member-function pointer <code>const RealVect&amp; (Packed::*)() const</code> giving the position. Forwarded to buildEqualWeightKDLeaves for bounding-box splitting. </td></tr>
+    <tr><td class="paramname">P</td><td>SoA payload type. </td></tr>
+    <tr><td class="paramname">Traits</td><td>Column descriptor for <code>P</code> (defaults to <a class="el" href="structParticleTraits.html" title="Traits class that a user specializes to describe the PAYLOAD columns of a particle type....">ParticleTraits</a></td></tr>
+  </table>
+  </dd>
+</dl>
+<p>). </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_gather</td><td>Per-slot gather: <code>(const <a class="el" href="classParticleSoA.html" title="Arena-backed Struct-of-Arrays particle container for a single grid patch.">ParticleSoA</a>&lt;P,Traits&gt;&amp;, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">std::size_t</a>) -&gt; Packed</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_reconcile</td><td>Daughter reconciliation: <code>(Packed&amp; p1, Packed&amp; p2, const Packed&amp; p0) -&gt; void</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_scatterLeaf</td><td>Leaf reducer: <code>(<a class="el" href="classParticleSoA.html" title="Arena-backed Struct-of-Arrays particle container for a single grid patch.">ParticleSoA</a>&lt;P,Traits&gt;&amp;, const Packed* first, const Packed* last, const <a class="el" href="classCellInfo.html" title="Class for the cell-information that is often queried when merging particles inside a cell.">CellInfo</a>&amp;) -&gt; void</code>. Appends exactly one merged particle per call. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A ParticleMerger&lt;P, Traits&gt; ready to be stored in <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">e.g</a>. <a class="el" href="classItoSolver.html#ad800ffce929d21041ba7e37797f535d0" title="Particle merger.">ItoSolver::m_particleMerger</a>. </dd></dl>
+
+</div>
+</div>
+<a id="a648524eadc9dc97d1f1652fc4b3606d5" name="a648524eadc9dc97d1f1652fc4b3606d5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a648524eadc9dc97d1f1652fc4b3606d5">&#9670;&#160;</a></span>makeReinitializeMerger()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">Context</a> , <a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">Traits</a>  = ParticleTraits&lt;P&gt;&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespaceParticleManagement.html#a0653357f8d5608240706c875758d1262">ParticleMerger</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; ParticleManagement::makeReinitializeMerger </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt; <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a>, <a class="el" href="classTracerParticleSolver.html">Context</a> &gt;(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;)&gt;&#160;</td>
+          <td class="paramname"><em>a_aggregate</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">void</a>(<a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;, <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Context</a> &amp;)&gt;&#160;</td>
+          <td class="paramname"><em>a_emit</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">RealVect</a>()&gt;&#160;</td>
+          <td class="paramname"><em>a_probLo</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Create a reinitialize super-particle merger as a reusable ParticleMerger. </p>
+<p>Returns a merger functor that collapses all physical particles in a cell into at most <code>a_numTargetParticles</code> new computational particles, placing them at random positions within the cell.</p>
+<p>The algorithm:</p><ol type="1">
+<li>Calls <code>a_aggregate</code> once on the input SoA to obtain the total physical-particle count and an arbitrary caller-defined context (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">e.g</a>. the weight-averaged energy for <a class="el" href="structItoParticle.html" title="SoA payload for ItoSolver particles, i.e. drifting Brownian walkers.">ItoParticle</a>).</li>
+<li>Returns early if the physical count is non-positive or the target is non-positive.</li>
+<li>Calls partitionParticleWeights to divide the physical count into at most <code>a_numTargetParticles</code> integer weights.</li>
+<li>Clears the SoA; for each weight draws a random position in the cell via <a class="el" href="classRandom.html#abbf104cf0592945d21c289b11b2d6984" title="Return a random position in the cube (a_lo, a_hi);.">Random::randomPosition</a> and calls <code>a_emit</code> once.</li>
+</ol>
+<p>The cell position is computed as <code>a_probLo</code> + dx * (gridIndex + <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">0.5</a>), matching the formula used in ItoSolver::reinitializeParticles.</p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Context</td><td>Arbitrary aggregated payload type (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">e.g</a>. <code>Real</code> for average energy). Must be copyable and default-constructible. </td></tr>
+    <tr><td class="paramname">P</td><td>SoA payload type. </td></tr>
+    <tr><td class="paramname">Traits</td><td>Column descriptor for <code>P</code> (defaults to <a class="el" href="structParticleTraits.html" title="Traits class that a user specializes to describe the PAYLOAD columns of a particle type....">ParticleTraits</a></td></tr>
+  </table>
+  </dd>
+</dl>
+<p>). </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_aggregate</td><td>Aggregate functor: <code>(const <a class="el" href="classParticleSoA.html" title="Arena-backed Struct-of-Arrays particle container for a single grid patch.">ParticleSoA</a>&lt;P,Traits&gt;&amp;) -&gt; pair&lt;long long, Context&gt;</code>. Returns total physical particle count and a context consumed by <code>a_emit</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_emit</td><td>Per-particle emit: <code>(<a class="el" href="classParticleSoA.html" title="Arena-backed Struct-of-Arrays particle container for a single grid patch.">ParticleSoA</a>&lt;P,Traits&gt;&amp;, const RealVect&amp; pos, long long weight, const Context&amp;) -&gt; void</code>. Appends exactly one particle. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Lazy supplier of the domain lower-left corner (from <a class="el" href="classAmrMesh.html#a7e22af33b0bc2737eb911562b2796ee4" title="Get lower-left corner of computational domain.">AmrMesh::getProbLo</a>). Called on every merge invocation; capture the solver's <a class="el" href="classAmrMesh.html" title="Class for handling spatial operations.">AmrMesh</a> reference so the call is deferred until after AMR setup completes. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A ParticleMerger&lt;P, Traits&gt; ready to be stored in <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">e.g</a>. <a class="el" href="classItoSolver.html#ad800ffce929d21041ba7e37797f535d0" title="Particle merger.">ItoSolver::m_particleMerger</a>. </dd></dl>
+
+</div>
+</div>
+<a id="a6ed160136e38c95de7c4ddd1831606f0" name="a6ed160136e38c95de7c4ddd1831606f0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6ed160136e38c95de7c4ddd1831606f0">&#9670;&#160;</a></span>makeSfcNearestNeighborMerger()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">Packed</a> , <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;(Packed::*)() packWeight, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;(Packed::*)() <a class="el" href="classTracerParticleSolver.html">const</a> packPosition, <a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">Traits</a>  = ParticleTraits&lt;P&gt;&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespaceParticleManagement.html#a0653357f8d5608240706c875758d1262">ParticleMerger</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; ParticleManagement::makeSfcNearestNeighborMerger </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">Packed</a>(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::size_t</a>)&gt;&#160;</td>
+          <td class="paramname"><em>a_gather</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">void</a>(<a class="el" href="classTracerParticleSolver.html">Packed</a> &amp;, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Packed</a> &amp;)&gt;&#160;</td>
+          <td class="paramname"><em>a_combine</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">void</a>(<a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Packed</a> &amp;)&gt;&#160;</td>
+          <td class="paramname"><em>a_scatter</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Create a space-filling-curve nearest-neighbor super-particle merger as a reusable ParticleMerger. </p>
+<p>Returns a merger functor that reduces (or grows) the particle set in a single SoA cell to the target count without forcing equal weights.</p>
+<p>When the cell contains more particles than the target:</p><ol type="1">
+<li>The intermediate list is sorted along a 21-bit Hilbert curve computed from particle positions.</li>
+<li><code>mergeAdjacentNearest</code> merges the closest adjacent pair repeatedly until the target count is reached, delegating payload arithmetic to <code>a_combine</code>.</li>
+</ol>
+<p>When the cell contains fewer particles than the target: the heaviest particle (by <code>packWeight</code>) is repeatedly split into two co-located halves (weight divided by two, all other fields copied) until the target is reached or no particle has weight &gt;= 2.</p>
+<p>The three user-supplied lambdas encode the particle-type-specific semantics:</p><ul>
+<li><code>a_gather</code> packs one SoA slot into the lightweight intermediate type <code>Packed</code>.</li>
+<li><code>a_combine</code> merges the second <code>Packed</code> particle into the first (weight-weighted centroid is the typical choice, but the caller decides).</li>
+<li><code>a_scatter</code> appends one surviving <code>Packed</code> particle back to the (already-cleared) SoA.</li>
+</ul>
+<p>Implementation note: thread-local scratch vectors are reused across cells so there is no per-cell heap allocation after the first call on a given thread.</p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Packed</td><td>Lightweight AoS intermediate type (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">e.g</a>. NonCommParticle&lt;M,N&gt;). Must be copyable. </td></tr>
+    <tr><td class="paramname">packWeight</td><td>Member-function pointer <code>Real&amp; (Packed::*)()</code> giving mutable access to the weight. Used only for the split path. </td></tr>
+    <tr><td class="paramname">packPosition</td><td>Member-function pointer <code>const RealVect&amp; (Packed::*)() const</code> giving the position. Used for Hilbert-key computation and forwarded to mergeAdjacentNearest. </td></tr>
+    <tr><td class="paramname">P</td><td>SoA payload type. </td></tr>
+    <tr><td class="paramname">Traits</td><td>Column descriptor for <code>P</code> (defaults to <a class="el" href="structParticleTraits.html" title="Traits class that a user specializes to describe the PAYLOAD columns of a particle type....">ParticleTraits</a></td></tr>
+  </table>
+  </dd>
+</dl>
+<p>). </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_gather</td><td>Per-slot gather: <code>(const <a class="el" href="classParticleSoA.html" title="Arena-backed Struct-of-Arrays particle container for a single grid patch.">ParticleSoA</a>&lt;P,Traits&gt;&amp;, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">std::size_t</a>) -&gt; Packed</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_combine</td><td>In-place merge: <code>(Packed&amp; first, const Packed&amp; second) -&gt; void</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_scatter</td><td>Append one merged particle: <code>(<a class="el" href="classParticleSoA.html" title="Arena-backed Struct-of-Arrays particle container for a single grid patch.">ParticleSoA</a>&lt;P,Traits&gt;&amp;, const Packed&amp;) -&gt; void</code>. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A ParticleMerger&lt;P, Traits&gt; ready to be stored in <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">e.g</a>. <a class="el" href="classItoSolver.html#ad800ffce929d21041ba7e37797f535d0" title="Particle merger.">ItoSolver::m_particleMerger</a>. </dd></dl>
+
+</div>
+</div>
+<a id="ad70134a1661f2195054d82a45bf757d4" name="ad70134a1661f2195054d82a45bf757d4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad70134a1661f2195054d82a45bf757d4">&#9670;&#160;</a></span>mergeAdjacentNearest()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;(P::*)() <a class="el" href="classTracerParticleSolver.html">const</a> position&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> ParticleManagement::mergeAdjacentNearest </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_particles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::size_t</a>&#160;</td>
+          <td class="paramname"><em>a_target</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">void</a>(<a class="el" href="classTracerParticleSolver.html">P</a> &amp;, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">P</a> &amp;)&gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_combine</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Merge an already spatially-ordered particle list down to a target count by repeatedly combining the nearest adjacent pair. </p>
+<p>The particles are assumed to be in a spatially coherent order (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">e.g</a>. sorted along a space-filling curve by the caller), so adjacency in the list approximates spatial proximity. The closest adjacent pair (by <code>position()</code>) is combined repeatedly until <code>a_target</code> particles remain. Combining the second particle into the first is delegated to <code>a_combine</code> (the caller decides the payload semantics, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">e.g</a>. a weight-weighted centroid and energy). This does NOT split, so it cannot increase the count &ndash; it is a no-op when the list already has <code>a_target</code> or fewer particles (the caller handles the split direction). Operates in place on per-thread scratch (allocation-free after warmup); on return <code>a_particles</code> holds the surviving merged particles. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_particles</td><td>Spatially-ordered particle list; overwritten with the merged result. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_target</td><td>Desired number of particles. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_combine</td><td>Callback that combines the second particle into the first. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="adb2e3437fa68515105d33f9a5b30b6aa" name="adb2e3437fa68515105d33f9a5b30b6aa"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#adb2e3437fa68515105d33f9a5b30b6aa">&#9670;&#160;</a></span>partitionParticles()</h2>
 
@@ -590,65 +948,6 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Return value </dd></dl>
-
-</div>
-</div>
-<a id="a79e3fbf7527373f821428eb6a82d2d99" name="a79e3fbf7527373f821428eb6a82d2d99"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a79e3fbf7527373f821428eb6a82d2d99">&#9670;&#160;</a></span>recursivePartitionAndSplitEqualWeightKD()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;(P::*)() weight, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;(P::*)() <a class="el" href="classTracerParticleSolver.html">const</a> position&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::shared_ptr</a>&lt; <a class="el" href="classKDNode.html">KDNode</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a> &gt; &gt; &gt; ParticleManagement::recursivePartitionAndSplitEqualWeightKD </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classKDNode.html">KDNode</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a> &gt;::ParticleList &amp;&#160;</td>
-          <td class="paramname"><em>a_inputParticles</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
-          <td class="paramname"><em>a_maxLeaves</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="namespaceParticleManagement.html#a355c356fabec1650406a887b59c2068f">BinaryParticleReconcile</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a> &gt;&#160;</td>
-          <td class="paramname"><em>a_particleReconcile</em> = <code>[](<a class="el" href="classTracerParticleSolver.html">P</a>&#160;&amp;<a class="el" href="classTracerParticleSolver.html">p1</a>,&#160;<a class="el" href="classTracerParticleSolver.html">P</a>&#160;&amp;<a class="el" href="classTracerParticleSolver.html">p2</a>,&#160;<a class="el" href="classTracerParticleSolver.html">const</a>&#160;<a class="el" href="classTracerParticleSolver.html">P</a>&#160;&amp;<a class="el" href="classTracerParticleSolver.html">p0</a>)&#160;-&gt;&#160;<a class="el" href="classTracerParticleSolver.html">void</a>&#160;{&#160;}</code>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Recursively build a KD-tree following the "equal weight" principle when partitioning nodes. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_inputParticles</td><td>Input particles. These are destroyed on output. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_maxLeaves</td><td>Maximum number of leaves in the tree. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_particleReconcile</td><td>Optional reconciliation function when splitting a particle into two new particles. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>Returns leaf nodes containing the particles</dd></dl>
-<p>If the number of leaves is a factor of two, leaves exist on the same level and the weight in each node will differ by at most one physical particle. The template parameters are</p>
-<p>P -&gt; Particle type exposing the weight()/position() member functions below P::*weight -&gt; Member function returning a mutable reference to the particle weight P::*position -&gt; Member function returning a const reference to the particle position.</p>
-<p>P must therefore be an AoS-style particle type with weight()/position() member functions (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">e.g</a>. <a class="el" href="classNonCommParticle.html" title="A generic non-communicated particle class.">NonCommParticle</a>), called as recursivePartitionAndSplitEqualWeightKD&lt;P, &amp;P::weight, &amp;P::position&gt;. The SoA payload types (<a class="el" href="structItoParticle.html" title="SoA payload for ItoSolver particles, i.e. drifting Brownian walkers.">ItoParticle</a>, <a class="el" href="structTracerParticle.html" title="SoA payload for tracer particles: interpolated velocity plus Runge-Kutta stage scratch.">TracerParticle</a>, ...) have no such member functions; their columns must first be packed into such an intermediary, as <a class="el" href="classItoSolver.html#a19b8cbf6b4b1366081e87651e63ae550" title="Superparticle merging with KD/BVH trees.">ItoSolver::makeSuperparticlesEqualWeightKD</a> does.</p>
-<p>The user can input a particle reconciliation function that manipulates the particle properties of the split particles. By default, the split particles will use the copy constructor and thus inherit class members from p0, with the exception of the particle weights. The reconcile function lets the user manipulate other particle properties, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">e.g</a>. ones that are not properly captured by the particle copy constructor, or that need some other form of reconciliation. </p>
 
 </div>
 </div>

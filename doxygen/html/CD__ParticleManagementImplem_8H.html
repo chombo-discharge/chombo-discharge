@@ -89,11 +89,17 @@ $(function() {
 
 <p>Implementation of <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">CD_ParticleManagement.H</a>.  
 <a href="#details">More...</a></p>
-<div class="textblock"><code>#include &lt;utility&gt;</code><br />
+<div class="textblock"><code>#include &lt;algorithm&gt;</code><br />
+<code>#include &lt;array&gt;</code><br />
+<code>#include &lt;cstdint&gt;</code><br />
+<code>#include &lt;functional&gt;</code><br />
+<code>#include &lt;limits&gt;</code><br />
+<code>#include &lt;utility&gt;</code><br />
 <code>#include &lt;type_traits&gt;</code><br />
 <code>#include &lt;CH_Timer.H&gt;</code><br />
 <code>#include &lt;<a class="el" href="CD__Random_8H_source.html">CD_Random.H</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="CD__ParticleLoops_8H_source.html">CD_ParticleLoops.H</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="CD__LoadBalancing_8H_source.html">CD_LoadBalancing.H</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="CD__ParticleManagement_8H_source.html">CD_ParticleManagement.H</a>&gt;</code><br />
 <code>#include &lt;CD_NamespaceHeader.H&gt;</code><br />
 <code>#include &lt;CD_NamespaceFooter.H&gt;</code><br />
@@ -102,123 +108,161 @@ Include dependency graph for CD_ParticleManagementImplem.H:</div>
 <div class="dyncontent">
 <div class="center"><img src="CD__ParticleManagementImplem_8H__incl.png" border="0" usemap="#aSource_2Particle_2CD__ParticleManagementImplem_8H" alt=""/></div>
 <map name="aSource_2Particle_2CD__ParticleManagementImplem_8H" id="aSource_2Particle_2CD__ParticleManagementImplem_8H">
-<area shape="rect" title="Implementation of CD_ParticleManagement.H." alt="" coords="664,5,891,45"/>
-<area shape="rect" title=" " alt="" coords="1137,313,1197,339"/>
-<area shape="poly" title=" " alt="" coords="770,47,752,91,738,149,735,180,737,210,745,238,761,264,785,281,823,295,870,305,923,313,1033,321,1123,322,1123,328,1032,326,922,318,869,311,821,300,783,286,757,267,740,241,731,211,729,180,732,148,747,89,765,45"/>
-<area shape="rect" title=" " alt="" coords="723,313,815,339"/>
-<area shape="poly" title=" " alt="" coords="671,48,543,79,478,101,419,126,373,155,356,171,344,188,338,205,338,223,345,243,359,263,382,280,417,294,462,304,512,312,617,320,709,323,709,328,617,326,511,317,461,309,416,299,380,285,355,267,340,245,333,224,333,204,340,185,352,167,370,151,417,121,476,96,541,74,670,43"/>
-<area shape="rect" title=" " alt="" coords="5,313,104,339"/>
-<area shape="poly" title=" " alt="" coords="664,44,548,65,426,96,320,122,235,141,197,154,160,174,122,202,82,242,66,270,59,300,54,298,61,268,78,238,118,198,157,169,195,149,234,136,319,117,425,91,547,60,663,39"/>
-<area shape="rect" href="CD__Random_8H.html" title="File containing some useful static methods related to random number generation." alt="" coords="549,167,665,192"/>
-<area shape="poly" title=" " alt="" coords="758,48,632,159,628,155,754,44"/>
-<area shape="rect" href="CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="1878,313,2063,339"/>
-<area shape="poly" title=" " alt="" coords="891,26,1448,39,2218,66,2593,84,2914,107,3042,120,3145,133,3215,148,3238,156,3251,165,3269,190,3275,216,3269,242,3251,267,3234,275,3200,282,3092,294,2761,312,2381,322,2077,326,2077,321,2381,316,2761,306,3091,289,3199,277,3232,270,3248,263,3264,240,3269,216,3264,192,3247,169,3236,161,3214,153,3144,139,3042,125,2913,112,2592,90,2218,71,1448,45,891,31"/>
-<area shape="rect" href="CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="1331,313,1509,339"/>
-<area shape="poly" title=" " alt="" coords="775,46,767,91,764,150,767,181,774,211,786,239,804,263,824,270,867,277,1003,292,1317,315,1316,321,1002,297,866,282,822,275,801,268,781,242,769,213,761,182,758,150,762,90,770,45"/>
-<area shape="rect" href="CD__ParticleLoops_8H.html" title="Declaration of a namespace for SIMD&#45;decorated loops over SoA particles." alt="" coords="2071,93,2219,119"/>
-<area shape="poly" title=" " alt="" coords="891,30,2058,97,2057,102,891,36"/>
-<area shape="rect" href="CD__ParticleManagement_8H.html" title="Namespace containing various particle management utilities." alt="" coords="1325,93,1521,119"/>
-<area shape="poly" title=" " alt="" coords="891,39,1311,89,1311,95,890,44"/>
-<area shape="poly" title=" " alt="" coords="549,185,478,192,411,206,385,217,369,229,365,245,375,264,397,280,431,293,520,311,621,319,710,322,710,327,621,325,520,316,429,298,395,284,371,267,360,245,365,226,382,212,409,201,478,187,548,180"/>
-<area shape="rect" title=" " alt="" coords="479,240,551,265"/>
-<area shape="poly" title=" " alt="" coords="594,194,542,234,539,229,590,190"/>
-<area shape="rect" title=" " alt="" coords="815,240,892,265"/>
-<area shape="poly" title=" " alt="" coords="647,189,802,234,801,239,646,195"/>
-<area shape="rect" title=" " alt="" coords="575,240,639,265"/>
-<area shape="poly" title=" " alt="" coords="609,192,609,226,604,226,604,192"/>
-<area shape="rect" title=" " alt="" coords="385,240,455,265"/>
-<area shape="poly" title=" " alt="" coords="578,195,464,237,462,233,576,190"/>
-<area shape="rect" title=" " alt="" coords="916,240,1009,265"/>
-<area shape="poly" title=" " alt="" coords="664,189,903,237,902,242,663,195"/>
-<area shape="poly" title=" " alt="" coords="665,179,796,182,978,192,1185,209,1395,237,1443,250,1490,263,1688,294,1865,313,1864,318,1688,299,1489,268,1441,255,1394,243,1185,214,978,197,796,188,665,184"/>
-<area shape="poly" title=" " alt="" coords="624,190,681,227,719,247,759,263,844,276,993,290,1317,315,1317,320,992,296,843,281,758,268,717,252,679,232,621,194"/>
-<area shape="rect" href="CD__RandomImplem_8H.html" title="Implementation of CD_Random.H." alt="" coords="93,240,259,265"/>
-<area shape="poly" title=" " alt="" coords="549,192,252,240,251,235,548,187"/>
-<area shape="poly" title=" " alt="" coords="158,268,87,309,85,304,155,263"/>
-<area shape="poly" title=" " alt="" coords="252,237,534,191,535,196,253,243"/>
-<area shape="poly" title=" " alt="" coords="260,257,373,263,1234,298,1865,319,1864,324,1233,303,373,268,259,262"/>
-<area shape="poly" title=" " alt="" coords="260,256,373,263,1317,316,1317,321,373,268,259,261"/>
-<area shape="rect" title=" " alt="" coords="128,313,195,339"/>
-<area shape="poly" title=" " alt="" coords="176,266,169,300,164,299,171,265"/>
-<area shape="rect" title=" " alt="" coords="219,313,293,339"/>
-<area shape="poly" title=" " alt="" coords="191,263,235,302,231,306,187,267"/>
-<area shape="rect" title=" " alt="" coords="317,313,421,339"/>
-<area shape="poly" title=" " alt="" coords="208,263,326,306,324,311,206,268"/>
-<area shape="poly" title=" " alt="" coords="2220,106,2472,112,2798,123,3085,140,3180,151,3209,158,3224,165,3242,190,3248,216,3242,242,3224,267,3207,275,3175,282,3069,294,2746,311,2375,321,2077,326,2077,321,2375,316,2746,306,3068,289,3174,277,3206,270,3221,263,3237,240,3243,216,3237,192,3221,169,3207,163,3179,157,3085,146,2797,128,2472,117,2220,111"/>
-<area shape="poly" title=" " alt="" coords="2122,121,1962,189,1851,231,1737,268,1624,295,1517,314,1517,309,1623,290,1735,263,1850,226,1960,184,2119,116"/>
-<area shape="rect" title=" " alt="" coords="3095,240,3166,265"/>
-<area shape="poly" title=" " alt="" coords="2220,115,3056,237,3082,241,3081,246,3056,243,2219,121"/>
-<area shape="rect" href="CD__Decorations_8H.html" title="Declaration of various decoration macros." alt="" coords="1901,240,2041,265"/>
-<area shape="poly" title=" " alt="" coords="2133,121,1997,233,1993,229,2129,117"/>
-<area shape="rect" href="CD__ParticleSoA_8H.html" title="Declaration of ParticleSoA, an arena&#45;backed Struct&#45;of&#45;Arrays particle container." alt="" coords="2251,167,2386,192"/>
-<area shape="poly" title=" " alt="" coords="2174,116,2279,159,2277,164,2172,121"/>
-<area shape="poly" title=" " alt="" coords="1973,266,1973,300,1968,300,1968,266"/>
-<area shape="poly" title=" " alt="" coords="1901,266,1522,314,1522,309,1900,260"/>
-<area shape="poly" title=" " alt="" coords="2251,189,2061,208,1946,223,1831,243,1784,255,1737,268,1628,283,1479,299,1211,324,1210,318,1478,294,1627,278,1735,263,1783,250,1830,237,1945,218,2061,202,2251,183"/>
-<area shape="poly" title=" " alt="" coords="2251,183,2003,184,1662,190,1485,198,1320,208,1179,223,1073,243,1048,254,1022,268,921,298,830,317,828,312,920,292,1020,263,1045,249,1071,237,1178,218,1319,203,1485,192,1661,185,2003,178,2251,178"/>
-<area shape="poly" title=" " alt="" coords="2251,183,2045,186,1743,194,1389,212,1207,226,1028,243,1023,243,1023,238,1028,237,1206,220,1389,207,1742,189,2045,181,2251,178"/>
-<area shape="poly" title=" " alt="" coords="2386,180,2512,187,2651,202,2710,213,2754,226,2769,235,2778,244,2779,255,2773,267,2759,277,2737,285,2672,298,2586,308,2484,316,2267,325,2077,327,2077,322,2266,319,2484,311,2585,303,2672,293,2735,280,2756,272,2769,264,2774,254,2773,247,2765,239,2752,231,2709,218,2650,207,2512,193,2386,185"/>
-<area shape="poly" title=" " alt="" coords="2251,187,2085,204,1987,220,1890,243,1861,255,1832,268,1752,287,1670,302,1524,320,1523,315,1670,297,1751,282,1830,263,1859,250,1889,237,1986,215,2085,199,2251,182"/>
-<area shape="poly" title=" " alt="" coords="2387,180,2686,197,2880,214,3076,237,3082,238,3081,243,3076,243,2880,219,2686,203,2386,186"/>
-<area shape="rect" title=" " alt="" coords="2521,240,2577,265"/>
-<area shape="poly" title=" " alt="" coords="2357,189,2509,236,2507,241,2355,195"/>
-<area shape="rect" title=" " alt="" coords="2601,240,2668,265"/>
-<area shape="poly" title=" " alt="" coords="2373,189,2588,237,2587,242,2372,195"/>
-<area shape="rect" title=" " alt="" coords="2693,240,2758,265"/>
-<area shape="poly" title=" " alt="" coords="2387,187,2518,208,2679,237,2678,243,2517,213,2386,193"/>
-<area shape="rect" title=" " alt="" coords="3003,313,3069,339"/>
-<area shape="poly" title=" " alt="" coords="2386,179,2553,182,2756,192,2853,199,2937,209,2999,222,3020,229,3034,238,3043,252,3047,268,3045,300,3040,299,3042,269,3038,254,3030,242,3018,234,2998,227,2936,214,2853,205,2756,197,2552,188,2386,184"/>
-<area shape="rect" title=" " alt="" coords="2065,240,2124,265"/>
-<area shape="poly" title=" " alt="" coords="2283,195,2138,241,2136,235,2282,189"/>
-<area shape="rect" title=" " alt="" coords="2149,240,2203,265"/>
-<area shape="poly" title=" " alt="" coords="2297,194,2213,236,2210,231,2295,190"/>
-<area shape="rect" title=" " alt="" coords="1661,240,1723,265"/>
-<area shape="poly" title=" " alt="" coords="2251,191,1738,249,1737,244,2251,186"/>
-<area shape="rect" title=" " alt="" coords="2228,240,2305,265"/>
-<area shape="poly" title=" " alt="" coords="2312,194,2285,230,2281,227,2308,191"/>
-<area shape="rect" title=" " alt="" coords="2330,240,2411,265"/>
-<area shape="poly" title=" " alt="" coords="2329,191,2356,227,2352,230,2325,194"/>
-<area shape="rect" title=" " alt="" coords="2436,240,2497,265"/>
-<area shape="poly" title=" " alt="" coords="2344,190,2431,232,2429,236,2341,194"/>
-<area shape="rect" href="CD__ParticleSoAImplem_8H.html" title="Implementation of CD_ParticleSoA.H." alt="" coords="2834,240,3019,265"/>
-<area shape="poly" title=" " alt="" coords="2387,187,2820,237,2820,242,2386,192"/>
-<area shape="poly" title=" " alt="" coords="2834,266,2815,268,2407,299,2078,321,2077,316,2407,294,2814,263,2834,261"/>
-<area shape="poly" title=" " alt="" coords="2834,264,2771,268,2057,303,1523,324,1523,318,2057,298,2771,263,2834,259"/>
-<area shape="poly" title=" " alt="" coords="2835,243,2399,192,2400,187,2836,237"/>
-<area shape="poly" title=" " alt="" coords="2946,263,3008,303,3005,308,2943,268"/>
-<area shape="rect" title=" " alt="" coords="2895,313,2958,339"/>
-<area shape="poly" title=" " alt="" coords="2929,266,2929,300,2924,300,2924,266"/>
-<area shape="rect" title=" " alt="" coords="3203,313,3291,339"/>
-<area shape="poly" title=" " alt="" coords="2979,263,3190,309,3189,315,2978,268"/>
-<area shape="poly" title=" " alt="" coords="1335,96,904,44,904,38,1335,91"/>
-<area shape="poly" title=" " alt="" coords="1360,121,1254,142,1135,169,1008,205,901,238,900,233,1007,200,1134,164,1253,137,1359,116"/>
-<area shape="poly" title=" " alt="" coords="1382,121,1217,169,1009,238,1007,233,1215,164,1380,116"/>
-<area shape="poly" title=" " alt="" coords="1521,108,1925,126,2465,155,2725,173,2947,193,3107,215,3156,226,3181,238,3187,253,3181,267,3164,275,3133,282,3031,293,2722,310,2365,321,2077,326,2077,321,2365,316,2721,305,3031,288,3132,276,3162,270,3177,263,3182,253,3177,242,3154,231,3106,220,2947,198,2725,178,2464,160,1925,131,1521,114"/>
-<area shape="poly" title=" " alt="" coords="1445,117,1472,137,1493,166,1496,179,1493,193,1483,224,1469,254,1439,304,1434,301,1464,252,1478,222,1488,191,1491,179,1488,168,1468,141,1442,121"/>
-<area shape="poly" title=" " alt="" coords="1521,112,2238,169,2237,174,1520,118"/>
-<area shape="poly" title=" " alt="" coords="1521,115,1584,133,1615,147,1643,165,1669,194,1686,226,1681,228,1665,197,1640,169,1612,151,1582,138,1520,120"/>
-<area shape="poly" title=" " alt="" coords="1521,105,1744,108,2052,117,2406,134,2766,164,2833,168,2893,168,2996,166,3044,170,3093,181,3145,203,3202,238,3216,251,3227,267,3242,299,3237,301,3223,269,3212,254,3198,242,3142,208,3091,186,3043,175,2996,171,2893,174,2833,174,2765,169,2406,140,2052,122,1744,113,1521,110"/>
-<area shape="rect" href="CD__KDNode_8H.html" title="Namespace containing various particle management utilities." alt="" coords="1228,167,1343,192"/>
-<area shape="poly" title=" " alt="" coords="1402,121,1321,163,1319,158,1399,116"/>
-<area shape="rect" href="CD__CellInfo_8H.html" title="Simple class for holding some quantities relevant in a grid cell." alt="" coords="1367,167,1479,192"/>
-<area shape="poly" title=" " alt="" coords="1425,119,1425,153,1420,153,1420,119"/>
-<area shape="poly" title=" " alt="" coords="1228,191,1086,212,906,243,905,237,1085,207,1227,186"/>
-<area shape="poly" title=" " alt="" coords="1234,195,1023,241,1022,236,1233,189"/>
-<area shape="poly" title=" " alt="" coords="1327,190,1490,237,1529,251,1567,263,1723,292,1865,311,1864,317,1722,298,1566,268,1527,256,1489,243,1325,195"/>
-<area shape="poly" title=" " alt="" coords="1289,192,1296,227,1303,246,1314,264,1342,288,1373,306,1371,310,1338,292,1310,267,1298,248,1291,228,1284,193"/>
-<area shape="poly" title=" " alt="" coords="1343,188,1647,241,1646,246,1342,193"/>
-<area shape="rect" title=" " alt="" coords="1324,240,1383,265"/>
-<area shape="poly" title=" " alt="" coords="1298,190,1335,228,1331,232,1295,194"/>
-<area shape="rect" href="CD__KDNodeImplem_8H.html" title="Implementation of CD_KDNode.H." alt="" coords="1084,240,1249,265"/>
-<area shape="poly" title=" " alt="" coords="1261,194,1192,235,1189,230,1258,190"/>
-<area shape="poly" title=" " alt="" coords="1169,266,1169,300,1164,300,1164,266"/>
-<area shape="poly" title=" " alt="" coords="1103,268,830,317,829,311,1102,263"/>
-<area shape="poly" title=" " alt="" coords="1250,259,1865,313,1864,318,1249,264"/>
-<area shape="poly" title=" " alt="" coords="1208,263,1366,307,1365,312,1207,268"/>
-<area shape="poly" title=" " alt="" coords="1192,237,1261,197,1263,202,1194,242"/>
-<area shape="poly" title=" " alt="" coords="1367,193,1355,195,1028,243,1023,243,1022,238,1028,237,1354,189,1366,187"/>
-<area shape="poly" title=" " alt="" coords="1450,190,1538,225,1650,263,1766,290,1874,309,1873,314,1765,295,1649,268,1536,230,1448,195"/>
-<area shape="poly" title=" " alt="" coords="1425,193,1423,300,1418,300,1420,192"/>
+<area shape="rect" title="Implementation of CD_ParticleManagement.H." alt="" coords="1665,5,1892,45"/>
+<area shape="rect" title=" " alt="" coords="227,313,312,339"/>
+<area shape="poly" title=" " alt="" coords="1665,31,1495,36,1277,47,1035,66,792,96,694,105,604,106,522,103,447,103,377,111,344,120,311,133,279,151,246,174,214,204,182,242,177,250,177,259,187,276,206,292,230,305,227,310,203,296,182,279,172,260,172,249,178,238,210,201,243,170,276,146,309,128,342,115,376,106,447,97,523,98,604,100,693,100,792,91,1035,61,1277,42,1495,31,1665,25"/>
+<area shape="rect" title=" " alt="" coords="1005,313,1061,339"/>
+<area shape="poly" title=" " alt="" coords="1679,48,1580,69,1474,96,1406,112,1344,120,1238,132,1190,143,1143,163,1097,194,1050,242,1042,255,1037,270,1034,300,1029,299,1032,268,1037,252,1046,238,1094,190,1141,158,1188,138,1237,127,1344,115,1405,106,1473,91,1578,64,1678,43"/>
+<area shape="rect" title=" " alt="" coords="1965,240,2032,265"/>
+<area shape="poly" title=" " alt="" coords="1799,44,1979,228,1976,232,1795,47"/>
+<area shape="rect" title=" " alt="" coords="2929,167,3015,192"/>
+<area shape="poly" title=" " alt="" coords="1892,25,2152,30,2469,42,2620,50,2751,61,2852,74,2887,82,2911,91,2928,103,2943,119,2964,152,2959,155,2938,123,2925,107,2908,96,2886,87,2851,80,2751,66,2620,55,2469,47,2152,36,1892,31"/>
+<area shape="rect" title=" " alt="" coords="923,313,981,339"/>
+<area shape="poly" title=" " alt="" coords="1665,42,1518,63,1351,91,1199,127,1139,147,1095,169,1055,200,1019,237,969,303,964,300,1015,233,1051,196,1092,164,1137,142,1197,122,1350,86,1517,58,1665,37"/>
+<area shape="rect" title=" " alt="" coords="3782,240,3842,265"/>
+<area shape="poly" title=" " alt="" coords="1892,27,2450,46,2817,64,3188,91,3283,93,3367,86,3515,68,3584,68,3617,72,3651,80,3686,92,3721,110,3757,134,3794,165,3804,178,3811,194,3816,225,3811,226,3806,195,3800,181,3790,169,3753,139,3718,115,3683,97,3650,85,3616,77,3583,73,3516,74,3368,92,3283,98,3188,96,2816,70,2450,51,1892,32"/>
+<area shape="rect" title=" " alt="" coords="1059,240,1151,265"/>
+<area shape="poly" title=" " alt="" coords="1711,48,1550,96,1323,174,1149,238,1147,233,1322,169,1549,91,1709,43"/>
+<area shape="rect" title=" " alt="" coords="104,313,203,339"/>
+<area shape="poly" title=" " alt="" coords="1665,31,1341,38,928,51,552,70,416,82,337,96,277,118,233,146,200,184,172,241,163,271,158,300,153,299,157,270,167,239,196,181,230,142,274,114,335,91,416,77,552,65,928,46,1341,33,1665,26"/>
+<area shape="rect" href="CD__Random_8H.html" title="File containing some useful static methods related to random number generation." alt="" coords="558,167,674,192"/>
+<area shape="poly" title=" " alt="" coords="1665,30,1513,35,1322,46,1112,65,902,96,835,111,769,129,660,164,659,159,768,124,834,105,901,91,1111,60,1322,40,1513,30,1665,25"/>
+<area shape="rect" href="CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="2138,313,2323,339"/>
+<area shape="poly" title=" " alt="" coords="1893,27,2142,41,2293,55,2447,75,2594,102,2725,138,2780,159,2828,183,2866,209,2894,239,2900,253,2894,267,2866,282,2815,293,2668,310,2494,320,2337,325,2337,320,2493,315,2667,305,2814,288,2864,277,2890,264,2895,253,2890,241,2863,213,2825,187,2778,164,2723,143,2593,107,2446,80,2292,60,2142,46,1892,32"/>
+<area shape="rect" href="CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="1708,313,1887,339"/>
+<area shape="poly" title=" " alt="" coords="1759,47,1713,98,1690,131,1673,167,1671,179,1673,192,1676,231,1681,246,1691,264,1718,288,1749,305,1747,310,1715,292,1687,267,1676,248,1671,232,1668,192,1666,179,1668,166,1685,129,1709,95,1755,44"/>
+<area shape="rect" href="CD__ParticleLoops_8H.html" title="Declaration of a namespace for SIMD&#45;decorated loops over SoA particles." alt="" coords="2143,93,2291,119"/>
+<area shape="poly" title=" " alt="" coords="1884,43,2140,88,2139,94,1883,48"/>
+<area shape="rect" href="CD__LoadBalancing_8H.html" title="Declaration of a static class for various load balancing operations." alt="" coords="1700,167,1857,192"/>
+<area shape="poly" title=" " alt="" coords="1781,46,1781,153,1776,153,1776,46"/>
+<area shape="rect" href="CD__ParticleManagement_8H.html" title="Namespace containing various particle management utilities." alt="" coords="2979,93,3175,119"/>
+<area shape="poly" title=" " alt="" coords="1892,29,2354,52,2948,91,2965,92,2965,97,2948,96,2353,58,1892,35"/>
+<area shape="poly" title=" " alt="" coords="674,186,1046,240,1046,245,674,192"/>
+<area shape="rect" title=" " alt="" coords="336,313,408,339"/>
+<area shape="poly" title=" " alt="" coords="558,182,462,184,352,192,299,200,253,210,216,224,191,242,187,252,191,264,207,273,241,285,323,309,322,314,239,290,205,278,187,267,181,252,187,238,213,220,251,205,298,195,351,187,462,179,558,177"/>
+<area shape="rect" title=" " alt="" coords="392,240,469,265"/>
+<area shape="poly" title=" " alt="" coords="587,195,474,237,473,233,585,190"/>
+<area shape="rect" title=" " alt="" coords="493,240,557,265"/>
+<area shape="poly" title=" " alt="" coords="603,194,553,233,549,229,600,190"/>
+<area shape="rect" title=" " alt="" coords="581,240,651,265"/>
+<area shape="poly" title=" " alt="" coords="619,192,619,226,613,226,613,192"/>
+<area shape="rect" title=" " alt="" coords="3237,313,3331,339"/>
+<area shape="poly" title=" " alt="" coords="674,179,2099,203,2894,221,3152,229,3256,238,3269,251,3277,267,3285,299,3280,300,3272,268,3264,254,3254,242,3152,235,2894,226,2099,208,674,184"/>
+<area shape="poly" title=" " alt="" coords="674,181,1040,200,1289,216,1543,237,1644,249,1746,263,2124,309,2124,314,1745,268,1644,254,1542,243,1289,222,1040,205,674,186"/>
+<area shape="poly" title=" " alt="" coords="670,189,869,230,1048,263,1222,283,1358,292,1494,299,1668,311,1694,313,1694,318,1668,316,1493,304,1357,297,1221,288,1048,268,868,235,669,195"/>
+<area shape="rect" href="CD__RandomImplem_8H.html" title="Implementation of CD_Random.H." alt="" coords="201,240,367,265"/>
+<area shape="poly" title=" " alt="" coords="558,194,344,240,343,234,557,189"/>
+<area shape="poly" title=" " alt="" coords="264,268,188,309,185,304,262,263"/>
+<area shape="poly" title=" " alt="" coords="344,237,556,192,557,198,345,242"/>
+<area shape="poly" title=" " alt="" coords="368,262,380,263,807,288,1139,297,1471,301,1899,311,2124,318,2124,324,1899,316,1471,306,1139,303,806,294,380,268,368,267"/>
+<area shape="poly" title=" " alt="" coords="368,262,380,263,576,276,742,284,1024,290,1306,294,1668,311,1694,312,1694,318,1668,316,1306,300,1024,295,742,289,576,281,380,268,368,267"/>
+<area shape="rect" title=" " alt="" coords="560,313,627,339"/>
+<area shape="poly" title=" " alt="" coords="337,263,547,310,546,316,336,268"/>
+<area shape="rect" title=" " alt="" coords="5,313,80,339"/>
+<area shape="poly" title=" " alt="" coords="246,268,94,312,93,307,244,263"/>
+<area shape="rect" title=" " alt="" coords="432,313,536,339"/>
+<area shape="poly" title=" " alt="" coords="317,263,439,306,437,311,315,268"/>
+<area shape="poly" title=" " alt="" coords="2227,118,2241,144,2255,180,2265,223,2263,266,2248,302,2243,300,2257,265,2259,223,2250,182,2236,146,2222,120"/>
+<area shape="poly" title=" " alt="" coords="2143,113,2018,120,1875,131,1753,147,1711,157,1690,169,1680,185,1679,203,1686,222,1698,240,1732,276,1769,304,1766,308,1729,280,1693,244,1681,224,1674,204,1675,184,1686,165,1709,152,1752,142,1874,126,2017,114,2143,108"/>
+<area shape="rect" title=" " alt="" coords="2323,240,2394,265"/>
+<area shape="poly" title=" " alt="" coords="2230,117,2278,165,2340,228,2336,232,2274,169,2227,121"/>
+<area shape="rect" href="CD__Decorations_8H.html" title="Declaration of various decoration macros." alt="" coords="2107,240,2247,265"/>
+<area shape="poly" title=" " alt="" coords="2217,120,2187,227,2182,226,2211,118"/>
+<area shape="rect" href="CD__ParticleSoA_8H.html" title="Declaration of ParticleSoA, an arena&#45;backed Struct&#45;of&#45;Arrays particle container." alt="" coords="2534,167,2669,192"/>
+<area shape="poly" title=" " alt="" coords="2280,116,2526,161,2525,167,2279,121"/>
+<area shape="poly" title=" " alt="" coords="2188,264,2216,301,2212,304,2184,267"/>
+<area shape="poly" title=" " alt="" coords="2117,268,1873,313,1872,308,2116,263"/>
+<area shape="poly" title=" " alt="" coords="2534,185,1847,204,1474,221,1339,231,1259,243,1234,254,1209,268,1139,294,1075,315,1074,310,1137,289,1207,263,1232,249,1258,237,1338,226,1474,215,1847,198,2534,179"/>
+<area shape="poly" title=" " alt="" coords="2534,191,2046,248,2045,243,2534,186"/>
+<area shape="poly" title=" " alt="" coords="2534,184,2234,190,1821,201,1432,218,1291,230,1209,243,1187,254,1165,268,995,315,994,310,1163,263,1184,249,1207,237,1291,224,1432,213,1820,196,2234,185,2534,179"/>
+<area shape="poly" title=" " alt="" coords="2669,181,3088,203,3662,237,3769,245,3768,251,3661,243,3087,209,2669,187"/>
+<area shape="poly" title=" " alt="" coords="2534,183,2308,184,1971,192,1575,210,1371,224,1171,243,1166,243,1165,238,1170,237,1371,219,1575,204,1971,186,2307,179,2534,178"/>
+<area shape="poly" title=" " alt="" coords="2669,181,3040,204,3216,220,3273,229,3300,238,3309,253,3310,270,3300,302,3295,300,3304,269,3303,254,3297,242,3272,234,3215,225,3040,209,2669,187"/>
+<area shape="poly" title=" " alt="" coords="2586,194,2528,230,2452,268,2375,294,2302,313,2301,308,2373,289,2450,263,2525,225,2583,190"/>
+<area shape="poly" title=" " alt="" coords="2569,195,2514,216,2452,242,2430,256,2408,268,2310,288,2175,303,1901,323,1900,317,2175,298,2309,282,2406,263,2428,251,2449,238,2512,211,2567,190"/>
+<area shape="poly" title=" " alt="" coords="2563,195,2408,240,2406,235,2562,189"/>
+<area shape="rect" title=" " alt="" coords="2521,240,2586,265"/>
+<area shape="poly" title=" " alt="" coords="2596,194,2571,230,2566,227,2591,191"/>
+<area shape="rect" title=" " alt="" coords="3588,313,3655,339"/>
+<area shape="poly" title=" " alt="" coords="2669,181,3221,206,3494,223,3581,230,3619,238,3628,252,3632,268,3631,300,3625,300,3627,269,3623,254,3616,242,3581,236,3493,228,3221,211,2669,186"/>
+<area shape="rect" title=" " alt="" coords="1109,313,1163,339"/>
+<area shape="poly" title=" " alt="" coords="2534,185,1877,205,1522,222,1392,232,1317,243,1173,310,1171,305,1315,237,1392,227,1521,217,1876,200,2534,180"/>
+<area shape="rect" title=" " alt="" coords="3355,313,3418,339"/>
+<area shape="poly" title=" " alt="" coords="2669,180,3037,200,3220,216,3285,226,3322,238,3340,250,3356,266,3377,299,3373,302,3351,269,3337,254,3320,242,3283,232,3219,222,3037,205,2669,186"/>
+<area shape="rect" title=" " alt="" coords="2611,240,2688,265"/>
+<area shape="poly" title=" " alt="" coords="2611,191,2636,227,2632,230,2607,194"/>
+<area shape="rect" title=" " alt="" coords="2713,240,2794,265"/>
+<area shape="poly" title=" " alt="" coords="2627,190,2717,232,2715,237,2625,194"/>
+<area shape="rect" title=" " alt="" coords="2819,240,2880,265"/>
+<area shape="poly" title=" " alt="" coords="2642,189,2806,236,2805,241,2640,195"/>
+<area shape="rect" href="CD__ParticleSoAImplem_8H.html" title="Implementation of CD_ParticleSoA.H." alt="" coords="3419,240,3605,265"/>
+<area shape="poly" title=" " alt="" coords="2669,183,2980,205,3388,237,3405,239,3405,244,3388,243,2979,210,2669,188"/>
+<area shape="poly" title=" " alt="" coords="3419,262,2337,321,2337,316,3419,256"/>
+<area shape="poly" title=" " alt="" coords="3419,261,3255,268,1900,323,1900,318,3255,263,3419,256"/>
+<area shape="poly" title=" " alt="" coords="3419,243,3412,243,3002,210,2682,188,2683,183,3002,205,3412,237,3419,238"/>
+<area shape="poly" title=" " alt="" coords="3531,263,3593,303,3590,308,3528,268"/>
+<area shape="rect" title=" " alt="" coords="3481,313,3543,339"/>
+<area shape="poly" title=" " alt="" coords="3515,266,3515,300,3509,300,3509,266"/>
+<area shape="rect" title=" " alt="" coords="3765,313,3853,339"/>
+<area shape="poly" title=" " alt="" coords="3560,263,3752,308,3751,314,3559,268"/>
+<area shape="poly" title=" " alt="" coords="1815,189,1953,234,1952,239,1813,195"/>
+<area shape="poly" title=" " alt="" coords="1804,190,1904,238,1929,251,1954,263,2049,290,2139,308,2138,314,2048,295,1952,268,1926,256,1901,242,1802,195"/>
+<area shape="poly" title=" " alt="" coords="1771,194,1751,226,1746,245,1748,265,1759,285,1775,302,1771,306,1755,288,1743,266,1740,245,1746,224,1766,191"/>
+<area shape="rect" href="CD__MultiFluidIndexSpace_8H.html" title="Multi&#45;fluid index space." alt="" coords="1328,240,1531,265"/>
+<area shape="poly" title=" " alt="" coords="1723,195,1500,240,1498,235,1722,189"/>
+<area shape="rect" href="CD__BoxSorting_8H.html" title="Declaration of an enum for identifying various ways of sorting grid patches." alt="" coords="1757,240,1891,265"/>
+<area shape="poly" title=" " alt="" coords="1788,191,1812,227,1807,230,1784,194"/>
+<area shape="rect" href="CD__Loads_8H.html" title="Declaration of a simple class for holding computational loads." alt="" coords="3142,240,3242,265"/>
+<area shape="poly" title=" " alt="" coords="1858,180,2371,198,2722,215,3079,237,3129,242,3128,247,3078,243,2721,220,2371,204,1857,185"/>
+<area shape="rect" href="CD__LoadBalancingImplem_8H.html" title=" " alt="" coords="675,240,882,265"/>
+<area shape="poly" title=" " alt="" coords="1700,189,896,245,896,240,1700,183"/>
+<area shape="poly" title=" " alt="" coords="1531,255,1745,263,1970,268,2160,269,2484,268,2640,269,2808,276,2999,289,3223,311,3223,316,2998,294,2808,281,2640,275,2484,273,2160,275,1970,273,1745,268,1531,260"/>
+<area shape="poly" title=" " alt="" coords="1531,260,2124,313,2124,318,1531,266"/>
+<area shape="poly" title=" " alt="" coords="1489,263,1725,308,1724,313,1488,268"/>
+<area shape="rect" title=" " alt="" coords="1355,313,1504,339"/>
+<area shape="poly" title=" " alt="" coords="1432,266,1432,300,1427,300,1427,266"/>
+<area shape="rect" title=" " alt="" coords="1528,313,1656,339"/>
+<area shape="poly" title=" " alt="" coords="1457,263,1554,305,1552,310,1454,268"/>
+<area shape="rect" title=" " alt="" coords="1200,313,1331,339"/>
+<area shape="poly" title=" " alt="" coords="1404,268,1306,310,1303,305,1402,263"/>
+<area shape="poly" title=" " alt="" coords="1890,263,2152,308,2151,314,1889,268"/>
+<area shape="poly" title=" " alt="" coords="1822,267,1809,302,1804,300,1817,265"/>
+<area shape="poly" title=" " alt="" coords="3142,265,3123,268,2904,289,2687,305,2337,324,2337,318,2687,300,2904,284,3122,263,3141,260"/>
+<area shape="poly" title=" " alt="" coords="3142,262,3079,268,2502,298,1900,323,1900,318,2502,293,3078,263,3142,257"/>
+<area shape="poly" title=" " alt="" coords="3224,263,3343,306,3341,311,3222,268"/>
+<area shape="rect" title=" " alt="" coords="3163,313,3213,339"/>
+<area shape="poly" title=" " alt="" coords="3194,266,3192,300,3187,300,3189,266"/>
+<area shape="rect" title=" " alt="" coords="3062,313,3138,339"/>
+<area shape="poly" title=" " alt="" coords="3179,267,3127,307,3124,303,3176,263"/>
+<area shape="poly" title=" " alt="" coords="675,268,515,288,326,316,325,311,514,282,675,263"/>
+<area shape="poly" title=" " alt="" coords="821,263,993,310,991,316,820,268"/>
+<area shape="poly" title=" " alt="" coords="808,263,912,306,910,310,806,268"/>
+<area shape="poly" title=" " alt="" coords="675,267,216,316,216,311,675,262"/>
+<area shape="poly" title=" " alt="" coords="701,268,574,288,422,316,421,311,573,283,700,263"/>
+<area shape="poly" title=" " alt="" coords="883,256,2124,317,2124,322,882,262"/>
+<area shape="poly" title=" " alt="" coords="883,258,1668,311,1694,313,1694,318,1668,316,882,263"/>
+<area shape="poly" title=" " alt="" coords="750,268,637,311,635,306,748,263"/>
+<area shape="poly" title=" " alt="" coords="732,268,545,313,544,307,731,263"/>
+<area shape="poly" title=" " alt="" coords="837,263,1096,314,1094,319,836,268"/>
+<area shape="poly" title=" " alt="" coords="882,242,1686,185,1687,190,882,247"/>
+<area shape="rect" title=" " alt="" coords="651,313,770,339"/>
+<area shape="poly" title=" " alt="" coords="769,268,733,305,729,301,766,264"/>
+<area shape="rect" title=" " alt="" coords="794,313,899,339"/>
+<area shape="poly" title=" " alt="" coords="792,264,828,301,824,305,788,268"/>
+<area shape="poly" title=" " alt="" coords="2979,97,2972,96,2375,58,1906,35,1906,29,2376,52,2972,91,2979,91"/>
+<area shape="poly" title=" " alt="" coords="3062,121,3002,161,2999,157,3059,116"/>
+<area shape="poly" title=" " alt="" coords="3175,108,3518,127,3676,143,3731,153,3764,164,3779,177,3791,193,3807,226,3802,228,3787,196,3775,181,3761,169,3730,158,3675,149,3517,133,3175,114"/>
+<area shape="poly" title=" " alt="" coords="3176,114,3297,131,3429,156,3492,173,3546,192,3590,213,3619,238,3639,258,3655,268,3663,275,3652,278,3564,284,3474,295,3345,316,3344,311,3473,290,3564,278,3651,273,3658,274,3652,272,3636,262,3616,242,3587,218,3544,197,3490,178,3428,161,3296,136,3175,120"/>
+<area shape="poly" title=" " alt="" coords="3085,118,3094,147,3102,187,3100,230,3093,250,3081,267,3066,277,3042,286,2973,300,2880,310,2771,318,2538,326,2337,328,2337,322,2538,321,2771,312,2879,305,2972,294,3041,281,3063,272,3077,263,3088,247,3094,229,3096,188,3089,149,3080,120"/>
+<area shape="poly" title=" " alt="" coords="2979,112,2809,121,2587,142,2466,159,2341,181,2217,208,2097,242,2071,255,2045,268,1958,294,1875,313,1874,308,1956,289,2043,263,2069,250,2095,238,2215,203,2340,175,2465,153,2587,136,2809,115,2979,107"/>
+<area shape="poly" title=" " alt="" coords="3001,121,2682,169,2682,163,3000,116"/>
+<area shape="poly" title=" " alt="" coords="3176,107,3251,113,3338,124,3429,140,3518,164,3596,187,3625,205,3652,239,3657,253,3651,267,3621,282,3563,296,3432,320,3431,315,3562,291,3619,277,3647,264,3651,253,3647,241,3622,209,3593,192,3517,169,3428,145,3337,129,3251,118,3175,113"/>
+<area shape="poly" title=" " alt="" coords="3175,104,3329,105,3508,114,3596,121,3676,132,3743,146,3793,164,3817,179,3834,194,3846,213,3857,239,3859,257,3855,275,3835,305,3830,302,3850,273,3854,257,3852,241,3842,216,3830,197,3814,183,3791,169,3742,151,3675,137,3595,127,3508,119,3329,111,3175,109"/>
+<area shape="rect" href="CD__CellInfo_8H.html" title="Simple class for holding some quantities relevant in a grid cell." alt="" coords="2955,240,3067,265"/>
+<area shape="poly" title=" " alt="" coords="3074,120,3024,229,3019,226,3069,118"/>
+<area shape="poly" title=" " alt="" coords="3055,263,3227,307,3226,312,3054,268"/>
+<area shape="poly" title=" " alt="" coords="2955,266,2936,268,2609,300,2338,321,2337,315,2609,295,2936,263,2954,260"/>
+<area shape="poly" title=" " alt="" coords="2955,262,2892,268,2333,303,1900,323,1900,318,2332,297,2892,263,2954,257"/>
 </map>
 </div>
 </div><div class="textblock"><div class="dynheader">
@@ -327,10 +371,26 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a79e3fbf7527373f821428eb6a82d2d99" id="r_a79e3fbf7527373f821428eb6a82d2d99"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;(P::*)() weight, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;(P::*)() <a class="el" href="classTracerParticleSolver.html">const</a> position&gt; </td></tr>
-<tr class="memitem:a79e3fbf7527373f821428eb6a82d2d99"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::shared_ptr</a>&lt; <a class="el" href="classKDNode.html">KDNode</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a> &gt; &gt; &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#a79e3fbf7527373f821428eb6a82d2d99">ParticleManagement::recursivePartitionAndSplitEqualWeightKD</a> (<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classKDNode.html">KDNode</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a> &gt;::ParticleList &amp;<a class="el" href="classTracerParticleSolver.html">a_inputParticles</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_maxLeaves</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="namespaceParticleManagement.html#a355c356fabec1650406a887b59c2068f">BinaryParticleReconcile</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a> &gt; <a class="el" href="classTracerParticleSolver.html">a_particleReconcile</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:a79e3fbf7527373f821428eb6a82d2d99"><td class="mdescLeft">&#160;</td><td class="mdescRight">Recursively build a KD-tree following the "equal weight" principle when partitioning nodes.  <br /></td></tr>
-<tr class="separator:a79e3fbf7527373f821428eb6a82d2d99"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae45f641dfffc20953f7d202b3bbdee10" id="r_ae45f641dfffc20953f7d202b3bbdee10"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;(P::*)() weight, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;(P::*)() <a class="el" href="classTracerParticleSolver.html">const</a> position&gt; </td></tr>
+<tr class="memitem:ae45f641dfffc20953f7d202b3bbdee10"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#ae45f641dfffc20953f7d202b3bbdee10">ParticleManagement::buildEqualWeightKDLeaves</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_particles</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_maxLeaves</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="namespaceParticleManagement.html#a355c356fabec1650406a887b59c2068f">BinaryParticleReconcile</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_particleReconcile</a>, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt; <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">P</a> *, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">P</a> * &gt; &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_leaves</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:ae45f641dfffc20953f7d202b3bbdee10"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build an equal-weight KD partition of a list of particles and return the leaf particle ranges.  <br /></td></tr>
+<tr class="separator:ae45f641dfffc20953f7d202b3bbdee10"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad70134a1661f2195054d82a45bf757d4" id="r_ad70134a1661f2195054d82a45bf757d4"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;(P::*)() <a class="el" href="classTracerParticleSolver.html">const</a> position&gt; </td></tr>
+<tr class="memitem:ad70134a1661f2195054d82a45bf757d4"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#ad70134a1661f2195054d82a45bf757d4">ParticleManagement::mergeAdjacentNearest</a> (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_particles</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::size_t</a> <a class="el" href="classTracerParticleSolver.html">a_target</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">void</a>(<a class="el" href="classTracerParticleSolver.html">P</a> &amp;, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">P</a> &amp;)&gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_combine</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:ad70134a1661f2195054d82a45bf757d4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Merge an already spatially-ordered particle list down to a target count by repeatedly combining the nearest adjacent pair.  <br /></td></tr>
+<tr class="separator:ad70134a1661f2195054d82a45bf757d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6ed160136e38c95de7c4ddd1831606f0" id="r_a6ed160136e38c95de7c4ddd1831606f0"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">Packed</a> , <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;(Packed::*)() packWeight, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;(Packed::*)() <a class="el" href="classTracerParticleSolver.html">const</a> packPosition, <a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">Traits</a>  = ParticleTraits&lt;P&gt;&gt; </td></tr>
+<tr class="memitem:a6ed160136e38c95de7c4ddd1831606f0"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="namespaceParticleManagement.html#a0653357f8d5608240706c875758d1262">ParticleMerger</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#a6ed160136e38c95de7c4ddd1831606f0">ParticleManagement::makeSfcNearestNeighborMerger</a> (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">Packed</a>(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::size_t</a>)&gt; <a class="el" href="classTracerParticleSolver.html">a_gather</a>, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">void</a>(<a class="el" href="classTracerParticleSolver.html">Packed</a> &amp;, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Packed</a> &amp;)&gt; <a class="el" href="classTracerParticleSolver.html">a_combine</a>, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">void</a>(<a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Packed</a> &amp;)&gt; <a class="el" href="classTracerParticleSolver.html">a_scatter</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a6ed160136e38c95de7c4ddd1831606f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a space-filling-curve nearest-neighbor super-particle merger as a reusable ParticleMerger.  <br /></td></tr>
+<tr class="separator:a6ed160136e38c95de7c4ddd1831606f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad67e840020de9b17223682bf08f13637" id="r_ad67e840020de9b17223682bf08f13637"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">Packed</a> , <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;(Packed::*)() packWeight, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;(Packed::*)() <a class="el" href="classTracerParticleSolver.html">const</a> packPosition, <a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">Traits</a>  = ParticleTraits&lt;P&gt;&gt; </td></tr>
+<tr class="memitem:ad67e840020de9b17223682bf08f13637"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="namespaceParticleManagement.html#a0653357f8d5608240706c875758d1262">ParticleMerger</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#ad67e840020de9b17223682bf08f13637">ParticleManagement::makeEqualWeightKDMerger</a> (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">Packed</a>(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::size_t</a>)&gt; <a class="el" href="classTracerParticleSolver.html">a_gather</a>, <a class="el" href="namespaceParticleManagement.html#a355c356fabec1650406a887b59c2068f">BinaryParticleReconcile</a>&lt; <a class="el" href="classTracerParticleSolver.html">Packed</a> &gt; <a class="el" href="classTracerParticleSolver.html">a_reconcile</a>, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">void</a>(<a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Packed</a> *, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Packed</a> *, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classCellInfo.html">CellInfo</a> &amp;)&gt; <a class="el" href="classTracerParticleSolver.html">a_scatterLeaf</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:ad67e840020de9b17223682bf08f13637"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an equal-weight KD-tree super-particle merger as a reusable ParticleMerger.  <br /></td></tr>
+<tr class="separator:ad67e840020de9b17223682bf08f13637"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a648524eadc9dc97d1f1652fc4b3606d5" id="r_a648524eadc9dc97d1f1652fc4b3606d5"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">Context</a> , <a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">Traits</a>  = ParticleTraits&lt;P&gt;&gt; </td></tr>
+<tr class="memitem:a648524eadc9dc97d1f1652fc4b3606d5"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="namespaceParticleManagement.html#a0653357f8d5608240706c875758d1262">ParticleMerger</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#a648524eadc9dc97d1f1652fc4b3606d5">ParticleManagement::makeReinitializeMerger</a> (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt; <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a>, <a class="el" href="classTracerParticleSolver.html">Context</a> &gt;(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;)&gt; <a class="el" href="classTracerParticleSolver.html">a_aggregate</a>, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">void</a>(<a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;, <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Context</a> &amp;)&gt; <a class="el" href="classTracerParticleSolver.html">a_emit</a>, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">RealVect</a>()&gt; <a class="el" href="classTracerParticleSolver.html">a_probLo</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a648524eadc9dc97d1f1652fc4b3606d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a reinitialize super-particle merger as a reusable ParticleMerger.  <br /></td></tr>
+<tr class="separator:a648524eadc9dc97d1f1652fc4b3606d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3101a3eb71695c1270e934df28b8af22" id="r_a3101a3eb71695c1270e934df28b8af22"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">T</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> &gt; </td></tr>
 <tr class="memitem:a3101a3eb71695c1270e934df28b8af22"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#a3101a3eb71695c1270e934df28b8af22">ParticleManagement::removePhysicalParticles</a> (<a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_particles</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">T</a> <a class="el" href="classTracerParticleSolver.html">a_numPhysPartToRemove</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:a3101a3eb71695c1270e934df28b8af22"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove physical particles from an SoA container (operates on the container-owned weight column).  <br /></td></tr>

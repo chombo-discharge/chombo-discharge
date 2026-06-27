@@ -192,7 +192,7 @@ Thus, <span class="math notranslate nohighlight">\(\Phi\)</span> does not satisf
 <p><span class="caption-number">Fig. 16 </span><span class="caption-text">Location of fluxes for finite volume discretization.</span><a class="headerlink" href="#id1" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
-<p>The finite volume update require fluxes on the face centroids rather than the centers.
+<p>The finite volume update requires fluxes on the face centroids rather than the centers.
 These are constructed by first computing the fluxes to second order on the face centers, and then interpolating them to the face centroids.
 For example, the flux <span class="math notranslate nohighlight">\(F_3\)</span> in the figure above is</p>
 <div class="math notranslate nohighlight">
@@ -201,7 +201,7 @@ For example, the flux <span class="math notranslate nohighlight">\(F_3\)</span> 
 </section>
 <section id="boundary-conditions">
 <h3>Boundary conditions<a class="headerlink" href="#boundary-conditions" title="Permalink to this heading"></a></h3>
-<p>The finite volume discretization of the Helmholtz equation require fluxes through the EB and domain faces.
+<p>The finite volume discretization of the Helmholtz equation requires fluxes through the EB and domain faces.
 Below, we discuss how these are implemented.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -219,7 +219,7 @@ On the domain boundaries where there is no EB the fluxes are face-centered and w
 If the EB intersects the domain side, we interpolate face-centered fluxes to face centroids.</p>
 <p>On the embedded boundaries the flux is more complicated to compute, and requires us to compute an approximation to the normal gradient <span class="math notranslate nohighlight">\(\partial_n\Phi\)</span> at the boundary.
 Our approach is to approximate this flux by expanding the solution as a polynomial using a specified number of grid cells.
-By using more grid cells than there are unknown in the Taylor series, we formulate an over-determined system of equations up to some specified order.
+By using more grid cells than there are unknowns in the Taylor series, we formulate an over-determined system of equations up to some specified order.
 As a first approximation we include only those cells in the quadrant or half-space defined by the normal vector, see <a class="reference internal" href="#fig-gradientreconstruction"><span class="std std-numref">Fig. 17</span></a>.
 If we can not find enough equations, several fallback options are in place to ensure that we obtain a sufficient number of equations.</p>
 <figure class="align-center" id="id2">
@@ -251,7 +251,7 @@ For the same reason, gradient reconstruction near the cut-cells might require in
 <div class="math notranslate nohighlight">
 \[A\partial_n\Phi + B\Phi = C,\]</div>
 <p>where <span class="math notranslate nohighlight">\(A\)</span>, <span class="math notranslate nohighlight">\(B\)</span>, and <span class="math notranslate nohighlight">\(C\)</span> are constants.
-This boundary conditions is enforced through the flux</p>
+This boundary condition is enforced through the flux</p>
 <div class="math notranslate nohighlight">
 \[\partial_n\Phi = \frac{1}{A}\left(C - B\Phi\right),\]</div>
 <p>which requires an evaluation of <span class="math notranslate nohighlight">\(\Phi\)</span> on the domain boundaries and the EB.</p>
@@ -310,8 +310,8 @@ The currently supported smoothers are:</p>
 <p>Users can select between the various smoothers in solvers that use multigrid.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p>Red-black Gauss-Seidel usually provide the best convergence rates.
-The multi-colored kernels are twice as expensive as red-black Gauss-Seidel relaxation in 2D, and four times as expensive in 3D, and then to only marginally improve convergence rates.</p>
+<p>Red-black Gauss-Seidel usually provides the best convergence rates.
+The multi-colored kernels are twice as expensive as red-black Gauss-Seidel relaxation in 2D, and four times as expensive in 3D, and tend to only marginally improve convergence rates.</p>
 </div>
 </section>
 </section>
@@ -322,7 +322,7 @@ The most common case is that involving discontinuous coefficients across the EB,
 <div class="math notranslate nohighlight">
 \[\beta\nabla\cdot\left[b\left(\mathbf{x}\right)\nabla\Phi\left(\mathbf{x}\right)\right] = \rho.\]</div>
 <p>where <span class="math notranslate nohighlight">\(b\left(\mathbf{x}\right)\)</span> is only piecewise constant.
-This is the natural boundary conditions on a dielectric surface, for example.</p>
+This is the natural boundary condition on a dielectric surface, for example.</p>
 <section id="jump-conditions">
 <span id="chap-jumpcondition"></span><h3>Jump conditions<a class="headerlink" href="#jump-conditions" title="Permalink to this heading"></a></h3>
 <p>For the case of discontinuous coefficients there is a jump condition on the interface between two materials:</p>

@@ -262,7 +262,7 @@ Firstly, note that there are two layers to the time integrators:</p>
 <li><p>A pure class <code class="docutils literal notranslate"><span class="pre">CdrPlasmaStepper</span></code> which inherits from <code class="docutils literal notranslate"><span class="pre">TimeSteppers</span></code> but does not implement an <code class="docutils literal notranslate"><span class="pre">advance</span></code> method.
 This class simply provides the base functionality for more easily developing time integrators.
 <code class="docutils literal notranslate"><span class="pre">CdrPlasmaStepper</span></code> contains methods that are necessary for coupling the solvers, e.g. calling the <a class="reference internal" href="#chap-cdrplasmaphysics"><span class="std std-ref">CdrPlasmaPhysics</span></a> methods at the correct time.</p></li>
-<li><p>Implementations of <code class="docutils literal notranslate"><span class="pre">CdrPlasmaPhysics</span></code>, which implement the <code class="docutils literal notranslate"><span class="pre">advance</span></code> method and can thus be used for advancing models.</p></li>
+<li><p>Implementations of <code class="docutils literal notranslate"><span class="pre">CdrPlasmaStepper</span></code>, which implement the <code class="docutils literal notranslate"><span class="pre">advance</span></code> method and can thus be used for advancing models.</p></li>
 </ol>
 <p>The supported time integrators are located in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/CdrPlasma/TimeSteppers</span></code>.
 There are two integrators that are commonly used.</p>
@@ -379,7 +379,7 @@ Note when the semi-implicit scheme is used, it is not necessary to restrict the 
 <section id="spectral-deferred-corrections">
 <span id="chap-sisdc"></span><h3>Spectral deferred corrections<a class="headerlink" href="#spectral-deferred-corrections" title="Permalink to this heading"></a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">CdrPlasmaImExSdcStepper</span></code> uses implicit-explicit (ImEx) spectral deferred corrections (SDCs) to advance the equations.
-This integrator implements the <code class="docutils literal notranslate"><span class="pre">advance</span></code> method for <code class="docutils literal notranslate"><span class="pre">CdrPlasmStepper</span></code>, and is a high-order method with implicit diffusion.</p>
+This integrator implements the <code class="docutils literal notranslate"><span class="pre">advance</span></code> method for <code class="docutils literal notranslate"><span class="pre">CdrPlasmaStepper</span></code>, and is a high-order method with implicit diffusion.</p>
 <section id="sdc-basics">
 <h4>SDC basics<a class="headerlink" href="#sdc-basics" title="Permalink to this heading"></a></h4>
 <p>First, we provide a quick introduction to the SDC procedure.
@@ -432,11 +432,11 @@ These become <a class="reference internal" href="../Solvers/CDR.html#chap-cdr"><
 These become <a class="reference internal" href="../Solvers/RTE.html#chap-radiativetransfer"><span class="std std-ref">Radiative transfer</span></a> solvers and contain metadata for the radiative transport solvers.</p></li>
 <li><p>Implemented the core functionality that couple the solvers together.</p></li>
 </ol>
-<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> automatically allocates the specified number of convection-diffusion-reaction and radiative transport solvers from the list of species the is instantiated.
+<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> automatically allocates the specified number of convection-diffusion-reaction and radiative transport solvers from the list of species that is instantiated.
 For information on how to interface into the CDR solvers, see <a class="reference internal" href="../Solvers/CDR.html#chap-cdrspecies"><span class="std std-ref">CdrSpecies</span></a>.
 Likewise, see <a class="reference internal" href="../Solvers/RTE.html#chap-rtspecies"><span class="std std-ref">RtSpecies</span></a> for how to interface into the RTE solvers.</p>
 <p>Implementation of the core functionality is comparatively straightforward, but can lead to boilerplate code.
-For this reason we also provide an implementation layer <a class="reference internal" href="#chap-cdrplasmajson"><span class="std std-ref">JSON interface</span></a> that provides a plug-and-play interface for specifying the plasma physics by using a JSON schema for description the physics.</p>
+For this reason we also provide an implementation layer <a class="reference internal" href="#chap-cdrplasmajson"><span class="std std-ref">JSON interface</span></a> that provides a plug-and-play interface for specifying the plasma physics by using a JSON schema for describing the physics.</p>
 </section>
 <section id="complete-api">
 <h3>Complete API<a class="headerlink" href="#complete-api" title="Permalink to this heading"></a></h3>
@@ -806,7 +806,7 @@ For this reason we also provide an implementation layer <a class="reference inte
 <section id="json-interface">
 <span id="chap-cdrplasmajson"></span><h2>JSON interface<a class="headerlink" href="#json-interface" title="Permalink to this heading"></a></h2>
 <p>Since implementations of <a class="reference internal" href="#chap-cdrplasmaphysics"><span class="std std-ref">CdrPlasmaPhysics</span></a> are usually boilerplate, we provide a class <code class="docutils literal notranslate"><span class="pre">CdrPlasmaJSON</span></code> which can initialize and parse various types of initial conditions and reactions from a JSON input file.
-This class is defined in <code class="docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/PlasmaModels/CdrPlasmaJSON</span></code>.</p>
+This class is defined in <code class="docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/CdrPlasma/PlasmaModels/CdrPlasmaJSON</span></code>.</p>
 <p><code class="docutils literal notranslate"><span class="pre">CdrPlasmaJSON</span></code> is a full implementation of <code class="docutils literal notranslate"><span class="pre">CdrPlasmaPhysics</span></code> which supports the definition of various species (neutral, plasma species, and photons) and methods of coupling them.
 We expect that <code class="docutils literal notranslate"><span class="pre">CdrPlasmaJSON</span></code> provides the simplest method of setting up a new plasma model.
 It is also comparatively straightforward to extend the class with further required functionality.</p>
@@ -840,7 +840,7 @@ McPhoto.source_type       = number
 </div>
 <p>When specifying <code class="docutils literal notranslate"><span class="pre">CdrPlasmaJSON.discrete_photons</span> <span class="pre">=</span> <span class="pre">true</span></code>, <code class="docutils literal notranslate"><span class="pre">CdrPlasmaJSON</span></code> will do a Poisson sampling of the number of photons that are generated in each cell and put this in the radiative transfer solvers’ source terms.
 This means that the radiative transfer solver source terms <em>contain the physical number of photons generated in one time step</em>.
-To turn off sampling inside the radiative transfer solver, we specify <code class="docutils literal notranslate"><span class="pre">McPhoto.photon_generation</span> <span class="pre">=</span> <span class="pre">stochastic</span></code> and set <code class="docutils literal notranslate"><span class="pre">McPhoto.source_type</span> <span class="pre">=</span> <span class="pre">number</span></code> to let the solver know that the source contains the number of physical photons.</p>
+To turn off sampling inside the radiative transfer solver, we specify <code class="docutils literal notranslate"><span class="pre">McPhoto.photon_generation</span> <span class="pre">=</span> <span class="pre">deterministic</span></code> and set <code class="docutils literal notranslate"><span class="pre">McPhoto.source_type</span> <span class="pre">=</span> <span class="pre">number</span></code> to let the solver know that the source contains the number of physical photons.</p>
 </div></blockquote>
 </li>
 <li><p>Alternatively, set the following class options:</p>
@@ -931,7 +931,7 @@ In this case one must specify the extra fields</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">density</span></code> For specifying the column where the density (in <span class="math notranslate nohighlight">\(\textrm{kg}\cdot\textrm{m}^{-3}\)</span>) is stored.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">molar</span> <span class="pre">mass</span></code> For specifying the molar mass (in <span class="math notranslate nohighlight">\(\textrm{g}\cdot\textrm{mol}^{-1}\)</span>) of the gas.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">min</span> <span class="pre">height</span></code> For setting the minimum altitude in the <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> internal table.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">max</span> <span class="pre">height</span></code> For setting the minimum altitude in the <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> internal table.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max</span> <span class="pre">height</span></code> For setting the maximum altitude in the <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> internal table.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">res</span> <span class="pre">height</span></code> For setting the height resolution in the <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> internal table.</p></li>
 </ul>
 <p>For example, assume that our file <code class="docutils literal notranslate"><span class="pre">MyAtmosphere.dat</span></code> contains the following data:</p>
@@ -1031,7 +1031,7 @@ Details are discussed further below.</p>
 </ul>
 <section id="density-functions">
 <h5>Density functions<a class="headerlink" href="#density-functions" title="Permalink to this heading"></a></h5>
-<p>To provide initial data one include <code class="docutils literal notranslate"><span class="pre">initial</span> <span class="pre">data</span></code> for each species.
+<p>To provide initial data, one includes <code class="docutils literal notranslate"><span class="pre">initial</span> <span class="pre">data</span></code> for each species.
 Currently, the following fields are supported:</p>
 <ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">uniform</span></code> For specifying a uniform background density.
@@ -1045,7 +1045,7 @@ Simply the field <code class="docutils literal notranslate"><span class="pre">un
 </ul>
 <p>The position must be a 2D/3D array.</p>
 </li>
-<li><p><code class="docutils literal notranslate"><span class="pre">gauss2</span></code> for specifying Gaussian seeds <span class="math notranslate nohighlight">\(n = n_0\exp\left(-\frac{\left(\mathbf{x}-\mathbf{x_0}\right)^4}{2R^4}\right)\)</span>.
+<li><p><code class="docutils literal notranslate"><span class="pre">gauss4</span></code> for specifying Gaussian seeds <span class="math notranslate nohighlight">\(n = n_0\exp\left(-\frac{\left(\mathbf{x}-\mathbf{x_0}\right)^4}{2R^4}\right)\)</span>.
 <code class="docutils literal notranslate"><span class="pre">gauss4</span></code> is an array where each array entry must contain</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">radius</span></code>, for specifying the radius <span class="math notranslate nohighlight">\(R\)</span>:</p></li>
@@ -1338,7 +1338,7 @@ For performance reasons, the tables are always resampled, see <a class="referenc
 </section>
 <section id="diffusion-coefficients">
 <h4>Diffusion coefficients<a class="headerlink" href="#diffusion-coefficients" title="Permalink to this heading"></a></h4>
-<p>Setting the diffusion coefficient is done <em>exactly</em> in the same was as the mobility.
+<p>Setting the diffusion coefficient is done <em>exactly</em> in the same way as the mobility.
 If a species is diffusive, one must include the field <code class="docutils literal notranslate"><span class="pre">diffusion</span></code> as well as <code class="docutils literal notranslate"><span class="pre">lookup</span></code>.
 For example, the JSON input for specifying a tabulated diffusion coefficient is done by</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;plasma species&quot;</span><span class="p">:</span>
@@ -1763,7 +1763,7 @@ Finally, the <code class="docutils literal notranslate"><span class="pre">dump</
 <h4>Modifying reactions<a class="headerlink" href="#modifying-reactions" title="Permalink to this heading"></a></h4>
 <section id="collisional-quenching">
 <h5>Collisional quenching<a class="headerlink" href="#collisional-quenching" title="Permalink to this heading"></a></h5>
-<p>To quench a reaction, include a field <code class="docutils literal notranslate"><span class="pre">qenching_pressure</span></code> and specify the <em>quenching pressure</em> (in atmospheres).
+<p>To quench a reaction, include a field <code class="docutils literal notranslate"><span class="pre">quenching_pressure</span></code> and specify the <em>quenching pressure</em> (in atmospheres).
 When computing reaction rates, the rate for the reaction will be modified as</p>
 <div class="math notranslate nohighlight">
 \[k \rightarrow k\frac{p_q}{p_q + p}\]</div>
@@ -1863,7 +1863,7 @@ We point out that the correction factor is restricted such that the reaction rat
 Note that this correction makes sense when rates are dependent only on the electric field, see <span id="id6">Soloviev and Krivtsov [<a class="reference internal" href="../ZZReferences.html#id101" title="V R Soloviev and V M Krivtsov. Surface barrier discharge modelling for aerodynamic applications. Journal of Physics D: Applied Physics, 42(12):125208, jun 2009. URL: http://stacks.iop.org/0022-3727/42/i=12/a=125208?key=crossref.6a72c0ae60b829dd552a56b7f9dfa90c, doi:10.1088/0022-3727/42/12/125208.">2009</a>]</span>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>When using the energy correction, the specifies species must be both mobile and diffusive.</p>
+<p>When using the energy correction, the specified species must be both mobile and diffusive.</p>
 </div>
 </section>
 </section>

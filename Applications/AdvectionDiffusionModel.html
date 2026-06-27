@@ -185,7 +185,7 @@ The equation of motion is</p>
 <p>The full implementation for this model consists of the following classes:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">AdvectionDiffusionStepper</span></code>, which implements <a class="reference internal" href="../Source/TimeStepper.html#chap-timestepper"><span class="std std-ref">TimeStepper</span></a>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">AdvectionDiffusionSpecies</span></code>, which implements <a class="reference internal" href="../Solvers/CDR.html#chap-cdrspecies"><span class="std std-ref">CdrSpecies</span></a>, and thus sparses the initial condition into the problem.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AdvectionDiffusionSpecies</span></code>, which implements <a class="reference internal" href="../Solvers/CDR.html#chap-cdrspecies"><span class="std std-ref">CdrSpecies</span></a>, and thus parses the initial condition into the problem.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">AdvectionDiffusionTagger</span></code>, which implements <a class="reference internal" href="../Source/CellTagger.html#chap-celltagger"><span class="std std-ref">CellTagger</span></a> and flags cells for refinement and coarsening.</p></li>
 </ul>
 <p>This module only uses <a class="reference internal" href="../Solvers/CDR.html#chap-cdrsolver"><span class="std std-ref">CdrSolver</span></a>.</p>
@@ -217,7 +217,7 @@ The Runge-Kutta advance is then</p>
 \phi^{k+1} &amp;= \phi^k - \frac{\Delta t}{2}\left(\left[\nabla\cdot\mathbf{J}\left(\phi^k\right)\right] + \left[\nabla\cdot\mathbf{J}\left(\phi^\prime\right)\right]\right)\end{split}\]</div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>Note that when diffusion and advecting is coupled in this way, we do not include the transverse terms in the <a class="reference internal" href="../Solvers/CDR.html#chap-cdrctu"><span class="std std-ref">CdrCTU</span></a> discretization and limit the time step by</p>
+<p>Note that when diffusion and advection are coupled in this way, we do not include the transverse terms in the <a class="reference internal" href="../Solvers/CDR.html#chap-cdrctu"><span class="std std-ref">CdrCTU</span></a> discretization and limit the time step by</p>
 <div class="math notranslate nohighlight">
 \[\Delta t \leq \frac{1}{\frac{\sum_{i=1}^d |v_i|}{\Delta x} + \frac{2dD}{\Delta x^2}},\]</div>
 <p>where <span class="math notranslate nohighlight">\(d\)</span> is the dimensionality and <span class="math notranslate nohighlight">\(D\)</span> is the diffusion coefficient.</p>
@@ -306,7 +306,7 @@ I.e. the flow field is a circulation around the Cartesian grid origin.</p>
 <section id="id3">
 <h3>Default behavior<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h3>
 <p>The default diffusion coefficient for this problem is set to a constant.
-To adjust it,  <span class="math notranslate nohighlight">\(\omega\)</span>, set</p>
+To adjust it, set</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>AdvectionDiffusion.diffco             = 1.0      ## Diffusion coefficient
 </pre></div>
 </div>

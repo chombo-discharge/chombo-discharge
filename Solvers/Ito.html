@@ -238,7 +238,7 @@ These extra fields are used for storing the following information in the particl
 <p>The <code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> class encapsulates the implementation of <a class="reference internal" href="#equation-ito-diffusion">Eq. 9</a> in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.
 This class can advance a set of computational particles (see <a class="reference internal" href="#chap-itoparticle"><span class="std std-ref">ItoParticle</span></a>) with the following functionality:</p>
 <ol class="arabic simple">
-<li><p>Move particles the a microscopic drift-diffusion model.</p></li>
+<li><p>Move particles with a microscopic drift-diffusion model.</p></li>
 <li><p>Compute particle intersection with embedded boundaries and domain edges.</p></li>
 <li><p>Deposit particles and other particle types on the mesh.</p></li>
 <li><p>Interpolate velocities and diffusion coefficients to the particle positions.</p></li>
@@ -252,10 +252,10 @@ Although the particle velocities and diffusion coefficients can be manually assi
 <li><p>Diffusion coefficient.</p></li>
 <li><p>Velocity function.</p></li>
 </ol>
-<p>The reason for storing both the mobility and velocity function is to simply to improve flexibility when assigned the particle velocity <span class="math notranslate nohighlight">\(\mathbf{V}\)</span>.
+<p>The reason for storing both the mobility and velocity function is simply to improve flexibility when assigning the particle velocity <span class="math notranslate nohighlight">\(\mathbf{V}\)</span>.
 Note that the velocity function does <em>not</em> have to represent the particle velocity.
 When using both the mobility and velocity function, one can compute the particle velocity as <span class="math notranslate nohighlight">\(\mathbf{V} = \mu\mathbf{v}\)</span>, where <span class="math notranslate nohighlight">\(\mathbf{v}\)</span> is a velocity field.
-This is typically done for discharge simulations where for simplicity we assign <span class="math notranslate nohighlight">\(\mathbf{v}\)</span> to be the electric field, and <span class="math notranslate nohighlight">\(\mu\)</span> to the the field-dependent mobility.
+This is typically done for discharge simulations where for simplicity we assign <span class="math notranslate nohighlight">\(\mathbf{v}\)</span> to be the electric field, and <span class="math notranslate nohighlight">\(\mu\)</span> to the field-dependent mobility.
 Additional information is available in <a class="reference internal" href="#chap-itointerpolation"><span class="std std-ref">Particle interpolation</span></a>.</p>
 </section>
 <section id="itospecies">
@@ -274,7 +274,7 @@ The constructor for the <code class="docutils literal notranslate"><span class="
 </div>
 <p>Here, <code class="docutils literal notranslate"><span class="pre">a_name</span></code> indicates a variable name for the solver.
 This variable will be used in, e.g., error messages and I/O functionality.
-<code class="docutils literal notranslate"><span class="pre">a_chargeNumber</span></code> indicates the charge number of the species and the two booleans <code class="docutils literal notranslate"><span class="pre">a_mobile</span></code> and <code class="docutils literal notranslate"><span class="pre">a_diffusive</span></code> indicates whether or not the solver is mobile or diffusive.</p>
+<code class="docutils literal notranslate"><span class="pre">a_chargeNumber</span></code> indicates the charge number of the species and the two booleans <code class="docutils literal notranslate"><span class="pre">a_mobile</span></code> and <code class="docutils literal notranslate"><span class="pre">a_diffusive</span></code> indicate whether or not the solver is mobile or diffusive.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The C++ <code class="docutils literal notranslate"><span class="pre">ItoSpecies</span></code> API is available at <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classItoSpecies.html">https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classItoSpecies.html</a>.</p>
@@ -322,7 +322,7 @@ The <code class="docutils literal notranslate"><span class="pre">ParticleOps</sp
 </div>
 <p>When sampling particles from a mesh-based density, the solver will generate the particles so that the specified density is approximately reached within each grid cell.
 If the density that is supplied does not lead to an integer number of particles in the grid cell (which is virtually always the case), the evaluation of the number of particles is stochastically evaluated.
-E.g., if the density is <span class="math notranslate nohighlight">\(\phi\)</span> and then grid cell volume is <span class="math notranslate nohighlight">\(\Delta V\)</span>, and <span class="math notranslate nohighlight">\(\phi\Delta V = 1.2\)</span>, then there is a 20% chance that there will be generated two particles within the grid cell, and 80% chance that only one particle will be generated.</p>
+E.g., if the density is <span class="math notranslate nohighlight">\(\phi\)</span> and the grid cell volume is <span class="math notranslate nohighlight">\(\Delta V\)</span>, and <span class="math notranslate nohighlight">\(\phi\Delta V = 1.2\)</span>, then there is a 20% chance that there will be generated two particles within the grid cell, and 80% chance that only one particle will be generated.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p>The number of initially sampled particles is set through <code class="docutils literal notranslate"><span class="pre">ItoSolver.ppc_restart</span></code>.</p>
@@ -478,7 +478,7 @@ This interpolation method is always parsed from an options file, and is usually 
 <p class="admonition-title">Important</p>
 <p>When interpolating particle properties from the mesh, the user must first ensure that ghost cells are properly updated.</p>
 </div>
-<p>The separation into a mobility function and a velocity field is motivated by the introduction of an electric conductivity that permits a rather simple velocity velocity relation as <span class="math notranslate nohighlight">\(\mathbf{v} = \mu\mathbf{E}\)</span>, where <span class="math notranslate nohighlight">\(\mathbf{E}\)</span> is the electric field.
+<p>The separation into a mobility function and a velocity field is motivated by the introduction of an electric conductivity that permits a rather simple velocity relation as <span class="math notranslate nohighlight">\(\mathbf{v} = \mu\mathbf{E}\)</span>, where <span class="math notranslate nohighlight">\(\mathbf{E}\)</span> is the electric field.
 Complete interpolation of the particle velocity consists of calling two functions:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm">  @brief Interpolate mobilities</span>
@@ -515,7 +515,7 @@ Complete interpolation of the particle velocity consists of calling two function
 <p>Interpolation of the diffusion coefficient is always done using an interpolation method</p>
 <div class="math notranslate nohighlight">
 \[D = D\left(\mathbf{X}\right).\]</div>
-<p>The function signatures is</p>
+<p>The function signature is</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm">  @brief Interpolate the diffusion field to the particle positions. </span>
 <span class="cm">  @details This computes D_p = Df(X_p) where Df is the diffusion field on the mesh. </span>
@@ -542,7 +542,7 @@ The most relevant function is</p>
 <span class="w">  </span><span class="p">});</span>
 </pre></div>
 </div>
-<p>Here, <code class="docutils literal notranslate"><span class="pre">EBIntersection</span></code> is a just an enum for putting logic into how the intersection is computed.
+<p>Here, <code class="docutils literal notranslate"><span class="pre">EBIntersection</span></code> is just an enum for putting logic into how the intersection is computed.
 Valid options are <code class="docutils literal notranslate"><span class="pre">EBIntersection::Bisection</span></code> and <code class="docutils literal notranslate"><span class="pre">EBIntersection::Raycast</span></code>.
 These algorithms are discussed in <a class="reference internal" href="../Source/Particles.html#chap-particleeb"><span class="std std-ref">Boundary interaction</span></a>.
 The flag <code class="docutils literal notranslate"><span class="pre">a_deleteParticles</span></code> specifies if the original particles should be deleted when populating the other particle containers (again, see <a class="reference internal" href="../Source/Particles.html#chap-particleeb"><span class="std std-ref">Boundary interaction</span></a>).</p>
@@ -612,8 +612,8 @@ This routine is implemented as</p>
 <h2>Superparticle management<a class="headerlink" href="#superparticle-management" title="Permalink to this heading"></a></h2>
 <p>It can occasionally be necessary to merge or split computational particles.
 This occurs in, e.g., plasma simulations where chemical reactions lead to exponential growth of particles.
-<code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> can currently handle superparticles through several internal functions, and is also equipped with an interface in which the user can inject an external particle-handling routine.
-The function for splitting and merging the particles is in all cases</p>
+<code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> handles superparticles via a configurable merger functor selected at parse time through <code class="docutils literal notranslate"><span class="pre">ItoSolver.merge_algorithm</span></code>; the user can also supply a custom functor through <code class="docutils literal notranslate"><span class="pre">setParticleMerger</span></code>.
+The entry point for splitting and merging is in all cases</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm">  @brief Make superparticles for a full container -- this is the AMR version that users will usually call. </span>
 <span class="cm">  @param[in] a_container        Which container to repartition into new superparticles</span>
@@ -634,7 +634,8 @@ The function for splitting and merging the particles is in all cases</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">equal_weight_kd</span></code> Use a kD-tree with bounding volume hierarchies to partition and split/merge the particles. This conserves the particle center-of-mass.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">reinitialize</span></code> Re-initialize the particles in each grid cell, ensuring that weights are as uniform as possible.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">reinitialize_bvh</span></code> Re-initialize the particles in each node of a kD tree. Weights are as uniform as possible.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">external</span></code> Use an externally injected particle merging algorithm. In order to use this feature the user must supply one through</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sfc_nn</span></code> Reach the target particle count by space-filling-curve nearest-neighbour clustering: when there are more particles than the target the nearest neighbours (along a Hilbert curve) are merged until the target count is reached, and when there are fewer the highest-weight particles are split. This gives spatially tight groups but does not equalize the weights.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">external</span></code> Use an externally injected particle merging algorithm. In order to use this feature the user must supply one through <code class="docutils literal notranslate"><span class="pre">setParticleMerger</span></code>.</p></li>
 </ul>
 <p>The user can set the merging algorithm through the input script (see <a class="reference internal" href="#chap-itoinput"><span class="std std-ref">Input options</span></a>), or supply one externally by setting the merge algorithm to <code class="docutils literal notranslate"><span class="pre">external</span></code>.
 In addition, the user must first supply a particle merging function:</p>
@@ -710,7 +711,7 @@ All options are run-time configurable.</span><a class="headerlink" href="#itoinp
 <span class="c1"># ItoSolver class options</span>
 <span class="c1"># ====================================================================================================</span>
 <span class="n">ItoSolver</span><span class="o">.</span><span class="n">verbosity</span>              <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>                 <span class="c1">## Class verbosity</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">merge_algorithm</span>        <span class="o">=</span> <span class="n">equal_weight_kd</span>    <span class="c1">## Particle merging algorithm. Either &#39;reinitialize&#39;, &#39;equal_weight_kd&#39;, or &#39;reinitialize_bvh&#39;</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">merge_algorithm</span>        <span class="o">=</span> <span class="n">equal_weight_kd</span>    <span class="c1">## Particle merging algorithm. One of &#39;reinitialize&#39;, &#39;equal_weight_kd&#39;, &#39;reinitialize_bvh&#39;, &#39;sfc_nn&#39;, &#39;none&#39;, or &#39;external&#39;</span>
 <span class="n">ItoSolver</span><span class="o">.</span><span class="n">plt_vars</span>               <span class="o">=</span> <span class="n">phi</span> <span class="n">vel</span> <span class="n">dco</span>        <span class="c1">## &#39;phi&#39;, &#39;vel&#39;, &#39;dco&#39;, &#39;part&#39;, &#39;eb_part&#39;, &#39;dom_part&#39;, &#39;src_part&#39;, &#39;energy_density&#39;, &#39;energy&#39;</span>
 <span class="n">ItoSolver</span><span class="o">.</span><span class="n">intersection_alg</span>       <span class="o">=</span> <span class="n">bisection</span>          <span class="c1">## Intersection algorithm for EB-particle intersections.</span>
 <span class="n">ItoSolver</span><span class="o">.</span><span class="n">bisect_step</span>            <span class="o">=</span> <span class="mf">1.E-4</span>              <span class="c1">## Bisection step length for intersection tests</span>
@@ -730,7 +731,7 @@ All options are run-time configurable.</span><a class="headerlink" href="#itoinp
 </div>
 <section id="plot-file-variables">
 <h3>Plot file variables<a class="headerlink" href="#plot-file-variables" title="Permalink to this heading"></a></h3>
-<p>Plot variables are specified using <code class="docutils literal notranslate"><span class="pre">ItoSolver.plt_vars</span></code>, see <a class="reference internal" href="#chap-itoplot"><span class="std std-ref">Plot files</span></a>).
+<p>Plot variables are specified using <code class="docutils literal notranslate"><span class="pre">ItoSolver.plt_vars</span></code>, see <a class="reference internal" href="#chap-itoplot"><span class="std std-ref">Plot files</span></a>.
 To add a variable to HDF5 output files, one can modify the <code class="docutils literal notranslate"><span class="pre">ItoSolver.plt_vars</span></code> input variable to include, e.g., the following variables:</p>
 <ul class="simple">
 <li><p><span class="math notranslate nohighlight">\(\phi\)</span>, i.e. the deposited particle weights (<code class="docutils literal notranslate"><span class="pre">ItoSolver.plt_vars</span> <span class="pre">=</span> <span class="pre">phi</span></code>)</p></li>
@@ -742,7 +743,7 @@ To add a variable to HDF5 output files, one can modify the <code class="docutils
 <h3>Particle-mesh configuration<a class="headerlink" href="#particle-mesh-configuration" title="Permalink to this heading"></a></h3>
 <p>To specify the mobility interpolation, use <code class="docutils literal notranslate"><span class="pre">ItoSolver.mobility_interp</span></code>.
 Valid options are <code class="docutils literal notranslate"><span class="pre">direct</span></code> and <code class="docutils literal notranslate"><span class="pre">velocity</span></code>, see <a class="reference internal" href="#chap-itointerpolation"><span class="std std-ref">Particle interpolation</span></a>.</p>
-<p>Deposition and coarse-fine deposition (see <a class="reference internal" href="../Source/Particles.html#chap-particlemesh"><span class="std std-ref">Particle-mesh</span></a>) is controlled using the flags</p>
+<p>Deposition and coarse-fine deposition (see <a class="reference internal" href="../Source/Particles.html#chap-particlemesh"><span class="std std-ref">Particle-mesh</span></a>) are controlled using the flags</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">ItoSolver.deposition</span></code> for the base deposition scheme.
 Valid options are <code class="docutils literal notranslate"><span class="pre">ngp</span></code>, <code class="docutils literal notranslate"><span class="pre">cic</span></code>, and <code class="docutils literal notranslate"><span class="pre">tsc</span></code>.</p></li>

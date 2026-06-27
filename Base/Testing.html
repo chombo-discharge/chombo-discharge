@@ -159,7 +159,7 @@
 <p>To ensure the integrity of <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>, we include tests in</p>
 <ul class="simple">
 <li><p><code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Tests</span></code> for a functional test suite.</p></li>
-<li><p><code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Convergence</span></code> for a code verification tests.</p></li>
+<li><p><code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Convergence</span></code> for code verification tests.</p></li>
 </ul>
 <section id="test-suite">
 <span id="chap-testsuite"></span><h2>Test suite<a class="headerlink" href="#test-suite" title="Permalink to this heading"></a></h2>
@@ -189,7 +189,7 @@ By default, this will compile without MPI and HDF5 support.</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">-hdf</span> <span class="pre">&lt;true/false&gt;</span></code> Use HDF5 or not.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">-cores</span> <span class="pre">&lt;number&gt;</span></code> Run with specified number of cores.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">-suites</span> <span class="pre">&lt;string&gt;</span></code> Run a specific application test suite.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">-tests</span> <span class="pre">&lt;string</span></code> Run a specific test.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-tests</span> <span class="pre">&lt;string&gt;</span></code> Run a specific test.</p></li>
 </ul>
 <p>For example, to compile with MPI and HDF5 enabled:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>python3 tests.py --compile --clean --silent --no_exec -mpi=true -hdf=true -cores 8
@@ -207,7 +207,7 @@ By default, this will compile without MPI and HDF5 support.</p>
 <section id="using-benchmark-files">
 <h3>Using benchmark files<a class="headerlink" href="#using-benchmark-files" title="Permalink to this heading"></a></h3>
 <p>The test suite can generate benchmark files which can later be compared against new test suite output files.
-This is often a good idea if one wants to ensure that modifications to the <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> source code does not unintentionally change the output of computer simulations.
+This is often a good idea if one wants to ensure that modifications to the <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> source code do not unintentionally change the output of computer simulations.
 In this case one can run the test suite and generate benchmark files <em>before</em> adding changes to <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.
 Once the code development is completed, the benchmark files can later be bit-wise (using <a class="reference external" href="https://support.hdfgroup.org/HDF5/doc/RM/Tools/h5diff.htm">h5diff</a>) compared against the results of a later test suite.</p>
 <p>This consists of the following steps:</p>
@@ -229,7 +229,7 @@ Once the code development is completed, the benchmark files can later be bit-wis
 </section>
 <section id="automated-testing">
 <span id="chap-automatedtests"></span><h2>Automated testing<a class="headerlink" href="#automated-testing" title="Permalink to this heading"></a></h2>
-<p>On <a class="reference external" href="https://github.com/chombo-discharge/chombo-discharge">GitHub</a>, the test suite is integrated with GitHub actions and are automatically run when opening a pull request for review.
+<p>On <a class="reference external" href="https://github.com/chombo-discharge/chombo-discharge">GitHub</a>, the test suite is integrated with GitHub actions and is automatically run when opening a pull request for review.
 In general, all tests must pass before a pull request can be merged.
 The test status can be observed either in the pull request, or at <a class="reference external" href="https://github.com/chombo-discharge/chombo-discharge/actions">https://github.com/chombo-discharge/chombo-discharge/actions</a>.
 The automated tests run <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> with <code class="docutils literal notranslate"><span class="pre">DEBUG=TRUE</span></code> and <code class="docutils literal notranslate"><span class="pre">OPT=FALSE</span></code> in order to catch assertion errors or other places where the code might break.
@@ -264,11 +264,11 @@ E.g,</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">CH_TIMER</span><span class="o">=</span><span class="m">1</span>
 </pre></div>
 </div>
-<p>The <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> will not only compute the time spent in each function, but also figure out the parent-child relation between function, and present the output as a hierarchical structure.
+<p>The <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> will not only compute the time spent in each function, but also figure out the parent-child relation between functions, and present the output as a hierarchical structure.
 This is often useful when optimizing functions at the development stage.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p><code class="docutils literal notranslate"><span class="pre">Chombo</span></code>’s timers are not meant to use with many time steps.
+<p><code class="docutils literal notranslate"><span class="pre">Chombo</span></code>’s timers are not meant to be used with many time steps.
 For efficient use, it is best to use it for a single time step.</p>
 </div>
 </li>

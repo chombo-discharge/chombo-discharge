@@ -171,7 +171,7 @@ It does not support higher-dimensional data interpolation.</p>
 <span class="k">class</span><span class="w"> </span><span class="nc">LookupTable1D</span>
 </pre></div>
 </div>
-<p>where the template parameter <code class="docutils literal notranslate"><span class="pre">N</span></code> indicates the number of dependent variables (<code class="docutils literal notranslate"><span class="pre">N=1</span></code> yields a compile-time error).
+<p>where the template parameter <code class="docutils literal notranslate"><span class="pre">N</span></code> indicates the number of dependent variables (<code class="docutils literal notranslate"><span class="pre">N=0</span></code> yields a compile-time error).
 Internally, the data is stored as an <code class="docutils literal notranslate"><span class="pre">std::vector&lt;std::array&lt;T,</span> <span class="pre">N</span> <span class="pre">+</span> <span class="pre">1&gt;</span> <span class="pre">&gt;</span></code> where the vector entries are rows and the <code class="docutils literal notranslate"><span class="pre">std::array&lt;T,</span> <span class="pre">N</span> <span class="pre">+</span> <span class="pre">1&gt;</span></code> are the column entries in that row.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
@@ -208,7 +208,7 @@ For example, to add two rows of data to a table with two dependent variables:</p
 <span class="n">myTable</span><span class="p">.</span><span class="n">addData</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="mf">3.0</span><span class="p">);</span>
 </pre></div>
 </div>
-<p>This will insert two new rows at the end up the table.</p>
+<p>This will insert two new rows at the end of the table.</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
 <p>Input data points do not need to be uniformly spaced, or even sorted.

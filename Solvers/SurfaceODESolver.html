@@ -318,7 +318,7 @@ The information about whether or not a cut-cell is on the dielectric or electrod
 </section>
 <section id="regridding">
 <h2>Regridding<a class="headerlink" href="#regridding" title="Permalink to this heading"></a></h2>
-<p>When regridding the <code class="docutils literal notranslate"><span class="pre">SurfaceODESolver&lt;N&gt;</span></code>, one must first call call</p>
+<p>When regridding the <code class="docutils literal notranslate"><span class="pre">SurfaceODESolver&lt;N&gt;</span></code>, one must first call</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm">  @brief Pre-regrid function. </span>
 <span class="cm">  @details This stores the data on the old mesh so it can be regridded later.</span>
@@ -351,13 +351,13 @@ After <a class="reference internal" href="../Source/AmrMesh.html#chap-amrmesh"><
 <p>which gives</p>
 <div class="math notranslate nohighlight">
 \[\vec{\phi}_{\mathbf{i}_{\textrm{fine}}} = r^{D-1}\frac{\alpha_{\mathbf{i}_{\textrm{coar}}}}{\sum_{\mathbf{i}_{\textrm{fine}}}\alpha_{\mathbf{i}_{\textrm{fine}}}}\vec{\phi}_{\mathbf{i}_{\textrm{coar}}},\]</div>
-<p>where <span class="math notranslate nohighlight">\(\mathbf{i}_{\textrm{fine}}\)</span> is set of cut-cells that occur when refining the coarse-grid cut-cell <span class="math notranslate nohighlight">\(\mathbf{i}_{\textrm{coar}}\)</span> and <span class="math notranslate nohighlight">\(r\)</span> is the refinement factor between the two grid levels.
+<p>where <span class="math notranslate nohighlight">\(\mathbf{i}_{\textrm{fine}}\)</span> is the set of cut-cells that occur when refining the coarse-grid cut-cell <span class="math notranslate nohighlight">\(\mathbf{i}_{\textrm{coar}}\)</span> and <span class="math notranslate nohighlight">\(r\)</span> is the refinement factor between the two grid levels.
 In this case <span class="math notranslate nohighlight">\(\vec{\phi}\)</span> is strictly conserved.
 Users can switch between these two methods by specifying the proper configuration option in the configuration file.</p>
 </section>
 <section id="input-options">
 <h2>Input options<a class="headerlink" href="#input-options" title="Permalink to this heading"></a></h2>
-<p>Several input options are available for configuring the run-time configuration of <code class="docutils literal notranslate"><span class="pre">MeshODESolver</span></code>, which are listed below</p>
+<p>Several input options are available for configuring the run-time configuration of <code class="docutils literal notranslate"><span class="pre">SurfaceODESolver</span></code>, which are listed below</p>
 <div class="literal-block-wrapper docutils container" id="id1">
 <div class="code-block-caption"><span class="caption-number">Listing 30 </span><span class="caption-text">Input options for the <code class="docutils literal notranslate"><span class="pre">SurfaceODESolver&lt;N&gt;</span></code> class.
 All options are run-time configurable.</span><a class="headerlink" href="#id1" title="Permalink to this code"></a></div>

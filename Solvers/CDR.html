@@ -176,12 +176,12 @@
 <p>Here, we discuss the discretization of the equation</p>
 <div class="math notranslate nohighlight" id="equation-cdr-equation">
 <span class="eqno">(5)<a class="headerlink" href="#equation-cdr-equation" title="Permalink to this equation"></a></span>\[\frac{\partial \phi}{\partial t} + \nabla\cdot\left(\mathbf{v} \phi - D\nabla \phi\right) = S.\]</div>
-<p>We assume that <span class="math notranslate nohighlight">\(\phi\)</span> is discretized by cell-centered averages (note that cell centers may lie inside solid boundaries), and use finite volume methods to construct fluxes in a cut-cells and regular cells.
+<p>We assume that <span class="math notranslate nohighlight">\(\phi\)</span> is discretized by cell-centered averages (note that cell centers may lie inside solid boundaries), and use finite volume methods to construct fluxes in cut cells and regular cells.
 Here, <span class="math notranslate nohighlight">\(\mathbf{v}\)</span> indicates a drift velocity and <span class="math notranslate nohighlight">\(D\)</span> is the (isotropic) diffusion coefficient.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Using cell-centered versions <span class="math notranslate nohighlight">\(\phi\)</span> might be problematic for some models since the state is extended outside the valid region.
-Models might have to recenter the state in order compute e.g. physically meaningful reaction terms in cut-cells.</p>
+Models might have to recenter the state in order to compute e.g. physically meaningful reaction terms in cut-cells.</p>
 </div>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
@@ -333,7 +333,7 @@ First, we compute the conservative divergence</p>
 <div class="math notranslate nohighlight">
 \[\phi_{\mathbf{i}}^{k+1} = \phi_{\mathbf{i}}^k - \Delta tD_{\mathbf{i}}^H.\]</div>
 <p>The hybrid divergence update fails to conserve mass by an amount <span class="math notranslate nohighlight">\(\delta M_{\mathbf{i}} = \kappa_{\mathbf{i}}\left(1-\kappa_{\mathbf{i}}\right)\left(D_{\mathbf{i}}^c - D_{\mathbf{i}}^{nc}\right)\)</span>.
-In order to main overall conservation, the excess mass is redistributed into neighboring grid cells.
+In order to maintain overall conservation, the excess mass is redistributed into neighboring grid cells.
 Let <span class="math notranslate nohighlight">\(\delta M_{\mathbf{i}, \mathbf{j}}\)</span> be the redistributed mass from <span class="math notranslate nohighlight">\(\mathbf{j}\)</span> to <span class="math notranslate nohighlight">\(\mathbf{i}\)</span> where</p>
 <div class="math notranslate nohighlight">
 \[\delta M_{\mathbf{i}} = \sum_{\mathbf{j} \in N(\mathbf{i})}\delta M_{\mathbf{i}, \mathbf{i}}.\]</div>
@@ -361,7 +361,7 @@ The user will need to call the function</p>
 The above steps are performed by interpolating <code class="docutils literal notranslate"><span class="pre">a_G</span></code> to face centroids in the cut cells for computing the conservative divergence, and the remaining steps are then performed successively.
 The result is put in <code class="docutils literal notranslate"><span class="pre">a_divG</span></code>.</p>
 <p>Note that when refinement boundaries intersect with embedded boundaries, the redistribution process is far more complicated since it needs to account for mass that moves over refinement boundaries.
-These additional complicated are taken care of inside <code class="docutils literal notranslate"><span class="pre">a_divG</span></code>, but are not discussed in detail here.</p>
+These additional complications are taken care of inside <code class="docutils literal notranslate"><span class="pre">a_divG</span></code>, but are not discussed in detail here.</p>
 <div class="admonition caution">
 <p class="admonition-title">Caution</p>
 <p>Mass redistribution has the effect of not being monotone and thus not TVD, and the discretization order is formally <span class="math notranslate nohighlight">\(\mathcal{O}(\Delta x)\)</span>.</p>
@@ -369,10 +369,10 @@ These additional complicated are taken care of inside <code class="docutils lite
 </section>
 <section id="explicit-advection">
 <span id="chap-explicitadvection"></span><h3>Explicit advection<a class="headerlink" href="#explicit-advection" title="Permalink to this heading"></a></h3>
-<p>Scalar advection updates follows the computation of the explicit divergence discussed in <a class="reference internal" href="#chap-explicitdivergence"><span class="std std-ref">Explicit divergences and redistribution</span></a>.
+<p>Scalar advection updates follow the computation of the explicit divergence discussed in <a class="reference internal" href="#chap-explicitdivergence"><span class="std std-ref">Explicit divergences and redistribution</span></a>.
 The face-centered fluxes <span class="math notranslate nohighlight">\(\mathbf{G} = \phi\mathbf{v}\)</span> are computed by instantiation classes for the convection-diffusion-reaction solvers.
 The function signature for explicit advection (<code class="docutils literal notranslate"><span class="pre">computeDivF</span></code>) was given in <a class="reference internal" href="#cdr-div-functions"><span class="std std-numref">Listing 24</span></a>.</p>
-<p>The face-centered fluxes are computed by using the velocities and boundary conditions that reside in the solver, and result is put in <code class="docutils literal notranslate"><span class="pre">a_divF</span></code> using the procedure outlined above.
+<p>The face-centered fluxes are computed by using the velocities and boundary conditions that reside in the solver, and the result is put in <code class="docutils literal notranslate"><span class="pre">a_divF</span></code> using the procedure outlined above.
 In the simplest case, these fluxes are simply calculated using an upwind rule, potentially extrapolated with slope-limiters from the cell-center.
 In more complex cases, we use both the normal and transverse slopes in a cell.
 The argument <code class="docutils literal notranslate"><span class="pre">a_extrapDt</span></code> is the time step size.
@@ -418,7 +418,7 @@ The function signature is given in <a class="reference internal" href="#cdr-div-
 </pre></div>
 </div>
 <p>Often, time integrators have the option of using implicit or explicit diffusion.
-If the time-evolution is not split (i.e. not using a Strang or Godunov splitting), the integrators will often call <code class="docutils literal notranslate"><span class="pre">computeDivJ</span></code> rather separately calling <code class="docutils literal notranslate"><span class="pre">computeDivF</span></code> and <code class="docutils literal notranslate"><span class="pre">computeDivD</span></code>.
+If the time-evolution is not split (i.e. not using a Strang or Godunov splitting), the integrators will often call <code class="docutils literal notranslate"><span class="pre">computeDivJ</span></code> rather than separately calling <code class="docutils literal notranslate"><span class="pre">computeDivF</span></code> and <code class="docutils literal notranslate"><span class="pre">computeDivD</span></code>.
 If you had a split-step Godunov method, the above procedure for a forward Euler method for both parts would be:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">CdrSolver</span><span class="o">*</span><span class="w"> </span><span class="n">solver</span><span class="p">;</span>
 
@@ -437,7 +437,7 @@ If you had a split-step Godunov method, the above procedure for a forward Euler 
 <span id="chap-implicitdiffusion"></span><h3>Implicit diffusion<a class="headerlink" href="#implicit-diffusion" title="Permalink to this heading"></a></h3>
 <p>Usage of implicit diffusion can occasionally be necessary, especially if the diffusive time step leads to numerical stiffness and severe time step limitations.
 The convection-diffusion-reaction solvers support two basic implicit diffusion solves which were given in <a class="reference internal" href="#cdr-implicit-diffusion"><span class="std std-ref">List of current implicit diffusion advance functions.</span></a>.</p>
-<p>As an example, perform a split step Godunov method with the Euler rules for explicit advection and implicit diffusion is done as follows:</p>
+<p>As an example, performing a split-step Godunov method with the Euler rules for explicit advection and implicit diffusion is done as follows:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// Compute phi = phi - dt*div(F)</span>
 <span class="n">solver</span><span class="o">-&gt;</span><span class="n">computeDivF</span><span class="p">(</span><span class="n">divF</span><span class="p">,</span><span class="w"> </span><span class="n">phi</span><span class="p">,</span><span class="w"> </span><span class="p">...);</span>
 <span class="nl">DataOps</span><span class="p">:</span><span class="n">incr</span><span class="p">(</span><span class="n">phi</span><span class="p">,</span><span class="w"> </span><span class="n">divF</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="n">dt</span><span class="p">);</span>
@@ -473,7 +473,7 @@ In the simplest case, the face-centered values of <span class="math notranslate 
 <span id="chap-cdrctu"></span><h2>CdrCTU<a class="headerlink" href="#cdrctu" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">CdrCTU</span></code> is an implementation class that uses the corner transport upwind (CTU) discretization.
 The CTU discretization uses information that propagates over corners of grid cells when calculating the face states.
-It can combine this with use various limiters:</p>
+It can combine this with the use of various limiters:</p>
 <ul class="simple">
 <li><p>No limiter.</p></li>
 <li><p>Minmod.</p></li>

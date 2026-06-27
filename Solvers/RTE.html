@@ -187,11 +187,11 @@
 <p>Radiative transfer solvers are supported in the form of</p>
 <ul class="simple">
 <li><p>Diffusion solvers, i.e. first order Eddington solvers, which take the form of a Helmholtz equation.</p></li>
-<li><p>Particle solvers, which track photons are particles (e.g., Monte Carlo sampled solvers).</p></li>
+<li><p>Particle solvers, which track photons as particles (e.g., Monte Carlo sampled solvers).</p></li>
 </ul>
-<p>The solvers share a parent class <code class="docutils literal notranslate"><span class="pre">RtSolver</span></code>, and code that uses only the <code class="docutils literal notranslate"><span class="pre">RtSolver</span></code> interface will should be able to switch between the two implementations.
+<p>The solvers share a parent class <code class="docutils literal notranslate"><span class="pre">RtSolver</span></code>, and code that uses only the <code class="docutils literal notranslate"><span class="pre">RtSolver</span></code> interface should be able to switch between the two implementations.
 Note, however, that the radiative transfer equation is inherently deterministic while Monte Carlo photon transport is inherently stochastic.
-The diffusion approximation relies on solving an elliptic equation in the stationary case and a parabolic equation in the time-dependent case, while the Monte-Carlo approach solves solves for fully transient or instantaneous transport.</p>
+The diffusion approximation relies on solving an elliptic equation in the stationary case and a parabolic equation in the time-dependent case, while the Monte-Carlo approach solves for fully transient or instantaneous transport.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p>The source code for the solver is located in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Source/RadiativeTransfer</span></code> and it is a fairly lightweight abstract class.
@@ -221,7 +221,7 @@ Currently, <code class="docutils literal notranslate"><span class="pre">RtSpecie
 </section>
 <section id="setting-the-source-term">
 <h3>Setting the source term<a class="headerlink" href="#setting-the-source-term" title="Permalink to this heading"></a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">RtSolver</span></code> stores a source term <span class="math notranslate nohighlight">\(\eta\)</span> on the mesh, which describes the number of photons that are generated produced per unit volume and time.
+<p><code class="docutils literal notranslate"><span class="pre">RtSolver</span></code> stores a source term <span class="math notranslate nohighlight">\(\eta\)</span> on the mesh, which describes the number of photons that are generated per unit volume and time.
 This variable can be set through the following functions:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm">  @brief Set source term</span>
@@ -262,7 +262,7 @@ The source code is located in <code class="file docutils literal notranslate"><s
 <p>In the diffusion approximation, the radiative transport equation is</p>
 <div class="math notranslate nohighlight" id="equation-transientdiffusionrte">
 <span class="eqno">(10)<a class="headerlink" href="#equation-transientdiffusionrte" title="Permalink to this equation"></a></span>\[\partial_t\Psi + \kappa\Psi - \nabla\cdot\left(\frac{1}{3\kappa}\nabla\Psi\right) = \frac{\eta}{c},\]</div>
-<p>where <span class="math notranslate nohighlight">\(\Psi\)</span> is the radiative intensity (i.e., photons absorbed per unit volume`.
+<p>where <span class="math notranslate nohighlight">\(\Psi\)</span> is the radiative intensity (i.e., photons absorbed per unit volume).
 Here, <span class="math notranslate nohighlight">\(\kappa\)</span> is the absorption coefficient (i.e., inverse absorption length).
 This value can be spatially dependent, and is passed in through the <a class="reference internal" href="#chap-rtspecies"><span class="std std-ref">RtSpecies</span></a> function <code class="docutils literal notranslate"><span class="pre">getAbsorptionCoefficient</span></code> that was discussed above.
 Note that in the context below, <span class="math notranslate nohighlight">\(\kappa\)</span> is <em>not</em> the volume fraction of a grid cell but the absorption coefficient.
@@ -313,7 +313,7 @@ All of these boundary condition specifications take the form <code class="docuti
 <div class="math notranslate nohighlight">
 \[\kappa\partial_n\Psi + \frac{3\kappa^2}{2}\frac{1-3r_2}{1-2r_1}\Psi = g,\]</div>
 <p>where <span class="math notranslate nohighlight">\(r_1\)</span> and <span class="math notranslate nohighlight">\(r_2\)</span> are reflection coefficients and <span class="math notranslate nohighlight">\(g\)</span> is a surface source, see <span id="id1">[<a class="reference internal" href="../ZZReferences.html#id51" title="Edward W. Larsen, Guido Thömmes, Axel Klar, Seaid Mohammed, and Thomas Götz. Simplified PN Approximations to the Equations of Radiative Heat Transfer and Applications. Journal of Computational Physics, 183(2):652–675, dec 2002. URL: https://www.sciencedirect.com/science/article/pii/S0021999102972104, doi:10.1006/JCPH.2002.7210.">Larsen <em>et al.</em>, 2002</a>]</span>.
-Note that when the user specifies the boundary condition value (e.g. by setting the BC function), he is setting the surface sourge <span class="math notranslate nohighlight">\(g\)</span>.
+Note that when the user specifies the boundary condition value (e.g. by setting the BC function), he is setting the surface source <span class="math notranslate nohighlight">\(g\)</span>.
 In the majority of cases, however, we will have <span class="math notranslate nohighlight">\(r_1 = r_2 = g = 0\)</span> and the BC becomes</p>
 <div class="math notranslate nohighlight">
 \[\partial_n\Psi + \frac{3\kappa}{2}\Psi = g.\]</div>
@@ -430,7 +430,7 @@ In the input script, the user can specify</p>
 <section id="monte-carlo-solver">
 <span id="chap-montecarlorte"></span><h2>Monte Carlo solver<a class="headerlink" href="#monte-carlo-solver" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">McPhoto</span></code> defines a class which can solve radiative transfer problems using discrete photons.
-The class derives from <a class="reference internal" href="#chap-rtsolver"><span class="std std-ref">RtSolver</span></a> and can thus be used also be used by applications that only require the <a class="reference internal" href="#chap-rtsolver"><span class="std std-ref">RtSolver</span></a> interface.
+The class derives from <a class="reference internal" href="#chap-rtsolver"><span class="std std-ref">RtSolver</span></a> and can thus also be used by applications that only require the <a class="reference internal" href="#chap-rtsolver"><span class="std std-ref">RtSolver</span></a> interface.
 <code class="docutils literal notranslate"><span class="pre">McPhoto</span></code> can provide a rather complex interaction with boundaries, such as computing the intersection between a photon path and a geometry, and thus capture shadows (which <a class="reference internal" href="#chap-eddingtonsp1"><span class="std std-ref">EddingtonSP1</span></a> can not).</p>
 <p>The Monte Carlo sampling is a particle-based radiative transfer solver, and particle-mesh operations (see <a class="reference internal" href="../Source/Particles.html#chap-particlemesh"><span class="std std-ref">Particle-mesh</span></a>) are thus required in order to deposit the photons on a mesh if one wants to compute mesh-based absorption profiles.</p>
 <div class="admonition tip">
@@ -529,14 +529,14 @@ This is the correct approach for, e.g., applications that always use mesh-based 
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">advance</span></code> function is <em>only</em> meant to be used together with a mesh-based source term that the user has filled prior to calling the method.</p>
-<p>When using the <code class="docutils literal notranslate"><span class="pre">advance</span></code>, the number of photons that are generated are limit to a user-specified number (see <a class="reference internal" href="#chap-mcphotooptions"><span class="std std-ref">Solver configuration</span></a> for further details).</p>
+<p>When using the <code class="docutils literal notranslate"><span class="pre">advance</span></code>, the number of photons that are generated are limited to a user-specified number (see <a class="reference internal" href="#chap-mcphotooptions"><span class="std std-ref">Solver configuration</span></a> for further details).</p>
 </div>
 </li>
 </ol>
 </section>
 <section id="transport-modes">
 <h3>Transport modes<a class="headerlink" href="#transport-modes" title="Permalink to this heading"></a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">McPhoto</span></code> can be run as a fully transient, in which photons are tracked in time, or as an instantaneous solver.
+<p><code class="docutils literal notranslate"><span class="pre">McPhoto</span></code> can be run as a fully transient solver, in which photons are tracked in time, or as an instantaneous solver.
 For the instantaneous mode, photon absorption positions are stochastically sampled with Monte Carlo procedure and the photons are immediately absorbed on the mesh.
 For the transient mode the photon advancement occurs over <span class="math notranslate nohighlight">\(\Delta t\)</span>, so there is a limited distance (<span class="math notranslate nohighlight">\(c \Delta t\)</span>) that the photons can propagate.
 In this case, only some of the photons will be absorbed on the mesh whereas the rest may continue their propagation.</p>
@@ -544,7 +544,7 @@ In this case, only some of the photons will be absorbed on the mesh whereas the 
 <h4>Instantaneous transport<a class="headerlink" href="#instantaneous-transport" title="Permalink to this heading"></a></h4>
 <p>When using instantaneous transport, any photon generated in a time step is immediately absorbed on the boundary through the following steps:</p>
 <ol class="arabic">
-<li><p>Optionally, have the solver generate photons to be transport (or add them externally).</p></li>
+<li><p>Optionally, have the solver generate photons to be transported (or add them externally).</p></li>
 <li><p>Draw a propagation distance <span class="math notranslate nohighlight">\(r\)</span> by drawing random numbers from an exponential distribution <span class="math notranslate nohighlight">\(p(r) = \kappa \exp\left(-\kappa r\right)\)</span>.
 Here, <span class="math notranslate nohighlight">\(\kappa\)</span> is computed by calling the underlying <a class="reference internal" href="#chap-rtspecies"><span class="std std-ref">RtSpecies</span></a> absorption function.
 The absorbed position of the photon is set to <span class="math notranslate nohighlight">\(\mathbf{x} = \mathbf{x}_0 + r\mathbf{n}\)</span>.</p>

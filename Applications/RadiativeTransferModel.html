@@ -151,7 +151,7 @@
              
   <section id="radiative-transfer">
 <span id="chap-radiativetransfermodel"></span><h1>Radiative transfer<a class="headerlink" href="#radiative-transfer" title="Permalink to this heading"></a></h1>
-<p>The radiative transfer model runs a single solver using the <a class="reference internal" href="../Solvers/RTE.html#chap-rtsolver"><span class="std std-ref">RtSolver</span></a> interface, where the underlying solver can derived from any subclass of <a class="reference internal" href="../Solvers/RTE.html#chap-rtsolver"><span class="std std-ref">RtSolver</span></a>.
+<p>The radiative transfer model runs a single solver using the <a class="reference internal" href="../Solvers/RTE.html#chap-rtsolver"><span class="std std-ref">RtSolver</span></a> interface, where the underlying solver can be derived from any subclass of <a class="reference internal" href="../Solvers/RTE.html#chap-rtsolver"><span class="std std-ref">RtSolver</span></a>.
 This module is designed to show how to set up and run <a class="reference internal" href="../Solvers/RTE.html#chap-rtsolver"><span class="std std-ref">RtSolver</span></a>, and the code was not written to solve any particular problem.
 Selecting between different types of solvers must be done at compile time.</p>
 <div class="admonition tip">
@@ -196,13 +196,13 @@ RadiativeTransferStepper.blob_center        = 0 0       ## Blob center
 <h2>Setting up a new problem<a class="headerlink" href="#setting-up-a-new-problem" title="Permalink to this heading"></a></h2>
 <p>To set up a new problem, using the Python setup tools in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/RadiativeTransfer</span></code> is the simplest way.
 A full description is available in the <code class="docutils literal notranslate"><span class="pre">README.md</span></code> contained in the folder:</p>
-<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span class="gh"># Physics/RtPhysics</span>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span class="gh"># Physics/RadiativeTransfer</span>
 This physics module solves for a radiative transfer problem. This module contains files for setting up the initial conditions and integrators. It does not feature adaptive mesh refinement. 
 
 The source files consist of the following:
 
-<span class="k">*</span><span class="w"> </span><span class="gs">**CD_RtPhysicsSpecies.H/cpp**</span> Implementation of RtSpecies, for setting up a radiative transfer equation. 
-<span class="k">*</span><span class="w"> </span><span class="gs">**CD_RtPhysicsStepper.H/cpp**</span> Implementation of TimeStepper, for advancing the radiative transfer equation, either stationary or transient. 
+<span class="k">*</span><span class="w"> </span><span class="gs">**CD_RadiativeTransferSpecies.H/cpp**</span> Implementation of RtSpecies, for setting up a radiative transfer equation. 
+<span class="k">*</span><span class="w"> </span><span class="gs">**CD_RadiativeTransferStepper.H and CD_RadiativeTransferStepperImplem.H**</span> Implementation of TimeStepper, for advancing the radiative transfer equation, either stationary or transient. 
 
 <span class="gu">## Setting up a new application</span>
 To set up a new problem, use the Python script. For example:
@@ -217,7 +217,7 @@ To install within chombo-discharge:
 python<span class="w"> </span>setup.py<span class="w"> </span>-base_dir<span class="o">=</span><span class="nv">$DISCHARGE_HOME</span>/MyApplications<span class="w"> </span>-app_name<span class="o">=</span>MyRadiativeTransfer<span class="w"> </span>-geometry<span class="o">=</span>Vessel
 <span class="sb">```</span>
 
-The application will then be installed to $DISCHARGE_HOME/myApplications/myRtPhysics.
+The application will then be installed to $DISCHARGE_HOME/MyApplications/MyRadiativeTransfer.
 The user will need to modify the geometry and set the initial conditions through the inputs file.
 Note that the user can choose between either using discrete or continuum models with the -RtSolver flag.
 

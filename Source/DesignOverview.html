@@ -147,7 +147,7 @@
   <section id="overview">
 <span id="chap-designoverview"></span><h1>Overview<a class="headerlink" href="#overview" title="Permalink to this heading"></a></h1>
 <p>A design principle in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is the division between the AMR core, geometry, solvers, physics coupling, and user applications.
-As an example, the fundamental time integrator class <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is a just an abstraction, i.e., it only presents an API which application codes must conform to.
+As an example, the fundamental time integrator class <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is just an abstraction, i.e., it only presents an API which application codes must conform to.
 Because of that, <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> can be used for solving completely unrelated problems.
 We have, for example, implementations of <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> for solving radiative transfer equations, advection-diffusion problems, electrostatic problems, or for plasma problems.</p>
 <p>The division between computational concepts (e.g., AMR functionality and solvers) exists so that users will be able to solve problems across a range of geometries, add new solvers functionality, or write entirely new applications, without requiring deep changes to <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.
@@ -157,7 +157,7 @@ In general, solvers may share common features (such as elliptic discretizations)
 For this reason numerical solvers are asked to <em>register</em> AMR requirements.
 For example, elliptic solvers need functionality for interpolating ghost cells over the refinement boundary, but pure particle solvers have no need for such functionality.
 A consequence of this is that the numerical solvers are asked (during their instantiation) to register what type of AMR infrastructure they require.
-In return, the AMR core will allocate this infrastructure and make it available to solver, as illustrated in <a class="reference internal" href="#fig-design"><span class="std std-numref">Fig. 1</span></a>.</p>
+In return, the AMR core will allocate this infrastructure and make it available to the solver, as illustrated in <a class="reference internal" href="#fig-design"><span class="std std-numref">Fig. 1</span></a>.</p>
 <figure class="align-center" id="id1">
 <span id="fig-design"></span><a class="reference internal image-reference" href="../_images/Design.png"><img alt="../_images/Design.png" src="../_images/Design.png" style="width: 70%;" /></a>
 <figcaption>

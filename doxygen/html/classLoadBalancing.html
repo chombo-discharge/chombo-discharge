@@ -125,6 +125,14 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a3d9f9b7dd45e05f80ebb5769d3a71d1e" id="r_a3d9f9b7dd45e05f80ebb5769d3a71d1e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">static</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLoadBalancing.html#a3d9f9b7dd45e05f80ebb5769d3a71d1e">gatherBoxesAndLoads</a> (<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Box</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_boxes</a>, <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">int</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_loads</a>)</td></tr>
 <tr class="memdesc:a3d9f9b7dd45e05f80ebb5769d3a71d1e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gather boxes and loads.  <br /></td></tr>
 <tr class="separator:a3d9f9b7dd45e05f80ebb5769d3a71d1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a224032c704030dc5a035280e79072282" id="r_a224032c704030dc5a035280e79072282"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="classTracerParticleSolver.html">int</a> DIM&gt; </td></tr>
+<tr class="memitem:a224032c704030dc5a035280e79072282"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">static</a> <a class="el" href="classTracerParticleSolver.html">uint64_t</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classLoadBalancing.html#a224032c704030dc5a035280e79072282">mortonIndex</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::array</a>&lt; <a class="el" href="classTracerParticleSolver.html">uint32_t</a>, <a class="el" href="classTracerParticleSolver.html">DIM</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_coords</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a224032c704030dc5a035280e79072282"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute a Morton (Z-order) code from integer coordinates, using 21 bits per direction.  <br /></td></tr>
+<tr class="separator:a224032c704030dc5a035280e79072282"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5768e457d7b8c1730dd17228eda9f0dd" id="r_a5768e457d7b8c1730dd17228eda9f0dd"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="classTracerParticleSolver.html">int</a> DIM&gt; </td></tr>
+<tr class="memitem:a5768e457d7b8c1730dd17228eda9f0dd"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">static</a> <a class="el" href="classTracerParticleSolver.html">uint64_t</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classLoadBalancing.html#a5768e457d7b8c1730dd17228eda9f0dd">hilbertIndex</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::array</a>&lt; <a class="el" href="classTracerParticleSolver.html">uint32_t</a>, <a class="el" href="classTracerParticleSolver.html">DIM</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_coords</a>)</td></tr>
+<tr class="memdesc:a5768e457d7b8c1730dd17228eda9f0dd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute a Hilbert-curve index from integer coordinates, using 21 bits per direction.  <br /></td></tr>
+<tr class="separator:a5768e457d7b8c1730dd17228eda9f0dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-static-methods" name="pro-static-methods"></a>
 Static Protected Member Functions</h2></td></tr>
@@ -148,14 +156,6 @@ Static Protected Member Functions</h2></td></tr>
 <tr class="memitem:aa42e270b7cadb0c4a5a5855c24c536e1"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">static</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classLoadBalancing.html#aa42e270b7cadb0c4a5a5855c24c536e1">sortSFC</a> (<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Box</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_boxes</a>, <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_loads</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">uint64_t</a>(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::array</a>&lt; <a class="el" href="classTracerParticleSolver.html">uint32_t</a>, <a class="el" href="classTracerParticleSolver.html">DIM</a> &gt;)&gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_sfcEncoder</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:aa42e270b7cadb0c4a5a5855c24c536e1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generic SFC sorting function.  <br /></td></tr>
 <tr class="separator:aa42e270b7cadb0c4a5a5855c24c536e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a080700c1e6df37d25bb4b678c4ba13fb" id="r_a080700c1e6df37d25bb4b678c4ba13fb"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="classTracerParticleSolver.html">int</a> DIM&gt; </td></tr>
-<tr class="memitem:a080700c1e6df37d25bb4b678c4ba13fb"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">static</a> <a class="el" href="classTracerParticleSolver.html">uint64_t</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classLoadBalancing.html#a080700c1e6df37d25bb4b678c4ba13fb">mortonIndex</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::array</a>&lt; <a class="el" href="classTracerParticleSolver.html">uint32_t</a>, <a class="el" href="classTracerParticleSolver.html">DIM</a> &gt; <a class="el" href="classTracerParticleSolver.html">a_coords</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:a080700c1e6df37d25bb4b678c4ba13fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper function for computing a Morton code using 21 bits per direction.  <br /></td></tr>
-<tr class="separator:a080700c1e6df37d25bb4b678c4ba13fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5768e457d7b8c1730dd17228eda9f0dd" id="r_a5768e457d7b8c1730dd17228eda9f0dd"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="classTracerParticleSolver.html">int</a> DIM&gt; </td></tr>
-<tr class="memitem:a5768e457d7b8c1730dd17228eda9f0dd"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">static</a> <a class="el" href="classTracerParticleSolver.html">uint64_t</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classLoadBalancing.html#a5768e457d7b8c1730dd17228eda9f0dd">hilbertIndex</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::array</a>&lt; <a class="el" href="classTracerParticleSolver.html">uint32_t</a>, <a class="el" href="classTracerParticleSolver.html">DIM</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_coords</a>)</td></tr>
-<tr class="memdesc:a5768e457d7b8c1730dd17228eda9f0dd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper function for computing a Hilbert index.  <br /></td></tr>
-<tr class="separator:a5768e457d7b8c1730dd17228eda9f0dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Static class which contains various load balancing routines. </p>
@@ -362,19 +362,19 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">int</a> DIM&gt; 
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">protected</span></span>  </td>
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
-<p>Helper function for computing a Hilbert index. </p>
-<dl class="section return"><dt>Returns</dt><dd>Return value </dd></dl>
+<p>Compute a Hilbert-curve index from integer coordinates, using 21 bits per direction. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_coords</td><td>Description </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coords</td><td>Integer coordinates (each &lt; 2^21). </td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>The Hilbert index. </dd></dl>
 
 </div>
 </div>
@@ -493,8 +493,8 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
 
 </div>
 </div>
-<a id="a080700c1e6df37d25bb4b678c4ba13fb" name="a080700c1e6df37d25bb4b678c4ba13fb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a080700c1e6df37d25bb4b678c4ba13fb">&#9670;&#160;</a></span>mortonIndex()</h2>
+<a id="a224032c704030dc5a035280e79072282" name="a224032c704030dc5a035280e79072282"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a224032c704030dc5a035280e79072282">&#9670;&#160;</a></span>mortonIndex()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -507,26 +507,26 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">int</a> DIM&gt; 
         <tr>
           <td class="memname"><a class="el" href="classTracerParticleSolver.html">uint64_t</a> LoadBalancing::mortonIndex </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::array</a>&lt; <a class="el" href="classTracerParticleSolver.html">uint32_t</a>, <a class="el" href="classTracerParticleSolver.html">DIM</a> &gt;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::array</a>&lt; <a class="el" href="classTracerParticleSolver.html">uint32_t</a>, <a class="el" href="classTracerParticleSolver.html">DIM</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_coords</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">protected</span><span class="mlabel">noexcept</span></span>  </td>
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
-<p>Helper function for computing a Morton code using 21 bits per direction. </p>
+<p>Compute a Morton (Z-order) code from integer coordinates, using 21 bits per direction. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_coords</td><td></td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coords</td><td>Integer coordinates (each &lt; 2^21). </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Return value </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>The interleaved Morton index. </dd></dl>
 
 </div>
 </div>

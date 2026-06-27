@@ -4,7 +4,7 @@ Data parsing
 ************
 
 Routines for reading simple column data into :ref:`Chap:LookupTable` are available.
-This is typically used, e.g., when parsing transport coefficients or other types of data requires by a computer simulation.
+This is typically used, e.g., when parsing transport coefficients or other types of data required by a computer simulation.
 
 .. tip::
 
@@ -22,7 +22,7 @@ Currently, three types of file reads are supported:
       1.0 2.0
       2.0 3.0
 
-   It is also possible to restrict which rows that are read, by specifying string identifiers on the line preceding the data and on the line immediately after the data.
+   It is also possible to restrict which rows are read, by specifying string identifiers on the line preceding the data and on the line immediately after the data.
 
    .. important::
 
@@ -35,7 +35,7 @@ Currently, three types of file reads are supported:
 
    .. literalinclude:: ../../../../Source/Utilities/CD_DataParser.H
       :language: c++
-      :lines: 30-89
+      :lines: 70-89
       :dedent: 2
 
 #. Read triangle mesh data from PLY or VTK files, returning a list of ``Triangle`` objects
