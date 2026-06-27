@@ -27,7 +27,7 @@ The only difference lies primarily in the assignment of MPI ranks to grids, i.e.
 :numref:`Fig:DualMesh` shows an example of a dual-grid approach.
 In  this figure we have a set of grid patches on a particular grid level.
 In the top panel the grid patches are load-balanced using the grid patch volume as a proxy for the computational load.
-The numbers in each grid patch indicates the MPI rank ownership of the patches.
+The numbers in each grid patch indicate the MPI rank ownership of the patches.
 In the bottom panel we have introduced computational particles in some of the patches.
 For particles, the computational load is better defined by the number of computational particles assigned to the patch, and so using the number of particles as a proxy for the load yields different rank ownership over the grid patches.
 

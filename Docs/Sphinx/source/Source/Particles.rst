@@ -313,7 +313,7 @@ Masked particles
 
 ``ParticleContainer<P, Traits>`` also supports the concept of *masked particles*, where one can fetch a subset of particles that live only in specified grid cells.
 Typically, this "specified region" is the refinement boundary, but the functionality is generic and might prove useful also in other cases.
-This functionality is unlikely to be used directly by users of chombo-discharge, but it is nonetheless fruitful to understand the concept in order to more easily fathom how deposition across refinement boundaries proceed.
+This functionality is unlikely to be used directly by users of chombo-discharge, but it is nonetheless fruitful to understand the concept in order to more easily fathom how deposition across refinement boundaries proceeds.
 
 When *masked particles* are used, the user provides a boolean mask over the AMR hierarchy and obtains the subset of particles that live in regions where the mask evaluates to true.
 This functionality is for example used for some of the particle deposition methods in ``chombo-discharge`` where we deposit particles that live near the refinement boundary with special deposition functions.
@@ -338,7 +338,7 @@ In the above functions the mask particles are *copied*, and the original particl
 After the user is done with the particles, they should be released through
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 651-652
+   :lines: 648-652
    :language: c++
    :dedent: 2
 
@@ -512,9 +512,9 @@ In addition, there can be complications near physical boundaries, such as domain
 
    Sketch of deposition schemes near refinement boundaries and cut-cells.
 
-``chombo-discharge`` support various ways of handling deposition across the refinement boundary.
+``chombo-discharge`` supports various ways of handling deposition across the refinement boundary.
 In all of these methods, the mass on the fine grid particles whose deposition clouds hang over the refinement boundaries is simply added to the coarse grid.
-The main modifications to the deposition scheme is performed for the coarse-grid particles that live around the refinement boundary (see :numref:`Fig:HaloMask`).
+The main modifications to the deposition scheme are performed for the coarse-grid particles that live around the refinement boundary (see :numref:`Fig:HaloMask`).
 For the coarse-grid particles the following processes then occur:
 
 .. _Fig:HaloMask:
@@ -613,14 +613,14 @@ The recommended pattern operates on one cell at a time: cell-sort the leaf, extr
 ``ParticleSoA<P>::extractCell`` performs the per-cell extraction
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleSoA.H
-   :lines: 1361-1362
+   :lines: 1362-1373
    :language: c++
 
 and the merged result is accumulated into an output ``ParticleSoA`` (via ``append``) which finally replaces the leaf with ``swap``.
 A complete worked example is ``ItoSolver::makeSuperparticles`` in :file:`$DISCHARGE_HOME/Source/ItoDiffusion/CD_ItoSolver.cpp`.
 
-``chombo-discharge`` has rather elementary support for handling superparticles.
-Currently, we only support reinitialization of particles, or agglomeration of particles using kD-trees, as discussed below.
+``chombo-discharge`` supports four merger strategies, all implemented as factory functions in ``ParticleManagement`` that return a ``ParticleMerger<P, Traits>`` functor.
+Each factory accepts user-supplied lambdas for the particle-type-specific gather, reduce, and scatter steps, so the same algorithm can be reused with any ``ParticleSoA`` payload type.
 
 kD-trees
 ________
@@ -639,14 +639,15 @@ At each level in the tree recursion one chooses an axis for partitioning one sub
 
 .. tip::
 
-   The source code for the kD-tree functionality is given in :file:`$DISCHARGE_HOME/Source/Particle/CD_KDNode.H`.
+   The source code for the kD-tree partitioner is given in :file:`$DISCHARGE_HOME/Source/Particle/CD_ParticleManagement.H` (``ParticleManagement::buildEqualWeightKDLeaves``).
 
-The kD-tree partitioner partitions a lightweight, communication-free particle type (``NonCommParticle``) carrying the position, weight, and any quantities to be preserved across a merge.
-Only the partitioner ``partitionAndSplitEqualWeightKD`` is currently supported, and this partitioner will divide the original subset into two new subsets such that the particle weights in the two halves differ by at most one physical particle.
+The kD-tree partitioner operates on a lightweight, communication-free particle type (``NonCommParticle``) carrying the position, weight, and any quantities to be preserved across a merge.
+The partitioner ``buildEqualWeightKDLeaves`` recursively bisects the input particles into spatially coherent leaves whose weights are as equal as possible -- at each bisection the two halves differ by at most one physical particle.
+It returns the leaf particle ranges directly; the tree is built in a flat, reusable scratch buffer rather than as linked node objects.
 
 .. warning::
 
-   ``partitionAndSplitEqualWeightKD`` will usually split particles to ensure that the weight in the two subsets are the same (thus creating new particles).
+   ``buildEqualWeightKDLeaves`` will usually split particles to ensure that the weight in the two subsets are the same (thus creating new particles).
    In this case any other members in the particle type are copied over into the new particles.
 
 The particles in each leaf of the kD-tree can then be merged into new particles.
@@ -660,3 +661,84 @@ Since the weight in the nodes of the tree differ by at most one, the resulting c
    kD-tree partitioning of particles into new particles whose weight differ by at most one.
    Left: Original particles with weights between 1 and 100.
    Right: Merged particles.
+
+KD-tree merging (``equal_weight_kd``)
+______________________________________
+
+``ParticleManagement::makeEqualWeightKDMerger`` wraps ``buildEqualWeightKDLeaves`` into a ``ParticleMerger`` functor.
+The caller provides three lambdas:
+
+* A *gather* function that packs one SoA slot into a ``NonCommParticle``.
+* A *reconcile* function (``BinaryParticleReconcile``) that propagates payload fields to both daughter particles when the median particle is split across a KD boundary.
+* A *scatter-leaf* function that receives the raw ``[first, last)`` pointer range of one leaf and appends exactly one merged particle to the SoA.
+
+.. literalinclude:: ../../../../Source/Particle/CD_ParticleManagement.H
+   :language: c++
+   :lines: 191-200
+   :dedent: 2
+
+In the weighted-centroid variant (``equal_weight_kd`` in ``ItoSolver``), the scatter-leaf computes the weight-averaged position and energy over all particles in the leaf.
+Particle weights need not be integers, but ``buildEqualWeightKDLeaves`` may create new particles at the KD boundaries (see warning above), so the total computational-particle count may exceed the target by a small amount during the build before being reduced.
+
+KD-tree with reinitialization (``reinitialize_bvh``)
+______________________________________________________
+
+The ``reinitialize_bvh`` variant uses the same ``makeEqualWeightKDMerger`` factory and the same KD partition, but replaces the centroid scatter with a position-reinitialising scatter:
+
+* **Cut-cells** (``volFrac < 1``): the weighted centroid is used to keep the merged particle inside the embedded boundary.
+* **Full cells**: a random point is drawn uniformly from the bounding box of the leaf, reinitialising the spatial distribution within each KD partition rather than collapsing it to a single point.
+
+This avoids accumulating all merged particles at a cluster of centroid positions in full cells, at the cost of discarding the fine-scale spatial information within each leaf.
+
+.. note::
+
+   In the full-cell branch, energy is accumulated over the leaf but is *not* normalised by weight -- the stored value is the total (not average) energy of the leaf.
+   This is intentional and matches the original ``ItoSolver`` behaviour.
+
+Reinitialization (``reinitialize``)
+_____________________________________
+
+``ParticleManagement::makeReinitializeMerger`` discards all spatial information and rebuilds the cell from scratch.
+
+.. literalinclude:: ../../../../Source/Particle/CD_ParticleManagement.H
+   :language: c++
+   :lines: 231-236
+   :dedent: 2
+
+The returned functor proceeds as follows:
+
+1. Calls *aggregate* once on the input SoA to obtain the total physical-particle count and a caller-defined context (e.g. the weight-averaged energy).
+2. Passes the physical count to ``partitionParticleWeights``, which divides it into at most ``ppc`` integer weights differing by at most one.
+3. For each weight, draws a random position in the cell via ``Random::randomPosition`` (cut-cell aware) and calls *emit* to append the new particle.
+
+All output particles share the same aggregated context, so per-particle information (e.g. individual energies) is lost.
+This method requires that particle weights are (close to) integers.
+
+.. tip::
+
+   ``makeReinitializeMerger`` captures ``probLo`` at parse time.
+   The cell-centre position is computed internally as ``probLo + dx * (gridIndex + 0.5)``, so no grid pointer needs to be retained in the returned functor.
+
+SFC nearest-neighbour merging (``sfc_nn``)
+___________________________________________
+
+``ParticleManagement::makeSfcNearestNeighborMerger`` sorts particles along a Hilbert space-filling curve and merges adjacent pairs until the count is at most ``ppc``.
+
+.. literalinclude:: ../../../../Source/Particle/CD_ParticleManagement.H
+   :language: c++
+   :lines: 147-155
+   :dedent: 2
+
+The caller provides three lambdas:
+
+* A *gather* function that packs one SoA slot into a ``NonCommParticle``.
+* A *combine* function that merges two adjacent intermediates in place (typically a weighted average of position and energy).
+* A *scatter* function that unpacks one merged intermediate back into the SoA.
+
+Unlike the KD-tree methods, SFC merging does not require integer weights.
+Particle counts below ``ppc`` are handled by splitting the heaviest particle: its weight is halved and a copy is appended, repeating until the target is reached (only if the heaviest particle has weight :math:`\geq 2`).
+The Hilbert ordering ensures that merged pairs are spatially close, which better preserves spatial correlations than random pairing and typically produces smoother merged distributions than the KD centroid.
+
+.. tip::
+
+   The source code for all merger factories is in :file:`$DISCHARGE_HOME/Source/Particle/CD_ParticleManagement.H`.

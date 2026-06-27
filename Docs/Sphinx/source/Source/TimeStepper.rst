@@ -32,7 +32,7 @@ The routines are used by :ref:`Chap:Driver` in the simulation setup step, both f
 registerRealms
 --------------
 
-``chombo-discharge`` permits things to happen on different sets of grids where the the grids themselves cover the same physical region, but where MPI ownership of grids might change between grid sets (see :ref:`Chap:Realm` for details).
+``chombo-discharge`` permits things to happen on different sets of grids where the grids themselves cover the same physical region, but where MPI ownership of grids might change between grid sets (see :ref:`Chap:Realm` for details).
 To register a :ref:`Chap:Realm`, users will have ``TimeStepper`` register realms in the ``registerRealms()`` routine, as follows:
 
 .. code-block:: c++
@@ -130,7 +130,7 @@ postInitialize
 --------------
 
 ``postInitialize`` is a special routine that is called *after* :ref:`Chap:Driver` has filled the solvers with initial data *and* :ref:`Chap:Driver` is done with all the initial regrids.
-While most data initialization steps can, however, be done in ``initialData``, the function is put there as an open door to the programmer for performing certain post-initialization functions that do not not need be performed in ``initialData`` (which is called once per initial regrid).
+While most data initialization steps can, however, be done in ``initialData``, the function is put there as an open door to the programmer for performing certain post-initialization functions that do not need to be performed in ``initialData`` (which is called once per initial regrid).
 For example, the :ref:`Chap:DischargeInceptionModel` uses this function to compute several relevant quantities after the electric has been obtained in ``initialData``.
 
 postCheckpointSetup
@@ -144,7 +144,7 @@ Several gas discharge models use this function to compute the electric field fro
 I/O routines
 ============
 
-``TimeStepper`` contains I/O routines primarily serves two purposes:
+``TimeStepper`` contains I/O routines that primarily serve two purposes:
 
 #. To provide data for HDF5 plot files, used for post-processing analysis.
 #. To read and write data from HDF5 checkpoint files, which are used to restart simulations from a specified time step.
@@ -196,7 +196,7 @@ The function signature is
    :lines: 186-194
    :dedent: 2
 	   
-In this function, ``a_output`` is pre-allocated block of memory that ``TimeStepper`` will write its components to (beginning at ``a_icomp``).
+In this function, ``a_output`` is a pre-allocated block of memory that ``TimeStepper`` will write its components to (beginning at ``a_icomp``).
 Note that if ``TimeStepper`` writes :math:`N` components, the implementation must increment ``a_icomp`` by :math:`N`.
 Usually, solvers will have their own ``writePlotData`` routines which lets ``TimeStepper`` simply call the solver functions.
 An example is given below for the :ref:`Chap:AdvectionDiffusionModel`:
@@ -299,7 +299,7 @@ As mentioned in the documentation for this method, the function takes a trial ti
 This time step is the one computed by ``computeDt``.
 It is, however, quite possible to advance the equations of motion over a time that does not equal ``a_dt``, which is generally the case for adaptive time stepping methods.
 
-The implementation of the ``advance`` method is usually the most time-consuming part of implementation a new ``TimeStepper``, and the implementation of this routine can become substantially complicated.
+The implementation of the ``advance`` method is usually the most time-consuming part of implementing a new ``TimeStepper``, and the implementation of this routine can become substantially complicated.
 For simpler problems this routine is relatively straightforward to implement, however, also in a way that involves AMR and cut-cells.
 
 .. _List:AdvectionDiffusionStepperAdvance:
@@ -360,7 +360,7 @@ In particular, when regrids occur the old grids are eventually destroyed so it i
 preRegrid
 ---------
 
-``preRegrid`` should any necessary pre-regrid operations that are necessary in order to call the ``regrid``.
+``preRegrid`` should perform any necessary pre-regrid operations that are necessary in order to call the ``regrid``.
 This will virtually always include caching the old-grid simulation state, both for the solvers and also for internal data in ``TimeStepper`` 
 Solvers usually know how to do this, and in some cases this function can be deceptively simple, as illustrated by the implementation of this function in :ref:`Chap:AdvectionDiffusionModel`:
 
@@ -409,7 +409,7 @@ This functionality is implemented through two routines:
 #. ``loadBalanceThisRealm`` which checks if a specific :ref:`Chap:Realm` should be load balanced.
 #. ``loadBalanceBoxes`` which load balances the boxes on the specified :ref:`Chap:Realm`.
 
-Note that these functions are not pure functions, and it is perfect fine to use their default implementation, in which case each MPI rank gets approximately the same number of grid patches. 
+Note that these functions are not pure functions, and it is perfectly fine to use their default implementation, in which case each MPI rank gets approximately the same number of grid patches. 
 
 loadBalanceThisRealm
 --------------------

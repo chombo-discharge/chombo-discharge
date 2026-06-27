@@ -3,7 +3,7 @@
 Code standard
 =============
 
-When submitting new code to ``chombo-discharge``, the following guidelines below show be followed.
+When submitting new code to ``chombo-discharge``, the following guidelines below should be followed.
 
 C++ standard
 ------------
@@ -14,14 +14,14 @@ Namespace
 ---------
 
 All code in ``chombo-discharge`` is embedded in a namespace ``ChomboDischarge``.
-Embedding into a namespace is done by including header file :file:`CD_NamespaceHeader.H` that contain the necessary definitions.
+Embedding into a namespace is done by including header file :file:`CD_NamespaceHeader.H` that contains the necessary definitions.
 This is done by including after any other file includes.
 In addition, files must include :file:`CD_NamespaceFooter.H` at the end. 
 
 File names
 ----------
 
-Each file should contain only one class definition, and the file name must be name of the class prepended by ``CD_``. 
+Each file should contain only one class definition, and the file name must be the name of the class prepended by ``CD_``. 
 For example, if you are contributing a class ``MyClass`` the header files for this class must be named :file:`CD_MyClass.H` and the implementation file must be named :file:`CD_MyClass.cpp`.
 If your code contains templates or inlined functions, these should be defined in files appended by ``Implem``, e.g. :file:`CD_MyClassImplem.H`.
 
@@ -54,7 +54,7 @@ I.e. for a file :file:`CD_MyClass.H` the header guard shall read
 File inclusions
 ---------------
 
-File inclusions should use the follow standards for C++, ``Chombo``, and ``chombo-discharge``
+File inclusions should use the following standards for C++, ``Chombo``, and ``chombo-discharge``
 
 1. *C++*. Use brackets, e.g. ``#include <memory>``.
 2. ``Chombo``. Use brackets, e.g. ``#include <LevelData.H>``.

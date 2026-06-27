@@ -834,37 +834,6 @@ public:
   mergeParticles(ParticleSoA<ItoParticle>& a_particles, const CellInfo& a_cellInfo, int a_ppc) const noexcept;
 
   /**
-    @brief Superparticle merging with KD/BVH trees
-    @param[in,out] a_particles Particles to be merged/split
-    @param[in]    a_cellInfo  Arithmetic information about the current grid cell.
-    @param[in]    a_ppc       Target number of particles per cell
-  */
-  virtual void
-  makeSuperparticlesEqualWeightKD(ParticleSoA<ItoParticle>& a_particles,
-                                  const CellInfo&           a_cellInfo,
-                                  int                       a_ppc) const noexcept;
-
-  /**
-    @brief Superparticle merging with BVH trees. This reinitializes particles within each BVH node.
-    @param[in,out] a_particles Particles to be merged/split
-    @param[in]    a_cellInfo  Arithmetic information about the current grid cell.
-    @param[in]    a_ppc       Target number of particles per cell
-  */
-  virtual void
-  makeSuperparticlesBVHReinitialize(ParticleSoA<ItoParticle>& a_particles,
-                                    const CellInfo&           a_cellInfo,
-                                    int                       a_ppc) const noexcept;
-
-  /**
-    @brief Particle re-initialization algorithm
-    @param[in,out] a_particles Particles to be merged/split
-    @param[in]    a_cellInfo  Arithmetic information about the current grid cell.
-    @param[in]    a_ppc       Target number of particles per cell
-  */
-  virtual void
-  reinitializeParticles(ParticleSoA<ItoParticle>& a_particles, const CellInfo& a_cellInfo, int a_ppc) const noexcept;
-
-  /**
     @brief Remap the bulk particle container.
   */
   virtual void

@@ -25,7 +25,7 @@ FieldSolver
 -----------
 
 ``FieldSolver`` is an abstract class for electrostatic solves in an EB context and contains most routines required for setting up and solving electrostatic problems.
-``FieldSolver`` can solve over three phases, gas, dielectric, and electrode, and thus it is uses ``MFAMRCellData`` functionality where data is defined over multiple phases (see :ref:`Chap:MeshData`).
+``FieldSolver`` can solve over three phases, gas, dielectric, and electrode, and thus it uses ``MFAMRCellData`` functionality where data is defined over multiple phases (see :ref:`Chap:MeshData`).
 
 Note that in order to separate the electrostatic solver interface from the implementation, ``FieldSolver`` is a pure class without knowledge of numerical discretizations.
 Currently, our only supported subclass is :ref:`Chap:FieldSolverGMG`, which supplies a finite-volume discretization that is solved with geometric multigrid.
@@ -93,7 +93,7 @@ Domain boundary conditions
 --------------------------
 
 Domain boundary conditions for the solver must be set by the user through an input script, whereas the boundary conditions on internal surfaces are Dirichlet by default.
-Note that on multifluid-boundaries the boundary condition is enforced by the conventional matching boundary condition that follows from Gauss` law.
+Note that on multifluid-boundaries the boundary condition is enforced by the conventional matching boundary condition that follows from Gauss' law.
 
 General format
 ______________
@@ -177,7 +177,7 @@ For example, using
    FieldSolverGMG.bc.y.low  = dirichlet 0.0
    FieldSolverGMG.bc.y.high = dirichlet 1.0
 
-will the set voltage on the lower y-plane to ground and the voltage on the upper y-plane to the live voltage.
+will set the voltage on the lower y-plane to ground and the voltage on the upper y-plane to the live voltage.
 Specifically, on the upper y-plane this specification will generate a potential boundary condition function of the type
 
 .. code-block:: c++
@@ -403,7 +403,7 @@ This is encapsulated by the pure member function
    :lines: 112-122
    :dedent: 2
 
-where ``a_phi`` is the resulting potential that was computing with the space charge density ``a_rho``, and surface charge density ``a_sigma``.
+where ``a_phi`` is the resulting potential that was computed with the space charge density ``a_rho``, and surface charge density ``a_sigma``.
    
 .. _Chap:FieldSolverGMG:   
 
@@ -447,7 +447,7 @@ See :ref:`Chap:PoissonDielectricBC` for additional details.
 Algorithmic adjustments
 _______________________
 
-By default, the Helmholtz operator uses a diagonally weighting of the operator using the volume fraction as weight.
+By default, the Helmholtz operator uses a diagonal weighting of the operator using the volume fraction as weight.
 This means that the quantity that is passed into ``AMRMultiGrid`` should be weighted by the volume fraction to avoid the small-cell problem of EB grids.
 The flag ``kappa_source`` indicates whether or not we should multiply the right-hand side by the volume fraction before passing it into the solver routine.
 If this flag is set to ``false``, it is an indication that the user has taken responsibility to perform this weighting prior to calling ``FieldSolver::solve(...)``.
@@ -572,12 +572,12 @@ Recall that the polarization (in frequency space) is
 
 where :math:`\chi(\omega)` is the dielectric susceptibility.
 
-There are two forms that ``chombo-discharge`` can support frequency dependent permittivities; through convolution or through auxiliary differential equations (ADEs).
+There are two forms through which ``chombo-discharge`` can support frequency-dependent permittivities: through convolution or through auxiliary differential equations (ADEs).
 
 Convolution approach
 ____________________
 
-In the time domain, the displacement field is.
+In the time domain, the displacement field is:
 
 .. math::
 
@@ -642,7 +642,7 @@ The Gauss law yields
    \nabla\cdot\left[\left(1 + C_0^k\right)\mathbf{E}^k\right] = \frac{\rho}{\epsilon_0} - \frac{1}{\epsilon_0}\nabla\cdot\sum_{m>0} C_m^k\mathbf{P}^{k-m}.
 
 Unlike the convolution approach, this only requires storing terms required for the ADE description. 
-This depends both on the order of the ADE, as well as it's discretization.
+This depends both on the order of the ADE, as well as its discretization.
 Normally, the ADE is a low-order PDE and a few terms are sufficient.    
    
 Limitations

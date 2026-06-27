@@ -56,7 +56,7 @@ EBCellFAB and FArrayBox
 -----------------------
 
 The ``EBCellFAB`` object is an array for holding cell-centered data in an embedded boundary context.
-The ``EBCellFAB`` has two data structures: An ``FArrayBox`` which is a Cartesian array, and a additional data structure that holds data in multi-valued grid cells.
+The ``EBCellFAB`` has two data structures: An ``FArrayBox`` which is a Cartesian array, and an additional data structure that holds data in multi-valued grid cells.
 Doing arithmetic with ``EBCellFAB`` usually requires one to iterate over all the cell in the ``FArrayBox``, and then also to iterate over the *irregular cells* (i.e., cut-cells) later.
 A ``VoFIterator`` is an object designed to iterate over the irregular cells, and must be defined by the set of cells that it will iterate over and the graph that describes the cell connectivity.
 
@@ -83,8 +83,8 @@ RefCountedPtr
 -------------
 
 ``RefCountedPtr<T>`` is a pointer class in ``Chombo`` with reference counting. 
-That is, when objects that hold a reference to some ``RefCountedPtr<T>`` object goes out of scope the reference counter is decremented.
-If the reference counter reaches zero, the object that ``RefCountedPtr<T>`` points to it is deallocated.
+That is, when objects that hold a reference to some ``RefCountedPtr<T>`` object go out of scope the reference counter is decremented.
+If the reference counter reaches zero, the object that ``RefCountedPtr<T>`` points to is deallocated.
 Using ``RefCountedPtr<T>`` is much preferred over using a raw pointer ``T*`` to 1) avoid memory leaks and 2) compress code since no explicit deallocations need to be called. 
 
 .. tip::
@@ -120,7 +120,7 @@ Data iterators also exist, and the most common is to use iterators that only ite
 
 Each MPI rank will then iterate *only* over the part of the grid where it has ownership.
 
-A related data iterators is ``LayoutIterator``, which will iterate over all boxes in the grid:
+A related data iterator is ``LayoutIterator``, which will iterate over all boxes in the grid:
 
 .. code-block:: c++
 
@@ -174,7 +174,7 @@ To obtain the EB-information for a specific grid patch, one will call:
 where ``EBISBox`` contains the geometric information over only one grid patch.
 One can thus think of the ``EBISLayout`` as a ``LayoutData<EBISBox>`` structure. 
 
-As an example, to iterate over all the cut-cells defined for a cell-centered data holder an AMR-level one would do:
+As an example, to iterate over all the cut-cells defined for a cell-centered data holder on an AMR-level one would do:
 
 .. code-block:: c++
 

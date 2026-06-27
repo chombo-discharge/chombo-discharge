@@ -29,6 +29,8 @@ parser.add_argument('-mpi',        help="Use MPI or not",         type=str, defa
 parser.add_argument('-petsc',      help="Compile with PETSC",     type=str, default=None,  required=False)
 parser.add_argument('-hdf',        help="Use HDF5 or not",        type=str, default=None,  required=False)
 parser.add_argument('-openmp',     help="Use OpenMP or not",      type=str, default=None,  required=False)
+parser.add_argument('-debug',      help="Build with debug symbols (DEBUG=TRUE/FALSE)", type=str, default=None, required=False)
+parser.add_argument('-opt',        help="Optimisation level (OPT=HIGH/FALSE)",         type=str, default=None, required=False)
 parser.add_argument('-dim',        help="Test dimensionality",    type=int, default=None,       required=False)
 parser.add_argument('-cores',      help="Number of cores to use", type=int, default=2,        required=False)
 parser.add_argument('-exec_mpi',   help="MPI run command.",       type=str, default="mpirun", required=False)
@@ -126,7 +128,7 @@ def pre_check(silent):
 # --------------------------------------------------
 # Function that compiles a test
 # --------------------------------------------------
-def compile_test(silent, build_procs, dim, mpi, omp, hdf, petsc, clean, main):
+def compile_test(silent, build_procs, dim, mpi, omp, hdf, petsc, debug, opt, clean, main):
     """ Set up and run a compilation of the target test. """
 
     makeCommand = "make "
@@ -145,6 +147,10 @@ def compile_test(silent, build_procs, dim, mpi, omp, hdf, petsc, clean, main):
         makeCommand += "USE_HDF=" + str(hdf).upper() + " "
     if petsc is not None:
         makeCommand += "USE_PETSC=" + str(petsc).upper() + " "
+    if debug is not None:
+        makeCommand += "DEBUG=" + str(debug).upper() + " "
+    if opt is not None:
+        makeCommand += "OPT=" + str(opt).upper() + " "
     if omp is not None and str(omp).upper() == "TRUE":
         makeCommand += "USE_MT=FALSE "
 
@@ -282,6 +288,8 @@ for test in config.sections():
                                         omp=args.openmp,
                                         hdf=args.hdf,
                                         petsc=args.petsc,
+                                        debug=args.debug,
+                                        opt=args.opt,
                                         clean=args.clean,
                                         main = str(config[str(test)]['exec']))
             if compile_code != 0:

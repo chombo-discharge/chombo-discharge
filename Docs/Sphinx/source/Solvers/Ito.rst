@@ -47,7 +47,7 @@ ItoSolver
 The ``ItoSolver`` class encapsulates the implementation of :eq:`ito_diffusion` in ``chombo-discharge``.
 This class can advance a set of computational particles (see :ref:`Chap:ItoParticle`) with the following functionality:
 
-#. Move particles the a microscopic drift-diffusion model.
+#. Move particles with a microscopic drift-diffusion model.
 #. Compute particle intersection with embedded boundaries and domain edges.
 #. Deposit particles and other particle types on the mesh.
 #. Interpolate velocities and diffusion coefficients to the particle positions.
@@ -61,10 +61,10 @@ Although the particle velocities and diffusion coefficients can be manually assi
 #. Diffusion coefficient.
 #. Velocity function.
 
-The reason for storing both the mobility and velocity function is to simply to improve flexibility when assigned the particle velocity :math:`\mathbf{V}`.
+The reason for storing both the mobility and velocity function is simply to improve flexibility when assigning the particle velocity :math:`\mathbf{V}`.
 Note that the velocity function does *not* have to represent the particle velocity.
 When using both the mobility and velocity function, one can compute the particle velocity as :math:`\mathbf{V} = \mu\mathbf{v}`, where :math:`\mathbf{v}` is a velocity field.
-This is typically done for discharge simulations where for simplicity we assign :math:`\mathbf{v}` to be the electric field, and :math:`\mu` to the the field-dependent mobility.
+This is typically done for discharge simulations where for simplicity we assign :math:`\mathbf{v}` to be the electric field, and :math:`\mu` to the field-dependent mobility.
 Additional information is available in :ref:`Chap:ItoInterpolation`.
 
 .. _Chap:ItoSpecies:
@@ -82,7 +82,7 @@ The constructor for the ``ItoSpecies`` class is
 
 Here, ``a_name`` indicates a variable name for the solver.
 This variable will be used in, e.g., error messages and I/O functionality.
-``a_chargeNumber`` indicates the charge number of the species and the two booleans ``a_mobile`` and ``a_diffusive`` indicates whether or not the solver is mobile or diffusive.
+``a_chargeNumber`` indicates the charge number of the species and the two booleans ``a_mobile`` and ``a_diffusive`` indicate whether or not the solver is mobile or diffusive.
 
 .. note::
 
@@ -119,7 +119,7 @@ When ``ItoSolver`` initializes the data in the solver, it will copy the particle
 
 When sampling particles from a mesh-based density, the solver will generate the particles so that the specified density is approximately reached within each grid cell.
 If the density that is supplied does not lead to an integer number of particles in the grid cell (which is virtually always the case), the evaluation of the number of particles is stochastically evaluated.
-E.g., if the density is :math:`\phi` and then grid cell volume is :math:`\Delta V`, and :math:`\phi\Delta V = 1.2`, then there is a 20% chance that there will be generated two particles within the grid cell, and 80% chance that only one particle will be generated.
+E.g., if the density is :math:`\phi` and the grid cell volume is :math:`\Delta V`, and :math:`\phi\Delta V = 1.2`, then there is a 20% chance that there will be generated two particles within the grid cell, and 80% chance that only one particle will be generated.
 
 .. tip::
    
@@ -157,7 +157,7 @@ Remapping particles
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 867-878
+   :lines: 836-847
    :dedent: 2
 
 The bottom function lets the user remap any ``ParticleContainer<ItoParticle>`` that lives in the solver.
@@ -237,7 +237,7 @@ This interpolation method is always parsed from an options file, and is usually 
    When interpolating particle properties from the mesh, the user must first ensure that ghost cells are properly updated.
 
 
-The separation into a mobility function and a velocity field is motivated by the introduction of an electric conductivity that permits a rather simple velocity velocity relation as :math:`\mathbf{v} = \mu\mathbf{E}`, where :math:`\mathbf{E}` is the electric field.
+The separation into a mobility function and a velocity field is motivated by the introduction of an electric conductivity that permits a rather simple velocity relation as :math:`\mathbf{v} = \mu\mathbf{E}`, where :math:`\mathbf{E}` is the electric field.
 Complete interpolation of the particle velocity consists of calling two functions:
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
@@ -277,7 +277,7 @@ Interpolation of the diffusion coefficient is always done using an interpolation
 
    D = D\left(\mathbf{X}\right).
 
-The function signatures is
+The function signature is
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
@@ -297,7 +297,7 @@ The most relevant function is
    :lines: 432-439
    :dedent: 2
 
-Here, ``EBIntersection`` is a just an enum for putting logic into how the intersection is computed.
+Here, ``EBIntersection`` is just an enum for putting logic into how the intersection is computed.
 Valid options are ``EBIntersection::Bisection`` and ``EBIntersection::Raycast``.
 These algorithms are discussed in :ref:`Chap:ParticleEB`.
 The flag ``a_deleteParticles`` specifies if the original particles should be deleted when populating the other particle containers (again, see :ref:`Chap:ParticleEB`).
@@ -321,7 +321,7 @@ This routine is implemented as
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 989-994
+   :lines: 958-963
    :dedent: 2
 
 which returns a CFL-like condition
@@ -337,7 +337,7 @@ The signatures for the diffusion time step are similar to the ones for drift:
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 1013-1018
+   :lines: 982-987
    :dedent: 2
 
 which returns a CFL-like condition
@@ -355,7 +355,7 @@ A combination of the advection and diffusion time step routines also exists as
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 902-912
+   :lines: 871-881
    :dedent: 2
 
 This time step limitation is inspired by fully explicit and non-split fluid models, and is calculated as
@@ -369,8 +369,8 @@ Superparticle management
 
 It can occasionally be necessary to merge or split computational particles.
 This occurs in, e.g., plasma simulations where chemical reactions lead to exponential growth of particles. 
-``ItoSolver`` can currently handle superparticles through several internal functions, and is also equipped with an interface in which the user can inject an external particle-handling routine.  
-The function for splitting and merging the particles is in all cases
+``ItoSolver`` handles superparticles via a configurable merger functor selected at parse time through ``ItoSolver.merge_algorithm``; the user can also supply a custom functor through ``setParticleMerger``.
+The entry point for splitting and merging is in all cases
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
@@ -390,8 +390,9 @@ In order to specify the merging algorithm the user must set the ``ItoSolver.merg
 * ``none`` - No particle merging/splitting is performed.
 * ``equal_weight_kd`` Use a kD-tree with bounding volume hierarchies to partition and split/merge the particles. This conserves the particle center-of-mass.
 * ``reinitialize`` Re-initialize the particles in each grid cell, ensuring that weights are as uniform as possible.
-* ``reinitialize_bvh`` Re-initialize the particles in each node of a kD tree. Weights are as uniform as possible. 
-* ``external`` Use an externally injected particle merging algorithm. In order to use this feature the user must supply one through
+* ``reinitialize_bvh`` Re-initialize the particles in each node of a kD tree. Weights are as uniform as possible.
+* ``sfc_nn`` Reach the target particle count by space-filling-curve nearest-neighbour clustering: when there are more particles than the target the nearest neighbours (along a Hilbert curve) are merged until the target count is reached, and when there are fewer the highest-weight particles are split. This gives spatially tight groups but does not equalize the weights.
+* ``external`` Use an externally injected particle merging algorithm. In order to use this feature the user must supply one through ``setParticleMerger``.
 
 The user can set the merging algorithm through the input script (see :ref:`Chap:ItoInput`), or supply one externally by setting the merge algorithm to ``external``.
 In addition, the user must first supply a particle merging function:
@@ -493,7 +494,7 @@ Several input options are available for configuring the run-time configuration o
 Plot file variables
 ___________________
 
-Plot variables are specified using ``ItoSolver.plt_vars``, see :ref:`Chap:ItoPlot`).
+Plot variables are specified using ``ItoSolver.plt_vars``, see :ref:`Chap:ItoPlot`.
 To add a variable to HDF5 output files, one can modify the ``ItoSolver.plt_vars`` input variable to include, e.g., the following variables:
 
 * :math:`\phi`, i.e. the deposited particle weights (``ItoSolver.plt_vars = phi``)
@@ -506,7 +507,7 @@ ___________________________
 To specify the mobility interpolation, use ``ItoSolver.mobility_interp``.
 Valid options are ``direct`` and ``velocity``, see :ref:`Chap:ItoInterpolation`.
 
-Deposition and coarse-fine deposition (see :ref:`Chap:ParticleMesh`) is controlled using the flags
+Deposition and coarse-fine deposition (see :ref:`Chap:ParticleMesh`) are controlled using the flags
 
 * ``ItoSolver.deposition`` for the base deposition scheme.
   Valid options are ``ngp``, ``cic``, and ``tsc``.
