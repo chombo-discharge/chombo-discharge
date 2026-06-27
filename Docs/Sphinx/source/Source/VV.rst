@@ -3,7 +3,7 @@
 Verification and validation
 ===========================
 
-We strive to include convergence testing (verification), and in some cases comparison with various types of experimental (validation).
+We strive to include convergence testing (verification), and in some cases comparison with various types of experimental data (validation).
 Below, we discuss our approach to spatial and temporal convergence testing.
 
 .. _Chap:SpatialConvergence:
@@ -59,4 +59,4 @@ Temporal integration errors are computed as
 
 .. tip::
 
-   If an exact solution as available, one can replace :math:`\phi^{k^\prime}_{\mathbf{i}}\left(\Delta x, \Delta t_f\right)` by :math:`\phi_e\left(\mathbf{i}\Delta x, k^\prime\Delta t_f\right)`.
+   If an exact solution is available, one can replace :math:`\phi^{k^\prime}_{\mathbf{i}}\left(\Delta x, \Delta t_f\right)` by :math:`\phi_e\left(\mathbf{i}\Delta x, k^\prime\Delta t_f\right)`.

@@ -45,7 +45,7 @@ For unimolecular reactions of the type
    X_A + X_B + \ldots \xrightarrow{k} \emptyset
 
 with :math:`A \neq B \neq \ldots` the propensity function is :math:`k X_A X_B \ldots`.
-For bimolecular of the type
+For bimolecular reactions of the type
 
 .. math::
 
@@ -84,7 +84,7 @@ The type of reaction that fires is determined from
 
    r_c = \textrm{smallest integer satisfying } \sum_{r^\prime = 1}^{r_c} a_{r^\prime} > u_2A,
 
-where and :math:`u_2` is another uniformly distributed random variable between :math:`0` and :math:`1`.
+where :math:`u_2` is another uniformly distributed random variable between :math:`0` and :math:`1`.
 The state is then advanced as
 
 .. math::
@@ -175,8 +175,8 @@ Assume that we wish to integrate over some time :math:`\Delta t`, which proceeds
 
       Next, advance the state using tau leaping for the non-critical reaction.
 
-   b. Otherwise: No crical reactions fire.
-      Advance the state using tau-leapnig for the non-critical reactions only.
+   b. Otherwise: No critical reactions fire.
+      Advance the state using tau-leaping for the non-critical reactions only.
       An exception is made if :math:`A\Delta\tau` is smaller than some specified threshold in which case we switch to SSA advancement (which is more efficient in this limit). 
 
 #. Check if :math:`\vec{X}` is a thermodynamically valid state.
@@ -381,7 +381,7 @@ Figure :numref:`Fig:KineticMonteCarloC1` shows the Kinetic Monte Carlo solution 
 C2: Schlögl model
 _________________
 
-Solution the Schlögl model are given in :file:`$DISCHARGE_HOME/Exec/Convergence/KineticMonteCarlo/C2`.
+Solutions to the Schlögl model are given in :file:`$DISCHARGE_HOME/Exec/Convergence/KineticMonteCarlo/C2`.
 For the Schlögl model we solve for a single population :math:`X` with the reactions
 
 .. math::
@@ -392,7 +392,7 @@ For the Schlögl model we solve for a single population :math:`X` with the react
    X  &\xrightarrow{c_4} B2.   
 
 The states :math:`B_1` and :math:`B_2` are buffered states with populations that do not change during the reactions. 
-Figure :numref:`Fig:KineticMonteCarloC1` shows the Kinetic Monte Carlo solutions for rates
+Figure :numref:`Fig:KineticMonteCarloC2` shows the Kinetic Monte Carlo solutions for rates
 
 .. math::
 

@@ -136,7 +136,7 @@ To deposit the particles, call
 This will deposit the particle weights onto the input data holder.
 
 The deposition function is set by the user, see :ref:`Chap:TracerInputOptions`.
-Complete details regarding how the deposition functions work is available in :ref:`Chap:ParticleMesh`.
+Complete details regarding how the deposition functions work are available in :ref:`Chap:ParticleMesh`.
 
 .. _Chap:TracerInputOptions:
 
@@ -146,5 +146,5 @@ Input options
 Available input options for the tracer particle solver are given in the listing below.
 
 .. literalinclude:: ../../../../Source/TracerParticles/CD_TracerParticleSolver.options
-   :caption: List on configuration options for ``TracerParticleSolver<P>``.
+   :caption: List of configuration options for ``TracerParticleSolver<P>``.
 	     All options are run-time configurable.

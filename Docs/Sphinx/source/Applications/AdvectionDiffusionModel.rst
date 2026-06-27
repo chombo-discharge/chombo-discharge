@@ -13,7 +13,7 @@ The equation of motion is
 The full implementation for this model consists of the following classes:
 
 * ``AdvectionDiffusionStepper``, which implements :ref:`Chap:TimeStepper`.
-* ``AdvectionDiffusionSpecies``, which implements :ref:`Chap:CdrSpecies`, and thus sparses the initial condition into the problem.
+* ``AdvectionDiffusionSpecies``, which implements :ref:`Chap:CdrSpecies`, and thus parses the initial condition into the problem.
 * ``AdvectionDiffusionTagger``, which implements :ref:`Chap:CellTagger` and flags cells for refinement and coarsening.
 
 This module only uses :ref:`Chap:CdrSolver`.
@@ -51,7 +51,7 @@ The Runge-Kutta advance is then
 
 .. warning::
    
-   Note that when diffusion and advecting is coupled in this way, we do not include the transverse terms in the :ref:`Chap:CdrCTU` discretization and limit the time step by
+   Note that when diffusion and advection are coupled in this way, we do not include the transverse terms in the :ref:`Chap:CdrCTU` discretization and limit the time step by
 
    .. math::
 
@@ -160,7 +160,7 @@ Default behavior
 ________________
 
 The default diffusion coefficient for this problem is set to a constant.
-To adjust it,  :math:`\omega`, set
+To adjust it, set
 
 .. literalinclude:: ../../../../Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.options
    :language: text

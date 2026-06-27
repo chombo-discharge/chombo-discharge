@@ -89,7 +89,7 @@ The source term can also be set on a component-by-component basis using
 As a function of :math:`\vec{\phi}`
 ___________________________________
 
-In order to compute the source term :math:`\vec{S}` as a function of :math:`\vec{\phi}`, ``MeshOdeSolver<N>`` has a function
+In order to compute the source term :math:`\vec{S}` as a function of :math:`\vec{\phi}`, ``MeshODESolver<N>`` has a function
 
 .. literalinclude:: ../../../../Source/MeshODESolver/CD_MeshODESolver.H
    :language: c++

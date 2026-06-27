@@ -6,7 +6,7 @@ Code testing
 To ensure the integrity of ``chombo-discharge``, we include tests in
 
 * :file:`$DISCHARGE_HOME/Exec/Tests` for a functional test suite.
-* :file:`$DISCHARGE_HOME/Exec/Convergence` for a code verification tests. 
+* :file:`$DISCHARGE_HOME/Exec/Convergence` for code verification tests.
 
 .. _Chap:TestSuite:
 
@@ -45,7 +45,7 @@ The following options are available for running the various tests:
 * ``-hdf <true/false>`` Use HDF5 or not.  
 * ``-cores <number>`` Run with specified number of cores.
 * ``-suites <string>`` Run a specific application test suite.
-* ``-tests <string`` Run a specific test.
+* ``-tests <string>`` Run a specific test.
 
 For example, to compile with MPI and HDF5 enabled:
 
@@ -69,7 +69,7 @@ Using benchmark files
 _____________________
 
 The test suite can generate benchmark files which can later be compared against new test suite output files.
-This is often a good idea if one wants to ensure that modifications to the ``chombo-discharge`` source code does not unintentionally change the output of computer simulations. 
+This is often a good idea if one wants to ensure that modifications to the ``chombo-discharge`` source code do not unintentionally change the output of computer simulations. 
 In this case one can run the test suite and generate benchmark files *before* adding changes to ``chombo-discharge``.
 Once the code development is completed, the benchmark files can later be bit-wise (using `h5diff <https://support.hdfgroup.org/HDF5/doc/RM/Tools/h5diff.htm>`_) compared against the results of a later test suite.
 
@@ -96,7 +96,7 @@ When running the tests this way, the output files are bit-wise compared and a wa
 Automated testing
 -----------------
 
-On `GitHub <https://github.com/chombo-discharge/chombo-discharge>`_, the test suite is integrated with GitHub actions and are automatically run when opening a pull request for review. 
+On `GitHub <https://github.com/chombo-discharge/chombo-discharge>`_, the test suite is integrated with GitHub actions and is automatically run when opening a pull request for review. 
 In general, all tests must pass before a pull request can be merged.
 The test status can be observed either in the pull request, or at `<https://github.com/chombo-discharge/chombo-discharge/actions>`_.
 The automated tests run ``chombo-discharge`` with ``DEBUG=TRUE`` and ``OPT=FALSE`` in order to catch assertion errors or other places where the code might break.
@@ -138,12 +138,12 @@ There are two ways to run performance profiling of ``chombo-discharge``:
 
      export CH_TIMER=1
 
-  The ``Chombo`` will not only compute the time spent in each function, but also figure out the parent-child relation between function, and present the output as a hierarchical structure.
+  The ``Chombo`` will not only compute the time spent in each function, but also figure out the parent-child relation between functions, and present the output as a hierarchical structure.
   This is often useful when optimizing functions at the development stage. 
 
   .. warning::
 
-     ``Chombo``'s timers are not meant to use with many time steps.
+     ``Chombo``'s timers are not meant to be used with many time steps.
      For efficient use, it is best to use it for a single time step.
 
 * In-place profiling using the ``chombo-discharge`` ``Timer`` class (see `<https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classTimer.html>`_ for the C++ API).

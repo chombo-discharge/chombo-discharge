@@ -14,6 +14,11 @@
 #define CD_PARTICLEMANAGEMENTIMPLEM_H
 
 // Std includes
+#include <algorithm>
+#include <array>
+#include <cstdint>
+#include <functional>
+#include <limits>
 #include <utility>
 #include <type_traits>
 
@@ -23,242 +28,579 @@
 // Our includes
 #include <CD_Random.H>
 #include <CD_ParticleLoops.H>
+#include <CD_LoadBalancing.H>
 #include <CD_ParticleManagement.H>
 #include <CD_NamespaceHeader.H>
 
 namespace ParticleManagement {
 
   template <class P, Real& (P::*weight)(), const RealVect& (P::*position)() const>
-  static inline void
-  partitionAndSplitEqualWeightKD(KDNode<P>& a_node, const BinaryParticleReconcile<P> a_particleReconcile) noexcept
+  inline void
+  buildEqualWeightKDLeaves(const std::vector<P>&                       a_particles,
+                           const int                                   a_maxLeaves,
+                           const BinaryParticleReconcile<P>&           a_particleReconcile,
+                           std::vector<std::pair<const P*, const P*>>& a_leaves) noexcept
   {
-    CH_assert(!(a_node.isInteriorNode()));
-    CH_assert(a_node.weight() > 2.0 - std::numeric_limits<Real>::min());
+    CH_TIME("ParticleManagement::buildEqualWeightKDLeaves");
 
-    constexpr Real splitThresh = 2.0 - std::numeric_limits<Real>::min();
-
-    // Particles and node weight.
-    typename KDNode<P>::ParticleList& particles = a_node.getParticles();
-
-    const Real W = a_node.weight();
-
-    // A. Figure out which coordinate direction we should partition and sort
-    //    the particles.
-    RealVect loCorner = +std::numeric_limits<Real>::max() * RealVect::Unit;
-    RealVect hiCorner = -std::numeric_limits<Real>::max() * RealVect::Unit;
-
-    for (auto& p : particles) {
-      const RealVect& pos = (p.*position)();
-      for (int dir = 0; dir < SpaceDim; dir++) {
-        loCorner[dir] = std::min(pos[dir], loCorner[dir]);
-        hiCorner[dir] = std::max(pos[dir], hiCorner[dir]);
-      }
-    }
-
-    const int splitDir = (hiCorner - loCorner).maxDir(true);
-
-    auto sortCrit = [splitDir](const P& p1, const P& p2) -> bool {
-      return (p1.*position)()[splitDir] < (p2.*position)()[splitDir];
+    // Half-open particle range [lo, hi) into the flat working buffer, plus the node weight. This replaces
+    // the old heap-allocated, shared_ptr-linked KDNode<P> (one alloc + atomic refcount per node).
+    struct NodeRange
+    {
+      std::size_t lo;
+      std::size_t hi;
+      Real        w;
     };
 
-    std::sort(particles.begin(), particles.end(), sortCrit);
+    // Reusable per-thread scratch: capacity is retained across calls (cleared, never freed), so after the
+    // first cell the merge does no heap allocation. The two particle buffers are ping-ponged level by level,
+    // so each node's particles are always a contiguous span -- no per-node particle list.
+    thread_local std::vector<P>         s_cur;
+    thread_local std::vector<P>         s_nxt;
+    thread_local std::vector<NodeRange> s_curNodes;
+    thread_local std::vector<NodeRange> s_nxtNodes;
 
-    // B. Determine the "median particle" and start computing the weight in the
-    //    two halves.
-    size_t id = 0;
-    Real   wl = 0.0;
-    Real   wr = W - (particles[id].*weight)();
+    a_leaves.clear();
 
-    for (size_t i = 1; i < particles.size(); i++) {
-      const Real& w = (particles[id].*weight)();
-
-      if (wl + w < wr) {
-        id = i;
-        wl += w;
-        wr = W - wl - (particles[id].*weight)();
-      }
-      else {
-        break;
-      }
+    const std::size_t numInput = a_particles.size();
+    if (numInput == 0 || a_maxLeaves <= 0) {
+      return;
     }
 
-    // C. Copy the two particle halves to each subnode.
-    P p = particles[id];
+    constexpr Real    splitThresh = 2.0 - std::numeric_limits<Real>::min();
+    const std::size_t maxLeaves   = static_cast<std::size_t>(a_maxLeaves);
 
-    typename KDNode<P>::ParticleList pl;
-    typename KDNode<P>::ParticleList pr;
+    // Seed the root level. Reserve room for split products: the median split adds at most one particle per
+    // internal node, i.e. fewer than maxLeaves extra particles over the whole build.
+    s_cur.clear();
+    s_cur.reserve(numInput + maxLeaves);
+    s_cur.insert(s_cur.end(), a_particles.begin(), a_particles.end());
 
-    std::move(particles.begin(), particles.begin() + id, std::back_inserter(pl));
-    std::move(particles.begin() + id + 1, particles.end(), std::back_inserter(pr));
-
-    const Real& pw = (p.*weight)();
-    const Real  dw = wr - wl;
-
-    CH_assert(wl + wr + pw == W);
-
-    // D. Assign the median particle; split the particle if we can.
-    if (pw >= splitThresh && pw >= std::abs(dw)) {
-      Real dwl = dw;
-      Real dwr = 0.0;
-      Real ddw = pw - dw;
-
-      const long long N = (long long)ddw;
-
-      if (N > 0LL) {
-
-        const long long Nr = N / 2;
-        const long long Nl = N - Nr;
-
-        dwl += (ddw / N) * Nl;
-        dwr += (ddw / N) * Nr;
-      }
-
-      if (dwl > 0.0 && dwr > 0.0) {
-        // Splitting particle.
-
-        P il(p);
-        P ir(p);
-
-        CH_assert(dwl >= 1.0);
-        CH_assert(dwr >= 1.0);
-
-        wl += dwl;
-        wr += dwr;
-
-        (il.*weight)() = dwl;
-        (ir.*weight)() = dwr;
-
-        // User can reconcile other particle properties.
-        a_particleReconcile(il, ir, p);
-
-        pl.emplace_back(std::move(il));
-        pr.emplace_back(std::move(ir));
-      }
-      else if (dwl > 0.0 && dwr == 0.0) {
-        // Particle assigned to left node.
-
-        P il(p);
-
-        CH_assert(dwl >= 1.0);
-
-        wl += dwl;
-        (il.*weight)() = dwl;
-        pl.emplace_back(std::move(il));
-      }
-      else if (dwl == 0.0 && dwr > 0.0) {
-        // Particle assigned to right node.
-
-        P ir(p);
-
-        CH_assert(dwr >= 1.0);
-
-        wr += dwr;
-        (ir.*weight)() = dwr;
-        pr.emplace_back(std::move(ir));
-      }
-      else {
-        // Should not happen.
-
-        MayDay::Abort("ParticleManagement::partitionAndSplitEqualWeightKD - logic bust");
-      }
-    }
-    else {
-      if (wl <= wr) {
-        wl += pw;
-        pl.emplace_back(std::move(p));
-      }
-      else {
-        wr += pw;
-        pr.emplace_back(std::move(p));
-      }
-    }
-
-    // E. If this breaks, weight is not conserved or we broke the median particle splitting; the weight difference
-    //    between the left/right node should be at most one physical particle.
-    CH_assert(wl + wr == W);
-    CH_assert(std::abs(wl - wr) <= 1.0);
-
-    // F. Instantiate the child nodes.
-    particles.resize(0);
-
-    a_node.getLeft()  = std::make_shared<KDNode<P>>(pl);
-    a_node.getRight() = std::make_shared<KDNode<P>>(pr);
-
-    a_node.getLeft()->weight()  = wl;
-    a_node.getRight()->weight() = wr;
-
-    // G. Debug code; make sure particle weights make sense
-#ifndef NDEBUG
-    Real WL = 0.0;
-    Real WR = 0.0;
-
-    // Note: Not auto& l/r : pl/pr because the particles were into the child node.
-    for (auto& l : a_node.getLeft()->getParticles()) {
-      CH_assert((l.*weight)() >= 1.0);
-
-      WL += (l.*weight)();
-    }
-
-    for (auto& r : a_node.getRight()->getParticles()) {
-      CH_assert((r.*weight)() >= 1.0);
-
-      WR += (r.*weight)();
-    }
-
-    CH_assert(WL == wl);
-    CH_assert(WR == wr);
-#endif
-  }
-
-  template <class P, Real& (P::*weight)(), const RealVect& (P::*position)() const>
-  inline std::vector<std::shared_ptr<KDNode<P>>>
-  recursivePartitionAndSplitEqualWeightKD(typename KDNode<P>::ParticleList& a_inputParticles,
-                                          const int                         a_maxLeaves,
-                                          const BinaryParticleReconcile<P>  a_particleReconcile) noexcept
-  {
-    CH_TIME("ParticleManagement::recursivePartitionAndSplitEqualWeightKD");
-
+    // Total weight (read from the non-const working copy; the weight() member-pointer is non-const-qualified).
     Real W = 0.0;
-
-    for (auto& p : a_inputParticles) {
+    for (P& p : s_cur) {
       W += (p.*weight)();
     }
 
-    std::vector<std::shared_ptr<KDNode<P>>> leaves;
+    s_curNodes.clear();
+    s_curNodes.push_back({static_cast<std::size_t>(0), numInput, W});
 
-    leaves.emplace_back(std::make_shared<KDNode<P>>(a_inputParticles));
-    leaves[0]->weight() = W;
-
+    // Breadth-first: split every splittable leaf of the current level, streaming the children contiguously
+    // into the next buffer, until we reach maxLeaves leaves or nothing can be split further.
     bool keepGoing = true;
-
-    while (keepGoing && leaves.size() < a_maxLeaves) {
+    while (keepGoing && s_curNodes.size() < maxLeaves) {
       keepGoing = false;
 
-      std::vector<std::shared_ptr<KDNode<P>>> newLeaves;
+      s_nxt.clear();
+      s_nxtNodes.clear();
 
-      for (const auto& l : leaves) {
-        if (l->weight() > 2.0 - std::numeric_limits<Real>::min()) {
-          ParticleManagement::partitionAndSplitEqualWeightKD<P, weight, position>(*l, a_particleReconcile);
+      // Each split turns one leaf into two (+1 leaf), so this level may split at most this many nodes
+      // before reaching maxLeaves. Nodes beyond the budget are carried forward unchanged -- they must NOT
+      // be dropped (doing so would discard their particles and break weight conservation).
+      std::size_t splitBudget = maxLeaves - s_curNodes.size();
 
-          newLeaves.emplace_back(l->getLeft());
-          newLeaves.emplace_back(l->getRight());
+      for (std::size_t ni = 0; ni < s_curNodes.size(); ni++) {
+        const NodeRange node = s_curNodes[ni];
+
+        if (node.w > splitThresh && splitBudget > 0) {
+          splitBudget--;
+
+          // ---- split this node (equal-weight median split) into s_nxt ----
+          P* const          beg = s_cur.data() + node.lo;
+          P* const          end = s_cur.data() + node.hi;
+          const std::size_t n   = node.hi - node.lo;
+          const Real        Wn  = node.w;
+
+          // A. Split along the longest bounding-box extent.
+          RealVect loCorner = +std::numeric_limits<Real>::max() * RealVect::Unit;
+          RealVect hiCorner = -std::numeric_limits<Real>::max() * RealVect::Unit;
+
+          for (P* p = beg; p != end; ++p) {
+            const RealVect& pos = ((*p).*position)();
+
+            for (int dir = 0; dir < SpaceDim; dir++) {
+              loCorner[dir] = std::min(pos[dir], loCorner[dir]);
+              hiCorner[dir] = std::max(pos[dir], hiCorner[dir]);
+            }
+          }
+
+          const int splitDir = (hiCorner - loCorner).maxDir(true);
+
+          std::sort(beg, end, [splitDir](const P& p1, const P& p2) -> bool {
+            return ((p1).*position)()[splitDir] < ((p2).*position)()[splitDir];
+          });
+
+          // B. Weight-balanced median particle.
+          std::size_t id = 0;
+          Real        wl = 0.0;
+          Real        wr = Wn - (beg[0].*weight)();
+
+          for (std::size_t i = 1; i < n; i++) {
+            const Real& w = (beg[id].*weight)();
+            if (wl + w < wr) {
+              id = i;
+              wl += w;
+              wr = Wn - wl - (beg[id].*weight)();
+            }
+            else {
+              break;
+            }
+          }
+
+          P          med = beg[id]; // non-const: weight() is a non-const-qualified member function
+          const Real pw  = (med.*weight)();
+          const Real dw  = wr - wl;
+
+          CH_assert(wl + wr + pw == Wn);
+
+          // C. Decide how the median is distributed; produce at most one extra particle per side.
+          bool hasExtraL = false;
+          bool hasExtraR = false;
+          P    extraL;
+          P    extraR;
+
+          if (pw >= splitThresh && pw >= std::abs(dw)) {
+            Real dwl = dw;
+            Real dwr = 0.0;
+
+            const Real      ddw    = pw - dw;
+            const long long Nsplit = (long long)ddw;
+
+            if (Nsplit > 0LL) {
+              const long long Nr = Nsplit / 2;
+              const long long Nl = Nsplit - Nr;
+
+              dwl += (ddw / Nsplit) * Nl;
+              dwr += (ddw / Nsplit) * Nr;
+            }
+
+            if (dwl > 0.0 && dwr > 0.0) {
+              // Split the median particle across both children.
+              extraL = med;
+              extraR = med;
+
+              CH_assert(dwl >= 1.0);
+              CH_assert(dwr >= 1.0);
+
+              wl += dwl;
+              wr += dwr;
+
+              (extraL.*weight)() = dwl;
+              (extraR.*weight)() = dwr;
+
+              a_particleReconcile(extraL, extraR, med);
+
+              hasExtraL = true;
+              hasExtraR = true;
+            }
+            else if (dwl > 0.0 && dwr == 0.0) {
+              extraL = med;
+              CH_assert(dwl >= 1.0);
+              wl += dwl;
+              (extraL.*weight)() = dwl;
+              hasExtraL          = true;
+            }
+            else if (dwl == 0.0 && dwr > 0.0) {
+              extraR = med;
+              CH_assert(dwr >= 1.0);
+              wr += dwr;
+              (extraR.*weight)() = dwr;
+              hasExtraR          = true;
+            }
+            else {
+              MayDay::Abort("ParticleManagement::buildEqualWeightKDLeaves - logic bust");
+            }
+          }
+          else {
+            // Median assigned whole to the lighter side (weight unchanged).
+            if (wl <= wr) {
+              wl        = wl + pw;
+              extraL    = med;
+              hasExtraL = true;
+            }
+            else {
+              wr        = wr + pw;
+              extraR    = med;
+              hasExtraR = true;
+            }
+          }
+
+          CH_assert(std::abs(wl + wr - Wn) <= Wn * std::numeric_limits<Real>::epsilon() * 16);
+          CH_assert(std::abs(wl - wr) <= 1.0);
+
+          // D. Stream the two children contiguously into s_nxt. Particle order within each child matches the
+          //    old implementation (base half first, then the median's piece), so the leaf reductions are
+          //    bit-for-bit identical. NOTE: reading from s_cur (stable) and writing to s_nxt (separate buffer).
+          const std::size_t leftLo = s_nxt.size();
+          s_nxt.insert(s_nxt.end(), beg, beg + id);
+          if (hasExtraL) {
+            s_nxt.push_back(std::move(extraL));
+          }
+          s_nxtNodes.push_back({leftLo, s_nxt.size(), wl});
+
+          const std::size_t rightLo = s_nxt.size();
+          s_nxt.insert(s_nxt.end(), beg + id + 1, end);
+          if (hasExtraR) {
+            s_nxt.push_back(std::move(extraR));
+          }
+          s_nxtNodes.push_back({rightLo, s_nxt.size(), wr});
 
           keepGoing = true;
         }
         else {
-          newLeaves.emplace_back(l);
-        }
-
-        // Break out if we have sufficient leaf nodes.
-        if (newLeaves.size() >= a_maxLeaves) {
-          break;
+          // Cannot split further -- carry this leaf forward unchanged.
+          const std::size_t lo = s_nxt.size();
+          s_nxt.insert(s_nxt.end(), s_cur.begin() + node.lo, s_cur.begin() + node.hi);
+          s_nxtNodes.push_back({lo, s_nxt.size(), node.w});
         }
       }
 
-      leaves = newLeaves;
+      s_cur.swap(s_nxt);
+      s_curNodes.swap(s_nxtNodes);
     }
 
-    return leaves;
+    // Emit the leaves as contiguous ranges into the (now stable) working buffer.
+    a_leaves.reserve(s_curNodes.size());
+    for (const NodeRange& r : s_curNodes) {
+      const P* const base = s_cur.data() + r.lo;
+      a_leaves.emplace_back(base, base + (r.hi - r.lo));
+    }
+  }
+
+  template <class P, const RealVect& (P::*position)() const>
+  inline void
+  mergeAdjacentNearest(std::vector<P>&                          a_particles,
+                       const std::size_t                        a_target,
+                       const std::function<void(P&, const P&)>& a_combine) noexcept
+  {
+    CH_TIME("ParticleManagement::mergeAdjacentNearest");
+
+    const std::size_t n = a_particles.size();
+    if (a_target == 0 || n <= a_target) {
+      return;
+    }
+
+    auto dist2 = [&a_particles](const std::size_t i, const std::size_t j) -> Real {
+      const RealVect& pi = (a_particles[i].*position)();
+      const RealVect& pj = (a_particles[j].*position)();
+
+      Real s = 0.0;
+
+      for (int d = 0; d < SpaceDim; d++) {
+        const Real dd = pi[d] - pj[d];
+
+        s += dd * dd;
+      }
+
+      return s;
+    };
+
+    // Index-based doubly-linked chain over the (spatially-ordered) list + liveness + version tags. No
+    // pointers and no per-call allocation after warmup.
+    thread_local std::vector<int>      prev, next;
+    thread_local std::vector<uint8_t>  alive;
+    thread_local std::vector<uint32_t> ver;
+
+    prev.assign(n, -1);
+    next.assign(n, -1);
+    alive.assign(n, 1);
+    ver.assign(n, 0);
+
+    for (std::size_t i = 0; i < n; i++) {
+      prev[i] = (i == 0) ? -1 : static_cast<int>(i - 1);
+      next[i] = (i + 1 == n) ? -1 : static_cast<int>(i + 1);
+    }
+
+    struct Edge
+    {
+      Real     d;
+      int      a;
+      int      b;
+      uint32_t va;
+      uint32_t vb;
+    };
+
+    const auto cmp = [](const Edge& x, const Edge& y) {
+      return x.d > y.d;
+    }; // min-heap
+
+    thread_local std::vector<Edge> heap;
+
+    heap.clear();
+
+    for (std::size_t i = 0; i + 1 < n; i++) {
+      heap.push_back({dist2(i, i + 1), static_cast<int>(i), static_cast<int>(i + 1), 0, 0});
+    }
+
+    std::make_heap(heap.begin(), heap.end(), cmp);
+
+    std::size_t count = n;
+    while (count > a_target && !heap.empty()) {
+      std::pop_heap(heap.begin(), heap.end(), cmp);
+      const Edge edge = heap.back();
+      heap.pop_back();
+
+      const int a = edge.a;
+      const int b = edge.b;
+
+      if (!alive[a] || !alive[b] || ver[a] != edge.va || ver[b] != edge.vb || next[a] != b) {
+        continue; // stale entry
+      }
+
+      // Combine b into a; a's centroid (and one neighbour) changes, so bump a's version.
+      a_combine(a_particles[a], a_particles[b]);
+      alive[b]     = 0;
+      const int nb = next[b];
+      next[a]      = nb;
+      if (nb >= 0) {
+        prev[nb] = a;
+      }
+
+      count--;
+      ver[a]++;
+
+      if (prev[a] >= 0) {
+        heap.push_back(
+          {dist2(static_cast<std::size_t>(prev[a]), static_cast<std::size_t>(a)), prev[a], a, ver[prev[a]], ver[a]});
+        std::push_heap(heap.begin(), heap.end(), cmp);
+      }
+      if (next[a] >= 0) {
+        heap.push_back(
+          {dist2(static_cast<std::size_t>(a), static_cast<std::size_t>(next[a])), a, next[a], ver[a], ver[next[a]]});
+        std::push_heap(heap.begin(), heap.end(), cmp);
+      }
+    }
+
+    // Compact the survivors back into a_particles (preserving chain order).
+    thread_local std::vector<P> survivors;
+
+    survivors.clear();
+    survivors.reserve(count);
+
+    for (std::size_t i = 0; i < n; i++) {
+      if (alive[i]) {
+        survivors.push_back(a_particles[i]);
+      }
+    }
+
+    a_particles.swap(survivors);
+  }
+
+  template <class Packed,
+            Real& (Packed::*packWeight)(),
+            const RealVect& (Packed::*packPosition)() const,
+            class P,
+            class Traits>
+  inline ParticleMerger<P, Traits>
+  makeSfcNearestNeighborMerger(std::function<Packed(const ParticleSoA<P, Traits>&, std::size_t)> a_gather,
+                               std::function<void(Packed&, const Packed&)>                       a_combine,
+                               std::function<void(ParticleSoA<P, Traits>&, const Packed&)>       a_scatter) noexcept
+  {
+    return [=](ParticleSoA<P, Traits>& a_particles, const CellInfo& /*a_cellInfo*/, int a_ppc) noexcept {
+      CH_TIMERS("ParticleManagement::makeSfcNearestNeighborMerger");
+      CH_TIMER("ParticleManagement::makeSfcNearestNeighborMerger::populate", t1);
+      CH_TIMER("ParticleManagement::makeSfcNearestNeighborMerger::sort_merge", t2);
+      CH_TIMER("ParticleManagement::makeSfcNearestNeighborMerger::emit", t3);
+
+      CH_START(t1);
+      thread_local std::vector<Packed> particles;
+
+      particles.clear();
+      particles.reserve(a_particles.size());
+
+      Real W = 0.0;
+
+      for (std::size_t i = 0; i < a_particles.size(); i++) {
+        Packed p = a_gather(a_particles, i);
+        W += (p.*packWeight)();
+        particles.emplace_back(std::move(p));
+      }
+      CH_STOP(t1);
+
+      if (W < 2.0 || a_ppc <= 0) {
+        return;
+      }
+
+      const std::size_t target = static_cast<std::size_t>(a_ppc);
+
+      CH_START(t2);
+      if (particles.size() > target) {
+        RealVect loCorner = +std::numeric_limits<Real>::max() * RealVect::Unit;
+        RealVect hiCorner = -std::numeric_limits<Real>::max() * RealVect::Unit;
+
+        for (const Packed& p : particles) {
+          const RealVect& x = (p.*packPosition)();
+
+          for (int dir = 0; dir < SpaceDim; dir++) {
+            loCorner[dir] = std::min(loCorner[dir], x[dir]);
+            hiCorner[dir] = std::max(hiCorner[dir], x[dir]);
+          }
+        }
+
+        RealVect invExtent = RealVect::Zero;
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          invExtent[dir] = (hiCorner[dir] > loCorner[dir]) ? 1.0 / (hiCorner[dir] - loCorner[dir]) : 0.0;
+        }
+
+        constexpr uint32_t                                         maxCoord = (1U << 21) - 1U;
+        thread_local std::vector<std::pair<uint64_t, std::size_t>> keyed;
+
+        keyed.clear();
+        keyed.reserve(particles.size());
+
+        for (std::size_t i = 0; i < particles.size(); i++) {
+          const RealVect& x = (particles[i].*packPosition)();
+
+          std::array<uint32_t, SpaceDim> coords;
+
+          for (int dir = 0; dir < SpaceDim; dir++) {
+            Real t      = (x[dir] - loCorner[dir]) * invExtent[dir];
+            t           = std::max(0.0, std::min(1.0, t));
+            coords[dir] = static_cast<uint32_t>(t * maxCoord);
+          }
+
+          keyed.emplace_back(LoadBalancing::hilbertIndex<SpaceDim>(coords), i);
+        }
+
+        std::sort(keyed.begin(), keyed.end(), [](const auto& a, const auto& b) {
+          return a.first < b.first;
+        });
+
+        thread_local std::vector<Packed> sorted;
+
+        sorted.clear();
+        sorted.reserve(particles.size());
+
+        for (const auto& k : keyed) {
+          sorted.push_back(particles[k.second]);
+        }
+        particles.swap(sorted);
+
+        mergeAdjacentNearest<Packed, packPosition>(particles, target, a_combine);
+      }
+      else if (particles.size() < target) {
+        while (particles.size() < target) {
+          std::size_t hi = 0;
+
+          for (std::size_t i = 1; i < particles.size(); i++) {
+            if ((particles[i].*packWeight)() > (particles[hi].*packWeight)()) {
+              hi = i;
+            }
+          }
+
+          if ((particles[hi].*packWeight)() < 2.0) {
+            break;
+          }
+
+          // Use floor/ceil rather than *= 0.5 so that integer weights remain integers after
+          // the split. weight * 0.5 on an odd integer (e.g. 3 -> 1.5) produces a fractional
+          // weight that later breaks removePhysicalParticles, which assumes integer weights.
+          const Real hw   = std::floor((particles[hi].*packWeight)() * 0.5);
+          Packed     half = particles[hi];
+          (particles[hi].*packWeight)() -= hw;
+          (half.*packWeight)() = hw;
+          particles.push_back(half);
+        }
+      }
+      CH_STOP(t2);
+
+      CH_START(t3);
+      a_particles.clear();
+      for (const Packed& p : particles) {
+        a_scatter(a_particles, p);
+      }
+      CH_STOP(t3);
+    };
+  }
+
+  template <class Packed,
+            Real& (Packed::*packWeight)(),
+            const RealVect& (Packed::*packPosition)() const,
+            class P,
+            class Traits>
+  inline ParticleMerger<P, Traits>
+  makeEqualWeightKDMerger(
+    std::function<Packed(const ParticleSoA<P, Traits>&, std::size_t)>                           a_gather,
+    BinaryParticleReconcile<Packed>                                                             a_reconcile,
+    std::function<void(ParticleSoA<P, Traits>&, const Packed*, const Packed*, const CellInfo&)> a_scatterLeaf) noexcept
+  {
+    return [=](ParticleSoA<P, Traits>& a_particles, const CellInfo& a_cellInfo, int a_ppc) noexcept {
+      CH_TIMERS("ParticleManagement::makeEqualWeightKDMerger");
+      CH_TIMER("ParticleManagement::makeEqualWeightKDMerger::populate", t1);
+      CH_TIMER("ParticleManagement::makeEqualWeightKDMerger::build_kd", t2);
+      CH_TIMER("ParticleManagement::makeEqualWeightKDMerger::scatter", t3);
+
+      CH_START(t1);
+      thread_local std::vector<Packed> particles;
+
+      particles.clear();
+      particles.reserve(a_particles.size());
+
+      Real W = 0.0;
+
+      for (std::size_t i = 0; i < a_particles.size(); i++) {
+        Packed p = a_gather(a_particles, i);
+        W += (p.*packWeight)();
+        particles.emplace_back(std::move(p));
+      }
+      CH_STOP(t1);
+
+      if (W < 2.0 || a_ppc <= 0) {
+        return;
+      }
+
+      CH_START(t2);
+      thread_local std::vector<std::pair<const Packed*, const Packed*>> leaves;
+
+      buildEqualWeightKDLeaves<Packed, packWeight, packPosition>(particles, a_ppc, a_reconcile, leaves);
+      CH_STOP(t2);
+
+      CH_START(t3);
+      a_particles.clear();
+      for (const auto& leaf : leaves) {
+        a_scatterLeaf(a_particles, leaf.first, leaf.second, a_cellInfo);
+      }
+      CH_STOP(t3);
+    };
+  }
+
+  template <class Context, class P, class Traits>
+  inline ParticleMerger<P, Traits>
+  makeReinitializeMerger(
+    std::function<std::pair<long long, Context>(const ParticleSoA<P, Traits>&)>              a_aggregate,
+    std::function<void(ParticleSoA<P, Traits>&, const RealVect&, long long, const Context&)> a_emit,
+    std::function<RealVect()>                                                                a_probLo) noexcept
+  {
+    return [=](ParticleSoA<P, Traits>& a_particles, const CellInfo& a_cellInfo, int a_ppc) noexcept {
+      CH_TIME("ParticleManagement::makeReinitializeMerger");
+
+      if (a_ppc <= 0) {
+        return;
+      }
+
+      const auto [numPhysical, context] = a_aggregate(a_particles);
+
+      if (numPhysical <= 0LL) {
+        return;
+      }
+
+      const std::vector<long long> weights = partitionParticleWeights(numPhysical, (long long)a_ppc);
+
+      const Real      dx            = a_cellInfo.getDx();
+      const Real      kappa         = a_cellInfo.getVolFrac();
+      const RealVect  cellPos       = a_probLo() + dx * (a_cellInfo.getGridIndex() + 0.5 * RealVect::Unit);
+      const RealVect& validLo       = a_cellInfo.getValidLo();
+      const RealVect& validHi       = a_cellInfo.getValidHi();
+      const RealVect& bndryCentroid = a_cellInfo.getBndryCentroid();
+      const RealVect& bndryNormal   = a_cellInfo.getBndryNormal();
+
+      a_particles.clear();
+
+      for (const long long wt : weights) {
+        const RealVect x = Random::randomPosition(cellPos, validLo, validHi, bndryCentroid, bndryNormal, dx, kappa);
+        a_emit(a_particles, x, wt, context);
+      }
+    };
   }
 
   template <typename P, typename Traits, typename T, typename>
@@ -378,7 +720,7 @@ namespace ParticleManagement {
         if (W > zero) {
           ret.resize(a_maxCompParticles, W);
 
-          for (int i = 0; i < ret.size() && r > zero; i++) {
+          for (std::size_t i = 0; i < ret.size() && r > zero; i++) {
             ret[i] += one;
             r--;
           }
