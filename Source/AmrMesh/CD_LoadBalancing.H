@@ -177,7 +177,7 @@ public:
   */
   template <int DIM>
   static uint64_t
-  mortonIndex(const std::array<uint32_t, DIM> a_coords) noexcept;
+  mortonIndex(const std::array<uint32_t, DIM>& a_coords) noexcept;
 
   /**
     @brief Compute a Hilbert-curve index from integer coordinates, using 21 bits per direction.

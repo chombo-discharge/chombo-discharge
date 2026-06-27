@@ -528,7 +528,6 @@ ItoSolver::parseParticleMerger()
 
     // Cut-cells: weighted-centroid position to avoid placing particles outside the EB.
     // Full cells: random point in the leaf bounding box to reinitialize spatial distribution.
-    // Note: energy is not normalized by weight in the full-cell branch (intentional).
     const std::function<void(ParticleSoA<ItoParticle>&, const PType*, const PType*, const CellInfo&)> scatterLeaf =
       [](ParticleSoA<ItoParticle>& a, const PType* first, const PType* last, const CellInfo& cellInfo) -> void {
       Real w = 0.0;
@@ -571,6 +570,8 @@ ItoSolver::parseParticleMerger()
         for (int dir = 0; dir < SpaceDim; dir++) {
           x[dir] = xMin[dir] + Random::getUniformReal01() * (xMax[dir] - xMin[dir]);
         }
+
+        e *= 1.0 / w;
 
         ItoParticle payload;
         payload.energy = static_cast<ParticleReal>(e);

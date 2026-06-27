@@ -358,7 +358,7 @@ LoadBalancing::sortSFC(Vector<Box>&                                             
 
 template <int DIM>
 uint64_t
-LoadBalancing::mortonIndex(const std::array<uint32_t, DIM> a_coords) noexcept
+LoadBalancing::mortonIndex(const std::array<uint32_t, DIM>& a_coords) noexcept
 {
   uint64_t code = 0;
 

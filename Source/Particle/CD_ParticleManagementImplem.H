@@ -225,7 +225,7 @@ namespace ParticleManagement {
             }
           }
 
-          CH_assert(wl + wr == Wn);
+          CH_assert(std::abs(wl + wr - Wn) <= Wn * std::numeric_limits<Real>::epsilon() * 16);
           CH_assert(std::abs(wl - wr) <= 1.0);
 
           // D. Stream the two children contiguously into s_nxt. Particle order within each child matches the
@@ -720,7 +720,7 @@ namespace ParticleManagement {
         if (W > zero) {
           ret.resize(a_maxCompParticles, W);
 
-          for (int i = 0; i < ret.size() && r > zero; i++) {
+          for (std::size_t i = 0; i < ret.size() && r > zero; i++) {
             ret[i] += one;
             r--;
           }
