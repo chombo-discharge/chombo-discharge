@@ -142,52 +142,74 @@ TiledMeshRefine::gatherSuperTiles(SuperTiles& a_tiles) const noexcept
   CH_TIME("TiledMeshRefine::gatherSuperTiles");
 
 #ifdef CH_MPI
-  // Fixed-size record per touched super-tile: the key followed by its sub-occupancy bitmask.
-  const int R = 1 + m_bitmaskWords;
+  // Promote locally-full super-tiles first: a super-tile all of whose sub-tiles are tagged on this rank is
+  // globally full (tags partition the domain by rank, so a super's tagged sub-tiles are disjoint across
+  // ranks and OR-ing is exact). Those are then sent as a single key instead of an all-ones bitmask.
+  this->classify(a_tiles);
 
-  std::vector<unsigned long long> sendBuffer(static_cast<std::size_t>(a_tiles.m_partial.size()) * R);
-  {
-    std::size_t idx = 0;
-    for (const auto& kv : a_tiles.m_partial) {
-      sendBuffer[idx++] = kv.first;
-      for (int w = 0; w < m_bitmaskWords; w++) {
-        sendBuffer[idx++] = kv.second[w];
-      }
+  const int nProc = numProc();
+
+  // All-gather a uint64 buffer (every rank's data, including this rank's), returning the concatenation.
+  auto allGather = [&](const std::vector<unsigned long long>& a_send) {
+    const int        mySendCount = static_cast<int>(a_send.size());
+    int              recvCount   = mySendCount;
+    std::vector<int> sendCounts(nProc);
+    std::vector<int> offsets(nProc);
+
+    MPI_Allreduce(MPI_IN_PLACE, &recvCount, 1, MPI_INT, MPI_SUM, Chombo_MPI::comm);
+    MPI_Allgather(&mySendCount, 1, MPI_INT, sendCounts.data(), 1, MPI_INT, Chombo_MPI::comm);
+    offsets[0] = 0;
+    for (int i = 0; i < nProc - 1; i++) {
+      offsets[i + 1] = offsets[i] + sendCounts[i];
+    }
+
+    std::vector<unsigned long long> recv(recvCount);
+    MPI_Allgatherv(a_send.data(),
+                   mySendCount,
+                   MPI_UNSIGNED_LONG_LONG,
+                   recv.data(),
+                   sendCounts.data(),
+                   offsets.data(),
+                   MPI_UNSIGNED_LONG_LONG,
+                   Chombo_MPI::comm);
+    return recv;
+  };
+
+  // Stream 1 -- full super-tiles, one key each (the "full marker", no bitmask).
+  const std::vector<unsigned long long> sendFull(a_tiles.m_full.begin(), a_tiles.m_full.end());
+  const std::vector<unsigned long long> recvFull = allGather(sendFull);
+
+  // Stream 2 -- partial super-tiles, key + sub-occupancy bitmask each.
+  const int                       R = 1 + m_bitmaskWords;
+  std::vector<unsigned long long> sendPartial;
+  sendPartial.reserve(a_tiles.m_partial.size() * R);
+  for (const auto& kv : a_tiles.m_partial) {
+    sendPartial.push_back(kv.first);
+    for (int w = 0; w < m_bitmaskWords; w++) {
+      sendPartial.push_back(kv.second[w]);
     }
   }
+  const std::vector<unsigned long long> recvPartial = allGather(sendPartial);
 
-  const int        mySendCount = static_cast<int>(sendBuffer.size());
-  int              recvCount   = mySendCount;
-  std::vector<int> sendCounts(numProc());
-  std::vector<int> offsets(numProc());
-
-  MPI_Allreduce(MPI_IN_PLACE, &recvCount, 1, MPI_INT, MPI_SUM, Chombo_MPI::comm);
-  MPI_Allgather(&mySendCount, 1, MPI_INT, sendCounts.data(), 1, MPI_INT, Chombo_MPI::comm);
-  offsets[0] = 0;
-  for (int i = 0; i < numProc() - 1; i++) {
-    offsets[i + 1] = offsets[i] + sendCounts[i];
-  }
-
-  std::vector<unsigned long long> recvBuffer(recvCount);
-  MPI_Allgatherv(sendBuffer.data(),
-                 mySendCount,
-                 MPI_UNSIGNED_LONG_LONG,
-                 recvBuffer.data(),
-                 sendCounts.data(),
-                 offsets.data(),
-                 MPI_UNSIGNED_LONG_LONG,
-                 Chombo_MPI::comm);
-
-  // Rebuild as the global OR of all ranks' contributions (this rank's own data is included).
+  // Rebuild the global representation: full markers are full; partial bitmasks are OR-ed per key, except
+  // for keys already known full. (Partials that OR to all-ones across ranks are promoted by the caller's
+  // subsequent classify().)
+  a_tiles.m_full.clear();
   a_tiles.m_partial.clear();
-  for (int i = 0; i < recvCount; i += R) {
-    const std::uint64_t         key = recvBuffer[i];
-    std::vector<std::uint64_t>& bm  = a_tiles.m_partial[key];
+  for (const unsigned long long key : recvFull) {
+    a_tiles.m_full.insert(key);
+  }
+  for (std::size_t i = 0; i < recvPartial.size(); i += R) {
+    const std::uint64_t key = recvPartial[i];
+    if (a_tiles.m_full.count(key) > 0) {
+      continue; // already full via a marker from some rank
+    }
+    std::vector<std::uint64_t>& bm = a_tiles.m_partial[key];
     if (bm.empty()) {
       bm.assign(m_bitmaskWords, 0);
     }
     for (int w = 0; w < m_bitmaskWords; w++) {
-      bm[w] |= recvBuffer[i + 1 + w];
+      bm[w] |= recvPartial[i + 1 + w];
     }
   }
 #endif

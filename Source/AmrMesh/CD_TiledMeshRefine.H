@@ -171,11 +171,14 @@ protected:
   classify(SuperTiles& a_tiles) const noexcept;
 
   /**
-    @brief Gather the (per-rank-local, unclassified) super-tile representation onto all ranks.
-    @details Each rank sends one fixed-size record (key + bitmask) per locally-touched super-tile; the
-    received bitmasks are OR-ed per key so the result is the global tagged set on every rank. The gathered
-    data scales with the number of touched super-tiles, not the number of fine tiles.
-    @param[in,out] a_tiles Local representation in (only m_partial populated); global representation out.
+    @brief Gather the (per-rank-local) super-tile representation onto all ranks.
+    @details Locally-full super-tiles are classified first and gathered as a single key each (a "full
+    marker", no bitmask); partial super-tiles are gathered as key + bitmask and OR-ed per key. Because tags
+    partition the domain by rank, a super-tile's tagged sub-tiles are disjoint across ranks, so the OR is
+    exact and a locally-full super-tile is globally full. The gathered data scales with the number of
+    touched super-tiles (full ones costing just a key), not the number of fine tiles. Partial super-tiles
+    that OR to all-ones across ranks are promoted by the caller's subsequent classify().
+    @param[in,out] a_tiles Local representation in; global representation out.
   */
   void
   gatherSuperTiles(SuperTiles& a_tiles) const noexcept;
