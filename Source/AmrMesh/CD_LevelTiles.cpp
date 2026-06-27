@@ -24,11 +24,11 @@ LevelTiles::LevelTiles() noexcept : m_isDefined(false)
   CH_TIME("LevelTiles::LevelTiles(weak)");
 }
 
-LevelTiles::LevelTiles(const DisjointBoxLayout& a_dbl, const int a_blockingFactor) noexcept
+LevelTiles::LevelTiles(const DisjointBoxLayout& a_dbl, const int a_minBlockSize) noexcept
 {
   CH_TIME("LevelTiles::LevelTiles(full)");
 
-  this->define(a_dbl, a_blockingFactor);
+  this->define(a_dbl, a_minBlockSize);
 }
 
 LevelTiles::~LevelTiles() noexcept
@@ -37,7 +37,7 @@ LevelTiles::~LevelTiles() noexcept
 }
 
 void
-LevelTiles::define(const DisjointBoxLayout& a_dbl, const int a_blockingFactor) noexcept
+LevelTiles::define(const DisjointBoxLayout& a_dbl, const int a_minBlockSize) noexcept
 {
   CH_TIME("LevelTiles::define");
 
@@ -49,7 +49,7 @@ LevelTiles::define(const DisjointBoxLayout& a_dbl, const int a_blockingFactor) n
 
   for (LayoutIterator lit = a_dbl.layoutIterator(); lit.ok(); ++lit) {
     const LayoutIndex& lidx   = lit();
-    const IntVect      tile   = coarsen(a_dbl[lidx], a_blockingFactor).smallEnd();
+    const IntVect      tile   = coarsen(a_dbl[lidx], a_minBlockSize).smallEnd();
     const unsigned int rankID = a_dbl.procID(lidx);
     const unsigned int tileID = a_dbl.index(lidx);
 

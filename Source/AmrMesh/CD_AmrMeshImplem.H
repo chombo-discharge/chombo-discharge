@@ -248,7 +248,7 @@ AmrMesh::allocate(ParticleContainer<P, Traits>& a_container, const std::string& 
     MayDay::Abort(str.c_str());
   }
 
-  if (m_maxBoxSize != m_blockingFactor) {
+  if (m_maxBoxSize != m_minBlockSize) {
     MayDay::Abort(
       "AmrMesh::allocate(ParticleContainer<P, Traits>, string) - only constant box sizes are supported for particle methods");
   }
@@ -258,7 +258,7 @@ AmrMesh::allocate(ParticleContainer<P, Traits>& a_container, const std::string& 
                      m_realms[a_realm]->getDx(),
                      m_realms[a_realm]->getRefinementRatios(),
                      m_probLo,
-                     m_blockingFactor,
+                     m_minBlockSize,
                      m_finestLevel,
                      a_realm,
                      &m_realms[a_realm]->getValidCells()); // alias for remap()'s stayer fast path
@@ -342,7 +342,7 @@ AmrMesh::remapToNewGrids(ParticleContainer<P, Traits>& a_particles,
                      this->getDomains(),
                      this->getDx(),
                      this->getRefinementRatios(),
-                     m_blockingFactor,
+                     m_minBlockSize,
                      a_newFinestLevel);
 }
 

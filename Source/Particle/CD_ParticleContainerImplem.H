@@ -40,7 +40,7 @@ ParticleContainer<P, Traits>::findDestination(const RealVect& a_pos) const
     IntVect tile;
 
     for (int dir = 0; dir < SpaceDim; dir++) {
-      tile[dir] = static_cast<int>(std::floor((a_pos[dir] - m_probLo[dir]) / (m_blockingFactor * m_dx[lvl][dir])));
+      tile[dir] = static_cast<int>(std::floor((a_pos[dir] - m_probLo[dir]) / (m_minBlockSize * m_dx[lvl][dir])));
     }
 
     const LevelTiles& tiles = *m_levelTiles[lvl];
@@ -505,7 +505,7 @@ ParticleContainer<P, Traits>::regrid(const Vector<DisjointBoxLayout>& a_grids,
                                      const Vector<ProblemDomain>&     a_domains,
                                      const Vector<Real>&              a_dx,
                                      const Vector<int>&               a_refRat,
-                                     const int                        a_blockingFactor,
+                                     const int                        a_minBlockSize,
                                      const int                        a_newFinestLevel)
 {
   CH_TIME("ParticleContainer::regrid");
@@ -513,11 +513,11 @@ ParticleContainer<P, Traits>::regrid(const Vector<DisjointBoxLayout>& a_grids,
   CH_assert(m_isDefined);
 
   // ---- adopt the new layout ----
-  m_grids          = a_grids;
-  m_domains        = a_domains;
-  m_refRat         = a_refRat;
-  m_blockingFactor = a_blockingFactor;
-  m_finestLevel    = a_newFinestLevel;
+  m_grids        = a_grids;
+  m_domains      = a_domains;
+  m_refRat       = a_refRat;
+  m_minBlockSize = a_minBlockSize;
+  m_finestLevel  = a_newFinestLevel;
 
   m_dx.resize(a_newFinestLevel + 1);
   for (int lvl = 0; lvl <= a_newFinestLevel; lvl++) {
@@ -532,7 +532,7 @@ ParticleContainer<P, Traits>::regrid(const Vector<DisjointBoxLayout>& a_grids,
   for (int lvl = 0; lvl <= a_newFinestLevel; lvl++) {
     m_particles[lvl]     = RefCountedPtr<LevelParticles>(new LevelParticles(a_grids[lvl]));
     m_maskParticles[lvl] = RefCountedPtr<LevelParticles>(new LevelParticles(a_grids[lvl]));
-    m_levelTiles[lvl]    = RefCountedPtr<LevelTiles>(new LevelTiles(a_grids[lvl], a_blockingFactor));
+    m_levelTiles[lvl]    = RefCountedPtr<LevelTiles>(new LevelTiles(a_grids[lvl], a_minBlockSize));
   }
 
   this->setupGrownGrids();

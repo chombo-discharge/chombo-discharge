@@ -45,7 +45,7 @@ Realm::define(const Vector<DisjointBoxLayout>&                           a_grids
               const Vector<Real>&                                        a_dx,
               const RealVect&                                            a_probLo,
               const int                                                  a_finestLevel,
-              const int                                                  a_blockingFactor,
+              const int                                                  a_minBlockSize,
               const int                                                  a_ebGhost,
               const int                                                  a_numGhost,
               const int                                                  a_lsfGhost,
@@ -69,7 +69,7 @@ Realm::define(const Vector<DisjointBoxLayout>&                           a_grids
   m_dx                   = a_dx;
   m_probLo               = a_probLo;
   m_finestLevel          = a_finestLevel;
-  m_blockingFactor       = a_blockingFactor;
+  m_minBlockSize         = a_minBlockSize;
   m_numGhost             = a_numGhost;
   m_baseif               = a_baseif;
   m_multifluidIndexSpace = a_mfis;
@@ -1066,7 +1066,7 @@ Realm::defineLevelTiles() noexcept
   m_levelTiles.resize(1 + m_finestLevel);
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    m_levelTiles[lvl] = RefCountedPtr<LevelTiles>(new LevelTiles(m_grids[lvl], m_blockingFactor));
+    m_levelTiles[lvl] = RefCountedPtr<LevelTiles>(new LevelTiles(m_grids[lvl], m_minBlockSize));
   }
 }
 

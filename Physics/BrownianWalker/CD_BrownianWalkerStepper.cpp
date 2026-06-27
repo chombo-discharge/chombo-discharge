@@ -756,7 +756,7 @@ BrownianWalkerStepper::loadBalanceBoxesParticles(Vector<Vector<int>>&           
                    m_amr->getDomains(),
                    m_amr->getDx(),
                    m_amr->getRefinementRatios(),
-                   m_amr->getBlockingFactor(),
+                   m_amr->getMinBlockSize(),
                    a_finestLevel);
 
   a_procs.resize(1 + a_finestLevel);

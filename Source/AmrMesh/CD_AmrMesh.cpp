@@ -933,7 +933,7 @@ AmrMesh::parseOptions()
   this->parseMaxAmrDepth();
   this->parseMaxSimulationDepth();
   this->parseRefinementRatios();
-  this->parseBlockingFactor();
+  this->parseMinBlockSize();
   this->parseMaxBoxSize();
   this->parseMaxEbisBoxSize();
   this->parseGridGeneration();
@@ -962,7 +962,7 @@ AmrMesh::parseRuntimeOptions()
 
   this->parseMaxSimulationDepth();
   this->parseVerbosity();
-  this->parseBlockingFactor();
+  this->parseMinBlockSize();
   this->parseMaxBoxSize();
   this->parseGridGeneration();
   this->parseBrBufferSize();
@@ -1160,7 +1160,7 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
 
   // Inside this loop we make the boxes.
   if (m_maxAmrDepth > 0 && hardcap > 0) {
-    domainSplit(m_domains[0], oldBoxes[0], m_maxBoxSize, m_blockingFactor);
+    domainSplit(m_domains[0], oldBoxes[0], m_maxBoxSize, m_minBlockSize);
 
     // If have old grids, we can use the old boxes as input to the grid generators (since they don't necessarily regrid all levels).
     if (!m_hasGrids) {
@@ -1186,7 +1186,7 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
       BRMeshRefine meshRefine(m_domains[0],
                               m_refinementRatios,
                               m_fillRatioBR,
-                              m_blockingFactor,
+                              m_minBlockSize,
                               m_bufferSizeBR,
                               m_maxBoxSize);
 
@@ -1195,7 +1195,7 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
       break;
     }
     case GridGenerationMethod::Tiled: {
-      TiledMeshRefine meshRefine(m_domains[0], m_refinementRatios, m_blockingFactor * IntVect::Unit);
+      TiledMeshRefine meshRefine(m_domains[0], m_refinementRatios, m_minBlockSize * IntVect::Unit);
 
       newFinestLevel = meshRefine.regrid(newBoxes, a_tags);
       newBoxes[0]    = oldBoxes[0];
@@ -1216,7 +1216,7 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
   }
   else { // Only end up here if we have a single grid level, i.e. just single-level grid decomposition.
     newBoxes.resize(1);
-    domainSplit(m_domains[0], newBoxes[0], m_maxBoxSize, m_blockingFactor);
+    domainSplit(m_domains[0], newBoxes[0], m_maxBoxSize, m_minBlockSize);
 
     m_finestLevel = 0;
   }
@@ -1224,7 +1224,7 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
   // Coarsest level also changes in this case, but that's not actually caught by the regridders. We have to do this because the blocking
   // factor could have been changed during runtime option parsing.
   if (a_lmin == 0) {
-    domainSplit(m_domains[0], newBoxes[0], m_maxBoxSize, m_blockingFactor);
+    domainSplit(m_domains[0], newBoxes[0], m_maxBoxSize, m_minBlockSize);
   }
 
   // Sort the boxes and then load balance them, using the patch volume as a proxy for the computational load.
@@ -2711,18 +2711,26 @@ AmrMesh::parseGridGeneration()
 }
 
 void
-AmrMesh::parseBlockingFactor()
+AmrMesh::parseMinBlockSize()
 {
-  CH_TIME("AmrMesh::parseBlockingFactor()");
+  CH_TIME("AmrMesh::parseMinBlockSize()");
   if (m_verbosity > 3) {
-    pout() << "AmrMesh::parseBlockingFactor()" << endl;
+    pout() << "AmrMesh::parseMinBlockSize()" << endl;
   }
 
   ParmParse pp("AmrMesh");
   int       blocking;
-  pp.get("blocking_factor", blocking);
+
+  // 'min_block_size' is the current name; 'blocking_factor' is accepted as a deprecated alias.
+  if (pp.contains("blocking_factor") && !pp.contains("min_block_size")) {
+    pp.get("blocking_factor", blocking);
+  }
+  else {
+    pp.get("min_block_size", blocking);
+  }
+
   if (blocking >= 4 && blocking % 2 == 0) {
-    m_blockingFactor = blocking;
+    m_minBlockSize = blocking;
   }
 }
 
@@ -2904,10 +2912,10 @@ AmrMesh::sanityCheck() const
   CH_assert(m_maxAmrDepth >= 0);
   for (int lvl = 0; lvl < m_refinementRatios.size(); lvl++) {
     CH_assert(m_refinementRatios[lvl] == 2 || m_refinementRatios[lvl] == 4);
-    CH_assert(m_blockingFactor >= 4 && m_blockingFactor % m_refinementRatios[lvl] == 0);
+    CH_assert(m_minBlockSize >= 4 && m_minBlockSize % m_refinementRatios[lvl] == 0);
   }
 
-  CH_assert(m_maxBoxSize >= 8 && m_maxBoxSize % m_blockingFactor == 0);
+  CH_assert(m_maxBoxSize >= 8 && m_maxBoxSize % m_minBlockSize == 0);
   CH_assert(m_fillRatioBR > 0. && m_fillRatioBR <= 1.0);
   CH_assert(m_bufferSizeBR > 0);
 
@@ -2944,7 +2952,7 @@ AmrMesh::sanityCheck() const
   // If this ever becomes a problem, take a look at this again.
   if (m_maxAmrDepth > 0) {
     for (int lvl = 0; lvl < m_maxAmrDepth; lvl++) {
-      if (m_refinementRatios[lvl] > 2 && m_blockingFactor < 8) {
+      if (m_refinementRatios[lvl] > 2 && m_minBlockSize < 8) {
         //        MayDay::Abort("AmrMesh::sanityCheck -- can't use blocking factor < 8 with factor 4 refinement!");
       }
     }
@@ -3041,14 +3049,14 @@ AmrMesh::getRedistributionRadius() const
 }
 
 int
-AmrMesh::getBlockingFactor() const
+AmrMesh::getMinBlockSize() const
 {
-  CH_TIME("AmrMesh::getBlockingFactor()");
+  CH_TIME("AmrMesh::getMinBlockSize()");
   if (m_verbosity > 1) {
-    pout() << "AmrMesh::getBlockingFactor()" << endl;
+    pout() << "AmrMesh::getMinBlockSize()" << endl;
   }
 
-  return m_blockingFactor;
+  return m_minBlockSize;
 }
 
 int
@@ -3765,7 +3773,7 @@ AmrMesh::defineRealms()
                      m_dx,
                      m_probLo,
                      m_finestLevel,
-                     m_blockingFactor,
+                     m_minBlockSize,
                      m_numEbGhostsCells,
                      m_numGhostCells,
                      m_numLsfGhostCells,
@@ -3821,7 +3829,7 @@ AmrMesh::regridRealm(const std::string&         a_realm,
                             m_dx,
                             m_probLo,
                             m_finestLevel,
-                            m_blockingFactor,
+                            m_minBlockSize,
                             m_numEbGhostsCells,
                             m_numGhostCells,
                             m_numLsfGhostCells,

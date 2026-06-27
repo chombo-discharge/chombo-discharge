@@ -28,7 +28,7 @@
 /**
   @brief Class for storing the AMR hierarchy as a collection of tiles. 
   @details This class only makes sense in terms of a grid which uses constant-size grid, which is a restriction we happily accept when using particles. This class
-  decomposes the AMR hierarchy into such tiles, each tile being the cells spanned by the blockingFactor^SpaceDim grid patch. 
+  decomposes the AMR hierarchy into such tiles, each tile being the cells spanned by the minBlockSize^SpaceDim grid patch. 
 */
 class LevelTiles
 {
@@ -72,9 +72,9 @@ public:
   /**
     @brief Full constructor - puts object in usable state.
     @param[in] a_dbl            Grids
-    @param[in] a_blockingFactor Grid size.
+    @param[in] a_minBlockSize Grid size.
   */
-  LevelTiles(const DisjointBoxLayout& a_dbl, const int a_blockingFactor) noexcept;
+  LevelTiles(const DisjointBoxLayout& a_dbl, const int a_minBlockSize) noexcept;
 
   /**
     @brief Destructor (does nothing)
@@ -84,10 +84,10 @@ public:
   /**
     @brief Define function. Puts object in usable state.
     @param[in] a_dbl            Grids
-    @param[in] a_blockingFactor Grid size.
+    @param[in] a_minBlockSize Grid size.
   */
   virtual void
-  define(const DisjointBoxLayout& a_dbl, const int a_blockingFactor) noexcept;
+  define(const DisjointBoxLayout& a_dbl, const int a_minBlockSize) noexcept;
 
   /**
     @brief Get the tiles own by this rank
