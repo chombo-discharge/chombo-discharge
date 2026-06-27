@@ -140,6 +140,27 @@ protected:
   */
   virtual void
   mergeTiles(Vector<Box>& a_boxes, const TileSet& a_tiles, const ProblemDomain& a_domain) const noexcept;
+
+  /**
+    @brief Pack a set of tiles into variable-sized (anisotropic) boxes via recursive Berger-Rigoutsos
+    bisection. This is the single shared box packer: the global merge calls it on the whole tile set,
+    and the per-super-tile generator calls it on each super-tile's tiles.
+    @details Recursive longest-extent bisection over the tile bounding box. At each node: if the node is
+    fully tagged and within the per-direction cap it is emitted as one box; otherwise it is split. The
+    split is tag-driven (Berger-Rigoutsos): cut at an empty slab (a zero-tag gap) in any direction if one
+    exists, else at the strongest signature inflection, else at the longest-axis midpoint; a node over the
+    cap is split at a cap multiple first. Deterministic (fixed axis/plane tie-breaks) and exact (a box is
+    emitted only when fully tagged, so no untagged cells are covered).
+    @param[in,out] a_tiles   Tiles to pack, in tile coordinates; reordered in place.
+    @param[in]     a_maxTile Per-direction cap in tile units (= max_box_size / tile_size).
+    @param[in]     a_probLo  Cell-space origin of the level (added when forming the cell boxes).
+    @param[out]    a_boxes   Boxes (cell coordinates) appended for these tiles.
+  */
+  virtual void
+  packTiles(std::vector<IntVect>& a_tiles,
+            const IntVect&        a_maxTile,
+            const IntVect&        a_probLo,
+            Vector<Box>&          a_boxes) const noexcept;
 };
 
 #include <CD_NamespaceFooter.H>

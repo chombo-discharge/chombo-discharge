@@ -12,6 +12,8 @@
 
 // Std includes
 #include <algorithm>
+#include <cstdlib>
+#include <limits>
 #include <set>
 #include <vector>
 
@@ -261,14 +263,29 @@ TiledMeshRefine::mergeTiles(Vector<Box>& a_boxes, const TileSet& a_tiles, const 
     maxTile[dir] = m_maxBoxSize[dir] / m_tileSize[dir];
   }
 
-  // Flatten the (sorted, globally identical) tile set into a contiguous buffer we can partition in place.
+  // Flatten the (sorted, globally identical) tile set into a contiguous buffer and pack it.
   std::vector<IntVect> tiles;
   tiles.reserve(a_tiles.size());
   for (const Tile& t : a_tiles) {
     tiles.emplace_back(D_DECL(t[0], t[1], t[2]));
   }
 
-  IntVect* const T = tiles.data();
+  this->packTiles(tiles, maxTile, a_domain.domainBox().smallEnd(), a_boxes);
+}
+
+void
+TiledMeshRefine::packTiles(std::vector<IntVect>& a_tiles,
+                           const IntVect&        a_maxTile,
+                           const IntVect&        a_probLo,
+                           Vector<Box>&          a_boxes) const noexcept
+{
+  CH_TIME("TiledMeshRefine::packTiles");
+
+  if (a_tiles.empty()) {
+    return;
+  }
+
+  IntVect* const T = a_tiles.data();
 
   // Bounding box (in tile coordinates) of a contiguous range [b, e).
   auto bbox = [&](const std::size_t b, const std::size_t e, IntVect& lo, IntVect& hi) {
@@ -282,6 +299,16 @@ TiledMeshRefine::mergeTiles(Vector<Box>& a_boxes, const TileSet& a_tiles, const 
     }
   };
 
+  // Number of tagged tiles in the slab coord[dir] == lo[dir] + p, over the range [b, e). The signatures
+  // used by the Berger-Rigoutsos split are these slab counts as a function of p.
+  std::vector<int> hist;
+  auto signature = [&](const std::size_t b, const std::size_t e, const IntVect& lo, const int ext, const int dir) {
+    hist.assign(ext, 0);
+    for (std::size_t i = b; i < e; i++) {
+      hist[T[i][dir] - lo[dir]]++;
+    }
+  };
+
   struct Work
   {
     std::size_t b, e;
@@ -292,13 +319,9 @@ TiledMeshRefine::mergeTiles(Vector<Box>& a_boxes, const TileSet& a_tiles, const 
   stack.reserve(64);
   {
     IntVect lo, hi;
-    bbox(0, tiles.size(), lo, hi);
-    stack.push_back({0, tiles.size(), lo, hi});
+    bbox(0, a_tiles.size(), lo, hi);
+    stack.push_back({0, a_tiles.size(), lo, hi});
   }
-
-  const IntVect probLo = a_domain.domainBox().smallEnd();
-
-  std::vector<int> hist; // reused per node
 
   while (!stack.empty()) {
     const Work w = stack.back();
@@ -306,20 +329,22 @@ TiledMeshRefine::mergeTiles(Vector<Box>& a_boxes, const TileSet& a_tiles, const 
 
     const std::size_t cnt = w.e - w.b;
 
-    long long vol  = 1;
-    bool      fits = true;
+    long long vol     = 1;
+    int       overDir = -1;
     for (int d = 0; d < SpaceDim; d++) {
       const int ext = w.hi[d] - w.lo[d] + 1;
       vol *= ext;
-      if (ext > maxTile[d]) {
-        fits = false;
+      if (ext > a_maxTile[d]) {
+        if (overDir < 0 || (w.hi[d] - w.lo[d]) > (w.hi[overDir] - w.lo[overDir])) {
+          overDir = d;
+        }
       }
     }
 
-    if (fits && vol == static_cast<long long>(cnt)) {
+    if (overDir < 0 && vol == static_cast<long long>(cnt)) {
       // Fully tagged and within the cap -> emit one (anisotropic) box in cell coordinates.
-      const IntVect boxLo = probLo + w.lo * m_tileSize;
-      const IntVect boxHi = probLo + (w.hi + IntVect::Unit) * m_tileSize - IntVect::Unit;
+      const IntVect boxLo = a_probLo + w.lo * m_tileSize;
+      const IntVect boxHi = a_probLo + (w.hi + IntVect::Unit) * m_tileSize - IntVect::Unit;
       a_boxes.push_back(Box(boxLo, boxHi));
       continue;
     }
@@ -328,47 +353,75 @@ TiledMeshRefine::mergeTiles(Vector<Box>& a_boxes, const TileSet& a_tiles, const 
     int dir = 0;
     int cut = 0;
 
-    // Over the cap in some direction? Split the most-over direction at a max-tile multiple.
-    int overDir = -1;
-    for (int d = 0; d < SpaceDim; d++) {
-      if (w.hi[d] - w.lo[d] + 1 > maxTile[d]) {
-        if (overDir < 0 || (w.hi[d] - w.lo[d]) > (w.hi[overDir] - w.lo[overDir])) {
-          overDir = d;
-        }
-      }
-    }
-
     if (overDir >= 0) {
+      // Over the cap -> split the most-over direction at a cap multiple (aligned to the tile-grid origin).
       dir = overDir;
-      cut = w.lo[dir] + maxTile[dir]; // align cap-cuts to the tile-grid origin
+      cut = w.lo[dir] + a_maxTile[dir];
     }
     else {
-      // Longest extent (tie -> lowest index).
-      for (int d = 1; d < SpaceDim; d++) {
-        if ((w.hi[d] - w.lo[d]) > (w.hi[dir] - w.lo[dir])) {
-          dir = d;
+      // Berger-Rigoutsos: prefer an empty slab (zero-tag gap) in ANY direction, nearest the middle.
+      int holeDir  = -1;
+      int holeCut  = -1;
+      int holeDist = std::numeric_limits<int>::max();
+      for (int d = 0; d < SpaceDim; d++) {
+        const int ext = w.hi[d] - w.lo[d] + 1;
+        if (ext < 2) {
+          continue;
         }
-      }
-      const int ext = w.hi[dir] - w.lo[dir] + 1;
-      hist.assign(ext, 0);
-      for (std::size_t i = w.b; i < w.e; i++) {
-        hist[T[i][dir] - w.lo[dir]]++;
+        signature(w.b, w.e, w.lo, ext, d);
+        const int mid = ext / 2;
+        for (int p = 1; p < ext; p++) {
+          if (hist[p] == 0) {
+            const int dist = std::abs(p - mid);
+            if (dist < holeDist) {
+              holeDist = dist;
+              holeDir  = d;
+              holeCut  = w.lo[d] + p;
+            }
+          }
+        }
       }
 
-      // Prefer a zero-tag gap nearest the middle (deterministic outward scan); else cut at the middle.
-      const int mid  = ext / 2;
-      int       best = -1;
-      for (int delta = 0; delta < ext && best < 0; delta++) {
-        const int kLo = mid - delta;
-        const int kHi = mid + delta;
-        if (kLo > 0 && kLo < ext && hist[kLo] == 0) {
-          best = kLo;
+      if (holeDir >= 0) {
+        dir = holeDir;
+        cut = holeCut;
+      }
+      else {
+        // No hole: cut at the strongest signature inflection (max |second difference|) across directions.
+        long long bestLap = -1;
+        int       bestDir = -1;
+        int       bestCut = -1;
+        for (int d = 0; d < SpaceDim; d++) {
+          const int ext = w.hi[d] - w.lo[d] + 1;
+          if (ext < 3) {
+            continue;
+          }
+          signature(w.b, w.e, w.lo, ext, d);
+          for (int p = 1; p < ext - 1; p++) {
+            const long long lap = std::llabs(static_cast<long long>(hist[p - 1]) - 2 * static_cast<long long>(hist[p]) +
+                                             static_cast<long long>(hist[p + 1]));
+            if (lap > bestLap) {
+              bestLap = lap;
+              bestDir = d;
+              bestCut = w.lo[d] + p + 1; // cut just past the inflection
+            }
+          }
         }
-        else if (kHi > 0 && kHi < ext && hist[kHi] == 0) {
-          best = kHi;
+
+        if (bestDir >= 0) {
+          dir = bestDir;
+          cut = bestCut;
+        }
+        else {
+          // Degenerate (e.g. a thin region) -> longest-axis midpoint.
+          for (int d = 1; d < SpaceDim; d++) {
+            if ((w.hi[d] - w.lo[d]) > (w.hi[dir] - w.lo[dir])) {
+              dir = d;
+            }
+          }
+          cut = w.lo[dir] + std::max(1, (w.hi[dir] - w.lo[dir] + 1) / 2);
         }
       }
-      cut = (best >= 0) ? (w.lo[dir] + best) : (w.lo[dir] + std::max(1, mid));
     }
 
     // Partition [b, e) by coord[dir] < cut.
