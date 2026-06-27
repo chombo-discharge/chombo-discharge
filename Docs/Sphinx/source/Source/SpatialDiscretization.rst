@@ -244,6 +244,9 @@ The merging is a recursive longest-axis bisection (a KD-tree, i.e. Berger-Rigout
 Because every box remains a union of aligned ``min_block_size`` tiles, the point-to-box lookup used by the particle infrastructure stays :math:`\mathcal{O}(1)`.
 When ``AmrMesh.min_block_size`` equals ``AmrMesh.max_box_size`` no merging is performed and the result is one box per tile, which is the most common configuration.
 
+Grid generation is *top-down* over a grid of super-tiles (a super-tile being one ``AmrMesh.max_box_size`` block of tiles): a fully-tagged super-tile becomes a single box directly, and individual ``AmrMesh.min_block_size`` tiles are materialized only inside partially-tagged super-tiles, i.e. at the boundary of the refined region.
+The intermediate data that is gathered across MPI ranks therefore scales with the refined *surface* (plus the number of boxes), not the refined *volume*, which keeps the memory footprint low even when refining very large regions.
+
 .. _TiledMeshRefine:
 .. figure:: /_static/figures/TiledMeshRefine.png
    :width: 25%
