@@ -732,7 +732,7 @@ The caller provides three lambdas:
 * A *scatter* function that unpacks one merged intermediate back into the SoA.
 
 Unlike the KD-tree methods, SFC merging does not require integer weights.
-Particle counts below ``ppc`` are handled by splitting the heaviest particle: its weight is halved and a copy is appended, repeating until the target is reached (only if the heaviest particle has weight ≥ 2).
+Particle counts below ``ppc`` are handled by splitting the heaviest particle: its weight is halved and a copy is appended, repeating until the target is reached (only if the heaviest particle has weight :math:`\geq 2`).
 The Hilbert ordering ensures that merged pairs are spatially close, which better preserves spatial correlations than random pairing and typically produces smoother merged distributions than the KD centroid.
 
 .. tip::
