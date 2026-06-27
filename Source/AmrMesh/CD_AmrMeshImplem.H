@@ -248,11 +248,6 @@ AmrMesh::allocate(ParticleContainer<P, Traits>& a_container, const std::string& 
     MayDay::Abort(str.c_str());
   }
 
-  if (m_maxBoxSize != m_minBlockSize) {
-    MayDay::Abort(
-      "AmrMesh::allocate(ParticleContainer<P, Traits>, string) - only constant box sizes are supported for particle methods");
-  }
-
   a_container.define(m_realms[a_realm]->getGrids(),
                      m_realms[a_realm]->getDomains(),
                      m_realms[a_realm]->getDx(),
