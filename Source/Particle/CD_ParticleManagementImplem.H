@@ -114,13 +114,16 @@ namespace ParticleManagement {
           // A. Split along the longest bounding-box extent.
           RealVect loCorner = +std::numeric_limits<Real>::max() * RealVect::Unit;
           RealVect hiCorner = -std::numeric_limits<Real>::max() * RealVect::Unit;
+
           for (P* p = beg; p != end; ++p) {
             const RealVect& pos = ((*p).*position)();
+
             for (int dir = 0; dir < SpaceDim; dir++) {
               loCorner[dir] = std::min(pos[dir], loCorner[dir]);
               hiCorner[dir] = std::max(pos[dir], hiCorner[dir]);
             }
           }
+
           const int splitDir = (hiCorner - loCorner).maxDir(true);
 
           std::sort(beg, end, [splitDir](const P& p1, const P& p2) -> bool {
@@ -131,6 +134,7 @@ namespace ParticleManagement {
           std::size_t id = 0;
           Real        wl = 0.0;
           Real        wr = Wn - (beg[0].*weight)();
+
           for (std::size_t i = 1; i < n; i++) {
             const Real& w = (beg[id].*weight)();
             if (wl + w < wr) {
@@ -156,8 +160,9 @@ namespace ParticleManagement {
           P    extraR;
 
           if (pw >= splitThresh && pw >= std::abs(dw)) {
-            Real            dwl    = dw;
-            Real            dwr    = 0.0;
+            Real dwl = dw;
+            Real dwr = 0.0;
+
             const Real      ddw    = pw - dw;
             const long long Nsplit = (long long)ddw;
 
@@ -209,12 +214,12 @@ namespace ParticleManagement {
           else {
             // Median assigned whole to the lighter side (weight unchanged).
             if (wl <= wr) {
-              wl += pw;
+              wl        = wl + pw;
               extraL    = med;
               hasExtraL = true;
             }
             else {
-              wr += pw;
+              wr        = wr + pw;
               extraR    = med;
               hasExtraR = true;
             }
@@ -278,11 +283,15 @@ namespace ParticleManagement {
     auto dist2 = [&a_particles](const std::size_t i, const std::size_t j) -> Real {
       const RealVect& pi = (a_particles[i].*position)();
       const RealVect& pj = (a_particles[j].*position)();
-      Real            s  = 0.0;
+
+      Real s = 0.0;
+
       for (int d = 0; d < SpaceDim; d++) {
         const Real dd = pi[d] - pj[d];
+
         s += dd * dd;
       }
+
       return s;
     };
 
@@ -291,10 +300,12 @@ namespace ParticleManagement {
     thread_local std::vector<int>      prev, next;
     thread_local std::vector<uint8_t>  alive;
     thread_local std::vector<uint32_t> ver;
+
     prev.assign(n, -1);
     next.assign(n, -1);
     alive.assign(n, 1);
     ver.assign(n, 0);
+
     for (std::size_t i = 0; i < n; i++) {
       prev[i] = (i == 0) ? -1 : static_cast<int>(i - 1);
       next[i] = (i + 1 == n) ? -1 : static_cast<int>(i + 1);
@@ -308,14 +319,19 @@ namespace ParticleManagement {
       uint32_t va;
       uint32_t vb;
     };
+
     const auto cmp = [](const Edge& x, const Edge& y) {
       return x.d > y.d;
     }; // min-heap
+
     thread_local std::vector<Edge> heap;
+
     heap.clear();
+
     for (std::size_t i = 0; i + 1 < n; i++) {
       heap.push_back({dist2(i, i + 1), static_cast<int>(i), static_cast<int>(i + 1), 0, 0});
     }
+
     std::make_heap(heap.begin(), heap.end(), cmp);
 
     std::size_t count = n;
@@ -326,6 +342,7 @@ namespace ParticleManagement {
 
       const int a = edge.a;
       const int b = edge.b;
+
       if (!alive[a] || !alive[b] || ver[a] != edge.va || ver[b] != edge.vb || next[a] != b) {
         continue; // stale entry
       }
@@ -338,6 +355,7 @@ namespace ParticleManagement {
       if (nb >= 0) {
         prev[nb] = a;
       }
+
       count--;
       ver[a]++;
 
@@ -355,13 +373,16 @@ namespace ParticleManagement {
 
     // Compact the survivors back into a_particles (preserving chain order).
     thread_local std::vector<P> survivors;
+
     survivors.clear();
     survivors.reserve(count);
+
     for (std::size_t i = 0; i < n; i++) {
       if (alive[i]) {
         survivors.push_back(a_particles[i]);
       }
     }
+
     a_particles.swap(survivors);
   }
 
@@ -383,9 +404,12 @@ namespace ParticleManagement {
 
       CH_START(t1);
       thread_local std::vector<Packed> particles;
+
       particles.clear();
       particles.reserve(a_particles.size());
+
       Real W = 0.0;
+
       for (std::size_t i = 0; i < a_particles.size(); i++) {
         Packed p = a_gather(a_particles, i);
         W += (p.*packWeight)();
@@ -403,8 +427,10 @@ namespace ParticleManagement {
       if (particles.size() > target) {
         RealVect loCorner = +std::numeric_limits<Real>::max() * RealVect::Unit;
         RealVect hiCorner = -std::numeric_limits<Real>::max() * RealVect::Unit;
+
         for (const Packed& p : particles) {
           const RealVect& x = (p.*packPosition)();
+
           for (int dir = 0; dir < SpaceDim; dir++) {
             loCorner[dir] = std::min(loCorner[dir], x[dir]);
             hiCorner[dir] = std::max(hiCorner[dir], x[dir]);
@@ -418,25 +444,33 @@ namespace ParticleManagement {
 
         constexpr uint32_t                                         maxCoord = (1U << 21) - 1U;
         thread_local std::vector<std::pair<uint64_t, std::size_t>> keyed;
+
         keyed.clear();
         keyed.reserve(particles.size());
+
         for (std::size_t i = 0; i < particles.size(); i++) {
-          const RealVect&                x = (particles[i].*packPosition)();
+          const RealVect& x = (particles[i].*packPosition)();
+
           std::array<uint32_t, SpaceDim> coords;
+
           for (int dir = 0; dir < SpaceDim; dir++) {
             Real t      = (x[dir] - loCorner[dir]) * invExtent[dir];
             t           = std::max(0.0, std::min(1.0, t));
             coords[dir] = static_cast<uint32_t>(t * maxCoord);
           }
+
           keyed.emplace_back(LoadBalancing::hilbertIndex<SpaceDim>(coords), i);
         }
+
         std::sort(keyed.begin(), keyed.end(), [](const auto& a, const auto& b) {
           return a.first < b.first;
         });
 
         thread_local std::vector<Packed> sorted;
+
         sorted.clear();
         sorted.reserve(particles.size());
+
         for (const auto& k : keyed) {
           sorted.push_back(particles[k.second]);
         }
@@ -447,14 +481,17 @@ namespace ParticleManagement {
       else if (particles.size() < target) {
         while (particles.size() < target) {
           std::size_t hi = 0;
+
           for (std::size_t i = 1; i < particles.size(); i++) {
             if ((particles[i].*packWeight)() > (particles[hi].*packWeight)()) {
               hi = i;
             }
           }
+
           if ((particles[hi].*packWeight)() < 2.0) {
             break;
           }
+
           Packed half = particles[hi];
           (particles[hi].*packWeight)() *= 0.5;
           (half.*packWeight)() *= 0.5;
@@ -491,9 +528,12 @@ namespace ParticleManagement {
 
       CH_START(t1);
       thread_local std::vector<Packed> particles;
+
       particles.clear();
       particles.reserve(a_particles.size());
+
       Real W = 0.0;
+
       for (std::size_t i = 0; i < a_particles.size(); i++) {
         Packed p = a_gather(a_particles, i);
         W += (p.*packWeight)();
@@ -507,6 +547,7 @@ namespace ParticleManagement {
 
       CH_START(t2);
       thread_local std::vector<std::pair<const Packed*, const Packed*>> leaves;
+
       buildEqualWeightKDLeaves<Packed, packWeight, packPosition>(particles, a_ppc, a_reconcile, leaves);
       CH_STOP(t2);
 
