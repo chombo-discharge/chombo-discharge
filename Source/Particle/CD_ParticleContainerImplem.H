@@ -501,16 +501,18 @@ ParticleContainer<P, Traits>::preRegrid()
 
 template <typename P, typename Traits>
 inline void
-ParticleContainer<P, Traits>::regrid(const Vector<DisjointBoxLayout>& a_grids,
-                                     const Vector<ProblemDomain>&     a_domains,
-                                     const Vector<Real>&              a_dx,
-                                     const Vector<int>&               a_refRat,
-                                     const int                        a_minBlockSize,
-                                     const int                        a_newFinestLevel)
+ParticleContainer<P, Traits>::regrid(const Vector<DisjointBoxLayout>&         a_grids,
+                                     const Vector<ProblemDomain>&             a_domains,
+                                     const Vector<Real>&                      a_dx,
+                                     const Vector<int>&                       a_refRat,
+                                     const int                                a_minBlockSize,
+                                     const Vector<RefCountedPtr<LevelTiles>>& a_levelTiles,
+                                     const int                                a_newFinestLevel)
 {
   CH_TIME("ParticleContainer::regrid");
 
   CH_assert(m_isDefined);
+  CH_assert(a_levelTiles.size() > a_newFinestLevel);
 
   // ---- adopt the new layout ----
   m_grids        = a_grids;
@@ -519,20 +521,21 @@ ParticleContainer<P, Traits>::regrid(const Vector<DisjointBoxLayout>& a_grids,
   m_minBlockSize = a_minBlockSize;
   m_finestLevel  = a_newFinestLevel;
 
+  // Alias the Realm's per-level tile->box maps (the single source of truth); never build our own.
+  m_levelTiles = a_levelTiles;
+
   m_dx.resize(a_newFinestLevel + 1);
   for (int lvl = 0; lvl <= a_newFinestLevel; lvl++) {
     m_dx[lvl] = a_dx[lvl] * RealVect::Unit;
   }
 
-  // ---- re-allocate the (empty) holders and tile maps over the new grids ----
+  // ---- re-allocate the (empty) holders over the new grids ----
   m_particles.resize(a_newFinestLevel + 1);
   m_maskParticles.resize(a_newFinestLevel + 1);
-  m_levelTiles.resize(a_newFinestLevel + 1);
 
   for (int lvl = 0; lvl <= a_newFinestLevel; lvl++) {
     m_particles[lvl]     = RefCountedPtr<LevelParticles>(new LevelParticles(a_grids[lvl]));
     m_maskParticles[lvl] = RefCountedPtr<LevelParticles>(new LevelParticles(a_grids[lvl]));
-    m_levelTiles[lvl]    = RefCountedPtr<LevelTiles>(new LevelTiles(a_grids[lvl], a_minBlockSize));
   }
 
   this->setupGrownGrids();

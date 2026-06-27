@@ -93,7 +93,7 @@ using AMRParticlesSoA = Vector<RefCountedPtr<LayoutData<ParticleSoA<P, Traits>>>
   <h4>Typical usage</h4>
   @code{.cpp}
     ParticleContainer<MyPayload> particles;
-    particles.define(grids, domains, dx, refRat, probLo, minBlockSize, finestLevel, "primal", validCells);
+    particles.define(grids, domains, dx, refRat, probLo, minBlockSize, levelTiles, finestLevel, "primal", validCells);
 
     // Add particles locally, then route every particle to its owning patch (and across ranks).
     particles.addParticlesLocal(lvl, pos, weight, MyPayload{...});
@@ -179,6 +179,9 @@ public:
     @param[in] a_probLo         Lower-left corner of the physical domain.
     @param[in] a_minBlockSize Grid blocking factor (tile size); the grids must be unions of
                                 minBlockSize-sized boxes for the tile ownership to be exact.
+    @param[in] a_levelTiles     The owning Realm's per-level tile->box maps, aliased (never built locally)
+                                as the patch-locating structure used by remap(). Must correspond to
+                                a_grids. Not owned; must outlive this container.
     @param[in] a_finestLevel    Finest AMR level index.
     @param[in] a_realm          Realm label (diagnostics only).
     @param[in] a_validCells     Optional alias to the realm's valid-cell mask (true = cell not covered
@@ -192,6 +195,7 @@ public:
          const Vector<int>&                                     a_refRat,
          const RealVect&                                        a_probLo,
          const int                                              a_minBlockSize,
+         const Vector<RefCountedPtr<LevelTiles>>&               a_levelTiles,
          const int                                              a_finestLevel,
          const std::string&                                     a_realm,
          const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>* a_validCells)
@@ -202,6 +206,7 @@ public:
     CH_assert(a_domains.size() > a_finestLevel);
     CH_assert(a_dx.size() > a_finestLevel);
     CH_assert(a_refRat.size() > a_finestLevel);
+    CH_assert(a_levelTiles.size() > a_finestLevel);
 
     m_grids           = a_grids;
     m_domains         = a_domains;
@@ -218,13 +223,14 @@ public:
       m_dx[lvl] = a_dx[lvl] * RealVect::Unit;
     }
 
+    // Alias the Realm's per-level tile->box maps (the single source of truth); never build our own.
+    m_levelTiles = a_levelTiles;
+
     m_particles.resize(a_finestLevel + 1);
     m_maskParticles.resize(a_finestLevel + 1);
-    m_levelTiles.resize(a_finestLevel + 1);
     for (int lvl = 0; lvl <= a_finestLevel; lvl++) {
       m_particles[lvl]     = RefCountedPtr<LevelParticles>(new LevelParticles(a_grids[lvl]));
       m_maskParticles[lvl] = RefCountedPtr<LevelParticles>(new LevelParticles(a_grids[lvl]));
-      m_levelTiles[lvl]    = RefCountedPtr<LevelTiles>(new LevelTiles(a_grids[lvl], a_minBlockSize));
     }
 
     // Buffer particles live on the grown grids (boxes grown by the refinement factor on finer levels).
@@ -594,15 +600,18 @@ public:
     @param[in] a_dx             New per-level (isotropic) grid spacing.
     @param[in] a_refRat         New per-level refinement ratios.
     @param[in] a_minBlockSize Grid blocking factor (tile size) for the new grids.
+    @param[in] a_levelTiles     The owning Realm's per-level tile->box maps for the new grids, aliased
+                                (never built locally). Must correspond to a_grids.
     @param[in] a_newFinestLevel New finest AMR level index.
   */
   void
-  regrid(const Vector<DisjointBoxLayout>& a_grids,
-         const Vector<ProblemDomain>&     a_domains,
-         const Vector<Real>&              a_dx,
-         const Vector<int>&               a_refRat,
-         const int                        a_minBlockSize,
-         const int                        a_newFinestLevel);
+  regrid(const Vector<DisjointBoxLayout>&         a_grids,
+         const Vector<ProblemDomain>&             a_domains,
+         const Vector<Real>&                      a_dx,
+         const Vector<int>&                       a_refRat,
+         const int                                a_minBlockSize,
+         const Vector<RefCountedPtr<LevelTiles>>& a_levelTiles,
+         const int                                a_newFinestLevel);
 
   ///@}
 

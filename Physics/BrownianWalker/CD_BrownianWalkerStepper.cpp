@@ -752,11 +752,14 @@ BrownianWalkerStepper::loadBalanceBoxesParticles(Vector<Vector<int>>&           
   ParticleContainer<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
   // Regrid the particles onto the new mesh (SoA regrid rebuilds over the new layout from the preRegrid cache).
+  // a_grids are the proxy grids (m_amr->getProxyGrids()) on which the Realm built its tile->box maps
+  // during regridAmr, so we alias those rather than building our own.
   particles.regrid(a_grids,
                    m_amr->getDomains(),
                    m_amr->getDx(),
                    m_amr->getRefinementRatios(),
                    m_amr->getMinBlockSize(),
+                   m_amr->getLevelTiles(a_realm),
                    a_finestLevel);
 
   a_procs.resize(1 + a_finestLevel);

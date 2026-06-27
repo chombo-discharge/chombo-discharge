@@ -254,6 +254,7 @@ AmrMesh::allocate(ParticleContainer<P, Traits>& a_container, const std::string& 
                      m_realms[a_realm]->getRefinementRatios(),
                      m_probLo,
                      m_minBlockSize,
+                     m_realms[a_realm]->getLevelTiles(), // alias the Realm's tile->box maps (single source)
                      m_finestLevel,
                      a_realm,
                      &m_realms[a_realm]->getValidCells()); // alias for remap()'s stayer fast path
@@ -338,6 +339,7 @@ AmrMesh::remapToNewGrids(ParticleContainer<P, Traits>& a_particles,
                      this->getDx(),
                      this->getRefinementRatios(),
                      m_minBlockSize,
+                     m_realms[realm]->getLevelTiles(), // alias the Realm's tile->box maps (single source)
                      a_newFinestLevel);
 }
 
