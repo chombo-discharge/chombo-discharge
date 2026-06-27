@@ -12,19 +12,17 @@
 
 // Std includes
 #include <algorithm>
+#include <cstdint>
 #include <cstdlib>
 #include <limits>
-#include <set>
 #include <vector>
 
 // Chombo includes
 #include <CH_Timer.H>
 
 // Our includes
-#include <CD_Tile.H>
 #include <CD_ParallelOps.H>
 #include <CD_TiledMeshRefine.H>
-#include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
 TiledMeshRefine::TiledMeshRefine(const ProblemDomain& a_coarsestDomain,
@@ -35,10 +33,15 @@ TiledMeshRefine::TiledMeshRefine(const ProblemDomain& a_coarsestDomain,
 {
   CH_TIME("TiledMeshRefine::TiledMeshRefine");
 
+  m_superVol = 1;
   for (int dir = 0; dir < SpaceDim; dir++) {
     CH_assert(a_maxBoxSize[dir] >= a_tileSize[dir]);
     CH_assert(a_maxBoxSize[dir] % a_tileSize[dir] == 0);
+
+    m_superFactor[dir] = a_maxBoxSize[dir] / a_tileSize[dir];
+    m_superVol *= m_superFactor[dir];
   }
+  m_bitmaskWords = static_cast<int>((m_superVol + 63) / 64);
 
   m_amrDomains.resize(0);
 
@@ -56,6 +59,181 @@ TiledMeshRefine::TiledMeshRefine(const ProblemDomain& a_coarsestDomain,
 TiledMeshRefine::~TiledMeshRefine() noexcept
 {
   CH_TIME("TiledMeshRefine::~TiledMeshRefine");
+}
+
+std::uint64_t
+TiledMeshRefine::encodeSuper(const IntVect& a_super) const noexcept
+{
+  std::uint64_t key = 0;
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    key |= (static_cast<std::uint64_t>(a_super[dir]) & 0x1FFFFF) << (21 * dir);
+  }
+  return key;
+}
+
+IntVect
+TiledMeshRefine::decodeSuper(const std::uint64_t a_key) const noexcept
+{
+  IntVect super;
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    super[dir] = static_cast<int>((a_key >> (21 * dir)) & 0x1FFFFF);
+  }
+  return super;
+}
+
+int
+TiledMeshRefine::subIndex(const IntVect& a_sub) const noexcept
+{
+  int lin    = 0;
+  int stride = 1;
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    lin += a_sub[dir] * stride;
+    stride *= m_superFactor[dir];
+  }
+  return lin;
+}
+
+void
+TiledMeshRefine::addFineTile(SuperTiles& a_tiles, const IntVect& a_fineTile) const noexcept
+{
+  IntVect super;
+  IntVect sub;
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    super[dir] = a_fineTile[dir] / m_superFactor[dir];
+    sub[dir]   = a_fineTile[dir] - super[dir] * m_superFactor[dir];
+  }
+
+  const std::uint64_t key = this->encodeSuper(super);
+  if (a_tiles.m_full.count(key) > 0) {
+    return; // already fully tagged
+  }
+
+  std::vector<std::uint64_t>& bm = a_tiles.m_partial[key];
+  if (bm.empty()) {
+    bm.assign(m_bitmaskWords, 0);
+  }
+
+  const int lin = this->subIndex(sub);
+  bm[lin >> 6] |= (1ull << (lin & 63));
+}
+
+void
+TiledMeshRefine::classify(SuperTiles& a_tiles) const noexcept
+{
+  for (auto it = a_tiles.m_partial.begin(); it != a_tiles.m_partial.end();) {
+    long long pop = 0;
+    for (const std::uint64_t w : it->second) {
+      pop += __builtin_popcountll(w);
+    }
+
+    if (pop == m_superVol) {
+      a_tiles.m_full.insert(it->first);
+      it = a_tiles.m_partial.erase(it);
+    }
+    else {
+      ++it;
+    }
+  }
+}
+
+void
+TiledMeshRefine::gatherSuperTiles(SuperTiles& a_tiles) const noexcept
+{
+  CH_TIME("TiledMeshRefine::gatherSuperTiles");
+
+#ifdef CH_MPI
+  // Fixed-size record per touched super-tile: the key followed by its sub-occupancy bitmask.
+  const int R = 1 + m_bitmaskWords;
+
+  std::vector<unsigned long long> sendBuffer(static_cast<std::size_t>(a_tiles.m_partial.size()) * R);
+  {
+    std::size_t idx = 0;
+    for (const auto& kv : a_tiles.m_partial) {
+      sendBuffer[idx++] = kv.first;
+      for (int w = 0; w < m_bitmaskWords; w++) {
+        sendBuffer[idx++] = kv.second[w];
+      }
+    }
+  }
+
+  const int        mySendCount = static_cast<int>(sendBuffer.size());
+  int              recvCount   = mySendCount;
+  std::vector<int> sendCounts(numProc());
+  std::vector<int> offsets(numProc());
+
+  MPI_Allreduce(MPI_IN_PLACE, &recvCount, 1, MPI_INT, MPI_SUM, Chombo_MPI::comm);
+  MPI_Allgather(&mySendCount, 1, MPI_INT, sendCounts.data(), 1, MPI_INT, Chombo_MPI::comm);
+  offsets[0] = 0;
+  for (int i = 0; i < numProc() - 1; i++) {
+    offsets[i + 1] = offsets[i] + sendCounts[i];
+  }
+
+  std::vector<unsigned long long> recvBuffer(recvCount);
+  MPI_Allgatherv(sendBuffer.data(),
+                 mySendCount,
+                 MPI_UNSIGNED_LONG_LONG,
+                 recvBuffer.data(),
+                 sendCounts.data(),
+                 offsets.data(),
+                 MPI_UNSIGNED_LONG_LONG,
+                 Chombo_MPI::comm);
+
+  // Rebuild as the global OR of all ranks' contributions (this rank's own data is included).
+  a_tiles.m_partial.clear();
+  for (int i = 0; i < recvCount; i += R) {
+    const std::uint64_t         key = recvBuffer[i];
+    std::vector<std::uint64_t>& bm  = a_tiles.m_partial[key];
+    if (bm.empty()) {
+      bm.assign(m_bitmaskWords, 0);
+    }
+    for (int w = 0; w < m_bitmaskWords; w++) {
+      bm[w] |= recvBuffer[i + 1 + w];
+    }
+  }
+#endif
+}
+
+void
+TiledMeshRefine::nestFrom(SuperTiles&       a_tiles,
+                          const SuperTiles& a_finer,
+                          const int         a_refToFine,
+                          const Box&        a_thisTileBox) const noexcept
+{
+  const Box fineTileBox = refine(a_thisTileBox, a_refToFine);
+
+  // Add every this-level tile in coarsen(grow(a_fineBox, 1)) (clipped to the domains).
+  auto addNest = [&](const Box& a_fineBox) {
+    const Box grown     = grow(a_fineBox, 1) & fineTileBox;
+    const Box coarsened = coarsen(grown, a_refToFine) & a_thisTileBox;
+    for (BoxIterator bit(coarsened); bit.ok(); ++bit) {
+      this->addFineTile(a_tiles, bit());
+    }
+  };
+
+  // Full finer super-tiles: their whole block, grown and coarsened, in bulk.
+  for (const std::uint64_t key : a_finer.m_full) {
+    const IntVect super = this->decodeSuper(key);
+    const IntVect blkLo = super * m_superFactor;
+    const IntVect blkHi = blkLo + m_superFactor - IntVect::Unit;
+    addNest(Box(blkLo, blkHi));
+  }
+
+  // Partial finer super-tiles: each tagged sub-tile individually (the finer boundary).
+  for (const auto& kv : a_finer.m_partial) {
+    const IntVect super = this->decodeSuper(kv.first);
+    for (int lin = 0; lin < m_superVol; lin++) {
+      if ((kv.second[lin >> 6] >> (lin & 63)) & 1ull) {
+        IntVect sub;
+        int     r = lin;
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          sub[dir] = r % m_superFactor[dir];
+          r /= m_superFactor[dir];
+        }
+        const IntVect fineTile = super * m_superFactor + sub;
+        addNest(Box(fineTile, fineTile));
+      }
+    }
+  }
 }
 
 int
@@ -79,8 +257,8 @@ TiledMeshRefine::regrid(Vector<Vector<Box>>& a_newGrids, const Vector<IntVectSet
   if (topLevel >= 0) {
     newFinestLevel = 1 + topLevel;
 
-    // Extra level of empty tiles so we can use makeLevelTiles for all levels
-    std::vector<TileSet> amrTiles(2 + newFinestLevel);
+    // Extra (empty) finer level so the finest level can use the same makeLevelTiles call.
+    std::vector<SuperTiles> amrTiles(2 + newFinestLevel);
 
     for (int lvl = newFinestLevel; lvl > 0; lvl--) {
       this->makeLevelTiles(amrTiles[lvl],
@@ -94,7 +272,7 @@ TiledMeshRefine::regrid(Vector<Vector<Box>>& a_newGrids, const Vector<IntVectSet
     // Coarsest grid just consists of proper nesting around the finer grids. Last argument is dummy.
     this->makeLevelTiles(amrTiles[0], amrTiles[1], IntVectSet(), m_amrDomains[0], m_refRatios[0], 1);
 
-    // Make tiles into boxes
+    // Make the super-tiles into boxes.
     a_newGrids.resize(1 + newFinestLevel);
     for (int lvl = 0; lvl <= newFinestLevel; lvl++) {
       this->makeBoxesFromTiles(a_newGrids[lvl], amrTiles[lvl], m_amrDomains[lvl]);
@@ -108,8 +286,8 @@ TiledMeshRefine::regrid(Vector<Vector<Box>>& a_newGrids, const Vector<IntVectSet
 }
 
 void
-TiledMeshRefine::makeLevelTiles(TileSet&             a_tiles,
-                                const TileSet&       a_fineTiles,
+TiledMeshRefine::makeLevelTiles(SuperTiles&          a_tiles,
+                                const SuperTiles&    a_fineTiles,
                                 const IntVectSet&    a_coarTags,
                                 const ProblemDomain& a_domain,
                                 const int            a_refToFine,
@@ -120,15 +298,16 @@ TiledMeshRefine::makeLevelTiles(TileSet&             a_tiles,
   CH_TIMER("TiledMeshRefine::makeLevelTiles::gather_tiles", t2);
   CH_TIMER("TiledMeshRefine::makeLevelTiles::add_fine_tiles", t3);
 
-  // Generate tiles from tags on the coarser level.
-  CH_START(t1);
+  a_tiles.m_full.clear();
+  a_tiles.m_partial.clear();
+
   const Box tileBox = Box(IntVect::Zero, a_domain.size() / m_tileSize - IntVect::Unit);
 
   const ProblemDomain coarDomain = coarsen(a_domain, a_refToCoar);
-  const ProblemDomain fineDomain = refine(a_domain, a_refToFine);
+  const IntVect       coarProbLo = coarDomain.domainBox().smallEnd();
 
-  const IntVect coarProbLo = coarDomain.domainBox().smallEnd();
-  a_tiles.clear();
+  // Generate (per-rank-local) super-tiles from tags on the coarser level.
+  CH_START(t1);
   for (IVSIterator ivsIt(a_coarTags); ivsIt.ok(); ++ivsIt) {
     CH_assert(a_refToCoar >= 2);
     CH_assert(a_refToCoar % 2 == 0);
@@ -139,138 +318,75 @@ TiledMeshRefine::makeLevelTiles(TileSet&             a_tiles,
                                       (tag[2] - coarProbLo[2]) / (m_tileSize[2] / a_refToCoar)));
 
     if (tileBox.contains(iv)) {
-      a_tiles.emplace(D_DECL(iv[0], iv[1], iv[2]));
+      this->addFineTile(a_tiles, iv);
     }
   }
   CH_STOP(t1);
 
-  // Gather tiles globally
-#ifdef CH_MPI
+  // Gather the compact super-tile representation onto all ranks, then classify full vs partial globally.
   CH_START(t2);
-  const int mySendCount  = static_cast<int>(a_tiles.size()) * SpaceDim;
-  int*      mySendBuffer = new int[mySendCount];
-
-  // Get the number of elements sent by each MPI rank and compute the offset array which is required by Allgatherv
-  int  recvCount  = mySendCount;
-  int* sendCounts = new int[numProc()];
-  int* offsets    = new int[numProc()];
-
-  MPI_Allreduce(MPI_IN_PLACE, &recvCount, 1, MPI_INT, MPI_SUM, Chombo_MPI::comm);
-  MPI_Allgather(&mySendCount, 1, MPI_INT, sendCounts, 1, MPI_INT, Chombo_MPI::comm);
-  offsets[0] = 0;
-  for (int i = 0; i < numProc() - 1; i++) {
-    offsets[i + 1] = offsets[i] + sendCounts[i];
-  }
-
-  // Linearize the tiles as integers onto the send buffer
-  int idx = 0;
-  for (const auto& t : a_tiles) {
-    for (int dir = 0; dir < SpaceDim; dir++, idx++) {
-      mySendBuffer[idx] = t[dir];
-    }
-  }
-  a_tiles.clear();
-
-  // Allocate storage and gather tiles
-  int* recvBuffer = new int[recvCount];
-  MPI_Allgatherv(mySendBuffer, mySendCount, MPI_INT, recvBuffer, sendCounts, offsets, MPI_INT, Chombo_MPI::comm);
-
-  // de-linearize the received data back into tiles
-  for (int i = 0; i < recvCount;) {
-    a_tiles.emplace(D_DECL(recvBuffer[i], recvBuffer[i + 1], recvBuffer[i + 2]));
-    i += SpaceDim;
-  }
-
-  delete[] recvBuffer;
-  delete[] offsets;
-  delete[] sendCounts;
-  delete[] mySendBuffer;
-
+  this->gatherSuperTiles(a_tiles);
+  this->classify(a_tiles);
   CH_STOP(t2);
-#endif
 
-  // Ensure proper nesting by adding coarsened tiles from the fine level. We grow by one tile (one the fine level) in order
-  // to ensure that we're nesting correctly.
+  // Ensure proper nesting by injecting the coarsened, grown-by-one buffer from the finer level.
   CH_START(t3);
-
-  const Box tileBoxFine = refine(tileBox, a_refToFine);
-
-  for (const Tile& fineTile : a_fineTiles) {
-    CH_assert(a_refToFine >= 2);
-    CH_assert(a_refToFine % 2 == 0);
-
-    const IntVect fineTileIV = IntVect(D_DECL(fineTile[0], fineTile[1], fineTile[2]));
-    const Box     fineBox    = grow(Box(fineTileIV, fineTileIV), 1) & tileBoxFine;
-    const Box     box        = coarsen(fineBox, a_refToFine);
-
-    BoxLoops::loop<D_DECL(1, 1, 1)>(box, [&](const IntVect& iv) -> void {
-      a_tiles.emplace(D_DECL(iv[0], iv[1], iv[2]));
-    });
-  }
-
+  this->nestFrom(a_tiles, a_fineTiles, a_refToFine, tileBox);
+  this->classify(a_tiles);
   CH_STOP(t3);
 }
 
 void
 TiledMeshRefine::makeBoxesFromTiles(Vector<Box>&         a_boxes,
-                                    const TileSet&       a_tileSet,
+                                    const SuperTiles&    a_tiles,
                                     const ProblemDomain& a_domain) const noexcept
 {
   CH_TIME("TiledMeshRefine::makeBoxesFromTiles");
-
-  // When the cap equals the tile size there is nothing to merge -> one box per tile (legacy behaviour).
-  bool merge = false;
-  for (int dir = 0; dir < SpaceDim; dir++) {
-    if (m_maxBoxSize[dir] > m_tileSize[dir]) {
-      merge = true;
-    }
-  }
-
-  if (merge) {
-    this->mergeTiles(a_boxes, a_tileSet, a_domain);
-    return;
-  }
 
   a_boxes.resize(0);
 
   const IntVect probLo = a_domain.domainBox().smallEnd();
 
-  for (const auto& tile : a_tileSet) {
-    IntVect boxLo = probLo;
-    for (int dir = 0; dir < SpaceDim; dir++) {
-      boxLo[dir] += tile[dir] * m_tileSize[dir];
-    }
-    const IntVect boxHi = boxLo + m_tileSize - IntVect::Unit;
+  // Visit super-tiles in sorted-key order so the box list is identical on every rank.
+  std::vector<std::uint64_t> fullKeys(a_tiles.m_full.begin(), a_tiles.m_full.end());
+  std::sort(fullKeys.begin(), fullKeys.end());
 
+  std::vector<std::uint64_t> partialKeys;
+  partialKeys.reserve(a_tiles.m_partial.size());
+  for (const auto& kv : a_tiles.m_partial) {
+    partialKeys.push_back(kv.first);
+  }
+  std::sort(partialKeys.begin(), partialKeys.end());
+
+  // Full super-tiles -> one (max_box_size) box each.
+  for (const std::uint64_t key : fullKeys) {
+    const IntVect super = this->decodeSuper(key);
+    const IntVect boxLo = probLo + (super * m_superFactor) * m_tileSize;
+    const IntVect boxHi = probLo + ((super + IntVect::Unit) * m_superFactor) * m_tileSize - IntVect::Unit;
     a_boxes.push_back(Box(boxLo, boxHi));
   }
-}
 
-void
-TiledMeshRefine::mergeTiles(Vector<Box>& a_boxes, const TileSet& a_tiles, const ProblemDomain& a_domain) const noexcept
-{
-  CH_TIME("TiledMeshRefine::mergeTiles");
+  // Partial super-tiles -> pack their tagged sub-tiles into variable-sized boxes.
+  std::vector<IntVect> members;
+  for (const std::uint64_t key : partialKeys) {
+    const std::vector<std::uint64_t>& bm    = a_tiles.m_partial.at(key);
+    const IntVect                     super = this->decodeSuper(key);
 
-  a_boxes.resize(0);
+    members.clear();
+    for (int lin = 0; lin < m_superVol; lin++) {
+      if ((bm[lin >> 6] >> (lin & 63)) & 1ull) {
+        IntVect sub;
+        int     r = lin;
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          sub[dir] = r % m_superFactor[dir];
+          r /= m_superFactor[dir];
+        }
+        members.push_back(super * m_superFactor + sub);
+      }
+    }
 
-  if (a_tiles.empty()) {
-    return;
+    this->packTiles(members, m_superFactor, probLo, a_boxes);
   }
-
-  // Cap in TILE units (the constructor guarantees m_maxBoxSize % m_tileSize == 0).
-  IntVect maxTile;
-  for (int dir = 0; dir < SpaceDim; dir++) {
-    maxTile[dir] = m_maxBoxSize[dir] / m_tileSize[dir];
-  }
-
-  // Flatten the (sorted, globally identical) tile set into a contiguous buffer and pack it.
-  std::vector<IntVect> tiles;
-  tiles.reserve(a_tiles.size());
-  for (const Tile& t : a_tiles) {
-    tiles.emplace_back(D_DECL(t[0], t[1], t[2]));
-  }
-
-  this->packTiles(tiles, maxTile, a_domain.domainBox().smallEnd(), a_boxes);
 }
 
 void
@@ -299,7 +415,7 @@ TiledMeshRefine::packTiles(std::vector<IntVect>& a_tiles,
     }
   };
 
-  // Number of tagged tiles in the slab coord[dir] == lo[dir] + p, over the range [b, e). The signatures
+  // Number of tagged tiles in the slab coord[dir] == lo[dir] + p over the range [b, e). The signatures
   // used by the Berger-Rigoutsos split are these slab counts as a function of p.
   std::vector<int> hist;
   auto signature = [&](const std::size_t b, const std::size_t e, const IntVect& lo, const int ext, const int dir) {
