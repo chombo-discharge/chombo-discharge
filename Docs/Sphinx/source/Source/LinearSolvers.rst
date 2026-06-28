@@ -279,4 +279,62 @@ Chombo provides (at least) three bottom solvers which can be used with ``AMRMult
 
 The user can select between these for the various solvers that use multigrid.
 Typically, smoothers tend to work sufficiently well if one can coarsen sufficiently far, although improved convergence rates can occasionally be achieved by using a conjugate gradient solver.
-In each case, a simple smoother with a specified number of relaxations is applied as a preconditioner for the bottom solver. 
+In each case, a simple smoother with a specified number of relaxations is applied as a preconditioner for the bottom solver.
+
+.. _Chap:MultigridTuning:
+
+Configuration
+_____________
+
+The ``EBHelmholtzOp`` and ``MFHelmholtzOp`` operators are configured through ParmParse at run time.
+All parameters below use a solver-class prefix (e.g. ``FieldSolverGMG``, ``EddingtonSP1``, ``CdrGodunov``, ``CdrCTU``); the generic ``gmg_`` stem is shared across all solvers.
+
+* ``<Solver>.gmg_pre_smooth``.
+  Controls the number of relaxations on each level during multigrid downsweeps.
+* ``<Solver>.gmg_post_smooth``.
+  Controls the number of relaxations on each level during multigrid upsweeps.
+* ``<Solver>.gmg_bott_smooth``.
+  Controls the number of relaxations before entering the bottom solve.
+* ``<Solver>.gmg_min_iter``.
+  Sets the minimum number of multigrid V-cycles to perform, regardless of the residual.
+* ``<Solver>.gmg_max_iter``.
+  Sets the maximum number of V-cycles before declaring convergence failure.
+* ``<Solver>.gmg_exit_tol``.
+  Sets the exit tolerance for multigrid.
+  Multigrid exits if :math:`r < \lambda r_0`, where :math:`\lambda` is the specified tolerance, :math:`r = |L\Phi - \rho|` is the residual, and :math:`r_0` is the residual for :math:`\Phi = 0`.
+* ``<Solver>.gmg_exit_hang``.
+  Sets the minimum permitted reduction in the convergence rate before aborting.
+  Letting :math:`r^k` be the residual after :math:`k` multigrid cycles, multigrid will abort if :math:`r^{k+1} \geq (1-h)r^k`, where :math:`h` is the hang factor.
+* ``<Solver>.gmg_min_cells``.
+  Sets the minimum number of cells along any coordinate direction for coarsened multigrid levels.
+  This controls how far multigrid will coarsen; e.g. ``gmg_min_cells = 16`` stops coarsening when the domain has 16 cells in any direction.
+* ``<Solver>.gmg_bc_order``.
+  Sets the polynomial order (and stencil radius) for least-squares gradient reconstruction on embedded boundaries.
+* ``<Solver>.gmg_bc_weight``.
+  Sets the least-squares stencil weighting factor for gradient reconstruction on EBs.
+  See :ref:`Chap:LeastSquares` for details.
+* ``<Solver>.gmg_jump_order``.
+  Sets the stencil order for least-squares gradient reconstruction at dielectric interfaces (multiphase problems only).
+* ``<Solver>.gmg_jump_weight``.
+  Sets the least-squares stencil weighting factor for gradient reconstruction at dielectric interfaces.
+  See :ref:`Chap:LeastSquares` for details.
+* ``<Solver>.gmg_bottom_solver``.
+  Sets the bottom solver type: ``bicgstab``, ``gmres``, or ``simple <N>`` where ``N`` is the number of smoothings.
+* ``<Solver>.gmg_cycle``.
+  Sets the multigrid cycle type.
+  Currently, only V-cycles are supported.
+* ``<Solver>.gmg_smoother``.
+  Sets the multigrid smoother: ``point_jacobi``, ``red_black``, or ``multi_color``.
+* ``<Solver>.gmg_relax_factor``.
+  Sets the overall relaxation damping factor applied to each smoother update.
+* ``<Solver>.gmg_reflux_free``.
+  If ``true``, use the reflux-free AMR operator.
+  Rather than computing coarse- and fine-level fluxes separately and then applying a reflux correction, this variant fills the coarse-level coarse-fine interface fluxes by conservatively averaging the fine-level fluxes, which are themselves computed from the composite (CF-interpolated) solution.
+  The two formulations are mathematically equivalent; neither is more accurate than the other.
+  Default is ``false``.
+
+.. note::
+
+   The actual ParmParse prefix for these parameters is set by the top-level solver
+   (e.g., ``FieldSolverGMG``, ``EddingtonSP1``, ``CdrGodunov``, ``CdrCTU``).
+   Refer to the individual solver documentation for the exact prefix.
