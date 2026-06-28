@@ -277,7 +277,7 @@ Particles whose cell is owned by no patch on any level (off-domain) are dropped 
 
 The point-to-patch mapping in step 2 maps the position to a ``min_block_size`` tile by integer division and looks it up in a per-level hash map.
 This is :math:`\mathcal{O}(1)` and works also when the grids contain variable-sized (anisotropic) boxes (see :ref:`Chap:MeshGeneration`), because every box is registered under each ``min_block_size`` tile it covers.
-The same mapping is exposed on the ``Realm`` class through ``Realm::getLevelAndBox`` for non-particle users.
+The same mapping is exposed on the ``Realm`` class through ``Realm::getLevelAndBox`` (see :ref:`Chap:RealmHashGrid`) for non-particle users; the container aliases the realm's hash grid rather than building its own.
 
 Regridding
 ----------
