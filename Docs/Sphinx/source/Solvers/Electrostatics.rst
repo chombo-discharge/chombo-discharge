@@ -516,6 +516,10 @@ We explain these options below:
   Sets the multigrid smoother.
 * ``FieldSolverGMG.gmg_relax_factor``.
   Sets the multigrid relaxation factor.
+* ``FieldSolverGMG.gmg_reflux_free``.
+  If ``true``, use the reflux-free AMR operator, which replaces the standard coarse-fine flux refluxing step with a conservative flux coarsening from the finer level.
+  This avoids one inter-level communication round but may reduce multigrid convergence on problems with sharp coarse-fine transitions.
+  Default is ``false``.
 
 
 

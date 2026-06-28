@@ -62,7 +62,8 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
                              const int&                                       a_jumpWeight,
                              const int&                                       a_preCondSmooth,
                              const Smoother&                                  a_relaxType,
-                             const Real&                                      a_relaxFactor)
+                             const Real&                                      a_relaxFactor,
+                             const bool                                       a_refluxFree)
 {
   CH_TIME("MFHelmholtzOp::MFHelmholtzOp(...)");
 
@@ -209,7 +210,8 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
                                                                                        a_ghostPhi,
                                                                                        a_ghostRhs,
                                                                                        ebHelmRelax,
-                                                                                       a_relaxFactor));
+                                                                                       a_relaxFactor,
+                                                                                       a_refluxFree));
 
     m_helmOps.insert({iphase, oper});
   }

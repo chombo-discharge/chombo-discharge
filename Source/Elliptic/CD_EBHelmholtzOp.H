@@ -98,6 +98,7 @@ public:
     @param[in] a_ghostRhs      Ghost cells in right-hand side
     @param[in] a_smoother      Which smoother to use
     @param[in] a_relaxFactor   Relaxation factor
+    @param[in] a_refluxFree    If true, use the reflux-free AMR operator (skips coarse-fine flux refluxing)
     @param[in] a_BcoefIrreg    B-coefficient on EB faces
   */
   EBHelmholtzOp(const Location::Cell                             a_dataLocation,
@@ -127,7 +128,8 @@ public:
                 const IntVect&                                   a_ghostPhi,
                 const IntVect&                                   a_ghostRhs,
                 const Smoother&                                  a_smoother,
-                const Real&                                      a_relaxFactor);
+                const Real&                                      a_relaxFactor,
+                const bool                                       a_refluxFree = false);
 
   /**
     @brief Dtor
@@ -453,14 +455,19 @@ public:
 
   /**
     @brief Fill domain flux. This fills the flux on the domain face using centered differencing ala applyDomainFlux
-    @details a_flux is replaced by the user-specified flux on the domain faces. 
-    @param[in,out] a_flux              Flux data holder.
-    @param[in,out] a_phi               Cell-centered data
-    @param[in]    a_cellBox           Computation box
-    @param[in]    a_dit               Data index
+    @details a_flux is replaced by the user-specified flux on the domain faces.
+    @param[in,out] a_flux                  Flux data holder.
+    @param[in,out] a_phi                   Cell-centered data
+    @param[in]    a_cellBox               Computation box
+    @param[in]    a_dit                   Data index
+    @param[in]    a_homogeneousPhysBC     If true, use homogeneous physical BCs
   */
   void
-  fillDomainFlux(EBFluxFAB& a_flux, const EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit);
+  fillDomainFlux(EBFluxFAB&       a_flux,
+                 const EBCellFAB& a_phi,
+                 const Box&       a_cellBox,
+                 const DataIndex& a_dit,
+                 const bool       a_homogeneousPhysBC);
 
   /**
     @brief Apply operator in irregular cells

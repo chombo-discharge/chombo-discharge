@@ -276,6 +276,11 @@ protected:
   bool m_isSolverSetup;
 
   /**
+    @brief Use reflux-free AMR operator in GMG
+  */
+  bool m_multigridRefluxFree;
+
+  /**
     @brief Use kappa scaling for source or not
   */
   bool m_kappaScale;

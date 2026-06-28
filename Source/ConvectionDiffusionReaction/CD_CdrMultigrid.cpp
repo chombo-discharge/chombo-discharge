@@ -429,7 +429,8 @@ CdrMultigrid::setupHelmholtzFactory()
                              m_smoother,
                              relaxFactor,
                              bottomDomain,
-                             m_amr->getMaxBlockSize()));
+                             m_amr->getMaxBlockSize(),
+                             m_multigridRefluxFree));
 }
 
 void
@@ -686,6 +687,8 @@ CdrMultigrid::parseMultigridSettings()
 
   ParmParse pp(m_className.c_str());
 
+  m_multigridRefluxFree = false;
+
   std::string str;
 
   pp.get("gmg_verbosity", m_multigridVerbosity);
@@ -697,6 +700,7 @@ CdrMultigrid::parseMultigridSettings()
   pp.get("gmg_exit_tol", m_multigridExitTolerance);
   pp.get("gmg_exit_hang", m_multigridExitHang);
   pp.get("gmg_min_cells", m_minCellsBottom);
+  pp.query("gmg_reflux_free", m_multigridRefluxFree);
 
   // Fetch the desired bottom solver from the input script. We look for things like CdrMultigrid.gmg_bottom_solver = bicgstab or '= simple <number>'
   // where <number> is the number of relaxation for the smoothing solver.

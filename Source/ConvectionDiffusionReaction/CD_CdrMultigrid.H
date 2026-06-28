@@ -222,6 +222,11 @@ protected:
   bool m_hasMultigridSolver;
 
   /**
+    @brief Use reflux-free AMR operator in GMG
+  */
+  bool m_multigridRefluxFree;
+
+  /**
     @brief Storage for Helmholtz a-coefficient. Always 1. 
   */
   EBAMRCellData m_helmAcoef;

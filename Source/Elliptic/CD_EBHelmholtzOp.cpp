@@ -58,7 +58,8 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
                              const IntVect&                                   a_ghostPhi,
                              const IntVect&                                   a_ghostRhs,
                              const Smoother&                                  a_smoother,
-                             const Real&                                      a_relaxFactor)
+                             const Real&                                      a_relaxFactor,
+                             const bool                                       a_refluxFree)
   : LevelTGAHelmOp<LevelData<EBCellFAB>, EBFluxFAB>(false), // Time-independent
     m_smoother(a_smoother),
     m_dataLocation(a_dataLocation),
@@ -102,7 +103,7 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
   m_doInterpCF       = true;
   m_doCoarsen        = true;
   m_doExchange       = true;
-  m_refluxFree       = false;
+  m_refluxFree       = a_refluxFree;
   m_profile          = false;
   m_interval         = Interval(m_comp, m_comp);
   m_relaxFactor      = a_relaxFactor;
@@ -926,7 +927,7 @@ EBHelmholtzOp::refluxFreeAMROperator(LevelData<EBCellFAB>&             a_Lphi,
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
-    this->fillDomainFlux((*m_flux)[din], a_phi[din], dbl[din], din);
+    this->fillDomainFlux((*m_flux)[din], a_phi[din], dbl[din], din, a_homogeneousPhysBC);
   }
 
   // The above calls replaced the fluxes on this level by (conservative) averages of the fluxes on
@@ -1395,9 +1396,10 @@ void
 EBHelmholtzOp::fillDomainFlux(EBFluxFAB&       a_flux,
                               const EBCellFAB& a_phi,
                               const Box& /*a_cellBox*/,
-                              const DataIndex& a_dit)
+                              const DataIndex& a_dit,
+                              const bool       a_homogeneousPhysBC)
 {
-  CH_TIME("EBHelmholtzOp::fillDomainFlux(EBFluxFAB, EBCellFAB, Box, DataIndex)");
+  CH_TIME("EBHelmholtzOp::fillDomainFlux(EBFluxFAB, EBCellFAB, Box, DataIndex, bool)");
 
   // TLDR: We compute the flux on the domain edges and store it in a cell-centered box. We then monkey with the ghost cells outside
   //       the domain so that centered differences on the edge cells inject said flux. This is a simple trick for enforcing the flux
@@ -1424,7 +1426,7 @@ EBHelmholtzOp::fillDomainFlux(EBFluxFAB&       a_flux,
       // Fill the domain flux. This might look weird because we are putting the flux in a cell-centered box. By this, we implicitly
       // understand that the flux that is stored in the box is the flux that comes in through the lo side in the coordinate direction we are looking.
       FArrayBox faceFlux(loBox, m_nComp);
-      m_domainBc->getFaceFlux(faceFlux, phiReg, bco, dir, Side::Lo, a_dit, false);
+      m_domainBc->getFaceFlux(faceFlux, phiReg, bco, dir, Side::Lo, a_dit, a_homogeneousPhysBC);
 
       // Copy flux over to the input data holder and multiply by beta.
       auto kernel = [&](const IntVect& iv) -> void {
@@ -1438,7 +1440,7 @@ EBHelmholtzOp::fillDomainFlux(EBFluxFAB&       a_flux,
       // Fill the domain flux. This might look weird because we are putting the flux in a cell-centered box. By this, we implicitly
       // understand that the flux that is stored in the box is the flux that comes in through the lo side in the coordinate direction we are looking.
       FArrayBox faceFlux(hiBox, m_nComp);
-      m_domainBc->getFaceFlux(faceFlux, phiReg, bco, dir, Side::Hi, a_dit, false);
+      m_domainBc->getFaceFlux(faceFlux, phiReg, bco, dir, Side::Hi, a_dit, a_homogeneousPhysBC);
 
       // Copy flux over to the input data holder and multiply by beta.
       auto kernel = [&](const IntVect& iv) -> void {

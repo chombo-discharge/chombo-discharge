@@ -99,6 +99,7 @@ public:
     @param[in] a_jumpOrder     Stencil order to use on jump cells
     @param[in] a_relaxType     Which smoother to use
     @param[in] a_relaxFactor   Relaxation factor
+    @param[in] a_refluxFree    If true, use the reflux-free AMR operator (skips coarse-fine flux refluxing)
     @param[in] a_ghostPhi Description
     @param[in] a_ghostRhs Description
     @param[in] a_jumpWeight Description
@@ -136,7 +137,8 @@ public:
                 const int&                                       a_jumpWeight,
                 const int&                                       a_preCondSmooth,
                 const Smoother&                                  a_relaxType,
-                const Real&                                      a_relaxFactor);
+                const Real&                                      a_relaxFactor,
+                const bool                                       a_refluxFree = false);
 
   /**
     @brief Destructor. 

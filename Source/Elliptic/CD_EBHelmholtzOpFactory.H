@@ -105,12 +105,13 @@ public:
     @param[in] a_ghostPhi         Number of ghost cells in solution vector. 
     @param[in] a_smoother         Relaxation method.
     @param[in] a_relaxFactor      Relaxation factor
-    @param[in] a_bottomDomain     Coarsest domain on which we run multigrid. Must be a coarsening of the AMR problem domains. 
-    @param[in] a_deeperLevelGrids Optional object in case you want to pre-define the deeper multigrid levels. 
-    @note a_deeperLevelGrids exists because the default behavior in this factory is to use direct coarsening for deeper AMR levels. 
-    However, this can prevent reaching "deep enough" into the multigrid hierarchy if you use small boxes (e.g. 16^3). So, a_deeperLevelGrids 
-    provide an option for using aggregation. The first entry a_deeperLevelGrids[0] should be a a factor 2 coarsening of the coarsest AMR level. 
-    @note This operator is for time-independent a- and b-coefficients. 
+    @param[in] a_refluxFree       If true, use the reflux-free AMR operator (skips coarse-fine flux refluxing)
+    @param[in] a_bottomDomain     Coarsest domain on which we run multigrid. Must be a coarsening of the AMR problem domains.
+    @param[in] a_deeperLevelGrids Optional object in case you want to pre-define the deeper multigrid levels.
+    @note a_deeperLevelGrids exists because the default behavior in this factory is to use direct coarsening for deeper AMR levels.
+    However, this can prevent reaching "deep enough" into the multigrid hierarchy if you use small boxes (e.g. 16^3). So, a_deeperLevelGrids
+    provide an option for using aggregation. The first entry a_deeperLevelGrids[0] should be a a factor 2 coarsening of the coarsest AMR level.
+    @note This operator is for time-independent a- and b-coefficients.
     @param[in] a_amrLevelGrids Amr level grids
     @param[in] a_validCells Valid cells
     @param[in] a_amrRefRatios Amr ref ratios
@@ -140,6 +141,7 @@ public:
                        const Real&             a_relaxFactor,
                        const ProblemDomain&    a_bottomDomain,
                        const int&              a_mgBlockingFactor,
+                       const bool              a_refluxFree       = false,
                        const AmrLevelGrids&    a_deeperLevelGrids = AmrLevelGrids());
 
   /**
@@ -242,6 +244,11 @@ protected:
     @brief Relaxation factor
   */
   Real m_relaxFactor;
+
+  /**
+    @brief Use reflux-free AMR operator
+  */
+  bool m_refluxFree;
 
   /**
     @brief Lower-left corner of computational domain

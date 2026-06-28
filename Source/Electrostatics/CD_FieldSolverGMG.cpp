@@ -98,6 +98,8 @@ FieldSolverGMG::parseMultigridSettings()
 
   ParmParse pp(m_className.c_str());
 
+  m_multigridRefluxFree = false;
+
   std::string str;
   pp.get("gmg_verbosity", m_multigridVerbosity);
   pp.get("gmg_use_default_settings", m_multigridUseDefaultSettings);
@@ -118,6 +120,7 @@ FieldSolverGMG::parseMultigridSettings()
   pp.get("gmg_reduce_order", m_multigridDropOrder);
   pp.get("gmg_relax_factor", m_multigridRelaxFactor);
   pp.get("gmg_bottom_verbosity", m_multigridBottomSolverVerbosity);
+  pp.query("gmg_reflux_free", m_multigridRefluxFree);
 
   // Fetch the desired bottom solver from the input script. We look for things like FieldSolverGMG.gmg_bottom_solver = bicgstab or '= simple <number>'
   // where <number> is the number of relaxation for the smoothing solver.
@@ -735,7 +738,8 @@ FieldSolverGMG::setupHelmholtzFactory()
                              m_multigridJumpOrder,
                              m_multigridJumpWeight,
                              m_multigridPreCondSmooth,
-                             m_amr->getMaxBlockSize()));
+                             m_amr->getMaxBlockSize(),
+                             m_multigridRefluxFree));
 }
 
 void

@@ -55,6 +55,7 @@ MFHelmholtzOpFactory::MFHelmholtzOpFactory(const MFIS&             a_mfis,
                                            const int&              a_jumpWeight,
                                            const int&              a_preCondSmooth,
                                            const int&              a_blockingFactor,
+                                           const bool              a_refluxFree,
                                            const AmrLevelGrids&    a_deeperLevelGrids)
   : m_mfis(a_mfis),
     m_dataLocation(a_dataLocation),
@@ -65,6 +66,7 @@ MFHelmholtzOpFactory::MFHelmholtzOpFactory(const MFIS&             a_mfis,
     m_alpha(a_alpha),
     m_beta(a_beta),
     m_relaxFactor(a_relaxFactor),
+    m_refluxFree(a_refluxFree),
     m_probLo(a_probLo),
     m_amrLevelGrids(a_amrLevelGrids),
     m_validCells(a_validCells),
@@ -709,7 +711,8 @@ MFHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bo
                              m_jumpWeight,
                              m_numPreCondSmooth,
                              m_smoother,
-                             m_relaxFactor);
+                             m_relaxFactor,
+                             m_refluxFree);
 
     mgOp->setJump(jump);
   }
@@ -794,7 +797,8 @@ MFHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain)
                                m_jumpWeight,
                                m_numPreCondSmooth,
                                m_smoother,
-                               m_relaxFactor);
+                               m_relaxFactor,
+                               m_refluxFree);
 
   // Give the operator access by reference to the jump data.
   op->setJump(m_amrJump[amrLevel]);

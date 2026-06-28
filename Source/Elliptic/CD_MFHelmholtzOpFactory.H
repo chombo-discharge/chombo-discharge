@@ -106,8 +106,9 @@ public:
     @param[in] a_jumpWeight       Equation weighting in multiphase cells
     @param[in] a_preCondSmooth    Number of smoothings in the preconditioner
     @param[in] a_relaxFactor      Relaxation factor
-    @param[in] a_bottomDomain     Coarsest domain on which we run multigrid. Must be a coarsening of the AMR problem domains. 
-    @param[in] a_deeperLevelGrids Optional object in case you want to pre-define the deeper multigrid levels. 
+    @param[in] a_refluxFree       If true, use the reflux-free AMR operator (skips coarse-fine flux refluxing)
+    @param[in] a_bottomDomain     Coarsest domain on which we run multigrid. Must be a coarsening of the AMR problem domains.
+    @param[in] a_deeperLevelGrids Optional object in case you want to pre-define the deeper multigrid levels.
     @param[in] a_amrLevelGrids Amr level grids
     @param[in] a_amrRefRatios Amr ref ratios
     @param[in] a_domainBcFactory Domain bc factory
@@ -143,6 +144,7 @@ public:
                        const int&              a_jumpWeight,
                        const int&              a_preCondSmooth,
                        const int&              a_blockingFactor,
+                       const bool              a_refluxFree       = false,
                        const AmrLevelGrids&    a_deeperLevelGrids = AmrLevelGrids());
 
   /**
@@ -270,6 +272,11 @@ protected:
     @brief Relaxation factor
   */
   Real m_relaxFactor;
+
+  /**
+    @brief Use reflux-free AMR operator
+  */
+  bool m_refluxFree;
 
   /**
     @brief Lower-left corner of computational domain

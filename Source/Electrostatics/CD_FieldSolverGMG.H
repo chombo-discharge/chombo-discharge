@@ -261,6 +261,11 @@ protected:
   bool m_multigridDropOrder;
 
   /**
+    @brief Use reflux-free AMR operator in GMG
+  */
+  bool m_multigridRefluxFree;
+
+  /**
     @brief Use default multigrid settings
   */
   bool m_multigridUseDefaultSettings;

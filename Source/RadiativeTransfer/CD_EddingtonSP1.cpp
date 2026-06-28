@@ -360,6 +360,8 @@ EddingtonSP1::parseMultigridSettings()
 {
   ParmParse pp(m_className.c_str());
 
+  m_multigridRefluxFree = false;
+
   std::string str;
 
   pp.get("gmg_verbosity", m_multigridVerbosity);
@@ -373,6 +375,7 @@ EddingtonSP1::parseMultigridSettings()
   pp.get("gmg_min_cells", m_minCellsBottom);
   pp.get("gmg_ebbc_order", m_multigridBcOrder);
   pp.get("gmg_ebbc_weight", m_multigridBcWeight);
+  pp.query("gmg_reflux_free", m_multigridRefluxFree);
 
   // Fetch the desired bottom solver from the input script. We look for things like EddingtonSP1.gmg_bottom_solver = bicgstab or '= simple <number>'
   // where <number> is the number of relaxation for the smoothing solver.
@@ -973,7 +976,8 @@ EddingtonSP1::setupHelmholtzFactory()
                                                                                       m_multigridRelaxMethod,
                                                                                       relaxFactor,
                                                                                       bottomDomain,
-                                                                                      m_amr->getMaxBlockSize()));
+                                                                                      m_amr->getMaxBlockSize(),
+                                                                                      m_multigridRefluxFree));
 }
 
 void
