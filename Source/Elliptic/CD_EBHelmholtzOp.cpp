@@ -618,7 +618,7 @@ EBHelmholtzOp::dotProduct(const LevelData<EBCellFAB>& a_lhs, const LevelData<EBC
     auto irregularKernel = [&](const VolIndex& vof) -> void {
       const Real kappa = ebisbox.volFrac(vof);
 
-      sumKappaXY += (kappa * X(vof, 0)) * (kappa * Y(vof, 0));
+      sumKappaXY += kappa * X(vof, 0) * Y(vof, 0);
       sumVolume += kappa;
     };
 
@@ -2016,12 +2016,14 @@ EBHelmholtzOp::computeDiagWeight()
           const Box sidebox = m_sideBox.at(std::make_pair(dir, sit()));
 
           if (sidebox.contains(iv)) {
+            const Real bcWeight = m_domainBc->getDiagWeight(dir, sit());
+
             Real              weightedAreaFrac = 0.0;
             Vector<FaceIndex> faces            = ebisbox.getFaces(vof, dir, sit());
             for (auto& f : faces.stdVector()) {
               weightedAreaFrac += ebisbox.areaFrac(f) * (*m_Bcoef)[din][dir](f, m_comp) / (m_dx * m_dx);
             }
-            betaWeight += -weightedAreaFrac;
+            betaWeight += -bcWeight * weightedAreaFrac;
           }
         }
       }

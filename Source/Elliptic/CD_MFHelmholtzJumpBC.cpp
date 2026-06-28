@@ -653,12 +653,14 @@ MFHelmholtzJumpBC::matchBC(BaseIVFAB<Real>& a_jump,
       jump *= 1. / static_cast<double>(vofsPhase0.size());
     }
 
+    const Real phi1Canon = bndryPhiPhase1(vofsPhase1[0], m_comp);
     for (int i = 0; i < vofsPhase0.size(); i++) {
-      bndryPhiPhase0(vofsPhase0[i], m_comp) += bndryPhiPhase1(vof0, m_comp);
+      bndryPhiPhase0(vofsPhase0[i], m_comp) += phi1Canon;
       bndryPhiPhase0(vofsPhase0[i], m_comp) *= -1.0;
     }
+    const Real phi0Combined = bndryPhiPhase0(vofsPhase0[0], m_comp);
     for (int i = 0; i < vofsPhase1.size(); i++) {
-      bndryPhiPhase1(vofsPhase1[i], m_comp) = bndryPhiPhase0(vof0, m_comp);
+      bndryPhiPhase1(vofsPhase1[i], m_comp) = phi0Combined;
     }
 
     if (!a_homogeneousPhysBC) {

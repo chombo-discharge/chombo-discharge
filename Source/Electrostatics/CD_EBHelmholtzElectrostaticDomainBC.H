@@ -126,6 +126,15 @@ public:
               const DataIndex&      a_dit,
               const bool            a_useHomogeneous) const override final;
 
+  /**
+    @brief Routes getDiagWeight to the per-face BC sub-object.
+    @param[in] a_dir  Coordinate direction.
+    @param[in] a_side High or low side.
+    @return Diagonal weight multiplier for the face.
+  */
+  Real
+  getDiagWeight(const int a_dir, const Side::LoHiSide a_side) const override;
+
 protected:
   /**
     @brief Electrostatic domain boundary conditions

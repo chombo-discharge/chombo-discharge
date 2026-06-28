@@ -102,6 +102,15 @@ public:
               const DataIndex&      a_dit,
               const bool            a_useHomogeneous) const override;
 
+  /**
+    @brief Returns 2.0: the Dirichlet ghost-cell formula uses half-cell spacing, doubling the stencil coefficient.
+    @param[in] a_dir  Coordinate direction.
+    @param[in] a_side High or low side.
+    @return 2.0
+  */
+  Real
+  getDiagWeight(const int a_dir, const Side::LoHiSide a_side) const override;
+
 protected:
   /**
     @brief Use constant for BC

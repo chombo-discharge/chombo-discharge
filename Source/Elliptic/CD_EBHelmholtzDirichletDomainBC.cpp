@@ -197,4 +197,10 @@ EBHelmholtzDirichletDomainBC::getFaceFlux(const VolIndex&       a_vof,
   return centroidFlux;
 }
 
+Real
+EBHelmholtzDirichletDomainBC::getDiagWeight(const int /*a_dir*/, const Side::LoHiSide /*a_side*/) const
+{
+  return 2.0;
+}
+
 #include <CD_NamespaceFooter.H>

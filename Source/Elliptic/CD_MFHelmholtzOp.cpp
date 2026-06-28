@@ -462,7 +462,7 @@ MFHelmholtzOp::dotProduct(const LevelData<MFCellFAB>& a_lhs, const LevelData<MFC
       auto irregularKernel = [&](const VolIndex& vof) -> void {
         const Real kappa = ebisbox.volFrac(vof);
 
-        sumKappaXY += (kappa * X(vof, 0)) * (kappa * Y(vof, 0));
+        sumKappaXY += kappa * X(vof, 0) * Y(vof, 0);
         sumVolume += kappa;
       };
 
@@ -936,7 +936,9 @@ MFHelmholtzOp::restrictResidual(LevelData<MFCellFAB>&       a_resCoar,
     MultifluidAlias::aliasMF(phi, op.first, a_phi);
     MultifluidAlias::aliasMF(rhs, op.first, a_rhs);
 
+    op.second->turnOffExchange();
     op.second->restrictResidual(resCoar, phi, rhs);
+    op.second->turnOnExchange();
   }
 }
 

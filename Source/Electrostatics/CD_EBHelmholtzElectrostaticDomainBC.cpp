@@ -132,4 +132,12 @@ EBHelmholtzElectrostaticDomainBC::getFaceFlux(const VolIndex&       a_vof,
   return bcPtr->getFaceFlux(a_vof, a_phi, a_Bcoef, a_dir, a_side, a_dit, a_useHomogeneous);
 }
 
+Real
+EBHelmholtzElectrostaticDomainBC::getDiagWeight(const int a_dir, const Side::LoHiSide a_side) const
+{
+  const auto& bcPtr = m_bcObjects.at(std::make_pair(a_dir, a_side));
+
+  return bcPtr->getDiagWeight(a_dir, a_side);
+}
+
 #include <CD_NamespaceFooter.H>

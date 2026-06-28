@@ -112,6 +112,18 @@ public:
               const DataIndex&      a_dit,
               const bool            a_useHomogeneous) const = 0;
 
+  /**
+    @brief Returns the diagonal weight multiplier for the domain-face contribution to the relaxation stencil.
+    @details For Dirichlet BCs the effective stencil uses a half-cell spacing giving a factor of 2.
+             For Neumann BCs the flux is prescribed independently of phi, contributing 0 to the diagonal.
+             The default returns 1 to preserve backward-compatibility with unspecialized subclasses.
+    @param[in] a_dir  Coordinate direction of the face.
+    @param[in] a_side High or low side.
+    @return Multiplier applied to B·area/dx² when building the diagonal relaxation weight.
+  */
+  virtual Real
+  getDiagWeight(const int a_dir, const Side::LoHiSide a_side) const;
+
 protected:
   /**
     @brief Component that everything is defined for. Always have m_comp = 0
