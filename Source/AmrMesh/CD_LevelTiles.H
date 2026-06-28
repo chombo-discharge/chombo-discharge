@@ -42,8 +42,9 @@ public:
 
   /**
     @brief Hash functor for using IntVect tiles as unordered_map keys.
-    @details Hashes all SpaceDim components (FNV-1a), with no bit-truncation, so tiles outside the
-    registered range (e.g. far-outcast particles) cannot alias a registered tile.
+    @details Hashes all SpaceDim components (FNV-1a). Hash collisions are harmless: std::unordered_map
+    distinguishes entries by key equality (IntVect::operator==), not by hash, so a collision only
+    affects performance and never returns a wrong value.
   */
   struct TileHasher
   {
@@ -55,7 +56,7 @@ public:
     std::size_t
     operator()(const IntVect& a_tile) const noexcept
     {
-      std::size_t hash = 1469598103934665603ULL;
+      std::size_t hash = 14695981039346656037ULL; // FNV-1a 64-bit offset basis
       for (int dir = 0; dir < SpaceDim; dir++) {
         hash ^= static_cast<std::size_t>(static_cast<unsigned int>(a_tile[dir]));
         hash *= 1099511628211ULL;
