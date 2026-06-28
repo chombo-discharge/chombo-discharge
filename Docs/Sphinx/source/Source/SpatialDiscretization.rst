@@ -238,12 +238,12 @@ The tile size is set by ``AmrMesh.min_block_size``.
 The tiled algorithm produces grids that are visually similar to octrees, but is slightly more general since it also supports refinement factors other than 2 and is not restricted to domain extensions that are an integer factor of 2 (e.g. :math:`2^{10}` cells in each direction).
 Moreover, the algorithm is extremely fast and has low memory consumption even at large scales.
 
-When ``AmrMesh.max_box_size`` is larger than ``AmrMesh.min_block_size`` the flagged tiles are subsequently *merged* into fewer, larger, possibly anisotropic boxes, where no box exceeds ``AmrMesh.max_box_size`` in any direction.
+When ``AmrMesh.max_block_size`` is larger than ``AmrMesh.min_block_size`` the flagged tiles are subsequently *merged* into fewer, larger, possibly anisotropic boxes, where no box exceeds ``AmrMesh.max_block_size`` in any direction.
 The merging is a recursive longest-axis bisection (a KD-tree, i.e. Berger-Rigoutsos applied to the tile grid) over the globally-gathered tile set: it is a deterministic function of the tiles and a fixed splitting rule, so every MPI rank produces the same boxes.
 Because every box remains a union of aligned ``min_block_size`` tiles, the point-to-box lookup used by the particle infrastructure stays :math:`\mathcal{O}(1)`.
-When ``AmrMesh.min_block_size`` equals ``AmrMesh.max_box_size`` no merging is performed and the result is one box per tile, which is the most common configuration.
+When ``AmrMesh.min_block_size`` equals ``AmrMesh.max_block_size`` no merging is performed and the result is one box per tile, which is the most common configuration.
 
-Grid generation is *top-down* over a grid of super-tiles (a super-tile being one ``AmrMesh.max_box_size`` block of tiles): a fully-tagged super-tile becomes a single box directly, and individual ``AmrMesh.min_block_size`` tiles are materialized only inside partially-tagged super-tiles, i.e. at the boundary of the refined region.
+Grid generation is *top-down* over a grid of super-tiles (a super-tile being one ``AmrMesh.max_block_size`` block of tiles): a fully-tagged super-tile becomes a single box directly, and individual ``AmrMesh.min_block_size`` tiles are materialized only inside partially-tagged super-tiles, i.e. at the boundary of the refined region.
 The intermediate data that is gathered across MPI ranks therefore scales with the refined *surface* (plus the number of boxes), not the refined *volume*, which keeps the memory footprint low even when refining very large regions.
 
 .. _TiledMeshRefine:

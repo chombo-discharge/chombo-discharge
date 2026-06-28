@@ -32,7 +32,7 @@
   minBlockSize^SpaceDim grid patch, and maps each tile to the grid box that contains it. Boxes may be larger than
   one tile (variable-sized/anisotropic boxes that are unions of aligned minBlockSize tiles): such a box is
   registered under every tile it covers, so the tile->box map stays uniform and a point->tile->box lookup is O(1).
-  When minBlockSize == maxBoxSize every box is exactly one tile (the one-tile-per-box fast path).
+  When minBlockSize == maxBlockSize every box is exactly one tile (the one-tile-per-box fast path).
 */
 class LevelTiles
 {

@@ -59,13 +59,13 @@ Domain decomposition
 
 With Cartesian AMR, each grid level is decomposed into grid blocks of constant size, or sizes that potentially vary between some min/max size along each dimension.
 In ``chombo-discharge`` this is encapsulated by ``AmrMesh.min_block_size``, which is the smallest grid box that can be generated when meshing the domain.
-Likewise, ``AmrMesh.max_box_size`` is the maximum box size that can be produced.
-When ``AmrMesh.max_box_size`` is larger than ``AmrMesh.min_block_size`` the grids may contain variable-sized (and anisotropic) boxes, each box being a union of aligned ``AmrMesh.min_block_size`` tiles; see :ref:`Chap:MeshGeneration`.
+Likewise, ``AmrMesh.max_block_size`` is the maximum box size that can be produced.
+When ``AmrMesh.max_block_size`` is larger than ``AmrMesh.min_block_size`` the grids may contain variable-sized (and anisotropic) boxes, each box being a union of aligned ``AmrMesh.min_block_size`` tiles; see :ref:`Chap:MeshGeneration`.
 This is supported by all solvers, including the particle infrastructure.
 
 .. tip::
 
-   Setting ``AmrMesh.min_block_size`` equal to ``AmrMesh.max_box_size`` yields fixed-size boxes, which is the most common configuration.
+   Setting ``AmrMesh.min_block_size`` equal to ``AmrMesh.max_block_size`` yields fixed-size boxes, which is the most common configuration.
 
 The flag ``AmrMesh.max_ebis_box`` indicates essentially the blocking factor when generating the cut-cell information at the start of a simulation.
 It may happen for very large simulations that one has to increase the box size (e.g., to 32) in order to trim grid metadata.

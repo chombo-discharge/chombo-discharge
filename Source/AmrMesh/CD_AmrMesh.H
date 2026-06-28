@@ -1642,11 +1642,22 @@ public:
   }
 
   /**
-    @brief Get maximum permitted box size
-    @return Maximum box size
+    @brief Get maximum permitted block size
+    @return Maximum block size
   */
   int
-  getMaxBoxSize() const;
+  getMaxBlockSize() const;
+
+  /**
+    @brief Deprecated alias for getMaxBlockSize().
+    @return Maximum block size.
+    @note 'max box size' was renamed to 'max block size'; use getMaxBlockSize().
+  */
+  int
+  getMaxBoxSize() const
+  {
+    return this->getMaxBlockSize();
+  }
 
   /**
     @brief Return buffer for B-R mesh refinement algorithm.
@@ -2180,7 +2191,7 @@ protected:
   /**
     @brief Max box size
   */
-  int m_maxBoxSize;
+  int m_maxBlockSize;
 
   /**
     @brief Maximum box size for EBIS generation
@@ -2342,7 +2353,7 @@ protected:
     @brief Parse the maximum permitted box size. 
   */
   void
-  parseMaxBoxSize();
+  parseMaxBlockSize();
 
   /**
     @brief Parse the maximum permitted box size. 

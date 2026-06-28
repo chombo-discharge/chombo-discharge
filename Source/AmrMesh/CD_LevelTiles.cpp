@@ -55,7 +55,7 @@ LevelTiles::define(const DisjointBoxLayout& a_dbl, const int a_minBlockSize) noe
 
     // A box is a union of aligned min_block_size tiles, so coarsening by the block size gives the
     // (possibly multi-tile) range of min-tiles it covers. Register the box under every one of them.
-    // When min_block_size == max_box_size this range is a single tile (the one-tile-per-box fast path).
+    // When min_block_size == max_block_size this range is a single tile (the one-tile-per-box fast path).
     const Box tileRange = coarsen(a_dbl[lidx], a_minBlockSize);
 
     for (BoxIterator bit(tileRange); bit.ok(); ++bit) {

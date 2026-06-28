@@ -934,7 +934,7 @@ AmrMesh::parseOptions()
   this->parseMaxSimulationDepth();
   this->parseRefinementRatios();
   this->parseMinBlockSize();
-  this->parseMaxBoxSize();
+  this->parseMaxBlockSize();
   this->parseMaxEbisBoxSize();
   this->parseGridGeneration();
   this->parseBrBufferSize();
@@ -963,7 +963,7 @@ AmrMesh::parseRuntimeOptions()
   this->parseMaxSimulationDepth();
   this->parseVerbosity();
   this->parseMinBlockSize();
-  this->parseMaxBoxSize();
+  this->parseMaxBlockSize();
   this->parseGridGeneration();
   this->parseBrBufferSize();
   this->parseBrFillRatio();
@@ -1160,7 +1160,7 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
 
   // Inside this loop we make the boxes.
   if (m_maxAmrDepth > 0 && hardcap > 0) {
-    domainSplit(m_domains[0], oldBoxes[0], m_maxBoxSize, m_minBlockSize);
+    domainSplit(m_domains[0], oldBoxes[0], m_maxBlockSize, m_minBlockSize);
 
     // If have old grids, we can use the old boxes as input to the grid generators (since they don't necessarily regrid all levels).
     if (!m_hasGrids) {
@@ -1188,7 +1188,7 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
                               m_fillRatioBR,
                               m_minBlockSize,
                               m_bufferSizeBR,
-                              m_maxBoxSize);
+                              m_maxBlockSize);
 
       newFinestLevel = meshRefine.regrid(newBoxes, tags, baseLevel, topLevel, oldBoxes);
 
@@ -1198,7 +1198,7 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
       TiledMeshRefine meshRefine(m_domains[0],
                                  m_refinementRatios,
                                  m_minBlockSize * IntVect::Unit,
-                                 m_maxBoxSize * IntVect::Unit);
+                                 m_maxBlockSize * IntVect::Unit);
 
       newFinestLevel = meshRefine.regrid(newBoxes, a_tags);
       newBoxes[0]    = oldBoxes[0];
@@ -1219,7 +1219,7 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
   }
   else { // Only end up here if we have a single grid level, i.e. just single-level grid decomposition.
     newBoxes.resize(1);
-    domainSplit(m_domains[0], newBoxes[0], m_maxBoxSize, m_minBlockSize);
+    domainSplit(m_domains[0], newBoxes[0], m_maxBlockSize, m_minBlockSize);
 
     m_finestLevel = 0;
   }
@@ -1227,7 +1227,7 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
   // Coarsest level also changes in this case, but that's not actually caught by the regridders. We have to do this because the blocking
   // factor could have been changed during runtime option parsing.
   if (a_lmin == 0) {
-    domainSplit(m_domains[0], newBoxes[0], m_maxBoxSize, m_minBlockSize);
+    domainSplit(m_domains[0], newBoxes[0], m_maxBlockSize, m_minBlockSize);
   }
 
   // Sort the boxes and then load balance them, using the patch volume as a proxy for the computational load.
@@ -2615,21 +2615,29 @@ AmrMesh::setGrids(const Vector<Vector<Box>>&                             a_boxes
 }
 
 void
-AmrMesh::parseMaxBoxSize()
+AmrMesh::parseMaxBlockSize()
 {
-  CH_TIME("AmrMesh::parseMaxBoxSize()");
+  CH_TIME("AmrMesh::parseMaxBlockSize()");
   if (m_verbosity > 3) {
-    pout() << "AmrMesh::parseMaxBoxSize()" << endl;
+    pout() << "AmrMesh::parseMaxBlockSize()" << endl;
   }
 
   ParmParse pp("AmrMesh");
-  int       boxSize;
-  pp.get("max_box_size", boxSize);
-  if (boxSize >= 4 && boxSize % 2 == 0) {
-    m_maxBoxSize = boxSize;
+  int       blockSize;
+
+  // 'max_block_size' is the current name; 'max_box_size' is accepted as a deprecated alias.
+  if (pp.contains("max_box_size") && !pp.contains("max_block_size")) {
+    pp.get("max_box_size", blockSize);
   }
   else {
-    MayDay::Error("AmrMesh::parseMaxBoxSize - must have box_size >= 4 and divisible by 2");
+    pp.get("max_block_size", blockSize);
+  }
+
+  if (blockSize >= 4 && blockSize % 2 == 0) {
+    m_maxBlockSize = blockSize;
+  }
+  else {
+    MayDay::Error("AmrMesh::parseMaxBlockSize - must have max_block_size >= 4 and divisible by 2");
   }
 }
 
@@ -2918,7 +2926,7 @@ AmrMesh::sanityCheck() const
     CH_assert(m_minBlockSize >= 4 && m_minBlockSize % m_refinementRatios[lvl] == 0);
   }
 
-  CH_assert(m_maxBoxSize >= 8 && m_maxBoxSize % m_minBlockSize == 0);
+  CH_assert(m_maxBlockSize >= 8 && m_maxBlockSize % m_minBlockSize == 0);
   CH_assert(m_fillRatioBR > 0. && m_fillRatioBR <= 1.0);
   CH_assert(m_bufferSizeBR > 0);
 
@@ -3075,14 +3083,14 @@ AmrMesh::getMinBlockSize() const
 }
 
 int
-AmrMesh::getMaxBoxSize() const
+AmrMesh::getMaxBlockSize() const
 {
-  CH_TIME("AmrMesh::getMaxBoxSize()");
+  CH_TIME("AmrMesh::getMaxBlockSize()");
   if (m_verbosity > 1) {
-    pout() << "AmrMesh::getMaxBoxSize()" << endl;
+    pout() << "AmrMesh::getMaxBlockSize()" << endl;
   }
 
-  return m_maxBoxSize;
+  return m_maxBlockSize;
 }
 
 int

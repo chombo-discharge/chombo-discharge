@@ -735,7 +735,7 @@ FieldSolverGMG::setupHelmholtzFactory()
                              m_multigridJumpOrder,
                              m_multigridJumpWeight,
                              m_multigridPreCondSmooth,
-                             m_amr->getMaxBoxSize()));
+                             m_amr->getMaxBlockSize()));
 }
 
 void

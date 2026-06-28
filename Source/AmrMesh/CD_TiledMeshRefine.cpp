@@ -28,17 +28,17 @@
 TiledMeshRefine::TiledMeshRefine(const ProblemDomain& a_coarsestDomain,
                                  const Vector<int>&   a_refRatios,
                                  const IntVect&       a_tileSize,
-                                 const IntVect&       a_maxBoxSize) noexcept
-  : m_refRatios(a_refRatios), m_tileSize(a_tileSize), m_maxBoxSize(a_maxBoxSize)
+                                 const IntVect&       a_maxBlockSize) noexcept
+  : m_refRatios(a_refRatios), m_tileSize(a_tileSize), m_maxBlockSize(a_maxBlockSize)
 {
   CH_TIME("TiledMeshRefine::TiledMeshRefine");
 
   m_superVol = 1;
   for (int dir = 0; dir < SpaceDim; dir++) {
-    CH_assert(a_maxBoxSize[dir] >= a_tileSize[dir]);
-    CH_assert(a_maxBoxSize[dir] % a_tileSize[dir] == 0);
+    CH_assert(a_maxBlockSize[dir] >= a_tileSize[dir]);
+    CH_assert(a_maxBlockSize[dir] % a_tileSize[dir] == 0);
 
-    m_superFactor[dir] = a_maxBoxSize[dir] / a_tileSize[dir];
+    m_superFactor[dir] = a_maxBlockSize[dir] / a_tileSize[dir];
     m_superVol *= m_superFactor[dir];
   }
   m_bitmaskWords = static_cast<int>((m_superVol + 63) / 64);
@@ -380,7 +380,7 @@ TiledMeshRefine::makeBoxesFromTiles(Vector<Box>&         a_boxes,
   }
   std::sort(partialKeys.begin(), partialKeys.end());
 
-  // Full super-tiles -> one (max_box_size) box each.
+  // Full super-tiles -> one (max_block_size) box each.
   for (const std::uint64_t key : fullKeys) {
     const IntVect super = this->decodeSuper(key);
     const IntVect boxLo = probLo + (super * m_superFactor) * m_tileSize;

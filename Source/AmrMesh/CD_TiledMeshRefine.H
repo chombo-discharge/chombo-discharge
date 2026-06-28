@@ -33,13 +33,13 @@
   @details This class provides a scalable method for grid generation where the grids are generated in a
   pre-set tile pattern, by flagging min_block_size tiles rather than cells for refinement.
 
-  Generation is top-down over a grid of super-tiles, where a super-tile is a max_box_size block of
+  Generation is top-down over a grid of super-tiles, where a super-tile is a max_block_size block of
   min_block_size tiles. Each level is represented compactly as the set of fully-tagged super-tiles plus,
   for partially-tagged super-tiles, a bitmask of which sub-tiles are tagged. Fine tiles are therefore
   materialized only at the boundary of the refined region (inside partial super-tiles), and only that
   compact representation is gathered across MPI ranks -- the intermediate memory scales with the refined
-  surface plus the box count, not the refined volume. Full super-tiles become one (max_box_size) box each;
-  partial super-tiles are packed into variable-sized boxes by packTiles. When max_box_size == min_block_size
+  surface plus the box count, not the refined volume. Full super-tiles become one (max_block_size) box each;
+  partial super-tiles are packed into variable-sized boxes by packTiles. When max_block_size == min_block_size
   every super-tile is a single tile and the output is one box per tile (legacy behaviour).
 */
 class TiledMeshRefine
@@ -55,14 +55,14 @@ public:
     @param[in] a_coarsestDomain Coarsest grid domain
     @param[in] a_refRatios      Refinement ratios
     @param[in] a_tileSize       Tile size (= minimum block size, in cells)
-    @param[in] a_maxBoxSize     Maximum box size (in cells). Tiles are merged into boxes no larger than
+    @param[in] a_maxBlockSize     Maximum box size (in cells). Tiles are merged into boxes no larger than
                                 this per direction. Must be a multiple of a_tileSize. When equal to
                                 a_tileSize the output is one box per tile (legacy behaviour).
   */
   TiledMeshRefine(const ProblemDomain& a_coarsestDomain,
                   const Vector<int>&   a_refRatios,
                   const IntVect&       a_tileSize,
-                  const IntVect&       a_maxBoxSize) noexcept;
+                  const IntVect&       a_maxBlockSize) noexcept;
 
   /**
     @brief Destructor (does nothing)
@@ -113,10 +113,10 @@ protected:
   /**
     @brief Maximum box size (in cells). Merge cap; a multiple of m_tileSize.
   */
-  IntVect m_maxBoxSize;
+  IntVect m_maxBlockSize;
 
   /**
-    @brief Number of min_block_size tiles per super-tile, per direction (= m_maxBoxSize / m_tileSize).
+    @brief Number of min_block_size tiles per super-tile, per direction (= m_maxBlockSize / m_tileSize).
   */
   IntVect m_superFactor;
 
@@ -218,8 +218,8 @@ protected:
 
   /**
     @brief Turn the super-tile representation into boxes.
-    @details Full super-tiles become one (max_box_size) box each; partial super-tiles are packed into
-    variable-sized boxes by packTiles. When max_box_size == min_block_size every super-tile is a single
+    @details Full super-tiles become one (max_block_size) box each; partial super-tiles are packed into
+    variable-sized boxes by packTiles. When max_block_size == min_block_size every super-tile is a single
     tile and this emits one box per tile (legacy behaviour). Super-tiles are visited in sorted-key order
     so the box list is identical on every rank.
     @param[out] a_boxes  Grid boxes generated from the tiles
@@ -239,7 +239,7 @@ protected:
     cap is split at a cap multiple first. Deterministic (fixed axis/plane tie-breaks) and exact (a box is
     emitted only when fully tagged, so no untagged cells are covered).
     @param[in,out] a_tiles   Tiles to pack, in tile coordinates; reordered in place.
-    @param[in]     a_maxTile Per-direction cap in tile units (= max_box_size / tile_size).
+    @param[in]     a_maxTile Per-direction cap in tile units (= max_block_size / tile_size).
     @param[in]     a_probLo  Cell-space origin of the level (added when forming the cell boxes).
     @param[out]    a_boxes   Boxes (cell coordinates) appended for these tiles.
   */
