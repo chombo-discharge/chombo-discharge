@@ -76,6 +76,11 @@ FieldSolverGMG.kappa_source          = true             ## Volume weighted space
 FieldSolverGMG.filter_rho            = 0                ## Number of filterings of space charge before Poisson solve
 FieldSolverGMG.filter_potential      = 0                ## Number of filterings of potential after Poisson solve
 
+FieldSolverGMG.solver                       = gmg          ## Solver(s), tried in order. 'gmg', 'gmres', 'bicgstab'. List = fallback chain
+FieldSolverGMG.krylov_eps                   = 1.E-10       ## Outer Krylov relative residual tolerance (gmres/bicgstab)
+FieldSolverGMG.krylov_max_iter              = 50           ## Outer Krylov max iterations (gmres/bicgstab)
+FieldSolverGMG.krylov_restart               = 30           ## GMRES restart length (gmres only)
+FieldSolverGMG.krylov_vcycles               = 1            ## V-cycles per Krylov preconditioner application
 FieldSolverGMG.gmg_verbosity                = 10           ## GMG verbosity
 FieldSolverGMG.gmg_use_default_settings     = true         ## Use default multigrid settings or not (see documentation)
 FieldSolverGMG.gmg_pre_smooth               = 10           ## Number of relaxations in downsweep
@@ -98,11 +103,6 @@ FieldSolverGMG.gmg_bottom_verbosity         = -1           ## Bottom solver verb
 FieldSolverGMG.gmg_cycle                    = vcycle       ## Cycle type. Only 'vcycle' supported for now
 FieldSolverGMG.gmg_smoother                 = red_black    ## Relaxation type. 'jacobi', 'multi_color', or 'red_black'
 FieldSolverGMG.gmg_relax_factor             = 1.0          ## Adjustable SOR factor
-FieldSolverGMG.solver                       = gmg          ## Solver(s), tried in order. 'gmg', 'gmres', 'bicgstab'. List = fallback chain
-FieldSolverGMG.krylov_eps                   = 1.E-10       ## Outer Krylov relative residual tolerance (gmres/bicgstab)
-FieldSolverGMG.krylov_max_iter              = 50           ## Outer Krylov max iterations (gmres/bicgstab)
-FieldSolverGMG.krylov_restart               = 30           ## GMRES restart length (gmres only)
-FieldSolverGMG.krylov_vcycles               = 1            ## V-cycles per Krylov preconditioner application
 
 # ====================================================================================================
 # SurfaceODESolver solver settings.

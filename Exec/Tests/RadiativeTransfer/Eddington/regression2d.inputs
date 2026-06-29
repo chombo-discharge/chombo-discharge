@@ -70,6 +70,11 @@ EddingtonSP1.reflectivity          = 0.            ## Reflectivity
 EddingtonSP1.kappa_scale           = true          ## Kappa scale source or not (depends on algorithm)
 EddingtonSP1.plt_vars              = phi src       ## Plot variables. Available are 'phi' and 'src'
 EddingtonSP1.use_regrid_slopes     = true          ## Slopes on/off when regridding
+EddingtonSP1.solver                = gmg           ## Solver(s), tried in order. 'gmg', 'gmres', 'bicgstab'. List = fallback chain
+EddingtonSP1.krylov_eps            = 1.E-10        ## Outer Krylov relative residual tolerance (gmres/bicgstab)
+EddingtonSP1.krylov_max_iter       = 50            ## Outer Krylov max iterations (gmres/bicgstab)
+EddingtonSP1.krylov_restart        = 30            ## GMRES restart length (gmres only)
+EddingtonSP1.krylov_vcycles        = 1             ## V-cycles per Krylov preconditioner application
 EddingtonSP1.gmg_verbosity         = -1            ## GMG verbosity
 EddingtonSP1.gmg_pre_smooth        = 8             ## Number of relaxations in downsweep
 EddingtonSP1.gmg_post_smooth       = 8             ## Number of relaxations in upsweep
@@ -84,11 +89,6 @@ EddingtonSP1.gmg_cycle             = vcycle        ## Cycle type. Only 'vcycle' 
 EddingtonSP1.gmg_ebbc_weight       = 2             ## EBBC weight (only for Dirichlet)
 EddingtonSP1.gmg_ebbc_order        = 2             ## EBBC order (only for Dirichlet)
 EddingtonSP1.gmg_smoother          = red_black     ## Relaxation type. 'jacobi', 'red_black', or 'multi_color'
-EddingtonSP1.solver                = gmg           ## Solver(s), tried in order. 'gmg', 'gmres', 'bicgstab'. List = fallback chain
-EddingtonSP1.krylov_eps            = 1.E-10        ## Outer Krylov relative residual tolerance (gmres/bicgstab)
-EddingtonSP1.krylov_max_iter       = 50            ## Outer Krylov max iterations (gmres/bicgstab)
-EddingtonSP1.krylov_restart        = 30            ## GMRES restart length (gmres only)
-EddingtonSP1.krylov_vcycles        = 1             ## V-cycles per Krylov preconditioner application
 EddingtonSP1.ebbc                  = larsen 0.0    ## Bc on embedded boundaries.
 EddingtonSP1.bc.x.lo               = larsen 0.0    ## Bc on domain side. 'dirichlet', 'neuman', or 'larsen'
 EddingtonSP1.bc.x.hi               = larsen 0.0    ## Bc on domain side. 'dirichlet', 'neuman', or 'larsen'

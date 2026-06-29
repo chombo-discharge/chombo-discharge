@@ -78,6 +78,11 @@ CdrGodunov.blend_conservation       = true                      ## Turn on/off b
 CdrGodunov.which_redistribution     = volume                    ## Redistribution type. 'volume', 'mass', or 'none' (turned off)
 CdrGodunov.use_regrid_slopes        = true                      ## Turn on/off slopes when regridding
 CdrGodunov.plot_mode                = density                   ## Plot densities 'density' or particle numbers ('numbers')
+CdrGodunov.solver                   = gmg                       ## Solver(s), tried in order. 'gmg', 'gmres', 'bicgstab'. List = fallback chain
+CdrGodunov.krylov_eps               = 1.E-10                    ## Outer Krylov relative residual tolerance (gmres/bicgstab)
+CdrGodunov.krylov_max_iter          = 50                        ## Outer Krylov max iterations (gmres/bicgstab)
+CdrGodunov.krylov_restart           = 30                        ## GMRES restart length (gmres only)
+CdrGodunov.krylov_vcycles           = 1                         ## V-cycles per Krylov preconditioner application
 CdrGodunov.gmg_verbosity            = 10                        ## GMG verbosity
 CdrGodunov.gmg_pre_smooth           = 12                        ## Number of relaxations in GMG downsweep
 CdrGodunov.gmg_post_smooth          = 12                        ## Number of relaxations in upsweep
@@ -90,11 +95,6 @@ CdrGodunov.gmg_min_cells            = 2                         ## Bottom drop
 CdrGodunov.gmg_bottom_solver        = bicgstab                  ## Bottom solver type. Valid options are 'simple' and 'bicgstab'
 CdrGodunov.gmg_cycle                = vcycle                    ## Cycle type. Only 'vcycle' supported for now
 CdrGodunov.gmg_smoother             = red_black                 ## Relaxation type. 'jacobi', 'multi_color', or 'red_black'
-CdrGodunov.solver                   = gmg                       ## Solver(s), tried in order. 'gmg', 'gmres', 'bicgstab'. List = fallback chain
-CdrGodunov.krylov_eps               = 1.E-10                    ## Outer Krylov relative residual tolerance (gmres/bicgstab)
-CdrGodunov.krylov_max_iter          = 50                        ## Outer Krylov max iterations (gmres/bicgstab)
-CdrGodunov.krylov_restart           = 30                        ## GMRES restart length (gmres only)
-CdrGodunov.krylov_vcycles           = 1                         ## V-cycles per Krylov preconditioner application
 
 # ====================================================================================================
 # ROD_DIELECTRIC CLASS OPTIONS

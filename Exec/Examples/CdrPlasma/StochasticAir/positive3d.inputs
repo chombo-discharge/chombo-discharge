@@ -82,6 +82,11 @@ FieldSolverGMG.kappa_source          = true             ## Volume weighted space
 FieldSolverGMG.filter_rho            = 0                ## Number of filterings of space charge before Poisson solve
 FieldSolverGMG.filter_potential      = 0                ## Number of filterings of potential after Poisson solve
 
+FieldSolverGMG.solver                       = gmg          ## Solver(s), tried in order. 'gmg', 'gmres', 'bicgstab'. List = fallback chain
+FieldSolverGMG.krylov_eps                   = 1.E-10       ## Outer Krylov relative residual tolerance (gmres/bicgstab)
+FieldSolverGMG.krylov_max_iter              = 50           ## Outer Krylov max iterations (gmres/bicgstab)
+FieldSolverGMG.krylov_restart               = 30           ## GMRES restart length (gmres only)
+FieldSolverGMG.krylov_vcycles               = 1            ## V-cycles per Krylov preconditioner application
 FieldSolverGMG.gmg_verbosity                = 10           ## GMG verbosity
 FieldSolverGMG.gmg_use_default_settings     = true         ## Use default multigrid settings or not (see documentation)
 FieldSolverGMG.gmg_pre_smooth               = 16           ## Number of relaxations in downsweep
@@ -105,11 +110,6 @@ FieldSolverGMG.gmg_cycle                    = vcycle       ## Cycle type. Only '
 FieldSolverGMG.gmg_smoother                 = red_black    ## Relaxation type. 'jacobi', 'multi_color', or 'red_black'
 FieldSolverGMG.gmg_relax_factor             = 1.0          ## Adjustable SOR factor
 FieldSolverGMG.gmg_reflux_free              = false        ## If true, use reflux-free AMR operator
-FieldSolverGMG.solver                       = gmg          ## Solver(s), tried in order. 'gmg', 'gmres', 'bicgstab'. List = fallback chain
-FieldSolverGMG.krylov_eps                   = 1.E-10       ## Outer Krylov relative residual tolerance (gmres/bicgstab)
-FieldSolverGMG.krylov_max_iter              = 50           ## Outer Krylov max iterations (gmres/bicgstab)
-FieldSolverGMG.krylov_restart               = 30           ## GMRES restart length (gmres only)
-FieldSolverGMG.krylov_vcycles               = 1            ## V-cycles per Krylov preconditioner application
 
 # ====================================================================================================
 # CdrCTU solver settings.
@@ -128,6 +128,11 @@ CdrCTU.plot_mode                = density                   ## Plot densities 'd
 CdrCTU.blend_conservation       = true                      ## Turn on/off blending with nonconservative divergenceo
 CdrCTU.which_redistribution     = volume                    ## Redistribution type. 'volume', 'mass', or 'none' (turned off)
 CdrCTU.use_regrid_slopes        = true                      ## Turn on/off slopes when regridding
+CdrCTU.solver                   = gmg                       ## Solver(s), tried in order. 'gmg', 'gmres', 'bicgstab'. List = fallback chain
+CdrCTU.krylov_eps               = 1.E-10                    ## Outer Krylov relative residual tolerance (gmres/bicgstab)
+CdrCTU.krylov_max_iter          = 50                        ## Outer Krylov max iterations (gmres/bicgstab)
+CdrCTU.krylov_restart           = 30                        ## GMRES restart length (gmres only)
+CdrCTU.krylov_vcycles           = 1                         ## V-cycles per Krylov preconditioner application
 CdrCTU.gmg_verbosity            = -1                        ## GMG verbosity
 CdrCTU.gmg_pre_smooth           = 12                        ## Number of relaxations in GMG downsweep
 CdrCTU.gmg_post_smooth          = 12                        ## Number of relaxations in upsweep
@@ -140,11 +145,6 @@ CdrCTU.gmg_min_cells            = 16                        ## Bottom drop
 CdrCTU.gmg_bottom_solver        = bicgstab                  ## Bottom solver type. Valid options are 'simple' and 'bicgstab'
 CdrCTU.gmg_cycle                = vcycle                    ## Cycle type. Only 'vcycle' supported for now
 CdrCTU.gmg_smoother             = red_black                 ## Relaxation type. 'jacobi', 'multi_color', or 'red_black'
-CdrCTU.solver                   = gmg                       ## Solver(s), tried in order. 'gmg', 'gmres', 'bicgstab'. List = fallback chain
-CdrCTU.krylov_eps               = 1.E-10                    ## Outer Krylov relative residual tolerance (gmres/bicgstab)
-CdrCTU.krylov_max_iter          = 50                        ## Outer Krylov max iterations (gmres/bicgstab)
-CdrCTU.krylov_restart           = 30                        ## GMRES restart length (gmres only)
-CdrCTU.krylov_vcycles           = 1                         ## V-cycles per Krylov preconditioner application
 
 # ====================================================================================================
 # McPhoto class options
