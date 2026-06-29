@@ -155,6 +155,7 @@ protected:
   */
   enum class FirstDerivStencil : unsigned short
   {
+    None,
     Centered2,
     Backward2,
     Forward2,
@@ -167,6 +168,7 @@ protected:
   */
   enum class SecondDerivStencil : unsigned short
   {
+    None,
     Centered2,
     Backward1,
     Forward1

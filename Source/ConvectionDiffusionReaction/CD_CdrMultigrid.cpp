@@ -429,7 +429,7 @@ CdrMultigrid::setupHelmholtzFactory()
                              m_smoother,
                              relaxFactor,
                              bottomDomain,
-                             m_amr->getMaxBoxSize()));
+                             m_amr->getMaxBlockSize()));
 }
 
 void

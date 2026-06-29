@@ -87,7 +87,7 @@ public:
     @param[in] a_dx               Grid resolutions
     @param[in] a_probLo           Lower-left corner of physical domain
     @param[in] a_finestLevel      Finest grid level
-    @param[in] a_blockingFactor   Grid blocking factor
+    @param[in] a_minBlockSize   Grid blocking factor
     @param[in] a_ebGhost          Number of ghost cells used for geometric information when making operators
     @param[in] a_numGhost         Number of ghost cells in data holders
     @param[in] a_lsfGhost         Number of ghost cells used when computing the level set on the mesh
@@ -107,7 +107,7 @@ public:
          const Vector<Real>&                                        a_dx,
          const RealVect&                                            a_probLo,
          const int                                                  a_finestLevel,
-         const int                                                  a_blockingFactor,
+         const int                                                  a_minBlockSize,
          const int                                                  a_ebGhost,
          const int                                                  a_numGhost,
          const int                                                  a_lsfGhost,
@@ -489,6 +489,38 @@ public:
   const Vector<RefCountedPtr<LevelTiles>>&
   getLevelTiles() const noexcept;
 
+  /**
+    @brief Result of a point->block query. See getLevelAndBox.
+  */
+  struct LevelAndBox
+  {
+    /** @brief AMR level containing the point, or -1 if not found. */
+    int level;
+
+    /** @brief Global box/grid index within that level's LevelTiles. */
+    unsigned int boxIndex;
+
+    /** @brief MPI rank owning that box. */
+    int rank;
+
+    /** @brief True if a covering box was found. */
+    bool valid;
+  };
+
+  /**
+    @brief Find the (finest) grid box covering a physical position.
+    @details O(1) point->block query implemented on the Realm's LevelTiles: the position is mapped to a
+    min_block_size tile by integer division, then looked up in the per-level tile->box hash, finest level
+    first. Works for variable-sized/anisotropic boxes because every box is registered under all the min
+    tiles it covers. This is the same mapping ParticleContainer uses to bin particles, exposed for any
+    user that needs to know which box owns a point.
+    @param[in] a_pos Physical position.
+    @return {level, boxIndex, rank, valid}. valid is false (and the other fields are unspecified) when no
+    box covers the point.
+  */
+  LevelAndBox
+  getLevelAndBox(const RealVect& a_pos) const noexcept;
+
 #ifdef CH_USE_PETSC
   /**
     @brief Get the PETSc grid object
@@ -516,7 +548,7 @@ protected:
   /**
     @brief Blocking factor
   */
-  int m_blockingFactor;
+  int m_minBlockSize;
 
   /**
     @brief Number of ghost cells

@@ -97,6 +97,13 @@ CoarseInterpQuadCF::defineStencils() noexcept
   // Go through the cells and figure out which FD approximation we will use.
   for (int dir = 0; dir < SpaceDim; dir++) {
     if (dir != m_ignoreDir) {
+      // Initialize to "no stencil" so that cells which cannot form a (one-sided) derivative without
+      // reaching outside the valid region contribute zero rather than reading uninitialized data. This
+      // matters at domain boundaries, where a centered stencil would reach a coarse cell outside the
+      // domain that is never filled in the coarse interpolation buffer.
+      m_firstDerivStencils[dir].setVal(FirstDerivStencil::None);
+      m_secondDerivStencils[dir].setVal(SecondDerivStencil::None);
+
       BoxLoops::loop<D_DECL(1, 1, 1)>(m_stencilBox, [&](const IntVect& ivCoar) -> void {
         const IntVect ivLoLo = ivCoar - 2 * BASISV(dir);
         const IntVect ivLo   = ivCoar - BASISV(dir);

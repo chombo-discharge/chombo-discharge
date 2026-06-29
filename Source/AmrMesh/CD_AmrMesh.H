@@ -1624,18 +1624,40 @@ public:
   getMaxSimulationDepth() const;
 
   /**
-    @brief Get blocking factor (i.e. the smallest possible box).
-    @return Blocking factor
+    @brief Get the minimum block size (i.e. the smallest possible box / tile size).
+    @return Minimum block size
   */
   int
-  getBlockingFactor() const;
+  getMinBlockSize() const;
 
   /**
-    @brief Get maximum permitted box size
-    @return Maximum box size
+    @brief Deprecated alias for getMinBlockSize().
+    @return Minimum block size
+    @note 'blocking factor' was renamed to 'min block size'; use getMinBlockSize().
   */
   int
-  getMaxBoxSize() const;
+  getBlockingFactor() const
+  {
+    return this->getMinBlockSize();
+  }
+
+  /**
+    @brief Get maximum permitted block size
+    @return Maximum block size
+  */
+  int
+  getMaxBlockSize() const;
+
+  /**
+    @brief Deprecated alias for getMaxBlockSize().
+    @return Maximum block size.
+    @note 'max box size' was renamed to 'max block size'; use getMaxBlockSize().
+  */
+  int
+  getMaxBoxSize() const
+  {
+    return this->getMaxBlockSize();
+  }
 
   /**
     @brief Return buffer for B-R mesh refinement algorithm.
@@ -2169,7 +2191,7 @@ protected:
   /**
     @brief Max box size
   */
-  int m_maxBoxSize;
+  int m_maxBlockSize;
 
   /**
     @brief Maximum box size for EBIS generation
@@ -2184,7 +2206,7 @@ protected:
   /**
     @brief Blocking factor
   */
-  int m_blockingFactor;
+  int m_minBlockSize;
 
   /**
     @brief Number of ghost cells to use for eb stuff
@@ -2331,7 +2353,7 @@ protected:
     @brief Parse the maximum permitted box size. 
   */
   void
-  parseMaxBoxSize();
+  parseMaxBlockSize();
 
   /**
     @brief Parse the maximum permitted box size. 
@@ -2344,7 +2366,7 @@ protected:
     @brief Parse the B-R blocking factor. For tiled mesh refinement this parses the tile size. 
   */
   void
-  parseBlockingFactor();
+  parseMinBlockSize();
 
   /**
     @brief Parse number of ghost cells for eb stuff

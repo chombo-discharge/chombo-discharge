@@ -13,6 +13,7 @@
 // Chombo includes
 #include <CH_Timer.H>
 #include <BoxLayout.H>
+#include <BoxIterator.H>
 #include <LevelData.H>
 
 // Our includes
@@ -24,11 +25,11 @@ LevelTiles::LevelTiles() noexcept : m_isDefined(false)
   CH_TIME("LevelTiles::LevelTiles(weak)");
 }
 
-LevelTiles::LevelTiles(const DisjointBoxLayout& a_dbl, const int a_blockingFactor) noexcept
+LevelTiles::LevelTiles(const DisjointBoxLayout& a_dbl, const int a_minBlockSize) noexcept
 {
   CH_TIME("LevelTiles::LevelTiles(full)");
 
-  this->define(a_dbl, a_blockingFactor);
+  this->define(a_dbl, a_minBlockSize);
 }
 
 LevelTiles::~LevelTiles() noexcept
@@ -37,7 +38,7 @@ LevelTiles::~LevelTiles() noexcept
 }
 
 void
-LevelTiles::define(const DisjointBoxLayout& a_dbl, const int a_blockingFactor) noexcept
+LevelTiles::define(const DisjointBoxLayout& a_dbl, const int a_minBlockSize) noexcept
 {
   CH_TIME("LevelTiles::define");
 
@@ -49,21 +50,29 @@ LevelTiles::define(const DisjointBoxLayout& a_dbl, const int a_blockingFactor) n
 
   for (LayoutIterator lit = a_dbl.layoutIterator(); lit.ok(); ++lit) {
     const LayoutIndex& lidx   = lit();
-    const IntVect      tile   = coarsen(a_dbl[lidx], a_blockingFactor).smallEnd();
     const unsigned int rankID = a_dbl.procID(lidx);
     const unsigned int tileID = a_dbl.index(lidx);
 
-    // If using MPI we need to figure out who owns this tile.
+    // A box is a union of aligned min_block_size tiles, so coarsening by the block size gives the
+    // (possibly multi-tile) range of min-tiles it covers. Register the box under every one of them.
+    // When min_block_size == max_block_size this range is a single tile (the one-tile-per-box fast path).
+    const Box tileRange = coarsen(a_dbl[lidx], a_minBlockSize);
+
+    for (BoxIterator bit(tileRange); bit.ok(); ++bit) {
+      const IntVect tile = bit();
+
+      // If using MPI we need to figure out who owns this tile.
 #if CH_MPI
-    if (myRank == rankID) {
-      m_myTiles[tile] = tileID;
-    }
-    else {
-      m_otherTiles[tile] = std::make_pair(tileID, rankID);
-    }
+      if (myRank == rankID) {
+        m_myTiles[tile] = tileID;
+      }
+      else {
+        m_otherTiles[tile] = std::make_pair(tileID, rankID);
+      }
 #else
-    m_myTiles[tile] = tileID;
+      m_myTiles[tile] = tileID;
 #endif
+    }
   }
 
   // Figure out which global indices correspond to which local indices.
@@ -74,19 +83,15 @@ LevelTiles::define(const DisjointBoxLayout& a_dbl, const int a_blockingFactor) n
   m_isDefined = true;
 }
 
-const std::map<IntVect, unsigned int, LevelTiles::TileComparator>&
+const std::unordered_map<IntVect, unsigned int, LevelTiles::TileHasher>&
 LevelTiles::getMyTiles() const noexcept
 {
   CH_assert(m_isDefined);
 
-  if (!m_isDefined) {
-    MayDay::Abort("define snuck out");
-  }
-
   return m_myTiles;
 }
 
-const std::map<IntVect, LevelTiles::BoxIDs, LevelTiles::TileComparator>&
+const std::unordered_map<IntVect, LevelTiles::BoxIDs, LevelTiles::TileHasher>&
 LevelTiles::getOtherTiles() const noexcept
 {
   CH_assert(m_isDefined);
@@ -94,7 +99,7 @@ LevelTiles::getOtherTiles() const noexcept
   return m_otherTiles;
 }
 
-const std::map<unsigned int, DataIndex>&
+const std::unordered_map<unsigned int, DataIndex>&
 LevelTiles::getMyGrids() const noexcept
 {
   CH_assert(m_isDefined);

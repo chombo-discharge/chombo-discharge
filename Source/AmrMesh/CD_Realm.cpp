@@ -10,6 +10,9 @@
   @author Robert Marskar
 */
 
+// Std includes
+#include <cmath>
+
 // Chombo includes
 #include <ParmParse.H>
 #include <NeighborIterator.H>
@@ -45,7 +48,7 @@ Realm::define(const Vector<DisjointBoxLayout>&                           a_grids
               const Vector<Real>&                                        a_dx,
               const RealVect&                                            a_probLo,
               const int                                                  a_finestLevel,
-              const int                                                  a_blockingFactor,
+              const int                                                  a_minBlockSize,
               const int                                                  a_ebGhost,
               const int                                                  a_numGhost,
               const int                                                  a_lsfGhost,
@@ -69,7 +72,7 @@ Realm::define(const Vector<DisjointBoxLayout>&                           a_grids
   m_dx                   = a_dx;
   m_probLo               = a_probLo;
   m_finestLevel          = a_finestLevel;
-  m_blockingFactor       = a_blockingFactor;
+  m_minBlockSize         = a_minBlockSize;
   m_numGhost             = a_numGhost;
   m_baseif               = a_baseif;
   m_multifluidIndexSpace = a_mfis;
@@ -1066,7 +1069,7 @@ Realm::defineLevelTiles() noexcept
   m_levelTiles.resize(1 + m_finestLevel);
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    m_levelTiles[lvl] = RefCountedPtr<LevelTiles>(new LevelTiles(m_grids[lvl], m_blockingFactor));
+    m_levelTiles[lvl] = RefCountedPtr<LevelTiles>(new LevelTiles(m_grids[lvl], m_minBlockSize));
   }
 }
 
@@ -1383,6 +1386,36 @@ const Vector<RefCountedPtr<LevelTiles>>&
 Realm::getLevelTiles() const noexcept
 {
   return m_levelTiles;
+}
+
+Realm::LevelAndBox
+Realm::getLevelAndBox(const RealVect& a_pos) const noexcept
+{
+  // Finest level whose min-tile contains the point wins.
+  for (int lvl = m_finestLevel; lvl >= 0; lvl--) {
+    IntVect tile;
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      tile[dir] = static_cast<int>(std::floor((a_pos[dir] - m_probLo[dir]) / (m_minBlockSize * m_dx[lvl])));
+    }
+
+    const LevelTiles& tiles = *m_levelTiles[lvl];
+
+    const auto& myTiles = tiles.getMyTiles();
+    const auto  mit     = myTiles.find(tile);
+    if (mit != myTiles.end()) {
+      return LevelAndBox{lvl, mit->second, procID(), true};
+    }
+
+#ifdef CH_MPI
+    const auto& otherTiles = tiles.getOtherTiles();
+    const auto  oit        = otherTiles.find(tile);
+    if (oit != otherTiles.end()) {
+      return LevelAndBox{lvl, oit->second.first, static_cast<int>(oit->second.second), true};
+    }
+#endif
+  }
+
+  return LevelAndBox{-1, 0u, -1, false};
 }
 
 #ifdef CH_USE_PETSC

@@ -52,18 +52,28 @@ Coarse-grid decomposition
 ``AmrMesh.coarsest_domain`` is the number of grid cells on the coarsest grid level (i.e., without AMR).
 It is important that cell sizes are uniform, so one must always have :math:`\Delta x = \Delta y = \Delta z`.
 Usually, this means that ``AmrMesh.lo_corner``, ``AmrMesh.hi_corner``, and ``AmrMesh.coarsest_domain`` must all be consistently defined. Moreover, it is normally desirable to make ``AmrMesh.coarsest_domain`` a factor of 2 (e.g., 64, 128, 256, etc.), since this permits arbitrarily deep multigrid coarsening.
-This is not a requirement, however, although we do note that ``AmrMesh.coarsest_domain`` *must* be divisible by ``AmrMesh.blocking_factor``.
+This is not a requirement, however, although we do note that ``AmrMesh.coarsest_domain`` *must* be divisible by ``AmrMesh.min_block_size``.
 
 Domain decomposition
 --------------------
 
 With Cartesian AMR, each grid level is decomposed into grid blocks of constant size, or sizes that potentially vary between some min/max size along each dimension.
-In ``chombo-discharge`` this is encapsulated by ``AmrMesh.blocking_factor``, which is the smallest grid box that can be generated when meshing the domain.
-Likewise, ``AmrMesh.max_box_size`` is the maximum box size that can be produced, but usage of a constant box size is a common and increased requirement in ``chombo-discharge``.
+In ``chombo-discharge`` this is encapsulated by ``AmrMesh.min_block_size``, which is the smallest grid box that can be generated when meshing the domain.
+Likewise, ``AmrMesh.max_block_size`` is the maximum box size that can be produced.
+When ``AmrMesh.max_block_size`` is larger than ``AmrMesh.min_block_size`` the grids may contain variable-sized (and anisotropic) boxes, each box being a union of aligned ``AmrMesh.min_block_size`` tiles; see :ref:`Chap:MeshGeneration`.
+This is supported by all solvers, including the particle infrastructure.
 
 .. tip::
 
-   Use fixed box sizes where ``AmrMesh.blocking_factor`` and ``AmrMesh.max_box_size`` are the same.
+   Setting ``AmrMesh.min_block_size`` equal to ``AmrMesh.max_block_size`` yields fixed-size boxes, which is the most common configuration.
+
+The block sizes must satisfy a few requirements, which are checked at run time:
+
+* ``AmrMesh.min_block_size`` must be a multiple of every refinement ratio in ``AmrMesh.ref_rat`` (so refined boxes coarsen cleanly), which in particular requires ``min_block_size`` :math:`\geq` the refinement ratio.
+* ``AmrMesh.max_block_size`` must be greater than or equal to ``AmrMesh.min_block_size`` and an integer multiple of it.
+* ``AmrMesh.coarsest_domain`` must be a multiple of ``AmrMesh.min_block_size`` in every direction.
+
+There is no lower bound of 8 on the box sizes; e.g. ``min_block_size = max_block_size = 4`` is permitted (with factor-2 refinement).
 
 The flag ``AmrMesh.max_ebis_box`` indicates essentially the blocking factor when generating the cut-cell information at the start of a simulation.
 It may happen for very large simulations that one has to increase the box size (e.g., to 32) in order to trim grid metadata.

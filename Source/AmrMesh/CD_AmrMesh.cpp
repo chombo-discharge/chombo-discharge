@@ -933,8 +933,8 @@ AmrMesh::parseOptions()
   this->parseMaxAmrDepth();
   this->parseMaxSimulationDepth();
   this->parseRefinementRatios();
-  this->parseBlockingFactor();
-  this->parseMaxBoxSize();
+  this->parseMinBlockSize();
+  this->parseMaxBlockSize();
   this->parseMaxEbisBoxSize();
   this->parseGridGeneration();
   this->parseBrBufferSize();
@@ -962,8 +962,8 @@ AmrMesh::parseRuntimeOptions()
 
   this->parseMaxSimulationDepth();
   this->parseVerbosity();
-  this->parseBlockingFactor();
-  this->parseMaxBoxSize();
+  this->parseMinBlockSize();
+  this->parseMaxBlockSize();
   this->parseGridGeneration();
   this->parseBrBufferSize();
   this->parseBrFillRatio();
@@ -1160,7 +1160,7 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
 
   // Inside this loop we make the boxes.
   if (m_maxAmrDepth > 0 && hardcap > 0) {
-    domainSplit(m_domains[0], oldBoxes[0], m_maxBoxSize, m_blockingFactor);
+    domainSplit(m_domains[0], oldBoxes[0], m_maxBlockSize, m_minBlockSize);
 
     // If have old grids, we can use the old boxes as input to the grid generators (since they don't necessarily regrid all levels).
     if (!m_hasGrids) {
@@ -1186,16 +1186,19 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
       BRMeshRefine meshRefine(m_domains[0],
                               m_refinementRatios,
                               m_fillRatioBR,
-                              m_blockingFactor,
+                              m_minBlockSize,
                               m_bufferSizeBR,
-                              m_maxBoxSize);
+                              m_maxBlockSize);
 
       newFinestLevel = meshRefine.regrid(newBoxes, tags, baseLevel, topLevel, oldBoxes);
 
       break;
     }
     case GridGenerationMethod::Tiled: {
-      TiledMeshRefine meshRefine(m_domains[0], m_refinementRatios, m_blockingFactor * IntVect::Unit);
+      TiledMeshRefine meshRefine(m_domains[0],
+                                 m_refinementRatios,
+                                 m_minBlockSize * IntVect::Unit,
+                                 m_maxBlockSize * IntVect::Unit);
 
       newFinestLevel = meshRefine.regrid(newBoxes, a_tags);
       newBoxes[0]    = oldBoxes[0];
@@ -1216,7 +1219,7 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
   }
   else { // Only end up here if we have a single grid level, i.e. just single-level grid decomposition.
     newBoxes.resize(1);
-    domainSplit(m_domains[0], newBoxes[0], m_maxBoxSize, m_blockingFactor);
+    domainSplit(m_domains[0], newBoxes[0], m_maxBlockSize, m_minBlockSize);
 
     m_finestLevel = 0;
   }
@@ -1224,7 +1227,7 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
   // Coarsest level also changes in this case, but that's not actually caught by the regridders. We have to do this because the blocking
   // factor could have been changed during runtime option parsing.
   if (a_lmin == 0) {
-    domainSplit(m_domains[0], newBoxes[0], m_maxBoxSize, m_blockingFactor);
+    domainSplit(m_domains[0], newBoxes[0], m_maxBlockSize, m_minBlockSize);
   }
 
   // Sort the boxes and then load balance them, using the patch volume as a proxy for the computational load.
@@ -2612,22 +2615,26 @@ AmrMesh::setGrids(const Vector<Vector<Box>>&                             a_boxes
 }
 
 void
-AmrMesh::parseMaxBoxSize()
+AmrMesh::parseMaxBlockSize()
 {
-  CH_TIME("AmrMesh::parseMaxBoxSize()");
+  CH_TIME("AmrMesh::parseMaxBlockSize()");
   if (m_verbosity > 3) {
-    pout() << "AmrMesh::parseMaxBoxSize()" << endl;
+    pout() << "AmrMesh::parseMaxBlockSize()" << endl;
   }
 
   ParmParse pp("AmrMesh");
-  int       boxSize;
-  pp.get("max_box_size", boxSize);
-  if (boxSize >= 4 && boxSize % 2 == 0) {
-    m_maxBoxSize = boxSize;
+  int       blockSize;
+
+  // 'max_block_size' is the current name; 'max_box_size' is accepted as a deprecated alias.
+  if (pp.contains("max_box_size") && !pp.contains("max_block_size")) {
+    pp.get("max_box_size", blockSize);
   }
   else {
-    MayDay::Error("AmrMesh::parseMaxBoxSize - must have box_size >= 4 and divisible by 2");
+    pp.get("max_block_size", blockSize);
   }
+
+  // Validity (floor, multiple of min_block_size) is enforced at runtime in sanityCheck.
+  m_maxBlockSize = blockSize;
 }
 
 void
@@ -2711,19 +2718,26 @@ AmrMesh::parseGridGeneration()
 }
 
 void
-AmrMesh::parseBlockingFactor()
+AmrMesh::parseMinBlockSize()
 {
-  CH_TIME("AmrMesh::parseBlockingFactor()");
+  CH_TIME("AmrMesh::parseMinBlockSize()");
   if (m_verbosity > 3) {
-    pout() << "AmrMesh::parseBlockingFactor()" << endl;
+    pout() << "AmrMesh::parseMinBlockSize()" << endl;
   }
 
   ParmParse pp("AmrMesh");
   int       blocking;
-  pp.get("blocking_factor", blocking);
-  if (blocking >= 4 && blocking % 2 == 0) {
-    m_blockingFactor = blocking;
+
+  // 'min_block_size' is the current name; 'blocking_factor' is accepted as a deprecated alias.
+  if (pp.contains("blocking_factor") && !pp.contains("min_block_size")) {
+    pp.get("blocking_factor", blocking);
   }
+  else {
+    pp.get("min_block_size", blocking);
+  }
+
+  // Validity (divisibility, floor, relation to max_block_size) is enforced at runtime in sanityCheck.
+  m_minBlockSize = blocking;
 }
 
 void
@@ -2902,14 +2916,40 @@ AmrMesh::sanityCheck() const
   }
 
   CH_assert(m_maxAmrDepth >= 0);
-  for (int lvl = 0; lvl < m_refinementRatios.size(); lvl++) {
-    CH_assert(m_refinementRatios[lvl] == 2 || m_refinementRatios[lvl] == 4);
-    CH_assert(m_blockingFactor >= 4 && m_blockingFactor % m_refinementRatios[lvl] == 0);
-  }
-
-  CH_assert(m_maxBoxSize >= 8 && m_maxBoxSize % m_blockingFactor == 0);
   CH_assert(m_fillRatioBR > 0. && m_fillRatioBR <= 1.0);
   CH_assert(m_bufferSizeBR > 0);
+
+  // ---- Block-size validity. These are runtime aborts (not CH_assert) so they also fire in optimized
+  //      builds: an invalid min/max combination otherwise corrupts the tile super-factor silently. ----
+  for (int lvl = 0; lvl < m_refinementRatios.size(); lvl++) {
+    if (m_refinementRatios[lvl] != 2 && m_refinementRatios[lvl] != 4) {
+      MayDay::Abort("AmrMesh::sanityCheck -- ref_rat entries must be 2 or 4");
+    }
+    if (m_minBlockSize % m_refinementRatios[lvl] != 0) {
+      MayDay::Abort("AmrMesh::sanityCheck -- min_block_size must be divisible by every ref_rat entry");
+    }
+  }
+  if (m_minBlockSize < 2) {
+    MayDay::Abort("AmrMesh::sanityCheck -- min_block_size must be >= 2");
+  }
+  if (m_maxBlockSize < m_minBlockSize) {
+    MayDay::Abort("AmrMesh::sanityCheck -- max_block_size must be >= min_block_size");
+  }
+  if (m_maxBlockSize % m_minBlockSize != 0) {
+    MayDay::Abort("AmrMesh::sanityCheck -- max_block_size must be an integer multiple of min_block_size");
+  }
+
+  // The coarsest domain must be a whole number of minimum-size blocks in every direction. Refined
+  // domains inherit this, and every grid box is then a union of aligned min_block_size tiles. Chombo's
+  // domainSplit hard-errors otherwise; front-run it with a clear message.
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    if (m_numCells[dir] % m_minBlockSize != 0) {
+      const std::string msg = "AmrMesh::sanityCheck -- coarsest_domain[" + std::to_string(dir) +
+                              "] = " + std::to_string(m_numCells[dir]) +
+                              " is not a multiple of min_block_size = " + std::to_string(m_minBlockSize);
+      MayDay::Abort(msg.c_str());
+    }
+  }
 
   bool badRes = false;
 
@@ -2944,7 +2984,7 @@ AmrMesh::sanityCheck() const
   // If this ever becomes a problem, take a look at this again.
   if (m_maxAmrDepth > 0) {
     for (int lvl = 0; lvl < m_maxAmrDepth; lvl++) {
-      if (m_refinementRatios[lvl] > 2 && m_blockingFactor < 8) {
+      if (m_refinementRatios[lvl] > 2 && m_minBlockSize < 8) {
         //        MayDay::Abort("AmrMesh::sanityCheck -- can't use blocking factor < 8 with factor 4 refinement!");
       }
     }
@@ -3041,25 +3081,25 @@ AmrMesh::getRedistributionRadius() const
 }
 
 int
-AmrMesh::getBlockingFactor() const
+AmrMesh::getMinBlockSize() const
 {
-  CH_TIME("AmrMesh::getBlockingFactor()");
+  CH_TIME("AmrMesh::getMinBlockSize()");
   if (m_verbosity > 1) {
-    pout() << "AmrMesh::getBlockingFactor()" << endl;
+    pout() << "AmrMesh::getMinBlockSize()" << endl;
   }
 
-  return m_blockingFactor;
+  return m_minBlockSize;
 }
 
 int
-AmrMesh::getMaxBoxSize() const
+AmrMesh::getMaxBlockSize() const
 {
-  CH_TIME("AmrMesh::getMaxBoxSize()");
+  CH_TIME("AmrMesh::getMaxBlockSize()");
   if (m_verbosity > 1) {
-    pout() << "AmrMesh::getMaxBoxSize()" << endl;
+    pout() << "AmrMesh::getMaxBlockSize()" << endl;
   }
 
-  return m_maxBoxSize;
+  return m_maxBlockSize;
 }
 
 int
@@ -3765,7 +3805,7 @@ AmrMesh::defineRealms()
                      m_dx,
                      m_probLo,
                      m_finestLevel,
-                     m_blockingFactor,
+                     m_minBlockSize,
                      m_numEbGhostsCells,
                      m_numGhostCells,
                      m_numLsfGhostCells,
@@ -3821,7 +3861,7 @@ AmrMesh::regridRealm(const std::string&         a_realm,
                             m_dx,
                             m_probLo,
                             m_finestLevel,
-                            m_blockingFactor,
+                            m_minBlockSize,
                             m_numEbGhostsCells,
                             m_numGhostCells,
                             m_numLsfGhostCells,

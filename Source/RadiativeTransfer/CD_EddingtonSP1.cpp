@@ -973,7 +973,7 @@ EddingtonSP1::setupHelmholtzFactory()
                                                                                       m_multigridRelaxMethod,
                                                                                       relaxFactor,
                                                                                       bottomDomain,
-                                                                                      m_amr->getMaxBoxSize()));
+                                                                                      m_amr->getMaxBlockSize()));
 }
 
 void

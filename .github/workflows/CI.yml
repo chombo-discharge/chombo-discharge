@@ -162,6 +162,11 @@ jobs:
         with:
           submodules: true
 
+      - name: Free disk space
+        run: |
+          sudo rm -rf /opt/hostedtoolcache /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/share/boost || true
+          df -h /
+
       - name: Get submodule commit hashes
         id: submodule-sha
         run: |
@@ -189,7 +194,15 @@ jobs:
       - name: Build Chombo
         if: steps.cache-chombo.outputs.cache-hit != 'true'
         run: |
-          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} chombo
+          build() { make -s -j"$1" DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} chombo; }
+          # The recursive Chombo build can intermittently leave a truncated archive member on resource-
+          # constrained runners. On failure, clear the partial libraries/objects and rebuild serially.
+          build ${{ env.CORES }} || {
+            echo "::warning::Chombo build failed -- cleaning partial libraries/objects and retrying with -j1"
+            find "$CHOMBO_HOME" -name 'lib*.a' -delete || true
+            find "$CHOMBO_HOME/src" -type d -name o -exec rm -rf {} + || true
+            build 1
+          }
 
       - name: Restore discharge library cache
         id: cache-discharge
@@ -262,6 +275,11 @@ jobs:
         with:
           submodules: true
 
+      - name: Free disk space
+        run: |
+          sudo rm -rf /opt/hostedtoolcache /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/share/boost || true
+          df -h /
+
       - name: Get submodule commit hashes
         id: submodule-sha
         run: |
@@ -308,7 +326,15 @@ jobs:
         if: steps.cache-chombo.outputs.cache-hit != 'true'
         run: |
           source /opt/intel/oneapi/setvars.sh
-          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} chombo
+          build() { make -s -j"$1" DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} chombo; }
+          # The recursive Chombo build can intermittently leave a truncated archive member on resource-
+          # constrained runners. On failure, clear the partial libraries/objects and rebuild serially.
+          build ${{ env.CORES }} || {
+            echo "::warning::Chombo build failed -- cleaning partial libraries/objects and retrying with -j1"
+            find "$CHOMBO_HOME" -name 'lib*.a' -delete || true
+            find "$CHOMBO_HOME/src" -type d -name o -exec rm -rf {} + || true
+            build 1
+          }
 
       - name: Restore discharge library cache
         id: cache-discharge
