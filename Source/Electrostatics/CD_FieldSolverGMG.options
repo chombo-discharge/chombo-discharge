@@ -17,6 +17,7 @@ FieldSolverGMG.gmg_verbosity                = -1           ## GMG verbosity
 FieldSolverGMG.gmg_use_default_settings     = true         ## Use default multigrid settings or not (see documentation)
 FieldSolverGMG.gmg_cycle                    = vcycle       ## Cycle type. 'vcycle' or 'wcycle'
 FieldSolverGMG.gmg_smoother                 = red_black    ## Relaxation. 'jacobi', 'multi_color', 'red_black', 'chebyshev <order> <eig_ratio>', or 'ras <inner_sweeps>'
+FieldSolverGMG.gmg_krylov_accel             = false        ## (Experimental) Use the V-cycle as a GMRES preconditioner instead of stand-alone V-cycling
 FieldSolverGMG.gmg_relax_factor             = 1.0          ## Adjustable SOR factor
 FieldSolverGMG.gmg_pre_smooth               = 12           ## Number of relaxations in downsweep
 FieldSolverGMG.gmg_post_smooth              = 12           ## Number of relaxations in upsweep
