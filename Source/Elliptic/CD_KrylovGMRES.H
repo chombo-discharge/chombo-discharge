@@ -13,9 +13,6 @@
 #ifndef CD_KrylovGMRES_H
 #define CD_KrylovGMRES_H
 
-// Std includes
-#include <vector>
-
 // Chombo includes
 #include <LevelData.H>
 #include <Vector.H>
@@ -144,7 +141,7 @@ protected:
   /**
     @brief Arnoldi basis, size m_allocRestart + 1.
   */
-  std::vector<Vec> m_basis;
+  Vector<Vec> m_basis;
 
   /**
     @brief A*K^{-1}*v_j scratch.
@@ -169,27 +166,37 @@ protected:
   /**
     @brief Hessenberg matrix, column-major, leading dimension m_allocRestart + 1.
   */
-  std::vector<Real> m_H;
+  Vector<Real> m_H;
 
   /**
     @brief Givens cosines.
   */
-  std::vector<Real> m_cs;
+  Vector<Real> m_cs;
 
   /**
     @brief Givens sines.
   */
-  std::vector<Real> m_sn;
+  Vector<Real> m_sn;
 
   /**
     @brief Rotated residual right-hand side.
   */
-  std::vector<Real> m_g;
+  Vector<Real> m_g;
 
   /**
     @brief Least-squares solution.
   */
-  std::vector<Real> m_y;
+  Vector<Real> m_y;
+
+  /**
+    @brief Persistent scratch for one Gram-Schmidt projection row (size m_allocRestart).
+  */
+  Vector<Real> m_hcol;
+
+  /**
+    @brief Persistent scratch for the reorthogonalization correction row (size m_allocRestart).
+  */
+  Vector<Real> m_corr;
 };
 
 #include <CD_NamespaceFooter.H>

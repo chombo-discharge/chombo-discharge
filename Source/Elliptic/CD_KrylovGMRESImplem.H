@@ -43,19 +43,21 @@ KrylovGMRES<T>::define(Op* a_op, const Vec& a_template) noexcept
   m_allocRestart = std::max(1, m_restart);
 
   m_basis.resize(m_allocRestart + 1);
-  for (auto& b : m_basis) {
-    m_op->create(b, a_template);
+  for (int i = 0; i < m_basis.size(); i++) {
+    m_op->create(m_basis[i], a_template);
   }
   m_op->create(m_w, a_template);
   m_op->create(m_z, a_template);
   m_op->create(m_c, a_template);
   m_op->create(m_r, a_template);
 
-  m_H.assign(static_cast<size_t>(m_allocRestart + 1) * m_allocRestart, 0.0);
-  m_cs.assign(m_allocRestart, 0.0);
-  m_sn.assign(m_allocRestart, 0.0);
-  m_g.assign(m_allocRestart + 1, 0.0);
-  m_y.assign(m_allocRestart, 0.0);
+  m_H    = Vector<Real>((m_allocRestart + 1) * m_allocRestart, 0.0);
+  m_cs   = Vector<Real>(m_allocRestart, 0.0);
+  m_sn   = Vector<Real>(m_allocRestart, 0.0);
+  m_g    = Vector<Real>(m_allocRestart + 1, 0.0);
+  m_y    = Vector<Real>(m_allocRestart, 0.0);
+  m_hcol = Vector<Real>(m_allocRestart, 0.0);
+  m_corr = Vector<Real>(m_allocRestart, 0.0);
 
   m_isDefined = true;
 }
@@ -65,8 +67,8 @@ void
 KrylovGMRES<T>::undefine() noexcept
 {
   if (m_isDefined) {
-    for (auto& b : m_basis) {
-      m_op->clear(b);
+    for (int i = 0; i < m_basis.size(); i++) {
+      m_op->clear(m_basis[i]);
     }
     m_basis.clear();
 
@@ -125,7 +127,9 @@ KrylovGMRES<T>::solve(Vec& a_phi, const Vec& a_rhs) noexcept
     op.assign(m_basis[0], m_r);
     op.scale(m_basis[0], 1.0 / beta);
 
-    std::fill(m_g.begin(), m_g.end(), 0.0);
+    for (int i = 0; i <= m; i++) {
+      m_g[i] = 0.0;
+    }
     m_g[0] = beta;
 
     int jUsed = 0;
@@ -139,19 +143,18 @@ KrylovGMRES<T>::solve(Vec& a_phi, const Vec& a_rhs) noexcept
       op.applyOp(m_w, m_z, true);
 
       // Classical Gram-Schmidt against v_0..v_j -- one fused reduction (mDotProduct) instead of j+1 dot products.
-      std::vector<Real> hcol(j + 1, 0.0);
-      op.mDotProduct(m_w, j + 1, &m_basis[0], hcol.data());
+      // m_hcol is persistent scratch; only entries 0..j are written and read this step.
+      op.mDotProduct(m_w, j + 1, &m_basis[0], &m_hcol[0]);
       for (int i = 0; i <= j; i++) {
-        op.incr(m_w, m_basis[i], -hcol[i]);
-        m_H[Hidx(i, j)] = hcol[i];
+        op.incr(m_w, m_basis[i], -m_hcol[i]);
+        m_H[Hidx(i, j)] = m_hcol[i];
       }
 
       if (m_reorthogonalize) {
-        std::vector<Real> corr(j + 1, 0.0);
-        op.mDotProduct(m_w, j + 1, &m_basis[0], corr.data());
+        op.mDotProduct(m_w, j + 1, &m_basis[0], &m_corr[0]);
         for (int i = 0; i <= j; i++) {
-          op.incr(m_w, m_basis[i], -corr[i]);
-          m_H[Hidx(i, j)] += corr[i];
+          op.incr(m_w, m_basis[i], -m_corr[i]);
+          m_H[Hidx(i, j)] += m_corr[i];
         }
       }
 
