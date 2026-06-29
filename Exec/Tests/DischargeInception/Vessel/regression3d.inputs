@@ -109,7 +109,7 @@ FieldSolverGMG.gmg_bottom_verbosity         = -1            ## Bottom solver ver
 FieldSolverGMG.gmg_cycle                    = vcycle        ## Cycle type. Only 'vcycle' supported for now.
 FieldSolverGMG.gmg_smoother                 = red_black     ## Relaxation type. 'jacobi', 'multi_color', or 'red_black'
 FieldSolverGMG.gmg_relax_factor             = 1.0           ## Adjustable SOR factor
-FieldSolverGMG.solver                       = gmg           ## Solver(s), tried in order. 'gmg', 'gmres', 'bicgstab'. List = fallback chain, e.g. 'gmg gmres' falls back to GMRES if GMG fails
+FieldSolverGMG.solver                       = gmg           ## Solver(s), tried in order. 'gmg', 'gmres', 'bicgstab'. List = fallback chain
 FieldSolverGMG.krylov_eps                   = 1.E-10        ## Outer Krylov relative residual tolerance (gmres/bicgstab)
 FieldSolverGMG.krylov_max_iter              = 50            ## Outer Krylov max iterations (gmres/bicgstab)
 FieldSolverGMG.krylov_restart               = 30            ## GMRES restart length (gmres only)
@@ -145,7 +145,7 @@ CdrCTU.gmg_min_cells            = 16                        ## Bottom drop
 CdrCTU.gmg_bottom_solver        = bicgstab                  ## Bottom solver type. Valid options are 'simple' and 'bicgstab'
 CdrCTU.gmg_cycle                = vcycle                    ## Cycle type. Only 'vcycle' supported for now
 CdrCTU.gmg_smoother             = red_black                 ## Relaxation type. 'jacobi', 'multi_color', or 'red_black'
-CdrCTU.solver                   = gmg                       ## Solver(s), tried in order. 'gmg', 'gmres', 'bicgstab'. List = fallback chain, e.g. 'gmg gmres' falls back to GMRES if GMG fails
+CdrCTU.solver                   = gmg                       ## Solver(s), tried in order. 'gmg', 'gmres', 'bicgstab'. List = fallback chain
 CdrCTU.krylov_eps               = 1.E-10                    ## Outer Krylov relative residual tolerance (gmres/bicgstab)
 CdrCTU.krylov_max_iter          = 50                        ## Outer Krylov max iterations (gmres/bicgstab)
 CdrCTU.krylov_restart           = 30                        ## GMRES restart length (gmres only)
