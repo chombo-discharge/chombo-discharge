@@ -410,6 +410,22 @@ public:
   dotProduct(const LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs) override final;
 
   /**
+    @brief Masked variant of dotProduct, used by the AMR-composite Krylov inner product.
+    @details Same kappa-weighted inner product as dotProduct (summed over all phases), except cells where a_mask is
+             false (e.g. cells covered by a finer AMR level) are excluded from the numerator. The volume
+             normalisation still counts all valid cells, matching Chombo's MultilevelLinearOp AMR dot product. The
+             mask is per-cell and shared across phases.
+    @param[in] a_lhs  First operand
+    @param[in] a_rhs  Second operand
+    @param[in] a_mask Per-cell mask; false marks cells excluded from the numerator (e.g. covered by a finer level)
+    @return Masked kappa-weighted inner product on this level
+  */
+  Real
+  dotProductMasked(const LevelData<MFCellFAB>&     a_lhs,
+                   const LevelData<MFCellFAB>&     a_rhs,
+                   const LevelData<BaseFab<bool>>& a_mask) const noexcept;
+
+  /**
     @brief Scale function
     @param[in,out] a_lhs   On output, a_lhs = a_lhs*a_scale
     @param[in]    a_scale Scaling factor

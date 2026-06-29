@@ -506,6 +506,78 @@ MFHelmholtzOp::dotProduct(const LevelData<MFCellFAB>& a_lhs, const LevelData<MFC
   return dotProd;
 }
 
+Real
+MFHelmholtzOp::dotProductMasked(const LevelData<MFCellFAB>&     a_lhs,
+                                const LevelData<MFCellFAB>&     a_rhs,
+                                const LevelData<BaseFab<bool>>& a_mask) const noexcept
+{
+  CH_TIME("MFHelmholtzOp::dotProductMasked");
+
+  Real sumKappaXY = 0.0;
+  Real sumVolume  = 0.0;
+
+  const DisjointBoxLayout& dbl  = a_lhs.disjointBoxLayout();
+  const DataIterator&      dit  = dbl.dataIterator();
+  const int                nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime) reduction(+ : sumKappaXY, sumVolume)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din     = dit[mybox];
+    const Box        cellBox = dbl[din];
+    const MFCellFAB& lhs     = a_lhs[din];
+
+    const BaseFab<bool>& mask = a_mask[din];
+
+    // The cell mask is shared across phases. Masked cells (covered by a finer level) are kept in the volume
+    // normalisation but excluded from the numerator -- matching Chombo's MultilevelLinearOp convention.
+    for (int i = 0; i < lhs.numPhases(); i++) {
+      const EBCellFAB& X = a_lhs[din].getPhase(i);
+      const EBCellFAB& Y = a_rhs[din].getPhase(i);
+
+      const FArrayBox& regX = X.getFArrayBox();
+      const FArrayBox& regY = Y.getFArrayBox();
+
+      const EBISBox& ebisbox = X.getEBISBox();
+
+      auto regularKernel = [&](const IntVect& iv) -> void {
+        if (ebisbox.isRegular(iv)) {
+          sumVolume += 1.0;
+          if (mask(iv, 0)) {
+            sumKappaXY += regX(iv, 0) * regY(iv, 0);
+          }
+        }
+      };
+
+      auto irregularKernel = [&](const VolIndex& vof) -> void {
+        const IntVect& iv    = vof.gridIndex();
+        const Real     kappa = ebisbox.volFrac(vof);
+
+        sumVolume += kappa;
+        if (mask(iv, 0)) {
+          sumKappaXY += kappa * X(vof, 0) * Y(vof, 0);
+        }
+      };
+
+      const bool isCovered = ebisbox.isAllCovered();
+      if (!isCovered) {
+        BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
+        BoxLoops::loop(m_helmOps.at(i)->getVofIterIrreg()[din], irregularKernel);
+      }
+    }
+  }
+
+  sumKappaXY = ParallelOps::sum(sumKappaXY);
+  sumVolume  = ParallelOps::sum(sumVolume);
+
+  Real dotProd = 0.0;
+
+  if (sumVolume > 0.0) {
+    dotProd = sumKappaXY / sumVolume;
+  }
+
+  return dotProd;
+}
+
 void
 MFHelmholtzOp::create(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs)
 {

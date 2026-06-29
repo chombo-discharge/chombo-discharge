@@ -14,13 +14,10 @@
 // Std includes
 #include <chrono>
 #include <ctime>
-#include <cmath>
 
 // Chombo includes
 #include <ParmParse.H>
 #include <EBAMRIO.H>
-#include <GMRESSolver.H>
-#include <MultilevelLinearOp.H>
 
 // Our includes
 #include <CD_EddingtonSP1.H>
@@ -31,76 +28,6 @@
 #include <CD_EBHelmholtzNeumannEBBCFactory.H>
 #include <CD_EBHelmholtzLarsenEBBCFactory.H>
 #include <CD_EBHelmholtzEddingtonSP1DomainBCFactory.H>
-
-// PROTOTYPE (Krylov-accelerated multigrid): an AMR-composite LinearOp that reuses an already-set-up AMRMultiGrid for
-// the matvec and the V-cycle preconditioner. All vector ops (create/assign/dotProduct/norm/...) are inherited from
-// MultilevelLinearOp -- their AMR-composite masking is correct -- and only the operations that need fully-wired AMR
-// operators are overridden to delegate to the working solver (the stock MultilevelLinearOp builds its own, un-set-up
-// operators whose applyOp/AMRVCycle return zero). In the global namespace, next to the Chombo types it uses.
-namespace {
-  class AMRMultigridKrylovOp : public MultilevelLinearOp<EBCellFAB>
-  {
-  public:
-    AMRMultiGrid<LevelData<EBCellFAB>>* m_mg    = nullptr;
-    int                                 m_lmax  = 0;
-    int                                 m_lbase = 0;
-
-    void
-    applyOp(Vector<LevelData<EBCellFAB>*>&       a_lhs,
-            const Vector<LevelData<EBCellFAB>*>& a_phi,
-            bool                                 a_homogeneous = false) override
-    {
-      m_mg->computeAMROperator(a_lhs,
-                               const_cast<Vector<LevelData<EBCellFAB>*>&>(a_phi),
-                               m_lmax,
-                               m_lbase,
-                               a_homogeneous);
-    }
-
-    void
-    residual(Vector<LevelData<EBCellFAB>*>&       a_lhs,
-             const Vector<LevelData<EBCellFAB>*>& a_phi,
-             const Vector<LevelData<EBCellFAB>*>& a_rhs,
-             bool                                 a_homogeneous = false) override
-    {
-      m_mg->computeAMRResidual(a_lhs,
-                               const_cast<Vector<LevelData<EBCellFAB>*>&>(a_phi),
-                               a_rhs,
-                               m_lmax,
-                               m_lbase,
-                               a_homogeneous,
-                               false);
-    }
-
-    void
-    preCond(Vector<LevelData<EBCellFAB>*>& a_cor, const Vector<LevelData<EBCellFAB>*>& a_residual) override
-    {
-      // One AMR V-cycle: a_cor = M^{-1} a_residual. AMRVCycle mangles the residual, so pass a copy.
-      this->setToZero(a_cor);
-
-      Vector<LevelData<EBCellFAB>*> tmpResid;
-      this->create(tmpResid, a_residual);
-      this->assign(tmpResid, a_residual);
-
-      m_mg->AMRVCycle(a_cor, tmpResid, m_lmax, m_lmax, m_lbase);
-
-      this->clear(tmpResid);
-    }
-
-    // GMRES requires norm(x)^2 == dotProduct(x,x). The inherited L2 norm actually returns the max-norm (the EB
-    // operator's norm ignores the order), which is inconsistent with the L2 dotProduct and breaks the Krylov
-    // orthogonalisation. Use the inner-product-induced norm for the L2 case GMRES uses.
-    Real
-    norm(const Vector<LevelData<EBCellFAB>*>& a_x, int a_ord) override
-    {
-      if (a_ord == 2) {
-        return std::sqrt(this->dotProduct(a_x, a_x));
-      }
-      return MultilevelLinearOp<EBCellFAB>::norm(a_x, a_ord);
-    }
-  };
-} // namespace
-
 #include <CD_NamespaceHeader.H>
 
 constexpr Real EddingtonSP1::m_alpha;
@@ -542,6 +469,10 @@ EddingtonSP1::parseMultigridSettings()
   if (m_minCellsBottom < 2) {
     m_minCellsBottom = 2;
   }
+
+  // Outer solver path: 'solver' = gmg (default) | gmres | bicgstab, plus the krylov_* settings. When != gmg the
+  // gmg_* settings above configure the V-cycle that preconditions the outer Krylov solver.
+  KrylovMultigrid::parseSettings(pp, m_krylovSettings);
 }
 
 void
@@ -740,56 +671,8 @@ EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData
     const Real phiResid  = m_multigridSolver->computeAMRResidual(phi, rhs, finestLevel, coarsestLevel);
     const Real zeroResid = m_multigridSolver->computeAMRResidual(zer, rhs, finestLevel, coarsestLevel);
 
-    // PROTOTYPE: Krylov-accelerated multigrid. When 'gmg_krylov_accel' is set, use the AMR multigrid V-cycle as a
-    // preconditioner for an outer GMRES (via the AMRMultigridKrylovOp adapter) instead of stand-alone V-cycling.
-    bool krylovAccel = false;
-    {
-      ParmParse pp("EddingtonSP1");
-      pp.query("gmg_krylov_accel", krylovAccel);
-    }
-
     if (phiResid > zeroResid * m_multigridExitTolerance) {
-      if (krylovAccel) {
-        Vector<DisjointBoxLayout> grids   = m_amr->getGrids(m_realm);
-        Vector<int>               refRat  = m_amr->getRefinementRatios();
-        Vector<ProblemDomain>     domains = m_amr->getDomains();
-        Vector<Real>              dxScal  = m_amr->getDx();
-
-        grids.resize(1 + finestLevel);
-        refRat.resize(1 + finestLevel);
-        domains.resize(1 + finestLevel);
-
-        Vector<RealVect> dx(1 + finestLevel);
-        for (int lvl = 0; lvl <= finestLevel; lvl++) {
-          dx[lvl] = dxScal[lvl] * RealVect::Unit;
-        }
-
-        RefCountedPtr<AMRLevelOpFactory<LevelData<EBCellFAB>>> opFactory(m_helmholtzOpFactory);
-
-        // The adapter inherits the (correct) AMR-composite vector ops from MultilevelLinearOp, so it still needs the
-        // base define() to build those. We disable the base's own preconditioner solver since we override preCond().
-        AMRMultigridKrylovOp mlOp;
-        mlOp.m_use_multigrid_preconditioner = false;
-        mlOp.m_isPrecondSolverInitialized   = true;
-        mlOp.define(grids, refRat, domains, dx, opFactory, coarsestLevel);
-        mlOp.m_mg    = &(*m_multigridSolver);
-        mlOp.m_lmax  = finestLevel;
-        mlOp.m_lbase = coarsestLevel;
-
-        // Make sure the reused solver is in a state where AMRVCycle can run.
-        m_multigridSolver->init(phi, rhs, finestLevel, coarsestLevel);
-        m_multigridSolver->setBottomSolver(finestLevel, coarsestLevel);
-
-        GMRESSolver<Vector<LevelData<EBCellFAB>*>> gmres;
-        gmres.define(&mlOp, true);
-        gmres.m_verbosity = 4;
-        gmres.m_imax      = 100;
-        gmres.m_reps      = m_multigridExitTolerance;
-        gmres.solve(phi, rhs);
-
-        converged = true;
-      }
-      else {
+      if (m_krylovSettings.type == KrylovMultigrid::SolverType::GMG) {
         // Residual is too large, solve.
         m_multigridSolver->m_convergenceMetric = zeroResid;
         m_multigridSolver->solveNoInitResid(phi, res, rhs, finestLevel, coarsestLevel, a_zeroPhi);
@@ -798,6 +681,17 @@ EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData
         if (status == 1 || status == 8 || status == 9) {    // 8 => Norm sufficiently small
           converged = true;
         }
+      }
+      else {
+        // Outer Krylov solve with the V-cycle as preconditioner.
+        converged = KrylovMultigrid::solve(&(*m_multigridSolver),
+                                           m_krylovOp,
+                                           phi,
+                                           rhs,
+                                           coarsestLevel,
+                                           finestLevel,
+                                           a_zeroPhi,
+                                           m_krylovSettings);
       }
     }
     else {
@@ -887,8 +781,20 @@ EddingtonSP1::advanceEuler(EBAMRCellData&       a_phi,
   // Figure out how far away we are from a "converged" solution and set the convergence metric. Then solve.
   const Real zeroResid = m_multigridSolver->computeAMRResidual(zer, eulerRHS, finestLevel, coarsestLevel);
 
-  m_multigridSolver->m_convergenceMetric = zeroResid;
-  m_multigridSolver->solve(newPhi, eulerRHS, finestLevel, coarsestLevel, a_zeroPhi);
+  if (m_krylovSettings.type == KrylovMultigrid::SolverType::GMG) {
+    m_multigridSolver->m_convergenceMetric = zeroResid;
+    m_multigridSolver->solve(newPhi, eulerRHS, finestLevel, coarsestLevel, a_zeroPhi);
+  }
+  else {
+    KrylovMultigrid::solve(&(*m_multigridSolver),
+                           m_krylovOp,
+                           newPhi,
+                           eulerRHS,
+                           coarsestLevel,
+                           finestLevel,
+                           a_zeroPhi,
+                           m_krylovSettings);
+  }
 }
 
 void
@@ -1208,6 +1114,21 @@ EddingtonSP1::setupMultigrid()
 
   // Init solver. This instantiates all the operators in AMRMultiGrid so we can just call "solve"
   m_multigridSolver->init(phi, rhs, finestLevel, 0);
+
+  // Define the outer-Krylov adapter if requested (reuses the just-initialised multigrid solver as preconditioner).
+  if (m_krylovSettings.type != KrylovMultigrid::SolverType::GMG) {
+    m_multigridSolver->setBottomSolver(finestLevel, 0);
+
+    Vector<DisjointBoxLayout> grids  = m_amr->getGrids(m_realm);
+    Vector<int>               refRat = m_amr->getRefinementRatios();
+    Vector<Real>              dxScal = m_amr->getDx();
+
+    grids.resize(1 + finestLevel);
+    refRat.resize(1 + finestLevel);
+    dxScal.resize(1 + finestLevel);
+
+    m_krylovOp.define(&(*m_multigridSolver), grids, refRat, dxScal, 0, finestLevel, m_krylovSettings.numVCycles);
+  }
 }
 
 void

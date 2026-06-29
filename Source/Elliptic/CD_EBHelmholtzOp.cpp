@@ -687,6 +687,80 @@ EBHelmholtzOp::dotProduct(const LevelData<EBCellFAB>& a_lhs, const LevelData<EBC
   return dotProd;
 }
 
+Real
+EBHelmholtzOp::dotProductMasked(const LevelData<EBCellFAB>&     a_lhs,
+                                const LevelData<EBCellFAB>&     a_rhs,
+                                const LevelData<BaseFab<bool>>& a_mask) const noexcept
+{
+  CH_TIME("EBHelmholtzOp::dotProductMasked");
+
+  const DisjointBoxLayout& dbl  = a_lhs.disjointBoxLayout();
+  const DataIterator&      dit  = dbl.dataIterator();
+  const int                nbox = dit.size();
+
+  Real sumKappaXY = 0.0;
+  Real sumVolume  = 0.0;
+
+#pragma omp parallel for schedule(runtime) reduction(+ : sumKappaXY, sumVolume)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din     = dit[mybox];
+    const Box        cellBox = dbl[din];
+
+    const EBCellFAB&     X    = a_lhs[din];
+    const EBCellFAB&     Y    = a_rhs[din];
+    const BaseFab<bool>& mask = a_mask[din];
+
+    const FArrayBox& regX = X.getFArrayBox();
+    const FArrayBox& regY = Y.getFArrayBox();
+
+    const EBISBox& ebisbox = X.getEBISBox();
+
+    // Cells masked out (covered by a finer level) are kept in the volume normalisation but excluded from the
+    // numerator -- this matches Chombo's MultilevelLinearOp, which zeroes covered data before the per-level dot.
+    auto regularKernel = [&](const IntVect& iv) -> void {
+      if (ebisbox.isRegular(iv)) {
+        sumVolume += 1.0;
+        if (mask(iv, 0)) {
+          sumKappaXY += regX(iv, 0) * regY(iv, 0);
+        }
+      }
+    };
+
+    auto irregularKernel = [&](const VolIndex& vof) -> void {
+      const IntVect& iv    = vof.gridIndex();
+      const Real     kappa = ebisbox.volFrac(vof);
+
+      sumVolume += kappa;
+      if (mask(iv, 0)) {
+        sumKappaXY += kappa * X(vof, 0) * Y(vof, 0);
+      }
+    };
+
+    const bool isCovered   = ebisbox.isAllCovered();
+    const bool isRegular   = ebisbox.isAllRegular();
+    const bool isIrregular = !isCovered && !isRegular;
+
+    if (isIrregular) {
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
+      BoxLoops::loop(m_vofIterIrreg[din], irregularKernel);
+    }
+    else if (isRegular) {
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
+    }
+  }
+
+  sumKappaXY = ParallelOps::sum(sumKappaXY);
+  sumVolume  = ParallelOps::sum(sumVolume);
+
+  Real dotProd = 0.0;
+
+  if (sumVolume > 0.0) {
+    dotProd = sumKappaXY / sumVolume;
+  }
+
+  return dotProd;
+}
+
 void
 EBHelmholtzOp::incr(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const Real a_scale)
 {

@@ -579,6 +579,21 @@ public:
   dotProduct(const LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs) override final;
 
   /**
+    @brief Masked variant of dotProduct, used by the AMR-composite Krylov inner product.
+    @details Same kappa-weighted inner product as dotProduct, except cells where a_mask is false (e.g. cells covered
+             by a finer AMR level) are excluded from the numerator. The volume normalisation still counts all valid
+             cells, matching the convention of Chombo's MultilevelLinearOp AMR dot product.
+    @param[in] a_lhs  First operand
+    @param[in] a_rhs  Second operand
+    @param[in] a_mask Per-cell mask; false marks cells excluded from the numerator (e.g. covered by a finer level)
+    @return Masked kappa-weighted inner product on this level
+  */
+  Real
+  dotProductMasked(const LevelData<EBCellFAB>&     a_lhs,
+                   const LevelData<EBCellFAB>&     a_rhs,
+                   const LevelData<BaseFab<bool>>& a_mask) const noexcept;
+
+  /**
     @brief Increment operator
     @param[in,out] a_lhs   Data to be incremented
     @param[in]    a_rhs   Incrementation data

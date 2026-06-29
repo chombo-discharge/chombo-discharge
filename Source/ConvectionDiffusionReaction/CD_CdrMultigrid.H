@@ -27,6 +27,7 @@
 // Our includes
 #include <CD_EBHelmholtzOpFactory.H>
 #include <CD_CdrSolver.H>
+#include <CD_KrylovMultigrid.H>
 #include <CD_NamespaceHeader.H>
 
 /**
@@ -230,6 +231,16 @@ protected:
     @brief GMRES solver
   */
   GMRESSolver<LevelData<EBCellFAB>> m_gmres;
+
+  /**
+    @brief Outer-Krylov settings (selects gmg/gmres/bicgstab and the krylov_* parameters)
+  */
+  KrylovMultigrid::Settings m_krylovSettings;
+
+  /**
+    @brief Adapter exposing the V-cycle as a preconditioner for the outer Krylov solver
+  */
+  AMRMultigridKrylovOp<EBCellFAB> m_krylovOp;
 
   /**
     @brief Is multigrid solver defined or not?

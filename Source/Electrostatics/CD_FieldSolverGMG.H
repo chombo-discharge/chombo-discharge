@@ -22,6 +22,7 @@
 // Our includes
 #include <CD_FieldSolver.H>
 #include <CD_MFHelmholtzOpFactory.H>
+#include <CD_KrylovMultigrid.H>
 #include <CD_NamespaceHeader.H>
 
 /**
@@ -406,6 +407,16 @@ protected:
     @brief multi-fluid simple solver
   */
   MFSimpleSolver m_mfsolver;
+
+  /**
+    @brief Outer-Krylov settings (selects gmg/gmres/bicgstab and the krylov_* parameters)
+  */
+  KrylovMultigrid::Settings m_krylovSettings;
+
+  /**
+    @brief Adapter exposing the V-cycle as a preconditioner for the outer Krylov solver
+  */
+  AMRMultigridKrylovOp<MFCellFAB> m_krylovOp;
 
   /**
     @brief Parse multigrid settings

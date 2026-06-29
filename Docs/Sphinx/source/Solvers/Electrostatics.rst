@@ -507,8 +507,10 @@ We explain these options below:
 * ``FieldSolverGMG.gmg_jump_weight``.
   Sets the least squares stencil weighting factor for least squares gradient reconstruction on dielectric interfaces.
   See :ref:`Chap:LeastSquares` for details. 
+* ``FieldSolverGMG.solver``.
+  Selects the top-level solver: ``gmg`` (default), ``gmres``, or ``bicgstab``. The Krylov options use the V-cycle as a preconditioner and are configured with the ``krylov_*`` keys; see :ref:`Chap:KrylovMultigrid`.
 * ``FieldSolverGMG.gmg_bottom_solver``.
-  Sets the bottom solver type. 
+  Sets the bottom solver type.
 * ``FieldSolverGMG.gmg_cycle``.
   Sets the multigrid cycle type: ``vcycle`` or ``wcycle``.
   W-cycles do more coarse-grid work per cycle and can help when V-cycle convergence rates degrade, but are substantially more expensive per cycle in deep AMR hierarchies.

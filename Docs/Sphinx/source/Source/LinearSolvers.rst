@@ -337,6 +337,35 @@ The user can select between these for the various solvers that use multigrid.
 Typically, smoothers tend to work sufficiently well if one can coarsen sufficiently far, although improved convergence rates can occasionally be achieved by using a conjugate gradient solver.
 In each case, a simple smoother with a specified number of relaxations is applied as a preconditioner for the bottom solver.
 
+.. note::
+
+   The *bottom solver* (``gmg_bottom_solver``) is the coarse-grid solver applied at the bottom of each V-cycle. It is unrelated to the top-level ``solver`` keyword described next, which selects whether the V-cycle is used stand-alone or as a preconditioner for an outer Krylov method.
+
+.. _Chap:KrylovMultigrid:
+
+Krylov-accelerated multigrid
+____________________________
+
+By default (``solver = gmg``) the Helmholtz equation is solved by stand-alone multigrid V-cycling.
+On hard problems (strong coefficient contrast, awkward geometry) the V-cycle convergence rate can degrade or stall.
+For these cases the V-cycle can instead be used as a *preconditioner* for an outer Krylov method:
+
+.. code-block:: text
+
+   FieldSolverGMG.solver = gmres      # or 'bicgstab'
+
+The outer Krylov iteration removes the slowly-converging error modes the V-cycle cannot, so it converges robustly where stand-alone multigrid does not.
+The V-cycle preconditioner is configured exactly as before (``gmg_smoother``, ``gmg_pre_smooth``, ``gmg_cycle``, ``gmg_bottom_solver``, ...); only the outer wrapper changes.
+The same ``solver`` keyword is available on ``FieldSolverGMG`` (multiphase) and on the single-phase solvers ``CdrCTU``, ``CdrGodunov``, and ``EddingtonSP1``.
+
+The solve is carried out in residual-correction form, so inhomogeneous boundary conditions and dielectric jump/surface-charge contributions are handled correctly, and a non-zero initial guess (warm start) is honoured.
+
+.. tip::
+
+   ``gmres`` keeps an orthogonal basis whose length is ``krylov_restart`` and whose memory cost grows with it (on large grids this can be significant); it is robust and the recommended default.
+   ``bicgstab`` uses a small, fixed amount of work storage but can break down on poorly-conditioned problems.
+   ``krylov_vcycles`` controls how many V-cycles make up one preconditioner application (usually 1); it is orthogonal to ``gmg_cycle`` (which selects V- vs W-cycles *within* a single application).
+
 .. _Chap:MultigridTuning:
 
 Configuration
@@ -385,6 +414,18 @@ All parameters below use a solver-class prefix (e.g. ``FieldSolverGMG``, ``Eddin
   Sets the overall relaxation damping factor applied to each smoother update.
 * ``<Solver>.gmg_reflux_free``.
   If ``true``, use the reflux-free AMR operator.
+* ``<Solver>.solver``.
+  Selects the top-level solver: ``gmg`` (default, stand-alone V-cycling), ``gmres``, or ``bicgstab``. The latter two use the multigrid V-cycle as a preconditioner (see :ref:`Chap:KrylovMultigrid`).
+* ``<Solver>.krylov_eps``.
+  Relative residual tolerance for the outer Krylov solver (``gmres``/``bicgstab``).
+* ``<Solver>.krylov_max_iter``.
+  Maximum number of outer Krylov iterations.
+* ``<Solver>.krylov_restart``.
+  GMRES restart length (ignored for ``bicgstab``).
+* ``<Solver>.krylov_vcycles``.
+  Number of V-cycles applied per Krylov preconditioner application.
+* ``<Solver>.krylov_verbosity``.
+  Verbosity of the outer Krylov solver.
   Rather than computing coarse- and fine-level fluxes separately and then applying a reflux correction, this variant fills the coarse-level coarse-fine interface fluxes by conservatively averaging the fine-level fluxes, which are themselves computed from the composite (CF-interpolated) solution.
   The two formulations are mathematically equivalent; neither is more accurate than the other.
   Default is ``false``.

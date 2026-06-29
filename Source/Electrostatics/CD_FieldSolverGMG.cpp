@@ -11,13 +11,8 @@
   @todo   Once the new operator is in, check the computeLoads routine. 
 */
 
-// Std includes
-#include <cmath>
-
 // Chombo includes
 #include <ParmParse.H>
-#include <MFCellFAB.H>
-#include <GMRESSolver.H>
 
 // Our includes
 #include <CD_FieldSolverGMG.H>
@@ -29,84 +24,6 @@
 #include <CD_MFHelmholtzJumpBCFactory.H>
 #include <CD_MFHelmholtzSaturationChargeJumpBCFactory.H>
 #include <CD_Units.H>
-
-/**
-  @brief No-op MFCellFAB overload of Chombo's writeVectorLevelName.
-  @details PROTOTYPE (Krylov-accelerated multigrid, multifluid): MultilevelLinearOp<MFCellFAB>::write() (an unused HDF5
-           debug helper) calls writeVectorLevelName(), which upstream only provides for FArrayBox/EBCellFAB. This
-           overload lets the virtual method instantiate. Must be declared before <MultilevelLinearOp.H>.
-*/
-void
-writeVectorLevelName(const Vector<LevelData<MFCellFAB>*>*, Vector<int>*, const char*)
-{}
-#include <MultilevelLinearOp.H>
-
-// PROTOTYPE: AMR-composite LinearOp that reuses an already-set-up AMRMultiGrid for the matvec and the V-cycle
-// preconditioner. Vector ops (create/assign/dotProduct/.../setToZero) are inherited from MultilevelLinearOp; only the
-// operations needing fully-wired AMR operators are overridden to delegate to the working solver (the stock wrapper
-// builds its own un-set-up operators whose applyOp/AMRVCycle/norm return zero for the multifluid operator). The norm
-// override makes norm(x)^2 == dotProduct(x,x), as GMRES requires (the EB norm otherwise returns the max-norm).
-namespace {
-  class AMRMultigridKrylovOpMF : public MultilevelLinearOp<MFCellFAB>
-  {
-  public:
-    AMRMultiGrid<LevelData<MFCellFAB>>* m_mg    = nullptr;
-    int                                 m_lmax  = 0;
-    int                                 m_lbase = 0;
-
-    void
-    applyOp(Vector<LevelData<MFCellFAB>*>&       a_lhs,
-            const Vector<LevelData<MFCellFAB>*>& a_phi,
-            bool                                 a_homogeneous = false) override
-    {
-      m_mg->computeAMROperator(a_lhs,
-                               const_cast<Vector<LevelData<MFCellFAB>*>&>(a_phi),
-                               m_lmax,
-                               m_lbase,
-                               a_homogeneous);
-    }
-
-    void
-    residual(Vector<LevelData<MFCellFAB>*>&       a_lhs,
-             const Vector<LevelData<MFCellFAB>*>& a_phi,
-             const Vector<LevelData<MFCellFAB>*>& a_rhs,
-             bool                                 a_homogeneous = false) override
-    {
-      m_mg->computeAMRResidual(a_lhs,
-                               const_cast<Vector<LevelData<MFCellFAB>*>&>(a_phi),
-                               a_rhs,
-                               m_lmax,
-                               m_lbase,
-                               a_homogeneous,
-                               false);
-    }
-
-    void
-    preCond(Vector<LevelData<MFCellFAB>*>& a_cor, const Vector<LevelData<MFCellFAB>*>& a_residual) override
-    {
-      // One AMR V-cycle: a_cor = M^{-1} a_residual. AMRVCycle mangles the residual, so pass a copy.
-      this->setToZero(a_cor);
-
-      Vector<LevelData<MFCellFAB>*> tmpResid;
-      this->create(tmpResid, a_residual);
-      this->assign(tmpResid, a_residual);
-
-      m_mg->AMRVCycle(a_cor, tmpResid, m_lmax, m_lmax, m_lbase);
-
-      this->clear(tmpResid);
-    }
-
-    Real
-    norm(const Vector<LevelData<MFCellFAB>*>& a_x, int a_ord) override
-    {
-      if (a_ord == 2) {
-        return std::sqrt(this->dotProduct(a_x, a_x));
-      }
-      return MultilevelLinearOp<MFCellFAB>::norm(a_x, a_ord);
-    }
-  };
-} // namespace
-
 #include <CD_NamespaceHeader.H>
 
 constexpr Real FieldSolverGMG::m_alpha;
@@ -317,6 +234,10 @@ FieldSolverGMG::parseMultigridSettings()
     m_mfsolver.setNumSmooths(40);
   }
 
+  // Outer solver path: 'solver' = gmg (default) | gmres | bicgstab, plus the krylov_* settings. When != gmg the
+  // gmg_* settings above configure the V-cycle that preconditions the outer Krylov solver.
+  KrylovMultigrid::parseSettings(pp, m_krylovSettings);
+
   // Things won't run unless this is fulfilled.
   CH_assert(m_minCellsBottom >= 2);
   CH_assert(m_multigridPreSmooth >= 0);
@@ -451,75 +372,9 @@ FieldSolverGMG::solve(MFAMRCellData&       a_phi,
   // Convergence criterion.
   const Real convergedResid = zeroResid * m_multigridExitTolerance;
 
-  // PROTOTYPE: Krylov-accelerated multigrid. When 'gmg_krylov_accel' is set, use the AMR multigrid V-cycle as a
-  // preconditioner for an outer GMRES (via the AMRMultigridKrylovOpMF adapter) instead of stand-alone V-cycling.
-  bool krylovAccel = false;
-  {
-    ParmParse pp("FieldSolverGMG");
-    pp.query("gmg_krylov_accel", krylovAccel);
-  }
-
   // If the residue rho - L(phi) is too large then we must get a new solution.
   if (phiResid > convergedResid) {
-    if (krylovAccel) {
-      Vector<DisjointBoxLayout> grids   = m_amr->getGrids(m_realm);
-      Vector<int>               refRat  = m_amr->getRefinementRatios();
-      Vector<ProblemDomain>     domains = m_amr->getDomains();
-      Vector<Real>              dxScal  = m_amr->getDx();
-
-      grids.resize(1 + finestLevel);
-      refRat.resize(1 + finestLevel);
-      domains.resize(1 + finestLevel);
-
-      Vector<RealVect> dx(1 + finestLevel);
-      for (int lvl = 0; lvl <= finestLevel; lvl++) {
-        dx[lvl] = dxScal[lvl] * RealVect::Unit;
-      }
-
-      RefCountedPtr<AMRLevelOpFactory<LevelData<MFCellFAB>>> opFactory(m_helmholtzOpFactory);
-
-      AMRMultigridKrylovOpMF mlOp;
-      mlOp.m_use_multigrid_preconditioner = false; // we override preCond()
-      mlOp.m_isPrecondSolverInitialized   = true;  // ... so the internal precond solver is never built/used
-      mlOp.define(grids, refRat, domains, dx, opFactory, coarsestLevel);
-      mlOp.m_mg    = &(*m_multigridSolver);
-      mlOp.m_lmax  = finestLevel;
-      mlOp.m_lbase = coarsestLevel;
-
-      // Make sure the reused solver is in a state where AMRVCycle can run.
-      m_multigridSolver->init(phi, rhs, finestLevel, coarsestLevel);
-      m_multigridSolver->setBottomSolver(finestLevel, coarsestLevel);
-
-      // GMRES applies the operator with homogeneous BCs, so the inhomogeneous boundary contribution must be
-      // folded into the right-hand side: solve L_homogeneous(phi) = rhs - L_inhomogeneous(0). For electrostatics
-      // the space-charge rhs is typically ~0 and the solve is driven entirely by the applied-voltage BCs, so this
-      // step is essential (otherwise GMRES would solve L(phi)=0 and return phi=0).
-      auto&                         wops = m_multigridSolver->getAMROperators();
-      Vector<LevelData<MFCellFAB>*> bEff(1 + finestLevel, nullptr);
-      for (int lvl = coarsestLevel; lvl <= finestLevel; lvl++) {
-        bEff[lvl] = new LevelData<MFCellFAB>();
-        wops[lvl]->create(*bEff[lvl], *rhs[lvl]);
-      }
-      m_multigridSolver->computeAMROperator(bEff, zer, finestLevel, coarsestLevel, false); // bEff = L_inhom(0)
-      for (int lvl = coarsestLevel; lvl <= finestLevel; lvl++) {
-        wops[lvl]->scale(*bEff[lvl], -1.0);
-        wops[lvl]->incr(*bEff[lvl], *rhs[lvl], 1.0); // bEff = rhs - L_inhom(0)
-      }
-
-      GMRESSolver<Vector<LevelData<MFCellFAB>*>> gmres;
-      gmres.define(&mlOp, true);
-      gmres.m_verbosity = 4;
-      gmres.m_imax      = 100;
-      gmres.m_reps      = m_multigridExitTolerance;
-      gmres.solve(phi, bEff);
-
-      for (int lvl = coarsestLevel; lvl <= finestLevel; lvl++) {
-        delete bEff[lvl];
-      }
-
-      converged = true;
-    }
-    else {
+    if (m_krylovSettings.type == KrylovMultigrid::SolverType::GMG) {
       m_multigridSolver->m_convergenceMetric = zeroResid;
       m_multigridSolver->solveNoInitResid(phi, res, rhs, finestLevel, coarsestLevel, a_zeroPhi);
 
@@ -527,6 +382,18 @@ FieldSolverGMG::solve(MFAMRCellData&       a_phi,
       if (status == 1 || status == 8) {                   // 8 => Norm sufficiently small
         converged = true;
       }
+    }
+    else {
+      // Outer Krylov solve with the V-cycle as preconditioner (residual-correction form; the inhomogeneous BC
+      // contribution enters through the initial residual computed inside the driver).
+      converged = KrylovMultigrid::solve(&(*m_multigridSolver),
+                                         m_krylovOp,
+                                         phi,
+                                         rhs,
+                                         coarsestLevel,
+                                         finestLevel,
+                                         a_zeroPhi,
+                                         m_krylovSettings);
     }
   }
   else {
@@ -1028,6 +895,22 @@ FieldSolverGMG::setupMultigrid()
 
   // Init the solver. This instantiates the all the operators in AMRMultiGrid so we can just call "solve"
   m_multigridSolver->init(phi, rhs, finestLevel, 0);
+
+  // If an outer Krylov solver is requested, set the bottom solver once (AMRVCycle needs it) and define the adapter
+  // that exposes the V-cycle as a preconditioner. Reuses the just-initialised multigrid solver and its operators.
+  if (m_krylovSettings.type != KrylovMultigrid::SolverType::GMG) {
+    m_multigridSolver->setBottomSolver(finestLevel, 0);
+
+    Vector<DisjointBoxLayout> grids  = m_amr->getGrids(m_realm);
+    Vector<int>               refRat = m_amr->getRefinementRatios();
+    Vector<Real>              dxScal = m_amr->getDx();
+
+    grids.resize(1 + finestLevel);
+    refRat.resize(1 + finestLevel);
+    dxScal.resize(1 + finestLevel);
+
+    m_krylovOp.define(&(*m_multigridSolver), grids, refRat, dxScal, 0, finestLevel, m_krylovSettings.numVCycles);
+  }
 }
 
 Vector<long long>
