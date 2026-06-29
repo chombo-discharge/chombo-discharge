@@ -428,6 +428,8 @@ CdrMultigrid::setupHelmholtzFactory()
                              ghostRhs,
                              m_smoother,
                              relaxFactor,
+                             m_chebyOrder,
+                             m_chebyEigRatio,
                              bottomDomain,
                              m_amr->getMaxBlockSize(),
                              m_multigridRefluxFree));
@@ -736,8 +738,12 @@ CdrMultigrid::parseMultigridSettings()
       "CdrMultigrid::parseMultigridSettings - logic bust in bottom solver. You must specify ' = bicgstab', ' = gmres', or ' = simple <number>'");
   }
 
-  // Relaxation type
-  pp.get("gmg_smoother", str);
+  // Relaxation type. The Chebyshev smoother takes two extra arguments,
+  // i.e. 'gmg_smoother = chebyshev <order> <eig_ratio>'.
+  m_chebyOrder    = 3;
+  m_chebyEigRatio = 4.0;
+
+  pp.get("gmg_smoother", str, 0);
   if (str == "jacobi") {
     m_smoother = EBHelmholtzOp::Smoother::PointJacobi;
   }
@@ -746,6 +752,17 @@ CdrMultigrid::parseMultigridSettings()
   }
   else if (str == "multi_color") {
     m_smoother = EBHelmholtzOp::Smoother::GauSaiMultiColor;
+  }
+  else if (str == "chebyshev") {
+    m_smoother = EBHelmholtzOp::Smoother::Chebyshev;
+
+    if (pp.countval("gmg_smoother") != 3) {
+      MayDay::Error(
+        "CdrMultigrid::parseMultigridSettings - the Chebyshev smoother requires 'gmg_smoother = chebyshev <order> <eig_ratio>'");
+    }
+
+    pp.get("gmg_smoother", m_chebyOrder, 1);
+    pp.get("gmg_smoother", m_chebyEigRatio, 2);
   }
   else {
     MayDay::Error("CdrMultigrid::parseMultigridSettings - unknown relaxation method requested");

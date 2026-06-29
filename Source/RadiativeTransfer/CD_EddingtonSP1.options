@@ -30,5 +30,5 @@ EddingtonSP1.gmg_bottom_solver     = bicgstab     ## Bottom solver type. Either 
 EddingtonSP1.gmg_cycle             = vcycle       ## Cycle type. Only 'vcycle' supported for now
 EddingtonSP1.gmg_ebbc_weight       = 1            ## EBBC weight (only for Dirichlet)
 EddingtonSP1.gmg_ebbc_order        = 2            ## EBBC order (only for Dirichlet)
-EddingtonSP1.gmg_smoother          = red_black    ## Relaxation type. 'jacobi', 'red_black', or 'multi_color'
+EddingtonSP1.gmg_smoother          = red_black    ## Relaxation. 'jacobi', 'multi_color', 'red_black', or 'chebyshev <order> <eig_ratio>'
 EddingtonSP1.gmg_reflux_free       = false        ## If true, use reflux-free AMR operator (folds coarse-fine flux correction into a single conservative flux coarsening pass; mathematically equivalent to the refluxed operator.

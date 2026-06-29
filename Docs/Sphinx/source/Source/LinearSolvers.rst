@@ -190,8 +190,9 @@ The Helmholtz equation is solved using multigrid, with various smoothers availab
 The currently supported smoothers are:
 
 1. Standard point Jacobi relaxation.
-2. Red-black Gauss-Seidel relaxation in which the relaxation pattern follows that of a checkerboard. 
-3. Multi-colored Gauss-Seidel relaxation in which the relaxation pattern follows quadrants in 2D and octants in 3D. 
+2. Red-black Gauss-Seidel relaxation in which the relaxation pattern follows that of a checkerboard.
+3. Multi-colored Gauss-Seidel relaxation in which the relaxation pattern follows quadrants in 2D and octants in 3D.
+4. Chebyshev polynomial relaxation (see :ref:`Chap:ChebyshevSmoother` below).
 
 Users can select between the various smoothers in solvers that use multigrid.
 
@@ -199,6 +200,36 @@ Users can select between the various smoothers in solvers that use multigrid.
 
    Red-black Gauss-Seidel usually provides the best convergence rates.
    The multi-colored kernels are twice as expensive as red-black Gauss-Seidel relaxation in 2D, and four times as expensive in 3D, and tend to only marginally improve convergence rates.
+
+.. _Chap:ChebyshevSmoother:
+
+Chebyshev smoother
+__________________
+
+The Chebyshev smoother is a polynomial (Chebyshev-Richardson) relaxation method that targets a prescribed window of the operator spectrum.
+A single invocation applies :math:`k` Richardson steps
+
+.. math::
+
+   \phi \leftarrow \phi + \omega_i D^{-1}\left(\rho - L\phi\right), \quad i = 0,1,\ldots,k-1,
+
+where :math:`D` is the operator diagonal and the step sizes :math:`\omega_i` are the reciprocals of the Chebyshev nodes on the eigenvalue window :math:`[\lambda_{\textrm{max}}/r,\,\lambda_{\textrm{max}}]`.
+Here :math:`k` is the polynomial *degree* (``order``) and :math:`r` is the *eigenvalue ratio* (``eig_ratio``), both supplied by the user.
+The upper bound :math:`\lambda_{\textrm{max}}` is estimated automatically from a Gershgorin bound on the Jacobi-preconditioned operator :math:`D^{-1}A`, and is therefore consistent with the operator coefficients (it equals :math:`2` for a pure Laplacian and is smaller when the :math:`\alpha`-term is present).
+
+The Chebyshev smoother is selected through the smoother specification, e.g.
+
+.. code-block:: text
+
+   FieldSolverGMG.gmg_smoother = chebyshev 3 4.0
+
+which selects polynomial degree :math:`k = 3` and eigenvalue ratio :math:`r = 4.0`.
+The same syntax is used by the other solvers that expose a ``gmg_smoother`` option.
+
+.. tip::
+
+   A single Chebyshev invocation performs ``order`` operator applications, so ``gmg_smoother = chebyshev 3 4.0`` with four pre/post smoothings costs roughly as much per V-cycle as twelve red-black smoothings.
+   The Chebyshev smoother is most useful with inexpensive (low-order) embedded-boundary stencils, where it reduces the number of V-cycles relative to Gauss-Seidel; with high-order boundary stencils Gauss-Seidel typically matches it at lower cost.
 
 
 Multiphase Helmholtz equation
@@ -324,7 +355,7 @@ All parameters below use a solver-class prefix (e.g. ``FieldSolverGMG``, ``Eddin
   Sets the multigrid cycle type.
   Currently, only V-cycles are supported.
 * ``<Solver>.gmg_smoother``.
-  Sets the multigrid smoother: ``point_jacobi``, ``red_black``, or ``multi_color``.
+  Sets the multigrid smoother: ``jacobi``, ``red_black``, ``multi_color``, or ``chebyshev <order> <eig_ratio>`` (see :ref:`Chap:ChebyshevSmoother`).
 * ``<Solver>.gmg_relax_factor``.
   Sets the overall relaxation damping factor applied to each smoother update.
 * ``<Solver>.gmg_reflux_free``.

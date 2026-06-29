@@ -187,6 +187,16 @@ protected:
   EBHelmholtzOp::Smoother m_smoother;
 
   /**
+    @brief Chebyshev polynomial degree (only used when m_smoother is Smoother::Chebyshev)
+  */
+  int m_chebyOrder;
+
+  /**
+    @brief Chebyshev eigenvalue ratio lambda_max/lambda_min (only used when m_smoother is Smoother::Chebyshev)
+  */
+  Real m_chebyEigRatio;
+
+  /**
     @brief GMG multigrid type
   */
   MultigridType m_multigridType;

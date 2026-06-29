@@ -51,6 +51,7 @@ public:
     PointJacobi,
     GauSaiRedBlack,
     GauSaiMultiColor,
+    Chebyshev,
   };
 
   /**
@@ -99,6 +100,8 @@ public:
     @param[in] a_jumpOrder     Stencil order to use on jump cells
     @param[in] a_relaxType     Which smoother to use
     @param[in] a_relaxFactor   Relaxation factor
+    @param[in] a_chebyOrder    Chebyshev polynomial degree (only used when a_relaxType is Smoother::Chebyshev)
+    @param[in] a_chebyEigRatio Chebyshev eigenvalue ratio lambda_max/lambda_min (only used when a_relaxType is Smoother::Chebyshev)
     @param[in] a_refluxFree    If true, use the reflux-free AMR operator (skips coarse-fine flux refluxing)
     @param[in] a_ghostPhi Description
     @param[in] a_ghostRhs Description
@@ -138,6 +141,8 @@ public:
                 const int&                                       a_preCondSmooth,
                 const Smoother&                                  a_relaxType,
                 const Real&                                      a_relaxFactor,
+                const int&                                       a_chebyOrder,
+                const Real&                                      a_chebyEigRatio,
                 const bool                                       a_refluxFree = false);
 
   /**
@@ -333,6 +338,15 @@ public:
   */
   void
   relaxGSMultiColor(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellFAB>& a_residual, const int a_iterations);
+
+  /**
+    @brief Chebyshev polynomial smoother.
+    @param[in,out] a_correction Correction
+    @param[in]    a_residual   Residual
+    @param[in]    a_iterations Number of iterations
+  */
+  void
+  relaxChebyshev(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellFAB>& a_residual, const int a_iterations);
 
   /**
     @brief Create method

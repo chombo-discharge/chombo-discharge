@@ -231,6 +231,16 @@ protected:
   MFHelmholtzOp::Smoother m_multigridRelaxMethod;
 
   /**
+    @brief Chebyshev polynomial degree (only used when m_multigridRelaxMethod is Smoother::Chebyshev)
+  */
+  int m_multigridChebyOrder;
+
+  /**
+    @brief Chebyshev eigenvalue ratio lambda_max/lambda_min (only used when m_multigridRelaxMethod is Smoother::Chebyshev)
+  */
+  Real m_multigridChebyEigRatio;
+
+  /**
     @brief GMG multigrid type
   */
   MultigridType m_multigridType;

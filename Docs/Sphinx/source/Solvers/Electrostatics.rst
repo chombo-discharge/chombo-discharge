@@ -513,7 +513,7 @@ We explain these options below:
   Sets the multigrid method.
   Currently, only V-cycles are supported.
 * ``FieldSolverGMG.gmg_smoother``.
-  Sets the multigrid smoother.
+  Sets the multigrid smoother: ``jacobi``, ``red_black``, ``multi_color``, or ``chebyshev <order> <eig_ratio>``.
 * ``FieldSolverGMG.gmg_relax_factor``.
   Sets the multigrid relaxation factor.
 * ``FieldSolverGMG.gmg_reflux_free``.

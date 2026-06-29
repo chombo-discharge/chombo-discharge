@@ -11,6 +11,10 @@
   @todo   Once performance and stability has settled down, remove the debug code in applyOpIrregular
 */
 
+// Std includes
+#include <cmath>
+#include <vector>
+
 // Chombo includes
 #include <ParmParse.H>
 #include <EBCellFactory.H>
@@ -59,6 +63,8 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
                              const IntVect&                                   a_ghostRhs,
                              const Smoother&                                  a_smoother,
                              const Real&                                      a_relaxFactor,
+                             const int&                                       a_chebyOrder,
+                             const Real&                                      a_chebyEigRatio,
                              const bool                                       a_refluxFree)
   : LevelTGAHelmOp<LevelData<EBCellFAB>, EBFluxFAB>(false), // Time-independent
     m_smoother(a_smoother),
@@ -108,6 +114,9 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
   m_interval         = Interval(m_comp, m_comp);
   m_relaxFactor      = a_relaxFactor;
   m_numSmoothPreCond = 10;
+  m_chebyOrder       = a_chebyOrder;
+  m_chebyEigRatio    = a_chebyEigRatio;
+  m_spectralRadius   = 2.0;
 
   ParmParse pp("EBHelmholtzOp");
   pp.query("reflux_free", m_refluxFree);
@@ -277,6 +286,24 @@ EBHelmholtzOp::getRelaxationCoeff() const noexcept
   CH_TIME("EBHelmholtzOp::getRelaxationCoeff");
 
   return m_relCoef;
+}
+
+int
+EBHelmholtzOp::getChebyOrder() const noexcept
+{
+  return m_chebyOrder;
+}
+
+Real
+EBHelmholtzOp::getChebyEigRatio() const noexcept
+{
+  return m_chebyEigRatio;
+}
+
+Real
+EBHelmholtzOp::getSpectralRadius() const noexcept
+{
+  return m_spectralRadius;
 }
 
 LayoutData<VoFIterator>&
@@ -507,6 +534,7 @@ EBHelmholtzOp::defineStencils()
   // Compute relaxation weights.
   this->computeDiagWeight();
   this->computeRelaxationCoefficient();
+  this->computeSpectralRadius();
   this->makeAggStencil();
 }
 
@@ -521,6 +549,7 @@ EBHelmholtzOp::setAlphaAndBeta(const Real& a_alpha, const Real& a_beta)
   // When we change alpha and beta we need to recompute relaxation coefficients...
   this->computeDiagWeight();
   this->computeRelaxationCoefficient();
+  this->computeSpectralRadius();
   this->makeAggStencil();
 }
 
@@ -1679,6 +1708,11 @@ EBHelmholtzOp::relax(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellF
 
     break;
   }
+  case Smoother::Chebyshev: {
+    this->relaxChebyshev(a_correction, a_residual, a_iterations);
+
+    break;
+  }
   default: {
     MayDay::Error("EBHelmholtzOp::relax - bogus relaxation method requested");
 
@@ -1749,6 +1783,88 @@ EBHelmholtzOp::pointJacobiKernel(EBCellFAB&             a_Lcorr,
     a_Lcorr -= a_residual;
     a_Lcorr *= m_relCoef[a_dit];
     a_correction -= a_Lcorr;
+  }
+}
+
+void
+EBHelmholtzOp::chebyshevKernel(EBCellFAB&             a_Lcorr,
+                               EBCellFAB&             a_corr,
+                               const EBCellFAB&       a_resid,
+                               const EBCellFAB&       a_Acoef,
+                               const EBFluxFAB&       a_Bcoef,
+                               const BaseIVFAB<Real>& a_BcoefIrreg,
+                               const Box&             a_cellBox,
+                               const DataIndex&       a_dit,
+                               const Real             a_omega) const noexcept
+{
+  CH_TIME("EBHelmholtzOp::chebyshevKernel");
+
+  const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
+
+  if (!ebisbox.isAllCovered()) {
+    this->applyOp(a_Lcorr, a_corr, a_Acoef, a_Bcoef, a_BcoefIrreg, a_cellBox, a_dit, true);
+
+    a_Lcorr -= a_resid;
+    a_Lcorr *= m_relCoef[a_dit];
+    a_Lcorr *= a_omega;
+    a_corr -= a_Lcorr;
+  }
+}
+
+void
+EBHelmholtzOp::relaxChebyshev(LevelData<EBCellFAB>&       a_correction,
+                              const LevelData<EBCellFAB>& a_residual,
+                              const int                   a_iterations)
+{
+  CH_TIME("EBHelmholtzOp::relaxChebyshev(LD<EBCellFAB>, LD<EBCellFAB>, int)");
+
+  // Chebyshev-Richardson polynomial smoother. Each outer iteration applies m_chebyOrder
+  // steps with step sizes omega_i chosen as the reciprocal Chebyshev nodes on
+  // [m_spectralRadius/m_chebyEigRatio, m_spectralRadius].
+  // m_spectralRadius is the Gershgorin upper bound on rho(D^{-1}A), computed at defineStencils time.
+
+  const Real lambdaMax = m_spectralRadius;
+  const Real lambdaMin = lambdaMax / m_chebyEigRatio;
+  const Real theta     = 0.5 * (lambdaMax + lambdaMin);
+  const Real delta     = 0.5 * (lambdaMax - lambdaMin);
+
+  // Precompute Chebyshev step sizes: omega_i = 1 / (theta - delta*cos((2i+1)*pi/(2k))).
+  std::vector<Real> omega(m_chebyOrder);
+  for (int i = 0; i < m_chebyOrder; i++) {
+    const Real sigma = theta - delta * std::cos((2 * i + 1) * M_PI / (2 * m_chebyOrder));
+    omega[i]         = 1.0 / sigma;
+  }
+
+  LevelData<EBCellFAB> Lcorr;
+  this->create(Lcorr, a_residual);
+
+  const DisjointBoxLayout& dbl  = m_eblg.getDBL();
+  const DataIterator&      dit  = dbl.dataIterator();
+  const int                nbox = dit.size();
+
+  for (int iter = 0; iter < a_iterations; iter++) {
+    for (int i = 0; i < m_chebyOrder; i++) {
+      if (m_doExchange) {
+        a_correction.exchange(m_exchangeCopier);
+      }
+
+      this->homogeneousCFInterp(a_correction);
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        this->chebyshevKernel(Lcorr[din],
+                              a_correction[din],
+                              a_residual[din],
+                              (*m_Acoef)[din],
+                              (*m_Bcoef)[din],
+                              (*m_BcoefIrreg)[din],
+                              dbl[din],
+                              din,
+                              omega[i]);
+      }
+    }
   }
 }
 
@@ -2098,6 +2214,51 @@ EBHelmholtzOp::computeRelaxationCoefficient()
 
     BoxLoops::loop(m_vofIterStenc[din], irregularKernel);
   }
+}
+
+void
+EBHelmholtzOp::computeSpectralRadius()
+{
+  CH_TIME("EBHelmholtzOp::computeSpectralRadius()");
+
+  // Gershgorin bound on rho(D^{-1}A) for cell i:
+  //   rho_i = 1 + sum_{j!=i}|A_{ij}| / A_{ii}
+  //         = 2 - alpha * A_i / diag_i
+  //         = 2 - alpha * A_i * relCoef_i
+  // This equals 2 for pure Laplacian (alpha=0) and < 2 for Helmholtz (alpha>0).
+  // For irregular cells, alphaDiagWeight = kappa*A already accounts for the volume fraction.
+
+  const DisjointBoxLayout& dbl   = m_eblg.getDBL();
+  const EBISLayout&        ebisl = m_eblg.getEBISL();
+  const DataIterator&      dit   = dbl.dataIterator();
+
+  Real localMax = 0.0;
+
+  for (int mybox = 0; mybox < dit.size(); mybox++) {
+    const DataIndex& din     = dit[mybox];
+    const EBISBox&   ebisbox = ebisl[din];
+    const Box&       cellBox = dbl[din];
+
+    const BaseFab<Real>& Aco = (*m_Acoef)[din].getSingleValuedFAB();
+    const BaseFab<Real>& rel = m_relCoef[din].getSingleValuedFAB();
+
+    // Regular cells: rho_i = 2 - alpha * Acoef_i * relCoef_i
+    auto regularKernel = [&](const IntVect& iv) {
+      if (ebisbox.isRegular(iv)) {
+        localMax = std::max(localMax, 2.0 - m_alpha * Aco(iv, m_comp) * rel(iv, m_comp));
+      }
+    };
+    BoxLoops::loop(cellBox, regularKernel);
+
+    // Irregular cells: alphaDiagWeight = kappa*A already absorbed in relCoef denominator
+    auto irregularKernel = [&](const VolIndex& vof) {
+      const Real rho = 2.0 - m_alpha * m_alphaDiagWeight[din](vof, m_comp) * m_relCoef[din](vof, m_comp);
+      localMax       = std::max(localMax, rho);
+    };
+    BoxLoops::loop(m_vofIterStenc[din], irregularKernel);
+  }
+
+  m_spectralRadius = ParallelOps::max(localMax);
 }
 
 void

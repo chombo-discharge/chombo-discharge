@@ -12,6 +12,8 @@
 
 // Std includes
 #include <chrono>
+#include <cmath>
+#include <vector>
 
 // Chombo includes
 #include <ParmParse.H>
@@ -63,6 +65,8 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
                              const int&                                       a_preCondSmooth,
                              const Smoother&                                  a_relaxType,
                              const Real&                                      a_relaxFactor,
+                             const int&                                       a_chebyOrder,
+                             const Real&                                      a_chebyEigRatio,
                              const bool                                       a_refluxFree)
 {
   CH_TIME("MFHelmholtzOp::MFHelmholtzOp(...)");
@@ -176,6 +180,11 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
 
       break;
     }
+    case MFHelmholtzOp::Smoother::Chebyshev: {
+      ebHelmRelax = EBHelmholtzOp::Smoother::Chebyshev;
+
+      break;
+    }
     default: {
       MayDay::Error("MFHelmholtzOp::MFHelmholtzOp - unsupported relaxation method requested");
 
@@ -211,6 +220,8 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
                                                                                        a_ghostRhs,
                                                                                        ebHelmRelax,
                                                                                        a_relaxFactor,
+                                                                                       a_chebyOrder,
+                                                                                       a_chebyEigRatio,
                                                                                        a_refluxFree));
 
     m_helmOps.insert({iphase, oper});
@@ -742,6 +753,11 @@ MFHelmholtzOp::relax(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellF
 
     break;
   }
+  case Smoother::Chebyshev: {
+    this->relaxChebyshev(a_correction, a_residual, a_iterations);
+
+    break;
+  }
   default: {
     MayDay::Error("MFHelmholtzOp::relax - bogus relaxation method requested");
 
@@ -909,6 +925,78 @@ MFHelmholtzOp::relaxGSMultiColor(LevelData<MFCellFAB>&       a_correction,
           const BaseIVFAB<Real>& BcoefIrreg = *(*m_BcoefIrreg)[din].getPhasePtr(iphase);
 
           op.second->gauSaiMultiColorKernel(Lph, phi, res, Acoef, Bcoef, BcoefIrreg, cellBox, din, m_colors[icolor]);
+        }
+      }
+    }
+  }
+}
+
+void
+MFHelmholtzOp::relaxChebyshev(LevelData<MFCellFAB>&       a_correction,
+                              const LevelData<MFCellFAB>& a_residual,
+                              const int                   a_iterations)
+{
+  CH_TIME("MFHelmholtzOp::relaxChebyshev");
+
+  // TLDR: Chebyshev-Richardson smoother; calls EBHelmholtzOp::chebyshevKernel per phase.
+  //       The Chebyshev step sizes are taken from the first phase's per-op settings.
+
+  // Fetch Chebyshev parameters from the first phase operator.
+  int  chebyOrder    = 3;
+  Real chebyEigRatio = 4.0;
+  Real lambdaMax     = 2.0;
+  if (!m_helmOps.empty()) {
+    chebyOrder    = m_helmOps.begin()->second->getChebyOrder();
+    chebyEigRatio = m_helmOps.begin()->second->getChebyEigRatio();
+    lambdaMax     = m_helmOps.begin()->second->getSpectralRadius();
+  }
+
+  const Real lambdaMin = lambdaMax / chebyEigRatio;
+  const Real theta     = 0.5 * (lambdaMax + lambdaMin);
+  const Real delta     = 0.5 * (lambdaMax - lambdaMin);
+
+  std::vector<Real> omega(chebyOrder);
+  for (int i = 0; i < chebyOrder; i++) {
+    const Real sigma = theta - delta * std::cos((2 * i + 1) * M_PI / (2 * chebyOrder));
+    omega[i]         = 1.0 / sigma;
+  }
+
+  LevelData<MFCellFAB> Lcorr;
+  this->create(Lcorr, a_correction);
+
+  const DisjointBoxLayout& dbl = m_mflg.getGrids();
+  const DataIterator&      dit = dbl.dataIterator();
+
+  const int nbox = dit.size();
+
+  constexpr bool homogeneousCFBC   = true;
+  constexpr bool homogeneousPhysBC = true;
+
+  for (int iter = 0; iter < a_iterations; iter++) {
+    for (int i = 0; i < chebyOrder; i++) {
+
+      this->exchangeGhost(a_correction);
+      this->interpolateCF(a_correction, nullptr, homogeneousCFBC);
+      this->updateJumpBC(a_correction, homogeneousPhysBC);
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        const Box cellBox = dbl[din];
+
+        for (auto& op : m_helmOps) {
+          const int iphase = op.first;
+
+          EBCellFAB&       Lph = Lcorr[din].getPhase(iphase);
+          EBCellFAB&       phi = a_correction[din].getPhase(iphase);
+          const EBCellFAB& res = a_residual[din].getPhase(iphase);
+
+          const EBCellFAB&       Acoef      = (*m_Acoef)[din].getPhase(iphase);
+          const EBFluxFAB&       Bcoef      = (*m_Bcoef)[din].getPhase(iphase);
+          const BaseIVFAB<Real>& BcoefIrreg = *(*m_BcoefIrreg)[din].getPhasePtr(iphase);
+
+          op.second->chebyshevKernel(Lph, phi, res, Acoef, Bcoef, BcoefIrreg, cellBox, din, omega[i]);
         }
       }
     }

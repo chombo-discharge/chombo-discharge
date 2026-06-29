@@ -105,6 +105,8 @@ public:
     @param[in] a_ghostPhi         Number of ghost cells in solution vector. 
     @param[in] a_smoother         Relaxation method.
     @param[in] a_relaxFactor      Relaxation factor
+    @param[in] a_chebyOrder       Chebyshev polynomial degree (only used when a_smoother is Smoother::Chebyshev)
+    @param[in] a_chebyEigRatio    Chebyshev eigenvalue ratio lambda_max/lambda_min (only used when a_smoother is Smoother::Chebyshev)
     @param[in] a_refluxFree       If true, use the reflux-free AMR operator (skips coarse-fine flux refluxing)
     @param[in] a_bottomDomain     Coarsest domain on which we run multigrid. Must be a coarsening of the AMR problem domains.
     @param[in] a_deeperLevelGrids Optional object in case you want to pre-define the deeper multigrid levels.
@@ -139,6 +141,8 @@ public:
                        const IntVect&          a_ghostRHS,
                        const Smoother&         a_smoother,
                        const Real&             a_relaxFactor,
+                       const int&              a_chebyOrder,
+                       const Real&             a_chebyEigRatio,
                        const ProblemDomain&    a_bottomDomain,
                        const int&              a_mgBlockingFactor,
                        const bool              a_refluxFree       = false,
@@ -214,6 +218,16 @@ protected:
     @brief Smoother
   */
   Smoother m_smoother;
+
+  /**
+    @brief Chebyshev polynomial degree (only used when m_smoother is Smoother::Chebyshev)
+  */
+  int m_chebyOrder;
+
+  /**
+    @brief Chebyshev eigenvalue ratio lambda_max/lambda_min (only used when m_smoother is Smoother::Chebyshev)
+  */
+  Real m_chebyEigRatio;
 
   /**
     @brief Number of AMR levels

@@ -411,8 +411,12 @@ EddingtonSP1::parseMultigridSettings()
       "EddingtonSP1::parseMultigridSettings - logic bust in bottom solver. You must specify ' = bicgstab', ' = gmres', or ' = simple <number>'");
   }
 
-  // Relaxation type
-  pp.get("gmg_smoother", str);
+  // Relaxation type. The Chebyshev smoother takes two extra arguments,
+  // i.e. 'gmg_smoother = chebyshev <order> <eig_ratio>'.
+  m_multigridChebyOrder    = 3;
+  m_multigridChebyEigRatio = 4.0;
+
+  pp.get("gmg_smoother", str, 0);
   if (str == "jacobi") {
     m_multigridRelaxMethod = EBHelmholtzOp::Smoother::PointJacobi;
   }
@@ -421,6 +425,17 @@ EddingtonSP1::parseMultigridSettings()
   }
   else if (str == "multi_color") {
     m_multigridRelaxMethod = EBHelmholtzOp::Smoother::GauSaiMultiColor;
+  }
+  else if (str == "chebyshev") {
+    m_multigridRelaxMethod = EBHelmholtzOp::Smoother::Chebyshev;
+
+    if (pp.countval("gmg_smoother") != 3) {
+      MayDay::Error(
+        "EddingtonSP1::parseMultigridSettings - the Chebyshev smoother requires 'gmg_smoother = chebyshev <order> <eig_ratio>'");
+    }
+
+    pp.get("gmg_smoother", m_multigridChebyOrder, 1);
+    pp.get("gmg_smoother", m_multigridChebyEigRatio, 2);
   }
   else {
     MayDay::Error("EddingtonSP1::parseMultigridSettings - unknown relaxation method requested");
@@ -975,6 +990,8 @@ EddingtonSP1::setupHelmholtzFactory()
                                                                                       ghostRhs,
                                                                                       m_multigridRelaxMethod,
                                                                                       relaxFactor,
+                                                                                      m_multigridChebyOrder,
+                                                                                      m_multigridChebyEigRatio,
                                                                                       bottomDomain,
                                                                                       m_amr->getMaxBlockSize(),
                                                                                       m_multigridRefluxFree));

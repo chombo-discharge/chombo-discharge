@@ -115,6 +115,8 @@ public:
     @param[in] a_ebBcFactory Eb bc factory
     @param[in] a_jumpBcFactory Jump bc factory
     @param[in] a_smoother Smoother
+    @param[in] a_chebyOrder Chebyshev polynomial degree (only used when a_smoother is Smoother::Chebyshev)
+    @param[in] a_chebyEigRatio Chebyshev eigenvalue ratio lambda_max/lambda_min (only used when a_smoother is Smoother::Chebyshev)
     @param[in] a_blockingFactor Blocking factor
   */
   MFHelmholtzOpFactory(const MFIS&             a_mfis,
@@ -139,6 +141,8 @@ public:
                        const IntVect&          a_ghostRhs,
                        const Smoother&         a_smoother,
                        const Real&             a_relaxFactor,
+                       const int&              a_chebyOrder,
+                       const Real&             a_chebyEigRatio,
                        const ProblemDomain&    a_bottomDomain,
                        const int&              a_jumpOrder,
                        const int&              a_jumpWeight,
@@ -237,6 +241,16 @@ protected:
     @brief Smoother
   */
   Smoother m_smoother;
+
+  /**
+    @brief Chebyshev polynomial degree (only used when m_smoother is Smoother::Chebyshev)
+  */
+  int m_chebyOrder;
+
+  /**
+    @brief Chebyshev eigenvalue ratio lambda_max/lambda_min (only used when m_smoother is Smoother::Chebyshev)
+  */
+  Real m_chebyEigRatio;
 
   /**
     @brief Number of AMR levels

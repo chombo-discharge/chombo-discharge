@@ -50,6 +50,7 @@ public:
     PointJacobi,
     GauSaiRedBlack,
     GauSaiMultiColor,
+    Chebyshev,
   };
 
   /**
@@ -98,6 +99,8 @@ public:
     @param[in] a_ghostRhs      Ghost cells in right-hand side
     @param[in] a_smoother      Which smoother to use
     @param[in] a_relaxFactor   Relaxation factor
+    @param[in] a_chebyOrder    Chebyshev polynomial degree (only used when a_smoother is Smoother::Chebyshev)
+    @param[in] a_chebyEigRatio Chebyshev eigenvalue ratio lambda_max/lambda_min (only used when a_smoother is Smoother::Chebyshev)
     @param[in] a_refluxFree    If true, use the reflux-free AMR operator (skips coarse-fine flux refluxing)
     @param[in] a_BcoefIrreg    B-coefficient on EB faces
   */
@@ -129,6 +132,8 @@ public:
                 const IntVect&                                   a_ghostRhs,
                 const Smoother&                                  a_smoother,
                 const Real&                                      a_relaxFactor,
+                const int&                                       a_chebyOrder,
+                const Real&                                      a_chebyEigRatio,
                 const bool                                       a_refluxFree = false);
 
   /**
@@ -262,6 +267,30 @@ public:
                     const BaseIVFAB<Real>& a_BcoefIrreg,
                     const Box&             a_cellBox,
                     const DataIndex&       a_dit) const noexcept;
+
+  /**
+    @brief Chebyshev smoother kernel.
+    @details Same as pointJacobiKernel but scales the update by a_omega (the Chebyshev step size).
+    @param[in,out] a_Lcorr      Storage for computing L(a_corr)
+    @param[in,out] a_corr       Correction
+    @param[in]    a_resid      Residual
+    @param[in]    a_Acoef      A-coefficient
+    @param[in]    a_Bcoef      B-coefficient
+    @param[in]    a_BcoefIrreg B-coefficient on EB faces
+    @param[in]    a_cellBox    Grid box
+    @param[in]    a_dit        Data index
+    @param[in]    a_omega      Chebyshev step-size scaling factor
+  */
+  void
+  chebyshevKernel(EBCellFAB&             a_Lcorr,
+                  EBCellFAB&             a_corr,
+                  const EBCellFAB&       a_resid,
+                  const EBCellFAB&       a_Acoef,
+                  const EBFluxFAB&       a_Bcoef,
+                  const BaseIVFAB<Real>& a_BcoefIrreg,
+                  const Box&             a_cellBox,
+                  const DataIndex&       a_dit,
+                  const Real             a_omega) const noexcept;
 
   /**
     @brief Red-black Gauss-Seidel kernel
@@ -888,6 +917,27 @@ public:
   getRelaxationCoeff() const noexcept;
 
   /**
+    @brief Returns m_chebyOrder. Used by MFHelmholtzOp to replicate Chebyshev parameters.
+    @return Chebyshev polynomial degree
+  */
+  int
+  getChebyOrder() const noexcept;
+
+  /**
+    @brief Returns m_chebyEigRatio. Used by MFHelmholtzOp to replicate Chebyshev parameters.
+    @return Chebyshev eigenvalue ratio (lambda_max / lambda_min)
+  */
+  Real
+  getChebyEigRatio() const noexcept;
+
+  /**
+    @brief Returns m_spectralRadius. Used by MFHelmholtzOp to replicate Chebyshev parameters.
+    @return Gershgorin bound on rho(D^{-1}A)
+  */
+  Real
+  getSpectralRadius() const noexcept;
+
+  /**
     @brief Return all-cut VoFIterators (one per patch). Used by MFHelmholtzOp.
     @return All-cut VoF iterators over irregular cells on this level.
   */
@@ -1012,6 +1062,23 @@ protected:
     @brief Successive over-relaxation factor (Must be >= 1).
   */
   Real m_relaxFactor;
+
+  /**
+    @brief Number of Chebyshev polynomial steps per smoother invocation.
+  */
+  int m_chebyOrder;
+
+  /**
+    @brief Ratio lambda_max/lambda_min for the Chebyshev eigenvalue window.
+    @details Targets the upper (1 - 1/m_chebyEigRatio) fraction of the spectrum.
+  */
+  Real m_chebyEigRatio;
+
+  /**
+    @brief Spectral radius estimate for the Jacobi-preconditioned operator D^{-1}A.
+    @details Computed via the Gershgorin bound after defineStencils(). Used as lambda_max in the Chebyshev smoother.
+  */
+  Real m_spectralRadius;
 
   /**
     @brief Vector resolution
@@ -1275,6 +1342,19 @@ protected:
   relaxGSMultiColor(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations);
 
   /**
+    @brief Chebyshev polynomial smoother.
+    @details Applies m_chebyOrder Chebyshev-Richardson steps of the form
+             correction += omega_i * relCoef * (residual - L(correction)).
+             The step sizes omega_i are derived from Chebyshev nodes on [lambdaMax/m_chebyEigRatio, lambdaMax]
+             where lambdaMax = 2 (safe bound for the Jacobi-preconditioned Laplacian-type operator).
+    @param[in,out] a_correction Correction
+    @param[in]    a_residual   Residual
+    @param[in]    a_iterations Number of outer smoother invocations (each applies m_chebyOrder steps)
+  */
+  void
+  relaxChebyshev(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations);
+
+  /**
     @brief Calculate the weight of the diagonal term
   */
   void
@@ -1285,6 +1365,14 @@ protected:
   */
   void
   computeRelaxationCoefficient();
+
+  /**
+    @brief Estimate the spectral radius of D^{-1}A (Jacobi-preconditioned operator) via the Gershgorin bound.
+    @details rho_i = 2 - alpha * A_i * relCoef_i. Equals 2 for pure Laplacian and decreases with alpha > 0.
+             Must be called after computeRelaxationCoefficient() and computeDiagWeight().
+  */
+  void
+  computeSpectralRadius();
 
   /**
     @brief Compute aggregated stencils
