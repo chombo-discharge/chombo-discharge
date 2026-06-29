@@ -93,8 +93,8 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structLevelTiles_1_1TileComparator.html">TileComparator</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">For lexicographically comparing tiles.  <a href="structLevelTiles_1_1TileComparator.html#details">More...</a><br /></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structLevelTiles_1_1TileHasher.html">TileHasher</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hash functor for using IntVect tiles as unordered_map keys.  <a href="structLevelTiles_1_1TileHasher.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
@@ -110,25 +110,25 @@ Public Member Functions</h2></td></tr>
 &#160;</td><td class="memItemRight" valign="bottom"><b>LevelTiles</b> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:a39577ecde2d6103ce34ed26fd6841081"><td class="mdescLeft">&#160;</td><td class="mdescRight">Weak constructor. Must subsequently call the define function. <br /></td></tr>
 <tr class="separator:a39577ecde2d6103ce34ed26fd6841081"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac2e99efd6285174cef2168b7982c391f" id="r_ac2e99efd6285174cef2168b7982c391f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLevelTiles.html#ac2e99efd6285174cef2168b7982c391f">LevelTiles</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">DisjointBoxLayout</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_dbl</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_blockingFactor</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:ac2e99efd6285174cef2168b7982c391f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor - puts object in usable state.  <br /></td></tr>
-<tr class="separator:ac2e99efd6285174cef2168b7982c391f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aee832c2347533659386dbb4e4d514702" id="r_aee832c2347533659386dbb4e4d514702"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLevelTiles.html#aee832c2347533659386dbb4e4d514702">LevelTiles</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">DisjointBoxLayout</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_dbl</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_minBlockSize</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:aee832c2347533659386dbb4e4d514702"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor - puts object in usable state.  <br /></td></tr>
+<tr class="separator:aee832c2347533659386dbb4e4d514702"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad3d167667205f827d8eee4815a2d5540" id="r_ad3d167667205f827d8eee4815a2d5540"><td class="memItemLeft" align="right" valign="top"><a id="ad3d167667205f827d8eee4815a2d5540" name="ad3d167667205f827d8eee4815a2d5540"></a>
 <a class="el" href="classTracerParticleSolver.html">virtual</a>&#160;</td><td class="memItemRight" valign="bottom"><b>~LevelTiles</b> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:ad3d167667205f827d8eee4815a2d5540"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor (does nothing) <br /></td></tr>
 <tr class="separator:ad3d167667205f827d8eee4815a2d5540"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af7be7344874a2ae9d21c0efa77f3d2fe" id="r_af7be7344874a2ae9d21c0efa77f3d2fe"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLevelTiles.html#af7be7344874a2ae9d21c0efa77f3d2fe">define</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">DisjointBoxLayout</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_dbl</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_blockingFactor</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:af7be7344874a2ae9d21c0efa77f3d2fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define function. Puts object in usable state.  <br /></td></tr>
-<tr class="separator:af7be7344874a2ae9d21c0efa77f3d2fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a24c8e847ba2e92a5db69a37ff95e42f8" id="r_a24c8e847ba2e92a5db69a37ff95e42f8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::map</a>&lt; <a class="el" href="classTracerParticleSolver.html">IntVect</a>, <a class="el" href="classTracerParticleSolver.html">unsigned</a> <a class="el" href="classTracerParticleSolver.html">int</a>, <a class="el" href="structLevelTiles_1_1TileComparator.html">TileComparator</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLevelTiles.html#a24c8e847ba2e92a5db69a37ff95e42f8">getMyTiles</a> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:a24c8e847ba2e92a5db69a37ff95e42f8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the tiles own by this rank.  <br /></td></tr>
-<tr class="separator:a24c8e847ba2e92a5db69a37ff95e42f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3aed04cd3d1c53c99397ae55c6df6a04" id="r_a3aed04cd3d1c53c99397ae55c6df6a04"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::map</a>&lt; <a class="el" href="classTracerParticleSolver.html">IntVect</a>, <a class="el" href="classLevelTiles.html#adbfa720456d7a7a78206e3f5f2d4decf">BoxIDs</a>, <a class="el" href="structLevelTiles_1_1TileComparator.html">TileComparator</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLevelTiles.html#a3aed04cd3d1c53c99397ae55c6df6a04">getOtherTiles</a> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:a3aed04cd3d1c53c99397ae55c6df6a04"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the tiles own by this rank.  <br /></td></tr>
-<tr class="separator:a3aed04cd3d1c53c99397ae55c6df6a04"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a707edcb53ccfa4b8d47faf7e9983b286" id="r_a707edcb53ccfa4b8d47faf7e9983b286"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::map</a>&lt; <a class="el" href="classTracerParticleSolver.html">unsigned</a> <a class="el" href="classTracerParticleSolver.html">int</a>, <a class="el" href="classTracerParticleSolver.html">DataIndex</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLevelTiles.html#a707edcb53ccfa4b8d47faf7e9983b286">getMyGrids</a> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:a707edcb53ccfa4b8d47faf7e9983b286"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the tiles own by this rank.  <br /></td></tr>
-<tr class="separator:a707edcb53ccfa4b8d47faf7e9983b286"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a202edc88b9e2e48ba6c6fc04dd60f5cf" id="r_a202edc88b9e2e48ba6c6fc04dd60f5cf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLevelTiles.html#a202edc88b9e2e48ba6c6fc04dd60f5cf">define</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">DisjointBoxLayout</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_dbl</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_minBlockSize</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a202edc88b9e2e48ba6c6fc04dd60f5cf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define function. Puts object in usable state.  <br /></td></tr>
+<tr class="separator:a202edc88b9e2e48ba6c6fc04dd60f5cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a412678bae7ed34cc5771195b136b9eb1" id="r_a412678bae7ed34cc5771195b136b9eb1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::unordered_map</a>&lt; <a class="el" href="classTracerParticleSolver.html">IntVect</a>, <a class="el" href="classTracerParticleSolver.html">unsigned</a> <a class="el" href="classTracerParticleSolver.html">int</a>, <a class="el" href="structLevelTiles_1_1TileHasher.html">TileHasher</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLevelTiles.html#a412678bae7ed34cc5771195b136b9eb1">getMyTiles</a> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a412678bae7ed34cc5771195b136b9eb1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the tiles owned by this rank.  <br /></td></tr>
+<tr class="separator:a412678bae7ed34cc5771195b136b9eb1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a13f3dc1342009a573668f508468d0fbd" id="r_a13f3dc1342009a573668f508468d0fbd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::unordered_map</a>&lt; <a class="el" href="classTracerParticleSolver.html">IntVect</a>, <a class="el" href="classLevelTiles.html#adbfa720456d7a7a78206e3f5f2d4decf">BoxIDs</a>, <a class="el" href="structLevelTiles_1_1TileHasher.html">TileHasher</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLevelTiles.html#a13f3dc1342009a573668f508468d0fbd">getOtherTiles</a> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a13f3dc1342009a573668f508468d0fbd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the tiles owned by other ranks.  <br /></td></tr>
+<tr class="separator:a13f3dc1342009a573668f508468d0fbd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acc1a8c262d886137ba317fe35b6c8c1c" id="r_acc1a8c262d886137ba317fe35b6c8c1c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::unordered_map</a>&lt; <a class="el" href="classTracerParticleSolver.html">unsigned</a> <a class="el" href="classTracerParticleSolver.html">int</a>, <a class="el" href="classTracerParticleSolver.html">DataIndex</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLevelTiles.html#acc1a8c262d886137ba317fe35b6c8c1c">getMyGrids</a> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:acc1a8c262d886137ba317fe35b6c8c1c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the mapping of grid index to DataIndex.  <br /></td></tr>
+<tr class="separator:acc1a8c262d886137ba317fe35b6c8c1c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -136,25 +136,25 @@ Protected Attributes</h2></td></tr>
 <a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_isDefined</b></td></tr>
 <tr class="memdesc:a23e92a10e2055eea2306101261ff045b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Is defined or not. <br /></td></tr>
 <tr class="separator:a23e92a10e2055eea2306101261ff045b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa8c969d7280a708659894f249b1f7ce6" id="r_aa8c969d7280a708659894f249b1f7ce6"><td class="memItemLeft" align="right" valign="top"><a id="aa8c969d7280a708659894f249b1f7ce6" name="aa8c969d7280a708659894f249b1f7ce6"></a>
-<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::map</a>&lt; <a class="el" href="classTracerParticleSolver.html">IntVect</a>, <a class="el" href="classTracerParticleSolver.html">unsigned</a> <a class="el" href="classTracerParticleSolver.html">int</a>, <a class="el" href="structLevelTiles_1_1TileComparator.html">TileComparator</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_myTiles</b></td></tr>
-<tr class="memdesc:aa8c969d7280a708659894f249b1f7ce6"><td class="mdescLeft">&#160;</td><td class="mdescRight">"Tiles" owned by this rank <br /></td></tr>
-<tr class="separator:aa8c969d7280a708659894f249b1f7ce6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a84b9bf92ab1bc768ca08a1949c777f5c" id="r_a84b9bf92ab1bc768ca08a1949c777f5c"><td class="memItemLeft" align="right" valign="top"><a id="a84b9bf92ab1bc768ca08a1949c777f5c" name="a84b9bf92ab1bc768ca08a1949c777f5c"></a>
-<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::map</a>&lt; <a class="el" href="classTracerParticleSolver.html">IntVect</a>, <a class="el" href="classLevelTiles.html#adbfa720456d7a7a78206e3f5f2d4decf">BoxIDs</a>, <a class="el" href="structLevelTiles_1_1TileComparator.html">TileComparator</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_otherTiles</b></td></tr>
-<tr class="memdesc:a84b9bf92ab1bc768ca08a1949c777f5c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Grids owned by other ranks. <br /></td></tr>
-<tr class="separator:a84b9bf92ab1bc768ca08a1949c777f5c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afb3818ef426ef01d88b51fe71232b9fe" id="r_afb3818ef426ef01d88b51fe71232b9fe"><td class="memItemLeft" align="right" valign="top"><a id="afb3818ef426ef01d88b51fe71232b9fe" name="afb3818ef426ef01d88b51fe71232b9fe"></a>
-<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::map</a>&lt; <a class="el" href="classTracerParticleSolver.html">unsigned</a> <a class="el" href="classTracerParticleSolver.html">int</a>, <a class="el" href="classTracerParticleSolver.html">DataIndex</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_myGrids</b></td></tr>
-<tr class="memdesc:afb3818ef426ef01d88b51fe71232b9fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mapping of grid index to DataIndex. <br /></td></tr>
-<tr class="separator:afb3818ef426ef01d88b51fe71232b9fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a42bf5ca544c8c1d7b8858a17334ee749" id="r_a42bf5ca544c8c1d7b8858a17334ee749"><td class="memItemLeft" align="right" valign="top"><a id="a42bf5ca544c8c1d7b8858a17334ee749" name="a42bf5ca544c8c1d7b8858a17334ee749"></a>
+<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::unordered_map</a>&lt; <a class="el" href="classTracerParticleSolver.html">IntVect</a>, <a class="el" href="classTracerParticleSolver.html">unsigned</a> <a class="el" href="classTracerParticleSolver.html">int</a>, <a class="el" href="structLevelTiles_1_1TileHasher.html">TileHasher</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_myTiles</b></td></tr>
+<tr class="memdesc:a42bf5ca544c8c1d7b8858a17334ee749"><td class="mdescLeft">&#160;</td><td class="mdescRight">"Tiles" owned by this rank <br /></td></tr>
+<tr class="separator:a42bf5ca544c8c1d7b8858a17334ee749"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a349fdb03cf81bd9a5cda73d8072d0fc5" id="r_a349fdb03cf81bd9a5cda73d8072d0fc5"><td class="memItemLeft" align="right" valign="top"><a id="a349fdb03cf81bd9a5cda73d8072d0fc5" name="a349fdb03cf81bd9a5cda73d8072d0fc5"></a>
+<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::unordered_map</a>&lt; <a class="el" href="classTracerParticleSolver.html">IntVect</a>, <a class="el" href="classLevelTiles.html#adbfa720456d7a7a78206e3f5f2d4decf">BoxIDs</a>, <a class="el" href="structLevelTiles_1_1TileHasher.html">TileHasher</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_otherTiles</b></td></tr>
+<tr class="memdesc:a349fdb03cf81bd9a5cda73d8072d0fc5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Grids owned by other ranks. <br /></td></tr>
+<tr class="separator:a349fdb03cf81bd9a5cda73d8072d0fc5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a87dbbca54a35e2aa0660fb4149913200" id="r_a87dbbca54a35e2aa0660fb4149913200"><td class="memItemLeft" align="right" valign="top"><a id="a87dbbca54a35e2aa0660fb4149913200" name="a87dbbca54a35e2aa0660fb4149913200"></a>
+<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::unordered_map</a>&lt; <a class="el" href="classTracerParticleSolver.html">unsigned</a> <a class="el" href="classTracerParticleSolver.html">int</a>, <a class="el" href="classTracerParticleSolver.html">DataIndex</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_myGrids</b></td></tr>
+<tr class="memdesc:a87dbbca54a35e2aa0660fb4149913200"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mapping of grid index to DataIndex. <br /></td></tr>
+<tr class="separator:a87dbbca54a35e2aa0660fb4149913200"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Class for storing the AMR hierarchy as a collection of tiles. </p>
-<p>This class only makes sense in terms of a grid which uses constant-size grid, which is a restriction we happily accept when using particles. This class decomposes the AMR hierarchy into such tiles, each tile being the cells spanned by the blockingFactor^SpaceDim grid patch. </p>
+<p>This class decomposes the AMR hierarchy into uniform tiles, each tile being the cells spanned by a minBlockSize^SpaceDim grid patch, and maps each tile to the grid box that contains it. Boxes may be larger than one tile (variable-sized/anisotropic boxes that are unions of aligned minBlockSize tiles): such a box is registered under every tile it covers, so the tile-&gt;box map stays uniform and a point-&gt;tile-&gt;box lookup is O(1). When minBlockSize == maxBlockSize every box is exactly one tile (the one-tile-per-box fast path). </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="ac2e99efd6285174cef2168b7982c391f" name="ac2e99efd6285174cef2168b7982c391f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac2e99efd6285174cef2168b7982c391f">&#9670;&#160;</a></span>LevelTiles()</h2>
+<a id="aee832c2347533659386dbb4e4d514702" name="aee832c2347533659386dbb4e4d514702"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aee832c2347533659386dbb4e4d514702">&#9670;&#160;</a></span>LevelTiles()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -172,7 +172,7 @@ Protected Attributes</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
-          <td class="paramname"><em>a_blockingFactor</em>&#160;</td>
+          <td class="paramname"><em>a_minBlockSize</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -191,7 +191,7 @@ Protected Attributes</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dbl</td><td>Grids </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_blockingFactor</td><td>Grid size. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_minBlockSize</td><td>Grid size. </td></tr>
   </table>
   </dd>
 </dl>
@@ -199,8 +199,8 @@ Protected Attributes</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="af7be7344874a2ae9d21c0efa77f3d2fe" name="af7be7344874a2ae9d21c0efa77f3d2fe"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af7be7344874a2ae9d21c0efa77f3d2fe">&#9670;&#160;</a></span>define()</h2>
+<a id="a202edc88b9e2e48ba6c6fc04dd60f5cf" name="a202edc88b9e2e48ba6c6fc04dd60f5cf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a202edc88b9e2e48ba6c6fc04dd60f5cf">&#9670;&#160;</a></span>define()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -218,7 +218,7 @@ Protected Attributes</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
-          <td class="paramname"><em>a_blockingFactor</em>&#160;</td>
+          <td class="paramname"><em>a_minBlockSize</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -237,15 +237,15 @@ Protected Attributes</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dbl</td><td>Grids </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_blockingFactor</td><td>Grid size. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_minBlockSize</td><td>Grid size. </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="a707edcb53ccfa4b8d47faf7e9983b286" name="a707edcb53ccfa4b8d47faf7e9983b286"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a707edcb53ccfa4b8d47faf7e9983b286">&#9670;&#160;</a></span>getMyGrids()</h2>
+<a id="acc1a8c262d886137ba317fe35b6c8c1c" name="acc1a8c262d886137ba317fe35b6c8c1c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acc1a8c262d886137ba317fe35b6c8c1c">&#9670;&#160;</a></span>getMyGrids()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -254,7 +254,7 @@ Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::map</a>&lt; <a class="el" href="classTracerParticleSolver.html">unsigned</a> <a class="el" href="classTracerParticleSolver.html">int</a>, <a class="el" href="classTracerParticleSolver.html">DataIndex</a> &gt; &amp; LevelTiles::getMyGrids </td>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::unordered_map</a>&lt; <a class="el" href="classTracerParticleSolver.html">unsigned</a> <a class="el" href="classTracerParticleSolver.html">int</a>, <a class="el" href="classTracerParticleSolver.html">DataIndex</a> &gt; &amp; LevelTiles::getMyGrids </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -267,13 +267,13 @@ Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Get the tiles own by this rank. </p>
-<dl class="section return"><dt>Returns</dt><dd>m_myGridIndices </dd></dl>
+<p>Get the mapping of grid index to DataIndex. </p>
+<dl class="section return"><dt>Returns</dt><dd>m_myGrids </dd></dl>
 
 </div>
 </div>
-<a id="a24c8e847ba2e92a5db69a37ff95e42f8" name="a24c8e847ba2e92a5db69a37ff95e42f8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a24c8e847ba2e92a5db69a37ff95e42f8">&#9670;&#160;</a></span>getMyTiles()</h2>
+<a id="a412678bae7ed34cc5771195b136b9eb1" name="a412678bae7ed34cc5771195b136b9eb1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a412678bae7ed34cc5771195b136b9eb1">&#9670;&#160;</a></span>getMyTiles()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -282,7 +282,7 @@ Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::map</a>&lt; <a class="el" href="classTracerParticleSolver.html">IntVect</a>, <a class="el" href="classTracerParticleSolver.html">unsigned</a> <a class="el" href="classTracerParticleSolver.html">int</a>, <a class="el" href="structLevelTiles_1_1TileComparator.html">LevelTiles::TileComparator</a> &gt; &amp; LevelTiles::getMyTiles </td>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::unordered_map</a>&lt; <a class="el" href="classTracerParticleSolver.html">IntVect</a>, <a class="el" href="classTracerParticleSolver.html">unsigned</a> <a class="el" href="classTracerParticleSolver.html">int</a>, <a class="el" href="structLevelTiles_1_1TileHasher.html">LevelTiles::TileHasher</a> &gt; &amp; LevelTiles::getMyTiles </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -295,13 +295,13 @@ Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Get the tiles own by this rank. </p>
+<p>Get the tiles owned by this rank. </p>
 <dl class="section return"><dt>Returns</dt><dd>m_myTiles </dd></dl>
 
 </div>
 </div>
-<a id="a3aed04cd3d1c53c99397ae55c6df6a04" name="a3aed04cd3d1c53c99397ae55c6df6a04"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3aed04cd3d1c53c99397ae55c6df6a04">&#9670;&#160;</a></span>getOtherTiles()</h2>
+<a id="a13f3dc1342009a573668f508468d0fbd" name="a13f3dc1342009a573668f508468d0fbd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a13f3dc1342009a573668f508468d0fbd">&#9670;&#160;</a></span>getOtherTiles()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -310,7 +310,7 @@ Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::map</a>&lt; <a class="el" href="classTracerParticleSolver.html">IntVect</a>, <a class="el" href="classLevelTiles.html#adbfa720456d7a7a78206e3f5f2d4decf">LevelTiles::BoxIDs</a>, <a class="el" href="structLevelTiles_1_1TileComparator.html">LevelTiles::TileComparator</a> &gt; &amp; LevelTiles::getOtherTiles </td>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::unordered_map</a>&lt; <a class="el" href="classTracerParticleSolver.html">IntVect</a>, <a class="el" href="classLevelTiles.html#adbfa720456d7a7a78206e3f5f2d4decf">LevelTiles::BoxIDs</a>, <a class="el" href="structLevelTiles_1_1TileHasher.html">LevelTiles::TileHasher</a> &gt; &amp; LevelTiles::getOtherTiles </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -323,7 +323,7 @@ Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Get the tiles own by this rank. </p>
+<p>Get the tiles owned by other ranks. </p>
 <dl class="section return"><dt>Returns</dt><dd>m_otherTiles </dd></dl>
 
 </div>

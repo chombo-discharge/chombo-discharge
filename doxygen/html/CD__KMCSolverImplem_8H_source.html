@@ -1052,10 +1052,10 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00899" name="l00899"></a><span class="lineno">  899</span>      <span class="comment">// Try big time step first.</span></div>
 <div class="line"><a id="l00900" name="l00900"></a><span class="lineno">  900</span>      <a class="code hl_class" href="classTracerParticleSolver.html">curDt</a> = <a class="code hl_class" href="classTracerParticleSolver.html">a_dt</a> - <a class="code hl_class" href="classTracerParticleSolver.html">curTime</a>;</div>
 <div class="line"><a id="l00901" name="l00901"></a><span class="lineno">  901</span> </div>
-<div class="line"><a id="l00902" name="l00902"></a><span class="lineno">  902</span>      <span class="keywordtype">bool</span> <a class="code hl_class" href="classTracerParticleSolver.html">valid</a> = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00902" name="l00902"></a><span class="lineno">  902</span>      <span class="keywordtype">bool</span> valid = <span class="keyword">false</span>;</div>
 <div class="line"><a id="l00903" name="l00903"></a><span class="lineno">  903</span> </div>
 <div class="line"><a id="l00904" name="l00904"></a><span class="lineno">  904</span>      <span class="comment">// Substepping so we end up with a valid state.</span></div>
-<div class="line"><a id="l00905" name="l00905"></a><span class="lineno">  905</span>      <span class="keywordflow">while</span> (!<a class="code hl_class" href="classTracerParticleSolver.html">valid</a>) {</div>
+<div class="line"><a id="l00905" name="l00905"></a><span class="lineno">  905</span>      <span class="keywordflow">while</span> (!valid) {</div>
 <div class="line"><a id="l00906" name="l00906"></a><span class="lineno">  906</span> </div>
 <div class="line"><a id="l00907" name="l00907"></a><span class="lineno">  907</span>        State <a class="code hl_class" href="classTracerParticleSolver.html">state</a> = <a class="code hl_class" href="classTracerParticleSolver.html">a_state</a>;</div>
 <div class="line"><a id="l00908" name="l00908"></a><span class="lineno">  908</span> </div>
@@ -1087,9 +1087,9 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00934" name="l00934"></a><span class="lineno">  934</span>        }</div>
 <div class="line"><a id="l00935" name="l00935"></a><span class="lineno">  935</span> </div>
 <div class="line"><a id="l00936" name="l00936"></a><span class="lineno">  936</span>        <span class="comment">// If this was a valid step, accept it. Else reduce dt.</span></div>
-<div class="line"><a id="l00937" name="l00937"></a><span class="lineno">  937</span>        <a class="code hl_class" href="classTracerParticleSolver.html">valid</a> = <a class="code hl_class" href="classTracerParticleSolver.html">state</a>.isValidState();</div>
+<div class="line"><a id="l00937" name="l00937"></a><span class="lineno">  937</span>        valid = <a class="code hl_class" href="classTracerParticleSolver.html">state</a>.isValidState();</div>
 <div class="line"><a id="l00938" name="l00938"></a><span class="lineno">  938</span> </div>
-<div class="line"><a id="l00939" name="l00939"></a><span class="lineno">  939</span>        <span class="keywordflow">if</span> (<a class="code hl_class" href="classTracerParticleSolver.html">valid</a>) {</div>
+<div class="line"><a id="l00939" name="l00939"></a><span class="lineno">  939</span>        <span class="keywordflow">if</span> (valid) {</div>
 <div class="line"><a id="l00940" name="l00940"></a><span class="lineno">  940</span>          <a class="code hl_class" href="classTracerParticleSolver.html">a_state</a> = <a class="code hl_class" href="classTracerParticleSolver.html">state</a>;</div>
 <div class="line"><a id="l00941" name="l00941"></a><span class="lineno">  941</span> </div>
 <div class="line"><a id="l00942" name="l00942"></a><span class="lineno">  942</span>          <a class="code hl_class" href="classTracerParticleSolver.html">curTime</a> += <a class="code hl_class" href="classTracerParticleSolver.html">curDt</a>;</div>

@@ -1,7 +1,5 @@
 var searchData=
 [
-  ['diffusion_0',['diffusion',['../structItoParticle.html#a6c24db3abe7c9c3bff3490a97cb608db',1,'ItoParticle']]],
-  ['dischargeinputfile_1',['dischargeinputfile',['../CD__Initialize_8cpp.html#ac8e19801b30b06ad1471ded42fceae57',1,'dischargeInputFile:&#160;CD_Initialize.cpp'],['../CD__Initialize_8H.html#ac8e19801b30b06ad1471ded42fceae57',1,'dischargeInputFile:&#160;CD_Initialize.cpp']]],
-  ['dischargeparser_2',['dischargeparser',['../CD__Initialize_8cpp.html#a0c42874407245a41ff2d427f9c24758e',1,'dischargeParser:&#160;CD_Initialize.cpp'],['../CD__Initialize_8H.html#a0c42874407245a41ff2d427f9c24758e',1,'dischargeParser:&#160;CD_Initialize.cpp']]],
-  ['dtstep_3',['dtStep',['../structDischargeInceptionParticle.html#af80b90c15ad2a54ac5180e08aac77c2a',1,'DischargeInceptionParticle']]]
+  ['c_0',['c',['../namespaceUnits.html#aeb867ff161ea992af060bf128f7ffdf3',1,'Units']]],
+  ['columns_1',['columns',['../structParticleTraits_3_01ItoParticle_01_4.html#aae4c718d1663a4d6a20e71c8ed84ebed',1,'ParticleTraits&lt; ItoParticle &gt;::columns'],['../structParticleTraits_3_01NoPayload_01_4.html#ae5fa0f460e55f5d13763c22ca6024245',1,'ParticleTraits&lt; NoPayload &gt;::columns'],['../structParticleTraits_3_01Photon_01_4.html#a98bd1965262647fe1568101cf92c34a0',1,'ParticleTraits&lt; Photon &gt;::columns'],['../structParticleTraits_3_01TracerParticle_01_4.html#ab39339ed4fba2e570ad685528ac0cad6',1,'ParticleTraits&lt; TracerParticle &gt;::columns'],['../structParticleTraits_3_01DischargeInceptionParticle_01_4.html#a218c534b4f6c134d42e83b73ac08f9f4',1,'ParticleTraits&lt; DischargeInceptionParticle &gt;::columns'],['../structParticleTraits_3_01ItoKMCFieldParticle_01_4.html#a23ce4f5ef1c7e3631379e1ec1c53b983',1,'ParticleTraits&lt; ItoKMCFieldParticle &gt;::columns']]]
 ];

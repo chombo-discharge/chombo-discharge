@@ -88,8 +88,9 @@ $(function() {
 
 <p>Declaration of <a class="el" href="classLevelTiles.html" title="Class for storing the AMR hierarchy as a collection of tiles.">LevelTiles</a>.  
 <a href="#details">More...</a></p>
-<div class="textblock"><code>#include &lt;vector&gt;</code><br />
-<code>#include &lt;map&gt;</code><br />
+<div class="textblock"><code>#include &lt;cstddef&gt;</code><br />
+<code>#include &lt;unordered_map&gt;</code><br />
+<code>#include &lt;vector&gt;</code><br />
 <code>#include &lt;IntVect.H&gt;</code><br />
 <code>#include &lt;DisjointBoxLayout.H&gt;</code><br />
 <code>#include &lt;DataIndex.H&gt;</code><br />
@@ -100,21 +101,23 @@ Include dependency graph for CD_LevelTiles.H:</div>
 <div class="dyncontent">
 <div class="center"><img src="CD__LevelTiles_8H__incl.png" border="0" usemap="#aSource_2AmrMesh_2CD__LevelTiles_8H" alt=""/></div>
 <map name="aSource_2AmrMesh_2CD__LevelTiles_8H" id="aSource_2AmrMesh_2CD__LevelTiles_8H">
-<area shape="rect" title="Declaration of LevelTiles." alt="" coords="230,5,473,31"/>
-<area shape="rect" title=" " alt="" coords="5,79,68,104"/>
-<area shape="poly" title=" " alt="" coords="297,33,82,81,81,76,296,28"/>
-<area shape="rect" title=" " alt="" coords="93,79,143,104"/>
-<area shape="poly" title=" " alt="" coords="315,33,157,81,156,76,313,28"/>
-<area shape="rect" title=" " alt="" coords="168,79,249,104"/>
-<area shape="poly" title=" " alt="" coords="330,33,245,75,243,70,327,28"/>
-<area shape="rect" title=" " alt="" coords="274,79,429,104"/>
-<area shape="poly" title=" " alt="" coords="354,31,354,65,349,65,349,31"/>
-<area shape="rect" title=" " alt="" coords="453,79,556,104"/>
-<area shape="poly" title=" " alt="" coords="377,28,468,70,466,75,375,33"/>
-<area shape="rect" href="CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="580,79,765,104"/>
-<area shape="poly" title=" " alt="" coords="404,28,608,73,607,78,402,33"/>
-<area shape="rect" href="CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="790,79,969,104"/>
-<area shape="poly" title=" " alt="" coords="437,28,781,74,780,79,436,33"/>
+<area shape="rect" title="Declaration of LevelTiles." alt="" coords="325,5,567,31"/>
+<area shape="rect" title=" " alt="" coords="5,79,76,104"/>
+<area shape="poly" title=" " alt="" coords="367,33,241,53,90,81,89,76,240,48,367,28"/>
+<area shape="rect" title=" " alt="" coords="100,79,224,104"/>
+<area shape="poly" title=" " alt="" coords="401,33,222,78,220,73,400,28"/>
+<area shape="rect" title=" " alt="" coords="248,79,311,104"/>
+<area shape="poly" title=" " alt="" coords="420,33,320,76,318,71,418,28"/>
+<area shape="rect" title=" " alt="" coords="335,79,416,104"/>
+<area shape="poly" title=" " alt="" coords="436,33,398,71,394,67,432,29"/>
+<area shape="rect" title=" " alt="" coords="441,79,595,104"/>
+<area shape="poly" title=" " alt="" coords="460,29,498,67,495,71,456,33"/>
+<area shape="rect" title=" " alt="" coords="620,79,723,104"/>
+<area shape="poly" title=" " alt="" coords="483,28,623,72,621,77,481,33"/>
+<area shape="rect" href="CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="747,79,932,104"/>
+<area shape="poly" title=" " alt="" coords="510,28,763,74,762,79,509,33"/>
+<area shape="rect" href="CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="957,79,1135,104"/>
+<area shape="poly" title=" " alt="" coords="543,28,943,75,943,80,542,33"/>
 </map>
 </div>
 </div><div class="textblock"><div class="dynheader">
@@ -286,8 +289,8 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLevelTiles.html">LevelTiles</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Class for storing the AMR hierarchy as a collection of tiles.  <a href="classLevelTiles.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structLevelTiles_1_1TileComparator.html">LevelTiles::TileComparator</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">For lexicographically comparing tiles.  <a href="structLevelTiles_1_1TileComparator.html#details">More...</a><br /></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structLevelTiles_1_1TileHasher.html">LevelTiles::TileHasher</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hash functor for using IntVect tiles as unordered_map keys.  <a href="structLevelTiles_1_1TileHasher.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>

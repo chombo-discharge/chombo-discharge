@@ -1,7 +1,8 @@
 var searchData=
 [
-  ['h5columns_0',['h5Columns',['../structParticleTraits_3_01ItoParticle_01_4.html#a171e779162705ca96866f71f72516967',1,'ParticleTraits&lt; ItoParticle &gt;']]],
-  ['hashi_1',['hasHi',['../structEBHelmholtzOp_1_1DomainBndryBoxes.html#a8e34cb80d4c685b836326711327576fb',1,'EBHelmholtzOp::DomainBndryBoxes']]],
-  ['haslo_2',['hasLo',['../structEBHelmholtzOp_1_1DomainBndryBoxes.html#a693fc6530ec8bc8205bcfab070b3b8b7',1,'EBHelmholtzOp::DomainBndryBoxes']]],
-  ['hibox_3',['hiBox',['../structEBHelmholtzOp_1_1DomainBndryBoxes.html#a6595f29de3dd95b9cf33d6c6db8c5af6',1,'EBHelmholtzOp::DomainBndryBoxes']]]
+  ['ga_5fx_0',['ga_x',['../structDischargeInceptionParticle.html#a1242694a9f9b068bda84a77e3f535bff',1,'DischargeInceptionParticle']]],
+  ['ga_5fy_1',['ga_y',['../structDischargeInceptionParticle.html#a8f588ffa2997c320baf4a0d8178e0822',1,'DischargeInceptionParticle']]],
+  ['ga_5fz_2',['ga_z',['../structDischargeInceptionParticle.html#ab8c56f662b28baa32331862525b0fcd9',1,'DischargeInceptionParticle']]],
+  ['gridcell_3',['gridCell',['../structPetscDOF.html#a3d0d4470a02ffeb5df92749ec0d02b52',1,'PetscDOF']]],
+  ['gridindex_4',['gridIndex',['../structParticleContainer_1_1Destination.html#a690f348bc479d674906d404079233967',1,'ParticleContainer::Destination']]]
 ];

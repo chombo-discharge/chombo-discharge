@@ -1,9 +1,13 @@
 var searchData=
 [
-  ['x0_5fx_0',['x0_x',['../structDischargeInceptionParticle.html#a64bcd7996d3ff4d76d16da71f0f8add7',1,'DischargeInceptionParticle::x0_x'],['../structItoKMCFieldParticle.html#afc50437ed0c23a527b6ba6c8f996bb50',1,'ItoKMCFieldParticle::x0_x']]],
-  ['x0_5fy_1',['x0_y',['../structDischargeInceptionParticle.html#a266dff18343dbfec3b26dd7a27fd2337',1,'DischargeInceptionParticle::x0_y'],['../structItoKMCFieldParticle.html#a9501d08f2b5c584e8d537a2d8b4054fc',1,'ItoKMCFieldParticle::x0_y']]],
-  ['x0_5fz_2',['x0_z',['../structDischargeInceptionParticle.html#a02b19bbada33c87ce08820d0833cae45',1,'DischargeInceptionParticle::x0_z'],['../structItoKMCFieldParticle.html#a6dd5c53a86607a6928a38105fcab9ad8',1,'ItoKMCFieldParticle::x0_z']]],
-  ['xk_5fx_3',['xk_x',['../structTracerParticle.html#a0b48915f039073b2192501166d48f47e',1,'TracerParticle']]],
-  ['xk_5fy_4',['xk_y',['../structTracerParticle.html#abd55d102a35cb9a16542ff800a668d0d',1,'TracerParticle']]],
-  ['xk_5fz_5',['xk_z',['../structTracerParticle.html#aae3d9fe439c3f91a2c805ddbed670027',1,'TracerParticle']]]
+  ['v_5fx_0',['v_x',['../structPhoton.html#a7d1169e47d33ca6bdbf70c6a81f57d71',1,'Photon::v_x'],['../structTracerParticle.html#a13c77f09403349300fefc3622632fdd9',1,'TracerParticle::v_x'],['../structDischargeInceptionParticle.html#acaf0482efc462d0082dd91a8f01167ac',1,'DischargeInceptionParticle::v_x']]],
+  ['v_5fy_1',['v_y',['../structPhoton.html#a1ad6e30a2f1b6a4421d0557ed2a96e56',1,'Photon::v_y'],['../structTracerParticle.html#aed8702c048252133a8a180f090abb73e',1,'TracerParticle::v_y'],['../structDischargeInceptionParticle.html#a37829b191beb27523945e698e25fc3f4',1,'DischargeInceptionParticle::v_y']]],
+  ['v_5fz_2',['v_z',['../structPhoton.html#ac223dd0701bade0eb47762b23a04a57a',1,'Photon::v_z'],['../structTracerParticle.html#ae303d2b158eac759d7aac95d0528cb36',1,'TracerParticle::v_z'],['../structDischargeInceptionParticle.html#aa1c1515d9c2144698324b9da3026519f',1,'DischargeInceptionParticle::v_z']]],
+  ['valid_3',['valid',['../structRealm_1_1LevelAndBox.html#aa61f1bc83a9d5446839951802d028915',1,'Realm::LevelAndBox']]],
+  ['vk_5fx_4',['vk_x',['../structDischargeInceptionParticle.html#aaa0cc26b90e101ad71e42d45c00522b1',1,'DischargeInceptionParticle']]],
+  ['vk_5fy_5',['vk_y',['../structDischargeInceptionParticle.html#a37192e8936c282ec30d421ffbaeeac11',1,'DischargeInceptionParticle']]],
+  ['vk_5fz_6',['vk_z',['../structDischargeInceptionParticle.html#ab92a6176af3451e788efbd8aaf593169',1,'DischargeInceptionParticle']]],
+  ['vx_7',['vx',['../structItoParticle.html#aac76b006b52e47bbe54ceec005f7a98b',1,'ItoParticle']]],
+  ['vy_8',['vy',['../structItoParticle.html#a325ca2011475b0d447b6ea82abbfc342',1,'ItoParticle']]],
+  ['vz_9',['vz',['../structItoParticle.html#a54b1861e51f6eae5011b45ca2139ce15',1,'ItoParticle']]]
 ];

@@ -9,5 +9,6 @@ var searchData=
   ['spheresdf_6',['SphereSdf',['../classSphereSdf.html',1,'']]],
   ['sumsizeof_7',['SumSizeof',['../structdetail_1_1SumSizeof.html',1,'detail']]],
   ['sumsizeof_3c_20std_3a_3atuple_3c_20ts_2e_2e_2e_20_3e_20_3e_8',['SumSizeof&lt; std::tuple&lt; Ts... &gt; &gt;',['../structdetail_1_1SumSizeof_3_01std_1_1tuple_3_01Ts_8_8_8_01_4_01_4.html',1,'detail']]],
-  ['surfaceodesolver_9',['SurfaceODESolver',['../classSurfaceODESolver.html',1,'']]]
+  ['supertiles_9',['SuperTiles',['../structTiledMeshRefine_1_1SuperTiles.html',1,'TiledMeshRefine']]],
+  ['surfaceodesolver_10',['SurfaceODESolver',['../classSurfaceODESolver.html',1,'']]]
 ];

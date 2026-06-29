@@ -86,14 +86,16 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>Header for class <a class="el" href="classTiledMeshRefine.html" title="Class for generation AMR boxes using a tiling algorithm.">TiledMeshRefine</a>.  
+<p>Header for class <a class="el" href="classTiledMeshRefine.html" title="Class for generating AMR boxes using a tiling algorithm.">TiledMeshRefine</a>.  
 <a href="#details">More...</a></p>
-<div class="textblock"><code>#include &lt;vector&gt;</code><br />
-<code>#include &lt;set&gt;</code><br />
+<div class="textblock"><code>#include &lt;cstdint&gt;</code><br />
+<code>#include &lt;unordered_map&gt;</code><br />
+<code>#include &lt;unordered_set&gt;</code><br />
+<code>#include &lt;vector&gt;</code><br />
 <code>#include &lt;IntVectSet.H&gt;</code><br />
 <code>#include &lt;ProblemDomain.H&gt;</code><br />
 <code>#include &lt;Box.H&gt;</code><br />
-<code>#include &lt;<a class="el" href="CD__Tile_8H_source.html">CD_Tile.H</a>&gt;</code><br />
+<code>#include &lt;BoxIterator.H&gt;</code><br />
 <code>#include &lt;CD_NamespaceHeader.H&gt;</code><br />
 <code>#include &lt;CD_NamespaceFooter.H&gt;</code><br />
 </div><div class="textblock"><div class="dynheader">
@@ -101,34 +103,27 @@ Include dependency graph for CD_TiledMeshRefine.H:</div>
 <div class="dyncontent">
 <div class="center"><img src="CD__TiledMeshRefine_8H__incl.png" border="0" usemap="#aSource_2AmrMesh_2CD__TiledMeshRefine_8H" alt=""/></div>
 <map name="aSource_2AmrMesh_2CD__TiledMeshRefine_8H" id="aSource_2AmrMesh_2CD__TiledMeshRefine_8H">
-<area shape="rect" title="Header for class TiledMeshRefine." alt="" coords="306,5,535,45"/>
-<area shape="rect" title=" " alt="" coords="5,93,68,119"/>
-<area shape="poly" title=" " alt="" coords="317,48,82,96,81,91,316,43"/>
-<area shape="rect" title=" " alt="" coords="93,93,135,119"/>
-<area shape="poly" title=" " alt="" coords="336,48,149,96,148,91,335,43"/>
-<area shape="rect" title=" " alt="" coords="160,93,263,119"/>
-<area shape="poly" title=" " alt="" coords="371,48,256,91,254,86,370,43"/>
-<area shape="rect" title=" " alt="" coords="287,93,429,119"/>
-<area shape="poly" title=" " alt="" coords="408,47,378,84,374,81,403,44"/>
-<area shape="rect" title=" " alt="" coords="453,93,514,119"/>
-<area shape="poly" title=" " alt="" coords="438,44,467,81,463,84,434,47"/>
-<area shape="rect" href="CD__Tile_8H.html" title="Simple class for representing a tile in arbitrary&#45;dimensional space." alt="" coords="684,93,771,119"/>
-<area shape="poly" title=" " alt="" coords="495,43,671,88,670,93,493,48"/>
-<area shape="rect" href="CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="820,240,1005,265"/>
-<area shape="poly" title=" " alt="" coords="536,33,657,53,722,70,784,91,849,118,873,136,898,165,911,196,915,226,910,227,905,197,893,168,870,139,846,122,782,96,721,75,656,59,535,39"/>
-<area shape="rect" href="CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="513,240,691,265"/>
-<area shape="poly" title=" " alt="" coords="463,43,497,64,528,92,553,125,572,162,597,226,592,228,568,164,548,128,524,95,494,68,460,48"/>
-<area shape="rect" title=" " alt="" coords="639,167,695,192"/>
-<area shape="poly" title=" " alt="" coords="719,121,688,158,684,154,715,117"/>
-<area shape="poly" title=" " alt="" coords="772,115,821,134,846,147,869,165,892,195,907,226,902,228,888,198,865,169,843,152,819,138,770,120"/>
-<area shape="poly" title=" " alt="" coords="697,121,661,140,629,168,615,197,607,227,602,226,610,195,625,165,658,136,695,116"/>
-<area shape="rect" href="CD__TileImplem_8H.html" title="Implementation of CD_Tile.H." alt="" coords="719,167,855,192"/>
-<area shape="poly" title=" " alt="" coords="732,117,763,155,759,159,728,121"/>
-<area shape="poly" title=" " alt="" coords="782,168,751,130,756,127,786,165"/>
-<area shape="poly" title=" " alt="" coords="809,190,882,231,879,235,806,194"/>
-<area shape="poly" title=" " alt="" coords="759,195,646,237,644,233,757,190"/>
-<area shape="rect" title=" " alt="" coords="736,240,796,265"/>
-<area shape="poly" title=" " alt="" coords="786,193,776,228,771,226,781,192"/>
+<area shape="rect" title="Header for class TiledMeshRefine." alt="" coords="481,5,711,45"/>
+<area shape="rect" title=" " alt="" coords="5,93,72,119"/>
+<area shape="poly" title=" " alt="" coords="481,40,300,62,86,96,85,91,299,57,481,35"/>
+<area shape="rect" title=" " alt="" coords="97,93,221,119"/>
+<area shape="poly" title=" " alt="" coords="492,48,234,94,233,89,491,43"/>
+<area shape="rect" title=" " alt="" coords="245,93,360,119"/>
+<area shape="poly" title=" " alt="" coords="526,48,360,92,358,87,525,43"/>
+<area shape="rect" title=" " alt="" coords="385,93,447,119"/>
+<area shape="poly" title=" " alt="" coords="554,48,456,90,454,85,552,43"/>
+<area shape="rect" title=" " alt="" coords="471,93,574,119"/>
+<area shape="poly" title=" " alt="" coords="580,47,545,85,541,81,576,44"/>
+<area shape="rect" title=" " alt="" coords="599,93,740,119"/>
+<area shape="poly" title=" " alt="" coords="616,44,651,81,647,85,612,47"/>
+<area shape="rect" title=" " alt="" coords="764,93,825,119"/>
+<area shape="poly" title=" " alt="" coords="645,43,754,86,752,91,643,48"/>
+<area shape="rect" title=" " alt="" coords="850,93,958,119"/>
+<area shape="poly" title=" " alt="" coords="670,43,846,87,845,92,669,48"/>
+<area shape="rect" href="CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="982,93,1167,119"/>
+<area shape="poly" title=" " alt="" coords="711,43,992,88,991,94,710,48"/>
+<area shape="rect" href="CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="1192,93,1371,119"/>
+<area shape="poly" title=" " alt="" coords="711,37,1179,90,1178,96,710,42"/>
 </map>
 </div>
 </div><div class="textblock"><div class="dynheader">
@@ -149,11 +144,14 @@ This graph shows which files directly or indirectly include this file:</div>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTiledMeshRefine.html">TiledMeshRefine</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Class for generation AMR boxes using a tiling algorithm.  <a href="classTiledMeshRefine.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Class for generating AMR boxes using a tiling algorithm.  <a href="classTiledMeshRefine.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structTiledMeshRefine_1_1SuperTiles.html">TiledMeshRefine::SuperTiles</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compact representation of one level's tiles over the super-tile grid.  <a href="structTiledMeshRefine_1_1SuperTiles.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Header for class <a class="el" href="classTiledMeshRefine.html" title="Class for generation AMR boxes using a tiling algorithm.">TiledMeshRefine</a>. </p>
+<div class="textblock"><p>Header for class <a class="el" href="classTiledMeshRefine.html" title="Class for generating AMR boxes using a tiling algorithm.">TiledMeshRefine</a>. </p>
 <dl class="section author"><dt>Author</dt><dd>Robert Marskar </dd></dl>
 </div></div><!-- contents -->
 <!-- start footer part -->

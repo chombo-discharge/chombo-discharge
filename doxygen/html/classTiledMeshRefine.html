@@ -77,8 +77,8 @@ $(function() {
 </div><!-- top -->
 <div class="header">
   <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
-<a href="#pro-types">Protected Types</a> &#124;
 <a href="#pro-methods">Protected Member Functions</a> &#124;
 <a href="#pro-attribs">Protected Attributes</a> &#124;
 <a href="classTiledMeshRefine-members.html">List of all members</a>  </div>
@@ -86,20 +86,26 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>Class for generation AMR boxes using a tiling algorithm.  
+<p>Class for generating AMR boxes using a tiling algorithm.  
  <a href="classTiledMeshRefine.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="CD__TiledMeshRefine_8H_source.html">CD_TiledMeshRefine.H</a>&gt;</code></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structTiledMeshRefine_1_1SuperTiles.html">SuperTiles</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compact representation of one level's tiles over the super-tile grid.  <a href="structTiledMeshRefine_1_1SuperTiles.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:af6fcb05be498acb73784263e6da86290" id="r_af6fcb05be498acb73784263e6da86290"><td class="memItemLeft" align="right" valign="top"><a id="af6fcb05be498acb73784263e6da86290" name="af6fcb05be498acb73784263e6da86290"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>TiledMeshRefine</b> ()=<a class="el" href="classTracerParticleSolver.html">delete</a></td></tr>
 <tr class="memdesc:af6fcb05be498acb73784263e6da86290"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor &ndash; deleted because we never need it. <br /></td></tr>
 <tr class="separator:af6fcb05be498acb73784263e6da86290"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a897ad3f83775ae4f6d17376776f4cc7e" id="r_a897ad3f83775ae4f6d17376776f4cc7e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTiledMeshRefine.html#a897ad3f83775ae4f6d17376776f4cc7e">TiledMeshRefine</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_coarsestDomain</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">int</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_refRatios</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_tileSize</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:a897ad3f83775ae4f6d17376776f4cc7e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <br /></td></tr>
-<tr class="separator:a897ad3f83775ae4f6d17376776f4cc7e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adbe4d2d5df59035770855814170aa6ce" id="r_adbe4d2d5df59035770855814170aa6ce"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTiledMeshRefine.html#adbe4d2d5df59035770855814170aa6ce">TiledMeshRefine</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_coarsestDomain</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">int</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_refRatios</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_tileSize</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_maxBlockSize</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:adbe4d2d5df59035770855814170aa6ce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <br /></td></tr>
+<tr class="separator:adbe4d2d5df59035770855814170aa6ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a89816a5aa8bea7e1893e6db548678cf4" id="r_a89816a5aa8bea7e1893e6db548678cf4"><td class="memItemLeft" align="right" valign="top"><a id="a89816a5aa8bea7e1893e6db548678cf4" name="a89816a5aa8bea7e1893e6db548678cf4"></a>
 <a class="el" href="classTracerParticleSolver.html">virtual</a>&#160;</td><td class="memItemRight" valign="bottom"><b>~TiledMeshRefine</b> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:a89816a5aa8bea7e1893e6db548678cf4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor (does nothing) <br /></td></tr>
@@ -108,25 +114,38 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a91798a2aa9d1a9d012217ad5845495c3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Regrid using the tile clustering algorithm.  <br /></td></tr>
 <tr class="separator:a91798a2aa9d1a9d012217ad5845495c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-types" name="pro-types"></a>
-Protected Types</h2></td></tr>
-<tr class="memitem:a8802759cd4147d2e29cc2122351dd41b" id="r_a8802759cd4147d2e29cc2122351dd41b"><td class="memItemLeft" align="right" valign="top"><a id="a8802759cd4147d2e29cc2122351dd41b" name="a8802759cd4147d2e29cc2122351dd41b"></a>
-<a class="el" href="classTracerParticleSolver.html">using</a>&#160;</td><td class="memItemRight" valign="bottom"><b>Tile</b> = <a class="el" href="classTileI.html">TileI</a>&lt; <a class="el" href="classTracerParticleSolver.html">int</a>, <a class="el" href="classTracerParticleSolver.html">SpaceDim</a> &gt;</td></tr>
-<tr class="memdesc:a8802759cd4147d2e29cc2122351dd41b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tile representation. <br /></td></tr>
-<tr class="separator:a8802759cd4147d2e29cc2122351dd41b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4f7547fb490a24fbbadb011b8d414da1" id="r_a4f7547fb490a24fbbadb011b8d414da1"><td class="memItemLeft" align="right" valign="top"><a id="a4f7547fb490a24fbbadb011b8d414da1" name="a4f7547fb490a24fbbadb011b8d414da1"></a>
-<a class="el" href="classTracerParticleSolver.html">using</a>&#160;</td><td class="memItemRight" valign="bottom"><b>TileSet</b> = <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::set</a>&lt; <a class="el" href="classTiledMeshRefine.html#a8802759cd4147d2e29cc2122351dd41b">Tile</a> &gt;</td></tr>
-<tr class="memdesc:a4f7547fb490a24fbbadb011b8d414da1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tile set representation. <br /></td></tr>
-<tr class="separator:a4f7547fb490a24fbbadb011b8d414da1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
-<tr class="memitem:a18a090528c2dea9d62d2b3f32a6e469b" id="r_a18a090528c2dea9d62d2b3f32a6e469b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTiledMeshRefine.html#a18a090528c2dea9d62d2b3f32a6e469b">makeLevelTiles</a> (<a class="el" href="classTiledMeshRefine.html#a4f7547fb490a24fbbadb011b8d414da1">TileSet</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_tiles</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTiledMeshRefine.html#a4f7547fb490a24fbbadb011b8d414da1">TileSet</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_fineTiles</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVectSet</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_coarTags</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_domain</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_refToFine</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_refToCoar</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:a18a090528c2dea9d62d2b3f32a6e469b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Make tiles on the current level from tags and tile coarsening from finer levels.  <br /></td></tr>
-<tr class="separator:a18a090528c2dea9d62d2b3f32a6e469b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab5ade263d072e3164e397e94da3be31f" id="r_ab5ade263d072e3164e397e94da3be31f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTiledMeshRefine.html#ab5ade263d072e3164e397e94da3be31f">makeBoxesFromTiles</a> (<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Box</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_boxes</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTiledMeshRefine.html#a4f7547fb490a24fbbadb011b8d414da1">TileSet</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_tiles</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_domain</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:ab5ade263d072e3164e397e94da3be31f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Turn tiles into boxes.  <br /></td></tr>
-<tr class="separator:ab5ade263d072e3164e397e94da3be31f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a546ff4726d6d1bf24f73bc9b3531f8cb" id="r_a546ff4726d6d1bf24f73bc9b3531f8cb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::uint64_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTiledMeshRefine.html#a546ff4726d6d1bf24f73bc9b3531f8cb">encodeSuper</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_super</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a546ff4726d6d1bf24f73bc9b3531f8cb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pack a super-tile index into a 64-bit key (21 bits per direction).  <br /></td></tr>
+<tr class="separator:a546ff4726d6d1bf24f73bc9b3531f8cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a688756952ada676b675ac4d79e7ce1db" id="r_a688756952ada676b675ac4d79e7ce1db"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">IntVect</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTiledMeshRefine.html#a688756952ada676b675ac4d79e7ce1db">decodeSuper</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::uint64_t</a> <a class="el" href="classTracerParticleSolver.html">a_key</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a688756952ada676b675ac4d79e7ce1db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Unpack a 64-bit super-tile key into a super-tile index.  <br /></td></tr>
+<tr class="separator:a688756952ada676b675ac4d79e7ce1db"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a690554208e812a9ceaa682e004e02920" id="r_a690554208e812a9ceaa682e004e02920"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTiledMeshRefine.html#a690554208e812a9ceaa682e004e02920">subIndex</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_sub</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a690554208e812a9ceaa682e004e02920"><td class="mdescLeft">&#160;</td><td class="mdescRight">Linear sub-tile index of a sub-position within a super-tile.  <br /></td></tr>
+<tr class="separator:a690554208e812a9ceaa682e004e02920"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a48ed9ce31a0bff39de1b285418aa351c" id="r_a48ed9ce31a0bff39de1b285418aa351c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTiledMeshRefine.html#a48ed9ce31a0bff39de1b285418aa351c">addFineTile</a> (<a class="el" href="structTiledMeshRefine_1_1SuperTiles.html">SuperTiles</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_tiles</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_fineTile</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a48ed9ce31a0bff39de1b285418aa351c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a fine tile (tile coordinates) to the representation by setting its sub-tile bit.  <br /></td></tr>
+<tr class="separator:a48ed9ce31a0bff39de1b285418aa351c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae884c7e1dc8f9b75ea7fc0fad7b8fc98" id="r_ae884c7e1dc8f9b75ea7fc0fad7b8fc98"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTiledMeshRefine.html#ae884c7e1dc8f9b75ea7fc0fad7b8fc98">classify</a> (<a class="el" href="structTiledMeshRefine_1_1SuperTiles.html">SuperTiles</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_tiles</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:ae884c7e1dc8f9b75ea7fc0fad7b8fc98"><td class="mdescLeft">&#160;</td><td class="mdescRight">Promote every partial super-tile whose bitmask is full to the full set.  <br /></td></tr>
+<tr class="separator:ae884c7e1dc8f9b75ea7fc0fad7b8fc98"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae82e9b0f94cda3380bdb9de9b1b74b3a" id="r_ae82e9b0f94cda3380bdb9de9b1b74b3a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTiledMeshRefine.html#ae82e9b0f94cda3380bdb9de9b1b74b3a">gatherSuperTiles</a> (<a class="el" href="structTiledMeshRefine_1_1SuperTiles.html">SuperTiles</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_tiles</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:ae82e9b0f94cda3380bdb9de9b1b74b3a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gather the (per-rank-local) super-tile representation onto all ranks.  <br /></td></tr>
+<tr class="separator:ae82e9b0f94cda3380bdb9de9b1b74b3a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5df0e98313b5060d27ea51816bdbd0c2" id="r_a5df0e98313b5060d27ea51816bdbd0c2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTiledMeshRefine.html#a5df0e98313b5060d27ea51816bdbd0c2">nestFrom</a> (<a class="el" href="structTiledMeshRefine_1_1SuperTiles.html">SuperTiles</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_tiles</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="structTiledMeshRefine_1_1SuperTiles.html">SuperTiles</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_finer</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_refToFine</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Box</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_thisTileBox</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a5df0e98313b5060d27ea51816bdbd0c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inject the proper-nesting buffer into a level from the (classified) finer level.  <br /></td></tr>
+<tr class="separator:a5df0e98313b5060d27ea51816bdbd0c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a20eb194bbf08571fdbbe80fe2411d448" id="r_a20eb194bbf08571fdbbe80fe2411d448"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTiledMeshRefine.html#a20eb194bbf08571fdbbe80fe2411d448">makeLevelTiles</a> (<a class="el" href="structTiledMeshRefine_1_1SuperTiles.html">SuperTiles</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_tiles</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="structTiledMeshRefine_1_1SuperTiles.html">SuperTiles</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_fineTiles</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVectSet</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_coarTags</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_domain</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_refToFine</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_refToCoar</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a20eb194bbf08571fdbbe80fe2411d448"><td class="mdescLeft">&#160;</td><td class="mdescRight">Make the super-tile representation on the current level from tags and finer-level nesting.  <br /></td></tr>
+<tr class="separator:a20eb194bbf08571fdbbe80fe2411d448"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a12c15b7344af9e2a9bded70dfda73e25" id="r_a12c15b7344af9e2a9bded70dfda73e25"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTiledMeshRefine.html#a12c15b7344af9e2a9bded70dfda73e25">makeBoxesFromTiles</a> (<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Box</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_boxes</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="structTiledMeshRefine_1_1SuperTiles.html">SuperTiles</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_tiles</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_domain</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a12c15b7344af9e2a9bded70dfda73e25"><td class="mdescLeft">&#160;</td><td class="mdescRight">Turn the super-tile representation into boxes.  <br /></td></tr>
+<tr class="separator:a12c15b7344af9e2a9bded70dfda73e25"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abe4494ac88978ccbb16121048373d4ed" id="r_abe4494ac88978ccbb16121048373d4ed"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTiledMeshRefine.html#abe4494ac88978ccbb16121048373d4ed">packTiles</a> (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">IntVect</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_tiles</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_maxTile</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_probLo</a>, <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Box</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_boxes</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:abe4494ac88978ccbb16121048373d4ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pack a set of tiles into variable-sized (anisotropic) boxes via recursive Berger-Rigoutsos bisection. This is the single shared box packer, called per partial super-tile.  <br /></td></tr>
+<tr class="separator:abe4494ac88978ccbb16121048373d4ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -139,15 +158,32 @@ Protected Attributes</h2></td></tr>
 <tr class="separator:a574bf17a3eb176becdc24d1b574b2732"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab920527c5ee8f5b0d4ab5ef9f295c1fa" id="r_ab920527c5ee8f5b0d4ab5ef9f295c1fa"><td class="memItemLeft" align="right" valign="top"><a id="ab920527c5ee8f5b0d4ab5ef9f295c1fa" name="ab920527c5ee8f5b0d4ab5ef9f295c1fa"></a>
 <a class="el" href="classTracerParticleSolver.html">IntVect</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_tileSize</b></td></tr>
-<tr class="memdesc:ab920527c5ee8f5b0d4ab5ef9f295c1fa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tile size. <br /></td></tr>
+<tr class="memdesc:ab920527c5ee8f5b0d4ab5ef9f295c1fa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tile size (= minimum block size, in cells) <br /></td></tr>
 <tr class="separator:ab920527c5ee8f5b0d4ab5ef9f295c1fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a81275ff470769d4322a888e80aa0901b" id="r_a81275ff470769d4322a888e80aa0901b"><td class="memItemLeft" align="right" valign="top"><a id="a81275ff470769d4322a888e80aa0901b" name="a81275ff470769d4322a888e80aa0901b"></a>
+<a class="el" href="classTracerParticleSolver.html">IntVect</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_maxBlockSize</b></td></tr>
+<tr class="memdesc:a81275ff470769d4322a888e80aa0901b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum box size (in cells). Merge cap; a multiple of m_tileSize. <br /></td></tr>
+<tr class="separator:a81275ff470769d4322a888e80aa0901b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab693d9fe3bd9db083759ff7bbd328fcf" id="r_ab693d9fe3bd9db083759ff7bbd328fcf"><td class="memItemLeft" align="right" valign="top"><a id="ab693d9fe3bd9db083759ff7bbd328fcf" name="ab693d9fe3bd9db083759ff7bbd328fcf"></a>
+<a class="el" href="classTracerParticleSolver.html">IntVect</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_superFactor</b></td></tr>
+<tr class="memdesc:ab693d9fe3bd9db083759ff7bbd328fcf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of min_block_size tiles per super-tile, per direction (= m_maxBlockSize / m_tileSize). <br /></td></tr>
+<tr class="separator:ab693d9fe3bd9db083759ff7bbd328fcf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad83783fa7ff64f22b3a59a81df595707" id="r_ad83783fa7ff64f22b3a59a81df595707"><td class="memItemLeft" align="right" valign="top"><a id="ad83783fa7ff64f22b3a59a81df595707" name="ad83783fa7ff64f22b3a59a81df595707"></a>
+<a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_superVol</b></td></tr>
+<tr class="memdesc:ad83783fa7ff64f22b3a59a81df595707"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of sub-tiles in a super-tile (the product of m_superFactor). <br /></td></tr>
+<tr class="separator:ad83783fa7ff64f22b3a59a81df595707"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab23116fa674ce0f5fb3e757643dce0aa" id="r_ab23116fa674ce0f5fb3e757643dce0aa"><td class="memItemLeft" align="right" valign="top"><a id="ab23116fa674ce0f5fb3e757643dce0aa" name="ab23116fa674ce0f5fb3e757643dce0aa"></a>
+<a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_bitmaskWords</b></td></tr>
+<tr class="memdesc:ab23116fa674ce0f5fb3e757643dce0aa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of 64-bit words in a super-tile sub-occupancy bitmask. <br /></td></tr>
+<tr class="separator:ab23116fa674ce0f5fb3e757643dce0aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Class for generation AMR boxes using a tiling algorithm. </p>
-<p>This class provides a scalable method for grid generation where the grids are generated in a pre-set tile pattern. This work by decomposing the grid into a tiled pattern, and then flagging tiles rather than cells for refinement. </p>
+<div class="textblock"><p>Class for generating AMR boxes using a tiling algorithm. </p>
+<p>This class provides a scalable method for grid generation where the grids are generated in a pre-set tile pattern, by flagging min_block_size tiles rather than cells for refinement.</p>
+<p>Generation is top-down over a grid of super-tiles, where a super-tile is a max_block_size block of min_block_size tiles. Each level is represented compactly as the set of fully-tagged super-tiles plus, for partially-tagged super-tiles, a bitmask of which sub-tiles are tagged. Fine tiles are therefore materialized only at the boundary of the refined region (inside partial super-tiles), and only that compact representation is gathered across MPI ranks &ndash; the intermediate memory scales with the refined surface plus the box count, not the refined volume. Full super-tiles become one (max_block_size) box each; partial super-tiles are packed into variable-sized boxes by packTiles. When max_block_size == min_block_size every super-tile is a single tile and the output is one box per tile (legacy behaviour). </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a897ad3f83775ae4f6d17376776f4cc7e" name="a897ad3f83775ae4f6d17376776f4cc7e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a897ad3f83775ae4f6d17376776f4cc7e">&#9670;&#160;</a></span>TiledMeshRefine()</h2>
+<a id="adbe4d2d5df59035770855814170aa6ce" name="adbe4d2d5df59035770855814170aa6ce"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adbe4d2d5df59035770855814170aa6ce">&#9670;&#160;</a></span>TiledMeshRefine()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -171,7 +207,13 @@ Protected Attributes</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_tileSize</em>&#160;</td>
+          <td class="paramname"><em>a_tileSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_maxBlockSize</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -191,7 +233,8 @@ Protected Attributes</h2></td></tr>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_coarsestDomain</td><td>Coarsest grid domain </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_refRatios</td><td>Refinement ratios </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_tileSize</td><td>Tile size </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_tileSize</td><td>Tile size (= minimum block size, in cells) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_maxBlockSize</td><td>Maximum box size (in cells). Tiles are merged into boxes no larger than this per direction. Must be a multiple of a_tileSize. When equal to a_tileSize the output is one box per tile (legacy behaviour). </td></tr>
   </table>
   </dd>
 </dl>
@@ -199,8 +242,192 @@ Protected Attributes</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="ab5ade263d072e3164e397e94da3be31f" name="ab5ade263d072e3164e397e94da3be31f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab5ade263d072e3164e397e94da3be31f">&#9670;&#160;</a></span>makeBoxesFromTiles()</h2>
+<a id="a48ed9ce31a0bff39de1b285418aa351c" name="a48ed9ce31a0bff39de1b285418aa351c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a48ed9ce31a0bff39de1b285418aa351c">&#9670;&#160;</a></span>addFineTile()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> TiledMeshRefine::addFineTile </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structTiledMeshRefine_1_1SuperTiles.html">SuperTiles</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_tiles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_fineTile</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Add a fine tile (tile coordinates) to the representation by setting its sub-tile bit. </p>
+<p>No-op if the tile's super-tile is already known to be full. Does not reclassify. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_tiles</td><td>Representation to add to. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_fineTile</td><td>Tile to add (non-negative tile coordinates). </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ae884c7e1dc8f9b75ea7fc0fad7b8fc98" name="ae884c7e1dc8f9b75ea7fc0fad7b8fc98"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae884c7e1dc8f9b75ea7fc0fad7b8fc98">&#9670;&#160;</a></span>classify()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> TiledMeshRefine::classify </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structTiledMeshRefine_1_1SuperTiles.html">SuperTiles</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_tiles</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Promote every partial super-tile whose bitmask is full to the full set. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_tiles</td><td>Representation to classify. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a688756952ada676b675ac4d79e7ce1db" name="a688756952ada676b675ac4d79e7ce1db"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a688756952ada676b675ac4d79e7ce1db">&#9670;&#160;</a></span>decodeSuper()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">IntVect</a> TiledMeshRefine::decodeSuper </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::uint64_t</a>&#160;</td>
+          <td class="paramname"><em>a_key</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Unpack a 64-bit super-tile key into a super-tile index. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_key</td><td>Packed key. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Super-tile index. </dd></dl>
+
+</div>
+</div>
+<a id="a546ff4726d6d1bf24f73bc9b3531f8cb" name="a546ff4726d6d1bf24f73bc9b3531f8cb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a546ff4726d6d1bf24f73bc9b3531f8cb">&#9670;&#160;</a></span>encodeSuper()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::uint64_t</a> TiledMeshRefine::encodeSuper </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_super</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Pack a super-tile index into a 64-bit key (21 bits per direction). </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_super</td><td>Super-tile index (non-negative). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Packed key. </dd></dl>
+
+</div>
+</div>
+<a id="ae82e9b0f94cda3380bdb9de9b1b74b3a" name="ae82e9b0f94cda3380bdb9de9b1b74b3a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae82e9b0f94cda3380bdb9de9b1b74b3a">&#9670;&#160;</a></span>gatherSuperTiles()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> TiledMeshRefine::gatherSuperTiles </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structTiledMeshRefine_1_1SuperTiles.html">SuperTiles</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_tiles</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Gather the (per-rank-local) super-tile representation onto all ranks. </p>
+<p>Locally-full super-tiles are classified first and gathered as a single key each (a "full
+marker", no bitmask); partial super-tiles are gathered as key + bitmask and OR-ed per key. Because tags partition the domain by rank, a super-tile's tagged sub-tiles are disjoint across ranks, so the OR is exact and a locally-full super-tile is globally full. The gathered data scales with the number of touched super-tiles (full ones costing just a key), not the number of fine tiles. Partial super-tiles that OR to all-ones across ranks are promoted by the caller's subsequent <a class="el" href="classTiledMeshRefine.html#ae884c7e1dc8f9b75ea7fc0fad7b8fc98" title="Promote every partial super-tile whose bitmask is full to the full set.">classify()</a>. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_tiles</td><td>Local representation in; global representation out. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a12c15b7344af9e2a9bded70dfda73e25" name="a12c15b7344af9e2a9bded70dfda73e25"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a12c15b7344af9e2a9bded70dfda73e25">&#9670;&#160;</a></span>makeBoxesFromTiles()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -217,7 +444,7 @@ Protected Attributes</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTiledMeshRefine.html#a4f7547fb490a24fbbadb011b8d414da1">TileSet</a> &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="structTiledMeshRefine_1_1SuperTiles.html">SuperTiles</a> &amp;&#160;</td>
           <td class="paramname"><em>a_tiles</em>, </td>
         </tr>
         <tr>
@@ -239,11 +466,11 @@ Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Turn tiles into boxes. </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>Turn the super-tile representation into boxes. </p>
+<p>Full super-tiles become one (max_block_size) box each; partial super-tiles are packed into variable-sized boxes by packTiles. When max_block_size == min_block_size every super-tile is a single tile and this emits one box per tile (legacy behaviour). Super-tiles are visited in sorted-key order so the box list is identical on every rank. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">a_boxes</td><td>Grid boxes generated from the tiles </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_tiles</td><td>Tiles to convert </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_tiles</td><td>Representation to convert </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_domain</td><td>Problem domain </td></tr>
   </table>
   </dd>
@@ -251,8 +478,8 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a18a090528c2dea9d62d2b3f32a6e469b" name="a18a090528c2dea9d62d2b3f32a6e469b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a18a090528c2dea9d62d2b3f32a6e469b">&#9670;&#160;</a></span>makeLevelTiles()</h2>
+<a id="a20eb194bbf08571fdbbe80fe2411d448" name="a20eb194bbf08571fdbbe80fe2411d448"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a20eb194bbf08571fdbbe80fe2411d448">&#9670;&#160;</a></span>makeLevelTiles()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -263,13 +490,13 @@ Protected Attributes</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> TiledMeshRefine::makeLevelTiles </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTiledMeshRefine.html#a4f7547fb490a24fbbadb011b8d414da1">TileSet</a> &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="structTiledMeshRefine_1_1SuperTiles.html">SuperTiles</a> &amp;&#160;</td>
           <td class="paramname"><em>a_tiles</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTiledMeshRefine.html#a4f7547fb490a24fbbadb011b8d414da1">TileSet</a> &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="structTiledMeshRefine_1_1SuperTiles.html">SuperTiles</a> &amp;&#160;</td>
           <td class="paramname"><em>a_fineTiles</em>, </td>
         </tr>
         <tr>
@@ -309,15 +536,133 @@ Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Make tiles on the current level from tags and tile coarsening from finer levels. </p>
+<p>Make the super-tile representation on the current level from tags and finer-level nesting. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_tiles</td><td>Tiles on the current level </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_fineTiles</td><td>Tiles on the finer level </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarTags</td><td>Refinement tags on the current level </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_tiles</td><td>Representation on the current level </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_fineTiles</td><td>Representation on the finer level </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarTags</td><td>Refinement tags on the current level (cells on the coarser level) </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_domain</td><td>Problem domain on the current level </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_refToFine</td><td>Refinement ratio to the finer level </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_refToCoar</td><td>Refinement ratio to the coarser level </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a5df0e98313b5060d27ea51816bdbd0c2" name="a5df0e98313b5060d27ea51816bdbd0c2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5df0e98313b5060d27ea51816bdbd0c2">&#9670;&#160;</a></span>nestFrom()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> TiledMeshRefine::nestFrom </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structTiledMeshRefine_1_1SuperTiles.html">SuperTiles</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_tiles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="structTiledMeshRefine_1_1SuperTiles.html">SuperTiles</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_finer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramname"><em>a_refToFine</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Box</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_thisTileBox</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Inject the proper-nesting buffer into a level from the (classified) finer level. </p>
+<p>Reproduces the legacy "grow each finer tile by one and coarsen" buffer exactly, but from the compact finer representation: full finer super-tiles contribute coarsen(grow(block,1)) in bulk, partial ones contribute coarsen(grow(tile,1)) per tagged sub-tile. Adds tiles to a_tiles; the caller reclassifies. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_tiles</td><td>Level being built (this level). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_finer</td><td>Classified finer-level representation. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_refToFine</td><td>Refinement ratio from this level to the finer level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_thisTileBox</td><td>Tile-coordinate bounding box of this level (for clipping). </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="abe4494ac88978ccbb16121048373d4ed" name="abe4494ac88978ccbb16121048373d4ed"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abe4494ac88978ccbb16121048373d4ed">&#9670;&#160;</a></span>packTiles()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> TiledMeshRefine::packTiles </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">IntVect</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_tiles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_maxTile</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_probLo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Box</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_boxes</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Pack a set of tiles into variable-sized (anisotropic) boxes via recursive Berger-Rigoutsos bisection. This is the single shared box packer, called per partial super-tile. </p>
+<p>Recursive longest-extent bisection over the tile bounding box. At each node: if the node is fully tagged and within the per-direction cap it is emitted as one box; otherwise it is split. The split is tag-driven (Berger-Rigoutsos): cut at an empty slab (a zero-tag gap) in any direction if one exists, else at the strongest signature inflection, else at the longest-axis midpoint; a node over the cap is split at a cap multiple first. Deterministic (fixed axis/plane tie-breaks) and exact (a box is emitted only when fully tagged, so no untagged cells are covered). </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_tiles</td><td>Tiles to pack, in tile coordinates; reordered in place. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_maxTile</td><td>Per-direction cap in tile units (= max_block_size / tile_size). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Cell-space origin of the level (added when forming the cell boxes). </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_boxes</td><td>Boxes (cell coordinates) appended for these tiles. </td></tr>
   </table>
   </dd>
 </dl>
@@ -367,6 +712,41 @@ Protected Attributes</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns the new finest grid level. </dd></dl>
+
+</div>
+</div>
+<a id="a690554208e812a9ceaa682e004e02920" name="a690554208e812a9ceaa682e004e02920"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a690554208e812a9ceaa682e004e02920">&#9670;&#160;</a></span>subIndex()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">int</a> TiledMeshRefine::subIndex </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_sub</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Linear sub-tile index of a sub-position within a super-tile. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_sub</td><td>Sub-position in [0, m_superFactor) per direction. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Linear index in [0, m_superVol). </dd></dl>
 
 </div>
 </div>

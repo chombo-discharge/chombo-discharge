@@ -20,6 +20,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -73,6 +74,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Particles.html">Particles</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Realm</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#dual-grid">Dual grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#patch-lookup-tile-hash-grid">Patch lookup (tile hash grid)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#interacting-with-realms">Interacting with realms</a></li>
 </ul>
 </li>
@@ -172,6 +174,25 @@ In the top panel the grid patches are load-balanced using the grid patch volume 
 The numbers in each grid patch indicate the MPI rank ownership of the patches.
 In the bottom panel we have introduced computational particles in some of the patches.
 For particles, the computational load is better defined by the number of computational particles assigned to the patch, and so using the number of particles as a proxy for the load yields different rank ownership over the grid patches.</p>
+</section>
+<section id="patch-lookup-tile-hash-grid">
+<span id="chap-realmhashgrid"></span><h2>Patch lookup (tile hash grid)<a class="headerlink" href="#patch-lookup-tile-hash-grid" title="Permalink to this heading"></a></h2>
+<p>Each <code class="docutils literal notranslate"><span class="pre">Realm</span></code> maintains, on every grid level, a <em>tile hash grid</em> that maps a physical position to the grid box (and the owning MPI rank) that covers it.
+The hierarchy is decomposed into uniform tiles of <code class="docutils literal notranslate"><span class="pre">AmrMesh.min_block_size</span></code> cells, and every grid box is registered under each tile it spans.
+Because a box is always a union of aligned <code class="docutils literal notranslate"><span class="pre">min_block_size</span></code> tiles – even when the grids contain variable-sized or anisotropic boxes (see <a class="reference internal" href="SpatialDiscretization.html#chap-meshgeneration"><span class="std std-ref">Mesh generation</span></a>) – the tile-to-box map stays uniform and is stored as a hash map (<code class="docutils literal notranslate"><span class="pre">std::unordered_map</span></code> keyed by the tile index).
+A position is therefore mapped to its owning box in <span class="math notranslate nohighlight">\(\mathcal{O}(1)\)</span>: the position is converted to a tile by integer division, and that tile is looked up in the per-level hash, finest level first.
+A box that spans more than one tile (i.e. larger than <code class="docutils literal notranslate"><span class="pre">min_block_size</span></code>) is simply registered under each of its tiles; when <code class="docutils literal notranslate"><span class="pre">min_block_size</span></code> equals <code class="docutils literal notranslate"><span class="pre">max_block_size</span></code> every box is a single tile and the map holds one entry per box.
+The hash grid is rebuilt during every regrid, so it always reflects the realm’s current grids and rank ownership.</p>
+<p>The lookup is exposed through <code class="docutils literal notranslate"><span class="pre">Realm::getLevelAndBox</span></code>, which returns the finest level whose box covers a given position:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">const</span><span class="w"> </span><span class="n">Realm</span><span class="o">::</span><span class="n">LevelAndBox</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">realm</span><span class="p">.</span><span class="n">getLevelAndBox</span><span class="p">(</span><span class="n">position</span><span class="p">);</span>
+<span class="c1">// result.level    -- AMR level containing the point (-1 if none)</span>
+<span class="c1">// result.boxIndex -- global grid-box index on that level</span>
+<span class="c1">// result.rank     -- MPI rank owning that box</span>
+<span class="c1">// result.valid    -- false if no box covers the point (i.e. off-domain)</span>
+</pre></div>
+</div>
+<p>This is the same mapping the particle infrastructure uses to bin particles during <code class="docutils literal notranslate"><span class="pre">remap()</span></code> (see <a class="reference internal" href="Particles.html#chap-particles"><span class="std std-ref">Particles</span></a>).
+<code class="docutils literal notranslate"><span class="pre">ParticleContainer</span></code> aliases the realm’s tile hash grid rather than building its own, so the <code class="docutils literal notranslate"><span class="pre">Realm</span></code> is the single source of truth for point-to-patch ownership.</p>
 </section>
 <section id="interacting-with-realms">
 <h2>Interacting with realms<a class="headerlink" href="#interacting-with-realms" title="Permalink to this heading"></a></h2>

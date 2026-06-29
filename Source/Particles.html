@@ -503,6 +503,9 @@ The remapping function for <code class="docutils literal notranslate"><span clas
 <li><p>Assign the scattered particles on each receiving rank.</p></li>
 </ol>
 <p>Particles whose cell is owned by no patch on any level (off-domain) are dropped and counted.</p>
+<p>The point-to-patch mapping in step 2 maps the position to a <code class="docutils literal notranslate"><span class="pre">min_block_size</span></code> tile by integer division and looks it up in a per-level hash map.
+This is <span class="math notranslate nohighlight">\(\mathcal{O}(1)\)</span> and works also when the grids contain variable-sized (anisotropic) boxes (see <a class="reference internal" href="SpatialDiscretization.html#chap-meshgeneration"><span class="std std-ref">Mesh generation</span></a>), because every box is registered under each <code class="docutils literal notranslate"><span class="pre">min_block_size</span></code> tile it covers.
+The same mapping is exposed on the <code class="docutils literal notranslate"><span class="pre">Realm</span></code> class through <code class="docutils literal notranslate"><span class="pre">Realm::getLevelAndBox</span></code> (see <a class="reference internal" href="Realm.html#chap-realmhashgrid"><span class="std std-ref">Patch lookup (tile hash grid)</span></a>) for non-particle users; the container aliases the realm’s hash grid rather than building its own.</p>
 </section>
 <section id="regridding">
 <h2>Regridding<a class="headerlink" href="#regridding" title="Permalink to this heading"></a></h2>
@@ -534,16 +537,19 @@ This is done as follows:</p>
 <span class="cm">  @param[in] a_domains        New per-level problem domains.</span>
 <span class="cm">  @param[in] a_dx             New per-level (isotropic) grid spacing.</span>
 <span class="cm">  @param[in] a_refRat         New per-level refinement ratios.</span>
-<span class="cm">  @param[in] a_blockingFactor Grid blocking factor (tile size) for the new grids.</span>
+<span class="cm">  @param[in] a_minBlockSize Grid blocking factor (tile size) for the new grids.</span>
+<span class="cm">  @param[in] a_levelTiles     The owning Realm&#39;s per-level tile-&gt;box maps for the new grids, aliased</span>
+<span class="cm">                              (never built locally). Must correspond to a_grids.</span>
 <span class="cm">  @param[in] a_newFinestLevel New finest AMR level index.</span>
 <span class="cm">*/</span>
 <span class="kt">void</span>
-<span class="nf">regrid</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">DisjointBoxLayout</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_grids</span><span class="p">,</span>
-<span class="w">       </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">ProblemDomain</span><span class="o">&gt;&amp;</span><span class="w">     </span><span class="n">a_domains</span><span class="p">,</span>
-<span class="w">       </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">              </span><span class="n">a_dx</span><span class="p">,</span>
-<span class="w">       </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w">               </span><span class="n">a_refRat</span><span class="p">,</span>
-<span class="w">       </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                        </span><span class="n">a_blockingFactor</span><span class="p">,</span>
-<span class="w">       </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                        </span><span class="n">a_newFinestLevel</span><span class="p">);</span>
+<span class="nf">regrid</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">DisjointBoxLayout</span><span class="o">&gt;&amp;</span><span class="w">         </span><span class="n">a_grids</span><span class="p">,</span>
+<span class="w">       </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">ProblemDomain</span><span class="o">&gt;&amp;</span><span class="w">             </span><span class="n">a_domains</span><span class="p">,</span>
+<span class="w">       </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">                      </span><span class="n">a_dx</span><span class="p">,</span>
+<span class="w">       </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w">                       </span><span class="n">a_refRat</span><span class="p">,</span>
+<span class="w">       </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                                </span><span class="n">a_minBlockSize</span><span class="p">,</span>
+<span class="w">       </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">LevelTiles</span><span class="o">&gt;&gt;&amp;</span><span class="w"> </span><span class="n">a_levelTiles</span><span class="p">,</span>
+<span class="w">       </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                                </span><span class="n">a_newFinestLevel</span><span class="p">);</span>
 </pre></div>
 </div>
 </li>

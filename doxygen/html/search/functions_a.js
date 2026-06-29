@@ -2,7 +2,7 @@ var searchData=
 [
   ['leastsquares_0',['LeastSquares',['../classLeastSquares.html#ae06d49a257d3ab70c997b87c80640336',1,'LeastSquares']]],
   ['lerp_1',['lerp',['../classPerlinSdf.html#a9b18780000df6c817726cadc76b0eabb',1,'PerlinSdf']]],
-  ['leveltiles_2',['leveltiles',['../classLevelTiles.html#a39577ecde2d6103ce34ed26fd6841081',1,'LevelTiles::LevelTiles() noexcept'],['../classLevelTiles.html#ac2e99efd6285174cef2168b7982c391f',1,'LevelTiles::LevelTiles(const DisjointBoxLayout &amp;a_dbl, const int a_blockingFactor) noexcept']]],
+  ['leveltiles_2',['leveltiles',['../classLevelTiles.html#a39577ecde2d6103ce34ed26fd6841081',1,'LevelTiles::LevelTiles() noexcept'],['../classLevelTiles.html#aee832c2347533659386dbb4e4d514702',1,'LevelTiles::LevelTiles(const DisjointBoxLayout &amp;a_dbl, const int a_minBlockSize) noexcept']]],
   ['linearin_3',['linearin',['../classDomainFluxIFFAB.html#ab2e4c3342286ef182f5fd8500c4d4396',1,'DomainFluxIFFAB::linearIn()'],['../classEBAddOp.html#aa8da21a5b1de6523e62f722401c70a4d',1,'EBAddOp::linearIn()'],['../classIrregAddOp.html#ac078e53da121ed9b9822cdbeab9c7caf',1,'IrregAddOp::linearIn()'],['../classKMCDualState.html#a41c4f2767a8f554f092693749d0d7cb9',1,'KMCDualState::linearIn()'],['../classKMCSingleState.html#a87fef33283a231153babd48f72f734eb',1,'KMCSingleState::linearIn()'],['../classMFBaseIVFAB.html#a44e6ca32b330f635ff8b042eee06542b',1,'MFBaseIVFAB::linearIn()']]],
   ['linearindex_4',['linearIndex',['../namespaceLaPackUtils.html#ad7cb69439037bed555931bfc0b461272',1,'LaPackUtils']]],
   ['linearizecolumnmajormatrix_5',['linearizeColumnMajorMatrix',['../namespaceLaPackUtils.html#acad6e09189914ea71e18ce1c88888c5d',1,'LaPackUtils']]],
