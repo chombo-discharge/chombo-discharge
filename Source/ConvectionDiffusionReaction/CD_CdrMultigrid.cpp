@@ -258,7 +258,11 @@ CdrMultigrid::advanceEuler(EBAMRCellData&       a_newPhi,
         converged = m_krylov.solve(newPhi, eulerRHS, false, solverType, m_krylovSettings);
       }
     }
-    m_fallbackPolicy.recordGmgOutcome(gmgAttempted, gmgConverged, m_krylovSettings.verbosity, "CdrMultigrid");
+    m_fallbackPolicy.recordOutcome(gmgAttempted,
+                                   gmgConverged,
+                                   m_krylov.lastKrylovIterations(),
+                                   m_krylovSettings.verbosity,
+                                   "CdrMultigrid");
   }
   else {
     DataOps::copy(a_newPhi, a_oldPhi);
@@ -383,7 +387,11 @@ CdrMultigrid::advanceCrankNicholson(EBAMRCellData&       a_newPhi,
         converged = m_krylov.solve(newPhi, eulerRHS, false, solverType, m_krylovSettings);
       }
     }
-    m_fallbackPolicy.recordGmgOutcome(gmgAttempted, gmgConverged, m_krylovSettings.verbosity, "CdrMultigrid");
+    m_fallbackPolicy.recordOutcome(gmgAttempted,
+                                   gmgConverged,
+                                   m_krylov.lastKrylovIterations(),
+                                   m_krylovSettings.verbosity,
+                                   "CdrMultigrid");
   }
   else {
     DataOps::copy(a_newPhi, a_oldPhi);
@@ -887,6 +895,10 @@ CdrMultigrid::parseMultigridSettings()
   // Optional: re-probe GMG every this many solves while latched onto the Krylov fallback. Default 1 (always retry
   // GMG first); larger values approach a permanent latch. State persists across regrids (see FallbackPolicy).
   pp.query("krylov_retry_interval", m_fallbackPolicy.retryInterval);
+
+  // Optional: adaptive early re-probe. If the Krylov fallback converges in <= this many iterations the V-cycle
+  // preconditioner is clearly strong, so re-probe GMG on the next solve. 0 disables it (only retry_interval applies).
+  pp.query("krylov_reprobe_iters", m_fallbackPolicy.reprobeIters);
   m_krylovSettings.verbosity = m_multigridVerbosity; // The Krylov solvers reuse the gmg_verbosity setting.
 }
 

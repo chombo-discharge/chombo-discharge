@@ -20,6 +20,7 @@ CdrCTU.krylov_max_iter           = 50                        ## Outer Krylov max
 CdrCTU.krylov_restart            = 30                        ## GMRES restart length (gmres only)
 CdrCTU.krylov_vcycles            = 1                         ## V-cycles per Krylov preconditioner application
 CdrCTU.krylov_retry_interval     = 1                         ## Re-probe GMG every N solves while latched to the Krylov fallback (1 = always retry GMG first)
+CdrCTU.krylov_reprobe_iters      = 0                         ## Re-probe GMG early when the Krylov fallback converges in <= this many iterations (0 = disabled)
 CdrCTU.gmg_verbosity             = -1                        ## GMG verbosity
 CdrCTU.gmg_pre_smooth            = 12                        ## Number of relaxations in GMG downsweep
 CdrCTU.gmg_post_smooth           = 12                        ## Number of relaxations in upsweep

@@ -116,7 +116,10 @@ namespace KrylovMultigrid {
              is wasteful when the failure is persistent (e.g. a fixed, hard field operator). This policy latches onto
              the Krylov fallback after a GMG failure and only re-probes GMG every ``retryInterval`` solves, reclaiming
              multigrid's speed whenever the problem becomes tractable again. ``retryInterval == 1`` reproduces the
-             memoryless "always retry GMG first" behaviour; a large value approaches a permanent latch.
+             memoryless "always retry GMG first" behaviour; a large value approaches a permanent latch. Optionally,
+             ``reprobeIters`` arms an *adaptive* early re-probe: if the Krylov fallback converges in very few iterations
+             the preconditioner is clearly strong, so GMG alone is likely to succeed and is re-probed on the next solve
+             without waiting for ``retryInterval``.
     @note The state is deliberately decoupled from regridding: hold an instance as a host-solver member and do *not*
           reset it when the operators are rebuilt (regrids may be far more frequent than the desired re-probe cadence).
           The counter advances per solve, so the re-probe cadence is measured in solves, not necessarily time steps.
@@ -129,9 +132,17 @@ namespace KrylovMultigrid {
     int retryInterval = 1;
 
     /**
+      @brief Adaptive early re-probe: re-probe GMG on the next solve whenever the Krylov fallback converged in this many
+             iterations or fewer (a strong preconditioner is a sign that GMG alone may now succeed). 0 disables it, so
+             only the periodic retryInterval applies.
+    */
+    int reprobeIters = 0;
+
+    /**
       @brief Start index into a_solvers for this solve, advancing the re-probe counter. Call exactly once per solve.
-      @details Returns 0 (include the leading GMG) when unlatched or when a periodic re-probe is due; otherwise returns
-               the index of the first non-GMG solver so the persistently-failing GMG attempt is skipped.
+      @details Returns 0 (include the leading GMG) when unlatched, when the periodic re-probe is due, or when an
+               adaptive early re-probe was armed by a cheap Krylov solve; otherwise returns the index of the first
+               non-GMG solver so the persistently-failing GMG attempt is skipped.
       @param[in] a_solvers The configured fallback chain.
       @return Start index into a_solvers.
     */
@@ -143,30 +154,34 @@ namespace KrylovMultigrid {
       }
 
       m_sinceProbe++;
-      if (m_sinceProbe >= std::max(1, retryInterval)) {
-        m_sinceProbe = 0;
+      if (m_reprobeNext || m_sinceProbe >= std::max(1, retryInterval)) {
+        m_sinceProbe  = 0;
+        m_reprobeNext = false;
 
-        return 0; // periodic re-probe of GMG
+        return 0; // re-probe GMG (periodic or adaptive)
       }
 
       return this->firstNonGmg(a_solvers);
     }
 
     /**
-      @brief Record the outcome of the leading GMG attempt and update the latch.
+      @brief Record the outcome of this solve and update the latch.
       @details Latching (a failed GMG attempt) is already announced by the host's fallback-chain message; this method
                additionally announces the *release* (a successful re-probe) at verbosity >= 1, since that transition is
-               otherwise silent.
+               otherwise silent. While latched and skipping GMG, a Krylov solve that converged in <= reprobeIters
+               iterations arms an adaptive early re-probe of GMG on the next solve.
       @param[in] a_gmgAttempted Whether a stand-alone GMG attempt was made this solve.
       @param[in] a_gmgConverged Whether that GMG attempt converged.
+      @param[in] a_krylovIters  Iterations taken by the Krylov fallback this solve, or < 0 if none ran.
       @param[in] a_verbosity    Host verbosity; a release message is printed when >= 1.
       @param[in] a_name         Host solver name, used to prefix the release message.
     */
     void
-    recordGmgOutcome(const bool         a_gmgAttempted,
-                     const bool         a_gmgConverged,
-                     const int          a_verbosity = -1,
-                     const std::string& a_name      = "")
+    recordOutcome(const bool         a_gmgAttempted,
+                  const bool         a_gmgConverged,
+                  const int          a_krylovIters = -1,
+                  const int          a_verbosity   = -1,
+                  const std::string& a_name        = "")
     {
       if (a_gmgAttempted) {
         const bool wasLatched = m_latched;
@@ -179,6 +194,10 @@ namespace KrylovMultigrid {
         if (a_verbosity >= 1 && wasLatched && !m_latched) {
           pout() << a_name << " - multigrid re-probe succeeded; releasing the Krylov fallback latch" << endl;
         }
+      }
+      else if (m_latched && reprobeIters > 0 && a_krylovIters >= 0 && a_krylovIters <= reprobeIters) {
+        // The Krylov fallback found the problem easy, so GMG alone may now succeed -- re-probe it next solve.
+        m_reprobeNext = true;
       }
     }
 
@@ -202,6 +221,11 @@ namespace KrylovMultigrid {
       @brief Solves since the last GMG attempt while latched.
     */
     int m_sinceProbe = 0;
+
+    /**
+      @brief Whether a cheap Krylov solve has armed an adaptive early re-probe of GMG on the next solve.
+    */
+    bool m_reprobeNext = false;
 
     /**
       @brief Index of the first non-GMG solver in the chain, or 0 if there is none.
@@ -327,6 +351,16 @@ namespace KrylovMultigrid {
     bool
     solve(Vec& a_phi, const Vec& a_rhs, const bool a_zeroPhi, const SolverType a_type, const Settings& a_settings);
 
+    /**
+      @brief Iteration count of the most recent Krylov solve (GMRES/BiCGStab).
+      @return Number of iterations, or -1 if no Krylov solve has run.
+    */
+    int
+    lastKrylovIterations() const
+    {
+      return m_lastKrylovIters;
+    }
+
   protected:
     /**
       @brief Lazily allocate the persistent residual-correction vectors r0/dphi from a template hierarchy.
@@ -360,6 +394,11 @@ namespace KrylovMultigrid {
       @brief Custom GMRES solver (lazily defined on first GMRES solve).
     */
     KrylovGMRES<T> m_gmres;
+
+    /**
+      @brief Iteration count of the most recent Krylov solve, or -1 if none has run.
+    */
+    int m_lastKrylovIters = -1;
 
     /**
       @brief Coarsest level.

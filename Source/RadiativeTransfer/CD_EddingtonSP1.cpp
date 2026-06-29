@@ -492,6 +492,10 @@ EddingtonSP1::parseMultigridSettings()
   // Optional: re-probe GMG every this many solves while latched onto the Krylov fallback. Default 1 (always retry
   // GMG first); larger values approach a permanent latch. State persists across regrids (see FallbackPolicy).
   pp.query("krylov_retry_interval", m_fallbackPolicy.retryInterval);
+
+  // Optional: adaptive early re-probe. If the Krylov fallback converges in <= this many iterations the V-cycle
+  // preconditioner is clearly strong, so re-probe GMG on the next solve. 0 disables it (only retry_interval applies).
+  pp.query("krylov_reprobe_iters", m_fallbackPolicy.reprobeIters);
   m_krylovSettings.verbosity = m_multigridVerbosity; // The Krylov solvers reuse the gmg_verbosity setting.
 }
 
@@ -724,10 +728,11 @@ EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData
 
         firstAttempt = false;
       }
-      m_fallbackPolicy.recordGmgOutcome(gmgAttempted,
-                                        gmgConverged,
-                                        m_krylovSettings.verbosity,
-                                        "EddingtonSP1::advance");
+      m_fallbackPolicy.recordOutcome(gmgAttempted,
+                                     gmgConverged,
+                                     m_krylov.lastKrylovIterations(),
+                                     m_krylovSettings.verbosity,
+                                     "EddingtonSP1::advance");
     }
     else {
       // Solution is already good enough
@@ -846,10 +851,11 @@ EddingtonSP1::advanceEuler(EBAMRCellData&       a_phi,
 
     firstAttempt = false;
   }
-  m_fallbackPolicy.recordGmgOutcome(gmgAttempted,
-                                    gmgConverged,
-                                    m_krylovSettings.verbosity,
-                                    "EddingtonSP1::advanceEuler");
+  m_fallbackPolicy.recordOutcome(gmgAttempted,
+                                 gmgConverged,
+                                 m_krylov.lastKrylovIterations(),
+                                 m_krylovSettings.verbosity,
+                                 "EddingtonSP1::advanceEuler");
 }
 
 void

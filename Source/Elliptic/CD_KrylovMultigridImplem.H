@@ -132,9 +132,10 @@ namespace KrylovMultigrid {
       m_gmres.m_maxIter   = a_settings.maxIter;
       m_gmres.m_verbosity = a_settings.verbosity;
 
-      converged    = m_gmres.solve(m_dphi, m_r0);
-      exitStatus   = m_gmres.m_exitStatus;
-      residualNorm = m_gmres.m_residualNorm;
+      converged         = m_gmres.solve(m_dphi, m_r0);
+      exitStatus        = m_gmres.m_exitStatus;
+      residualNorm      = m_gmres.m_residualNorm;
+      m_lastKrylovIters = m_gmres.m_iterations;
 
       break;
     }
@@ -146,9 +147,10 @@ namespace KrylovMultigrid {
       m_bicg.m_maxIter   = a_settings.maxIter;
       m_bicg.m_verbosity = a_settings.verbosity;
 
-      converged    = m_bicg.solve(m_dphi, m_r0);
-      exitStatus   = m_bicg.m_exitStatus;
-      residualNorm = m_bicg.m_residualNorm;
+      converged         = m_bicg.solve(m_dphi, m_r0);
+      exitStatus        = m_bicg.m_exitStatus;
+      residualNorm      = m_bicg.m_residualNorm;
+      m_lastKrylovIters = m_bicg.m_iterations;
 
       break;
     }

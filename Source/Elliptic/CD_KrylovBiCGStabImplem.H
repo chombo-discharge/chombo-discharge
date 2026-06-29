@@ -105,6 +105,7 @@ KrylovBiCGStab<T>::solve(Vec& a_phi, const Vec& a_rhs) noexcept
   if (rnorm0 == 0.0) {
     m_exitStatus   = 1;
     m_residualNorm = 0.0;
+    m_iterations   = 0;
     return true;
   }
 
@@ -226,6 +227,7 @@ KrylovBiCGStab<T>::solve(Vec& a_phi, const Vec& a_rhs) noexcept
   }
 
   m_residualNorm = rnorm;
+  m_iterations   = iter;
 
   op.incr(a_phi, m_e, 1.0); // commit the accumulated correction
 

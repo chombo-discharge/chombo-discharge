@@ -76,6 +76,11 @@ public:
   Real m_residualNorm = -1.0;
 
   /**
+    @brief Number of iterations performed by the last solve().
+  */
+  int m_iterations = 0;
+
+  /**
     @brief Default constructor. Call define() before use.
   */
   KrylovBiCGStab() noexcept = default;

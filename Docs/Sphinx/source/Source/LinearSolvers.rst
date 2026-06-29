@@ -381,7 +381,8 @@ which runs cheap stand-alone multigrid and only pays for GMRES on the (hopefully
 When the chain begins with ``gmg`` and multigrid fails *persistently* (e.g. a fixed, hard field operator that the V-cycle cannot crack), retrying it first on every solve wastes a full failed V-cycle batch each time before the fallback even starts.
 ``krylov_retry_interval`` governs this: after a multigrid failure the chain *latches* onto the Krylov solver and skips multigrid, re-probing it only every ``krylov_retry_interval`` solves and releasing the latch as soon as a re-probe converges.
 The default ``1`` retries multigrid on every solve (no latching, the original behaviour); a large value approaches "switch to the Krylov solver and stay there".
-The latch is counted in solves and is deliberately independent of regridding, so it behaves sensibly even when regrids are far more frequent than the desired re-probe cadence; the latch *release* is reported at ``gmg_verbosity >= 1``.
+``krylov_reprobe_iters`` adds an optional *adaptive* trigger on top: while latched, if the Krylov solver converges in that many iterations or fewer the preconditioner is evidently strong, so multigrid is re-probed on the next solve without waiting for the full interval.
+The latch is counted in solves and is deliberately independent of regridding, so it behaves sensibly even when regrids are far more frequent than the desired re-probe cadence; the latch *release* (a re-probe that converges) is reported at ``gmg_verbosity >= 1``.
 
 .. tip::
 
@@ -463,6 +464,8 @@ All parameters below use a solver-class prefix (e.g. ``FieldSolverGMG``, ``Eddin
   Number of V-cycles applied per Krylov preconditioner application.
 * ``<Solver>.krylov_retry_interval``.
   For a ``gmg ...`` fallback chain: when stand-alone multigrid fails and the chain latches onto the Krylov solver, re-probe multigrid every this many solves (see :ref:`Chap:KrylovMultigrid`). Optional; defaults to ``1`` (retry multigrid first on every solve). Larger values skip the wasted multigrid attempt while it keeps failing.
+* ``<Solver>.krylov_reprobe_iters``.
+  Adaptive early re-probe: while latched onto the Krylov fallback, re-probe multigrid on the next solve whenever the Krylov solver converged in this many iterations or fewer (a strong preconditioner suggests multigrid alone may now succeed). Optional; defaults to ``0`` (disabled, only ``krylov_retry_interval`` applies).
 
 The outer Krylov solver reuses the ``gmg_verbosity`` setting (there is no separate ``krylov_verbosity``). With ``gmg_verbosity >= 1`` a one-line convergence summary (initial/final residual, reduction, exit status) is printed for each Krylov solve, and a message is printed whenever a fallback chain switches solver; the per-iteration residual history from the GMRES/BiCGStab solvers is printed at ``gmg_verbosity >= 4``.
 

@@ -83,6 +83,11 @@ public:
   Real m_residualNorm = -1.0;
 
   /**
+    @brief Number of Arnoldi iterations performed by the last solve().
+  */
+  int m_iterations = 0;
+
+  /**
     @brief Default constructor. Call define() before use.
   */
   KrylovGMRES() noexcept = default;

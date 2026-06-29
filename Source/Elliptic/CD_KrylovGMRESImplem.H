@@ -114,6 +114,7 @@ KrylovGMRES<T>::solve(Vec& a_phi, const Vec& a_rhs) noexcept
   if (beta0 == 0.0) {
     m_exitStatus   = 1;
     m_residualNorm = 0.0;
+    m_iterations   = 0;
     return true;
   }
 
@@ -229,6 +230,7 @@ KrylovGMRES<T>::solve(Vec& a_phi, const Vec& a_rhs) noexcept
 
   m_exitStatus   = (rnorm <= m_eps * beta0) ? 1 : 3;
   m_residualNorm = rnorm;
+  m_iterations   = iter;
 
   return (m_exitStatus == 1);
 }
