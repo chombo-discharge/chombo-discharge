@@ -430,6 +430,7 @@ CdrMultigrid::setupHelmholtzFactory()
                              relaxFactor,
                              m_chebyOrder,
                              m_chebyEigRatio,
+                             m_rasInnerSweeps,
                              bottomDomain,
                              m_amr->getMaxBlockSize(),
                              m_multigridRefluxFree));
@@ -739,9 +740,11 @@ CdrMultigrid::parseMultigridSettings()
   }
 
   // Relaxation type. The Chebyshev smoother takes two extra arguments,
-  // i.e. 'gmg_smoother = chebyshev <order> <eig_ratio>'.
-  m_chebyOrder    = 3;
-  m_chebyEigRatio = 4.0;
+  // i.e. 'gmg_smoother = chebyshev <order> <eig_ratio>', and the restricted additive Schwarz smoother takes one,
+  // i.e. 'gmg_smoother = ras <inner_sweeps>'.
+  m_chebyOrder     = 3;
+  m_chebyEigRatio  = 4.0;
+  m_rasInnerSweeps = 2;
 
   pp.get("gmg_smoother", str, 0);
   if (str == "jacobi") {
@@ -766,6 +769,13 @@ CdrMultigrid::parseMultigridSettings()
   }
   else if (str == "ras") {
     m_smoother = EBHelmholtzOp::Smoother::RestrictedAdditiveSchwarz;
+
+    if (pp.countval("gmg_smoother") != 2) {
+      MayDay::Error(
+        "CdrMultigrid::parseMultigridSettings - the restricted additive Schwarz smoother requires 'gmg_smoother = ras <inner_sweeps>'");
+    }
+
+    pp.get("gmg_smoother", m_rasInnerSweeps, 1);
   }
   else {
     MayDay::Error("CdrMultigrid::parseMultigridSettings - unknown relaxation method requested");
@@ -776,8 +786,11 @@ CdrMultigrid::parseMultigridSettings()
   if (str == "vcycle") {
     m_multigridType = MultigridType::VCycle;
   }
+  else if (str == "wcycle") {
+    m_multigridType = MultigridType::WCycle;
+  }
   else {
-    MayDay::Error("CdrMultigrid::parseMultigridSettings - unknown cycle type requested");
+    MayDay::Error("CdrMultigrid::parseMultigridSettings - unknown cycle type requested. Use 'vcycle' or 'wcycle'.");
   }
 
   // No lower than 2.

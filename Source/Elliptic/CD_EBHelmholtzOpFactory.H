@@ -107,6 +107,7 @@ public:
     @param[in] a_relaxFactor      Relaxation factor
     @param[in] a_chebyOrder       Chebyshev polynomial degree (only used when a_smoother is Smoother::Chebyshev)
     @param[in] a_chebyEigRatio    Chebyshev eigenvalue ratio lambda_max/lambda_min (only used when a_smoother is Smoother::Chebyshev)
+    @param[in] a_rasInnerSweeps   Number of inner frozen-ghost sweeps per restricted-additive-Schwarz iteration (only used when a_smoother is Smoother::RestrictedAdditiveSchwarz)
     @param[in] a_refluxFree       If true, use the reflux-free AMR operator (skips coarse-fine flux refluxing)
     @param[in] a_bottomDomain     Coarsest domain on which we run multigrid. Must be a coarsening of the AMR problem domains.
     @param[in] a_deeperLevelGrids Optional object in case you want to pre-define the deeper multigrid levels.
@@ -143,6 +144,7 @@ public:
                        const Real&             a_relaxFactor,
                        const int&              a_chebyOrder,
                        const Real&             a_chebyEigRatio,
+                       const int&              a_rasInnerSweeps,
                        const ProblemDomain&    a_bottomDomain,
                        const int&              a_mgBlockingFactor,
                        const bool              a_refluxFree       = false,
@@ -228,6 +230,11 @@ protected:
     @brief Chebyshev eigenvalue ratio lambda_max/lambda_min (only used when m_smoother is Smoother::Chebyshev)
   */
   Real m_chebyEigRatio;
+
+  /**
+    @brief Number of inner frozen-ghost sweeps per restricted-additive-Schwarz iteration (only used when m_smoother is Smoother::RestrictedAdditiveSchwarz)
+  */
+  int m_rasInnerSweeps;
 
   /**
     @brief Number of AMR levels

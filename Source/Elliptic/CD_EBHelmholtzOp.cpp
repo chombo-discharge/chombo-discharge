@@ -65,6 +65,7 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
                              const Real&                                      a_relaxFactor,
                              const int&                                       a_chebyOrder,
                              const Real&                                      a_chebyEigRatio,
+                             const int&                                       a_rasInnerSweeps,
                              const bool                                       a_refluxFree)
   : LevelTGAHelmOp<LevelData<EBCellFAB>, EBFluxFAB>(false), // Time-independent
     m_smoother(a_smoother),
@@ -117,13 +118,12 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
   m_chebyOrder       = a_chebyOrder;
   m_chebyEigRatio    = a_chebyEigRatio;
   m_spectralRadius   = 2.0;
-  m_rasInnerSweeps   = 2;
+  m_rasInnerSweeps   = a_rasInnerSweeps;
 
   ParmParse pp("EBHelmholtzOp");
   pp.query("reflux_free", m_refluxFree);
   pp.query("profile", m_profile);
   pp.query("precond_smooth", m_numSmoothPreCond);
-  pp.query("ras_inner_sweeps", m_rasInnerSweeps);
 
   m_timer = Timer("EBHelmholtzOp");
 

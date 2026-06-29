@@ -241,19 +241,20 @@ The restricted additive Schwarz smoother is a *block* smoother whose blocks are 
 Each outer invocation fills the ghost cells once and then performs a number of red-black Gauss-Seidel sweeps on every patch *with the ghost cells held frozen* (a Dirichlet, inexact local solve).
 Across patches the iteration is additive (block Jacobi), and since the blocks are disjoint the update is automatically restricted to the valid region; no additive damping is required.
 
-The number of inner (frozen-ghost) sweeps is set with ``EBHelmholtzOp.ras_inner_sweeps`` (default 2), and the smoother is selected with
+The smoother is selected through the smoother specification, with the number of inner (frozen-ghost) sweeps as an argument, e.g.
 
 .. code-block:: text
 
-   FieldSolverGMG.gmg_smoother = ras
+   FieldSolverGMG.gmg_smoother = ras 2
 
-The same selection works for the other solvers that expose ``gmg_smoother`` (e.g. ``CdrCTU``, ``CdrGodunov``, ``EddingtonSP1``).
+which performs two inner sweeps per outer relaxation.
+The same syntax works for the other solvers that expose ``gmg_smoother`` (e.g. ``CdrCTU``, ``CdrGodunov``, ``EddingtonSP1``).
 
 .. tip::
 
    The key property of this smoother is that it amortises the halo exchange (and, for the multiphase operator, the jump-boundary update) over the inner sweeps: it performs only one exchange per outer relaxation rather than one per colour.
    On communication-bound problems it therefore reaches a given multigrid convergence rate with fewer halo exchanges than point relaxation, even though it performs more operator applications per cycle.
-   Over-solving each block (a large ``ras_inner_sweeps``) is counter-productive, because the additive coupling then over-commits to stale neighbour data; two inner sweeps is a good default.
+   Over-solving each block (a large inner-sweep count) is counter-productive, because the additive coupling then over-commits to stale neighbour data; two inner sweeps is a good default.
 
 
 Multiphase Helmholtz equation
@@ -376,8 +377,8 @@ All parameters below use a solver-class prefix (e.g. ``FieldSolverGMG``, ``Eddin
 * ``<Solver>.gmg_bottom_solver``.
   Sets the bottom solver type: ``bicgstab``, ``gmres``, or ``simple <N>`` where ``N`` is the number of smoothings.
 * ``<Solver>.gmg_cycle``.
-  Sets the multigrid cycle type.
-  Currently, only V-cycles are supported.
+  Sets the multigrid cycle type: ``vcycle`` or ``wcycle``.
+  W-cycles do more coarse-grid work per cycle and can help when V-cycle convergence rates degrade, but are substantially more expensive per cycle in deep AMR hierarchies.
 * ``<Solver>.gmg_smoother``.
   Sets the multigrid smoother: ``jacobi``, ``red_black``, ``multi_color``, ``chebyshev <order> <eig_ratio>`` (see :ref:`Chap:ChebyshevSmoother`), or ``ras`` (see :ref:`Chap:SchwarzSmoother`).
 * ``<Solver>.gmg_relax_factor``.

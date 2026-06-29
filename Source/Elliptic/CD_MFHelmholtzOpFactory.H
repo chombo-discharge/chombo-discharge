@@ -117,6 +117,7 @@ public:
     @param[in] a_smoother Smoother
     @param[in] a_chebyOrder Chebyshev polynomial degree (only used when a_smoother is Smoother::Chebyshev)
     @param[in] a_chebyEigRatio Chebyshev eigenvalue ratio lambda_max/lambda_min (only used when a_smoother is Smoother::Chebyshev)
+    @param[in] a_rasInnerSweeps Number of inner frozen-ghost sweeps per restricted-additive-Schwarz iteration (only used when a_smoother is Smoother::RestrictedAdditiveSchwarz)
     @param[in] a_blockingFactor Blocking factor
   */
   MFHelmholtzOpFactory(const MFIS&             a_mfis,
@@ -143,6 +144,7 @@ public:
                        const Real&             a_relaxFactor,
                        const int&              a_chebyOrder,
                        const Real&             a_chebyEigRatio,
+                       const int&              a_rasInnerSweeps,
                        const ProblemDomain&    a_bottomDomain,
                        const int&              a_jumpOrder,
                        const int&              a_jumpWeight,
@@ -251,6 +253,11 @@ protected:
     @brief Chebyshev eigenvalue ratio lambda_max/lambda_min (only used when m_smoother is Smoother::Chebyshev)
   */
   Real m_chebyEigRatio;
+
+  /**
+    @brief Number of inner frozen-ghost sweeps per restricted-additive-Schwarz iteration (only used when m_smoother is Smoother::RestrictedAdditiveSchwarz)
+  */
+  int m_rasInnerSweeps;
 
   /**
     @brief Number of AMR levels

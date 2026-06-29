@@ -52,6 +52,7 @@ MFHelmholtzOpFactory::MFHelmholtzOpFactory(const MFIS&             a_mfis,
                                            const Real&             a_relaxFactor,
                                            const int&              a_chebyOrder,
                                            const Real&             a_chebyEigRatio,
+                                           const int&              a_rasInnerSweeps,
                                            const ProblemDomain&    a_bottomDomain,
                                            const int&              a_jumpOrder,
                                            const int&              a_jumpWeight,
@@ -64,6 +65,7 @@ MFHelmholtzOpFactory::MFHelmholtzOpFactory(const MFIS&             a_mfis,
     m_smoother(a_smoother),
     m_chebyOrder(a_chebyOrder),
     m_chebyEigRatio(a_chebyEigRatio),
+    m_rasInnerSweeps(a_rasInnerSweeps),
     m_numPreCondSmooth(a_preCondSmooth),
     m_ghostPhi(a_ghostPhi),
     m_ghostRhs(a_ghostRhs),
@@ -718,6 +720,7 @@ MFHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bo
                              m_relaxFactor,
                              m_chebyOrder,
                              m_chebyEigRatio,
+                             m_rasInnerSweeps,
                              m_refluxFree);
 
     mgOp->setJump(jump);
@@ -806,6 +809,7 @@ MFHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain)
                                m_relaxFactor,
                                m_chebyOrder,
                                m_chebyEigRatio,
+                               m_rasInnerSweeps,
                                m_refluxFree);
 
   // Give the operator access by reference to the jump data.

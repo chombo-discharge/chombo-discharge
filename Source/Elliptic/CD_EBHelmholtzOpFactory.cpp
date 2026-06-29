@@ -45,6 +45,7 @@ EBHelmholtzOpFactory::EBHelmholtzOpFactory(const Location::Cell    a_dataLocatio
                                            const Real&             a_relaxFactor,
                                            const int&              a_chebyOrder,
                                            const Real&             a_chebyEigRatio,
+                                           const int&              a_rasInnerSweeps,
                                            const ProblemDomain&    a_bottomDomain,
                                            const int&              a_mgBlockingFactor,
                                            const bool              a_refluxFree,
@@ -53,6 +54,7 @@ EBHelmholtzOpFactory::EBHelmholtzOpFactory(const Location::Cell    a_dataLocatio
     m_smoother(a_smoother),
     m_chebyOrder(a_chebyOrder),
     m_chebyEigRatio(a_chebyEigRatio),
+    m_rasInnerSweeps(a_rasInnerSweeps),
     m_ghostPhi(a_ghostPhi),
     m_ghostRhs(a_ghostRhs),
     m_alpha(a_alpha),
@@ -560,6 +562,7 @@ EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bo
                              m_relaxFactor,
                              m_chebyOrder,
                              m_chebyEigRatio,
+                             m_rasInnerSweeps,
                              m_refluxFree);
   }
 
@@ -646,6 +649,7 @@ EBHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain)
                          m_relaxFactor,
                          m_chebyOrder,
                          m_chebyEigRatio,
+                         m_rasInnerSweeps,
                          m_refluxFree);
 
   return op;

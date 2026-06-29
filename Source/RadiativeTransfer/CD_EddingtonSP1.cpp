@@ -412,9 +412,11 @@ EddingtonSP1::parseMultigridSettings()
   }
 
   // Relaxation type. The Chebyshev smoother takes two extra arguments,
-  // i.e. 'gmg_smoother = chebyshev <order> <eig_ratio>'.
-  m_multigridChebyOrder    = 3;
-  m_multigridChebyEigRatio = 4.0;
+  // i.e. 'gmg_smoother = chebyshev <order> <eig_ratio>', and the restricted additive Schwarz smoother takes one,
+  // i.e. 'gmg_smoother = ras <inner_sweeps>'.
+  m_multigridChebyOrder     = 3;
+  m_multigridChebyEigRatio  = 4.0;
+  m_multigridRasInnerSweeps = 2;
 
   pp.get("gmg_smoother", str, 0);
   if (str == "jacobi") {
@@ -439,6 +441,13 @@ EddingtonSP1::parseMultigridSettings()
   }
   else if (str == "ras") {
     m_multigridRelaxMethod = EBHelmholtzOp::Smoother::RestrictedAdditiveSchwarz;
+
+    if (pp.countval("gmg_smoother") != 2) {
+      MayDay::Error(
+        "EddingtonSP1::parseMultigridSettings - the restricted additive Schwarz smoother requires 'gmg_smoother = ras <inner_sweeps>'");
+    }
+
+    pp.get("gmg_smoother", m_multigridRasInnerSweeps, 1);
   }
   else {
     MayDay::Error("EddingtonSP1::parseMultigridSettings - unknown relaxation method requested");
@@ -449,8 +458,11 @@ EddingtonSP1::parseMultigridSettings()
   if (str == "vcycle") {
     m_multigridType = MultigridType::VCycle;
   }
+  else if (str == "wcycle") {
+    m_multigridType = MultigridType::WCycle;
+  }
   else {
-    MayDay::Error("EddingtonSP1::parseMultigridSettings - unknown cycle type requested");
+    MayDay::Error("EddingtonSP1::parseMultigridSettings - unknown cycle type requested. Use 'vcycle' or 'wcycle'.");
   }
 
   // No lower than 2.
@@ -995,6 +1007,7 @@ EddingtonSP1::setupHelmholtzFactory()
                                                                                       relaxFactor,
                                                                                       m_multigridChebyOrder,
                                                                                       m_multigridChebyEigRatio,
+                                                                                      m_multigridRasInnerSweeps,
                                                                                       bottomDomain,
                                                                                       m_amr->getMaxBlockSize(),
                                                                                       m_multigridRefluxFree));

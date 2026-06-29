@@ -241,6 +241,11 @@ protected:
   Real m_multigridChebyEigRatio;
 
   /**
+    @brief Number of inner frozen-ghost sweeps per restricted-additive-Schwarz iteration (only used when m_multigridRelaxMethod is Smoother::RestrictedAdditiveSchwarz)
+  */
+  int m_multigridRasInnerSweeps;
+
+  /**
     @brief GMG multigrid type
   */
   MultigridType m_multigridType;

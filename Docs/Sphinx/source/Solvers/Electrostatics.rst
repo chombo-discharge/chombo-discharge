@@ -510,8 +510,8 @@ We explain these options below:
 * ``FieldSolverGMG.gmg_bottom_solver``.
   Sets the bottom solver type. 
 * ``FieldSolverGMG.gmg_cycle``.
-  Sets the multigrid method.
-  Currently, only V-cycles are supported.
+  Sets the multigrid cycle type: ``vcycle`` or ``wcycle``.
+  W-cycles do more coarse-grid work per cycle and can help when V-cycle convergence rates degrade, but are substantially more expensive per cycle in deep AMR hierarchies.
 * ``FieldSolverGMG.gmg_smoother``.
   Sets the multigrid smoother: ``jacobi``, ``red_black``, ``multi_color``, ``chebyshev <order> <eig_ratio>``, or ``ras``.
 * ``FieldSolverGMG.gmg_relax_factor``.

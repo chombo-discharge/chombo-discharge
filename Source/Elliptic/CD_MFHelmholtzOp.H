@@ -103,6 +103,7 @@ public:
     @param[in] a_relaxFactor   Relaxation factor
     @param[in] a_chebyOrder    Chebyshev polynomial degree (only used when a_relaxType is Smoother::Chebyshev)
     @param[in] a_chebyEigRatio Chebyshev eigenvalue ratio lambda_max/lambda_min (only used when a_relaxType is Smoother::Chebyshev)
+    @param[in] a_rasInnerSweeps Number of inner frozen-ghost sweeps per restricted-additive-Schwarz iteration (only used when a_relaxType is Smoother::RestrictedAdditiveSchwarz)
     @param[in] a_refluxFree    If true, use the reflux-free AMR operator (skips coarse-fine flux refluxing)
     @param[in] a_ghostPhi Description
     @param[in] a_ghostRhs Description
@@ -144,6 +145,7 @@ public:
                 const Real&                                      a_relaxFactor,
                 const int&                                       a_chebyOrder,
                 const Real&                                      a_chebyEigRatio,
+                const int&                                       a_rasInnerSweeps,
                 const bool                                       a_refluxFree = false);
 
   /**
