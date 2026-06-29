@@ -42,12 +42,23 @@ KrylovMultigrid::solve(AMRMultiGrid<LevelData<T>>*  a_mg,
     a_op.setToZero(a_phi);
   }
 
+  // The preconditioner drives AMRMultiGrid::AMRVCycle directly, which needs the solver's multigrid holders and its
+  // *intermediate* multigrid depths. AMRMultiGrid sets these up in init() and tears them down in revert(); the host
+  // solvers call revert() after every solve (and the stand-alone GMG path re-init()s every solve via
+  // solveNoInitResid). We must therefore (re-)initialise here before every Krylov solve -- otherwise the second and
+  // later solves on a given grid run the V-cycle with reverted (full-coarsening) depths and return a wrong
+  // correction. This mirrors what AMRMultiGrid::solve()/solveNoInitResid() do internally for the stand-alone path.
+  a_mg->init(a_phi, a_rhs, a_lmax, a_lbase);
+  a_mg->setBottomSolver(a_lmax, a_lbase);
+
   // Initial residual r0 = rhs - L_inhomogeneous(phi). This is the only place the inhomogeneous boundary/jump
-  // contribution enters; the Krylov matvec and preconditioner run homogeneously.
+  // contribution enters; the Krylov matvec and preconditioner run homogeneously. computeAMRResidual already returns
+  // the residual in Chombo's convention (rhs - L(phi)), so it must NOT be negated -- negating it flips the sign of
+  // the correction and yields phi = 2*phi0 - phi* for a warm start (a wrong field; only the cold phi0 = 0 case
+  // survives, as -phi* happens to have the right field magnitude).
   Vec r0;
   a_op.create(r0, a_rhs);
-  a_mg->computeAMRResidual(r0, a_phi, a_rhs, a_lmax, a_lbase, false, false); // r0 = L(phi) - rhs
-  a_op.scale(r0, -1.0);                                                      // r0 = rhs - L(phi)
+  a_mg->computeAMRResidual(r0, a_phi, a_rhs, a_lmax, a_lbase, false, false); // r0 = rhs - L(phi)
 
   // Correction dphi, solved homogeneously: L_homogeneous(dphi) = r0.
   Vec dphi;
