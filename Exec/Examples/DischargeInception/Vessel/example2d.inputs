@@ -107,7 +107,7 @@ FieldSolverGMG.gmg_bottom_verbosity         = -1           ## Bottom solver verb
 FieldSolverGMG.gmg_cycle                    = vcycle       ## Cycle type. Only 'vcycle' supported for now.
 FieldSolverGMG.gmg_smoother                 = red_black    ## Relaxation type. 'jacobi', 'multi_color', or 'red_black'
 FieldSolverGMG.gmg_relax_factor             = 1.0          ## Adjustable SOR factor
-FieldSolverGMG.gmg_reflux_free              = false        ## If true, use reflux-free AMR operator (folds coarse-fine flux correction into a single conservative flux coarsening pass; mathematically equivalent to the refluxed operator.
+FieldSolverGMG.gmg_reflux_free              = false        ## If true, use reflux-free AMR operator
 
 # ====================================================================================================
 # CdrCTU solver settings.

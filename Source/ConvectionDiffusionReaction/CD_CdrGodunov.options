@@ -33,4 +33,4 @@ CdrGodunov.krylov_max_iter          = 50                        ## Outer Krylov 
 CdrGodunov.krylov_restart           = 30                        ## GMRES restart length (gmres only)
 CdrGodunov.krylov_vcycles           = 1                         ## V-cycles per Krylov preconditioner application
 CdrGodunov.krylov_verbosity         = -1                        ## Outer Krylov verbosity
-CdrGodunov.gmg_reflux_free          = false                     ## If true, use reflux-free AMR operator (folds coarse-fine flux correction into a single conservative flux coarsening pass; mathematically equivalent to the refluxed operator.
+CdrGodunov.gmg_reflux_free          = false                     ## If true, use reflux-free AMR operator
