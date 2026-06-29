@@ -346,7 +346,7 @@ In each case, a simple smoother with a specified number of relaxations is applie
 Krylov-accelerated multigrid
 ____________________________
 
-By default (``solver = gmg``) the Helmholtz equation is solved by stand-alone multigrid V-cycling.
+The ``solver`` key and the ``krylov_*`` keys are mandatory input parameters (like the ``gmg_*`` keys); they must be present in the input file, and the shipped templates set ``solver = gmg``, which solves the Helmholtz equation by stand-alone multigrid V-cycling.
 On hard problems (strong coefficient contrast, awkward geometry) the V-cycle convergence rate can degrade or stall.
 For these cases the V-cycle can instead be used as a *preconditioner* for an outer Krylov method:
 
@@ -427,7 +427,7 @@ All parameters below use a solver-class prefix (e.g. ``FieldSolverGMG``, ``Eddin
 * ``<Solver>.gmg_reflux_free``.
   If ``true``, use the reflux-free AMR operator.
 * ``<Solver>.solver``.
-  Selects the top-level solver: ``gmg`` (default, stand-alone V-cycling), ``gmres``, or ``bicgstab``. The latter two use the multigrid V-cycle as a preconditioner. A space-separated list is a fallback chain tried in order, e.g. ``gmg gmres`` (see :ref:`Chap:KrylovMultigrid`).
+  Selects the top-level solver: ``gmg`` (stand-alone V-cycling), ``gmres``, or ``bicgstab``. The latter two use the multigrid V-cycle as a preconditioner. A space-separated list is a fallback chain tried in order, e.g. ``gmg gmres`` (see :ref:`Chap:KrylovMultigrid`). This key and the ``krylov_*`` keys below are mandatory.
 * ``<Solver>.krylov_eps``.
   Relative residual tolerance for the outer Krylov solver (``gmres``/``bicgstab``).
 * ``<Solver>.krylov_max_iter``.

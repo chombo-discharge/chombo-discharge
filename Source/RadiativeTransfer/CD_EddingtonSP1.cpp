@@ -470,9 +470,25 @@ EddingtonSP1::parseMultigridSettings()
     m_minCellsBottom = 2;
   }
 
-  // Outer solver path: 'solver' = gmg (default) | gmres | bicgstab, plus the krylov_* settings. When != gmg the
-  // gmg_* settings above configure the V-cycle that preconditions the outer Krylov solver.
-  KrylovMultigrid::parseSettings(pp, m_krylovSettings);
+  // Outer solver path: 'solver' = gmg | gmres | bicgstab (a space-separated list is a fallback chain), plus the
+  // krylov_* settings. When the solver is not gmg, the gmg_* settings above configure the V-cycle that preconditions
+  // the outer Krylov solver. These are read here (mandatory, like the gmg_* keys) and passed to KrylovMultigrid::solve.
+  const int numKrylovSolvers = pp.countval("solver");
+  if (numKrylovSolvers < 1) {
+    MayDay::Error("EddingtonSP1::parseMultigridSettings - 'solver' must list at least one of 'gmg', 'gmres', "
+                  "'bicgstab'");
+  }
+  m_krylovSettings.solvers.resize(numKrylovSolvers);
+  for (int i = 0; i < numKrylovSolvers; i++) {
+    std::string solverStr;
+    pp.get("solver", solverStr, i);
+    m_krylovSettings.solvers[i] = KrylovMultigrid::toSolverType(solverStr);
+  }
+  pp.get("krylov_eps", m_krylovSettings.eps);
+  pp.get("krylov_max_iter", m_krylovSettings.maxIter);
+  pp.get("krylov_restart", m_krylovSettings.restart);
+  pp.get("krylov_vcycles", m_krylovSettings.numVCycles);
+  pp.get("krylov_verbosity", m_krylovSettings.verbosity);
 }
 
 void

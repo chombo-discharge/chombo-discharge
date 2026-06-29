@@ -89,6 +89,12 @@ CdrCTU.gmg_min_cells            = 2                         ## Bottom drop
 CdrCTU.gmg_bottom_solver        = bicgstab                  ## Bottom solver type. Valid options are 'simple' and 'bicgstab'
 CdrCTU.gmg_cycle                = vcycle                    ## Cycle type. Only 'vcycle' supported for now
 CdrCTU.gmg_smoother             = red_black                 ## Relaxation type. 'jacobi', 'multi_color', or 'red_black'
+CdrCTU.solver                   = gmg                       ## Solver(s), tried in order. 'gmg', 'gmres', 'bicgstab'. List = fallback chain, e.g. 'gmg gmres' falls back to GMRES if GMG fails
+CdrCTU.krylov_eps               = 1.E-10                    ## Outer Krylov relative residual tolerance (gmres/bicgstab)
+CdrCTU.krylov_max_iter          = 50                        ## Outer Krylov max iterations (gmres/bicgstab)
+CdrCTU.krylov_restart           = 30                        ## GMRES restart length (gmres only)
+CdrCTU.krylov_vcycles           = 1                         ## V-cycles per Krylov preconditioner application
+CdrCTU.krylov_verbosity         = -1                        ## Outer Krylov verbosity
 
 # ====================================================================================================
 # ROD_DIELECTRIC CLASS OPTIONS

@@ -13,11 +13,13 @@
 #ifndef CD_KrylovMultigrid_H
 #define CD_KrylovMultigrid_H
 
+// Std includes
+#include <string>
+
 // Chombo includes
 #include <AMRMultiGrid.H>
 #include <LevelData.H>
 #include <Vector.H>
-#include <ParmParse.H>
 
 // Our includes
 #include <CD_AMRMultigridKrylovOp.H>
@@ -74,41 +76,29 @@ namespace KrylovMultigrid {
   };
 
   /*!
-    @brief Parse the solver path and Krylov settings from an input group.
-    @details Reads the 'solver' key (gmg|gmres|bicgstab) and the 'krylov_*' keys from the given input group. All are
-             optional; absent keys keep the defaults so existing input scripts default to stand-alone multigrid.
-    @param[in]  a_pp       ParmParse scoped to the host solver's class name
-    @param[out] a_settings Settings to fill
+    @brief Map a solver-type string to the corresponding enum.
+    @details Pure string-to-enum conversion; the host solver is responsible for reading the input database (the
+             Krylov module deliberately does not call ParmParse). Aborts on an unrecognised string.
+    @param[in] a_str One of 'gmg', 'gmres', or 'bicgstab'.
+    @return The corresponding SolverType.
   */
-  inline void
-  parseSettings(ParmParse& a_pp, Settings& a_settings)
+  inline SolverType
+  toSolverType(const std::string& a_str)
   {
-    const int num = a_pp.contains("solver") ? a_pp.countval("solver") : 0;
-    if (num > 0) {
-      a_settings.solvers.resize(num);
-      for (int i = 0; i < num; i++) {
-        std::string str;
-        a_pp.get("solver", str, i);
-        if (str == "gmg") {
-          a_settings.solvers[i] = SolverType::GMG;
-        }
-        else if (str == "gmres") {
-          a_settings.solvers[i] = SolverType::GMRES;
-        }
-        else if (str == "bicgstab") {
-          a_settings.solvers[i] = SolverType::BiCGStab;
-        }
-        else {
-          MayDay::Error("KrylovMultigrid::parseSettings - 'solver' entries must be 'gmg', 'gmres', or 'bicgstab'");
-        }
-      }
+    if (a_str == "gmg") {
+      return SolverType::GMG;
+    }
+    else if (a_str == "gmres") {
+      return SolverType::GMRES;
+    }
+    else if (a_str == "bicgstab") {
+      return SolverType::BiCGStab;
+    }
+    else {
+      MayDay::Error("KrylovMultigrid::toSolverType - solver must be 'gmg', 'gmres', or 'bicgstab'");
     }
 
-    a_pp.query("krylov_eps", a_settings.eps);
-    a_pp.query("krylov_max_iter", a_settings.maxIter);
-    a_pp.query("krylov_restart", a_settings.restart);
-    a_pp.query("krylov_vcycles", a_settings.numVCycles);
-    a_pp.query("krylov_verbosity", a_settings.verbosity);
+    return SolverType::GMG;
   }
 
   /*!
