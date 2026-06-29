@@ -672,26 +672,33 @@ EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData
     const Real zeroResid = m_multigridSolver->computeAMRResidual(zer, rhs, finestLevel, coarsestLevel);
 
     if (phiResid > zeroResid * m_multigridExitTolerance) {
-      if (m_krylovSettings.type == KrylovMultigrid::SolverType::GMG) {
-        // Residual is too large, solve.
-        m_multigridSolver->m_convergenceMetric = zeroResid;
-        m_multigridSolver->solveNoInitResid(phi, res, rhs, finestLevel, coarsestLevel, a_zeroPhi);
+      // Try the solver chain in order (e.g. 'gmg gmres'), warm-starting each attempt from the previous one.
+      bool firstAttempt = true;
+      for (int i = 0; i < m_krylovSettings.solvers.size() && !converged; i++) {
+        const KrylovMultigrid::SolverType solverType = m_krylovSettings.solvers[i];
+        const bool                        zeroPhi    = a_zeroPhi && firstAttempt;
 
-        const int status = m_multigridSolver->m_exitStatus; // 1 => Initial norm sufficiently reduced
-        if (status == 1 || status == 8 || status == 9) {    // 8 => Norm sufficiently small
-          converged = true;
+        if (solverType == KrylovMultigrid::SolverType::GMG) {
+          m_multigridSolver->m_convergenceMetric = zeroResid;
+          m_multigridSolver->solveNoInitResid(phi, res, rhs, finestLevel, coarsestLevel, zeroPhi);
+
+          const int status = m_multigridSolver->m_exitStatus; // 1 => Initial norm sufficiently reduced
+          converged        = (status == 1 || status == 8 || status == 9);
         }
-      }
-      else {
-        // Outer Krylov solve with the V-cycle as preconditioner.
-        converged = KrylovMultigrid::solve(&(*m_multigridSolver),
-                                           m_krylovOp,
-                                           phi,
-                                           rhs,
-                                           coarsestLevel,
-                                           finestLevel,
-                                           a_zeroPhi,
-                                           m_krylovSettings);
+        else {
+          // Outer Krylov solve with the V-cycle as preconditioner.
+          converged = KrylovMultigrid::solve(&(*m_multigridSolver),
+                                             m_krylovOp,
+                                             phi,
+                                             rhs,
+                                             coarsestLevel,
+                                             finestLevel,
+                                             zeroPhi,
+                                             solverType,
+                                             m_krylovSettings);
+        }
+
+        firstAttempt = false;
       }
     }
     else {
@@ -778,22 +785,36 @@ EddingtonSP1::advanceEuler(EBAMRCellData&       a_phi,
   const int coarsestLevel = 0;
   const int finestLevel   = m_amr->getFinestLevel();
 
-  // Figure out how far away we are from a "converged" solution and set the convergence metric. Then solve.
+  // Figure out how far away we are from a "converged" solution and set the convergence metric. Then solve, trying
+  // the solver chain in order (e.g. 'gmg gmres') and warm-starting each attempt from the previous one.
   const Real zeroResid = m_multigridSolver->computeAMRResidual(zer, eulerRHS, finestLevel, coarsestLevel);
 
-  if (m_krylovSettings.type == KrylovMultigrid::SolverType::GMG) {
-    m_multigridSolver->m_convergenceMetric = zeroResid;
-    m_multigridSolver->solve(newPhi, eulerRHS, finestLevel, coarsestLevel, a_zeroPhi);
-  }
-  else {
-    KrylovMultigrid::solve(&(*m_multigridSolver),
-                           m_krylovOp,
-                           newPhi,
-                           eulerRHS,
-                           coarsestLevel,
-                           finestLevel,
-                           a_zeroPhi,
-                           m_krylovSettings);
+  bool converged    = false;
+  bool firstAttempt = true;
+  for (int i = 0; i < m_krylovSettings.solvers.size() && !converged; i++) {
+    const KrylovMultigrid::SolverType solverType = m_krylovSettings.solvers[i];
+    const bool                        zeroPhi    = a_zeroPhi && firstAttempt;
+
+    if (solverType == KrylovMultigrid::SolverType::GMG) {
+      m_multigridSolver->m_convergenceMetric = zeroResid;
+      m_multigridSolver->solve(newPhi, eulerRHS, finestLevel, coarsestLevel, zeroPhi);
+
+      const int status = m_multigridSolver->m_exitStatus;
+      converged        = (status == 1 || status == 8 || status == 9);
+    }
+    else {
+      converged = KrylovMultigrid::solve(&(*m_multigridSolver),
+                                         m_krylovOp,
+                                         newPhi,
+                                         eulerRHS,
+                                         coarsestLevel,
+                                         finestLevel,
+                                         zeroPhi,
+                                         solverType,
+                                         m_krylovSettings);
+    }
+
+    firstAttempt = false;
   }
 }
 
@@ -1116,7 +1137,7 @@ EddingtonSP1::setupMultigrid()
   m_multigridSolver->init(phi, rhs, finestLevel, 0);
 
   // Define the outer-Krylov adapter if requested (reuses the just-initialised multigrid solver as preconditioner).
-  if (m_krylovSettings.type != KrylovMultigrid::SolverType::GMG) {
+  if (m_krylovSettings.usesKrylov()) {
     m_multigridSolver->setBottomSolver(finestLevel, 0);
 
     Vector<DisjointBoxLayout> grids  = m_amr->getGrids(m_realm);

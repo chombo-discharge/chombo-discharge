@@ -41,16 +41,36 @@ namespace KrylovMultigrid {
   };
 
   /*!
-    @brief Outer-Krylov configuration. Defaults reproduce stand-alone multigrid (type == GMG).
+    @brief Outer-Krylov configuration. Defaults reproduce stand-alone multigrid (solvers == {GMG}).
   */
   struct Settings
   {
-    SolverType type       = SolverType::GMG; /*!< Solver method. */
-    Real       eps        = 1.E-10;          /*!< Relative residual tolerance. */
-    int        maxIter    = 50;              /*!< Maximum outer iterations. */
-    int        restart    = 30;              /*!< GMRES restart length (unused for BiCGStab). */
-    int        numVCycles = 1;               /*!< V-cycles applied per preconditioner invocation. */
-    int        verbosity  = -1;              /*!< Outer Krylov verbosity. */
+    /*!
+      @brief Solvers attempted in order; the first that converges wins. E.g. {GMG, GMRES} means "try stand-alone
+             multigrid, fall back to GMRES if it does not converge".
+    */
+    Vector<SolverType> solvers = Vector<SolverType>(1, SolverType::GMG);
+
+    Real eps        = 1.E-10; /*!< Relative residual tolerance. */
+    int  maxIter    = 50;     /*!< Maximum outer iterations. */
+    int  restart    = 30;     /*!< GMRES restart length (unused for BiCGStab). */
+    int  numVCycles = 1;      /*!< V-cycles applied per preconditioner invocation. */
+    int  verbosity  = -1;     /*!< Outer Krylov verbosity. */
+
+    /*!
+      @brief Whether any solver in the chain is a Krylov method (and hence needs the preconditioner adapter).
+      @return True if the chain contains GMRES or BiCGStab.
+    */
+    bool
+    usesKrylov() const
+    {
+      for (int i = 0; i < solvers.size(); i++) {
+        if (solvers[i] != SolverType::GMG) {
+          return true;
+        }
+      }
+      return false;
+    }
   };
 
   /*!
@@ -63,20 +83,24 @@ namespace KrylovMultigrid {
   inline void
   parseSettings(ParmParse& a_pp, Settings& a_settings)
   {
-    std::string str;
-    if (a_pp.contains("solver")) {
-      a_pp.get("solver", str);
-      if (str == "gmg") {
-        a_settings.type = SolverType::GMG;
-      }
-      else if (str == "gmres") {
-        a_settings.type = SolverType::GMRES;
-      }
-      else if (str == "bicgstab") {
-        a_settings.type = SolverType::BiCGStab;
-      }
-      else {
-        MayDay::Error("KrylovMultigrid::parseSettings - 'solver' must be 'gmg', 'gmres', or 'bicgstab'");
+    const int num = a_pp.contains("solver") ? a_pp.countval("solver") : 0;
+    if (num > 0) {
+      a_settings.solvers.resize(num);
+      for (int i = 0; i < num; i++) {
+        std::string str;
+        a_pp.get("solver", str, i);
+        if (str == "gmg") {
+          a_settings.solvers[i] = SolverType::GMG;
+        }
+        else if (str == "gmres") {
+          a_settings.solvers[i] = SolverType::GMRES;
+        }
+        else if (str == "bicgstab") {
+          a_settings.solvers[i] = SolverType::BiCGStab;
+        }
+        else {
+          MayDay::Error("KrylovMultigrid::parseSettings - 'solver' entries must be 'gmg', 'gmres', or 'bicgstab'");
+        }
       }
     }
 
@@ -100,7 +124,8 @@ namespace KrylovMultigrid {
     @param[in]     a_lbase    Coarsest level
     @param[in]     a_lmax     Finest level
     @param[in]     a_zeroPhi  If true, start from phi = 0
-    @param[in]     a_settings Outer-Krylov settings (type must be GMRES or BiCGStab)
+    @param[in]     a_type     Which Krylov method to run (GMRES or BiCGStab)
+    @param[in]     a_settings Outer-Krylov settings (tolerance, iterations, restart, ...)
     @return True if the Krylov solver reported convergence.
   */
   template <class T>
@@ -112,6 +137,7 @@ namespace KrylovMultigrid {
         const int                    a_lbase,
         const int                    a_lmax,
         const bool                   a_zeroPhi,
+        const SolverType             a_type,
         const Settings&              a_settings);
 
 } // namespace KrylovMultigrid

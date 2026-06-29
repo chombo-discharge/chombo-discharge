@@ -231,19 +231,29 @@ CdrMultigrid::advanceEuler(EBAMRCellData&       a_newPhi,
     // Always from previous solution (warm start).
     DataOps::copy(a_newPhi, a_oldPhi);
 
-    // Do the multigrid solve (stand-alone V-cycle, or V-cycle-preconditioned outer Krylov).
-    if (m_krylovSettings.type == KrylovMultigrid::SolverType::GMG) {
-      m_multigridSolver->solveNoInitResid(newPhi, resid, eulerRHS, finestLevel, coarsestLevel, false);
-    }
-    else {
-      KrylovMultigrid::solve(&(*m_multigridSolver),
-                             m_krylovOp,
-                             newPhi,
-                             eulerRHS,
-                             coarsestLevel,
-                             finestLevel,
-                             false,
-                             m_krylovSettings);
+    // Do the multigrid solve, trying the solver chain in order (e.g. 'gmg gmres'). Each attempt warm-starts from the
+    // previous one (a_newPhi is updated in place).
+    bool converged = false;
+    for (int i = 0; i < m_krylovSettings.solvers.size() && !converged; i++) {
+      const KrylovMultigrid::SolverType solverType = m_krylovSettings.solvers[i];
+
+      if (solverType == KrylovMultigrid::SolverType::GMG) {
+        m_multigridSolver->solveNoInitResid(newPhi, resid, eulerRHS, finestLevel, coarsestLevel, false);
+
+        const int status = m_multigridSolver->m_exitStatus;
+        converged        = (status == 1 || status == 8);
+      }
+      else {
+        converged = KrylovMultigrid::solve(&(*m_multigridSolver),
+                                           m_krylovOp,
+                                           newPhi,
+                                           eulerRHS,
+                                           coarsestLevel,
+                                           finestLevel,
+                                           false,
+                                           solverType,
+                                           m_krylovSettings);
+      }
     }
   }
   else {
@@ -342,19 +352,29 @@ CdrMultigrid::advanceCrankNicholson(EBAMRCellData&       a_newPhi,
     // Always from previous solution (warm start).
     DataOps::copy(a_newPhi, a_oldPhi);
 
-    // Do the multigrid solve (stand-alone V-cycle, or V-cycle-preconditioned outer Krylov).
-    if (m_krylovSettings.type == KrylovMultigrid::SolverType::GMG) {
-      m_multigridSolver->solveNoInitResid(newPhi, resid, eulerRHS, finestLevel, coarsestLevel, false);
-    }
-    else {
-      KrylovMultigrid::solve(&(*m_multigridSolver),
-                             m_krylovOp,
-                             newPhi,
-                             eulerRHS,
-                             coarsestLevel,
-                             finestLevel,
-                             false,
-                             m_krylovSettings);
+    // Do the multigrid solve, trying the solver chain in order (e.g. 'gmg gmres'). Each attempt warm-starts from the
+    // previous one (a_newPhi is updated in place).
+    bool converged = false;
+    for (int i = 0; i < m_krylovSettings.solvers.size() && !converged; i++) {
+      const KrylovMultigrid::SolverType solverType = m_krylovSettings.solvers[i];
+
+      if (solverType == KrylovMultigrid::SolverType::GMG) {
+        m_multigridSolver->solveNoInitResid(newPhi, resid, eulerRHS, finestLevel, coarsestLevel, false);
+
+        const int status = m_multigridSolver->m_exitStatus;
+        converged        = (status == 1 || status == 8);
+      }
+      else {
+        converged = KrylovMultigrid::solve(&(*m_multigridSolver),
+                                           m_krylovOp,
+                                           newPhi,
+                                           eulerRHS,
+                                           coarsestLevel,
+                                           finestLevel,
+                                           false,
+                                           solverType,
+                                           m_krylovSettings);
+      }
     }
   }
   else {
@@ -554,7 +574,7 @@ CdrMultigrid::setupMultigrid()
   m_multigridSolver->init(phi, rhs, finestLevel, 0);
 
   // Define the outer-Krylov adapter if requested (reuses the just-initialised multigrid solver as preconditioner).
-  if (m_krylovSettings.type != KrylovMultigrid::SolverType::GMG) {
+  if (m_krylovSettings.usesKrylov()) {
     m_multigridSolver->setBottomSolver(finestLevel, 0);
 
     Vector<DisjointBoxLayout> grids  = m_amr->getGrids(m_realm);

@@ -372,28 +372,37 @@ FieldSolverGMG::solve(MFAMRCellData&       a_phi,
   // Convergence criterion.
   const Real convergedResid = zeroResid * m_multigridExitTolerance;
 
-  // If the residue rho - L(phi) is too large then we must get a new solution.
+  // If the residue rho - L(phi) is too large then we must get a new solution. The solver chain is tried in order
+  // (e.g. 'gmg gmres' tries stand-alone multigrid, then GMRES if it fails); each attempt after the first warm-starts
+  // from the previous attempt's result.
   if (phiResid > convergedResid) {
-    if (m_krylovSettings.type == KrylovMultigrid::SolverType::GMG) {
-      m_multigridSolver->m_convergenceMetric = zeroResid;
-      m_multigridSolver->solveNoInitResid(phi, res, rhs, finestLevel, coarsestLevel, a_zeroPhi);
+    bool firstAttempt = true;
+    for (int i = 0; i < m_krylovSettings.solvers.size() && !converged; i++) {
+      const KrylovMultigrid::SolverType solverType = m_krylovSettings.solvers[i];
+      const bool                        zeroPhi    = a_zeroPhi && firstAttempt;
 
-      const int status = m_multigridSolver->m_exitStatus; // 1 => Initial norm sufficiently reduced
-      if (status == 1 || status == 8) {                   // 8 => Norm sufficiently small
-        converged = true;
+      if (solverType == KrylovMultigrid::SolverType::GMG) {
+        m_multigridSolver->m_convergenceMetric = zeroResid;
+        m_multigridSolver->solveNoInitResid(phi, res, rhs, finestLevel, coarsestLevel, zeroPhi);
+
+        const int status = m_multigridSolver->m_exitStatus; // 1 => Initial norm sufficiently reduced
+        converged        = (status == 1 || status == 8);    // 8 => Norm sufficiently small
       }
-    }
-    else {
-      // Outer Krylov solve with the V-cycle as preconditioner (residual-correction form; the inhomogeneous BC
-      // contribution enters through the initial residual computed inside the driver).
-      converged = KrylovMultigrid::solve(&(*m_multigridSolver),
-                                         m_krylovOp,
-                                         phi,
-                                         rhs,
-                                         coarsestLevel,
-                                         finestLevel,
-                                         a_zeroPhi,
-                                         m_krylovSettings);
+      else {
+        // Outer Krylov solve with the V-cycle as preconditioner (residual-correction form; the inhomogeneous BC
+        // contribution enters through the initial residual computed inside the driver).
+        converged = KrylovMultigrid::solve(&(*m_multigridSolver),
+                                           m_krylovOp,
+                                           phi,
+                                           rhs,
+                                           coarsestLevel,
+                                           finestLevel,
+                                           zeroPhi,
+                                           solverType,
+                                           m_krylovSettings);
+      }
+
+      firstAttempt = false;
     }
   }
   else {
@@ -898,7 +907,7 @@ FieldSolverGMG::setupMultigrid()
 
   // If an outer Krylov solver is requested, set the bottom solver once (AMRVCycle needs it) and define the adapter
   // that exposes the V-cycle as a preconditioner. Reuses the just-initialised multigrid solver and its operators.
-  if (m_krylovSettings.type != KrylovMultigrid::SolverType::GMG) {
+  if (m_krylovSettings.usesKrylov()) {
     m_multigridSolver->setBottomSolver(finestLevel, 0);
 
     Vector<DisjointBoxLayout> grids  = m_amr->getGrids(m_realm);

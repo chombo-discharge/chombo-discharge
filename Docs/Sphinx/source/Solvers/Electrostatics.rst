@@ -508,7 +508,7 @@ We explain these options below:
   Sets the least squares stencil weighting factor for least squares gradient reconstruction on dielectric interfaces.
   See :ref:`Chap:LeastSquares` for details. 
 * ``FieldSolverGMG.solver``.
-  Selects the top-level solver: ``gmg`` (default), ``gmres``, or ``bicgstab``. The Krylov options use the V-cycle as a preconditioner and are configured with the ``krylov_*`` keys; see :ref:`Chap:KrylovMultigrid`.
+  Selects the top-level solver: ``gmg`` (default), ``gmres``, or ``bicgstab``; a space-separated list (e.g. ``gmg gmres``) is a fallback chain tried in order. The Krylov options use the V-cycle as a preconditioner and are configured with the ``krylov_*`` keys; see :ref:`Chap:KrylovMultigrid`.
 * ``FieldSolverGMG.gmg_bottom_solver``.
   Sets the bottom solver type.
 * ``FieldSolverGMG.gmg_cycle``.

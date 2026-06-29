@@ -27,7 +27,7 @@ CdrGodunov.gmg_min_cells            = 16                        ## Bottom drop
 CdrGodunov.gmg_bottom_solver        = bicgstab                  ## Bottom solver type. Valid options are 'simple' and 'bicgstab'
 CdrGodunov.gmg_cycle                = vcycle                    ## Cycle type. 'vcycle' or 'wcycle'
 CdrGodunov.gmg_smoother             = red_black                 ## Relaxation. 'jacobi', 'multi_color', 'red_black', 'chebyshev <order> <eig_ratio>', or 'ras <inner_sweeps>'
-CdrGodunov.solver                   = gmg                       ## Solver. 'gmg', 'gmres', or 'bicgstab' (gmres/bicgstab use the V-cycle as preconditioner)
+CdrGodunov.solver                   = gmg                       ## Solver(s), tried in order. 'gmg', 'gmres', 'bicgstab'. List = fallback chain, e.g. 'gmg gmres' falls back to GMRES if GMG fails
 CdrGodunov.krylov_eps               = 1.E-10                    ## Outer Krylov relative residual tolerance (gmres/bicgstab)
 CdrGodunov.krylov_max_iter          = 50                        ## Outer Krylov max iterations (gmres/bicgstab)
 CdrGodunov.krylov_restart           = 30                        ## GMRES restart length (gmres only)

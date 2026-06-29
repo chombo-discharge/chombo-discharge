@@ -31,6 +31,7 @@ KrylovMultigrid::solve(AMRMultiGrid<LevelData<T>>*  a_mg,
                        const int                    a_lbase,
                        const int                    a_lmax,
                        const bool                   a_zeroPhi,
+                       const SolverType             a_type,
                        const Settings&              a_settings)
 {
   CH_TIME("KrylovMultigrid::solve");
@@ -55,7 +56,7 @@ KrylovMultigrid::solve(AMRMultiGrid<LevelData<T>>*  a_mg,
 
   bool converged = false;
 
-  switch (a_settings.type) {
+  switch (a_type) {
   case SolverType::GMRES: {
     GMRESSolver<Vec> gmres;
     gmres.define(&a_op, true);
