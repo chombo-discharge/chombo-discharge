@@ -208,7 +208,7 @@ protected:
     @param[in]  a_refToFine  Refinement ratio to the finer level
     @param[in]  a_refToCoar  Refinement ratio to the coarser level
   */
-  void
+  virtual void
   makeLevelTiles(SuperTiles&          a_tiles,
                  const SuperTiles&    a_fineTiles,
                  const IntVectSet&    a_coarTags,
@@ -226,7 +226,7 @@ protected:
     @param[in]  a_tiles  Representation to convert
     @param[in]  a_domain Problem domain
   */
-  void
+  virtual void
   makeBoxesFromTiles(Vector<Box>& a_boxes, const SuperTiles& a_tiles, const ProblemDomain& a_domain) const noexcept;
 
   /**

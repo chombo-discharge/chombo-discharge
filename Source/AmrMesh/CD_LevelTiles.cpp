@@ -88,10 +88,6 @@ LevelTiles::getMyTiles() const noexcept
 {
   CH_assert(m_isDefined);
 
-  if (!m_isDefined) {
-    MayDay::Abort("define snuck out");
-  }
-
   return m_myTiles;
 }
 

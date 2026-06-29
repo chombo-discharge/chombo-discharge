@@ -17,7 +17,7 @@ AmrMesh.fill_ratio           = 1.0                  ## Fill ratio for grid gener
 AmrMesh.buffer_size          = 2                    ## Number of cells between grid levels
 AmrMesh.grid_algorithm       = tiled                ## Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
 AmrMesh.box_sorting          = morton               ## 'none', 'shuffle', 'morton'
-AmrMesh.min_block_size       = 16                   ## Blocking factor.
+AmrMesh.min_block_size       = 8                    ## Blocking factor.
 AmrMesh.max_block_size       = 16                   ## Maximum allowed box size
 AmrMesh.max_ebis_box         = 16                   ## Maximum allowed box size for EBIS generation.
 AmrMesh.ref_rat              = 2 2 2 2 2 2          ## Refinement ratios (mixed ratios are allowed).
@@ -104,7 +104,6 @@ FieldSolverGMG.gmg_bottom_verbosity         = -1           ## Bottom solver verb
 FieldSolverGMG.gmg_cycle                    = vcycle       ## Cycle type. Only 'vcycle' supported for now.
 FieldSolverGMG.gmg_smoother                 = red_black    ## Relaxation type. 'jacobi', 'multi_color', or 'red_black'
 FieldSolverGMG.gmg_relax_factor             = 1.0          ## Adjustable SOR factor
-FieldSolverGMG.gmg_reflux_free              = false        ## If true, use reflux-free AMR operator (folds coarse-fine flux correction into a single conservative flux coarsening pass; mathematically equivalent to the refluxed operator.
 
 # ====================================================================================================
 # ItoSolver class options

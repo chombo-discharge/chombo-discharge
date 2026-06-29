@@ -67,6 +67,14 @@ This is supported by all solvers, including the particle infrastructure.
 
    Setting ``AmrMesh.min_block_size`` equal to ``AmrMesh.max_block_size`` yields fixed-size boxes, which is the most common configuration.
 
+The block sizes must satisfy a few requirements, which are checked at run time:
+
+* ``AmrMesh.min_block_size`` must be a multiple of every refinement ratio in ``AmrMesh.ref_rat`` (so refined boxes coarsen cleanly), which in particular requires ``min_block_size`` :math:`\geq` the refinement ratio.
+* ``AmrMesh.max_block_size`` must be greater than or equal to ``AmrMesh.min_block_size`` and an integer multiple of it.
+* ``AmrMesh.coarsest_domain`` must be a multiple of ``AmrMesh.min_block_size`` in every direction.
+
+There is no lower bound of 8 on the box sizes; e.g. ``min_block_size = max_block_size = 4`` is permitted (with factor-2 refinement).
+
 The flag ``AmrMesh.max_ebis_box`` indicates essentially the blocking factor when generating the cut-cell information at the start of a simulation.
 It may happen for very large simulations that one has to increase the box size (e.g., to 32) in order to trim grid metadata.
 

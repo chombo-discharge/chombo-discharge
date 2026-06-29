@@ -74,6 +74,16 @@ XTRACPPFLAGS += -DCD_PARTICLE_REAL=$(if $(filter FLOAT,$(PARTICLE_PRECISION)),fl
 # partial rebuild would mix objects with different sizeof(ParticleReal) into one ODR-violating binary.
 # Both halves are always explicit (DOUBLE included), unlike Chombo's native _precision which omits it.
 #
+# PRECISION must be given a default here, for the SAME reason PARTICLE_PRECISION is: the top-level
+# orchestrator (GNUmakefile) includes THIS file and exports XTRACONFIG to its recursive Chombo
+# sub-build, but it never reads Chombo's Make.defs.local where PRECISION is normally set. Without a
+# default $(PRECISION) is empty there, so the orchestrator builds/names the Chombo libraries as
+# ...OPENMPCC..DOUBLE while every app build (which DOES read Make.defs.local) computes
+# ...OPENMPCC.DOUBLE.DOUBLE -- a permanent mismatch that makes the prebuilt Chombo libraries
+# invisible and forces a second, redundant Chombo rebuild. `?=' yields to a real Make.defs.local or
+# command-line setting (e.g. PRECISION=FLOAT), so this only fills in the orchestrator's blank.
+PRECISION ?= DOUBLE
+#
 # The append is resolved lazily, so $(PRECISION)/$(PARTICLE_PRECISION) pick up values from
 # Make.defs.local, which is read after this file. It must also be IDEMPOTENT: Chombo exports
 # XTRACONFIG (mk/Make.rules), so recursive $(MAKE) sub-builds -- e.g. an app's `dependencies' rule

@@ -2633,12 +2633,8 @@ AmrMesh::parseMaxBlockSize()
     pp.get("max_block_size", blockSize);
   }
 
-  if (blockSize >= 4 && blockSize % 2 == 0) {
-    m_maxBlockSize = blockSize;
-  }
-  else {
-    MayDay::Error("AmrMesh::parseMaxBlockSize - must have max_block_size >= 4 and divisible by 2");
-  }
+  // Validity (floor, multiple of min_block_size) is enforced at runtime in sanityCheck.
+  m_maxBlockSize = blockSize;
 }
 
 void
@@ -2740,9 +2736,8 @@ AmrMesh::parseMinBlockSize()
     pp.get("min_block_size", blocking);
   }
 
-  if (blocking >= 4 && blocking % 2 == 0) {
-    m_minBlockSize = blocking;
-  }
+  // Validity (divisibility, floor, relation to max_block_size) is enforced at runtime in sanityCheck.
+  m_minBlockSize = blocking;
 }
 
 void
@@ -2921,14 +2916,28 @@ AmrMesh::sanityCheck() const
   }
 
   CH_assert(m_maxAmrDepth >= 0);
-  for (int lvl = 0; lvl < m_refinementRatios.size(); lvl++) {
-    CH_assert(m_refinementRatios[lvl] == 2 || m_refinementRatios[lvl] == 4);
-    CH_assert(m_minBlockSize >= 4 && m_minBlockSize % m_refinementRatios[lvl] == 0);
-  }
-
-  CH_assert(m_maxBlockSize >= 8 && m_maxBlockSize % m_minBlockSize == 0);
   CH_assert(m_fillRatioBR > 0. && m_fillRatioBR <= 1.0);
   CH_assert(m_bufferSizeBR > 0);
+
+  // ---- Block-size validity. These are runtime aborts (not CH_assert) so they also fire in optimized
+  //      builds: an invalid min/max combination otherwise corrupts the tile super-factor silently. ----
+  for (int lvl = 0; lvl < m_refinementRatios.size(); lvl++) {
+    if (m_refinementRatios[lvl] != 2 && m_refinementRatios[lvl] != 4) {
+      MayDay::Abort("AmrMesh::sanityCheck -- ref_rat entries must be 2 or 4");
+    }
+    if (m_minBlockSize % m_refinementRatios[lvl] != 0) {
+      MayDay::Abort("AmrMesh::sanityCheck -- min_block_size must be divisible by every ref_rat entry");
+    }
+  }
+  if (m_minBlockSize < 2) {
+    MayDay::Abort("AmrMesh::sanityCheck -- min_block_size must be >= 2");
+  }
+  if (m_maxBlockSize < m_minBlockSize) {
+    MayDay::Abort("AmrMesh::sanityCheck -- max_block_size must be >= min_block_size");
+  }
+  if (m_maxBlockSize % m_minBlockSize != 0) {
+    MayDay::Abort("AmrMesh::sanityCheck -- max_block_size must be an integer multiple of min_block_size");
+  }
 
   // The coarsest domain must be a whole number of minimum-size blocks in every direction. Refined
   // domains inherit this, and every grid box is then a union of aligned min_block_size tiles. Chombo's

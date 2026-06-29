@@ -12,6 +12,7 @@
 
 // Std includes
 #include <algorithm>
+#include <bitset>
 #include <cstdint>
 #include <cstdlib>
 #include <limits>
@@ -66,6 +67,10 @@ TiledMeshRefine::encodeSuper(const IntVect& a_super) const noexcept
 {
   std::uint64_t key = 0;
   for (int dir = 0; dir < SpaceDim; dir++) {
+    // The key packs 21 bits per direction; a super-tile index this large is unreachable for any
+    // realistic domain (it would require > 2^21 super-tiles in one direction).
+    CH_assert(a_super[dir] >= 0 && a_super[dir] < (1 << 21));
+
     key |= (static_cast<std::uint64_t>(a_super[dir]) & 0x1FFFFF) << (21 * dir);
   }
   return key;
@@ -123,7 +128,7 @@ TiledMeshRefine::classify(SuperTiles& a_tiles) const noexcept
   for (auto it = a_tiles.m_partial.begin(); it != a_tiles.m_partial.end();) {
     long long pop = 0;
     for (const std::uint64_t w : it->second) {
-      pop += __builtin_popcountll(w);
+      pop += static_cast<long long>(std::bitset<64>(w).count());
     }
 
     if (pop == m_superVol) {
