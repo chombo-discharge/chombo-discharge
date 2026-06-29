@@ -524,8 +524,11 @@ We explain these options below:
   The two formulations are mathematically equivalent; neither is more accurate than the other.
   Default is ``false``.
 
+.. tip::
 
-
+   If multigrid remains slow or fails to converge after tuning the options above -- e.g. ``gmg_verbosity > 0`` shows it hanging or hitting ``gmg_max_iter`` -- use the V-cycle as a *preconditioner* for an outer Krylov solver rather than as a stand-alone solver.
+   Set ``FieldSolverGMG.solver = gmres`` (robust, recommended) or ``bicgstab``, or use the fallback chain ``FieldSolverGMG.solver = gmg gmres`` to keep multigrid's speed on the easy steps and fall back to GMRES only when it stalls.
+   See :ref:`Chap:KrylovMultigrid` for what the Krylov solvers implement and for the ``krylov_*`` options.
 
 
 .. warning::

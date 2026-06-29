@@ -346,19 +346,29 @@ In each case, a simple smoother with a specified number of relaxations is applie
 Krylov-accelerated multigrid
 ____________________________
 
-The ``solver`` key and the ``krylov_*`` keys are mandatory input parameters (like the ``gmg_*`` keys); they must be present in the input file, and the shipped templates set ``solver = gmg``, which solves the Helmholtz equation by stand-alone multigrid V-cycling.
-On hard problems (strong coefficient contrast, awkward geometry) the V-cycle convergence rate can degrade or stall.
-For these cases the V-cycle can instead be used as a *preconditioner* for an outer Krylov method:
+By default the Helmholtz equation is solved by stand-alone multigrid V-cycling (``solver = gmg``), which is the cheapest option and the right choice whenever it converges well.
+On hard problems, however, the V-cycle convergence rate can degrade or stall: strong coefficient contrast (e.g. high-permittivity dielectrics), awkward cut-cell geometry, deep AMR hierarchies, or nearly indefinite operators can all make multigrid converge slowly, *hang* (see ``gmg_exit_hang``), or exhaust ``gmg_max_iter``.
+In these cases the V-cycle can instead be used as a *preconditioner* for an outer Krylov method, which removes the slowly-converging error modes that the smoother and coarse-grid correction cannot, and converges robustly where stand-alone multigrid does not:
 
 .. code-block:: text
 
    FieldSolverGMG.solver = gmres      # or 'bicgstab'
 
-The outer Krylov iteration removes the slowly-converging error modes the V-cycle cannot, so it converges robustly where stand-alone multigrid does not.
-The V-cycle preconditioner is configured exactly as before (``gmg_smoother``, ``gmg_pre_smooth``, ``gmg_cycle``, ``gmg_bottom_solver``, ...); only the outer wrapper changes.
+``chombo-discharge`` ships its own GMRES and BiCGStab implementations for this purpose (in :file:`$DISCHARGE_HOME/Source/Elliptic`); these are *not* the Chombo bottom solvers of the same name.
+Both act directly on the AMR hierarchy: the matrix-vector product is the composite Helmholtz operator, and the preconditioner is the multigrid V-cycle, supplied through a thin adapter (``AMRMultigridKrylovOp``).
+The solve is carried out in residual-correction form, so inhomogeneous boundary conditions and dielectric jump/surface-charge contributions are handled correctly, and a non-zero initial guess (warm start) is honoured.
+The V-cycle preconditioner is configured exactly as for stand-alone multigrid (``gmg_smoother``, ``gmg_pre_smooth``, ``gmg_cycle``, ``gmg_bottom_solver``, ...); only the outer wrapper changes.
 The same ``solver`` keyword is available on ``FieldSolverGMG`` (multiphase) and on the single-phase solvers ``CdrCTU``, ``CdrGodunov``, and ``EddingtonSP1``.
 
-The solve is carried out in residual-correction form, so inhomogeneous boundary conditions and dielectric jump/surface-charge contributions are handled correctly, and a non-zero initial guess (warm start) is honoured.
+The two methods implement:
+
+* **GMRES** (``gmres``) -- a restarted, right-preconditioned generalized minimal residual method, :math:`\textrm{GMRES}(m)` with :math:`m =` ``krylov_restart``.
+  It builds an orthonormal Krylov basis by Arnoldi iteration (classical Gram-Schmidt with reorthogonalization) and chooses, at each step, the correction that minimizes the residual over the current subspace; every ``krylov_restart`` iterations the basis is discarded and the iteration restarts from the current solution.
+  It is robust and is the recommended default.
+  Its memory cost grows with ``krylov_restart`` (it stores roughly ``krylov_restart`` AMR-sized vectors), which can be significant on large grids.
+* **BiCGStab** (``bicgstab``) -- a stabilized biconjugate-gradient method built on short recurrences.
+  It uses a small, fixed amount of work storage independent of the iteration count, so it is cheaper in memory than GMRES and is often competitive in iteration count.
+  Its recurrences can, however, *break down* (a near-zero inner product) on poorly-conditioned or strongly non-symmetric problems; the implementation restarts a bounded number of times on breakdown, but GMRES is the safer choice when robustness matters.
 
 ``solver`` also accepts a space-separated *fallback chain*: the listed solvers are attempted in order and the first that converges wins, with each attempt warm-started from the previous one. The idiomatic choice is
 
@@ -370,15 +380,22 @@ which runs cheap stand-alone multigrid and only pays for GMRES on the (hopefully
 
 .. tip::
 
-   ``gmres`` keeps an orthogonal basis whose length is ``krylov_restart`` and whose memory cost grows with it (on large grids this can be significant); it is robust and the recommended default.
+   Reach for the Krylov solvers when stand-alone multigrid is the bottleneck: if ``gmg_verbosity > 0`` shows the V-cycle hanging, hitting ``gmg_max_iter``, or converging at a poor rate that you cannot fix by adjusting the smoother, cycle type, or coarsening, switch to ``gmres`` (or the ``gmg gmres`` fallback chain).
+   Conversely, if pure multigrid already converges in a handful of V-cycles there is nothing to gain -- the outer Krylov iteration only adds cost.
+
+.. tip::
+
+   ``gmres`` is robust and the recommended default; raise ``krylov_restart`` if it stagnates (at the cost of memory) or lower it to save memory.
    ``bicgstab`` uses a small, fixed amount of work storage but can break down on poorly-conditioned problems.
    ``krylov_vcycles`` controls how many V-cycles make up one preconditioner application (usually 1); it is orthogonal to ``gmg_cycle`` (which selects V- vs W-cycles *within* a single application).
+
+The ``solver`` key and the ``krylov_*`` keys are mandatory input parameters (like the ``gmg_*`` keys) and must be present in the input file; the shipped templates set ``solver = gmg``.
 
 .. note::
 
    The Krylov convergence history is computed from a threaded floating-point reduction (the AMR inner product), so the printed residuals -- and the solution at a finite tolerance -- vary slightly from run to run. This is expected for parallel Krylov solvers; run single-threaded for bit-reproducibility.
 
-.. _Chap:MultigridTuning:
+.. _Chap:HelmholtzConfiguration:
 
 Configuration
 _____________
@@ -440,7 +457,7 @@ All parameters below use a solver-class prefix (e.g. ``FieldSolverGMG``, ``Eddin
 * ``<Solver>.krylov_vcycles``.
   Number of V-cycles applied per Krylov preconditioner application.
 
-The outer Krylov solver reuses the ``gmg_verbosity`` setting (there is no separate ``krylov_verbosity``). With ``gmg_verbosity >= 1`` a one-line convergence summary (initial/final residual, reduction, exit status) is printed for each Krylov solve, and a message is printed whenever a fallback chain switches solver; the Chombo solver's own per-iteration history appears at higher verbosities.
+The outer Krylov solver reuses the ``gmg_verbosity`` setting (there is no separate ``krylov_verbosity``). With ``gmg_verbosity >= 1`` a one-line convergence summary (initial/final residual, reduction, exit status) is printed for each Krylov solve, and a message is printed whenever a fallback chain switches solver; the per-iteration residual history from the GMRES/BiCGStab solvers is printed at ``gmg_verbosity >= 4``.
 
 .. note::
 
