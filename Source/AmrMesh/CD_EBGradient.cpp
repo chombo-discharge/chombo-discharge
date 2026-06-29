@@ -239,7 +239,7 @@ EBGradient::computeNormalDerivative(LevelData<EBFluxFAB>& a_gradient, const Leve
       const IntVect shift = BASISV(dir);
 
       auto regularFaceDerivative = [&](const IntVect& iv) -> void {
-        regGradient(iv, dir) = idx * regPhi(iv, m_comp) - regPhi(iv - shift, m_comp);
+        regGradient(iv, dir) = idx * (regPhi(iv, m_comp) - regPhi(iv - shift, m_comp));
       };
 
       // Cut-cell version of the above.
@@ -993,8 +993,12 @@ EBGradient::getLeastSquaresStencil(VoFStencil&            a_stencilCoar,
     }
     knownTerms |= IntVect::Zero;
 
+    // Solve in double precision (Real). Single precision is not robust here: the dual-level system mixes coarse (dx)
+    // and fine (dx/refRat) displacements, so for refRat = 4 the order-2 columns span a factor ~64 in magnitude and
+    // the single-precision pseudo-inverse can return bad stencil weights at the awkward EBCF cut-cells. This matches
+    // the dual-level interpolator in EBLeastSquaresMultigridInterpolator, which also uses Real.
     const std::map<IntVect, std::pair<VoFStencil, VoFStencil>> stencils = LeastSquares::computeDualLevelStencils<
-      float>(derivTerms, knownTerms, fineVoFs, coarVoFs, fineDisplacements, coarDisplacements, a_weight, a_order);
+      Real>(derivTerms, knownTerms, fineVoFs, coarVoFs, fineDisplacements, coarDisplacements, a_weight, a_order);
     // LeastSquares returns a map over all derivatives (unknowns) in the Taylor series. These are stored
     // as IntVects so that IntVect(1,1) = d^2/(dxdy) and so on. We are after IntVect(1,0) = d/dx, IntVect(0,1) = d/dy. We fetch
     // those and place them in a_stencilFine and a_stencilCoar. We encode the direction in the stencil variable (in a_stencilFine) and

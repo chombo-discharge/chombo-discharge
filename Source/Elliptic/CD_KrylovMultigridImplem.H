@@ -13,6 +13,9 @@
 #ifndef CD_KrylovMultigridImplem_H
 #define CD_KrylovMultigridImplem_H
 
+// Std includes
+#include <algorithm>
+
 // Chombo includes
 #include <CH_Timer.H>
 #include <parstream.H>
@@ -72,11 +75,16 @@ KrylovMultigrid::solve(AMRMultiGrid<LevelData<T>>*  a_mg,
   bool converged  = false;
   int  exitStatus = -1;
 
+  // Keep the Chombo solver output terse. At verbosity >= 4 both GMRES and BiCGStab print a one-line-per-iteration
+  // convergence history (akin to AMRMultiGrid's residual/rate report) plus restart messages; at >= 5 BiCGStab also
+  // dumps its internal scalars (alpha/beta/omega/rho) every iteration. Cap at 4 so we only ever get the terse history.
+  const int solverVerbosity = std::min(a_settings.verbosity, 4);
+
   switch (a_type) {
   case SolverType::GMRES: {
     GMRESSolver<Vec> gmres;
     gmres.define(&a_op, true);
-    gmres.m_verbosity = a_settings.verbosity;
+    gmres.m_verbosity = solverVerbosity;
     gmres.m_imax      = a_settings.maxIter;
     gmres.m_reps      = a_settings.eps;
     gmres.setRestartLen(a_settings.restart);
@@ -91,7 +99,7 @@ KrylovMultigrid::solve(AMRMultiGrid<LevelData<T>>*  a_mg,
   case SolverType::BiCGStab: {
     BiCGStabSolver<Vec> bicg;
     bicg.define(&a_op, true);
-    bicg.m_verbosity = a_settings.verbosity;
+    bicg.m_verbosity = solverVerbosity;
     bicg.m_imax      = a_settings.maxIter;
     bicg.m_eps       = a_settings.eps;
 
