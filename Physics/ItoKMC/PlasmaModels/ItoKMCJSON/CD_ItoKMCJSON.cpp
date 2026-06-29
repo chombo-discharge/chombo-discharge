@@ -3573,10 +3573,17 @@ ItoKMCJSON::secondaryEmissionEB(Vector<ParticleSoA<ItoParticle>>& a_secondaryPar
       const auto& plasmaProducts = reactions.getProducts();
       const auto& distribution   = reactions.getDistribution();
 
-      // Figure out the number of particles to sample and then run a multinomial sampling
+      // Figure out the number of particles to sample and then run a multinomial sampling. Guard against
+      // non-positive/non-finite weights: a negative or NaN weight would cast to a huge size_t and corrupt N.
       size_t N = 0;
       for (std::size_t j = 0; j < a_primaryParticles[i].size(); j++) {
-        N += (size_t)a_primaryParticles[i].weight(j);
+        const Real w = a_primaryParticles[i].weight(j);
+
+        CH_assert(w >= 0.0);
+
+        if (w > 0.0) {
+          N += (size_t)w;
+        }
       }
 
       const std::vector<size_t> X = this->multinomial(N, distribution);
@@ -3608,10 +3615,17 @@ ItoKMCJSON::secondaryEmissionEB(Vector<ParticleSoA<ItoParticle>>& a_secondaryPar
       const auto& plasmaProducts = reactions.getProducts();
       const auto& distribution   = reactions.getDistribution();
 
-      // Figure out the number of particles to sample and then run a multinomial sampling
+      // Figure out the number of particles to sample and then run a multinomial sampling. Guard against
+      // non-positive/non-finite weights: a negative or NaN weight would cast to a huge size_t and corrupt N.
       size_t N = 0;
       for (std::size_t j = 0; j < a_primaryPhotons[i].size(); j++) {
-        N += (size_t)a_primaryPhotons[i].weight(j);
+        const Real w = a_primaryPhotons[i].weight(j);
+
+        CH_assert(w >= 0.0);
+
+        if (w > 0.0) {
+          N += (size_t)w;
+        }
       }
 
       const std::vector<size_t> X = this->multinomial(N, distribution);
@@ -3801,7 +3815,7 @@ ItoKMCJSON::getPlotVariables(const RealVect& a_E,
 }
 
 std::vector<size_t>
-ItoKMCJSON::multinomial(const size_t N, const std::discrete_distribution<size_t>& a_distribution) const noexcept
+ItoKMCJSON::multinomial(const size_t N, const std::discrete_distribution<int>& a_distribution) const noexcept
 {
   CH_TIME("ItoKMCJSON::multinomial");
   if (m_verbose) {
@@ -3817,9 +3831,15 @@ ItoKMCJSON::multinomial(const size_t N, const std::discrete_distribution<size_t>
 
   for (int i = 0; i < P.size(); i++) {
     if (rho > 0.0) {
-      std::binomial_distribution<size_t> d(S, P[i] / rho);
+      // Conditional sampling: the i'th outcome is Binomial(remaining trials, P[i]/rho). Floating-point
+      // drift in the running rho = sum_{k>=i} P[k] can push P[i]/rho marginally above 1 on the final
+      // term, which is an invalid (and undefined) success probability for the binomial -- so clamp it.
+      const double p = std::min(P[i] / rho, 1.0);
 
-      X[i] = Random::getDiscrete(d);
+      // Note: std::binomial_distribution requires a *signed* integer type for the number of trials.
+      std::binomial_distribution<long long> d(static_cast<long long>(S), p);
+
+      X[i] = static_cast<size_t>(Random::getDiscrete(d));
     }
 
     rho = rho - P[i];
