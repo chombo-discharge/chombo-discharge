@@ -420,6 +420,11 @@ protected:
   KrylovMultigrid::Settings m_krylovSettings;
 
   /**
+    @brief Fallback-chain latch policy (persists across regrids; re-probes GMG every krylov_retry_interval solves)
+  */
+  KrylovMultigrid::FallbackPolicy m_fallbackPolicy;
+
+  /**
     @brief Outer-Krylov driver (V-cycle-preconditioned BiCGStab/GMRES with persistent work vectors)
   */
   KrylovMultigrid::Solver<EBCellFAB> m_krylov;

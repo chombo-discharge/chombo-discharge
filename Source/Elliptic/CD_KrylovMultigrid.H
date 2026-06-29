@@ -14,12 +14,14 @@
 #define CD_KrylovMultigrid_H
 
 // Std includes
+#include <algorithm>
 #include <string>
 
 // Chombo includes
 #include <AMRMultiGrid.H>
 #include <LevelData.H>
 #include <Vector.H>
+#include <parstream.H>
 
 // Our includes
 #include <CD_AMRMultigridKrylovOp.H>
@@ -104,6 +106,118 @@ namespace KrylovMultigrid {
         }
       }
       return false;
+    }
+  };
+
+  /**
+    @brief Stateful policy for the ``solver`` fallback chain.
+    @details When the leading stand-alone multigrid (GMG) entry of a chain such as ``gmg gmres`` fails, the chain
+             falls back to the Krylov solver. Without memory the next solve pays a full failed GMG attempt again, which
+             is wasteful when the failure is persistent (e.g. a fixed, hard field operator). This policy latches onto
+             the Krylov fallback after a GMG failure and only re-probes GMG every ``retryInterval`` solves, reclaiming
+             multigrid's speed whenever the problem becomes tractable again. ``retryInterval == 1`` reproduces the
+             memoryless "always retry GMG first" behaviour; a large value approaches a permanent latch.
+    @note The state is deliberately decoupled from regridding: hold an instance as a host-solver member and do *not*
+          reset it when the operators are rebuilt (regrids may be far more frequent than the desired re-probe cadence).
+          The counter advances per solve, so the re-probe cadence is measured in solves, not necessarily time steps.
+  */
+  struct FallbackPolicy
+  {
+    /**
+      @brief Re-probe GMG every this many solves while latched. Clamped to >= 1; 1 reproduces always-retry behaviour.
+    */
+    int retryInterval = 1;
+
+    /**
+      @brief Start index into a_solvers for this solve, advancing the re-probe counter. Call exactly once per solve.
+      @details Returns 0 (include the leading GMG) when unlatched or when a periodic re-probe is due; otherwise returns
+               the index of the first non-GMG solver so the persistently-failing GMG attempt is skipped.
+      @param[in] a_solvers The configured fallback chain.
+      @return Start index into a_solvers.
+    */
+    int
+    startIndex(const Vector<SolverType>& a_solvers)
+    {
+      if (!m_latched) {
+        return 0;
+      }
+
+      m_sinceProbe++;
+      if (m_sinceProbe >= std::max(1, retryInterval)) {
+        m_sinceProbe = 0;
+
+        return 0; // periodic re-probe of GMG
+      }
+
+      return this->firstNonGmg(a_solvers);
+    }
+
+    /**
+      @brief Record the outcome of the leading GMG attempt and update the latch.
+      @details Latching (a failed GMG attempt) is already announced by the host's fallback-chain message; this method
+               additionally announces the *release* (a successful re-probe) at verbosity >= 1, since that transition is
+               otherwise silent.
+      @param[in] a_gmgAttempted Whether a stand-alone GMG attempt was made this solve.
+      @param[in] a_gmgConverged Whether that GMG attempt converged.
+      @param[in] a_verbosity    Host verbosity; a release message is printed when >= 1.
+      @param[in] a_name         Host solver name, used to prefix the release message.
+    */
+    void
+    recordGmgOutcome(const bool         a_gmgAttempted,
+                     const bool         a_gmgConverged,
+                     const int          a_verbosity = -1,
+                     const std::string& a_name      = "")
+    {
+      if (a_gmgAttempted) {
+        const bool wasLatched = m_latched;
+
+        m_latched = !a_gmgConverged;
+        if (m_latched) {
+          m_sinceProbe = 0;
+        }
+
+        if (a_verbosity >= 1 && wasLatched && !m_latched) {
+          pout() << a_name << " - multigrid re-probe succeeded; releasing the Krylov fallback latch" << endl;
+        }
+      }
+    }
+
+    /**
+      @brief Whether the policy is currently latched onto the Krylov fallback.
+      @return True if latched.
+    */
+    bool
+    isLatched() const
+    {
+      return m_latched;
+    }
+
+  protected:
+    /**
+      @brief Whether a failed GMG attempt has latched us onto the Krylov fallback.
+    */
+    bool m_latched = false;
+
+    /**
+      @brief Solves since the last GMG attempt while latched.
+    */
+    int m_sinceProbe = 0;
+
+    /**
+      @brief Index of the first non-GMG solver in the chain, or 0 if there is none.
+      @param[in] a_solvers The fallback chain.
+      @return Start index that skips a leading GMG.
+    */
+    int
+    firstNonGmg(const Vector<SolverType>& a_solvers) const
+    {
+      for (int i = 0; i < a_solvers.size(); i++) {
+        if (a_solvers[i] != SolverType::GMG) {
+          return i;
+        }
+      }
+
+      return 0;
     }
   };
 

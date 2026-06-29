@@ -488,6 +488,10 @@ EddingtonSP1::parseMultigridSettings()
   pp.get("krylov_max_iter", m_krylovSettings.maxIter);
   pp.get("krylov_restart", m_krylovSettings.restart);
   pp.get("krylov_vcycles", m_krylovSettings.numVCycles);
+
+  // Optional: re-probe GMG every this many solves while latched onto the Krylov fallback. Default 1 (always retry
+  // GMG first); larger values approach a permanent latch. State persists across regrids (see FallbackPolicy).
+  pp.query("krylov_retry_interval", m_fallbackPolicy.retryInterval);
   m_krylovSettings.verbosity = m_multigridVerbosity; // The Krylov solvers reuse the gmg_verbosity setting.
 }
 
@@ -688,13 +692,17 @@ EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData
     const Real zeroResid = m_multigridSolver->computeAMRResidual(zer, rhs, finestLevel, coarsestLevel);
 
     if (phiResid > zeroResid * m_multigridExitTolerance) {
-      // Try the solver chain in order (e.g. 'gmg gmres'), warm-starting each attempt from the previous one.
-      bool firstAttempt = true;
-      for (int i = 0; i < m_krylovSettings.solvers.size() && !converged; i++) {
+      // Try the solver chain in order (e.g. 'gmg gmres'), warm-starting each attempt from the previous one. Begin at
+      // the policy's preferred index, which skips a persistently-failing GMG while latched onto the fallback.
+      const int startIdx     = m_fallbackPolicy.startIndex(m_krylovSettings.solvers);
+      bool      firstAttempt = true;
+      bool      gmgAttempted = false;
+      bool      gmgConverged = false;
+      for (int i = startIdx; i < m_krylovSettings.solvers.size() && !converged; i++) {
         const KrylovMultigrid::SolverType solverType = m_krylovSettings.solvers[i];
         const bool                        zeroPhi    = a_zeroPhi && firstAttempt;
 
-        if (i > 0 && m_krylovSettings.verbosity >= 1) {
+        if (i > startIdx && m_krylovSettings.verbosity >= 1) {
           pout() << "EddingtonSP1::advance - '" << KrylovMultigrid::solverTypeName(m_krylovSettings.solvers[i - 1])
                  << "' did not converge; falling back to '" << KrylovMultigrid::solverTypeName(solverType) << "'"
                  << endl;
@@ -706,6 +714,8 @@ EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData
 
           const int status = m_multigridSolver->m_exitStatus; // 1 => Initial norm sufficiently reduced
           converged        = (status == 1 || status == 8 || status == 9);
+          gmgAttempted     = true;
+          gmgConverged     = converged;
         }
         else {
           // Outer Krylov solve with the V-cycle as preconditioner.
@@ -714,6 +724,10 @@ EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData
 
         firstAttempt = false;
       }
+      m_fallbackPolicy.recordGmgOutcome(gmgAttempted,
+                                        gmgConverged,
+                                        m_krylovSettings.verbosity,
+                                        "EddingtonSP1::advance");
     }
     else {
       // Solution is already good enough
@@ -803,13 +817,16 @@ EddingtonSP1::advanceEuler(EBAMRCellData&       a_phi,
   // the solver chain in order (e.g. 'gmg gmres') and warm-starting each attempt from the previous one.
   const Real zeroResid = m_multigridSolver->computeAMRResidual(zer, eulerRHS, finestLevel, coarsestLevel);
 
-  bool converged    = false;
-  bool firstAttempt = true;
-  for (int i = 0; i < m_krylovSettings.solvers.size() && !converged; i++) {
+  const int startIdx     = m_fallbackPolicy.startIndex(m_krylovSettings.solvers);
+  bool      converged    = false;
+  bool      firstAttempt = true;
+  bool      gmgAttempted = false;
+  bool      gmgConverged = false;
+  for (int i = startIdx; i < m_krylovSettings.solvers.size() && !converged; i++) {
     const KrylovMultigrid::SolverType solverType = m_krylovSettings.solvers[i];
     const bool                        zeroPhi    = a_zeroPhi && firstAttempt;
 
-    if (i > 0 && m_krylovSettings.verbosity >= 1) {
+    if (i > startIdx && m_krylovSettings.verbosity >= 1) {
       pout() << "EddingtonSP1::advanceEuler - '" << KrylovMultigrid::solverTypeName(m_krylovSettings.solvers[i - 1])
              << "' did not converge; falling back to '" << KrylovMultigrid::solverTypeName(solverType) << "'" << endl;
     }
@@ -820,6 +837,8 @@ EddingtonSP1::advanceEuler(EBAMRCellData&       a_phi,
 
       const int status = m_multigridSolver->m_exitStatus;
       converged        = (status == 1 || status == 8 || status == 9);
+      gmgAttempted     = true;
+      gmgConverged     = converged;
     }
     else {
       converged = m_krylov.solve(newPhi, eulerRHS, zeroPhi, solverType, m_krylovSettings);
@@ -827,6 +846,10 @@ EddingtonSP1::advanceEuler(EBAMRCellData&       a_phi,
 
     firstAttempt = false;
   }
+  m_fallbackPolicy.recordGmgOutcome(gmgAttempted,
+                                    gmgConverged,
+                                    m_krylovSettings.verbosity,
+                                    "EddingtonSP1::advanceEuler");
 }
 
 void

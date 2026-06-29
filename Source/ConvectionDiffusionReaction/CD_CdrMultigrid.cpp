@@ -232,12 +232,16 @@ CdrMultigrid::advanceEuler(EBAMRCellData&       a_newPhi,
     DataOps::copy(a_newPhi, a_oldPhi);
 
     // Do the multigrid solve, trying the solver chain in order (e.g. 'gmg gmres'). Each attempt warm-starts from the
-    // previous one (a_newPhi is updated in place).
-    bool converged = false;
-    for (int i = 0; i < m_krylovSettings.solvers.size() && !converged; i++) {
+    // previous one (a_newPhi is updated in place). Begin at the policy's preferred index, which skips a
+    // persistently-failing GMG while latched onto the fallback.
+    const int startIdx     = m_fallbackPolicy.startIndex(m_krylovSettings.solvers);
+    bool      converged    = false;
+    bool      gmgAttempted = false;
+    bool      gmgConverged = false;
+    for (int i = startIdx; i < m_krylovSettings.solvers.size() && !converged; i++) {
       const KrylovMultigrid::SolverType solverType = m_krylovSettings.solvers[i];
 
-      if (i > 0 && m_krylovSettings.verbosity >= 1) {
+      if (i > startIdx && m_krylovSettings.verbosity >= 1) {
         pout() << "CdrMultigrid - '" << KrylovMultigrid::solverTypeName(m_krylovSettings.solvers[i - 1])
                << "' did not converge; falling back to '" << KrylovMultigrid::solverTypeName(solverType) << "'" << endl;
       }
@@ -247,11 +251,14 @@ CdrMultigrid::advanceEuler(EBAMRCellData&       a_newPhi,
 
         const int status = m_multigridSolver->m_exitStatus;
         converged        = (status == 1 || status == 8);
+        gmgAttempted     = true;
+        gmgConverged     = converged;
       }
       else {
         converged = m_krylov.solve(newPhi, eulerRHS, false, solverType, m_krylovSettings);
       }
     }
+    m_fallbackPolicy.recordGmgOutcome(gmgAttempted, gmgConverged, m_krylovSettings.verbosity, "CdrMultigrid");
   }
   else {
     DataOps::copy(a_newPhi, a_oldPhi);
@@ -350,12 +357,16 @@ CdrMultigrid::advanceCrankNicholson(EBAMRCellData&       a_newPhi,
     DataOps::copy(a_newPhi, a_oldPhi);
 
     // Do the multigrid solve, trying the solver chain in order (e.g. 'gmg gmres'). Each attempt warm-starts from the
-    // previous one (a_newPhi is updated in place).
-    bool converged = false;
-    for (int i = 0; i < m_krylovSettings.solvers.size() && !converged; i++) {
+    // previous one (a_newPhi is updated in place). Begin at the policy's preferred index, which skips a
+    // persistently-failing GMG while latched onto the fallback.
+    const int startIdx     = m_fallbackPolicy.startIndex(m_krylovSettings.solvers);
+    bool      converged    = false;
+    bool      gmgAttempted = false;
+    bool      gmgConverged = false;
+    for (int i = startIdx; i < m_krylovSettings.solvers.size() && !converged; i++) {
       const KrylovMultigrid::SolverType solverType = m_krylovSettings.solvers[i];
 
-      if (i > 0 && m_krylovSettings.verbosity >= 1) {
+      if (i > startIdx && m_krylovSettings.verbosity >= 1) {
         pout() << "CdrMultigrid - '" << KrylovMultigrid::solverTypeName(m_krylovSettings.solvers[i - 1])
                << "' did not converge; falling back to '" << KrylovMultigrid::solverTypeName(solverType) << "'" << endl;
       }
@@ -365,11 +376,14 @@ CdrMultigrid::advanceCrankNicholson(EBAMRCellData&       a_newPhi,
 
         const int status = m_multigridSolver->m_exitStatus;
         converged        = (status == 1 || status == 8);
+        gmgAttempted     = true;
+        gmgConverged     = converged;
       }
       else {
         converged = m_krylov.solve(newPhi, eulerRHS, false, solverType, m_krylovSettings);
       }
     }
+    m_fallbackPolicy.recordGmgOutcome(gmgAttempted, gmgConverged, m_krylovSettings.verbosity, "CdrMultigrid");
   }
   else {
     DataOps::copy(a_newPhi, a_oldPhi);
@@ -869,6 +883,10 @@ CdrMultigrid::parseMultigridSettings()
   pp.get("krylov_max_iter", m_krylovSettings.maxIter);
   pp.get("krylov_restart", m_krylovSettings.restart);
   pp.get("krylov_vcycles", m_krylovSettings.numVCycles);
+
+  // Optional: re-probe GMG every this many solves while latched onto the Krylov fallback. Default 1 (always retry
+  // GMG first); larger values approach a permanent latch. State persists across regrids (see FallbackPolicy).
+  pp.query("krylov_retry_interval", m_fallbackPolicy.retryInterval);
   m_krylovSettings.verbosity = m_multigridVerbosity; // The Krylov solvers reuse the gmg_verbosity setting.
 }
 
