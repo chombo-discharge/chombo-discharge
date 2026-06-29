@@ -437,6 +437,9 @@ EddingtonSP1::parseMultigridSettings()
     pp.get("gmg_smoother", m_multigridChebyOrder, 1);
     pp.get("gmg_smoother", m_multigridChebyEigRatio, 2);
   }
+  else if (str == "ras") {
+    m_multigridRelaxMethod = EBHelmholtzOp::Smoother::RestrictedAdditiveSchwarz;
+  }
   else {
     MayDay::Error("EddingtonSP1::parseMultigridSettings - unknown relaxation method requested");
   }

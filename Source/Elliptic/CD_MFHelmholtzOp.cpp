@@ -185,6 +185,11 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
 
       break;
     }
+    case MFHelmholtzOp::Smoother::RestrictedAdditiveSchwarz: {
+      ebHelmRelax = EBHelmholtzOp::Smoother::RestrictedAdditiveSchwarz;
+
+      break;
+    }
     default: {
       MayDay::Error("MFHelmholtzOp::MFHelmholtzOp - unsupported relaxation method requested");
 
@@ -758,6 +763,11 @@ MFHelmholtzOp::relax(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellF
 
     break;
   }
+  case Smoother::RestrictedAdditiveSchwarz: {
+    this->relaxRestrictedAdditiveSchwarz(a_correction, a_residual, a_iterations);
+
+    break;
+  }
   default: {
     MayDay::Error("MFHelmholtzOp::relax - bogus relaxation method requested");
 
@@ -867,6 +877,68 @@ MFHelmholtzOp::relaxGSRedBlack(LevelData<MFCellFAB>&       a_correction,
           const BaseIVFAB<Real>& BcoefIrreg = *(*m_BcoefIrreg)[din].getPhasePtr(iphase);
 
           op.second->gauSaiRedBlackKernel(Lph, phi, res, Acoef, Bcoef, BcoefIrreg, cellBox, din, redBlack);
+        }
+      }
+    }
+  }
+}
+
+void
+MFHelmholtzOp::relaxRestrictedAdditiveSchwarz(LevelData<MFCellFAB>&       a_correction,
+                                              const LevelData<MFCellFAB>& a_residual,
+                                              const int                   a_iterations)
+{
+  CH_TIME("MFHelmholtzOp::relaxRestrictedAdditiveSchwarz");
+
+  // TLDR: Restricted additive Schwarz (block) smoother. Ghost cells/jump BCs are filled ONCE per outer iteration,
+  //       then each patch performs a number of frozen-ghost red-black sweeps (inexact local Dirichlet solve). Across
+  //       patches the iteration is additive (block Jacobi). The inner-sweep count is taken from the first phase
+  //       operator.
+
+  LevelData<MFCellFAB> Lcorr;
+  this->create(Lcorr, a_correction);
+
+  const DisjointBoxLayout& dbl = m_mflg.getGrids();
+  const DataIterator&      dit = dbl.dataIterator();
+
+  const int nbox = dit.size();
+
+  constexpr bool homogeneousCFBC   = true;
+  constexpr bool homogeneousPhysBC = true;
+
+  int innerSweeps = 2;
+  if (!m_helmOps.empty()) {
+    innerSweeps = m_helmOps.begin()->second->getRasInnerSweeps();
+  }
+
+  for (int i = 0; i < a_iterations; i++) {
+
+    // Fill/interpolate ghost cells and match the BC once per outer iteration -- frozen during the inner block sweeps.
+    this->exchangeGhost(a_correction);
+    this->interpolateCF(a_correction, nullptr, homogeneousCFBC);
+    this->updateJumpBC(a_correction, homogeneousPhysBC);
+
+    // Inexact local solve on each patch.
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din     = dit[mybox];
+      const Box        cellBox = dbl[din];
+
+      for (int sweep = 0; sweep < innerSweeps; sweep++) {
+        for (int redBlack = 0; redBlack <= 1; redBlack++) {
+          for (auto& op : m_helmOps) {
+            const int iphase = op.first;
+
+            EBCellFAB&       Lph = Lcorr[din].getPhase(iphase);
+            EBCellFAB&       phi = a_correction[din].getPhase(iphase);
+            const EBCellFAB& res = a_residual[din].getPhase(iphase);
+
+            const EBCellFAB&       Acoef      = (*m_Acoef)[din].getPhase(iphase);
+            const EBFluxFAB&       Bcoef      = (*m_Bcoef)[din].getPhase(iphase);
+            const BaseIVFAB<Real>& BcoefIrreg = *(*m_BcoefIrreg)[din].getPhasePtr(iphase);
+
+            op.second->gauSaiRedBlackKernel(Lph, phi, res, Acoef, Bcoef, BcoefIrreg, cellBox, din, redBlack);
+          }
         }
       }
     }

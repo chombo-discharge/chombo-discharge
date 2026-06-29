@@ -764,6 +764,9 @@ CdrMultigrid::parseMultigridSettings()
     pp.get("gmg_smoother", m_chebyOrder, 1);
     pp.get("gmg_smoother", m_chebyEigRatio, 2);
   }
+  else if (str == "ras") {
+    m_smoother = EBHelmholtzOp::Smoother::RestrictedAdditiveSchwarz;
+  }
   else {
     MayDay::Error("CdrMultigrid::parseMultigridSettings - unknown relaxation method requested");
   }

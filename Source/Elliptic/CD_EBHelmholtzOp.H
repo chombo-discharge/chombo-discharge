@@ -51,6 +51,7 @@ public:
     GauSaiRedBlack,
     GauSaiMultiColor,
     Chebyshev,
+    RestrictedAdditiveSchwarz,
   };
 
   /**
@@ -938,6 +939,13 @@ public:
   getSpectralRadius() const noexcept;
 
   /**
+    @brief Returns m_rasInnerSweeps. Used by MFHelmholtzOp to replicate the Schwarz block solve.
+    @return Number of inner (frozen-ghost) red-black sweeps per outer Schwarz iteration
+  */
+  int
+  getRasInnerSweeps() const noexcept;
+
+  /**
     @brief Return all-cut VoFIterators (one per patch). Used by MFHelmholtzOp.
     @return All-cut VoF iterators over irregular cells on this level.
   */
@@ -1079,6 +1087,11 @@ protected:
     @details Computed via the Gershgorin bound after defineStencils(). Used as lambda_max in the Chebyshev smoother.
   */
   Real m_spectralRadius;
+
+  /**
+    @brief Number of inner (frozen-ghost) red-black sweeps per outer restricted-additive-Schwarz iteration.
+  */
+  int m_rasInnerSweeps;
 
   /**
     @brief Vector resolution
@@ -1353,6 +1366,23 @@ protected:
   */
   void
   relaxChebyshev(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations);
+
+  /**
+    @brief Restricted additive Schwarz smoother (block smoother).
+    @details Each outer iteration exchanges ghost cells once and then performs m_rasInnerSweeps
+             red-black Gauss-Seidel sweeps per patch with the ghost cells held frozen (Dirichlet).
+             The blocks are the disjoint patches, so the update is automatically restricted to the
+             valid region and no additive damping is required (overlap = 0). Because the ghost
+             exchange is amortised over the inner sweeps, this smoother performs fewer halo exchanges
+             per multigrid cycle than point relaxation.
+    @param[in,out] a_correction Correction
+    @param[in]    a_residual   Residual
+    @param[in]    a_iterations Number of outer Schwarz iterations
+  */
+  void
+  relaxRestrictedAdditiveSchwarz(LevelData<EBCellFAB>&       a_correction,
+                                 const LevelData<EBCellFAB>& a_residual,
+                                 const int                   a_iterations);
 
   /**
     @brief Calculate the weight of the diagonal term

@@ -182,6 +182,9 @@ FieldSolverGMG::parseMultigridSettings()
     pp.get("gmg_smoother", m_multigridChebyOrder, 1);
     pp.get("gmg_smoother", m_multigridChebyEigRatio, 2);
   }
+  else if (str == "ras") {
+    m_multigridRelaxMethod = MFHelmholtzOp::Smoother::RestrictedAdditiveSchwarz;
+  }
   else {
     MayDay::Error("FieldSolverGMG::parseMultigridSettings() - unsupported relaxation method requested");
   }

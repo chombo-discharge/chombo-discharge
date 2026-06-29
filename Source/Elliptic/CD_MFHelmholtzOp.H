@@ -52,6 +52,7 @@ public:
     GauSaiRedBlack,
     GauSaiMultiColor,
     Chebyshev,
+    RestrictedAdditiveSchwarz,
   };
 
   /**
@@ -347,6 +348,20 @@ public:
   */
   void
   relaxChebyshev(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellFAB>& a_residual, const int a_iterations);
+
+  /**
+    @brief Restricted additive Schwarz smoother (block smoother).
+    @details Exchanges ghost cells once per outer iteration and then performs a number of frozen-ghost
+             red-black sweeps per patch (inexact local Dirichlet solve). The block (inner-sweep) count is
+             taken from the first phase operator.
+    @param[in,out] a_correction Correction
+    @param[in]    a_residual   Residual
+    @param[in]    a_iterations Number of outer Schwarz iterations
+  */
+  void
+  relaxRestrictedAdditiveSchwarz(LevelData<MFCellFAB>&       a_correction,
+                                 const LevelData<MFCellFAB>& a_residual,
+                                 const int                   a_iterations);
 
   /**
     @brief Create method

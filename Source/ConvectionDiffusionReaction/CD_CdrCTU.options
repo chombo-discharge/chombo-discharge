@@ -25,5 +25,5 @@ CdrCTU.gmg_exit_hang            = 0.2                       ## Solver hang
 CdrCTU.gmg_min_cells            = 16                        ## Bottom drop
 CdrCTU.gmg_bottom_solver        = bicgstab                  ## Bottom solver type. Valid options are 'simple' and 'bicgstab'
 CdrCTU.gmg_cycle                = vcycle                    ## Cycle type. Only 'vcycle' supported for now
-CdrCTU.gmg_smoother             = red_black                 ## Relaxation. 'jacobi', 'multi_color', 'red_black', or 'chebyshev <order> <eig_ratio>'
+CdrCTU.gmg_smoother             = red_black                 ## Relaxation. 'jacobi', 'multi_color', 'red_black', 'chebyshev <order> <eig_ratio>', or 'ras'
 CdrCTU.gmg_reflux_free          = false                     ## If true, use reflux-free AMR operator (folds coarse-fine flux correction into a single conservative flux coarsening pass; mathematically equivalent to the refluxed operator.

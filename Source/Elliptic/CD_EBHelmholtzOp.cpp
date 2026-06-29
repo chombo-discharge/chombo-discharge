@@ -117,11 +117,13 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
   m_chebyOrder       = a_chebyOrder;
   m_chebyEigRatio    = a_chebyEigRatio;
   m_spectralRadius   = 2.0;
+  m_rasInnerSweeps   = 2;
 
   ParmParse pp("EBHelmholtzOp");
   pp.query("reflux_free", m_refluxFree);
   pp.query("profile", m_profile);
   pp.query("precond_smooth", m_numSmoothPreCond);
+  pp.query("ras_inner_sweeps", m_rasInnerSweeps);
 
   m_timer = Timer("EBHelmholtzOp");
 
@@ -304,6 +306,12 @@ Real
 EBHelmholtzOp::getSpectralRadius() const noexcept
 {
   return m_spectralRadius;
+}
+
+int
+EBHelmholtzOp::getRasInnerSweeps() const noexcept
+{
+  return m_rasInnerSweeps;
 }
 
 LayoutData<VoFIterator>&
@@ -1713,6 +1721,11 @@ EBHelmholtzOp::relax(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellF
 
     break;
   }
+  case Smoother::RestrictedAdditiveSchwarz: {
+    this->relaxRestrictedAdditiveSchwarz(a_correction, a_residual, a_iterations);
+
+    break;
+  }
   default: {
     MayDay::Error("EBHelmholtzOp::relax - bogus relaxation method requested");
 
@@ -1910,6 +1923,56 @@ EBHelmholtzOp::relaxGSRedBlack(LevelData<EBCellFAB>&       a_correction,
                                    dbl[din],
                                    din,
                                    redBlack);
+      }
+    }
+  }
+}
+
+void
+EBHelmholtzOp::relaxRestrictedAdditiveSchwarz(LevelData<EBCellFAB>&       a_correction,
+                                              const LevelData<EBCellFAB>& a_residual,
+                                              const int                   a_iterations)
+{
+  CH_TIME("EBHelmholtzOp::relaxRestrictedAdditiveSchwarz(LD<EBCellFAB>, LD<EBCellFAB>, int)");
+
+  // TLDR: Restricted additive Schwarz (block) smoother. The blocks are the disjoint patches, each solved inexactly
+  //       with m_rasInnerSweeps frozen-ghost red-black sweeps. Ghost cells are filled ONCE per outer iteration and
+  //       all patches use the same frozen data (block Jacobi across patches). The update is automatically restricted
+  //       to the valid region. Amortising the halo exchange over the inner sweeps is what makes this cheaper per
+  //       multigrid cycle than point relaxation.
+
+  LevelData<EBCellFAB> Lcorr;
+  this->create(Lcorr, a_residual);
+
+  const DisjointBoxLayout& dbl  = m_eblg.getDBL();
+  const DataIterator&      dit  = dbl.dataIterator();
+  const int                nbox = dit.size();
+
+  for (int iter = 0; iter < a_iterations; iter++) {
+
+    // Fill ghost cells once per outer iteration -- they are then frozen during the inner block sweeps.
+    if (m_doExchange) {
+      a_correction.exchange(m_exchangeCopier);
+    }
+    this->homogeneousCFInterp(a_correction);
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      // Inexact local solve: m_rasInnerSweeps red-black sweeps with frozen ghosts.
+      for (int sweep = 0; sweep < m_rasInnerSweeps; sweep++) {
+        for (int redBlack = 0; redBlack <= 1; redBlack++) {
+          this->gauSaiRedBlackKernel(Lcorr[din],
+                                     a_correction[din],
+                                     a_residual[din],
+                                     (*m_Acoef)[din],
+                                     (*m_Bcoef)[din],
+                                     (*m_BcoefIrreg)[din],
+                                     dbl[din],
+                                     din,
+                                     redBlack);
+        }
       }
     }
   }
