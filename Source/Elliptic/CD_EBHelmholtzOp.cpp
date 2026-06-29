@@ -687,12 +687,19 @@ EBHelmholtzOp::dotProduct(const LevelData<EBCellFAB>& a_lhs, const LevelData<EBC
   return dotProd;
 }
 
-Real
-EBHelmholtzOp::dotProductMasked(const LevelData<EBCellFAB>&     a_lhs,
-                                const LevelData<EBCellFAB>&     a_rhs,
-                                const LevelData<BaseFab<bool>>& a_mask) const noexcept
+void
+EBHelmholtzOp::dotProductMaskedLocal(Real&                           a_sumKappaXY,
+                                     Real&                           a_sumVolume,
+                                     const LevelData<EBCellFAB>&     a_lhs,
+                                     const LevelData<EBCellFAB>&     a_rhs,
+                                     const LevelData<BaseFab<bool>>& a_mask,
+                                     const bool                      a_needVolume) const noexcept
 {
-  CH_TIME("EBHelmholtzOp::dotProductMasked");
+  CH_TIME("EBHelmholtzOp::dotProductMaskedLocal");
+
+  // TLDR: Rank-local (un-reduced) partials for the masked AMR inner product. The caller (AMRMultigridKrylovOp)
+  //       batches the per-level partials into a single MPI reduction; the volume is geometry-only and is reduced/
+  //       cached once, so a_needVolume can be set false on subsequent calls to skip recomputing it.
 
   const DisjointBoxLayout& dbl  = a_lhs.disjointBoxLayout();
   const DataIterator&      dit  = dbl.dataIterator();
@@ -719,7 +726,9 @@ EBHelmholtzOp::dotProductMasked(const LevelData<EBCellFAB>&     a_lhs,
     // numerator -- this matches Chombo's MultilevelLinearOp, which zeroes covered data before the per-level dot.
     auto regularKernel = [&](const IntVect& iv) -> void {
       if (ebisbox.isRegular(iv)) {
-        sumVolume += 1.0;
+        if (a_needVolume) {
+          sumVolume += 1.0;
+        }
         if (mask(iv, 0)) {
           sumKappaXY += regX(iv, 0) * regY(iv, 0);
         }
@@ -730,7 +739,9 @@ EBHelmholtzOp::dotProductMasked(const LevelData<EBCellFAB>&     a_lhs,
       const IntVect& iv    = vof.gridIndex();
       const Real     kappa = ebisbox.volFrac(vof);
 
-      sumVolume += kappa;
+      if (a_needVolume) {
+        sumVolume += kappa;
+      }
       if (mask(iv, 0)) {
         sumKappaXY += kappa * X(vof, 0) * Y(vof, 0);
       }
@@ -749,16 +760,8 @@ EBHelmholtzOp::dotProductMasked(const LevelData<EBCellFAB>&     a_lhs,
     }
   }
 
-  sumKappaXY = ParallelOps::sum(sumKappaXY);
-  sumVolume  = ParallelOps::sum(sumVolume);
-
-  Real dotProd = 0.0;
-
-  if (sumVolume > 0.0) {
-    dotProd = sumKappaXY / sumVolume;
-  }
-
-  return dotProd;
+  a_sumKappaXY = sumKappaXY;
+  a_sumVolume  = sumVolume;
 }
 
 void

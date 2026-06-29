@@ -579,19 +579,27 @@ public:
   dotProduct(const LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs) override final;
 
   /**
-    @brief Masked variant of dotProduct, used by the AMR-composite Krylov inner product.
+    @brief Rank-local (un-reduced) partials for the masked AMR-composite Krylov inner product.
     @details Same kappa-weighted inner product as dotProduct, except cells where a_mask is false (e.g. cells covered
-             by a finer AMR level) are excluded from the numerator. The volume normalisation still counts all valid
-             cells, matching the convention of Chombo's MultilevelLinearOp AMR dot product.
-    @param[in] a_lhs  First operand
-    @param[in] a_rhs  Second operand
-    @param[in] a_mask Per-cell mask; false marks cells excluded from the numerator (e.g. covered by a finer level)
-    @return Masked kappa-weighted inner product on this level
+             by a finer AMR level) are excluded from the numerator; the volume normalisation counts all valid cells,
+             matching Chombo's MultilevelLinearOp AMR dot product. Unlike dotProduct this performs NO MPI reduction:
+             it returns the rank-local partial sums so the caller (AMRMultigridKrylovOp) can batch the per-level
+             partials into a single MPI_Allreduce. The volume is geometry-only and is reduced/cached once by the
+             caller, so a_needVolume can be set false on later calls to skip recomputing it.
+    @param[out] a_sumKappaXY Rank-local masked numerator (sum of kappa*X*Y over unmasked cells)
+    @param[out] a_sumVolume  Rank-local volume (sum over all valid cells); set to zero when a_needVolume is false
+    @param[in]  a_lhs        First operand
+    @param[in]  a_rhs        Second operand
+    @param[in]  a_mask       Per-cell mask; false marks cells excluded from the numerator
+    @param[in]  a_needVolume If false, skip accumulating a_sumVolume (caller already cached it)
   */
-  Real
-  dotProductMasked(const LevelData<EBCellFAB>&     a_lhs,
-                   const LevelData<EBCellFAB>&     a_rhs,
-                   const LevelData<BaseFab<bool>>& a_mask) const noexcept;
+  void
+  dotProductMaskedLocal(Real&                           a_sumKappaXY,
+                        Real&                           a_sumVolume,
+                        const LevelData<EBCellFAB>&     a_lhs,
+                        const LevelData<EBCellFAB>&     a_rhs,
+                        const LevelData<BaseFab<bool>>& a_mask,
+                        const bool                      a_needVolume) const noexcept;
 
   /**
     @brief Increment operator

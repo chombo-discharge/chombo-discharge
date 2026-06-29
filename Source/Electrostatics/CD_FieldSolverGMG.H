@@ -414,9 +414,9 @@ protected:
   KrylovMultigrid::Settings m_krylovSettings;
 
   /**
-    @brief Adapter exposing the V-cycle as a preconditioner for the outer Krylov solver
+    @brief Outer-Krylov driver (V-cycle-preconditioned BiCGStab/GMRES with persistent work vectors)
   */
-  AMRMultigridKrylovOp<MFCellFAB> m_krylovOp;
+  KrylovMultigrid::Driver<MFCellFAB> m_krylov;
 
   /**
     @brief Parse multigrid settings

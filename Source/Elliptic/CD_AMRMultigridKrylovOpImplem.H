@@ -19,6 +19,7 @@
 
 // Our includes
 #include <CD_AMRMultigridKrylovOp.H>
+#include <CD_ParallelOps.H>
 #include <CD_NamespaceHeader.H>
 
 template <class T>
@@ -42,12 +43,13 @@ AMRMultigridKrylovOp<T>::define(AMRMultiGrid<LevelData<T>>*      a_mg,
 {
   CH_TIME("AMRMultigridKrylovOp::define");
 
-  m_mg          = a_mg;
-  m_amrOps      = a_mg->getAMROperators();
-  m_lbase       = a_lbase;
-  m_lmax        = a_lmax;
-  m_numVCycles  = std::max(1, a_numVCycles);
-  m_precondInit = false;
+  m_mg           = a_mg;
+  m_amrOps       = a_mg->getAMROperators();
+  m_lbase        = a_lbase;
+  m_lmax         = a_lmax;
+  m_numVCycles   = std::max(1, a_numVCycles);
+  m_precondInit  = false;
+  m_volumeCached = false; // Geometry changed; the cached per-level volumes are stale.
 
   // AMR inner-product weight dx^SpaceDim per level.
   m_dxScale.resize(a_lmax + 1, 1.0);
@@ -177,13 +179,101 @@ AMRMultigridKrylovOp<T>::dotProduct(const Vec& a_1, const Vec& a_2)
 
   using OpType = typename AMRMultigridKrylovOpTraits<T>::OpType;
 
+  const int  nLevels = m_lmax - m_lbase + 1;
+  const bool needVol = !m_volumeCached;
+
+  // Rank-local partials packed into one buffer: per-level numerators, then (first call only) per-level volumes.
+  // A single MPI_Allreduce of this buffer replaces the 2*nLevels separate reductions of the old per-level path.
+  Vector<Real> partials(needVol ? 2 * nLevels : nLevels, 0.0);
+
+  for (int lvl = m_lbase; lvl <= m_lmax; lvl++) {
+    auto* op  = static_cast<OpType*>(m_amrOps[lvl]);
+    Real  xy  = 0.0;
+    Real  vol = 0.0;
+    op->dotProductMaskedLocal(xy, vol, *a_1[lvl], *a_2[lvl], *m_validMask[lvl], needVol);
+
+    partials[lvl - m_lbase] = xy;
+    if (needVol) {
+      partials[nLevels + (lvl - m_lbase)] = vol;
+    }
+  }
+
+  ParallelOps::sum(partials);
+
+  if (needVol) {
+    m_volume.resize(m_lmax + 1, 0.0);
+    for (int lvl = m_lbase; lvl <= m_lmax; lvl++) {
+      m_volume[lvl] = partials[nLevels + (lvl - m_lbase)];
+    }
+    m_volumeCached = true;
+  }
+
   Real prod = 0.0;
   for (int lvl = m_lbase; lvl <= m_lmax; lvl++) {
-    auto* op = static_cast<OpType*>(m_amrOps[lvl]);
-    prod += op->dotProductMasked(*a_1[lvl], *a_2[lvl], *m_validMask[lvl]) * m_dxScale[lvl];
+    if (m_volume[lvl] > 0.0) {
+      prod += (partials[lvl - m_lbase] / m_volume[lvl]) * m_dxScale[lvl];
+    }
   }
 
   return prod;
+}
+
+template <class T>
+void
+AMRMultigridKrylovOp<T>::mDotProduct(const Vec& a_1, const int a_sz, const Vec a_2[], Real a_mdots[])
+{
+  CH_TIME("AMRMultigridKrylovOp::mDotProduct");
+
+  using OpType = typename AMRMultigridKrylovOpTraits<T>::OpType;
+
+  const int  nLevels = m_lmax - m_lbase + 1;
+  const int  nNum    = a_sz * nLevels;
+  const bool needVol = !m_volumeCached;
+
+  // All a_sz*nLevels rank-local numerators (plus per-level volumes on the first call) in one buffer -> one reduction.
+  Vector<Real> partials(needVol ? nNum + nLevels : nNum, 0.0);
+
+  for (int lvl = m_lbase; lvl <= m_lmax; lvl++) {
+    auto* op  = static_cast<OpType*>(m_amrOps[lvl]);
+    Real  vol = 0.0;
+
+    for (int k = 0; k < a_sz; k++) {
+      Real       xy          = 0.0;
+      Real       v           = 0.0;
+      const bool needVolHere = needVol && (k == 0); // Volume is geometry-only; compute it once per level.
+
+      op->dotProductMaskedLocal(xy, v, *a_1[lvl], *(a_2[k][lvl]), *m_validMask[lvl], needVolHere);
+
+      partials[k * nLevels + (lvl - m_lbase)] = xy;
+      if (needVolHere) {
+        vol = v;
+      }
+    }
+
+    if (needVol) {
+      partials[nNum + (lvl - m_lbase)] = vol;
+    }
+  }
+
+  ParallelOps::sum(partials);
+
+  if (needVol) {
+    m_volume.resize(m_lmax + 1, 0.0);
+    for (int lvl = m_lbase; lvl <= m_lmax; lvl++) {
+      m_volume[lvl] = partials[nNum + (lvl - m_lbase)];
+    }
+    m_volumeCached = true;
+  }
+
+  for (int k = 0; k < a_sz; k++) {
+    Real prod = 0.0;
+    for (int lvl = m_lbase; lvl <= m_lmax; lvl++) {
+      if (m_volume[lvl] > 0.0) {
+        prod += (partials[k * nLevels + (lvl - m_lbase)] / m_volume[lvl]) * m_dxScale[lvl];
+      }
+    }
+    a_mdots[k] = prod;
+  }
 }
 
 template <class T>

@@ -249,15 +249,7 @@ CdrMultigrid::advanceEuler(EBAMRCellData&       a_newPhi,
         converged        = (status == 1 || status == 8);
       }
       else {
-        converged = KrylovMultigrid::solve(&(*m_multigridSolver),
-                                           m_krylovOp,
-                                           newPhi,
-                                           eulerRHS,
-                                           coarsestLevel,
-                                           finestLevel,
-                                           false,
-                                           solverType,
-                                           m_krylovSettings);
+        converged = m_krylov.solve(newPhi, eulerRHS, false, solverType, m_krylovSettings);
       }
     }
   }
@@ -375,15 +367,7 @@ CdrMultigrid::advanceCrankNicholson(EBAMRCellData&       a_newPhi,
         converged        = (status == 1 || status == 8);
       }
       else {
-        converged = KrylovMultigrid::solve(&(*m_multigridSolver),
-                                           m_krylovOp,
-                                           newPhi,
-                                           eulerRHS,
-                                           coarsestLevel,
-                                           finestLevel,
-                                           false,
-                                           solverType,
-                                           m_krylovSettings);
+        converged = m_krylov.solve(newPhi, eulerRHS, false, solverType, m_krylovSettings);
       }
     }
   }
@@ -595,7 +579,7 @@ CdrMultigrid::setupMultigrid()
     refRat.resize(1 + finestLevel);
     dxScal.resize(1 + finestLevel);
 
-    m_krylovOp.define(&(*m_multigridSolver), grids, refRat, dxScal, 0, finestLevel, m_krylovSettings.numVCycles);
+    m_krylov.define(&(*m_multigridSolver), grids, refRat, dxScal, 0, finestLevel, m_krylovSettings.numVCycles);
   }
 }
 
@@ -869,7 +853,7 @@ CdrMultigrid::parseMultigridSettings()
 
   // Outer solver path: 'solver' = gmg | gmres | bicgstab (a space-separated list is a fallback chain), plus the
   // krylov_* settings. When the solver is not gmg, the gmg_* settings above configure the V-cycle that preconditions
-  // the outer Krylov solver. These are read here (mandatory, like the gmg_* keys) and passed to KrylovMultigrid::solve.
+  // the outer Krylov solver. These are read here (mandatory, like the gmg_* keys) and passed to the Krylov driver.
   const int numKrylovSolvers = pp.countval("solver");
   if (numKrylovSolvers < 1) {
     MayDay::Error("CdrMultigrid::parseMultigridSettings - 'solver' must list at least one of 'gmg', 'gmres', "

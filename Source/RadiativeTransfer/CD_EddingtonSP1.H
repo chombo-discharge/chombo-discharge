@@ -414,9 +414,9 @@ protected:
   KrylovMultigrid::Settings m_krylovSettings;
 
   /**
-    @brief Adapter exposing the V-cycle as a preconditioner for the outer Krylov solver
+    @brief Outer-Krylov driver (V-cycle-preconditioned BiCGStab/GMRES with persistent work vectors)
   */
-  AMRMultigridKrylovOp<EBCellFAB> m_krylovOp;
+  KrylovMultigrid::Driver<EBCellFAB> m_krylov;
 
   /**
     @brief For regridding the source term. This is needed when doing a stationary solve. 

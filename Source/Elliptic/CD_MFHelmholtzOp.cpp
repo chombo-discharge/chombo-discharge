@@ -506,12 +506,19 @@ MFHelmholtzOp::dotProduct(const LevelData<MFCellFAB>& a_lhs, const LevelData<MFC
   return dotProd;
 }
 
-Real
-MFHelmholtzOp::dotProductMasked(const LevelData<MFCellFAB>&     a_lhs,
-                                const LevelData<MFCellFAB>&     a_rhs,
-                                const LevelData<BaseFab<bool>>& a_mask) const noexcept
+void
+MFHelmholtzOp::dotProductMaskedLocal(Real&                           a_sumKappaXY,
+                                     Real&                           a_sumVolume,
+                                     const LevelData<MFCellFAB>&     a_lhs,
+                                     const LevelData<MFCellFAB>&     a_rhs,
+                                     const LevelData<BaseFab<bool>>& a_mask,
+                                     const bool                      a_needVolume) const noexcept
 {
-  CH_TIME("MFHelmholtzOp::dotProductMasked");
+  CH_TIME("MFHelmholtzOp::dotProductMaskedLocal");
+
+  // TLDR: Rank-local (un-reduced) partials for the masked AMR inner product, summed over both phases. The caller
+  //       (AMRMultigridKrylovOp) batches the per-level partials into a single MPI reduction; the volume is
+  //       geometry-only and is reduced/cached once, so a_needVolume can be false on subsequent calls.
 
   Real sumKappaXY = 0.0;
   Real sumVolume  = 0.0;
@@ -541,7 +548,9 @@ MFHelmholtzOp::dotProductMasked(const LevelData<MFCellFAB>&     a_lhs,
 
       auto regularKernel = [&](const IntVect& iv) -> void {
         if (ebisbox.isRegular(iv)) {
-          sumVolume += 1.0;
+          if (a_needVolume) {
+            sumVolume += 1.0;
+          }
           if (mask(iv, 0)) {
             sumKappaXY += regX(iv, 0) * regY(iv, 0);
           }
@@ -552,7 +561,9 @@ MFHelmholtzOp::dotProductMasked(const LevelData<MFCellFAB>&     a_lhs,
         const IntVect& iv    = vof.gridIndex();
         const Real     kappa = ebisbox.volFrac(vof);
 
-        sumVolume += kappa;
+        if (a_needVolume) {
+          sumVolume += kappa;
+        }
         if (mask(iv, 0)) {
           sumKappaXY += kappa * X(vof, 0) * Y(vof, 0);
         }
@@ -566,16 +577,8 @@ MFHelmholtzOp::dotProductMasked(const LevelData<MFCellFAB>&     a_lhs,
     }
   }
 
-  sumKappaXY = ParallelOps::sum(sumKappaXY);
-  sumVolume  = ParallelOps::sum(sumVolume);
-
-  Real dotProd = 0.0;
-
-  if (sumVolume > 0.0) {
-    dotProd = sumKappaXY / sumVolume;
-  }
-
-  return dotProd;
+  a_sumKappaXY = sumKappaXY;
+  a_sumVolume  = sumVolume;
 }
 
 void

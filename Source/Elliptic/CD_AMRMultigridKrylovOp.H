@@ -153,6 +153,19 @@ public:
   dotProduct(const Vec& a_1, const Vec& a_2) override;
 
   /*!
+    @brief Batched inner products a_mdots[k] = dotProduct(a_1, a_2[k]) for k=0..a_sz-1.
+    @details Overrides the LinearOp default (which loops dotProduct, one MPI reduction each). Here all a_sz*nLevel
+             rank-local partials are reduced in a single MPI_Allreduce. This is the per-iteration cost of Krylov
+             orthogonalization (Gram-Schmidt), so the single fused reduction is the dominant scaling win.
+    @param[in]  a_1     Fixed operand
+    @param[in]  a_sz    Number of right operands
+    @param[in]  a_2     Array of a_sz right operands
+    @param[out] a_mdots Array of a_sz inner products
+  */
+  void
+  mDotProduct(const Vec& a_1, const int a_sz, const Vec a_2[], Real a_mdots[]) override;
+
+  /*!
     @brief Increment a_lhs += a_scale*a_x.
     @param[in,out] a_lhs   Accumulator
     @param[in]     a_x     Increment
@@ -209,6 +222,12 @@ protected:
 
   /*! @brief Per-level mask: false where the level is covered by a finer level (excluded from the inner product). */
   Vector<RefCountedPtr<LevelData<BaseFab<bool>>>> m_validMask;
+
+  /*! @brief Per-level reduced total volume (geometry-only, vector-independent); cached on first dotProduct. */
+  mutable Vector<Real> m_volume;
+
+  /*! @brief Whether m_volume has been computed and reduced. Reset to false in define() (regrid invalidates it). */
+  mutable bool m_volumeCached = false;
 
   /*! @brief Coarsest level in the solve. */
   int m_lbase = 0;

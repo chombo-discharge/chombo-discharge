@@ -236,7 +236,7 @@ FieldSolverGMG::parseMultigridSettings()
 
   // Outer solver path: 'solver' = gmg | gmres | bicgstab (a space-separated list is a fallback chain), plus the
   // krylov_* settings. When the solver is not gmg, the gmg_* settings above configure the V-cycle that preconditions
-  // the outer Krylov solver. These are read here (mandatory, like the gmg_* keys) and passed to KrylovMultigrid::solve.
+  // the outer Krylov solver. These are read here (mandatory, like the gmg_* keys) and passed to the Krylov driver.
   const int numKrylovSolvers = pp.countval("solver");
   if (numKrylovSolvers < 1) {
     MayDay::Error("FieldSolverGMG::parseMultigridSettings - 'solver' must list at least one of 'gmg', 'gmres', "
@@ -412,15 +412,7 @@ FieldSolverGMG::solve(MFAMRCellData&       a_phi,
       else {
         // Outer Krylov solve with the V-cycle as preconditioner (residual-correction form; the inhomogeneous BC
         // contribution enters through the initial residual computed inside the driver).
-        converged = KrylovMultigrid::solve(&(*m_multigridSolver),
-                                           m_krylovOp,
-                                           phi,
-                                           rhs,
-                                           coarsestLevel,
-                                           finestLevel,
-                                           zeroPhi,
-                                           solverType,
-                                           m_krylovSettings);
+        converged = m_krylov.solve(phi, rhs, zeroPhi, solverType, m_krylovSettings);
       }
 
       firstAttempt = false;
@@ -939,7 +931,7 @@ FieldSolverGMG::setupMultigrid()
     refRat.resize(1 + finestLevel);
     dxScal.resize(1 + finestLevel);
 
-    m_krylovOp.define(&(*m_multigridSolver), grids, refRat, dxScal, 0, finestLevel, m_krylovSettings.numVCycles);
+    m_krylov.define(&(*m_multigridSolver), grids, refRat, dxScal, 0, finestLevel, m_krylovSettings.numVCycles);
   }
 }
 
