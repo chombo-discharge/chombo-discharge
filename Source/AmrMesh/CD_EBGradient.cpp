@@ -693,12 +693,20 @@ EBGradient::defineStencilsEBCF(const LevelData<FArrayBox>& a_coarMaskInvalid) no
     DenseIntVectSet validRegionCoar(grownBox, true);
     DenseIntVectSet validRegionFine(grownBoxFine, false);
 
+    // The fine data is supplied to computeAMRGradient through a refined-coarse holder that carries only m_ghostVector
+    // ghost cells, so the two-level stencils may only reference fine cells within that reach of this patch. Restrict
+    // the fine valid region accordingly. Without this, for m_refRat > m_ghostVector the stencil reaches fine cells the
+    // holder never allocates/fills (the refined-coarse EBISL only carries m_ghostVector ghosts), producing garbage
+    // gradients at EBCF cells abutting a box boundary. For m_refRat == m_ghostVector (e.g. refRat = 2 with the default
+    // two ghost cells) fineDataBox == grownBoxFine, so this changes nothing.
+    const Box fineDataBox = grow(refine(cellBox, m_refRat), m_ghostVector) & grownBoxFine;
+
     // Not auto-vectorizable: this is a one-time setup loop with a data-dependent branch and
     // DenseIntVectSet modification.
     auto regularKernel = [&](const IntVect& iv) -> void {
       if (coarMaskInvalid(iv, m_comp) > 0.0) {
         validRegionCoar -= iv;
-        validRegionFine |= refine(Box(iv, iv), m_refRat);
+        validRegionFine |= (refine(Box(iv, iv), m_refRat) & fineDataBox);
       }
     };
 
