@@ -102,6 +102,26 @@ namespace KrylovMultigrid {
   }
 
   /*!
+    @brief Human-readable name for a solver type, for diagnostic output.
+    @param[in] a_type Solver type.
+    @return "gmg", "gmres", or "bicgstab".
+  */
+  inline std::string
+  solverTypeName(const SolverType a_type)
+  {
+    switch (a_type) {
+    case SolverType::GMG:
+      return "gmg";
+    case SolverType::GMRES:
+      return "gmres";
+    case SolverType::BiCGStab:
+      return "bicgstab";
+    }
+
+    return "unknown";
+  }
+
+  /*!
     @brief Solve L(phi) = rhs with an outer Krylov method preconditioned by the multigrid V-cycle.
     @details Runs in residual-correction form so the inhomogeneous boundary contribution (and any jump/surface-charge
              contribution) enters only through the initial residual r0 = rhs - L(phi); the matrix-vector product and

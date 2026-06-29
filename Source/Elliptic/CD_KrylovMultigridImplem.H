@@ -15,6 +15,7 @@
 
 // Chombo includes
 #include <CH_Timer.H>
+#include <parstream.H>
 #include <GMRESSolver.H>
 #include <BiCGStabSolver.H>
 
@@ -60,12 +61,16 @@ KrylovMultigrid::solve(AMRMultiGrid<LevelData<T>>*  a_mg,
   a_op.create(r0, a_rhs);
   a_mg->computeAMRResidual(r0, a_phi, a_rhs, a_lmax, a_lbase, false, false); // r0 = rhs - L(phi)
 
+  // Initial residual norm (same norm the Krylov solver uses internally) -- kept for the convergence-metric printout.
+  const Real rNorm0 = a_op.norm(r0, 2);
+
   // Correction dphi, solved homogeneously: L_homogeneous(dphi) = r0.
   Vec dphi;
   a_op.create(dphi, a_phi);
   a_op.setToZero(dphi);
 
-  bool converged = false;
+  bool converged  = false;
+  int  exitStatus = -1;
 
   switch (a_type) {
   case SolverType::GMRES: {
@@ -78,7 +83,8 @@ KrylovMultigrid::solve(AMRMultiGrid<LevelData<T>>*  a_mg,
 
     gmres.solve(dphi, r0);
 
-    converged = (gmres.m_exitStatus == 1);
+    exitStatus = gmres.m_exitStatus;
+    converged  = (exitStatus == 1);
 
     break;
   }
@@ -91,7 +97,8 @@ KrylovMultigrid::solve(AMRMultiGrid<LevelData<T>>*  a_mg,
 
     bicg.solve(dphi, r0);
 
-    converged = (bicg.m_exitStatus == 1);
+    exitStatus = bicg.m_exitStatus;
+    converged  = (exitStatus == 1);
 
     break;
   }
@@ -100,6 +107,25 @@ KrylovMultigrid::solve(AMRMultiGrid<LevelData<T>>*  a_mg,
 
     break;
   }
+  }
+
+  // Convergence metrics. The verbosity is the host's gmg_verbosity (reused for the Krylov solvers). At this level we
+  // print a one-line summary: the residual reduction in the Krylov norm and the solver exit status. The full
+  // per-iteration history is emitted by the Chombo solver itself at higher verbosity.
+  if (a_settings.verbosity >= 1) {
+    Vec res;
+    a_op.create(res, r0);
+    a_op.applyOp(res, dphi, true); // res = L_homogeneous(dphi)
+    a_op.scale(res, -1.0);
+    a_op.incr(res, r0, 1.0); // res = r0 - L_homogeneous(dphi) = final Krylov residual
+    const Real rNorm = a_op.norm(res, 2);
+    a_op.clear(res);
+
+    const Real reduction = (rNorm0 > 0.0) ? rNorm / rNorm0 : 0.0;
+
+    pout() << "KrylovMultigrid::solve - " << solverTypeName(a_type) << (converged ? " converged" : " did NOT converge")
+           << " (|r0| = " << rNorm0 << ", |r| = " << rNorm << ", reduction = " << reduction
+           << ", status = " << exitStatus << ")" << endl;
   }
 
   // phi += dphi.

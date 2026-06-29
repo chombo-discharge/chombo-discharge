@@ -89,7 +89,6 @@ EddingtonSP1.krylov_eps            = 1.E-10        ## Outer Krylov relative resi
 EddingtonSP1.krylov_max_iter       = 50            ## Outer Krylov max iterations (gmres/bicgstab)
 EddingtonSP1.krylov_restart        = 30            ## GMRES restart length (gmres only)
 EddingtonSP1.krylov_vcycles        = 1             ## V-cycles per Krylov preconditioner application
-EddingtonSP1.krylov_verbosity      = -1            ## Outer Krylov verbosity
 EddingtonSP1.ebbc                  = larsen 0.0    ## Bc on embedded boundaries.
 EddingtonSP1.bc.x.lo               = larsen 0.0    ## Boundary on domain. 'neumann' or 'larsen'
 EddingtonSP1.bc.x.hi               = larsen 0.0    ## Boundary on domain. 'neumann' or 'larsen'

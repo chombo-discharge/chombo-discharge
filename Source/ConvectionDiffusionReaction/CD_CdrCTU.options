@@ -31,5 +31,4 @@ CdrCTU.krylov_eps               = 1.E-10                    ## Outer Krylov rela
 CdrCTU.krylov_max_iter          = 50                        ## Outer Krylov max iterations (gmres/bicgstab)
 CdrCTU.krylov_restart           = 30                        ## GMRES restart length (gmres only)
 CdrCTU.krylov_vcycles           = 1                         ## V-cycles per Krylov preconditioner application
-CdrCTU.krylov_verbosity         = -1                        ## Outer Krylov verbosity
 CdrCTU.gmg_reflux_free          = false                     ## If true, use reflux-free AMR operator

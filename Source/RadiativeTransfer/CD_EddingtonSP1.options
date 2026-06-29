@@ -37,4 +37,3 @@ EddingtonSP1.krylov_eps            = 1.E-10       ## Outer Krylov relative resid
 EddingtonSP1.krylov_max_iter       = 50           ## Outer Krylov max iterations (gmres/bicgstab)
 EddingtonSP1.krylov_restart        = 30           ## GMRES restart length (gmres only)
 EddingtonSP1.krylov_vcycles        = 1            ## V-cycles per Krylov preconditioner application
-EddingtonSP1.krylov_verbosity      = -1           ## Outer Krylov verbosity

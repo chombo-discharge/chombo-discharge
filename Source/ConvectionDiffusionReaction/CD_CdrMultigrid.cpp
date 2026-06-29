@@ -237,6 +237,11 @@ CdrMultigrid::advanceEuler(EBAMRCellData&       a_newPhi,
     for (int i = 0; i < m_krylovSettings.solvers.size() && !converged; i++) {
       const KrylovMultigrid::SolverType solverType = m_krylovSettings.solvers[i];
 
+      if (i > 0 && m_krylovSettings.verbosity >= 1) {
+        pout() << "CdrMultigrid - '" << KrylovMultigrid::solverTypeName(m_krylovSettings.solvers[i - 1])
+               << "' did not converge; falling back to '" << KrylovMultigrid::solverTypeName(solverType) << "'" << endl;
+      }
+
       if (solverType == KrylovMultigrid::SolverType::GMG) {
         m_multigridSolver->solveNoInitResid(newPhi, resid, eulerRHS, finestLevel, coarsestLevel, false);
 
@@ -357,6 +362,11 @@ CdrMultigrid::advanceCrankNicholson(EBAMRCellData&       a_newPhi,
     bool converged = false;
     for (int i = 0; i < m_krylovSettings.solvers.size() && !converged; i++) {
       const KrylovMultigrid::SolverType solverType = m_krylovSettings.solvers[i];
+
+      if (i > 0 && m_krylovSettings.verbosity >= 1) {
+        pout() << "CdrMultigrid - '" << KrylovMultigrid::solverTypeName(m_krylovSettings.solvers[i - 1])
+               << "' did not converge; falling back to '" << KrylovMultigrid::solverTypeName(solverType) << "'" << endl;
+      }
 
       if (solverType == KrylovMultigrid::SolverType::GMG) {
         m_multigridSolver->solveNoInitResid(newPhi, resid, eulerRHS, finestLevel, coarsestLevel, false);
@@ -875,7 +885,7 @@ CdrMultigrid::parseMultigridSettings()
   pp.get("krylov_max_iter", m_krylovSettings.maxIter);
   pp.get("krylov_restart", m_krylovSettings.restart);
   pp.get("krylov_vcycles", m_krylovSettings.numVCycles);
-  pp.get("krylov_verbosity", m_krylovSettings.verbosity);
+  m_krylovSettings.verbosity = m_multigridVerbosity; // The Krylov solvers reuse the gmg_verbosity setting.
 }
 
 #include <CD_NamespaceFooter.H>

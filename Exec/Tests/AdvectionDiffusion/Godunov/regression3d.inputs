@@ -95,7 +95,6 @@ CdrGodunov.krylov_eps               = 1.E-10                    ## Outer Krylov 
 CdrGodunov.krylov_max_iter          = 50                        ## Outer Krylov max iterations (gmres/bicgstab)
 CdrGodunov.krylov_restart           = 30                        ## GMRES restart length (gmres only)
 CdrGodunov.krylov_vcycles           = 1                         ## V-cycles per Krylov preconditioner application
-CdrGodunov.krylov_verbosity         = -1                        ## Outer Krylov verbosity
 
 # ====================================================================================================
 # ROD_DIELECTRIC CLASS OPTIONS

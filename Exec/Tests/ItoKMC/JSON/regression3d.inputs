@@ -109,7 +109,6 @@ FieldSolverGMG.krylov_eps                   = 1.E-10       ## Outer Krylov relat
 FieldSolverGMG.krylov_max_iter              = 50           ## Outer Krylov max iterations (gmres/bicgstab)
 FieldSolverGMG.krylov_restart               = 30           ## GMRES restart length (gmres only)
 FieldSolverGMG.krylov_vcycles               = 1            ## V-cycles per Krylov preconditioner application
-FieldSolverGMG.krylov_verbosity             = -1           ## Outer Krylov verbosity
 
 # ====================================================================================================
 # ItoSolver class options
@@ -164,7 +163,6 @@ CdrCTU.krylov_eps               = 1.E-10                    ## Outer Krylov rela
 CdrCTU.krylov_max_iter          = 50                        ## Outer Krylov max iterations (gmres/bicgstab)
 CdrCTU.krylov_restart           = 30                        ## GMRES restart length (gmres only)
 CdrCTU.krylov_vcycles           = 1                         ## V-cycles per Krylov preconditioner application
-CdrCTU.krylov_verbosity         = -1                        ## Outer Krylov verbosity
 
 # ====================================================================================================
 # McPhoto class options

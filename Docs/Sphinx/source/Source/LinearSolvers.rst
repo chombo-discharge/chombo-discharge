@@ -426,6 +426,9 @@ All parameters below use a solver-class prefix (e.g. ``FieldSolverGMG``, ``Eddin
   Sets the overall relaxation damping factor applied to each smoother update.
 * ``<Solver>.gmg_reflux_free``.
   If ``true``, use the reflux-free AMR operator.
+  Rather than computing coarse- and fine-level fluxes separately and then applying a reflux correction, this variant fills the coarse-level coarse-fine interface fluxes by conservatively averaging the fine-level fluxes, which are themselves computed from the composite (CF-interpolated) solution.
+  The two formulations are mathematically equivalent; neither is more accurate than the other.
+  Default is ``false``.
 * ``<Solver>.solver``.
   Selects the top-level solver: ``gmg`` (stand-alone V-cycling), ``gmres``, or ``bicgstab``. The latter two use the multigrid V-cycle as a preconditioner. A space-separated list is a fallback chain tried in order, e.g. ``gmg gmres`` (see :ref:`Chap:KrylovMultigrid`). This key and the ``krylov_*`` keys below are mandatory.
 * ``<Solver>.krylov_eps``.
@@ -436,11 +439,8 @@ All parameters below use a solver-class prefix (e.g. ``FieldSolverGMG``, ``Eddin
   GMRES restart length (ignored for ``bicgstab``).
 * ``<Solver>.krylov_vcycles``.
   Number of V-cycles applied per Krylov preconditioner application.
-* ``<Solver>.krylov_verbosity``.
-  Verbosity of the outer Krylov solver.
-  Rather than computing coarse- and fine-level fluxes separately and then applying a reflux correction, this variant fills the coarse-level coarse-fine interface fluxes by conservatively averaging the fine-level fluxes, which are themselves computed from the composite (CF-interpolated) solution.
-  The two formulations are mathematically equivalent; neither is more accurate than the other.
-  Default is ``false``.
+
+The outer Krylov solver reuses the ``gmg_verbosity`` setting (there is no separate ``krylov_verbosity``). With ``gmg_verbosity >= 1`` a one-line convergence summary (initial/final residual, reduction, exit status) is printed for each Krylov solve, and a message is printed whenever a fallback chain switches solver; the Chombo solver's own per-iteration history appears at higher verbosities.
 
 .. note::
 
