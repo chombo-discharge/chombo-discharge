@@ -42,35 +42,70 @@ class EBHelmholtzOpFactory : public AMRLevelOpFactory<LevelData<EBCellFAB>>
 {
 public:
   // Various alias for cutting down on typing.
-  /** @brief Smoother type alias. */
+
+  /**
+    @brief Smoother type alias.
+  */
   using Smoother = EBHelmholtzOp::Smoother;
 
-  /** @brief alias type alias. */
+  /**
+    @brief alias type alias.
+  */
   using AmrLevelGrids = Vector<RefCountedPtr<EBLevelGrid>>;
-  /** @brief alias type alias. */
+
+  /**
+    @brief alias type alias.
+  */
   using AmrMask = Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>;
-  /** @brief alias type alias. */
+
+  /**
+    @brief alias type alias.
+  */
   using AmrInterpolators = Vector<RefCountedPtr<EBMultigridInterpolator>>;
-  /** @brief alias type alias. */
+
+  /**
+    @brief alias type alias.
+  */
   using AmrFluxRegisters = Vector<RefCountedPtr<EBReflux>>;
-  /** @brief alias type alias. */
+
+  /**
+    @brief alias type alias.
+  */
   using AmrCoarseners = Vector<RefCountedPtr<EBCoarAve>>;
 
-  /** @brief alias type alias. */
+  /**
+    @brief alias type alias.
+  */
   using AmrCellData = Vector<RefCountedPtr<LevelData<EBCellFAB>>>;
-  /** @brief alias type alias. */
+
+  /**
+    @brief alias type alias.
+  */
   using AmrFluxData = Vector<RefCountedPtr<LevelData<EBFluxFAB>>>;
-  /** @brief alias type alias. */
+
+  /**
+    @brief alias type alias.
+  */
   using AmrIrreData = Vector<RefCountedPtr<LevelData<BaseIVFAB<Real>>>>;
 
-  /** @brief alias type alias. */
+  /**
+    @brief alias type alias.
+  */
   using AmrResolutions = Vector<Real>;
-  /** @brief alias type alias. */
+
+  /**
+    @brief alias type alias.
+  */
   using AmrRefRatios = Vector<int>;
 
-  /** @brief alias type alias. */
+  /**
+    @brief alias type alias.
+  */
   using DomainBCFactory = RefCountedPtr<EBHelmholtzDomainBCFactory>; // Will be replaced with better BC class...
-  /** @brief alias type alias. */
+
+  /**
+    @brief alias type alias.
+  */
   using EBBCFactory = RefCountedPtr<EBHelmholtzEBBCFactory>;
 
   /**
@@ -277,6 +312,7 @@ protected:
   RealVect m_probLo;
 
   // Things that pertain to AMR levels. The first entry corresponds to the coarsest AMR level.
+
   /**
     @brief AMR grids
   */

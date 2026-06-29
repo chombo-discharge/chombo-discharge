@@ -41,38 +41,80 @@ class MFHelmholtzOpFactory : public AMRLevelOpFactory<LevelData<MFCellFAB>>
 {
 public:
   // Various alias for cutting down on typing.
-  /** @brief alias type alias. */
+
+  /**
+    @brief alias type alias.
+  */
   using MFIS = RefCountedPtr<MultiFluidIndexSpace>;
-  /** @brief alias type alias. */
+
+  /**
+    @brief alias type alias.
+  */
   using AmrLevelGrids = Vector<MFLevelGrid>;
-  /** @brief alias type alias. */
+
+  /**
+    @brief alias type alias.
+  */
   using AmrInterpolators = Vector<MFMultigridInterpolator>;
-  /** @brief alias type alias. */
+
+  /**
+    @brief alias type alias.
+  */
   using AmrFluxRegisters = Vector<MFReflux>;
-  /** @brief alias type alias. */
+
+  /**
+    @brief alias type alias.
+  */
   using AmrCoarseners = Vector<MFCoarAve>;
-  /** @brief alias type alias. */
+
+  /**
+    @brief alias type alias.
+  */
   using AmrResolutions = Vector<Real>;
-  /** @brief alias type alias. */
+
+  /**
+    @brief alias type alias.
+  */
   using AmrRefRatios = Vector<int>;
-  /** @brief alias type alias. */
+
+  /**
+    @brief alias type alias.
+  */
   using AmrMask = Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>;
 
-  /** @brief alias type alias. */
+  /**
+    @brief alias type alias.
+  */
   using AmrCellData = Vector<RefCountedPtr<LevelData<MFCellFAB>>>;
-  /** @brief alias type alias. */
+
+  /**
+    @brief alias type alias.
+  */
   using AmrFluxData = Vector<RefCountedPtr<LevelData<MFFluxFAB>>>;
-  /** @brief alias type alias. */
+
+  /**
+    @brief alias type alias.
+  */
   using AmrIrreData = Vector<RefCountedPtr<LevelData<MFBaseIVFAB>>>;
 
-  /** @brief alias type alias. */
+  /**
+    @brief alias type alias.
+  */
   using DomainBCFactory = RefCountedPtr<MFHelmholtzDomainBCFactory>;
-  /** @brief alias type alias. */
+
+  /**
+    @brief alias type alias.
+  */
   using EBBCFactory = RefCountedPtr<MFHelmholtzEBBCFactory>;
-  /** @brief alias type alias. */
+
+  /**
+    @brief alias type alias.
+  */
   using JumpBCFactory = RefCountedPtr<MFHelmholtzJumpBCFactory>;
 
-  /** @brief Smoother type alias. */
+  /**
+    @brief Smoother type alias.
+  */
   using Smoother = MFHelmholtzOp::Smoother;
 
   /**

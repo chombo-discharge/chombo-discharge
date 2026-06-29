@@ -240,7 +240,7 @@ protected:
   /**
     @brief Outer-Krylov driver (V-cycle-preconditioned BiCGStab/GMRES with persistent work vectors)
   */
-  KrylovMultigrid::Driver<EBCellFAB> m_krylov;
+  KrylovMultigrid::Solver<EBCellFAB> m_krylov;
 
   /**
     @brief Is multigrid solver defined or not?

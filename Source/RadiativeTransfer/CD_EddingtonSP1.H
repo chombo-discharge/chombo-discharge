@@ -364,13 +364,19 @@ protected:
   /**
     @brief 
   */
-  /** @brief Multigrid exit tolerance. */
+
+  /**
+    @brief Multigrid exit tolerance.
+  */
   Real m_multigridExitTolerance;
 
   /**
     @brief 
   */
-  /** @brief Multigrid exit hang. */
+
+  /**
+    @brief Multigrid exit hang.
+  */
   Real m_multigridExitHang;
 
   /**
@@ -416,7 +422,7 @@ protected:
   /**
     @brief Outer-Krylov driver (V-cycle-preconditioned BiCGStab/GMRES with persistent work vectors)
   */
-  KrylovMultigrid::Driver<EBCellFAB> m_krylov;
+  KrylovMultigrid::Solver<EBCellFAB> m_krylov;
 
   /**
     @brief For regridding the source term. This is needed when doing a stationary solve. 

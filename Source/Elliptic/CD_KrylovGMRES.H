@@ -24,7 +24,7 @@
 #include <CD_AMRMultigridKrylovOp.H>
 #include <CD_NamespaceHeader.H>
 
-/*!
+/**
   @brief Restarted GMRES(m) acting on an AMR hierarchy through AMRMultigridKrylovOp.
   @details A chombo-discharge replacement for Chombo's GMRESSolver on the outer Krylov path, written for scale-out.
            The Arnoldi basis (m_restart + 1 hierarchies) and the few scratch vectors are allocated once in define()
@@ -40,37 +40,62 @@ template <class T>
 class KrylovGMRES
 {
 public:
-  using Op  = AMRMultigridKrylovOp<T>; /*!< Operator/adapter type. */
-  using Vec = Vector<LevelData<T>*>;   /*!< Multilevel data type the solver acts on. */
+  /**
+    @brief Operator/adapter type.
+  */
+  using Op = AMRMultigridKrylovOp<T>;
 
-  /*! @brief Relative residual tolerance (against the initial residual norm). */
+  /**
+    @brief Multilevel data type the solver acts on.
+  */
+  using Vec = Vector<LevelData<T>*>;
+
+  /**
+    @brief Relative residual tolerance (against the initial residual norm).
+  */
   Real m_eps = 1.E-10;
 
-  /*! @brief Maximum number of iterations (total Arnoldi steps across restart cycles). */
+  /**
+    @brief Maximum number of iterations (total Arnoldi steps across restart cycles).
+  */
   int m_maxIter = 50;
 
-  /*! @brief Restart length m in GMRES(m). Must be set before define() (sizes the persistent basis). */
+  /**
+    @brief Restart length m in GMRES(m). Must be set before define() (sizes the persistent basis).
+  */
   int m_restart = 30;
 
-  /*! @brief Whether to do one classical Gram-Schmidt reorthogonalization pass (robustness; on by default). */
+  /**
+    @brief Whether to do one classical Gram-Schmidt reorthogonalization pass (robustness; on by default).
+  */
   bool m_reorthogonalize = true;
 
-  /*! @brief Verbosity; at >= 4 a terse one-line-per-iteration residual history is printed. */
+  /**
+    @brief Verbosity; at >= 4 a terse one-line-per-iteration residual history is printed.
+  */
   int m_verbosity = -1;
 
-  /*! @brief Exit status after solve(): 1 = converged, 3 = max iterations, -1 = not run. */
+  /**
+    @brief Exit status after solve(): 1 = converged, 3 = max iterations, -1 = not run.
+  */
   int m_exitStatus = -1;
 
-  /*! @brief Final residual norm after solve() (in the adapter inner-product norm). */
+  /**
+    @brief Final residual norm after solve() (in the adapter inner-product norm).
+  */
   Real m_residualNorm = -1.0;
 
-  /*! @brief Default constructor. Call define() before use. */
+  /**
+    @brief Default constructor. Call define() before use.
+  */
   KrylovGMRES() noexcept = default;
 
-  /*! @brief Destructor. Frees the persistent basis and scratch. */
+  /**
+    @brief Destructor. Frees the persistent basis and scratch.
+  */
   ~KrylovGMRES() noexcept;
 
-  /*!
+  /**
     @brief Allocate the persistent basis (m_restart + 1 vectors) and scratch. Call once per regrid.
     @param[in] a_op       The (already define()d) operator/adapter to solve against
     @param[in] a_template A hierarchy whose layout the work vectors mirror (e.g. the rhs)
@@ -78,18 +103,20 @@ public:
   void
   define(Op* a_op, const Vec& a_template) noexcept;
 
-  /*! @brief Free the persistent basis and scratch. */
+  /**
+    @brief Free the persistent basis and scratch.
+  */
   void
   undefine() noexcept;
 
-  /*!
+  /**
     @brief Whether define() has been called.
     @return True if defined.
   */
   bool
   isDefined() const noexcept;
 
-  /*!
+  /**
     @brief Solve a_op(a_phi) = a_rhs (homogeneous operator) with restarted GMRES(m_restart).
     @param[in,out] a_phi Solution (in: initial guess; out: solution). Warm starts are honoured.
     @param[in]     a_rhs Right-hand side.
@@ -99,28 +126,70 @@ public:
   solve(Vec& a_phi, const Vec& a_rhs) noexcept;
 
 protected:
-  /*! @brief Operator/adapter (not owned). */
+  /**
+    @brief Operator/adapter (not owned).
+  */
   Op* m_op = nullptr;
 
-  /*! @brief Whether the basis/scratch are allocated. */
+  /**
+    @brief Whether the basis/scratch are allocated.
+  */
   bool m_isDefined = false;
 
-  /*! @brief Restart length the persistent storage was sized for. */
+  /**
+    @brief Restart length the persistent storage was sized for.
+  */
   int m_allocRestart = 0;
 
-  /*! @brief Arnoldi basis, size m_allocRestart + 1. */
+  /**
+    @brief Arnoldi basis, size m_allocRestart + 1.
+  */
   std::vector<Vec> m_basis;
 
-  Vec m_w; /*!< A*K^{-1}*v_j scratch. */
-  Vec m_z; /*!< K^{-1}*v_j and final preconditioned-update scratch. */
-  Vec m_c; /*!< Accumulated unpreconditioned solution update (sum y_k v_k). */
-  Vec m_r; /*!< Residual. */
+  /**
+    @brief A*K^{-1}*v_j scratch.
+  */
+  Vec m_w;
 
-  std::vector<Real> m_H;  /*!< Hessenberg matrix, column-major, leading dimension m_allocRestart + 1. */
-  std::vector<Real> m_cs; /*!< Givens cosines. */
-  std::vector<Real> m_sn; /*!< Givens sines. */
-  std::vector<Real> m_g;  /*!< Rotated residual right-hand side. */
-  std::vector<Real> m_y;  /*!< Least-squares solution. */
+  /**
+    @brief K^{-1}*v_j and final preconditioned-update scratch.
+  */
+  Vec m_z;
+
+  /**
+    @brief Accumulated unpreconditioned solution update (sum y_k v_k).
+  */
+  Vec m_c;
+
+  /**
+    @brief Residual.
+  */
+  Vec m_r;
+
+  /**
+    @brief Hessenberg matrix, column-major, leading dimension m_allocRestart + 1.
+  */
+  std::vector<Real> m_H;
+
+  /**
+    @brief Givens cosines.
+  */
+  std::vector<Real> m_cs;
+
+  /**
+    @brief Givens sines.
+  */
+  std::vector<Real> m_sn;
+
+  /**
+    @brief Rotated residual right-hand side.
+  */
+  std::vector<Real> m_g;
+
+  /**
+    @brief Least-squares solution.
+  */
+  std::vector<Real> m_y;
 };
 
 #include <CD_NamespaceFooter.H>

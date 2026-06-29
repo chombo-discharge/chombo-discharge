@@ -27,41 +27,71 @@
 #include <CD_KrylovGMRES.H>
 #include <CD_NamespaceHeader.H>
 
-/*!
+/**
   @brief Support code for using an AMR-multigrid V-cycle as a preconditioner for an outer Krylov solver.
   @details The V-cycle itself (smoother, cycle type, bottom solver, BC stencils, ...) is configured by the usual
            gmg_* options of the host solver. The settings here control the outer Krylov wrapper.
 */
 namespace KrylovMultigrid {
 
-  /*!
+  /**
     @brief Top-level solve method.
   */
   enum class SolverType
   {
-    GMG,     /*!< Stand-alone multigrid V-cycling (no outer Krylov). */
-    GMRES,   /*!< GMRES preconditioned by the V-cycle. */
-    BiCGStab /*!< BiCGStab preconditioned by the V-cycle. */
+    /**
+      @brief Stand-alone multigrid V-cycling (no outer Krylov).
+    */
+    GMG,
+
+    /**
+      @brief GMRES preconditioned by the V-cycle.
+    */
+    GMRES,
+
+    /**
+      @brief BiCGStab preconditioned by the V-cycle.
+    */
+    BiCGStab
   };
 
-  /*!
+  /**
     @brief Outer-Krylov configuration. Defaults reproduce stand-alone multigrid (solvers == {GMG}).
   */
   struct Settings
   {
-    /*!
+    /**
       @brief Solvers attempted in order; the first that converges wins. E.g. {GMG, GMRES} means "try stand-alone
              multigrid, fall back to GMRES if it does not converge".
     */
     Vector<SolverType> solvers = Vector<SolverType>(1, SolverType::GMG);
 
-    Real eps        = 1.E-10; /*!< Relative residual tolerance. */
-    int  maxIter    = 50;     /*!< Maximum outer iterations. */
-    int  restart    = 30;     /*!< GMRES restart length (unused for BiCGStab). */
-    int  numVCycles = 1;      /*!< V-cycles applied per preconditioner invocation. */
-    int  verbosity  = -1;     /*!< Outer Krylov verbosity. */
+    /**
+      @brief Relative residual tolerance.
+    */
+    Real eps = 1.E-10;
 
-    /*!
+    /**
+      @brief Maximum outer iterations.
+    */
+    int maxIter = 50;
+
+    /**
+      @brief GMRES restart length (unused for BiCGStab).
+    */
+    int restart = 30;
+
+    /**
+      @brief V-cycles applied per preconditioner invocation.
+    */
+    int numVCycles = 1;
+
+    /**
+      @brief Outer Krylov verbosity.
+    */
+    int verbosity = -1;
+
+    /**
       @brief Whether any solver in the chain is a Krylov method (and hence needs the preconditioner adapter).
       @return True if the chain contains GMRES or BiCGStab.
     */
@@ -77,7 +107,7 @@ namespace KrylovMultigrid {
     }
   };
 
-  /*!
+  /**
     @brief Map a solver-type string to the corresponding enum.
     @details Pure string-to-enum conversion; the host solver is responsible for reading the input database (the
              Krylov module deliberately does not call ParmParse). Aborts on an unrecognised string.
@@ -103,7 +133,7 @@ namespace KrylovMultigrid {
     return SolverType::GMG;
   }
 
-  /*!
+  /**
     @brief Human-readable name for a solver type, for diagnostic output.
     @param[in] a_type Solver type.
     @return "gmg", "gmres", or "bicgstab".
@@ -123,7 +153,7 @@ namespace KrylovMultigrid {
     return "unknown";
   }
 
-  /*!
+  /**
     @brief Stateful owner of the outer-Krylov solver path.
     @details Holds the V-cycle adapter (AMRMultigridKrylovOp), the chombo-discharge BiCGStab/GMRES solvers, and the
              persistent residual-correction work vectors. define() is called once per regrid; solve() reuses the
@@ -134,18 +164,25 @@ namespace KrylovMultigrid {
     @note T is the FAB type (EBCellFAB or MFCellFAB).
   */
   template <class T>
-  class Driver
+  class Solver
   {
   public:
-    using Vec = Vector<LevelData<T>*>; /*!< Multilevel data type. */
+    /**
+      @brief Multilevel data type.
+    */
+    using Vec = Vector<LevelData<T>*>;
 
-    /*! @brief Default constructor. Call define() before use. */
-    Driver() noexcept = default;
+    /**
+      @brief Default constructor. Call define() before use.
+    */
+    Solver() noexcept = default;
 
-    /*! @brief Destructor. Frees the persistent work vectors and custom solvers. */
-    ~Driver() noexcept;
+    /**
+      @brief Destructor. Frees the persistent work vectors and custom solvers.
+    */
+    ~Solver() noexcept;
 
-    /*!
+    /**
       @brief Define the V-cycle adapter and reset the persistent work. Call once per regrid.
       @param[in] a_mg         Fully set-up multigrid solver (reused for matvec and preconditioning)
       @param[in] a_grids      Grids on each level (index 0..a_lmax)
@@ -164,7 +201,7 @@ namespace KrylovMultigrid {
            const int                        a_lmax,
            const int                        a_numVCycles);
 
-    /*!
+    /**
       @brief Solve L(phi) = rhs with the chosen outer Krylov method preconditioned by the V-cycle.
       @param[in,out] a_phi      Solution (in: initial guess unless a_zeroPhi; out: solution)
       @param[in]     a_rhs      Right-hand side
@@ -177,36 +214,68 @@ namespace KrylovMultigrid {
     solve(Vec& a_phi, const Vec& a_rhs, const bool a_zeroPhi, const SolverType a_type, const Settings& a_settings);
 
   protected:
-    /*!
+    /**
       @brief Lazily allocate the persistent residual-correction vectors r0/dphi from a template hierarchy.
       @param[in] a_template A hierarchy whose layout the work vectors mirror (e.g. the rhs).
     */
     void
     allocateWork(const Vec& a_template);
 
-    /*! @brief Free the persistent work vectors and undefine the custom solvers. */
+    /**
+      @brief Free the persistent work vectors and undefine the custom solvers.
+    */
     void
     freeWork();
 
-    /*! @brief Multigrid solver (not owned). */
+    /**
+      @brief Multigrid solver (not owned).
+    */
     AMRMultiGrid<LevelData<T>>* m_mg = nullptr;
 
-    /*! @brief V-cycle-as-preconditioner adapter. */
+    /**
+      @brief V-cycle-as-preconditioner adapter.
+    */
     AMRMultigridKrylovOp<T> m_op;
 
-    /*! @brief Custom BiCGStab solver (lazily defined on first BiCGStab solve). */
+    /**
+      @brief Custom BiCGStab solver (lazily defined on first BiCGStab solve).
+    */
     KrylovBiCGStab<T> m_bicg;
 
-    /*! @brief Custom GMRES solver (lazily defined on first GMRES solve). */
+    /**
+      @brief Custom GMRES solver (lazily defined on first GMRES solve).
+    */
     KrylovGMRES<T> m_gmres;
 
-    int  m_lbase         = 0;     /*!< Coarsest level. */
-    int  m_lmax          = 0;     /*!< Finest level. */
-    bool m_isDefined     = false; /*!< Whether define() has been called. */
-    bool m_workAllocated = false; /*!< Whether r0/dphi are allocated for the current grid. */
+    /**
+      @brief Coarsest level.
+    */
+    int m_lbase = 0;
 
-    Vec m_r0;   /*!< Persistent initial residual. */
-    Vec m_dphi; /*!< Persistent correction. */
+    /**
+      @brief Finest level.
+    */
+    int m_lmax = 0;
+
+    /**
+      @brief Whether define() has been called.
+    */
+    bool m_isDefined = false;
+
+    /**
+      @brief Whether r0/dphi are allocated for the current grid.
+    */
+    bool m_workAllocated = false;
+
+    /**
+      @brief Persistent initial residual.
+    */
+    Vec m_r0;
+
+    /**
+      @brief Persistent correction.
+    */
+    Vec m_dphi;
   };
 
 } // namespace KrylovMultigrid

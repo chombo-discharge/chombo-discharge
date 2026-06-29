@@ -27,14 +27,14 @@
 namespace KrylovMultigrid {
 
   template <class T>
-  Driver<T>::~Driver() noexcept
+  Solver<T>::~Solver() noexcept
   {
     this->freeWork();
   }
 
   template <class T>
   void
-  Driver<T>::freeWork()
+  Solver<T>::freeWork()
   {
     m_bicg.undefine();
     m_gmres.undefine();
@@ -48,7 +48,7 @@ namespace KrylovMultigrid {
 
   template <class T>
   void
-  Driver<T>::allocateWork(const Vec& a_template)
+  Solver<T>::allocateWork(const Vec& a_template)
   {
     m_op.create(m_r0, a_template);
     m_op.create(m_dphi, a_template);
@@ -57,7 +57,7 @@ namespace KrylovMultigrid {
 
   template <class T>
   void
-  Driver<T>::define(AMRMultiGrid<LevelData<T>>*      a_mg,
+  Solver<T>::define(AMRMultiGrid<LevelData<T>>*      a_mg,
                     const Vector<DisjointBoxLayout>& a_grids,
                     const Vector<int>&               a_refRat,
                     const Vector<Real>&              a_dx,
@@ -65,7 +65,7 @@ namespace KrylovMultigrid {
                     const int                        a_lmax,
                     const int                        a_numVCycles)
   {
-    CH_TIME("KrylovMultigrid::Driver::define");
+    CH_TIME("KrylovMultigrid::Solver::define");
 
     // Release any storage tied to the previous grid before redefining the adapter for the new one. The work vectors
     // are re-allocated lazily on the first solve (when a template hierarchy is available).
@@ -82,13 +82,13 @@ namespace KrylovMultigrid {
 
   template <class T>
   bool
-  Driver<T>::solve(Vec&             a_phi,
+  Solver<T>::solve(Vec&             a_phi,
                    const Vec&       a_rhs,
                    const bool       a_zeroPhi,
                    const SolverType a_type,
                    const Settings&  a_settings)
   {
-    CH_TIME("KrylovMultigrid::Driver::solve");
+    CH_TIME("KrylovMultigrid::Solver::solve");
 
     CH_assert(m_isDefined);
 
@@ -153,7 +153,7 @@ namespace KrylovMultigrid {
       break;
     }
     default: {
-      MayDay::Error("KrylovMultigrid::Driver::solve - SolverType must be GMRES or BiCGStab");
+      MayDay::Error("KrylovMultigrid::Solver::solve - SolverType must be GMRES or BiCGStab");
 
       break;
     }

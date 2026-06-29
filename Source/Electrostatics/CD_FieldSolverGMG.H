@@ -416,7 +416,7 @@ protected:
   /**
     @brief Outer-Krylov driver (V-cycle-preconditioned BiCGStab/GMRES with persistent work vectors)
   */
-  KrylovMultigrid::Driver<MFCellFAB> m_krylov;
+  KrylovMultigrid::Solver<MFCellFAB> m_krylov;
 
   /**
     @brief Parse multigrid settings
