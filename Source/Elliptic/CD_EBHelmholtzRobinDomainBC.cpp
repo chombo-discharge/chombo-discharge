@@ -227,4 +227,12 @@ EBHelmholtzRobinDomainBC::getFaceFlux(const VolIndex&       a_vof,
   return centroidFlux;
 }
 
+Real
+EBHelmholtzRobinDomainBC::getDiagWeight(const int /*a_dir*/, const Side::LoHiSide /*a_side*/) const
+{
+  // Preserves the value previously inherited from the (now-removed) base default. Not re-derived from the Robin
+  // getFaceFlux discretization above; see EBHelmholtzDomainBC::getDiagWeight and review if that flux changes.
+  return 1.0;
+}
+
 #include <CD_NamespaceFooter.H>

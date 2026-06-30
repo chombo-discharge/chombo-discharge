@@ -47,12 +47,6 @@ EBHelmholtzDomainBC::define(const Location::Cell a_dataLocation,
   m_dx           = a_dx;
 }
 
-Real
-EBHelmholtzDomainBC::getDiagWeight(const int /*a_dir*/, const Side::LoHiSide /*a_side*/) const
-{
-  return 1.0;
-}
-
 void
 EBHelmholtzDomainBC::multiplyByBcoef(BaseFab<Real>&       a_flux,
                                      const BaseFab<Real>& a_bco,

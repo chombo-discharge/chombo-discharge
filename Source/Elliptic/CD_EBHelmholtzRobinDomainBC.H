@@ -99,6 +99,18 @@ public:
               const DataIndex&      a_dit,
               const bool            a_useHomogeneous) const override;
 
+  /**
+    @brief Diagonal-weight multiplier for the domain-face contribution to the relaxation diagonal.
+    @details See EBHelmholtzDomainBC::getDiagWeight for how this is selected. The value here preserves the 1.0 that
+             this BC inherited from the previous (non-pure) base default; it has not been re-derived from the Robin
+             getFaceFlux discretization and should be reviewed against it.
+    @param[in] a_dir  Coordinate direction of the face.
+    @param[in] a_side High or low side.
+    @return Diagonal weight.
+  */
+  Real
+  getDiagWeight(const int a_dir, const Side::LoHiSide a_side) const override;
+
 protected:
   /**
     @brief Use constant for BC

@@ -113,16 +113,31 @@ public:
               const bool            a_useHomogeneous) const = 0;
 
   /**
-    @brief Returns the diagonal weight multiplier for the domain-face contribution to the relaxation stencil.
-    @details For Dirichlet BCs the effective stencil uses a half-cell spacing giving a factor of 2.
-             For Neumann BCs the flux is prescribed independently of phi, contributing 0 to the diagonal.
-             The default returns 1 to preserve backward-compatibility with unspecialized subclasses.
+    @brief Diagonal-weight multiplier for this boundary face's contribution to the relaxation diagonal.
+    @details EBHelmholtzOp::computeDiagWeight builds the relaxation diagonal (m_betaDiagWeight) by taking the
+             interior stencil diagonal and, for each domain-boundary face, subtracting this weight times the
+             area-fraction-weighted face B-coefficient, i.e. betaWeight -= getDiagWeight() * sum(areaFrac * B/dx^2).
+             This weight is therefore the coefficient with which the boundary cell's own value phi_i enters the
+             discretized boundary flux returned by getFaceFlux() -- it is how strongly the boundary flux feeds back
+             onto the diagonal. It is dimensionless and MUST be kept consistent with this subclass's getFaceFlux()
+             discretization: the two encode the same boundary stencil, so if that discretization changes (e.g. a
+             higher-order or centroid-based flux) this value must change with it.
+
+             How to choose it: read off the coefficient of phi_i in getFaceFlux(). For the shipped discretizations:
+               - Dirichlet -> 2. The boundary value sits half a cell from the cell centre, so the one-sided difference
+                 (phi_b - phi_i)/(dx/2) carries a factor of 2 on phi_i.
+               - Neumann   -> 0. The flux is prescribed independently of phi_i, so it does not feed the diagonal.
+
+             This is pure virtual on purpose: every concrete domain BC must state its diagonal contribution
+             explicitly, so a new BC cannot silently inherit a wrong value. Note this only affects the relaxation
+             (smoother) diagonal, not the operator apply, so an inconsistent value degrades convergence rather than
+             changing the converged solution.
     @param[in] a_dir  Coordinate direction of the face.
     @param[in] a_side High or low side.
     @return Multiplier applied to B·area/dx² when building the diagonal relaxation weight.
   */
   virtual Real
-  getDiagWeight(const int a_dir, const Side::LoHiSide a_side) const;
+  getDiagWeight(const int a_dir, const Side::LoHiSide a_side) const = 0;
 
 protected:
   /**
