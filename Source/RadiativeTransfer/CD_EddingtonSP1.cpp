@@ -474,6 +474,7 @@ EddingtonSP1::parseMultigridSettings()
   // krylov_* settings. When the solver is not gmg, the gmg_* settings above configure the V-cycle that preconditions
   // the outer Krylov solver. These are read here (mandatory, like the gmg_* keys) and passed to the Krylov driver.
   const int numKrylovSolvers = pp.countval("solver");
+
   if (numKrylovSolvers < 1) {
     MayDay::Error("EddingtonSP1::parseMultigridSettings - 'solver' must list at least one of 'gmg', 'gmres', "
                   "'bicgstab'");
@@ -481,9 +482,11 @@ EddingtonSP1::parseMultigridSettings()
   m_krylovSettings.solvers.resize(numKrylovSolvers);
   for (int i = 0; i < numKrylovSolvers; i++) {
     std::string solverStr;
+
     pp.get("solver", solverStr, i);
     m_krylovSettings.solvers[i] = EllipticSolverChain::toSolverType(solverStr);
   }
+
   pp.get("krylov_eps", m_krylovSettings.eps);
   pp.get("krylov_max_iter", m_krylovSettings.maxIter);
   pp.get("krylov_restart", m_krylovSettings.restart);
@@ -496,7 +499,9 @@ EddingtonSP1::parseMultigridSettings()
   // Adaptive early re-probe: if the Krylov fallback converges in <= this many iterations the V-cycle
   // preconditioner is clearly strong, so re-probe GMG on the next solve. 0 disables it (only retry_interval applies).
   pp.get("krylov_reprobe_iters", m_fallbackPolicy.reprobeIters);
-  m_krylovSettings.verbosity = m_multigridVerbosity; // The Krylov solvers reuse the gmg_verbosity setting.
+
+  // The Krylov solvers reuse the gmg_verbosity setting.
+  m_krylovSettings.verbosity = m_multigridVerbosity;
 }
 
 void
@@ -702,14 +707,18 @@ EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData
       if (a_zeroPhi) {
         DataOps::setValue(a_phi, 0.0);
       }
+
       const bool useChain = m_krylovSettings.solvers.size() > 1 && m_krylovSettings.usesKrylov();
+
       if (useChain) {
         m_krylov.snapshotGuess(phi, rhs);
       }
 
-      const int startIdx     = m_fallbackPolicy.startIndex(m_krylovSettings.solvers);
-      bool      gmgAttempted = false;
-      bool      gmgConverged = false;
+      const int startIdx = m_fallbackPolicy.startIndex(m_krylovSettings.solvers);
+
+      bool gmgAttempted = false;
+      bool gmgConverged = false;
+
       for (int i = startIdx; i < m_krylovSettings.solvers.size() && !converged; i++) {
         const EllipticSolverChain::SolverType solverType = m_krylovSettings.solvers[i];
         const bool                            zeroPhi    = false; // phi already holds the starting solution
@@ -725,9 +734,10 @@ EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData
           m_multigridSolver->solveNoInitResid(phi, res, rhs, finestLevel, coarsestLevel, zeroPhi);
 
           const int status = m_multigridSolver->m_exitStatus; // 1 => Initial norm sufficiently reduced
-          converged        = (status == 1 || status == 8 || status == 9);
-          gmgAttempted     = true;
-          gmgConverged     = converged;
+
+          converged    = (status == 1 || status == 8 || status == 9);
+          gmgAttempted = true;
+          gmgConverged = converged;
         }
         else {
           // Outer Krylov solve with the V-cycle as preconditioner.
@@ -739,6 +749,7 @@ EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData
           m_krylov.keepOrRestore(phi, rhs);
         }
       }
+
       m_fallbackPolicy.recordOutcome(gmgAttempted,
                                      gmgConverged,
                                      m_krylov.lastKrylovIterations(),
@@ -757,7 +768,8 @@ EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData
     this->advanceEuler(a_phi, scaledSource, Units::c * a_dt, a_zeroPhi);
 
     const int status = m_multigridSolver->m_exitStatus; // 1 => Initial norm sufficiently reduced
-    if (status == 1 || status == 8 || status == 9) {    // 8 => Norm sufficiently small
+
+    if (status == 1 || status == 8 || status == 9) { // 8 => Norm sufficiently small
       converged = true;
     }
   }
@@ -800,6 +812,7 @@ EddingtonSP1::advanceEuler(EBAMRCellData&       a_phi,
   // Compute the diagonal scaling of the operator.
   Vector<AMRLevelOp<LevelData<EBCellFAB>>*> amrOps = m_multigridSolver->getAMROperators();
   Vector<MGLevelOp<LevelData<EBCellFAB>>*>  mgOps  = m_multigridSolver->getAllOperators();
+
   for (int i = 0; i < amrOps.size(); i++) {
     auto* helmholtzOperator = (TGAHelmOp<LevelData<EBCellFAB>>*)amrOps[i];
 
@@ -814,6 +827,7 @@ EddingtonSP1::advanceEuler(EBAMRCellData&       a_phi,
   }
 
   DataOps::incr(scratch, a_source, a_dt);
+
   if (m_kappaScale) {
     DataOps::kappaScale(scratch, m_amr->getVofIterator(m_realm, m_phase));
   }
@@ -838,15 +852,19 @@ EddingtonSP1::advanceEuler(EBAMRCellData&       a_phi,
   if (a_zeroPhi) {
     DataOps::setValue(a_phi, 0.0);
   }
+
   const bool useChain = m_krylovSettings.solvers.size() > 1 && m_krylovSettings.usesKrylov();
+
   if (useChain) {
     m_krylov.snapshotGuess(newPhi, eulerRHS);
   }
 
-  const int startIdx     = m_fallbackPolicy.startIndex(m_krylovSettings.solvers);
-  bool      converged    = false;
-  bool      gmgAttempted = false;
-  bool      gmgConverged = false;
+  const int startIdx = m_fallbackPolicy.startIndex(m_krylovSettings.solvers);
+
+  bool converged    = false;
+  bool gmgAttempted = false;
+  bool gmgConverged = false;
+
   for (int i = startIdx; i < m_krylovSettings.solvers.size() && !converged; i++) {
     const EllipticSolverChain::SolverType solverType = m_krylovSettings.solvers[i];
     const bool                            zeroPhi    = false; // newPhi already holds the starting solution
@@ -862,9 +880,10 @@ EddingtonSP1::advanceEuler(EBAMRCellData&       a_phi,
       m_multigridSolver->solve(newPhi, eulerRHS, finestLevel, coarsestLevel, zeroPhi);
 
       const int status = m_multigridSolver->m_exitStatus;
-      converged        = (status == 1 || status == 8 || status == 9);
-      gmgAttempted     = true;
-      gmgConverged     = converged;
+
+      converged    = (status == 1 || status == 8 || status == 9);
+      gmgAttempted = true;
+      gmgConverged = converged;
     }
     else {
       converged = m_krylov.solve(newPhi, eulerRHS, zeroPhi, solverType, m_krylovSettings);
@@ -875,6 +894,7 @@ EddingtonSP1::advanceEuler(EBAMRCellData&       a_phi,
       m_krylov.keepOrRestore(newPhi, eulerRHS);
     }
   }
+
   m_fallbackPolicy.recordOutcome(gmgAttempted,
                                  gmgConverged,
                                  m_krylov.lastKrylovIterations(),

@@ -1920,12 +1920,14 @@ EBHelmholtzOp::relaxChebyshev(LevelData<EBCellFAB>&       a_correction,
 
   // Precompute Chebyshev step sizes: omega_i = 1 / (theta - delta*cos((2i+1)*pi/(2k))).
   std::vector<Real> omega(m_chebyOrder);
+
   for (int i = 0; i < m_chebyOrder; i++) {
     const Real sigma = theta - delta * std::cos((2 * i + 1) * M_PI / (2 * m_chebyOrder));
     omega[i]         = 1.0 / sigma;
   }
 
   LevelData<EBCellFAB> Lcorr;
+
   this->create(Lcorr, a_residual);
 
   const DisjointBoxLayout& dbl  = m_eblg.getDBL();
@@ -2019,6 +2021,7 @@ EBHelmholtzOp::relaxRestrictedAdditiveSchwarz(LevelData<EBCellFAB>&       a_corr
   //       multigrid cycle than point relaxation.
 
   LevelData<EBCellFAB> Lcorr;
+
   this->create(Lcorr, a_residual);
 
   const DisjointBoxLayout& dbl  = m_eblg.getDBL();
@@ -2388,13 +2391,15 @@ EBHelmholtzOp::computeSpectralRadius()
         localMax = std::max(localMax, 2.0 - m_alpha * Aco(iv, m_comp) * rel(iv, m_comp));
       }
     };
-    BoxLoops::loop(cellBox, regularKernel);
 
     // Irregular cells: alphaDiagWeight = kappa*A already absorbed in relCoef denominator
     auto irregularKernel = [&](const VolIndex& vof) {
       const Real rho = 2.0 - m_alpha * m_alphaDiagWeight[din](vof, m_comp) * m_relCoef[din](vof, m_comp);
-      localMax       = std::max(localMax, rho);
+
+      localMax = std::max(localMax, rho);
     };
+
+    BoxLoops::loop(cellBox, regularKernel);
     BoxLoops::loop(m_vofIterStenc[din], irregularKernel);
   }
 

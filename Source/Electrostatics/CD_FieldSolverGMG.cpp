@@ -242,12 +242,16 @@ FieldSolverGMG::parseMultigridSettings()
     MayDay::Error("FieldSolverGMG::parseMultigridSettings - 'solver' must list at least one of 'gmg', 'gmres', "
                   "'bicgstab'");
   }
+
   m_krylovSettings.solvers.resize(numKrylovSolvers);
+
   for (int i = 0; i < numKrylovSolvers; i++) {
     std::string solverStr;
+
     pp.get("solver", solverStr, i);
     m_krylovSettings.solvers[i] = EllipticSolverChain::toSolverType(solverStr);
   }
+
   pp.get("krylov_eps", m_krylovSettings.eps);
   pp.get("krylov_max_iter", m_krylovSettings.maxIter);
   pp.get("krylov_restart", m_krylovSettings.restart);
@@ -295,6 +299,7 @@ FieldSolverGMG::parseJumpBC()
   }
   else {
     const std::string errorString = "FieldSolverGMG::parseJumpBC -- error, argument '" + str + "' not recognized";
+
     MayDay::Error(errorString.c_str());
   }
 }
@@ -409,14 +414,18 @@ FieldSolverGMG::solve(MFAMRCellData&       a_phi,
     if (a_zeroPhi) {
       DataOps::setValue(a_phi, 0.0);
     }
+
     const bool useChain = m_krylovSettings.solvers.size() > 1 && m_krylovSettings.usesKrylov();
+
     if (useChain) {
       m_krylov.snapshotGuess(phi, rhs);
     }
 
-    const int startIdx     = m_fallbackPolicy.startIndex(m_krylovSettings.solvers);
-    bool      gmgAttempted = false;
-    bool      gmgConverged = false;
+    const int startIdx = m_fallbackPolicy.startIndex(m_krylovSettings.solvers);
+
+    bool gmgAttempted = false;
+    bool gmgConverged = false;
+
     for (int i = startIdx; i < m_krylovSettings.solvers.size() && !converged; i++) {
       const EllipticSolverChain::SolverType solverType = m_krylovSettings.solvers[i];
       const bool                            zeroPhi    = false; // phi already holds the starting solution
@@ -432,9 +441,10 @@ FieldSolverGMG::solve(MFAMRCellData&       a_phi,
         m_multigridSolver->solveNoInitResid(phi, res, rhs, finestLevel, coarsestLevel, zeroPhi);
 
         const int status = m_multigridSolver->m_exitStatus; // 1 => Initial norm sufficiently reduced
-        converged        = (status == 1 || status == 8);    // 8 => Norm sufficiently small
-        gmgAttempted     = true;
-        gmgConverged     = converged;
+
+        converged    = (status == 1 || status == 8); // 8 => Norm sufficiently small
+        gmgAttempted = true;
+        gmgConverged = converged;
       }
       else {
         // Outer Krylov solve with the V-cycle as preconditioner (residual-correction form; the inhomogeneous BC
@@ -448,6 +458,7 @@ FieldSolverGMG::solve(MFAMRCellData&       a_phi,
         m_krylov.keepOrRestore(phi, rhs);
       }
     }
+
     m_fallbackPolicy.recordOutcome(gmgAttempted,
                                    gmgConverged,
                                    m_krylov.lastKrylovIterations(),
@@ -469,6 +480,7 @@ FieldSolverGMG::solve(MFAMRCellData&       a_phi,
   // If we are also solving for the saturation charge we get that solution from the factory (it can be a free parameter in the Helmholtz solve).
   if (m_jumpBcType == JumpBCType::SaturationCharge) {
     const EBAMRIVData& factorySigma = m_helmholtzOpFactory->getSigma();
+
     DataOps::copy(m_sigma, factorySigma);
     DataOps::scale(m_sigma, Units::eps0, m_amr->getVofIterator(m_realm, phase::gas));
 
