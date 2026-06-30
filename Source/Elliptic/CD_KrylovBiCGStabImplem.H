@@ -142,6 +142,8 @@ KrylovBiCGStab<T>::solve(Vec& a_phi, const Vec& a_rhs) noexcept
   };
 
   while (iter < m_maxIter && rnorm > m_eps * rnorm0) {
+    const Real rnormStart = rnorm; // residual at the start of this iteration (for the convergence-rate report)
+
     const Real rhoNew = op.dotProduct(m_rTilde, m_r);
     if (rhoNew == 0.0) {
       if (breakdown()) {
@@ -197,14 +199,14 @@ KrylovBiCGStab<T>::solve(Vec& a_phi, const Vec& a_rhs) noexcept
     op.incr(m_e, m_sTilde, omega); // e += omega*s_tilde
     op.incr(m_r, m_t, -omega);     // r = s - omega*t
 
-    const Real rnormPrev = rnorm;
-    rnorm                = op.norm(m_r, 2);
+    rnorm = op.norm(m_r, 2);
 
     rho = rhoNew;
 
     if (m_verbosity >= 4) {
+      // Rate is the iteration-over-iteration reduction factor r_{k-1}/r_k (>1 = converging), matching AMRMultiGrid.
       pout() << "      KrylovBiCGStab:: iteration = " << iter << ", residual = " << rnorm
-             << ", rate = " << ((rnormPrev > 0.0) ? rnorm / rnormPrev : 0.0) << endl;
+             << ", rate = " << ((rnorm > 0.0) ? rnormStart / rnorm : 0.0) << endl;
     }
 
     if (rnorm <= m_eps * rnorm0) {

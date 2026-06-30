@@ -234,6 +234,13 @@ CdrMultigrid::advanceEuler(EBAMRCellData&       a_newPhi,
     // Do the multigrid solve, trying the solver chain in order (e.g. 'gmg gmres'). Each attempt warm-starts from the
     // previous one (a_newPhi is updated in place). Begin at the policy's preferred index, which skips a
     // persistently-failing GMG while latched onto the fallback.
+    // Snapshot the warm-start solution (the copy of the old state); a failed attempt reverts to it unless it reduced
+    // the residual (see keepOrRestore).
+    const bool useChain = m_krylovSettings.solvers.size() > 1 && m_krylovSettings.usesKrylov();
+    if (useChain) {
+      m_krylov.snapshotGuess(newPhi, eulerRHS);
+    }
+
     const int startIdx     = m_fallbackPolicy.startIndex(m_krylovSettings.solvers);
     bool      converged    = false;
     bool      gmgAttempted = false;
@@ -256,6 +263,11 @@ CdrMultigrid::advanceEuler(EBAMRCellData&       a_newPhi,
       }
       else {
         converged = m_krylov.solve(newPhi, eulerRHS, false, solverType, m_krylovSettings);
+      }
+
+      // Warm-start rule: keep a failed attempt only if it reduced the residual below the chain's initial residual.
+      if (!converged && useChain && i + 1 < m_krylovSettings.solvers.size()) {
+        m_krylov.keepOrRestore(newPhi, eulerRHS);
       }
     }
     m_fallbackPolicy.recordOutcome(gmgAttempted,
@@ -363,6 +375,13 @@ CdrMultigrid::advanceCrankNicholson(EBAMRCellData&       a_newPhi,
     // Do the multigrid solve, trying the solver chain in order (e.g. 'gmg gmres'). Each attempt warm-starts from the
     // previous one (a_newPhi is updated in place). Begin at the policy's preferred index, which skips a
     // persistently-failing GMG while latched onto the fallback.
+    // Snapshot the warm-start solution (the copy of the old state); a failed attempt reverts to it unless it reduced
+    // the residual (see keepOrRestore).
+    const bool useChain = m_krylovSettings.solvers.size() > 1 && m_krylovSettings.usesKrylov();
+    if (useChain) {
+      m_krylov.snapshotGuess(newPhi, eulerRHS);
+    }
+
     const int startIdx     = m_fallbackPolicy.startIndex(m_krylovSettings.solvers);
     bool      converged    = false;
     bool      gmgAttempted = false;
@@ -385,6 +404,11 @@ CdrMultigrid::advanceCrankNicholson(EBAMRCellData&       a_newPhi,
       }
       else {
         converged = m_krylov.solve(newPhi, eulerRHS, false, solverType, m_krylovSettings);
+      }
+
+      // Warm-start rule: keep a failed attempt only if it reduced the residual below the chain's initial residual.
+      if (!converged && useChain && i + 1 < m_krylovSettings.solvers.size()) {
+        m_krylov.keepOrRestore(newPhi, eulerRHS);
       }
     }
     m_fallbackPolicy.recordOutcome(gmgAttempted,

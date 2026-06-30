@@ -370,7 +370,7 @@ The two methods implement:
   It uses a small, fixed amount of work storage independent of the iteration count, so it is cheaper in memory than GMRES and is often competitive in iteration count.
   Its recurrences can, however, *break down* (a near-zero inner product) on poorly-conditioned or strongly non-symmetric problems; the implementation restarts a bounded number of times on breakdown, but GMRES is the safer choice when robustness matters.
 
-``solver`` also accepts a space-separated *fallback chain*: the listed solvers are attempted in order and the first that converges wins, with each attempt warm-started from the previous one. The idiomatic choice is
+``solver`` also accepts a space-separated *fallback chain* of any length (e.g. ``gmg bicgstab gmres``): the listed solvers are attempted in order and the first that converges wins. Each attempt warm-starts from the previous attempt's result *only if* that result reduced the residual below the chain's initial residual; otherwise it falls back to the initial-residual solution, so a diverged attempt never pollutes the next solver's initial guess. The idiomatic choice is
 
 .. code-block:: text
 

@@ -42,6 +42,7 @@ namespace KrylovMultigrid {
     if (m_workAllocated) {
       m_op.clear(m_r0);
       m_op.clear(m_dphi);
+      m_op.clear(m_phiInit);
       m_workAllocated = false;
     }
   }
@@ -52,7 +53,41 @@ namespace KrylovMultigrid {
   {
     m_op.create(m_r0, a_template);
     m_op.create(m_dphi, a_template);
+    m_op.create(m_phiInit, a_template);
     m_workAllocated = true;
+  }
+
+  template <class T>
+  void
+  Solver<T>::snapshotGuess(Vec& a_phi, const Vec& a_rhs)
+  {
+    CH_TIME("KrylovMultigrid::Solver::snapshotGuess");
+
+    if (!m_workAllocated) {
+      this->allocateWork(a_phi);
+    }
+
+    m_op.assign(m_phiInit, a_phi);
+    m_initResidual = m_mg->computeAMRResidual(a_phi, a_rhs, m_lmax, m_lbase);
+  }
+
+  template <class T>
+  bool
+  Solver<T>::keepOrRestore(Vec& a_phi, const Vec& a_rhs)
+  {
+    CH_TIME("KrylovMultigrid::Solver::keepOrRestore");
+
+    const Real r = m_mg->computeAMRResidual(a_phi, a_rhs, m_lmax, m_lbase);
+
+    // Keep the just-failed solve only if it improved on the chain's initial residual; otherwise revert to the
+    // initial-residual solution.
+    if (r >= m_initResidual) {
+      m_op.assign(a_phi, m_phiInit);
+
+      return false;
+    }
+
+    return true;
   }
 
   template <class T>

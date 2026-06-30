@@ -361,6 +361,28 @@ namespace KrylovMultigrid {
       return m_lastKrylovIters;
     }
 
+    /**
+      @brief Snapshot the chain's starting guess and its residual for the fallback warm-start rule.
+      @details Call once, before the first attempt in a fallback chain. Stores a copy of the starting solution (the
+               "initial-residual solution") so keepOrRestore() can fall back to it.
+      @param[in,out] a_phi The starting guess (after any zeroing the host has applied); its ghost cells may be filled.
+      @param[in]     a_rhs Right-hand side, used to evaluate the initial residual.
+    */
+    void
+    snapshotGuess(Vec& a_phi, const Vec& a_rhs);
+
+    /**
+      @brief Warm-start rule applied between fallback attempts.
+      @details If the just-failed attempt left a residual smaller than the snapshot's initial residual, a_phi is kept
+               (the failed solve is a better warm start); otherwise a_phi is restored to the snapshot (the
+               initial-residual solution). snapshotGuess() must have been called first.
+      @param[in,out] a_phi Current solution; restored to the snapshot if it did not improve on the initial residual.
+      @param[in]     a_rhs Right-hand side, used to evaluate the current residual.
+      @return True if the current solution was kept, false if it was restored.
+    */
+    bool
+    keepOrRestore(Vec& a_phi, const Vec& a_rhs);
+
   protected:
     /**
       @brief Lazily allocate the persistent residual-correction vectors r0/dphi from a template hierarchy.
@@ -429,6 +451,16 @@ namespace KrylovMultigrid {
       @brief Persistent correction.
     */
     Vec m_dphi;
+
+    /**
+      @brief Snapshot of the chain's starting guess (the initial-residual solution) for the warm-start rule.
+    */
+    Vec m_phiInit;
+
+    /**
+      @brief Residual of the snapshot (the initial residual of the fallback chain).
+    */
+    Real m_initResidual = 0.0;
   };
 
 } // namespace KrylovMultigrid

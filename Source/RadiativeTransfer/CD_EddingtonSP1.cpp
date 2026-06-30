@@ -696,15 +696,23 @@ EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData
     const Real zeroResid = m_multigridSolver->computeAMRResidual(zer, rhs, finestLevel, coarsestLevel);
 
     if (phiResid > zeroResid * m_multigridExitTolerance) {
-      // Try the solver chain in order (e.g. 'gmg gmres'), warm-starting each attempt from the previous one. Begin at
-      // the policy's preferred index, which skips a persistently-failing GMG while latched onto the fallback.
+      // Establish and snapshot the chain's starting solution. Every fallback attempt starts from this same guess,
+      // except that a failed attempt which reduced the residual is kept as the warm start (see keepOrRestore). Begin
+      // at the policy's preferred index, which skips a persistently-failing GMG while latched onto the fallback.
+      if (a_zeroPhi) {
+        DataOps::setValue(a_phi, 0.0);
+      }
+      const bool useChain = m_krylovSettings.solvers.size() > 1 && m_krylovSettings.usesKrylov();
+      if (useChain) {
+        m_krylov.snapshotGuess(phi, rhs);
+      }
+
       const int startIdx     = m_fallbackPolicy.startIndex(m_krylovSettings.solvers);
-      bool      firstAttempt = true;
       bool      gmgAttempted = false;
       bool      gmgConverged = false;
       for (int i = startIdx; i < m_krylovSettings.solvers.size() && !converged; i++) {
         const KrylovMultigrid::SolverType solverType = m_krylovSettings.solvers[i];
-        const bool                        zeroPhi    = a_zeroPhi && firstAttempt;
+        const bool                        zeroPhi    = false; // phi already holds the starting solution
 
         if (i > startIdx && m_krylovSettings.verbosity >= 1) {
           pout() << "EddingtonSP1::advance - '" << KrylovMultigrid::solverTypeName(m_krylovSettings.solvers[i - 1])
@@ -726,7 +734,10 @@ EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData
           converged = m_krylov.solve(phi, rhs, zeroPhi, solverType, m_krylovSettings);
         }
 
-        firstAttempt = false;
+        // Warm-start rule: keep a failed attempt only if it reduced the residual below the chain's initial residual.
+        if (!converged && useChain && i + 1 < m_krylovSettings.solvers.size()) {
+          m_krylov.keepOrRestore(phi, rhs);
+        }
       }
       m_fallbackPolicy.recordOutcome(gmgAttempted,
                                      gmgConverged,
@@ -822,14 +833,23 @@ EddingtonSP1::advanceEuler(EBAMRCellData&       a_phi,
   // the solver chain in order (e.g. 'gmg gmres') and warm-starting each attempt from the previous one.
   const Real zeroResid = m_multigridSolver->computeAMRResidual(zer, eulerRHS, finestLevel, coarsestLevel);
 
+  // Establish and snapshot the chain's starting solution; failed attempts revert to it unless they reduced the
+  // residual (see keepOrRestore).
+  if (a_zeroPhi) {
+    DataOps::setValue(a_phi, 0.0);
+  }
+  const bool useChain = m_krylovSettings.solvers.size() > 1 && m_krylovSettings.usesKrylov();
+  if (useChain) {
+    m_krylov.snapshotGuess(newPhi, eulerRHS);
+  }
+
   const int startIdx     = m_fallbackPolicy.startIndex(m_krylovSettings.solvers);
   bool      converged    = false;
-  bool      firstAttempt = true;
   bool      gmgAttempted = false;
   bool      gmgConverged = false;
   for (int i = startIdx; i < m_krylovSettings.solvers.size() && !converged; i++) {
     const KrylovMultigrid::SolverType solverType = m_krylovSettings.solvers[i];
-    const bool                        zeroPhi    = a_zeroPhi && firstAttempt;
+    const bool                        zeroPhi    = false; // newPhi already holds the starting solution
 
     if (i > startIdx && m_krylovSettings.verbosity >= 1) {
       pout() << "EddingtonSP1::advanceEuler - '" << KrylovMultigrid::solverTypeName(m_krylovSettings.solvers[i - 1])
@@ -849,7 +869,10 @@ EddingtonSP1::advanceEuler(EBAMRCellData&       a_phi,
       converged = m_krylov.solve(newPhi, eulerRHS, zeroPhi, solverType, m_krylovSettings);
     }
 
-    firstAttempt = false;
+    // Warm-start rule: keep a failed attempt only if it reduced the residual below the chain's initial residual.
+    if (!converged && useChain && i + 1 < m_krylovSettings.solvers.size()) {
+      m_krylov.keepOrRestore(newPhi, eulerRHS);
+    }
   }
   m_fallbackPolicy.recordOutcome(gmgAttempted,
                                  gmgConverged,

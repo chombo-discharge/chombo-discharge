@@ -397,18 +397,29 @@ FieldSolverGMG::solve(MFAMRCellData&       a_phi,
   const Real convergedResid = zeroResid * m_multigridExitTolerance;
 
   // If the residue rho - L(phi) is too large then we must get a new solution. The solver chain is tried in order
-  // (e.g. 'gmg gmres' tries stand-alone multigrid, then GMRES if it fails); each attempt after the first warm-starts
-  // from the previous attempt's result.
+  // (e.g. 'gmg gmres' tries stand-alone multigrid, then GMRES if it fails). A failed attempt is kept as the warm
+  // start for the next solver only if it reduced the residual below the initial residual (see keepOrRestore);
+  // otherwise the next solver restarts from the initial-residual solution.
   if (phiResid > convergedResid) {
     // Begin the chain at the policy's preferred index: normally 0 (try GMG first), but the index of the first Krylov
     // solver while latched onto the fallback (re-probing GMG only every krylov_retry_interval solves).
+    // Establish and snapshot the chain's starting solution (the "initial-residual solution"). Every fallback attempt
+    // starts from this same guess, except that a failed attempt which actually reduced the residual is kept as the
+    // warm start for the next solver (see keepOrRestore below).
+    if (a_zeroPhi) {
+      DataOps::setValue(a_phi, 0.0);
+    }
+    const bool useChain = m_krylovSettings.solvers.size() > 1 && m_krylovSettings.usesKrylov();
+    if (useChain) {
+      m_krylov.snapshotGuess(phi, rhs);
+    }
+
     const int startIdx     = m_fallbackPolicy.startIndex(m_krylovSettings.solvers);
-    bool      firstAttempt = true;
     bool      gmgAttempted = false;
     bool      gmgConverged = false;
     for (int i = startIdx; i < m_krylovSettings.solvers.size() && !converged; i++) {
       const KrylovMultigrid::SolverType solverType = m_krylovSettings.solvers[i];
-      const bool                        zeroPhi    = a_zeroPhi && firstAttempt;
+      const bool                        zeroPhi    = false; // phi already holds the starting solution
 
       if (i > startIdx && m_krylovSettings.verbosity >= 1) {
         pout() << "FieldSolverGMG::solve - '" << KrylovMultigrid::solverTypeName(m_krylovSettings.solvers[i - 1])
@@ -430,7 +441,11 @@ FieldSolverGMG::solve(MFAMRCellData&       a_phi,
         converged = m_krylov.solve(phi, rhs, zeroPhi, solverType, m_krylovSettings);
       }
 
-      firstAttempt = false;
+      // Warm-start rule: keep a failed attempt only if it reduced the residual below the chain's initial residual;
+      // otherwise revert to the initial-residual solution before trying the next solver.
+      if (!converged && useChain && i + 1 < m_krylovSettings.solvers.size()) {
+        m_krylov.keepOrRestore(phi, rhs);
+      }
     }
     m_fallbackPolicy.recordOutcome(gmgAttempted,
                                    gmgConverged,
