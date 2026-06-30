@@ -42,7 +42,7 @@ namespace {
 
   constexpr int  g_N        = 32;  // level-0 cells per direction
   constexpr int  g_minBlk   = 16;  // blocking factor (tile size)
-  constexpr int  g_refRat   = 2;   // refinement ratio level 0 -> 1
+  constexpr int  g_refRat   = 4;   // refinement ratio level 0 -> 1
   constexpr int  g_numGhost = 2;   // ghost layer width (cells)
   constexpr int  g_finest   = 1;   // finest level index
   const Real     g_L        = 1.0; // physical domain length
@@ -326,6 +326,52 @@ main(int argc, char* argv[])
         nerr++;
       }
     }
+  }
+
+  // ---------------------------------------------------------------------------
+  // REPRO (temporary): fill -> discard valids -> remap the ghosts back. Mirrors the McPhoto demo to
+  // localize the MPI stall in the no-EBIS harness. Tripwires print to pout.<rank>.
+  // ---------------------------------------------------------------------------
+  {
+    unsigned long long ghostsNow = 0;
+    for (int lt = 0; lt <= g_finest; lt++) {
+      for (DataIterator dit(grids[lt]); dit.ok(); ++dit) {
+        const auto& gl = container[lt][dit()];
+        for (std::size_t i = 0; i < gl.size(); i++) {
+          if (gl.isGhost(i)) {
+            ghostsNow++;
+          }
+        }
+      }
+    }
+    const unsigned long long ghostsGlobal = ParallelOps::sum(ghostsNow);
+    if (procID() == 0) {
+      std::cout << "REPRO: ghosts after fill (global) = " << ghostsGlobal << std::endl;
+      std::cout << "REPRO: before discard+remap" << std::endl;
+    }
+  }
+  for (int lt = 0; lt <= g_finest; lt++) {
+    for (DataIterator dit(grids[lt]); dit.ok(); ++dit) {
+      auto&       reproLeaf = container[lt][dit()];
+      std::size_t ri        = 0;
+      while (ri < reproLeaf.size()) {
+        if (reproLeaf.isGhost(ri)) {
+          reproLeaf.ghost(ri) = GhostType::Valid;
+          ri++;
+        }
+        else {
+          reproLeaf.remove(ri);
+        }
+      }
+    }
+  }
+  if (procID() == 0) {
+    std::cout << "REPRO: discarded valids, calling remap()" << std::endl;
+  }
+  container.remap();
+  if (procID() == 0) {
+    std::cout << "REPRO: remap() returned, valid=" << container.getNumberOfValidParticlesGlobal()
+              << " outcast=" << container.getNumberOfOutcastParticlesGlobal() << std::endl;
   }
 
   // ---------------------------------------------------------------------------

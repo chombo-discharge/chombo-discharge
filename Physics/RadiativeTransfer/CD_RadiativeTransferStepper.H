@@ -266,6 +266,20 @@ namespace Physics {
       ghostBoundaryTest();
 
       /**
+	@brief DEV visualization: append 0/1 plot fields marking cells that have same/coarser/finer ghost
+	targets in the Realm ghost-target tables.
+	@param[in,out] a_output      Output data holder.
+	@param[in,out] a_icomp       Starting component (advanced by 3 on return).
+	@param[in]     a_outputRealm Output realm (must equal m_realm).
+	@param[in]     a_level       Grid level.
+      */
+      void
+      writeGhostTargetPlotData(LevelData<EBCellFAB>& a_output,
+                               int&                  a_icomp,
+                               const std::string&    a_outputRealm,
+                               const int             a_level) const;
+
+      /**
 	@brief Whether to run ghostBoundaryTest() in postInitialize(). Default false.
       */
       bool m_ghostBoundaryTest = false;

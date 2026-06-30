@@ -23,9 +23,30 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Alias for cutting down on the typic of booleans defined over AMR grids. 
+  @brief Alias for cutting down on the typic of booleans defined over AMR grids.
 */
 using AMRMask = Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>;
+
+/**
+  @brief A particle scatter target: the (grid index, owning/receiving rank) of a destination box.
+  @details Reuses the LevelTiles BoxIDs convention: first = grid index on the target level, second =
+  rank that owns (and will receive) that box. The sending rank is intentionally not stored.
+*/
+using GhostTarget = LevelTiles::BoxIDs;
+
+/**
+  @brief Per grid box, a sparse lookup from a source-level cell to the destination boxes whose ghosted
+  box (the box grown by the number of ghost cells) overlaps that cell.
+  @details A cell with no entry scatters nowhere in this direction. A cell may map to several targets
+  (overlapping ghost regions), and the same particle may appear in the same-level, coarser, and finer
+  tables simultaneously.
+*/
+using GhostTargetMap = std::unordered_map<IntVect, std::vector<GhostTarget>, LevelTiles::TileHasher>;
+
+/**
+  @brief AMR-wide ghost-target lookup: one per-box map per level, indexed by the SOURCE level.
+*/
+using AMRGhostTargets = Vector<RefCountedPtr<LayoutData<GhostTargetMap>>>;
 
 /**
   @brief Class for holding multifluid Realms, which are the Realms that we actually use. 
@@ -483,6 +504,27 @@ public:
   getValidCells() const;
 
   /**
+    @brief Get the same-level ghost-particle scatter targets.
+    @return m_ghostTargetsSame
+  */
+  const AMRGhostTargets&
+  getGhostTargetsSame() const noexcept;
+
+  /**
+    @brief Get the coarser-level ghost-particle scatter targets.
+    @return m_ghostTargetsCoar
+  */
+  const AMRGhostTargets&
+  getGhostTargetsCoar() const noexcept;
+
+  /**
+    @brief Get the finer-level ghost-particle scatter targets.
+    @return m_ghostTargetsFine
+  */
+  const AMRGhostTargets&
+  getGhostTargetsFine() const noexcept;
+
+  /**
     @brief Get the tiled space
     @return Level tiles
   */
@@ -610,6 +652,24 @@ protected:
   */
   AMRMask m_validCells;
 
+  /**
+    @brief Ghost-particle scatter targets to SAME-level boxes. Indexed by source level; per source box,
+    maps a source cell to the same-level boxes whose ghosted box covers it. See defineGhostTargets().
+  */
+  AMRGhostTargets m_ghostTargetsSame;
+
+  /**
+    @brief Ghost-particle scatter targets to the next-COARSER level. Indexed by source level (>=1);
+    per source (fine) box, maps a source cell to the coarser-level boxes whose ghosted box covers it.
+  */
+  AMRGhostTargets m_ghostTargetsCoar;
+
+  /**
+    @brief Ghost-particle scatter targets to the next-FINER level. Indexed by source level (<finest);
+    per source (coarse) box, maps a source cell to the finer-level boxes whose ghosted box covers it.
+  */
+  AMRGhostTargets m_ghostTargetsFine;
+
 #ifdef CH_USE_PETSC
   /**
     @brief PETSc grid
@@ -736,6 +796,19 @@ protected:
   */
   void
   defineLevelTiles() noexcept;
+
+  /**
+    @brief Build the same/coarser/finer ghost-particle scatter-target lookups.
+    @details For every level and every box, records (per source cell) which boxes on the same level,
+    the next-coarser level, and the next-finer level have a ghosted box (box grown by m_numGhost,
+    clamped to the domain) that overlaps the cell, together with the owning (receiving) rank. The
+    cross-level tables map the source cell through coarsen()/refine() so the lookup key is always the
+    cell at the source level. Periodic boundaries are not handled.
+    @note The cross-level build currently intersects against every box on the neighbouring level; this
+    is O(boxes) per box and may need the coarsened/refined-layout + copy approach used by defineValidCells.
+  */
+  void
+  defineGhostTargets() noexcept;
 
   /**
     @brief Define the PETSc composite grid

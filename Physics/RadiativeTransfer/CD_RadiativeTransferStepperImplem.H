@@ -23,6 +23,7 @@
 // Our includes
 #include <CD_RadiativeTransferStepper.H>
 #include <CD_RadiativeTransferSpecies.H>
+#include <CD_AmrMesh.H>
 #include <CD_McPhoto.H>
 #include <CD_Photon.H>
 #include <CD_ParticleContainer.H>
@@ -140,9 +141,12 @@ RadiativeTransferStepper<T>::postInitialize()
     pout() << "RadiativeTransferStepper::postInitialize" << endl;
   }
 
-  if (m_ghostBoundaryTest) {
-    this->ghostBoundaryTest();
-  }
+  // PARKED: the particle-scatter dev path (sample -> fillGhostParticles -> discard -> remap) is on hold
+  // while we develop and visualize the Realm ghost-target tables. m_ghostBoundaryTest now only gates the
+  // ghost-target plot fields (see writeGhostTargetPlotData / getNumberOfPlotVariables).
+  // if (m_ghostBoundaryTest) {
+  //   this->ghostBoundaryTest();
+  // }
 }
 
 template <typename T>
@@ -270,7 +274,8 @@ RadiativeTransferStepper<T>::getNumberOfPlotVariables() const
     pout() << "RadiativeTransferStepper::getNumberOfPlotVariables" << endl;
   }
 
-  return m_solver->getNumberOfPlotVariables();
+  // +3 dev fields (ghost_same/ghost_coar/ghost_fine) visualizing the Realm ghost-target tables.
+  return m_solver->getNumberOfPlotVariables() + (m_ghostBoundaryTest ? 3 : 0);
 }
 
 template <typename T>
@@ -282,7 +287,13 @@ RadiativeTransferStepper<T>::getPlotVariableNames() const
     pout() << "RadiativeTransferStepper::getPlotVariableNames" << endl;
   }
 
-  return m_solver->getPlotVariableNames();
+  Vector<std::string> names = m_solver->getPlotVariableNames();
+  if (m_ghostBoundaryTest) {
+    names.push_back("ghost_same");
+    names.push_back("ghost_coar");
+    names.push_back("ghost_fine");
+  }
+  return names;
 }
 
 template <typename T>
@@ -298,6 +309,60 @@ RadiativeTransferStepper<T>::writePlotData(LevelData<EBCellFAB>& a_output,
   }
 
   m_solver->writePlotData(a_output, a_icomp, a_outputRealm, a_level);
+
+  if (m_ghostBoundaryTest) {
+    this->writeGhostTargetPlotData(a_output, a_icomp, a_outputRealm, a_level);
+  }
+}
+
+template <typename T>
+void
+RadiativeTransferStepper<T>::writeGhostTargetPlotData(LevelData<EBCellFAB>& a_output,
+                                                      int&                  a_icomp,
+                                                      const std::string&    a_outputRealm,
+                                                      const int             a_level) const
+{
+  // DEV visualization: write 0/1 per cell that has at least one ghost target in each of the three
+  // Realm tables (same/coarser/finer level). Assumes the output realm matches the stepper realm (true
+  // for the McPhoto example). The tables are mesh structures and need no particles.
+  CH_assert(a_outputRealm == m_realm);
+
+  const AMRGhostTargets& same = m_amr->getGhostTargetsSame(m_realm);
+  const AMRGhostTargets& coar = m_amr->getGhostTargetsCoar(m_realm);
+  const AMRGhostTargets& fine = m_amr->getGhostTargetsFine(m_realm);
+
+  const DisjointBoxLayout& dbl  = m_amr->getGrids(m_realm)[a_level];
+  const DataIterator&      dit  = dbl.dataIterator();
+  const int                nbox = dit.size();
+
+  const AMRGhostTargets* tables[3] = {&same, &coar, &fine};
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din      = dit[mybox];
+    const Box        validBox = dbl[din];
+
+    EBCellFAB&     out = a_output[din];
+    BaseFab<Real>& reg = out.getSingleValuedFAB();
+
+    for (int k = 0; k < 3; k++) {
+      const int comp = a_icomp + k;
+
+      out.setVal(comp, 0.0);
+
+      const AMRGhostTargets& table = *tables[k];
+      if (a_level < table.size() && !table[a_level].isNull()) {
+        const GhostTargetMap& map = (*table[a_level])[din];
+        for (const auto& kv : map) {
+          if (validBox.contains(kv.first)) {
+            reg(kv.first, comp) = 1.0;
+          }
+        }
+      }
+    }
+  }
+
+  a_icomp += 3;
 }
 
 template <typename T>

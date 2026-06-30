@@ -17,6 +17,7 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <cstdlib>
 #include <cstring>
 #include <limits>
 #include <map>
@@ -28,10 +29,36 @@
 #include <CH_Timer.H>
 #include <CH_assert.H>
 #include <BoxIterator.H>
+#include <parstream.H>
 
 // Our includes
 #include <CD_ParticleContainer.H>
 #include <CD_NamespaceHeader.H>
+
+// Debug tripwires for localizing MPI stalls in the ghost/remap paths. Off unless the environment
+// variable CD_PARTICLE_TRIPWIRE is set, so production runs are silent. Each marker is written to
+// the per-rank pout file and flushed, so the last marker in each file localizes where a rank stalled.
+namespace {
+  inline bool
+  cdParticleTripwireOn()
+  {
+    static const bool s_on = (std::getenv("CD_PARTICLE_TRIPWIRE") != nullptr);
+    return s_on;
+  }
+} // namespace
+
+/**
+  @brief Debug tripwire macro for localizing MPI stalls in the ghost/remap paths.
+  @details Emits a flushed marker line to the per-rank pout file only when the environment variable
+  CD_PARTICLE_TRIPWIRE is set, so production runs are silent. Temporary development aid.
+  @param msg A stream-insertable expression appended to the marker.
+*/
+#define CD_TRIPWIRE(msg)                      \
+  do {                                        \
+    if (cdParticleTripwireOn()) {             \
+      pout() << "[tripwire] " << msg << endl; \
+    }                                         \
+  } while (0)
 
 template <typename P, typename Traits>
 inline typename ParticleContainer<P, Traits>::Destination
@@ -273,6 +300,18 @@ ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool, const bool a
   const int myRank   = procID();
   const int numRanks = numProc();
 
+  CD_TRIPWIRE("distributeFromPool: enter setOwnerToReceiver=" << a_setOwnerToReceiver);
+  if (cdParticleTripwireOn()) {
+    std::size_t nSame  = 0;
+    std::size_t nCross = 0;
+    for (int r = 0; r < numRanks; r++) {
+      for (auto& kv : a_pool[r]) {
+        (r == myRank ? nSame : nCross) += kv.second.size();
+      }
+    }
+    CD_TRIPWIRE("distributeFromPool: pool same-rank=" << nSame << " cross-rank=" << nCross);
+  }
+
   // ---- same-rank movers: catenate each pooled leaf into its destination leaf ----
   // On the gather-all path the destination leaves are empty (remap clears them; regrid allocates them
   // fresh) so catenate() takes the O(1) arena-swap fast path. On the mask fast path the destinations
@@ -281,10 +320,15 @@ ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool, const bool a
   for (auto& kv : a_pool[myRank]) {
     const int          lvl  = kv.first.first;
     const unsigned int gidx = kv.first.second;
-    const DataIndex    din  = m_levelTiles[lvl]->getMyGrids().at(gidx);
+    if (cdParticleTripwireOn() && m_levelTiles[lvl]->getMyGrids().count(gidx) == 0) {
+      CD_TRIPWIRE("distributeFromPool: SAME-RANK dest lvl=" << lvl << " gidx=" << gidx << " NOT owned here!");
+    }
+    const DataIndex din = m_levelTiles[lvl]->getMyGrids().at(gidx);
 
     (*m_particles[lvl])[din].catenate(kv.second);
   }
+
+  CD_TRIPWIRE("distributeFromPool: same-rank done");
 
 #ifdef CH_MPI
   // ---- cross-rank movers: one Alltoallv of linearized particles ----
@@ -341,7 +385,9 @@ ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool, const bool a
     sendCounts[r] = static_cast<int>(sendBuf[r].size());
   }
 
+  CD_TRIPWIRE("distributeFromPool: before MPI_Alltoall");
   MPI_Alltoall(sendCounts.data(), 1, MPI_INT, recvCounts.data(), 1, MPI_INT, Chombo_MPI::comm);
+  CD_TRIPWIRE("distributeFromPool: after MPI_Alltoall");
 
   std::vector<int> sdispl(numRanks, 0);
   std::vector<int> rdispl(numRanks, 0);
@@ -371,6 +417,7 @@ ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool, const bool a
     }
   }
 
+  CD_TRIPWIRE("distributeFromPool: before MPI_Alltoallv stot=" << stot << " rtot=" << rtot);
   MPI_Alltoallv(sflat.data(),
                 sendCounts.data(),
                 sdispl.data(),
@@ -380,6 +427,7 @@ ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool, const bool a
                 rdispl.data(),
                 MPI_BYTE,
                 Chombo_MPI::comm);
+  CD_TRIPWIRE("distributeFromPool: after MPI_Alltoallv");
 
   // ---- unpack: group received chunks by destination leaf, then append in parallel ----
   // Pass 1 (serial, header-only walk): record each chunk's payload pointer + count, grouped by its
@@ -436,6 +484,18 @@ ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool, const bool a
   }
 
   const int numGroups = static_cast<int>(groups.size());
+
+  if (cdParticleTripwireOn()) {
+    for (const DestGroup& g : groups) {
+      const bool ownedHere = m_levelTiles[g.level]->getMyGrids().count(g.gridIndex) > 0;
+      if (!ownedHere) {
+        CD_TRIPWIRE("distributeFromPool: RECEIVED group lvl=" << g.level << " gidx=" << g.gridIndex
+                                                              << " count=" << g.total << " NOT owned here!");
+      }
+    }
+    CD_TRIPWIRE("distributeFromPool: unpacking " << numGroups << " groups");
+  }
+
 #ifdef _OPENMP
 #pragma omp parallel for schedule(runtime)
 #endif
@@ -459,7 +519,11 @@ ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool, const bool a
       }
     }
   }
+
+  CD_TRIPWIRE("distributeFromPool: unpack done");
 #endif
+
+  CD_TRIPWIRE("distributeFromPool: return");
 }
 
 template <typename P, typename Traits>
@@ -610,6 +674,8 @@ ParticleContainer<P, Traits>::gatherGhostsToPool()
 {
   CH_TIME("ParticleContainer::gatherGhostsToPool");
 
+  CD_TRIPWIRE("gatherGhostsToPool: enter");
+
   // A candidate destination patch: its own (ungrown) box, the box grown by m_numGhost and clamped to
   // the domain, and its global (gridIndex, rank) identity (matching LevelTiles / distributeFromPool).
   struct GhostBox
@@ -725,6 +791,18 @@ ParticleContainer<P, Traits>::gatherGhostsToPool()
 #endif
   }
 
+  if (cdParticleTripwireOn()) {
+    std::size_t nbins = 0;
+    std::size_t npart = 0;
+    for (int r = 0; r < numProc(); r++) {
+      nbins += pool[r].size();
+      for (auto& kv : pool[r]) {
+        npart += kv.second.size();
+      }
+    }
+    CD_TRIPWIRE("gatherGhostsToPool: done, " << nbins << " dest bins, " << npart << " ghost copies");
+  }
+
   return pool;
 }
 
@@ -736,6 +814,8 @@ ParticleContainer<P, Traits>::fillGhostParticles()
 
   CH_assert(m_isDefined);
 
+  CD_TRIPWIRE("fillGhostParticles: enter numGhost=" << m_numGhost);
+
   // Refill from a clean slate: drop any existing ghost halo first.
   this->clearGhostParticles();
 
@@ -743,10 +823,14 @@ ParticleContainer<P, Traits>::fillGhostParticles()
     return; // no ghost layer requested
   }
 
+  CD_TRIPWIRE("fillGhostParticles: gathering ghosts");
   MoverPool pool = this->gatherGhostsToPool();
 
+  CD_TRIPWIRE("fillGhostParticles: distributing ghosts");
   // a_setOwnerToReceiver == false: ghost copies keep their true owner's rankID (not the receiver's).
   this->distributeFromPool(pool, false);
+
+  CD_TRIPWIRE("fillGhostParticles: done");
 
   m_isOrganizedByCell = false; // ghosts appended to the leaves invalidate any cell sort
 }

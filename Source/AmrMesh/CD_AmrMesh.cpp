@@ -3405,6 +3405,54 @@ AmrMesh::getLevelTiles(const std::string& a_realm) const
   return m_realms[a_realm]->getLevelTiles();
 }
 
+const AMRGhostTargets&
+AmrMesh::getGhostTargetsSame(const std::string& a_realm) const
+{
+  CH_TIME("AmrMesh::getGhostTargetsSame(string)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getGhostTargetsSame(string)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getGhostTargetsSame(string) - could not find realm '" + a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getGhostTargetsSame();
+}
+
+const AMRGhostTargets&
+AmrMesh::getGhostTargetsCoar(const std::string& a_realm) const
+{
+  CH_TIME("AmrMesh::getGhostTargetsCoar(string)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getGhostTargetsCoar(string)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getGhostTargetsCoar(string) - could not find realm '" + a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getGhostTargetsCoar();
+}
+
+const AMRGhostTargets&
+AmrMesh::getGhostTargetsFine(const std::string& a_realm) const
+{
+  CH_TIME("AmrMesh::getGhostTargetsFine(string)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getGhostTargetsFine(string)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getGhostTargetsFine(string) - could not find realm '" + a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getGhostTargetsFine();
+}
+
 const Vector<RefCountedPtr<EBLevelGrid>>&
 AmrMesh::getEBLevelGrid(const std::string& a_realm, const phase::which_phase a_phase) const
 {
