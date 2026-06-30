@@ -2041,54 +2041,9 @@ ItoKMCGodunovStepper<I, C, R, F>::plotParticles() const noexcept
       char              fileChar[1000];
       sprintf(fileChar, "%s.step%07d.%dd.h5part", prefix.c_str(), this->m_timeStep, SpaceDim);
 
-      // Scalar datasets: container weight + the ItoParticle scalar payload columns, named by
-      // ItoParticle::s_realVariables = {weight, mobility, diffusion, energy, scratch}.
-      using Leaf = ParticleSoA<ItoParticle>;
-      const std::vector<std::pair<std::string, std::function<Real(const Leaf&, std::size_t)>>> scalarVars = {
-        {ItoParticle::s_realVariables[0],
-         [](const Leaf& l, std::size_t i) {
-           return l.weight(i);
-         }},
-        {ItoParticle::s_realVariables[1],
-         [](const Leaf& l, std::size_t i) {
-           return l.get<&ItoParticle::mobility>(i);
-         }},
-        {ItoParticle::s_realVariables[2],
-         [](const Leaf& l, std::size_t i) {
-           return l.get<&ItoParticle::diffusion>(i);
-         }},
-        {ItoParticle::s_realVariables[3],
-         [](const Leaf& l, std::size_t i) {
-           return l.get<&ItoParticle::energy>(i);
-         }},
-        {ItoParticle::s_realVariables[4], [](const Leaf& l, std::size_t i) {
-           return l.get<&ItoParticle::scratch>(i);
-         }}};
-
-      // Vector datasets, named by ItoParticle::s_vectVariables = {old, v, scratch}.
-      const std::vector<std::pair<std::string, std::function<RealVect(const Leaf&, std::size_t)>>> vectorVars = {
-        {ItoParticle::s_vectVariables[0],
-         [](const Leaf& l, std::size_t i) {
-           return RealVect(
-             D_DECL(l.get<&ItoParticle::old_x>(i), l.get<&ItoParticle::old_y>(i), l.get<&ItoParticle::old_z>(i)));
-         }},
-        {ItoParticle::s_vectVariables[1],
-         [](const Leaf& l, std::size_t i) {
-           return RealVect(D_DECL(l.get<&ItoParticle::vx>(i), l.get<&ItoParticle::vy>(i), l.get<&ItoParticle::vz>(i)));
-         }},
-        {ItoParticle::s_vectVariables[2], [](const Leaf& l, std::size_t i) {
-           return RealVect(D_DECL(l.get<&ItoParticle::scratch_x>(i),
-                                  l.get<&ItoParticle::scratch_y>(i),
-                                  l.get<&ItoParticle::scratch_z>(i)));
-         }}};
-
-      // Plot the particles directly from the live SoA container.
-      DischargeIO::writeH5Part(std::string(fileChar),
-                               particles,
-                               scalarVars,
-                               vectorVars,
-                               this->m_amr->getProbLo(),
-                               this->m_time);
+      // Plot the particles directly from the live SoA container. The output datasets (id, position, weight
+      // and the selected ItoParticle payload columns) are derived from ParticleTraits<ItoParticle>::h5PartColumns.
+      DischargeIO::writeH5Part(std::string(fileChar), particles, this->m_amr->getProbLo(), this->m_time);
     }
   }
 }

@@ -48,6 +48,12 @@ struct ParticleTraits<ItoKMCFieldParticle>
     &ItoKMCFieldParticle::phiA,
     &ItoKMCFieldParticle::phiB,
     D_DECL(&ItoKMCFieldParticle::x0_x, &ItoKMCFieldParticle::x0_y, &ItoKMCFieldParticle::x0_z));
+
+  /**
+     @brief No payload columns are written to H5Part visualization files: this is a transient internal type
+            used only for the E-dot-J energy computation, so only id, position and weight are written.
+  */
+  static constexpr auto h5PartColumns = std::make_tuple();
 };
 
 #include <CD_NamespaceFooter.H>

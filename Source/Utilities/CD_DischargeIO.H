@@ -142,45 +142,26 @@ namespace DischargeIO {
 #endif
 
   /**
-    @brief Accessor returning a scalar payload quantity of SoA particle (a_leaf, a_index) for writeH5Part.
-    @tparam P      Payload type of the container.
-    @tparam Traits Column descriptor for the payload.
-  */
-  template <typename P, typename Traits>
-  using H5PartScalar = std::function<Real(const ParticleSoA<P, Traits>&, std::size_t)>;
-
-  /**
-    @brief Accessor returning a vector payload quantity of SoA particle (a_leaf, a_index) for writeH5Part.
-    @tparam P      Payload type of the container.
-    @tparam Traits Column descriptor for the payload.
-  */
-  template <typename P, typename Traits>
-  using H5PartVect = std::function<RealVect(const ParticleSoA<P, Traits>&, std::size_t)>;
-
-  /**
     @brief Write an SoA particle container to an H5Part file (quick visualization).
-    @details Position, id, and weight are taken from the container-owned columns; the caller supplies the
-    payload datasets as (name, accessor) pairs so the
-    scalar-vs-vector distinction and naming are explicit (the SoA columns tuple interleaves scalar and
-    vector-component columns, so there is no implicit reals/vects partition to rely on). Each vector
-    dataset is written as name-x/name-y/name-z.
+    @details Position, id and weight are taken from the container-owned columns and written
+    automatically. The payload datasets are derived declaratively from the optional
+    @c Traits::h5PartColumns tuple (a list of H5Part::Scalar / H5Part::Vector descriptors pairing a
+    dataset name with the selecting payload member pointer(s)); if @c Traits::h5PartColumns is not
+    declared, only id/position/weight are written. Each vector descriptor is written as
+    name-x/name-y/name-z.
     @param[in] a_filename    File name.
     @param[in] a_particles   SoA particle container.
-    @param[in] a_scalarVars  Scalar datasets: (name, accessor) pairs.
-    @param[in] a_vectorVars  Vector datasets: (name, accessor) pairs.
-    @param[in] a_shift       Particle position shift.
+    @param[in] a_shift       Particle position shift (subtracted from the written positions).
     @param[in] a_time        Physical time.
     @tparam P      Payload type of the container.
     @tparam Traits Column descriptor for the payload.
   */
   template <typename P, typename Traits>
   void
-  writeH5Part(std::string                                                  a_filename,
-              const ParticleContainer<P, Traits>&                          a_particles,
-              std::vector<std::pair<std::string, H5PartScalar<P, Traits>>> a_scalarVars,
-              std::vector<std::pair<std::string, H5PartVect<P, Traits>>>   a_vectorVars,
-              RealVect                                                     a_shift,
-              Real                                                         a_time) noexcept;
+  writeH5Part(std::string                         a_filename,
+              const ParticleContainer<P, Traits>& a_particles,
+              RealVect                            a_shift,
+              Real                                a_time) noexcept;
 
 #ifdef CH_USE_HDF5
   /**

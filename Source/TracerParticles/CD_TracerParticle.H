@@ -70,6 +70,14 @@ struct ParticleTraits<TracerParticle>
     D_DECL(&TracerParticle::k1_x, &TracerParticle::k1_y, &TracerParticle::k1_z),
     D_DECL(&TracerParticle::k2_x, &TracerParticle::k2_y, &TracerParticle::k2_z),
     D_DECL(&TracerParticle::k3_x, &TracerParticle::k3_y, &TracerParticle::k3_z));
+
+  /**
+     @brief Payload columns written to H5Part visualization files: the interpolated velocity vector (id,
+            position and weight are written automatically; the position snapshot and Runge-Kutta stage
+            columns are internal and not plotted).
+  */
+  static constexpr auto h5PartColumns = std::make_tuple(
+    H5Part::Vector{"v", D_DECL(&TracerParticle::v_x, &TracerParticle::v_y, &TracerParticle::v_z)});
 };
 
 #include <CD_NamespaceFooter.H>
