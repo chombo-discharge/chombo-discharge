@@ -1001,8 +1001,16 @@ EBGradient::getLeastSquaresStencil(VoFStencil&            a_stencilCoar,
     }
     knownTerms |= IntVect::Zero;
 
-    const std::map<IntVect, std::pair<VoFStencil, VoFStencil>> stencils = LeastSquares::computeDualLevelStencils<
-      Real>(derivTerms, knownTerms, fineVoFs, coarVoFs, fineDisplacements, coarDisplacements, a_weight, a_order);
+    // Returns a std::map<IntVect, std::pair<VoFStencil, VoFStencil>>.
+    const auto stencils = LeastSquares::computeDualLevelStencils<Real>(derivTerms,
+                                                                       knownTerms,
+                                                                       fineVoFs,
+                                                                       coarVoFs,
+                                                                       fineDisplacements,
+                                                                       coarDisplacements,
+                                                                       a_weight,
+                                                                       a_order);
+
     // LeastSquares returns a map over all derivatives (unknowns) in the Taylor series. These are stored
     // as IntVects so that IntVect(1,1) = d^2/(dxdy) and so on. We are after IntVect(1,0) = d/dx, IntVect(0,1) = d/dy. We fetch
     // those and place them in a_stencilFine and a_stencilCoar. We encode the direction in the stencil variable (in a_stencilFine) and
