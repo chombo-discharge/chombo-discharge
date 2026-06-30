@@ -29,6 +29,13 @@
 namespace DischargeIO {
 
   /**
+    @brief Self-contained void-alias (maps any type pack to void) for the h5PartColumns SFINAE detector.
+    @tparam ... Ignored type pack.
+  */
+  template <typename...>
+  using VoidT = void;
+
+  /**
     @brief Detector (false case) for an optional Traits::h5PartColumns descriptor tuple.
     @tparam Traits Column descriptor for the payload.
   */
@@ -42,7 +49,7 @@ namespace DischargeIO {
     @tparam Traits Column descriptor declaring h5PartColumns.
   */
   template <typename Traits>
-  struct HasH5PartColumns<Traits, detail::Void<decltype(Traits::h5PartColumns)>> : std::true_type
+  struct HasH5PartColumns<Traits, VoidT<decltype(Traits::h5PartColumns)>> : std::true_type
   {
   };
 
@@ -94,7 +101,7 @@ namespace DischargeIO {
       }
     }
 
-    H5Dwrite(dataset, H5Dget_type(dataset), a_memSpace, a_fileSpace, H5P_DEFAULT, ds.data());
+    H5Dwrite(dataset, H5T_NATIVE_DOUBLE, a_memSpace, a_fileSpace, H5P_DEFAULT, ds.data());
     H5Dclose(dataset);
   }
 
@@ -163,7 +170,7 @@ namespace DischargeIO {
                                a_particles,
                                desc.name,
                                [](const ParticleSoA<P, Traits>& a_leaf, std::size_t a_i) -> double {
-                                 constexpr auto member = std::get<I>(Traits::h5PartColumns).member;
+                                 constexpr auto member = desc.member;
                                  return static_cast<double>(a_leaf.template get<member>(a_i));
                                });
     }
@@ -319,11 +326,11 @@ DischargeIO::writeH5Part(std::string                         a_filename,
     }
   }
 
-  H5Dwrite(datasetID, H5Dget_type(datasetID), memSpaceID, fileSpaceID, H5P_DEFAULT, id.data());
-  H5Dwrite(datasetX, H5Dget_type(datasetX), memSpaceID, fileSpaceID, H5P_DEFAULT, x.data());
-  H5Dwrite(datasetY, H5Dget_type(datasetY), memSpaceID, fileSpaceID, H5P_DEFAULT, y.data());
+  H5Dwrite(datasetID, H5T_NATIVE_LLONG, memSpaceID, fileSpaceID, H5P_DEFAULT, id.data());
+  H5Dwrite(datasetX, H5T_NATIVE_DOUBLE, memSpaceID, fileSpaceID, H5P_DEFAULT, x.data());
+  H5Dwrite(datasetY, H5T_NATIVE_DOUBLE, memSpaceID, fileSpaceID, H5P_DEFAULT, y.data());
 #if CH_SPACEDIM == 3
-  H5Dwrite(datasetZ, H5Dget_type(datasetZ), memSpaceID, fileSpaceID, H5P_DEFAULT, z.data());
+  H5Dwrite(datasetZ, H5T_NATIVE_DOUBLE, memSpaceID, fileSpaceID, H5P_DEFAULT, z.data());
 #endif
 
   H5Dclose(datasetID);

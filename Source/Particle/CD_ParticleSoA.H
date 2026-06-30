@@ -174,9 +174,6 @@ template <typename P>
 struct ParticleTraits;
 
 /**
-   @brief Empty payload: ParticleSoA<> is a position+weight+metadata point particle.
-*/
-/**
   @brief Declarative descriptors for selecting which particle PAYLOAD columns are written to H5Part
          (visualization) files. A @c ParticleTraits specialization may declare an optional
          @c h5PartColumns tuple of these descriptors; DischargeIO::writeH5Part then derives the output
@@ -267,6 +264,9 @@ namespace H5Part {
 
 } // namespace H5Part
 
+/**
+   @brief Empty payload: ParticleSoA<> is a position+weight+metadata point particle.
+*/
 struct NoPayload
 {
 };
