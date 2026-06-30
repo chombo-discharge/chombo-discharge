@@ -120,14 +120,18 @@ KrylovBiCGStab<T>::solve(Vec& a_phi, const Vec& a_rhs) noexcept
   auto restart = [&]() -> void {
     op.incr(a_phi, m_e, 1.0);
     op.setToZero(m_e);
+
     computeResidual();
+
     op.assign(m_rTilde, m_r);
     op.setToZero(m_p);
     op.setToZero(m_v);
+
     rho   = 1.0;
     alpha = 1.0;
     omega = 1.0;
     rnorm = op.norm(m_r, 2);
+
     restarts++;
   };
 
@@ -135,9 +139,12 @@ KrylovBiCGStab<T>::solve(Vec& a_phi, const Vec& a_rhs) noexcept
   auto breakdown = [&]() -> bool {
     if (restarts < m_numRestarts) {
       restart();
+
       return false; // continue
     }
+
     m_exitStatus = 2;
+
     return true; // stop
   };
 
@@ -145,10 +152,12 @@ KrylovBiCGStab<T>::solve(Vec& a_phi, const Vec& a_rhs) noexcept
     const Real rnormStart = rnorm; // residual at the start of this iteration (for the convergence-rate report)
 
     const Real rhoNew = op.dotProduct(m_rTilde, m_r);
+
     if (rhoNew == 0.0) {
       if (breakdown()) {
         break;
       }
+
       continue;
     }
 
@@ -167,6 +176,7 @@ KrylovBiCGStab<T>::solve(Vec& a_phi, const Vec& a_rhs) noexcept
       if (breakdown()) {
         break;
       }
+
       continue;
     }
     alpha = rhoNew / rtv;
@@ -177,6 +187,7 @@ KrylovBiCGStab<T>::solve(Vec& a_phi, const Vec& a_rhs) noexcept
     rnorm = op.norm(m_r, 2);
     if (rnorm <= m_eps * rnorm0) { // converged on the half-step s
       m_exitStatus = 1;
+
       break;
     }
 
@@ -186,14 +197,19 @@ KrylovBiCGStab<T>::solve(Vec& a_phi, const Vec& a_rhs) noexcept
     // omega = (t,s)/(t,t) -- both inner products in a single fused MPI reduction.
     Real      dots[2];
     const Vec rhsPair[2] = {m_r, m_t};
+
     op.mDotProduct(m_t, 2, rhsPair, dots);
+
     const Real tDotT = dots[1];
+
     if (tDotT == 0.0) {
       if (breakdown()) {
         break;
       }
+
       continue;
     }
+
     omega = dots[0] / tDotT;
 
     op.incr(m_e, m_sTilde, omega); // e += omega*s_tilde
@@ -218,6 +234,7 @@ KrylovBiCGStab<T>::solve(Vec& a_phi, const Vec& a_rhs) noexcept
       if (breakdown()) {
         break;
       }
+
       continue;
     }
 

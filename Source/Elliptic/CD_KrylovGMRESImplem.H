@@ -70,6 +70,7 @@ KrylovGMRES<T>::undefine() noexcept
     for (int i = 0; i < m_basis.size(); i++) {
       m_op->clear(m_basis[i]);
     }
+
     m_basis.clear();
 
     m_op->clear(m_w);
@@ -100,8 +101,9 @@ KrylovGMRES<T>::solve(Vec& a_phi, const Vec& a_rhs) noexcept
 
   m_exitStatus = -1;
 
-  const int  m    = m_allocRestart; // restart length
-  const int  ldH  = m + 1;          // Hessenberg leading dimension
+  const int m   = m_allocRestart; // restart length
+  const int ldH = m + 1;          // Hessenberg leading dimension
+
   const auto Hidx = [ldH](const int r, const int c) -> int {
     return r + c * ldH;
   };
@@ -146,6 +148,7 @@ KrylovGMRES<T>::solve(Vec& a_phi, const Vec& a_rhs) noexcept
       // Classical Gram-Schmidt against v_0..v_j -- one fused reduction (mDotProduct) instead of j+1 dot products.
       // m_hcol is persistent scratch; only entries 0..j are written and read this step.
       op.mDotProduct(m_w, j + 1, &m_basis[0], &m_hcol[0]);
+
       for (int i = 0; i <= j; i++) {
         op.incr(m_w, m_basis[i], -m_hcol[i]);
         m_H[Hidx(i, j)] = m_hcol[i];
@@ -153,6 +156,7 @@ KrylovGMRES<T>::solve(Vec& a_phi, const Vec& a_rhs) noexcept
 
       if (m_reorthogonalize) {
         op.mDotProduct(m_w, j + 1, &m_basis[0], &m_corr[0]);
+
         for (int i = 0; i <= j; i++) {
           op.incr(m_w, m_basis[i], -m_corr[i]);
           m_H[Hidx(i, j)] += m_corr[i];
@@ -177,9 +181,11 @@ KrylovGMRES<T>::solve(Vec& a_phi, const Vec& a_rhs) noexcept
       const Real hjj   = m_H[Hidx(j, j)];
       const Real hj1j  = m_H[Hidx(j + 1, j)];
       const Real denom = std::sqrt(hjj * hjj + hj1j * hj1j);
+
       if (denom == 0.0) {
         break;
       }
+
       m_cs[j]             = hjj / denom;
       m_sn[j]             = hj1j / denom;
       m_H[Hidx(j, j)]     = denom;
@@ -205,9 +211,11 @@ KrylovGMRES<T>::solve(Vec& a_phi, const Vec& a_rhs) noexcept
     // Back-substitute the (jUsed x jUsed) upper-triangular system H y = g.
     for (int i = jUsed - 1; i >= 0; i--) {
       Real s = m_g[i];
+
       for (int k = i + 1; k < jUsed; k++) {
         s -= m_H[Hidx(i, k)] * m_y[k];
       }
+
       m_y[i] = (m_H[Hidx(i, i)] != 0.0) ? s / m_H[Hidx(i, i)] : 0.0;
     }
 
@@ -216,6 +224,7 @@ KrylovGMRES<T>::solve(Vec& a_phi, const Vec& a_rhs) noexcept
     for (int k = 0; k < jUsed; k++) {
       op.incr(m_c, m_basis[k], m_y[k]);
     }
+
     op.preCond(m_z, m_c);
     op.incr(a_phi, m_z, 1.0);
 
