@@ -467,7 +467,7 @@ All parameters below use a solver-class prefix (e.g. ``FieldSolverGMG``, ``Eddin
 * ``<Solver>.krylov_reprobe_iters``.
   Adaptive early re-probe: while latched onto the Krylov fallback, re-probe multigrid on the next solve whenever the Krylov solver converged in this many iterations or fewer (a strong preconditioner suggests multigrid alone may now succeed). Optional; defaults to ``0`` (disabled, only ``krylov_retry_interval`` applies).
 
-The outer Krylov solver reuses the ``gmg_verbosity`` setting (there is no separate ``krylov_verbosity``). With ``gmg_verbosity >= 1`` a one-line convergence summary (initial/final residual, reduction, exit status) is printed for each Krylov solve, and a message is printed whenever a fallback chain switches solver; the per-iteration residual history from the GMRES/BiCGStab solvers is printed at ``gmg_verbosity >= 4``.
+The outer Krylov solver reuses the ``gmg_verbosity`` setting (there is no separate ``krylov_verbosity``). With ``gmg_verbosity >= 1`` a one-line convergence summary is printed for each Krylov solve (the relative residual ``rel.res``, the absolute residual ``|r|``, the zero-residual ``|r_zero|``, the iteration count, and the exit status), and a message is printed whenever a fallback chain switches solver; the per-iteration residual history from the GMRES/BiCGStab solvers is printed at ``gmg_verbosity >= 4``. The printed residuals are *relative* residuals -- the true residual normalized by the zero-residual ``||rhs - L(0)||`` -- so progress is on a common, solver-independent scale that is directly comparable to the convergence tolerance ``krylov_eps``.
 
 .. note::
 

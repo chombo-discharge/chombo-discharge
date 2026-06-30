@@ -193,7 +193,8 @@ KrylovGMRES<T>::solve(Vec& a_phi, const Vec& a_rhs) noexcept
       jUsed = j + 1;
 
       if (m_verbosity >= 4) {
-        pout() << "      KrylovGMRES:: iteration = " << iter << ", residual = " << rnorm << endl;
+        pout() << "      KrylovGMRES:: iteration = " << iter << ", rel. residual = " << (rnorm / m_residualScale)
+               << endl;
       }
 
       if (rnorm <= m_eps * beta0 || hjp1 == 0.0) {

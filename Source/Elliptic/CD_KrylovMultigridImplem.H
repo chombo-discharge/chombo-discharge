@@ -143,14 +143,20 @@ namespace KrylovMultigrid {
     m_mg->init(a_phi, a_rhs, m_lmax, m_lbase);
     m_mg->setBottomSolver(m_lmax, m_lbase);
 
+    // Zero-residual ||rhs - L(0)|| in the adapter norm. The printed residuals are normalized against this so they are
+    // on a common, solver-independent scale (a relative residual), comparable to the convergence tolerance. m_dphi is
+    // the (zero) correction accumulator, reused here as the zero solution.
+    m_op.setToZero(m_dphi);
+    m_mg->computeAMRResidual(m_r0, m_dphi, a_rhs, m_lmax, m_lbase, false, false);
+    const Real zeroResid     = m_op.norm(m_r0, 2);
+    const Real residualScale = (zeroResid > 0.0) ? zeroResid : 1.0;
+
     // Initial residual r0 = rhs - L_inhomogeneous(phi). This is the only inhomogeneous evaluation; the Krylov matvec
     // and preconditioner run with homogeneous boundary conditions. computeAMRResidual returns rhs - L(phi) in
     // Chombo's convention, so it must NOT be negated.
     m_mg->computeAMRResidual(m_r0, a_phi, a_rhs, m_lmax, m_lbase, false, false);
 
     const Real rNorm0 = m_op.norm(m_r0, 2);
-
-    m_op.setToZero(m_dphi);
 
     bool converged    = false;
     int  exitStatus   = -1;
@@ -163,9 +169,10 @@ namespace KrylovMultigrid {
         m_gmres.m_restart = restart;
         m_gmres.define(&m_op, a_rhs);
       }
-      m_gmres.m_eps       = a_settings.eps;
-      m_gmres.m_maxIter   = a_settings.maxIter;
-      m_gmres.m_verbosity = a_settings.verbosity;
+      m_gmres.m_eps           = a_settings.eps;
+      m_gmres.m_maxIter       = a_settings.maxIter;
+      m_gmres.m_verbosity     = a_settings.verbosity;
+      m_gmres.m_residualScale = residualScale;
 
       converged         = m_gmres.solve(m_dphi, m_r0);
       exitStatus        = m_gmres.m_exitStatus;
@@ -178,9 +185,10 @@ namespace KrylovMultigrid {
       if (!m_bicg.isDefined()) {
         m_bicg.define(&m_op, a_rhs);
       }
-      m_bicg.m_eps       = a_settings.eps;
-      m_bicg.m_maxIter   = a_settings.maxIter;
-      m_bicg.m_verbosity = a_settings.verbosity;
+      m_bicg.m_eps           = a_settings.eps;
+      m_bicg.m_maxIter       = a_settings.maxIter;
+      m_bicg.m_verbosity     = a_settings.verbosity;
+      m_bicg.m_residualScale = residualScale;
 
       converged         = m_bicg.solve(m_dphi, m_r0);
       exitStatus        = m_bicg.m_exitStatus;
@@ -196,14 +204,16 @@ namespace KrylovMultigrid {
     }
     }
 
-    // One-line convergence summary (the per-iteration history, if any, is printed by the solver itself). The
-    // verbosity is the host's gmg_verbosity, reused for the Krylov path.
+    // One-line convergence summary (the per-iteration history, if any, is printed by the solver itself). The residual
+    // is reported relative to the zero-residual (rel.res = ||r|| / ||r_zero||), the same solver-independent scale used
+    // in the per-iteration output, with the absolute norms kept for reference. The verbosity is the host's
+    // gmg_verbosity, reused for the Krylov path.
     if (a_settings.verbosity >= 1) {
-      const Real reduction = (rNorm0 > 0.0) ? residualNorm / rNorm0 : 0.0;
+      const Real relRes = residualNorm / residualScale;
 
       pout() << "KrylovMultigrid - " << solverTypeName(a_type) << (converged ? " converged" : " did NOT converge")
-             << " (|r0| = " << rNorm0 << ", |r| = " << residualNorm << ", reduction = " << reduction
-             << ", status = " << exitStatus << ")" << endl;
+             << " (rel.res = " << relRes << ", |r| = " << residualNorm << ", |r_zero| = " << zeroResid
+             << ", iters = " << m_lastKrylovIters << ", status = " << exitStatus << ")" << endl;
     }
 
     // phi += dphi.

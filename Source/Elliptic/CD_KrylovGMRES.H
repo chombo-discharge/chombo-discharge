@@ -88,6 +88,13 @@ public:
   int m_iterations = 0;
 
   /**
+    @brief Display normalization for printed residuals (set to the zero-residual by the driver; 1 = print absolute).
+    @details Affects only verbose output, not the convergence test. The printed value is the relative residual
+             ||r|| / ||r_zero||, so progress is comparable across solvers regardless of their internal norm.
+  */
+  Real m_residualScale = 1.0;
+
+  /**
     @brief Default constructor. Call define() before use.
   */
   KrylovGMRES() noexcept = default;
