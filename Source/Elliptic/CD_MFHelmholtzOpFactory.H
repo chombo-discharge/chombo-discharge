@@ -41,38 +41,80 @@ class MFHelmholtzOpFactory : public AMRLevelOpFactory<LevelData<MFCellFAB>>
 {
 public:
   // Various alias for cutting down on typing.
-  /** @brief alias type alias. */
+
+  /**
+    @brief alias type alias.
+  */
   using MFIS = RefCountedPtr<MultiFluidIndexSpace>;
-  /** @brief alias type alias. */
+
+  /**
+    @brief alias type alias.
+  */
   using AmrLevelGrids = Vector<MFLevelGrid>;
-  /** @brief alias type alias. */
+
+  /**
+    @brief alias type alias.
+  */
   using AmrInterpolators = Vector<MFMultigridInterpolator>;
-  /** @brief alias type alias. */
+
+  /**
+    @brief alias type alias.
+  */
   using AmrFluxRegisters = Vector<MFReflux>;
-  /** @brief alias type alias. */
+
+  /**
+    @brief alias type alias.
+  */
   using AmrCoarseners = Vector<MFCoarAve>;
-  /** @brief alias type alias. */
+
+  /**
+    @brief alias type alias.
+  */
   using AmrResolutions = Vector<Real>;
-  /** @brief alias type alias. */
+
+  /**
+    @brief alias type alias.
+  */
   using AmrRefRatios = Vector<int>;
-  /** @brief alias type alias. */
+
+  /**
+    @brief alias type alias.
+  */
   using AmrMask = Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>;
 
-  /** @brief alias type alias. */
+  /**
+    @brief alias type alias.
+  */
   using AmrCellData = Vector<RefCountedPtr<LevelData<MFCellFAB>>>;
-  /** @brief alias type alias. */
+
+  /**
+    @brief alias type alias.
+  */
   using AmrFluxData = Vector<RefCountedPtr<LevelData<MFFluxFAB>>>;
-  /** @brief alias type alias. */
+
+  /**
+    @brief alias type alias.
+  */
   using AmrIrreData = Vector<RefCountedPtr<LevelData<MFBaseIVFAB>>>;
 
-  /** @brief alias type alias. */
+  /**
+    @brief alias type alias.
+  */
   using DomainBCFactory = RefCountedPtr<MFHelmholtzDomainBCFactory>;
-  /** @brief alias type alias. */
+
+  /**
+    @brief alias type alias.
+  */
   using EBBCFactory = RefCountedPtr<MFHelmholtzEBBCFactory>;
-  /** @brief alias type alias. */
+
+  /**
+    @brief alias type alias.
+  */
   using JumpBCFactory = RefCountedPtr<MFHelmholtzJumpBCFactory>;
 
-  /** @brief Smoother type alias. */
+  /**
+    @brief Smoother type alias.
+  */
   using Smoother = MFHelmholtzOp::Smoother;
 
   /**
@@ -106,14 +148,18 @@ public:
     @param[in] a_jumpWeight       Equation weighting in multiphase cells
     @param[in] a_preCondSmooth    Number of smoothings in the preconditioner
     @param[in] a_relaxFactor      Relaxation factor
-    @param[in] a_bottomDomain     Coarsest domain on which we run multigrid. Must be a coarsening of the AMR problem domains. 
-    @param[in] a_deeperLevelGrids Optional object in case you want to pre-define the deeper multigrid levels. 
+    @param[in] a_refluxFree       If true, use the reflux-free AMR operator (skips coarse-fine flux refluxing)
+    @param[in] a_bottomDomain     Coarsest domain on which we run multigrid. Must be a coarsening of the AMR problem domains.
+    @param[in] a_deeperLevelGrids Optional object in case you want to pre-define the deeper multigrid levels.
     @param[in] a_amrLevelGrids Amr level grids
     @param[in] a_amrRefRatios Amr ref ratios
     @param[in] a_domainBcFactory Domain bc factory
     @param[in] a_ebBcFactory Eb bc factory
     @param[in] a_jumpBcFactory Jump bc factory
     @param[in] a_smoother Smoother
+    @param[in] a_chebyOrder Chebyshev polynomial degree (only used when a_smoother is Smoother::Chebyshev)
+    @param[in] a_chebyEigRatio Chebyshev eigenvalue ratio lambda_max/lambda_min (only used when a_smoother is Smoother::Chebyshev)
+    @param[in] a_rasInnerSweeps Number of inner frozen-ghost sweeps per restricted-additive-Schwarz iteration (only used when a_smoother is Smoother::RestrictedAdditiveSchwarz)
     @param[in] a_blockingFactor Blocking factor
   */
   MFHelmholtzOpFactory(const MFIS&             a_mfis,
@@ -138,11 +184,15 @@ public:
                        const IntVect&          a_ghostRhs,
                        const Smoother&         a_smoother,
                        const Real&             a_relaxFactor,
+                       const int&              a_chebyOrder,
+                       const Real&             a_chebyEigRatio,
+                       const int&              a_rasInnerSweeps,
                        const ProblemDomain&    a_bottomDomain,
                        const int&              a_jumpOrder,
                        const int&              a_jumpWeight,
                        const int&              a_preCondSmooth,
                        const int&              a_blockingFactor,
+                       const bool              a_refluxFree       = false,
                        const AmrLevelGrids&    a_deeperLevelGrids = AmrLevelGrids());
 
   /**
@@ -237,6 +287,21 @@ protected:
   Smoother m_smoother;
 
   /**
+    @brief Chebyshev polynomial degree (only used when m_smoother is Smoother::Chebyshev)
+  */
+  int m_chebyOrder;
+
+  /**
+    @brief Chebyshev eigenvalue ratio lambda_max/lambda_min (only used when m_smoother is Smoother::Chebyshev)
+  */
+  Real m_chebyEigRatio;
+
+  /**
+    @brief Number of inner frozen-ghost sweeps per restricted-additive-Schwarz iteration (only used when m_smoother is Smoother::RestrictedAdditiveSchwarz)
+  */
+  int m_rasInnerSweeps;
+
+  /**
     @brief Number of AMR levels
   */
   int m_numAmrLevels;
@@ -270,6 +335,11 @@ protected:
     @brief Relaxation factor
   */
   Real m_relaxFactor;
+
+  /**
+    @brief Use reflux-free AMR operator
+  */
+  bool m_refluxFree;
 
   /**
     @brief Lower-left corner of computational domain

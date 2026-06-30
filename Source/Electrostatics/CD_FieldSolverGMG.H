@@ -22,6 +22,7 @@
 // Our includes
 #include <CD_FieldSolver.H>
 #include <CD_MFHelmholtzOpFactory.H>
+#include <CD_EllipticSolverChain.H>
 #include <CD_NamespaceHeader.H>
 
 /**
@@ -231,6 +232,21 @@ protected:
   MFHelmholtzOp::Smoother m_multigridRelaxMethod;
 
   /**
+    @brief Chebyshev polynomial degree (only used when m_multigridRelaxMethod is Smoother::Chebyshev)
+  */
+  int m_multigridChebyOrder;
+
+  /**
+    @brief Chebyshev eigenvalue ratio lambda_max/lambda_min (only used when m_multigridRelaxMethod is Smoother::Chebyshev)
+  */
+  Real m_multigridChebyEigRatio;
+
+  /**
+    @brief Number of inner frozen-ghost sweeps per restricted-additive-Schwarz iteration (only used when m_multigridRelaxMethod is Smoother::RestrictedAdditiveSchwarz)
+  */
+  int m_multigridRasInnerSweeps;
+
+  /**
     @brief GMG multigrid type
   */
   MultigridType m_multigridType;
@@ -259,6 +275,11 @@ protected:
     @brief Drop order in coarsened grid cells
   */
   bool m_multigridDropOrder;
+
+  /**
+    @brief Use reflux-free AMR operator in GMG
+  */
+  bool m_multigridRefluxFree;
 
   /**
     @brief Use default multigrid settings
@@ -386,6 +407,21 @@ protected:
     @brief multi-fluid simple solver
   */
   MFSimpleSolver m_mfsolver;
+
+  /**
+    @brief Outer-Krylov settings (selects gmg/gmres/bicgstab and the krylov_* parameters)
+  */
+  EllipticSolverChain::Settings m_krylovSettings;
+
+  /**
+    @brief Fallback-chain latch policy (persists across regrids; re-probes GMG every krylov_retry_interval solves)
+  */
+  EllipticSolverChain::FallbackPolicy m_fallbackPolicy;
+
+  /**
+    @brief Outer-Krylov driver (V-cycle-preconditioned BiCGStab/GMRES with persistent work vectors)
+  */
+  EllipticSolverChain::KrylovSolver<MFCellFAB> m_krylov;
 
   /**
     @brief Parse multigrid settings

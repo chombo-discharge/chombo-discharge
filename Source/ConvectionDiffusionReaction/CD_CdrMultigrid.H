@@ -27,6 +27,7 @@
 // Our includes
 #include <CD_EBHelmholtzOpFactory.H>
 #include <CD_CdrSolver.H>
+#include <CD_EllipticSolverChain.H>
 #include <CD_NamespaceHeader.H>
 
 /**
@@ -187,6 +188,21 @@ protected:
   EBHelmholtzOp::Smoother m_smoother;
 
   /**
+    @brief Chebyshev polynomial degree (only used when m_smoother is Smoother::Chebyshev)
+  */
+  int m_chebyOrder;
+
+  /**
+    @brief Chebyshev eigenvalue ratio lambda_max/lambda_min (only used when m_smoother is Smoother::Chebyshev)
+  */
+  Real m_chebyEigRatio;
+
+  /**
+    @brief Number of inner frozen-ghost sweeps per restricted-additive-Schwarz iteration (only used when m_smoother is Smoother::RestrictedAdditiveSchwarz)
+  */
+  int m_rasInnerSweeps;
+
+  /**
     @brief GMG multigrid type
   */
   MultigridType m_multigridType;
@@ -217,9 +233,29 @@ protected:
   GMRESSolver<LevelData<EBCellFAB>> m_gmres;
 
   /**
+    @brief Outer-Krylov settings (selects gmg/gmres/bicgstab and the krylov_* parameters)
+  */
+  EllipticSolverChain::Settings m_krylovSettings;
+
+  /**
+    @brief Fallback-chain latch policy (persists across regrids; re-probes GMG every krylov_retry_interval solves)
+  */
+  EllipticSolverChain::FallbackPolicy m_fallbackPolicy;
+
+  /**
+    @brief Outer-Krylov driver (V-cycle-preconditioned BiCGStab/GMRES with persistent work vectors)
+  */
+  EllipticSolverChain::KrylovSolver<EBCellFAB> m_krylov;
+
+  /**
     @brief Is multigrid solver defined or not?
   */
   bool m_hasMultigridSolver;
+
+  /**
+    @brief Use reflux-free AMR operator in GMG
+  */
+  bool m_multigridRefluxFree;
 
   /**
     @brief Storage for Helmholtz a-coefficient. Always 1. 

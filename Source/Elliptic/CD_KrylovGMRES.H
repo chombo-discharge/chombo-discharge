@@ -1,0 +1,208 @@
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+/**
+  @file   CD_KrylovGMRES.H
+  @brief  Restarted, right-preconditioned GMRES over an AMR hierarchy, with persistent basis and fused reductions
+  @author Robert Marskar
+*/
+
+#ifndef CD_KRYLOVGMRES_H
+#define CD_KRYLOVGMRES_H
+
+// Chombo includes
+#include <LevelData.H>
+#include <Vector.H>
+
+// Our includes
+#include <CD_AMRMultigridKrylovOp.H>
+#include <CD_NamespaceHeader.H>
+
+/**
+  @brief Restarted GMRES(m) acting on an AMR hierarchy through AMRMultigridKrylovOp.
+  @details A chombo-discharge replacement for Chombo's GMRESSolver on the outer Krylov path, written for scale-out.
+           The Arnoldi basis (m_restart + 1 hierarchies) and the few scratch vectors are allocated once in define()
+           and reused across solves (no per-solve allocation). Orthogonalization uses classical Gram-Schmidt issued
+           through the adapter's batched mDotProduct, so each Arnoldi step costs a single MPI reduction (plus one for
+           the norm) regardless of the AMR level count -- as opposed to the modified Gram-Schmidt / per-vector dot
+           products that scale poorly. Right preconditioning keeps the tracked residual the true residual; the
+           preconditioned solution update is formed once per restart cycle (one extra preCond), so the basis vectors
+           need not be stored in preconditioned form.
+  @note T is the FAB type (EBCellFAB or MFCellFAB).
+*/
+template <class T>
+class KrylovGMRES
+{
+public:
+  /**
+    @brief Relative residual tolerance (against the initial residual norm).
+  */
+  Real m_eps = 1.E-10;
+
+  /**
+    @brief Maximum number of iterations (total Arnoldi steps across restart cycles).
+  */
+  int m_maxIter = 50;
+
+  /**
+    @brief Restart length m in GMRES(m). Must be set before define() (sizes the persistent basis).
+  */
+  int m_restart = 30;
+
+  /**
+    @brief Whether to do one classical Gram-Schmidt reorthogonalization pass (robustness; on by default).
+  */
+  bool m_reorthogonalize = true;
+
+  /**
+    @brief Verbosity; at >= 4 a terse one-line-per-iteration residual history is printed.
+  */
+  int m_verbosity = -1;
+
+  /**
+    @brief Exit status after solve(): 1 = converged, 3 = max iterations, -1 = not run.
+  */
+  int m_exitStatus = -1;
+
+  /**
+    @brief Final residual norm after solve() (in the adapter inner-product norm).
+  */
+  Real m_residualNorm = -1.0;
+
+  /**
+    @brief Number of Arnoldi iterations performed by the last solve().
+  */
+  int m_iterations = 0;
+
+  /**
+    @brief Display normalization for printed residuals (set to the zero-residual by the driver; 1 = print absolute).
+    @details Affects only verbose output, not the convergence test. The printed value is the relative residual
+             ||r|| / ||r_zero||, so progress is comparable across solvers regardless of their internal norm.
+  */
+  Real m_residualScale = 1.0;
+
+  /**
+    @brief Default constructor. Call define() before use.
+  */
+  KrylovGMRES() noexcept = default;
+
+  /**
+    @brief Destructor. Frees the persistent basis and scratch.
+  */
+  ~KrylovGMRES() noexcept;
+
+  /**
+    @brief Allocate the persistent basis (m_restart + 1 vectors) and scratch. Call once per regrid.
+    @param[in] a_op       The (already define()d) operator/adapter to solve against
+    @param[in] a_template A hierarchy whose layout the work vectors mirror (e.g. the rhs)
+  */
+  void
+  define(AMRMultigridKrylovOp<T>* a_op, const Vector<LevelData<T>*>& a_template) noexcept;
+
+  /**
+    @brief Free the persistent basis and scratch.
+  */
+  void
+  undefine() noexcept;
+
+  /**
+    @brief Whether define() has been called.
+    @return True if defined.
+  */
+  bool
+  isDefined() const noexcept;
+
+  /**
+    @brief Solve a_op(a_phi) = a_rhs (homogeneous operator) with restarted GMRES(m_restart).
+    @param[in,out] a_phi Solution (in: initial guess; out: solution). Warm starts are honoured.
+    @param[in]     a_rhs Right-hand side.
+    @return True if converged (m_exitStatus == 1).
+  */
+  bool
+  solve(Vector<LevelData<T>*>& a_phi, const Vector<LevelData<T>*>& a_rhs) noexcept;
+
+protected:
+  /**
+    @brief Operator/adapter (not owned).
+  */
+  AMRMultigridKrylovOp<T>* m_op = nullptr;
+
+  /**
+    @brief Whether the basis/scratch are allocated.
+  */
+  bool m_isDefined = false;
+
+  /**
+    @brief Restart length the persistent storage was sized for.
+  */
+  int m_allocRestart = 0;
+
+  /**
+    @brief Arnoldi basis, size m_allocRestart + 1.
+  */
+  Vector<Vector<LevelData<T>*>> m_basis;
+
+  /**
+    @brief A*K^{-1}*v_j scratch.
+  */
+  Vector<LevelData<T>*> m_w;
+
+  /**
+    @brief K^{-1}*v_j and final preconditioned-update scratch.
+  */
+  Vector<LevelData<T>*> m_z;
+
+  /**
+    @brief Accumulated unpreconditioned solution update (sum y_k v_k).
+  */
+  Vector<LevelData<T>*> m_c;
+
+  /**
+    @brief Residual.
+  */
+  Vector<LevelData<T>*> m_r;
+
+  /**
+    @brief Hessenberg matrix, column-major, leading dimension m_allocRestart + 1.
+  */
+  Vector<Real> m_H;
+
+  /**
+    @brief Givens cosines.
+  */
+  Vector<Real> m_cs;
+
+  /**
+    @brief Givens sines.
+  */
+  Vector<Real> m_sn;
+
+  /**
+    @brief Rotated residual right-hand side.
+  */
+  Vector<Real> m_g;
+
+  /**
+    @brief Least-squares solution.
+  */
+  Vector<Real> m_y;
+
+  /**
+    @brief Persistent scratch for one Gram-Schmidt projection row (size m_allocRestart).
+  */
+  Vector<Real> m_hcol;
+
+  /**
+    @brief Persistent scratch for the reorthogonalization correction row (size m_allocRestart).
+  */
+  Vector<Real> m_corr;
+};
+
+#include <CD_NamespaceFooter.H>
+
+#include <CD_KrylovGMRESImplem.H>
+
+#endif

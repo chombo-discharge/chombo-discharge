@@ -131,6 +131,18 @@ public:
               const DataIndex&      a_dit,
               const bool            a_useHomogeneous) const override final;
 
+  /**
+    @brief Diagonal-weight multiplier for the domain-face contribution to the relaxation diagonal.
+    @details Routes to the per-face sub-BC object, exactly as getFaceFlux does (see
+             EBHelmholtzDomainBC::getDiagWeight), so each side reports the diagonal weight of its actual BC
+             (Dirichlet/Neumann/Larsen).
+    @param[in] a_dir  Coordinate direction of the face.
+    @param[in] a_side High or low side.
+    @return Diagonal weight of the per-face sub-BC.
+  */
+  Real
+  getDiagWeight(const int a_dir, const Side::LoHiSide a_side) const override final;
+
 protected:
   /**
     @brief Eddington domain boundary conditions

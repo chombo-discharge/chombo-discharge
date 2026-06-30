@@ -133,4 +133,13 @@ EBHelmholtzEddingtonSP1DomainBC::getFaceFlux(const VolIndex&       a_vof,
   return bcPtr->getFaceFlux(a_vof, a_phi, a_Bcoef, a_dir, a_side, a_dit, a_useHomogeneous);
 }
 
+Real
+EBHelmholtzEddingtonSP1DomainBC::getDiagWeight(const int a_dir, const Side::LoHiSide a_side) const
+{
+  // Delegate to the actual per-face BC, like getFaceFlux above.
+  const auto& bcPtr = m_bcObjects.at(std::make_pair(a_dir, a_side));
+
+  return bcPtr->getDiagWeight(a_dir, a_side);
+}
+
 #include <CD_NamespaceFooter.H>

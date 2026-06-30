@@ -1645,6 +1645,11 @@ FieldSolver::writeMultifluidData(LevelData<EBCellFAB>&    a_output,
           // In this case we are purely inside the solid region -- take the data from the solid phase.
           fabGas.copy(fabSolid);
         }
+        else if (isSolidIrregular || (isSolidCovered && isGasIrregular)) {
+          for (comp = 0; comp < numComp; comp++) {
+            BoxLoops::loop<D_DECL(1, 1, 1)>(fabGas.box() & domain, kernel);
+          }
+        }
         else if (isGasIrregular && isSolidIrregular) {
           // In this case we are looking at a grid patch that lies on the gas-solid boundary. We need to determine which cells
           // go into the output region. We happen to know that all gas-side data is already filled, so we only need to grok

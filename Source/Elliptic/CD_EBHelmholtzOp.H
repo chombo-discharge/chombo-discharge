@@ -50,6 +50,8 @@ public:
     PointJacobi,
     GauSaiRedBlack,
     GauSaiMultiColor,
+    Chebyshev,
+    RestrictedAdditiveSchwarz,
   };
 
   /**
@@ -98,6 +100,10 @@ public:
     @param[in] a_ghostRhs      Ghost cells in right-hand side
     @param[in] a_smoother      Which smoother to use
     @param[in] a_relaxFactor   Relaxation factor
+    @param[in] a_chebyOrder    Chebyshev polynomial degree (only used when a_smoother is Smoother::Chebyshev)
+    @param[in] a_chebyEigRatio Chebyshev eigenvalue ratio lambda_max/lambda_min (only used when a_smoother is Smoother::Chebyshev)
+    @param[in] a_rasInnerSweeps Number of inner frozen-ghost sweeps per restricted-additive-Schwarz iteration (only used when a_smoother is Smoother::RestrictedAdditiveSchwarz)
+    @param[in] a_refluxFree    If true, use the reflux-free AMR operator (skips coarse-fine flux refluxing)
     @param[in] a_BcoefIrreg    B-coefficient on EB faces
   */
   EBHelmholtzOp(const Location::Cell                             a_dataLocation,
@@ -127,7 +133,11 @@ public:
                 const IntVect&                                   a_ghostPhi,
                 const IntVect&                                   a_ghostRhs,
                 const Smoother&                                  a_smoother,
-                const Real&                                      a_relaxFactor);
+                const Real&                                      a_relaxFactor,
+                const int&                                       a_chebyOrder,
+                const Real&                                      a_chebyEigRatio,
+                const int&                                       a_rasInnerSweeps,
+                const bool                                       a_refluxFree = false);
 
   /**
     @brief Dtor
@@ -260,6 +270,30 @@ public:
                     const BaseIVFAB<Real>& a_BcoefIrreg,
                     const Box&             a_cellBox,
                     const DataIndex&       a_dit) const noexcept;
+
+  /**
+    @brief Chebyshev smoother kernel.
+    @details Same as pointJacobiKernel but scales the update by a_omega (the Chebyshev step size).
+    @param[in,out] a_Lcorr      Storage for computing L(a_corr)
+    @param[in,out] a_corr       Correction
+    @param[in]    a_resid      Residual
+    @param[in]    a_Acoef      A-coefficient
+    @param[in]    a_Bcoef      B-coefficient
+    @param[in]    a_BcoefIrreg B-coefficient on EB faces
+    @param[in]    a_cellBox    Grid box
+    @param[in]    a_dit        Data index
+    @param[in]    a_omega      Chebyshev step-size scaling factor
+  */
+  void
+  chebyshevKernel(EBCellFAB&             a_Lcorr,
+                  EBCellFAB&             a_corr,
+                  const EBCellFAB&       a_resid,
+                  const EBCellFAB&       a_Acoef,
+                  const EBFluxFAB&       a_Bcoef,
+                  const BaseIVFAB<Real>& a_BcoefIrreg,
+                  const Box&             a_cellBox,
+                  const DataIndex&       a_dit,
+                  const Real             a_omega) const noexcept;
 
   /**
     @brief Red-black Gauss-Seidel kernel
@@ -453,14 +487,19 @@ public:
 
   /**
     @brief Fill domain flux. This fills the flux on the domain face using centered differencing ala applyDomainFlux
-    @details a_flux is replaced by the user-specified flux on the domain faces. 
-    @param[in,out] a_flux              Flux data holder.
-    @param[in,out] a_phi               Cell-centered data
-    @param[in]    a_cellBox           Computation box
-    @param[in]    a_dit               Data index
+    @details a_flux is replaced by the user-specified flux on the domain faces.
+    @param[in,out] a_flux                  Flux data holder.
+    @param[in,out] a_phi                   Cell-centered data
+    @param[in]    a_cellBox               Computation box
+    @param[in]    a_dit                   Data index
+    @param[in]    a_homogeneousPhysBC     If true, use homogeneous physical BCs
   */
   void
-  fillDomainFlux(EBFluxFAB& a_flux, const EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit);
+  fillDomainFlux(EBFluxFAB&       a_flux,
+                 const EBCellFAB& a_phi,
+                 const Box&       a_cellBox,
+                 const DataIndex& a_dit,
+                 const bool       a_homogeneousPhysBC);
 
   /**
     @brief Apply operator in irregular cells
@@ -538,6 +577,29 @@ public:
   */
   Real
   dotProduct(const LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs) override final;
+
+  /**
+    @brief Rank-local (un-reduced) partials for the masked AMR-composite Krylov inner product.
+    @details Same kappa-weighted inner product as dotProduct, except cells where a_mask is false (e.g. cells covered
+             by a finer AMR level) are excluded from the numerator; the volume normalisation counts all valid cells,
+             matching Chombo's MultilevelLinearOp AMR dot product. Unlike dotProduct this performs NO MPI reduction:
+             it returns the rank-local partial sums so the caller (AMRMultigridKrylovOp) can batch the per-level
+             partials into a single MPI_Allreduce. The volume is geometry-only and is reduced/cached once by the
+             caller, so a_needVolume can be set false on later calls to skip recomputing it.
+    @param[out] a_sumKappaXY Rank-local masked numerator (sum of kappa*X*Y over unmasked cells)
+    @param[out] a_sumVolume  Rank-local volume (sum over all valid cells); set to zero when a_needVolume is false
+    @param[in]  a_lhs        First operand
+    @param[in]  a_rhs        Second operand
+    @param[in]  a_mask       Per-cell mask; false marks cells excluded from the numerator
+    @param[in]  a_needVolume If false, skip accumulating a_sumVolume (caller already cached it)
+  */
+  void
+  dotProductMaskedLocal(Real&                           a_sumKappaXY,
+                        Real&                           a_sumVolume,
+                        const LevelData<EBCellFAB>&     a_lhs,
+                        const LevelData<EBCellFAB>&     a_rhs,
+                        const LevelData<BaseFab<bool>>& a_mask,
+                        const bool                      a_needVolume) const noexcept;
 
   /**
     @brief Increment operator
@@ -881,6 +943,34 @@ public:
   getRelaxationCoeff() const noexcept;
 
   /**
+    @brief Returns m_chebyOrder. Used by MFHelmholtzOp to replicate Chebyshev parameters.
+    @return Chebyshev polynomial degree
+  */
+  int
+  getChebyOrder() const noexcept;
+
+  /**
+    @brief Returns m_chebyEigRatio. Used by MFHelmholtzOp to replicate Chebyshev parameters.
+    @return Chebyshev eigenvalue ratio (lambda_max / lambda_min)
+  */
+  Real
+  getChebyEigRatio() const noexcept;
+
+  /**
+    @brief Returns m_spectralRadius. Used by MFHelmholtzOp to replicate Chebyshev parameters.
+    @return Gershgorin bound on rho(D^{-1}A)
+  */
+  Real
+  getSpectralRadius() const noexcept;
+
+  /**
+    @brief Returns m_rasInnerSweeps. Used by MFHelmholtzOp to replicate the Schwarz block solve.
+    @return Number of inner (frozen-ghost) red-black sweeps per outer Schwarz iteration
+  */
+  int
+  getRasInnerSweeps() const noexcept;
+
+  /**
     @brief Return all-cut VoFIterators (one per patch). Used by MFHelmholtzOp.
     @return All-cut VoF iterators over irregular cells on this level.
   */
@@ -1005,6 +1095,28 @@ protected:
     @brief Successive over-relaxation factor (Must be >= 1).
   */
   Real m_relaxFactor;
+
+  /**
+    @brief Number of Chebyshev polynomial steps per smoother invocation.
+  */
+  int m_chebyOrder;
+
+  /**
+    @brief Ratio lambda_max/lambda_min for the Chebyshev eigenvalue window.
+    @details Targets the upper (1 - 1/m_chebyEigRatio) fraction of the spectrum.
+  */
+  Real m_chebyEigRatio;
+
+  /**
+    @brief Spectral radius estimate for the Jacobi-preconditioned operator D^{-1}A.
+    @details Computed via the Gershgorin bound after defineStencils(). Used as lambda_max in the Chebyshev smoother.
+  */
+  Real m_spectralRadius;
+
+  /**
+    @brief Number of inner (frozen-ghost) red-black sweeps per outer restricted-additive-Schwarz iteration.
+  */
+  int m_rasInnerSweeps;
 
   /**
     @brief Vector resolution
@@ -1268,6 +1380,36 @@ protected:
   relaxGSMultiColor(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations);
 
   /**
+    @brief Chebyshev polynomial smoother.
+    @details Applies m_chebyOrder Chebyshev-Richardson steps of the form
+             correction += omega_i * relCoef * (residual - L(correction)).
+             The step sizes omega_i are derived from Chebyshev nodes on [lambdaMax/m_chebyEigRatio, lambdaMax]
+             where lambdaMax = 2 (safe bound for the Jacobi-preconditioned Laplacian-type operator).
+    @param[in,out] a_correction Correction
+    @param[in]    a_residual   Residual
+    @param[in]    a_iterations Number of outer smoother invocations (each applies m_chebyOrder steps)
+  */
+  void
+  relaxChebyshev(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations);
+
+  /**
+    @brief Restricted additive Schwarz smoother (block smoother).
+    @details Each outer iteration exchanges ghost cells once and then performs m_rasInnerSweeps
+             red-black Gauss-Seidel sweeps per patch with the ghost cells held frozen (Dirichlet).
+             The blocks are the disjoint patches, so the update is automatically restricted to the
+             valid region and no additive damping is required (overlap = 0). Because the ghost
+             exchange is amortised over the inner sweeps, this smoother performs fewer halo exchanges
+             per multigrid cycle than point relaxation.
+    @param[in,out] a_correction Correction
+    @param[in]    a_residual   Residual
+    @param[in]    a_iterations Number of outer Schwarz iterations
+  */
+  void
+  relaxRestrictedAdditiveSchwarz(LevelData<EBCellFAB>&       a_correction,
+                                 const LevelData<EBCellFAB>& a_residual,
+                                 const int                   a_iterations);
+
+  /**
     @brief Calculate the weight of the diagonal term
   */
   void
@@ -1278,6 +1420,14 @@ protected:
   */
   void
   computeRelaxationCoefficient();
+
+  /**
+    @brief Estimate the spectral radius of D^{-1}A (Jacobi-preconditioned operator) via the Gershgorin bound.
+    @details rho_i = 2 - alpha * A_i * relCoef_i. Equals 2 for pure Laplacian and decreases with alpha > 0.
+             Must be called after computeRelaxationCoefficient() and computeDiagWeight().
+  */
+  void
+  computeSpectralRadius();
 
   /**
     @brief Compute aggregated stencils

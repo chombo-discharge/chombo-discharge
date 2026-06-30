@@ -653,12 +653,17 @@ MFHelmholtzJumpBC::matchBC(BaseIVFAB<Real>& a_jump,
       jump *= 1. / static_cast<double>(vofsPhase0.size());
     }
 
+    // For multi-valued cells (vofsPhase{0,1}.size() > 1, rare) the jump relation is enforced on a single canonical
+    // VoF per phase -- the first valid VoF, [0]. This replaces the old VolIndex(iv, 0) proxy, which indexed component
+    // 0 rather than a valid VoF in the opposite phase.
+    const Real phi1Canon = bndryPhiPhase1(vofsPhase1[0], m_comp);
     for (int i = 0; i < vofsPhase0.size(); i++) {
-      bndryPhiPhase0(vofsPhase0[i], m_comp) += bndryPhiPhase1(vof0, m_comp);
+      bndryPhiPhase0(vofsPhase0[i], m_comp) += phi1Canon;
       bndryPhiPhase0(vofsPhase0[i], m_comp) *= -1.0;
     }
+    const Real phi0Combined = bndryPhiPhase0(vofsPhase0[0], m_comp);
     for (int i = 0; i < vofsPhase1.size(); i++) {
-      bndryPhiPhase1(vofsPhase1[i], m_comp) = bndryPhiPhase0(vof0, m_comp);
+      bndryPhiPhase1(vofsPhase1[i], m_comp) = phi0Combined;
     }
 
     if (!a_homogeneousPhysBC) {
