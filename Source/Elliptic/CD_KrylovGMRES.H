@@ -38,16 +38,6 @@ class KrylovGMRES
 {
 public:
   /**
-    @brief Operator/adapter type.
-  */
-  using Op = AMRMultigridKrylovOp<T>;
-
-  /**
-    @brief Multilevel data type the solver acts on.
-  */
-  using Vec = Vector<LevelData<T>*>;
-
-  /**
     @brief Relative residual tolerance (against the initial residual norm).
   */
   Real m_eps = 1.E-10;
@@ -110,7 +100,7 @@ public:
     @param[in] a_template A hierarchy whose layout the work vectors mirror (e.g. the rhs)
   */
   void
-  define(Op* a_op, const Vec& a_template) noexcept;
+  define(AMRMultigridKrylovOp<T>* a_op, const Vector<LevelData<T>*>& a_template) noexcept;
 
   /**
     @brief Free the persistent basis and scratch.
@@ -132,13 +122,13 @@ public:
     @return True if converged (m_exitStatus == 1).
   */
   bool
-  solve(Vec& a_phi, const Vec& a_rhs) noexcept;
+  solve(Vector<LevelData<T>*>& a_phi, const Vector<LevelData<T>*>& a_rhs) noexcept;
 
 protected:
   /**
     @brief Operator/adapter (not owned).
   */
-  Op* m_op = nullptr;
+  AMRMultigridKrylovOp<T>* m_op = nullptr;
 
   /**
     @brief Whether the basis/scratch are allocated.
@@ -153,27 +143,27 @@ protected:
   /**
     @brief Arnoldi basis, size m_allocRestart + 1.
   */
-  Vector<Vec> m_basis;
+  Vector<Vector<LevelData<T>*>> m_basis;
 
   /**
     @brief A*K^{-1}*v_j scratch.
   */
-  Vec m_w;
+  Vector<LevelData<T>*> m_w;
 
   /**
     @brief K^{-1}*v_j and final preconditioned-update scratch.
   */
-  Vec m_z;
+  Vector<LevelData<T>*> m_z;
 
   /**
     @brief Accumulated unpreconditioned solution update (sum y_k v_k).
   */
-  Vec m_c;
+  Vector<LevelData<T>*> m_c;
 
   /**
     @brief Residual.
   */
-  Vec m_r;
+  Vector<LevelData<T>*> m_r;
 
   /**
     @brief Hessenberg matrix, column-major, leading dimension m_allocRestart + 1.

@@ -36,16 +36,6 @@ class KrylovBiCGStab
 {
 public:
   /**
-    @brief Operator/adapter type.
-  */
-  using Op = AMRMultigridKrylovOp<T>;
-
-  /**
-    @brief Multilevel data type the solver acts on.
-  */
-  using Vec = Vector<LevelData<T>*>;
-
-  /**
     @brief Relative residual tolerance (against the initial residual norm).
   */
   Real m_eps = 1.E-10;
@@ -103,7 +93,7 @@ public:
     @param[in] a_template A hierarchy whose layout the work vectors mirror (e.g. the rhs)
   */
   void
-  define(Op* a_op, const Vec& a_template) noexcept;
+  define(AMRMultigridKrylovOp<T>* a_op, const Vector<LevelData<T>*>& a_template) noexcept;
 
   /**
     @brief Free the persistent work vectors.
@@ -125,13 +115,13 @@ public:
     @return True if converged (m_exitStatus == 1).
   */
   bool
-  solve(Vec& a_phi, const Vec& a_rhs) noexcept;
+  solve(Vector<LevelData<T>*>& a_phi, const Vector<LevelData<T>*>& a_rhs) noexcept;
 
 protected:
   /**
     @brief Operator/adapter (not owned).
   */
-  Op* m_op = nullptr;
+  AMRMultigridKrylovOp<T>* m_op = nullptr;
 
   /**
     @brief Whether the work vectors are allocated.
@@ -141,42 +131,42 @@ protected:
   /**
     @brief Residual / s.
   */
-  Vec m_r;
+  Vector<LevelData<T>*> m_r;
 
   /**
     @brief Shadow residual.
   */
-  Vec m_rTilde;
+  Vector<LevelData<T>*> m_rTilde;
 
   /**
     @brief Accumulated correction (added to a_phi at the end).
   */
-  Vec m_e;
+  Vector<LevelData<T>*> m_e;
 
   /**
     @brief Search direction.
   */
-  Vec m_p;
+  Vector<LevelData<T>*> m_p;
 
   /**
     @brief Preconditioned search direction.
   */
-  Vec m_pTilde;
+  Vector<LevelData<T>*> m_pTilde;
 
   /**
     @brief Preconditioned s.
   */
-  Vec m_sTilde;
+  Vector<LevelData<T>*> m_sTilde;
 
   /**
     @brief A*s_tilde.
   */
-  Vec m_t;
+  Vector<LevelData<T>*> m_t;
 
   /**
     @brief A*p_tilde.
   */
-  Vec m_v;
+  Vector<LevelData<T>*> m_v;
 };
 
 #include <CD_NamespaceFooter.H>

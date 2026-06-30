@@ -33,7 +33,7 @@ KrylovGMRES<T>::~KrylovGMRES() noexcept
 
 template <class T>
 void
-KrylovGMRES<T>::define(Op* a_op, const Vec& a_template) noexcept
+KrylovGMRES<T>::define(AMRMultigridKrylovOp<T>* a_op, const Vector<LevelData<T>*>& a_template) noexcept
 {
   CH_TIME("KrylovGMRES::define");
 
@@ -91,13 +91,13 @@ KrylovGMRES<T>::isDefined() const noexcept
 
 template <class T>
 bool
-KrylovGMRES<T>::solve(Vec& a_phi, const Vec& a_rhs) noexcept
+KrylovGMRES<T>::solve(Vector<LevelData<T>*>& a_phi, const Vector<LevelData<T>*>& a_rhs) noexcept
 {
   CH_TIME("KrylovGMRES::solve");
 
   CH_assert(m_isDefined);
 
-  Op& op = *m_op;
+  AMRMultigridKrylovOp<T>& op = *m_op;
 
   m_exitStatus = -1;
 

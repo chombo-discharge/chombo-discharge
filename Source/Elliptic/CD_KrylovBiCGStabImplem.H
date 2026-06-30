@@ -29,7 +29,7 @@ KrylovBiCGStab<T>::~KrylovBiCGStab() noexcept
 
 template <class T>
 void
-KrylovBiCGStab<T>::define(Op* a_op, const Vec& a_template) noexcept
+KrylovBiCGStab<T>::define(AMRMultigridKrylovOp<T>* a_op, const Vector<LevelData<T>*>& a_template) noexcept
 {
   CH_TIME("KrylovBiCGStab::define");
 
@@ -77,13 +77,13 @@ KrylovBiCGStab<T>::isDefined() const noexcept
 
 template <class T>
 bool
-KrylovBiCGStab<T>::solve(Vec& a_phi, const Vec& a_rhs) noexcept
+KrylovBiCGStab<T>::solve(Vector<LevelData<T>*>& a_phi, const Vector<LevelData<T>*>& a_rhs) noexcept
 {
   CH_TIME("KrylovBiCGStab::solve");
 
   CH_assert(m_isDefined);
 
-  Op& op = *m_op;
+  AMRMultigridKrylovOp<T>& op = *m_op;
 
   m_exitStatus = -1;
 
@@ -195,8 +195,8 @@ KrylovBiCGStab<T>::solve(Vec& a_phi, const Vec& a_rhs) noexcept
     op.applyOp(m_t, m_sTilde, true); // t = A s_tilde
 
     // omega = (t,s)/(t,t) -- both inner products in a single fused MPI reduction.
-    Real      dots[2];
-    const Vec rhsPair[2] = {m_r, m_t};
+    Real                        dots[2];
+    const Vector<LevelData<T>*> rhsPair[2] = {m_r, m_t};
 
     op.mDotProduct(m_t, 2, rhsPair, dots);
 
