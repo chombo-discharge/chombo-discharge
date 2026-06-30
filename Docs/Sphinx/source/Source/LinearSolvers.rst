@@ -348,16 +348,16 @@ ____________________________
 
 By default the Helmholtz equation is solved by stand-alone multigrid V-cycling (``solver = gmg``), which is the cheapest option and the right choice whenever it converges well.
 On hard problems, however, the V-cycle convergence rate can degrade or stall: strong coefficient contrast (e.g. high-permittivity dielectrics), awkward cut-cell geometry, deep AMR hierarchies, or nearly indefinite operators can all make multigrid converge slowly, *hang* (see ``gmg_exit_hang``), or exhaust ``gmg_max_iter``.
-In these cases the V-cycle can instead be used as a *preconditioner* for an outer Krylov method, which removes the slowly-converging error modes that the smoother and coarse-grid correction cannot, and converges robustly where stand-alone multigrid does not:
+In these cases the multigrid cycle can instead be used as a *preconditioner* for an outer Krylov method, which removes the slowly-converging error modes that the smoother and coarse-grid correction cannot, and converges robustly where stand-alone multigrid does not:
 
 .. code-block:: text
 
    FieldSolverGMG.solver = gmres      # or 'bicgstab'
 
 ``chombo-discharge`` ships its own GMRES and BiCGStab implementations for this purpose (in :file:`$DISCHARGE_HOME/Source/Elliptic`); these are *not* the Chombo bottom solvers of the same name.
-Both act directly on the AMR hierarchy: the matrix-vector product is the composite Helmholtz operator, and the preconditioner is the multigrid V-cycle, supplied through a thin adapter (``AMRMultigridKrylovOp``).
+Both act directly on the AMR hierarchy: the matrix-vector product is the composite Helmholtz operator, and the preconditioner is the multigrid cycle, supplied through a thin adapter (``AMRMultigridKrylovOp``). The cycle type is deferred to the multigrid configuration (``gmg_cycle``) and is normally a V-cycle for efficiency.
 The solve is carried out in residual-correction form, so inhomogeneous boundary conditions and dielectric jump/surface-charge contributions are handled correctly, and a non-zero initial guess (warm start) is honoured.
-The V-cycle preconditioner is configured exactly as for stand-alone multigrid (``gmg_smoother``, ``gmg_pre_smooth``, ``gmg_cycle``, ``gmg_bottom_solver``, ...); only the outer wrapper changes.
+The multigrid preconditioner is configured exactly as for stand-alone multigrid (``gmg_smoother``, ``gmg_pre_smooth``, ``gmg_cycle``, ``gmg_bottom_solver``, ...); only the outer wrapper changes.
 The same ``solver`` keyword is available on ``FieldSolverGMG`` (multiphase) and on the single-phase solvers ``CdrCTU``, ``CdrGodunov``, and ``EddingtonSP1``.
 
 The two methods implement:
@@ -393,7 +393,7 @@ The latch is counted in solves and is deliberately independent of regridding, so
 
    ``gmres`` is robust and the recommended default; raise ``krylov_restart`` if it stagnates (at the cost of memory) or lower it to save memory.
    ``bicgstab`` uses a small, fixed amount of work storage but can break down on poorly-conditioned problems.
-   ``krylov_vcycles`` controls how many V-cycles make up one preconditioner application (usually 1); it is orthogonal to ``gmg_cycle`` (which selects V- vs W-cycles *within* a single application).
+   ``krylov_vcycles`` controls how many multigrid cycles make up one preconditioner application (usually 1); the cycle *type* is deferred to the multigrid configuration via ``gmg_cycle`` (V- or W-cycles), and should normally be a V-cycle for efficiency.
 
 The ``solver`` key and the ``krylov_*`` keys are mandatory input parameters (like the ``gmg_*`` keys) and must be present in the input file; the shipped templates set ``solver = gmg``.
 
@@ -453,7 +453,7 @@ All parameters below use a solver-class prefix (e.g. ``FieldSolverGMG``, ``Eddin
   The two formulations are mathematically equivalent; neither is more accurate than the other.
   Default is ``false``.
 * ``<Solver>.solver``.
-  Selects the top-level solver: ``gmg`` (stand-alone V-cycling), ``gmres``, or ``bicgstab``. The latter two use the multigrid V-cycle as a preconditioner. A space-separated list is a fallback chain tried in order, e.g. ``gmg gmres`` (see :ref:`Chap:KrylovMultigrid`). This key and the ``krylov_*`` keys below are mandatory.
+  Selects the top-level solver: ``gmg`` (stand-alone multigrid), ``gmres``, or ``bicgstab``. The latter two use the multigrid cycle as a preconditioner. A space-separated list is a fallback chain tried in order, e.g. ``gmg gmres`` (see :ref:`Chap:KrylovMultigrid`). This key and the ``krylov_*`` keys below are mandatory.
 * ``<Solver>.krylov_eps``.
   Relative residual tolerance for the outer Krylov solver (``gmres``/``bicgstab``).
 * ``<Solver>.krylov_max_iter``.
@@ -461,7 +461,7 @@ All parameters below use a solver-class prefix (e.g. ``FieldSolverGMG``, ``Eddin
 * ``<Solver>.krylov_restart``.
   GMRES restart length (ignored for ``bicgstab``).
 * ``<Solver>.krylov_vcycles``.
-  Number of V-cycles applied per Krylov preconditioner application.
+  Number of multigrid cycles applied per Krylov preconditioner application. The cycle type is deferred to the multigrid configuration via ``gmg_cycle`` and should normally be a V-cycle for efficiency.
 * ``<Solver>.krylov_retry_interval``.
   For a ``gmg ...`` fallback chain: when stand-alone multigrid fails and the chain latches onto the Krylov solver, re-probe multigrid every this many solves (see :ref:`Chap:KrylovMultigrid`). Optional; defaults to ``1`` (retry multigrid first on every solve). Larger values skip the wasted multigrid attempt while it keeps failing.
 * ``<Solver>.krylov_reprobe_iters``.

@@ -6,7 +6,7 @@
 
 /**
   @file   CD_KrylovMultigrid.H
-  @brief  Outer Krylov solve (GMRES/BiCGStab) preconditioned by an AMR-multigrid V-cycle
+  @brief  Outer Krylov solve (GMRES/BiCGStab) preconditioned by an AMR-multigrid cycle
   @author Robert Marskar
 */
 
@@ -30,8 +30,8 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Support code for using an AMR-multigrid V-cycle as a preconditioner for an outer Krylov solver.
-  @details The V-cycle itself (smoother, cycle type, bottom solver, BC stencils, ...) is configured by the usual
+  @brief Support code for using an AMR-multigrid cycle as a preconditioner for an outer Krylov solver.
+  @details The multigrid cycle itself (smoother, cycle type, bottom solver, BC stencils, ...) is configured by the usual
            gmg_* options of the host solver. The settings here control the outer Krylov wrapper.
 */
 namespace KrylovMultigrid {
@@ -47,12 +47,12 @@ namespace KrylovMultigrid {
     GMG,
 
     /**
-      @brief GMRES preconditioned by the V-cycle.
+      @brief GMRES preconditioned by the multigrid cycle.
     */
     GMRES,
 
     /**
-      @brief BiCGStab preconditioned by the V-cycle.
+      @brief BiCGStab preconditioned by the multigrid cycle.
     */
     BiCGStab
   };
@@ -84,7 +84,8 @@ namespace KrylovMultigrid {
     int restart = 30;
 
     /**
-      @brief V-cycles applied per preconditioner invocation.
+      @brief Number of multigrid cycles applied per preconditioner invocation. The cycle type (V/W) is deferred
+             to the multigrid configuration via gmg_cycle; it should normally be a V-cycle for efficiency.
     */
     int numVCycles = 1;
 
@@ -293,7 +294,7 @@ namespace KrylovMultigrid {
 
   /**
     @brief Stateful owner of the outer-Krylov solver path.
-    @details Holds the V-cycle adapter (AMRMultigridKrylovOp), the chombo-discharge BiCGStab/GMRES solvers, and the
+    @details Holds the multigrid-cycle adapter (AMRMultigridKrylovOp), the chombo-discharge BiCGStab/GMRES solvers, and the
              persistent residual-correction work vectors. define() is called once per regrid; solve() reuses the
              adapter, the (lazily defined) custom solvers and the work vectors across all subsequent solves, so there
              is no per-solve work-vector allocation. solve() runs in residual-correction form so the inhomogeneous
@@ -321,14 +322,14 @@ namespace KrylovMultigrid {
     ~Solver() noexcept;
 
     /**
-      @brief Define the V-cycle adapter and reset the persistent work. Call once per regrid.
+      @brief Define the multigrid-preconditioner adapter and reset the persistent work. Call once per regrid.
       @param[in] a_mg         Fully set-up multigrid solver (reused for matvec and preconditioning)
       @param[in] a_grids      Grids on each level (index 0..a_lmax)
       @param[in] a_refRat     Refinement ratio to the next finer level (index 0..a_lmax)
       @param[in] a_dx         Grid spacing on each level (index 0..a_lmax)
       @param[in] a_lbase      Coarsest level in the solve
       @param[in] a_lmax       Finest level in the solve
-      @param[in] a_numVCycles V-cycles per preconditioner invocation
+      @param[in] a_numVCycles Number of multigrid cycles per preconditioner invocation (cycle type from gmg_cycle; normally a V-cycle)
     */
     void
     define(AMRMultiGrid<LevelData<T>>*      a_mg,
@@ -340,7 +341,7 @@ namespace KrylovMultigrid {
            const int                        a_numVCycles);
 
     /**
-      @brief Solve L(phi) = rhs with the chosen outer Krylov method preconditioned by the V-cycle.
+      @brief Solve L(phi) = rhs with the chosen outer Krylov method preconditioned by the multigrid cycle.
       @param[in,out] a_phi      Solution (in: initial guess unless a_zeroPhi; out: solution)
       @param[in]     a_rhs      Right-hand side
       @param[in]     a_zeroPhi  If true, start from phi = 0
@@ -403,7 +404,7 @@ namespace KrylovMultigrid {
     AMRMultiGrid<LevelData<T>>* m_mg = nullptr;
 
     /**
-      @brief V-cycle-as-preconditioner adapter.
+      @brief Multigrid-cycle-as-preconditioner adapter.
     */
     AMRMultigridKrylovOp<T> m_op;
 

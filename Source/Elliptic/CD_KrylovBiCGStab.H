@@ -27,7 +27,7 @@
            scale-out: the eight work vectors are allocated once in define() and reused across solves (no per-solve
            allocation), and the omega numerator/denominator inner products are fused into a single mDotProduct so the
            adapter issues one MPI reduction instead of two. The matrix-vector product and preconditioner are the
-           homogeneous AMR operator and V-cycle supplied by the adapter; solve() updates the solution in place and
+           homogeneous AMR operator and multigrid cycle supplied by the adapter; solve() updates the solution in place and
            honours a non-zero initial guess (warm start).
   @note T is the FAB type (EBCellFAB or MFCellFAB).
 */

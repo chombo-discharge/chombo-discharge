@@ -120,10 +120,10 @@ AMRMultigridKrylovOp<T>::preCond(Vec& a_cor, const Vec& a_residual)
   this->setToZero(a_cor);
 
   for (int iter = 0; iter < m_numVCycles; iter++) {
-    // The V-cycle needs (residual - L(cor)) as its input and mangles that argument, so we feed it a scratch copy.
+    // The multigrid cycle needs (residual - L(cor)) as its input and mangles that argument, so we feed it a scratch copy.
     // On the first cycle cor == 0, so the input is just a_residual -- skip the (expensive) residual evaluation. Only
     // multi-cycle preconditioning (numVCycles > 1) needs the recompute, which keeps the common single-cycle case as
-    // cheap as one V-cycle (one extra matvec per cycle would otherwise roughly double the work per Krylov iteration).
+    // cheap as one cycle (one extra matvec per cycle would otherwise roughly double the work per Krylov iteration).
     if (iter == 0) {
       this->assign(m_precondTmp, a_residual);
     }

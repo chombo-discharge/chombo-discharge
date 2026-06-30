@@ -6,7 +6,7 @@
 
 /**
   @file   CD_AMRMultigridKrylovOp.H
-  @brief  Linear-operator adapter that exposes an AMR-multigrid V-cycle as a Krylov preconditioner
+  @brief  Linear-operator adapter that exposes an AMR-multigrid cycle as a Krylov preconditioner
   @author Robert Marskar
 */
 
@@ -66,8 +66,9 @@ struct AMRMultigridKrylovOpTraits<MFCellFAB>
 /**
   @brief Adapter presenting an already-defined AMRMultiGrid as a LinearOp over the AMR hierarchy.
   @details This lets an outer Krylov solver (GMRES/BiCGStab, operating on Vector<LevelData<T>*>) use the
-           multigrid V-cycle as a preconditioner. The matrix-vector product and the preconditioner delegate to
-           the supplied, fully set-up AMRMultiGrid (its AMR operators and AMRVCycle). The vector operations
+           multigrid cycle as a preconditioner. The matrix-vector product and the preconditioner delegate to
+           the supplied, fully set-up AMRMultiGrid (its AMR operators and multigrid cycle; the cycle type follows the
+           AMRMultiGrid configuration / gmg_cycle, normally a V-cycle for efficiency). The vector operations
            delegate to the per-level AMR operators, and the AMR inner product is computed allocation-free using
            a per-level fine-covered mask precomputed in define().
   @note T is the FAB type (EBCellFAB or MFCellFAB); the LinearOp acts on Vector<LevelData<T>*>.
@@ -99,7 +100,7 @@ public:
     @param[in] a_dx         Grid spacing on each level (index 0..a_lmax)
     @param[in] a_lbase      Coarsest level in the solve
     @param[in] a_lmax       Finest level in the solve
-    @param[in] a_numVCycles Number of V-cycles applied per preconditioner invocation
+    @param[in] a_numVCycles Number of multigrid cycles applied per preconditioner invocation (cycle type from the AMRMultiGrid configuration; normally a V-cycle)
   */
   void
   define(AMRMultiGrid<LevelData<T>>*      a_mg,
@@ -130,7 +131,7 @@ public:
   residual(Vec& a_lhs, const Vec& a_phi, const Vec& a_rhs, bool a_homogeneous = false) override;
 
   /**
-    @brief Apply the preconditioner: a_cor approx L^{-1} a_residual via m_numVCycles multigrid V-cycles.
+    @brief Apply the preconditioner: a_cor approx L^{-1} a_residual via m_numVCycles multigrid cycles (cycle type from the AMRMultiGrid configuration; normally V-cycles).
     @param[out] a_cor      Preconditioned correction
     @param[in]  a_residual Residual to precondition
   */
@@ -269,7 +270,7 @@ protected:
   int m_lmax = 0;
 
   /**
-    @brief Number of V-cycles per preconditioner application.
+    @brief Number of multigrid cycles per preconditioner application (cycle type from the AMRMultiGrid configuration; normally V-cycles).
   */
   int m_numVCycles = 1;
 
@@ -284,7 +285,7 @@ protected:
   mutable Vec m_precondTmp;
 
   /**
-    @brief Preconditioner scratch (V-cycle correction), lazily allocated on first preCond.
+    @brief Preconditioner scratch (cycle correction), lazily allocated on first preCond.
   */
   mutable Vec m_precondDcor;
 };
