@@ -40,7 +40,7 @@ template <class T>
 struct AMRMultigridKrylovOpTraits;
 
 /**
-  @brief EBCellFAB specialization -> EBHelmholtzOp.
+  @brief EBCellFAB specialization. Used for encapsulating EBHelmholtzOp.
 */
 template <>
 struct AMRMultigridKrylovOpTraits<EBCellFAB>
@@ -52,7 +52,7 @@ struct AMRMultigridKrylovOpTraits<EBCellFAB>
 };
 
 /**
-  @brief MFCellFAB specialization -> MFHelmholtzOp.
+  @brief MFCellFAB specialization. Used for encapsulating MFHelmholtzOp.
 */
 template <>
 struct AMRMultigridKrylovOpTraits<MFCellFAB>
@@ -68,7 +68,7 @@ struct AMRMultigridKrylovOpTraits<MFCellFAB>
   @details This lets an outer Krylov solver (GMRES/BiCGStab, operating on Vector<LevelData<T>*>) use the
            multigrid cycle as a preconditioner. The matrix-vector product and the preconditioner delegate to
            the supplied, fully set-up AMRMultiGrid (its AMR operators and multigrid cycle; the cycle type follows the
-           AMRMultiGrid configuration / gmg_cycle, normally a V-cycle for efficiency). The vector operations
+           AMRMultiGrid configuration / cycle, normally a V-cycle for efficiency). The vector operations
            delegate to the per-level AMR operators, and the AMR inner product is computed allocation-free using
            a per-level fine-covered mask precomputed in define().
   @note T is the FAB type (EBCellFAB or MFCellFAB); the LinearOp acts on Vector<LevelData<T>*>.
@@ -88,7 +88,7 @@ public:
   AMRMultigridKrylovOp() = default;
 
   /**
-    @brief Destructor. Frees preconditioner scratch storage.
+    @brief Destructor. Frees the preconditioner scratch storage.
   */
   virtual ~AMRMultigridKrylovOp();
 
