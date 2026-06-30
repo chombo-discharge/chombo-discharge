@@ -15,7 +15,6 @@
 
 // Chombo includes
 #include <CH_Timer.H>
-#include <LayoutIterator.H>
 
 // Our includes
 #include <CD_AMRMultigridKrylovOp.H>
@@ -33,13 +32,12 @@ AMRMultigridKrylovOp<T>::~AMRMultigridKrylovOp()
 
 template <class T>
 void
-AMRMultigridKrylovOp<T>::define(AMRMultiGrid<LevelData<T>>*      a_mg,
-                                const Vector<DisjointBoxLayout>& a_grids,
-                                const Vector<int>&               a_refRat,
-                                const Vector<Real>&              a_dx,
-                                const int                        a_lbase,
-                                const int                        a_lmax,
-                                const int                        a_numVCycles)
+AMRMultigridKrylovOp<T>::define(AMRMultiGrid<LevelData<T>>*                            a_mg,
+                                const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_validCells,
+                                const Vector<Real>&                                    a_dx,
+                                const int                                              a_lbase,
+                                const int                                              a_lmax,
+                                const int                                              a_numVCycles)
 {
   CH_TIME("AMRMultigridKrylovOp::define");
 
@@ -57,57 +55,37 @@ AMRMultigridKrylovOp<T>::define(AMRMultiGrid<LevelData<T>>*      a_mg,
     m_dxScale[lvl] = D_TERM(a_dx[lvl], *a_dx[lvl], *a_dx[lvl]);
   }
 
-  // Precompute a per-level "valid" mask: true everywhere, then false on regions covered by a finer level. This is
-  // the allocation-free analogue of MultilevelLinearOp, which instead zeroes covered data before each dot product.
-  m_validMask.resize(a_lmax + 1);
-  for (int lvl = a_lbase; lvl <= a_lmax; lvl++) {
-    m_validMask[lvl] = RefCountedPtr<LevelData<BaseFab<bool>>>(
-      new LevelData<BaseFab<bool>>(a_grids[lvl], 1, IntVect::Zero));
-
-    const DataIterator& dit = a_grids[lvl].dataIterator();
-    for (int mybox = 0; mybox < dit.size(); mybox++) {
-      (*m_validMask[lvl])[dit[mybox]].setVal(true);
-    }
-
-    if (lvl < a_lmax) {
-      const DisjointBoxLayout& finerGrids = a_grids[lvl + 1];
-      const int                nRefFine   = a_refRat[lvl];
-
-      for (int mybox = 0; mybox < dit.size(); mybox++) {
-        const DataIndex& din     = dit[mybox];
-        const Box        thisBox = a_grids[lvl][din];
-        BaseFab<bool>&   mask    = (*m_validMask[lvl])[din];
-
-        for (LayoutIterator lit = finerGrids.layoutIterator(); lit.ok(); ++lit) {
-          Box coarFine = finerGrids[lit];
-          coarFine.coarsen(nRefFine);
-          coarFine &= thisBox;
-          if (!coarFine.isEmpty()) {
-            mask.setVal(false, coarFine, 0, 1);
-          }
-        }
-      }
-    }
-  }
+  // Per-level "valid" mask (true except where covered by a finer level), used so the AMR inner product counts each
+  // cell once. This is exactly AmrMesh's valid-cell mask, so we share it (refcounted) instead of rebuilding it.
+  m_validMask = a_validCells;
 }
 
 template <class T>
 void
-AMRMultigridKrylovOp<T>::applyOp(Vec& a_lhs, const Vec& a_phi, bool a_homogeneous)
+AMRMultigridKrylovOp<T>::applyOp(Vector<LevelData<T>*>& a_lhs, const Vector<LevelData<T>*>& a_phi, bool a_homogeneous)
 {
-  m_mg->computeAMROperator(a_lhs, const_cast<Vec&>(a_phi), m_lmax, m_lbase, a_homogeneous);
+  m_mg->computeAMROperator(a_lhs, const_cast<Vector<LevelData<T>*>&>(a_phi), m_lmax, m_lbase, a_homogeneous);
 }
 
 template <class T>
 void
-AMRMultigridKrylovOp<T>::residual(Vec& a_lhs, const Vec& a_phi, const Vec& a_rhs, bool a_homogeneous)
+AMRMultigridKrylovOp<T>::residual(Vector<LevelData<T>*>&       a_lhs,
+                                  const Vector<LevelData<T>*>& a_phi,
+                                  const Vector<LevelData<T>*>& a_rhs,
+                                  bool                         a_homogeneous)
 {
-  m_mg->computeAMRResidual(a_lhs, const_cast<Vec&>(a_phi), a_rhs, m_lmax, m_lbase, a_homogeneous, false);
+  m_mg->computeAMRResidual(a_lhs,
+                           const_cast<Vector<LevelData<T>*>&>(a_phi),
+                           a_rhs,
+                           m_lmax,
+                           m_lbase,
+                           a_homogeneous,
+                           false);
 }
 
 template <class T>
 void
-AMRMultigridKrylovOp<T>::preCond(Vec& a_cor, const Vec& a_residual)
+AMRMultigridKrylovOp<T>::preCond(Vector<LevelData<T>*>& a_cor, const Vector<LevelData<T>*>& a_residual)
 {
   CH_TIME("AMRMultigridKrylovOp::preCond");
 
@@ -141,7 +119,7 @@ AMRMultigridKrylovOp<T>::preCond(Vec& a_cor, const Vec& a_residual)
 
 template <class T>
 void
-AMRMultigridKrylovOp<T>::create(Vec& a_lhs, const Vec& a_rhs)
+AMRMultigridKrylovOp<T>::create(Vector<LevelData<T>*>& a_lhs, const Vector<LevelData<T>*>& a_rhs)
 {
   a_lhs.resize(a_rhs.size(), nullptr);
   for (int lvl = m_lbase; lvl < a_rhs.size(); lvl++) {
@@ -152,7 +130,7 @@ AMRMultigridKrylovOp<T>::create(Vec& a_lhs, const Vec& a_rhs)
 
 template <class T>
 void
-AMRMultigridKrylovOp<T>::clear(Vec& a_lhs)
+AMRMultigridKrylovOp<T>::clear(Vector<LevelData<T>*>& a_lhs)
 {
   for (int lvl = 0; lvl < a_lhs.size(); lvl++) {
     if (a_lhs[lvl] != nullptr) {
@@ -164,7 +142,7 @@ AMRMultigridKrylovOp<T>::clear(Vec& a_lhs)
 
 template <class T>
 void
-AMRMultigridKrylovOp<T>::assign(Vec& a_lhs, const Vec& a_rhs)
+AMRMultigridKrylovOp<T>::assign(Vector<LevelData<T>*>& a_lhs, const Vector<LevelData<T>*>& a_rhs)
 {
   for (int lvl = m_lbase; lvl < a_rhs.size(); lvl++) {
     m_amrOps[lvl]->assign(*a_lhs[lvl], *a_rhs[lvl]);
@@ -173,7 +151,7 @@ AMRMultigridKrylovOp<T>::assign(Vec& a_lhs, const Vec& a_rhs)
 
 template <class T>
 Real
-AMRMultigridKrylovOp<T>::dotProduct(const Vec& a_1, const Vec& a_2)
+AMRMultigridKrylovOp<T>::dotProduct(const Vector<LevelData<T>*>& a_1, const Vector<LevelData<T>*>& a_2)
 {
   CH_TIME("AMRMultigridKrylovOp::dotProduct");
 
@@ -220,7 +198,10 @@ AMRMultigridKrylovOp<T>::dotProduct(const Vec& a_1, const Vec& a_2)
 
 template <class T>
 void
-AMRMultigridKrylovOp<T>::mDotProduct(const Vec& a_1, const int a_sz, const Vec a_2[], Real a_mdots[])
+AMRMultigridKrylovOp<T>::mDotProduct(const Vector<LevelData<T>*>& a_1,
+                                     const int                    a_sz,
+                                     const Vector<LevelData<T>*>  a_2[],
+                                     Real                         a_mdots[])
 {
   CH_TIME("AMRMultigridKrylovOp::mDotProduct");
 
@@ -278,7 +259,7 @@ AMRMultigridKrylovOp<T>::mDotProduct(const Vec& a_1, const int a_sz, const Vec a
 
 template <class T>
 void
-AMRMultigridKrylovOp<T>::incr(Vec& a_lhs, const Vec& a_x, Real a_scale)
+AMRMultigridKrylovOp<T>::incr(Vector<LevelData<T>*>& a_lhs, const Vector<LevelData<T>*>& a_x, Real a_scale)
 {
   for (int lvl = m_lbase; lvl < a_lhs.size(); lvl++) {
     m_amrOps[lvl]->incr(*a_lhs[lvl], *a_x[lvl], a_scale);
@@ -287,7 +268,11 @@ AMRMultigridKrylovOp<T>::incr(Vec& a_lhs, const Vec& a_x, Real a_scale)
 
 template <class T>
 void
-AMRMultigridKrylovOp<T>::axby(Vec& a_lhs, const Vec& a_x, const Vec& a_y, Real a_a, Real a_b)
+AMRMultigridKrylovOp<T>::axby(Vector<LevelData<T>*>&       a_lhs,
+                              const Vector<LevelData<T>*>& a_x,
+                              const Vector<LevelData<T>*>& a_y,
+                              Real                         a_a,
+                              Real                         a_b)
 {
   for (int lvl = m_lbase; lvl < a_lhs.size(); lvl++) {
     m_amrOps[lvl]->axby(*a_lhs[lvl], *a_x[lvl], *a_y[lvl], a_a, a_b);
@@ -296,7 +281,7 @@ AMRMultigridKrylovOp<T>::axby(Vec& a_lhs, const Vec& a_x, const Vec& a_y, Real a
 
 template <class T>
 void
-AMRMultigridKrylovOp<T>::scale(Vec& a_lhs, const Real& a_scale)
+AMRMultigridKrylovOp<T>::scale(Vector<LevelData<T>*>& a_lhs, const Real& a_scale)
 {
   for (int lvl = m_lbase; lvl < a_lhs.size(); lvl++) {
     m_amrOps[lvl]->scale(*a_lhs[lvl], a_scale);
@@ -305,7 +290,7 @@ AMRMultigridKrylovOp<T>::scale(Vec& a_lhs, const Real& a_scale)
 
 template <class T>
 Real
-AMRMultigridKrylovOp<T>::norm(const Vec& a_rhs, int a_ord)
+AMRMultigridKrylovOp<T>::norm(const Vector<LevelData<T>*>& a_rhs, int a_ord)
 {
   if (a_ord == 2) {
     return std::sqrt(this->dotProduct(a_rhs, a_rhs));
@@ -321,7 +306,7 @@ AMRMultigridKrylovOp<T>::norm(const Vec& a_rhs, int a_ord)
 
 template <class T>
 void
-AMRMultigridKrylovOp<T>::setToZero(Vec& a_lhs)
+AMRMultigridKrylovOp<T>::setToZero(Vector<LevelData<T>*>& a_lhs)
 {
   for (int lvl = m_lbase; lvl < a_lhs.size(); lvl++) {
     m_amrOps[lvl]->setToZero(*a_lhs[lvl]);

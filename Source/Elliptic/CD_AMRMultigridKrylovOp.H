@@ -78,11 +78,6 @@ class AMRMultigridKrylovOp : public LinearOp<Vector<LevelData<T>*>>
 {
 public:
   /**
-    @brief Multilevel data type the LinearOp acts on.
-  */
-  using Vec = Vector<LevelData<T>*>;
-
-  /**
     @brief Default constructor. Call define() before use.
   */
   AMRMultigridKrylovOp() = default;
@@ -95,21 +90,20 @@ public:
   /**
     @brief Define the adapter. Call once per regrid (after the AMRMultiGrid has been defined and init'd).
     @param[in] a_mg         The fully set-up multigrid solver to reuse for matvec and preconditioning
-    @param[in] a_grids      Grids on each level (index 0..a_lmax)
-    @param[in] a_refRat     Refinement ratio to the next finer level (index 0..a_lmax)
+    @param[in] a_validCells Per-level valid-cell mask (true where not covered by a finer level). Reused from
+                            AmrMesh::getValidCells rather than rebuilt here.
     @param[in] a_dx         Grid spacing on each level (index 0..a_lmax)
     @param[in] a_lbase      Coarsest level in the solve
     @param[in] a_lmax       Finest level in the solve
     @param[in] a_numVCycles Number of multigrid cycles applied per preconditioner invocation (cycle type from the AMRMultiGrid configuration; normally a V-cycle)
   */
   void
-  define(AMRMultiGrid<LevelData<T>>*      a_mg,
-         const Vector<DisjointBoxLayout>& a_grids,
-         const Vector<int>&               a_refRat,
-         const Vector<Real>&              a_dx,
-         const int                        a_lbase,
-         const int                        a_lmax,
-         const int                        a_numVCycles);
+  define(AMRMultiGrid<LevelData<T>>*                            a_mg,
+         const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_validCells,
+         const Vector<Real>&                                    a_dx,
+         const int                                              a_lbase,
+         const int                                              a_lmax,
+         const int                                              a_numVCycles);
 
   /**
     @brief Matrix-vector product L(phi) over the AMR hierarchy (always homogeneous for the Krylov path).
@@ -118,7 +112,7 @@ public:
     @param[in]  a_homogeneous Use homogeneous boundary conditions
   */
   void
-  applyOp(Vec& a_lhs, const Vec& a_phi, bool a_homogeneous = false) override;
+  applyOp(Vector<LevelData<T>*>& a_lhs, const Vector<LevelData<T>*>& a_phi, bool a_homogeneous = false) override;
 
   /**
     @brief AMR residual a_lhs = L(a_phi) - a_rhs.
@@ -128,7 +122,10 @@ public:
     @param[in]  a_homogeneous Use homogeneous boundary conditions
   */
   void
-  residual(Vec& a_lhs, const Vec& a_phi, const Vec& a_rhs, bool a_homogeneous = false) override;
+  residual(Vector<LevelData<T>*>&       a_lhs,
+           const Vector<LevelData<T>*>& a_phi,
+           const Vector<LevelData<T>*>& a_rhs,
+           bool                         a_homogeneous = false) override;
 
   /**
     @brief Apply the preconditioner: a_cor approx L^{-1} a_residual via m_numVCycles multigrid cycles (cycle type from the AMRMultiGrid configuration; normally V-cycles).
@@ -136,7 +133,7 @@ public:
     @param[in]  a_residual Residual to precondition
   */
   void
-  preCond(Vec& a_cor, const Vec& a_residual) override;
+  preCond(Vector<LevelData<T>*>& a_cor, const Vector<LevelData<T>*>& a_residual) override;
 
   /**
     @brief Allocate a_lhs to mirror a_rhs.
@@ -144,14 +141,14 @@ public:
     @param[in]  a_rhs Template holder
   */
   void
-  create(Vec& a_lhs, const Vec& a_rhs) override;
+  create(Vector<LevelData<T>*>& a_lhs, const Vector<LevelData<T>*>& a_rhs) override;
 
   /**
     @brief Free a holder created by create().
     @param[in,out] a_lhs Holder to free
   */
   void
-  clear(Vec& a_lhs) override;
+  clear(Vector<LevelData<T>*>& a_lhs) override;
 
   /**
     @brief Copy a_rhs into a_lhs.
@@ -159,7 +156,7 @@ public:
     @param[in]  a_rhs Source
   */
   void
-  assign(Vec& a_lhs, const Vec& a_rhs) override;
+  assign(Vector<LevelData<T>*>& a_lhs, const Vector<LevelData<T>*>& a_rhs) override;
 
   /**
     @brief AMR-composite inner product (allocation-free, fine-covered cells masked out).
@@ -168,7 +165,7 @@ public:
     @return Inner product
   */
   Real
-  dotProduct(const Vec& a_1, const Vec& a_2) override;
+  dotProduct(const Vector<LevelData<T>*>& a_1, const Vector<LevelData<T>*>& a_2) override;
 
   /**
     @brief Batched inner products a_mdots[k] = dotProduct(a_1, a_2[k]) for k=0..a_sz-1.
@@ -181,7 +178,10 @@ public:
     @param[out] a_mdots Array of a_sz inner products
   */
   void
-  mDotProduct(const Vec& a_1, const int a_sz, const Vec a_2[], Real a_mdots[]) override;
+  mDotProduct(const Vector<LevelData<T>*>& a_1,
+              const int                    a_sz,
+              const Vector<LevelData<T>*>  a_2[],
+              Real                         a_mdots[]) override;
 
   /**
     @brief Increment a_lhs += a_scale*a_x.
@@ -190,7 +190,7 @@ public:
     @param[in]     a_scale Scale factor
   */
   void
-  incr(Vec& a_lhs, const Vec& a_x, Real a_scale) override;
+  incr(Vector<LevelData<T>*>& a_lhs, const Vector<LevelData<T>*>& a_x, Real a_scale) override;
 
   /**
     @brief Set a_lhs = a_a*a_x + a_b*a_y.
@@ -201,7 +201,11 @@ public:
     @param[in]  a_b   Scale of a_y
   */
   void
-  axby(Vec& a_lhs, const Vec& a_x, const Vec& a_y, Real a_a, Real a_b) override;
+  axby(Vector<LevelData<T>*>&       a_lhs,
+       const Vector<LevelData<T>*>& a_x,
+       const Vector<LevelData<T>*>& a_y,
+       Real                         a_a,
+       Real                         a_b) override;
 
   /**
     @brief Scale a_lhs *= a_scale.
@@ -209,7 +213,7 @@ public:
     @param[in]     a_scale Scale factor
   */
   void
-  scale(Vec& a_lhs, const Real& a_scale) override;
+  scale(Vector<LevelData<T>*>& a_lhs, const Real& a_scale) override;
 
   /**
     @brief Norm of a_rhs. For a_ord==2 this is the inner-product-induced norm sqrt(dotProduct(x,x)) so that it is
@@ -219,14 +223,14 @@ public:
     @return Norm
   */
   Real
-  norm(const Vec& a_rhs, int a_ord) override;
+  norm(const Vector<LevelData<T>*>& a_rhs, int a_ord) override;
 
   /**
     @brief Set a_lhs = 0.
     @param[out] a_lhs Vector
   */
   void
-  setToZero(Vec& a_lhs) override;
+  setToZero(Vector<LevelData<T>*>& a_lhs) override;
 
 protected:
   /**
@@ -245,7 +249,8 @@ protected:
   Vector<Real> m_dxScale;
 
   /**
-    @brief Per-level mask: false where the level is covered by a finer level (excluded from the inner product).
+    @brief Per-level valid-cell mask: false where the level is covered by a finer level (excluded from the inner
+           product). Shared (refcounted) with AmrMesh's valid-cell mask rather than built here.
   */
   Vector<RefCountedPtr<LevelData<BaseFab<bool>>>> m_validMask;
 
@@ -282,12 +287,12 @@ protected:
   /**
     @brief Preconditioner scratch (residual), lazily allocated on first preCond.
   */
-  mutable Vec m_precondTmp;
+  mutable Vector<LevelData<T>*> m_precondTmp;
 
   /**
     @brief Preconditioner scratch (cycle correction), lazily allocated on first preCond.
   */
-  mutable Vec m_precondDcor;
+  mutable Vector<LevelData<T>*> m_precondDcor;
 };
 
 #include <CD_NamespaceFooter.H>

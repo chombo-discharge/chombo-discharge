@@ -625,7 +625,12 @@ CdrMultigrid::setupMultigrid()
     refRat.resize(1 + finestLevel);
     dxScal.resize(1 + finestLevel);
 
-    m_krylov.define(&(*m_multigridSolver), grids, refRat, dxScal, 0, finestLevel, m_krylovSettings.numVCycles);
+    m_krylov.define(&(*m_multigridSolver),
+                    m_amr->getValidCells(m_realm),
+                    dxScal,
+                    0,
+                    finestLevel,
+                    m_krylovSettings.numVCycles);
   }
 }
 

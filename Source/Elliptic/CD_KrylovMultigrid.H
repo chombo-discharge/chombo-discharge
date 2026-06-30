@@ -324,21 +324,20 @@ namespace KrylovMultigrid {
     /**
       @brief Define the multigrid-preconditioner adapter and reset the persistent work. Call once per regrid.
       @param[in] a_mg         Fully set-up multigrid solver (reused for matvec and preconditioning)
-      @param[in] a_grids      Grids on each level (index 0..a_lmax)
-      @param[in] a_refRat     Refinement ratio to the next finer level (index 0..a_lmax)
+      @param[in] a_validCells Per-level valid-cell mask (true where not covered by a finer level), e.g. from
+                              AmrMesh::getValidCells
       @param[in] a_dx         Grid spacing on each level (index 0..a_lmax)
       @param[in] a_lbase      Coarsest level in the solve
       @param[in] a_lmax       Finest level in the solve
       @param[in] a_numVCycles Number of multigrid cycles per preconditioner invocation (cycle type from gmg_cycle; normally a V-cycle)
     */
     void
-    define(AMRMultiGrid<LevelData<T>>*      a_mg,
-           const Vector<DisjointBoxLayout>& a_grids,
-           const Vector<int>&               a_refRat,
-           const Vector<Real>&              a_dx,
-           const int                        a_lbase,
-           const int                        a_lmax,
-           const int                        a_numVCycles);
+    define(AMRMultiGrid<LevelData<T>>*                            a_mg,
+           const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_validCells,
+           const Vector<Real>&                                    a_dx,
+           const int                                              a_lbase,
+           const int                                              a_lmax,
+           const int                                              a_numVCycles);
 
     /**
       @brief Solve L(phi) = rhs with the chosen outer Krylov method preconditioned by the multigrid cycle.

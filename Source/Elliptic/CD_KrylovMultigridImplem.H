@@ -92,13 +92,12 @@ namespace KrylovMultigrid {
 
   template <class T>
   void
-  Solver<T>::define(AMRMultiGrid<LevelData<T>>*      a_mg,
-                    const Vector<DisjointBoxLayout>& a_grids,
-                    const Vector<int>&               a_refRat,
-                    const Vector<Real>&              a_dx,
-                    const int                        a_lbase,
-                    const int                        a_lmax,
-                    const int                        a_numVCycles)
+  Solver<T>::define(AMRMultiGrid<LevelData<T>>*                            a_mg,
+                    const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_validCells,
+                    const Vector<Real>&                                    a_dx,
+                    const int                                              a_lbase,
+                    const int                                              a_lmax,
+                    const int                                              a_numVCycles)
   {
     CH_TIME("KrylovMultigrid::Solver::define");
 
@@ -110,7 +109,7 @@ namespace KrylovMultigrid {
     m_lbase = a_lbase;
     m_lmax  = a_lmax;
 
-    m_op.define(a_mg, a_grids, a_refRat, a_dx, a_lbase, a_lmax, a_numVCycles);
+    m_op.define(a_mg, a_validCells, a_dx, a_lbase, a_lmax, a_numVCycles);
 
     m_isDefined = true;
   }
