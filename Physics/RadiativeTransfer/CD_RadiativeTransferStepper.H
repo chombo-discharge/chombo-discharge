@@ -251,6 +251,29 @@ namespace Physics {
       */
       void
       setGaussianSource();
+
+      /**
+	@brief Ghost-particle boundary verification (McPhoto only; no-op otherwise).
+	@details A visual self-consistency check of ParticleContainer::fillGhostParticles(): samples
+	particles uniformly in the domain box, fills the ghost layer, discards the valid particles
+	(keeping only the ghosts), and remaps the ghosts back to their owners. The result holds only
+	the particles that lie within a ghost layer of some patch boundary, with multiplicity equal to
+	the number of patches that ghosted each one -- so a plot shows particles along the patch
+	boundaries, with extra weight at corners/coarse-fine boundaries. Gated by the
+	'ghost_boundary_test' input (default false), so normal runs are unaffected.
+      */
+      void
+      ghostBoundaryTest();
+
+      /**
+	@brief Whether to run ghostBoundaryTest() in postInitialize(). Default false.
+      */
+      bool m_ghostBoundaryTest = false;
+
+      /**
+	@brief Number of particles to sample for ghostBoundaryTest().
+      */
+      int m_ghostBoundaryTestParticles = 0;
     };
   } // namespace RadiativeTransfer
 } // namespace Physics

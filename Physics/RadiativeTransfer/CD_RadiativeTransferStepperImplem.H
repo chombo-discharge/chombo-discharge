@@ -12,15 +12,22 @@
 
 // Std includes
 #include <math.h>
+#include <type_traits>
 
 // Chombo includes
 #include <CH_Timer.H>
+#include <DataIterator.H>
 #include <ParmParse.H>
 #include <PolyGeom.H>
 
 // Our includes
 #include <CD_RadiativeTransferStepper.H>
 #include <CD_RadiativeTransferSpecies.H>
+#include <CD_McPhoto.H>
+#include <CD_Photon.H>
+#include <CD_ParticleContainer.H>
+#include <CD_ParticleSoA.H>
+#include <CD_Random.H>
 #include <CD_NamespaceHeader.H>
 
 using namespace Physics::RadiativeTransfer;
@@ -39,6 +46,12 @@ RadiativeTransferStepper<T>::RadiativeTransferStepper()
   pp.get("dt", m_dt);
 
   m_forceDt = -1.0;
+
+  // Optional ghost-particle boundary verification (McPhoto only). Off unless explicitly requested.
+  m_ghostBoundaryTest          = false;
+  m_ghostBoundaryTestParticles = 100000;
+  pp.query("ghost_boundary_test", m_ghostBoundaryTest);
+  pp.query("ghost_boundary_test_particles", m_ghostBoundaryTestParticles);
 }
 
 template <typename T>
@@ -125,6 +138,74 @@ RadiativeTransferStepper<T>::postInitialize()
   CH_TIME("RadiativeTransferStepper::postInitialize");
   if (m_verbosity > 5) {
     pout() << "RadiativeTransferStepper::postInitialize" << endl;
+  }
+
+  if (m_ghostBoundaryTest) {
+    this->ghostBoundaryTest();
+  }
+}
+
+template <typename T>
+void
+RadiativeTransferStepper<T>::ghostBoundaryTest()
+{
+  CH_TIME("RadiativeTransferStepper::ghostBoundaryTest");
+
+  // This verification needs the McPhoto particle container; it is a no-op for mesh-based solvers.
+  if constexpr (std::is_same_v<T, McPhoto>) {
+    ParticleContainer<Photon>& photons = static_cast<T*>(&(*m_solver))->getPhotons();
+
+    // (1) Sample particles uniformly in the domain box (on rank 0; remap distributes them to owners).
+    const RealVect probLo = m_amr->getProbLo();
+    const RealVect probHi = m_amr->getProbHi();
+
+    photons.clearParticles();
+
+    ParticleSoA<Photon> sampled;
+    if (procID() == 0) {
+      for (int i = 0; i < m_ghostBoundaryTestParticles; i++) {
+        sampled.append(Random::randomPosition(probLo, probHi), 1.0);
+      }
+    }
+    photons.addParticlesDestructive(sampled); // routes every particle to its owning patch/level/rank
+
+    // (2) Fill the ghost layer of every patch.
+    photons.fillGhostParticles();
+
+    // (3) Discard the valid particles, keeping only the ghosts, and turn the ghosts into ordinary
+    //     (valid) particles so the subsequent remap() will route them rather than drop them.
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      const DisjointBoxLayout& dbl  = m_amr->getGrids(m_realm)[lvl];
+      const DataIterator&      dit  = dbl.dataIterator();
+      const int                nbox = dit.size();
+
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        ParticleSoA<Photon>& leaf = photons[lvl][dit[mybox]];
+
+        std::size_t i = 0;
+        while (i < leaf.size()) {
+          if (leaf.isGhost(i)) {
+            leaf.ghost(i) = GhostType::Valid; // a former ghost becomes an ordinary particle
+            i++;
+          }
+          else {
+            leaf.remove(i); // discard the patch's own valid particle (swap-pop; do not advance)
+          }
+        }
+      }
+    }
+
+    // (4) Remap the former ghosts back to their owners. What remains are exactly the particles that lay
+    //     within a ghost layer of some patch boundary, duplicated once per patch that ghosted them.
+    photons.remap();
+
+    if (procID() == 0) {
+      pout() << "RadiativeTransferStepper::ghostBoundaryTest - boundary particles after remap = "
+             << photons.getNumberOfValidParticlesGlobal() << endl;
+    }
+  }
+  else {
+    MayDay::Warning("RadiativeTransferStepper::ghostBoundaryTest - only implemented for the McPhoto solver");
   }
 }
 
