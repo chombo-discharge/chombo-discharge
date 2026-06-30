@@ -203,7 +203,7 @@ KrylovBiCGStab<T>::solve(Vec& a_phi, const Vec& a_rhs) noexcept
 
     rho = rhoNew;
 
-    if (m_verbosity >= 4) {
+    if (m_verbosity >= 3) {
       // Rate is the iteration-over-iteration reduction factor r_{k-1}/r_k (>1 = converging), matching AMRMultiGrid.
       pout() << "      KrylovBiCGStab:: iteration = " << iter << ", rel. residual = " << (rnorm / m_residualScale)
              << ", rate = " << ((rnorm > 0.0) ? rnormStart / rnorm : 0.0) << endl;
