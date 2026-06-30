@@ -8,7 +8,7 @@
 
 ### Alternative solutions 
 
-# PR-review checklist
+### PR-review checklist
 
 Mandatory:
 
