@@ -489,13 +489,13 @@ EddingtonSP1::parseMultigridSettings()
   pp.get("krylov_restart", m_krylovSettings.restart);
   pp.get("krylov_vcycles", m_krylovSettings.numVCycles);
 
-  // Optional: re-probe GMG every this many solves while latched onto the Krylov fallback. Default 1 (always retry
+  // Re-probe GMG every this many solves while latched onto the Krylov fallback (1 = always retry
   // GMG first); larger values approach a permanent latch. State persists across regrids (see FallbackPolicy).
-  pp.query("krylov_retry_interval", m_fallbackPolicy.retryInterval);
+  pp.get("krylov_retry_interval", m_fallbackPolicy.retryInterval);
 
-  // Optional: adaptive early re-probe. If the Krylov fallback converges in <= this many iterations the V-cycle
+  // Adaptive early re-probe: if the Krylov fallback converges in <= this many iterations the V-cycle
   // preconditioner is clearly strong, so re-probe GMG on the next solve. 0 disables it (only retry_interval applies).
-  pp.query("krylov_reprobe_iters", m_fallbackPolicy.reprobeIters);
+  pp.get("krylov_reprobe_iters", m_fallbackPolicy.reprobeIters);
   m_krylovSettings.verbosity = m_multigridVerbosity; // The Krylov solvers reuse the gmg_verbosity setting.
 }
 
