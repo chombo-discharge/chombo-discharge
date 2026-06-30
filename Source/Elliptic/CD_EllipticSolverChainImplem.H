@@ -147,6 +147,7 @@ namespace EllipticSolverChain {
     // the (zero) correction accumulator, reused here as the zero solution.
     m_op.setToZero(m_dphi);
     m_mg->computeAMRResidual(m_r0, m_dphi, a_rhs, m_lmax, m_lbase, false, false);
+
     const Real zeroResid     = m_op.norm(m_r0, 2);
     const Real residualScale = (zeroResid > 0.0) ? zeroResid : 1.0;
 
@@ -164,10 +165,12 @@ namespace EllipticSolverChain {
     switch (a_type) {
     case SolverType::GMRES: {
       const int restart = std::max(1, a_settings.restart);
+
       if (!m_gmres.isDefined() || m_gmres.m_restart != restart) {
         m_gmres.m_restart = restart;
         m_gmres.define(&m_op, a_rhs);
       }
+
       m_gmres.m_eps           = a_settings.eps;
       m_gmres.m_maxIter       = a_settings.maxIter;
       m_gmres.m_verbosity     = a_settings.verbosity;
@@ -184,6 +187,7 @@ namespace EllipticSolverChain {
       if (!m_bicg.isDefined()) {
         m_bicg.define(&m_op, a_rhs);
       }
+
       m_bicg.m_eps           = a_settings.eps;
       m_bicg.m_maxIter       = a_settings.maxIter;
       m_bicg.m_verbosity     = a_settings.verbosity;
