@@ -401,13 +401,28 @@ The ``solver`` key and the ``krylov_*`` keys are mandatory input parameters (lik
 
    The Krylov convergence history is computed from a threaded floating-point reduction (the AMR inner product), so the printed residuals -- and the solution at a finite tolerance -- vary slightly from run to run. This is expected for parallel Krylov solvers; run single-threaded for bit-reproducibility.
 
-.. _Chap:HelmholtzConfiguration:
+.. _Chap:MultigridTuning:
 
-Configuration
-_____________
+Tuning multigrid performance
+____________________________
+
+Multigrid coarsens the solution (and the geometry with it) over a hierarchy of grid levels and smooths the solution on each level.
+A number of factors influence its performance; often the most critical are the radius of the cut-cell stencils and how far multigrid is allowed to coarsen.
+Convergence is further improved by increasing the number of smoothings per level (up to a point) and by the choice of smoother and bottom solver.
 
 The ``EBHelmholtzOp`` and ``MFHelmholtzOp`` operators are configured through ParmParse at run time.
 All parameters below use a solver-class prefix (e.g. ``FieldSolverGMG``, ``EddingtonSP1``, ``CdrGodunov``, ``CdrCTU``); the generic ``gmg_`` stem is shared across all solvers.
+
+* ``<Solver>.gmg_verbosity``.
+  Controls the multigrid verbosity; a value :math:`> 0` prints multigrid convergence information.
+* ``<Solver>.gmg_bottom_verbosity``.
+  Controls the bottom-solver verbosity; a value :math:`> 0` prints bottom-solver convergence information (the detail depends on the bottom solver in use).
+* ``<Solver>.gmg_use_default_settings``.
+  Use a known-robust set of default multigrid settings.
+
+  .. tip::
+
+     Enabling this tends to make most problems converge, but potentially at suboptimal convergence rates.
 
 * ``<Solver>.gmg_pre_smooth``.
   Controls the number of relaxations on each level during multigrid downsweeps.
@@ -466,6 +481,11 @@ All parameters below use a solver-class prefix (e.g. ``FieldSolverGMG``, ``Eddin
   For a ``gmg ...`` fallback chain: when stand-alone multigrid fails and the chain latches onto the Krylov solver, re-probe multigrid every this many solves (see :ref:`Chap:KrylovMultigrid`). Optional; defaults to ``1`` (retry multigrid first on every solve). Larger values skip the wasted multigrid attempt while it keeps failing.
 * ``<Solver>.krylov_reprobe_iters``.
   Adaptive early re-probe: while latched onto the Krylov fallback, re-probe multigrid on the next solve whenever the Krylov solver converged in this many iterations or fewer (a strong preconditioner suggests multigrid alone may now succeed). Optional; defaults to ``0`` (disabled, only ``krylov_retry_interval`` applies).
+
+.. warning::
+
+   When ``gmg_bottom_solver`` is set to a regular smoother you must also specify the number of smoothings, e.g.
+   ``<Solver>.gmg_bottom_solver = simple 64``. Using ``simple`` without a count is a run-time error.
 
 The outer Krylov solver reuses the ``gmg_verbosity`` setting (there is no separate ``krylov_verbosity``). With ``gmg_verbosity >= 1`` a one-line convergence summary is printed for each Krylov solve (the relative residual ``rel.res``, the absolute residual ``|r|``, the zero-residual ``|r_zero|``, the iteration count, and the exit status), and a message is printed whenever a fallback chain switches solver; the per-iteration residual history from the GMRES/BiCGStab solvers is printed at ``gmg_verbosity >= 4``. The printed residuals are *relative* residuals -- the true residual normalized by the zero-residual ``||rhs - L(0)||`` -- so progress is on a common, solver-independent scale that is directly comparable to the convergence tolerance ``krylov_eps``.
 
