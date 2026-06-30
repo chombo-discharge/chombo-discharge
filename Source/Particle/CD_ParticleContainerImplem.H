@@ -20,12 +20,14 @@
 #include <cstring>
 #include <limits>
 #include <map>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
 // Chombo includes
 #include <CH_Timer.H>
 #include <CH_assert.H>
+#include <BoxIterator.H>
 
 // Our includes
 #include <CD_ParticleContainer.H>
@@ -264,7 +266,7 @@ ParticleContainer<P, Traits>::gatherMoversToPool()
 
 template <typename P, typename Traits>
 inline void
-ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool)
+ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool, const bool a_setOwnerToReceiver)
 {
   CH_TIME("ParticleContainer::distributeFromPool");
 
@@ -450,7 +452,10 @@ ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool)
       for (std::uint64_t c = 0; c < chunk.count; c++) {
         tgt.delinearizeAndAppend(q);
         q += pp;
-        tgt.rankID(tgt.size() - 1) = myRank; // owner is the receiving rank
+        if (a_setOwnerToReceiver) {
+          tgt.rankID(tgt.size() - 1) = myRank; // remap/regrid: owner is the receiving rank
+        }
+        // else: keep the rankID carried in the buffer (ghost particles record their true owner)
       }
     }
   }
@@ -474,7 +479,7 @@ ParticleContainer<P, Traits>::remap()
     // -- do NOT clearParticles() here; distributeFromPool() appends the movers onto the existing leaves.
     MoverPool pool = this->gatherMoversToPool();
 
-    this->distributeFromPool(pool);
+    this->distributeFromPool(pool, true); // remap: the receiving rank becomes the new owner
   }
   else {
     // Fallback: re-pool every valid particle (used when no mask is available, e.g. addParticlesDestructive
@@ -482,7 +487,7 @@ ParticleContainer<P, Traits>::remap()
     MoverPool pool = this->gatherToPool(m_particles, m_grids);
 
     this->clearParticles();
-    this->distributeFromPool(pool);
+    this->distributeFromPool(pool, true); // remap: the receiving rank becomes the new owner
   }
 
   m_isOrganizedByCell = false;
@@ -554,7 +559,7 @@ ParticleContainer<P, Traits>::regrid(const Vector<DisjointBoxLayout>&         a_
 
   // ---- redistribute the cached particles onto the new layout ----
   MoverPool pool = this->gatherToPool(m_cacheParticles, m_cacheGrids);
-  this->distributeFromPool(pool);
+  this->distributeFromPool(pool, true); // regrid: the receiving rank becomes the new owner
 
   // ---- release the cache ----
   m_cacheParticles.resize(0);
@@ -595,6 +600,132 @@ ParticleContainer<P, Traits>::clearGhostParticles()
       }
     }
   }
+
+  m_isOrganizedByCell = false; // swap-pop reorders the surviving valid particles
+}
+
+template <typename P, typename Traits>
+inline typename ParticleContainer<P, Traits>::MoverPool
+ParticleContainer<P, Traits>::gatherGhostsToPool()
+{
+  CH_TIME("ParticleContainer::gatherGhostsToPool");
+
+  // A candidate destination patch: its own (ungrown) box, the box grown by m_numGhost and clamped to
+  // the domain, and its global (gridIndex, rank) identity (matching LevelTiles / distributeFromPool).
+  struct GhostBox
+  {
+    Box          box;       // ungrown box; a particle inside it is the patch's own, not a ghost
+    Box          grownBox;  // grow(box, m_numGhost) & domain -- shell + interior
+    unsigned int gridIndex; // global box index
+    int          rank;      // owning rank of this box
+  };
+  using GhostTileMap = std::unordered_map<IntVect, std::vector<GhostBox>, LevelTiles::TileHasher>;
+
+  // Build, per level, a tile -> grown-boxes map from the GLOBAL grids. The DisjointBoxLayout is global
+  // metadata on every rank, so a source particle can be matched against destination patches on any rank
+  // with no communication. A grown box is registered under every min-tile it covers (the same tiling as
+  // findDestination), so a particle's tile lookup yields all candidate destinations.
+  std::vector<GhostTileMap> ghostTiles(m_finestLevel + 1);
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    const DisjointBoxLayout& dbl       = m_grids[lvl];
+    const Box                domainBox = m_domains[lvl].domainBox();
+
+    for (LayoutIterator lit = dbl.layoutIterator(); lit.ok(); ++lit) {
+      const Box          box  = dbl[lit()];
+      const unsigned int gidx = dbl.index(lit());
+      const int          rank = dbl.procID(lit());
+
+      Box grownBox = grow(box, m_numGhost);
+      grownBox &= domainBox;
+
+      const Box tileRange = coarsen(grownBox, m_minBlockSize);
+      for (BoxIterator bit(tileRange); bit.ok(); ++bit) {
+        ghostTiles[lvl][bit()].push_back(GhostBox{box, grownBox, gidx, rank});
+      }
+    }
+  }
+
+  MoverPool pool(numProc());
+
+  // Bin one source leaf's particles as ghosts of every destination patch whose shell contains them.
+  auto binLeaf = [this, &ghostTiles](MoverPool& a_target, const Leaf& a_leaf, const int a_srcLvl) {
+    for (std::size_t i = 0; i < a_leaf.size(); i++) {
+      const RealVect pos = a_leaf.position(i);
+
+      // A source particle can only be a ghost of patches at most one level away (coarse/same/fine).
+      for (int dstLvl = a_srcLvl - 1; dstLvl <= a_srcLvl + 1; dstLvl++) {
+        if (dstLvl < 0 || dstLvl > m_finestLevel) {
+          continue;
+        }
+
+        IntVect tile;
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          tile[dir] = static_cast<int>(std::floor((pos[dir] - m_probLo[dir]) / (m_minBlockSize * m_dx[dstLvl][dir])));
+        }
+
+        const auto mit = ghostTiles[dstLvl].find(tile);
+        if (mit == ghostTiles[dstLvl].end()) {
+          continue;
+        }
+
+        const IntVect cellIv = this->cellIndex(dstLvl, pos);
+
+        // GhostType is from the destination's view: a source on a coarser level is a Coarse ghost, on a
+        // finer level a Fine ghost, on the same level a SameLevel ghost.
+        const GhostType gt = (a_srcLvl == dstLvl)  ? GhostType::SameLevel
+                             : (a_srcLvl < dstLvl) ? GhostType::Coarse
+                                                   : GhostType::Fine;
+
+        for (const GhostBox& gb : mit->second) {
+          // A ghost lies in the patch's shell: inside the grown box but outside the patch's own box.
+          if (gb.grownBox.contains(cellIv) && !gb.box.contains(cellIv)) {
+            Leaf& bin = a_target[gb.rank][PoolKey(dstLvl, gb.gridIndex)];
+
+            bin.append(pos, a_leaf.weight(i), a_leaf.gather(i));
+
+            const std::size_t k = bin.size() - 1;
+
+            bin.particleID(k) = a_leaf.particleID(i); // preserve id
+            bin.rankID(k)     = a_leaf.rankID(i);     // preserve the true owner (a ghost records its owner)
+            bin.ghost(k)      = gt;
+          }
+        }
+      }
+    }
+  };
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    const LevelParticles& level = *m_particles[lvl];
+    const DataIterator&   dit   = m_grids[lvl].dataIterator();
+    const int             nbox  = dit.size();
+
+#ifdef _OPENMP
+#pragma omp parallel
+    {
+      MoverPool threadPool(numProc()); // thread-local; no locking while binning
+
+#pragma omp for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        binLeaf(threadPool, level[dit[mybox]], lvl);
+      }
+
+#pragma omp critical(ParticleContainer_gatherGhostsMerge)
+      {
+        for (int r = 0; r < numProc(); r++) {
+          for (auto& kv : threadPool[r]) {
+            pool[r][kv.first].catenate(kv.second);
+          }
+        }
+      }
+    }
+#else
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      binLeaf(pool, level[dit[mybox]], lvl);
+    }
+#endif
+  }
+
+  return pool;
 }
 
 template <typename P, typename Traits>
@@ -608,10 +739,16 @@ ParticleContainer<P, Traits>::fillGhostParticles()
   // Refill from a clean slate: drop any existing ghost halo first.
   this->clearGhostParticles();
 
-  // TODO: Phase 2 -- gather copies of particles from adjacent same-level patches and from the
-  // coarse/fine levels that overlap each patch's ghosted/grown box (m_grownGrids), route them with
-  // the existing pool->MPI_Alltoallv machinery (gatherToPool/distributeFromPool), and append them
-  // into each leaf tagged with the appropriate GhostType (SameLevel/Coarse/Fine).
+  if (m_numGhost <= 0) {
+    return; // no ghost layer requested
+  }
+
+  MoverPool pool = this->gatherGhostsToPool();
+
+  // a_setOwnerToReceiver == false: ghost copies keep their true owner's rankID (not the receiver's).
+  this->distributeFromPool(pool, false);
+
+  m_isOrganizedByCell = false; // ghosts appended to the leaves invalidate any cell sort
 }
 
 template <typename P, typename Traits>

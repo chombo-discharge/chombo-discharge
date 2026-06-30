@@ -179,6 +179,8 @@ public:
     @param[in] a_probLo         Lower-left corner of the physical domain.
     @param[in] a_minBlockSize Grid blocking factor (tile size); the grids must be unions of
                                 minBlockSize-sized boxes for the tile ownership to be exact.
+    @param[in] a_numGhost       Width (in cells, at each destination patch's own level) of the ghost
+                                layer filled by fillGhostParticles(). Zero disables ghost filling.
     @param[in] a_levelTiles     The owning Realm's per-level tile->box maps, aliased (never built locally)
                                 as the patch-locating structure used by remap(). Must correspond to
                                 a_grids. Not owned; must outlive this container.
@@ -195,6 +197,7 @@ public:
          const Vector<int>&                                     a_refRat,
          const RealVect&                                        a_probLo,
          const int                                              a_minBlockSize,
+         const int                                              a_numGhost,
          const Vector<RefCountedPtr<LevelTiles>>&               a_levelTiles,
          const int                                              a_finestLevel,
          const std::string&                                     a_realm,
@@ -213,6 +216,7 @@ public:
     m_refRat          = a_refRat;
     m_probLo          = a_probLo;
     m_minBlockSize    = a_minBlockSize;
+    m_numGhost        = a_numGhost;
     m_finestLevel     = a_finestLevel;
     m_realm           = a_realm;
     m_validCells      = a_validCells;
@@ -884,11 +888,28 @@ protected:
   gatherMoversToPool();
 
   /**
-    @brief Assign a mover pool into the (assumed empty) valid holders: local appends + MPI scatter.
-    @param[in,out] a_pool Per-rank mover pool produced by gatherToPool (consumed).
+    @brief Gather ghost copies of every valid particle into a per-rank, per-destination-patch pool.
+    @details For every valid particle, finds all patches on levels [l-1, l, l+1] whose ghost layer
+    (grow(box, m_numGhost), clamped to the domain) contains the particle's cell but whose own box does
+    not -- i.e. the particle lies in that patch's ghost shell. A copy is binned for each such patch with
+    the appropriate GhostType (SameLevel/Coarse/Fine from the destination's view) and the source's
+    particleID and rankID PRESERVED (a ghost records its true owner, not the receiver). A particle may
+    be a ghost of several patches, so it can be binned more than once. Non-periodic.
+    @return The per-rank ghost pool (distribute it with a_setOwnerToReceiver == false).
+  */
+  MoverPool
+  gatherGhostsToPool();
+
+  /**
+    @brief Assign a pool into the valid holders: local appends + MPI scatter.
+    @param[in,out] a_pool              Per-rank pool (consumed). Same-rank bins are catenated into the
+                                       destination leaf; cross-rank bins are linearized and Alltoallv'd.
+    @param[in] a_setOwnerToReceiver    If true, every cross-rank particle's rankID is set to the
+                                       receiving rank (remap/regrid ownership). If false, the rankID
+                                       carried in the pool is preserved (ghost particles keep their owner).
   */
   void
-  distributeFromPool(MoverPool& a_pool);
+  distributeFromPool(MoverPool& a_pool, const bool a_setOwnerToReceiver);
 
   /**
     @brief Per-level AMR grids.
@@ -924,6 +945,11 @@ protected:
     @brief Grid blocking factor (tile size).
   */
   int m_minBlockSize;
+
+  /**
+    @brief Width (in cells, at each patch's own level) of the ghost layer filled by fillGhostParticles().
+  */
+  int m_numGhost;
 
   /**
     @brief Finest AMR level index.
