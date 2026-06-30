@@ -78,7 +78,7 @@ FieldSolverGMG.kappa_source          = true               ## Volume weighted spa
 FieldSolverGMG.filter_rho            = 0                  ## Number of filterings of space charge before Poisson solve
 FieldSolverGMG.filter_potential      = 0                  ## Number of filterings of potential after Poisson solve
 
-FieldSolverGMG.solver                       = gmg          ## Solver(s), tried in order. 'gmg', 'gmres', 'bicgstab'. List = fallback chain
+FieldSolverGMG.solver                       = gmg gmres    ## Solver(s), tried in order. 'gmg', 'gmres', 'bicgstab'. List = fallback chain
 FieldSolverGMG.krylov_eps                   = 1.E-10       ## Outer Krylov relative residual tolerance (gmres/bicgstab)
 FieldSolverGMG.krylov_max_iter              = 50           ## Outer Krylov max iterations (gmres/bicgstab)
 FieldSolverGMG.krylov_restart               = 30           ## GMRES restart length (gmres only)

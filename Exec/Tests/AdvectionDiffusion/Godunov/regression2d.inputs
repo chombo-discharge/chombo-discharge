@@ -63,40 +63,41 @@ Driver.refine_dielectrics           = 0                   ## Refine dielectric s
 # ====================================================================================================
 # CDR_GDNV SOLVER SETTINGS
 # ----------------------------------------------------------------------------------------------------
-CdrGodunov.stochastic_diffusion      = false                     ## Stochastic advection. 'true' or 'false'
-CdrGodunov.seed                      = -1                        ## Seed. Random seed with seed < 0
-CdrGodunov.bc.x.lo                   = wall                      ## 'data', 'function', 'wall', or 'outflow'
-CdrGodunov.bc.x.hi                   = wall                      ## 'data', 'function', 'wall', or 'outflow'
-CdrGodunov.bc.y.lo                   = wall                      ## 'data', 'function', 'wall', or 'outflow'
-CdrGodunov.bc.y.hi                   = wall                      ## 'data', 'function', 'wall', or 'outflow'
-CdrGodunov.bc.z.lo                   = wall                      ## 'data', 'function', 'wall', or 'outflow'
-CdrGodunov.bc.z.hi                   = wall                      ## 'data', 'function', 'wall', or 'outflow'
-CdrGodunov.limit_slopes              = true                      ## Use slope-limiters for godunov
-CdrGodunov.plt_vars                  = phi vel src dco ebflux    ## Plot variables. Options are 'phi', 'vel', 'dco', 'src'
-CdrGodunov.extrap_source             = false                     ## Flag for including source term for time-extrapolation
-CdrGodunov.blend_conservation        = true                      ## Turn on/off blending with nonconservative divergenceo
-CdrGodunov.which_redistribution      = volume                    ## Redistribution type. 'volume', 'mass', or 'none' (turned off)
-CdrGodunov.use_regrid_slopes         = true                      ## Turn on/off slopes when regridding
-CdrGodunov.plot_mode                 = density                   ## Plot densities 'density' or particle numbers ('numbers')
-CdrGodunov.solver                    = gmg                       ## Solver(s), tried in order. 'gmg', 'gmres', 'bicgstab'. List = fallback chain
-CdrGodunov.krylov_eps                = 1.E-10                    ## Outer Krylov relative residual tolerance (gmres/bicgstab)
-CdrGodunov.krylov_max_iter           = 50                        ## Outer Krylov max iterations (gmres/bicgstab)
-CdrGodunov.krylov_restart            = 30                        ## GMRES restart length (gmres only)
-CdrGodunov.krylov_vcycles            = 1                         ## V-cycles per Krylov preconditioner application
-CdrGodunov.krylov_retry_interval     = 1                         ## Re-probe GMG every N solves while latched to the Krylov fallback (1 = always retry GMG first)
-CdrGodunov.krylov_reprobe_iters      = 0                         ## Re-probe GMG early when the Krylov fallback converges in <= this many iterations (0 = disabled)
-CdrGodunov.gmg_verbosity             = 10                        ## GMG verbosity
-CdrGodunov.gmg_pre_smooth            = 12                        ## Number of relaxations in GMG downsweep
-CdrGodunov.gmg_post_smooth           = 12                        ## Number of relaxations in upsweep
-CdrGodunov.gmg_bott_smooth           = 12                        ## NUmber of relaxations before dropping to bottom solver
-CdrGodunov.gmg_min_iter              = 5                         ## Minimum number of iterations
-CdrGodunov.gmg_max_iter              = 32                        ## Maximum number of iterations
-CdrGodunov.gmg_exit_tol              = 1.E-10                    ## Residue tolerance
-CdrGodunov.gmg_exit_hang             = 0.2                       ## Solver hang
-CdrGodunov.gmg_min_cells             = 2                         ## Bottom drop
-CdrGodunov.gmg_bottom_solver         = bicgstab                  ## Bottom solver type. Valid options are 'simple' and 'bicgstab'
-CdrGodunov.gmg_cycle                 = vcycle                    ## Cycle type. Only 'vcycle' supported for now
-CdrGodunov.gmg_smoother              = red_black                 ## Relaxation type. 'jacobi', 'multi_color', or 'red_black'
+CdrGodunov.stochastic_diffusion     = false                     ## Stochastic advection. 'true' or 'false'
+CdrGodunov.seed                     = -1                        ## Seed. Random seed with seed < 0
+CdrGodunov.bc.x.lo                  = wall                      ## 'data', 'function', 'wall', or 'outflow'
+CdrGodunov.bc.x.hi                  = wall                      ## 'data', 'function', 'wall', or 'outflow'
+CdrGodunov.bc.y.lo                  = wall                      ## 'data', 'function', 'wall', or 'outflow'
+CdrGodunov.bc.y.hi                  = wall                      ## 'data', 'function', 'wall', or 'outflow'
+CdrGodunov.bc.z.lo                  = wall                      ## 'data', 'function', 'wall', or 'outflow'
+CdrGodunov.bc.z.hi                  = wall                      ## 'data', 'function', 'wall', or 'outflow'
+CdrGodunov.limit_slopes             = true                      ## Use slope-limiters for godunov
+CdrGodunov.plt_vars                 = phi vel src dco ebflux    ## Plot variables. Options are 'phi', 'vel', 'dco', 'src'
+CdrGodunov.extrap_source            = false                     ## Flag for including source term for time-extrapolation
+CdrGodunov.blend_conservation       = true                      ## Turn on/off blending with nonconservative divergenceo
+CdrGodunov.which_redistribution     = volume                    ## Redistribution type. 'volume', 'mass', or 'none' (turned off)
+CdrGodunov.use_regrid_slopes        = true                      ## Turn on/off slopes when regridding
+CdrGodunov.plot_mode                = density                   ## Plot densities 'density' or particle numbers ('numbers')
+
+CdrGodunov.solver                    = gmg gmres    ## Solver(s), tried in order. 'gmg', 'gmres', 'bicgstab'. List = fallback chain
+CdrGodunov.krylov_eps                = 1.E-10       ## Outer Krylov relative residual tolerance (gmres/bicgstab)
+CdrGodunov.krylov_max_iter           = 50           ## Outer Krylov max iterations (gmres/bicgstab)
+CdrGodunov.krylov_restart            = 30           ## GMRES restart length (gmres only)
+CdrGodunov.krylov_vcycles            = 1            ## V-cycles per Krylov preconditioner application
+CdrGodunov.krylov_retry_interval     = 1            ## Re-probe GMG every N solves while latched to the Krylov fallback (1 = always retry GMG first)
+CdrGodunov.krylov_reprobe_iters      = 0            ## Re-probe GMG early when the Krylov fallback converges in <= this many iterations (0 = disabled)
+CdrGodunov.gmg_verbosity             = 10           ## GMG verbosity
+CdrGodunov.gmg_pre_smooth            = 12           ## Number of relaxations in GMG downsweep
+CdrGodunov.gmg_post_smooth           = 12           ## Number of relaxations in upsweep
+CdrGodunov.gmg_bott_smooth           = 12           ## NUmber of relaxations before dropping to bottom solver
+CdrGodunov.gmg_min_iter              = 5            ## Minimum number of iterations
+CdrGodunov.gmg_max_iter              = 32           ## Maximum number of iterations
+CdrGodunov.gmg_exit_tol              = 1.E-10       ## Residue tolerance
+CdrGodunov.gmg_exit_hang             = 0.2          ## Solver hang
+CdrGodunov.gmg_min_cells             = 2            ## Bottom drop
+CdrGodunov.gmg_bottom_solver         = bicgstab     ## Bottom solver type. Valid options are 'simple' and 'bicgstab'
+CdrGodunov.gmg_cycle                 = vcycle       ## Cycle type. Only 'vcycle' supported for now
+CdrGodunov.gmg_smoother              = red_black    ## Relaxation type. 'jacobi', 'multi_color', or 'red_black'
 
 # ====================================================================================================
 # ROD_DIELECTRIC CLASS OPTIONS

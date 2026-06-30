@@ -17,7 +17,7 @@ EddingtonSP1.bc.z.lo     = larsen 0.0    ## Bc on domain side. 'dirichlet', 'neu
 EddingtonSP1.bc.z.hi     = larsen 0.0    ## Bc on domain side. 'dirichlet', 'neuman', or 'larsen'
 EddingtonSP1.bc.z.hi     = larsen 0.0    ## Bc on domain side. 'dirichlet', 'neuman', or 'larsen'
 
-EddingtonSP1.solver                    = gmg          ## Solver(s), tried in order. 'gmg', 'gmres', 'bicgstab'. List = fallback chain
+EddingtonSP1.solver                    = gmg gmres    ## Solver(s), tried in order. 'gmg', 'gmres', 'bicgstab'. List = fallback chain
 EddingtonSP1.krylov_eps                = 1.E-10       ## Outer Krylov relative residual tolerance (gmres/bicgstab)
 EddingtonSP1.krylov_max_iter           = 50           ## Outer Krylov max iterations (gmres/bicgstab)
 EddingtonSP1.krylov_restart            = 30           ## GMRES restart length (gmres only)
