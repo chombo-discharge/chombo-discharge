@@ -237,14 +237,17 @@ CdrMultigrid::advanceEuler(EBAMRCellData&       a_newPhi,
     // Snapshot the warm-start solution (the copy of the old state); a failed attempt reverts to it unless it reduced
     // the residual (see keepOrRestore).
     const bool useChain = m_krylovSettings.solvers.size() > 1 && m_krylovSettings.usesKrylov();
+
     if (useChain) {
       m_krylov.snapshotGuess(newPhi, eulerRHS);
     }
 
-    const int startIdx     = m_fallbackPolicy.startIndex(m_krylovSettings.solvers);
-    bool      converged    = false;
-    bool      gmgAttempted = false;
-    bool      gmgConverged = false;
+    const int startIdx = m_fallbackPolicy.startIndex(m_krylovSettings.solvers);
+
+    bool converged    = false;
+    bool gmgAttempted = false;
+    bool gmgConverged = false;
+
     for (int i = startIdx; i < m_krylovSettings.solvers.size() && !converged; i++) {
       const EllipticSolverChain::SolverType solverType = m_krylovSettings.solvers[i];
 
@@ -258,9 +261,10 @@ CdrMultigrid::advanceEuler(EBAMRCellData&       a_newPhi,
         m_multigridSolver->solveNoInitResid(newPhi, resid, eulerRHS, finestLevel, coarsestLevel, false);
 
         const int status = m_multigridSolver->m_exitStatus;
-        converged        = (status == 1 || status == 8);
-        gmgAttempted     = true;
-        gmgConverged     = converged;
+
+        converged    = (status == 1 || status == 8);
+        gmgAttempted = true;
+        gmgConverged = converged;
       }
       else {
         converged = m_krylov.solve(newPhi, eulerRHS, false, solverType, m_krylovSettings);
@@ -271,6 +275,7 @@ CdrMultigrid::advanceEuler(EBAMRCellData&       a_newPhi,
         m_krylov.keepOrRestore(newPhi, eulerRHS);
       }
     }
+
     m_fallbackPolicy.recordOutcome(gmgAttempted,
                                    gmgConverged,
                                    m_krylov.lastKrylovIterations(),
@@ -379,14 +384,17 @@ CdrMultigrid::advanceCrankNicholson(EBAMRCellData&       a_newPhi,
     // Snapshot the warm-start solution (the copy of the old state); a failed attempt reverts to it unless it reduced
     // the residual (see keepOrRestore).
     const bool useChain = m_krylovSettings.solvers.size() > 1 && m_krylovSettings.usesKrylov();
+
     if (useChain) {
       m_krylov.snapshotGuess(newPhi, eulerRHS);
     }
 
-    const int startIdx     = m_fallbackPolicy.startIndex(m_krylovSettings.solvers);
-    bool      converged    = false;
-    bool      gmgAttempted = false;
-    bool      gmgConverged = false;
+    const int startIdx = m_fallbackPolicy.startIndex(m_krylovSettings.solvers);
+
+    bool converged    = false;
+    bool gmgAttempted = false;
+    bool gmgConverged = false;
+
     for (int i = startIdx; i < m_krylovSettings.solvers.size() && !converged; i++) {
       const EllipticSolverChain::SolverType solverType = m_krylovSettings.solvers[i];
 
@@ -400,9 +408,10 @@ CdrMultigrid::advanceCrankNicholson(EBAMRCellData&       a_newPhi,
         m_multigridSolver->solveNoInitResid(newPhi, resid, eulerRHS, finestLevel, coarsestLevel, false);
 
         const int status = m_multigridSolver->m_exitStatus;
-        converged        = (status == 1 || status == 8);
-        gmgAttempted     = true;
-        gmgConverged     = converged;
+
+        converged    = (status == 1 || status == 8);
+        gmgAttempted = true;
+        gmgConverged = converged;
       }
       else {
         converged = m_krylov.solve(newPhi, eulerRHS, false, solverType, m_krylovSettings);
@@ -413,6 +422,7 @@ CdrMultigrid::advanceCrankNicholson(EBAMRCellData&       a_newPhi,
         m_krylov.keepOrRestore(newPhi, eulerRHS);
       }
     }
+
     m_fallbackPolicy.recordOutcome(gmgAttempted,
                                    gmgConverged,
                                    m_krylov.lastKrylovIterations(),
@@ -908,16 +918,20 @@ CdrMultigrid::parseMultigridSettings()
   // krylov_* settings. When the solver is not gmg, the gmg_* settings above configure the V-cycle that preconditions
   // the outer Krylov solver. These are read here (mandatory, like the gmg_* keys) and passed to the Krylov driver.
   const int numKrylovSolvers = pp.countval("solver");
+
   if (numKrylovSolvers < 1) {
     MayDay::Error("CdrMultigrid::parseMultigridSettings - 'solver' must list at least one of 'gmg', 'gmres', "
                   "'bicgstab'");
   }
+
   m_krylovSettings.solvers.resize(numKrylovSolvers);
+
   for (int i = 0; i < numKrylovSolvers; i++) {
     std::string solverStr;
     pp.get("solver", solverStr, i);
     m_krylovSettings.solvers[i] = EllipticSolverChain::toSolverType(solverStr);
   }
+
   pp.get("krylov_eps", m_krylovSettings.eps);
   pp.get("krylov_max_iter", m_krylovSettings.maxIter);
   pp.get("krylov_restart", m_krylovSettings.restart);
@@ -930,7 +944,9 @@ CdrMultigrid::parseMultigridSettings()
   // Adaptive early re-probe: if the Krylov fallback converges in <= this many iterations the V-cycle
   // preconditioner is clearly strong, so re-probe GMG on the next solve. 0 disables it (only retry_interval applies).
   pp.get("krylov_reprobe_iters", m_fallbackPolicy.reprobeIters);
-  m_krylovSettings.verbosity = m_multigridVerbosity; // The Krylov solvers reuse the gmg_verbosity setting.
+
+  // The Krylov solvers reuse the gmg_verbosity setting.
+  m_krylovSettings.verbosity = m_multigridVerbosity;
 }
 
 #include <CD_NamespaceFooter.H>
