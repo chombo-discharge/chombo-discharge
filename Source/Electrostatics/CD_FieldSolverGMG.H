@@ -22,7 +22,7 @@
 // Our includes
 #include <CD_FieldSolver.H>
 #include <CD_MFHelmholtzOpFactory.H>
-#include <CD_KrylovMultigrid.H>
+#include <CD_EllipticSolverChain.H>
 #include <CD_NamespaceHeader.H>
 
 /**
@@ -411,17 +411,17 @@ protected:
   /**
     @brief Outer-Krylov settings (selects gmg/gmres/bicgstab and the krylov_* parameters)
   */
-  KrylovMultigrid::Settings m_krylovSettings;
+  EllipticSolverChain::Settings m_krylovSettings;
 
   /**
     @brief Fallback-chain latch policy (persists across regrids; re-probes GMG every krylov_retry_interval solves)
   */
-  KrylovMultigrid::FallbackPolicy m_fallbackPolicy;
+  EllipticSolverChain::FallbackPolicy m_fallbackPolicy;
 
   /**
     @brief Outer-Krylov driver (V-cycle-preconditioned BiCGStab/GMRES with persistent work vectors)
   */
-  KrylovMultigrid::Solver<MFCellFAB> m_krylov;
+  EllipticSolverChain::KrylovSolver<MFCellFAB> m_krylov;
 
   /**
     @brief Parse multigrid settings

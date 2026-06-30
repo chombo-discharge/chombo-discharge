@@ -246,7 +246,7 @@ FieldSolverGMG::parseMultigridSettings()
   for (int i = 0; i < numKrylovSolvers; i++) {
     std::string solverStr;
     pp.get("solver", solverStr, i);
-    m_krylovSettings.solvers[i] = KrylovMultigrid::toSolverType(solverStr);
+    m_krylovSettings.solvers[i] = EllipticSolverChain::toSolverType(solverStr);
   }
   pp.get("krylov_eps", m_krylovSettings.eps);
   pp.get("krylov_max_iter", m_krylovSettings.maxIter);
@@ -418,15 +418,16 @@ FieldSolverGMG::solve(MFAMRCellData&       a_phi,
     bool      gmgAttempted = false;
     bool      gmgConverged = false;
     for (int i = startIdx; i < m_krylovSettings.solvers.size() && !converged; i++) {
-      const KrylovMultigrid::SolverType solverType = m_krylovSettings.solvers[i];
-      const bool                        zeroPhi    = false; // phi already holds the starting solution
+      const EllipticSolverChain::SolverType solverType = m_krylovSettings.solvers[i];
+      const bool                            zeroPhi    = false; // phi already holds the starting solution
 
       if (i > startIdx && m_krylovSettings.verbosity >= 1) {
-        pout() << "FieldSolverGMG::solve - '" << KrylovMultigrid::solverTypeName(m_krylovSettings.solvers[i - 1])
-               << "' did not converge; falling back to '" << KrylovMultigrid::solverTypeName(solverType) << "'" << endl;
+        pout() << "FieldSolverGMG::solve - '" << EllipticSolverChain::solverTypeName(m_krylovSettings.solvers[i - 1])
+               << "' did not converge; falling back to '" << EllipticSolverChain::solverTypeName(solverType) << "'"
+               << endl;
       }
 
-      if (solverType == KrylovMultigrid::SolverType::GMG) {
+      if (solverType == EllipticSolverChain::SolverType::GMG) {
         m_multigridSolver->m_convergenceMetric = zeroResid;
         m_multigridSolver->solveNoInitResid(phi, res, rhs, finestLevel, coarsestLevel, zeroPhi);
 

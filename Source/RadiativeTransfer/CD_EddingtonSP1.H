@@ -28,7 +28,7 @@
 #include <CD_RtSolver.H>
 #include <CD_EBHelmholtzOpFactory.H>
 #include <CD_EddingtonSP1DomainBc.H>
-#include <CD_KrylovMultigrid.H>
+#include <CD_EllipticSolverChain.H>
 #include <CD_NamespaceHeader.H>
 
 /**
@@ -417,17 +417,17 @@ protected:
   /**
     @brief Outer-Krylov settings (selects gmg/gmres/bicgstab and the krylov_* parameters)
   */
-  KrylovMultigrid::Settings m_krylovSettings;
+  EllipticSolverChain::Settings m_krylovSettings;
 
   /**
     @brief Fallback-chain latch policy (persists across regrids; re-probes GMG every krylov_retry_interval solves)
   */
-  KrylovMultigrid::FallbackPolicy m_fallbackPolicy;
+  EllipticSolverChain::FallbackPolicy m_fallbackPolicy;
 
   /**
     @brief Outer-Krylov driver (V-cycle-preconditioned BiCGStab/GMRES with persistent work vectors)
   */
-  KrylovMultigrid::Solver<EBCellFAB> m_krylov;
+  EllipticSolverChain::KrylovSolver<EBCellFAB> m_krylov;
 
   /**
     @brief For regridding the source term. This is needed when doing a stationary solve. 

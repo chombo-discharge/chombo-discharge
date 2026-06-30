@@ -5,13 +5,13 @@
  */
 
 /**
-  @file   CD_KrylovMultigridImplem.H
-  @brief  Implementation of CD_KrylovMultigrid.H
+  @file   CD_EllipticSolverChainImplem.H
+  @brief  Implementation of CD_EllipticSolverChain.H
   @author Robert Marskar
 */
 
-#ifndef CD_KrylovMultigridImplem_H
-#define CD_KrylovMultigridImplem_H
+#ifndef CD_ELLIPTICSOLVERCHAINIMPLEM_H
+#define CD_ELLIPTICSOLVERCHAINIMPLEM_H
 
 // Std includes
 #include <algorithm>
@@ -21,20 +21,20 @@
 #include <parstream.H>
 
 // Our includes
-#include <CD_KrylovMultigrid.H>
+#include <CD_EllipticSolverChain.H>
 #include <CD_NamespaceHeader.H>
 
-namespace KrylovMultigrid {
+namespace EllipticSolverChain {
 
   template <class T>
-  Solver<T>::~Solver() noexcept
+  KrylovSolver<T>::~KrylovSolver() noexcept
   {
     this->freeWork();
   }
 
   template <class T>
   void
-  Solver<T>::freeWork()
+  KrylovSolver<T>::freeWork()
   {
     m_bicg.undefine();
     m_gmres.undefine();
@@ -49,7 +49,7 @@ namespace KrylovMultigrid {
 
   template <class T>
   void
-  Solver<T>::allocateWork(const Vec& a_template)
+  KrylovSolver<T>::allocateWork(const Vec& a_template)
   {
     m_op.create(m_r0, a_template);
     m_op.create(m_dphi, a_template);
@@ -59,9 +59,9 @@ namespace KrylovMultigrid {
 
   template <class T>
   void
-  Solver<T>::snapshotGuess(Vec& a_phi, const Vec& a_rhs)
+  KrylovSolver<T>::snapshotGuess(Vec& a_phi, const Vec& a_rhs)
   {
-    CH_TIME("KrylovMultigrid::Solver::snapshotGuess");
+    CH_TIME("EllipticSolverChain::KrylovSolver::snapshotGuess");
 
     if (!m_workAllocated) {
       this->allocateWork(a_phi);
@@ -73,9 +73,9 @@ namespace KrylovMultigrid {
 
   template <class T>
   bool
-  Solver<T>::keepOrRestore(Vec& a_phi, const Vec& a_rhs)
+  KrylovSolver<T>::keepOrRestore(Vec& a_phi, const Vec& a_rhs)
   {
-    CH_TIME("KrylovMultigrid::Solver::keepOrRestore");
+    CH_TIME("EllipticSolverChain::KrylovSolver::keepOrRestore");
 
     const Real r = m_mg->computeAMRResidual(a_phi, a_rhs, m_lmax, m_lbase);
 
@@ -92,14 +92,14 @@ namespace KrylovMultigrid {
 
   template <class T>
   void
-  Solver<T>::define(AMRMultiGrid<LevelData<T>>*                            a_mg,
-                    const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_validCells,
-                    const Vector<Real>&                                    a_dx,
-                    const int                                              a_lbase,
-                    const int                                              a_lmax,
-                    const int                                              a_numVCycles)
+  KrylovSolver<T>::define(AMRMultiGrid<LevelData<T>>*                            a_mg,
+                          const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_validCells,
+                          const Vector<Real>&                                    a_dx,
+                          const int                                              a_lbase,
+                          const int                                              a_lmax,
+                          const int                                              a_numVCycles)
   {
-    CH_TIME("KrylovMultigrid::Solver::define");
+    CH_TIME("EllipticSolverChain::KrylovSolver::define");
 
     // Release any storage tied to the previous grid before redefining the adapter for the new one. The work vectors
     // are re-allocated lazily on the first solve (when a template hierarchy is available).
@@ -116,13 +116,13 @@ namespace KrylovMultigrid {
 
   template <class T>
   bool
-  Solver<T>::solve(Vec&             a_phi,
-                   const Vec&       a_rhs,
-                   const bool       a_zeroPhi,
-                   const SolverType a_type,
-                   const Settings&  a_settings)
+  KrylovSolver<T>::solve(Vec&             a_phi,
+                         const Vec&       a_rhs,
+                         const bool       a_zeroPhi,
+                         const SolverType a_type,
+                         const Settings&  a_settings)
   {
-    CH_TIME("KrylovMultigrid::Solver::solve");
+    CH_TIME("EllipticSolverChain::KrylovSolver::solve");
 
     CH_assert(m_isDefined);
 
@@ -197,7 +197,7 @@ namespace KrylovMultigrid {
       break;
     }
     default: {
-      MayDay::Error("KrylovMultigrid::Solver::solve - SolverType must be GMRES or BiCGStab");
+      MayDay::Error("EllipticSolverChain::KrylovSolver::solve - SolverType must be GMRES or BiCGStab");
 
       break;
     }
@@ -210,7 +210,7 @@ namespace KrylovMultigrid {
     if (a_settings.verbosity >= 1) {
       const Real relRes = residualNorm / residualScale;
 
-      pout() << "KrylovMultigrid - " << solverTypeName(a_type) << (converged ? " converged" : " did NOT converge")
+      pout() << "EllipticSolverChain - " << solverTypeName(a_type) << (converged ? " converged" : " did NOT converge")
              << " (rel.res = " << relRes << ", |r| = " << residualNorm << ", |r_zero| = " << zeroResid
              << ", iters = " << m_lastKrylovIters << ", status = " << exitStatus << ")" << endl;
     }
@@ -221,7 +221,7 @@ namespace KrylovMultigrid {
     return converged;
   }
 
-} // namespace KrylovMultigrid
+} // namespace EllipticSolverChain
 
 #include <CD_NamespaceFooter.H>
 

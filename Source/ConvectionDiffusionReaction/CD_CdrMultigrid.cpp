@@ -246,14 +246,15 @@ CdrMultigrid::advanceEuler(EBAMRCellData&       a_newPhi,
     bool      gmgAttempted = false;
     bool      gmgConverged = false;
     for (int i = startIdx; i < m_krylovSettings.solvers.size() && !converged; i++) {
-      const KrylovMultigrid::SolverType solverType = m_krylovSettings.solvers[i];
+      const EllipticSolverChain::SolverType solverType = m_krylovSettings.solvers[i];
 
       if (i > startIdx && m_krylovSettings.verbosity >= 1) {
-        pout() << "CdrMultigrid - '" << KrylovMultigrid::solverTypeName(m_krylovSettings.solvers[i - 1])
-               << "' did not converge; falling back to '" << KrylovMultigrid::solverTypeName(solverType) << "'" << endl;
+        pout() << "CdrMultigrid - '" << EllipticSolverChain::solverTypeName(m_krylovSettings.solvers[i - 1])
+               << "' did not converge; falling back to '" << EllipticSolverChain::solverTypeName(solverType) << "'"
+               << endl;
       }
 
-      if (solverType == KrylovMultigrid::SolverType::GMG) {
+      if (solverType == EllipticSolverChain::SolverType::GMG) {
         m_multigridSolver->solveNoInitResid(newPhi, resid, eulerRHS, finestLevel, coarsestLevel, false);
 
         const int status = m_multigridSolver->m_exitStatus;
@@ -387,14 +388,15 @@ CdrMultigrid::advanceCrankNicholson(EBAMRCellData&       a_newPhi,
     bool      gmgAttempted = false;
     bool      gmgConverged = false;
     for (int i = startIdx; i < m_krylovSettings.solvers.size() && !converged; i++) {
-      const KrylovMultigrid::SolverType solverType = m_krylovSettings.solvers[i];
+      const EllipticSolverChain::SolverType solverType = m_krylovSettings.solvers[i];
 
       if (i > startIdx && m_krylovSettings.verbosity >= 1) {
-        pout() << "CdrMultigrid - '" << KrylovMultigrid::solverTypeName(m_krylovSettings.solvers[i - 1])
-               << "' did not converge; falling back to '" << KrylovMultigrid::solverTypeName(solverType) << "'" << endl;
+        pout() << "CdrMultigrid - '" << EllipticSolverChain::solverTypeName(m_krylovSettings.solvers[i - 1])
+               << "' did not converge; falling back to '" << EllipticSolverChain::solverTypeName(solverType) << "'"
+               << endl;
       }
 
-      if (solverType == KrylovMultigrid::SolverType::GMG) {
+      if (solverType == EllipticSolverChain::SolverType::GMG) {
         m_multigridSolver->solveNoInitResid(newPhi, resid, eulerRHS, finestLevel, coarsestLevel, false);
 
         const int status = m_multigridSolver->m_exitStatus;
@@ -914,7 +916,7 @@ CdrMultigrid::parseMultigridSettings()
   for (int i = 0; i < numKrylovSolvers; i++) {
     std::string solverStr;
     pp.get("solver", solverStr, i);
-    m_krylovSettings.solvers[i] = KrylovMultigrid::toSolverType(solverStr);
+    m_krylovSettings.solvers[i] = EllipticSolverChain::toSolverType(solverStr);
   }
   pp.get("krylov_eps", m_krylovSettings.eps);
   pp.get("krylov_max_iter", m_krylovSettings.maxIter);

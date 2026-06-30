@@ -5,13 +5,13 @@
  */
 
 /**
-  @file   CD_KrylovMultigrid.H
+  @file   CD_EllipticSolverChain.H
   @brief  Outer Krylov solve (GMRES/BiCGStab) preconditioned by an AMR-multigrid cycle
   @author Robert Marskar
 */
 
-#ifndef CD_KrylovMultigrid_H
-#define CD_KrylovMultigrid_H
+#ifndef CD_ELLIPTICSOLVERCHAIN_H
+#define CD_ELLIPTICSOLVERCHAIN_H
 
 // Std includes
 #include <algorithm>
@@ -34,7 +34,7 @@
   @details The multigrid cycle itself (smoother, cycle type, bottom solver, BC stencils, ...) is configured by the usual
            gmg_* options of the host solver. The settings here control the outer Krylov wrapper.
 */
-namespace KrylovMultigrid {
+namespace EllipticSolverChain {
 
   /**
     @brief Top-level solve method.
@@ -266,7 +266,7 @@ namespace KrylovMultigrid {
       return SolverType::BiCGStab;
     }
     else {
-      MayDay::Error("KrylovMultigrid::toSolverType - solver must be 'gmg', 'gmres', or 'bicgstab'");
+      MayDay::Error("EllipticSolverChain::toSolverType - solver must be 'gmg', 'gmres', or 'bicgstab'");
     }
 
     return SolverType::GMG;
@@ -274,7 +274,7 @@ namespace KrylovMultigrid {
 
   /**
     @brief Human-readable name for a solver type, for diagnostic output.
-    @param[in] a_type Solver type.
+    @param[in] a_type KrylovSolver type.
     @return "gmg", "gmres", or "bicgstab".
   */
   inline std::string
@@ -303,7 +303,7 @@ namespace KrylovMultigrid {
     @note T is the FAB type (EBCellFAB or MFCellFAB).
   */
   template <class T>
-  class Solver
+  class KrylovSolver
   {
   public:
     /**
@@ -314,12 +314,12 @@ namespace KrylovMultigrid {
     /**
       @brief Default constructor. Call define() before use.
     */
-    Solver() noexcept = default;
+    KrylovSolver() noexcept = default;
 
     /**
       @brief Destructor. Frees the persistent work vectors and custom solvers.
     */
-    ~Solver() noexcept;
+    ~KrylovSolver() noexcept;
 
     /**
       @brief Define the multigrid-preconditioner adapter and reset the persistent work. Call once per regrid.
@@ -463,10 +463,10 @@ namespace KrylovMultigrid {
     Real m_initResidual = 0.0;
   };
 
-} // namespace KrylovMultigrid
+} // namespace EllipticSolverChain
 
 #include <CD_NamespaceFooter.H>
 
-#include <CD_KrylovMultigridImplem.H>
+#include <CD_EllipticSolverChainImplem.H>
 
 #endif
