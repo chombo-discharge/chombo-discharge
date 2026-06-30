@@ -22,7 +22,7 @@
   Only the user payload columns may use the narrower @c ParticleReal.
 
   @verbatim
-      [ x | pad | y | pad | z | pad | weight | pad | id | pad | rank | pad | payload... ]
+      [ x | pad | y | pad | z | pad | weight | pad | id | pad | rank | pad | ghost | pad | payload... ]
   @endverbatim
 
   Column base pointers are cached, so element access is as cheap as a plain array. Bulk
@@ -162,6 +162,22 @@ using ParticleID = std::int64_t;
    @brief Owning-rank identifier type (container-owned metadata column; fixed-width for I/O).
 */
 using RankID = std::int32_t;
+
+/**
+   @brief Ghost designation of a particle (container-owned metadata column).
+   @details A valid particle (the patch's own, owned particle) has GhostType::Valid. A ghost
+   particle is a transient copy that overlaps the patch's ghosted/grown box and is owned
+   elsewhere; the non-Valid enumerators record where it came from so the remap routines (and any
+   per-patch consumer) know its provenance. Stored as a single byte to keep the per-particle
+   footprint minimal.
+*/
+enum class GhostType : std::uint8_t
+{
+  Valid     = 0, ///< Owned, valid particle of this patch (not a ghost).
+  SameLevel = 1, ///< Ghost from an adjacent patch on the same level.
+  Coarse    = 2, ///< Ghost from the next-coarser level (level l-1).
+  Fine      = 3  ///< Ghost from the next-finer level (level l+1).
+};
 
 /**
   @brief Traits class that a user specializes to describe the PAYLOAD columns of a
@@ -576,12 +592,17 @@ public:
   static constexpr std::size_t s_rankCol = SpaceDim + 2;
 
   /**
-     @brief Index of the first payload column.
+     @brief Column index of the container-owned ghost designation.
   */
-  static constexpr std::size_t s_payloadBegin = SpaceDim + 3;
+  static constexpr std::size_t s_ghostCol = SpaceDim + 3;
 
   /**
-     @brief Total number of columns (SpaceDim position + weight + id + rank + payload).
+     @brief Index of the first payload column.
+  */
+  static constexpr std::size_t s_payloadBegin = SpaceDim + 4;
+
+  /**
+     @brief Total number of columns (SpaceDim position + weight + id + rank + ghost + payload).
   */
   static constexpr std::size_t s_numColumns = s_payloadBegin + s_numPayloadColumns;
 
@@ -599,10 +620,10 @@ private:
   using PositionValues = typename detail::RepeatTuple<double, SpaceDim>::Type;
 
   /**
-     @brief The mandatory column value types: positions (double), weight (double), id, rank.
+     @brief The mandatory column value types: positions (double), weight (double), id, rank, ghost.
   */
   using MandatoryValues = decltype(std::tuple_cat(std::declval<PositionValues>(),
-                                                  std::declval<std::tuple<double, ParticleID, RankID>>()));
+                                                  std::declval<std::tuple<double, ParticleID, RankID, GhostType>>()));
 
   /**
      @brief The payload column value types.
@@ -1159,6 +1180,43 @@ public:
     CH_assert(a_index < m_size);
 
     return this->template columnByIndex<s_rankCol>()[a_index];
+  }
+
+  /**
+    @brief Ghost designation of particle i (container-owned metadata).
+    @param[in] a_index Particle index.
+    @return Reference to the ghost designation.
+  */
+  GhostType&
+  ghost(const std::size_t a_index) noexcept
+  {
+    CH_assert(a_index < m_size);
+
+    return this->template columnByIndex<s_ghostCol>()[a_index];
+  }
+
+  /**
+    @brief Const ghost designation of particle i.
+    @param[in] a_index Particle index.
+    @return Const reference to the ghost designation.
+  */
+  const GhostType&
+  ghost(const std::size_t a_index) const noexcept
+  {
+    CH_assert(a_index < m_size);
+
+    return this->template columnByIndex<s_ghostCol>()[a_index];
+  }
+
+  /**
+    @brief Whether particle i is a ghost particle (any non-Valid designation).
+    @param[in] a_index Particle index.
+    @return True if the particle is a ghost, false if it is a valid/owned particle.
+  */
+  bool
+  isGhost(const std::size_t a_index) const noexcept
+  {
+    return this->ghost(a_index) != GhostType::Valid;
   }
 
   ///@}

@@ -500,6 +500,8 @@ public:
 
   /**
     @brief Number of valid particles owned by this rank.
+    @details Ghost particles (any non-Valid GhostType) are excluded -- only owned, valid particles
+    are counted, even if a transient ghost halo is currently present in the leaves.
     @return Local valid particle count summed over all levels and patches.
   */
   unsigned long long
@@ -518,9 +520,14 @@ public:
 
 #pragma omp parallel for schedule(runtime) reduction(+ : n)
       for (int mybox = 0; mybox < nbox; mybox++) {
-        const DataIndex& din = dit[mybox];
+        const DataIndex& din  = dit[mybox];
+        const Leaf&      leaf = level[din];
 
-        n += static_cast<unsigned long long>(level[din].size());
+        for (std::size_t i = 0; i < leaf.size(); i++) {
+          if (!leaf.isGhost(i)) {
+            n++;
+          }
+        }
       }
     }
 
@@ -612,6 +619,36 @@ public:
          const int                                a_minBlockSize,
          const Vector<RefCountedPtr<LevelTiles>>& a_levelTiles,
          const int                                a_newFinestLevel);
+
+  ///@}
+
+  /**
+    @name Ghost particles
+  */
+  ///@{
+
+  /**
+    @brief Fill each patch's ghost halo with copies of particles that overlap its ghosted box.
+    @details A ghost particle is a transient, non-owned copy of a particle that lives in an adjacent
+    region (a neighbouring patch on the same level, the next-coarser level, or the next-finer level)
+    and overlaps this patch's ghosted/grown box. The copies are appended into the SAME leaf as the
+    valid particles and tagged with the appropriate GhostType (SameLevel/Coarse/Fine) so consumers
+    can tell them from the owned particles via ParticleSoA::isGhost(). Ghosts are transient: this
+    routine first calls clearGhostParticles() so it is safe to refill, and remap()/preRegrid()/
+    regrid() drop ghosts so they are never routed or cached as if valid.
+    @note The cross-patch/cross-level routing is not yet implemented -- this currently only clears any
+    existing ghost halo. See the Phase-2 remap work.
+  */
+  void
+  fillGhostParticles();
+
+  /**
+    @brief Remove every ghost particle (any non-Valid GhostType) from all levels and patches.
+    @details Owned (Valid) particles are left untouched. Removal is by swap-and-pop, so particle
+    order within a leaf is not preserved. Keeps leaf capacity.
+  */
+  void
+  clearGhostParticles();
 
   ///@}
 

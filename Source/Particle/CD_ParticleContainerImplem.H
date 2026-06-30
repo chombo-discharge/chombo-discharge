@@ -465,6 +465,9 @@ ParticleContainer<P, Traits>::remap()
 
   CH_assert(m_isDefined);
 
+  // Ghost particles are transient, non-owned copies; drop them so they are never routed as if owned.
+  this->clearGhostParticles();
+
   if (m_validCells != nullptr && static_cast<int>(m_validCells->size()) >= m_finestLevel + 1) {
     // Mask fast path: a particle still in its box and not under a finer grid cannot change owner, so we
     // leave those "stayers" in place and pool only the movers. Destinations therefore keep their stayers
@@ -492,6 +495,9 @@ ParticleContainer<P, Traits>::preRegrid()
   CH_TIME("ParticleContainer::preRegrid");
 
   CH_assert(m_isDefined);
+
+  // Ghost particles are transient, non-owned copies; drop them so they are never cached/regridded.
+  this->clearGhostParticles();
 
   // Share the current holders (RefCountedPtr) so regrid() can rebuild m_particles while the old
   // particles stay alive in the cache. Remember the old layout for iterating the cache.
@@ -555,6 +561,57 @@ ParticleContainer<P, Traits>::regrid(const Vector<DisjointBoxLayout>&         a_
   m_cacheGrids.resize(0);
 
   m_isOrganizedByCell = false;
+}
+
+template <typename P, typename Traits>
+inline void
+ParticleContainer<P, Traits>::clearGhostParticles()
+{
+  CH_TIME("ParticleContainer::clearGhostParticles");
+
+  CH_assert(m_isDefined);
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    LevelParticles&          level = *m_particles[lvl];
+    const DisjointBoxLayout& dbl   = m_grids[lvl];
+    const DataIterator&      dit   = dbl.dataIterator();
+
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din  = dit[mybox];
+      Leaf&            leaf = level[din];
+
+      // Swap-and-pop every ghost; the swapped-in particle now occupies index i, so do NOT advance on a hit.
+      std::size_t i = 0;
+      while (i < leaf.size()) {
+        if (leaf.isGhost(i)) {
+          leaf.remove(i);
+        }
+        else {
+          i++;
+        }
+      }
+    }
+  }
+}
+
+template <typename P, typename Traits>
+inline void
+ParticleContainer<P, Traits>::fillGhostParticles()
+{
+  CH_TIME("ParticleContainer::fillGhostParticles");
+
+  CH_assert(m_isDefined);
+
+  // Refill from a clean slate: drop any existing ghost halo first.
+  this->clearGhostParticles();
+
+  // TODO: Phase 2 -- gather copies of particles from adjacent same-level patches and from the
+  // coarse/fine levels that overlap each patch's ghosted/grown box (m_grownGrids), route them with
+  // the existing pool->MPI_Alltoallv machinery (gatherToPool/distributeFromPool), and append them
+  // into each leaf tagged with the appropriate GhostType (SameLevel/Coarse/Fine).
 }
 
 template <typename P, typename Traits>
