@@ -10,8 +10,8 @@
   @author Robert Marskar
 */
 
-#ifndef CD_KrylovGMRES_H
-#define CD_KrylovGMRES_H
+#ifndef CD_KRYLOVGMRES_H
+#define CD_KRYLOVGMRES_H
 
 // Chombo includes
 #include <LevelData.H>

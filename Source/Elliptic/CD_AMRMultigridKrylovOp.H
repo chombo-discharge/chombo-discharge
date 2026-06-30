@@ -10,8 +10,8 @@
   @author Robert Marskar
 */
 
-#ifndef CD_AMRMultigridKrylovOp_H
-#define CD_AMRMultigridKrylovOp_H
+#ifndef CD_AMRMULTIGRIDKRYLOVOP_H
+#define CD_AMRMULTIGRIDKRYLOVOP_H
 
 // Std includes
 #include <cmath>

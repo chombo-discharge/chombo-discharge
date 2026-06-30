@@ -10,8 +10,8 @@
   @author Robert Marskar
 */
 
-#ifndef CD_KrylovBiCGStabImplem_H
-#define CD_KrylovBiCGStabImplem_H
+#ifndef CD_KRYLOVBICGSTABIMPLEM_H
+#define CD_KRYLOVBICGSTABIMPLEM_H
 
 // Chombo includes
 #include <CH_Timer.H>

@@ -10,8 +10,8 @@
   @author Robert Marskar
 */
 
-#ifndef CD_KrylovGMRESImplem_H
-#define CD_KrylovGMRESImplem_H
+#ifndef CD_KRYLOVGMRESIMPLEM_H
+#define CD_KRYLOVGMRESIMPLEM_H
 
 // Std includes
 #include <algorithm>

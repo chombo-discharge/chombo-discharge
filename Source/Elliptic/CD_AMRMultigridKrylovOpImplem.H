@@ -10,8 +10,8 @@
   @author Robert Marskar
 */
 
-#ifndef CD_AMRMultigridKrylovOpImplem_H
-#define CD_AMRMultigridKrylovOpImplem_H
+#ifndef CD_AMRMULTIGRIDKRYLOVOPIMPLEM_H
+#define CD_AMRMULTIGRIDKRYLOVOPIMPLEM_H
 
 // Chombo includes
 #include <CH_Timer.H>
