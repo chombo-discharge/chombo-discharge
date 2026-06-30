@@ -706,7 +706,7 @@ EBGradient::defineStencilsEBCF(const LevelData<FArrayBox>& a_coarMaskInvalid) no
     auto regularKernel = [&](const IntVect& iv) -> void {
       if (coarMaskInvalid(iv, m_comp) > 0.0) {
         validRegionCoar -= iv;
-        validRegionFine |= (refine(Box(iv, iv), m_refRat) & fineDataBox);
+        validRegionFine |= refine(Box(iv, iv), m_refRat) & fineDataBox;
       }
     };
 
