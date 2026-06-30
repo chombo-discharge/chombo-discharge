@@ -42,35 +42,70 @@ class EBHelmholtzOpFactory : public AMRLevelOpFactory<LevelData<EBCellFAB>>
 {
 public:
   // Various alias for cutting down on typing.
-  /** @brief Smoother type alias. */
+
+  /**
+    @brief Smoother type alias.
+  */
   using Smoother = EBHelmholtzOp::Smoother;
 
-  /** @brief alias type alias. */
+  /**
+    @brief alias type alias.
+  */
   using AmrLevelGrids = Vector<RefCountedPtr<EBLevelGrid>>;
-  /** @brief alias type alias. */
+
+  /**
+    @brief alias type alias.
+  */
   using AmrMask = Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>;
-  /** @brief alias type alias. */
+
+  /**
+    @brief alias type alias.
+  */
   using AmrInterpolators = Vector<RefCountedPtr<EBMultigridInterpolator>>;
-  /** @brief alias type alias. */
+
+  /**
+    @brief alias type alias.
+  */
   using AmrFluxRegisters = Vector<RefCountedPtr<EBReflux>>;
-  /** @brief alias type alias. */
+
+  /**
+    @brief alias type alias.
+  */
   using AmrCoarseners = Vector<RefCountedPtr<EBCoarAve>>;
 
-  /** @brief alias type alias. */
+  /**
+    @brief alias type alias.
+  */
   using AmrCellData = Vector<RefCountedPtr<LevelData<EBCellFAB>>>;
-  /** @brief alias type alias. */
+
+  /**
+    @brief alias type alias.
+  */
   using AmrFluxData = Vector<RefCountedPtr<LevelData<EBFluxFAB>>>;
-  /** @brief alias type alias. */
+
+  /**
+    @brief alias type alias.
+  */
   using AmrIrreData = Vector<RefCountedPtr<LevelData<BaseIVFAB<Real>>>>;
 
-  /** @brief alias type alias. */
+  /**
+    @brief alias type alias.
+  */
   using AmrResolutions = Vector<Real>;
-  /** @brief alias type alias. */
+
+  /**
+    @brief alias type alias.
+  */
   using AmrRefRatios = Vector<int>;
 
-  /** @brief alias type alias. */
+  /**
+    @brief alias type alias.
+  */
   using DomainBCFactory = RefCountedPtr<EBHelmholtzDomainBCFactory>; // Will be replaced with better BC class...
-  /** @brief alias type alias. */
+
+  /**
+    @brief alias type alias.
+  */
   using EBBCFactory = RefCountedPtr<EBHelmholtzEBBCFactory>;
 
   /**
@@ -105,12 +140,16 @@ public:
     @param[in] a_ghostPhi         Number of ghost cells in solution vector. 
     @param[in] a_smoother         Relaxation method.
     @param[in] a_relaxFactor      Relaxation factor
-    @param[in] a_bottomDomain     Coarsest domain on which we run multigrid. Must be a coarsening of the AMR problem domains. 
-    @param[in] a_deeperLevelGrids Optional object in case you want to pre-define the deeper multigrid levels. 
-    @note a_deeperLevelGrids exists because the default behavior in this factory is to use direct coarsening for deeper AMR levels. 
-    However, this can prevent reaching "deep enough" into the multigrid hierarchy if you use small boxes (e.g. 16^3). So, a_deeperLevelGrids 
-    provide an option for using aggregation. The first entry a_deeperLevelGrids[0] should be a a factor 2 coarsening of the coarsest AMR level. 
-    @note This operator is for time-independent a- and b-coefficients. 
+    @param[in] a_chebyOrder       Chebyshev polynomial degree (only used when a_smoother is Smoother::Chebyshev)
+    @param[in] a_chebyEigRatio    Chebyshev eigenvalue ratio lambda_max/lambda_min (only used when a_smoother is Smoother::Chebyshev)
+    @param[in] a_rasInnerSweeps   Number of inner frozen-ghost sweeps per restricted-additive-Schwarz iteration (only used when a_smoother is Smoother::RestrictedAdditiveSchwarz)
+    @param[in] a_refluxFree       If true, use the reflux-free AMR operator (skips coarse-fine flux refluxing)
+    @param[in] a_bottomDomain     Coarsest domain on which we run multigrid. Must be a coarsening of the AMR problem domains.
+    @param[in] a_deeperLevelGrids Optional object in case you want to pre-define the deeper multigrid levels.
+    @note a_deeperLevelGrids exists because the default behavior in this factory is to use direct coarsening for deeper AMR levels.
+    However, this can prevent reaching "deep enough" into the multigrid hierarchy if you use small boxes (e.g. 16^3). So, a_deeperLevelGrids
+    provide an option for using aggregation. The first entry a_deeperLevelGrids[0] should be a a factor 2 coarsening of the coarsest AMR level.
+    @note This operator is for time-independent a- and b-coefficients.
     @param[in] a_amrLevelGrids Amr level grids
     @param[in] a_validCells Valid cells
     @param[in] a_amrRefRatios Amr ref ratios
@@ -138,8 +177,12 @@ public:
                        const IntVect&          a_ghostRHS,
                        const Smoother&         a_smoother,
                        const Real&             a_relaxFactor,
+                       const int&              a_chebyOrder,
+                       const Real&             a_chebyEigRatio,
+                       const int&              a_rasInnerSweeps,
                        const ProblemDomain&    a_bottomDomain,
                        const int&              a_mgBlockingFactor,
+                       const bool              a_refluxFree       = false,
                        const AmrLevelGrids&    a_deeperLevelGrids = AmrLevelGrids());
 
   /**
@@ -214,6 +257,21 @@ protected:
   Smoother m_smoother;
 
   /**
+    @brief Chebyshev polynomial degree (only used when m_smoother is Smoother::Chebyshev)
+  */
+  int m_chebyOrder;
+
+  /**
+    @brief Chebyshev eigenvalue ratio lambda_max/lambda_min (only used when m_smoother is Smoother::Chebyshev)
+  */
+  Real m_chebyEigRatio;
+
+  /**
+    @brief Number of inner frozen-ghost sweeps per restricted-additive-Schwarz iteration (only used when m_smoother is Smoother::RestrictedAdditiveSchwarz)
+  */
+  int m_rasInnerSweeps;
+
+  /**
     @brief Number of AMR levels
   */
   int m_numAmrLevels;
@@ -244,11 +302,17 @@ protected:
   Real m_relaxFactor;
 
   /**
+    @brief Use reflux-free AMR operator
+  */
+  bool m_refluxFree;
+
+  /**
     @brief Lower-left corner of computational domain
   */
   RealVect m_probLo;
 
   // Things that pertain to AMR levels. The first entry corresponds to the coarsest AMR level.
+
   /**
     @brief AMR grids
   */

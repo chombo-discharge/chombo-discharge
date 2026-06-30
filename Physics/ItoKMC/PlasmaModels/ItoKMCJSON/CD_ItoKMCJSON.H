@@ -801,7 +801,7 @@ namespace Physics {
         @param[in] N N
       */
       std::vector<size_t>
-      multinomial(const size_t N, const std::discrete_distribution<size_t>& a_distribution) const noexcept;
+      multinomial(const size_t N, const std::discrete_distribution<int>& a_distribution) const noexcept;
     };
   } // namespace ItoKMC
 } // namespace Physics

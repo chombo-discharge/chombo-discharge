@@ -360,6 +360,8 @@ EddingtonSP1::parseMultigridSettings()
 {
   ParmParse pp(m_className.c_str());
 
+  m_multigridRefluxFree = false;
+
   std::string str;
 
   pp.get("gmg_verbosity", m_multigridVerbosity);
@@ -373,6 +375,7 @@ EddingtonSP1::parseMultigridSettings()
   pp.get("gmg_min_cells", m_minCellsBottom);
   pp.get("gmg_ebbc_order", m_multigridBcOrder);
   pp.get("gmg_ebbc_weight", m_multigridBcWeight);
+  pp.query("gmg_reflux_free", m_multigridRefluxFree);
 
   // Fetch the desired bottom solver from the input script. We look for things like EddingtonSP1.gmg_bottom_solver = bicgstab or '= simple <number>'
   // where <number> is the number of relaxation for the smoothing solver.
@@ -408,8 +411,14 @@ EddingtonSP1::parseMultigridSettings()
       "EddingtonSP1::parseMultigridSettings - logic bust in bottom solver. You must specify ' = bicgstab', ' = gmres', or ' = simple <number>'");
   }
 
-  // Relaxation type
-  pp.get("gmg_smoother", str);
+  // Relaxation type. The Chebyshev smoother takes two extra arguments,
+  // i.e. 'gmg_smoother = chebyshev <order> <eig_ratio>', and the restricted additive Schwarz smoother takes one,
+  // i.e. 'gmg_smoother = ras <inner_sweeps>'.
+  m_multigridChebyOrder     = 3;
+  m_multigridChebyEigRatio  = 4.0;
+  m_multigridRasInnerSweeps = 2;
+
+  pp.get("gmg_smoother", str, 0);
   if (str == "jacobi") {
     m_multigridRelaxMethod = EBHelmholtzOp::Smoother::PointJacobi;
   }
@@ -418,6 +427,27 @@ EddingtonSP1::parseMultigridSettings()
   }
   else if (str == "multi_color") {
     m_multigridRelaxMethod = EBHelmholtzOp::Smoother::GauSaiMultiColor;
+  }
+  else if (str == "chebyshev") {
+    m_multigridRelaxMethod = EBHelmholtzOp::Smoother::Chebyshev;
+
+    if (pp.countval("gmg_smoother") != 3) {
+      MayDay::Error(
+        "EddingtonSP1::parseMultigridSettings - the Chebyshev smoother requires 'gmg_smoother = chebyshev <order> <eig_ratio>'");
+    }
+
+    pp.get("gmg_smoother", m_multigridChebyOrder, 1);
+    pp.get("gmg_smoother", m_multigridChebyEigRatio, 2);
+  }
+  else if (str == "ras") {
+    m_multigridRelaxMethod = EBHelmholtzOp::Smoother::RestrictedAdditiveSchwarz;
+
+    if (pp.countval("gmg_smoother") != 2) {
+      MayDay::Error(
+        "EddingtonSP1::parseMultigridSettings - the restricted additive Schwarz smoother requires 'gmg_smoother = ras <inner_sweeps>'");
+    }
+
+    pp.get("gmg_smoother", m_multigridRasInnerSweeps, 1);
   }
   else {
     MayDay::Error("EddingtonSP1::parseMultigridSettings - unknown relaxation method requested");
@@ -428,14 +458,50 @@ EddingtonSP1::parseMultigridSettings()
   if (str == "vcycle") {
     m_multigridType = MultigridType::VCycle;
   }
+  else if (str == "wcycle") {
+    m_multigridType = MultigridType::WCycle;
+  }
   else {
-    MayDay::Error("EddingtonSP1::parseMultigridSettings - unknown cycle type requested");
+    MayDay::Error("EddingtonSP1::parseMultigridSettings - unknown cycle type requested. Use 'vcycle' or 'wcycle'.");
   }
 
   // No lower than 2.
   if (m_minCellsBottom < 2) {
     m_minCellsBottom = 2;
   }
+
+  // Outer solver path: 'solver' = gmg | gmres | bicgstab (a space-separated list is a fallback chain), plus the
+  // krylov_* settings. When the solver is not gmg, the gmg_* settings above configure the V-cycle that preconditions
+  // the outer Krylov solver. These are read here (mandatory, like the gmg_* keys) and passed to the Krylov driver.
+  const int numKrylovSolvers = pp.countval("solver");
+
+  if (numKrylovSolvers < 1) {
+    MayDay::Error("EddingtonSP1::parseMultigridSettings - 'solver' must list at least one of 'gmg', 'gmres', "
+                  "'bicgstab'");
+  }
+  m_krylovSettings.solvers.resize(numKrylovSolvers);
+  for (int i = 0; i < numKrylovSolvers; i++) {
+    std::string solverStr;
+
+    pp.get("solver", solverStr, i);
+    m_krylovSettings.solvers[i] = EllipticSolverChain::toSolverType(solverStr);
+  }
+
+  pp.get("krylov_eps", m_krylovSettings.eps);
+  pp.get("krylov_max_iter", m_krylovSettings.maxIter);
+  pp.get("krylov_restart", m_krylovSettings.restart);
+  pp.get("krylov_vcycles", m_krylovSettings.numVCycles);
+
+  // Re-probe GMG every this many solves while latched onto the Krylov fallback (1 = always retry
+  // GMG first); larger values approach a permanent latch. State persists across regrids (see FallbackPolicy).
+  pp.get("krylov_retry_interval", m_fallbackPolicy.retryInterval);
+
+  // Adaptive early re-probe: if the Krylov fallback converges in <= this many iterations the V-cycle
+  // preconditioner is clearly strong, so re-probe GMG on the next solve. 0 disables it (only retry_interval applies).
+  pp.get("krylov_reprobe_iters", m_fallbackPolicy.reprobeIters);
+
+  // The Krylov solvers reuse the gmg_verbosity setting.
+  m_krylovSettings.verbosity = m_multigridVerbosity;
 }
 
 void
@@ -635,14 +701,60 @@ EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData
     const Real zeroResid = m_multigridSolver->computeAMRResidual(zer, rhs, finestLevel, coarsestLevel);
 
     if (phiResid > zeroResid * m_multigridExitTolerance) {
-      // Residual is too large, solve.
-      m_multigridSolver->m_convergenceMetric = zeroResid;
-      m_multigridSolver->solveNoInitResid(phi, res, rhs, finestLevel, coarsestLevel, a_zeroPhi);
-
-      const int status = m_multigridSolver->m_exitStatus; // 1 => Initial norm sufficiently reduced
-      if (status == 1 || status == 8 || status == 9) {    // 8 => Norm sufficiently small
-        converged = true;
+      // Establish and snapshot the chain's starting solution. Every fallback attempt starts from this same guess,
+      // except that a failed attempt which reduced the residual is kept as the warm start (see keepOrRestore). Begin
+      // at the policy's preferred index, which skips a persistently-failing GMG while latched onto the fallback.
+      if (a_zeroPhi) {
+        DataOps::setValue(a_phi, 0.0);
       }
+
+      const bool useChain = m_krylovSettings.solvers.size() > 1 && m_krylovSettings.usesKrylov();
+
+      if (useChain) {
+        m_krylov.snapshotGuess(phi, rhs);
+      }
+
+      const int startIdx = m_fallbackPolicy.startIndex(m_krylovSettings.solvers);
+
+      bool gmgAttempted = false;
+      bool gmgConverged = false;
+
+      for (int i = startIdx; i < m_krylovSettings.solvers.size() && !converged; i++) {
+        const EllipticSolverChain::SolverType solverType = m_krylovSettings.solvers[i];
+        const bool                            zeroPhi    = false; // phi already holds the starting solution
+
+        if (i > startIdx && m_krylovSettings.verbosity >= 1) {
+          pout() << "EddingtonSP1::advance - '" << EllipticSolverChain::solverTypeName(m_krylovSettings.solvers[i - 1])
+                 << "' did not converge; falling back to '" << EllipticSolverChain::solverTypeName(solverType) << "'"
+                 << endl;
+        }
+
+        if (solverType == EllipticSolverChain::SolverType::GMG) {
+          m_multigridSolver->m_convergenceMetric = zeroResid;
+          m_multigridSolver->solveNoInitResid(phi, res, rhs, finestLevel, coarsestLevel, zeroPhi);
+
+          const int status = m_multigridSolver->m_exitStatus; // 1 => Initial norm sufficiently reduced
+
+          converged    = (status == 1 || status == 8 || status == 9);
+          gmgAttempted = true;
+          gmgConverged = converged;
+        }
+        else {
+          // Outer Krylov solve with the V-cycle as preconditioner.
+          converged = m_krylov.solve(phi, rhs, zeroPhi, solverType, m_krylovSettings);
+        }
+
+        // Warm-start rule: keep a failed attempt only if it reduced the residual below the chain's initial residual.
+        if (!converged && useChain && i + 1 < m_krylovSettings.solvers.size()) {
+          m_krylov.keepOrRestore(phi, rhs);
+        }
+      }
+
+      m_fallbackPolicy.recordOutcome(gmgAttempted,
+                                     gmgConverged,
+                                     m_krylov.lastKrylovIterations(),
+                                     m_krylovSettings.verbosity,
+                                     "EddingtonSP1::advance");
     }
     else {
       // Solution is already good enough
@@ -656,7 +768,8 @@ EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData
     this->advanceEuler(a_phi, scaledSource, Units::c * a_dt, a_zeroPhi);
 
     const int status = m_multigridSolver->m_exitStatus; // 1 => Initial norm sufficiently reduced
-    if (status == 1 || status == 8 || status == 9) {    // 8 => Norm sufficiently small
+
+    if (status == 1 || status == 8 || status == 9) { // 8 => Norm sufficiently small
       converged = true;
     }
   }
@@ -699,6 +812,7 @@ EddingtonSP1::advanceEuler(EBAMRCellData&       a_phi,
   // Compute the diagonal scaling of the operator.
   Vector<AMRLevelOp<LevelData<EBCellFAB>>*> amrOps = m_multigridSolver->getAMROperators();
   Vector<MGLevelOp<LevelData<EBCellFAB>>*>  mgOps  = m_multigridSolver->getAllOperators();
+
   for (int i = 0; i < amrOps.size(); i++) {
     auto* helmholtzOperator = (TGAHelmOp<LevelData<EBCellFAB>>*)amrOps[i];
 
@@ -713,6 +827,7 @@ EddingtonSP1::advanceEuler(EBAMRCellData&       a_phi,
   }
 
   DataOps::incr(scratch, a_source, a_dt);
+
   if (m_kappaScale) {
     DataOps::kappaScale(scratch, m_amr->getVofIterator(m_realm, m_phase));
   }
@@ -728,11 +843,63 @@ EddingtonSP1::advanceEuler(EBAMRCellData&       a_phi,
   const int coarsestLevel = 0;
   const int finestLevel   = m_amr->getFinestLevel();
 
-  // Figure out how far away we are from a "converged" solution and set the convergence metric. Then solve.
+  // Figure out how far away we are from a "converged" solution and set the convergence metric. Then solve, trying
+  // the solver chain in order (e.g. 'gmg gmres') and warm-starting each attempt from the previous one.
   const Real zeroResid = m_multigridSolver->computeAMRResidual(zer, eulerRHS, finestLevel, coarsestLevel);
 
-  m_multigridSolver->m_convergenceMetric = zeroResid;
-  m_multigridSolver->solve(newPhi, eulerRHS, finestLevel, coarsestLevel, a_zeroPhi);
+  // Establish and snapshot the chain's starting solution; failed attempts revert to it unless they reduced the
+  // residual (see keepOrRestore).
+  if (a_zeroPhi) {
+    DataOps::setValue(a_phi, 0.0);
+  }
+
+  const bool useChain = m_krylovSettings.solvers.size() > 1 && m_krylovSettings.usesKrylov();
+
+  if (useChain) {
+    m_krylov.snapshotGuess(newPhi, eulerRHS);
+  }
+
+  const int startIdx = m_fallbackPolicy.startIndex(m_krylovSettings.solvers);
+
+  bool converged    = false;
+  bool gmgAttempted = false;
+  bool gmgConverged = false;
+
+  for (int i = startIdx; i < m_krylovSettings.solvers.size() && !converged; i++) {
+    const EllipticSolverChain::SolverType solverType = m_krylovSettings.solvers[i];
+    const bool                            zeroPhi    = false; // newPhi already holds the starting solution
+
+    if (i > startIdx && m_krylovSettings.verbosity >= 1) {
+      pout() << "EddingtonSP1::advanceEuler - '" << EllipticSolverChain::solverTypeName(m_krylovSettings.solvers[i - 1])
+             << "' did not converge; falling back to '" << EllipticSolverChain::solverTypeName(solverType) << "'"
+             << endl;
+    }
+
+    if (solverType == EllipticSolverChain::SolverType::GMG) {
+      m_multigridSolver->m_convergenceMetric = zeroResid;
+      m_multigridSolver->solve(newPhi, eulerRHS, finestLevel, coarsestLevel, zeroPhi);
+
+      const int status = m_multigridSolver->m_exitStatus;
+
+      converged    = (status == 1 || status == 8 || status == 9);
+      gmgAttempted = true;
+      gmgConverged = converged;
+    }
+    else {
+      converged = m_krylov.solve(newPhi, eulerRHS, zeroPhi, solverType, m_krylovSettings);
+    }
+
+    // Warm-start rule: keep a failed attempt only if it reduced the residual below the chain's initial residual.
+    if (!converged && useChain && i + 1 < m_krylovSettings.solvers.size()) {
+      m_krylov.keepOrRestore(newPhi, eulerRHS);
+    }
+  }
+
+  m_fallbackPolicy.recordOutcome(gmgAttempted,
+                                 gmgConverged,
+                                 m_krylov.lastKrylovIterations(),
+                                 m_krylovSettings.verbosity,
+                                 "EddingtonSP1::advanceEuler");
 }
 
 void
@@ -972,8 +1139,12 @@ EddingtonSP1::setupHelmholtzFactory()
                                                                                       ghostRhs,
                                                                                       m_multigridRelaxMethod,
                                                                                       relaxFactor,
+                                                                                      m_multigridChebyOrder,
+                                                                                      m_multigridChebyEigRatio,
+                                                                                      m_multigridRasInnerSweeps,
                                                                                       bottomDomain,
-                                                                                      m_amr->getMaxBlockSize()));
+                                                                                      m_amr->getMaxBlockSize(),
+                                                                                      m_multigridRefluxFree));
 }
 
 void
@@ -1048,6 +1219,26 @@ EddingtonSP1::setupMultigrid()
 
   // Init solver. This instantiates all the operators in AMRMultiGrid so we can just call "solve"
   m_multigridSolver->init(phi, rhs, finestLevel, 0);
+
+  // Define the outer-Krylov adapter if requested (reuses the just-initialised multigrid solver as preconditioner).
+  if (m_krylovSettings.usesKrylov()) {
+    m_multigridSolver->setBottomSolver(finestLevel, 0);
+
+    Vector<DisjointBoxLayout> grids  = m_amr->getGrids(m_realm);
+    Vector<int>               refRat = m_amr->getRefinementRatios();
+    Vector<Real>              dxScal = m_amr->getDx();
+
+    grids.resize(1 + finestLevel);
+    refRat.resize(1 + finestLevel);
+    dxScal.resize(1 + finestLevel);
+
+    m_krylov.define(&(*m_multigridSolver),
+                    m_amr->getValidCells(m_realm),
+                    dxScal,
+                    0,
+                    finestLevel,
+                    m_krylovSettings.numVCycles);
+  }
 }
 
 void

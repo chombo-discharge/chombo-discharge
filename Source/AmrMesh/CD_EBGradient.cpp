@@ -239,7 +239,7 @@ EBGradient::computeNormalDerivative(LevelData<EBFluxFAB>& a_gradient, const Leve
       const IntVect shift = BASISV(dir);
 
       auto regularFaceDerivative = [&](const IntVect& iv) -> void {
-        regGradient(iv, dir) = idx * regPhi(iv, m_comp) - regPhi(iv - shift, m_comp);
+        regGradient(iv, dir) = idx * (regPhi(iv, m_comp) - regPhi(iv - shift, m_comp));
       };
 
       // Cut-cell version of the above.
@@ -693,12 +693,20 @@ EBGradient::defineStencilsEBCF(const LevelData<FArrayBox>& a_coarMaskInvalid) no
     DenseIntVectSet validRegionCoar(grownBox, true);
     DenseIntVectSet validRegionFine(grownBoxFine, false);
 
+    // The fine data is supplied to computeAMRGradient through a refined-coarse holder that carries only m_ghostVector
+    // ghost cells, so the two-level stencils may only reference fine cells within that reach of this patch. Restrict
+    // the fine valid region accordingly. Without this, for m_refRat > m_ghostVector the stencil reaches fine cells the
+    // holder never allocates/fills (the refined-coarse EBISL only carries m_ghostVector ghosts), producing garbage
+    // gradients at EBCF cells abutting a box boundary. For m_refRat == m_ghostVector (e.g. refRat = 2 with the default
+    // two ghost cells) fineDataBox == grownBoxFine, so this changes nothing.
+    const Box fineDataBox = grow(refine(cellBox, m_refRat), m_ghostVector) & grownBoxFine;
+
     // Not auto-vectorizable: this is a one-time setup loop with a data-dependent branch and
     // DenseIntVectSet modification.
     auto regularKernel = [&](const IntVect& iv) -> void {
       if (coarMaskInvalid(iv, m_comp) > 0.0) {
         validRegionCoar -= iv;
-        validRegionFine |= refine(Box(iv, iv), m_refRat);
+        validRegionFine |= refine(Box(iv, iv), m_refRat) & fineDataBox;
       }
     };
 
@@ -993,8 +1001,19 @@ EBGradient::getLeastSquaresStencil(VoFStencil&            a_stencilCoar,
     }
     knownTerms |= IntVect::Zero;
 
-    const std::map<IntVect, std::pair<VoFStencil, VoFStencil>> stencils = LeastSquares::computeDualLevelStencils<
-      float>(derivTerms, knownTerms, fineVoFs, coarVoFs, fineDisplacements, coarDisplacements, a_weight, a_order);
+    // Returns a std::map<IntVect, std::pair<VoFStencil, VoFStencil>>. Solved in double precision (Real): the
+    // dual-level system mixes coarse (dx) and fine (dx/refRat) displacements, so the order-2 columns span a wide
+    // magnitude range (~refRat^2), and a single-precision pseudo-inverse can return poor stencil weights at the
+    // awkward EBCF cut-cells. Matches the dual-level interpolator in EBLeastSquaresMultigridInterpolator.
+    const auto stencils = LeastSquares::computeDualLevelStencils<Real>(derivTerms,
+                                                                       knownTerms,
+                                                                       fineVoFs,
+                                                                       coarVoFs,
+                                                                       fineDisplacements,
+                                                                       coarDisplacements,
+                                                                       a_weight,
+                                                                       a_order);
+
     // LeastSquares returns a map over all derivatives (unknowns) in the Taylor series. These are stored
     // as IntVects so that IntVect(1,1) = d^2/(dxdy) and so on. We are after IntVect(1,0) = d/dx, IntVect(0,1) = d/dy. We fetch
     // those and place them in a_stencilFine and a_stencilCoar. We encode the direction in the stencil variable (in a_stencilFine) and

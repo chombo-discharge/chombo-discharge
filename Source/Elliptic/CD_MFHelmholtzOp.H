@@ -51,6 +51,8 @@ public:
     PointJacobi,
     GauSaiRedBlack,
     GauSaiMultiColor,
+    Chebyshev,
+    RestrictedAdditiveSchwarz,
   };
 
   /**
@@ -99,6 +101,10 @@ public:
     @param[in] a_jumpOrder     Stencil order to use on jump cells
     @param[in] a_relaxType     Which smoother to use
     @param[in] a_relaxFactor   Relaxation factor
+    @param[in] a_chebyOrder    Chebyshev polynomial degree (only used when a_relaxType is Smoother::Chebyshev)
+    @param[in] a_chebyEigRatio Chebyshev eigenvalue ratio lambda_max/lambda_min (only used when a_relaxType is Smoother::Chebyshev)
+    @param[in] a_rasInnerSweeps Number of inner frozen-ghost sweeps per restricted-additive-Schwarz iteration (only used when a_relaxType is Smoother::RestrictedAdditiveSchwarz)
+    @param[in] a_refluxFree    If true, use the reflux-free AMR operator (skips coarse-fine flux refluxing)
     @param[in] a_ghostPhi Description
     @param[in] a_ghostRhs Description
     @param[in] a_jumpWeight Description
@@ -136,7 +142,11 @@ public:
                 const int&                                       a_jumpWeight,
                 const int&                                       a_preCondSmooth,
                 const Smoother&                                  a_relaxType,
-                const Real&                                      a_relaxFactor);
+                const Real&                                      a_relaxFactor,
+                const int&                                       a_chebyOrder,
+                const Real&                                      a_chebyEigRatio,
+                const int&                                       a_rasInnerSweeps,
+                const bool                                       a_refluxFree = false);
 
   /**
     @brief Destructor. 
@@ -333,6 +343,29 @@ public:
   relaxGSMultiColor(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellFAB>& a_residual, const int a_iterations);
 
   /**
+    @brief Chebyshev polynomial smoother.
+    @param[in,out] a_correction Correction
+    @param[in]    a_residual   Residual
+    @param[in]    a_iterations Number of iterations
+  */
+  void
+  relaxChebyshev(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellFAB>& a_residual, const int a_iterations);
+
+  /**
+    @brief Restricted additive Schwarz smoother (block smoother).
+    @details Exchanges ghost cells once per outer iteration and then performs a number of frozen-ghost
+             red-black sweeps per patch (inexact local Dirichlet solve). The block (inner-sweep) count is
+             taken from the first phase operator.
+    @param[in,out] a_correction Correction
+    @param[in]    a_residual   Residual
+    @param[in]    a_iterations Number of outer Schwarz iterations
+  */
+  void
+  relaxRestrictedAdditiveSchwarz(LevelData<MFCellFAB>&       a_correction,
+                                 const LevelData<MFCellFAB>& a_residual,
+                                 const int                   a_iterations);
+
+  /**
     @brief Create method
     @param[out] a_lhs Clone
     @param[out] a_rhs Original data
@@ -375,6 +408,30 @@ public:
   */
   Real
   dotProduct(const LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs) override final;
+
+  /**
+    @brief Rank-local (un-reduced) partials for the masked AMR-composite Krylov inner product (summed over phases).
+    @details Same kappa-weighted inner product as dotProduct (summed over all phases), except cells where a_mask is
+             false (e.g. cells covered by a finer AMR level) are excluded from the numerator; the volume
+             normalisation counts all valid cells, matching Chombo's MultilevelLinearOp AMR dot product. The mask is
+             per-cell and shared across phases. Unlike dotProduct this performs NO MPI reduction: it returns the
+             rank-local partial sums so the caller (AMRMultigridKrylovOp) can batch the per-level partials into a
+             single MPI_Allreduce. The volume is geometry-only and is reduced/cached once by the caller, so
+             a_needVolume can be set false on later calls to skip recomputing it.
+    @param[out] a_sumKappaXY Rank-local masked numerator (sum of kappa*X*Y over unmasked cells, both phases)
+    @param[out] a_sumVolume  Rank-local volume (sum over all valid cells); set to zero when a_needVolume is false
+    @param[in]  a_lhs        First operand
+    @param[in]  a_rhs        Second operand
+    @param[in]  a_mask       Per-cell mask; false marks cells excluded from the numerator
+    @param[in]  a_needVolume If false, skip accumulating a_sumVolume (caller already cached it)
+  */
+  void
+  dotProductMaskedLocal(Real&                           a_sumKappaXY,
+                        Real&                           a_sumVolume,
+                        const LevelData<MFCellFAB>&     a_lhs,
+                        const LevelData<MFCellFAB>&     a_rhs,
+                        const LevelData<BaseFab<bool>>& a_mask,
+                        const bool                      a_needVolume) const noexcept;
 
   /**
     @brief Scale function

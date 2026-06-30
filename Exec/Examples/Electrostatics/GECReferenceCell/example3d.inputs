@@ -11,8 +11,8 @@ AmrMesh.fill_ratio           = 1.0                      ## Fill ratio for grid g
 AmrMesh.buffer_size          = 2                        ## Number of cells between grid levels
 AmrMesh.grid_algorithm       = tiled                    ## Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
 AmrMesh.box_sorting          = morton                   ## 'none', 'shuffle', 'morton'
-AmrMesh.min_block_size       = 16                       ## Blocking factor.
-AmrMesh.max_block_size       = 16                       ## Maximum allowed box size
+AmrMesh.min_block_size       = 4                        ## Blocking factor.
+AmrMesh.max_block_size       = 32                       ## Maximum allowed box size
 AmrMesh.max_ebis_box         = 16                       ## Maximum allowed box size for EBIS generation.
 AmrMesh.ref_rat              = 2 2 2 2 2 2              ## Refinement ratios (mixed ratios are allowed).
 AmrMesh.num_ghost            = 2                        ## Number of ghost cells.
@@ -76,28 +76,36 @@ FieldSolverGMG.kappa_source          = true           ## Volume weighted space c
 FieldSolverGMG.filter_rho            = 0              ## Number of filterings of space charge before Poisson solve
 FieldSolverGMG.filter_potential      = 0              ## Number of filterings of potential after Poisson solve
 
-FieldSolverGMG.gmg_verbosity                = 10           ## GMG verbosity
-FieldSolverGMG.gmg_use_default_settings     = false        ## Use default multigrid settings or not (see documentation)
-FieldSolverGMG.gmg_pre_smooth               = 24           ## Number of relaxations in downsweep
-FieldSolverGMG.gmg_post_smooth              = 24           ## Number of relaxations in upsweep
-FieldSolverGMG.gmg_bott_smooth              = 24           ## Number of at bottom level (before dropping to bottom solver)
-FieldSolverGMG.gmg_precond_smooth           = 4            ## Number of smoothing steps in the preconditioner
-FieldSolverGMG.gmg_min_iter                 = 5            ## Minimum number of iterations
-FieldSolverGMG.gmg_max_iter                 = 32           ## Maximum number of iterations
-FieldSolverGMG.gmg_exit_tol                 = 1.E-10       ## Residue tolerance
-FieldSolverGMG.gmg_exit_hang                = 0.2          ## Solver hang
-FieldSolverGMG.gmg_min_cells                = 16           ## Bottom drop
-FieldSolverGMG.gmg_drop_order               = 0            ## Drop stencil order to 1 if domain is coarser than this.
-FieldSolverGMG.gmg_bc_order                 = 2            ## Boundary condition order for multigrid
-FieldSolverGMG.gmg_bc_weight                = 4            ## Boundary condition weights (for least squares)
-FieldSolverGMG.gmg_jump_order               = 1            ## Boundary condition order for jump conditions
-FieldSolverGMG.gmg_jump_weight              = 4            ## Boundary condition weight for jump conditions (for least squares)
-FieldSolverGMG.gmg_reduce_order             = true         ## If true, always use order=1 EB stencils in coarsened cells
-FieldSolverGMG.gmg_bottom_solver            = simple 32    ## Bottom solver type. 'simple', 'bicgstab', or 'gmres'
-FieldSolverGMG.gmg_bottom_verbosity         = -1           ## Bottom solver verbosity.
-FieldSolverGMG.gmg_cycle                    = vcycle       ## Cycle type. Only 'vcycle' supported for now.
-FieldSolverGMG.gmg_smoother                 = red_black    ## Relaxation type. 'jacobi', 'multi_color', or 'red_black'
-FieldSolverGMG.gmg_relax_factor             = 1.0          ## Adjustable SOR factor
+FieldSolverGMG.solver                       = gmg bicgstab gmres    ## Solver(s), tried in order. 'gmg', 'gmres', 'bicgstab'. List = fallback chain
+FieldSolverGMG.krylov_eps                   = 1.E-10                ## Outer Krylov relative residual tolerance (gmres/bicgstab)
+FieldSolverGMG.krylov_max_iter              = 50                    ## Outer Krylov max iterations (gmres/bicgstab)
+FieldSolverGMG.krylov_restart               = 30                    ## GMRES restart length (gmres only)
+FieldSolverGMG.krylov_vcycles               = 1                     ## V-cycles per Krylov preconditioner application
+FieldSolverGMG.krylov_retry_interval        = 1                     ## Re-probe GMG every N solves while latched to the Krylov fallback (1 = always retry GMG first)
+FieldSolverGMG.krylov_reprobe_iters         = 0                     ## Re-probe GMG early when the Krylov fallback converges in <= this many iterations (0 = disabled)
+FieldSolverGMG.gmg_verbosity                = 10                    ## GMG verbosity
+FieldSolverGMG.gmg_use_default_settings     = false                 ## Use default multigrid settings or not (see documentation)
+FieldSolverGMG.gmg_pre_smooth               = 12                    ## Number of relaxations in downsweep
+FieldSolverGMG.gmg_post_smooth              = 12                    ## Number of relaxations in upsweep
+FieldSolverGMG.gmg_bott_smooth              = 12                    ## Number of at bottom level (before dropping to bottom solver)
+FieldSolverGMG.gmg_precond_smooth           = 4                     ## Number of smoothing steps in the preconditioner
+FieldSolverGMG.gmg_min_iter                 = 5                     ## Minimum number of iterations
+FieldSolverGMG.gmg_max_iter                 = 32                    ## Maximum number of iterations
+FieldSolverGMG.gmg_exit_tol                 = 1.E-10                ## Residue tolerance
+FieldSolverGMG.gmg_exit_hang                = 0.2                   ## Solver hang
+FieldSolverGMG.gmg_min_cells                = 16                    ## Bottom drop
+FieldSolverGMG.gmg_drop_order               = 0                     ## Drop stencil order to 1 if domain is coarser than this.
+FieldSolverGMG.gmg_bc_order                 = 2                     ## Boundary condition order for multigrid
+FieldSolverGMG.gmg_bc_weight                = 4                     ## Boundary condition weights (for least squares)
+FieldSolverGMG.gmg_jump_order               = 1                     ## Boundary condition order for jump conditions
+FieldSolverGMG.gmg_jump_weight              = 4                     ## Boundary condition weight for jump conditions (for least squares)
+FieldSolverGMG.gmg_reduce_order             = true                  ## If true, always use order=1 EB stencils in coarsened cells
+FieldSolverGMG.gmg_bottom_solver            = simple 32             ## Bottom solver type. 'simple', 'bicgstab', or 'gmres'
+FieldSolverGMG.gmg_bottom_verbosity         = -1                    ## Bottom solver verbosity.
+FieldSolverGMG.gmg_cycle                    = vcycle                ## Cycle type. Only 'vcycle' supported for now.
+FieldSolverGMG.gmg_smoother                 = red_black             ## Relaxation type. 'jacobi', 'multi_color', or 'red_black'
+FieldSolverGMG.gmg_relax_factor             = 1.0                   ## Adjustable SOR factor
+FieldSolverGMG.gmg_reflux_free              = false                 ## If true, use reflux-free AMR operator
 
 # ====================================================================================================
 # SurfaceODESolver solver settings.

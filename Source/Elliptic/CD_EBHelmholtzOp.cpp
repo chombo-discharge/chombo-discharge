@@ -11,6 +11,10 @@
   @todo   Once performance and stability has settled down, remove the debug code in applyOpIrregular
 */
 
+// Std includes
+#include <cmath>
+#include <vector>
+
 // Chombo includes
 #include <ParmParse.H>
 #include <EBCellFactory.H>
@@ -58,7 +62,11 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
                              const IntVect&                                   a_ghostPhi,
                              const IntVect&                                   a_ghostRhs,
                              const Smoother&                                  a_smoother,
-                             const Real&                                      a_relaxFactor)
+                             const Real&                                      a_relaxFactor,
+                             const int&                                       a_chebyOrder,
+                             const Real&                                      a_chebyEigRatio,
+                             const int&                                       a_rasInnerSweeps,
+                             const bool                                       a_refluxFree)
   : LevelTGAHelmOp<LevelData<EBCellFAB>, EBFluxFAB>(false), // Time-independent
     m_smoother(a_smoother),
     m_dataLocation(a_dataLocation),
@@ -102,11 +110,15 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
   m_doInterpCF       = true;
   m_doCoarsen        = true;
   m_doExchange       = true;
-  m_refluxFree       = false;
+  m_refluxFree       = a_refluxFree;
   m_profile          = false;
   m_interval         = Interval(m_comp, m_comp);
   m_relaxFactor      = a_relaxFactor;
   m_numSmoothPreCond = 10;
+  m_chebyOrder       = a_chebyOrder;
+  m_chebyEigRatio    = a_chebyEigRatio;
+  m_spectralRadius   = 2.0;
+  m_rasInnerSweeps   = a_rasInnerSweeps;
 
   ParmParse pp("EBHelmholtzOp");
   pp.query("reflux_free", m_refluxFree);
@@ -276,6 +288,30 @@ EBHelmholtzOp::getRelaxationCoeff() const noexcept
   CH_TIME("EBHelmholtzOp::getRelaxationCoeff");
 
   return m_relCoef;
+}
+
+int
+EBHelmholtzOp::getChebyOrder() const noexcept
+{
+  return m_chebyOrder;
+}
+
+Real
+EBHelmholtzOp::getChebyEigRatio() const noexcept
+{
+  return m_chebyEigRatio;
+}
+
+Real
+EBHelmholtzOp::getSpectralRadius() const noexcept
+{
+  return m_spectralRadius;
+}
+
+int
+EBHelmholtzOp::getRasInnerSweeps() const noexcept
+{
+  return m_rasInnerSweeps;
 }
 
 LayoutData<VoFIterator>&
@@ -506,6 +542,7 @@ EBHelmholtzOp::defineStencils()
   // Compute relaxation weights.
   this->computeDiagWeight();
   this->computeRelaxationCoefficient();
+  this->computeSpectralRadius();
   this->makeAggStencil();
 }
 
@@ -520,6 +557,7 @@ EBHelmholtzOp::setAlphaAndBeta(const Real& a_alpha, const Real& a_beta)
   // When we change alpha and beta we need to recompute relaxation coefficients...
   this->computeDiagWeight();
   this->computeRelaxationCoefficient();
+  this->computeSpectralRadius();
   this->makeAggStencil();
 }
 
@@ -618,7 +656,7 @@ EBHelmholtzOp::dotProduct(const LevelData<EBCellFAB>& a_lhs, const LevelData<EBC
     auto irregularKernel = [&](const VolIndex& vof) -> void {
       const Real kappa = ebisbox.volFrac(vof);
 
-      sumKappaXY += (kappa * X(vof, 0)) * (kappa * Y(vof, 0));
+      sumKappaXY += kappa * X(vof, 0) * Y(vof, 0);
       sumVolume += kappa;
     };
 
@@ -647,6 +685,83 @@ EBHelmholtzOp::dotProduct(const LevelData<EBCellFAB>& a_lhs, const LevelData<EBC
   }
 
   return dotProd;
+}
+
+void
+EBHelmholtzOp::dotProductMaskedLocal(Real&                           a_sumKappaXY,
+                                     Real&                           a_sumVolume,
+                                     const LevelData<EBCellFAB>&     a_lhs,
+                                     const LevelData<EBCellFAB>&     a_rhs,
+                                     const LevelData<BaseFab<bool>>& a_mask,
+                                     const bool                      a_needVolume) const noexcept
+{
+  CH_TIME("EBHelmholtzOp::dotProductMaskedLocal");
+
+  // TLDR: Rank-local (un-reduced) partials for the masked AMR inner product. The caller (AMRMultigridKrylovOp)
+  //       batches the per-level partials into a single MPI reduction; the volume is geometry-only and is reduced/
+  //       cached once, so a_needVolume can be set false on subsequent calls to skip recomputing it.
+
+  const DisjointBoxLayout& dbl  = a_lhs.disjointBoxLayout();
+  const DataIterator&      dit  = dbl.dataIterator();
+  const int                nbox = dit.size();
+
+  Real sumKappaXY = 0.0;
+  Real sumVolume  = 0.0;
+
+#pragma omp parallel for schedule(runtime) reduction(+ : sumKappaXY, sumVolume)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din     = dit[mybox];
+    const Box        cellBox = dbl[din];
+
+    const EBCellFAB&     X    = a_lhs[din];
+    const EBCellFAB&     Y    = a_rhs[din];
+    const BaseFab<bool>& mask = a_mask[din];
+
+    const FArrayBox& regX = X.getFArrayBox();
+    const FArrayBox& regY = Y.getFArrayBox();
+
+    const EBISBox& ebisbox = X.getEBISBox();
+
+    // Cells masked out (covered by a finer level) are kept in the volume normalisation but excluded from the
+    // numerator -- this matches Chombo's MultilevelLinearOp, which zeroes covered data before the per-level dot.
+    auto regularKernel = [&](const IntVect& iv) -> void {
+      if (ebisbox.isRegular(iv)) {
+        if (a_needVolume) {
+          sumVolume += 1.0;
+        }
+        if (mask(iv, 0)) {
+          sumKappaXY += regX(iv, 0) * regY(iv, 0);
+        }
+      }
+    };
+
+    auto irregularKernel = [&](const VolIndex& vof) -> void {
+      const IntVect& iv    = vof.gridIndex();
+      const Real     kappa = ebisbox.volFrac(vof);
+
+      if (a_needVolume) {
+        sumVolume += kappa;
+      }
+      if (mask(iv, 0)) {
+        sumKappaXY += kappa * X(vof, 0) * Y(vof, 0);
+      }
+    };
+
+    const bool isCovered   = ebisbox.isAllCovered();
+    const bool isRegular   = ebisbox.isAllRegular();
+    const bool isIrregular = !isCovered && !isRegular;
+
+    if (isIrregular) {
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
+      BoxLoops::loop(m_vofIterIrreg[din], irregularKernel);
+    }
+    else if (isRegular) {
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
+    }
+  }
+
+  a_sumKappaXY = sumKappaXY;
+  a_sumVolume  = sumVolume;
 }
 
 void
@@ -926,7 +1041,7 @@ EBHelmholtzOp::refluxFreeAMROperator(LevelData<EBCellFAB>&             a_Lphi,
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
-    this->fillDomainFlux((*m_flux)[din], a_phi[din], dbl[din], din);
+    this->fillDomainFlux((*m_flux)[din], a_phi[din], dbl[din], din, a_homogeneousPhysBC);
   }
 
   // The above calls replaced the fluxes on this level by (conservative) averages of the fluxes on
@@ -1395,9 +1510,10 @@ void
 EBHelmholtzOp::fillDomainFlux(EBFluxFAB&       a_flux,
                               const EBCellFAB& a_phi,
                               const Box& /*a_cellBox*/,
-                              const DataIndex& a_dit)
+                              const DataIndex& a_dit,
+                              const bool       a_homogeneousPhysBC)
 {
-  CH_TIME("EBHelmholtzOp::fillDomainFlux(EBFluxFAB, EBCellFAB, Box, DataIndex)");
+  CH_TIME("EBHelmholtzOp::fillDomainFlux(EBFluxFAB, EBCellFAB, Box, DataIndex, bool)");
 
   // TLDR: We compute the flux on the domain edges and store it in a cell-centered box. We then monkey with the ghost cells outside
   //       the domain so that centered differences on the edge cells inject said flux. This is a simple trick for enforcing the flux
@@ -1424,7 +1540,7 @@ EBHelmholtzOp::fillDomainFlux(EBFluxFAB&       a_flux,
       // Fill the domain flux. This might look weird because we are putting the flux in a cell-centered box. By this, we implicitly
       // understand that the flux that is stored in the box is the flux that comes in through the lo side in the coordinate direction we are looking.
       FArrayBox faceFlux(loBox, m_nComp);
-      m_domainBc->getFaceFlux(faceFlux, phiReg, bco, dir, Side::Lo, a_dit, false);
+      m_domainBc->getFaceFlux(faceFlux, phiReg, bco, dir, Side::Lo, a_dit, a_homogeneousPhysBC);
 
       // Copy flux over to the input data holder and multiply by beta.
       auto kernel = [&](const IntVect& iv) -> void {
@@ -1438,7 +1554,7 @@ EBHelmholtzOp::fillDomainFlux(EBFluxFAB&       a_flux,
       // Fill the domain flux. This might look weird because we are putting the flux in a cell-centered box. By this, we implicitly
       // understand that the flux that is stored in the box is the flux that comes in through the lo side in the coordinate direction we are looking.
       FArrayBox faceFlux(hiBox, m_nComp);
-      m_domainBc->getFaceFlux(faceFlux, phiReg, bco, dir, Side::Hi, a_dit, false);
+      m_domainBc->getFaceFlux(faceFlux, phiReg, bco, dir, Side::Hi, a_dit, a_homogeneousPhysBC);
 
       // Copy flux over to the input data holder and multiply by beta.
       auto kernel = [&](const IntVect& iv) -> void {
@@ -1677,6 +1793,16 @@ EBHelmholtzOp::relax(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellF
 
     break;
   }
+  case Smoother::Chebyshev: {
+    this->relaxChebyshev(a_correction, a_residual, a_iterations);
+
+    break;
+  }
+  case Smoother::RestrictedAdditiveSchwarz: {
+    this->relaxRestrictedAdditiveSchwarz(a_correction, a_residual, a_iterations);
+
+    break;
+  }
   default: {
     MayDay::Error("EBHelmholtzOp::relax - bogus relaxation method requested");
 
@@ -1751,6 +1877,90 @@ EBHelmholtzOp::pointJacobiKernel(EBCellFAB&             a_Lcorr,
 }
 
 void
+EBHelmholtzOp::chebyshevKernel(EBCellFAB&             a_Lcorr,
+                               EBCellFAB&             a_corr,
+                               const EBCellFAB&       a_resid,
+                               const EBCellFAB&       a_Acoef,
+                               const EBFluxFAB&       a_Bcoef,
+                               const BaseIVFAB<Real>& a_BcoefIrreg,
+                               const Box&             a_cellBox,
+                               const DataIndex&       a_dit,
+                               const Real             a_omega) const noexcept
+{
+  CH_TIME("EBHelmholtzOp::chebyshevKernel");
+
+  const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
+
+  if (!ebisbox.isAllCovered()) {
+    this->applyOp(a_Lcorr, a_corr, a_Acoef, a_Bcoef, a_BcoefIrreg, a_cellBox, a_dit, true);
+
+    a_Lcorr -= a_resid;
+    a_Lcorr *= m_relCoef[a_dit];
+    a_Lcorr *= a_omega;
+    a_corr -= a_Lcorr;
+  }
+}
+
+void
+EBHelmholtzOp::relaxChebyshev(LevelData<EBCellFAB>&       a_correction,
+                              const LevelData<EBCellFAB>& a_residual,
+                              const int                   a_iterations)
+{
+  CH_TIME("EBHelmholtzOp::relaxChebyshev(LD<EBCellFAB>, LD<EBCellFAB>, int)");
+
+  // Chebyshev-Richardson polynomial smoother. Each outer iteration applies m_chebyOrder
+  // steps with step sizes omega_i chosen as the reciprocal Chebyshev nodes on
+  // [m_spectralRadius/m_chebyEigRatio, m_spectralRadius].
+  // m_spectralRadius is the Gershgorin upper bound on rho(D^{-1}A), computed at defineStencils time.
+
+  const Real lambdaMax = m_spectralRadius;
+  const Real lambdaMin = lambdaMax / m_chebyEigRatio;
+  const Real theta     = 0.5 * (lambdaMax + lambdaMin);
+  const Real delta     = 0.5 * (lambdaMax - lambdaMin);
+
+  // Precompute Chebyshev step sizes: omega_i = 1 / (theta - delta*cos((2i+1)*pi/(2k))).
+  std::vector<Real> omega(m_chebyOrder);
+
+  for (int i = 0; i < m_chebyOrder; i++) {
+    const Real sigma = theta - delta * std::cos((2 * i + 1) * M_PI / (2 * m_chebyOrder));
+    omega[i]         = 1.0 / sigma;
+  }
+
+  LevelData<EBCellFAB> Lcorr;
+
+  this->create(Lcorr, a_residual);
+
+  const DisjointBoxLayout& dbl  = m_eblg.getDBL();
+  const DataIterator&      dit  = dbl.dataIterator();
+  const int                nbox = dit.size();
+
+  for (int iter = 0; iter < a_iterations; iter++) {
+    for (int i = 0; i < m_chebyOrder; i++) {
+      if (m_doExchange) {
+        a_correction.exchange(m_exchangeCopier);
+      }
+
+      this->homogeneousCFInterp(a_correction);
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        this->chebyshevKernel(Lcorr[din],
+                              a_correction[din],
+                              a_residual[din],
+                              (*m_Acoef)[din],
+                              (*m_Bcoef)[din],
+                              (*m_BcoefIrreg)[din],
+                              dbl[din],
+                              din,
+                              omega[i]);
+      }
+    }
+  }
+}
+
+void
 EBHelmholtzOp::relaxGSRedBlack(LevelData<EBCellFAB>&       a_correction,
                                const LevelData<EBCellFAB>& a_residual,
                                const int                   a_iterations)
@@ -1792,6 +2002,57 @@ EBHelmholtzOp::relaxGSRedBlack(LevelData<EBCellFAB>&       a_correction,
                                    dbl[din],
                                    din,
                                    redBlack);
+      }
+    }
+  }
+}
+
+void
+EBHelmholtzOp::relaxRestrictedAdditiveSchwarz(LevelData<EBCellFAB>&       a_correction,
+                                              const LevelData<EBCellFAB>& a_residual,
+                                              const int                   a_iterations)
+{
+  CH_TIME("EBHelmholtzOp::relaxRestrictedAdditiveSchwarz(LD<EBCellFAB>, LD<EBCellFAB>, int)");
+
+  // TLDR: Restricted additive Schwarz (block) smoother. The blocks are the disjoint patches, each solved inexactly
+  //       with m_rasInnerSweeps frozen-ghost red-black sweeps. Ghost cells are filled ONCE per outer iteration and
+  //       all patches use the same frozen data (block Jacobi across patches). The update is automatically restricted
+  //       to the valid region. Amortising the halo exchange over the inner sweeps is what makes this cheaper per
+  //       multigrid cycle than point relaxation.
+
+  LevelData<EBCellFAB> Lcorr;
+
+  this->create(Lcorr, a_residual);
+
+  const DisjointBoxLayout& dbl  = m_eblg.getDBL();
+  const DataIterator&      dit  = dbl.dataIterator();
+  const int                nbox = dit.size();
+
+  for (int iter = 0; iter < a_iterations; iter++) {
+
+    // Fill ghost cells once per outer iteration -- they are then frozen during the inner block sweeps.
+    if (m_doExchange) {
+      a_correction.exchange(m_exchangeCopier);
+    }
+    this->homogeneousCFInterp(a_correction);
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      // Inexact local solve: m_rasInnerSweeps red-black sweeps with frozen ghosts.
+      for (int sweep = 0; sweep < m_rasInnerSweeps; sweep++) {
+        for (int redBlack = 0; redBlack <= 1; redBlack++) {
+          this->gauSaiRedBlackKernel(Lcorr[din],
+                                     a_correction[din],
+                                     a_residual[din],
+                                     (*m_Acoef)[din],
+                                     (*m_Bcoef)[din],
+                                     (*m_BcoefIrreg)[din],
+                                     dbl[din],
+                                     din,
+                                     redBlack);
+        }
       }
     }
   }
@@ -2016,12 +2277,14 @@ EBHelmholtzOp::computeDiagWeight()
           const Box sidebox = m_sideBox.at(std::make_pair(dir, sit()));
 
           if (sidebox.contains(iv)) {
+            const Real bcWeight = m_domainBc->getDiagWeight(dir, sit());
+
             Real              weightedAreaFrac = 0.0;
             Vector<FaceIndex> faces            = ebisbox.getFaces(vof, dir, sit());
             for (auto& f : faces.stdVector()) {
               weightedAreaFrac += ebisbox.areaFrac(f) * (*m_Bcoef)[din][dir](f, m_comp) / (m_dx * m_dx);
             }
-            betaWeight += -weightedAreaFrac;
+            betaWeight += -bcWeight * weightedAreaFrac;
           }
         }
       }
@@ -2094,6 +2357,55 @@ EBHelmholtzOp::computeRelaxationCoefficient()
 
     BoxLoops::loop(m_vofIterStenc[din], irregularKernel);
   }
+}
+
+void
+EBHelmholtzOp::computeSpectralRadius()
+{
+  CH_TIME("EBHelmholtzOp::computeSpectralRadius()");
+
+  // Gershgorin bound on rho(D^{-1}A) for cell i:
+  //   rho_i = 1 + sum_{j!=i}|A_{ij}| / A_{ii}
+  //         = 2 - alpha * A_i / diag_i
+  //         = 2 - alpha * A_i * relCoef_i
+  // This equals 2 for pure Laplacian (alpha=0) and < 2 for Helmholtz (alpha>0).
+  // For irregular cells, alphaDiagWeight = kappa*A already accounts for the volume fraction.
+
+  const DisjointBoxLayout& dbl   = m_eblg.getDBL();
+  const EBISLayout&        ebisl = m_eblg.getEBISL();
+  const DataIterator&      dit   = dbl.dataIterator();
+
+  Real localMax = 0.0;
+
+  const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime) reduction(max : localMax)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din     = dit[mybox];
+    const EBISBox&   ebisbox = ebisl[din];
+    const Box&       cellBox = dbl[din];
+
+    const BaseFab<Real>& Aco = (*m_Acoef)[din].getSingleValuedFAB();
+    const BaseFab<Real>& rel = m_relCoef[din].getSingleValuedFAB();
+
+    // Regular cells: rho_i = 2 - alpha * Acoef_i * relCoef_i
+    auto regularKernel = [&](const IntVect& iv) {
+      if (ebisbox.isRegular(iv)) {
+        localMax = std::max(localMax, 2.0 - m_alpha * Aco(iv, m_comp) * rel(iv, m_comp));
+      }
+    };
+
+    // Irregular cells: alphaDiagWeight = kappa*A already absorbed in relCoef denominator
+    auto irregularKernel = [&](const VolIndex& vof) {
+      const Real rho = 2.0 - m_alpha * m_alphaDiagWeight[din](vof, m_comp) * m_relCoef[din](vof, m_comp);
+
+      localMax = std::max(localMax, rho);
+    };
+
+    BoxLoops::loop(cellBox, regularKernel);
+    BoxLoops::loop(m_vofIterStenc[din], irregularKernel);
+  }
+
+  m_spectralRadius = ParallelOps::max(localMax);
 }
 
 void

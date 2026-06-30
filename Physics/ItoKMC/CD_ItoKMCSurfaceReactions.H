@@ -83,7 +83,7 @@ namespace Physics {
 	@brief Get the discrete distribution used to randomly select a reaction pathway.
 	@return Discrete distribution weighted by the reaction efficiencies.
       */
-      inline std::discrete_distribution<size_t>&
+      inline std::discrete_distribution<int>&
       getDistribution() const noexcept;
 
     protected:
@@ -110,7 +110,7 @@ namespace Physics {
       /**
 	@brief Discrete distribution -- useful when drawing a reaction.
       */
-      mutable std::discrete_distribution<size_t> m_distribution;
+      mutable std::discrete_distribution<int> m_distribution;
     };
   } // namespace ItoKMC
 } // namespace Physics

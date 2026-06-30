@@ -594,13 +594,23 @@ Simple particle visualization can be performed by writing ``H5Part`` compatible 
 This is done through the function ``writeH5Part`` in the ``DischargeIO`` namespace, with the following signature:
 
 .. literalinclude:: ../../../../Source/Utilities/CD_DischargeIO.H
-   :lines: 176-183
+   :lines: 159-164
    :language: c++
    :dedent: 2
 
 This routine permits particles to be written (in parallel, when using MPI) into a file readable by VisIt.
-The container-owned position, id, and weight are written automatically.
-The ``a_scalarVars`` and ``a_vectorVars`` arguments are lists of ``(name, accessor)`` pairs, where each accessor is a callable ``(const ParticleSoA<P>&, std::size_t) -> Real`` (scalar) or ``-> RealVect`` (vector); this lets the caller name and select exactly which payload quantities to export (each vector dataset is written as ``name-x``/``name-y``/``name-z``).
+The container-owned ``id``, position, and ``weight`` are always written automatically.
+Which *payload* columns are exported is declared once, per particle type, through an optional ``h5PartColumns`` member of the ``ParticleTraits`` specialization.
+This descriptor co-locates each dataset name with the payload member pointer(s) it selects, so there is no positional coupling between names and accessors, and internal scratch columns are simply left out (opt-in).
+For example, ``ParticleTraits<ItoParticle>`` declares
+
+.. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoParticle.H
+   :lines: 81-90
+   :language: c++
+   :dedent: 2
+
+Each ``H5Part::Scalar`` descriptor becomes one dataset; each ``H5Part::Vector`` descriptor is written as ``name-x``/``name-y``/``name-z``.
+If a particle type declares no ``h5PartColumns`` (or an empty one), only ``id``, position, and ``weight`` are written.
 The argument ``a_shift`` will simply shift the particle positions in the output HDF5 file.
 
 .. _Chap:SuperParticles:

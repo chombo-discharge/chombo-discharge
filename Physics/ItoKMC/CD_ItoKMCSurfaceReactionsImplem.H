@@ -50,7 +50,7 @@ ItoKMCSurfaceReactions::add(const ItoKMCSurfaceReaction& a_surfaceReaction) noex
   m_products.emplace_back(a_surfaceReaction.getProducts());
   m_efficiencies.emplace_back(a_surfaceReaction.getEfficiency());
 
-  m_distribution = std::discrete_distribution<size_t>(std::begin(m_efficiencies), std::end(m_efficiencies));
+  m_distribution = std::discrete_distribution<int>(std::begin(m_efficiencies), std::end(m_efficiencies));
 
   m_isDefined = true;
 }
@@ -83,7 +83,7 @@ ItoKMCSurfaceReactions::getEfficiencies() const noexcept
   return m_efficiencies;
 }
 
-inline std::discrete_distribution<size_t>&
+inline std::discrete_distribution<int>&
 ItoKMCSurfaceReactions::getDistribution() const noexcept
 {
   return m_distribution;

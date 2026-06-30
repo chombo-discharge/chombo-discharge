@@ -13,10 +13,6 @@
 #ifndef CD_ITOPARTICLE_H
 #define CD_ITOPARTICLE_H
 
-// Std includes
-#include <string>
-#include <vector>
-
 // Our includes
 #include <CD_ParticleSoA.H>
 #include <CD_NamespaceHeader.H>
@@ -33,16 +29,6 @@
 */
 struct ItoParticle
 {
-  /**
-    @brief Naming convention for scalar fields (used by ItoKMC plotting).
-  */
-  static std::vector<std::string> s_realVariables;
-
-  /**
-    @brief Naming convention for vector fields (used by ItoKMC plotting).
-  */
-  static std::vector<std::string> s_vectVariables;
-
   ParticleReal mobility  = 0.0; ///< Mobility coefficient.
   ParticleReal diffusion = 0.0; ///< Diffusion coefficient.
   ParticleReal energy    = 0.0; ///< Average particle energy.
@@ -91,6 +77,17 @@ struct ParticleTraits<ItoParticle>
      @brief Subset of payload columns written to HDF5 checkpoints: the per-component velocity.
   */
   static constexpr auto h5Columns = std::make_tuple(D_DECL(&ItoParticle::vx, &ItoParticle::vy, &ItoParticle::vz));
+
+  /**
+     @brief Payload columns written to H5Part visualization files: the transport coefficients, the average
+            energy and the velocity vector (id, position and weight are written automatically; the scratch
+            and previous-position columns are internal and not plotted).
+  */
+  static constexpr auto h5PartColumns = std::make_tuple(
+    H5Part::Scalar{"mobility", &ItoParticle::mobility},
+    H5Part::Scalar{"diffusion", &ItoParticle::diffusion},
+    H5Part::Scalar{"energy", &ItoParticle::energy},
+    H5Part::Vector{"v", D_DECL(&ItoParticle::vx, &ItoParticle::vy, &ItoParticle::vz)});
 };
 
 #include <CD_NamespaceFooter.H>

@@ -123,6 +123,15 @@ public:
               const DataIndex&      a_dit,
               const bool            a_useHomogeneous) const override;
 
+  /**
+    @brief Returns 0.0: a Neumann BC prescribes the flux independently of phi, contributing nothing to the diagonal.
+    @param[in] a_dir  Coordinate direction.
+    @param[in] a_side High or low side.
+    @return 0.0
+  */
+  Real
+  getDiagWeight(const int a_dir, const Side::LoHiSide a_side) const override;
+
 protected:
   /**
     @brief Hook for multiplying by b-coefficient or not

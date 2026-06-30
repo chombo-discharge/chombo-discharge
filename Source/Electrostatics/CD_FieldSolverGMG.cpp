@@ -98,6 +98,8 @@ FieldSolverGMG::parseMultigridSettings()
 
   ParmParse pp(m_className.c_str());
 
+  m_multigridRefluxFree = false;
+
   std::string str;
   pp.get("gmg_verbosity", m_multigridVerbosity);
   pp.get("gmg_use_default_settings", m_multigridUseDefaultSettings);
@@ -118,6 +120,7 @@ FieldSolverGMG::parseMultigridSettings()
   pp.get("gmg_reduce_order", m_multigridDropOrder);
   pp.get("gmg_relax_factor", m_multigridRelaxFactor);
   pp.get("gmg_bottom_verbosity", m_multigridBottomSolverVerbosity);
+  pp.query("gmg_reflux_free", m_multigridRefluxFree);
 
   // Fetch the desired bottom solver from the input script. We look for things like FieldSolverGMG.gmg_bottom_solver = bicgstab or '= simple <number>'
   // where <number> is the number of relaxation for the smoothing solver.
@@ -153,8 +156,14 @@ FieldSolverGMG::parseMultigridSettings()
       "FieldSolverGMG::parseMultigridSettings() - logic bust in bottom solver. You must specify ' = bicgstab', ' = gmres', or ' = simple <number>'");
   }
 
-  // Get a string for the multigrid smoother. This must either be "jacobi", "red_black", or "multi_color".
-  pp.get("gmg_smoother", str);
+  // Get a string for the multigrid smoother. The Chebyshev smoother takes two extra arguments,
+  // i.e. 'gmg_smoother = chebyshev <order> <eig_ratio>', and the restricted additive Schwarz smoother takes one,
+  // i.e. 'gmg_smoother = ras <inner_sweeps>'.
+  m_multigridChebyOrder     = 3;
+  m_multigridChebyEigRatio  = 4.0;
+  m_multigridRasInnerSweeps = 2;
+
+  pp.get("gmg_smoother", str, 0);
   if (str == "jacobi") {
     m_multigridRelaxMethod = MFHelmholtzOp::Smoother::PointJacobi;
   }
@@ -163,6 +172,27 @@ FieldSolverGMG::parseMultigridSettings()
   }
   else if (str == "multi_color") {
     m_multigridRelaxMethod = MFHelmholtzOp::Smoother::GauSaiMultiColor;
+  }
+  else if (str == "chebyshev") {
+    m_multigridRelaxMethod = MFHelmholtzOp::Smoother::Chebyshev;
+
+    if (pp.countval("gmg_smoother") != 3) {
+      MayDay::Error(
+        "FieldSolverGMG::parseMultigridSettings() - the Chebyshev smoother requires 'gmg_smoother = chebyshev <order> <eig_ratio>'");
+    }
+
+    pp.get("gmg_smoother", m_multigridChebyOrder, 1);
+    pp.get("gmg_smoother", m_multigridChebyEigRatio, 2);
+  }
+  else if (str == "ras") {
+    m_multigridRelaxMethod = MFHelmholtzOp::Smoother::RestrictedAdditiveSchwarz;
+
+    if (pp.countval("gmg_smoother") != 2) {
+      MayDay::Error(
+        "FieldSolverGMG::parseMultigridSettings() - the restricted additive Schwarz smoother requires 'gmg_smoother = ras <inner_sweeps>'");
+    }
+
+    pp.get("gmg_smoother", m_multigridRasInnerSweeps, 1);
   }
   else {
     MayDay::Error("FieldSolverGMG::parseMultigridSettings() - unsupported relaxation method requested");
@@ -173,9 +203,12 @@ FieldSolverGMG::parseMultigridSettings()
   if (str == "vcycle") {
     m_multigridType = MultigridType::VCycle;
   }
+  else if (str == "wcycle") {
+    m_multigridType = MultigridType::WCycle;
+  }
   else {
     MayDay::Error(
-      "FieldSolverGMG::parseMultigridSettings - unsupported multigrid cycle type requested. Only vcycle supported for now. ");
+      "FieldSolverGMG::parseMultigridSettings - unsupported multigrid cycle type requested. Use 'vcycle' or 'wcycle'.");
   }
 
   // No lower than 2.
@@ -200,6 +233,38 @@ FieldSolverGMG::parseMultigridSettings()
     m_bottomSolverType       = BottomSolverType::Simple;
     m_mfsolver.setNumSmooths(40);
   }
+
+  // Outer solver path: 'solver' = gmg | gmres | bicgstab (a space-separated list is a fallback chain), plus the
+  // krylov_* settings. When the solver is not gmg, the gmg_* settings above configure the V-cycle that preconditions
+  // the outer Krylov solver. These are read here (mandatory, like the gmg_* keys) and passed to the Krylov driver.
+  const int numKrylovSolvers = pp.countval("solver");
+  if (numKrylovSolvers < 1) {
+    MayDay::Error("FieldSolverGMG::parseMultigridSettings - 'solver' must list at least one of 'gmg', 'gmres', "
+                  "'bicgstab'");
+  }
+
+  m_krylovSettings.solvers.resize(numKrylovSolvers);
+
+  for (int i = 0; i < numKrylovSolvers; i++) {
+    std::string solverStr;
+
+    pp.get("solver", solverStr, i);
+    m_krylovSettings.solvers[i] = EllipticSolverChain::toSolverType(solverStr);
+  }
+
+  pp.get("krylov_eps", m_krylovSettings.eps);
+  pp.get("krylov_max_iter", m_krylovSettings.maxIter);
+  pp.get("krylov_restart", m_krylovSettings.restart);
+  pp.get("krylov_vcycles", m_krylovSettings.numVCycles);
+
+  // Re-probe GMG every this many solves while latched onto the Krylov fallback (1 = always retry
+  // GMG first); larger values approach a permanent latch. State persists across regrids (see FallbackPolicy).
+  pp.get("krylov_retry_interval", m_fallbackPolicy.retryInterval);
+
+  // Adaptive early re-probe: if the Krylov fallback converges in <= this many iterations the V-cycle
+  // preconditioner is clearly strong, so re-probe GMG on the next solve. 0 disables it (only retry_interval applies).
+  pp.get("krylov_reprobe_iters", m_fallbackPolicy.reprobeIters);
+  m_krylovSettings.verbosity = m_multigridVerbosity; // The Krylov solvers reuse the gmg_verbosity setting.
 
   // Things won't run unless this is fulfilled.
   CH_assert(m_minCellsBottom >= 2);
@@ -234,6 +299,7 @@ FieldSolverGMG::parseJumpBC()
   }
   else {
     const std::string errorString = "FieldSolverGMG::parseJumpBC -- error, argument '" + str + "' not recognized";
+
     MayDay::Error(errorString.c_str());
   }
 }
@@ -335,15 +401,69 @@ FieldSolverGMG::solve(MFAMRCellData&       a_phi,
   // Convergence criterion.
   const Real convergedResid = zeroResid * m_multigridExitTolerance;
 
-  // If the residue rho - L(phi) is too large then we must get a new solution.
+  // If the residue rho - L(phi) is too large then we must get a new solution. The solver chain is tried in order
+  // (e.g. 'gmg gmres' tries stand-alone multigrid, then GMRES if it fails). A failed attempt is kept as the warm
+  // start for the next solver only if it reduced the residual below the initial residual (see keepOrRestore);
+  // otherwise the next solver restarts from the initial-residual solution.
   if (phiResid > convergedResid) {
-    m_multigridSolver->m_convergenceMetric = zeroResid;
-    m_multigridSolver->solveNoInitResid(phi, res, rhs, finestLevel, coarsestLevel, a_zeroPhi);
-
-    const int status = m_multigridSolver->m_exitStatus; // 1 => Initial norm sufficiently reduced
-    if (status == 1 || status == 8) {                   // 8 => Norm sufficiently small
-      converged = true;
+    // Begin the chain at the policy's preferred index: normally 0 (try GMG first), but the index of the first Krylov
+    // solver while latched onto the fallback (re-probing GMG only every krylov_retry_interval solves).
+    // Establish and snapshot the chain's starting solution (the "initial-residual solution"). Every fallback attempt
+    // starts from this same guess, except that a failed attempt which actually reduced the residual is kept as the
+    // warm start for the next solver (see keepOrRestore below).
+    if (a_zeroPhi) {
+      DataOps::setValue(a_phi, 0.0);
     }
+
+    const bool useChain = m_krylovSettings.solvers.size() > 1 && m_krylovSettings.usesKrylov();
+
+    if (useChain) {
+      m_krylov.snapshotGuess(phi, rhs);
+    }
+
+    const int startIdx = m_fallbackPolicy.startIndex(m_krylovSettings.solvers);
+
+    bool gmgAttempted = false;
+    bool gmgConverged = false;
+
+    for (int i = startIdx; i < m_krylovSettings.solvers.size() && !converged; i++) {
+      const EllipticSolverChain::SolverType solverType = m_krylovSettings.solvers[i];
+      const bool                            zeroPhi    = false; // phi already holds the starting solution
+
+      if (i > startIdx && m_krylovSettings.verbosity >= 1) {
+        pout() << "FieldSolverGMG::solve - '" << EllipticSolverChain::solverTypeName(m_krylovSettings.solvers[i - 1])
+               << "' did not converge; falling back to '" << EllipticSolverChain::solverTypeName(solverType) << "'"
+               << endl;
+      }
+
+      if (solverType == EllipticSolverChain::SolverType::GMG) {
+        m_multigridSolver->m_convergenceMetric = zeroResid;
+        m_multigridSolver->solveNoInitResid(phi, res, rhs, finestLevel, coarsestLevel, zeroPhi);
+
+        const int status = m_multigridSolver->m_exitStatus; // 1 => Initial norm sufficiently reduced
+
+        converged    = (status == 1 || status == 8); // 8 => Norm sufficiently small
+        gmgAttempted = true;
+        gmgConverged = converged;
+      }
+      else {
+        // Outer Krylov solve with the V-cycle as preconditioner (residual-correction form; the inhomogeneous BC
+        // contribution enters through the initial residual computed inside the driver).
+        converged = m_krylov.solve(phi, rhs, zeroPhi, solverType, m_krylovSettings);
+      }
+
+      // Warm-start rule: keep a failed attempt only if it reduced the residual below the chain's initial residual;
+      // otherwise revert to the initial-residual solution before trying the next solver.
+      if (!converged && useChain && i + 1 < m_krylovSettings.solvers.size()) {
+        m_krylov.keepOrRestore(phi, rhs);
+      }
+    }
+
+    m_fallbackPolicy.recordOutcome(gmgAttempted,
+                                   gmgConverged,
+                                   m_krylov.lastKrylovIterations(),
+                                   m_krylovSettings.verbosity,
+                                   "FieldSolverGMG::solve");
   }
   else {
     converged = true;
@@ -360,6 +480,7 @@ FieldSolverGMG::solve(MFAMRCellData&       a_phi,
   // If we are also solving for the saturation charge we get that solution from the factory (it can be a free parameter in the Helmholtz solve).
   if (m_jumpBcType == JumpBCType::SaturationCharge) {
     const EBAMRIVData& factorySigma = m_helmholtzOpFactory->getSigma();
+
     DataOps::copy(m_sigma, factorySigma);
     DataOps::scale(m_sigma, Units::eps0, m_amr->getVofIterator(m_realm, phase::gas));
 
@@ -731,11 +852,15 @@ FieldSolverGMG::setupHelmholtzFactory()
                              ghostRhs,
                              m_multigridRelaxMethod,
                              m_multigridRelaxFactor,
+                             m_multigridChebyOrder,
+                             m_multigridChebyEigRatio,
+                             m_multigridRasInnerSweeps,
                              bottomDomain,
                              m_multigridJumpOrder,
                              m_multigridJumpWeight,
                              m_multigridPreCondSmooth,
-                             m_amr->getMaxBlockSize()));
+                             m_amr->getMaxBlockSize(),
+                             m_multigridRefluxFree));
 }
 
 void
@@ -840,6 +965,27 @@ FieldSolverGMG::setupMultigrid()
 
   // Init the solver. This instantiates the all the operators in AMRMultiGrid so we can just call "solve"
   m_multigridSolver->init(phi, rhs, finestLevel, 0);
+
+  // If an outer Krylov solver is requested, set the bottom solver once (AMRVCycle needs it) and define the adapter
+  // that exposes the V-cycle as a preconditioner. Reuses the just-initialised multigrid solver and its operators.
+  if (m_krylovSettings.usesKrylov()) {
+    m_multigridSolver->setBottomSolver(finestLevel, 0);
+
+    Vector<DisjointBoxLayout> grids  = m_amr->getGrids(m_realm);
+    Vector<int>               refRat = m_amr->getRefinementRatios();
+    Vector<Real>              dxScal = m_amr->getDx();
+
+    grids.resize(1 + finestLevel);
+    refRat.resize(1 + finestLevel);
+    dxScal.resize(1 + finestLevel);
+
+    m_krylov.define(&(*m_multigridSolver),
+                    m_amr->getValidCells(m_realm),
+                    dxScal,
+                    0,
+                    finestLevel,
+                    m_krylovSettings.numVCycles);
+  }
 }
 
 Vector<long long>

@@ -203,4 +203,10 @@ EBHelmholtzNeumannDomainBC::getFaceFlux(const VolIndex& a_vof,
   return centroidFlux;
 }
 
+Real
+EBHelmholtzNeumannDomainBC::getDiagWeight(const int /*a_dir*/, const Side::LoHiSide /*a_side*/) const
+{
+  return 0.0;
+}
+
 #include <CD_NamespaceFooter.H>

@@ -12,6 +12,8 @@
 
 // Std includes
 #include <chrono>
+#include <cmath>
+#include <vector>
 
 // Chombo includes
 #include <ParmParse.H>
@@ -62,7 +64,11 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
                              const int&                                       a_jumpWeight,
                              const int&                                       a_preCondSmooth,
                              const Smoother&                                  a_relaxType,
-                             const Real&                                      a_relaxFactor)
+                             const Real&                                      a_relaxFactor,
+                             const int&                                       a_chebyOrder,
+                             const Real&                                      a_chebyEigRatio,
+                             const int&                                       a_rasInnerSweeps,
+                             const bool                                       a_refluxFree)
 {
   CH_TIME("MFHelmholtzOp::MFHelmholtzOp(...)");
 
@@ -175,6 +181,16 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
 
       break;
     }
+    case MFHelmholtzOp::Smoother::Chebyshev: {
+      ebHelmRelax = EBHelmholtzOp::Smoother::Chebyshev;
+
+      break;
+    }
+    case MFHelmholtzOp::Smoother::RestrictedAdditiveSchwarz: {
+      ebHelmRelax = EBHelmholtzOp::Smoother::RestrictedAdditiveSchwarz;
+
+      break;
+    }
     default: {
       MayDay::Error("MFHelmholtzOp::MFHelmholtzOp - unsupported relaxation method requested");
 
@@ -209,7 +225,11 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
                                                                                        a_ghostPhi,
                                                                                        a_ghostRhs,
                                                                                        ebHelmRelax,
-                                                                                       a_relaxFactor));
+                                                                                       a_relaxFactor,
+                                                                                       a_chebyOrder,
+                                                                                       a_chebyEigRatio,
+                                                                                       a_rasInnerSweeps,
+                                                                                       a_refluxFree));
 
     m_helmOps.insert({iphase, oper});
   }
@@ -462,7 +482,7 @@ MFHelmholtzOp::dotProduct(const LevelData<MFCellFAB>& a_lhs, const LevelData<MFC
       auto irregularKernel = [&](const VolIndex& vof) -> void {
         const Real kappa = ebisbox.volFrac(vof);
 
-        sumKappaXY += (kappa * X(vof, 0)) * (kappa * Y(vof, 0));
+        sumKappaXY += kappa * X(vof, 0) * Y(vof, 0);
         sumVolume += kappa;
       };
 
@@ -484,6 +504,81 @@ MFHelmholtzOp::dotProduct(const LevelData<MFCellFAB>& a_lhs, const LevelData<MFC
   }
 
   return dotProd;
+}
+
+void
+MFHelmholtzOp::dotProductMaskedLocal(Real&                           a_sumKappaXY,
+                                     Real&                           a_sumVolume,
+                                     const LevelData<MFCellFAB>&     a_lhs,
+                                     const LevelData<MFCellFAB>&     a_rhs,
+                                     const LevelData<BaseFab<bool>>& a_mask,
+                                     const bool                      a_needVolume) const noexcept
+{
+  CH_TIME("MFHelmholtzOp::dotProductMaskedLocal");
+
+  // TLDR: Rank-local (un-reduced) partials for the masked AMR inner product, summed over both phases. The caller
+  //       (AMRMultigridKrylovOp) batches the per-level partials into a single MPI reduction; the volume is
+  //       geometry-only and is reduced/cached once, so a_needVolume can be false on subsequent calls.
+
+  Real sumKappaXY = 0.0;
+  Real sumVolume  = 0.0;
+
+  const DisjointBoxLayout& dbl  = a_lhs.disjointBoxLayout();
+  const DataIterator&      dit  = dbl.dataIterator();
+  const int                nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime) reduction(+ : sumKappaXY, sumVolume)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din     = dit[mybox];
+    const Box        cellBox = dbl[din];
+    const MFCellFAB& lhs     = a_lhs[din];
+
+    const BaseFab<bool>& mask = a_mask[din];
+
+    // The cell mask is shared across phases. Masked cells (covered by a finer level) are kept in the volume
+    // normalisation but excluded from the numerator -- matching Chombo's MultilevelLinearOp convention.
+    for (int i = 0; i < lhs.numPhases(); i++) {
+      const EBCellFAB& X = a_lhs[din].getPhase(i);
+      const EBCellFAB& Y = a_rhs[din].getPhase(i);
+
+      const FArrayBox& regX = X.getFArrayBox();
+      const FArrayBox& regY = Y.getFArrayBox();
+
+      const EBISBox& ebisbox = X.getEBISBox();
+
+      auto regularKernel = [&](const IntVect& iv) -> void {
+        if (ebisbox.isRegular(iv)) {
+          if (a_needVolume) {
+            sumVolume += 1.0;
+          }
+          if (mask(iv, 0)) {
+            sumKappaXY += regX(iv, 0) * regY(iv, 0);
+          }
+        }
+      };
+
+      auto irregularKernel = [&](const VolIndex& vof) -> void {
+        const IntVect& iv    = vof.gridIndex();
+        const Real     kappa = ebisbox.volFrac(vof);
+
+        if (a_needVolume) {
+          sumVolume += kappa;
+        }
+        if (mask(iv, 0)) {
+          sumKappaXY += kappa * X(vof, 0) * Y(vof, 0);
+        }
+      };
+
+      const bool isCovered = ebisbox.isAllCovered();
+      if (!isCovered) {
+        BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
+        BoxLoops::loop(m_helmOps.at(i)->getVofIterIrreg()[din], irregularKernel);
+      }
+    }
+  }
+
+  a_sumKappaXY = sumKappaXY;
+  a_sumVolume  = sumVolume;
 }
 
 void
@@ -740,6 +835,16 @@ MFHelmholtzOp::relax(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellF
 
     break;
   }
+  case Smoother::Chebyshev: {
+    this->relaxChebyshev(a_correction, a_residual, a_iterations);
+
+    break;
+  }
+  case Smoother::RestrictedAdditiveSchwarz: {
+    this->relaxRestrictedAdditiveSchwarz(a_correction, a_residual, a_iterations);
+
+    break;
+  }
   default: {
     MayDay::Error("MFHelmholtzOp::relax - bogus relaxation method requested");
 
@@ -856,6 +961,68 @@ MFHelmholtzOp::relaxGSRedBlack(LevelData<MFCellFAB>&       a_correction,
 }
 
 void
+MFHelmholtzOp::relaxRestrictedAdditiveSchwarz(LevelData<MFCellFAB>&       a_correction,
+                                              const LevelData<MFCellFAB>& a_residual,
+                                              const int                   a_iterations)
+{
+  CH_TIME("MFHelmholtzOp::relaxRestrictedAdditiveSchwarz");
+
+  // TLDR: Restricted additive Schwarz (block) smoother. Ghost cells/jump BCs are filled ONCE per outer iteration,
+  //       then each patch performs a number of frozen-ghost red-black sweeps (inexact local Dirichlet solve). Across
+  //       patches the iteration is additive (block Jacobi). The inner-sweep count is taken from the first phase
+  //       operator.
+
+  LevelData<MFCellFAB> Lcorr;
+  this->create(Lcorr, a_correction);
+
+  const DisjointBoxLayout& dbl = m_mflg.getGrids();
+  const DataIterator&      dit = dbl.dataIterator();
+
+  const int nbox = dit.size();
+
+  constexpr bool homogeneousCFBC   = true;
+  constexpr bool homogeneousPhysBC = true;
+
+  int innerSweeps = 2;
+  if (!m_helmOps.empty()) {
+    innerSweeps = m_helmOps.begin()->second->getRasInnerSweeps();
+  }
+
+  for (int i = 0; i < a_iterations; i++) {
+
+    // Fill/interpolate ghost cells and match the BC once per outer iteration -- frozen during the inner block sweeps.
+    this->exchangeGhost(a_correction);
+    this->interpolateCF(a_correction, nullptr, homogeneousCFBC);
+    this->updateJumpBC(a_correction, homogeneousPhysBC);
+
+    // Inexact local solve on each patch.
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din     = dit[mybox];
+      const Box        cellBox = dbl[din];
+
+      for (int sweep = 0; sweep < innerSweeps; sweep++) {
+        for (int redBlack = 0; redBlack <= 1; redBlack++) {
+          for (auto& op : m_helmOps) {
+            const int iphase = op.first;
+
+            EBCellFAB&       Lph = Lcorr[din].getPhase(iphase);
+            EBCellFAB&       phi = a_correction[din].getPhase(iphase);
+            const EBCellFAB& res = a_residual[din].getPhase(iphase);
+
+            const EBCellFAB&       Acoef      = (*m_Acoef)[din].getPhase(iphase);
+            const EBFluxFAB&       Bcoef      = (*m_Bcoef)[din].getPhase(iphase);
+            const BaseIVFAB<Real>& BcoefIrreg = *(*m_BcoefIrreg)[din].getPhasePtr(iphase);
+
+            op.second->gauSaiRedBlackKernel(Lph, phi, res, Acoef, Bcoef, BcoefIrreg, cellBox, din, redBlack);
+          }
+        }
+      }
+    }
+  }
+}
+
+void
 MFHelmholtzOp::relaxGSMultiColor(LevelData<MFCellFAB>&       a_correction,
                                  const LevelData<MFCellFAB>& a_residual,
                                  const int                   a_iterations)
@@ -914,6 +1081,80 @@ MFHelmholtzOp::relaxGSMultiColor(LevelData<MFCellFAB>&       a_correction,
 }
 
 void
+MFHelmholtzOp::relaxChebyshev(LevelData<MFCellFAB>&       a_correction,
+                              const LevelData<MFCellFAB>& a_residual,
+                              const int                   a_iterations)
+{
+  CH_TIME("MFHelmholtzOp::relaxChebyshev");
+
+  // TLDR: Chebyshev-Richardson smoother; calls EBHelmholtzOp::chebyshevKernel per phase.
+  //       The Chebyshev step sizes are taken from the first phase's per-op settings.
+
+  // Fetch Chebyshev parameters from the first phase operator.
+  int  chebyOrder    = 3;
+  Real chebyEigRatio = 4.0;
+  Real lambdaMax     = 2.0;
+
+  if (!m_helmOps.empty()) {
+    chebyOrder    = m_helmOps.begin()->second->getChebyOrder();
+    chebyEigRatio = m_helmOps.begin()->second->getChebyEigRatio();
+    lambdaMax     = m_helmOps.begin()->second->getSpectralRadius();
+  }
+
+  const Real lambdaMin = lambdaMax / chebyEigRatio;
+  const Real theta     = 0.5 * (lambdaMax + lambdaMin);
+  const Real delta     = 0.5 * (lambdaMax - lambdaMin);
+
+  std::vector<Real> omega(chebyOrder);
+
+  for (int i = 0; i < chebyOrder; i++) {
+    const Real sigma = theta - delta * std::cos((2 * i + 1) * M_PI / (2 * chebyOrder));
+    omega[i]         = 1.0 / sigma;
+  }
+
+  LevelData<MFCellFAB> Lcorr;
+  this->create(Lcorr, a_correction);
+
+  const DisjointBoxLayout& dbl = m_mflg.getGrids();
+  const DataIterator&      dit = dbl.dataIterator();
+
+  const int nbox = dit.size();
+
+  constexpr bool homogeneousCFBC   = true;
+  constexpr bool homogeneousPhysBC = true;
+
+  for (int iter = 0; iter < a_iterations; iter++) {
+    for (int i = 0; i < chebyOrder; i++) {
+
+      this->exchangeGhost(a_correction);
+      this->interpolateCF(a_correction, nullptr, homogeneousCFBC);
+      this->updateJumpBC(a_correction, homogeneousPhysBC);
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        const Box cellBox = dbl[din];
+
+        for (auto& op : m_helmOps) {
+          const int iphase = op.first;
+
+          EBCellFAB&       Lph = Lcorr[din].getPhase(iphase);
+          EBCellFAB&       phi = a_correction[din].getPhase(iphase);
+          const EBCellFAB& res = a_residual[din].getPhase(iphase);
+
+          const EBCellFAB&       Acoef      = (*m_Acoef)[din].getPhase(iphase);
+          const EBFluxFAB&       Bcoef      = (*m_Bcoef)[din].getPhase(iphase);
+          const BaseIVFAB<Real>& BcoefIrreg = *(*m_BcoefIrreg)[din].getPhasePtr(iphase);
+
+          op.second->chebyshevKernel(Lph, phi, res, Acoef, Bcoef, BcoefIrreg, cellBox, din, omega[i]);
+        }
+      }
+    }
+  }
+}
+
+void
 MFHelmholtzOp::restrictResidual(LevelData<MFCellFAB>&       a_resCoar,
                                 LevelData<MFCellFAB>&       a_phi,
                                 const LevelData<MFCellFAB>& a_rhs)
@@ -936,7 +1177,9 @@ MFHelmholtzOp::restrictResidual(LevelData<MFCellFAB>&       a_resCoar,
     MultifluidAlias::aliasMF(phi, op.first, a_phi);
     MultifluidAlias::aliasMF(rhs, op.first, a_rhs);
 
+    op.second->turnOffExchange();
     op.second->restrictResidual(resCoar, phi, rhs);
+    op.second->turnOnExchange();
   }
 }
 
