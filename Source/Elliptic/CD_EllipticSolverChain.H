@@ -6,7 +6,7 @@
 
 /**
   @file   CD_EllipticSolverChain.H
-  @brief  Outer Krylov solve (GMRES/BiCGStab) preconditioned by an AMR-multigrid cycle
+  @brief  Declaration of outer Krylov solves (GMRES/BiCGStab) preconditioned by an AMR-multigrid cycle
   @author Robert Marskar
 */
 
@@ -106,6 +106,7 @@ namespace EllipticSolverChain {
           return true;
         }
       }
+
       return false;
     }
   };
@@ -281,12 +282,15 @@ namespace EllipticSolverChain {
   solverTypeName(const SolverType a_type)
   {
     switch (a_type) {
-    case SolverType::GMG:
+    case SolverType::GMG: {
       return "gmg";
-    case SolverType::GMRES:
+    }
+    case SolverType::GMRES: {
       return "gmres";
-    case SolverType::BiCGStab:
+    }
+    case SolverType::BiCGStab: {
       return "bicgstab";
+    }
     }
 
     return "unknown";
@@ -312,7 +316,7 @@ namespace EllipticSolverChain {
     using Vec = Vector<LevelData<T>*>;
 
     /**
-      @brief Default constructor. Call define() before use.
+      @brief Default constructor. Must call define() before use.
     */
     KrylovSolver() noexcept = default;
 
@@ -324,8 +328,7 @@ namespace EllipticSolverChain {
     /**
       @brief Define the multigrid-preconditioner adapter and reset the persistent work. Call once per regrid.
       @param[in] a_mg         Fully set-up multigrid solver (reused for matvec and preconditioning)
-      @param[in] a_validCells Per-level valid-cell mask (true where not covered by a finer level), e.g. from
-                              AmrMesh::getValidCells
+      @param[in] a_validCells Per-level valid-cell mask (true where not covered by a finer level), e.g. from AmrMesh::getValidCells
       @param[in] a_dx         Grid spacing on each level (index 0..a_lmax)
       @param[in] a_lbase      Coarsest level in the solve
       @param[in] a_lmax       Finest level in the solve
