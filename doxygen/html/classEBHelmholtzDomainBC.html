@@ -147,6 +147,9 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~EBHelmholtzDomain
 <tr class="memitem:a18dc7979d449e64d88f38fa8c0922537" id="r_a18dc7979d449e64d88f38fa8c0922537"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzDomainBC.html#a18dc7979d449e64d88f38fa8c0922537">getFaceFlux</a> (const VolIndex &amp;a_vof, const EBCellFAB &amp;a_phi, const EBFaceFAB &amp;a_Bcoef, const int &amp;a_dir, const Side::LoHiSide &amp;a_side, const DataIndex &amp;a_dit, const bool a_useHomogeneous) const =0</td></tr>
 <tr class="memdesc:a18dc7979d449e64d88f38fa8c0922537"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get face flux. This is for irregular cells.  <br /></td></tr>
 <tr class="separator:a18dc7979d449e64d88f38fa8c0922537"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a24fd78e8d1e9e6408c7d6bf5be80091b" id="r_a24fd78e8d1e9e6408c7d6bf5be80091b"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzDomainBC.html#a24fd78e8d1e9e6408c7d6bf5be80091b">getDiagWeight</a> (const int a_dir, const Side::LoHiSide a_side) const =0</td></tr>
+<tr class="memdesc:a24fd78e8d1e9e6408c7d6bf5be80091b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Diagonal-weight multiplier for this boundary face's contribution to the relaxation diagonal.  <br /></td></tr>
+<tr class="separator:a24fd78e8d1e9e6408c7d6bf5be80091b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
@@ -310,6 +313,59 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Boundary position </dd></dl>
+
+</div>
+</div>
+<a id="a24fd78e8d1e9e6408c7d6bf5be80091b" name="a24fd78e8d1e9e6408c7d6bf5be80091b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a24fd78e8d1e9e6408c7d6bf5be80091b">&#9670;&#160;</a></span>getDiagWeight()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual Real EBHelmholtzDomainBC::getDiagWeight </td>
+          <td>(</td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_dir</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Side::LoHiSide&#160;</td>
+          <td class="paramname"><em>a_side</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Diagonal-weight multiplier for this boundary face's contribution to the relaxation diagonal. </p>
+<p><a class="el" href="classEBHelmholtzOp.html#a2b4e8202869126ba34ed41369a81b71c" title="Calculate the weight of the diagonal term.">EBHelmholtzOp::computeDiagWeight</a> builds the relaxation diagonal (m_betaDiagWeight) by taking the interior stencil diagonal and, for each domain-boundary face, subtracting this weight times the area-fraction-weighted face B-coefficient, i.e. betaWeight -= <a class="el" href="classEBHelmholtzDomainBC.html#a24fd78e8d1e9e6408c7d6bf5be80091b" title="Diagonal-weight multiplier for this boundary face&#39;s contribution to the relaxation diagonal.">getDiagWeight()</a> * sum(areaFrac * B/dx^2). This weight is therefore the coefficient with which the boundary cell's own value phi_i enters the discretized boundary flux returned by <a class="el" href="classEBHelmholtzDomainBC.html#a8792e75adf6e14497d402b0f6382e0ca" title="Get face flux. This is for regular cells.">getFaceFlux()</a> &ndash; it is how strongly the boundary flux feeds back onto the diagonal. It is dimensionless and MUST be kept consistent with this subclass's <a class="el" href="classEBHelmholtzDomainBC.html#a8792e75adf6e14497d402b0f6382e0ca" title="Get face flux. This is for regular cells.">getFaceFlux()</a> discretization: the two encode the same boundary stencil, so if that discretization changes (e.g. a higher-order or centroid-based flux) this value must change with it.</p>
+<p>How to choose it: read off the coefficient of phi_i in <a class="el" href="classEBHelmholtzDomainBC.html#a8792e75adf6e14497d402b0f6382e0ca" title="Get face flux. This is for regular cells.">getFaceFlux()</a>. For the shipped discretizations:</p><ul>
+<li>Dirichlet -&gt; 2. The boundary value sits half a cell from the cell centre, so the one-sided difference (phi_b - phi_i)/(dx/2) carries a factor of 2 on phi_i.</li>
+<li>Neumann -&gt; 0. The flux is prescribed independently of phi_i, so it does not feed the diagonal.</li>
+</ul>
+<p>This is pure virtual on purpose: every concrete domain BC must state its diagonal contribution explicitly, so a new BC cannot silently inherit a wrong value. Note this only affects the relaxation (smoother) diagonal, not the operator apply, so an inconsistent value degrades convergence rather than changing the converged solution. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dir</td><td>Coordinate direction of the face. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_side</td><td>High or low side. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Multiplier applied to B·area/dx² when building the diagonal relaxation weight. </dd></dl>
+
+<p>Implemented in <a class="el" href="classEBHelmholtzElectrostaticDomainBC.html#aa5a957640c3cde146fa1ab24cf49c4c5">EBHelmholtzElectrostaticDomainBC</a>, <a class="el" href="classEBHelmholtzDirichletDomainBC.html#a2a46c0f3be6f11ba79a93c18b882df25">EBHelmholtzDirichletDomainBC</a>, <a class="el" href="classEBHelmholtzNeumannDomainBC.html#aa9c8cc70746d699ca697deba6540b7d1">EBHelmholtzNeumannDomainBC</a>, <a class="el" href="classEBHelmholtzRobinDomainBC.html#acfb9f6cd1b6685d371ce6a3e96a18b9d">EBHelmholtzRobinDomainBC</a>, and <a class="el" href="classEBHelmholtzEddingtonSP1DomainBC.html#a9d6ef5e63854846920873d0a83235b53">EBHelmholtzEddingtonSP1DomainBC</a>.</p>
 
 </div>
 </div>

@@ -453,80 +453,10 @@ The flag ``kappa_source`` indicates whether or not we should multiply the right-
 If this flag is set to ``false``, it is an indication that the user has taken responsibility to perform this weighting prior to calling ``FieldSolver::solve(...)``.
 If this flag is set to ``true``, ``FieldSolverGMG`` will perform the multiplication before the multigrid solve.
 
-.. _Chap:MultigridTuning:
-
 Tuning multigrid performance
 ____________________________
 
-Multigrid operates by coarsening the solution (and the geometry with it) on a hierarchy of grid levels, and smoothing the solution on each level.
-There are a number of factors that influence the multigrid performance.
-Often the most critical factors are the radius of the cut-cell stencils and how far multigrid is allowed to coarsen.
-In addition, the multigrid convergence is improved by increasing the number of smoothings per grid level (up to a certain point), as well as the type of smoother and bottom solver being used.
-We explain these options below:
-
-* ``FieldSolverGMG.gmg_verbosity``.
-  Controls the multigrid verbosity.
-  Setting it to a number :math:`> 0` will print multigrid convergence information.
-* ``FieldSolverGMG.gmg_bottom_verbosity``.
-  Controls the multigrid bottom solver verbosity.
-  Setting it to a number :math:`> 0` will print some bottom solver convergence information.
-  The information printed depends on the bottom solver that is used.
-* ``FieldSolverGMG.gmg_use_default_settings``.
-  Use default multigrid settings.
-  
-  .. tip::
-     
-     Enabling this setting tends to make most problems converge, but potentially at suboptimal convergence rates.
-
-* ``FieldSolverGMG.gmg_pre_smooth``.
-  Controls the number of relaxations on each level during multigrid downsweeps.
-* ``FieldSolverGMG.gmg_post_smooth``.
-  Controls the number of relaxations on each level during multigrid upsweeps.
-* ``FieldSolverGMG.gmg_bott_smooth``.
-  Controls the number of relaxations before entering the bottom solve. 
-* ``FieldSolverGMG.gmg_min_iter``.
-  Sets the minimum number of iterations that multigrid will perform. 
-* ``FieldSolverGMG.gmg_max_iter``.
-  Sets the maximum number of iterations that multigrid will perform. 
-* ``FieldSolverGMG.gmg_exit_tol``.
-  Sets the exit tolerance for multigrid.
-  Multigrid will exit the iterations if :math:`r < \lambda r_0` where :math:`\lambda` is the specified tolerance, :math:`r = |L\Phi -\rho|` is the residual and :math:`r_0` is the residual for :math:`\Phi = 0`.  
-* ``FieldSolverGMG.gmg_exit_hang``.
-  Sets the minimum permitted reduction in the convergence rate before exiting multigrid.
-  Letting :math:`r^k` be the residual after :math:`k` multigrid cycles, multigrid will abort if the residual between levels is not reduce by at least a factor of :math:`r^{k+1} < (1-h)r^k`, where :math:`h` is the "hang" factor.
-* ``FieldSolverGMG.gmg_min_cells``.
-  Sets the minimum amount of cells along any coordinate direction for coarsened levels.
-  Note that this will control how far multigrid will coarsen. Setting a number ``gmg_min_cells = 16`` will terminate multigrid coarsening when the domain has 16 cells in any of the coordinate direction. 
-* ``FieldSolverGMG.gmg_bc_order``.
-  Sets the stencil order for Dirichlet boundary conditions (on electrodes).
-  Note that this is also the stencil radius. 
-* ``FieldSolverGMG.gmg_bc_weight``. Sets the least squares stencil weighting factor for least squares gradient reconstruction on EBs.
-  See :ref:`Chap:LeastSquares` for details. 
-* ``FieldSolverGMG.gmg_jump_order``. Sets the stencil order when performing least squares gradient reconstruction on dielectric interfaces.
-  Note that this is also the stencil radius. 
-* ``FieldSolverGMG.gmg_jump_weight``.
-  Sets the least squares stencil weighting factor for least squares gradient reconstruction on dielectric interfaces.
-  See :ref:`Chap:LeastSquares` for details. 
-* ``FieldSolverGMG.gmg_bottom_solver``.
-  Sets the bottom solver type. 
-* ``FieldSolverGMG.gmg_cycle``.
-  Sets the multigrid method.
-  Currently, only V-cycles are supported.
-* ``FieldSolverGMG.gmg_smoother``.
-  Sets the multigrid smoother.
-* ``FieldSolverGMG.gmg_relax_factor``.
-  Sets the multigrid relaxation factor.
-
-
-
-
-
-.. warning::
-
-   When setting the bottom solver (which by default is a biconjugate gradient stabilized method) to a regular smoother, one must also specify the number of smoothings to perform.
-   E.g., ``FieldSolverGMG.gmg_bottom_solver = simple 64``.
-   Setting the bottom solver to ``simple`` without specifying the number of smoothings that will be performed will issue a run-time error. 
-		
+The multigrid solver (smoothers, bottom solvers, cycle type, exit criteria) and the outer Krylov (GMRES/BiCGStab) configuration are shared across all ``chombo-discharge`` solvers and are documented centrally -- including the full list of ``gmg_*`` and ``krylov_*`` options -- in :ref:`Chap:MultigridTuning`.
 
 Adjusting output
 ________________

@@ -14,5 +14,6 @@ var searchData=
   ['scratch_11',['scratch',['../structItoParticle.html#a37b7d18008006114dd18ff9d8020060d',1,'ItoParticle']]],
   ['scratch_5fx_12',['scratch_x',['../structItoParticle.html#a9c5a7e6256b8d83c295f1bf3fea70339',1,'ItoParticle']]],
   ['scratch_5fy_13',['scratch_y',['../structItoParticle.html#ac863ced85fcb703f3fa45b1a82815ef4',1,'ItoParticle']]],
-  ['scratch_5fz_14',['scratch_z',['../structItoParticle.html#ada630493e16ac46fd67f4d3303e456e1',1,'ItoParticle']]]
+  ['scratch_5fz_14',['scratch_z',['../structItoParticle.html#ada630493e16ac46fd67f4d3303e456e1',1,'ItoParticle']]],
+  ['solvers_15',['solvers',['../structEllipticSolverChain_1_1Settings.html#a2a73ad95fe0c257f99fbfddc91259e98',1,'EllipticSolverChain::Settings']]]
 ];

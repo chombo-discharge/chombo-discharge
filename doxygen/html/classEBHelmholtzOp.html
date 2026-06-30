@@ -128,10 +128,15 @@ Classes</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
 Public Types</h2></td></tr>
-<tr class="memitem:a54eab4d142d767aa607a33d7be679f17" id="r_a54eab4d142d767aa607a33d7be679f17"><td class="memItemLeft" align="right" valign="top"><a id="a54eab4d142d767aa607a33d7be679f17" name="a54eab4d142d767aa607a33d7be679f17"></a>enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a54eab4d142d767aa607a33d7be679f17">Smoother</a> { <b>NoRelax</b>
+<tr class="memitem:a54eab4d142d767aa607a33d7be679f17" id="r_a54eab4d142d767aa607a33d7be679f17"><td class="memItemLeft" align="right" valign="top"><a id="a54eab4d142d767aa607a33d7be679f17" name="a54eab4d142d767aa607a33d7be679f17"></a>enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a54eab4d142d767aa607a33d7be679f17">Smoother</a> { <br />
+&#160;&#160;<b>NoRelax</b>
 , <b>PointJacobi</b>
 , <b>GauSaiRedBlack</b>
 , <b>GauSaiMultiColor</b>
+, <br />
+&#160;&#160;<b>Chebyshev</b>
+, <b>RestrictedAdditiveSchwarz</b>
+<br />
  }</td></tr>
 <tr class="memdesc:a54eab4d142d767aa607a33d7be679f17"><td class="mdescLeft">&#160;</td><td class="mdescRight">Relaxation method for the operators. <br /></td></tr>
 <tr class="separator:a54eab4d142d767aa607a33d7be679f17"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -148,9 +153,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a8e8b97e874d4af3ddf9f2b50aa55f504" id="r_a8e8b97e874d4af3ddf9f2b50aa55f504"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a8e8b97e874d4af3ddf9f2b50aa55f504">EBHelmholtzOp</a> (const <a class="el" href="classEBHelmholtzOp.html">EBHelmholtzOp</a> &amp;&amp;a_other)=delete</td></tr>
 <tr class="memdesc:a8e8b97e874d4af3ddf9f2b50aa55f504"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed move constructor.  <br /></td></tr>
 <tr class="separator:a8e8b97e874d4af3ddf9f2b50aa55f504"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a81a9ad17a278ea22beffe59d2d28523e" id="r_a81a9ad17a278ea22beffe59d2d28523e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a81a9ad17a278ea22beffe59d2d28523e">EBHelmholtzOp</a> (const <a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a> a_dataLocation, const EBLevelGrid &amp;a_eblgFine, const EBLevelGrid &amp;a_eblg, const EBLevelGrid &amp;a_eblgCoFi, const EBLevelGrid &amp;a_eblgCoar, const EBLevelGrid &amp;a_eblgCoarMG, const RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt; &amp;a_validCells, const RefCountedPtr&lt; <a class="el" href="classEBMultigridInterpolator.html">EBMultigridInterpolator</a> &gt; &amp;a_interpolator, const RefCountedPtr&lt; <a class="el" href="classEBReflux.html">EBReflux</a> &gt; &amp;a_fluxReg, const RefCountedPtr&lt; <a class="el" href="classEBCoarAve.html">EBCoarAve</a> &gt; &amp;a_coarAve, const RefCountedPtr&lt; <a class="el" href="classEBHelmholtzDomainBC.html">EBHelmholtzDomainBC</a> &gt; &amp;a_domainBC, const RefCountedPtr&lt; <a class="el" href="classEBHelmholtzEBBC.html">EBHelmholtzEBBC</a> &gt; &amp;a_ebBC, const RealVect &amp;a_probLo, const Real &amp;a_dx, const int &amp;a_refToFine, const int &amp;a_refToCoar, const bool &amp;a_hasFine, const bool &amp;a_hasCoar, const bool &amp;a_hasMGObjects, const Real &amp;a_alpha, const Real &amp;a_beta, const RefCountedPtr&lt; LevelData&lt; EBCellFAB &gt; &gt; &amp;a_Acoef, const RefCountedPtr&lt; LevelData&lt; EBFluxFAB &gt; &gt; &amp;a_Bcoef, const RefCountedPtr&lt; LevelData&lt; BaseIVFAB&lt; Real &gt; &gt; &gt; &amp;a_BcoefIrreg, const IntVect &amp;a_ghostPhi, const IntVect &amp;a_ghostRhs, const <a class="el" href="classEBHelmholtzOp.html#a54eab4d142d767aa607a33d7be679f17">Smoother</a> &amp;a_smoother, const Real &amp;a_relaxFactor)</td></tr>
-<tr class="memdesc:a81a9ad17a278ea22beffe59d2d28523e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor.  <br /></td></tr>
-<tr class="separator:a81a9ad17a278ea22beffe59d2d28523e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae65c77df705c09690fe7cc4cc9c5e0ab" id="r_ae65c77df705c09690fe7cc4cc9c5e0ab"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#ae65c77df705c09690fe7cc4cc9c5e0ab">EBHelmholtzOp</a> (const <a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a> a_dataLocation, const EBLevelGrid &amp;a_eblgFine, const EBLevelGrid &amp;a_eblg, const EBLevelGrid &amp;a_eblgCoFi, const EBLevelGrid &amp;a_eblgCoar, const EBLevelGrid &amp;a_eblgCoarMG, const RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt; &amp;a_validCells, const RefCountedPtr&lt; <a class="el" href="classEBMultigridInterpolator.html">EBMultigridInterpolator</a> &gt; &amp;a_interpolator, const RefCountedPtr&lt; <a class="el" href="classEBReflux.html">EBReflux</a> &gt; &amp;a_fluxReg, const RefCountedPtr&lt; <a class="el" href="classEBCoarAve.html">EBCoarAve</a> &gt; &amp;a_coarAve, const RefCountedPtr&lt; <a class="el" href="classEBHelmholtzDomainBC.html">EBHelmholtzDomainBC</a> &gt; &amp;a_domainBC, const RefCountedPtr&lt; <a class="el" href="classEBHelmholtzEBBC.html">EBHelmholtzEBBC</a> &gt; &amp;a_ebBC, const RealVect &amp;a_probLo, const Real &amp;a_dx, const int &amp;a_refToFine, const int &amp;a_refToCoar, const bool &amp;a_hasFine, const bool &amp;a_hasCoar, const bool &amp;a_hasMGObjects, const Real &amp;a_alpha, const Real &amp;a_beta, const RefCountedPtr&lt; LevelData&lt; EBCellFAB &gt; &gt; &amp;a_Acoef, const RefCountedPtr&lt; LevelData&lt; EBFluxFAB &gt; &gt; &amp;a_Bcoef, const RefCountedPtr&lt; LevelData&lt; BaseIVFAB&lt; Real &gt; &gt; &gt; &amp;a_BcoefIrreg, const IntVect &amp;a_ghostPhi, const IntVect &amp;a_ghostRhs, const <a class="el" href="classEBHelmholtzOp.html#a54eab4d142d767aa607a33d7be679f17">Smoother</a> &amp;a_smoother, const Real &amp;a_relaxFactor, const int &amp;a_chebyOrder, const Real &amp;a_chebyEigRatio, const int &amp;a_rasInnerSweeps, const bool a_refluxFree=false)</td></tr>
+<tr class="memdesc:ae65c77df705c09690fe7cc4cc9c5e0ab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor.  <br /></td></tr>
+<tr class="separator:ae65c77df705c09690fe7cc4cc9c5e0ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2d728e76605bb07ea19198787f6ade65" id="r_a2d728e76605bb07ea19198787f6ade65"><td class="memItemLeft" align="right" valign="top"><a id="a2d728e76605bb07ea19198787f6ade65" name="a2d728e76605bb07ea19198787f6ade65"></a>
 virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~EBHelmholtzOp</b> ()</td></tr>
 <tr class="memdesc:a2d728e76605bb07ea19198787f6ade65"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dtor. <br /></td></tr>
@@ -202,6 +207,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>turnOnCFInterp</b> ()
 <tr class="memitem:a42e84fd428fbaa6764c06ccf7111c37a" id="r_a42e84fd428fbaa6764c06ccf7111c37a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a42e84fd428fbaa6764c06ccf7111c37a">pointJacobiKernel</a> (EBCellFAB &amp;a_Lcorr, EBCellFAB &amp;a_corr, const EBCellFAB &amp;a_resid, const EBCellFAB &amp;a_Acoef, const EBFluxFAB &amp;a_Bcoef, const BaseIVFAB&lt; Real &gt; &amp;a_BcoefIrreg, const Box &amp;a_cellBox, const DataIndex &amp;a_dit) const noexcept</td></tr>
 <tr class="memdesc:a42e84fd428fbaa6764c06ccf7111c37a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Point Jacobi kernel.  <br /></td></tr>
 <tr class="separator:a42e84fd428fbaa6764c06ccf7111c37a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8585d6dd5e5352e06effa08d29e56883" id="r_a8585d6dd5e5352e06effa08d29e56883"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a8585d6dd5e5352e06effa08d29e56883">chebyshevKernel</a> (EBCellFAB &amp;a_Lcorr, EBCellFAB &amp;a_corr, const EBCellFAB &amp;a_resid, const EBCellFAB &amp;a_Acoef, const EBFluxFAB &amp;a_Bcoef, const BaseIVFAB&lt; Real &gt; &amp;a_BcoefIrreg, const Box &amp;a_cellBox, const DataIndex &amp;a_dit, const Real a_omega) const noexcept</td></tr>
+<tr class="memdesc:a8585d6dd5e5352e06effa08d29e56883"><td class="mdescLeft">&#160;</td><td class="mdescRight">Chebyshev smoother kernel.  <br /></td></tr>
+<tr class="separator:a8585d6dd5e5352e06effa08d29e56883"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab5d70cb28b0d0ada764a0d7efac3ed02" id="r_ab5d70cb28b0d0ada764a0d7efac3ed02"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#ab5d70cb28b0d0ada764a0d7efac3ed02">gauSaiRedBlackKernel</a> (EBCellFAB &amp;a_Lcorr, EBCellFAB &amp;a_corr, const EBCellFAB &amp;a_resid, const EBCellFAB &amp;a_Acoef, const EBFluxFAB &amp;a_Bcoef, const BaseIVFAB&lt; Real &gt; &amp;a_BcoefIrreg, const Box &amp;a_cellBox, const DataIndex &amp;a_dit, const int &amp;a_redBlack) const noexcept</td></tr>
 <tr class="memdesc:ab5d70cb28b0d0ada764a0d7efac3ed02"><td class="mdescLeft">&#160;</td><td class="mdescRight">Red-black Gauss-Seidel kernel.  <br /></td></tr>
 <tr class="separator:ab5d70cb28b0d0ada764a0d7efac3ed02"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -241,9 +249,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>turnOnCFInterp</b> ()
 <tr class="memitem:a1fdfeeb58c4a2bc867cf8cb6680869ab" id="r_a1fdfeeb58c4a2bc867cf8cb6680869ab"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a1fdfeeb58c4a2bc867cf8cb6680869ab">applyDomainFlux</a> (EBCellFAB &amp;a_phi, const EBFluxFAB &amp;a_Bcoef, const Box &amp;a_cellBox, const DataIndex &amp;a_dit, const bool a_homogeneousPhysBc) const noexcept</td></tr>
 <tr class="memdesc:a1fdfeeb58c4a2bc867cf8cb6680869ab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply domain flux.  <br /></td></tr>
 <tr class="separator:a1fdfeeb58c4a2bc867cf8cb6680869ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8dd96a0878237551c9896f32aefa8b59" id="r_a8dd96a0878237551c9896f32aefa8b59"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a8dd96a0878237551c9896f32aefa8b59">fillDomainFlux</a> (EBFluxFAB &amp;a_flux, const EBCellFAB &amp;a_phi, const Box &amp;a_cellBox, const DataIndex &amp;a_dit)</td></tr>
-<tr class="memdesc:a8dd96a0878237551c9896f32aefa8b59"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill domain flux. This fills the flux on the domain face using centered differencing ala applyDomainFlux.  <br /></td></tr>
-<tr class="separator:a8dd96a0878237551c9896f32aefa8b59"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1e45d649e222b2f66dd8518c548ee055" id="r_a1e45d649e222b2f66dd8518c548ee055"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a1e45d649e222b2f66dd8518c548ee055">fillDomainFlux</a> (EBFluxFAB &amp;a_flux, const EBCellFAB &amp;a_phi, const Box &amp;a_cellBox, const DataIndex &amp;a_dit, const bool a_homogeneousPhysBC)</td></tr>
+<tr class="memdesc:a1e45d649e222b2f66dd8518c548ee055"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill domain flux. This fills the flux on the domain face using centered differencing ala applyDomainFlux.  <br /></td></tr>
+<tr class="separator:a1e45d649e222b2f66dd8518c548ee055"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aeb9bae07673b5ddfa13806558cc42ff0" id="r_aeb9bae07673b5ddfa13806558cc42ff0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#aeb9bae07673b5ddfa13806558cc42ff0">applyOpIrregular</a> (EBCellFAB &amp;a_Lphi, const EBCellFAB &amp;a_phi, const EBCellFAB &amp;a_Acoef, const EBFluxFAB &amp;a_Bcoef, const BaseIVFAB&lt; Real &gt; &amp;a_BcoefIrreg, const BaseIVFAB&lt; Real &gt; &amp;a_alphaDiagWeight, const Box &amp;a_cellBox, const DataIndex &amp;a_dit, const bool a_homogeneousPhysBC) const noexcept</td></tr>
 <tr class="memdesc:aeb9bae07673b5ddfa13806558cc42ff0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply operator in irregular cells.  <br /></td></tr>
 <tr class="separator:aeb9bae07673b5ddfa13806558cc42ff0"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -265,6 +273,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>turnOnCFInterp</b> ()
 <tr class="memitem:a44f56d178a4158b3167c057c25fe55f4" id="r_a44f56d178a4158b3167c057c25fe55f4"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a44f56d178a4158b3167c057c25fe55f4">dotProduct</a> (const LevelData&lt; EBCellFAB &gt; &amp;a_lhs, const LevelData&lt; EBCellFAB &gt; &amp;a_rhs) override final</td></tr>
 <tr class="memdesc:a44f56d178a4158b3167c057c25fe55f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the dot product??  <br /></td></tr>
 <tr class="separator:a44f56d178a4158b3167c057c25fe55f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a915ade76d91600a95b0f68ae142a9ea6" id="r_a915ade76d91600a95b0f68ae142a9ea6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a915ade76d91600a95b0f68ae142a9ea6">dotProductMaskedLocal</a> (Real &amp;a_sumKappaXY, Real &amp;a_sumVolume, const LevelData&lt; EBCellFAB &gt; &amp;a_lhs, const LevelData&lt; EBCellFAB &gt; &amp;a_rhs, const LevelData&lt; BaseFab&lt; bool &gt; &gt; &amp;a_mask, const bool a_needVolume) const noexcept</td></tr>
+<tr class="memdesc:a915ade76d91600a95b0f68ae142a9ea6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rank-local (un-reduced) partials for the masked AMR-composite Krylov inner product.  <br /></td></tr>
+<tr class="separator:a915ade76d91600a95b0f68ae142a9ea6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac89913ad920e33c937e58a14d4501639" id="r_ac89913ad920e33c937e58a14d4501639"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#ac89913ad920e33c937e58a14d4501639">incr</a> (LevelData&lt; EBCellFAB &gt; &amp;a_lhs, const LevelData&lt; EBCellFAB &gt; &amp;a_rhs, const Real a_scale) override final</td></tr>
 <tr class="memdesc:ac89913ad920e33c937e58a14d4501639"><td class="mdescLeft">&#160;</td><td class="mdescRight">Increment operator.  <br /></td></tr>
 <tr class="separator:ac89913ad920e33c937e58a14d4501639"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -360,6 +371,18 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>deallocateFlux</b> ()
 <tr class="memitem:af7b310f56af8bc0fd708b220929b01f9" id="r_af7b310f56af8bc0fd708b220929b01f9"><td class="memItemLeft" align="right" valign="top">const LevelData&lt; EBCellFAB &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#af7b310f56af8bc0fd708b220929b01f9">getRelaxationCoeff</a> () const noexcept</td></tr>
 <tr class="memdesc:af7b310f56af8bc0fd708b220929b01f9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns m_relCoef. Used by <a class="el" href="classMFHelmholtzOp.html" title="Operator for solving multifluid Helmholtz on a grid level.">MFHelmholtzOp</a>.  <br /></td></tr>
 <tr class="separator:af7b310f56af8bc0fd708b220929b01f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a37cfff0af3c368e1f1fcf625cf83b5fe" id="r_a37cfff0af3c368e1f1fcf625cf83b5fe"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a37cfff0af3c368e1f1fcf625cf83b5fe">getChebyOrder</a> () const noexcept</td></tr>
+<tr class="memdesc:a37cfff0af3c368e1f1fcf625cf83b5fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns m_chebyOrder. Used by <a class="el" href="classMFHelmholtzOp.html" title="Operator for solving multifluid Helmholtz on a grid level.">MFHelmholtzOp</a> to replicate Chebyshev parameters.  <br /></td></tr>
+<tr class="separator:a37cfff0af3c368e1f1fcf625cf83b5fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a05be06154956bc0bdc8efdb965bca7ff" id="r_a05be06154956bc0bdc8efdb965bca7ff"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a05be06154956bc0bdc8efdb965bca7ff">getChebyEigRatio</a> () const noexcept</td></tr>
+<tr class="memdesc:a05be06154956bc0bdc8efdb965bca7ff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns m_chebyEigRatio. Used by <a class="el" href="classMFHelmholtzOp.html" title="Operator for solving multifluid Helmholtz on a grid level.">MFHelmholtzOp</a> to replicate Chebyshev parameters.  <br /></td></tr>
+<tr class="separator:a05be06154956bc0bdc8efdb965bca7ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae411bb9dc1947562dfca0ecaf4e4b912" id="r_ae411bb9dc1947562dfca0ecaf4e4b912"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#ae411bb9dc1947562dfca0ecaf4e4b912">getSpectralRadius</a> () const noexcept</td></tr>
+<tr class="memdesc:ae411bb9dc1947562dfca0ecaf4e4b912"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns m_spectralRadius. Used by <a class="el" href="classMFHelmholtzOp.html" title="Operator for solving multifluid Helmholtz on a grid level.">MFHelmholtzOp</a> to replicate Chebyshev parameters.  <br /></td></tr>
+<tr class="separator:ae411bb9dc1947562dfca0ecaf4e4b912"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1b2041fcff8e5827e5d0ba99150e6223" id="r_a1b2041fcff8e5827e5d0ba99150e6223"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a1b2041fcff8e5827e5d0ba99150e6223">getRasInnerSweeps</a> () const noexcept</td></tr>
+<tr class="memdesc:a1b2041fcff8e5827e5d0ba99150e6223"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns m_rasInnerSweeps. Used by <a class="el" href="classMFHelmholtzOp.html" title="Operator for solving multifluid Helmholtz on a grid level.">MFHelmholtzOp</a> to replicate the Schwarz block solve.  <br /></td></tr>
+<tr class="separator:a1b2041fcff8e5827e5d0ba99150e6223"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aab8b94b8c56584a5a574612b42ddee16" id="r_aab8b94b8c56584a5a574612b42ddee16"><td class="memItemLeft" align="right" valign="top">LayoutData&lt; VoFIterator &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#aab8b94b8c56584a5a574612b42ddee16">getVofIterIrreg</a> () const noexcept</td></tr>
 <tr class="memdesc:aab8b94b8c56584a5a574612b42ddee16"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return all-cut VoFIterators (one per patch). Used by <a class="el" href="classMFHelmholtzOp.html" title="Operator for solving multifluid Helmholtz on a grid level.">MFHelmholtzOp</a>.  <br /></td></tr>
 <tr class="separator:aab8b94b8c56584a5a574612b42ddee16"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -381,6 +404,12 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:a01995f0b9cac6833fd90bc6336845c04" id="r_a01995f0b9cac6833fd90bc6336845c04"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a01995f0b9cac6833fd90bc6336845c04">relaxGSMultiColor</a> (LevelData&lt; EBCellFAB &gt; &amp;a_correction, const LevelData&lt; EBCellFAB &gt; &amp;a_residual, const int a_iterations)</td></tr>
 <tr class="memdesc:a01995f0b9cac6833fd90bc6336845c04"><td class="mdescLeft">&#160;</td><td class="mdescRight">Multi-colored gauss-seidel relaxation.  <br /></td></tr>
 <tr class="separator:a01995f0b9cac6833fd90bc6336845c04"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1ec66499bc4ed09c3b318a21e37a7223" id="r_a1ec66499bc4ed09c3b318a21e37a7223"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a1ec66499bc4ed09c3b318a21e37a7223">relaxChebyshev</a> (LevelData&lt; EBCellFAB &gt; &amp;a_correction, const LevelData&lt; EBCellFAB &gt; &amp;a_residual, const int a_iterations)</td></tr>
+<tr class="memdesc:a1ec66499bc4ed09c3b318a21e37a7223"><td class="mdescLeft">&#160;</td><td class="mdescRight">Chebyshev polynomial smoother.  <br /></td></tr>
+<tr class="separator:a1ec66499bc4ed09c3b318a21e37a7223"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac67361e80a99b1d796e9d9fac3ad73e3" id="r_ac67361e80a99b1d796e9d9fac3ad73e3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#ac67361e80a99b1d796e9d9fac3ad73e3">relaxRestrictedAdditiveSchwarz</a> (LevelData&lt; EBCellFAB &gt; &amp;a_correction, const LevelData&lt; EBCellFAB &gt; &amp;a_residual, const int a_iterations)</td></tr>
+<tr class="memdesc:ac67361e80a99b1d796e9d9fac3ad73e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Restricted additive Schwarz smoother (block smoother).  <br /></td></tr>
+<tr class="separator:ac67361e80a99b1d796e9d9fac3ad73e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2b4e8202869126ba34ed41369a81b71c" id="r_a2b4e8202869126ba34ed41369a81b71c"><td class="memItemLeft" align="right" valign="top"><a id="a2b4e8202869126ba34ed41369a81b71c" name="a2b4e8202869126ba34ed41369a81b71c"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>computeDiagWeight</b> ()</td></tr>
 <tr class="memdesc:a2b4e8202869126ba34ed41369a81b71c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the weight of the diagonal term. <br /></td></tr>
@@ -389,6 +418,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>computeDiagWeight</b>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>computeRelaxationCoefficient</b> ()</td></tr>
 <tr class="memdesc:a6d1aa298b65f2361aac473eb4a485818"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate relaxation coefficient. <br /></td></tr>
 <tr class="separator:a6d1aa298b65f2361aac473eb4a485818"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a436c508d90997a4264fccc27646ec776" id="r_a436c508d90997a4264fccc27646ec776"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a436c508d90997a4264fccc27646ec776">computeSpectralRadius</a> ()</td></tr>
+<tr class="memdesc:a436c508d90997a4264fccc27646ec776"><td class="mdescLeft">&#160;</td><td class="mdescRight">Estimate the spectral radius of D^{-1}A (Jacobi-preconditioned operator) via the Gershgorin bound.  <br /></td></tr>
+<tr class="separator:a436c508d90997a4264fccc27646ec776"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3ac61f40ecdd28ebd7f0d40ca8edb733" id="r_a3ac61f40ecdd28ebd7f0d40ca8edb733"><td class="memItemLeft" align="right" valign="top"><a id="a3ac61f40ecdd28ebd7f0d40ca8edb733" name="a3ac61f40ecdd28ebd7f0d40ca8edb733"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>makeAggStencil</b> ()</td></tr>
 <tr class="memdesc:a3ac61f40ecdd28ebd7f0d40ca8edb733"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute aggregated stencils. <br /></td></tr>
@@ -502,6 +534,20 @@ Real&#160;</td><td class="memItemRight" valign="bottom"><b>m_dx</b></td></tr>
 Real&#160;</td><td class="memItemRight" valign="bottom"><b>m_relaxFactor</b></td></tr>
 <tr class="memdesc:aa7a6e09dfa0081bb3d970b3abf7cc10d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Successive over-relaxation factor (Must be &gt;= 1). <br /></td></tr>
 <tr class="separator:aa7a6e09dfa0081bb3d970b3abf7cc10d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac0e6c21cbb838034f171d3f20e45cf27" id="r_ac0e6c21cbb838034f171d3f20e45cf27"><td class="memItemLeft" align="right" valign="top"><a id="ac0e6c21cbb838034f171d3f20e45cf27" name="ac0e6c21cbb838034f171d3f20e45cf27"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>m_chebyOrder</b></td></tr>
+<tr class="memdesc:ac0e6c21cbb838034f171d3f20e45cf27"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of Chebyshev polynomial steps per smoother invocation. <br /></td></tr>
+<tr class="separator:ac0e6c21cbb838034f171d3f20e45cf27"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4325bc6a771d5daab2d4409e36c91987" id="r_a4325bc6a771d5daab2d4409e36c91987"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a4325bc6a771d5daab2d4409e36c91987">m_chebyEigRatio</a></td></tr>
+<tr class="memdesc:a4325bc6a771d5daab2d4409e36c91987"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ratio lambda_max/lambda_min for the Chebyshev eigenvalue window.  <br /></td></tr>
+<tr class="separator:a4325bc6a771d5daab2d4409e36c91987"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abdfbb88d60796f86fb6f03d7a93bd0e8" id="r_abdfbb88d60796f86fb6f03d7a93bd0e8"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#abdfbb88d60796f86fb6f03d7a93bd0e8">m_spectralRadius</a></td></tr>
+<tr class="memdesc:abdfbb88d60796f86fb6f03d7a93bd0e8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Spectral radius estimate for the Jacobi-preconditioned operator D^{-1}A.  <br /></td></tr>
+<tr class="separator:abdfbb88d60796f86fb6f03d7a93bd0e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8dadd95bd3ed9fd45b4753d7f41df550" id="r_a8dadd95bd3ed9fd45b4753d7f41df550"><td class="memItemLeft" align="right" valign="top"><a id="a8dadd95bd3ed9fd45b4753d7f41df550" name="a8dadd95bd3ed9fd45b4753d7f41df550"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>m_rasInnerSweeps</b></td></tr>
+<tr class="memdesc:a8dadd95bd3ed9fd45b4753d7f41df550"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of inner (frozen-ghost) red-black sweeps per outer restricted-additive-Schwarz iteration. <br /></td></tr>
+<tr class="separator:a8dadd95bd3ed9fd45b4753d7f41df550"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac78b8a900cd999bd21e4d88f929a5c98" id="r_ac78b8a900cd999bd21e4d88f929a5c98"><td class="memItemLeft" align="right" valign="top"><a id="ac78b8a900cd999bd21e4d88f929a5c98" name="ac78b8a900cd999bd21e4d88f929a5c98"></a>
 RealVect&#160;</td><td class="memItemRight" valign="bottom"><b>m_vecDx</b></td></tr>
 <tr class="memdesc:ac78b8a900cd999bd21e4d88f929a5c98"><td class="mdescLeft">&#160;</td><td class="mdescRight">Vector resolution. <br /></td></tr>
@@ -739,8 +785,8 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_com
 
 </div>
 </div>
-<a id="a81a9ad17a278ea22beffe59d2d28523e" name="a81a9ad17a278ea22beffe59d2d28523e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a81a9ad17a278ea22beffe59d2d28523e">&#9670;&#160;</a></span>EBHelmholtzOp() <span class="overload">[3/3]</span></h2>
+<a id="ae65c77df705c09690fe7cc4cc9c5e0ab" name="ae65c77df705c09690fe7cc4cc9c5e0ab"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae65c77df705c09690fe7cc4cc9c5e0ab">&#9670;&#160;</a></span>EBHelmholtzOp() <span class="overload">[3/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -911,7 +957,31 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_com
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const Real &amp;&#160;</td>
-          <td class="paramname"><em>a_relaxFactor</em>&#160;</td>
+          <td class="paramname"><em>a_relaxFactor</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int &amp;&#160;</td>
+          <td class="paramname"><em>a_chebyOrder</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real &amp;&#160;</td>
+          <td class="paramname"><em>a_chebyEigRatio</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int &amp;&#160;</td>
+          <td class="paramname"><em>a_rasInnerSweeps</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const bool&#160;</td>
+          <td class="paramname"><em>a_refluxFree</em> = <code>false</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -951,6 +1021,10 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_com
     <tr><td class="paramdir">[in]</td><td class="paramname">a_ghostRhs</td><td>Ghost cells in right-hand side </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_smoother</td><td>Which smoother to use </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_relaxFactor</td><td>Relaxation factor </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_chebyOrder</td><td>Chebyshev polynomial degree (only used when a_smoother is Smoother::Chebyshev) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_chebyEigRatio</td><td>Chebyshev eigenvalue ratio lambda_max/lambda_min (only used when a_smoother is Smoother::Chebyshev) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_rasInnerSweeps</td><td>Number of inner frozen-ghost sweeps per restricted-additive-Schwarz iteration (only used when a_smoother is Smoother::RestrictedAdditiveSchwarz) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_refluxFree</td><td>If true, use the reflux-free AMR operator (skips coarse-fine flux refluxing) </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_BcoefIrreg</td><td>B-coefficient on EB faces </td></tr>
   </table>
   </dd>
@@ -2303,6 +2377,100 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_com
 
 </div>
 </div>
+<a id="a8585d6dd5e5352e06effa08d29e56883" name="a8585d6dd5e5352e06effa08d29e56883"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8585d6dd5e5352e06effa08d29e56883">&#9670;&#160;</a></span>chebyshevKernel()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EBHelmholtzOp::chebyshevKernel </td>
+          <td>(</td>
+          <td class="paramtype">EBCellFAB &amp;&#160;</td>
+          <td class="paramname"><em>a_Lcorr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">EBCellFAB &amp;&#160;</td>
+          <td class="paramname"><em>a_corr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const EBCellFAB &amp;&#160;</td>
+          <td class="paramname"><em>a_resid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const EBCellFAB &amp;&#160;</td>
+          <td class="paramname"><em>a_Acoef</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const EBFluxFAB &amp;&#160;</td>
+          <td class="paramname"><em>a_Bcoef</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const BaseIVFAB&lt; Real &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_BcoefIrreg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Box &amp;&#160;</td>
+          <td class="paramname"><em>a_cellBox</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const DataIndex &amp;&#160;</td>
+          <td class="paramname"><em>a_dit</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_omega</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Chebyshev smoother kernel. </p>
+<p>Same as pointJacobiKernel but scales the update by a_omega (the Chebyshev step size). </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_Lcorr</td><td>Storage for computing L(a_corr) </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_corr</td><td>Correction </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_resid</td><td>Residual </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_Acoef</td><td>A-coefficient </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_Bcoef</td><td>B-coefficient </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_BcoefIrreg</td><td>B-coefficient on EB faces </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cellBox</td><td>Grid box </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dit</td><td>Data index </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_omega</td><td>Chebyshev step-size scaling factor </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="ab553adaef5b221c70974b674af1e1d90" name="ab553adaef5b221c70974b674af1e1d90"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab553adaef5b221c70974b674af1e1d90">&#9670;&#160;</a></span>coarsenCell()</h2>
 
@@ -2615,6 +2783,34 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_com
 
 </div>
 </div>
+<a id="a436c508d90997a4264fccc27646ec776" name="a436c508d90997a4264fccc27646ec776"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a436c508d90997a4264fccc27646ec776">&#9670;&#160;</a></span>computeSpectralRadius()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EBHelmholtzOp::computeSpectralRadius </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Estimate the spectral radius of D^{-1}A (Jacobi-preconditioned operator) via the Gershgorin bound. </p>
+<p>rho_i = 2 - alpha * A_i * relCoef_i. Equals 2 for pure Laplacian and decreases with alpha &gt; 0. Must be called after <a class="el" href="classEBHelmholtzOp.html#a6d1aa298b65f2361aac473eb4a485818" title="Calculate relaxation coefficient.">computeRelaxationCoefficient()</a> and <a class="el" href="classEBHelmholtzOp.html#a2b4e8202869126ba34ed41369a81b71c" title="Calculate the weight of the diagonal term.">computeDiagWeight()</a>. </p>
+
+</div>
+</div>
 <a id="a0d5f92a5e0e4c04d53848174f8a595e5" name="a0d5f92a5e0e4c04d53848174f8a595e5"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a0d5f92a5e0e4c04d53848174f8a595e5">&#9670;&#160;</a></span>create()</h2>
 
@@ -2889,8 +3085,81 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_com
 
 </div>
 </div>
-<a id="a8dd96a0878237551c9896f32aefa8b59" name="a8dd96a0878237551c9896f32aefa8b59"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8dd96a0878237551c9896f32aefa8b59">&#9670;&#160;</a></span>fillDomainFlux()</h2>
+<a id="a915ade76d91600a95b0f68ae142a9ea6" name="a915ade76d91600a95b0f68ae142a9ea6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a915ade76d91600a95b0f68ae142a9ea6">&#9670;&#160;</a></span>dotProductMaskedLocal()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EBHelmholtzOp::dotProductMaskedLocal </td>
+          <td>(</td>
+          <td class="paramtype">Real &amp;&#160;</td>
+          <td class="paramname"><em>a_sumKappaXY</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Real &amp;&#160;</td>
+          <td class="paramname"><em>a_sumVolume</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_lhs</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_rhs</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const LevelData&lt; BaseFab&lt; bool &gt; &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_mask</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const bool&#160;</td>
+          <td class="paramname"><em>a_needVolume</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Rank-local (un-reduced) partials for the masked AMR-composite Krylov inner product. </p>
+<p>Same kappa-weighted inner product as dotProduct, except cells where a_mask is false (e.g. cells covered by a finer AMR level) are excluded from the numerator; the volume normalisation counts all valid cells, matching Chombo's MultilevelLinearOp AMR dot product. Unlike dotProduct this performs NO MPI reduction: it returns the rank-local partial sums so the caller (<a class="el" href="classAMRMultigridKrylovOp.html" title="Adapter presenting an already-defined AMRMultiGrid as a LinearOp over the AMR hierarchy.">AMRMultigridKrylovOp</a>) can batch the per-level partials into a single MPI_Allreduce. The volume is geometry-only and is reduced/cached once by the caller, so a_needVolume can be set false on later calls to skip recomputing it. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_sumKappaXY</td><td>Rank-local masked numerator (sum of kappa*X*Y over unmasked cells) </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_sumVolume</td><td>Rank-local volume (sum over all valid cells); set to zero when a_needVolume is false </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_lhs</td><td>First operand </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_rhs</td><td>Second operand </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_mask</td><td>Per-cell mask; false marks cells excluded from the numerator </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_needVolume</td><td>If false, skip accumulating a_sumVolume (caller already cached it) </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a1e45d649e222b2f66dd8518c548ee055" name="a1e45d649e222b2f66dd8518c548ee055"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1e45d649e222b2f66dd8518c548ee055">&#9670;&#160;</a></span>fillDomainFlux()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2917,7 +3186,13 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_com
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const DataIndex &amp;&#160;</td>
-          <td class="paramname"><em>a_dit</em>&#160;</td>
+          <td class="paramname"><em>a_dit</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const bool&#160;</td>
+          <td class="paramname"><em>a_homogeneousPhysBC</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -2934,6 +3209,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_com
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_phi</td><td>Cell-centered data </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_cellBox</td><td>Computation box </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dit</td><td>Data index </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_homogeneousPhysBC</td><td>If true, use homogeneous physical BCs </td></tr>
   </table>
   </dd>
 </dl>
@@ -3273,6 +3549,62 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_com
 
 </div>
 </div>
+<a id="a05be06154956bc0bdc8efdb965bca7ff" name="a05be06154956bc0bdc8efdb965bca7ff"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a05be06154956bc0bdc8efdb965bca7ff">&#9670;&#160;</a></span>getChebyEigRatio()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Real EBHelmholtzOp::getChebyEigRatio </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns m_chebyEigRatio. Used by <a class="el" href="classMFHelmholtzOp.html" title="Operator for solving multifluid Helmholtz on a grid level.">MFHelmholtzOp</a> to replicate Chebyshev parameters. </p>
+<dl class="section return"><dt>Returns</dt><dd>Chebyshev eigenvalue ratio (lambda_max / lambda_min) </dd></dl>
+
+</div>
+</div>
+<a id="a37cfff0af3c368e1f1fcf625cf83b5fe" name="a37cfff0af3c368e1f1fcf625cf83b5fe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a37cfff0af3c368e1f1fcf625cf83b5fe">&#9670;&#160;</a></span>getChebyOrder()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int EBHelmholtzOp::getChebyOrder </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns m_chebyOrder. Used by <a class="el" href="classMFHelmholtzOp.html" title="Operator for solving multifluid Helmholtz on a grid level.">MFHelmholtzOp</a> to replicate Chebyshev parameters. </p>
+<dl class="section return"><dt>Returns</dt><dd>Chebyshev polynomial degree </dd></dl>
+
+</div>
+</div>
 <a id="a63b4bfad4d0f236ad1ae4b71b1936ee0" name="a63b4bfad4d0f236ad1ae4b71b1936ee0"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a63b4bfad4d0f236ad1ae4b71b1936ee0">&#9670;&#160;</a></span>getFaceCenterFluxStencil()</h2>
 
@@ -3453,6 +3785,34 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_com
 
 </div>
 </div>
+<a id="a1b2041fcff8e5827e5d0ba99150e6223" name="a1b2041fcff8e5827e5d0ba99150e6223"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1b2041fcff8e5827e5d0ba99150e6223">&#9670;&#160;</a></span>getRasInnerSweeps()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int EBHelmholtzOp::getRasInnerSweeps </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns m_rasInnerSweeps. Used by <a class="el" href="classMFHelmholtzOp.html" title="Operator for solving multifluid Helmholtz on a grid level.">MFHelmholtzOp</a> to replicate the Schwarz block solve. </p>
+<dl class="section return"><dt>Returns</dt><dd>Number of inner (frozen-ghost) red-black sweeps per outer Schwarz iteration </dd></dl>
+
+</div>
+</div>
 <a id="af7b310f56af8bc0fd708b220929b01f9" name="af7b310f56af8bc0fd708b220929b01f9"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af7b310f56af8bc0fd708b220929b01f9">&#9670;&#160;</a></span>getRelaxationCoeff()</h2>
 
@@ -3478,6 +3838,34 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_com
 
 <p>Returns m_relCoef. Used by <a class="el" href="classMFHelmholtzOp.html" title="Operator for solving multifluid Helmholtz on a grid level.">MFHelmholtzOp</a>. </p>
 <dl class="section return"><dt>Returns</dt><dd>Relaxation coeff </dd></dl>
+
+</div>
+</div>
+<a id="ae411bb9dc1947562dfca0ecaf4e4b912" name="ae411bb9dc1947562dfca0ecaf4e4b912"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae411bb9dc1947562dfca0ecaf4e4b912">&#9670;&#160;</a></span>getSpectralRadius()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Real EBHelmholtzOp::getSpectralRadius </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns m_spectralRadius. Used by <a class="el" href="classMFHelmholtzOp.html" title="Operator for solving multifluid Helmholtz on a grid level.">MFHelmholtzOp</a> to replicate Chebyshev parameters. </p>
+<dl class="section return"><dt>Returns</dt><dd>Gershgorin bound on rho(D^{-1}A) </dd></dl>
 
 </div>
 </div>
@@ -4169,6 +4557,58 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_com
 
 </div>
 </div>
+<a id="a1ec66499bc4ed09c3b318a21e37a7223" name="a1ec66499bc4ed09c3b318a21e37a7223"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1ec66499bc4ed09c3b318a21e37a7223">&#9670;&#160;</a></span>relaxChebyshev()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EBHelmholtzOp::relaxChebyshev </td>
+          <td>(</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_correction</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_residual</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_iterations</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Chebyshev polynomial smoother. </p>
+<p>Applies m_chebyOrder Chebyshev-Richardson steps of the form correction += omega_i * relCoef * (residual - L(correction)). The step sizes omega_i are derived from Chebyshev nodes on [lambdaMax/m_chebyEigRatio, lambdaMax] where lambdaMax = 2 (safe bound for the Jacobi-preconditioned Laplacian-type operator). </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_correction</td><td>Correction </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_residual</td><td>Residual </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_iterations</td><td>Number of outer smoother invocations (each applies m_chebyOrder steps) </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a01995f0b9cac6833fd90bc6336845c04" name="a01995f0b9cac6833fd90bc6336845c04"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a01995f0b9cac6833fd90bc6336845c04">&#9670;&#160;</a></span>relaxGSMultiColor()</h2>
 
@@ -4319,6 +4759,58 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_com
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_correction</td><td>Correction </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_residual</td><td>Residual </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_iterations</td><td>Number of iterations </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ac67361e80a99b1d796e9d9fac3ad73e3" name="ac67361e80a99b1d796e9d9fac3ad73e3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac67361e80a99b1d796e9d9fac3ad73e3">&#9670;&#160;</a></span>relaxRestrictedAdditiveSchwarz()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EBHelmholtzOp::relaxRestrictedAdditiveSchwarz </td>
+          <td>(</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_correction</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_residual</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_iterations</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Restricted additive Schwarz smoother (block smoother). </p>
+<p>Each outer iteration exchanges ghost cells once and then performs m_rasInnerSweeps red-black Gauss-Seidel sweeps per patch with the ghost cells held frozen (Dirichlet). The blocks are the disjoint patches, so the update is automatically restricted to the valid region and no additive damping is required (overlap = 0). Because the ghost exchange is amortised over the inner sweeps, this smoother performs fewer halo exchanges per multigrid cycle than point relaxation. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_correction</td><td>Correction </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_residual</td><td>Residual </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_iterations</td><td>Number of outer Schwarz iterations </td></tr>
   </table>
   </dd>
 </dl>
@@ -4756,6 +5248,31 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_com
 
 </div>
 </div>
+<a id="a4325bc6a771d5daab2d4409e36c91987" name="a4325bc6a771d5daab2d4409e36c91987"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4325bc6a771d5daab2d4409e36c91987">&#9670;&#160;</a></span>m_chebyEigRatio</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Real EBHelmholtzOp::m_chebyEigRatio</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Ratio lambda_max/lambda_min for the Chebyshev eigenvalue window. </p>
+<p>Targets the upper (1 - 1/m_chebyEigRatio) fraction of the spectrum. </p>
+
+</div>
+</div>
 <a id="abc9fc7b10d58f9e22b3d51d4bf6c6327" name="abc9fc7b10d58f9e22b3d51d4bf6c6327"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#abc9fc7b10d58f9e22b3d51d4bf6c6327">&#9670;&#160;</a></span>m_doCoarsen</h2>
 
@@ -4878,6 +5395,31 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_com
 
 <p>Operator stencils in irregular cells (and ones that border irregular cells if using a centroid discretization). </p>
 <p>This stencil is =&gt; sum(fluxes)/dx, not including boundary faces or EB faces. I.e. this is the same as kappa*div(F) with the exclusion of faces where we have boundary conditions. </p>
+
+</div>
+</div>
+<a id="abdfbb88d60796f86fb6f03d7a93bd0e8" name="abdfbb88d60796f86fb6f03d7a93bd0e8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abdfbb88d60796f86fb6f03d7a93bd0e8">&#9670;&#160;</a></span>m_spectralRadius</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Real EBHelmholtzOp::m_spectralRadius</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Spectral radius estimate for the Jacobi-preconditioned operator D^{-1}A. </p>
+<p>Computed via the Gershgorin bound after <a class="el" href="classEBHelmholtzOp.html#af1e883965165f53ff42eb0312c835788" title="Define stencils.">defineStencils()</a>. Used as lambda_max in the Chebyshev smoother. </p>
 
 </div>
 </div>

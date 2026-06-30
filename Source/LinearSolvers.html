@@ -84,6 +84,8 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#multigrid-ghost-cell-interpolation">Multigrid ghost cell interpolation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#relaxation-methods">Relaxation methods</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#chebyshev-smoother">Chebyshev smoother</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#restricted-additive-schwarz-smoother">Restricted additive Schwarz smoother</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#multiphase-helmholtz-equation">Multiphase Helmholtz equation</a><ul>
@@ -93,6 +95,8 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#amrmultigrid">AMRMultiGrid</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#bottom-solvers">Bottom solvers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#krylov-accelerated-multigrid">Krylov-accelerated multigrid</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tuning-multigrid-performance">Tuning multigrid performance</a></li>
 </ul>
 </li>
 </ul>
@@ -306,12 +310,53 @@ The currently supported smoothers are:</p>
 <li><p>Standard point Jacobi relaxation.</p></li>
 <li><p>Red-black Gauss-Seidel relaxation in which the relaxation pattern follows that of a checkerboard.</p></li>
 <li><p>Multi-colored Gauss-Seidel relaxation in which the relaxation pattern follows quadrants in 2D and octants in 3D.</p></li>
+<li><p>Chebyshev polynomial relaxation (see <a class="reference internal" href="#chap-chebyshevsmoother"><span class="std std-ref">Chebyshev smoother</span></a> below).</p></li>
+<li><p>Restricted additive Schwarz (a block smoother, see <a class="reference internal" href="#chap-schwarzsmoother"><span class="std std-ref">Restricted additive Schwarz smoother</span></a> below).</p></li>
 </ol>
 <p>Users can select between the various smoothers in solvers that use multigrid.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p>Red-black Gauss-Seidel usually provides the best convergence rates.
 The multi-colored kernels are twice as expensive as red-black Gauss-Seidel relaxation in 2D, and four times as expensive in 3D, and tend to only marginally improve convergence rates.</p>
+</div>
+</section>
+<section id="chebyshev-smoother">
+<span id="chap-chebyshevsmoother"></span><h3>Chebyshev smoother<a class="headerlink" href="#chebyshev-smoother" title="Permalink to this heading"></a></h3>
+<p>The Chebyshev smoother is a polynomial (Chebyshev-Richardson) relaxation method that targets a prescribed window of the operator spectrum.
+A single invocation applies <span class="math notranslate nohighlight">\(k\)</span> Richardson steps</p>
+<div class="math notranslate nohighlight">
+\[\phi \leftarrow \phi + \omega_i D^{-1}\left(\rho - L\phi\right), \quad i = 0,1,\ldots,k-1,\]</div>
+<p>where <span class="math notranslate nohighlight">\(D\)</span> is the operator diagonal and the step sizes <span class="math notranslate nohighlight">\(\omega_i\)</span> are the reciprocals of the Chebyshev nodes on the eigenvalue window <span class="math notranslate nohighlight">\([\lambda_{\textrm{max}}/r,\,\lambda_{\textrm{max}}]\)</span>.
+Here <span class="math notranslate nohighlight">\(k\)</span> is the polynomial <em>degree</em> (<code class="docutils literal notranslate"><span class="pre">order</span></code>) and <span class="math notranslate nohighlight">\(r\)</span> is the <em>eigenvalue ratio</em> (<code class="docutils literal notranslate"><span class="pre">eig_ratio</span></code>), both supplied by the user.
+The upper bound <span class="math notranslate nohighlight">\(\lambda_{\textrm{max}}\)</span> is estimated automatically from a Gershgorin bound on the Jacobi-preconditioned operator <span class="math notranslate nohighlight">\(D^{-1}A\)</span>, and is therefore consistent with the operator coefficients (it equals <span class="math notranslate nohighlight">\(2\)</span> for a pure Laplacian and is smaller when the <span class="math notranslate nohighlight">\(\alpha\)</span>-term is present).</p>
+<p>The Chebyshev smoother is selected through the smoother specification, e.g.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>FieldSolverGMG.gmg_smoother = chebyshev 3 4.0
+</pre></div>
+</div>
+<p>which selects polynomial degree <span class="math notranslate nohighlight">\(k = 3\)</span> and eigenvalue ratio <span class="math notranslate nohighlight">\(r = 4.0\)</span>.
+The same syntax is used by the other solvers that expose a <code class="docutils literal notranslate"><span class="pre">gmg_smoother</span></code> option.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>A single Chebyshev invocation performs <code class="docutils literal notranslate"><span class="pre">order</span></code> operator applications, so <code class="docutils literal notranslate"><span class="pre">gmg_smoother</span> <span class="pre">=</span> <span class="pre">chebyshev</span> <span class="pre">3</span> <span class="pre">4.0</span></code> with four pre/post smoothings costs roughly as much per V-cycle as twelve red-black smoothings.
+The Chebyshev smoother is most useful with inexpensive (low-order) embedded-boundary stencils, where it reduces the number of V-cycles relative to Gauss-Seidel; with high-order boundary stencils Gauss-Seidel typically matches it at lower cost.</p>
+</div>
+</section>
+<section id="restricted-additive-schwarz-smoother">
+<span id="chap-schwarzsmoother"></span><h3>Restricted additive Schwarz smoother<a class="headerlink" href="#restricted-additive-schwarz-smoother" title="Permalink to this heading"></a></h3>
+<p>The restricted additive Schwarz smoother is a <em>block</em> smoother whose blocks are the disjoint grid patches.
+Each outer invocation fills the ghost cells once and then performs a number of red-black Gauss-Seidel sweeps on every patch <em>with the ghost cells held frozen</em> (a Dirichlet, inexact local solve).
+Across patches the iteration is additive (block Jacobi), and since the blocks are disjoint the update is automatically restricted to the valid region; no additive damping is required.</p>
+<p>The smoother is selected through the smoother specification, with the number of inner (frozen-ghost) sweeps as an argument, e.g.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>FieldSolverGMG.gmg_smoother = ras 2
+</pre></div>
+</div>
+<p>which performs two inner sweeps per outer relaxation.
+The same syntax works for the other solvers that expose <code class="docutils literal notranslate"><span class="pre">gmg_smoother</span></code> (e.g. <code class="docutils literal notranslate"><span class="pre">CdrCTU</span></code>, <code class="docutils literal notranslate"><span class="pre">CdrGodunov</span></code>, <code class="docutils literal notranslate"><span class="pre">EddingtonSP1</span></code>).</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>The key property of this smoother is that it amortises the halo exchange (and, for the multiphase operator, the jump-boundary update) over the inner sweeps: it performs only one exchange per outer relaxation rather than one per colour.
+On communication-bound problems it therefore reaches a given multigrid convergence rate with fewer halo exchanges than point relaxation, even though it performs more operator applications per cycle.
+Over-solving each block (a large inner-sweep count) is counter-productive, because the additive coupling then over-commits to stale neighbour data; two inner sweeps is a good default.</p>
 </div>
 </section>
 </section>
@@ -372,6 +417,150 @@ It takes an “operator factory” as an argument, and the factory can generate 
 <p>The user can select between these for the various solvers that use multigrid.
 Typically, smoothers tend to work sufficiently well if one can coarsen sufficiently far, although improved convergence rates can occasionally be achieved by using a conjugate gradient solver.
 In each case, a simple smoother with a specified number of relaxations is applied as a preconditioner for the bottom solver.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <em>bottom solver</em> (<code class="docutils literal notranslate"><span class="pre">gmg_bottom_solver</span></code>) is the coarse-grid solver applied at the bottom of each V-cycle. It is unrelated to the top-level <code class="docutils literal notranslate"><span class="pre">solver</span></code> keyword described next, which selects whether the V-cycle is used stand-alone or as a preconditioner for an outer Krylov method.</p>
+</div>
+</section>
+<section id="krylov-accelerated-multigrid">
+<span id="chap-krylovmultigrid"></span><h3>Krylov-accelerated multigrid<a class="headerlink" href="#krylov-accelerated-multigrid" title="Permalink to this heading"></a></h3>
+<p>By default the Helmholtz equation is solved by stand-alone multigrid V-cycling (<code class="docutils literal notranslate"><span class="pre">solver</span> <span class="pre">=</span> <span class="pre">gmg</span></code>), which is the cheapest option and the right choice whenever it converges well.
+On hard problems, however, the V-cycle convergence rate can degrade or stall: strong coefficient contrast (e.g. high-permittivity dielectrics), awkward cut-cell geometry, deep AMR hierarchies, or nearly indefinite operators can all make multigrid converge slowly, <em>hang</em> (see <code class="docutils literal notranslate"><span class="pre">gmg_exit_hang</span></code>), or exhaust <code class="docutils literal notranslate"><span class="pre">gmg_max_iter</span></code>.
+In these cases the multigrid cycle can instead be used as a <em>preconditioner</em> for an outer Krylov method, which removes the slowly-converging error modes that the smoother and coarse-grid correction cannot, and converges robustly where stand-alone multigrid does not:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>FieldSolverGMG.solver = gmres      # or &#39;bicgstab&#39;
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> ships its own GMRES and BiCGStab implementations for this purpose (in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Source/Elliptic</span></code>); these are <em>not</em> the Chombo bottom solvers of the same name.
+Both act directly on the AMR hierarchy: the matrix-vector product is the composite Helmholtz operator, and the preconditioner is the multigrid cycle, supplied through a thin adapter (<code class="docutils literal notranslate"><span class="pre">AMRMultigridKrylovOp</span></code>). The cycle type is deferred to the multigrid configuration (<code class="docutils literal notranslate"><span class="pre">gmg_cycle</span></code>) and is normally a V-cycle for efficiency.
+The solve is carried out in residual-correction form, so inhomogeneous boundary conditions and dielectric jump/surface-charge contributions are handled correctly, and a non-zero initial guess (warm start) is honoured.
+The multigrid preconditioner is configured exactly as for stand-alone multigrid (<code class="docutils literal notranslate"><span class="pre">gmg_smoother</span></code>, <code class="docutils literal notranslate"><span class="pre">gmg_pre_smooth</span></code>, <code class="docutils literal notranslate"><span class="pre">gmg_cycle</span></code>, <code class="docutils literal notranslate"><span class="pre">gmg_bottom_solver</span></code>, …); only the outer wrapper changes.
+The same <code class="docutils literal notranslate"><span class="pre">solver</span></code> keyword is available on <code class="docutils literal notranslate"><span class="pre">FieldSolverGMG</span></code> (multiphase) and on the single-phase solvers <code class="docutils literal notranslate"><span class="pre">CdrCTU</span></code>, <code class="docutils literal notranslate"><span class="pre">CdrGodunov</span></code>, and <code class="docutils literal notranslate"><span class="pre">EddingtonSP1</span></code>.</p>
+<p>The two methods implement:</p>
+<ul class="simple">
+<li><p><strong>GMRES</strong> (<code class="docutils literal notranslate"><span class="pre">gmres</span></code>) – a restarted, right-preconditioned generalized minimal residual method, <span class="math notranslate nohighlight">\(\textrm{GMRES}(m)\)</span> with <span class="math notranslate nohighlight">\(m =\)</span> <code class="docutils literal notranslate"><span class="pre">krylov_restart</span></code>.
+It builds an orthonormal Krylov basis by Arnoldi iteration (classical Gram-Schmidt with reorthogonalization) and chooses, at each step, the correction that minimizes the residual over the current subspace; every <code class="docutils literal notranslate"><span class="pre">krylov_restart</span></code> iterations the basis is discarded and the iteration restarts from the current solution.
+It is robust and is the recommended default.
+Its memory cost grows with <code class="docutils literal notranslate"><span class="pre">krylov_restart</span></code> (it stores roughly <code class="docutils literal notranslate"><span class="pre">krylov_restart</span></code> AMR-sized vectors), which can be significant on large grids.</p></li>
+<li><p><strong>BiCGStab</strong> (<code class="docutils literal notranslate"><span class="pre">bicgstab</span></code>) – a stabilized biconjugate-gradient method built on short recurrences.
+It uses a small, fixed amount of work storage independent of the iteration count, so it is cheaper in memory than GMRES and is often competitive in iteration count.
+Its recurrences can, however, <em>break down</em> (a near-zero inner product) on poorly-conditioned or strongly non-symmetric problems; the implementation restarts a bounded number of times on breakdown, but GMRES is the safer choice when robustness matters.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">solver</span></code> also accepts a space-separated <em>fallback chain</em> of any length (e.g. <code class="docutils literal notranslate"><span class="pre">gmg</span> <span class="pre">bicgstab</span> <span class="pre">gmres</span></code>): the listed solvers are attempted in order and the first that converges wins. Each attempt warm-starts from the previous attempt’s result <em>only if</em> that result reduced the residual below the chain’s initial residual; otherwise it falls back to the initial-residual solution, so a diverged attempt never pollutes the next solver’s initial guess. The idiomatic choice is</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>FieldSolverGMG.solver = gmg gmres
+</pre></div>
+</div>
+<p>which runs cheap stand-alone multigrid and only pays for GMRES on the (hopefully rare) steps where multigrid fails to converge – giving the speed of multigrid with the robustness of a Krylov method.</p>
+<p>When the chain begins with <code class="docutils literal notranslate"><span class="pre">gmg</span></code> and multigrid fails <em>persistently</em> (e.g. a fixed, hard field operator that the V-cycle cannot crack), retrying it first on every solve wastes a full failed V-cycle batch each time before the fallback even starts.
+<code class="docutils literal notranslate"><span class="pre">krylov_retry_interval</span></code> governs this: after a multigrid failure the chain <em>latches</em> onto the Krylov solver and skips multigrid, re-probing it only every <code class="docutils literal notranslate"><span class="pre">krylov_retry_interval</span></code> solves and releasing the latch as soon as a re-probe converges.
+The default <code class="docutils literal notranslate"><span class="pre">1</span></code> retries multigrid on every solve (no latching, the original behaviour); a large value approaches “switch to the Krylov solver and stay there”.
+<code class="docutils literal notranslate"><span class="pre">krylov_reprobe_iters</span></code> adds an optional <em>adaptive</em> trigger on top: while latched, if the Krylov solver converges in that many iterations or fewer the preconditioner is evidently strong, so multigrid is re-probed on the next solve without waiting for the full interval.
+The latch is counted in solves and is deliberately independent of regridding, so it behaves sensibly even when regrids are far more frequent than the desired re-probe cadence; the latch <em>release</em> (a re-probe that converges) is reported at <code class="docutils literal notranslate"><span class="pre">gmg_verbosity</span> <span class="pre">&gt;=</span> <span class="pre">1</span></code>.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Reach for the Krylov solvers when stand-alone multigrid is the bottleneck: if <code class="docutils literal notranslate"><span class="pre">gmg_verbosity</span> <span class="pre">&gt;</span> <span class="pre">0</span></code> shows the V-cycle hanging, hitting <code class="docutils literal notranslate"><span class="pre">gmg_max_iter</span></code>, or converging at a poor rate that you cannot fix by adjusting the smoother, cycle type, or coarsening, switch to <code class="docutils literal notranslate"><span class="pre">gmres</span></code> (or the <code class="docutils literal notranslate"><span class="pre">gmg</span> <span class="pre">gmres</span></code> fallback chain).
+Conversely, if pure multigrid already converges in a handful of V-cycles there is nothing to gain – the outer Krylov iteration only adds cost.</p>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p><code class="docutils literal notranslate"><span class="pre">gmres</span></code> is robust and the recommended default; raise <code class="docutils literal notranslate"><span class="pre">krylov_restart</span></code> if it stagnates (at the cost of memory) or lower it to save memory.
+<code class="docutils literal notranslate"><span class="pre">bicgstab</span></code> uses a small, fixed amount of work storage but can break down on poorly-conditioned problems.
+<code class="docutils literal notranslate"><span class="pre">krylov_vcycles</span></code> controls how many multigrid cycles make up one preconditioner application (usually 1); the cycle <em>type</em> is deferred to the multigrid configuration via <code class="docutils literal notranslate"><span class="pre">gmg_cycle</span></code> (V- or W-cycles), and should normally be a V-cycle for efficiency.</p>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">solver</span></code> key and the <code class="docutils literal notranslate"><span class="pre">krylov_*</span></code> keys are mandatory input parameters (like the <code class="docutils literal notranslate"><span class="pre">gmg_*</span></code> keys) and must be present in the input file; the shipped templates set <code class="docutils literal notranslate"><span class="pre">solver</span> <span class="pre">=</span> <span class="pre">gmg</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The Krylov convergence history is computed from a threaded floating-point reduction (the AMR inner product), so the printed residuals – and the solution at a finite tolerance – vary slightly from run to run. This is expected for parallel Krylov solvers; run single-threaded for bit-reproducibility.</p>
+</div>
+</section>
+<section id="tuning-multigrid-performance">
+<span id="chap-multigridtuning"></span><h3>Tuning multigrid performance<a class="headerlink" href="#tuning-multigrid-performance" title="Permalink to this heading"></a></h3>
+<p>Multigrid coarsens the solution (and the geometry with it) over a hierarchy of grid levels and smooths the solution on each level.
+A number of factors influence its performance; often the most critical are the radius of the cut-cell stencils and how far multigrid is allowed to coarsen.
+Convergence is further improved by increasing the number of smoothings per level (up to a point) and by the choice of smoother and bottom solver.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">EBHelmholtzOp</span></code> and <code class="docutils literal notranslate"><span class="pre">MFHelmholtzOp</span></code> operators are configured through ParmParse at run time.
+All parameters below use a solver-class prefix (e.g. <code class="docutils literal notranslate"><span class="pre">FieldSolverGMG</span></code>, <code class="docutils literal notranslate"><span class="pre">EddingtonSP1</span></code>, <code class="docutils literal notranslate"><span class="pre">CdrGodunov</span></code>, <code class="docutils literal notranslate"><span class="pre">CdrCTU</span></code>); the generic <code class="docutils literal notranslate"><span class="pre">gmg_</span></code> stem is shared across all solvers.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;Solver&gt;.gmg_verbosity</span></code>.
+Controls the multigrid verbosity; a value <span class="math notranslate nohighlight">\(&gt; 0\)</span> prints multigrid convergence information.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;Solver&gt;.gmg_bottom_verbosity</span></code>.
+Controls the bottom-solver verbosity; a value <span class="math notranslate nohighlight">\(&gt; 0\)</span> prints bottom-solver convergence information (the detail depends on the bottom solver in use).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;Solver&gt;.gmg_use_default_settings</span></code>.
+Use a known-robust set of default multigrid settings.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Enabling this tends to make most problems converge, but potentially at suboptimal convergence rates.</p>
+</div>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;Solver&gt;.gmg_pre_smooth</span></code>.
+Controls the number of relaxations on each level during multigrid downsweeps.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;Solver&gt;.gmg_post_smooth</span></code>.
+Controls the number of relaxations on each level during multigrid upsweeps.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;Solver&gt;.gmg_bott_smooth</span></code>.
+Controls the number of relaxations before entering the bottom solve.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;Solver&gt;.gmg_min_iter</span></code>.
+Sets the minimum number of multigrid V-cycles to perform, regardless of the residual.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;Solver&gt;.gmg_max_iter</span></code>.
+Sets the maximum number of V-cycles before declaring convergence failure.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;Solver&gt;.gmg_exit_tol</span></code>.
+Sets the exit tolerance for multigrid.
+Multigrid exits if <span class="math notranslate nohighlight">\(r &lt; \lambda r_0\)</span>, where <span class="math notranslate nohighlight">\(\lambda\)</span> is the specified tolerance, <span class="math notranslate nohighlight">\(r = |L\Phi - \rho|\)</span> is the residual, and <span class="math notranslate nohighlight">\(r_0\)</span> is the residual for <span class="math notranslate nohighlight">\(\Phi = 0\)</span>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;Solver&gt;.gmg_exit_hang</span></code>.
+Sets the minimum permitted reduction in the convergence rate before aborting.
+Letting <span class="math notranslate nohighlight">\(r^k\)</span> be the residual after <span class="math notranslate nohighlight">\(k\)</span> multigrid cycles, multigrid will abort if <span class="math notranslate nohighlight">\(r^{k+1} \geq (1-h)r^k\)</span>, where <span class="math notranslate nohighlight">\(h\)</span> is the hang factor.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;Solver&gt;.gmg_min_cells</span></code>.
+Sets the minimum number of cells along any coordinate direction for coarsened multigrid levels.
+This controls how far multigrid will coarsen; e.g. <code class="docutils literal notranslate"><span class="pre">gmg_min_cells</span> <span class="pre">=</span> <span class="pre">16</span></code> stops coarsening when the domain has 16 cells in any direction.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;Solver&gt;.gmg_bc_order</span></code>.
+Sets the polynomial order (and stencil radius) for least-squares gradient reconstruction on embedded boundaries.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;Solver&gt;.gmg_bc_weight</span></code>.
+Sets the least-squares stencil weighting factor for gradient reconstruction on EBs.
+See <a class="reference internal" href="../Utilities/LeastSquares.html#chap-leastsquares"><span class="std std-ref">Least squares</span></a> for details.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;Solver&gt;.gmg_jump_order</span></code>.
+Sets the stencil order for least-squares gradient reconstruction at dielectric interfaces (multiphase problems only).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;Solver&gt;.gmg_jump_weight</span></code>.
+Sets the least-squares stencil weighting factor for gradient reconstruction at dielectric interfaces.
+See <a class="reference internal" href="../Utilities/LeastSquares.html#chap-leastsquares"><span class="std std-ref">Least squares</span></a> for details.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;Solver&gt;.gmg_bottom_solver</span></code>.
+Sets the bottom solver type: <code class="docutils literal notranslate"><span class="pre">bicgstab</span></code>, <code class="docutils literal notranslate"><span class="pre">gmres</span></code>, or <code class="docutils literal notranslate"><span class="pre">simple</span> <span class="pre">&lt;N&gt;</span></code> where <code class="docutils literal notranslate"><span class="pre">N</span></code> is the number of smoothings.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;Solver&gt;.gmg_cycle</span></code>.
+Sets the multigrid cycle type: <code class="docutils literal notranslate"><span class="pre">vcycle</span></code> or <code class="docutils literal notranslate"><span class="pre">wcycle</span></code>.
+W-cycles do more coarse-grid work per cycle and can help when V-cycle convergence rates degrade, but are substantially more expensive per cycle in deep AMR hierarchies.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;Solver&gt;.gmg_smoother</span></code>.
+Sets the multigrid smoother: <code class="docutils literal notranslate"><span class="pre">jacobi</span></code>, <code class="docutils literal notranslate"><span class="pre">red_black</span></code>, <code class="docutils literal notranslate"><span class="pre">multi_color</span></code>, <code class="docutils literal notranslate"><span class="pre">chebyshev</span> <span class="pre">&lt;order&gt;</span> <span class="pre">&lt;eig_ratio&gt;</span></code> (see <a class="reference internal" href="#chap-chebyshevsmoother"><span class="std std-ref">Chebyshev smoother</span></a>), or <code class="docutils literal notranslate"><span class="pre">ras</span></code> (see <a class="reference internal" href="#chap-schwarzsmoother"><span class="std std-ref">Restricted additive Schwarz smoother</span></a>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;Solver&gt;.gmg_relax_factor</span></code>.
+Sets the overall relaxation damping factor applied to each smoother update.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;Solver&gt;.gmg_reflux_free</span></code>.
+If <code class="docutils literal notranslate"><span class="pre">true</span></code>, use the reflux-free AMR operator.
+Rather than computing coarse- and fine-level fluxes separately and then applying a reflux correction, this variant fills the coarse-level coarse-fine interface fluxes by conservatively averaging the fine-level fluxes, which are themselves computed from the composite (CF-interpolated) solution.
+The two formulations are mathematically equivalent; neither is more accurate than the other.
+Default is <code class="docutils literal notranslate"><span class="pre">false</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;Solver&gt;.solver</span></code>.
+Selects the top-level solver: <code class="docutils literal notranslate"><span class="pre">gmg</span></code> (stand-alone multigrid), <code class="docutils literal notranslate"><span class="pre">gmres</span></code>, or <code class="docutils literal notranslate"><span class="pre">bicgstab</span></code>. The latter two use the multigrid cycle as a preconditioner. A space-separated list is a fallback chain tried in order, e.g. <code class="docutils literal notranslate"><span class="pre">gmg</span> <span class="pre">gmres</span></code> (see <a class="reference internal" href="#chap-krylovmultigrid"><span class="std std-ref">Krylov-accelerated multigrid</span></a>). This key and the <code class="docutils literal notranslate"><span class="pre">krylov_*</span></code> keys below are mandatory.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;Solver&gt;.krylov_eps</span></code>.
+Relative residual tolerance for the outer Krylov solver (<code class="docutils literal notranslate"><span class="pre">gmres</span></code>/<code class="docutils literal notranslate"><span class="pre">bicgstab</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;Solver&gt;.krylov_max_iter</span></code>.
+Maximum number of outer Krylov iterations.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;Solver&gt;.krylov_restart</span></code>.
+GMRES restart length (ignored for <code class="docutils literal notranslate"><span class="pre">bicgstab</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;Solver&gt;.krylov_vcycles</span></code>.
+Number of multigrid cycles applied per Krylov preconditioner application. The cycle type is deferred to the multigrid configuration via <code class="docutils literal notranslate"><span class="pre">gmg_cycle</span></code> and should normally be a V-cycle for efficiency.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;Solver&gt;.krylov_retry_interval</span></code>.
+For a <code class="docutils literal notranslate"><span class="pre">gmg</span> <span class="pre">...</span></code> fallback chain: when stand-alone multigrid fails and the chain latches onto the Krylov solver, re-probe multigrid every this many solves (see <a class="reference internal" href="#chap-krylovmultigrid"><span class="std std-ref">Krylov-accelerated multigrid</span></a>). Optional; defaults to <code class="docutils literal notranslate"><span class="pre">1</span></code> (retry multigrid first on every solve). Larger values skip the wasted multigrid attempt while it keeps failing.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;Solver&gt;.krylov_reprobe_iters</span></code>.
+Adaptive early re-probe: while latched onto the Krylov fallback, re-probe multigrid on the next solve whenever the Krylov solver converged in this many iterations or fewer (a strong preconditioner suggests multigrid alone may now succeed). Optional; defaults to <code class="docutils literal notranslate"><span class="pre">0</span></code> (disabled, only <code class="docutils literal notranslate"><span class="pre">krylov_retry_interval</span></code> applies).</p></li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>When <code class="docutils literal notranslate"><span class="pre">gmg_bottom_solver</span></code> is set to a regular smoother you must also specify the number of smoothings, e.g.
+<code class="docutils literal notranslate"><span class="pre">&lt;Solver&gt;.gmg_bottom_solver</span> <span class="pre">=</span> <span class="pre">simple</span> <span class="pre">64</span></code>. Using <code class="docutils literal notranslate"><span class="pre">simple</span></code> without a count is a run-time error.</p>
+</div>
+<p>The outer Krylov solver reuses the <code class="docutils literal notranslate"><span class="pre">gmg_verbosity</span></code> setting (there is no separate <code class="docutils literal notranslate"><span class="pre">krylov_verbosity</span></code>). With <code class="docutils literal notranslate"><span class="pre">gmg_verbosity</span> <span class="pre">&gt;=</span> <span class="pre">1</span></code> a one-line convergence summary is printed for each Krylov solve (the relative residual <code class="docutils literal notranslate"><span class="pre">rel.res</span></code>, the absolute residual <code class="docutils literal notranslate"><span class="pre">|r|</span></code>, the zero-residual <code class="docutils literal notranslate"><span class="pre">|r_zero|</span></code>, the iteration count, and the exit status), and a message is printed whenever a fallback chain switches solver; the per-iteration residual history from the GMRES/BiCGStab solvers is printed at <code class="docutils literal notranslate"><span class="pre">gmg_verbosity</span> <span class="pre">&gt;=</span> <span class="pre">4</span></code>. The printed residuals are <em>relative</em> residuals – the true residual normalized by the zero-residual <code class="docutils literal notranslate"><span class="pre">||rhs</span> <span class="pre">-</span> <span class="pre">L(0)||</span></code> – so progress is on a common, solver-independent scale that is directly comparable to the convergence tolerance <code class="docutils literal notranslate"><span class="pre">krylov_eps</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The actual ParmParse prefix for these parameters is set by the top-level solver
+(e.g., <code class="docutils literal notranslate"><span class="pre">FieldSolverGMG</span></code>, <code class="docutils literal notranslate"><span class="pre">EddingtonSP1</span></code>, <code class="docutils literal notranslate"><span class="pre">CdrGodunov</span></code>, <code class="docutils literal notranslate"><span class="pre">CdrCTU</span></code>).
+Refer to the individual solver documentation for the exact prefix.</p>
+</div>
 </section>
 </section>
 </section>

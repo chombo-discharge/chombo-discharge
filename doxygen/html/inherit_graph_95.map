@@ -1,3 +1,9 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$classMFMultigridInterpolator.html" title="Wrapper class for holding multifluid EBMultigridInterpolators." alt="" coords="5,5,181,31"/>
+<area shape="rect" id="Node000000" title=" " alt="" coords="5,77,85,102"/>
+<area shape="rect" id="Node000001" href="$classAMRMultigridKrylovOp.html" title=" " alt="" coords="152,5,323,45"/>
+<area shape="poly" id="edge104_Node000000_Node000001" title=" " alt="" coords="92,69,132,55,169,43,170,48,134,60,93,74"/>
+<area shape="rect" id="Node000002" href="$classAMRMultigridKrylovOp.html" title=" " alt="" coords="152,69,323,109"/>
+<area shape="poly" id="edge105_Node000000_Node000002" title=" " alt="" coords="99,87,152,87,152,92,99,92"/>
+<area shape="rect" id="Node000003" href="$classAMRMultigridKrylovOp.html" title="Adapter presenting an already&#45;defined AMRMultiGrid as a LinearOp over the AMR hierarchy." alt="" coords="133,134,341,159"/>
+<area shape="poly" id="edge106_Node000000_Node000003" title=" " alt="" coords="92,104,134,119,180,131,179,137,133,124,90,109"/>
 </map>

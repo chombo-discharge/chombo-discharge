@@ -391,6 +391,8 @@ We do not discuss all options here, but note the following:
 * ``CdrCTU.use_ctu``, which must be *true* or *false*.
   If setting this to false, transverse terms are turned off the ``CdrCTU`` will use the donor-cell scheme and time step restriction.
 * All options that begin with ``gmg_`` indicate control over how the geometric multigrid algorithm operates, e.g., number of smoothings on each level or the bottom solver type.
+  In particular, ``gmg_reflux_free`` (default ``false``) selects the reflux-free AMR operator, which fills coarse-level coarse-fine interface fluxes by conservatively averaging the fine-level fluxes computed from the composite solution, rather than applying a separate reflux correction step.
+  The two formulations are mathematically equivalent.
 * ``CdrCTU.plt_vars`` indicate which variables are added to plot files.
 
 .. _Chap:CdrGodunov:

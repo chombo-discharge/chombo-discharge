@@ -133,6 +133,9 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~EBHelmholtzRobinD
 <tr class="memitem:aa94ba1c4e56929cb94bbf04d1595b1a6" id="r_aa94ba1c4e56929cb94bbf04d1595b1a6"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzRobinDomainBC.html#aa94ba1c4e56929cb94bbf04d1595b1a6">getFaceFlux</a> (const VolIndex &amp;a_vof, const EBCellFAB &amp;a_phi, const EBFaceFAB &amp;a_Bcoef, const int &amp;a_dir, const Side::LoHiSide &amp;a_side, const DataIndex &amp;a_dit, const bool a_useHomogeneous) const override</td></tr>
 <tr class="memdesc:aa94ba1c4e56929cb94bbf04d1595b1a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get face flux. This is for irregular cells.  <br /></td></tr>
 <tr class="separator:aa94ba1c4e56929cb94bbf04d1595b1a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acfb9f6cd1b6685d371ce6a3e96a18b9d" id="r_acfb9f6cd1b6685d371ce6a3e96a18b9d"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzRobinDomainBC.html#acfb9f6cd1b6685d371ce6a3e96a18b9d">getDiagWeight</a> (const int a_dir, const Side::LoHiSide a_side) const override</td></tr>
+<tr class="memdesc:acfb9f6cd1b6685d371ce6a3e96a18b9d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Diagonal-weight multiplier for the domain-face contribution to the relaxation diagonal.  <br /></td></tr>
+<tr class="separator:acfb9f6cd1b6685d371ce6a3e96a18b9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classEBHelmholtzDomainBC"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classEBHelmholtzDomainBC')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classEBHelmholtzDomainBC.html">EBHelmholtzDomainBC</a></td></tr>
 <tr class="memitem:a62a27c07e95d20640a776252334856a7 inherit pub_methods_classEBHelmholtzDomainBC" id="r_a62a27c07e95d20640a776252334856a7"><td class="memItemLeft" align="right" valign="top">
 &#160;</td><td class="memItemRight" valign="bottom"><b>EBHelmholtzDomainBC</b> ()</td></tr>
@@ -240,6 +243,54 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 <dd>
 In our notation, n points into the computational domain. </dd></dl>
 </div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="acfb9f6cd1b6685d371ce6a3e96a18b9d" name="acfb9f6cd1b6685d371ce6a3e96a18b9d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acfb9f6cd1b6685d371ce6a3e96a18b9d">&#9670;&#160;</a></span>getDiagWeight()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Real EBHelmholtzRobinDomainBC::getDiagWeight </td>
+          <td>(</td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_dir</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Side::LoHiSide&#160;</td>
+          <td class="paramname"><em>a_side</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Diagonal-weight multiplier for the domain-face contribution to the relaxation diagonal. </p>
+<p>See <a class="el" href="classEBHelmholtzDomainBC.html#a24fd78e8d1e9e6408c7d6bf5be80091b" title="Diagonal-weight multiplier for this boundary face&#39;s contribution to the relaxation diagonal.">EBHelmholtzDomainBC::getDiagWeight</a> for how this is selected. The value here preserves the 1.0 that this BC inherited from the previous (non-pure) base default; it has not been re-derived from the Robin getFaceFlux discretization and should be reviewed against it. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dir</td><td>Coordinate direction of the face. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_side</td><td>High or low side. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Diagonal weight. </dd></dl>
+
+<p>Implements <a class="el" href="classEBHelmholtzDomainBC.html#a24fd78e8d1e9e6408c7d6bf5be80091b">EBHelmholtzDomainBC</a>.</p>
+
+</div>
+</div>
 <a id="ac2f46f12385bddc8a77c61634e4a2124" name="ac2f46f12385bddc8a77c61634e4a2124"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ac2f46f12385bddc8a77c61634e4a2124">&#9670;&#160;</a></span>getFaceFlux() <span class="overload">[1/2]</span></h2>
 

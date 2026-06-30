@@ -1,0 +1,7 @@
+<map id="KrylovBiCGStab&lt; T &gt;" name="KrylovBiCGStab&lt; T &gt;">
+<area shape="rect" id="Node000001" title="Preconditioned BiCGStab solver acting on an AMR hierarchy through AMRMultigridKrylovOp." alt="" coords="157,5,320,31"/>
+<area shape="rect" id="Node000002" href="$classKrylovBiCGStab.html" title=" " alt="" coords="5,93,227,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="212,41,134,95,131,91,209,37"/>
+<area shape="rect" id="Node000003" href="$classKrylovBiCGStab.html" title=" " alt="" coords="251,93,475,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="270,36,294,52,348,91,345,95,290,57,267,41"/>
+</map>

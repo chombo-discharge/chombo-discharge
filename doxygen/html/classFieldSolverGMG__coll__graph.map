@@ -1,9 +1,35 @@
 <map id="FieldSolverGMG" name="FieldSolverGMG">
-<area shape="rect" id="Node000001" title="Implementation of FieldSolver which uses multigrid." alt="" coords="115,168,242,193"/>
-<area shape="rect" id="Node000002" href="$classFieldSolver.html" title="Base class for electrostatic solvers." alt="" coords="131,93,226,119"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="181,133,181,168,176,168,176,133"/>
-<area shape="rect" id="Node000003" href="$classElectrostaticDomainBc.html" title="Class which maps boundary condition types to a side and direction." alt="" coords="5,5,176,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="114,38,168,91,165,95,110,42"/>
-<area shape="rect" id="Node000004" href="$classElectrostaticEbBc.html" title="Class which maps boundary condition types to a side and direction." alt="" coords="201,5,335,31"/>
-<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="257,45,237,71,203,95,200,91,233,67,253,41"/>
+<area shape="rect" id="Node000001" title="Implementation of FieldSolver which uses multigrid." alt="" coords="1719,120,1845,145"/>
+<area shape="rect" id="Node000002" href="$classFieldSolver.html" title="Base class for electrostatic solvers." alt="" coords="1399,31,1493,56"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1508,49,1597,66,1696,91,1757,117,1755,122,1694,97,1596,71,1507,54"/>
+<area shape="rect" id="Node000003" href="$classElectrostaticDomainBc.html" title="Class which maps boundary condition types to a side and direction." alt="" coords="991,5,1161,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="1175,22,1399,37,1398,43,1175,27"/>
+<area shape="rect" id="Node000004" href="$classElectrostaticEbBc.html" title="Class which maps boundary condition types to a side and direction." alt="" coords="1009,55,1143,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="1157,65,1316,59,1398,49,1399,54,1316,65,1157,71"/>
+<area shape="rect" id="Node000005" href="$structEllipticSolverChain_1_1Settings.html" title="Outer&#45;Krylov configuration. Defaults reproduce stand&#45;alone multigrid (solvers == {GMG})." alt="" coords="1374,81,1518,121"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="1532,106,1719,124,1718,129,1531,111"/>
+<area shape="rect" id="Node000006" href="$structEllipticSolverChain_1_1FallbackPolicy.html" title="Stateful policy for the solver fallback chain." alt="" coords="1374,145,1518,185"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="1532,156,1694,142,1718,139,1719,144,1695,147,1532,162"/>
+<area shape="rect" id="Node000007" href="$classEllipticSolverChain_1_1KrylovSolver.html" title=" " alt="" coords="1340,209,1552,249"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="1565,208,1630,193,1694,174,1758,143,1761,148,1696,179,1631,199,1566,213"/>
+<area shape="rect" id="Node000008" href="$classAMRMultigridKrylovOp.html" title=" " alt="" coords="641,191,812,231"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="826,211,1340,223,1340,229,826,216"/>
+<area shape="rect" id="Node000012" href="$classKrylovBiCGStab.html" title=" " alt="" coords="964,260,1188,285"/>
+<area shape="poly" id="edge12_Node000012_Node000008" title=" " alt="" coords="800,233,837,242,964,261,963,267,835,247,799,238"/>
+<area shape="rect" id="Node000014" href="$classKrylovGMRES.html" title=" " alt="" coords="971,147,1181,172"/>
+<area shape="poly" id="edge15_Node000014_Node000008" title=" " alt="" coords="826,194,990,169,990,175,826,199"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="272,169,489,209"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="503,194,641,203,641,208,503,199"/>
+<area shape="rect" id="Node000010" href="$classAMRMultigridKrylovOp.html" title="Adapter presenting an already&#45;defined AMRMultiGrid as a LinearOp over the AMR hierarchy." alt="" coords="277,233,485,259"/>
+<area shape="poly" id="edge9_Node000008_Node000010" title=" " alt="" coords="499,234,617,222,641,219,641,225,618,227,499,239"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="5,226,223,266"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="236,243,276,243,276,249,236,249"/>
+<area shape="poly" id="edge11_Node000007_Node000012" title=" " alt="" coords="1200,256,1316,242,1339,239,1340,244,1316,247,1201,261"/>
+<area shape="rect" id="Node000013" href="$classKrylovBiCGStab.html" title="Preconditioned BiCGStab solver acting on an AMR hierarchy through AMRMultigridKrylovOp." alt="" coords="645,279,808,304"/>
+<area shape="poly" id="edge13_Node000012_Node000013" title=" " alt="" coords="822,291,940,287,988,283,989,288,940,293,822,296"/>
+<area shape="poly" id="edge14_Node000007_Node000014" title=" " alt="" coords="1196,170,1317,190,1380,206,1379,211,1315,195,1195,175"/>
+<area shape="rect" id="Node000015" href="$classKrylovGMRES.html" title="Restarted GMRES(m) acting on an AMR hierarchy through AMRMultigridKrylovOp." alt="" coords="652,109,801,135"/>
+<area shape="poly" id="edge16_Node000014_Node000015" title=" " alt="" coords="815,129,971,145,970,151,815,134"/>
+<area shape="rect" id="Node000016" href="$classEllipticSolverChain_1_1KrylovSolver.html" title="Stateful owner of the outer&#45;Krylov solver path." alt="" coords="1001,310,1151,350"/>
+<area shape="poly" id="edge17_Node000007_Node000016" title=" " alt="" coords="1164,311,1315,274,1395,246,1397,251,1317,279,1165,316"/>
 </map>

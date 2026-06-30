@@ -127,9 +127,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>reset</b> () noexcept
 <tr class="memitem:a8668f9dd4d2e10987ca640b862b7a438" id="r_a8668f9dd4d2e10987ca640b862b7a438"><td class="memItemLeft" align="right" valign="top">const std::vector&lt; Real &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactions.html#a8668f9dd4d2e10987ca640b862b7a438">getEfficiencies</a> () const noexcept</td></tr>
 <tr class="memdesc:a8668f9dd4d2e10987ca640b862b7a438"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the efficiency (probability) for each competing reaction pathway.  <br /></td></tr>
 <tr class="separator:a8668f9dd4d2e10987ca640b862b7a438"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a56d3b1355590bdcceefe6165c84892f4" id="r_a56d3b1355590bdcceefe6165c84892f4"><td class="memItemLeft" align="right" valign="top">std::discrete_distribution&lt; size_t &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactions.html#a56d3b1355590bdcceefe6165c84892f4">getDistribution</a> () const noexcept</td></tr>
-<tr class="memdesc:a56d3b1355590bdcceefe6165c84892f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the discrete distribution used to randomly select a reaction pathway.  <br /></td></tr>
-<tr class="separator:a56d3b1355590bdcceefe6165c84892f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6ef15ce782f55b9b9fb331223d059e4c" id="r_a6ef15ce782f55b9b9fb331223d059e4c"><td class="memItemLeft" align="right" valign="top">std::discrete_distribution&lt; int &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactions.html#a6ef15ce782f55b9b9fb331223d059e4c">getDistribution</a> () const noexcept</td></tr>
+<tr class="memdesc:a6ef15ce782f55b9b9fb331223d059e4c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the discrete distribution used to randomly select a reaction pathway.  <br /></td></tr>
+<tr class="separator:a6ef15ce782f55b9b9fb331223d059e4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -149,10 +149,10 @@ std::vector&lt; <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReact
 std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_efficiencies</b></td></tr>
 <tr class="memdesc:ac6d4bb38dd647282ca18b77203f2e7f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reaction efficiencies. <br /></td></tr>
 <tr class="separator:ac6d4bb38dd647282ca18b77203f2e7f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac2bc0ecb8739b5a2c7e3a5cbee3d9fa0" id="r_ac2bc0ecb8739b5a2c7e3a5cbee3d9fa0"><td class="memItemLeft" align="right" valign="top"><a id="ac2bc0ecb8739b5a2c7e3a5cbee3d9fa0" name="ac2bc0ecb8739b5a2c7e3a5cbee3d9fa0"></a>
-std::discrete_distribution&lt; size_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_distribution</b></td></tr>
-<tr class="memdesc:ac2bc0ecb8739b5a2c7e3a5cbee3d9fa0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Discrete distribution &ndash; useful when drawing a reaction. <br /></td></tr>
-<tr class="separator:ac2bc0ecb8739b5a2c7e3a5cbee3d9fa0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abfb3ecc13d0c6f276d16ade94b94e4f9" id="r_abfb3ecc13d0c6f276d16ade94b94e4f9"><td class="memItemLeft" align="right" valign="top"><a id="abfb3ecc13d0c6f276d16ade94b94e4f9" name="abfb3ecc13d0c6f276d16ade94b94e4f9"></a>
+std::discrete_distribution&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_distribution</b></td></tr>
+<tr class="memdesc:abfb3ecc13d0c6f276d16ade94b94e4f9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Discrete distribution &ndash; useful when drawing a reaction. <br /></td></tr>
+<tr class="separator:abfb3ecc13d0c6f276d16ade94b94e4f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Reaction class for describing multiple pathways of secondary emissions due to a single outgoing particle in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html" title="Abstract base class coupling Kinetic Monte Carlo chemistry to Ito/CDR plasma solvers.">ItoKMCPhysics</a>. </p>
@@ -192,8 +192,8 @@ std::discrete_distribution&lt; size_t &gt;&#160;</td><td class="memItemRight" va
 
 </div>
 </div>
-<a id="a56d3b1355590bdcceefe6165c84892f4" name="a56d3b1355590bdcceefe6165c84892f4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a56d3b1355590bdcceefe6165c84892f4">&#9670;&#160;</a></span>getDistribution()</h2>
+<a id="a6ef15ce782f55b9b9fb331223d059e4c" name="a6ef15ce782f55b9b9fb331223d059e4c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6ef15ce782f55b9b9fb331223d059e4c">&#9670;&#160;</a></span>getDistribution()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -202,7 +202,7 @@ std::discrete_distribution&lt; size_t &gt;&#160;</td><td class="memItemRight" va
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">std::discrete_distribution&lt; size_t &gt; &amp; ItoKMCSurfaceReactions::getDistribution </td>
+          <td class="memname">std::discrete_distribution&lt; int &gt; &amp; ItoKMCSurfaceReactions::getDistribution </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>

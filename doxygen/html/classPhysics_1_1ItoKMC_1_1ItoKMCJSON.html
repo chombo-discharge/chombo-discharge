@@ -395,9 +395,9 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>initializePar
 <tr class="memitem:a4e3309066e93b4e53d7eacd98e2becfe" id="r_a4e3309066e93b4e53d7eacd98e2becfe"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a4e3309066e93b4e53d7eacd98e2becfe">updateReactionRates</a> (std::vector&lt; std::shared_ptr&lt; const <a class="el" href="CD__ItoKMCPhysics_8H.html#ad61b790100426fb082d6276c5c66a811">KMCReaction</a> &gt; &gt; &amp;a_kmcReactions, const RealVect a_E, const RealVect a_pos, const Vector&lt; Real &gt; &amp;a_phi, const Vector&lt; RealVect &gt; &amp;a_gradPhi, const Real a_dt, const Real a_dx, const Real a_kappa) const noexcept override</td></tr>
 <tr class="memdesc:a4e3309066e93b4e53d7eacd98e2becfe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update reaction rates.  <br /></td></tr>
 <tr class="separator:a4e3309066e93b4e53d7eacd98e2becfe"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a98d867d578f2eecb36df2039d80119b6" id="r_a98d867d578f2eecb36df2039d80119b6"><td class="memItemLeft" align="right" valign="top">std::vector&lt; size_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a98d867d578f2eecb36df2039d80119b6">multinomial</a> (const size_t N, const std::discrete_distribution&lt; size_t &gt; &amp;a_distribution) const noexcept</td></tr>
-<tr class="memdesc:a98d867d578f2eecb36df2039d80119b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sample a multinomial distribution with N samples.  <br /></td></tr>
-<tr class="separator:a98d867d578f2eecb36df2039d80119b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9232747f83e6ab99818108ec6ccbc337" id="r_a9232747f83e6ab99818108ec6ccbc337"><td class="memItemLeft" align="right" valign="top">std::vector&lt; size_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a9232747f83e6ab99818108ec6ccbc337">multinomial</a> (const size_t N, const std::discrete_distribution&lt; int &gt; &amp;a_distribution) const noexcept</td></tr>
+<tr class="memdesc:a9232747f83e6ab99818108ec6ccbc337"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sample a multinomial distribution with N samples.  <br /></td></tr>
+<tr class="separator:a9232747f83e6ab99818108ec6ccbc337"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_methods_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td colspan="2" onclick="javascript:toggleInherit('pro_methods_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics')"><img src="closed.png" alt="-"/>&#160;Protected Member Functions inherited from <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html">Physics::ItoKMC::ItoKMCPhysics</a></td></tr>
 <tr class="memitem:ad07dced52dea863e99271fb07956a143 inherit pro_methods_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics" id="r_ad07dced52dea863e99271fb07956a143"><td class="memItemLeft" align="right" valign="top">
 void&#160;</td><td class="memItemRight" valign="bottom"><b>define</b> () noexcept</td></tr>
@@ -1778,8 +1778,8 @@ static thread_local <a class="el" href="CD__ItoKMCPhysics_8H.html#a0ebb7009dfa17
 
 </div>
 </div>
-<a id="a98d867d578f2eecb36df2039d80119b6" name="a98d867d578f2eecb36df2039d80119b6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a98d867d578f2eecb36df2039d80119b6">&#9670;&#160;</a></span>multinomial()</h2>
+<a id="a9232747f83e6ab99818108ec6ccbc337" name="a9232747f83e6ab99818108ec6ccbc337"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9232747f83e6ab99818108ec6ccbc337">&#9670;&#160;</a></span>multinomial()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1796,7 +1796,7 @@ static thread_local <a class="el" href="CD__ItoKMCPhysics_8H.html#a0ebb7009dfa17
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const std::discrete_distribution&lt; size_t &gt; &amp;&#160;</td>
+          <td class="paramtype">const std::discrete_distribution&lt; int &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_distribution</em>&#160;</td>
         </tr>
         <tr>

@@ -1,10 +1,4 @@
 var searchData=
 [
-  ['particleid_0',['ParticleID',['../CD__ParticleSoA_8H.html#afec4fd5f60cd0dd55574084c6276a49e',1,'CD_ParticleSoA.H']]],
-  ['particlemap_1',['ParticleMap',['../CD__ParticleMap_8H.html#a97b108f5c28bab96d953fca40cfa36b4',1,'CD_ParticleMap.H']]],
-  ['particlemerger_2',['ParticleMerger',['../namespaceParticleManagement.html#a0653357f8d5608240706c875758d1262',1,'ParticleManagement']]],
-  ['particlereal_3',['ParticleReal',['../CD__ParticleSoA_8H.html#af6a88235a5f32bc8c9cc19f7cef44502',1,'CD_ParticleSoA.H']]],
-  ['payloadcolumns_4',['PayloadColumns',['../classParticleSoA.html#aa84965609a679daf9ec9a6e080556d09',1,'ParticleSoA']]],
-  ['poolkey_5',['PoolKey',['../classParticleContainer.html#ae2cce85a255d04a2418fc69832343a2f',1,'ParticleContainer']]],
-  ['products_6',['Products',['../classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactions.html#a38756855e8ce4a7fafb99afea390eb80',1,'Physics::ItoKMC::ItoKMCSurfaceReactions']]]
+  ['optype_0',['optype',['../structAMRMultigridKrylovOpTraits_3_01EBCellFAB_01_4.html#a0f7b1cebc370fb53e7350a8deafd4fd6',1,'AMRMultigridKrylovOpTraits&lt; EBCellFAB &gt;::OpType'],['../structAMRMultigridKrylovOpTraits_3_01MFCellFAB_01_4.html#a1ff6825b8e956f5197cc7f518be8d220',1,'AMRMultigridKrylovOpTraits&lt; MFCellFAB &gt;::OpType']]]
 ];

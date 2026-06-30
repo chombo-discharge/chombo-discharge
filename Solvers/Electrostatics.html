@@ -550,10 +550,17 @@ FieldSolverGMG.bc.z.hi               = dirichlet 0.0    ## Bc type (see docs)
 </span><span class="hll">FieldSolverGMG.use_regrid_slopes     = true             ## Use slopes when regridding or not
 </span><span class="hll">FieldSolverGMG.kappa_source          = true             ## Volume weighted space charge density or not (depends on algorithm)
 </span>
-<span class="hll">FieldSolverGMG.gmg_verbosity                = -1           ## GMG verbosity
+<span class="hll">FieldSolverGMG.solver                       = gmg gmres    ## Solver(s), tried in order. &#39;gmg&#39;, &#39;gmres&#39;, &#39;bicgstab&#39;. List = fallback chain
+</span><span class="hll">FieldSolverGMG.krylov_eps                   = 1.E-10       ## Outer Krylov relative residual tolerance (gmres/bicgstab)
+</span><span class="hll">FieldSolverGMG.krylov_max_iter              = 50           ## Outer Krylov max iterations (gmres/bicgstab)
+</span><span class="hll">FieldSolverGMG.krylov_restart               = 30           ## GMRES restart length (gmres only)
+</span><span class="hll">FieldSolverGMG.krylov_vcycles               = 1            ## V-cycles per Krylov preconditioner application
+</span><span class="hll">FieldSolverGMG.krylov_retry_interval        = 1            ## Re-probe GMG every N solves while latched to the Krylov fallback (1 = always retry GMG first)
+</span><span class="hll">FieldSolverGMG.krylov_reprobe_iters         = 0            ## Re-probe GMG early when the Krylov fallback converges in &lt;= this many iterations (0 = disabled)
+</span><span class="hll">FieldSolverGMG.gmg_verbosity                = -1           ## GMG verbosity
 </span><span class="hll">FieldSolverGMG.gmg_use_default_settings     = true         ## Use default multigrid settings or not (see documentation)
-</span><span class="hll">FieldSolverGMG.gmg_cycle                    = vcycle       ## Cycle type. Only &#39;vcycle&#39; supported for now.
-</span><span class="hll">FieldSolverGMG.gmg_smoother                 = red_black    ## Relaxation type. &#39;jacobi&#39;, &#39;multi_color&#39;, or &#39;red_black&#39;
+</span><span class="hll">FieldSolverGMG.gmg_cycle                    = vcycle       ## Cycle type. &#39;vcycle&#39; or &#39;wcycle&#39;
+</span><span class="hll">FieldSolverGMG.gmg_smoother                 = red_black    ## Relaxation. &#39;jacobi&#39;, &#39;multi_color&#39;, &#39;red_black&#39;, &#39;chebyshev &lt;order&gt; &lt;eig_ratio&gt;&#39;, or &#39;ras &lt;inner_sweeps&gt;&#39;
 </span><span class="hll">FieldSolverGMG.gmg_relax_factor             = 1.0          ## Adjustable SOR factor
 </span><span class="hll">FieldSolverGMG.gmg_pre_smooth               = 12           ## Number of relaxations in downsweep
 </span><span class="hll">FieldSolverGMG.gmg_post_smooth              = 12           ## Number of relaxations in upsweep
@@ -565,14 +572,15 @@ FieldSolverGMG.bc.z.hi               = dirichlet 0.0    ## Bc type (see docs)
 </span><span class="hll">FieldSolverGMG.gmg_exit_hang                = 0.2          ## Solver hang
 </span><span class="hll">FieldSolverGMG.gmg_min_cells                = 16           ## Bottom drop
 </span><span class="hll">FieldSolverGMG.gmg_drop_order               = 0            ## Drop stencil order to 1 if domain is coarser than this.
-</span><span class="hll">FieldSolverGMG.gmg_bc_order                 = 1            ## Boundary condition order for multigrid
-</span><span class="hll">FieldSolverGMG.gmg_bc_weight                = 4            ## Boundary condition weights (for least squares)
-</span><span class="hll">FieldSolverGMG.gmg_jump_order               = 1            ## Boundary condition order for jump conditions
-</span><span class="hll">FieldSolverGMG.gmg_jump_weight              = 4            ## Boundary condition weight for jump conditions (for least squares)
-</span><span class="hll">FieldSolverGMG.gmg_reduce_order             = true         ## If true, always use order=1 EB stencils in coarsened cells
-</span><span class="hll">FieldSolverGMG.gmg_bottom_solver            = bicgstab     ## Bottom solver type. &#39;simple&#39;, &#39;bicgstab&#39;, or &#39;gmres&#39;
-</span><span class="hll">FieldSolverGMG.gmg_bottom_verbosity         = -1           ## Bottom solver verbosity.
-</span></pre></div>
+</span>FieldSolverGMG.gmg_bc_order                 = 1            ## Boundary condition order for multigrid
+FieldSolverGMG.gmg_bc_weight                = 4            ## Boundary condition weights (for least squares)
+FieldSolverGMG.gmg_jump_order               = 1            ## Boundary condition order for jump conditions
+FieldSolverGMG.gmg_jump_weight              = 4            ## Boundary condition weight for jump conditions (for least squares)
+FieldSolverGMG.gmg_reduce_order             = true         ## If true, always use order=1 EB stencils in coarsened cells
+FieldSolverGMG.gmg_bottom_solver            = bicgstab     ## Bottom solver type. &#39;simple&#39;, &#39;bicgstab&#39;, or &#39;gmres&#39;
+FieldSolverGMG.gmg_bottom_verbosity         = -1           ## Bottom solver verbosity.
+FieldSolverGMG.gmg_reflux_free              = false        ## If true, use reflux-free AMR operator
+</pre></div>
 </div>
 </div>
 <p>Note that <em>all</em> options pertaining to IO or multigrid are run-time configurable (see <a class="reference internal" href="../Base/Control.html#chap-runtimeconfig"><span class="std std-ref">Run-time configurations</span></a>).</p>
@@ -598,72 +606,8 @@ If this flag is set to <code class="docutils literal notranslate"><span class="p
 If this flag is set to <code class="docutils literal notranslate"><span class="pre">true</span></code>, <code class="docutils literal notranslate"><span class="pre">FieldSolverGMG</span></code> will perform the multiplication before the multigrid solve.</p>
 </section>
 <section id="tuning-multigrid-performance">
-<span id="chap-multigridtuning"></span><h3>Tuning multigrid performance<a class="headerlink" href="#tuning-multigrid-performance" title="Permalink to this heading"></a></h3>
-<p>Multigrid operates by coarsening the solution (and the geometry with it) on a hierarchy of grid levels, and smoothing the solution on each level.
-There are a number of factors that influence the multigrid performance.
-Often the most critical factors are the radius of the cut-cell stencils and how far multigrid is allowed to coarsen.
-In addition, the multigrid convergence is improved by increasing the number of smoothings per grid level (up to a certain point), as well as the type of smoother and bottom solver being used.
-We explain these options below:</p>
-<ul>
-<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_verbosity</span></code>.
-Controls the multigrid verbosity.
-Setting it to a number <span class="math notranslate nohighlight">\(&gt; 0\)</span> will print multigrid convergence information.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_bottom_verbosity</span></code>.
-Controls the multigrid bottom solver verbosity.
-Setting it to a number <span class="math notranslate nohighlight">\(&gt; 0\)</span> will print some bottom solver convergence information.
-The information printed depends on the bottom solver that is used.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_use_default_settings</span></code>.
-Use default multigrid settings.</p>
-<div class="admonition tip">
-<p class="admonition-title">Tip</p>
-<p>Enabling this setting tends to make most problems converge, but potentially at suboptimal convergence rates.</p>
-</div>
-</li>
-<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_pre_smooth</span></code>.
-Controls the number of relaxations on each level during multigrid downsweeps.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_post_smooth</span></code>.
-Controls the number of relaxations on each level during multigrid upsweeps.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_bott_smooth</span></code>.
-Controls the number of relaxations before entering the bottom solve.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_min_iter</span></code>.
-Sets the minimum number of iterations that multigrid will perform.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_max_iter</span></code>.
-Sets the maximum number of iterations that multigrid will perform.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_exit_tol</span></code>.
-Sets the exit tolerance for multigrid.
-Multigrid will exit the iterations if <span class="math notranslate nohighlight">\(r &lt; \lambda r_0\)</span> where <span class="math notranslate nohighlight">\(\lambda\)</span> is the specified tolerance, <span class="math notranslate nohighlight">\(r = |L\Phi -\rho|\)</span> is the residual and <span class="math notranslate nohighlight">\(r_0\)</span> is the residual for <span class="math notranslate nohighlight">\(\Phi = 0\)</span>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_exit_hang</span></code>.
-Sets the minimum permitted reduction in the convergence rate before exiting multigrid.
-Letting <span class="math notranslate nohighlight">\(r^k\)</span> be the residual after <span class="math notranslate nohighlight">\(k\)</span> multigrid cycles, multigrid will abort if the residual between levels is not reduce by at least a factor of <span class="math notranslate nohighlight">\(r^{k+1} &lt; (1-h)r^k\)</span>, where <span class="math notranslate nohighlight">\(h\)</span> is the “hang” factor.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_min_cells</span></code>.
-Sets the minimum amount of cells along any coordinate direction for coarsened levels.
-Note that this will control how far multigrid will coarsen. Setting a number <code class="docutils literal notranslate"><span class="pre">gmg_min_cells</span> <span class="pre">=</span> <span class="pre">16</span></code> will terminate multigrid coarsening when the domain has 16 cells in any of the coordinate direction.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_bc_order</span></code>.
-Sets the stencil order for Dirichlet boundary conditions (on electrodes).
-Note that this is also the stencil radius.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_bc_weight</span></code>. Sets the least squares stencil weighting factor for least squares gradient reconstruction on EBs.
-See <a class="reference internal" href="../Utilities/LeastSquares.html#chap-leastsquares"><span class="std std-ref">Least squares</span></a> for details.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_jump_order</span></code>. Sets the stencil order when performing least squares gradient reconstruction on dielectric interfaces.
-Note that this is also the stencil radius.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_jump_weight</span></code>.
-Sets the least squares stencil weighting factor for least squares gradient reconstruction on dielectric interfaces.
-See <a class="reference internal" href="../Utilities/LeastSquares.html#chap-leastsquares"><span class="std std-ref">Least squares</span></a> for details.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_bottom_solver</span></code>.
-Sets the bottom solver type.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_cycle</span></code>.
-Sets the multigrid method.
-Currently, only V-cycles are supported.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_smoother</span></code>.
-Sets the multigrid smoother.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_relax_factor</span></code>.
-Sets the multigrid relaxation factor.</p></li>
-</ul>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>When setting the bottom solver (which by default is a biconjugate gradient stabilized method) to a regular smoother, one must also specify the number of smoothings to perform.
-E.g., <code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_bottom_solver</span> <span class="pre">=</span> <span class="pre">simple</span> <span class="pre">64</span></code>.
-Setting the bottom solver to <code class="docutils literal notranslate"><span class="pre">simple</span></code> without specifying the number of smoothings that will be performed will issue a run-time error.</p>
-</div>
+<h3>Tuning multigrid performance<a class="headerlink" href="#tuning-multigrid-performance" title="Permalink to this heading"></a></h3>
+<p>The multigrid solver (smoothers, bottom solvers, cycle type, exit criteria) and the outer Krylov (GMRES/BiCGStab) configuration are shared across all <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> solvers and are documented centrally – including the full list of <code class="docutils literal notranslate"><span class="pre">gmg_*</span></code> and <code class="docutils literal notranslate"><span class="pre">krylov_*</span></code> options – in <a class="reference internal" href="../Source/LinearSolvers.html#chap-multigridtuning"><span class="std std-ref">Tuning multigrid performance</span></a>.</p>
 </section>
 <section id="adjusting-output">
 <h3>Adjusting output<a class="headerlink" href="#adjusting-output" title="Permalink to this heading"></a></h3>

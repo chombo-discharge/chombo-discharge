@@ -106,13 +106,39 @@ Collaboration diagram for FieldSolverGMG:</div>
 <div class="dyncontent">
 <div class="center"><img src="classFieldSolverGMG__coll__graph.png" border="0" usemap="#aFieldSolverGMG_coll__map" alt="Collaboration graph"/></div>
 <map name="aFieldSolverGMG_coll__map" id="aFieldSolverGMG_coll__map">
-<area shape="rect" title="Implementation of FieldSolver which uses multigrid." alt="" coords="115,168,242,193"/>
-<area shape="rect" href="classFieldSolver.html" title="Base class for electrostatic solvers." alt="" coords="131,93,226,119"/>
-<area shape="poly" title=" " alt="" coords="181,133,181,168,176,168,176,133"/>
-<area shape="rect" href="classElectrostaticDomainBc.html" title="Class which maps boundary condition types to a side and direction." alt="" coords="5,5,176,31"/>
-<area shape="poly" title=" " alt="" coords="114,38,168,91,165,95,110,42"/>
-<area shape="rect" href="classElectrostaticEbBc.html" title="Class which maps boundary condition types to a side and direction." alt="" coords="201,5,335,31"/>
-<area shape="poly" title=" " alt="" coords="257,45,237,71,203,95,200,91,233,67,253,41"/>
+<area shape="rect" title="Implementation of FieldSolver which uses multigrid." alt="" coords="1719,120,1845,145"/>
+<area shape="rect" href="classFieldSolver.html" title="Base class for electrostatic solvers." alt="" coords="1399,31,1493,56"/>
+<area shape="poly" title=" " alt="" coords="1508,49,1597,66,1696,91,1757,117,1755,122,1694,97,1596,71,1507,54"/>
+<area shape="rect" href="classElectrostaticDomainBc.html" title="Class which maps boundary condition types to a side and direction." alt="" coords="991,5,1161,31"/>
+<area shape="poly" title=" " alt="" coords="1175,22,1399,37,1398,43,1175,27"/>
+<area shape="rect" href="classElectrostaticEbBc.html" title="Class which maps boundary condition types to a side and direction." alt="" coords="1009,55,1143,80"/>
+<area shape="poly" title=" " alt="" coords="1157,65,1316,59,1398,49,1399,54,1316,65,1157,71"/>
+<area shape="rect" href="structEllipticSolverChain_1_1Settings.html" title="Outer&#45;Krylov configuration. Defaults reproduce stand&#45;alone multigrid (solvers == {GMG})." alt="" coords="1374,81,1518,121"/>
+<area shape="poly" title=" " alt="" coords="1532,106,1719,124,1718,129,1531,111"/>
+<area shape="rect" href="structEllipticSolverChain_1_1FallbackPolicy.html" title="Stateful policy for the solver fallback chain." alt="" coords="1374,145,1518,185"/>
+<area shape="poly" title=" " alt="" coords="1532,156,1694,142,1718,139,1719,144,1695,147,1532,162"/>
+<area shape="rect" href="classEllipticSolverChain_1_1KrylovSolver.html" title=" " alt="" coords="1340,209,1552,249"/>
+<area shape="poly" title=" " alt="" coords="1565,208,1630,193,1694,174,1758,143,1761,148,1696,179,1631,199,1566,213"/>
+<area shape="rect" href="classAMRMultigridKrylovOp.html" title=" " alt="" coords="641,191,812,231"/>
+<area shape="poly" title=" " alt="" coords="826,211,1340,223,1340,229,826,216"/>
+<area shape="rect" href="classKrylovBiCGStab.html" title=" " alt="" coords="964,260,1188,285"/>
+<area shape="poly" title=" " alt="" coords="800,233,837,242,964,261,963,267,835,247,799,238"/>
+<area shape="rect" href="classKrylovGMRES.html" title=" " alt="" coords="971,147,1181,172"/>
+<area shape="poly" title=" " alt="" coords="826,194,990,169,990,175,826,199"/>
+<area shape="rect" title=" " alt="" coords="272,169,489,209"/>
+<area shape="poly" title=" " alt="" coords="503,194,641,203,641,208,503,199"/>
+<area shape="rect" href="classAMRMultigridKrylovOp.html" title="Adapter presenting an already&#45;defined AMRMultiGrid as a LinearOp over the AMR hierarchy." alt="" coords="277,233,485,259"/>
+<area shape="poly" title=" " alt="" coords="499,234,617,222,641,219,641,225,618,227,499,239"/>
+<area shape="rect" title=" " alt="" coords="5,226,223,266"/>
+<area shape="poly" title=" " alt="" coords="236,243,276,243,276,249,236,249"/>
+<area shape="poly" title=" " alt="" coords="1200,256,1316,242,1339,239,1340,244,1316,247,1201,261"/>
+<area shape="rect" href="classKrylovBiCGStab.html" title="Preconditioned BiCGStab solver acting on an AMR hierarchy through AMRMultigridKrylovOp." alt="" coords="645,279,808,304"/>
+<area shape="poly" title=" " alt="" coords="822,291,940,287,988,283,989,288,940,293,822,296"/>
+<area shape="poly" title=" " alt="" coords="1196,170,1317,190,1380,206,1379,211,1315,195,1195,175"/>
+<area shape="rect" href="classKrylovGMRES.html" title="Restarted GMRES(m) acting on an AMR hierarchy through AMRMultigridKrylovOp." alt="" coords="652,109,801,135"/>
+<area shape="poly" title=" " alt="" coords="815,129,971,145,970,151,815,134"/>
+<area shape="rect" href="classEllipticSolverChain_1_1KrylovSolver.html" title="Stateful owner of the outer&#45;Krylov solver path." alt="" coords="1001,310,1151,350"/>
+<area shape="poly" title=" " alt="" coords="1164,311,1315,274,1395,246,1397,251,1317,279,1165,316"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -419,6 +445,18 @@ Protected Attributes</h2></td></tr>
 <a class="el" href="classMFHelmholtzOp.html#afa2411375a5509aae293271cda50c2f1">MFHelmholtzOp::Smoother</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_multigridRelaxMethod</b></td></tr>
 <tr class="memdesc:a018b0dad26fd8df10e09da5f1ead6495"><td class="mdescLeft">&#160;</td><td class="mdescRight">Relaxation type for gmg. <br /></td></tr>
 <tr class="separator:a018b0dad26fd8df10e09da5f1ead6495"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ade1397308d433e8468ea7df717a2e7ec" id="r_ade1397308d433e8468ea7df717a2e7ec"><td class="memItemLeft" align="right" valign="top"><a id="ade1397308d433e8468ea7df717a2e7ec" name="ade1397308d433e8468ea7df717a2e7ec"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>m_multigridChebyOrder</b></td></tr>
+<tr class="memdesc:ade1397308d433e8468ea7df717a2e7ec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Chebyshev polynomial degree (only used when m_multigridRelaxMethod is Smoother::Chebyshev) <br /></td></tr>
+<tr class="separator:ade1397308d433e8468ea7df717a2e7ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab74c44e56910637a8dba69cda502929c" id="r_ab74c44e56910637a8dba69cda502929c"><td class="memItemLeft" align="right" valign="top"><a id="ab74c44e56910637a8dba69cda502929c" name="ab74c44e56910637a8dba69cda502929c"></a>
+Real&#160;</td><td class="memItemRight" valign="bottom"><b>m_multigridChebyEigRatio</b></td></tr>
+<tr class="memdesc:ab74c44e56910637a8dba69cda502929c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Chebyshev eigenvalue ratio lambda_max/lambda_min (only used when m_multigridRelaxMethod is Smoother::Chebyshev) <br /></td></tr>
+<tr class="separator:ab74c44e56910637a8dba69cda502929c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a09c22063b45b0b1c1de8231c641ef4c1" id="r_a09c22063b45b0b1c1de8231c641ef4c1"><td class="memItemLeft" align="right" valign="top"><a id="a09c22063b45b0b1c1de8231c641ef4c1" name="a09c22063b45b0b1c1de8231c641ef4c1"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>m_multigridRasInnerSweeps</b></td></tr>
+<tr class="memdesc:a09c22063b45b0b1c1de8231c641ef4c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of inner frozen-ghost sweeps per restricted-additive-Schwarz iteration (only used when m_multigridRelaxMethod is Smoother::RestrictedAdditiveSchwarz) <br /></td></tr>
+<tr class="separator:a09c22063b45b0b1c1de8231c641ef4c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a26de8e3b856eb22fb9553a5a86bd7eec" id="r_a26de8e3b856eb22fb9553a5a86bd7eec"><td class="memItemLeft" align="right" valign="top"><a id="a26de8e3b856eb22fb9553a5a86bd7eec" name="a26de8e3b856eb22fb9553a5a86bd7eec"></a>
 <a class="el" href="classFieldSolverGMG.html#a3032fb46bc6481f113071a78e482a32c">MultigridType</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_multigridType</b></td></tr>
 <tr class="memdesc:a26de8e3b856eb22fb9553a5a86bd7eec"><td class="mdescLeft">&#160;</td><td class="mdescRight">GMG multigrid type. <br /></td></tr>
@@ -443,6 +481,10 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_isSolverSetup</b></
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_multigridDropOrder</b></td></tr>
 <tr class="memdesc:af8120424e6f150c4818fe7025770f264"><td class="mdescLeft">&#160;</td><td class="mdescRight">Drop order in coarsened grid cells. <br /></td></tr>
 <tr class="separator:af8120424e6f150c4818fe7025770f264"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6973238f73692b42beb4c47a4d514081" id="r_a6973238f73692b42beb4c47a4d514081"><td class="memItemLeft" align="right" valign="top"><a id="a6973238f73692b42beb4c47a4d514081" name="a6973238f73692b42beb4c47a4d514081"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_multigridRefluxFree</b></td></tr>
+<tr class="memdesc:a6973238f73692b42beb4c47a4d514081"><td class="mdescLeft">&#160;</td><td class="mdescRight">Use reflux-free AMR operator in GMG. <br /></td></tr>
+<tr class="separator:a6973238f73692b42beb4c47a4d514081"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a315c5b68213cd56a6231aac773f36378" id="r_a315c5b68213cd56a6231aac773f36378"><td class="memItemLeft" align="right" valign="top"><a id="a315c5b68213cd56a6231aac773f36378" name="a315c5b68213cd56a6231aac773f36378"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_multigridUseDefaultSettings</b></td></tr>
 <tr class="memdesc:a315c5b68213cd56a6231aac773f36378"><td class="mdescLeft">&#160;</td><td class="mdescRight">Use default multigrid settings. <br /></td></tr>
@@ -541,6 +583,18 @@ GMRESSolver&lt; LevelData&lt; MFCellFAB &gt; &gt;&#160;</td><td class="memItemRi
 MFSimpleSolver&#160;</td><td class="memItemRight" valign="bottom"><b>m_mfsolver</b></td></tr>
 <tr class="memdesc:a93aa1ab42b5519c96a2e5e53d16e5192"><td class="mdescLeft">&#160;</td><td class="mdescRight">multi-fluid simple solver <br /></td></tr>
 <tr class="separator:a93aa1ab42b5519c96a2e5e53d16e5192"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1454b5dabfe8ca37e7f776599d85e674" id="r_a1454b5dabfe8ca37e7f776599d85e674"><td class="memItemLeft" align="right" valign="top"><a id="a1454b5dabfe8ca37e7f776599d85e674" name="a1454b5dabfe8ca37e7f776599d85e674"></a>
+<a class="el" href="structEllipticSolverChain_1_1Settings.html">EllipticSolverChain::Settings</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_krylovSettings</b></td></tr>
+<tr class="memdesc:a1454b5dabfe8ca37e7f776599d85e674"><td class="mdescLeft">&#160;</td><td class="mdescRight">Outer-Krylov settings (selects gmg/gmres/bicgstab and the krylov_* parameters) <br /></td></tr>
+<tr class="separator:a1454b5dabfe8ca37e7f776599d85e674"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a871b2bd9627e18b915fbdd2bd815ee00" id="r_a871b2bd9627e18b915fbdd2bd815ee00"><td class="memItemLeft" align="right" valign="top"><a id="a871b2bd9627e18b915fbdd2bd815ee00" name="a871b2bd9627e18b915fbdd2bd815ee00"></a>
+<a class="el" href="structEllipticSolverChain_1_1FallbackPolicy.html">EllipticSolverChain::FallbackPolicy</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_fallbackPolicy</b></td></tr>
+<tr class="memdesc:a871b2bd9627e18b915fbdd2bd815ee00"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fallback-chain latch policy (persists across regrids; re-probes GMG every krylov_retry_interval solves) <br /></td></tr>
+<tr class="separator:a871b2bd9627e18b915fbdd2bd815ee00"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa6123aa583c5b5c52752d7bd65bacdb9" id="r_aa6123aa583c5b5c52752d7bd65bacdb9"><td class="memItemLeft" align="right" valign="top"><a id="aa6123aa583c5b5c52752d7bd65bacdb9" name="aa6123aa583c5b5c52752d7bd65bacdb9"></a>
+<a class="el" href="classEllipticSolverChain_1_1KrylovSolver.html">EllipticSolverChain::KrylovSolver</a>&lt; MFCellFAB &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_krylov</b></td></tr>
+<tr class="memdesc:aa6123aa583c5b5c52752d7bd65bacdb9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Outer-Krylov driver (V-cycle-preconditioned BiCGStab/GMRES with persistent work vectors) <br /></td></tr>
+<tr class="separator:aa6123aa583c5b5c52752d7bd65bacdb9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_attribs_classFieldSolver"><td colspan="2" onclick="javascript:toggleInherit('pro_attribs_classFieldSolver')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="classFieldSolver.html">FieldSolver</a></td></tr>
 <tr class="memitem:a29440a493a6844cb639f080fa023ffd6 inherit pro_attribs_classFieldSolver" id="r_a29440a493a6844cb639f080fa023ffd6"><td class="memItemLeft" align="right" valign="top">
 <a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_dataLocation</b></td></tr>

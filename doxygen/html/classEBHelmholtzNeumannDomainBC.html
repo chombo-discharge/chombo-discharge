@@ -143,6 +143,9 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~EBHelmholtzNeuman
 <tr class="memitem:a882d13dc5401a6b1b8fc10f405e87292" id="r_a882d13dc5401a6b1b8fc10f405e87292"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzNeumannDomainBC.html#a882d13dc5401a6b1b8fc10f405e87292">getFaceFlux</a> (const VolIndex &amp;a_vof, const EBCellFAB &amp;a_phi, const EBFaceFAB &amp;a_Bcoef, const int &amp;a_dir, const Side::LoHiSide &amp;a_side, const DataIndex &amp;a_dit, const bool a_useHomogeneous) const override</td></tr>
 <tr class="memdesc:a882d13dc5401a6b1b8fc10f405e87292"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get face flux. This is for irregular cells.  <br /></td></tr>
 <tr class="separator:a882d13dc5401a6b1b8fc10f405e87292"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa9c8cc70746d699ca697deba6540b7d1" id="r_aa9c8cc70746d699ca697deba6540b7d1"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzNeumannDomainBC.html#aa9c8cc70746d699ca697deba6540b7d1">getDiagWeight</a> (const int a_dir, const Side::LoHiSide a_side) const override</td></tr>
+<tr class="memdesc:aa9c8cc70746d699ca697deba6540b7d1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns 0.0: a Neumann BC prescribes the flux independently of phi, contributing nothing to the diagonal.  <br /></td></tr>
+<tr class="separator:aa9c8cc70746d699ca697deba6540b7d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classEBHelmholtzDomainBC"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classEBHelmholtzDomainBC')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classEBHelmholtzDomainBC.html">EBHelmholtzDomainBC</a></td></tr>
 <tr class="memitem:a62a27c07e95d20640a776252334856a7 inherit pub_methods_classEBHelmholtzDomainBC" id="r_a62a27c07e95d20640a776252334856a7"><td class="memItemLeft" align="right" valign="top">
 &#160;</td><td class="memItemRight" valign="bottom"><b>EBHelmholtzDomainBC</b> ()</td></tr>
@@ -291,6 +294,54 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="aa9c8cc70746d699ca697deba6540b7d1" name="aa9c8cc70746d699ca697deba6540b7d1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa9c8cc70746d699ca697deba6540b7d1">&#9670;&#160;</a></span>getDiagWeight()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Real EBHelmholtzNeumannDomainBC::getDiagWeight </td>
+          <td>(</td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_dir</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Side::LoHiSide&#160;</td>
+          <td class="paramname"><em>a_side</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns 0.0: a Neumann BC prescribes the flux independently of phi, contributing nothing to the diagonal. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dir</td><td>Coordinate direction. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_side</td><td>High or low side. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>0.0 </dd></dl>
+
+<p>Implements <a class="el" href="classEBHelmholtzDomainBC.html#a24fd78e8d1e9e6408c7d6bf5be80091b">EBHelmholtzDomainBC</a>.</p>
+
+</div>
+</div>
 <a id="a956583b1dcd342d47b20cf3671342830" name="a956583b1dcd342d47b20cf3671342830"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a956583b1dcd342d47b20cf3671342830">&#9670;&#160;</a></span>getFaceFlux() <span class="overload">[1/2]</span></h2>
 
