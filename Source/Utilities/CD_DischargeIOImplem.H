@@ -25,14 +25,181 @@
 #include <CD_DischargeIO.H>
 #include <CD_NamespaceHeader.H>
 
+#ifdef CH_USE_HDF5
+namespace DischargeIO {
+
+  /**
+    @brief Detector (false case) for an optional Traits::h5PartColumns descriptor tuple.
+    @tparam Traits Column descriptor for the payload.
+  */
+  template <typename Traits, typename = void>
+  struct HasH5PartColumns : std::false_type
+  {
+  };
+
+  /**
+    @brief Detector (true case) for an optional Traits::h5PartColumns descriptor tuple.
+    @tparam Traits Column descriptor declaring h5PartColumns.
+  */
+  template <typename Traits>
+  struct HasH5PartColumns<Traits, detail::Void<decltype(Traits::h5PartColumns)>> : std::true_type
+  {
+  };
+
+  /**
+    @brief Write one named scalar dataset (one value per particle) into an open H5Part step group.
+    @details Gathers the value for every valid particle across all AMR levels (in the same per-level,
+    per-box, per-particle order as the id/position datasets) and writes it as an H5T_NATIVE_DOUBLE dataset.
+    @param[in] a_grp        Open H5Part step group.
+    @param[in] a_fileSpace  File dataspace (global particle count, hyperslab pre-selected).
+    @param[in] a_memSpace   Memory dataspace (local particle count, hyperslab pre-selected).
+    @param[in] a_particles  SoA particle container.
+    @param[in] a_name       Dataset name.
+    @param[in] a_gather     Callable (const ParticleSoA<P,Traits>&, std::size_t) -> double.
+    @tparam P      Payload type of the container.
+    @tparam Traits Column descriptor for the payload.
+    @tparam Gather Gather-callable type.
+  */
+  template <typename P, typename Traits, typename Gather>
+  inline void
+  writeH5PartScalarDataset(hid_t                               a_grp,
+                           hid_t                               a_fileSpace,
+                           hid_t                               a_memSpace,
+                           const ParticleContainer<P, Traits>& a_particles,
+                           const std::string&                  a_name,
+                           Gather                              a_gather) noexcept
+  {
+    hid_t dataset = H5Dcreate2(a_grp,
+                               a_name.c_str(),
+                               H5T_NATIVE_DOUBLE,
+                               a_fileSpace,
+                               H5P_DEFAULT,
+                               H5P_DEFAULT,
+                               H5P_DEFAULT);
+
+    std::vector<double> ds;
+
+    for (int lvl = 0; lvl <= a_particles.getFinestLevel(); lvl++) {
+      const DisjointBoxLayout& dbl  = a_particles.getGrids()[lvl];
+      const DataIterator&      dit  = dbl.dataIterator();
+      const int                nbox = dit.size();
+
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex&              din  = dit[mybox];
+        const ParticleSoA<P, Traits>& leaf = a_particles[lvl][din];
+
+        for (std::size_t i = 0; i < leaf.size(); i++) {
+          ds.push_back(a_gather(leaf, i));
+        }
+      }
+    }
+
+    H5Dwrite(dataset, H5Dget_type(dataset), a_memSpace, a_fileSpace, H5P_DEFAULT, ds.data());
+    H5Dclose(dataset);
+  }
+
+  /**
+    @brief Write the SpaceDim component datasets (name-x/name-y/name-z) of one H5Part::Vector descriptor.
+    @param[in] a_grp        Open H5Part step group.
+    @param[in] a_fileSpace  File dataspace.
+    @param[in] a_memSpace   Memory dataspace.
+    @param[in] a_particles  SoA particle container.
+    @param[in] a_dirs       Index sequence [0, SpaceDim) of the spatial components.
+    @tparam I      Index of the descriptor within Traits::h5PartColumns.
+    @tparam P      Payload type of the container.
+    @tparam Traits Column descriptor for the payload.
+    @tparam Dirs   Spatial component indices [0, SpaceDim).
+  */
+  template <std::size_t I, typename P, typename Traits, std::size_t... Dirs>
+  inline void
+  writeH5PartVectorColumn(hid_t                                         a_grp,
+                          hid_t                                         a_fileSpace,
+                          hid_t                                         a_memSpace,
+                          const ParticleContainer<P, Traits>&           a_particles,
+                          [[maybe_unused]] std::index_sequence<Dirs...> a_dirs) noexcept
+  {
+    constexpr auto    desc      = std::get<I>(Traits::h5PartColumns);
+    const char* const suffix[3] = {"-x", "-y", "-z"};
+
+    (writeH5PartScalarDataset(a_grp,
+                              a_fileSpace,
+                              a_memSpace,
+                              a_particles,
+                              std::string(desc.name) + suffix[Dirs],
+                              [](const ParticleSoA<P, Traits>& a_leaf, std::size_t a_i) -> double {
+                                constexpr auto member = std::get<Dirs>(std::get<I>(Traits::h5PartColumns).members);
+                                return static_cast<double>(a_leaf.template get<member>(a_i));
+                              }),
+     ...);
+  }
+
+  /**
+    @brief Write one payload descriptor of Traits::h5PartColumns (scalar -> one dataset, vector ->
+           SpaceDim datasets).
+    @param[in] a_grp        Open H5Part step group.
+    @param[in] a_fileSpace  File dataspace.
+    @param[in] a_memSpace   Memory dataspace.
+    @param[in] a_particles  SoA particle container.
+    @tparam I      Index of the descriptor within Traits::h5PartColumns.
+    @tparam P      Payload type of the container.
+    @tparam Traits Column descriptor for the payload.
+  */
+  template <std::size_t I, typename P, typename Traits>
+  inline void
+  writeH5PartColumn(hid_t                               a_grp,
+                    hid_t                               a_fileSpace,
+                    hid_t                               a_memSpace,
+                    const ParticleContainer<P, Traits>& a_particles) noexcept
+  {
+    constexpr auto desc = std::get<I>(Traits::h5PartColumns);
+
+    if constexpr (decltype(desc)::s_isVector) {
+      writeH5PartVectorColumn<I>(a_grp, a_fileSpace, a_memSpace, a_particles, std::make_index_sequence<SpaceDim>{});
+    }
+    else {
+      writeH5PartScalarDataset(a_grp,
+                               a_fileSpace,
+                               a_memSpace,
+                               a_particles,
+                               desc.name,
+                               [](const ParticleSoA<P, Traits>& a_leaf, std::size_t a_i) -> double {
+                                 constexpr auto member = std::get<I>(Traits::h5PartColumns).member;
+                                 return static_cast<double>(a_leaf.template get<member>(a_i));
+                               });
+    }
+  }
+
+  /**
+    @brief Write every payload descriptor in Traits::h5PartColumns.
+    @param[in] a_grp        Open H5Part step group.
+    @param[in] a_fileSpace  File dataspace.
+    @param[in] a_memSpace   Memory dataspace.
+    @param[in] a_particles  SoA particle container.
+    @param[in] a_indices    Index sequence [0, size(h5PartColumns)).
+    @tparam P      Payload type of the container.
+    @tparam Traits Column descriptor for the payload.
+    @tparam I      Descriptor indices [0, size(h5PartColumns)).
+  */
+  template <typename P, typename Traits, std::size_t... I>
+  inline void
+  writeH5PartColumns(hid_t                                      a_grp,
+                     hid_t                                      a_fileSpace,
+                     hid_t                                      a_memSpace,
+                     const ParticleContainer<P, Traits>&        a_particles,
+                     [[maybe_unused]] std::index_sequence<I...> a_indices) noexcept
+  {
+    (writeH5PartColumn<I>(a_grp, a_fileSpace, a_memSpace, a_particles), ...);
+  }
+
+} // namespace DischargeIO
+#endif
+
 template <typename P, typename Traits>
 void
-DischargeIO::writeH5Part(std::string                                                  a_filename,
-                         const ParticleContainer<P, Traits>&                          a_particles,
-                         std::vector<std::pair<std::string, H5PartScalar<P, Traits>>> a_scalarVars,
-                         std::vector<std::pair<std::string, H5PartVect<P, Traits>>>   a_vectorVars,
-                         RealVect                                                     a_shift,
-                         Real                                                         a_time) noexcept
+DischargeIO::writeH5Part(std::string                         a_filename,
+                         const ParticleContainer<P, Traits>& a_particles,
+                         RealVect                            a_shift,
+                         Real                                a_time) noexcept
 {
 #ifdef CH_USE_HDF5
   CH_TIME("DischargeIO::writeH5Part(SoA)");
@@ -166,84 +333,29 @@ DischargeIO::writeH5Part(std::string                                            
   H5Dclose(datasetZ);
 #endif
 
-  // Write the scalar payload datasets (caller-named; e.g. weight + payload scalar columns).
-  for (const auto& var : a_scalarVars) {
-    hid_t dataset = H5Dcreate2(grp,
-                               var.first.c_str(),
-                               H5T_NATIVE_DOUBLE,
-                               fileSpaceID,
-                               H5P_DEFAULT,
-                               H5P_DEFAULT,
-                               H5P_DEFAULT);
+  // Weight is a container-owned column and is always written.
+  writeH5PartScalarDataset(grp,
+                           fileSpaceID,
+                           memSpaceID,
+                           a_particles,
+                           "weight",
+                           [](const ParticleSoA<P, Traits>& a_leaf, std::size_t a_i) -> double {
+                             return a_leaf.weight(a_i);
+                           });
 
-    std::vector<double> ds;
-
-    for (int lvl = 0; lvl <= a_particles.getFinestLevel(); lvl++) {
-      const DisjointBoxLayout& dbl = a_particles.getGrids()[lvl];
-      const DataIterator&      dit = dbl.dataIterator();
-
-      const int nbox = dit.size();
-
-      for (int mybox = 0; mybox < nbox; mybox++) {
-        const DataIndex&              din  = dit[mybox];
-        const ParticleSoA<P, Traits>& leaf = a_particles[lvl][din];
-
-        for (std::size_t i = 0; i < leaf.size(); i++) {
-          ds.push_back(var.second(leaf, i));
-        }
-      }
-    }
-
-    H5Dwrite(dataset, H5Dget_type(dataset), memSpaceID, fileSpaceID, H5P_DEFAULT, ds.data());
-    H5Dclose(dataset);
+  // Payload datasets, derived declaratively from the optional Traits::h5PartColumns descriptor tuple.
+  if constexpr (HasH5PartColumns<Traits>::value) {
+    using H5PartTuple = std::remove_cv_t<std::remove_reference_t<decltype(Traits::h5PartColumns)>>;
+    writeH5PartColumns(grp,
+                       fileSpaceID,
+                       memSpaceID,
+                       a_particles,
+                       std::make_index_sequence<std::tuple_size<H5PartTuple>::value>{});
   }
 
-  // Write the vector payload datasets as name-x/name-y/name-z.
-  for (const auto& var : a_vectorVars) {
-    for (int dir = 0; dir < SpaceDim; dir++) {
-      std::string varName = var.first;
-      if (dir == 0) {
-        varName += "-x";
-      }
-      else if (dir == 1) {
-        varName += "-y";
-      }
-      else if (dir == 2) {
-        varName += "-z";
-      }
-
-      hid_t dataset = H5Dcreate2(grp,
-                                 varName.c_str(),
-                                 H5T_NATIVE_DOUBLE,
-                                 fileSpaceID,
-                                 H5P_DEFAULT,
-                                 H5P_DEFAULT,
-                                 H5P_DEFAULT);
-
-      std::vector<double> ds;
-
-      for (int lvl = 0; lvl <= a_particles.getFinestLevel(); lvl++) {
-        const DisjointBoxLayout& dbl = a_particles.getGrids()[lvl];
-        const DataIterator&      dit = dbl.dataIterator();
-
-        const int nbox = dit.size();
-
-        for (int mybox = 0; mybox < nbox; mybox++) {
-          const DataIndex&              din  = dit[mybox];
-          const ParticleSoA<P, Traits>& leaf = a_particles[lvl][din];
-
-          for (std::size_t i = 0; i < leaf.size(); i++) {
-            ds.push_back(var.second(leaf, i)[dir]);
-          }
-        }
-      }
-
-      H5Dwrite(dataset, H5Dget_type(dataset), memSpaceID, fileSpaceID, H5P_DEFAULT, ds.data());
-      H5Dclose(dataset);
-    }
-  }
-
-  // Close top group and file
+  // Close dataspaces, top group and file
+  H5Sclose(fileSpaceID);
+  H5Sclose(memSpaceID);
   H5Gclose(grp);
   H5Fclose(fileID);
 #endif

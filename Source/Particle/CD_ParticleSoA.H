@@ -176,6 +176,97 @@ struct ParticleTraits;
 /**
    @brief Empty payload: ParticleSoA<> is a position+weight+metadata point particle.
 */
+/**
+  @brief Declarative descriptors for selecting which particle PAYLOAD columns are written to H5Part
+         (visualization) files. A @c ParticleTraits specialization may declare an optional
+         @c h5PartColumns tuple of these descriptors; DischargeIO::writeH5Part then derives the output
+         datasets directly, eliminating hand-maintained, positionally coupled name/accessor lists.
+  @details Position, id and weight are written automatically by writeH5Part and need NOT be listed here;
+           only the EXTRA payload columns are. Each descriptor pairs a dataset name with the
+           pointer(s)-to-member that select the column(s):
+
+    @code
+      static constexpr auto h5PartColumns = std::make_tuple(
+        H5Part::Scalar{"mobility", &ItoParticle::mobility},
+        H5Part::Vector{"v", D_DECL(&ItoParticle::vx, &ItoParticle::vy, &ItoParticle::vz)});
+    @endcode
+
+  @note The descriptors live in a nested @c H5Part namespace so that @c H5Part::Vector does not collide
+        with Chombo's @c Vector container.
+*/
+namespace H5Part {
+
+  /**
+    @brief Descriptor of a single scalar payload column written to one H5Part dataset.
+    @tparam M Pointer-to-member type selecting the payload column.
+  */
+  template <typename M>
+  struct Scalar
+  {
+    /**
+      @brief Tag identifying this descriptor as a scalar (single-component) column.
+    */
+    static constexpr bool s_isVector = false;
+
+    /**
+      @brief H5Part dataset name.
+    */
+    const char* name;
+
+    /**
+      @brief Pointer-to-member selecting the payload column.
+    */
+    M member;
+  };
+
+  /**
+    @brief Deduction guide so that @c Scalar{"name", &P::m} deduces the member-pointer type.
+    @tparam M Pointer-to-member type.
+  */
+  template <typename M>
+  Scalar(const char*, M) -> Scalar<M>;
+
+  /**
+    @brief Descriptor of a SpaceDim-component vector payload column, written as name-x/name-y/name-z.
+    @tparam Ms Pointer-to-member types of the per-component payload columns (SpaceDim of them).
+  */
+  template <typename... Ms>
+  struct Vector
+  {
+    /**
+      @brief Tag identifying this descriptor as a vector (multi-component) column.
+    */
+    static constexpr bool s_isVector = true;
+
+    /**
+      @brief H5Part dataset base name (datasets are name-x/name-y/name-z).
+    */
+    const char* name;
+
+    /**
+      @brief Pointers-to-member selecting the per-component payload columns.
+    */
+    std::tuple<Ms...> members;
+
+    /**
+      @brief Constructor.
+      @param[in] a_name    Dataset base name.
+      @param[in] a_members Per-component payload member pointers (SpaceDim of them).
+    */
+    constexpr Vector(const char* a_name, Ms... a_members) noexcept : name(a_name), members(a_members...)
+    {}
+  };
+
+  /**
+    @brief Deduction guide so that @c Vector{"name", D_DECL(&P::x, &P::y, &P::z)} deduces the
+           member-pointer types.
+    @tparam Ms Pointer-to-member types.
+  */
+  template <typename... Ms>
+  Vector(const char*, Ms...) -> Vector<Ms...>;
+
+} // namespace H5Part
+
 struct NoPayload
 {
 };

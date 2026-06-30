@@ -70,6 +70,15 @@ struct ParticleTraits<DischargeInceptionParticle>
     D_DECL(&DischargeInceptionParticle::ga_x, &DischargeInceptionParticle::ga_y, &DischargeInceptionParticle::ga_z),
     &DischargeInceptionParticle::alphaEff,
     &DischargeInceptionParticle::dtStep);
+
+  /**
+     @brief Payload columns written to H5Part visualization files: the interpolated velocity vector (id,
+            position and weight are written automatically; the remaining columns are internal integrator
+            state and not plotted).
+  */
+  static constexpr auto h5PartColumns = std::make_tuple(H5Part::Vector{
+    "v",
+    D_DECL(&DischargeInceptionParticle::v_x, &DischargeInceptionParticle::v_y, &DischargeInceptionParticle::v_z)});
 };
 
 #include <CD_NamespaceFooter.H>

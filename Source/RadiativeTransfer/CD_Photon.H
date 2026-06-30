@@ -44,6 +44,14 @@ struct ParticleTraits<Photon>
 {
   /// @brief Payload column member-pointers: kappa followed by the per-component velocity.
   static constexpr auto columns = std::make_tuple(&Photon::kappa, D_DECL(&Photon::v_x, &Photon::v_y, &Photon::v_z));
+
+  /**
+     @brief Payload columns written to H5Part visualization files: the absorption coefficient and the
+            velocity vector (id, position and weight are written automatically).
+  */
+  static constexpr auto h5PartColumns = std::make_tuple(
+    H5Part::Scalar{"kappa", &Photon::kappa},
+    H5Part::Vector{"v", D_DECL(&Photon::v_x, &Photon::v_y, &Photon::v_z)});
 };
 
 #include <CD_NamespaceFooter.H>
