@@ -186,6 +186,10 @@ AMRMultigridKrylovOp<T>::dotProduct(const Vector<LevelData<T>*>& a_1, const Vect
     m_volumeCached = true;
   }
 
+  // Combine into a volume-weighted sum of per-level means: sum_lvl mean_lvl(kappa*X*Y) * dx_lvl^d. This is a
+  // self-consistent inner product (all that the outer GMRES/BiCGStab require), but note it is NOT AMRMultiGrid's
+  // internal single-normalization inner product -- so the Krylov solvers' residuals are measured in a different
+  // (though equivalent) norm than the one AMRMultiGrid reports for the inner V-cycles.
   Real prod = 0.0;
   for (int lvl = m_lbase; lvl <= m_lmax; lvl++) {
     if (m_volume[lvl] > 0.0) {

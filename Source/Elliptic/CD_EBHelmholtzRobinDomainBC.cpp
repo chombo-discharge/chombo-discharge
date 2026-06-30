@@ -230,8 +230,11 @@ EBHelmholtzRobinDomainBC::getFaceFlux(const VolIndex&       a_vof,
 Real
 EBHelmholtzRobinDomainBC::getDiagWeight(const int /*a_dir*/, const Side::LoHiSide /*a_side*/) const
 {
-  // Preserves the value previously inherited from the (now-removed) base default. Not re-derived from the Robin
-  // getFaceFlux discretization above; see EBHelmholtzDomainBC::getDiagWeight and review if that flux changes.
+  // Placeholder weight (preserves the pre-pure-virtual base default of 1.0). The true Robin diagonal contribution
+  // is coefficient-dependent: the phi_i coefficient in getFaceFlux() above scales with the runtime A/B ratio and
+  // the side, so it cannot be expressed as the single constant this scalar API returns. This weight feeds only the
+  // relaxation/smoother diagonal, so an inexact value degrades smoother efficiency but never the converged solution
+  // (see EBHelmholtzDomainBC::getDiagWeight). Deriving a coefficient-aware weight would require extending the API.
   return 1.0;
 }
 

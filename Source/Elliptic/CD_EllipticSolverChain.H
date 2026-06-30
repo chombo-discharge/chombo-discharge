@@ -155,13 +155,14 @@ namespace EllipticSolverChain {
         return 0;
       }
 
-      m_sinceProbe++;
-      if (m_reprobeNext || m_sinceProbe >= std::max(1, retryInterval)) {
+      if (m_reprobeNext || m_sinceProbe + 1 >= std::max(1, retryInterval)) {
         m_sinceProbe  = 0;
         m_reprobeNext = false;
 
         return 0; // re-probe GMG (periodic or adaptive)
       }
+
+      m_sinceProbe++; // another solve skipped GMG; advance toward the next periodic re-probe
 
       return this->firstNonGmg(a_solvers);
     }

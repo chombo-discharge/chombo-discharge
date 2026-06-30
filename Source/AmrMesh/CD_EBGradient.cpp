@@ -1001,7 +1001,10 @@ EBGradient::getLeastSquaresStencil(VoFStencil&            a_stencilCoar,
     }
     knownTerms |= IntVect::Zero;
 
-    // Returns a std::map<IntVect, std::pair<VoFStencil, VoFStencil>>.
+    // Returns a std::map<IntVect, std::pair<VoFStencil, VoFStencil>>. Solved in double precision (Real): the
+    // dual-level system mixes coarse (dx) and fine (dx/refRat) displacements, so the order-2 columns span a wide
+    // magnitude range (~refRat^2), and a single-precision pseudo-inverse can return poor stencil weights at the
+    // awkward EBCF cut-cells. Matches the dual-level interpolator in EBLeastSquaresMultigridInterpolator.
     const auto stencils = LeastSquares::computeDualLevelStencils<Real>(derivTerms,
                                                                        knownTerms,
                                                                        fineVoFs,

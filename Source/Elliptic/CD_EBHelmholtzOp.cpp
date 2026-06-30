@@ -2377,7 +2377,9 @@ EBHelmholtzOp::computeSpectralRadius()
 
   Real localMax = 0.0;
 
-  for (int mybox = 0; mybox < dit.size(); mybox++) {
+  const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime) reduction(max : localMax)
+  for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din     = dit[mybox];
     const EBISBox&   ebisbox = ebisl[din];
     const Box&       cellBox = dbl[din];

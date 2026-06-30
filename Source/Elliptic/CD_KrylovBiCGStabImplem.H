@@ -187,6 +187,7 @@ KrylovBiCGStab<T>::solve(Vector<LevelData<T>*>& a_phi, const Vector<LevelData<T>
     rnorm = op.norm(m_r, 2);
     if (rnorm <= m_eps * rnorm0) { // converged on the half-step s
       m_exitStatus = 1;
+      iter++; // this (half) iteration was performed -- count it before breaking
 
       break;
     }
@@ -227,6 +228,8 @@ KrylovBiCGStab<T>::solve(Vector<LevelData<T>*>& a_phi, const Vector<LevelData<T>
 
     if (rnorm <= m_eps * rnorm0) {
       m_exitStatus = 1;
+      iter++; // this iteration was performed -- count it before breaking
+
       break;
     }
 
