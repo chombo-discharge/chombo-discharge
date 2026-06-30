@@ -686,7 +686,7 @@ ParticleContainer<P, Traits>::gatherGhostsToPool()
             const std::size_t k = bin.size() - 1;
 
             bin.particleID(k) = a_leaf.particleID(i); // preserve id
-            bin.rankID(k)     = a_leaf.rankID(i);     // preserve the true owner (a ghost records its owner)
+            bin.rankID(k)     = procID();             // owner is this rank (it owns its valid particles)
             bin.ghost(k)      = gt;
           }
         }

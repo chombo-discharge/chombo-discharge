@@ -892,9 +892,10 @@ protected:
     @details For every valid particle, finds all patches on levels [l-1, l, l+1] whose ghost layer
     (grow(box, m_numGhost), clamped to the domain) contains the particle's cell but whose own box does
     not -- i.e. the particle lies in that patch's ghost shell. A copy is binned for each such patch with
-    the appropriate GhostType (SameLevel/Coarse/Fine from the destination's view) and the source's
-    particleID and rankID PRESERVED (a ghost records its true owner, not the receiver). A particle may
-    be a ghost of several patches, so it can be binned more than once. Non-periodic.
+    the appropriate GhostType (SameLevel/Coarse/Fine from the destination's view), the source's
+    particleID preserved, and rankID set to the owning rank (this rank, which owns its valid particles)
+    so a ghost records its true owner rather than the receiver. A particle may be a ghost of several
+    patches, so it can be binned more than once. Non-periodic.
     @return The per-rank ghost pool (distribute it with a_setOwnerToReceiver == false).
   */
   MoverPool
