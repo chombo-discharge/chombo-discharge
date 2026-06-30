@@ -1094,6 +1094,7 @@ MFHelmholtzOp::relaxChebyshev(LevelData<MFCellFAB>&       a_correction,
   int  chebyOrder    = 3;
   Real chebyEigRatio = 4.0;
   Real lambdaMax     = 2.0;
+
   if (!m_helmOps.empty()) {
     chebyOrder    = m_helmOps.begin()->second->getChebyOrder();
     chebyEigRatio = m_helmOps.begin()->second->getChebyEigRatio();
@@ -1105,6 +1106,7 @@ MFHelmholtzOp::relaxChebyshev(LevelData<MFCellFAB>&       a_correction,
   const Real delta     = 0.5 * (lambdaMax - lambdaMin);
 
   std::vector<Real> omega(chebyOrder);
+
   for (int i = 0; i < chebyOrder; i++) {
     const Real sigma = theta - delta * std::cos((2 * i + 1) * M_PI / (2 * chebyOrder));
     omega[i]         = 1.0 / sigma;
