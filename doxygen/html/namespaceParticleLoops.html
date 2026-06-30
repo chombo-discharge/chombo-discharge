@@ -87,12 +87,12 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a00a84427e650034af595bdb9b2cde5de" id="r_a00a84427e650034af595bdb9b2cde5de"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Functor</a> &gt; </td></tr>
-<tr class="memitem:a00a84427e650034af595bdb9b2cde5de"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">ALWAYS_INLINE</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleLoops.html#a00a84427e650034af595bdb9b2cde5de">loop</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_soa</a>, <a class="el" href="classTracerParticleSolver.html">Functor</a> &amp;&amp;<a class="el" href="classTracerParticleSolver.html">a_kernel</a>)</td></tr>
+<tr class="memitem:a00a84427e650034af595bdb9b2cde5de" id="r_a00a84427e650034af595bdb9b2cde5de"><td class="memTemplParams" colspan="2">template&lt;typename P , typename Traits , typename Functor &gt; </td></tr>
+<tr class="memitem:a00a84427e650034af595bdb9b2cde5de"><td class="memTemplItemLeft" align="right" valign="top">ALWAYS_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleLoops.html#a00a84427e650034af595bdb9b2cde5de">loop</a> (const <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; P, Traits &gt; &amp;a_soa, Functor &amp;&amp;a_kernel)</td></tr>
 <tr class="memdesc:a00a84427e650034af595bdb9b2cde5de"><td class="mdescLeft">&#160;</td><td class="mdescRight">Launch a kernel over every particle in a <a class="el" href="classParticleSoA.html" title="Arena-backed Struct-of-Arrays particle container for a single grid patch.">ParticleSoA</a>, decorating the loop with CD_PRAGMA_SIMD.  <br /></td></tr>
 <tr class="separator:a00a84427e650034af595bdb9b2cde5de"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aedc38b74dab3bc859f00c7176dabd6b1" id="r_aedc38b74dab3bc859f00c7176dabd6b1"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">T</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Functor</a> &gt; </td></tr>
-<tr class="memitem:aedc38b74dab3bc859f00c7176dabd6b1"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">ALWAYS_INLINE</a> <a class="el" href="classTracerParticleSolver.html">T</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleLoops.html#aedc38b74dab3bc859f00c7176dabd6b1">reduce</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_soa</a>, <a class="el" href="classTracerParticleSolver.html">T</a> <a class="el" href="classTracerParticleSolver.html">a_initial</a>, <a class="el" href="classTracerParticleSolver.html">Functor</a> &amp;&amp;<a class="el" href="classTracerParticleSolver.html">a_kernel</a>)</td></tr>
+<tr class="memitem:aedc38b74dab3bc859f00c7176dabd6b1" id="r_aedc38b74dab3bc859f00c7176dabd6b1"><td class="memTemplParams" colspan="2">template&lt;typename P , typename Traits , typename T , typename Functor &gt; </td></tr>
+<tr class="memitem:aedc38b74dab3bc859f00c7176dabd6b1"><td class="memTemplItemLeft" align="right" valign="top">ALWAYS_INLINE T&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleLoops.html#aedc38b74dab3bc859f00c7176dabd6b1">reduce</a> (const <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; P, Traits &gt; &amp;a_soa, T a_initial, Functor &amp;&amp;a_kernel)</td></tr>
 <tr class="memdesc:aedc38b74dab3bc859f00c7176dabd6b1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fold a kernel over every particle in a <a class="el" href="classParticleSoA.html" title="Arena-backed Struct-of-Arrays particle container for a single grid patch.">ParticleSoA</a>, accumulating a reduction value.  <br /></td></tr>
 <tr class="separator:aedc38b74dab3bc859f00c7176dabd6b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -105,18 +105,18 @@ Functions</h2></td></tr>
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Functor</a> &gt; </div>
+template&lt;typename P , typename Traits , typename Functor &gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">ALWAYS_INLINE</a> <a class="el" href="classTracerParticleSolver.html">void</a> ParticleLoops::loop </td>
+          <td class="memname">ALWAYS_INLINE void ParticleLoops::loop </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; P, Traits &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_soa</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">Functor</a> &amp;&amp;&#160;</td>
+          <td class="paramtype">Functor &amp;&amp;&#160;</td>
           <td class="paramname"><em>a_kernel</em>&#160;</td>
         </tr>
         <tr>
@@ -134,14 +134,14 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
   <table class="tparams">
     <tr><td class="paramname">P</td><td>Payload type of the <a class="el" href="classParticleSoA.html" title="Arena-backed Struct-of-Arrays particle container for a single grid patch.">ParticleSoA</a>. </td></tr>
     <tr><td class="paramname">Traits</td><td>Column descriptor for the payload. </td></tr>
-    <tr><td class="paramname">Functor</td><td>Callable type taking a <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">std::size_t</a> particle index. </td></tr>
+    <tr><td class="paramname">Functor</td><td>Callable type taking a std::size_t particle index. </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_soa</td><td>Particle container to iterate over (read for its size only). </td></tr>
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_kernel</td><td>Callable taking a <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">std::size_t</a> particle index. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_kernel</td><td>Callable taking a std::size_t particle index. </td></tr>
   </table>
   </dd>
 </dl>
@@ -154,24 +154,24 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">T</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Functor</a> &gt; </div>
+template&lt;typename P , typename Traits , typename T , typename Functor &gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">ALWAYS_INLINE</a> <a class="el" href="classTracerParticleSolver.html">T</a> ParticleLoops::reduce </td>
+          <td class="memname">ALWAYS_INLINE T ParticleLoops::reduce </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; P, Traits &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_soa</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">T</a>&#160;</td>
+          <td class="paramtype">T&#160;</td>
           <td class="paramname"><em>a_initial</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">Functor</a> &amp;&amp;&#160;</td>
+          <td class="paramtype">Functor &amp;&amp;&#160;</td>
           <td class="paramname"><em>a_kernel</em>&#160;</td>
         </tr>
         <tr>
@@ -183,14 +183,14 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 </div><div class="memdoc">
 
 <p>Fold a kernel over every particle in a <a class="el" href="classParticleSoA.html" title="Arena-backed Struct-of-Arrays particle container for a single grid patch.">ParticleSoA</a>, accumulating a reduction value. </p>
-<p>The accumulator is threaded sequentially through the particles: for each particle index i in [0, a_soa.size()) the accumulator is updated as <code>acc</code> = a_kernel(acc, i), and the final value is returned. This is the reduction analogue of <a class="el" href="namespaceParticleLoops.html#a00a84427e650034af595bdb9b2cde5de" title="Launch a kernel over every particle in a ParticleSoA, decorating the loop with CD_PRAGMA_SIMD.">loop()</a>: because <code>CD_PRAGMA_SIMD</code> (ivdep) does not guarantee a correct floating-point reduction, this loop is intentionally a plain sequential fold with NO SIMD decoration. As with <a class="el" href="namespaceParticleLoops.html#a00a84427e650034af595bdb9b2cde5de" title="Launch a kernel over every particle in a ParticleSoA, decorating the loop with CD_PRAGMA_SIMD.">loop()</a>, capture the column pointers ONCE before the call and read them by index inside the kernel &ndash; do not call <code><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">a_soa.column&lt;&gt;()</a></code> inside the kernel, and do not mutate the container's structure (append/remove/resize).</p>
-<dl class="section note"><dt>Note</dt><dd>Sequential and order-deterministic, so it is correct for non-associative reductions (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">e.g</a>. floating-point sums where bitwise reproducibility matters) as well as min/max. The trip count is taken from the container so it always matches the columns the kernel captured from it. </dd></dl>
+<p>The accumulator is threaded sequentially through the particles: for each particle index i in [0, a_soa.size()) the accumulator is updated as <code>acc</code> = a_kernel(acc, i), and the final value is returned. This is the reduction analogue of <a class="el" href="namespaceParticleLoops.html#a00a84427e650034af595bdb9b2cde5de" title="Launch a kernel over every particle in a ParticleSoA, decorating the loop with CD_PRAGMA_SIMD.">loop()</a>: because <code>CD_PRAGMA_SIMD</code> (ivdep) does not guarantee a correct floating-point reduction, this loop is intentionally a plain sequential fold with NO SIMD decoration. As with <a class="el" href="namespaceParticleLoops.html#a00a84427e650034af595bdb9b2cde5de" title="Launch a kernel over every particle in a ParticleSoA, decorating the loop with CD_PRAGMA_SIMD.">loop()</a>, capture the column pointers ONCE before the call and read them by index inside the kernel &ndash; do not call <code>a_soa.column&lt;&gt;()</code> inside the kernel, and do not mutate the container's structure (append/remove/resize).</p>
+<dl class="section note"><dt>Note</dt><dd>Sequential and order-deterministic, so it is correct for non-associative reductions (e.g. floating-point sums where bitwise reproducibility matters) as well as min/max. The trip count is taken from the container so it always matches the columns the kernel captured from it. </dd></dl>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">P</td><td>Payload type of the <a class="el" href="classParticleSoA.html" title="Arena-backed Struct-of-Arrays particle container for a single grid patch.">ParticleSoA</a>. </td></tr>
     <tr><td class="paramname">Traits</td><td>Column descriptor for the payload. </td></tr>
     <tr><td class="paramname">T</td><td>Accumulator type. </td></tr>
-    <tr><td class="paramname">Functor</td><td>Callable type taking (T accumulator, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">std::size_t</a> particle index) and returning T. </td></tr>
+    <tr><td class="paramname">Functor</td><td>Callable type taking (T accumulator, std::size_t particle index) and returning T. </td></tr>
   </table>
   </dd>
 </dl>
@@ -198,7 +198,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_soa</td><td>Particle container to iterate over (read for its size only). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_initial</td><td>Initial accumulator value. </td></tr>
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_kernel</td><td>Callable taking (T accumulator, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">std::size_t</a> particle index) and returning the updated accumulator. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_kernel</td><td>Callable taking (T accumulator, std::size_t particle index) and returning the updated accumulator. </td></tr>
   </table>
   </dd>
 </dl>

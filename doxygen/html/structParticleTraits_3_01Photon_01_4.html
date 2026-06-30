@@ -91,13 +91,50 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
 <tr class="memitem:a98bd1965262647fe1568101cf92c34a0" id="r_a98bd1965262647fe1568101cf92c34a0"><td class="memItemLeft" align="right" valign="top"><a id="a98bd1965262647fe1568101cf92c34a0" name="a98bd1965262647fe1568101cf92c34a0"></a>
-<a class="el" href="classTracerParticleSolver.html">static</a> <a class="el" href="classTracerParticleSolver.html">constexpr</a> <a class="el" href="classTracerParticleSolver.html">auto</a>&#160;</td><td class="memItemRight" valign="bottom"><b>columns</b> = <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::make_tuple</a>(&amp;<a class="el" href="structPhoton.html#acf519a31aa0069aed3e09a012b8a7bcf">Photon::kappa</a>, <a class="el" href="classTracerParticleSolver.html">D_DECL</a>(&amp;<a class="el" href="structPhoton.html#a7d1169e47d33ca6bdbf70c6a81f57d71">Photon::v_x</a>, &amp;<a class="el" href="structPhoton.html#a1ad6e30a2f1b6a4421d0557ed2a96e56">Photon::v_y</a>, &amp;<a class="el" href="structPhoton.html#ac223dd0701bade0eb47762b23a04a57a">Photon::v_z</a>))</td></tr>
+static constexpr auto&#160;</td><td class="memItemRight" valign="bottom"><b>columns</b> = std::make_tuple(&amp;<a class="el" href="structPhoton.html#acf519a31aa0069aed3e09a012b8a7bcf">Photon::kappa</a>, D_DECL(&amp;<a class="el" href="structPhoton.html#a7d1169e47d33ca6bdbf70c6a81f57d71">Photon::v_x</a>, &amp;<a class="el" href="structPhoton.html#a1ad6e30a2f1b6a4421d0557ed2a96e56">Photon::v_y</a>, &amp;<a class="el" href="structPhoton.html#ac223dd0701bade0eb47762b23a04a57a">Photon::v_z</a>))</td></tr>
 <tr class="memdesc:a98bd1965262647fe1568101cf92c34a0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Payload column member-pointers: kappa followed by the per-component velocity. <br /></td></tr>
 <tr class="separator:a98bd1965262647fe1568101cf92c34a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a00f1bf1e15b1881f7efc75a2b194c14b" id="r_a00f1bf1e15b1881f7efc75a2b194c14b"><td class="memItemLeft" align="right" valign="top">static constexpr auto&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structParticleTraits_3_01Photon_01_4.html#a00f1bf1e15b1881f7efc75a2b194c14b">h5PartColumns</a></td></tr>
+<tr class="memdesc:a00f1bf1e15b1881f7efc75a2b194c14b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Payload columns written to <a class="el" href="namespaceH5Part.html" title="Declarative descriptors for selecting which particle PAYLOAD columns are written to H5Part (visualiza...">H5Part</a> visualization files: the absorption coefficient and the velocity vector (id, position and weight are written automatically).  <br /></td></tr>
+<tr class="separator:a00f1bf1e15b1881f7efc75a2b194c14b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p><a class="el" href="structParticleTraits.html" title="Traits class that a user specializes to describe the PAYLOAD columns of a particle type....">ParticleTraits</a> specialization listing the payload columns of <a class="el" href="structPhoton.html" title="SoA payload for Monte Carlo radiative-transfer photons.">Photon</a>. </p>
-</div><hr/>The documentation for this struct was generated from the following file:<ul>
+</div><h2 class="groupheader">Member Data Documentation</h2>
+<a id="a00f1bf1e15b1881f7efc75a2b194c14b" name="a00f1bf1e15b1881f7efc75a2b194c14b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a00f1bf1e15b1881f7efc75a2b194c14b">&#9670;&#160;</a></span>h5PartColumns</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr auto <a class="el" href="structParticleTraits.html">ParticleTraits</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt;::h5PartColumns</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<b>Initial value:</b><div class="fragment"><div class="line">= std::make_tuple(</div>
+<div class="line">    <a class="code hl_struct" href="structH5Part_1_1Scalar.html">H5Part::Scalar</a>{<span class="stringliteral">&quot;kappa&quot;</span>, &amp;<a class="code hl_variable" href="structPhoton.html#acf519a31aa0069aed3e09a012b8a7bcf">Photon::kappa</a>},</div>
+<div class="line">    <a class="code hl_struct" href="structH5Part_1_1Vector.html">H5Part::Vector</a>{<span class="stringliteral">&quot;v&quot;</span>, D_DECL(&amp;<a class="code hl_variable" href="structPhoton.html#a7d1169e47d33ca6bdbf70c6a81f57d71">Photon::v_x</a>, &amp;<a class="code hl_variable" href="structPhoton.html#a1ad6e30a2f1b6a4421d0557ed2a96e56">Photon::v_y</a>, &amp;<a class="code hl_variable" href="structPhoton.html#ac223dd0701bade0eb47762b23a04a57a">Photon::v_z</a>)})</div>
+<div class="ttc" id="astructH5Part_1_1Scalar_html"><div class="ttname"><a href="structH5Part_1_1Scalar.html">H5Part::Scalar</a></div><div class="ttdoc">Descriptor of a single scalar payload column written to one H5Part dataset.</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:202</div></div>
+<div class="ttc" id="astructH5Part_1_1Vector_html"><div class="ttname"><a href="structH5Part_1_1Vector.html">H5Part::Vector</a></div><div class="ttdoc">Descriptor of a SpaceDim-component vector payload column, written as name-x/name-y/name-z.</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:232</div></div>
+<div class="ttc" id="astructPhoton_html_a1ad6e30a2f1b6a4421d0557ed2a96e56"><div class="ttname"><a href="structPhoton.html#a1ad6e30a2f1b6a4421d0557ed2a96e56">Photon::v_y</a></div><div class="ttdeci">ParticleReal v_y</div><div class="ttdoc">Velocity, y-component.</div><div class="ttdef"><b>Definition</b> CD_Photon.H:33</div></div>
+<div class="ttc" id="astructPhoton_html_a7d1169e47d33ca6bdbf70c6a81f57d71"><div class="ttname"><a href="structPhoton.html#a7d1169e47d33ca6bdbf70c6a81f57d71">Photon::v_x</a></div><div class="ttdeci">ParticleReal v_x</div><div class="ttdoc">Velocity, x-component.</div><div class="ttdef"><b>Definition</b> CD_Photon.H:32</div></div>
+<div class="ttc" id="astructPhoton_html_ac223dd0701bade0eb47762b23a04a57a"><div class="ttname"><a href="structPhoton.html#ac223dd0701bade0eb47762b23a04a57a">Photon::v_z</a></div><div class="ttdeci">ParticleReal v_z</div><div class="ttdoc">Velocity, z-component.</div><div class="ttdef"><b>Definition</b> CD_Photon.H:35</div></div>
+<div class="ttc" id="astructPhoton_html_acf519a31aa0069aed3e09a012b8a7bcf"><div class="ttname"><a href="structPhoton.html#acf519a31aa0069aed3e09a012b8a7bcf">Photon::kappa</a></div><div class="ttdeci">ParticleReal kappa</div><div class="ttdoc">Mean absorption coefficient (inverse mean free path).</div><div class="ttdef"><b>Definition</b> CD_Photon.H:30</div></div>
+</div><!-- fragment -->
+<p>Payload columns written to <a class="el" href="namespaceH5Part.html" title="Declarative descriptors for selecting which particle PAYLOAD columns are written to H5Part (visualiza...">H5Part</a> visualization files: the absorption coefficient and the velocity vector (id, position and weight are written automatically). </p>
+
+</div>
+</div>
+<hr/>The documentation for this struct was generated from the following file:<ul>
 <li>Source/RadiativeTransfer/<a class="el" href="CD__Photon_8H_source.html">CD_Photon.H</a></li>
 </ul>
 </div><!-- contents -->

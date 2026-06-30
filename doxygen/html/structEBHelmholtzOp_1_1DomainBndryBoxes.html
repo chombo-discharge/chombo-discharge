@@ -95,29 +95,29 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a17a3942de16767f29f86c570addae479" id="r_a17a3942de16767f29f86c570addae479"><td class="memItemLeft" align="right" valign="top"><a id="a17a3942de16767f29f86c570addae479" name="a17a3942de16767f29f86c570addae479"></a>
-<a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><b>touchesDomain</b> = <a class="el" href="classTracerParticleSolver.html">false</a></td></tr>
-<tr class="memdesc:a17a3942de16767f29f86c570addae479"><td class="mdescLeft">&#160;</td><td class="mdescRight">True if the patch abuts the domain boundary on any side, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">i.e</a>. if any boundary-flux work is needed at all. <br /></td></tr>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>touchesDomain</b> = false</td></tr>
+<tr class="memdesc:a17a3942de16767f29f86c570addae479"><td class="mdescLeft">&#160;</td><td class="mdescRight">True if the patch abuts the domain boundary on any side, i.e. if any boundary-flux work is needed at all. <br /></td></tr>
 <tr class="separator:a17a3942de16767f29f86c570addae479"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a693fc6530ec8bc8205bcfab070b3b8b7" id="r_a693fc6530ec8bc8205bcfab070b3b8b7"><td class="memItemLeft" align="right" valign="top"><a id="a693fc6530ec8bc8205bcfab070b3b8b7" name="a693fc6530ec8bc8205bcfab070b3b8b7"></a>
-<a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><b>hasLo</b> [<a class="el" href="classTracerParticleSolver.html">SpaceDim</a>] = {<a class="el" href="classTracerParticleSolver.html">D_DECL</a>(0, 0, 0)}</td></tr>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>hasLo</b> [SpaceDim] = {D_DECL(0, 0, 0)}</td></tr>
 <tr class="memdesc:a693fc6530ec8bc8205bcfab070b3b8b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-direction flag: 1 if the patch abuts the lo domain face in that direction, 0 otherwise. <br /></td></tr>
 <tr class="separator:a693fc6530ec8bc8205bcfab070b3b8b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8e34cb80d4c685b836326711327576fb" id="r_a8e34cb80d4c685b836326711327576fb"><td class="memItemLeft" align="right" valign="top"><a id="a8e34cb80d4c685b836326711327576fb" name="a8e34cb80d4c685b836326711327576fb"></a>
-<a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><b>hasHi</b> [<a class="el" href="classTracerParticleSolver.html">SpaceDim</a>] = {<a class="el" href="classTracerParticleSolver.html">D_DECL</a>(0, 0, 0)}</td></tr>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>hasHi</b> [SpaceDim] = {D_DECL(0, 0, 0)}</td></tr>
 <tr class="memdesc:a8e34cb80d4c685b836326711327576fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-direction flag: 1 if the patch abuts the hi domain face in that direction, 0 otherwise. <br /></td></tr>
 <tr class="separator:a8e34cb80d4c685b836326711327576fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a46bd6228bd95408e49b182b38f90b8c9" id="r_a46bd6228bd95408e49b182b38f90b8c9"><td class="memItemLeft" align="right" valign="top"><a id="a46bd6228bd95408e49b182b38f90b8c9" name="a46bd6228bd95408e49b182b38f90b8c9"></a>
-<a class="el" href="classTracerParticleSolver.html">Box</a>&#160;</td><td class="memItemRight" valign="bottom"><b>loBox</b> [<a class="el" href="classTracerParticleSolver.html">SpaceDim</a>]</td></tr>
+Box&#160;</td><td class="memItemRight" valign="bottom"><b>loBox</b> [SpaceDim]</td></tr>
 <tr class="memdesc:a46bd6228bd95408e49b182b38f90b8c9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lo-side cell-centered box abutting the domain. Valid only when hasLo[dir] == 1. <br /></td></tr>
 <tr class="separator:a46bd6228bd95408e49b182b38f90b8c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6595f29de3dd95b9cf33d6c6db8c5af6" id="r_a6595f29de3dd95b9cf33d6c6db8c5af6"><td class="memItemLeft" align="right" valign="top"><a id="a6595f29de3dd95b9cf33d6c6db8c5af6" name="a6595f29de3dd95b9cf33d6c6db8c5af6"></a>
-<a class="el" href="classTracerParticleSolver.html">Box</a>&#160;</td><td class="memItemRight" valign="bottom"><b>hiBox</b> [<a class="el" href="classTracerParticleSolver.html">SpaceDim</a>]</td></tr>
+Box&#160;</td><td class="memItemRight" valign="bottom"><b>hiBox</b> [SpaceDim]</td></tr>
 <tr class="memdesc:a6595f29de3dd95b9cf33d6c6db8c5af6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hi-side cell-centered box abutting the domain. Valid only when hasHi[dir] == 1. <br /></td></tr>
 <tr class="separator:a6595f29de3dd95b9cf33d6c6db8c5af6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Cached domain-boundary boxes for a single grid patch. </p>
-<p>Precomputed in <a class="el" href="classEBHelmholtzOp.html#af1e883965165f53ff42eb0312c835788" title="Define stencils.">EBHelmholtzOp::defineStencils</a> so that applyDomainFlux and fillDomainFlux can avoid recomputing <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">EBArith::loHi</a> (and its associated timer/box-arithmetic overhead) on every V-cycle. The boxes depend only on the problem domain and the grid layout, both of which are fixed once the operator has been defined. </p>
+<p>Precomputed in <a class="el" href="classEBHelmholtzOp.html#af1e883965165f53ff42eb0312c835788" title="Define stencils.">EBHelmholtzOp::defineStencils</a> so that applyDomainFlux and fillDomainFlux can avoid recomputing EBArith::loHi (and its associated timer/box-arithmetic overhead) on every V-cycle. The boxes depend only on the problem domain and the grid layout, both of which are fixed once the operator has been defined. </p>
 </div><hr/>The documentation for this struct was generated from the following file:<ul>
 <li>Source/Elliptic/<a class="el" href="CD__EBHelmholtzOp_8H_source.html">CD_EBHelmholtzOp.H</a></li>
 </ul>

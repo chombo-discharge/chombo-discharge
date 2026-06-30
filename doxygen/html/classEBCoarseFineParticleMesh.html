@@ -103,143 +103,143 @@ Public Types</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:aa9223e5ce668dfa37a71bb655f7a1962" id="r_aa9223e5ce668dfa37a71bb655f7a1962"><td class="memItemLeft" align="right" valign="top"><a id="aa9223e5ce668dfa37a71bb655f7a1962" name="aa9223e5ce668dfa37a71bb655f7a1962"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>EBCoarseFineParticleMesh</b> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+&#160;</td><td class="memItemRight" valign="bottom"><b>EBCoarseFineParticleMesh</b> () noexcept</td></tr>
 <tr class="memdesc:aa9223e5ce668dfa37a71bb655f7a1962"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor. Leaves object in undefined state and subsequently requires a call to define. <br /></td></tr>
 <tr class="separator:aa9223e5ce668dfa37a71bb655f7a1962"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a651430c6a68bf11e14d98fccf9143d1a" id="r_a651430c6a68bf11e14d98fccf9143d1a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseFineParticleMesh.html#a651430c6a68bf11e14d98fccf9143d1a">EBCoarseFineParticleMesh</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBLevelGrid</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_eblgCoar</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBLevelGrid</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_eblgFine</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_refRat</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> <a class="el" href="classTracerParticleSolver.html">a_ghost</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a651430c6a68bf11e14d98fccf9143d1a" id="r_a651430c6a68bf11e14d98fccf9143d1a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseFineParticleMesh.html#a651430c6a68bf11e14d98fccf9143d1a">EBCoarseFineParticleMesh</a> (const EBLevelGrid &amp;a_eblgCoar, const EBLevelGrid &amp;a_eblgFine, const int a_refRat, const IntVect a_ghost) noexcept</td></tr>
 <tr class="memdesc:a651430c6a68bf11e14d98fccf9143d1a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor. Calls define.  <br /></td></tr>
 <tr class="separator:a651430c6a68bf11e14d98fccf9143d1a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a91ac30302ad4f8fac7f26d3a1b3cad6c" id="r_a91ac30302ad4f8fac7f26d3a1b3cad6c"><td class="memItemLeft" align="right" valign="top"><a id="a91ac30302ad4f8fac7f26d3a1b3cad6c" name="a91ac30302ad4f8fac7f26d3a1b3cad6c"></a>
-<a class="el" href="classTracerParticleSolver.html">virtual</a>&#160;</td><td class="memItemRight" valign="bottom"><b>~EBCoarseFineParticleMesh</b> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~EBCoarseFineParticleMesh</b> () noexcept</td></tr>
 <tr class="memdesc:a91ac30302ad4f8fac7f26d3a1b3cad6c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor (does nothing) <br /></td></tr>
 <tr class="separator:a91ac30302ad4f8fac7f26d3a1b3cad6c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9e351ed56180a1bb49aaf58a4edc092e" id="r_a9e351ed56180a1bb49aaf58a4edc092e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseFineParticleMesh.html#a9e351ed56180a1bb49aaf58a4edc092e">define</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBLevelGrid</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_eblgCoar</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBLevelGrid</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_eblgFine</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_refRat</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> <a class="el" href="classTracerParticleSolver.html">a_ghost</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a9e351ed56180a1bb49aaf58a4edc092e" id="r_a9e351ed56180a1bb49aaf58a4edc092e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseFineParticleMesh.html#a9e351ed56180a1bb49aaf58a4edc092e">define</a> (const EBLevelGrid &amp;a_eblgCoar, const EBLevelGrid &amp;a_eblgFine, const int a_refRat, const IntVect a_ghost) noexcept</td></tr>
 <tr class="memdesc:a9e351ed56180a1bb49aaf58a4edc092e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define function.  <br /></td></tr>
 <tr class="separator:a9e351ed56180a1bb49aaf58a4edc092e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1e17e413892b84ba2c803d663a622fd9" id="r_a1e17e413892b84ba2c803d663a622fd9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseFineParticleMesh.html#a1e17e413892b84ba2c803d663a622fd9">addFineGhostsToCoarse</a> (<a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_coarData</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_fineData</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a1e17e413892b84ba2c803d663a622fd9" id="r_a1e17e413892b84ba2c803d663a622fd9"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseFineParticleMesh.html#a1e17e413892b84ba2c803d663a622fd9">addFineGhostsToCoarse</a> (LevelData&lt; EBCellFAB &gt; &amp;a_coarData, const LevelData&lt; EBCellFAB &gt; &amp;a_fineData) const noexcept</td></tr>
 <tr class="memdesc:a1e17e413892b84ba2c803d663a622fd9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsen the fine-level ghost cells and add them to the coarse level.  <br /></td></tr>
 <tr class="separator:a1e17e413892b84ba2c803d663a622fd9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3ca611ee336353314986a5fbacf3fa86" id="r_a3ca611ee336353314986a5fbacf3fa86"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseFineParticleMesh.html#a3ca611ee336353314986a5fbacf3fa86">addFiCoDataToFine</a> (<a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_fineData</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_fiCoData</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a3ca611ee336353314986a5fbacf3fa86" id="r_a3ca611ee336353314986a5fbacf3fa86"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseFineParticleMesh.html#a3ca611ee336353314986a5fbacf3fa86">addFiCoDataToFine</a> (LevelData&lt; EBCellFAB &gt; &amp;a_fineData, const LevelData&lt; EBCellFAB &gt; &amp;a_fiCoData) const noexcept</td></tr>
 <tr class="memdesc:a3ca611ee336353314986a5fbacf3fa86"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add the valid+ghost cells on the refined coarse level to the valid cells on the fine level.  <br /></td></tr>
 <tr class="separator:a3ca611ee336353314986a5fbacf3fa86"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a944fef2f990d97c5262048872770c437" id="r_a944fef2f990d97c5262048872770c437"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseFineParticleMesh.html#a944fef2f990d97c5262048872770c437">addInvalidCoarseToFine</a> (<a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_fineData</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_coarData</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a944fef2f990d97c5262048872770c437" id="r_a944fef2f990d97c5262048872770c437"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseFineParticleMesh.html#a944fef2f990d97c5262048872770c437">addInvalidCoarseToFine</a> (LevelData&lt; EBCellFAB &gt; &amp;a_fineData, const LevelData&lt; EBCellFAB &gt; &amp;a_coarData) const noexcept</td></tr>
 <tr class="memdesc:a944fef2f990d97c5262048872770c437"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function which piecewise interpolates the data underneath the fine grid and adds it to the fine grid.  <br /></td></tr>
 <tr class="separator:a944fef2f990d97c5262048872770c437"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aab7101521c28e5b7bc01a8a0d7b65985" id="r_aab7101521c28e5b7bc01a8a0d7b65985"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseFineParticleMesh.html#aab7101521c28e5b7bc01a8a0d7b65985">exchangeAndAddFiCoData</a> (<a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_fiCoData</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:aab7101521c28e5b7bc01a8a0d7b65985" id="r_aab7101521c28e5b7bc01a8a0d7b65985"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseFineParticleMesh.html#aab7101521c28e5b7bc01a8a0d7b65985">exchangeAndAddFiCoData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_fiCoData) const noexcept</td></tr>
 <tr class="memdesc:aab7101521c28e5b7bc01a8a0d7b65985"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function which performs an exchange+add operation on the refined coarse data.  <br /></td></tr>
 <tr class="separator:aab7101521c28e5b7bc01a8a0d7b65985"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7d0a508fb112f92fcf0da434ac23a0fd" id="r_a7d0a508fb112f92fcf0da434ac23a0fd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseFineParticleMesh.html#a7d0a508fb112f92fcf0da434ac23a0fd">restrictAndAddFiCoDataToCoar</a> (<a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_coarData</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_fiCoData</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEBCoarseFineParticleMesh.html#ac28322de791a075d85bc98414056a268">EBCoarseFineParticleMesh::Average</a> <a class="el" href="classTracerParticleSolver.html">a_average</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a7d0a508fb112f92fcf0da434ac23a0fd" id="r_a7d0a508fb112f92fcf0da434ac23a0fd"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseFineParticleMesh.html#a7d0a508fb112f92fcf0da434ac23a0fd">restrictAndAddFiCoDataToCoar</a> (LevelData&lt; EBCellFAB &gt; &amp;a_coarData, const LevelData&lt; EBCellFAB &gt; &amp;a_fiCoData, const <a class="el" href="classEBCoarseFineParticleMesh.html#ac28322de791a075d85bc98414056a268">EBCoarseFineParticleMesh::Average</a> a_average) const noexcept</td></tr>
 <tr class="memdesc:a7d0a508fb112f92fcf0da434ac23a0fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsen the data on the refined coarse grid to the coarse grid. The grids must be defined over the same layout.  <br /></td></tr>
 <tr class="separator:a7d0a508fb112f92fcf0da434ac23a0fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af6454aafec98aaf102858f3d7f9c2af9" id="r_af6454aafec98aaf102858f3d7f9c2af9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBLevelGrid</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseFineParticleMesh.html#af6454aafec98aaf102858f3d7f9c2af9">getEblgFiCo</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memitem:af6454aafec98aaf102858f3d7f9c2af9" id="r_af6454aafec98aaf102858f3d7f9c2af9"><td class="memItemLeft" align="right" valign="top">const EBLevelGrid &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseFineParticleMesh.html#af6454aafec98aaf102858f3d7f9c2af9">getEblgFiCo</a> () const</td></tr>
 <tr class="memdesc:af6454aafec98aaf102858f3d7f9c2af9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the refined version of the coarse eblevelgrid.  <br /></td></tr>
 <tr class="separator:af6454aafec98aaf102858f3d7f9c2af9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adced6795096224a7297dca938acf1355" id="r_adced6795096224a7297dca938acf1355"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="classTracerParticleSolver.html">int</a> NCOMP&gt; </td></tr>
-<tr class="memitem:adced6795096224a7297dca938acf1355"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classEBCoarseFineParticleMesh.html#adced6795096224a7297dca938acf1355">getBufferFiCo</a> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:adced6795096224a7297dca938acf1355" id="r_adced6795096224a7297dca938acf1355"><td class="memTemplParams" colspan="2">template&lt;int NCOMP&gt; </td></tr>
+<tr class="memitem:adced6795096224a7297dca938acf1355"><td class="memTemplItemLeft" align="right" valign="top">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classEBCoarseFineParticleMesh.html#adced6795096224a7297dca938acf1355">getBufferFiCo</a> () const noexcept</td></tr>
 <tr class="memdesc:adced6795096224a7297dca938acf1355"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get buffer storage on the refined coarse level.  <br /></td></tr>
 <tr class="separator:adced6795096224a7297dca938acf1355"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
 <tr class="memitem:a2bad69ac0ae797e12ea4c833abcbf969" id="r_a2bad69ac0ae797e12ea4c833abcbf969"><td class="memItemLeft" align="right" valign="top"><a id="a2bad69ac0ae797e12ea4c833abcbf969" name="a2bad69ac0ae797e12ea4c833abcbf969"></a>
-<a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>defineVoFIterators</b> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>defineVoFIterators</b> () noexcept</td></tr>
 <tr class="memdesc:a2bad69ac0ae797e12ea4c833abcbf969"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the vof iterators. <br /></td></tr>
 <tr class="separator:a2bad69ac0ae797e12ea4c833abcbf969"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a50a6a2433945eac71eca174dcbdd2cde" id="r_a50a6a2433945eac71eca174dcbdd2cde"><td class="memItemLeft" align="right" valign="top"><a id="a50a6a2433945eac71eca174dcbdd2cde" name="a50a6a2433945eac71eca174dcbdd2cde"></a>
-<a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>defineStencils</b> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>defineStencils</b> () noexcept</td></tr>
 <tr class="memdesc:a50a6a2433945eac71eca174dcbdd2cde"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the vof iterators. <br /></td></tr>
 <tr class="separator:a50a6a2433945eac71eca174dcbdd2cde"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5504d0a3709d7a568f1f09a2428f64a2" id="r_a5504d0a3709d7a568f1f09a2428f64a2"><td class="memItemLeft" align="right" valign="top"><a id="a5504d0a3709d7a568f1f09a2428f64a2" name="a5504d0a3709d7a568f1f09a2428f64a2"></a>
-<a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>defineBufferFiCo</b> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>defineBufferFiCo</b> () noexcept</td></tr>
 <tr class="memdesc:a5504d0a3709d7a568f1f09a2428f64a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the buffer storages. <br /></td></tr>
 <tr class="separator:a5504d0a3709d7a568f1f09a2428f64a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad8861139131f1f9c33abe5ad4b4229ec" id="r_ad8861139131f1f9c33abe5ad4b4229ec"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseFineParticleMesh.html#ad8861139131f1f9c33abe5ad4b4229ec">conservativeAverageAndAdd</a> (<a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_coarData</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_fineData</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">DataIndex</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_din</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:ad8861139131f1f9c33abe5ad4b4229ec" id="r_ad8861139131f1f9c33abe5ad4b4229ec"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseFineParticleMesh.html#ad8861139131f1f9c33abe5ad4b4229ec">conservativeAverageAndAdd</a> (EBCellFAB &amp;a_coarData, const EBCellFAB &amp;a_fineData, const DataIndex &amp;a_din) const noexcept</td></tr>
 <tr class="memdesc:ad8861139131f1f9c33abe5ad4b4229ec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Conservatively average and add data from the refined coarse data to the coarse data.  <br /></td></tr>
 <tr class="separator:ad8861139131f1f9c33abe5ad4b4229ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0d38b0ee1721ad89393ec4a9e0c80376" id="r_a0d38b0ee1721ad89393ec4a9e0c80376"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseFineParticleMesh.html#a0d38b0ee1721ad89393ec4a9e0c80376">arithmeticAverageAndAdd</a> (<a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_coarData</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_fineData</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">DataIndex</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_din</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a0d38b0ee1721ad89393ec4a9e0c80376" id="r_a0d38b0ee1721ad89393ec4a9e0c80376"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseFineParticleMesh.html#a0d38b0ee1721ad89393ec4a9e0c80376">arithmeticAverageAndAdd</a> (EBCellFAB &amp;a_coarData, const EBCellFAB &amp;a_fineData, const DataIndex &amp;a_din) const noexcept</td></tr>
 <tr class="memdesc:a0d38b0ee1721ad89393ec4a9e0c80376"><td class="mdescLeft">&#160;</td><td class="mdescRight">Arithmetically average and add data from the refined coarse data to the coarse data.  <br /></td></tr>
 <tr class="separator:a0d38b0ee1721ad89393ec4a9e0c80376"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
 <tr class="memitem:a954e37509b2c2c7f750543791f9e70c1" id="r_a954e37509b2c2c7f750543791f9e70c1"><td class="memItemLeft" align="right" valign="top"><a id="a954e37509b2c2c7f750543791f9e70c1" name="a954e37509b2c2c7f750543791f9e70c1"></a>
-<a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_isDefined</b></td></tr>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_isDefined</b></td></tr>
 <tr class="memdesc:a954e37509b2c2c7f750543791f9e70c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Is defined or not. <br /></td></tr>
 <tr class="separator:a954e37509b2c2c7f750543791f9e70c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1e5c9572e013dd782765f71b751682f2" id="r_a1e5c9572e013dd782765f71b751682f2"><td class="memItemLeft" align="right" valign="top"><a id="a1e5c9572e013dd782765f71b751682f2" name="a1e5c9572e013dd782765f71b751682f2"></a>
-<a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_verbose</b></td></tr>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_verbose</b></td></tr>
 <tr class="memdesc:a1e5c9572e013dd782765f71b751682f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Verbose or not. Useful for debugging. <br /></td></tr>
 <tr class="separator:a1e5c9572e013dd782765f71b751682f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2a62047af2b8b2c6225dabee40ab023f" id="r_a2a62047af2b8b2c6225dabee40ab023f"><td class="memItemLeft" align="right" valign="top"><a id="a2a62047af2b8b2c6225dabee40ab023f" name="a2a62047af2b8b2c6225dabee40ab023f"></a>
-<a class="el" href="classTracerParticleSolver.html">EBLevelGrid</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_eblgCoar</b></td></tr>
+EBLevelGrid&#160;</td><td class="memItemRight" valign="bottom"><b>m_eblgCoar</b></td></tr>
 <tr class="memdesc:a2a62047af2b8b2c6225dabee40ab023f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarse EBLevelGrid. <br /></td></tr>
 <tr class="separator:a2a62047af2b8b2c6225dabee40ab023f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0b3fc6d6fb7d54cfa4fae27c41200bec" id="r_a0b3fc6d6fb7d54cfa4fae27c41200bec"><td class="memItemLeft" align="right" valign="top"><a id="a0b3fc6d6fb7d54cfa4fae27c41200bec" name="a0b3fc6d6fb7d54cfa4fae27c41200bec"></a>
-<a class="el" href="classTracerParticleSolver.html">EBLevelGrid</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_eblgFine</b></td></tr>
+EBLevelGrid&#160;</td><td class="memItemRight" valign="bottom"><b>m_eblgFine</b></td></tr>
 <tr class="memdesc:a0b3fc6d6fb7d54cfa4fae27c41200bec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fine EBLevelGrid. <br /></td></tr>
 <tr class="separator:a0b3fc6d6fb7d54cfa4fae27c41200bec"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a17f73d4365044ac8ce7949e410b28341" id="r_a17f73d4365044ac8ce7949e410b28341"><td class="memItemLeft" align="right" valign="top"><a id="a17f73d4365044ac8ce7949e410b28341" name="a17f73d4365044ac8ce7949e410b28341"></a>
-<a class="el" href="classTracerParticleSolver.html">EBLevelGrid</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_eblgFiCo</b></td></tr>
+EBLevelGrid&#160;</td><td class="memItemRight" valign="bottom"><b>m_eblgFiCo</b></td></tr>
 <tr class="memdesc:a17f73d4365044ac8ce7949e410b28341"><td class="mdescLeft">&#160;</td><td class="mdescRight">Refined coarse EBLevelGrid. <br /></td></tr>
 <tr class="separator:a17f73d4365044ac8ce7949e410b28341"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa07deafe2adb100b56f3ba10a18a620c" id="r_aa07deafe2adb100b56f3ba10a18a620c"><td class="memItemLeft" align="right" valign="top"><a id="aa07deafe2adb100b56f3ba10a18a620c" name="aa07deafe2adb100b56f3ba10a18a620c"></a>
-<a class="el" href="classTracerParticleSolver.html">EBLevelGrid</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_eblgCoFi</b></td></tr>
+EBLevelGrid&#160;</td><td class="memItemRight" valign="bottom"><b>m_eblgCoFi</b></td></tr>
 <tr class="memdesc:aa07deafe2adb100b56f3ba10a18a620c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsening of m_eblgFine. <br /></td></tr>
 <tr class="separator:aa07deafe2adb100b56f3ba10a18a620c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac9211bfc013382b810698c50a5354c00" id="r_ac9211bfc013382b810698c50a5354c00"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Copier</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseFineParticleMesh.html#ac9211bfc013382b810698c50a5354c00">m_copierFiCoToFineIncludeGhosts</a></td></tr>
+<tr class="memitem:ac9211bfc013382b810698c50a5354c00" id="r_ac9211bfc013382b810698c50a5354c00"><td class="memItemLeft" align="right" valign="top">Copier&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseFineParticleMesh.html#ac9211bfc013382b810698c50a5354c00">m_copierFiCoToFineIncludeGhosts</a></td></tr>
 <tr class="memdesc:ac9211bfc013382b810698c50a5354c00"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copier for copying data from the refined coarse level to the fine level.  <br /></td></tr>
 <tr class="separator:ac9211bfc013382b810698c50a5354c00"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab512f78862bdbcdcf41e92044e3202e9" id="r_ab512f78862bdbcdcf41e92044e3202e9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Copier</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseFineParticleMesh.html#ab512f78862bdbcdcf41e92044e3202e9">m_copierCoFiToCoarIncludeGhosts</a></td></tr>
+<tr class="memitem:ab512f78862bdbcdcf41e92044e3202e9" id="r_ab512f78862bdbcdcf41e92044e3202e9"><td class="memItemLeft" align="right" valign="top">Copier&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseFineParticleMesh.html#ab512f78862bdbcdcf41e92044e3202e9">m_copierCoFiToCoarIncludeGhosts</a></td></tr>
 <tr class="memdesc:ab512f78862bdbcdcf41e92044e3202e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copier for copying data from the coarsened fine level to the coarse level.  <br /></td></tr>
 <tr class="separator:ab512f78862bdbcdcf41e92044e3202e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3b2ae91259ed0805342c094a03fab095" id="r_a3b2ae91259ed0805342c094a03fab095"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Copier</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseFineParticleMesh.html#a3b2ae91259ed0805342c094a03fab095">m_copierFiCoToFineNoGhosts</a></td></tr>
+<tr class="memitem:a3b2ae91259ed0805342c094a03fab095" id="r_a3b2ae91259ed0805342c094a03fab095"><td class="memItemLeft" align="right" valign="top">Copier&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseFineParticleMesh.html#a3b2ae91259ed0805342c094a03fab095">m_copierFiCoToFineNoGhosts</a></td></tr>
 <tr class="memdesc:a3b2ae91259ed0805342c094a03fab095"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copier for copying data from the refined coarse level to the fine level.  <br /></td></tr>
 <tr class="separator:a3b2ae91259ed0805342c094a03fab095"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a04011529740977e46120ded8bb9132fe" id="r_a04011529740977e46120ded8bb9132fe"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Copier</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseFineParticleMesh.html#a04011529740977e46120ded8bb9132fe">m_copierFiCoToFiCo</a></td></tr>
+<tr class="memitem:a04011529740977e46120ded8bb9132fe" id="r_a04011529740977e46120ded8bb9132fe"><td class="memItemLeft" align="right" valign="top">Copier&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseFineParticleMesh.html#a04011529740977e46120ded8bb9132fe">m_copierFiCoToFiCo</a></td></tr>
 <tr class="memdesc:a04011529740977e46120ded8bb9132fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copier for that moves data from valid+ghost -&gt; valid on the refined coarse level.  <br /></td></tr>
 <tr class="separator:a04011529740977e46120ded8bb9132fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9c11e44c5ee44f05b815b1897507deb6" id="r_a9c11e44c5ee44f05b815b1897507deb6"><td class="memItemLeft" align="right" valign="top"><a id="a9c11e44c5ee44f05b815b1897507deb6" name="a9c11e44c5ee44f05b815b1897507deb6"></a>
-<a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_bufferFiCoReal</b></td></tr>
+LevelData&lt; EBCellFAB &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_bufferFiCoReal</b></td></tr>
 <tr class="memdesc:a9c11e44c5ee44f05b815b1897507deb6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Buffer storage on the refined coarse level. One component only. <br /></td></tr>
 <tr class="separator:a9c11e44c5ee44f05b815b1897507deb6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4808afe0da004c819a3944018b42e199" id="r_a4808afe0da004c819a3944018b42e199"><td class="memItemLeft" align="right" valign="top"><a id="a4808afe0da004c819a3944018b42e199" name="a4808afe0da004c819a3944018b42e199"></a>
-<a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_bufferFiCoRealVect</b></td></tr>
+LevelData&lt; EBCellFAB &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_bufferFiCoRealVect</b></td></tr>
 <tr class="memdesc:a4808afe0da004c819a3944018b42e199"><td class="mdescLeft">&#160;</td><td class="mdescRight">Buffer storage on the refined coarse level. One component only. <br /></td></tr>
 <tr class="separator:a4808afe0da004c819a3944018b42e199"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7c7c87ef2159ba2f65db66a0f8c64e61" id="r_a7c7c87ef2159ba2f65db66a0f8c64e61"><td class="memItemLeft" align="right" valign="top"><a id="a7c7c87ef2159ba2f65db66a0f8c64e61" name="a7c7c87ef2159ba2f65db66a0f8c64e61"></a>
-<a class="el" href="classTracerParticleSolver.html">LayoutData</a>&lt; <a class="el" href="classTracerParticleSolver.html">VoFIterator</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_vofIterFineGhosts</b></td></tr>
+LayoutData&lt; VoFIterator &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_vofIterFineGhosts</b></td></tr>
 <tr class="memdesc:a7c7c87ef2159ba2f65db66a0f8c64e61"><td class="mdescLeft">&#160;</td><td class="mdescRight">VoFIterator for fine-grid irregular ghost cells. <br /></td></tr>
 <tr class="separator:a7c7c87ef2159ba2f65db66a0f8c64e61"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3b82a4278f576bea1ff299fc1a4b7e8b" id="r_a3b82a4278f576bea1ff299fc1a4b7e8b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">LayoutData</a>&lt; <a class="el" href="classTracerParticleSolver.html">VoFIterator</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseFineParticleMesh.html#a3b82a4278f576bea1ff299fc1a4b7e8b">m_vofIterCoFiGhosts</a></td></tr>
+<tr class="memitem:a3b82a4278f576bea1ff299fc1a4b7e8b" id="r_a3b82a4278f576bea1ff299fc1a4b7e8b"><td class="memItemLeft" align="right" valign="top">LayoutData&lt; VoFIterator &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseFineParticleMesh.html#a3b82a4278f576bea1ff299fc1a4b7e8b">m_vofIterCoFiGhosts</a></td></tr>
 <tr class="memdesc:a3b82a4278f576bea1ff299fc1a4b7e8b"><td class="mdescLeft">&#160;</td><td class="mdescRight">VoFIterator for coarse grid cells that are coarsenings of fine-grid ghost irregular cells.  <br /></td></tr>
 <tr class="separator:a3b82a4278f576bea1ff299fc1a4b7e8b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a091cc3e010dd371ce485b0ab635a055e" id="r_a091cc3e010dd371ce485b0ab635a055e"><td class="memItemLeft" align="right" valign="top"><a id="a091cc3e010dd371ce485b0ab635a055e" name="a091cc3e010dd371ce485b0ab635a055e"></a>
-<a class="el" href="classTracerParticleSolver.html">LayoutData</a>&lt; <a class="el" href="classTracerParticleSolver.html">VoFIterator</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_vofIterCoar</b></td></tr>
+LayoutData&lt; VoFIterator &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_vofIterCoar</b></td></tr>
 <tr class="memdesc:a091cc3e010dd371ce485b0ab635a055e"><td class="mdescLeft">&#160;</td><td class="mdescRight">VoFIterator for coarse cells. <br /></td></tr>
 <tr class="separator:a091cc3e010dd371ce485b0ab635a055e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a463f22539ab7078d62097e60d9546dce" id="r_a463f22539ab7078d62097e60d9546dce"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">LayoutData</a>&lt; <a class="el" href="classTracerParticleSolver.html">BaseIVFAB</a>&lt; <a class="el" href="classTracerParticleSolver.html">VoFStencil</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseFineParticleMesh.html#a463f22539ab7078d62097e60d9546dce">m_cellArithmeticStencils</a></td></tr>
+<tr class="memitem:a463f22539ab7078d62097e60d9546dce" id="r_a463f22539ab7078d62097e60d9546dce"><td class="memItemLeft" align="right" valign="top">LayoutData&lt; BaseIVFAB&lt; VoFStencil &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseFineParticleMesh.html#a463f22539ab7078d62097e60d9546dce">m_cellArithmeticStencils</a></td></tr>
 <tr class="memdesc:a463f22539ab7078d62097e60d9546dce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stencils for arithmetic coarsening of volume data.  <br /></td></tr>
 <tr class="separator:a463f22539ab7078d62097e60d9546dce"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2603d1be91ee3fedda76a60db1ce2ebf" id="r_a2603d1be91ee3fedda76a60db1ce2ebf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">LayoutData</a>&lt; <a class="el" href="classTracerParticleSolver.html">BaseIVFAB</a>&lt; <a class="el" href="classTracerParticleSolver.html">VoFStencil</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseFineParticleMesh.html#a2603d1be91ee3fedda76a60db1ce2ebf">m_cellConservativeStencils</a></td></tr>
+<tr class="memitem:a2603d1be91ee3fedda76a60db1ce2ebf" id="r_a2603d1be91ee3fedda76a60db1ce2ebf"><td class="memItemLeft" align="right" valign="top">LayoutData&lt; BaseIVFAB&lt; VoFStencil &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBCoarseFineParticleMesh.html#a2603d1be91ee3fedda76a60db1ce2ebf">m_cellConservativeStencils</a></td></tr>
 <tr class="memdesc:a2603d1be91ee3fedda76a60db1ce2ebf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stencils for conservative coarsening of volume data.  <br /></td></tr>
 <tr class="separator:a2603d1be91ee3fedda76a60db1ce2ebf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acde53eb0d4b97c9274cb7fe39dee2308" id="r_acde53eb0d4b97c9274cb7fe39dee2308"><td class="memItemLeft" align="right" valign="top"><a id="acde53eb0d4b97c9274cb7fe39dee2308" name="acde53eb0d4b97c9274cb7fe39dee2308"></a>
-<a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_refRat</b></td></tr>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>m_refRat</b></td></tr>
 <tr class="memdesc:acde53eb0d4b97c9274cb7fe39dee2308"><td class="mdescLeft">&#160;</td><td class="mdescRight">Refinement ratio between the two levels. <br /></td></tr>
 <tr class="separator:acde53eb0d4b97c9274cb7fe39dee2308"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aab2fa0638640b04d4e80dc86353f4f3a" id="r_aab2fa0638640b04d4e80dc86353f4f3a"><td class="memItemLeft" align="right" valign="top"><a id="aab2fa0638640b04d4e80dc86353f4f3a" name="aab2fa0638640b04d4e80dc86353f4f3a"></a>
-<a class="el" href="classTracerParticleSolver.html">IntVect</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_ghost</b></td></tr>
+IntVect&#160;</td><td class="memItemRight" valign="bottom"><b>m_ghost</b></td></tr>
 <tr class="memdesc:aab2fa0638640b04d4e80dc86353f4f3a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of ghost cells in data holders. <br /></td></tr>
 <tr class="separator:aab2fa0638640b04d4e80dc86353f4f3a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-static-attribs" name="pro-static-attribs"></a>
 Static Protected Attributes</h2></td></tr>
 <tr class="memitem:aca7c6f121d6d1032dfadead01d42cc51" id="r_aca7c6f121d6d1032dfadead01d42cc51"><td class="memItemLeft" align="right" valign="top"><a id="aca7c6f121d6d1032dfadead01d42cc51" name="aca7c6f121d6d1032dfadead01d42cc51"></a>
-<a class="el" href="classTracerParticleSolver.html">static</a> <a class="el" href="classTracerParticleSolver.html">constexpr</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_comp</b> = 0</td></tr>
+static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_comp</b> = 0</td></tr>
 <tr class="memdesc:aca7c6f121d6d1032dfadead01d42cc51"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default component. <br /></td></tr>
 <tr class="separator:aca7c6f121d6d1032dfadead01d42cc51"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a89014d36cfe624cda9ff7866d2415cb3" id="r_a89014d36cfe624cda9ff7866d2415cb3"><td class="memItemLeft" align="right" valign="top"><a id="a89014d36cfe624cda9ff7866d2415cb3" name="a89014d36cfe624cda9ff7866d2415cb3"></a>
-<a class="el" href="classTracerParticleSolver.html">static</a> <a class="el" href="classTracerParticleSolver.html">constexpr</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_nComp</b> = 1</td></tr>
+static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nComp</b> = 1</td></tr>
 <tr class="memdesc:a89014d36cfe624cda9ff7866d2415cb3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum number of components. <br /></td></tr>
 <tr class="separator:a89014d36cfe624cda9ff7866d2415cb3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -248,7 +248,7 @@ Static Protected Attributes</h2></td></tr>
 <p>To use this class, the user can directly some functions:</p><ol type="1">
 <li>addFineGhostsToCoarse which adds the contribution of the fine level's particles to the coarse level. This will add the part of the particle clouds that hang over the refinement boundary to the coarse level. Likewise, the user can get a buffer (getFiCoBuffer) for getting a temporary data holder on which he can use special deposition procedures.</li>
 <li>addFiCoDataToFine where the user will have deposited coarse-level particles on a fine-grid buffer, and he/she wants to add the result back to the fine grid.</li>
-<li>addInvalidCoarseToFine where the coarse-grid deposition clouds are interpolated to the fine grid. This is the case when <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">e.g</a>. the coarse-grid clouds deposit underneath the fine level but the mass should end up on the fine level.</li>
+<li>addInvalidCoarseToFine where the coarse-grid deposition clouds are interpolated to the fine grid. This is the case when e.g. the coarse-grid clouds deposit underneath the fine level but the mass should end up on the fine level.</li>
 <li>exchangeAndAddFiCoData where deposited particles on the refined coarse grids have their masses synchronized (ghost cells are added across patches). </li>
 </ol>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
@@ -264,25 +264,25 @@ Static Protected Attributes</h2></td></tr>
         <tr>
           <td class="memname">EBCoarseFineParticleMesh::EBCoarseFineParticleMesh </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBLevelGrid</a> &amp;&#160;</td>
+          <td class="paramtype">const EBLevelGrid &amp;&#160;</td>
           <td class="paramname"><em>a_eblgCoar</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBLevelGrid</a> &amp;&#160;</td>
+          <td class="paramtype">const EBLevelGrid &amp;&#160;</td>
           <td class="paramname"><em>a_eblgFine</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype">const int&#160;</td>
           <td class="paramname"><em>a_refRat</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a>&#160;</td>
+          <td class="paramtype">const IntVect&#160;</td>
           <td class="paramname"><em>a_ghost</em>&#160;</td>
         </tr>
         <tr>
@@ -322,15 +322,15 @@ Static Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> EBCoarseFineParticleMesh::addFiCoDataToFine </td>
+          <td class="memname">void EBCoarseFineParticleMesh::addFiCoDataToFine </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_fineData</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_fiCoData</em>&#160;</td>
         </tr>
         <tr>
@@ -367,15 +367,15 @@ Static Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> EBCoarseFineParticleMesh::addFineGhostsToCoarse </td>
+          <td class="memname">void EBCoarseFineParticleMesh::addFineGhostsToCoarse </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_coarData</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_fineData</em>&#160;</td>
         </tr>
         <tr>
@@ -392,7 +392,7 @@ Static Protected Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Coarsen the fine-level ghost cells and add them to the coarse level. </p>
-<p>On output, the contents in the ghost cells on the refinement boundary are added from the fine level to the coarse level. This routine is used when the fine-level particles have particle clouds that deposit into the ghost cells outside the fine level, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">i.e</a>. over the refinement boundary. This routine coarsens that data and adds the mass to the coarse level. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>On output, the contents in the ghost cells on the refinement boundary are added from the fine level to the coarse level. This routine is used when the fine-level particles have particle clouds that deposit into the ghost cells outside the fine level, i.e. over the refinement boundary. This routine coarsens that data and adds the mass to the coarse level. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_coarData</td><td>Coarse mesh data. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_fineData</td><td>Fine mesh data. </td></tr>
@@ -412,15 +412,15 @@ Static Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> EBCoarseFineParticleMesh::addInvalidCoarseToFine </td>
+          <td class="memname">void EBCoarseFineParticleMesh::addInvalidCoarseToFine </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_fineData</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_coarData</em>&#160;</td>
         </tr>
         <tr>
@@ -457,21 +457,21 @@ Static Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> EBCoarseFineParticleMesh::arithmeticAverageAndAdd </td>
+          <td class="memname">void EBCoarseFineParticleMesh::arithmeticAverageAndAdd </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &amp;&#160;</td>
+          <td class="paramtype">EBCellFAB &amp;&#160;</td>
           <td class="paramname"><em>a_coarData</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &amp;&#160;</td>
+          <td class="paramtype">const EBCellFAB &amp;&#160;</td>
           <td class="paramname"><em>a_fineData</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">DataIndex</a> &amp;&#160;</td>
+          <td class="paramtype">const DataIndex &amp;&#160;</td>
           <td class="paramname"><em>a_din</em>&#160;</td>
         </tr>
         <tr>
@@ -509,21 +509,21 @@ Static Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> EBCoarseFineParticleMesh::conservativeAverageAndAdd </td>
+          <td class="memname">void EBCoarseFineParticleMesh::conservativeAverageAndAdd </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &amp;&#160;</td>
+          <td class="paramtype">EBCellFAB &amp;&#160;</td>
           <td class="paramname"><em>a_coarData</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &amp;&#160;</td>
+          <td class="paramtype">const EBCellFAB &amp;&#160;</td>
           <td class="paramname"><em>a_fineData</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">DataIndex</a> &amp;&#160;</td>
+          <td class="paramtype">const DataIndex &amp;&#160;</td>
           <td class="paramname"><em>a_din</em>&#160;</td>
         </tr>
         <tr>
@@ -561,27 +561,27 @@ Static Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> EBCoarseFineParticleMesh::define </td>
+          <td class="memname">void EBCoarseFineParticleMesh::define </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBLevelGrid</a> &amp;&#160;</td>
+          <td class="paramtype">const EBLevelGrid &amp;&#160;</td>
           <td class="paramname"><em>a_eblgCoar</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBLevelGrid</a> &amp;&#160;</td>
+          <td class="paramtype">const EBLevelGrid &amp;&#160;</td>
           <td class="paramname"><em>a_eblgFine</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype">const int&#160;</td>
           <td class="paramname"><em>a_refRat</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a>&#160;</td>
+          <td class="paramtype">const IntVect&#160;</td>
           <td class="paramname"><em>a_ghost</em>&#160;</td>
         </tr>
         <tr>
@@ -620,9 +620,9 @@ Static Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> EBCoarseFineParticleMesh::exchangeAndAddFiCoData </td>
+          <td class="memname">void EBCoarseFineParticleMesh::exchangeAndAddFiCoData </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_fiCoData</em></td><td>)</td>
           <td> const</td>
         </tr>
@@ -650,13 +650,13 @@ Static Protected Attributes</h2></td></tr>
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">int</a> NCOMP&gt; </div>
+template&lt;int NCOMP&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp; EBCoarseFineParticleMesh::getBufferFiCo </td>
+          <td class="memname">LevelData&lt; EBCellFAB &gt; &amp; EBCoarseFineParticleMesh::getBufferFiCo </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -681,7 +681,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">int</a> NCOMP&gt
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBLevelGrid</a> &amp; EBCoarseFineParticleMesh::getEblgFiCo </td>
+          <td class="memname">const EBLevelGrid &amp; EBCoarseFineParticleMesh::getEblgFiCo </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -704,21 +704,21 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">int</a> NCOMP&gt
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> EBCoarseFineParticleMesh::restrictAndAddFiCoDataToCoar </td>
+          <td class="memname">void EBCoarseFineParticleMesh::restrictAndAddFiCoDataToCoar </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_coarData</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_fiCoData</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEBCoarseFineParticleMesh.html#ac28322de791a075d85bc98414056a268">EBCoarseFineParticleMesh::Average</a>&#160;</td>
+          <td class="paramtype">const <a class="el" href="classEBCoarseFineParticleMesh.html#ac28322de791a075d85bc98414056a268">EBCoarseFineParticleMesh::Average</a>&#160;</td>
           <td class="paramname"><em>a_average</em>&#160;</td>
         </tr>
         <tr>
@@ -757,7 +757,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">int</a> NCOMP&gt
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">LayoutData</a>&lt;<a class="el" href="classTracerParticleSolver.html">BaseIVFAB</a>&lt;<a class="el" href="classTracerParticleSolver.html">VoFStencil</a>&gt; &gt; EBCoarseFineParticleMesh::m_cellArithmeticStencils</td>
+          <td class="memname">LayoutData&lt;BaseIVFAB&lt;VoFStencil&gt; &gt; EBCoarseFineParticleMesh::m_cellArithmeticStencils</td>
         </tr>
       </table>
   </td>
@@ -782,7 +782,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">int</a> NCOMP&gt
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">LayoutData</a>&lt;<a class="el" href="classTracerParticleSolver.html">BaseIVFAB</a>&lt;<a class="el" href="classTracerParticleSolver.html">VoFStencil</a>&gt; &gt; EBCoarseFineParticleMesh::m_cellConservativeStencils</td>
+          <td class="memname">LayoutData&lt;BaseIVFAB&lt;VoFStencil&gt; &gt; EBCoarseFineParticleMesh::m_cellConservativeStencils</td>
         </tr>
       </table>
   </td>
@@ -808,7 +808,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">int</a> NCOMP&gt
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">Copier</a> EBCoarseFineParticleMesh::m_copierCoFiToCoarIncludeGhosts</td>
+          <td class="memname">Copier EBCoarseFineParticleMesh::m_copierCoFiToCoarIncludeGhosts</td>
         </tr>
       </table>
   </td>
@@ -833,7 +833,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">int</a> NCOMP&gt
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">Copier</a> EBCoarseFineParticleMesh::m_copierFiCoToFiCo</td>
+          <td class="memname">Copier EBCoarseFineParticleMesh::m_copierFiCoToFiCo</td>
         </tr>
       </table>
   </td>
@@ -858,7 +858,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">int</a> NCOMP&gt
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">Copier</a> EBCoarseFineParticleMesh::m_copierFiCoToFineIncludeGhosts</td>
+          <td class="memname">Copier EBCoarseFineParticleMesh::m_copierFiCoToFineIncludeGhosts</td>
         </tr>
       </table>
   </td>
@@ -883,7 +883,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">int</a> NCOMP&gt
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">Copier</a> EBCoarseFineParticleMesh::m_copierFiCoToFineNoGhosts</td>
+          <td class="memname">Copier EBCoarseFineParticleMesh::m_copierFiCoToFineNoGhosts</td>
         </tr>
       </table>
   </td>
@@ -908,7 +908,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">int</a> NCOMP&gt
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">LayoutData</a>&lt;<a class="el" href="classTracerParticleSolver.html">VoFIterator</a>&gt; EBCoarseFineParticleMesh::m_vofIterCoFiGhosts</td>
+          <td class="memname">LayoutData&lt;VoFIterator&gt; EBCoarseFineParticleMesh::m_vofIterCoFiGhosts</td>
         </tr>
       </table>
   </td>

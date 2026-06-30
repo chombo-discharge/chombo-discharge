@@ -1,13 +1,11 @@
 <map id="Source/ItoDiffusion/CD_ItoParticle.H" name="Source/ItoDiffusion/CD_ItoParticle.H">
-<area shape="rect" id="Node000001" title="SoA payload for Ito diffusion particles (drifting Brownian walkers)" alt="" coords="1339,5,1485,45"/>
+<area shape="rect" id="Node000001" title="SoA payload for Ito diffusion particles (drifting Brownian walkers)" alt="" coords="1395,5,1541,45"/>
 <area shape="rect" id="Node000002" href="$CD__ItoKMCPhysics_8H.html" title="Declaration of the Physics::ItoKMC::ItoKMCPhysics abstract base class." alt="" coords="578,189,841,214"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1326,51,756,191,755,186,1325,45"/>
-<area shape="rect" id="Node000019" href="$CD__ItoParticle_8cpp.html" title="Implementation of CD_ItoParticle.H." alt="" coords="1285,93,1430,133"/>
-<area shape="poly" id="edge26_Node000001_Node000019" title=" " alt="" coords="1395,58,1372,95,1367,92,1390,56"/>
-<area shape="rect" id="Node000020" href="$CD__ItoSolver_8H.html" title="Declaration of solver class for Ito diffusion." alt="" coords="1451,181,1597,221"/>
-<area shape="poly" id="edge27_Node000001_Node000020" title=" " alt="" coords="1434,56,1514,180,1510,183,1429,59"/>
-<area shape="rect" id="Node000031" href="$CD__ItoSpecies_8H.html" title="Declaration of an ItoSpecies class that passes in names and initial data to ItoSolvers." alt="" coords="1506,93,1651,133"/>
-<area shape="poly" id="edge45_Node000001_Node000031" title=" " alt="" coords="1462,49,1543,91,1541,96,1459,54"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1383,49,760,191,759,186,1382,44"/>
+<area shape="rect" id="Node000019" href="$CD__ItoSolver_8H.html" title="Declaration of solver class for Ito diffusion." alt="" coords="1451,181,1597,221"/>
+<area shape="poly" id="edge26_Node000001_Node000019" title=" " alt="" coords="1477,58,1497,132,1517,180,1512,182,1492,134,1472,60"/>
+<area shape="rect" id="Node000030" href="$CD__ItoSpecies_8H.html" title="Declaration of an ItoSpecies class that passes in names and initial data to ItoSolvers." alt="" coords="1506,93,1651,133"/>
+<area shape="poly" id="edge44_Node000001_Node000030" title=" " alt="" coords="1505,52,1556,91,1553,95,1502,56"/>
 <area shape="rect" id="Node000003" href="$CD__ItoKMCPhysics_8cpp.html" title="Implementation of CD_ItoKMCPhysics.H." alt="" coords="104,277,379,302"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="634,219,304,279,303,274,633,214"/>
 <area shape="rect" id="Node000004" href="$CD__ItoKMCPhysicsImplem_8H.html" title="Implementation of CD_ItoKMCPhysics.H." alt="" coords="453,269,701,309"/>
@@ -48,40 +46,40 @@
 <area shape="poly" id="edge22_Node000016_Node000013" title=" " alt="" coords="1389,535,1388,500,1393,500,1394,534"/>
 <area shape="rect" id="Node000018" href="$CD__ItoKMCJSON_8cpp.html" title="Implementation of CD_ItoKMCJSON.H." alt="" coords="689,357,930,397"/>
 <area shape="poly" id="edge25_Node000017_Node000018" title=" " alt="" coords="831,323,819,358,814,356,826,322"/>
-<area shape="poly" id="edge32_Node000020_Node000005" title=" " alt="" coords="1577,226,1603,244,1624,264,1634,287,1633,299,1626,311,1596,326,1541,341,1406,367,1405,362,1539,336,1595,321,1622,307,1627,298,1629,288,1619,267,1599,248,1574,230"/>
-<area shape="rect" id="Node000021" href="$CD__BrownianWalkerStepper_8H.html" title="Declaration of the Physics::BrownianWalker::BrownianWalkerStepper class." alt="" coords="1493,357,1713,397"/>
-<area shape="poly" id="edge28_Node000020_Node000021" title=" " alt="" coords="1611,221,1644,240,1670,268,1676,280,1676,293,1667,318,1650,340,1630,359,1627,355,1646,337,1663,315,1671,292,1670,282,1666,271,1641,244,1608,226"/>
-<area shape="rect" id="Node000023" href="$CD__BrownianWalkerTagger_8H.html" title="Declaration of the Physics::BrownianWalker::BrownianWalkerTagger class." alt="" coords="1029,269,1243,309"/>
-<area shape="poly" id="edge30_Node000020_Node000023" title=" " alt="" coords="1438,224,1222,272,1221,267,1437,219"/>
-<area shape="rect" id="Node000025" href="$CD__ItoLayout_8H.html" title="Declaration of a class that holds a set of ItoSolvers." alt="" coords="1789,269,1934,309"/>
-<area shape="poly" id="edge33_Node000020_Node000025" title=" " alt="" coords="1610,222,1789,267,1787,272,1609,227"/>
-<area shape="rect" id="Node000029" href="$CD__ItoSolver_8cpp.html" title="Implementation of CD_ItoSolver.H." alt="" coords="1267,269,1413,309"/>
-<area shape="poly" id="edge42_Node000020_Node000029" title=" " alt="" coords="1472,230,1381,272,1379,267,1470,225"/>
-<area shape="rect" id="Node000030" href="$CD__ItoSolverImplem_8H.html" title="Implementation of CD_ItoSolver.H." alt="" coords="1437,269,1611,309"/>
-<area shape="poly" id="edge43_Node000020_Node000030" title=" " alt="" coords="1518,235,1519,269,1514,269,1513,235"/>
-<area shape="rect" id="Node000022" href="$CD__BrownianWalkerStepper_8cpp.html" title="Implementation of CD_BrownianWalkerStepper.H." alt="" coords="1515,453,1749,493"/>
-<area shape="poly" id="edge29_Node000021_Node000022" title=" " alt="" coords="1615,410,1629,452,1624,453,1610,411"/>
-<area shape="rect" id="Node000024" href="$CD__BrownianWalkerTagger_8cpp.html" title="Implementation of CD_BrownianWalkerTagger.H." alt="" coords="955,357,1181,397"/>
-<area shape="poly" id="edge31_Node000023_Node000024" title=" " alt="" coords="1115,322,1085,359,1081,355,1110,319"/>
-<area shape="poly" id="edge35_Node000025_Node000005" title=" " alt="" coords="1775,307,1407,367,1407,362,1775,302"/>
-<area shape="poly" id="edge34_Node000025_Node000021" title=" " alt="" coords="1792,316,1660,360,1658,355,1791,311"/>
-<area shape="rect" id="Node000026" href="$CD__ItoIterator_8H.html" title="Declaration of an iterator class for ItoLayout." alt="" coords="1953,357,2098,397"/>
-<area shape="poly" id="edge36_Node000025_Node000026" title=" " alt="" coords="1911,313,1991,355,1988,360,1908,318"/>
-<area shape="rect" id="Node000028" href="$CD__ItoLayoutImplem_8H.html" title="Implementation of CD_ItoLayout.H." alt="" coords="1773,453,1950,493"/>
-<area shape="poly" id="edge41_Node000025_Node000028" title=" " alt="" coords="1857,323,1855,391,1858,452,1853,453,1850,391,1852,323"/>
-<area shape="rect" id="Node000027" href="$CD__ItoIteratorImplem_8H.html" title="Implementation of CD_ItoIterator.H." alt="" coords="1975,453,2156,493"/>
-<area shape="poly" id="edge37_Node000026_Node000027" title=" " alt="" coords="2033,409,2052,451,2047,454,2028,411"/>
-<area shape="poly" id="edge39_Node000026_Node000028" title=" " alt="" coords="1982,406,1896,455,1893,450,1979,402"/>
-<area shape="poly" id="edge38_Node000027_Node000026" title=" " alt="" coords="2058,441,2038,399,2043,396,2063,439"/>
-<area shape="poly" id="edge40_Node000028_Node000025" title=" " alt="" coords="1866,439,1868,372,1864,310,1870,310,1873,372,1871,439"/>
-<area shape="poly" id="edge44_Node000030_Node000020" title=" " alt="" coords="1530,256,1529,222,1534,222,1535,256"/>
-<area shape="poly" id="edge49_Node000031_Node000002" title=" " alt="" coords="1492,130,1443,136,1119,169,842,192,841,187,1118,163,1442,131,1492,125"/>
-<area shape="poly" id="edge50_Node000031_Node000020" title=" " alt="" coords="1561,146,1538,183,1534,180,1557,144"/>
-<area shape="rect" id="Node000032" href="$CD__BrownianWalkerSpecies_8H.html" title="Declaration of the Physics::BrownianWalker::BrownianWalkerSpecies class." alt="" coords="1631,181,1852,221"/>
-<area shape="poly" id="edge46_Node000031_Node000032" title=" " alt="" coords="1628,137,1707,179,1704,184,1625,142"/>
-<area shape="rect" id="Node000034" href="$CD__ItoSpecies_8cpp.html" title="Implementation of CD_ItoSpecies.H." alt="" coords="1876,181,2023,221"/>
-<area shape="poly" id="edge51_Node000031_Node000034" title=" " alt="" coords="1665,132,1876,180,1875,186,1664,137"/>
-<area shape="poly" id="edge48_Node000032_Node000022" title=" " alt="" coords="1749,235,1751,270,1750,312,1743,357,1728,399,1702,431,1670,455,1667,450,1698,427,1723,396,1738,355,1745,312,1746,271,1744,235"/>
-<area shape="rect" id="Node000033" href="$CD__BrownianWalkerSpecies_8cpp.html" title="Implementation of CD_BrownianWalkerSpecies.H." alt="" coords="1959,269,2193,309"/>
-<area shape="poly" id="edge47_Node000032_Node000033" title=" " alt="" coords="1829,222,2003,267,2002,272,1827,227"/>
+<area shape="poly" id="edge31_Node000019_Node000005" title=" " alt="" coords="1577,226,1603,244,1624,264,1634,287,1633,299,1626,311,1596,326,1541,341,1406,367,1405,362,1539,336,1595,321,1622,307,1627,298,1629,288,1619,267,1599,248,1574,230"/>
+<area shape="rect" id="Node000020" href="$CD__BrownianWalkerStepper_8H.html" title="Declaration of the Physics::BrownianWalker::BrownianWalkerStepper class." alt="" coords="1493,357,1713,397"/>
+<area shape="poly" id="edge27_Node000019_Node000020" title=" " alt="" coords="1611,221,1644,240,1670,268,1676,280,1676,293,1667,318,1650,340,1630,359,1627,355,1646,337,1663,315,1671,292,1670,282,1666,271,1641,244,1608,226"/>
+<area shape="rect" id="Node000022" href="$CD__BrownianWalkerTagger_8H.html" title="Declaration of the Physics::BrownianWalker::BrownianWalkerTagger class." alt="" coords="1029,269,1243,309"/>
+<area shape="poly" id="edge29_Node000019_Node000022" title=" " alt="" coords="1438,224,1222,272,1221,267,1437,219"/>
+<area shape="rect" id="Node000024" href="$CD__ItoLayout_8H.html" title="Declaration of a class that holds a set of ItoSolvers." alt="" coords="1789,269,1934,309"/>
+<area shape="poly" id="edge32_Node000019_Node000024" title=" " alt="" coords="1610,222,1789,267,1787,272,1609,227"/>
+<area shape="rect" id="Node000028" href="$CD__ItoSolver_8cpp.html" title="Implementation of CD_ItoSolver.H." alt="" coords="1267,269,1413,309"/>
+<area shape="poly" id="edge41_Node000019_Node000028" title=" " alt="" coords="1472,230,1381,272,1379,267,1470,225"/>
+<area shape="rect" id="Node000029" href="$CD__ItoSolverImplem_8H.html" title="Implementation of CD_ItoSolver.H." alt="" coords="1437,269,1611,309"/>
+<area shape="poly" id="edge42_Node000019_Node000029" title=" " alt="" coords="1518,235,1519,269,1514,269,1513,235"/>
+<area shape="rect" id="Node000021" href="$CD__BrownianWalkerStepper_8cpp.html" title="Implementation of CD_BrownianWalkerStepper.H." alt="" coords="1515,453,1749,493"/>
+<area shape="poly" id="edge28_Node000020_Node000021" title=" " alt="" coords="1615,410,1629,452,1624,453,1610,411"/>
+<area shape="rect" id="Node000023" href="$CD__BrownianWalkerTagger_8cpp.html" title="Implementation of CD_BrownianWalkerTagger.H." alt="" coords="955,357,1181,397"/>
+<area shape="poly" id="edge30_Node000022_Node000023" title=" " alt="" coords="1115,322,1085,359,1081,355,1110,319"/>
+<area shape="poly" id="edge34_Node000024_Node000005" title=" " alt="" coords="1775,307,1407,367,1407,362,1775,302"/>
+<area shape="poly" id="edge33_Node000024_Node000020" title=" " alt="" coords="1792,316,1660,360,1658,355,1791,311"/>
+<area shape="rect" id="Node000025" href="$CD__ItoIterator_8H.html" title="Declaration of an iterator class for ItoLayout." alt="" coords="1953,357,2098,397"/>
+<area shape="poly" id="edge35_Node000024_Node000025" title=" " alt="" coords="1911,313,1991,355,1988,360,1908,318"/>
+<area shape="rect" id="Node000027" href="$CD__ItoLayoutImplem_8H.html" title="Implementation of CD_ItoLayout.H." alt="" coords="1773,453,1950,493"/>
+<area shape="poly" id="edge40_Node000024_Node000027" title=" " alt="" coords="1857,323,1855,391,1858,452,1853,453,1850,391,1852,323"/>
+<area shape="rect" id="Node000026" href="$CD__ItoIteratorImplem_8H.html" title="Implementation of CD_ItoIterator.H." alt="" coords="1975,453,2156,493"/>
+<area shape="poly" id="edge36_Node000025_Node000026" title=" " alt="" coords="2033,409,2052,451,2047,454,2028,411"/>
+<area shape="poly" id="edge38_Node000025_Node000027" title=" " alt="" coords="1982,406,1896,455,1893,450,1979,402"/>
+<area shape="poly" id="edge37_Node000026_Node000025" title=" " alt="" coords="2058,441,2038,399,2043,396,2063,439"/>
+<area shape="poly" id="edge39_Node000027_Node000024" title=" " alt="" coords="1866,439,1868,372,1864,310,1870,310,1873,372,1871,439"/>
+<area shape="poly" id="edge43_Node000029_Node000019" title=" " alt="" coords="1530,256,1529,222,1534,222,1535,256"/>
+<area shape="poly" id="edge48_Node000030_Node000002" title=" " alt="" coords="1493,126,825,191,825,186,1492,120"/>
+<area shape="poly" id="edge49_Node000030_Node000019" title=" " alt="" coords="1561,146,1538,183,1534,180,1557,144"/>
+<area shape="rect" id="Node000031" href="$CD__BrownianWalkerSpecies_8H.html" title="Declaration of the Physics::BrownianWalker::BrownianWalkerSpecies class." alt="" coords="1631,181,1852,221"/>
+<area shape="poly" id="edge45_Node000030_Node000031" title=" " alt="" coords="1628,137,1707,179,1704,184,1625,142"/>
+<area shape="rect" id="Node000033" href="$CD__ItoSpecies_8cpp.html" title="Implementation of CD_ItoSpecies.H." alt="" coords="1876,181,2023,221"/>
+<area shape="poly" id="edge50_Node000030_Node000033" title=" " alt="" coords="1665,132,1876,180,1875,186,1664,137"/>
+<area shape="poly" id="edge47_Node000031_Node000021" title=" " alt="" coords="1749,235,1751,270,1750,312,1743,357,1728,399,1702,431,1670,455,1667,450,1698,427,1723,396,1738,355,1745,312,1746,271,1744,235"/>
+<area shape="rect" id="Node000032" href="$CD__BrownianWalkerSpecies_8cpp.html" title="Implementation of CD_BrownianWalkerSpecies.H." alt="" coords="1959,269,2193,309"/>
+<area shape="poly" id="edge46_Node000031_Node000032" title=" " alt="" coords="1829,222,2003,267,2002,272,1827,227"/>
 </map>

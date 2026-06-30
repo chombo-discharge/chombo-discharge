@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['memoryreport_0',['MemoryReport',['../namespaceMemoryReport.html',1,'']]]
+  ['lapackutils_0',['LaPackUtils',['../namespaceLaPackUtils.html',1,'']]],
+  ['location_1',['Location',['../namespaceLocation.html',1,'']]]
 ];

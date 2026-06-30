@@ -97,41 +97,41 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
 Public Types</h2></td></tr>
 <tr class="memitem:ae6b85c38b93061f5f3f5d5280b4855c3" id="r_ae6b85c38b93061f5f3f5d5280b4855c3"><td class="memItemLeft" align="right" valign="top"><a id="ae6b85c38b93061f5f3f5d5280b4855c3" name="ae6b85c38b93061f5f3f5d5280b4855c3"></a>
-<a class="el" href="classTracerParticleSolver.html">using</a>&#160;</td><td class="memItemRight" valign="bottom"><b>MolarFraction</b> = <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> <a class="el" href="classTracerParticleSolver.html">a_pos</a>)&gt;</td></tr>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>MolarFraction</b> = std::function&lt; Real(const RealVect a_pos)&gt;</td></tr>
 <tr class="memdesc:ae6b85c38b93061f5f3f5d5280b4855c3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Alias for position-dependent molar fraction. <br /></td></tr>
 <tr class="separator:ae6b85c38b93061f5f3f5d5280b4855c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a8228d5677ff0cfc5a61050a4a288a32c" id="r_a8228d5677ff0cfc5a61050a4a288a32c"><td class="memItemLeft" align="right" valign="top"><a id="a8228d5677ff0cfc5a61050a4a288a32c" name="a8228d5677ff0cfc5a61050a4a288a32c"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>ItoKMCBackgroundSpecies</b> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+&#160;</td><td class="memItemRight" valign="bottom"><b>ItoKMCBackgroundSpecies</b> () noexcept</td></tr>
 <tr class="memdesc:a8228d5677ff0cfc5a61050a4a288a32c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor. Must subsequently call the define function. <br /></td></tr>
 <tr class="separator:a8228d5677ff0cfc5a61050a4a288a32c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a479ad848595284c12b942914121a2f47" id="r_a479ad848595284c12b942914121a2f47"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCBackgroundSpecies.html#a479ad848595284c12b942914121a2f47">ItoKMCBackgroundSpecies</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_name</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCBackgroundSpecies.html#ae6b85c38b93061f5f3f5d5280b4855c3">MolarFraction</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_molarFraction</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a479ad848595284c12b942914121a2f47" id="r_a479ad848595284c12b942914121a2f47"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCBackgroundSpecies.html#a479ad848595284c12b942914121a2f47">ItoKMCBackgroundSpecies</a> (const std::string &amp;a_name, const <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCBackgroundSpecies.html#ae6b85c38b93061f5f3f5d5280b4855c3">MolarFraction</a> &amp;a_molarFraction) noexcept</td></tr>
 <tr class="memdesc:a479ad848595284c12b942914121a2f47"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor. Calls the define function.  <br /></td></tr>
 <tr class="separator:a479ad848595284c12b942914121a2f47"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2b89a761a7e352a4a60f55619703c1ba" id="r_a2b89a761a7e352a4a60f55619703c1ba"><td class="memItemLeft" align="right" valign="top"><a id="a2b89a761a7e352a4a60f55619703c1ba" name="a2b89a761a7e352a4a60f55619703c1ba"></a>
-<a class="el" href="classTracerParticleSolver.html">virtual</a>&#160;</td><td class="memItemRight" valign="bottom"><b>~ItoKMCBackgroundSpecies</b> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~ItoKMCBackgroundSpecies</b> () noexcept</td></tr>
 <tr class="memdesc:a2b89a761a7e352a4a60f55619703c1ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. <br /></td></tr>
 <tr class="separator:a2b89a761a7e352a4a60f55619703c1ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a714dbc8edb17f9a5815dbee06a73ee97" id="r_a714dbc8edb17f9a5815dbee06a73ee97"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCBackgroundSpecies.html#a714dbc8edb17f9a5815dbee06a73ee97">define</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_name</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCBackgroundSpecies.html#ae6b85c38b93061f5f3f5d5280b4855c3">MolarFraction</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_molarFraction</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a714dbc8edb17f9a5815dbee06a73ee97" id="r_a714dbc8edb17f9a5815dbee06a73ee97"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCBackgroundSpecies.html#a714dbc8edb17f9a5815dbee06a73ee97">define</a> (const std::string &amp;a_name, const <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCBackgroundSpecies.html#ae6b85c38b93061f5f3f5d5280b4855c3">MolarFraction</a> &amp;a_molarFraction) noexcept</td></tr>
 <tr class="memdesc:a714dbc8edb17f9a5815dbee06a73ee97"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define function. Puts object in usable state.  <br /></td></tr>
 <tr class="separator:a714dbc8edb17f9a5815dbee06a73ee97"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1664c6fc15c7fa1ca586d8638461b568" id="r_a1664c6fc15c7fa1ca586d8638461b568"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCBackgroundSpecies.html#a1664c6fc15c7fa1ca586d8638461b568">molarFraction</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_pos</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a1664c6fc15c7fa1ca586d8638461b568" id="r_a1664c6fc15c7fa1ca586d8638461b568"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCBackgroundSpecies.html#a1664c6fc15c7fa1ca586d8638461b568">molarFraction</a> (const RealVect &amp;a_pos) const noexcept</td></tr>
 <tr class="memdesc:a1664c6fc15c7fa1ca586d8638461b568"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get molar fraction at a physical position.  <br /></td></tr>
 <tr class="separator:a1664c6fc15c7fa1ca586d8638461b568"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a42663af0d4768051f9c0499cd9d5ee99" id="r_a42663af0d4768051f9c0499cd9d5ee99"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCBackgroundSpecies.html#a42663af0d4768051f9c0499cd9d5ee99">getName</a> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a42663af0d4768051f9c0499cd9d5ee99" id="r_a42663af0d4768051f9c0499cd9d5ee99"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCBackgroundSpecies.html#a42663af0d4768051f9c0499cd9d5ee99">getName</a> () const noexcept</td></tr>
 <tr class="memdesc:a42663af0d4768051f9c0499cd9d5ee99"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the species name.  <br /></td></tr>
 <tr class="separator:a42663af0d4768051f9c0499cd9d5ee99"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
 <tr class="memitem:aed58daad919434e3d46e97affcd02dc8" id="r_aed58daad919434e3d46e97affcd02dc8"><td class="memItemLeft" align="right" valign="top"><a id="aed58daad919434e3d46e97affcd02dc8" name="aed58daad919434e3d46e97affcd02dc8"></a>
-<a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_isDefined</b></td></tr>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_isDefined</b></td></tr>
 <tr class="memdesc:aed58daad919434e3d46e97affcd02dc8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Make sure model has initial data. <br /></td></tr>
 <tr class="separator:aed58daad919434e3d46e97affcd02dc8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac103fae5bf164e37edde2063054e30ea" id="r_ac103fae5bf164e37edde2063054e30ea"><td class="memItemLeft" align="right" valign="top"><a id="ac103fae5bf164e37edde2063054e30ea" name="ac103fae5bf164e37edde2063054e30ea"></a>
-<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_name</b></td></tr>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><b>m_name</b></td></tr>
 <tr class="memdesc:ac103fae5bf164e37edde2063054e30ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Neutral species name. <br /></td></tr>
 <tr class="separator:ac103fae5bf164e37edde2063054e30ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a963df2eba67950ea20c5103e4025c0eb" id="r_a963df2eba67950ea20c5103e4025c0eb"><td class="memItemLeft" align="right" valign="top"><a id="a963df2eba67950ea20c5103e4025c0eb" name="a963df2eba67950ea20c5103e4025c0eb"></a>
@@ -154,13 +154,13 @@ Protected Attributes</h2></td></tr>
         <tr>
           <td class="memname">ItoKMCBackgroundSpecies::ItoKMCBackgroundSpecies </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;&#160;</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
           <td class="paramname"><em>a_name</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCBackgroundSpecies.html#ae6b85c38b93061f5f3f5d5280b4855c3">MolarFraction</a> &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCBackgroundSpecies.html#ae6b85c38b93061f5f3f5d5280b4855c3">MolarFraction</a> &amp;&#160;</td>
           <td class="paramname"><em>a_molarFraction</em>&#160;</td>
         </tr>
         <tr>
@@ -198,15 +198,15 @@ Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> ItoKMCBackgroundSpecies::define </td>
+          <td class="memname">void ItoKMCBackgroundSpecies::define </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;&#160;</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
           <td class="paramname"><em>a_name</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCBackgroundSpecies.html#ae6b85c38b93061f5f3f5d5280b4855c3">MolarFraction</a> &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCBackgroundSpecies.html#ae6b85c38b93061f5f3f5d5280b4855c3">MolarFraction</a> &amp;&#160;</td>
           <td class="paramname"><em>a_molarFraction</em>&#160;</td>
         </tr>
         <tr>
@@ -243,7 +243,7 @@ Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> ItoKMCBackgroundSpecies::getName </td>
+          <td class="memname">std::string ItoKMCBackgroundSpecies::getName </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -271,9 +271,9 @@ Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">Real</a> ItoKMCBackgroundSpecies::molarFraction </td>
+          <td class="memname">Real ItoKMCBackgroundSpecies::molarFraction </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;&#160;</td>
+          <td class="paramtype">const RealVect &amp;&#160;</td>
           <td class="paramname"><em>a_pos</em></td><td>)</td>
           <td> const</td>
         </tr>

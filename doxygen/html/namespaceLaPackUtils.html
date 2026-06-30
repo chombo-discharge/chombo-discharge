@@ -87,37 +87,37 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:ad7cb69439037bed555931bfc0b461272" id="r_ad7cb69439037bed555931bfc0b461272"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceLaPackUtils.html#ad7cb69439037bed555931bfc0b461272">linearIndex</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">irow</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">jcol</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">M</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">N</a>)</td></tr>
+<tr class="memitem:ad7cb69439037bed555931bfc0b461272" id="r_ad7cb69439037bed555931bfc0b461272"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceLaPackUtils.html#ad7cb69439037bed555931bfc0b461272">linearIndex</a> (const int irow, const int jcol, const int M, const int N)</td></tr>
 <tr class="memdesc:ad7cb69439037bed555931bfc0b461272"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the index in the linearized matrix of size MxN.  <br /></td></tr>
 <tr class="separator:ad7cb69439037bed555931bfc0b461272"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abda1be55d4517de413a554bbda06d0d3" id="r_abda1be55d4517de413a554bbda06d0d3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceLaPackUtils.html#abda1be55d4517de413a554bbda06d0d3">computeSVD</a> (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">double</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_linU</a>, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">double</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_linSigma</a>, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">double</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_linVtran</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">double</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_linA</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_M</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_N</a>)</td></tr>
+<tr class="memitem:abda1be55d4517de413a554bbda06d0d3" id="r_abda1be55d4517de413a554bbda06d0d3"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceLaPackUtils.html#abda1be55d4517de413a554bbda06d0d3">computeSVD</a> (std::vector&lt; double &gt; &amp;a_linU, std::vector&lt; double &gt; &amp;a_linSigma, std::vector&lt; double &gt; &amp;a_linVtran, const std::vector&lt; double &gt; &amp;a_linA, const int &amp;a_M, const int &amp;a_N)</td></tr>
 <tr class="memdesc:abda1be55d4517de413a554bbda06d0d3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the singular value decomposition of a matrix.  <br /></td></tr>
 <tr class="separator:abda1be55d4517de413a554bbda06d0d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0ceda4b662b0df38bae763f698403f30" id="r_a0ceda4b662b0df38bae763f698403f30"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceLaPackUtils.html#a0ceda4b662b0df38bae763f698403f30">computeSVD</a> (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">float</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_linU</a>, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">float</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_linSigma</a>, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">float</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_linVtran</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">float</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_linA</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_M</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_N</a>)</td></tr>
+<tr class="memitem:a0ceda4b662b0df38bae763f698403f30" id="r_a0ceda4b662b0df38bae763f698403f30"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceLaPackUtils.html#a0ceda4b662b0df38bae763f698403f30">computeSVD</a> (std::vector&lt; float &gt; &amp;a_linU, std::vector&lt; float &gt; &amp;a_linSigma, std::vector&lt; float &gt; &amp;a_linVtran, const std::vector&lt; float &gt; &amp;a_linA, const int &amp;a_M, const int &amp;a_N)</td></tr>
 <tr class="memdesc:a0ceda4b662b0df38bae763f698403f30"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the singular value decomposition of a matrix.  <br /></td></tr>
 <tr class="separator:a0ceda4b662b0df38bae763f698403f30"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae451bcb5403e96788e9081886e16e342" id="r_ae451bcb5403e96788e9081886e16e342"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceLaPackUtils.html#ae451bcb5403e96788e9081886e16e342">computePseudoInverse</a> (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">double</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_linAplus</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">double</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_linA</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_M</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_N</a>)</td></tr>
+<tr class="memitem:ae451bcb5403e96788e9081886e16e342" id="r_ae451bcb5403e96788e9081886e16e342"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceLaPackUtils.html#ae451bcb5403e96788e9081886e16e342">computePseudoInverse</a> (std::vector&lt; double &gt; &amp;a_linAplus, const std::vector&lt; double &gt; &amp;a_linA, const int &amp;a_M, const int &amp;a_N)</td></tr>
 <tr class="memdesc:ae451bcb5403e96788e9081886e16e342"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the pseudoinverse of matrix through singular value decomposition.  <br /></td></tr>
 <tr class="separator:ae451bcb5403e96788e9081886e16e342"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4903a60b3ab9b7fe09362a4db55859b1" id="r_a4903a60b3ab9b7fe09362a4db55859b1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceLaPackUtils.html#a4903a60b3ab9b7fe09362a4db55859b1">computePseudoInverse</a> (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">float</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_linAplus</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">float</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_linA</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_M</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_N</a>)</td></tr>
+<tr class="memitem:a4903a60b3ab9b7fe09362a4db55859b1" id="r_a4903a60b3ab9b7fe09362a4db55859b1"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceLaPackUtils.html#a4903a60b3ab9b7fe09362a4db55859b1">computePseudoInverse</a> (std::vector&lt; float &gt; &amp;a_linAplus, const std::vector&lt; float &gt; &amp;a_linA, const int &amp;a_M, const int &amp;a_N)</td></tr>
 <tr class="memdesc:a4903a60b3ab9b7fe09362a4db55859b1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the pseudoinverse of matrix through singular value decomposition.  <br /></td></tr>
 <tr class="separator:a4903a60b3ab9b7fe09362a4db55859b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a88a00f76a295f0bfafdcdb395dfe2089" id="r_a88a00f76a295f0bfafdcdb395dfe2089"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceLaPackUtils.html#a88a00f76a295f0bfafdcdb395dfe2089">linearizeMatrix</a> (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">double</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_linA</a>, <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_M</a>, <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_N</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">double</a> &gt; &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_A</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">char</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_format</a>)</td></tr>
+<tr class="memitem:a88a00f76a295f0bfafdcdb395dfe2089" id="r_a88a00f76a295f0bfafdcdb395dfe2089"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceLaPackUtils.html#a88a00f76a295f0bfafdcdb395dfe2089">linearizeMatrix</a> (std::vector&lt; double &gt; &amp;a_linA, int &amp;a_M, int &amp;a_N, const std::vector&lt; std::vector&lt; double &gt; &gt; &amp;a_A, const char &amp;a_format)</td></tr>
 <tr class="memdesc:a88a00f76a295f0bfafdcdb395dfe2089"><td class="mdescLeft">&#160;</td><td class="mdescRight">Linearize a matrix to column major Fortran form by assuming row or major column format of the input matrix.  <br /></td></tr>
 <tr class="separator:a88a00f76a295f0bfafdcdb395dfe2089"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acad6e09189914ea71e18ce1c88888c5d" id="r_acad6e09189914ea71e18ce1c88888c5d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceLaPackUtils.html#acad6e09189914ea71e18ce1c88888c5d">linearizeColumnMajorMatrix</a> (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">double</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_linA</a>, <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_M</a>, <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_N</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">double</a> &gt; &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_A</a>)</td></tr>
+<tr class="memitem:acad6e09189914ea71e18ce1c88888c5d" id="r_acad6e09189914ea71e18ce1c88888c5d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceLaPackUtils.html#acad6e09189914ea71e18ce1c88888c5d">linearizeColumnMajorMatrix</a> (std::vector&lt; double &gt; &amp;a_linA, int &amp;a_M, int &amp;a_N, const std::vector&lt; std::vector&lt; double &gt; &gt; &amp;a_A)</td></tr>
 <tr class="memdesc:acad6e09189914ea71e18ce1c88888c5d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Linearize a matrix to column major Fortran form by column major format of the input matrix.  <br /></td></tr>
 <tr class="separator:acad6e09189914ea71e18ce1c88888c5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9ab64610aa3df12aa1cd2368e5fc51b7" id="r_a9ab64610aa3df12aa1cd2368e5fc51b7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceLaPackUtils.html#a9ab64610aa3df12aa1cd2368e5fc51b7">linearizeRowMajorMatrix</a> (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">double</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_linA</a>, <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_M</a>, <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_N</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">double</a> &gt; &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_A</a>)</td></tr>
+<tr class="memitem:a9ab64610aa3df12aa1cd2368e5fc51b7" id="r_a9ab64610aa3df12aa1cd2368e5fc51b7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceLaPackUtils.html#a9ab64610aa3df12aa1cd2368e5fc51b7">linearizeRowMajorMatrix</a> (std::vector&lt; double &gt; &amp;a_linA, int &amp;a_M, int &amp;a_N, const std::vector&lt; std::vector&lt; double &gt; &gt; &amp;a_A)</td></tr>
 <tr class="memdesc:a9ab64610aa3df12aa1cd2368e5fc51b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Linearize a matrix to column major Fortran form by row major format of the input matrix.  <br /></td></tr>
 <tr class="separator:a9ab64610aa3df12aa1cd2368e5fc51b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a31251edf334bd122212fd44a01d8ef32" id="r_a31251edf334bd122212fd44a01d8ef32"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceLaPackUtils.html#a31251edf334bd122212fd44a01d8ef32">deLinearizeMatrix</a> (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">double</a> &gt; &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_A</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_M</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_N</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">double</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_linA</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">char</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_format</a>)</td></tr>
+<tr class="memitem:a31251edf334bd122212fd44a01d8ef32" id="r_a31251edf334bd122212fd44a01d8ef32"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceLaPackUtils.html#a31251edf334bd122212fd44a01d8ef32">deLinearizeMatrix</a> (std::vector&lt; std::vector&lt; double &gt; &gt; &amp;a_A, const int &amp;a_M, const int &amp;a_N, const std::vector&lt; double &gt; &amp;a_linA, const char &amp;a_format)</td></tr>
 <tr class="memdesc:a31251edf334bd122212fd44a01d8ef32"><td class="mdescLeft">&#160;</td><td class="mdescRight">Delinearize a linearized matrix from column major Fortran to row or major column matrix format.  <br /></td></tr>
 <tr class="separator:a31251edf334bd122212fd44a01d8ef32"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af3b3d4bf7b2b69072566c92b04e801f1" id="r_af3b3d4bf7b2b69072566c92b04e801f1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceLaPackUtils.html#af3b3d4bf7b2b69072566c92b04e801f1">deLinearizeColumnMajorMatrix</a> (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">double</a> &gt; &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_A</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_M</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_N</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">double</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_linA</a>)</td></tr>
+<tr class="memitem:af3b3d4bf7b2b69072566c92b04e801f1" id="r_af3b3d4bf7b2b69072566c92b04e801f1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceLaPackUtils.html#af3b3d4bf7b2b69072566c92b04e801f1">deLinearizeColumnMajorMatrix</a> (std::vector&lt; std::vector&lt; double &gt; &gt; &amp;a_A, const int &amp;a_M, const int &amp;a_N, const std::vector&lt; double &gt; &amp;a_linA)</td></tr>
 <tr class="memdesc:af3b3d4bf7b2b69072566c92b04e801f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Delinearize a linearized matrix from column major Fortran to column major form.  <br /></td></tr>
 <tr class="separator:af3b3d4bf7b2b69072566c92b04e801f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a63b55b29f0dc308118bfb5ac21d8e9e2" id="r_a63b55b29f0dc308118bfb5ac21d8e9e2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceLaPackUtils.html#a63b55b29f0dc308118bfb5ac21d8e9e2">deLinearizeRowMajorMatrix</a> (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">double</a> &gt; &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_A</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_M</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_N</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">double</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_linA</a>)</td></tr>
+<tr class="memitem:a63b55b29f0dc308118bfb5ac21d8e9e2" id="r_a63b55b29f0dc308118bfb5ac21d8e9e2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceLaPackUtils.html#a63b55b29f0dc308118bfb5ac21d8e9e2">deLinearizeRowMajorMatrix</a> (std::vector&lt; std::vector&lt; double &gt; &gt; &amp;a_A, const int &amp;a_M, const int &amp;a_N, const std::vector&lt; double &gt; &amp;a_linA)</td></tr>
 <tr class="memdesc:a63b55b29f0dc308118bfb5ac21d8e9e2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Delinearize a linearized matrix from column major Fortran to row major form.  <br /></td></tr>
 <tr class="separator:a63b55b29f0dc308118bfb5ac21d8e9e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -131,27 +131,27 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">bool</a> LaPackUtils::computePseudoInverse </td>
+          <td class="memname">bool LaPackUtils::computePseudoInverse </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">double</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">std::vector&lt; double &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_linAplus</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">double</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const std::vector&lt; double &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_linA</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;&#160;</td>
+          <td class="paramtype">const int &amp;&#160;</td>
           <td class="paramname"><em>a_M</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;&#160;</td>
+          <td class="paramtype">const int &amp;&#160;</td>
           <td class="paramname"><em>a_N</em>&#160;</td>
         </tr>
         <tr>
@@ -183,27 +183,27 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">bool</a> LaPackUtils::computePseudoInverse </td>
+          <td class="memname">bool LaPackUtils::computePseudoInverse </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">float</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">std::vector&lt; float &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_linAplus</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">float</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const std::vector&lt; float &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_linA</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;&#160;</td>
+          <td class="paramtype">const int &amp;&#160;</td>
           <td class="paramname"><em>a_M</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;&#160;</td>
+          <td class="paramtype">const int &amp;&#160;</td>
           <td class="paramname"><em>a_N</em>&#160;</td>
         </tr>
         <tr>
@@ -235,39 +235,39 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">bool</a> LaPackUtils::computeSVD </td>
+          <td class="memname">bool LaPackUtils::computeSVD </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">double</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">std::vector&lt; double &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_linU</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">double</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">std::vector&lt; double &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_linSigma</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">double</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">std::vector&lt; double &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_linVtran</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">double</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const std::vector&lt; double &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_linA</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;&#160;</td>
+          <td class="paramtype">const int &amp;&#160;</td>
           <td class="paramname"><em>a_M</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;&#160;</td>
+          <td class="paramtype">const int &amp;&#160;</td>
           <td class="paramname"><em>a_N</em>&#160;</td>
         </tr>
         <tr>
@@ -306,39 +306,39 @@ A = U\Sigma V^\intercal.
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">bool</a> LaPackUtils::computeSVD </td>
+          <td class="memname">bool LaPackUtils::computeSVD </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">float</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">std::vector&lt; float &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_linU</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">float</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">std::vector&lt; float &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_linSigma</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">float</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">std::vector&lt; float &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_linVtran</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">float</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const std::vector&lt; float &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_linA</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;&#160;</td>
+          <td class="paramtype">const int &amp;&#160;</td>
           <td class="paramname"><em>a_M</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;&#160;</td>
+          <td class="paramtype">const int &amp;&#160;</td>
           <td class="paramname"><em>a_N</em>&#160;</td>
         </tr>
         <tr>
@@ -377,27 +377,27 @@ A = U\Sigma V^\intercal.
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> LaPackUtils::deLinearizeColumnMajorMatrix </td>
+          <td class="memname">void LaPackUtils::deLinearizeColumnMajorMatrix </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">double</a> &gt; &gt; &amp;&#160;</td>
+          <td class="paramtype">std::vector&lt; std::vector&lt; double &gt; &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_A</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;&#160;</td>
+          <td class="paramtype">const int &amp;&#160;</td>
           <td class="paramname"><em>a_M</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;&#160;</td>
+          <td class="paramtype">const int &amp;&#160;</td>
           <td class="paramname"><em>a_N</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">double</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const std::vector&lt; double &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_linA</em>&#160;</td>
         </tr>
         <tr>
@@ -428,33 +428,33 @@ A = U\Sigma V^\intercal.
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> LaPackUtils::deLinearizeMatrix </td>
+          <td class="memname">void LaPackUtils::deLinearizeMatrix </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">double</a> &gt; &gt; &amp;&#160;</td>
+          <td class="paramtype">std::vector&lt; std::vector&lt; double &gt; &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_A</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;&#160;</td>
+          <td class="paramtype">const int &amp;&#160;</td>
           <td class="paramname"><em>a_M</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;&#160;</td>
+          <td class="paramtype">const int &amp;&#160;</td>
           <td class="paramname"><em>a_N</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">double</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const std::vector&lt; double &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_linA</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">char</a> &amp;&#160;</td>
+          <td class="paramtype">const char &amp;&#160;</td>
           <td class="paramname"><em>a_format</em>&#160;</td>
         </tr>
         <tr>
@@ -486,27 +486,27 @@ A = U\Sigma V^\intercal.
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> LaPackUtils::deLinearizeRowMajorMatrix </td>
+          <td class="memname">void LaPackUtils::deLinearizeRowMajorMatrix </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">double</a> &gt; &gt; &amp;&#160;</td>
+          <td class="paramtype">std::vector&lt; std::vector&lt; double &gt; &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_A</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;&#160;</td>
+          <td class="paramtype">const int &amp;&#160;</td>
           <td class="paramname"><em>a_M</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;&#160;</td>
+          <td class="paramtype">const int &amp;&#160;</td>
           <td class="paramname"><em>a_N</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">double</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const std::vector&lt; double &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_linA</em>&#160;</td>
         </tr>
         <tr>
@@ -537,27 +537,27 @@ A = U\Sigma V^\intercal.
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">int</a> LaPackUtils::linearIndex </td>
+          <td class="memname">int LaPackUtils::linearIndex </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype">const int&#160;</td>
           <td class="paramname"><em>irow</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype">const int&#160;</td>
           <td class="paramname"><em>jcol</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype">const int&#160;</td>
           <td class="paramname"><em>M</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype">const int&#160;</td>
           <td class="paramname"><em>N</em>&#160;</td>
         </tr>
         <tr>
@@ -589,27 +589,27 @@ A = U\Sigma V^\intercal.
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> LaPackUtils::linearizeColumnMajorMatrix </td>
+          <td class="memname">void LaPackUtils::linearizeColumnMajorMatrix </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">double</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">std::vector&lt; double &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_linA</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">int</a> &amp;&#160;</td>
+          <td class="paramtype">int &amp;&#160;</td>
           <td class="paramname"><em>a_M</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">int</a> &amp;&#160;</td>
+          <td class="paramtype">int &amp;&#160;</td>
           <td class="paramname"><em>a_N</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">double</a> &gt; &gt; &amp;&#160;</td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; double &gt; &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_A</em>&#160;</td>
         </tr>
         <tr>
@@ -640,33 +640,33 @@ A = U\Sigma V^\intercal.
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> LaPackUtils::linearizeMatrix </td>
+          <td class="memname">void LaPackUtils::linearizeMatrix </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">double</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">std::vector&lt; double &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_linA</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">int</a> &amp;&#160;</td>
+          <td class="paramtype">int &amp;&#160;</td>
           <td class="paramname"><em>a_M</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">int</a> &amp;&#160;</td>
+          <td class="paramtype">int &amp;&#160;</td>
           <td class="paramname"><em>a_N</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">double</a> &gt; &gt; &amp;&#160;</td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; double &gt; &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_A</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">char</a> &amp;&#160;</td>
+          <td class="paramtype">const char &amp;&#160;</td>
           <td class="paramname"><em>a_format</em>&#160;</td>
         </tr>
         <tr>
@@ -698,27 +698,27 @@ A = U\Sigma V^\intercal.
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> LaPackUtils::linearizeRowMajorMatrix </td>
+          <td class="memname">void LaPackUtils::linearizeRowMajorMatrix </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">double</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">std::vector&lt; double &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_linA</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">int</a> &amp;&#160;</td>
+          <td class="paramtype">int &amp;&#160;</td>
           <td class="paramname"><em>a_M</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">int</a> &amp;&#160;</td>
+          <td class="paramtype">int &amp;&#160;</td>
           <td class="paramname"><em>a_N</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">double</a> &gt; &gt; &amp;&#160;</td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; double &gt; &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_A</em>&#160;</td>
         </tr>
         <tr>

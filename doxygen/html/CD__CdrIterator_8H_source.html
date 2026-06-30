@@ -119,7 +119,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
 <div class="line"><a id="l00045" name="l00045"></a><span class="lineno"><a class="line" href="classCdrIterator.html#ab9fc5e49a7ad1f48891f1d9e394a3aa7">   45</a></span>  <a class="code hl_function" href="classCdrIterator.html#ab9fc5e49a7ad1f48891f1d9e394a3aa7">CdrIterator</a>() = <span class="keyword">delete</span>;</div>
 <div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>  <a class="code hl_function" href="classCdrIterator.html#ab9fc5e49a7ad1f48891f1d9e394a3aa7">CdrIterator</a>(<a class="code hl_class" href="classTracerParticleSolver.html">CdrLayout&lt;T&gt;</a>&amp; <a class="code hl_class" href="classTracerParticleSolver.html">a_layout</a>, <span class="keyword">const</span> <a class="code hl_enumeration" href="classCdrIterator.html#abfed0ae43a81afdd3d4cd47f01be3e50">SpeciesIteration</a> <a class="code hl_class" href="classTracerParticleSolver.html">a_mode</a> = SpeciesIteration::All);</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>  <a class="code hl_function" href="classCdrIterator.html#ab9fc5e49a7ad1f48891f1d9e394a3aa7">CdrIterator</a>(<a class="code hl_class" href="classCdrLayout.html">CdrLayout&lt;T&gt;</a>&amp; a_layout, <span class="keyword">const</span> <a class="code hl_enumeration" href="classCdrIterator.html#abfed0ae43a81afdd3d4cd47f01be3e50">SpeciesIteration</a> a_mode = SpeciesIteration::All);</div>
 <div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
 <div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>  <span class="keyword">virtual</span> <a class="code hl_function" href="classCdrIterator.html#ad43a87222356e92b118d6774615fd984">~CdrIterator</a>();</div>
 <div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
@@ -138,10 +138,10 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>  <span class="keyword">virtual</span> <span class="keywordtype">void</span></div>
 <div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>  <a class="code hl_function" href="classCdrIterator.html#a8c5cf3c23cffcb92d31db923aff1ad45">operator++</a>();</div>
 <div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span> </div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>  <span class="keyword">virtual</span> <a class="code hl_class" href="classTracerParticleSolver.html">RefCountedPtr&lt;T&gt;</a>&amp;</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>  <span class="keyword">virtual</span> RefCountedPtr&lt;T&gt;&amp;</div>
 <div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>  <a class="code hl_function" href="classCdrIterator.html#a79a6370eda70a07959a9c2ddeb253dcd">operator()</a>();</div>
 <div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span> </div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>  <span class="keyword">virtual</span> <a class="code hl_class" href="classTracerParticleSolver.html">RefCountedPtr&lt;CdrSpecies&gt;</a>&amp;</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>  <span class="keyword">virtual</span> RefCountedPtr&lt;CdrSpecies&gt;&amp;</div>
 <div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>  <a class="code hl_function" href="classCdrIterator.html#a640c06f98f11b9a75bb669c31c4e811b">getSpecies</a>();</div>
 <div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span> </div>
 <div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span><span class="keyword">protected</span>:</div>
@@ -153,9 +153,9 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span> </div>
 <div class="line"><a id="l00125" name="l00125"></a><span class="lineno"><a class="line" href="classCdrIterator.html#a1ec99b2010b51e9b2b78267532b37681">  125</a></span>  <span class="keywordtype">bool</span> <a class="code hl_variable" href="classCdrIterator.html#a1ec99b2010b51e9b2b78267532b37681">m_isDefined</a>;</div>
 <div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span> </div>
-<div class="line"><a id="l00130" name="l00130"></a><span class="lineno"><a class="line" href="classCdrIterator.html#a0e3ec29cf3e7e22706d2b1268522420e">  130</a></span>  <a class="code hl_class" href="classTracerParticleSolver.html">Vector&lt;RefCountedPtr&lt;T&gt;</a>&gt; <a class="code hl_variable" href="classCdrIterator.html#a0e3ec29cf3e7e22706d2b1268522420e">m_solvers</a>;</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno"><a class="line" href="classCdrIterator.html#a0e3ec29cf3e7e22706d2b1268522420e">  130</a></span>  Vector&lt;RefCountedPtr&lt;T&gt;&gt; <a class="code hl_variable" href="classCdrIterator.html#a0e3ec29cf3e7e22706d2b1268522420e">m_solvers</a>;</div>
 <div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span> </div>
-<div class="line"><a id="l00135" name="l00135"></a><span class="lineno"><a class="line" href="classCdrIterator.html#a29a2356521b7a72a6399eaff1aa56154">  135</a></span>  <a class="code hl_class" href="classTracerParticleSolver.html">Vector&lt;RefCountedPtr&lt;CdrSpecies&gt;</a>&gt; <a class="code hl_variable" href="classCdrIterator.html#a29a2356521b7a72a6399eaff1aa56154">m_species</a>;</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno"><a class="line" href="classCdrIterator.html#a29a2356521b7a72a6399eaff1aa56154">  135</a></span>  Vector&lt;RefCountedPtr&lt;CdrSpecies&gt;&gt; <a class="code hl_variable" href="classCdrIterator.html#a29a2356521b7a72a6399eaff1aa56154">m_species</a>;</div>
 <div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>};</div>
 </div>
 <div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span> </div>
@@ -183,7 +183,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="ttc" id="aclassCdrIterator_html_ad02e9db152ff730a84515ff6db5ec3e3"><div class="ttname"><a href="classCdrIterator.html#ad02e9db152ff730a84515ff6db5ec3e3">CdrIterator::m_mode</a></div><div class="ttdeci">SpeciesIteration m_mode</div><div class="ttdoc">Which species to iterate over.</div><div class="ttdef"><b>Definition</b> CD_CdrIterator.H:110</div></div>
 <div class="ttc" id="aclassCdrIterator_html_ad43a87222356e92b118d6774615fd984"><div class="ttname"><a href="classCdrIterator.html#ad43a87222356e92b118d6774615fd984">CdrIterator::~CdrIterator</a></div><div class="ttdeci">virtual ~CdrIterator()</div><div class="ttdoc">Destructor (does nothing).</div><div class="ttdef"><b>Definition</b> CD_CdrIteratorImplem.H:37</div></div>
 <div class="ttc" id="aclassCdrIterator_html_aedf49ecaa5514585f336b4b5fc5aea7f"><div class="ttname"><a href="classCdrIterator.html#aedf49ecaa5514585f336b4b5fc5aea7f">CdrIterator::getNumberOfSolvers</a></div><div class="ttdeci">virtual int getNumberOfSolvers()</div><div class="ttdoc">Get number of solvers.</div><div class="ttdef"><b>Definition</b> CD_CdrIteratorImplem.H:44</div></div>
-<div class="ttc" id="aclassTracerParticleSolver_html"><div class="ttname"><a href="classTracerParticleSolver.html">TracerParticleSolver</a></div><div class="ttdoc">Base class for a tracer particle solver. This solver can advance particles in a pre-defined velocity ...</div><div class="ttdef"><b>Definition</b> CD_TracerParticleSolver.H:39</div></div>
+<div class="ttc" id="aclassCdrLayout_html"><div class="ttname"><a href="classCdrLayout.html">CdrLayout</a></div><div class="ttdoc">Class for holding a set of CdrSolvers.</div><div class="ttdef"><b>Definition</b> CD_CdrLayout.H:38</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

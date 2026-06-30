@@ -111,17 +111,17 @@ Collaboration diagram for IrregAddOp:</div>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a00e93640c7a04e19ef07ffb116ae8726" id="r_a00e93640c7a04e19ef07ffb116ae8726"><td class="memItemLeft" align="right" valign="top"><a id="a00e93640c7a04e19ef07ffb116ae8726" name="a00e93640c7a04e19ef07ffb116ae8726"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>IrregAddOp</b> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+&#160;</td><td class="memItemRight" valign="bottom"><b>IrregAddOp</b> () noexcept</td></tr>
 <tr class="memdesc:a00e93640c7a04e19ef07ffb116ae8726"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor (does nothing) <br /></td></tr>
 <tr class="separator:a00e93640c7a04e19ef07ffb116ae8726"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8952e263448887f656eefba3e3c5d932" id="r_a8952e263448887f656eefba3e3c5d932"><td class="memItemLeft" align="right" valign="top"><a id="a8952e263448887f656eefba3e3c5d932" name="a8952e263448887f656eefba3e3c5d932"></a>
-<a class="el" href="classTracerParticleSolver.html">virtual</a>&#160;</td><td class="memItemRight" valign="bottom"><b>~IrregAddOp</b> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~IrregAddOp</b> () noexcept</td></tr>
 <tr class="memdesc:a8952e263448887f656eefba3e3c5d932"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor (does nothing) <br /></td></tr>
 <tr class="separator:a8952e263448887f656eefba3e3c5d932"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac078e53da121ed9b9822cdbeab9c7caf" id="r_ac078e53da121ed9b9822cdbeab9c7caf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIrregAddOp.html#ac078e53da121ed9b9822cdbeab9c7caf">linearIn</a> (<a class="el" href="classTracerParticleSolver.html">BaseIVFAB</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_data</a>, <a class="el" href="classTracerParticleSolver.html">void</a> *<a class="el" href="classTracerParticleSolver.html">a_buffer</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Box</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_region</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Interval</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_comps</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
+<tr class="memitem:ac078e53da121ed9b9822cdbeab9c7caf" id="r_ac078e53da121ed9b9822cdbeab9c7caf"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIrregAddOp.html#ac078e53da121ed9b9822cdbeab9c7caf">linearIn</a> (BaseIVFAB&lt; Real &gt; &amp;a_data, void *a_buffer, const Box &amp;a_region, const Interval &amp;a_comps) const override</td></tr>
 <tr class="memdesc:ac078e53da121ed9b9822cdbeab9c7caf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Linearization function. We linearize the buffer onto arg, but since this is an addition operator we need to add the result.  <br /></td></tr>
 <tr class="separator:ac078e53da121ed9b9822cdbeab9c7caf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a74b8d314cc7b399a6eb0e93639d7ebf0" id="r_a74b8d314cc7b399a6eb0e93639d7ebf0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIrregAddOp.html#a74b8d314cc7b399a6eb0e93639d7ebf0">op</a> (<a class="el" href="classTracerParticleSolver.html">BaseIVFAB</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_dst</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Box</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_regionFrom</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Interval</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_dstVars</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Box</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_regionTo</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">BaseIVFAB</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_src</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Interval</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_srcVars</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
+<tr class="memitem:a74b8d314cc7b399a6eb0e93639d7ebf0" id="r_a74b8d314cc7b399a6eb0e93639d7ebf0"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIrregAddOp.html#a74b8d314cc7b399a6eb0e93639d7ebf0">op</a> (BaseIVFAB&lt; Real &gt; &amp;a_dst, const Box &amp;a_regionFrom, const Interval &amp;a_dstVars, const Box &amp;a_regionTo, const BaseIVFAB&lt; Real &gt; &amp;a_src, const Interval &amp;a_srcVars) const override</td></tr>
 <tr class="memdesc:a74b8d314cc7b399a6eb0e93639d7ebf0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Operator function. Increments data with source.  <br /></td></tr>
 <tr class="separator:a74b8d314cc7b399a6eb0e93639d7ebf0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -138,27 +138,27 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> IrregAddOp::linearIn </td>
+          <td class="memname">void IrregAddOp::linearIn </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">BaseIVFAB</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">BaseIVFAB&lt; Real &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_data</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">void</a> *&#160;</td>
+          <td class="paramtype">void *&#160;</td>
           <td class="paramname"><em>a_buffer</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Box</a> &amp;&#160;</td>
+          <td class="paramtype">const Box &amp;&#160;</td>
           <td class="paramname"><em>a_region</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Interval</a> &amp;&#160;</td>
+          <td class="paramtype">const Interval &amp;&#160;</td>
           <td class="paramname"><em>a_comps</em>&#160;</td>
         </tr>
         <tr>
@@ -197,39 +197,39 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> IrregAddOp::op </td>
+          <td class="memname">void IrregAddOp::op </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">BaseIVFAB</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">BaseIVFAB&lt; Real &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_dst</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Box</a> &amp;&#160;</td>
+          <td class="paramtype">const Box &amp;&#160;</td>
           <td class="paramname"><em>a_regionFrom</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Interval</a> &amp;&#160;</td>
+          <td class="paramtype">const Interval &amp;&#160;</td>
           <td class="paramname"><em>a_dstVars</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Box</a> &amp;&#160;</td>
+          <td class="paramtype">const Box &amp;&#160;</td>
           <td class="paramname"><em>a_regionTo</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">BaseIVFAB</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const BaseIVFAB&lt; Real &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_src</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Interval</a> &amp;&#160;</td>
+          <td class="paramtype">const Interval &amp;&#160;</td>
           <td class="paramname"><em>a_srcVars</em>&#160;</td>
         </tr>
         <tr>

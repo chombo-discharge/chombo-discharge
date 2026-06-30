@@ -97,142 +97,142 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:abf041cd52fc9431850b9f174ca7f1855"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor. Leaves the object undefined; call <a class="el" href="classEBAMRParticleMesh.html#a3ce62438bb19cb2c2363b262643c9e59" title="Define the per-level leaves, coarse-fine mesh operators, and halo/transition masks.">define()</a>. <br /></td></tr>
 <tr class="separator:abf041cd52fc9431850b9f174ca7f1855"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a36106f1a4af1bd2ee0b1e8098a23bfcb" id="r_a36106f1a4af1bd2ee0b1e8098a23bfcb"><td class="memItemLeft" align="right" valign="top"><a id="a36106f1a4af1bd2ee0b1e8098a23bfcb" name="a36106f1a4af1bd2ee0b1e8098a23bfcb"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>~EBAMRParticleMesh</b> ()=<a class="el" href="classTracerParticleSolver.html">default</a></td></tr>
+&#160;</td><td class="memItemRight" valign="bottom"><b>~EBAMRParticleMesh</b> ()=default</td></tr>
 <tr class="memdesc:a36106f1a4af1bd2ee0b1e8098a23bfcb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. <br /></td></tr>
 <tr class="separator:a36106f1a4af1bd2ee0b1e8098a23bfcb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7af7eb77fa0c6963b2b6bf4d60aaad31" id="r_a7af7eb77fa0c6963b2b6bf4d60aaad31"><td class="memItemLeft" align="right" valign="top"><a id="a7af7eb77fa0c6963b2b6bf4d60aaad31" name="a7af7eb77fa0c6963b2b6bf4d60aaad31"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>EBAMRParticleMesh</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEBAMRParticleMesh.html">EBAMRParticleMesh</a> &amp;)=<a class="el" href="classTracerParticleSolver.html">delete</a></td></tr>
+&#160;</td><td class="memItemRight" valign="bottom"><b>EBAMRParticleMesh</b> (const <a class="el" href="classEBAMRParticleMesh.html">EBAMRParticleMesh</a> &amp;)=delete</td></tr>
 <tr class="memdesc:a7af7eb77fa0c6963b2b6bf4d60aaad31"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy construction is deleted (shared RefCountedPtr state). <br /></td></tr>
 <tr class="separator:a7af7eb77fa0c6963b2b6bf4d60aaad31"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a52692bdec426a85895d3e102777f2096" id="r_a52692bdec426a85895d3e102777f2096"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classEBAMRParticleMesh.html">EBAMRParticleMesh</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRParticleMesh.html#a52692bdec426a85895d3e102777f2096">operator=</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEBAMRParticleMesh.html">EBAMRParticleMesh</a> &amp;)=<a class="el" href="classTracerParticleSolver.html">delete</a></td></tr>
+<tr class="memitem:a52692bdec426a85895d3e102777f2096" id="r_a52692bdec426a85895d3e102777f2096"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classEBAMRParticleMesh.html">EBAMRParticleMesh</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRParticleMesh.html#a52692bdec426a85895d3e102777f2096">operator=</a> (const <a class="el" href="classEBAMRParticleMesh.html">EBAMRParticleMesh</a> &amp;)=delete</td></tr>
 <tr class="memdesc:a52692bdec426a85895d3e102777f2096"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy assignment is deleted.  <br /></td></tr>
 <tr class="separator:a52692bdec426a85895d3e102777f2096"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3ce62438bb19cb2c2363b262643c9e59" id="r_a3ce62438bb19cb2c2363b262643c9e59"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRParticleMesh.html#a3ce62438bb19cb2c2363b262643c9e59">define</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBLevelGrid</a> &gt; &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_eblgs</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">int</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_refRat</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_dx</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_probLo</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_ghost</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_finestLevel</a>)</td></tr>
+<tr class="memitem:a3ce62438bb19cb2c2363b262643c9e59" id="r_a3ce62438bb19cb2c2363b262643c9e59"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRParticleMesh.html#a3ce62438bb19cb2c2363b262643c9e59">define</a> (const Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt; &amp;a_eblgs, const Vector&lt; int &gt; &amp;a_refRat, const Vector&lt; Real &gt; &amp;a_dx, const RealVect &amp;a_probLo, const int a_ghost, const int a_finestLevel)</td></tr>
 <tr class="memdesc:a3ce62438bb19cb2c2363b262643c9e59"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the per-level leaves, coarse-fine mesh operators, and halo/transition masks.  <br /></td></tr>
 <tr class="separator:a3ce62438bb19cb2c2363b262643c9e59"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Interpolation</div></td></tr>
-<tr class="memitem:a2729b63b78685329d4763efc533b43a2" id="r_a2729b63b78685329d4763efc533b43a2"><td class="memTemplParams" colspan="2">template&lt;auto... Members, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; </td></tr>
-<tr class="memitem:a2729b63b78685329d4763efc533b43a2"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classEBAMRParticleMesh.html#a2729b63b78685329d4763efc533b43a2">interpolate</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_particles</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_meshData</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> <a class="el" href="classTracerParticleSolver.html">a_interpType</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classTracerParticleSolver.html">a_forceIrregNGP</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memitem:a2729b63b78685329d4763efc533b43a2" id="r_a2729b63b78685329d4763efc533b43a2"><td class="memTemplParams" colspan="2">template&lt;auto... Members, typename P , typename Traits &gt; </td></tr>
+<tr class="memitem:a2729b63b78685329d4763efc533b43a2"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classEBAMRParticleMesh.html#a2729b63b78685329d4763efc533b43a2">interpolate</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles, const EBAMRCellData &amp;a_meshData, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_interpType, const bool a_forceIrregNGP) const</td></tr>
 <tr class="memdesc:a2729b63b78685329d4763efc533b43a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate a mesh field onto one or more payload columns, across all levels.  <br /></td></tr>
 <tr class="separator:a2729b63b78685329d4763efc533b43a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a444fa9f347000492832a2d294f60cccc" id="r_a444fa9f347000492832a2d294f60cccc"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; </td></tr>
-<tr class="memitem:a444fa9f347000492832a2d294f60cccc"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classEBAMRParticleMesh.html#a444fa9f347000492832a2d294f60cccc">interpolateWeight</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_particles</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_meshData</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> <a class="el" href="classTracerParticleSolver.html">a_interpType</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classTracerParticleSolver.html">a_forceIrregNGP</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memitem:a444fa9f347000492832a2d294f60cccc" id="r_a444fa9f347000492832a2d294f60cccc"><td class="memTemplParams" colspan="2">template&lt;typename P , typename Traits &gt; </td></tr>
+<tr class="memitem:a444fa9f347000492832a2d294f60cccc"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classEBAMRParticleMesh.html#a444fa9f347000492832a2d294f60cccc">interpolateWeight</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles, const EBAMRCellData &amp;a_meshData, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_interpType, const bool a_forceIrregNGP) const</td></tr>
 <tr class="memdesc:a444fa9f347000492832a2d294f60cccc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate a mesh field onto the container-owned weight column, across all levels.  <br /></td></tr>
 <tr class="separator:a444fa9f347000492832a2d294f60cccc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Deposition (all coarse-fine strategies)</div></td></tr>
-<tr class="memitem:a20b0192f19fabb8275a735b0168b302d" id="r_a20b0192f19fabb8275a735b0168b302d"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; </td></tr>
-<tr class="memitem:a20b0192f19fabb8275a735b0168b302d"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classEBAMRParticleMesh.html#a20b0192f19fabb8275a735b0168b302d">depositWeight</a> (<a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_meshData</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_particles</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> <a class="el" href="classTracerParticleSolver.html">a_depositionType</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a> <a class="el" href="classTracerParticleSolver.html">a_coarseFineDeposition</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classTracerParticleSolver.html">a_forceIrregNGP</a>)</td></tr>
+<tr class="memitem:a20b0192f19fabb8275a735b0168b302d" id="r_a20b0192f19fabb8275a735b0168b302d"><td class="memTemplParams" colspan="2">template&lt;typename P , typename Traits &gt; </td></tr>
+<tr class="memitem:a20b0192f19fabb8275a735b0168b302d"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classEBAMRParticleMesh.html#a20b0192f19fabb8275a735b0168b302d">depositWeight</a> (EBAMRCellData &amp;a_meshData, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_depositionType, const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a> a_coarseFineDeposition, const bool a_forceIrregNGP)</td></tr>
 <tr class="memdesc:a20b0192f19fabb8275a735b0168b302d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit the container-owned weight onto the AMR mesh.  <br /></td></tr>
 <tr class="separator:a20b0192f19fabb8275a735b0168b302d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5136fe41ef4566051ba5c51482795f33" id="r_a5136fe41ef4566051ba5c51482795f33"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">CellGather</a> &gt; </td></tr>
-<tr class="memitem:a5136fe41ef4566051ba5c51482795f33"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classEBAMRParticleMesh.html#a5136fe41ef4566051ba5c51482795f33">depositGathered</a> (<a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_meshData</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_particles</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> <a class="el" href="classTracerParticleSolver.html">a_depositionType</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a> <a class="el" href="classTracerParticleSolver.html">a_coarseFineDeposition</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classTracerParticleSolver.html">a_forceIrregNGP</a>, <a class="el" href="classTracerParticleSolver.html">CellGather</a> <a class="el" href="classTracerParticleSolver.html">a_cellGather</a>)</td></tr>
+<tr class="memitem:a5136fe41ef4566051ba5c51482795f33" id="r_a5136fe41ef4566051ba5c51482795f33"><td class="memTemplParams" colspan="2">template&lt;typename P , typename Traits , typename CellGather &gt; </td></tr>
+<tr class="memitem:a5136fe41ef4566051ba5c51482795f33"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classEBAMRParticleMesh.html#a5136fe41ef4566051ba5c51482795f33">depositGathered</a> (EBAMRCellData &amp;a_meshData, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_depositionType, const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a> a_coarseFineDeposition, const bool a_forceIrregNGP, CellGather a_cellGather)</td></tr>
 <tr class="memdesc:a5136fe41ef4566051ba5c51482795f33"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit a custom per-particle scalar (computed by a_cellGather) onto the AMR mesh.  <br /></td></tr>
 <tr class="separator:a5136fe41ef4566051ba5c51482795f33"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abb784098847e2cd5d521f0e447e58438" id="r_abb784098847e2cd5d521f0e447e58438"><td class="memTemplParams" colspan="2">template&lt;auto... Members, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; </td></tr>
-<tr class="memitem:abb784098847e2cd5d521f0e447e58438"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classEBAMRParticleMesh.html#abb784098847e2cd5d521f0e447e58438">deposit</a> (<a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_meshData</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_particles</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> <a class="el" href="classTracerParticleSolver.html">a_depositionType</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a> <a class="el" href="classTracerParticleSolver.html">a_coarseFineDeposition</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classTracerParticleSolver.html">a_forceIrregNGP</a>)</td></tr>
+<tr class="memitem:abb784098847e2cd5d521f0e447e58438" id="r_abb784098847e2cd5d521f0e447e58438"><td class="memTemplParams" colspan="2">template&lt;auto... Members, typename P , typename Traits &gt; </td></tr>
+<tr class="memitem:abb784098847e2cd5d521f0e447e58438"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classEBAMRParticleMesh.html#abb784098847e2cd5d521f0e447e58438">deposit</a> (EBAMRCellData &amp;a_meshData, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_depositionType, const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a> a_coarseFineDeposition, const bool a_forceIrregNGP)</td></tr>
 <tr class="memdesc:abb784098847e2cd5d521f0e447e58438"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit one or more payload columns onto the AMR mesh.  <br /></td></tr>
 <tr class="separator:abb784098847e2cd5d521f0e447e58438"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
 <tr class="memitem:a6955f939755a6d78d95be24256b83d16" id="r_a6955f939755a6d78d95be24256b83d16"><td class="memItemLeft" align="right" valign="top"><a id="a6955f939755a6d78d95be24256b83d16" name="a6955f939755a6d78d95be24256b83d16"></a>
-<a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>errorUnsupported</b> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>errorUnsupported</b> () const</td></tr>
 <tr class="memdesc:a6955f939755a6d78d95be24256b83d16"><td class="mdescLeft">&#160;</td><td class="mdescRight">Abort on an unrecognized coarse-fine deposition strategy. <br /></td></tr>
 <tr class="separator:a6955f939755a6d78d95be24256b83d16"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6d1da335a1ae9076481b3365f0d35ae9" id="r_a6d1da335a1ae9076481b3365f0d35ae9"><td class="memItemLeft" align="right" valign="top"><a id="a6d1da335a1ae9076481b3365f0d35ae9" name="a6d1da335a1ae9076481b3365f0d35ae9"></a>
-<a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>defineEBParticleMesh</b> ()</td></tr>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>defineEBParticleMesh</b> ()</td></tr>
 <tr class="memdesc:a6d1da335a1ae9076481b3365f0d35ae9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the per-level per-patch <a class="el" href="classEBParticleMesh.html" title="Deposits/interpolates ParticleSoA leaves on a single patch, with embedded-boundary (cut-cell) awarene...">EBParticleMesh</a> leaves (valid grids + refined-coarse grids). <br /></td></tr>
 <tr class="separator:a6d1da335a1ae9076481b3365f0d35ae9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af7078bfe1729f10b1739edd264749101" id="r_af7078bfe1729f10b1739edd264749101"><td class="memItemLeft" align="right" valign="top"><a id="af7078bfe1729f10b1739edd264749101" name="af7078bfe1729f10b1739edd264749101"></a>
-<a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>defineLevelMotion</b> ()</td></tr>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>defineLevelMotion</b> ()</td></tr>
 <tr class="memdesc:af7078bfe1729f10b1739edd264749101"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the per-level valid+ghost -&gt; valid Copiers. <br /></td></tr>
 <tr class="separator:af7078bfe1729f10b1739edd264749101"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af42bd65a697b9fe12d4637b13df2cd24" id="r_af42bd65a697b9fe12d4637b13df2cd24"><td class="memItemLeft" align="right" valign="top"><a id="af42bd65a697b9fe12d4637b13df2cd24" name="af42bd65a697b9fe12d4637b13df2cd24"></a>
-<a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>defineCoarseFineMotion</b> ()</td></tr>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>defineCoarseFineMotion</b> ()</td></tr>
 <tr class="memdesc:af42bd65a697b9fe12d4637b13df2cd24"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the per-level coarse-fine mesh operators (null on level 0). <br /></td></tr>
 <tr class="separator:af42bd65a697b9fe12d4637b13df2cd24"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae6a4d0bf7c6f34ec411b8513ed159363" id="r_ae6a4d0bf7c6f34ec411b8513ed159363"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Container</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">PatchDeposit</a> &gt; </td></tr>
-<tr class="memitem:ae6a4d0bf7c6f34ec411b8513ed159363"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classEBAMRParticleMesh.html#ae6a4d0bf7c6f34ec411b8513ed159363">depositInterpCore</a> (<a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_meshData</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Container</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_particles</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_numComp</a>, <a class="el" href="classTracerParticleSolver.html">PatchDeposit</a> <a class="el" href="classTracerParticleSolver.html">a_patchDeposit</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memitem:ae6a4d0bf7c6f34ec411b8513ed159363" id="r_ae6a4d0bf7c6f34ec411b8513ed159363"><td class="memTemplParams" colspan="2">template&lt;typename Container , typename PatchDeposit &gt; </td></tr>
+<tr class="memitem:ae6a4d0bf7c6f34ec411b8513ed159363"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classEBAMRParticleMesh.html#ae6a4d0bf7c6f34ec411b8513ed159363">depositInterpCore</a> (EBAMRCellData &amp;a_meshData, const Container &amp;a_particles, const int a_numComp, PatchDeposit a_patchDeposit) const</td></tr>
 <tr class="memdesc:ae6a4d0bf7c6f34ec411b8513ed159363"><td class="mdescLeft">&#160;</td><td class="mdescRight">The CoarseFineDeposition::Interp deposition algorithm, parameterized by the per-patch deposit.  <br /></td></tr>
 <tr class="separator:ae6a4d0bf7c6f34ec411b8513ed159363"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7b4b35f75c3d4c7d8cc0ad55a5281266" id="r_a7b4b35f75c3d4c7d8cc0ad55a5281266"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRParticleMesh.html#a7b4b35f75c3d4c7d8cc0ad55a5281266">defineOuterHaloMasks</a> ()</td></tr>
+<tr class="memitem:a7b4b35f75c3d4c7d8cc0ad55a5281266" id="r_a7b4b35f75c3d4c7d8cc0ad55a5281266"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRParticleMesh.html#a7b4b35f75c3d4c7d8cc0ad55a5281266">defineOuterHaloMasks</a> ()</td></tr>
 <tr class="memdesc:a7b4b35f75c3d4c7d8cc0ad55a5281266"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the per-width outer-halo masks: per level, the coarse cells just outside the fine patch.  <br /></td></tr>
 <tr class="separator:a7b4b35f75c3d4c7d8cc0ad55a5281266"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aef4c8e93c1b5608dac5ee07ecd3b8703" id="r_aef4c8e93c1b5608dac5ee07ecd3b8703"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="classTracerParticleSolver.html">int</a> NCOMP, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Container</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">PatchDeposit</a> &gt; </td></tr>
-<tr class="memitem:aef4c8e93c1b5608dac5ee07ecd3b8703"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classEBAMRParticleMesh.html#aef4c8e93c1b5608dac5ee07ecd3b8703">depositHaloCore</a> (<a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_meshData</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Container</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_particles</a>, <a class="el" href="classTracerParticleSolver.html">PatchDeposit</a> <a class="el" href="classTracerParticleSolver.html">a_patchDeposit</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memitem:aef4c8e93c1b5608dac5ee07ecd3b8703" id="r_aef4c8e93c1b5608dac5ee07ecd3b8703"><td class="memTemplParams" colspan="2">template&lt;int NCOMP, typename Container , typename PatchDeposit &gt; </td></tr>
+<tr class="memitem:aef4c8e93c1b5608dac5ee07ecd3b8703"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classEBAMRParticleMesh.html#aef4c8e93c1b5608dac5ee07ecd3b8703">depositHaloCore</a> (EBAMRCellData &amp;a_meshData, const Container &amp;a_particles, PatchDeposit a_patchDeposit) const</td></tr>
 <tr class="memdesc:aef4c8e93c1b5608dac5ee07ecd3b8703"><td class="mdescLeft">&#160;</td><td class="mdescRight">The CoarseFineDeposition::Halo deposition algorithm.  <br /></td></tr>
 <tr class="separator:aef4c8e93c1b5608dac5ee07ecd3b8703"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7d1cf402dee91611338549efd608e0d0" id="r_a7d1cf402dee91611338549efd608e0d0"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="classTracerParticleSolver.html">int</a> NCOMP, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Container</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">PatchDeposit</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">PatchDepositNGP</a> &gt; </td></tr>
-<tr class="memitem:a7d1cf402dee91611338549efd608e0d0"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classEBAMRParticleMesh.html#a7d1cf402dee91611338549efd608e0d0">depositHaloNGPCore</a> (<a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_meshData</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Container</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_particles</a>, <a class="el" href="classTracerParticleSolver.html">PatchDeposit</a> <a class="el" href="classTracerParticleSolver.html">a_patch</a>, <a class="el" href="classTracerParticleSolver.html">PatchDepositNGP</a> <a class="el" href="classTracerParticleSolver.html">a_patchNGP</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memitem:a7d1cf402dee91611338549efd608e0d0" id="r_a7d1cf402dee91611338549efd608e0d0"><td class="memTemplParams" colspan="2">template&lt;int NCOMP, typename Container , typename PatchDeposit , typename PatchDepositNGP &gt; </td></tr>
+<tr class="memitem:a7d1cf402dee91611338549efd608e0d0"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classEBAMRParticleMesh.html#a7d1cf402dee91611338549efd608e0d0">depositHaloNGPCore</a> (EBAMRCellData &amp;a_meshData, const Container &amp;a_particles, PatchDeposit a_patch, PatchDepositNGP a_patchNGP) const</td></tr>
 <tr class="memdesc:a7d1cf402dee91611338549efd608e0d0"><td class="mdescLeft">&#160;</td><td class="mdescRight">The CoarseFineDeposition::HaloNGP deposition algorithm.  <br /></td></tr>
 <tr class="separator:a7d1cf402dee91611338549efd608e0d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4c532d3e483268c2317422f1cee0fcf3" id="r_a4c532d3e483268c2317422f1cee0fcf3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRParticleMesh.html#a4c532d3e483268c2317422f1cee0fcf3">getTransitionMaskWidth</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> <a class="el" href="classTracerParticleSolver.html">a_depositionType</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_refRat</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memitem:a4c532d3e483268c2317422f1cee0fcf3" id="r_a4c532d3e483268c2317422f1cee0fcf3"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRParticleMesh.html#a4c532d3e483268c2317422f1cee0fcf3">getTransitionMaskWidth</a> (const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_depositionType, const int a_refRat) const</td></tr>
 <tr class="memdesc:a4c532d3e483268c2317422f1cee0fcf3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transition-mask width for a kernel: CIC -&gt; refRat/2, TSC -&gt; refRat (NGP is handled upstream).  <br /></td></tr>
 <tr class="separator:a4c532d3e483268c2317422f1cee0fcf3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a16971bd2ceb59b1cdb6bf556d31ffca7" id="r_a16971bd2ceb59b1cdb6bf556d31ffca7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRParticleMesh.html#a16971bd2ceb59b1cdb6bf556d31ffca7">defineTransitionMasks</a> ()</td></tr>
+<tr class="memitem:a16971bd2ceb59b1cdb6bf556d31ffca7" id="r_a16971bd2ceb59b1cdb6bf556d31ffca7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRParticleMesh.html#a16971bd2ceb59b1cdb6bf556d31ffca7">defineTransitionMasks</a> ()</td></tr>
 <tr class="memdesc:a16971bd2ceb59b1cdb6bf556d31ffca7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the per-width transition masks: the fine-side transition band, on the refined-coarse grid.  <br /></td></tr>
 <tr class="separator:a16971bd2ceb59b1cdb6bf556d31ffca7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4da4e775ddafcb0f6fc17041cfaf3e1c" id="r_a4da4e775ddafcb0f6fc17041cfaf3e1c"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Container</a> &gt; </td></tr>
-<tr class="memitem:a4da4e775ddafcb0f6fc17041cfaf3e1c"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classEBAMRParticleMesh.html#a4da4e775ddafcb0f6fc17041cfaf3e1c">transferMaskParticlesTransition</a> (<a class="el" href="classTracerParticleSolver.html">Container</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_particles</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> <a class="el" href="classTracerParticleSolver.html">a_depositionType</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memitem:a4da4e775ddafcb0f6fc17041cfaf3e1c" id="r_a4da4e775ddafcb0f6fc17041cfaf3e1c"><td class="memTemplParams" colspan="2">template&lt;typename Container &gt; </td></tr>
+<tr class="memitem:a4da4e775ddafcb0f6fc17041cfaf3e1c"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classEBAMRParticleMesh.html#a4da4e775ddafcb0f6fc17041cfaf3e1c">transferMaskParticlesTransition</a> (Container &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_depositionType) const</td></tr>
 <tr class="memdesc:a4da4e775ddafcb0f6fc17041cfaf3e1c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Move the coarse-side transition particles into the container mask holder (using the FiCo mask).  <br /></td></tr>
 <tr class="separator:a4da4e775ddafcb0f6fc17041cfaf3e1c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad94e8663a7eedbb71b434f484124b1db" id="r_ad94e8663a7eedbb71b434f484124b1db"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="classTracerParticleSolver.html">int</a> NCOMP, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Container</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">PatchDeposit</a> &gt; </td></tr>
-<tr class="memitem:ad94e8663a7eedbb71b434f484124b1db"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classEBAMRParticleMesh.html#ad94e8663a7eedbb71b434f484124b1db">depositTransitionCore</a> (<a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_meshData</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Container</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_particles</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> <a class="el" href="classTracerParticleSolver.html">a_depositionType</a>, <a class="el" href="classTracerParticleSolver.html">PatchDeposit</a> <a class="el" href="classTracerParticleSolver.html">a_patch</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memitem:ad94e8663a7eedbb71b434f484124b1db" id="r_ad94e8663a7eedbb71b434f484124b1db"><td class="memTemplParams" colspan="2">template&lt;int NCOMP, typename Container , typename PatchDeposit &gt; </td></tr>
+<tr class="memitem:ad94e8663a7eedbb71b434f484124b1db"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classEBAMRParticleMesh.html#ad94e8663a7eedbb71b434f484124b1db">depositTransitionCore</a> (EBAMRCellData &amp;a_meshData, const Container &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_depositionType, PatchDeposit a_patch) const</td></tr>
 <tr class="memdesc:ad94e8663a7eedbb71b434f484124b1db"><td class="mdescLeft">&#160;</td><td class="mdescRight">The CoarseFineDeposition::Transition deposition algorithm.  <br /></td></tr>
 <tr class="separator:ad94e8663a7eedbb71b434f484124b1db"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
 <tr class="memitem:aada81b44c0d6c6fe72043f5e58aff8e2" id="r_aada81b44c0d6c6fe72043f5e58aff8e2"><td class="memItemLeft" align="right" valign="top"><a id="aada81b44c0d6c6fe72043f5e58aff8e2" name="aada81b44c0d6c6fe72043f5e58aff8e2"></a>
-<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBLevelGrid</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_eblgs</b></td></tr>
+Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_eblgs</b></td></tr>
 <tr class="memdesc:aada81b44c0d6c6fe72043f5e58aff8e2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-level EB level grids. <br /></td></tr>
 <tr class="separator:aada81b44c0d6c6fe72043f5e58aff8e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af7563d64c64ed92f4fdcf1eae9e1cddc" id="r_af7563d64c64ed92f4fdcf1eae9e1cddc"><td class="memItemLeft" align="right" valign="top"><a id="af7563d64c64ed92f4fdcf1eae9e1cddc" name="af7563d64c64ed92f4fdcf1eae9e1cddc"></a>
-<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">int</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_refRat</b></td></tr>
+Vector&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_refRat</b></td></tr>
 <tr class="memdesc:af7563d64c64ed92f4fdcf1eae9e1cddc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-level refinement ratios. <br /></td></tr>
 <tr class="separator:af7563d64c64ed92f4fdcf1eae9e1cddc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5dfa422111fdd0bab4cf9bd63c4bcb04" id="r_a5dfa422111fdd0bab4cf9bd63c4bcb04"><td class="memItemLeft" align="right" valign="top"><a id="a5dfa422111fdd0bab4cf9bd63c4bcb04" name="a5dfa422111fdd0bab4cf9bd63c4bcb04"></a>
-<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_dx</b></td></tr>
+Vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_dx</b></td></tr>
 <tr class="memdesc:a5dfa422111fdd0bab4cf9bd63c4bcb04"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-level grid spacing (isotropic). <br /></td></tr>
 <tr class="separator:a5dfa422111fdd0bab4cf9bd63c4bcb04"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7d3c4e172d2c9af84f4c928a870d409c" id="r_a7d3c4e172d2c9af84f4c928a870d409c"><td class="memItemLeft" align="right" valign="top"><a id="a7d3c4e172d2c9af84f4c928a870d409c" name="a7d3c4e172d2c9af84f4c928a870d409c"></a>
-<a class="el" href="classTracerParticleSolver.html">RealVect</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_probLo</b></td></tr>
+RealVect&#160;</td><td class="memItemRight" valign="bottom"><b>m_probLo</b></td></tr>
 <tr class="memdesc:a7d3c4e172d2c9af84f4c928a870d409c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lower-left corner of the physical domain. <br /></td></tr>
 <tr class="separator:a7d3c4e172d2c9af84f4c928a870d409c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a058299fef9258d9584c6ac8736bdb4b2" id="r_a058299fef9258d9584c6ac8736bdb4b2"><td class="memItemLeft" align="right" valign="top"><a id="a058299fef9258d9584c6ac8736bdb4b2" name="a058299fef9258d9584c6ac8736bdb4b2"></a>
-<a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_ghost</b></td></tr>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>m_ghost</b></td></tr>
 <tr class="memdesc:a058299fef9258d9584c6ac8736bdb4b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of ghost cells in the mesh data holders. <br /></td></tr>
 <tr class="separator:a058299fef9258d9584c6ac8736bdb4b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6f76849f380fb119794cfd7553ba1bdf" id="r_a6f76849f380fb119794cfd7553ba1bdf"><td class="memItemLeft" align="right" valign="top"><a id="a6f76849f380fb119794cfd7553ba1bdf" name="a6f76849f380fb119794cfd7553ba1bdf"></a>
-<a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_finestLevel</b></td></tr>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>m_finestLevel</b></td></tr>
 <tr class="memdesc:a6f76849f380fb119794cfd7553ba1bdf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finest AMR level index. <br /></td></tr>
 <tr class="separator:a6f76849f380fb119794cfd7553ba1bdf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9ae94c60cd4c3695ed3e9ee3677be9c3" id="r_a9ae94c60cd4c3695ed3e9ee3677be9c3"><td class="memItemLeft" align="right" valign="top"><a id="a9ae94c60cd4c3695ed3e9ee3677be9c3" name="a9ae94c60cd4c3695ed3e9ee3677be9c3"></a>
-<a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_isDefined</b></td></tr>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_isDefined</b></td></tr>
 <tr class="memdesc:a9ae94c60cd4c3695ed3e9ee3677be9c3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether <a class="el" href="classEBAMRParticleMesh.html#a3ce62438bb19cb2c2363b262643c9e59" title="Define the per-level leaves, coarse-fine mesh operators, and halo/transition masks.">define()</a> has been called. <br /></td></tr>
 <tr class="separator:a9ae94c60cd4c3695ed3e9ee3677be9c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa1199b02a9b4bbf52d883148877ff427" id="r_aa1199b02a9b4bbf52d883148877ff427"><td class="memItemLeft" align="right" valign="top"><a id="aa1199b02a9b4bbf52d883148877ff427" name="aa1199b02a9b4bbf52d883148877ff427"></a>
-<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LayoutData</a>&lt; <a class="el" href="classEBParticleMesh.html">EBParticleMesh</a> &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_ebParticleMesh</b></td></tr>
+Vector&lt; RefCountedPtr&lt; LayoutData&lt; <a class="el" href="classEBParticleMesh.html">EBParticleMesh</a> &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_ebParticleMesh</b></td></tr>
 <tr class="memdesc:aa1199b02a9b4bbf52d883148877ff427"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-level per-patch deposition/interpolation leaves. <br /></td></tr>
 <tr class="separator:aa1199b02a9b4bbf52d883148877ff427"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab72c43fc182e9c5fb6c0b15a607706f8" id="r_ab72c43fc182e9c5fb6c0b15a607706f8"><td class="memItemLeft" align="right" valign="top"><a id="ab72c43fc182e9c5fb6c0b15a607706f8" name="ab72c43fc182e9c5fb6c0b15a607706f8"></a>
-<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Copier</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_levelCopiers</b></td></tr>
+Vector&lt; Copier &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_levelCopiers</b></td></tr>
 <tr class="memdesc:ab72c43fc182e9c5fb6c0b15a607706f8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-level valid+ghost -&gt; valid Copiers (fold ghost-deposited mass into the owner patch). <br /></td></tr>
 <tr class="separator:ab72c43fc182e9c5fb6c0b15a607706f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5c5b9dff0fa365dbd0b5727b2c7388fb" id="r_a5c5b9dff0fa365dbd0b5727b2c7388fb"><td class="memItemLeft" align="right" valign="top"><a id="a5c5b9dff0fa365dbd0b5727b2c7388fb" name="a5c5b9dff0fa365dbd0b5727b2c7388fb"></a>
-<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classEBCoarseFineParticleMesh.html">EBCoarseFineParticleMesh</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_coarseFinePM</b></td></tr>
+Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBCoarseFineParticleMesh.html">EBCoarseFineParticleMesh</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_coarseFinePM</b></td></tr>
 <tr class="memdesc:a5c5b9dff0fa365dbd0b5727b2c7388fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-level coarse-fine mesh operators (null on level 0). <br /></td></tr>
 <tr class="separator:a5c5b9dff0fa365dbd0b5727b2c7388fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aef1ac124f7d261d7d87132d14ec231bb" id="r_aef1ac124f7d261d7d87132d14ec231bb"><td class="memItemLeft" align="right" valign="top"><a id="aef1ac124f7d261d7d87132d14ec231bb" name="aef1ac124f7d261d7d87132d14ec231bb"></a>
-<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LayoutData</a>&lt; <a class="el" href="classEBParticleMesh.html">EBParticleMesh</a> &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_ebParticleMeshFiCo</b></td></tr>
+Vector&lt; RefCountedPtr&lt; LayoutData&lt; <a class="el" href="classEBParticleMesh.html">EBParticleMesh</a> &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_ebParticleMeshFiCo</b></td></tr>
 <tr class="memdesc:aef1ac124f7d261d7d87132d14ec231bb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-level per-patch leaves on the refined-coarse (FiCo) grid (null on level 0). <br /></td></tr>
 <tr class="separator:aef1ac124f7d261d7d87132d14ec231bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5a2d9a81eaab5921f102d42c8124289f" id="r_a5a2d9a81eaab5921f102d42c8124289f"><td class="memItemLeft" align="right" valign="top"><a id="a5a2d9a81eaab5921f102d42c8124289f" name="a5a2d9a81eaab5921f102d42c8124289f"></a>
-<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::map</a>&lt; <a class="el" href="classTracerParticleSolver.html">int</a>, <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">BaseFab</a>&lt; <a class="el" href="classTracerParticleSolver.html">bool</a> &gt; &gt; &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_outerHaloMasks</b></td></tr>
+std::map&lt; int, Vector&lt; RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_outerHaloMasks</b></td></tr>
 <tr class="memdesc:a5a2d9a81eaab5921f102d42c8124289f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Outer-halo masks keyed by halo width: per-level coarse cells just outside the fine patch. <br /></td></tr>
 <tr class="separator:a5a2d9a81eaab5921f102d42c8124289f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaf49cb7c475601f8016d46db47baeb44" id="r_aaf49cb7c475601f8016d46db47baeb44"><td class="memItemLeft" align="right" valign="top"><a id="aaf49cb7c475601f8016d46db47baeb44" name="aaf49cb7c475601f8016d46db47baeb44"></a>
-<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::map</a>&lt; <a class="el" href="classTracerParticleSolver.html">int</a>, <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">BaseFab</a>&lt; <a class="el" href="classTracerParticleSolver.html">bool</a> &gt; &gt; &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_transitionMasks</b></td></tr>
+std::map&lt; int, Vector&lt; RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_transitionMasks</b></td></tr>
 <tr class="memdesc:aaf49cb7c475601f8016d46db47baeb44"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transition masks keyed by width: per-level fine-side transition band, on the refined-coarse grid. <br /></td></tr>
 <tr class="separator:aaf49cb7c475601f8016d46db47baeb44"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -259,39 +259,39 @@ Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> EBAMRParticleMesh::define </td>
+          <td class="memname">void EBAMRParticleMesh::define </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBLevelGrid</a> &gt; &gt; &amp;&#160;</td>
+          <td class="paramtype">const Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_eblgs</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">int</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const Vector&lt; int &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_refRat</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const Vector&lt; Real &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_dx</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;&#160;</td>
+          <td class="paramtype">const RealVect &amp;&#160;</td>
           <td class="paramname"><em>a_probLo</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype">const int&#160;</td>
           <td class="paramname"><em>a_ghost</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype">const int&#160;</td>
           <td class="paramname"><em>a_finestLevel</em>&#160;</td>
         </tr>
         <tr>
@@ -332,7 +332,7 @@ Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> EBAMRParticleMesh::defineOuterHaloMasks </td>
+          <td class="memname">void EBAMRParticleMesh::defineOuterHaloMasks </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -360,7 +360,7 @@ Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> EBAMRParticleMesh::defineTransitionMasks </td>
+          <td class="memname">void EBAMRParticleMesh::defineTransitionMasks </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -384,39 +384,39 @@ Protected Attributes</h2></td></tr>
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;auto... Members, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; </div>
+template&lt;auto... Members, typename P , typename Traits &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> EBAMRParticleMesh::deposit </td>
+          <td class="memname">void EBAMRParticleMesh::deposit </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype">EBAMRCellData &amp;&#160;</td>
           <td class="paramname"><em>a_meshData</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_particles</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a>&#160;</td>
+          <td class="paramtype">const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a>&#160;</td>
           <td class="paramname"><em>a_depositionType</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a>&#160;</td>
+          <td class="paramtype">const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a>&#160;</td>
           <td class="paramname"><em>a_coarseFineDeposition</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td>
+          <td class="paramtype">const bool&#160;</td>
           <td class="paramname"><em>a_forceIrregNGP</em>&#160;</td>
         </tr>
         <tr>
@@ -460,45 +460,45 @@ template&lt;auto... Members, <a class="el" href="classTracerParticleSolver.html"
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">CellGather</a> &gt; </div>
+template&lt;typename P , typename Traits , typename CellGather &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> EBAMRParticleMesh::depositGathered </td>
+          <td class="memname">void EBAMRParticleMesh::depositGathered </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype">EBAMRCellData &amp;&#160;</td>
           <td class="paramname"><em>a_meshData</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_particles</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a>&#160;</td>
+          <td class="paramtype">const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a>&#160;</td>
           <td class="paramname"><em>a_depositionType</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a>&#160;</td>
+          <td class="paramtype">const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a>&#160;</td>
           <td class="paramname"><em>a_coarseFineDeposition</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td>
+          <td class="paramtype">const bool&#160;</td>
           <td class="paramname"><em>a_forceIrregNGP</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">CellGather</a>&#160;</td>
+          <td class="paramtype">CellGather&#160;</td>
           <td class="paramname"><em>a_cellGather</em>&#160;</td>
         </tr>
         <tr>
@@ -519,7 +519,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
   <table class="tparams">
     <tr><td class="paramname">P</td><td>Payload type (deduced). </td></tr>
     <tr><td class="paramname">Traits</td><td>Column descriptor (deduced). </td></tr>
-    <tr><td class="paramname">CellGather</td><td>Callable (const ParticleSoA&lt;P, Traits&gt;&amp; a_leaf, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">std::size_t</a> a_i) -&gt; Real. </td></tr>
+    <tr><td class="paramname">CellGather</td><td>Callable (const ParticleSoA&lt;P, Traits&gt;&amp; a_leaf, std::size_t a_i) -&gt; Real. </td></tr>
   </table>
   </dd>
 </dl>
@@ -543,27 +543,27 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">int</a> NCOMP, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Container</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">PatchDeposit</a> &gt; </div>
+template&lt;int NCOMP, typename Container , typename PatchDeposit &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> EBAMRParticleMesh::depositHaloCore </td>
+          <td class="memname">void EBAMRParticleMesh::depositHaloCore </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype">EBAMRCellData &amp;&#160;</td>
           <td class="paramname"><em>a_meshData</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Container</a> &amp;&#160;</td>
+          <td class="paramtype">const Container &amp;&#160;</td>
           <td class="paramname"><em>a_particles</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">PatchDeposit</a>&#160;</td>
+          <td class="paramtype">PatchDeposit&#160;</td>
           <td class="paramname"><em>a_patchDeposit</em>&#160;</td>
         </tr>
         <tr>
@@ -605,33 +605,33 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">int</a> NCOMP, <
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">int</a> NCOMP, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Container</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">PatchDeposit</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">PatchDepositNGP</a> &gt; </div>
+template&lt;int NCOMP, typename Container , typename PatchDeposit , typename PatchDepositNGP &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> EBAMRParticleMesh::depositHaloNGPCore </td>
+          <td class="memname">void EBAMRParticleMesh::depositHaloNGPCore </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype">EBAMRCellData &amp;&#160;</td>
           <td class="paramname"><em>a_meshData</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Container</a> &amp;&#160;</td>
+          <td class="paramtype">const Container &amp;&#160;</td>
           <td class="paramname"><em>a_particles</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">PatchDeposit</a>&#160;</td>
+          <td class="paramtype">PatchDeposit&#160;</td>
           <td class="paramname"><em>a_patch</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">PatchDepositNGP</a>&#160;</td>
+          <td class="paramtype">PatchDepositNGP&#160;</td>
           <td class="paramname"><em>a_patchNGP</em>&#160;</td>
         </tr>
         <tr>
@@ -675,33 +675,33 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">int</a> NCOMP, <
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Container</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">PatchDeposit</a> &gt; </div>
+template&lt;typename Container , typename PatchDeposit &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> EBAMRParticleMesh::depositInterpCore </td>
+          <td class="memname">void EBAMRParticleMesh::depositInterpCore </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype">EBAMRCellData &amp;&#160;</td>
           <td class="paramname"><em>a_meshData</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Container</a> &amp;&#160;</td>
+          <td class="paramtype">const Container &amp;&#160;</td>
           <td class="paramname"><em>a_particles</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype">const int&#160;</td>
           <td class="paramname"><em>a_numComp</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">PatchDeposit</a>&#160;</td>
+          <td class="paramtype">PatchDeposit&#160;</td>
           <td class="paramname"><em>a_patchDeposit</em>&#160;</td>
         </tr>
         <tr>
@@ -743,33 +743,33 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">int</a> NCOMP, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Container</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">PatchDeposit</a> &gt; </div>
+template&lt;int NCOMP, typename Container , typename PatchDeposit &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> EBAMRParticleMesh::depositTransitionCore </td>
+          <td class="memname">void EBAMRParticleMesh::depositTransitionCore </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype">EBAMRCellData &amp;&#160;</td>
           <td class="paramname"><em>a_meshData</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Container</a> &amp;&#160;</td>
+          <td class="paramtype">const Container &amp;&#160;</td>
           <td class="paramname"><em>a_particles</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a>&#160;</td>
+          <td class="paramtype">const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a>&#160;</td>
           <td class="paramname"><em>a_depositionType</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">PatchDeposit</a>&#160;</td>
+          <td class="paramtype">PatchDeposit&#160;</td>
           <td class="paramname"><em>a_patch</em>&#160;</td>
         </tr>
         <tr>
@@ -812,39 +812,39 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">int</a> NCOMP, <
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; </div>
+template&lt;typename P , typename Traits &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> EBAMRParticleMesh::depositWeight </td>
+          <td class="memname">void EBAMRParticleMesh::depositWeight </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype">EBAMRCellData &amp;&#160;</td>
           <td class="paramname"><em>a_meshData</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_particles</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a>&#160;</td>
+          <td class="paramtype">const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a>&#160;</td>
           <td class="paramname"><em>a_depositionType</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a>&#160;</td>
+          <td class="paramtype">const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a>&#160;</td>
           <td class="paramname"><em>a_coarseFineDeposition</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td>
+          <td class="paramtype">const bool&#160;</td>
           <td class="paramname"><em>a_forceIrregNGP</em>&#160;</td>
         </tr>
         <tr>
@@ -891,15 +891,15 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">int</a> EBAMRParticleMesh::getTransitionMaskWidth </td>
+          <td class="memname">int EBAMRParticleMesh::getTransitionMaskWidth </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a>&#160;</td>
+          <td class="paramtype">const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a>&#160;</td>
           <td class="paramname"><em>a_depositionType</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype">const int&#160;</td>
           <td class="paramname"><em>a_refRat</em>&#160;</td>
         </tr>
         <tr>
@@ -933,33 +933,33 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;auto... Members, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; </div>
+template&lt;auto... Members, typename P , typename Traits &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> EBAMRParticleMesh::interpolate </td>
+          <td class="memname">void EBAMRParticleMesh::interpolate </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_particles</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype">const EBAMRCellData &amp;&#160;</td>
           <td class="paramname"><em>a_meshData</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a>&#160;</td>
+          <td class="paramtype">const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a>&#160;</td>
           <td class="paramname"><em>a_interpType</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td>
+          <td class="paramtype">const bool&#160;</td>
           <td class="paramname"><em>a_forceIrregNGP</em>&#160;</td>
         </tr>
         <tr>
@@ -1002,33 +1002,33 @@ template&lt;auto... Members, <a class="el" href="classTracerParticleSolver.html"
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; </div>
+template&lt;typename P , typename Traits &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> EBAMRParticleMesh::interpolateWeight </td>
+          <td class="memname">void EBAMRParticleMesh::interpolateWeight </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_particles</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype">const EBAMRCellData &amp;&#160;</td>
           <td class="paramname"><em>a_meshData</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a>&#160;</td>
+          <td class="paramtype">const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a>&#160;</td>
           <td class="paramname"><em>a_interpType</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td>
+          <td class="paramtype">const bool&#160;</td>
           <td class="paramname"><em>a_forceIrregNGP</em>&#160;</td>
         </tr>
         <tr>
@@ -1076,7 +1076,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
         <tr>
           <td class="memname"><a class="el" href="classEBAMRParticleMesh.html">EBAMRParticleMesh</a> &amp; EBAMRParticleMesh::operator= </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEBAMRParticleMesh.html">EBAMRParticleMesh</a> &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="classEBAMRParticleMesh.html">EBAMRParticleMesh</a> &amp;&#160;</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
         </tr>
@@ -1099,21 +1099,21 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Container</a> &gt; </div>
+template&lt;typename Container &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> EBAMRParticleMesh::transferMaskParticlesTransition </td>
+          <td class="memname">void EBAMRParticleMesh::transferMaskParticlesTransition </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">Container</a> &amp;&#160;</td>
+          <td class="paramtype">Container &amp;&#160;</td>
           <td class="paramname"><em>a_particles</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a>&#160;</td>
+          <td class="paramtype">const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a>&#160;</td>
           <td class="paramname"><em>a_depositionType</em>&#160;</td>
         </tr>
         <tr>

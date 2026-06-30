@@ -87,10 +87,10 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a554dcb29bb180400d8d3f7a9c4db57a5" id="r_a554dcb29bb180400d8d3f7a9c4db57a5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">RealVect</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacePolyUtils.html#a554dcb29bb180400d8d3f7a9c4db57a5">brentRootFinder</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; BaseIF &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_impFunc</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_point1</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_point2</a>)</td></tr>
+<tr class="memitem:a554dcb29bb180400d8d3f7a9c4db57a5" id="r_a554dcb29bb180400d8d3f7a9c4db57a5"><td class="memItemLeft" align="right" valign="top">RealVect&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacePolyUtils.html#a554dcb29bb180400d8d3f7a9c4db57a5">brentRootFinder</a> (const RefCountedPtr&lt; BaseIF &gt; &amp;a_impFunc, const RealVect &amp;a_point1, const RealVect &amp;a_point2)</td></tr>
 <tr class="memdesc:a554dcb29bb180400d8d3f7a9c4db57a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the root of a function between two points. This is a 1D problem along the line.  <br /></td></tr>
 <tr class="separator:a554dcb29bb180400d8d3f7a9c4db57a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a54737623b93191fb61fc6962e181f912" id="r_a54737623b93191fb61fc6962e181f912"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacePolyUtils.html#a54737623b93191fb61fc6962e181f912">brentSolve</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_point1</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_point2</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">x</a>)&gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_func</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a54737623b93191fb61fc6962e181f912" id="r_a54737623b93191fb61fc6962e181f912"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacePolyUtils.html#a54737623b93191fb61fc6962e181f912">brentSolve</a> (const Real a_point1, const Real a_point2, const std::function&lt; Real(const Real x)&gt; &amp;a_func) noexcept</td></tr>
 <tr class="memdesc:a54737623b93191fb61fc6962e181f912"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the root of a function between two points. This is a 1D problem.  <br /></td></tr>
 <tr class="separator:a54737623b93191fb61fc6962e181f912"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -104,21 +104,21 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">RealVect</a> PolyUtils::brentRootFinder </td>
+          <td class="memname">RealVect PolyUtils::brentRootFinder </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; BaseIF &gt; &amp;&#160;</td>
+          <td class="paramtype">const RefCountedPtr&lt; BaseIF &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_impFunc</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;&#160;</td>
+          <td class="paramtype">const RealVect &amp;&#160;</td>
           <td class="paramname"><em>a_point1</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;&#160;</td>
+          <td class="paramtype">const RealVect &amp;&#160;</td>
           <td class="paramname"><em>a_point2</em>&#160;</td>
         </tr>
         <tr>
@@ -138,7 +138,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section note"><dt>Note</dt><dd>The root MUST be bracketed, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">i.e</a>. f(x1)*f(x2) &lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">0.0</a>. Anything else is an error. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>The root MUST be bracketed, i.e. f(x1)*f(x2) &lt; 0.0. Anything else is an error. </dd></dl>
 <dl class="section return"><dt>Returns</dt><dd>Return value </dd></dl>
 
 </div>
@@ -153,21 +153,21 @@ Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">Real</a> PolyUtils::brentSolve </td>
+          <td class="memname">Real PolyUtils::brentSolve </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td>
+          <td class="paramtype">const Real&#160;</td>
           <td class="paramname"><em>a_point1</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td>
+          <td class="paramtype">const Real&#160;</td>
           <td class="paramname"><em>a_point2</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">x</a>)&gt; &amp;&#160;</td>
+          <td class="paramtype">const std::function&lt; Real(const Real x)&gt; &amp;&#160;</td>
           <td class="paramname"><em>a_func</em>&#160;</td>
         </tr>
         <tr>

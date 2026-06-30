@@ -95,16 +95,16 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
 Public Types</h2></td></tr>
 <tr class="memitem:a9eadd5600a143895f24db4f71981020a" id="r_a9eadd5600a143895f24db4f71981020a"><td class="memItemLeft" align="right" valign="top"><a id="a9eadd5600a143895f24db4f71981020a" name="a9eadd5600a143895f24db4f71981020a"></a>
-<a class="el" href="classTracerParticleSolver.html">using</a>&#160;</td><td class="memItemRight" valign="bottom"><b>H5Tuple</b> = <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::remove_cv_t</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::remove_reference_t</a>&lt; <a class="el" href="classTracerParticleSolver.html">decltype</a>(Traits::h5Columns)&gt; &gt;</td></tr>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>H5Tuple</b> = std::remove_cv_t&lt; std::remove_reference_t&lt; decltype(Traits::h5Columns)&gt; &gt;</td></tr>
 <tr class="memdesc:a9eadd5600a143895f24db4f71981020a"><td class="mdescLeft">&#160;</td><td class="mdescRight">The declared h5Columns tuple type. <br /></td></tr>
 <tr class="separator:a9eadd5600a143895f24db4f71981020a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2178085175b178ea1a4e0abc99b0f0cc" id="r_a2178085175b178ea1a4e0abc99b0f0cc"><td class="memItemLeft" align="right" valign="top"><a id="a2178085175b178ea1a4e0abc99b0f0cc" name="a2178085175b178ea1a4e0abc99b0f0cc"></a>
-<a class="el" href="classTracerParticleSolver.html">using</a>&#160;</td><td class="memItemRight" valign="bottom"><b>Type</b> = <a class="el" href="classTracerParticleSolver.html">decltype</a>(<a class="el" href="CD__ParticleSoA_8H.html#adfaa0feb2fd1fd444566951974b306c2">deriveH5Seq</a>&lt; <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;(<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::make_index_sequence</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::tuple_size</a>&lt; <a class="el" href="structdetail_1_1H5ColumnSubset_3_01Traits_00_01Fallback_00_01Void_3_01decltype_07Traits_1_1h5Columns_08_4_01_4.html#a9eadd5600a143895f24db4f71981020a">H5Tuple</a> &gt;::value &gt;{}))</td></tr>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>Type</b> = decltype(<a class="el" href="CD__ParticleSoA_8H.html#adfaa0feb2fd1fd444566951974b306c2">deriveH5Seq</a>&lt; Traits &gt;(std::make_index_sequence&lt; std::tuple_size&lt; <a class="el" href="structdetail_1_1H5ColumnSubset_3_01Traits_00_01Fallback_00_01Void_3_01decltype_07Traits_1_1h5Columns_08_4_01_4.html#a9eadd5600a143895f24db4f71981020a">H5Tuple</a> &gt;::value &gt;{}))</td></tr>
 <tr class="memdesc:a2178085175b178ea1a4e0abc99b0f0cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Derived payload-column index subset. <br /></td></tr>
 <tr class="separator:a2178085175b178ea1a4e0abc99b0f0cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a>, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Fallback</a>&gt;<br />
+<div class="textblock"><div class="compoundTemplParams">template&lt;typename Traits, typename Fallback&gt;<br />
 struct detail::H5ColumnSubset&lt; Traits, Fallback, Void&lt; decltype(Traits::h5Columns)&gt; &gt;</div><p>Specialization selecting the declared HDF5 payload subset when <code>Traits::h5Columns</code> exists. </p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">

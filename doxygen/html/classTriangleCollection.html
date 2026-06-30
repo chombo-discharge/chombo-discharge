@@ -94,51 +94,51 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
 Public Types</h2></td></tr>
 <tr class="memitem:a431a440c6d3b678a215b120d74cd104d" id="r_a431a440c6d3b678a215b120d74cd104d"><td class="memItemLeft" align="right" valign="top"><a id="a431a440c6d3b678a215b120d74cd104d" name="a431a440c6d3b678a215b120d74cd104d"></a>
-<a class="el" href="classTracerParticleSolver.html">using</a>&#160;</td><td class="memItemRight" valign="bottom"><b>Vec3</b> = <a class="el" href="classTriangle.html#a5b560671d6c13da47a96a30044447801">Triangle::Vec3</a></td></tr>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>Vec3</b> = <a class="el" href="classTriangle.html#a5b560671d6c13da47a96a30044447801">Triangle::Vec3</a></td></tr>
 <tr class="memdesc:a431a440c6d3b678a215b120d74cd104d"><td class="mdescLeft">&#160;</td><td class="mdescRight">3D vector type, re-exported from <a class="el" href="classTriangle.html" title="Class that represents a single triangle together with associated metadata on the vertices (one float ...">Triangle</a> for convenience. <br /></td></tr>
 <tr class="separator:a431a440c6d3b678a215b120d74cd104d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0ff4c4a67cc7f532d28dacca0801a250" id="r_a0ff4c4a67cc7f532d28dacca0801a250"><td class="memItemLeft" align="right" valign="top"><a id="a0ff4c4a67cc7f532d28dacca0801a250" name="a0ff4c4a67cc7f532d28dacca0801a250"></a>
-<a class="el" href="classTracerParticleSolver.html">using</a>&#160;</td><td class="memItemRight" valign="bottom"><b>BV</b> = EBGeometry::BoundingVolumes::AABBT&lt; <a class="el" href="classTracerParticleSolver.html">Real</a> &gt;</td></tr>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>BV</b> = EBGeometry::BoundingVolumes::AABBT&lt; Real &gt;</td></tr>
 <tr class="memdesc:a0ff4c4a67cc7f532d28dacca0801a250"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bounding volume type. <br /></td></tr>
 <tr class="separator:a0ff4c4a67cc7f532d28dacca0801a250"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:aad2a0f2a00836af4b857d68b45a5f14a" id="r_aad2a0f2a00836af4b857d68b45a5f14a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTriangleCollection.html#aad2a0f2a00836af4b857d68b45a5f14a">TriangleCollection</a> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:aad2a0f2a00836af4b857d68b45a5f14a" id="r_aad2a0f2a00836af4b857d68b45a5f14a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTriangleCollection.html#aad2a0f2a00836af4b857d68b45a5f14a">TriangleCollection</a> () noexcept</td></tr>
 <tr class="memdesc:aad2a0f2a00836af4b857d68b45a5f14a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor.  <br /></td></tr>
 <tr class="separator:aad2a0f2a00836af4b857d68b45a5f14a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af84389532d447a554080062ccecc4b81" id="r_af84389532d447a554080062ccecc4b81"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTriangleCollection.html#af84389532d447a554080062ccecc4b81">TriangleCollection</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::shared_ptr</a>&lt; <a class="el" href="classTriangle.html">Triangle</a> &gt; &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_triangles</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:af84389532d447a554080062ccecc4b81" id="r_af84389532d447a554080062ccecc4b81"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTriangleCollection.html#af84389532d447a554080062ccecc4b81">TriangleCollection</a> (const std::vector&lt; std::shared_ptr&lt; <a class="el" href="classTriangle.html">Triangle</a> &gt; &gt; &amp;a_triangles) noexcept</td></tr>
 <tr class="memdesc:af84389532d447a554080062ccecc4b81"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor. Takes the input triangles and stores them in a BVH-tree.  <br /></td></tr>
 <tr class="separator:af84389532d447a554080062ccecc4b81"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a088c5283f0b816083fc42c1a5ab31d98" id="r_a088c5283f0b816083fc42c1a5ab31d98"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTriangleCollection.html#a088c5283f0b816083fc42c1a5ab31d98">TriangleCollection</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_filename</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_vertexDataIdentifier</a>)</td></tr>
+<tr class="memitem:a088c5283f0b816083fc42c1a5ab31d98" id="r_a088c5283f0b816083fc42c1a5ab31d98"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTriangleCollection.html#a088c5283f0b816083fc42c1a5ab31d98">TriangleCollection</a> (const std::string &amp;a_filename, const std::string &amp;a_vertexDataIdentifier)</td></tr>
 <tr class="memdesc:a088c5283f0b816083fc42c1a5ab31d98"><td class="mdescLeft">&#160;</td><td class="mdescRight">File-reading constructor. Reads a PLY or VTK mesh file and builds the BVH.  <br /></td></tr>
 <tr class="separator:a088c5283f0b816083fc42c1a5ab31d98"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abda8aa951c63ebdeddac3047f6809963" id="r_abda8aa951c63ebdeddac3047f6809963"><td class="memItemLeft" align="right" valign="top"><a id="abda8aa951c63ebdeddac3047f6809963" name="abda8aa951c63ebdeddac3047f6809963"></a>
-<a class="el" href="classTracerParticleSolver.html">virtual</a>&#160;</td><td class="memItemRight" valign="bottom"><b>~TriangleCollection</b> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~TriangleCollection</b> () noexcept</td></tr>
 <tr class="memdesc:abda8aa951c63ebdeddac3047f6809963"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor (does nothing). <br /></td></tr>
 <tr class="separator:abda8aa951c63ebdeddac3047f6809963"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8bd7b91a436f88d9ad3166cb506bec4d" id="r_a8bd7b91a436f88d9ad3166cb506bec4d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTriangleCollection.html#a8bd7b91a436f88d9ad3166cb506bec4d">define</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::shared_ptr</a>&lt; <a class="el" href="classTriangle.html">Triangle</a> &gt; &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_triangles</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a8bd7b91a436f88d9ad3166cb506bec4d" id="r_a8bd7b91a436f88d9ad3166cb506bec4d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTriangleCollection.html#a8bd7b91a436f88d9ad3166cb506bec4d">define</a> (const std::vector&lt; std::shared_ptr&lt; <a class="el" href="classTriangle.html">Triangle</a> &gt; &gt; &amp;a_triangles) noexcept</td></tr>
 <tr class="memdesc:a8bd7b91a436f88d9ad3166cb506bec4d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the BVH tree from a set of triangles.  <br /></td></tr>
 <tr class="separator:a8bd7b91a436f88d9ad3166cb506bec4d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a779bcdf8b39439d28f8f5f7375bd1bb8" id="r_a779bcdf8b39439d28f8f5f7375bd1bb8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::shared_ptr</a>&lt; <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTriangle.html">Triangle</a> &gt;, <a class="el" href="classTracerParticleSolver.html">Real</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTriangleCollection.html#a779bcdf8b39439d28f8f5f7375bd1bb8">getClosestTriangles</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTriangleCollection.html#a431a440c6d3b678a215b120d74cd104d">Vec3</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_point</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a779bcdf8b39439d28f8f5f7375bd1bb8" id="r_a779bcdf8b39439d28f8f5f7375bd1bb8"><td class="memItemLeft" align="right" valign="top">virtual std::vector&lt; std::pair&lt; std::shared_ptr&lt; const <a class="el" href="classTriangle.html">Triangle</a> &gt;, Real &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTriangleCollection.html#a779bcdf8b39439d28f8f5f7375bd1bb8">getClosestTriangles</a> (const <a class="el" href="classTriangleCollection.html#a431a440c6d3b678a215b120d74cd104d">Vec3</a> &amp;a_point) const noexcept</td></tr>
 <tr class="memdesc:a779bcdf8b39439d28f8f5f7375bd1bb8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hierarchical BVH search that returns candidate closest triangles to a query point.  <br /></td></tr>
 <tr class="separator:a779bcdf8b39439d28f8f5f7375bd1bb8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
 <tr class="memitem:a98297b7febe918ac49520ef2454f9011" id="r_a98297b7febe918ac49520ef2454f9011"><td class="memItemLeft" align="right" valign="top"><a id="a98297b7febe918ac49520ef2454f9011" name="a98297b7febe918ac49520ef2454f9011"></a>
-<a class="el" href="classTracerParticleSolver.html">static</a> <a class="el" href="classTracerParticleSolver.html">constexpr</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><b>K</b> = 4</td></tr>
+static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>K</b> = 4</td></tr>
 <tr class="memdesc:a98297b7febe918ac49520ef2454f9011"><td class="mdescLeft">&#160;</td><td class="mdescRight">Branching factor for BVH tree. <br /></td></tr>
 <tr class="separator:a98297b7febe918ac49520ef2454f9011"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
 <tr class="memitem:a7aa4cba43dfe8f497b01c323237fcb00" id="r_a7aa4cba43dfe8f497b01c323237fcb00"><td class="memItemLeft" align="right" valign="top"><a id="a7aa4cba43dfe8f497b01c323237fcb00" name="a7aa4cba43dfe8f497b01c323237fcb00"></a>
-<a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_isDefined</b> = <a class="el" href="classTracerParticleSolver.html">false</a></td></tr>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_isDefined</b> = false</td></tr>
 <tr class="memdesc:a7aa4cba43dfe8f497b01c323237fcb00"><td class="mdescLeft">&#160;</td><td class="mdescRight">Is defined or not. <br /></td></tr>
 <tr class="separator:a7aa4cba43dfe8f497b01c323237fcb00"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad9eb200fb6cb43a193df7fd5d299a149" id="r_ad9eb200fb6cb43a193df7fd5d299a149"><td class="memItemLeft" align="right" valign="top"><a id="ad9eb200fb6cb43a193df7fd5d299a149" name="ad9eb200fb6cb43a193df7fd5d299a149"></a>
-<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::shared_ptr</a>&lt; EBGeometry::BVH::LinearBVH&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>, <a class="el" href="classTriangle.html">Triangle</a>, <a class="el" href="classTriangleCollection.html#a0ff4c4a67cc7f532d28dacca0801a250">BV</a>, <a class="el" href="classTriangleCollection.html#a98297b7febe918ac49520ef2454f9011">K</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_bvh</b></td></tr>
+std::shared_ptr&lt; EBGeometry::BVH::LinearBVH&lt; Real, <a class="el" href="classTriangle.html">Triangle</a>, <a class="el" href="classTriangleCollection.html#a0ff4c4a67cc7f532d28dacca0801a250">BV</a>, <a class="el" href="classTriangleCollection.html#a98297b7febe918ac49520ef2454f9011">K</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_bvh</b></td></tr>
 <tr class="memdesc:ad9eb200fb6cb43a193df7fd5d299a149"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classTriangle.html" title="Class that represents a single triangle together with associated metadata on the vertices (one float ...">Triangle</a> collection &ndash; stored in a BVH-tree for faster lookup. <br /></td></tr>
 <tr class="separator:ad9eb200fb6cb43a193df7fd5d299a149"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -151,7 +151,7 @@ Protected Attributes</h2></td></tr>
 </ol>
 <p><a class="el" href="classTriangle.html#a828045d94c3f50443bc8d17bf886218b" title="Interpolate vertex data at a point using barycentric coordinates or IDW fallback.">Triangle::interpolate()</a> uses two different strategies depending on where the query point falls:</p><ul>
 <li><b>Inside the triangle</b>: barycentric interpolation via area ratios. Weights u, v, w satisfy u + v + w = 1 and lie in [0, 1], so the result is a convex combination of the vertex values.</li>
-<li><b>Outside the triangle</b>: inverse-distance weighting (IDW, Shepard power = 1) over the two nearest vertices. If d_i and d_j are the distances to the two closest vertices, the weights are w_i = d_j/(d_i+d_j) and w_j = d_i/(d_i+d_j). These always sum to one and lie in [0, 1], so the interpolated value is guaranteed to stay within the range of the vertex data. When d_i = d_j = 0, equal weights of <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">0.5</a> are used to avoid division by zero.</li>
+<li><b>Outside the triangle</b>: inverse-distance weighting (IDW, Shepard power = 1) over the two nearest vertices. If d_i and d_j are the distances to the two closest vertices, the weights are w_i = d_j/(d_i+d_j) and w_j = d_i/(d_i+d_j). These always sum to one and lie in [0, 1], so the interpolated value is guaranteed to stay within the range of the vertex data. When d_i = d_j = 0, equal weights of 0.5 are used to avoid division by zero.</li>
 </ul>
 <p>The outside-triangle path is therefore a bounded, range-preserving extrapolation rather than an unconstrained linear extrapolation. Degenerate triangles (zero area) always return zero. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
@@ -195,7 +195,7 @@ Protected Attributes</h2></td></tr>
         <tr>
           <td class="memname">TriangleCollection::TriangleCollection </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::shared_ptr</a>&lt; <a class="el" href="classTriangle.html">Triangle</a> &gt; &gt; &amp;&#160;</td>
+          <td class="paramtype">const std::vector&lt; std::shared_ptr&lt; <a class="el" href="classTriangle.html">Triangle</a> &gt; &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_triangles</em></td><td>)</td>
           <td></td>
         </tr>
@@ -226,13 +226,13 @@ Protected Attributes</h2></td></tr>
         <tr>
           <td class="memname">TriangleCollection::TriangleCollection </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;&#160;</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
           <td class="paramname"><em>a_filename</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;&#160;</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
           <td class="paramname"><em>a_vertexDataIdentifier</em>&#160;</td>
         </tr>
         <tr>
@@ -266,9 +266,9 @@ a_vertexDataIdentifier)). Issues a fatal error for unsupported file types and a 
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> TriangleCollection::define </td>
+          <td class="memname">void TriangleCollection::define </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::shared_ptr</a>&lt; <a class="el" href="classTriangle.html">Triangle</a> &gt; &gt; &amp;&#160;</td>
+          <td class="paramtype">const std::vector&lt; std::shared_ptr&lt; <a class="el" href="classTriangle.html">Triangle</a> &gt; &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_triangles</em></td><td>)</td>
           <td></td>
         </tr>
@@ -300,9 +300,9 @@ a_vertexDataIdentifier)). Issues a fatal error for unsupported file types and a 
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::shared_ptr</a>&lt; <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTriangle.html">Triangle</a> &gt;, <a class="el" href="classTracerParticleSolver.html">Real</a> &gt; &gt; TriangleCollection::getClosestTriangles </td>
+          <td class="memname">std::vector&lt; std::pair&lt; std::shared_ptr&lt; const <a class="el" href="classTriangle.html">Triangle</a> &gt;, Real &gt; &gt; TriangleCollection::getClosestTriangles </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTriangleCollection.html#a431a440c6d3b678a215b120d74cd104d">Vec3</a> &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="classTriangleCollection.html#a431a440c6d3b678a215b120d74cd104d">Vec3</a> &amp;&#160;</td>
           <td class="paramname"><em>a_point</em></td><td>)</td>
           <td> const</td>
         </tr>

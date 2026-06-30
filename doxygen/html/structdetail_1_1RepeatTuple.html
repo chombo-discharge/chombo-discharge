@@ -88,7 +88,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">std::tuple</a> of N copies of T (used to build the SpaceDim position columns).  
+<p>std::tuple of N copies of T (used to build the SpaceDim position columns).  
  <a href="structdetail_1_1RepeatTuple.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="CD__ParticleSoA_8H_source.html">CD_ParticleSoA.H</a>&gt;</code></p>
@@ -96,25 +96,25 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
 Public Types</h2></td></tr>
 <tr class="memitem:a51c105d7be0a5e37aad5005d90802827" id="r_a51c105d7be0a5e37aad5005d90802827"><td class="memTemplParams" colspan="2"><a id="a51c105d7be0a5e37aad5005d90802827" name="a51c105d7be0a5e37aad5005d90802827"></a>
-template&lt;<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::size_t</a> &gt; </td></tr>
-<tr class="memitem:a51c105d7be0a5e37aad5005d90802827"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">using</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><b>Always</b> = <a class="el" href="classTracerParticleSolver.html">T</a></td></tr>
+template&lt;std::size_t &gt; </td></tr>
+<tr class="memitem:a51c105d7be0a5e37aad5005d90802827"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>Always</b> = T</td></tr>
 <tr class="memdesc:a51c105d7be0a5e37aad5005d90802827"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper alias that maps any index to T. <br /></td></tr>
 <tr class="separator:a51c105d7be0a5e37aad5005d90802827"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1c60dad535a2b6569197c17b4c86be66" id="r_a1c60dad535a2b6569197c17b4c86be66"><td class="memItemLeft" align="right" valign="top"><a id="a1c60dad535a2b6569197c17b4c86be66" name="a1c60dad535a2b6569197c17b4c86be66"></a>
-<a class="el" href="classTracerParticleSolver.html">using</a>&#160;</td><td class="memItemRight" valign="bottom"><b>Type</b> = <a class="el" href="classTracerParticleSolver.html">decltype</a>(<a class="el" href="structdetail_1_1RepeatTuple.html#a19ecb9c5851ba3011c8056b47552790b">make</a>(<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::make_index_sequence</a>&lt; <a class="el" href="classTracerParticleSolver.html">N</a> &gt;{}))</td></tr>
-<tr class="memdesc:a1c60dad535a2b6569197c17b4c86be66"><td class="mdescLeft">&#160;</td><td class="mdescRight">The resulting <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">std::tuple</a> type. <br /></td></tr>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>Type</b> = decltype(<a class="el" href="structdetail_1_1RepeatTuple.html#a19ecb9c5851ba3011c8056b47552790b">make</a>(std::make_index_sequence&lt; N &gt;{}))</td></tr>
+<tr class="memdesc:a1c60dad535a2b6569197c17b4c86be66"><td class="mdescLeft">&#160;</td><td class="mdescRight">The resulting std::tuple type. <br /></td></tr>
 <tr class="separator:a1c60dad535a2b6569197c17b4c86be66"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a19ecb9c5851ba3011c8056b47552790b" id="r_a19ecb9c5851ba3011c8056b47552790b"><td class="memTemplParams" colspan="2">template&lt;std::size_t... I&gt; </td></tr>
-<tr class="memitem:a19ecb9c5851ba3011c8056b47552790b"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">static</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::tuple</a>&lt; <a class="el" href="structdetail_1_1RepeatTuple.html#a51c105d7be0a5e37aad5005d90802827">Always</a>&lt; <a class="el" href="classTracerParticleSolver.html">I</a> &gt;... &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="structdetail_1_1RepeatTuple.html#a19ecb9c5851ba3011c8056b47552790b">make</a> (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::index_sequence</a>&lt; I... &gt;)</td></tr>
+<tr class="memitem:a19ecb9c5851ba3011c8056b47552790b"><td class="memTemplItemLeft" align="right" valign="top">static std::tuple&lt; <a class="el" href="structdetail_1_1RepeatTuple.html#a51c105d7be0a5e37aad5005d90802827">Always</a>&lt; I &gt;... &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="structdetail_1_1RepeatTuple.html#a19ecb9c5851ba3011c8056b47552790b">make</a> (std::index_sequence&lt; I... &gt;)</td></tr>
 <tr class="memdesc:a19ecb9c5851ba3011c8056b47552790b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deduce the repeated-tuple type from an index sequence (declaration only).  <br /></td></tr>
 <tr class="separator:a19ecb9c5851ba3011c8056b47552790b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">T</a>, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::size_t</a> N&gt;<br />
-struct detail::RepeatTuple&lt; T, N &gt;</div><p><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">std::tuple</a> of N copies of T (used to build the SpaceDim position columns). </p>
+<div class="textblock"><div class="compoundTemplParams">template&lt;typename T, std::size_t N&gt;<br />
+struct detail::RepeatTuple&lt; T, N &gt;</div><p>std::tuple of N copies of T (used to build the SpaceDim position columns). </p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">T</td><td>Element type to repeat. </td></tr>
@@ -129,7 +129,7 @@ struct detail::RepeatTuple&lt; T, N &gt;</div><p><a class="el" href="classTracer
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">T</a> , <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::size_t</a> N&gt; </div>
+template&lt;typename T , std::size_t N&gt; </div>
 <div class="memtemplate">
 template&lt;std::size_t... I&gt; </div>
 <table class="mlabels">
@@ -137,9 +137,9 @@ template&lt;std::size_t... I&gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">static</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::tuple</a>&lt; <a class="el" href="structdetail_1_1RepeatTuple.html#a51c105d7be0a5e37aad5005d90802827">Always</a>&lt; <a class="el" href="classTracerParticleSolver.html">I</a> &gt;... &gt; <a class="el" href="structdetail_1_1RepeatTuple.html">detail::RepeatTuple</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a>, <a class="el" href="classTracerParticleSolver.html">N</a> &gt;::make </td>
+          <td class="memname">static std::tuple&lt; <a class="el" href="structdetail_1_1RepeatTuple.html#a51c105d7be0a5e37aad5005d90802827">Always</a>&lt; I &gt;... &gt; <a class="el" href="structdetail_1_1RepeatTuple.html">detail::RepeatTuple</a>&lt; T, N &gt;::make </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::index_sequence</a>&lt; I... &gt;&#160;</td>
+          <td class="paramtype">std::index_sequence&lt; I... &gt;&#160;</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
         </tr>
@@ -158,7 +158,7 @@ template&lt;std::size_t... I&gt; </div>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">std::tuple</a> of N copies of T. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A std::tuple of N copies of T. </dd></dl>
 
 </div>
 </div>

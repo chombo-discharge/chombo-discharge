@@ -105,7 +105,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="foldopen" id="foldopen00021" data-start="{" data-end="}">
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno"><a class="line" href="classFieldSolverFactory.html#a2ac5e056f3c9446810cc877dfb276822">   21</a></span><a class="code hl_function" href="classFieldSolverFactory.html#a2ac5e056f3c9446810cc877dfb276822">FieldSolverFactory&lt;T&gt;::FieldSolverFactory</a>()</div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>{</div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>  <a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">CH_TIME</a>(<span class="stringliteral">&quot;FieldSolverFactory&lt;T&gt;::FieldSolverFactory()&quot;</span>);</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>  CH_TIME(<span class="stringliteral">&quot;FieldSolverFactory&lt;T&gt;::FieldSolverFactory()&quot;</span>);</div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>}</div>
 </div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
@@ -113,18 +113,18 @@ $(document).ready(function() { init_codefold(0); });
 <div class="foldopen" id="foldopen00027" data-start="{" data-end="}">
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno"><a class="line" href="classFieldSolverFactory.html#a89307d98dc389060b35a2a542071b08b">   27</a></span><a class="code hl_function" href="classFieldSolverFactory.html#a89307d98dc389060b35a2a542071b08b">FieldSolverFactory&lt;T&gt;::~FieldSolverFactory</a>()</div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>{</div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>  <a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">CH_TIME</a>(<span class="stringliteral">&quot;FieldSolverFactory&lt;T&gt;::~FieldSolverFactory()&quot;</span>);</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>  CH_TIME(<span class="stringliteral">&quot;FieldSolverFactory&lt;T&gt;::~FieldSolverFactory()&quot;</span>);</div>
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>}</div>
 </div>
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
 <div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><a class="code hl_class" href="classTracerParticleSolver.html">RefCountedPtr&lt;FieldSolver&gt;</a></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>RefCountedPtr&lt;FieldSolver&gt;</div>
 <div class="foldopen" id="foldopen00034" data-start="{" data-end="}">
 <div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="classFieldSolverFactory.html#a44d84ea17a7f26c61e0492f299027916">   34</a></span><a class="code hl_function" href="classFieldSolverFactory.html#a44d84ea17a7f26c61e0492f299027916">FieldSolverFactory&lt;T&gt;::newSolver</a>()<span class="keyword"> const</span></div>
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="keyword"></span>{</div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>  <a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">CH_TIME</a>(<span class="stringliteral">&quot;FieldSolverFactory&lt;T&gt;::newSolver()&quot;</span>);</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>  CH_TIME(<span class="stringliteral">&quot;FieldSolverFactory&lt;T&gt;::newSolver()&quot;</span>);</div>
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">RefCountedPtr&lt;FieldSolver&gt;</a>(<span class="keyword">new</span> <a class="code hl_class" href="classTracerParticleSolver.html">T</a>);</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>  <span class="keywordflow">return</span> RefCountedPtr&lt;FieldSolver&gt;(<span class="keyword">new</span> T);</div>
 <div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>}</div>
 </div>
 <div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
@@ -135,8 +135,6 @@ $(document).ready(function() { init_codefold(0); });
 <div class="ttc" id="aclassFieldSolverFactory_html_a2ac5e056f3c9446810cc877dfb276822"><div class="ttname"><a href="classFieldSolverFactory.html#a2ac5e056f3c9446810cc877dfb276822">FieldSolverFactory::FieldSolverFactory</a></div><div class="ttdeci">FieldSolverFactory()</div><div class="ttdoc">Constructor (does nothing)</div><div class="ttdef"><b>Definition</b> CD_FieldSolverFactoryImplem.H:21</div></div>
 <div class="ttc" id="aclassFieldSolverFactory_html_a44d84ea17a7f26c61e0492f299027916"><div class="ttname"><a href="classFieldSolverFactory.html#a44d84ea17a7f26c61e0492f299027916">FieldSolverFactory::newSolver</a></div><div class="ttdeci">RefCountedPtr&lt; FieldSolver &gt; newSolver() const</div><div class="ttdoc">Factory method.</div><div class="ttdef"><b>Definition</b> CD_FieldSolverFactoryImplem.H:34</div></div>
 <div class="ttc" id="aclassFieldSolverFactory_html_a89307d98dc389060b35a2a542071b08b"><div class="ttname"><a href="classFieldSolverFactory.html#a89307d98dc389060b35a2a542071b08b">FieldSolverFactory::~FieldSolverFactory</a></div><div class="ttdeci">~FieldSolverFactory()</div><div class="ttdoc">Constructor (does nothing)</div><div class="ttdef"><b>Definition</b> CD_FieldSolverFactoryImplem.H:27</div></div>
-<div class="ttc" id="aclassTracerParticleSolver_html"><div class="ttname"><a href="classTracerParticleSolver.html">TracerParticleSolver</a></div><div class="ttdoc">Base class for a tracer particle solver. This solver can advance particles in a pre-defined velocity ...</div><div class="ttdef"><b>Definition</b> CD_TracerParticleSolver.H:39</div></div>
-<div class="ttc" id="aclassTracerParticleSolver_html_a4fa2ba84feb2e79304ef1d8c0aafd77d"><div class="ttname"><a href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">TracerParticleSolver::TracerParticleSolver</a></div><div class="ttdeci">TracerParticleSolver()</div><div class="ttdoc">Default constructor.</div><div class="ttdef"><b>Definition</b> CD_TracerParticleSolverImplem.H:26</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

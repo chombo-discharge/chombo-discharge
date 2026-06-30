@@ -92,80 +92,80 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a005e0a7d3b650b0a85c39376770f2f76" id="r_a005e0a7d3b650b0a85c39376770f2f76"><td class="memItemLeft" align="right" valign="top"><a id="a005e0a7d3b650b0a85c39376770f2f76" name="a005e0a7d3b650b0a85c39376770f2f76"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>EBAMRData</b> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+&#160;</td><td class="memItemRight" valign="bottom"><b>EBAMRData</b> () noexcept</td></tr>
 <tr class="memdesc:a005e0a7d3b650b0a85c39376770f2f76"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor. Does nothing. <br /></td></tr>
 <tr class="separator:a005e0a7d3b650b0a85c39376770f2f76"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af9fdb70b7be84bf77e111a1c5dc82c4d" id="r_af9fdb70b7be84bf77e111a1c5dc82c4d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#af9fdb70b7be84bf77e111a1c5dc82c4d">EBAMRData</a> (<a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_size</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:af9fdb70b7be84bf77e111a1c5dc82c4d" id="r_af9fdb70b7be84bf77e111a1c5dc82c4d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#af9fdb70b7be84bf77e111a1c5dc82c4d">EBAMRData</a> (int a_size) noexcept</td></tr>
 <tr class="memdesc:af9fdb70b7be84bf77e111a1c5dc82c4d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. Sets m_data to size a_size but does not allocate anything.  <br /></td></tr>
 <tr class="separator:af9fdb70b7be84bf77e111a1c5dc82c4d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7e295369cd82f326ef0a4b80bf90e1d9" id="r_a7e295369cd82f326ef0a4b80bf90e1d9"><td class="memItemLeft" align="right" valign="top"><a id="a7e295369cd82f326ef0a4b80bf90e1d9" name="a7e295369cd82f326ef0a4b80bf90e1d9"></a>
-<a class="el" href="classTracerParticleSolver.html">virtual</a>&#160;</td><td class="memItemRight" valign="bottom"><b>~EBAMRData</b> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~EBAMRData</b> () noexcept</td></tr>
 <tr class="memdesc:a7e295369cd82f326ef0a4b80bf90e1d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. Does nothing. <br /></td></tr>
 <tr class="separator:a7e295369cd82f326ef0a4b80bf90e1d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afa4e1b7d6ec550bf338183204bdc9017" id="r_afa4e1b7d6ec550bf338183204bdc9017"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#afa4e1b7d6ec550bf338183204bdc9017">operator[]</a> (<a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_level</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:afa4e1b7d6ec550bf338183204bdc9017" id="r_afa4e1b7d6ec550bf338183204bdc9017"><td class="memItemLeft" align="right" valign="top">RefCountedPtr&lt; LevelData&lt; T &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#afa4e1b7d6ec550bf338183204bdc9017">operator[]</a> (int a_level) noexcept</td></tr>
 <tr class="memdesc:afa4e1b7d6ec550bf338183204bdc9017"><td class="mdescLeft">&#160;</td><td class="mdescRight">Indexing operators. Returns m_data[a_level].  <br /></td></tr>
 <tr class="separator:afa4e1b7d6ec550bf338183204bdc9017"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aea0acd419b832ddde5c3f67a4a3bf886" id="r_aea0acd419b832ddde5c3f67a4a3bf886"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#aea0acd419b832ddde5c3f67a4a3bf886">operator[]</a> (<a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_level</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:aea0acd419b832ddde5c3f67a4a3bf886" id="r_aea0acd419b832ddde5c3f67a4a3bf886"><td class="memItemLeft" align="right" valign="top">const RefCountedPtr&lt; LevelData&lt; T &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#aea0acd419b832ddde5c3f67a4a3bf886">operator[]</a> (int a_level) const noexcept</td></tr>
 <tr class="memdesc:aea0acd419b832ddde5c3f67a4a3bf886"><td class="mdescLeft">&#160;</td><td class="mdescRight">Indexing operators. Returns const m_data[a_level].  <br /></td></tr>
 <tr class="separator:aea0acd419b832ddde5c3f67a4a3bf886"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa622b0541af0ec883763307d19280381" id="r_aa622b0541af0ec883763307d19280381"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#aa622b0541af0ec883763307d19280381">resize</a> (<a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_size</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:aa622b0541af0ec883763307d19280381" id="r_aa622b0541af0ec883763307d19280381"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#aa622b0541af0ec883763307d19280381">resize</a> (int a_size) noexcept</td></tr>
 <tr class="memdesc:aa622b0541af0ec883763307d19280381"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resize m_data to having size a_size.  <br /></td></tr>
 <tr class="separator:aa622b0541af0ec883763307d19280381"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa7da244519f04b86dd4af729347ec7d6" id="r_aa7da244519f04b86dd4af729347ec7d6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#aa7da244519f04b86dd4af729347ec7d6">setRealm</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_realm</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:aa7da244519f04b86dd4af729347ec7d6" id="r_aa7da244519f04b86dd4af729347ec7d6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#aa7da244519f04b86dd4af729347ec7d6">setRealm</a> (const std::string &amp;a_realm) noexcept</td></tr>
 <tr class="memdesc:aa7da244519f04b86dd4af729347ec7d6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the realm for this object.  <br /></td></tr>
 <tr class="separator:aa7da244519f04b86dd4af729347ec7d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a959f38f7adb9f012ce1ddf4efc855bde" id="r_a959f38f7adb9f012ce1ddf4efc855bde"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#a959f38f7adb9f012ce1ddf4efc855bde">size</a> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a959f38f7adb9f012ce1ddf4efc855bde" id="r_a959f38f7adb9f012ce1ddf4efc855bde"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#a959f38f7adb9f012ce1ddf4efc855bde">size</a> () const noexcept</td></tr>
 <tr class="memdesc:a959f38f7adb9f012ce1ddf4efc855bde"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get size of m_data.  <br /></td></tr>
 <tr class="separator:a959f38f7adb9f012ce1ddf4efc855bde"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5b94dee364b74d56756fa45a848e7fa4" id="r_a5b94dee364b74d56756fa45a848e7fa4"><td class="memItemLeft" align="right" valign="top"><a id="a5b94dee364b74d56756fa45a848e7fa4" name="a5b94dee364b74d56756fa45a848e7fa4"></a>
-<a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>exchange</b> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>exchange</b> () noexcept</td></tr>
 <tr class="memdesc:a5b94dee364b74d56756fa45a848e7fa4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Exchange on all AMR levels. <br /></td></tr>
 <tr class="separator:a5b94dee364b74d56756fa45a848e7fa4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa1dd364444444ec8b5361a9766b1e979" id="r_aa1dd364444444ec8b5361a9766b1e979"><td class="memItemLeft" align="right" valign="top"><a id="aa1dd364444444ec8b5361a9766b1e979" name="aa1dd364444444ec8b5361a9766b1e979"></a>
-<a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>clear</b> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>clear</b> () noexcept</td></tr>
 <tr class="memdesc:aa1dd364444444ec8b5361a9766b1e979"><td class="mdescLeft">&#160;</td><td class="mdescRight">Delete all data. <br /></td></tr>
 <tr class="separator:aa1dd364444444ec8b5361a9766b1e979"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a15cbdc605f116b83f6defb8d943e97cd" id="r_a15cbdc605f116b83f6defb8d943e97cd"><td class="memItemLeft" align="right" valign="top"><a id="a15cbdc605f116b83f6defb8d943e97cd" name="a15cbdc605f116b83f6defb8d943e97cd"></a>
-<a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>reserve</b> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>reserve</b> () noexcept</td></tr>
 <tr class="memdesc:a15cbdc605f116b83f6defb8d943e97cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reserve data. <br /></td></tr>
 <tr class="separator:a15cbdc605f116b83f6defb8d943e97cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ade763fbedf99b6a1897ab18229f534ba" id="r_ade763fbedf99b6a1897ab18229f534ba"><td class="memItemLeft" align="right" valign="top"><a id="ade763fbedf99b6a1897ab18229f534ba" name="ade763fbedf99b6a1897ab18229f534ba"></a>
-<a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>release</b> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>release</b> () noexcept</td></tr>
 <tr class="memdesc:ade763fbedf99b6a1897ab18229f534ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Release data. <br /></td></tr>
 <tr class="separator:ade763fbedf99b6a1897ab18229f534ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa1c35283d111e57c0208830819c56ba8" id="r_aa1c35283d111e57c0208830819c56ba8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#aa1c35283d111e57c0208830819c56ba8">isReserved</a> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:aa1c35283d111e57c0208830819c56ba8" id="r_aa1c35283d111e57c0208830819c56ba8"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#aa1c35283d111e57c0208830819c56ba8">isReserved</a> () const noexcept</td></tr>
 <tr class="memdesc:aa1c35283d111e57c0208830819c56ba8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if data is reserved.  <br /></td></tr>
 <tr class="separator:aa1c35283d111e57c0208830819c56ba8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4cd751591c1b6c7df68fe6de16e0d998" id="r_a4cd751591c1b6c7df68fe6de16e0d998"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#a4cd751591c1b6c7df68fe6de16e0d998">getData</a> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a4cd751591c1b6c7df68fe6de16e0d998" id="r_a4cd751591c1b6c7df68fe6de16e0d998"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; LevelData&lt; T &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#a4cd751591c1b6c7df68fe6de16e0d998">getData</a> () noexcept</td></tr>
 <tr class="memdesc:a4cd751591c1b6c7df68fe6de16e0d998"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get underlying data. Returns m_data.  <br /></td></tr>
 <tr class="separator:a4cd751591c1b6c7df68fe6de16e0d998"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a518e63efc37c46c5897ddb47e2ee62bf" id="r_a518e63efc37c46c5897ddb47e2ee62bf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#a518e63efc37c46c5897ddb47e2ee62bf">getData</a> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a518e63efc37c46c5897ddb47e2ee62bf" id="r_a518e63efc37c46c5897ddb47e2ee62bf"><td class="memItemLeft" align="right" valign="top">const Vector&lt; RefCountedPtr&lt; LevelData&lt; T &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#a518e63efc37c46c5897ddb47e2ee62bf">getData</a> () const noexcept</td></tr>
 <tr class="memdesc:a518e63efc37c46c5897ddb47e2ee62bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get underlying data. Returns const m_data.  <br /></td></tr>
 <tr class="separator:a518e63efc37c46c5897ddb47e2ee62bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9d26c036a54efee2196dd9de8b0203fd" id="r_a9d26c036a54efee2196dd9de8b0203fd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#a9d26c036a54efee2196dd9de8b0203fd">push_back</a> (<a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt; &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_levelData</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a9d26c036a54efee2196dd9de8b0203fd" id="r_a9d26c036a54efee2196dd9de8b0203fd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#a9d26c036a54efee2196dd9de8b0203fd">push_back</a> (RefCountedPtr&lt; LevelData&lt; T &gt; &gt; &amp;a_levelData) noexcept</td></tr>
 <tr class="memdesc:a9d26c036a54efee2196dd9de8b0203fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Push a LevelData&lt;T&gt; object to the back of the data vector.  <br /></td></tr>
 <tr class="separator:a9d26c036a54efee2196dd9de8b0203fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae21af3fabcaa3364bbcaf641b63798e0" id="r_ae21af3fabcaa3364bbcaf641b63798e0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#ae21af3fabcaa3364bbcaf641b63798e0">getRealm</a> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:ae21af3fabcaa3364bbcaf641b63798e0" id="r_ae21af3fabcaa3364bbcaf641b63798e0"><td class="memItemLeft" align="right" valign="top">const std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#ae21af3fabcaa3364bbcaf641b63798e0">getRealm</a> () const noexcept</td></tr>
 <tr class="memdesc:ae21af3fabcaa3364bbcaf641b63798e0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the string identifier for whatever realm this data is supposed to be allocated over.  <br /></td></tr>
 <tr class="separator:ae21af3fabcaa3364bbcaf641b63798e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
 <tr class="memitem:a79179654f3e46665092cef2a59885fe6" id="r_a79179654f3e46665092cef2a59885fe6"><td class="memItemLeft" align="right" valign="top"><a id="a79179654f3e46665092cef2a59885fe6" name="a79179654f3e46665092cef2a59885fe6"></a>
-<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_realm</b></td></tr>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><b>m_realm</b></td></tr>
 <tr class="memdesc:a79179654f3e46665092cef2a59885fe6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Identifier for realm. <br /></td></tr>
 <tr class="separator:a79179654f3e46665092cef2a59885fe6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a17dabd86e8fd96df61e26ccf2c2bbd6c" id="r_a17dabd86e8fd96df61e26ccf2c2bbd6c"><td class="memItemLeft" align="right" valign="top"><a id="a17dabd86e8fd96df61e26ccf2c2bbd6c" name="a17dabd86e8fd96df61e26ccf2c2bbd6c"></a>
-<a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_reserved</b></td></tr>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_reserved</b></td></tr>
 <tr class="memdesc:a17dabd86e8fd96df61e26ccf2c2bbd6c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reserved or not. <br /></td></tr>
 <tr class="separator:a17dabd86e8fd96df61e26ccf2c2bbd6c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae7331f5ac75760e7519b84b5b4a84560" id="r_ae7331f5ac75760e7519b84b5b4a84560"><td class="memItemLeft" align="right" valign="top"><a id="ae7331f5ac75760e7519b84b5b4a84560" name="ae7331f5ac75760e7519b84b5b4a84560"></a>
-<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_data</b></td></tr>
+Vector&lt; RefCountedPtr&lt; LevelData&lt; T &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_data</b></td></tr>
 <tr class="memdesc:ae7331f5ac75760e7519b84b5b4a84560"><td class="mdescLeft">&#160;</td><td class="mdescRight">Underlying data. <br /></td></tr>
 <tr class="separator:ae7331f5ac75760e7519b84b5b4a84560"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">T</a>&gt;<br />
+<div class="textblock"><div class="compoundTemplParams">template&lt;typename T&gt;<br />
 class EBAMRData&lt; T &gt;</div><p>Default class for holding LevelData&lt;T&gt; data across an EBAMR realm. </p>
 <p>This class is a base class for holding LevelData&lt;T&gt; over a realm. The class does not have arithmetic operators or assignment operators because LevelData&lt;T&gt; does not have them. Manipulating the data is done directly by fetching the data on a level through the indexing operator [], or by fetching all the data through getData. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
@@ -175,15 +175,15 @@ class EBAMRData&lt; T &gt;</div><p>Default class for holding LevelData&lt;T&gt; 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">T</a> &gt; </div>
+template&lt;typename T &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt;<a class="el" href="classEBAMRData.html">::EBAMRData</a> </td>
+          <td class="memname"><a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt;<a class="el" href="classEBAMRData.html">::EBAMRData</a> </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype">int&#160;</td>
           <td class="paramname"><em>a_size</em></td><td>)</td>
           <td></td>
         </tr>
@@ -212,13 +212,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">T</a> &gt; </div>
+template&lt;typename T &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt; &gt; &gt; &amp; <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt;::getData </td>
+          <td class="memname">const Vector&lt; RefCountedPtr&lt; LevelData&lt; T &gt; &gt; &gt; &amp; <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt;::getData </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -242,13 +242,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">T</a> &gt; </div>
+template&lt;typename T &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt; &gt; &gt; &amp; <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt;::getData </td>
+          <td class="memname">Vector&lt; RefCountedPtr&lt; LevelData&lt; T &gt; &gt; &gt; &amp; <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt;::getData </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -272,13 +272,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">T</a> &gt; </div>
+template&lt;typename T &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt;::getRealm </td>
+          <td class="memname">const std::string <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt;::getRealm </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -302,13 +302,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">T</a> &gt; </div>
+template&lt;typename T &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt;::isReserved </td>
+          <td class="memname">bool <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt;::isReserved </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -332,15 +332,15 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">T</a> &gt; </div>
+template&lt;typename T &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt; &gt; &amp; <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt;<a class="el" href="classTracerParticleSolver.html">::operator</a>[] </td>
+          <td class="memname">const RefCountedPtr&lt; LevelData&lt; T &gt; &gt; &amp; <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt;::operator[] </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype">int&#160;</td>
           <td class="paramname"><em>a_level</em></td><td>)</td>
           <td> const</td>
         </tr>
@@ -369,15 +369,15 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">T</a> &gt; </div>
+template&lt;typename T &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt; &gt; &amp; <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt;<a class="el" href="classTracerParticleSolver.html">::operator</a>[] </td>
+          <td class="memname">RefCountedPtr&lt; LevelData&lt; T &gt; &gt; &amp; <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt;::operator[] </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype">int&#160;</td>
           <td class="paramname"><em>a_level</em></td><td>)</td>
           <td></td>
         </tr>
@@ -406,15 +406,15 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">T</a> &gt; </div>
+template&lt;typename T &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt;::push_back </td>
+          <td class="memname">void <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt;::push_back </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt; &gt; &amp;&#160;</td>
+          <td class="paramtype">RefCountedPtr&lt; LevelData&lt; T &gt; &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_levelData</em></td><td>)</td>
           <td></td>
         </tr>
@@ -442,15 +442,15 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">T</a> &gt; </div>
+template&lt;typename T &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt;::resize </td>
+          <td class="memname">void <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt;::resize </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype">int&#160;</td>
           <td class="paramname"><em>a_size</em></td><td>)</td>
           <td></td>
         </tr>
@@ -478,15 +478,15 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">T</a> &gt; </div>
+template&lt;typename T &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt;::setRealm </td>
+          <td class="memname">void <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt;::setRealm </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;&#160;</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
           <td class="paramname"><em>a_realm</em></td><td>)</td>
           <td></td>
         </tr>
@@ -514,13 +514,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">T</a> &gt; </div>
+template&lt;typename T &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt;::size </td>
+          <td class="memname">int <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt;::size </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>

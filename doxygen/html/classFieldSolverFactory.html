@@ -98,14 +98,14 @@ Public Member Functions</h2></td></tr>
 &#160;</td><td class="memItemRight" valign="bottom"><b>~FieldSolverFactory</b> ()</td></tr>
 <tr class="memdesc:a89307d98dc389060b35a2a542071b08b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor (does nothing) <br /></td></tr>
 <tr class="separator:a89307d98dc389060b35a2a542071b08b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a44d84ea17a7f26c61e0492f299027916" id="r_a44d84ea17a7f26c61e0492f299027916"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classFieldSolver.html">FieldSolver</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolverFactory.html#a44d84ea17a7f26c61e0492f299027916">newSolver</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memitem:a44d84ea17a7f26c61e0492f299027916" id="r_a44d84ea17a7f26c61e0492f299027916"><td class="memItemLeft" align="right" valign="top">RefCountedPtr&lt; <a class="el" href="classFieldSolver.html">FieldSolver</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolverFactory.html#a44d84ea17a7f26c61e0492f299027916">newSolver</a> () const</td></tr>
 <tr class="memdesc:a44d84ea17a7f26c61e0492f299027916"><td class="mdescLeft">&#160;</td><td class="mdescRight">Factory method.  <br /></td></tr>
 <tr class="separator:a44d84ea17a7f26c61e0492f299027916"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">T</a>&gt;<br />
+<div class="textblock"><div class="compoundTemplParams">template&lt;class T&gt;<br />
 class FieldSolverFactory&lt; T &gt;</div><p>Factory class for poisson solvers. Used to instantiate any FieldSolver-derived classes with automatic casting to the base class. </p>
-<p>This class is mostly used for easily making FieldSolvers of any type into a <a class="el" href="classFieldSolver.html" title="Base class for electrostatic solvers.">FieldSolver</a> (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">i.e</a>. casting to smart pointer), but as a side-effect it also provides a factory method for generating any number of field solvers. </p>
+<p>This class is mostly used for easily making FieldSolvers of any type into a <a class="el" href="classFieldSolver.html" title="Base class for electrostatic solvers.">FieldSolver</a> (i.e. casting to smart pointer), but as a side-effect it also provides a factory method for generating any number of field solvers. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a44d84ea17a7f26c61e0492f299027916" name="a44d84ea17a7f26c61e0492f299027916"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a44d84ea17a7f26c61e0492f299027916">&#9670;&#160;</a></span>newSolver()</h2>
@@ -113,10 +113,10 @@ class FieldSolverFactory&lt; T &gt;</div><p>Factory class for poisson solvers. U
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">T</a> &gt; </div>
+template&lt;class T &gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classFieldSolver.html">FieldSolver</a> &gt; <a class="el" href="classFieldSolverFactory.html">FieldSolverFactory</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt;::newSolver </td>
+          <td class="memname">RefCountedPtr&lt; <a class="el" href="classFieldSolver.html">FieldSolver</a> &gt; <a class="el" href="classFieldSolverFactory.html">FieldSolverFactory</a>&lt; T &gt;::newSolver </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>

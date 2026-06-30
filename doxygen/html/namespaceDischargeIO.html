@@ -77,7 +77,6 @@ $(function() {
 </div><!-- top -->
 <div class="header">
   <div class="summary">
-<a href="#typedef-members">Typedefs</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle"><div class="title">DischargeIO Namespace Reference</div></div>
 </div><!--header-->
@@ -86,84 +85,22 @@ $(function() {
 <p>Namespace which encapsulates chombo-discharge IO functionality.  
 <a href="namespaceDischargeIO.html#details">More...</a></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
-Typedefs</h2></td></tr>
-<tr class="memitem:ac282f41f53d5b9827e77f2a8b3d88605" id="r_ac282f41f53d5b9827e77f2a8b3d88605"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; </td></tr>
-<tr class="memitem:ac282f41f53d5b9827e77f2a8b3d88605"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">using</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceDischargeIO.html#ac282f41f53d5b9827e77f2a8b3d88605">H5PartScalar</a> = <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::size_t</a>)&gt;</td></tr>
-<tr class="memdesc:ac282f41f53d5b9827e77f2a8b3d88605"><td class="mdescLeft">&#160;</td><td class="mdescRight">Accessor returning a scalar payload quantity of SoA particle (a_leaf, a_index) for writeH5Part.  <br /></td></tr>
-<tr class="separator:ac282f41f53d5b9827e77f2a8b3d88605"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9fdb098d1393962eddc835a811dfbf03" id="r_a9fdb098d1393962eddc835a811dfbf03"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; </td></tr>
-<tr class="memitem:a9fdb098d1393962eddc835a811dfbf03"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">using</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceDischargeIO.html#a9fdb098d1393962eddc835a811dfbf03">H5PartVect</a> = <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">RealVect</a>(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::size_t</a>)&gt;</td></tr>
-<tr class="memdesc:a9fdb098d1393962eddc835a811dfbf03"><td class="mdescLeft">&#160;</td><td class="mdescRight">Accessor returning a vector payload quantity of SoA particle (a_leaf, a_index) for writeH5Part.  <br /></td></tr>
-<tr class="separator:a9fdb098d1393962eddc835a811dfbf03"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a957da12ee406f8da1ebe1a2f4395012b" id="r_a957da12ee406f8da1ebe1a2f4395012b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceDischargeIO.html#a957da12ee406f8da1ebe1a2f4395012b">numberFmt</a> (<a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">n</a>, <a class="el" href="classTracerParticleSolver.html">char</a> <a class="el" href="classTracerParticleSolver.html">a_sep</a>=',') <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:a957da12ee406f8da1ebe1a2f4395012b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number formatting method &ndash; writes big numbers using an input separator. <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">E.g</a>. the number 123456 is written as 123,456.  <br /></td></tr>
+<tr class="memitem:a957da12ee406f8da1ebe1a2f4395012b" id="r_a957da12ee406f8da1ebe1a2f4395012b"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceDischargeIO.html#a957da12ee406f8da1ebe1a2f4395012b">numberFmt</a> (long long n, char a_sep=',') noexcept</td></tr>
+<tr class="memdesc:a957da12ee406f8da1ebe1a2f4395012b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number formatting method &ndash; writes big numbers using an input separator. E.g. the number 123456 is written as 123,456.  <br /></td></tr>
 <tr class="separator:a957da12ee406f8da1ebe1a2f4395012b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a215905b464e4689a2e0b98b560857c5c" id="r_a215905b464e4689a2e0b98b560857c5c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceDischargeIO.html#a215905b464e4689a2e0b98b560857c5c">numberFmt</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_numbers</a>, <a class="el" href="classTracerParticleSolver.html">char</a> <a class="el" href="classTracerParticleSolver.html">a_sep</a>=',') <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a215905b464e4689a2e0b98b560857c5c" id="r_a215905b464e4689a2e0b98b560857c5c"><td class="memItemLeft" align="right" valign="top">Vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceDischargeIO.html#a215905b464e4689a2e0b98b560857c5c">numberFmt</a> (const Vector&lt; long long &gt; &amp;a_numbers, char a_sep=',') noexcept</td></tr>
 <tr class="memdesc:a215905b464e4689a2e0b98b560857c5c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number formatting game. This just prints the number 123456 as 123,456.  <br /></td></tr>
 <tr class="separator:a215905b464e4689a2e0b98b560857c5c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a96bf5fafd86e5b6e123d502f1d18d8d0" id="r_a96bf5fafd86e5b6e123d502f1d18d8d0"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; </td></tr>
-<tr class="memitem:a96bf5fafd86e5b6e123d502f1d18d8d0"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceDischargeIO.html#a96bf5fafd86e5b6e123d502f1d18d8d0">writeH5Part</a> (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> <a class="el" href="classTracerParticleSolver.html">a_filename</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_particles</a>, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a>, <a class="el" href="namespaceDischargeIO.html#ac282f41f53d5b9827e77f2a8b3d88605">H5PartScalar</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &gt; &gt; <a class="el" href="classTracerParticleSolver.html">a_scalarVars</a>, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a>, <a class="el" href="namespaceDischargeIO.html#a9fdb098d1393962eddc835a811dfbf03">H5PartVect</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &gt; &gt; <a class="el" href="classTracerParticleSolver.html">a_vectorVars</a>, <a class="el" href="classTracerParticleSolver.html">RealVect</a> <a class="el" href="classTracerParticleSolver.html">a_shift</a>, <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_time</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:a96bf5fafd86e5b6e123d502f1d18d8d0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write an SoA particle container to an H5Part file (quick visualization).  <br /></td></tr>
-<tr class="separator:a96bf5fafd86e5b6e123d502f1d18d8d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a10ce9adf5e883c8699c57ccfeffb05dc" id="r_a10ce9adf5e883c8699c57ccfeffb05dc"><td class="memTemplParams" colspan="2">template&lt;typename P , typename Traits &gt; </td></tr>
+<tr class="memitem:a10ce9adf5e883c8699c57ccfeffb05dc"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceDischargeIO.html#a10ce9adf5e883c8699c57ccfeffb05dc">writeH5Part</a> (std::string a_filename, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles, RealVect a_shift, Real a_time) noexcept</td></tr>
+<tr class="memdesc:a10ce9adf5e883c8699c57ccfeffb05dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write an SoA particle container to an <a class="el" href="namespaceH5Part.html" title="Declarative descriptors for selecting which particle PAYLOAD columns are written to H5Part (visualiza...">H5Part</a> file (quick visualization).  <br /></td></tr>
+<tr class="separator:a10ce9adf5e883c8699c57ccfeffb05dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Namespace which encapsulates chombo-discharge IO functionality. </p>
-</div><h2 class="groupheader">Typedef Documentation</h2>
-<a id="ac282f41f53d5b9827e77f2a8b3d88605" name="ac282f41f53d5b9827e77f2a8b3d88605"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac282f41f53d5b9827e77f2a8b3d88605">&#9670;&#160;</a></span>H5PartScalar</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; </div>
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">using</a> <a class="el" href="namespaceDischargeIO.html#ac282f41f53d5b9827e77f2a8b3d88605">DischargeIO::H5PartScalar</a> = <a class="el" href="classTracerParticleSolver.html">typedef</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt;<a class="el" href="classTracerParticleSolver.html">Real</a>(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt;<a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a>&gt;&amp;, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::size_t</a>)&gt;</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Accessor returning a scalar payload quantity of SoA particle (a_leaf, a_index) for writeH5Part. </p>
-<dl class="tparams"><dt>Template Parameters</dt><dd>
-  <table class="tparams">
-    <tr><td class="paramname">P</td><td>Payload type of the container. </td></tr>
-    <tr><td class="paramname">Traits</td><td>Column descriptor for the payload. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a9fdb098d1393962eddc835a811dfbf03" name="a9fdb098d1393962eddc835a811dfbf03"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9fdb098d1393962eddc835a811dfbf03">&#9670;&#160;</a></span>H5PartVect</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; </div>
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">using</a> <a class="el" href="namespaceDischargeIO.html#a9fdb098d1393962eddc835a811dfbf03">DischargeIO::H5PartVect</a> = <a class="el" href="classTracerParticleSolver.html">typedef</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt;<a class="el" href="classTracerParticleSolver.html">RealVect</a>(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt;<a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a>&gt;&amp;, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::size_t</a>)&gt;</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Accessor returning a vector payload quantity of SoA particle (a_leaf, a_index) for writeH5Part. </p>
-<dl class="tparams"><dt>Template Parameters</dt><dd>
-  <table class="tparams">
-    <tr><td class="paramname">P</td><td>Payload type of the container. </td></tr>
-    <tr><td class="paramname">Traits</td><td>Column descriptor for the payload. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<h2 class="groupheader">Function Documentation</h2>
+</div><h2 class="groupheader">Function Documentation</h2>
 <a id="a215905b464e4689a2e0b98b560857c5c" name="a215905b464e4689a2e0b98b560857c5c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a215905b464e4689a2e0b98b560857c5c">&#9670;&#160;</a></span>numberFmt() <span class="overload">[1/2]</span></h2>
 
@@ -174,15 +111,15 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &gt; DischargeIO::numberFmt </td>
+          <td class="memname">Vector&lt; std::string &gt; DischargeIO::numberFmt </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const Vector&lt; long long &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_numbers</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">char</a>&#160;</td>
+          <td class="paramtype">char&#160;</td>
           <td class="paramname"><em>a_sep</em> = <code>','</code>&#160;</td>
         </tr>
         <tr>
@@ -220,15 +157,15 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> DischargeIO::numberFmt </td>
+          <td class="memname">std::string DischargeIO::numberFmt </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a>&#160;</td>
+          <td class="paramtype">long long&#160;</td>
           <td class="paramname"><em>n</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">char</a>&#160;</td>
+          <td class="paramtype">char&#160;</td>
           <td class="paramname"><em>a_sep</em> = <code>','</code>&#160;</td>
         </tr>
         <tr>
@@ -244,7 +181,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 </table>
 </div><div class="memdoc">
 
-<p>Number formatting method &ndash; writes big numbers using an input separator. <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">E.g</a>. the number 123456 is written as 123,456. </p>
+<p>Number formatting method &ndash; writes big numbers using an input separator. E.g. the number 123456 is written as 123,456. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">n</td><td>Number to format as string with separator </td></tr>
@@ -256,51 +193,39 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 
 </div>
 </div>
-<a id="a96bf5fafd86e5b6e123d502f1d18d8d0" name="a96bf5fafd86e5b6e123d502f1d18d8d0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a96bf5fafd86e5b6e123d502f1d18d8d0">&#9670;&#160;</a></span>writeH5Part()</h2>
+<a id="a10ce9adf5e883c8699c57ccfeffb05dc" name="a10ce9adf5e883c8699c57ccfeffb05dc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a10ce9adf5e883c8699c57ccfeffb05dc">&#9670;&#160;</a></span>writeH5Part()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; </div>
+template&lt;typename P , typename Traits &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> DischargeIO::writeH5Part </td>
+          <td class="memname">void DischargeIO::writeH5Part </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a>&#160;</td>
+          <td class="paramtype">std::string&#160;</td>
           <td class="paramname"><em>a_filename</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_particles</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a>, <a class="el" href="namespaceDischargeIO.html#ac282f41f53d5b9827e77f2a8b3d88605">H5PartScalar</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &gt; &gt;&#160;</td>
-          <td class="paramname"><em>a_scalarVars</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a>, <a class="el" href="namespaceDischargeIO.html#a9fdb098d1393962eddc835a811dfbf03">H5PartVect</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &gt; &gt;&#160;</td>
-          <td class="paramname"><em>a_vectorVars</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">RealVect</a>&#160;</td>
+          <td class="paramtype">RealVect&#160;</td>
           <td class="paramname"><em>a_shift</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td>
+          <td class="paramtype">Real&#160;</td>
           <td class="paramname"><em>a_time</em>&#160;</td>
         </tr>
         <tr>
@@ -316,14 +241,12 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 </table>
 </div><div class="memdoc">
 
-<p>Write an SoA particle container to an H5Part file (quick visualization). </p>
-<p>Position, id, and weight are taken from the container-owned columns; the caller supplies the payload datasets as (name, accessor) pairs so the scalar-vs-vector distinction and naming are explicit (the SoA columns tuple interleaves scalar and vector-component columns, so there is no implicit reals/vects partition to rely on). Each vector dataset is written as name-x/name-y/name-z. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Write an SoA particle container to an <a class="el" href="namespaceH5Part.html" title="Declarative descriptors for selecting which particle PAYLOAD columns are written to H5Part (visualiza...">H5Part</a> file (quick visualization). </p>
+<p>Position, id and weight are taken from the container-owned columns and written automatically. The payload datasets are derived declaratively from the optional <code>Traits::h5PartColumns</code> tuple (a list of <a class="el" href="structH5Part_1_1Scalar.html" title="Descriptor of a single scalar payload column written to one H5Part dataset.">H5Part::Scalar</a> / <a class="el" href="structH5Part_1_1Vector.html" title="Descriptor of a SpaceDim-component vector payload column, written as name-x/name-y/name-z.">H5Part::Vector</a> descriptors pairing a dataset name with the selecting payload member pointer(s)); if <code>Traits::h5PartColumns</code> is not declared, only id/position/weight are written. Each vector descriptor is written as name-x/name-y/name-z. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_filename</td><td>File name. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_particles</td><td>SoA particle container. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_scalarVars</td><td>Scalar datasets: (name, accessor) pairs. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_vectorVars</td><td>Vector datasets: (name, accessor) pairs. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_shift</td><td>Particle position shift. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_shift</td><td>Particle position shift (subtracted from the written positions). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_time</td><td>Physical time. </td></tr>
   </table>
   </dd>

@@ -108,7 +108,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="keyword">public</span>:</div>
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno"><a class="line" href="classRtIterator.html#ae5e43bd511b1b8960650e65b6924d571">   30</a></span>  <a class="code hl_function" href="classRtIterator.html#ae5e43bd511b1b8960650e65b6924d571">RtIterator</a>() = <span class="keyword">delete</span>;</div>
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>  <a class="code hl_function" href="classRtIterator.html#ae5e43bd511b1b8960650e65b6924d571">RtIterator</a>(<a class="code hl_class" href="classTracerParticleSolver.html">RtLayout&lt;T&gt;</a>&amp; <a class="code hl_class" href="classTracerParticleSolver.html">a_layout</a>);</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>  <a class="code hl_function" href="classRtIterator.html#ae5e43bd511b1b8960650e65b6924d571">RtIterator</a>(<a class="code hl_class" href="classRtLayout.html">RtLayout&lt;T&gt;</a>&amp; a_layout);</div>
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
 <div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>  <span class="keyword">virtual</span> <a class="code hl_function" href="classRtIterator.html#a425a78a39133452a9ca27a7103859411">~RtIterator</a>();</div>
 <div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
@@ -127,10 +127,10 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>  <span class="keyword">virtual</span> <span class="keywordtype">void</span></div>
 <div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>  <a class="code hl_function" href="classRtIterator.html#a5d949cf66d9d2f19705b7641ee7504a4">operator++</a>();</div>
 <div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span> </div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>  <span class="keyword">virtual</span> <a class="code hl_class" href="classTracerParticleSolver.html">RefCountedPtr&lt;T&gt;</a>&amp;</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>  <span class="keyword">virtual</span> RefCountedPtr&lt;T&gt;&amp;</div>
 <div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>  <a class="code hl_function" href="classRtIterator.html#a0a0c47ab496bec48061deb77aeb32d73">operator()</a>();</div>
 <div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span> </div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>  <span class="keyword">virtual</span> <a class="code hl_class" href="classTracerParticleSolver.html">RefCountedPtr&lt;RtSpecies&gt;</a>&amp;</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>  <span class="keyword">virtual</span> RefCountedPtr&lt;RtSpecies&gt;&amp;</div>
 <div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>  <a class="code hl_function" href="classRtIterator.html#af0e98d0b03e477447ef1639776564363">getSpecies</a>();</div>
 <div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span> </div>
 <div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span><span class="keyword">protected</span>:</div>
@@ -138,9 +138,9 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span> </div>
 <div class="line"><a id="l00098" name="l00098"></a><span class="lineno"><a class="line" href="classRtIterator.html#a15834656958b9af19a720a11b9d93092">   98</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="classRtIterator.html#a15834656958b9af19a720a11b9d93092">m_num</a>;</div>
 <div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span> </div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno"><a class="line" href="classRtIterator.html#a0641599de793b6475e957127e0675de1">  103</a></span>  <a class="code hl_class" href="classTracerParticleSolver.html">Vector&lt;RefCountedPtr&lt;T&gt;</a>&gt; <a class="code hl_variable" href="classRtIterator.html#a0641599de793b6475e957127e0675de1">m_solvers</a>;</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno"><a class="line" href="classRtIterator.html#a0641599de793b6475e957127e0675de1">  103</a></span>  Vector&lt;RefCountedPtr&lt;T&gt;&gt; <a class="code hl_variable" href="classRtIterator.html#a0641599de793b6475e957127e0675de1">m_solvers</a>;</div>
 <div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span> </div>
-<div class="line"><a id="l00108" name="l00108"></a><span class="lineno"><a class="line" href="classRtIterator.html#adb4a564932325ca722784825289f6ad3">  108</a></span>  <a class="code hl_class" href="classTracerParticleSolver.html">Vector&lt;RefCountedPtr&lt;RtSpecies&gt;</a>&gt; <a class="code hl_variable" href="classRtIterator.html#adb4a564932325ca722784825289f6ad3">m_species</a>;</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno"><a class="line" href="classRtIterator.html#adb4a564932325ca722784825289f6ad3">  108</a></span>  Vector&lt;RefCountedPtr&lt;RtSpecies&gt;&gt; <a class="code hl_variable" href="classRtIterator.html#adb4a564932325ca722784825289f6ad3">m_species</a>;</div>
 <div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>};</div>
 </div>
 <div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span> </div>
@@ -164,7 +164,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="ttc" id="aclassRtIterator_html_adb4a564932325ca722784825289f6ad3"><div class="ttname"><a href="classRtIterator.html#adb4a564932325ca722784825289f6ad3">RtIterator::m_species</a></div><div class="ttdeci">Vector&lt; RefCountedPtr&lt; RtSpecies &gt; &gt; m_species</div><div class="ttdoc">Ions.</div><div class="ttdef"><b>Definition</b> CD_RtIterator.H:108</div></div>
 <div class="ttc" id="aclassRtIterator_html_ae5e43bd511b1b8960650e65b6924d571"><div class="ttname"><a href="classRtIterator.html#ae5e43bd511b1b8960650e65b6924d571">RtIterator::RtIterator</a></div><div class="ttdeci">RtIterator()=delete</div><div class="ttdoc">Empty constructor.</div></div>
 <div class="ttc" id="aclassRtIterator_html_af0e98d0b03e477447ef1639776564363"><div class="ttname"><a href="classRtIterator.html#af0e98d0b03e477447ef1639776564363">RtIterator::getSpecies</a></div><div class="ttdeci">virtual RefCountedPtr&lt; RtSpecies &gt; &amp; getSpecies()</div><div class="ttdoc">Get current species pointed to by the iterator.</div><div class="ttdef"><b>Definition</b> CD_RtIteratorImplem.H:86</div></div>
-<div class="ttc" id="aclassTracerParticleSolver_html"><div class="ttname"><a href="classTracerParticleSolver.html">TracerParticleSolver</a></div><div class="ttdoc">Base class for a tracer particle solver. This solver can advance particles in a pre-defined velocity ...</div><div class="ttdef"><b>Definition</b> CD_TracerParticleSolver.H:39</div></div>
+<div class="ttc" id="aclassRtLayout_html"><div class="ttname"><a href="classRtLayout.html">RtLayout</a></div><div class="ttdoc">Class for holding a set of RtSolvers. T must derive from RtSolver.</div><div class="ttdef"><b>Definition</b> CD_RtLayout.H:28</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

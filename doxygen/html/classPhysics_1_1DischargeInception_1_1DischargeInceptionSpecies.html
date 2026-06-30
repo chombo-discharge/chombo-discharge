@@ -119,14 +119,14 @@ Collaboration diagram for Physics::DischargeInception::DischargeInceptionSpecies
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a52a0e47767217a4f00a4fbfe226d4f79" id="r_a52a0e47767217a4f00a4fbfe226d4f79"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionSpecies.html#a52a0e47767217a4f00a4fbfe226d4f79">DischargeInceptionSpecies</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_pos</a>)&gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_initialData</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classTracerParticleSolver.html">a_mobile</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classTracerParticleSolver.html">a_diffusive</a>)</td></tr>
+<tr class="memitem:a52a0e47767217a4f00a4fbfe226d4f79" id="r_a52a0e47767217a4f00a4fbfe226d4f79"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionSpecies.html#a52a0e47767217a4f00a4fbfe226d4f79">DischargeInceptionSpecies</a> (const std::function&lt; Real(const RealVect &amp;a_pos)&gt; &amp;a_initialData, const bool a_mobile, const bool a_diffusive)</td></tr>
 <tr class="memdesc:a52a0e47767217a4f00a4fbfe226d4f79"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor.  <br /></td></tr>
 <tr class="separator:a52a0e47767217a4f00a4fbfe226d4f79"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a47abd74ac599a1ac2185b072e77606fe" id="r_a47abd74ac599a1ac2185b072e77606fe"><td class="memItemLeft" align="right" valign="top"><a id="a47abd74ac599a1ac2185b072e77606fe" name="a47abd74ac599a1ac2185b072e77606fe"></a>
-<a class="el" href="classTracerParticleSolver.html">virtual</a>&#160;</td><td class="memItemRight" valign="bottom"><b>~DischargeInceptionSpecies</b> ()</td></tr>
+virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~DischargeInceptionSpecies</b> ()</td></tr>
 <tr class="memdesc:a47abd74ac599a1ac2185b072e77606fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. <br /></td></tr>
 <tr class="separator:a47abd74ac599a1ac2185b072e77606fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5b338bb89973ddc220fd0fc3d04566d0" id="r_a5b338bb89973ddc220fd0fc3d04566d0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionSpecies.html#a5b338bb89973ddc220fd0fc3d04566d0">initialData</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_pos</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_time</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
+<tr class="memitem:a5b338bb89973ddc220fd0fc3d04566d0" id="r_a5b338bb89973ddc220fd0fc3d04566d0"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionSpecies.html#a5b338bb89973ddc220fd0fc3d04566d0">initialData</a> (const RealVect &amp;a_pos, const Real a_time) const override</td></tr>
 <tr class="memdesc:a5b338bb89973ddc220fd0fc3d04566d0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the initial species density at the given position.  <br /></td></tr>
 <tr class="separator:a5b338bb89973ddc220fd0fc3d04566d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classCdrSpecies"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classCdrSpecies')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classCdrSpecies.html">CdrSpecies</a></td></tr>
@@ -134,26 +134,26 @@ Public Member Functions</h2></td></tr>
 &#160;</td><td class="memItemRight" valign="bottom"><b>CdrSpecies</b> ()</td></tr>
 <tr class="memdesc:a9a072f8a393301f6d5e5dcb4382d1570 inherit pub_methods_classCdrSpecies"><td class="mdescLeft">&#160;</td><td class="mdescRight">Weak constructor. <br /></td></tr>
 <tr class="separator:a9a072f8a393301f6d5e5dcb4382d1570 inherit pub_methods_classCdrSpecies"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad2391efcfae8d591300d6be780e41f57 inherit pub_methods_classCdrSpecies" id="r_ad2391efcfae8d591300d6be780e41f57"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSpecies.html#ad2391efcfae8d591300d6be780e41f57">CdrSpecies</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_name</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_chargeNumber</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classTracerParticleSolver.html">a_isMobile</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classTracerParticleSolver.html">a_isDiffusive</a>)</td></tr>
+<tr class="memitem:ad2391efcfae8d591300d6be780e41f57 inherit pub_methods_classCdrSpecies" id="r_ad2391efcfae8d591300d6be780e41f57"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSpecies.html#ad2391efcfae8d591300d6be780e41f57">CdrSpecies</a> (const std::string &amp;a_name, const int a_chargeNumber, const bool a_isMobile, const bool a_isDiffusive)</td></tr>
 <tr class="memdesc:ad2391efcfae8d591300d6be780e41f57 inherit pub_methods_classCdrSpecies"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor.  <br /></td></tr>
 <tr class="separator:ad2391efcfae8d591300d6be780e41f57 inherit pub_methods_classCdrSpecies"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a16d3138b62d8b68b5db48e16fffe42e7 inherit pub_methods_classCdrSpecies" id="r_a16d3138b62d8b68b5db48e16fffe42e7"><td class="memItemLeft" align="right" valign="top">
-<a class="el" href="classTracerParticleSolver.html">virtual</a>&#160;</td><td class="memItemRight" valign="bottom"><b>~CdrSpecies</b> ()</td></tr>
+virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~CdrSpecies</b> ()</td></tr>
 <tr class="memdesc:a16d3138b62d8b68b5db48e16fffe42e7 inherit pub_methods_classCdrSpecies"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor (does nothing) <br /></td></tr>
 <tr class="separator:a16d3138b62d8b68b5db48e16fffe42e7 inherit pub_methods_classCdrSpecies"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5a0ee34d24179fc307d42184ed74216a inherit pub_methods_classCdrSpecies" id="r_a5a0ee34d24179fc307d42184ed74216a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSpecies.html#a5a0ee34d24179fc307d42184ed74216a">getName</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memitem:a5a0ee34d24179fc307d42184ed74216a inherit pub_methods_classCdrSpecies" id="r_a5a0ee34d24179fc307d42184ed74216a"><td class="memItemLeft" align="right" valign="top">virtual std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSpecies.html#a5a0ee34d24179fc307d42184ed74216a">getName</a> () const</td></tr>
 <tr class="memdesc:a5a0ee34d24179fc307d42184ed74216a inherit pub_methods_classCdrSpecies"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return name.  <br /></td></tr>
 <tr class="separator:a5a0ee34d24179fc307d42184ed74216a inherit pub_methods_classCdrSpecies"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7f49fab243bf52f7abdb0948e08ef13e inherit pub_methods_classCdrSpecies" id="r_a7f49fab243bf52f7abdb0948e08ef13e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSpecies.html#a7f49fab243bf52f7abdb0948e08ef13e">getChargeNumber</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memitem:a7f49fab243bf52f7abdb0948e08ef13e inherit pub_methods_classCdrSpecies" id="r_a7f49fab243bf52f7abdb0948e08ef13e"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSpecies.html#a7f49fab243bf52f7abdb0948e08ef13e">getChargeNumber</a> () const</td></tr>
 <tr class="memdesc:a7f49fab243bf52f7abdb0948e08ef13e inherit pub_methods_classCdrSpecies"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return charge.  <br /></td></tr>
 <tr class="separator:a7f49fab243bf52f7abdb0948e08ef13e inherit pub_methods_classCdrSpecies"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae2d8ac71278d692598a728913773d935 inherit pub_methods_classCdrSpecies" id="r_ae2d8ac71278d692598a728913773d935"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSpecies.html#ae2d8ac71278d692598a728913773d935">isDiffusive</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memitem:ae2d8ac71278d692598a728913773d935 inherit pub_methods_classCdrSpecies" id="r_ae2d8ac71278d692598a728913773d935"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSpecies.html#ae2d8ac71278d692598a728913773d935">isDiffusive</a> () const</td></tr>
 <tr class="memdesc:ae2d8ac71278d692598a728913773d935 inherit pub_methods_classCdrSpecies"><td class="mdescLeft">&#160;</td><td class="mdescRight">Diffusive species or not.  <br /></td></tr>
 <tr class="separator:ae2d8ac71278d692598a728913773d935 inherit pub_methods_classCdrSpecies"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a20380aa670d0e524786823824149f120 inherit pub_methods_classCdrSpecies" id="r_a20380aa670d0e524786823824149f120"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSpecies.html#a20380aa670d0e524786823824149f120">isMobile</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memitem:a20380aa670d0e524786823824149f120 inherit pub_methods_classCdrSpecies" id="r_a20380aa670d0e524786823824149f120"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSpecies.html#a20380aa670d0e524786823824149f120">isMobile</a> () const</td></tr>
 <tr class="memdesc:a20380aa670d0e524786823824149f120 inherit pub_methods_classCdrSpecies"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mobile species or not.  <br /></td></tr>
 <tr class="separator:a20380aa670d0e524786823824149f120 inherit pub_methods_classCdrSpecies"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4ba9108f45f92fb5602b687a2ee552a1 inherit pub_methods_classCdrSpecies" id="r_a4ba9108f45f92fb5602b687a2ee552a1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structNoPayload.html">NoPayload</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSpecies.html#a4ba9108f45f92fb5602b687a2ee552a1">getInitialParticles</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memitem:a4ba9108f45f92fb5602b687a2ee552a1 inherit pub_methods_classCdrSpecies" id="r_a4ba9108f45f92fb5602b687a2ee552a1"><td class="memItemLeft" align="right" valign="top">virtual const <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structNoPayload.html">NoPayload</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSpecies.html#a4ba9108f45f92fb5602b687a2ee552a1">getInitialParticles</a> () const</td></tr>
 <tr class="memdesc:a4ba9108f45f92fb5602b687a2ee552a1 inherit pub_methods_classCdrSpecies"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get initial particles.  <br /></td></tr>
 <tr class="separator:a4ba9108f45f92fb5602b687a2ee552a1 inherit pub_methods_classCdrSpecies"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1c713af444ffcbc64e9bedc6a611bc18 inherit pub_methods_classCdrSpecies" id="r_a1c713af444ffcbc64e9bedc6a611bc18"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structNoPayload.html">NoPayload</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSpecies.html#a1c713af444ffcbc64e9bedc6a611bc18">getInitialParticles</a> ()</td></tr>
@@ -163,24 +163,24 @@ Public Member Functions</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
 <tr class="memitem:ab9d94cca288f2f87d7996371202dee34" id="r_ab9d94cca288f2f87d7996371202dee34"><td class="memItemLeft" align="right" valign="top"><a id="ab9d94cca288f2f87d7996371202dee34" name="ab9d94cca288f2f87d7996371202dee34"></a>
-<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_pos</a>)&gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_initialData</b></td></tr>
+std::function&lt; Real(const RealVect &amp;a_pos)&gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_initialData</b></td></tr>
 <tr class="memdesc:ab9d94cca288f2f87d7996371202dee34"><td class="mdescLeft">&#160;</td><td class="mdescRight">Callable that maps a position to the initial species density. <br /></td></tr>
 <tr class="separator:ab9d94cca288f2f87d7996371202dee34"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_attribs_classCdrSpecies"><td colspan="2" onclick="javascript:toggleInherit('pro_attribs_classCdrSpecies')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="classCdrSpecies.html">CdrSpecies</a></td></tr>
 <tr class="memitem:adda8e85f35c9f042b1010ff6278c8d0a inherit pro_attribs_classCdrSpecies" id="r_adda8e85f35c9f042b1010ff6278c8d0a"><td class="memItemLeft" align="right" valign="top">
-<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_name</b></td></tr>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><b>m_name</b></td></tr>
 <tr class="memdesc:adda8e85f35c9f042b1010ff6278c8d0a inherit pro_attribs_classCdrSpecies"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cdr_Species name. <br /></td></tr>
 <tr class="separator:adda8e85f35c9f042b1010ff6278c8d0a inherit pro_attribs_classCdrSpecies"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acbad7f546bcf5811b7e2807a4a86afd0 inherit pro_attribs_classCdrSpecies" id="r_acbad7f546bcf5811b7e2807a4a86afd0"><td class="memItemLeft" align="right" valign="top">
-<a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_chargeNumber</b></td></tr>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>m_chargeNumber</b></td></tr>
 <tr class="memdesc:acbad7f546bcf5811b7e2807a4a86afd0 inherit pro_attribs_classCdrSpecies"><td class="mdescLeft">&#160;</td><td class="mdescRight">Charge. <br /></td></tr>
 <tr class="separator:acbad7f546bcf5811b7e2807a4a86afd0 inherit pro_attribs_classCdrSpecies"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abc3587b2182ee3126ac972b0e7ce1cc7 inherit pro_attribs_classCdrSpecies" id="r_abc3587b2182ee3126ac972b0e7ce1cc7"><td class="memItemLeft" align="right" valign="top">
-<a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_isDiffusive</b></td></tr>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_isDiffusive</b></td></tr>
 <tr class="memdesc:abc3587b2182ee3126ac972b0e7ce1cc7 inherit pro_attribs_classCdrSpecies"><td class="mdescLeft">&#160;</td><td class="mdescRight">Diffusive <a class="el" href="classCdrSpecies.html" title="Abstract class that describes the scalar quantity that is advected in CdrSolver.">CdrSpecies</a> or not. <br /></td></tr>
 <tr class="separator:abc3587b2182ee3126ac972b0e7ce1cc7 inherit pro_attribs_classCdrSpecies"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3c3ed3a4a2d4c98322cbb10e035cec41 inherit pro_attribs_classCdrSpecies" id="r_a3c3ed3a4a2d4c98322cbb10e035cec41"><td class="memItemLeft" align="right" valign="top">
-<a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_isMobile</b></td></tr>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_isMobile</b></td></tr>
 <tr class="memdesc:a3c3ed3a4a2d4c98322cbb10e035cec41 inherit pro_attribs_classCdrSpecies"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mobile <a class="el" href="classCdrSpecies.html" title="Abstract class that describes the scalar quantity that is advected in CdrSolver.">CdrSpecies</a> or not. <br /></td></tr>
 <tr class="separator:a3c3ed3a4a2d4c98322cbb10e035cec41 inherit pro_attribs_classCdrSpecies"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a52aa0b0b653e0d22ea9bfd87e334593d inherit pro_attribs_classCdrSpecies" id="r_a52aa0b0b653e0d22ea9bfd87e334593d"><td class="memItemLeft" align="right" valign="top">
@@ -204,19 +204,19 @@ Protected Attributes</h2></td></tr>
         <tr>
           <td class="memname">Physics::DischargeInception::DischargeInceptionSpecies::DischargeInceptionSpecies </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_pos</a>)&gt; &amp;&#160;</td>
+          <td class="paramtype">const std::function&lt; Real(const RealVect &amp;a_pos)&gt; &amp;&#160;</td>
           <td class="paramname"><em>a_initialData</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td>
+          <td class="paramtype">const bool&#160;</td>
           <td class="paramname"><em>a_mobile</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td>
+          <td class="paramtype">const bool&#160;</td>
           <td class="paramname"><em>a_diffusive</em>&#160;</td>
         </tr>
         <tr>
@@ -255,15 +255,15 @@ Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">Real</a> Physics::DischargeInception::DischargeInceptionSpecies::initialData </td>
+          <td class="memname">Real Physics::DischargeInception::DischargeInceptionSpecies::initialData </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;&#160;</td>
+          <td class="paramtype">const RealVect &amp;&#160;</td>
           <td class="paramname"><em>a_pos</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td>
+          <td class="paramtype">const Real&#160;</td>
           <td class="paramname"><em>a_time</em>&#160;</td>
         </tr>
         <tr>

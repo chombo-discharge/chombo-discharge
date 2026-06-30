@@ -113,11 +113,11 @@ Classes</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
 Public Types</h2></td></tr>
 <tr class="memitem:a87b7cf2ff4c56fb0ee98ebca42fdd839" id="r_a87b7cf2ff4c56fb0ee98ebca42fdd839"><td class="memItemLeft" align="right" valign="top"><a id="a87b7cf2ff4c56fb0ee98ebca42fdd839" name="a87b7cf2ff4c56fb0ee98ebca42fdd839"></a>
-<a class="el" href="classTracerParticleSolver.html">using</a>&#160;</td><td class="memItemRight" valign="bottom"><b>Leaf</b> = <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;</td></tr>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>Leaf</b> = <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; P, Traits &gt;</td></tr>
 <tr class="memdesc:a87b7cf2ff4c56fb0ee98ebca42fdd839"><td class="mdescLeft">&#160;</td><td class="mdescRight">The per-patch leaf type owned at every (level, box). <br /></td></tr>
 <tr class="separator:a87b7cf2ff4c56fb0ee98ebca42fdd839"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac062ccbae3ee7ce005703a85ec15e1a5" id="r_ac062ccbae3ee7ce005703a85ec15e1a5"><td class="memItemLeft" align="right" valign="top"><a id="ac062ccbae3ee7ce005703a85ec15e1a5" name="ac062ccbae3ee7ce005703a85ec15e1a5"></a>
-<a class="el" href="classTracerParticleSolver.html">using</a>&#160;</td><td class="memItemRight" valign="bottom"><b>LevelParticles</b> = <a class="el" href="classTracerParticleSolver.html">LayoutData</a>&lt; <a class="el" href="classParticleContainer.html#a87b7cf2ff4c56fb0ee98ebca42fdd839">Leaf</a> &gt;</td></tr>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>LevelParticles</b> = LayoutData&lt; <a class="el" href="classParticleContainer.html#a87b7cf2ff4c56fb0ee98ebca42fdd839">Leaf</a> &gt;</td></tr>
 <tr class="memdesc:ac062ccbae3ee7ce005703a85ec15e1a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">The per-level holder type (one Leaf per box on the level's DisjointBoxLayout). <br /></td></tr>
 <tr class="separator:ac062ccbae3ee7ce005703a85ec15e1a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -129,246 +129,246 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a436bc8a55380fbea2d491d02ba5b7466"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct an empty, undefined container. Call <a class="el" href="classParticleContainer.html#a76b35ee8a07d588f7070ccd6f658ad47" title="Allocate the per-level holders and the per-level tile-ownership maps over the AMR grids.">define()</a> before use. <br /></td></tr>
 <tr class="separator:a436bc8a55380fbea2d491d02ba5b7466"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad52a0e255eba4ae87be9ea8faa3c574f" id="r_ad52a0e255eba4ae87be9ea8faa3c574f"><td class="memItemLeft" align="right" valign="top"><a id="ad52a0e255eba4ae87be9ea8faa3c574f" name="ad52a0e255eba4ae87be9ea8faa3c574f"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>~ParticleContainer</b> ()=<a class="el" href="classTracerParticleSolver.html">default</a></td></tr>
+&#160;</td><td class="memItemRight" valign="bottom"><b>~ParticleContainer</b> ()=default</td></tr>
 <tr class="memdesc:ad52a0e255eba4ae87be9ea8faa3c574f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. <br /></td></tr>
 <tr class="separator:ad52a0e255eba4ae87be9ea8faa3c574f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac5c1aa158a46331465db43b87e796611" id="r_ac5c1aa158a46331465db43b87e796611"><td class="memItemLeft" align="right" valign="top"><a id="ac5c1aa158a46331465db43b87e796611" name="ac5c1aa158a46331465db43b87e796611"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>ParticleContainer</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a> &amp;)=<a class="el" href="classTracerParticleSolver.html">delete</a></td></tr>
+&#160;</td><td class="memItemRight" valign="bottom"><b>ParticleContainer</b> (const <a class="el" href="classParticleContainer.html">ParticleContainer</a> &amp;)=delete</td></tr>
 <tr class="memdesc:ac5c1aa158a46331465db43b87e796611"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy construction is deleted (holders are shared RefCountedPtr &ndash; a copy would alias). <br /></td></tr>
 <tr class="separator:ac5c1aa158a46331465db43b87e796611"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a35ddd88eda595d55ae5a072c8dfa7a59" id="r_a35ddd88eda595d55ae5a072c8dfa7a59"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classParticleContainer.html">ParticleContainer</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a35ddd88eda595d55ae5a072c8dfa7a59">operator=</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a> &amp;)=<a class="el" href="classTracerParticleSolver.html">delete</a></td></tr>
+<tr class="memitem:a35ddd88eda595d55ae5a072c8dfa7a59" id="r_a35ddd88eda595d55ae5a072c8dfa7a59"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classParticleContainer.html">ParticleContainer</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a35ddd88eda595d55ae5a072c8dfa7a59">operator=</a> (const <a class="el" href="classParticleContainer.html">ParticleContainer</a> &amp;)=delete</td></tr>
 <tr class="memdesc:a35ddd88eda595d55ae5a072c8dfa7a59"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy assignment is deleted (move-only ownership).  <br /></td></tr>
 <tr class="separator:a35ddd88eda595d55ae5a072c8dfa7a59"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a76b35ee8a07d588f7070ccd6f658ad47" id="r_a76b35ee8a07d588f7070ccd6f658ad47"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a76b35ee8a07d588f7070ccd6f658ad47">define</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">DisjointBoxLayout</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_grids</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_domains</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_dx</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">int</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_refRat</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_probLo</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_minBlockSize</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classLevelTiles.html">LevelTiles</a> &gt; &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_levelTiles</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_finestLevel</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_realm</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">BaseFab</a>&lt; <a class="el" href="classTracerParticleSolver.html">bool</a> &gt; &gt; &gt; &gt; *<a class="el" href="classTracerParticleSolver.html">a_validCells</a>)</td></tr>
+<tr class="memitem:a76b35ee8a07d588f7070ccd6f658ad47" id="r_a76b35ee8a07d588f7070ccd6f658ad47"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a76b35ee8a07d588f7070ccd6f658ad47">define</a> (const Vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const Vector&lt; ProblemDomain &gt; &amp;a_domains, const Vector&lt; Real &gt; &amp;a_dx, const Vector&lt; int &gt; &amp;a_refRat, const RealVect &amp;a_probLo, const int a_minBlockSize, const Vector&lt; RefCountedPtr&lt; <a class="el" href="classLevelTiles.html">LevelTiles</a> &gt; &gt; &amp;a_levelTiles, const int a_finestLevel, const std::string &amp;a_realm, const Vector&lt; RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt; &gt; *a_validCells)</td></tr>
 <tr class="memdesc:a76b35ee8a07d588f7070ccd6f658ad47"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocate the per-level holders and the per-level tile-ownership maps over the AMR grids.  <br /></td></tr>
 <tr class="separator:a76b35ee8a07d588f7070ccd6f658ad47"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Grid metadata</div></td></tr>
-<tr class="memitem:a8123d5012822f5fafe8ee7198d594c3c" id="r_a8123d5012822f5fafe8ee7198d594c3c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">DisjointBoxLayout</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a8123d5012822f5fafe8ee7198d594c3c">getGrids</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memitem:a8123d5012822f5fafe8ee7198d594c3c" id="r_a8123d5012822f5fafe8ee7198d594c3c"><td class="memItemLeft" align="right" valign="top">const Vector&lt; DisjointBoxLayout &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a8123d5012822f5fafe8ee7198d594c3c">getGrids</a> () const</td></tr>
 <tr class="memdesc:a8123d5012822f5fafe8ee7198d594c3c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-level AMR grids.  <br /></td></tr>
 <tr class="separator:a8123d5012822f5fafe8ee7198d594c3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a21447a8869fff4facce3de5c4a1cde26" id="r_a21447a8869fff4facce3de5c4a1cde26"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RealVect</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a21447a8869fff4facce3de5c4a1cde26">getDx</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memitem:a21447a8869fff4facce3de5c4a1cde26" id="r_a21447a8869fff4facce3de5c4a1cde26"><td class="memItemLeft" align="right" valign="top">Vector&lt; RealVect &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a21447a8869fff4facce3de5c4a1cde26">getDx</a> () const</td></tr>
 <tr class="memdesc:a21447a8869fff4facce3de5c4a1cde26"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-level grid spacing.  <br /></td></tr>
 <tr class="separator:a21447a8869fff4facce3de5c4a1cde26"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a95f29caf267b88936917ec94ba3f5ff0" id="r_a95f29caf267b88936917ec94ba3f5ff0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">RealVect</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a95f29caf267b88936917ec94ba3f5ff0">getProbLo</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memitem:a95f29caf267b88936917ec94ba3f5ff0" id="r_a95f29caf267b88936917ec94ba3f5ff0"><td class="memItemLeft" align="right" valign="top">RealVect&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a95f29caf267b88936917ec94ba3f5ff0">getProbLo</a> () const</td></tr>
 <tr class="memdesc:a95f29caf267b88936917ec94ba3f5ff0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lower-left corner of the physical domain.  <br /></td></tr>
 <tr class="separator:a95f29caf267b88936917ec94ba3f5ff0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5f8af8d0aece940c7e14692009bf9917" id="r_a5f8af8d0aece940c7e14692009bf9917"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a5f8af8d0aece940c7e14692009bf9917">getFinestLevel</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memitem:a5f8af8d0aece940c7e14692009bf9917" id="r_a5f8af8d0aece940c7e14692009bf9917"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a5f8af8d0aece940c7e14692009bf9917">getFinestLevel</a> () const</td></tr>
 <tr class="memdesc:a5f8af8d0aece940c7e14692009bf9917"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finest AMR level index.  <br /></td></tr>
 <tr class="separator:a5f8af8d0aece940c7e14692009bf9917"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aace757bc99cf469521c23af3c0d082a2" id="r_aace757bc99cf469521c23af3c0d082a2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#aace757bc99cf469521c23af3c0d082a2">getRealm</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memitem:aace757bc99cf469521c23af3c0d082a2" id="r_aace757bc99cf469521c23af3c0d082a2"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#aace757bc99cf469521c23af3c0d082a2">getRealm</a> () const</td></tr>
 <tr class="memdesc:aace757bc99cf469521c23af3c0d082a2"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> label.  <br /></td></tr>
 <tr class="separator:aace757bc99cf469521c23af3c0d082a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Particle holders</div></td></tr>
-<tr class="memitem:af67e7b6e2ac74bc71f0a869652a41090" id="r_af67e7b6e2ac74bc71f0a869652a41090"><td class="memItemLeft" align="right" valign="top"><a class="el" href="CD__ParticleContainer_8H.html#aebe7aa617c4ebd39bc2093e596bdb0ad">AMRParticlesSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#af67e7b6e2ac74bc71f0a869652a41090">getParticles</a> ()</td></tr>
+<tr class="memitem:af67e7b6e2ac74bc71f0a869652a41090" id="r_af67e7b6e2ac74bc71f0a869652a41090"><td class="memItemLeft" align="right" valign="top"><a class="el" href="CD__ParticleContainer_8H.html#aebe7aa617c4ebd39bc2093e596bdb0ad">AMRParticlesSoA</a>&lt; P, Traits &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#af67e7b6e2ac74bc71f0a869652a41090">getParticles</a> ()</td></tr>
 <tr class="memdesc:af67e7b6e2ac74bc71f0a869652a41090"><td class="mdescLeft">&#160;</td><td class="mdescRight">The valid particles on all levels.  <br /></td></tr>
 <tr class="separator:af67e7b6e2ac74bc71f0a869652a41090"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac005b2117f23d11b64dcdef91508ee79" id="r_ac005b2117f23d11b64dcdef91508ee79"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__ParticleContainer_8H.html#aebe7aa617c4ebd39bc2093e596bdb0ad">AMRParticlesSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#ac005b2117f23d11b64dcdef91508ee79">getParticles</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memitem:ac005b2117f23d11b64dcdef91508ee79" id="r_ac005b2117f23d11b64dcdef91508ee79"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="CD__ParticleContainer_8H.html#aebe7aa617c4ebd39bc2093e596bdb0ad">AMRParticlesSoA</a>&lt; P, Traits &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#ac005b2117f23d11b64dcdef91508ee79">getParticles</a> () const</td></tr>
 <tr class="memdesc:ac005b2117f23d11b64dcdef91508ee79"><td class="mdescLeft">&#160;</td><td class="mdescRight">The valid particles on all levels (const).  <br /></td></tr>
 <tr class="separator:ac005b2117f23d11b64dcdef91508ee79"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af491e445a7e8aae6a5aca11be6a7eb2e" id="r_af491e445a7e8aae6a5aca11be6a7eb2e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="CD__ParticleContainer_8H.html#aebe7aa617c4ebd39bc2093e596bdb0ad">AMRParticlesSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#af491e445a7e8aae6a5aca11be6a7eb2e">getMaskParticles</a> ()</td></tr>
+<tr class="memitem:af491e445a7e8aae6a5aca11be6a7eb2e" id="r_af491e445a7e8aae6a5aca11be6a7eb2e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="CD__ParticleContainer_8H.html#aebe7aa617c4ebd39bc2093e596bdb0ad">AMRParticlesSoA</a>&lt; P, Traits &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#af491e445a7e8aae6a5aca11be6a7eb2e">getMaskParticles</a> ()</td></tr>
 <tr class="memdesc:af491e445a7e8aae6a5aca11be6a7eb2e"><td class="mdescLeft">&#160;</td><td class="mdescRight">The halo/mask particles on all levels.  <br /></td></tr>
 <tr class="separator:af491e445a7e8aae6a5aca11be6a7eb2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6a0d7cc66d7268e0793a36d1f230b2d4" id="r_a6a0d7cc66d7268e0793a36d1f230b2d4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__ParticleContainer_8H.html#aebe7aa617c4ebd39bc2093e596bdb0ad">AMRParticlesSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a6a0d7cc66d7268e0793a36d1f230b2d4">getMaskParticles</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memitem:a6a0d7cc66d7268e0793a36d1f230b2d4" id="r_a6a0d7cc66d7268e0793a36d1f230b2d4"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="CD__ParticleContainer_8H.html#aebe7aa617c4ebd39bc2093e596bdb0ad">AMRParticlesSoA</a>&lt; P, Traits &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a6a0d7cc66d7268e0793a36d1f230b2d4">getMaskParticles</a> () const</td></tr>
 <tr class="memdesc:a6a0d7cc66d7268e0793a36d1f230b2d4"><td class="mdescLeft">&#160;</td><td class="mdescRight">The halo/mask particles on all levels (const).  <br /></td></tr>
 <tr class="separator:a6a0d7cc66d7268e0793a36d1f230b2d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9d077fd9e8dd5267ecda1020fe980f69" id="r_a9d077fd9e8dd5267ecda1020fe980f69"><td class="memItemLeft" align="right" valign="top"><a class="el" href="CD__ParticleContainer_8H.html#aebe7aa617c4ebd39bc2093e596bdb0ad">AMRParticlesSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a9d077fd9e8dd5267ecda1020fe980f69">getBufferParticles</a> ()</td></tr>
+<tr class="memitem:a9d077fd9e8dd5267ecda1020fe980f69" id="r_a9d077fd9e8dd5267ecda1020fe980f69"><td class="memItemLeft" align="right" valign="top"><a class="el" href="CD__ParticleContainer_8H.html#aebe7aa617c4ebd39bc2093e596bdb0ad">AMRParticlesSoA</a>&lt; P, Traits &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a9d077fd9e8dd5267ecda1020fe980f69">getBufferParticles</a> ()</td></tr>
 <tr class="memdesc:a9d077fd9e8dd5267ecda1020fe980f69"><td class="mdescLeft">&#160;</td><td class="mdescRight">The grown-grid buffer particles on all levels.  <br /></td></tr>
 <tr class="separator:a9d077fd9e8dd5267ecda1020fe980f69"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5ce2c58eb13f71c0a74dee0aeed38d46" id="r_a5ce2c58eb13f71c0a74dee0aeed38d46"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__ParticleContainer_8H.html#aebe7aa617c4ebd39bc2093e596bdb0ad">AMRParticlesSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a5ce2c58eb13f71c0a74dee0aeed38d46">getBufferParticles</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memitem:a5ce2c58eb13f71c0a74dee0aeed38d46" id="r_a5ce2c58eb13f71c0a74dee0aeed38d46"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="CD__ParticleContainer_8H.html#aebe7aa617c4ebd39bc2093e596bdb0ad">AMRParticlesSoA</a>&lt; P, Traits &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a5ce2c58eb13f71c0a74dee0aeed38d46">getBufferParticles</a> () const</td></tr>
 <tr class="memdesc:a5ce2c58eb13f71c0a74dee0aeed38d46"><td class="mdescLeft">&#160;</td><td class="mdescRight">The grown-grid buffer particles on all levels (const).  <br /></td></tr>
 <tr class="separator:a5ce2c58eb13f71c0a74dee0aeed38d46"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6fce205a588f7cd9f3f77dc5e2528d2c" id="r_a6fce205a588f7cd9f3f77dc5e2528d2c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classParticleContainer.html#ac062ccbae3ee7ce005703a85ec15e1a5">LevelParticles</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a6fce205a588f7cd9f3f77dc5e2528d2c">operator[]</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_lvl</a>)</td></tr>
+<tr class="memitem:a6fce205a588f7cd9f3f77dc5e2528d2c" id="r_a6fce205a588f7cd9f3f77dc5e2528d2c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classParticleContainer.html#ac062ccbae3ee7ce005703a85ec15e1a5">LevelParticles</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a6fce205a588f7cd9f3f77dc5e2528d2c">operator[]</a> (const int a_lvl)</td></tr>
 <tr class="memdesc:a6fce205a588f7cd9f3f77dc5e2528d2c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Valid particles on one level (index by DataIndex to reach a patch's Leaf).  <br /></td></tr>
 <tr class="separator:a6fce205a588f7cd9f3f77dc5e2528d2c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a01ad81822934437c51104e8b3a9d1679" id="r_a01ad81822934437c51104e8b3a9d1679"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleContainer.html#ac062ccbae3ee7ce005703a85ec15e1a5">LevelParticles</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a01ad81822934437c51104e8b3a9d1679">operator[]</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_lvl</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memitem:a01ad81822934437c51104e8b3a9d1679" id="r_a01ad81822934437c51104e8b3a9d1679"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classParticleContainer.html#ac062ccbae3ee7ce005703a85ec15e1a5">LevelParticles</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a01ad81822934437c51104e8b3a9d1679">operator[]</a> (const int a_lvl) const</td></tr>
 <tr class="memdesc:a01ad81822934437c51104e8b3a9d1679"><td class="mdescLeft">&#160;</td><td class="mdescRight">Valid particles on one level (const).  <br /></td></tr>
 <tr class="separator:a01ad81822934437c51104e8b3a9d1679"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">State</div></td></tr>
-<tr class="memitem:a7e82ffb50d4e29e8e0a42c4c322c8717" id="r_a7e82ffb50d4e29e8e0a42c4c322c8717"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a7e82ffb50d4e29e8e0a42c4c322c8717">isOrganizedByCell</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memitem:a7e82ffb50d4e29e8e0a42c4c322c8717" id="r_a7e82ffb50d4e29e8e0a42c4c322c8717"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a7e82ffb50d4e29e8e0a42c4c322c8717">isOrganizedByCell</a> () const</td></tr>
 <tr class="memdesc:a7e82ffb50d4e29e8e0a42c4c322c8717"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether the valid leaves are currently cell-sorted.  <br /></td></tr>
 <tr class="separator:a7e82ffb50d4e29e8e0a42c4c322c8717"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a04d95ecab21858ae77fc9d95d7b7ce3d" id="r_a04d95ecab21858ae77fc9d95d7b7ce3d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a04d95ecab21858ae77fc9d95d7b7ce3d">isDefined</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memitem:a04d95ecab21858ae77fc9d95d7b7ce3d" id="r_a04d95ecab21858ae77fc9d95d7b7ce3d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a04d95ecab21858ae77fc9d95d7b7ce3d">isDefined</a> () const</td></tr>
 <tr class="memdesc:a04d95ecab21858ae77fc9d95d7b7ce3d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether <a class="el" href="classParticleContainer.html#a76b35ee8a07d588f7070ccd6f658ad47" title="Allocate the per-level holders and the per-level tile-ownership maps over the AMR grids.">define()</a> has been called.  <br /></td></tr>
 <tr class="separator:a04d95ecab21858ae77fc9d95d7b7ce3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Population</div></td></tr>
 <tr class="memitem:a10dea58e175d3e0686716dc9d4972291" id="r_a10dea58e175d3e0686716dc9d4972291"><td class="memItemLeft" align="right" valign="top"><a id="a10dea58e175d3e0686716dc9d4972291" name="a10dea58e175d3e0686716dc9d4972291"></a>
-<a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>clearParticles</b> ()</td></tr>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>clearParticles</b> ()</td></tr>
 <tr class="memdesc:a10dea58e175d3e0686716dc9d4972291"><td class="mdescLeft">&#160;</td><td class="mdescRight">Drop all valid particles on every level (keeps each leaf's arena capacity). <br /></td></tr>
 <tr class="separator:a10dea58e175d3e0686716dc9d4972291"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abcd1d984c501cd1508c1df3de51117b8" id="r_abcd1d984c501cd1508c1df3de51117b8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#abcd1d984c501cd1508c1df3de51117b8">addParticlesDestructive</a> (<a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_particles</a>)</td></tr>
+<tr class="memitem:abcd1d984c501cd1508c1df3de51117b8" id="r_abcd1d984c501cd1508c1df3de51117b8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#abcd1d984c501cd1508c1df3de51117b8">addParticlesDestructive</a> (<a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; P, Traits &gt; &amp;a_particles)</td></tr>
 <tr class="memdesc:abcd1d984c501cd1508c1df3de51117b8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a free-standing buffer of particles to the container, routing each to its owner.  <br /></td></tr>
 <tr class="separator:abcd1d984c501cd1508c1df3de51117b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Counting</div></td></tr>
-<tr class="memitem:ac07f5f5c59ac8476413c53357dce93c7" id="r_ac07f5f5c59ac8476413c53357dce93c7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">unsigned</a> <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#ac07f5f5c59ac8476413c53357dce93c7">getNumberOfValidParticlesLocal</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memitem:ac07f5f5c59ac8476413c53357dce93c7" id="r_ac07f5f5c59ac8476413c53357dce93c7"><td class="memItemLeft" align="right" valign="top">unsigned long long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#ac07f5f5c59ac8476413c53357dce93c7">getNumberOfValidParticlesLocal</a> () const</td></tr>
 <tr class="memdesc:ac07f5f5c59ac8476413c53357dce93c7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of valid particles owned by this rank.  <br /></td></tr>
 <tr class="separator:ac07f5f5c59ac8476413c53357dce93c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a53c76176615da3bb4b8e252448ce10c3" id="r_a53c76176615da3bb4b8e252448ce10c3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">unsigned</a> <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a53c76176615da3bb4b8e252448ce10c3">getNumberOfValidParticlesGlobal</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memitem:a53c76176615da3bb4b8e252448ce10c3" id="r_a53c76176615da3bb4b8e252448ce10c3"><td class="memItemLeft" align="right" valign="top">unsigned long long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a53c76176615da3bb4b8e252448ce10c3">getNumberOfValidParticlesGlobal</a> () const</td></tr>
 <tr class="memdesc:a53c76176615da3bb4b8e252448ce10c3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of valid particles across all ranks.  <br /></td></tr>
 <tr class="separator:a53c76176615da3bb4b8e252448ce10c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a703a672990580ce605a1d194f7641f92" id="r_a703a672990580ce605a1d194f7641f92"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">unsigned</a> <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a703a672990580ce605a1d194f7641f92">getNumberOfOutcastParticlesLocal</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memitem:a703a672990580ce605a1d194f7641f92" id="r_a703a672990580ce605a1d194f7641f92"><td class="memItemLeft" align="right" valign="top">unsigned long long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a703a672990580ce605a1d194f7641f92">getNumberOfOutcastParticlesLocal</a> () const</td></tr>
 <tr class="memdesc:a703a672990580ce605a1d194f7641f92"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of particles dropped off-domain by the most recent <a class="el" href="classParticleContainer.html#aad7d26975f869cee92354c1d14e16be1" title="Redistribute every valid particle to the patch/level/rank that owns its cell.">remap()</a> on this rank.  <br /></td></tr>
 <tr class="separator:a703a672990580ce605a1d194f7641f92"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a64d3724cf54c5a2ce1910425b4027a9d" id="r_a64d3724cf54c5a2ce1910425b4027a9d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">unsigned</a> <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a64d3724cf54c5a2ce1910425b4027a9d">getNumberOfOutcastParticlesGlobal</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memitem:a64d3724cf54c5a2ce1910425b4027a9d" id="r_a64d3724cf54c5a2ce1910425b4027a9d"><td class="memItemLeft" align="right" valign="top">unsigned long long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a64d3724cf54c5a2ce1910425b4027a9d">getNumberOfOutcastParticlesGlobal</a> () const</td></tr>
 <tr class="memdesc:a64d3724cf54c5a2ce1910425b4027a9d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of particles dropped off-domain by the most recent <a class="el" href="classParticleContainer.html#aad7d26975f869cee92354c1d14e16be1" title="Redistribute every valid particle to the patch/level/rank that owns its cell.">remap()</a>, across all ranks.  <br /></td></tr>
 <tr class="separator:a64d3724cf54c5a2ce1910425b4027a9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Dynamics</div></td></tr>
-<tr class="memitem:aad7d26975f869cee92354c1d14e16be1" id="r_aad7d26975f869cee92354c1d14e16be1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#aad7d26975f869cee92354c1d14e16be1">remap</a> ()</td></tr>
+<tr class="memitem:aad7d26975f869cee92354c1d14e16be1" id="r_aad7d26975f869cee92354c1d14e16be1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#aad7d26975f869cee92354c1d14e16be1">remap</a> ()</td></tr>
 <tr class="memdesc:aad7d26975f869cee92354c1d14e16be1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Redistribute every valid particle to the patch/level/rank that owns its cell.  <br /></td></tr>
 <tr class="separator:aad7d26975f869cee92354c1d14e16be1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a59356226c69f0aaad9bbb1a36756ee9f" id="r_a59356226c69f0aaad9bbb1a36756ee9f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a59356226c69f0aaad9bbb1a36756ee9f">preRegrid</a> ()</td></tr>
+<tr class="memitem:a59356226c69f0aaad9bbb1a36756ee9f" id="r_a59356226c69f0aaad9bbb1a36756ee9f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a59356226c69f0aaad9bbb1a36756ee9f">preRegrid</a> ()</td></tr>
 <tr class="memdesc:a59356226c69f0aaad9bbb1a36756ee9f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cache the current valid particles ahead of a regrid.  <br /></td></tr>
 <tr class="separator:a59356226c69f0aaad9bbb1a36756ee9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0d300b45ec1be0ec77b4350653429d1f" id="r_a0d300b45ec1be0ec77b4350653429d1f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a0d300b45ec1be0ec77b4350653429d1f">regrid</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">DisjointBoxLayout</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_grids</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_domains</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_dx</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">int</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_refRat</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_minBlockSize</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classLevelTiles.html">LevelTiles</a> &gt; &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_levelTiles</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_newFinestLevel</a>)</td></tr>
+<tr class="memitem:a0d300b45ec1be0ec77b4350653429d1f" id="r_a0d300b45ec1be0ec77b4350653429d1f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a0d300b45ec1be0ec77b4350653429d1f">regrid</a> (const Vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const Vector&lt; ProblemDomain &gt; &amp;a_domains, const Vector&lt; Real &gt; &amp;a_dx, const Vector&lt; int &gt; &amp;a_refRat, const int a_minBlockSize, const Vector&lt; RefCountedPtr&lt; <a class="el" href="classLevelTiles.html">LevelTiles</a> &gt; &gt; &amp;a_levelTiles, const int a_newFinestLevel)</td></tr>
 <tr class="memdesc:a0d300b45ec1be0ec77b4350653429d1f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rebuild over a new AMR layout and redistribute the <a class="el" href="classParticleContainer.html#a59356226c69f0aaad9bbb1a36756ee9f" title="Cache the current valid particles ahead of a regrid.">preRegrid()</a>-cached particles onto it.  <br /></td></tr>
 <tr class="separator:a0d300b45ec1be0ec77b4350653429d1f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Halo and buffer particles</div></td></tr>
-<tr class="memitem:ad12fc7d10652f6aa1b9e543517c64279" id="r_ad12fc7d10652f6aa1b9e543517c64279"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#ad12fc7d10652f6aa1b9e543517c64279">copyMaskParticles</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">BaseFab</a>&lt; <a class="el" href="classTracerParticleSolver.html">bool</a> &gt; &gt; &gt; &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_mask</a>)</td></tr>
+<tr class="memitem:ad12fc7d10652f6aa1b9e543517c64279" id="r_ad12fc7d10652f6aa1b9e543517c64279"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#ad12fc7d10652f6aa1b9e543517c64279">copyMaskParticles</a> (const Vector&lt; RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt; &gt; &amp;a_mask)</td></tr>
 <tr class="memdesc:ad12fc7d10652f6aa1b9e543517c64279"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy the valid particles selected by a per-cell mask into the mask holder, all levels.  <br /></td></tr>
 <tr class="separator:ad12fc7d10652f6aa1b9e543517c64279"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adcbec5aeef293ebaaec29db9977f74e7" id="r_adcbec5aeef293ebaaec29db9977f74e7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#adcbec5aeef293ebaaec29db9977f74e7">copyMaskParticles</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_level</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">BaseFab</a>&lt; <a class="el" href="classTracerParticleSolver.html">bool</a> &gt; &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_mask</a>)</td></tr>
+<tr class="memitem:adcbec5aeef293ebaaec29db9977f74e7" id="r_adcbec5aeef293ebaaec29db9977f74e7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#adcbec5aeef293ebaaec29db9977f74e7">copyMaskParticles</a> (const int a_level, const LevelData&lt; BaseFab&lt; bool &gt; &gt; &amp;a_mask)</td></tr>
 <tr class="memdesc:adcbec5aeef293ebaaec29db9977f74e7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy the valid particles whose cell the mask marks true into the mask holder, one level.  <br /></td></tr>
 <tr class="separator:adcbec5aeef293ebaaec29db9977f74e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2c5aa826fa8ed13cdfbc390838c41d40" id="r_a2c5aa826fa8ed13cdfbc390838c41d40"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a2c5aa826fa8ed13cdfbc390838c41d40">transferMaskParticles</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">BaseFab</a>&lt; <a class="el" href="classTracerParticleSolver.html">bool</a> &gt; &gt; &gt; &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_mask</a>)</td></tr>
+<tr class="memitem:a2c5aa826fa8ed13cdfbc390838c41d40" id="r_a2c5aa826fa8ed13cdfbc390838c41d40"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a2c5aa826fa8ed13cdfbc390838c41d40">transferMaskParticles</a> (const Vector&lt; RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt; &gt; &amp;a_mask)</td></tr>
 <tr class="memdesc:a2c5aa826fa8ed13cdfbc390838c41d40"><td class="mdescLeft">&#160;</td><td class="mdescRight">Move the valid particles selected by a per-cell mask into the mask holder, all levels.  <br /></td></tr>
 <tr class="separator:a2c5aa826fa8ed13cdfbc390838c41d40"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2397eda58082392223a9b8a32d6ced77" id="r_a2397eda58082392223a9b8a32d6ced77"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a2397eda58082392223a9b8a32d6ced77">transferMaskParticles</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_level</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">BaseFab</a>&lt; <a class="el" href="classTracerParticleSolver.html">bool</a> &gt; &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_mask</a>)</td></tr>
+<tr class="memitem:a2397eda58082392223a9b8a32d6ced77" id="r_a2397eda58082392223a9b8a32d6ced77"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a2397eda58082392223a9b8a32d6ced77">transferMaskParticles</a> (const int a_level, const LevelData&lt; BaseFab&lt; bool &gt; &gt; &amp;a_mask)</td></tr>
 <tr class="memdesc:a2397eda58082392223a9b8a32d6ced77"><td class="mdescLeft">&#160;</td><td class="mdescRight">Move the valid particles whose cell the mask marks true into the mask holder, one level.  <br /></td></tr>
 <tr class="separator:a2397eda58082392223a9b8a32d6ced77"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab4ffb9e6f805669ca04061e64501b286" id="r_ab4ffb9e6f805669ca04061e64501b286"><td class="memItemLeft" align="right" valign="top"><a id="ab4ffb9e6f805669ca04061e64501b286" name="ab4ffb9e6f805669ca04061e64501b286"></a>
-<a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>clearMaskParticles</b> ()</td></tr>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>clearMaskParticles</b> ()</td></tr>
 <tr class="memdesc:ab4ffb9e6f805669ca04061e64501b286"><td class="mdescLeft">&#160;</td><td class="mdescRight">Drop all mask/halo particles on every level (keeps capacity). <br /></td></tr>
 <tr class="separator:ab4ffb9e6f805669ca04061e64501b286"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abe534de1fb79f8512ca492f46098db35" id="r_abe534de1fb79f8512ca492f46098db35"><td class="memItemLeft" align="right" valign="top"><a id="abe534de1fb79f8512ca492f46098db35" name="abe534de1fb79f8512ca492f46098db35"></a>
-<a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>clearBufferParticles</b> ()</td></tr>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>clearBufferParticles</b> ()</td></tr>
 <tr class="memdesc:abe534de1fb79f8512ca492f46098db35"><td class="mdescLeft">&#160;</td><td class="mdescRight">Drop all buffer particles on every level (keeps capacity). <br /></td></tr>
 <tr class="separator:abe534de1fb79f8512ca492f46098db35"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a081313c4908c45e0bb4cf27b6c19b769" id="r_a081313c4908c45e0bb4cf27b6c19b769"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">BoxLayout</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a081313c4908c45e0bb4cf27b6c19b769">getGrownGrids</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memitem:a081313c4908c45e0bb4cf27b6c19b769" id="r_a081313c4908c45e0bb4cf27b6c19b769"><td class="memItemLeft" align="right" valign="top">const Vector&lt; BoxLayout &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a081313c4908c45e0bb4cf27b6c19b769">getGrownGrids</a> () const</td></tr>
 <tr class="memdesc:a081313c4908c45e0bb4cf27b6c19b769"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-level grown grids that the buffer particles live on.  <br /></td></tr>
 <tr class="separator:a081313c4908c45e0bb4cf27b6c19b769"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad6300088ad6554bd177e6917227b5189" id="r_ad6300088ad6554bd177e6917227b5189"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#ad6300088ad6554bd177e6917227b5189">transferParticles</a> (<a class="el" href="CD__ParticleContainer_8H.html#aebe7aa617c4ebd39bc2093e596bdb0ad">AMRParticlesSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_source</a>)</td></tr>
+<tr class="memitem:ad6300088ad6554bd177e6917227b5189" id="r_ad6300088ad6554bd177e6917227b5189"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#ad6300088ad6554bd177e6917227b5189">transferParticles</a> (<a class="el" href="CD__ParticleContainer_8H.html#aebe7aa617c4ebd39bc2093e596bdb0ad">AMRParticlesSoA</a>&lt; P, Traits &gt; &amp;a_source)</td></tr>
 <tr class="memdesc:ad6300088ad6554bd177e6917227b5189"><td class="mdescLeft">&#160;</td><td class="mdescRight">Move all particles from another holder (on the same valid grids) into the valid holder.  <br /></td></tr>
 <tr class="separator:ad6300088ad6554bd177e6917227b5189"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Cell sorting</div></td></tr>
-<tr class="memitem:a63d36895f50a4b4b0c1c51d6beb7a9f9" id="r_a63d36895f50a4b4b0c1c51d6beb7a9f9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a63d36895f50a4b4b0c1c51d6beb7a9f9">organizeParticlesByCell</a> ()</td></tr>
+<tr class="memitem:a63d36895f50a4b4b0c1c51d6beb7a9f9" id="r_a63d36895f50a4b4b0c1c51d6beb7a9f9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a63d36895f50a4b4b0c1c51d6beb7a9f9">organizeParticlesByCell</a> ()</td></tr>
 <tr class="memdesc:a63d36895f50a4b4b0c1c51d6beb7a9f9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cell-sort every valid leaf (counting sort into Fortran cell order + CSR cell offsets).  <br /></td></tr>
 <tr class="separator:a63d36895f50a4b4b0c1c51d6beb7a9f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4c9adff2bd72cc3aa1e2346aa801626f" id="r_a4c9adff2bd72cc3aa1e2346aa801626f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a4c9adff2bd72cc3aa1e2346aa801626f">organizeParticlesByPatch</a> ()</td></tr>
+<tr class="memitem:a4c9adff2bd72cc3aa1e2346aa801626f" id="r_a4c9adff2bd72cc3aa1e2346aa801626f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a4c9adff2bd72cc3aa1e2346aa801626f">organizeParticlesByPatch</a> ()</td></tr>
 <tr class="memdesc:a4c9adff2bd72cc3aa1e2346aa801626f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return to a by-patch view (the leaves remain a single contiguous array per patch).  <br /></td></tr>
 <tr class="separator:a4c9adff2bd72cc3aa1e2346aa801626f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-types" name="pro-types"></a>
 Protected Types</h2></td></tr>
 <tr class="memitem:ae2cce85a255d04a2418fc69832343a2f" id="r_ae2cce85a255d04a2418fc69832343a2f"><td class="memItemLeft" align="right" valign="top"><a id="ae2cce85a255d04a2418fc69832343a2f" name="ae2cce85a255d04a2418fc69832343a2f"></a>
-<a class="el" href="classTracerParticleSolver.html">using</a>&#160;</td><td class="memItemRight" valign="bottom"><b>PoolKey</b> = <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt; <a class="el" href="classTracerParticleSolver.html">int</a>, <a class="el" href="classTracerParticleSolver.html">unsigned</a> <a class="el" href="classTracerParticleSolver.html">int</a> &gt;</td></tr>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>PoolKey</b> = std::pair&lt; int, unsigned int &gt;</td></tr>
 <tr class="memdesc:ae2cce85a255d04a2418fc69832343a2f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pool key identifying a destination patch: (level, grid index within the level). <br /></td></tr>
 <tr class="separator:ae2cce85a255d04a2418fc69832343a2f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a55ca1dc0711b599cf86dc2e4036c832a" id="r_a55ca1dc0711b599cf86dc2e4036c832a"><td class="memItemLeft" align="right" valign="top"><a id="a55ca1dc0711b599cf86dc2e4036c832a" name="a55ca1dc0711b599cf86dc2e4036c832a"></a>
-<a class="el" href="classTracerParticleSolver.html">using</a>&#160;</td><td class="memItemRight" valign="bottom"><b>MoverPool</b> = <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::map</a>&lt; <a class="el" href="classParticleContainer.html#ae2cce85a255d04a2418fc69832343a2f">PoolKey</a>, <a class="el" href="classParticleContainer.html#a87b7cf2ff4c56fb0ee98ebca42fdd839">Leaf</a> &gt; &gt;</td></tr>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>MoverPool</b> = std::vector&lt; std::map&lt; <a class="el" href="classParticleContainer.html#ae2cce85a255d04a2418fc69832343a2f">PoolKey</a>, <a class="el" href="classParticleContainer.html#a87b7cf2ff4c56fb0ee98ebca42fdd839">Leaf</a> &gt; &gt;</td></tr>
 <tr class="memdesc:a55ca1dc0711b599cf86dc2e4036c832a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-rank pool of movers: pool[rank] maps a destination patch to a small SoA of particles. <br /></td></tr>
 <tr class="separator:a55ca1dc0711b599cf86dc2e4036c832a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
 <tr class="memitem:a3e5be9f836e89ceab4ed846de0880b4d" id="r_a3e5be9f836e89ceab4ed846de0880b4d"><td class="memItemLeft" align="right" valign="top"><a id="a3e5be9f836e89ceab4ed846de0880b4d" name="a3e5be9f836e89ceab4ed846de0880b4d"></a>
-<a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>setupGrownGrids</b> ()</td></tr>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>setupGrownGrids</b> ()</td></tr>
 <tr class="memdesc:a3e5be9f836e89ceab4ed846de0880b4d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the grown grids (buffer-particle layout): boxes grown by the refinement factor. <br /></td></tr>
 <tr class="separator:a3e5be9f836e89ceab4ed846de0880b4d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a565736db892977b62293eef688f8fd07" id="r_a565736db892977b62293eef688f8fd07"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classParticleContainer.html#a55ca1dc0711b599cf86dc2e4036c832a">MoverPool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a565736db892977b62293eef688f8fd07">gatherToPool</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__ParticleContainer_8H.html#aebe7aa617c4ebd39bc2093e596bdb0ad">AMRParticlesSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_source</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">DisjointBoxLayout</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_sourceGrids</a>)</td></tr>
+<tr class="memitem:a565736db892977b62293eef688f8fd07" id="r_a565736db892977b62293eef688f8fd07"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classParticleContainer.html#a55ca1dc0711b599cf86dc2e4036c832a">MoverPool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a565736db892977b62293eef688f8fd07">gatherToPool</a> (const <a class="el" href="CD__ParticleContainer_8H.html#aebe7aa617c4ebd39bc2093e596bdb0ad">AMRParticlesSoA</a>&lt; P, Traits &gt; &amp;a_source, const Vector&lt; DisjointBoxLayout &gt; &amp;a_sourceGrids)</td></tr>
 <tr class="memdesc:a565736db892977b62293eef688f8fd07"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gather every particle of a source holder into a per-rank, per-destination-patch pool.  <br /></td></tr>
 <tr class="separator:a565736db892977b62293eef688f8fd07"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3f0a8ff5bd653a029d686fc83c511f34" id="r_a3f0a8ff5bd653a029d686fc83c511f34"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classParticleContainer.html#a55ca1dc0711b599cf86dc2e4036c832a">MoverPool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a3f0a8ff5bd653a029d686fc83c511f34">gatherMoversToPool</a> ()</td></tr>
 <tr class="memdesc:a3f0a8ff5bd653a029d686fc83c511f34"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mask fast path for <a class="el" href="classParticleContainer.html#aad7d26975f869cee92354c1d14e16be1" title="Redistribute every valid particle to the patch/level/rank that owns its cell.">remap()</a>: pool ONLY the movers, leaving stayers in place.  <br /></td></tr>
 <tr class="separator:a3f0a8ff5bd653a029d686fc83c511f34"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaf178d7d1d1f57ed09880a214d2372a2" id="r_aaf178d7d1d1f57ed09880a214d2372a2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#aaf178d7d1d1f57ed09880a214d2372a2">distributeFromPool</a> (<a class="el" href="classParticleContainer.html#a55ca1dc0711b599cf86dc2e4036c832a">MoverPool</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_pool</a>)</td></tr>
+<tr class="memitem:aaf178d7d1d1f57ed09880a214d2372a2" id="r_aaf178d7d1d1f57ed09880a214d2372a2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#aaf178d7d1d1f57ed09880a214d2372a2">distributeFromPool</a> (<a class="el" href="classParticleContainer.html#a55ca1dc0711b599cf86dc2e4036c832a">MoverPool</a> &amp;a_pool)</td></tr>
 <tr class="memdesc:aaf178d7d1d1f57ed09880a214d2372a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Assign a mover pool into the (assumed empty) valid holders: local appends + MPI scatter.  <br /></td></tr>
 <tr class="separator:aaf178d7d1d1f57ed09880a214d2372a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a17bf7a1b121571660081516bb3650c33" id="r_a17bf7a1b121571660081516bb3650c33"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">IntVect</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a17bf7a1b121571660081516bb3650c33">cellIndex</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_lvl</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_pos</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memitem:a17bf7a1b121571660081516bb3650c33" id="r_a17bf7a1b121571660081516bb3650c33"><td class="memItemLeft" align="right" valign="top">IntVect&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a17bf7a1b121571660081516bb3650c33">cellIndex</a> (const int a_lvl, const RealVect &amp;a_pos) const</td></tr>
 <tr class="memdesc:a17bf7a1b121571660081516bb3650c33"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cell index containing a position on a given level (floor((x - probLo)/dx)).  <br /></td></tr>
 <tr class="separator:a17bf7a1b121571660081516bb3650c33"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2503981971f7735e94f3d64d4f372d4b" id="r_a2503981971f7735e94f3d64d4f372d4b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structParticleContainer_1_1Destination.html">Destination</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a2503981971f7735e94f3d64d4f372d4b">findDestination</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_pos</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memitem:a2503981971f7735e94f3d64d4f372d4b" id="r_a2503981971f7735e94f3d64d4f372d4b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structParticleContainer_1_1Destination.html">Destination</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a2503981971f7735e94f3d64d4f372d4b">findDestination</a> (const RealVect &amp;a_pos) const</td></tr>
 <tr class="memdesc:a2503981971f7735e94f3d64d4f372d4b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Map a position to its owning (level, grid index, rank) via the finest containing tile.  <br /></td></tr>
 <tr class="separator:a2503981971f7735e94f3d64d4f372d4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
 <tr class="memitem:adc568d065513c2c9d512adc4d5568ce9" id="r_adc568d065513c2c9d512adc4d5568ce9"><td class="memItemLeft" align="right" valign="top"><a id="adc568d065513c2c9d512adc4d5568ce9" name="adc568d065513c2c9d512adc4d5568ce9"></a>
-<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">DisjointBoxLayout</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_grids</b></td></tr>
+Vector&lt; DisjointBoxLayout &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_grids</b></td></tr>
 <tr class="memdesc:adc568d065513c2c9d512adc4d5568ce9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-level AMR grids. <br /></td></tr>
 <tr class="separator:adc568d065513c2c9d512adc4d5568ce9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac469a50d6fddd956388cae532a1b4548" id="r_ac469a50d6fddd956388cae532a1b4548"><td class="memItemLeft" align="right" valign="top"><a id="ac469a50d6fddd956388cae532a1b4548" name="ac469a50d6fddd956388cae532a1b4548"></a>
-<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_domains</b></td></tr>
+Vector&lt; ProblemDomain &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_domains</b></td></tr>
 <tr class="memdesc:ac469a50d6fddd956388cae532a1b4548"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-level problem domains. <br /></td></tr>
 <tr class="separator:ac469a50d6fddd956388cae532a1b4548"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad796c23dced6b2ebbba53526335de9e6" id="r_ad796c23dced6b2ebbba53526335de9e6"><td class="memItemLeft" align="right" valign="top"><a id="ad796c23dced6b2ebbba53526335de9e6" name="ad796c23dced6b2ebbba53526335de9e6"></a>
-<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RealVect</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_dx</b></td></tr>
+Vector&lt; RealVect &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_dx</b></td></tr>
 <tr class="memdesc:ad796c23dced6b2ebbba53526335de9e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-level grid spacing (isotropic, stored as RealVect). <br /></td></tr>
 <tr class="separator:ad796c23dced6b2ebbba53526335de9e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a606c3dacf7c7a52f30734110d95617f7" id="r_a606c3dacf7c7a52f30734110d95617f7"><td class="memItemLeft" align="right" valign="top"><a id="a606c3dacf7c7a52f30734110d95617f7" name="a606c3dacf7c7a52f30734110d95617f7"></a>
-<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">int</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_refRat</b></td></tr>
+Vector&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_refRat</b></td></tr>
 <tr class="memdesc:a606c3dacf7c7a52f30734110d95617f7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-level refinement ratios (entry l is the ratio between level l and l+1). <br /></td></tr>
 <tr class="separator:a606c3dacf7c7a52f30734110d95617f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab911aa631443e1c756a5392ff79faabc" id="r_ab911aa631443e1c756a5392ff79faabc"><td class="memItemLeft" align="right" valign="top"><a id="ab911aa631443e1c756a5392ff79faabc" name="ab911aa631443e1c756a5392ff79faabc"></a>
-<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classLevelTiles.html">LevelTiles</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_levelTiles</b></td></tr>
+Vector&lt; RefCountedPtr&lt; <a class="el" href="classLevelTiles.html">LevelTiles</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_levelTiles</b></td></tr>
 <tr class="memdesc:ab911aa631443e1c756a5392ff79faabc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-level tile-ownership maps (cell tile -&gt; owning grid index / rank), used by <a class="el" href="classParticleContainer.html#aad7d26975f869cee92354c1d14e16be1" title="Redistribute every valid particle to the patch/level/rank that owns its cell.">remap()</a>. <br /></td></tr>
 <tr class="separator:ab911aa631443e1c756a5392ff79faabc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9f11887700e788994fa15603aef2ecd7" id="r_a9f11887700e788994fa15603aef2ecd7"><td class="memItemLeft" align="right" valign="top"><a id="a9f11887700e788994fa15603aef2ecd7" name="a9f11887700e788994fa15603aef2ecd7"></a>
-<a class="el" href="classTracerParticleSolver.html">RealVect</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_probLo</b></td></tr>
+RealVect&#160;</td><td class="memItemRight" valign="bottom"><b>m_probLo</b></td></tr>
 <tr class="memdesc:a9f11887700e788994fa15603aef2ecd7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lower-left corner of the physical domain. <br /></td></tr>
 <tr class="separator:a9f11887700e788994fa15603aef2ecd7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9938e618fd10b94b4876c419fa97abed" id="r_a9938e618fd10b94b4876c419fa97abed"><td class="memItemLeft" align="right" valign="top"><a id="a9938e618fd10b94b4876c419fa97abed" name="a9938e618fd10b94b4876c419fa97abed"></a>
-<a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_minBlockSize</b></td></tr>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>m_minBlockSize</b></td></tr>
 <tr class="memdesc:a9938e618fd10b94b4876c419fa97abed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Grid blocking factor (tile size). <br /></td></tr>
 <tr class="separator:a9938e618fd10b94b4876c419fa97abed"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a329e0871cf8e1ed44efaa84b83d9edf3" id="r_a329e0871cf8e1ed44efaa84b83d9edf3"><td class="memItemLeft" align="right" valign="top"><a id="a329e0871cf8e1ed44efaa84b83d9edf3" name="a329e0871cf8e1ed44efaa84b83d9edf3"></a>
-<a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_finestLevel</b></td></tr>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>m_finestLevel</b></td></tr>
 <tr class="memdesc:a329e0871cf8e1ed44efaa84b83d9edf3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finest AMR level index. <br /></td></tr>
 <tr class="separator:a329e0871cf8e1ed44efaa84b83d9edf3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9076d8da13ab16988b9767b1c854f85e" id="r_a9076d8da13ab16988b9767b1c854f85e"><td class="memItemLeft" align="right" valign="top"><a id="a9076d8da13ab16988b9767b1c854f85e" name="a9076d8da13ab16988b9767b1c854f85e"></a>
-<a class="el" href="classTracerParticleSolver.html">unsigned</a> <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_numOutcastLocal</b></td></tr>
+unsigned long long&#160;</td><td class="memItemRight" valign="bottom"><b>m_numOutcastLocal</b></td></tr>
 <tr class="memdesc:a9076d8da13ab16988b9767b1c854f85e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Particles dropped off-domain by the most recent <a class="el" href="classParticleContainer.html#aad7d26975f869cee92354c1d14e16be1" title="Redistribute every valid particle to the patch/level/rank that owns its cell.">remap()</a> (local count). <br /></td></tr>
 <tr class="separator:a9076d8da13ab16988b9767b1c854f85e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a86ac4cdd6b56e67bf2e7623f5d14281e" id="r_a86ac4cdd6b56e67bf2e7623f5d14281e"><td class="memItemLeft" align="right" valign="top"><a id="a86ac4cdd6b56e67bf2e7623f5d14281e" name="a86ac4cdd6b56e67bf2e7623f5d14281e"></a>
-<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_realm</b></td></tr>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><b>m_realm</b></td></tr>
 <tr class="memdesc:a86ac4cdd6b56e67bf2e7623f5d14281e"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> label (diagnostics only). <br /></td></tr>
 <tr class="separator:a86ac4cdd6b56e67bf2e7623f5d14281e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a79188e998c3b8230901edcf93f622dd9" id="r_a79188e998c3b8230901edcf93f622dd9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">BaseFab</a>&lt; <a class="el" href="classTracerParticleSolver.html">bool</a> &gt; &gt; &gt; &gt; *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a79188e998c3b8230901edcf93f622dd9">m_validCells</a> = <a class="el" href="classTracerParticleSolver.html">nullptr</a></td></tr>
+<tr class="memitem:a79188e998c3b8230901edcf93f622dd9" id="r_a79188e998c3b8230901edcf93f622dd9"><td class="memItemLeft" align="right" valign="top">const Vector&lt; RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt; &gt; *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a79188e998c3b8230901edcf93f622dd9">m_validCells</a> = nullptr</td></tr>
 <tr class="memdesc:a79188e998c3b8230901edcf93f622dd9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Optional alias to the realm's valid-cell mask (true = cell not covered by a finer level).  <br /></td></tr>
 <tr class="separator:a79188e998c3b8230901edcf93f622dd9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae421ec08bacdaff85d57898f08c1f9ee" id="r_ae421ec08bacdaff85d57898f08c1f9ee"><td class="memItemLeft" align="right" valign="top"><a id="ae421ec08bacdaff85d57898f08c1f9ee" name="ae421ec08bacdaff85d57898f08c1f9ee"></a>
-<a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_isDefined</b></td></tr>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_isDefined</b></td></tr>
 <tr class="memdesc:ae421ec08bacdaff85d57898f08c1f9ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether <a class="el" href="classParticleContainer.html#a76b35ee8a07d588f7070ccd6f658ad47" title="Allocate the per-level holders and the per-level tile-ownership maps over the AMR grids.">define()</a> has been called. <br /></td></tr>
 <tr class="separator:ae421ec08bacdaff85d57898f08c1f9ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a85a3cc3641d33ee285eb70e949489395" id="r_a85a3cc3641d33ee285eb70e949489395"><td class="memItemLeft" align="right" valign="top"><a id="a85a3cc3641d33ee285eb70e949489395" name="a85a3cc3641d33ee285eb70e949489395"></a>
-<a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_isOrganizedByCell</b></td></tr>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_isOrganizedByCell</b></td></tr>
 <tr class="memdesc:a85a3cc3641d33ee285eb70e949489395"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether the valid leaves are currently cell-sorted. <br /></td></tr>
 <tr class="separator:a85a3cc3641d33ee285eb70e949489395"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6a11b502327eafc258dd7aa1692083f0" id="r_a6a11b502327eafc258dd7aa1692083f0"><td class="memItemLeft" align="right" valign="top"><a id="a6a11b502327eafc258dd7aa1692083f0" name="a6a11b502327eafc258dd7aa1692083f0"></a>
-<a class="el" href="CD__ParticleContainer_8H.html#aebe7aa617c4ebd39bc2093e596bdb0ad">AMRParticlesSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_particles</b></td></tr>
+<a class="el" href="CD__ParticleContainer_8H.html#aebe7aa617c4ebd39bc2093e596bdb0ad">AMRParticlesSoA</a>&lt; P, Traits &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_particles</b></td></tr>
 <tr class="memdesc:a6a11b502327eafc258dd7aa1692083f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Valid particles: one <a class="el" href="classParticleSoA.html" title="Arena-backed Struct-of-Arrays particle container for a single grid patch.">ParticleSoA</a> leaf per box, per level. <br /></td></tr>
 <tr class="separator:a6a11b502327eafc258dd7aa1692083f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3173658cba0d65fbb27a5dd8e8a95d90" id="r_a3173658cba0d65fbb27a5dd8e8a95d90"><td class="memItemLeft" align="right" valign="top"><a id="a3173658cba0d65fbb27a5dd8e8a95d90" name="a3173658cba0d65fbb27a5dd8e8a95d90"></a>
-<a class="el" href="CD__ParticleContainer_8H.html#aebe7aa617c4ebd39bc2093e596bdb0ad">AMRParticlesSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_cacheParticles</b></td></tr>
+<a class="el" href="CD__ParticleContainer_8H.html#aebe7aa617c4ebd39bc2093e596bdb0ad">AMRParticlesSoA</a>&lt; P, Traits &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_cacheParticles</b></td></tr>
 <tr class="memdesc:a3173658cba0d65fbb27a5dd8e8a95d90"><td class="mdescLeft">&#160;</td><td class="mdescRight">Regrid cache: the pre-regrid valid holders, kept alive over the old layout by <a class="el" href="classParticleContainer.html#a59356226c69f0aaad9bbb1a36756ee9f" title="Cache the current valid particles ahead of a regrid.">preRegrid()</a>. <br /></td></tr>
 <tr class="separator:a3173658cba0d65fbb27a5dd8e8a95d90"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af5a0a14cb0293271d7b1f65e6da7a1bc" id="r_af5a0a14cb0293271d7b1f65e6da7a1bc"><td class="memItemLeft" align="right" valign="top"><a id="af5a0a14cb0293271d7b1f65e6da7a1bc" name="af5a0a14cb0293271d7b1f65e6da7a1bc"></a>
-<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">DisjointBoxLayout</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_cacheGrids</b></td></tr>
+Vector&lt; DisjointBoxLayout &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_cacheGrids</b></td></tr>
 <tr class="memdesc:af5a0a14cb0293271d7b1f65e6da7a1bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">The old (pre-regrid) grids the cache holders are defined on (for iterating the cache). <br /></td></tr>
 <tr class="separator:af5a0a14cb0293271d7b1f65e6da7a1bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a13d01ec93ebff90dd324a18e5d074c32" id="r_a13d01ec93ebff90dd324a18e5d074c32"><td class="memItemLeft" align="right" valign="top"><a id="a13d01ec93ebff90dd324a18e5d074c32" name="a13d01ec93ebff90dd324a18e5d074c32"></a>
-<a class="el" href="CD__ParticleContainer_8H.html#aebe7aa617c4ebd39bc2093e596bdb0ad">AMRParticlesSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_maskParticles</b></td></tr>
+<a class="el" href="CD__ParticleContainer_8H.html#aebe7aa617c4ebd39bc2093e596bdb0ad">AMRParticlesSoA</a>&lt; P, Traits &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_maskParticles</b></td></tr>
 <tr class="memdesc:a13d01ec93ebff90dd324a18e5d074c32"><td class="mdescLeft">&#160;</td><td class="mdescRight">Halo/mask particles per level. <br /></td></tr>
 <tr class="separator:a13d01ec93ebff90dd324a18e5d074c32"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5c725b4975be1479b9b845e7d2d32c6a" id="r_a5c725b4975be1479b9b845e7d2d32c6a"><td class="memItemLeft" align="right" valign="top"><a id="a5c725b4975be1479b9b845e7d2d32c6a" name="a5c725b4975be1479b9b845e7d2d32c6a"></a>
-<a class="el" href="CD__ParticleContainer_8H.html#aebe7aa617c4ebd39bc2093e596bdb0ad">AMRParticlesSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_bufferParticles</b></td></tr>
+<a class="el" href="CD__ParticleContainer_8H.html#aebe7aa617c4ebd39bc2093e596bdb0ad">AMRParticlesSoA</a>&lt; P, Traits &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_bufferParticles</b></td></tr>
 <tr class="memdesc:a5c725b4975be1479b9b845e7d2d32c6a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Grown-grid buffer particles per level (on m_grownGrids; filled during halo deposition). <br /></td></tr>
 <tr class="separator:a5c725b4975be1479b9b845e7d2d32c6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4f6f0fa21714816d571295e3db3f8284" id="r_a4f6f0fa21714816d571295e3db3f8284"><td class="memItemLeft" align="right" valign="top"><a id="a4f6f0fa21714816d571295e3db3f8284" name="a4f6f0fa21714816d571295e3db3f8284"></a>
-<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">BoxLayout</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_grownGrids</b></td></tr>
+Vector&lt; BoxLayout &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_grownGrids</b></td></tr>
 <tr class="memdesc:a4f6f0fa21714816d571295e3db3f8284"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-level grown grids (boxes grown by the refinement factor on finer levels) for the buffer. <br /></td></tr>
 <tr class="separator:a4f6f0fa21714816d571295e3db3f8284"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a> = NoPayload, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a> = ParticleTraits&lt;P&gt;&gt;<br />
+<div class="textblock"><div class="compoundTemplParams">template&lt;typename P = NoPayload, typename Traits = ParticleTraits&lt;P&gt;&gt;<br />
 class ParticleContainer&lt; P, Traits &gt;</div><p>AMR-hierarchy container of computational particles, stored per patch in Struct-of-Arrays form. </p>
 <p><a class="el" href="classParticleContainer.html" title="AMR-hierarchy container of computational particles, stored per patch in Struct-of-Arrays form.">ParticleContainer</a> owns particles distributed across an AMR hierarchy. For every level it holds one <code>LayoutData&lt;ParticleSoA&lt;P&gt;&gt;</code> indexed by <code>DataIndex</code> over that level's <code>DisjointBoxLayout</code>, so the particles of a single patch are reached as <code>container</code>[lvl][din] and stored contiguously in Struct-of-Arrays form (see <a class="el" href="classParticleSoA.html" title="Arena-backed Struct-of-Arrays particle container for a single grid patch.">ParticleSoA</a>). Each particle carries a position and a weight (owned by the leaf) plus the user payload <code>P</code>, which contributes the extra per-particle columns.</p>
 <h3>Particle holders</h3>
@@ -384,29 +384,33 @@ class ParticleContainer&lt; P, Traits &gt;</div><p>AMR-hierarchy container of co
 <h3>Cell sorting</h3>
 <p>A leaf stores its particles in arbitrary (append) order by default. <a class="el" href="classParticleContainer.html#a63d36895f50a4b4b0c1c51d6beb7a9f9" title="Cell-sort every valid leaf (counting sort into Fortran cell order + CSR cell offsets).">organizeParticlesByCell()</a> sorts each valid leaf so that the particles of a cell occupy a contiguous range (queried through the leaf's CSR cell offsets); <a class="el" href="classParticleContainer.html#a4c9adff2bd72cc3aa1e2346aa801626f" title="Return to a by-patch view (the leaves remain a single contiguous array per patch).">organizeParticlesByPatch()</a> returns to the unsorted view. <a class="el" href="classParticleContainer.html#a7e82ffb50d4e29e8e0a42c4c322c8717" title="Whether the valid leaves are currently cell-sorted.">isOrganizedByCell()</a> reports the current state.</p>
 <h4>Typical usage</h4>
-<div class="fragment"><div class="line">    <a class="code hl_class" href="classTracerParticleSolver.html">ParticleContainer&lt;MyPayload&gt;</a> <a class="code hl_class" href="classTracerParticleSolver.html">particles</a>;</div>
-<div class="line">    <a class="code hl_class" href="classTracerParticleSolver.html">particles</a>.define(<a class="code hl_class" href="classTracerParticleSolver.html">grids</a>, <a class="code hl_class" href="classTracerParticleSolver.html">domains</a>, <a class="code hl_class" href="classTracerParticleSolver.html">dx</a>, <a class="code hl_class" href="classTracerParticleSolver.html">refRat</a>, <a class="code hl_class" href="classTracerParticleSolver.html">probLo</a>, <a class="code hl_class" href="classTracerParticleSolver.html">minBlockSize</a>, <a class="code hl_class" href="classTracerParticleSolver.html">levelTiles</a>, <a class="code hl_class" href="classTracerParticleSolver.html">finestLevel</a>, <span class="stringliteral">&quot;primal&quot;</span>, <a class="code hl_class" href="classTracerParticleSolver.html">validCells</a>);</div>
+<div class="fragment"><div class="line">    <a class="code hl_class" href="classParticleContainer.html">ParticleContainer&lt;MyPayload&gt;</a> particles;</div>
+<div class="line">    particles.<a class="code hl_function" href="classParticleContainer.html#a76b35ee8a07d588f7070ccd6f658ad47">define</a>(grids, domains, dx, refRat, probLo, minBlockSize, levelTiles, finestLevel, <span class="stringliteral">&quot;primal&quot;</span>, validCells);</div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// Add particles locally, then route every particle to its owning patch (and across ranks).</span></div>
-<div class="line">    <a class="code hl_class" href="classTracerParticleSolver.html">particles</a>.addParticlesLocal(<a class="code hl_class" href="classTracerParticleSolver.html">lvl</a>, <a class="code hl_class" href="classTracerParticleSolver.html">pos</a>, weight, <a class="code hl_class" href="classTracerParticleSolver.html">MyPayload</a>{...});</div>
-<div class="line">    <a class="code hl_class" href="classTracerParticleSolver.html">particles</a>.<a class="code hl_function" href="classTracerParticleSolver.html#a2173dd281f00cc869d7ed513ddf46eb4">remap</a>();</div>
+<div class="line">    particles.addParticlesLocal(lvl, pos, weight, MyPayload{...});</div>
+<div class="line">    particles.<a class="code hl_function" href="classParticleContainer.html#aad7d26975f869cee92354c1d14e16be1">remap</a>();</div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// Iterate the valid particles of one patch.</span></div>
-<div class="line">    <span class="keyword">const</span> <a class="code hl_class" href="classTracerParticleSolver.html">DisjointBoxLayout</a>&amp; <a class="code hl_class" href="classTracerParticleSolver.html">dbl</a>  = <a class="code hl_class" href="classTracerParticleSolver.html">particles</a>.getGrids()[<a class="code hl_class" href="classTracerParticleSolver.html">lvl</a>];</div>
-<div class="line">    <span class="keyword">const</span> <a class="code hl_class" href="classTracerParticleSolver.html">DataIterator</a>&amp;      <a class="code hl_class" href="classTracerParticleSolver.html">dit</a>  = <a class="code hl_class" href="classTracerParticleSolver.html">dbl</a>.dataIterator();</div>
-<div class="line">    <span class="keyword">const</span> <span class="keywordtype">int</span>                <a class="code hl_class" href="classTracerParticleSolver.html">nbox</a> = <a class="code hl_class" href="classTracerParticleSolver.html">dit</a>.size();</div>
+<div class="line">    <span class="keyword">const</span> DisjointBoxLayout&amp; dbl  = particles.<a class="code hl_function" href="classParticleContainer.html#a8123d5012822f5fafe8ee7198d594c3c">getGrids</a>()[lvl];</div>
+<div class="line">    <span class="keyword">const</span> DataIterator&amp;      dit  = dbl.dataIterator();</div>
+<div class="line">    <span class="keyword">const</span> <span class="keywordtype">int</span>                nbox = dit.size();</div>
 <div class="line"><span class="preprocessor">#pragma omp parallel for schedule(runtime)</span></div>
-<div class="line">    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> <a class="code hl_class" href="classTracerParticleSolver.html">mybox</a> = 0; <a class="code hl_class" href="classTracerParticleSolver.html">mybox</a> &lt; <a class="code hl_class" href="classTracerParticleSolver.html">nbox</a>; <a class="code hl_class" href="classTracerParticleSolver.html">mybox</a>++) {</div>
-<div class="line">      <span class="keyword">const</span> <a class="code hl_class" href="classTracerParticleSolver.html">DataIndex</a>&amp;        <a class="code hl_class" href="classTracerParticleSolver.html">din</a>  = <a class="code hl_class" href="classTracerParticleSolver.html">dit</a>[<a class="code hl_class" href="classTracerParticleSolver.html">mybox</a>];</div>
-<div class="line">      <a class="code hl_class" href="classTracerParticleSolver.html">ParticleSoA&lt;MyPayload&gt;</a>&amp; <a class="code hl_class" href="classTracerParticleSolver.html">leaf</a> = <a class="code hl_class" href="classTracerParticleSolver.html">particles</a>[<a class="code hl_class" href="classTracerParticleSolver.html">lvl</a>][<a class="code hl_class" href="classTracerParticleSolver.html">din</a>];</div>
-<div class="line">      <span class="keywordflow">for</span> (<a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::size_t</a> <a class="code hl_class" href="classTracerParticleSolver.html">i</a> = 0; <a class="code hl_class" href="classTracerParticleSolver.html">i</a> &lt; <a class="code hl_class" href="classTracerParticleSolver.html">leaf</a>.size(); <a class="code hl_class" href="classTracerParticleSolver.html">i</a>++) {</div>
-<div class="line">        <span class="keyword">const</span> <a class="code hl_class" href="classTracerParticleSolver.html">RealVect</a> <a class="code hl_class" href="classTracerParticleSolver.html">x</a> = <a class="code hl_class" href="classTracerParticleSolver.html">leaf</a>.position(<a class="code hl_class" href="classTracerParticleSolver.html">i</a>);</div>
+<div class="line">    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> mybox = 0; mybox &lt; nbox; mybox++) {</div>
+<div class="line">      <span class="keyword">const</span> DataIndex&amp;        din  = dit[mybox];</div>
+<div class="line">      <a class="code hl_class" href="classParticleSoA.html">ParticleSoA&lt;MyPayload&gt;</a>&amp; leaf = particles[lvl][din];</div>
+<div class="line">      <span class="keywordflow">for</span> (std::size_t i = 0; i &lt; leaf.<a class="code hl_function" href="classParticleSoA.html#a4a1ed9474a75b6142f7fccebaf059d13">size</a>(); i++) {</div>
+<div class="line">        <span class="keyword">const</span> RealVect x = leaf.<a class="code hl_function" href="classParticleSoA.html#a3a8d5e1e4128aab802b386b611d4f082">position</a>(i);</div>
 <div class="line">        <span class="comment">// ... use x, leaf.weight(i), payload columns ...</span></div>
 <div class="line">      }</div>
 <div class="line">    }</div>
-<div class="ttc" id="aclassTracerParticleSolver_html"><div class="ttname"><a href="classTracerParticleSolver.html">TracerParticleSolver</a></div><div class="ttdoc">Base class for a tracer particle solver. This solver can advance particles in a pre-defined velocity ...</div><div class="ttdef"><b>Definition</b> CD_TracerParticleSolver.H:39</div></div>
-<div class="ttc" id="aclassTracerParticleSolver_html_a2173dd281f00cc869d7ed513ddf46eb4"><div class="ttname"><a href="classTracerParticleSolver.html#a2173dd281f00cc869d7ed513ddf46eb4">TracerParticleSolver::remap</a></div><div class="ttdeci">virtual void remap()</div><div class="ttdoc">Remap particles.</div><div class="ttdef"><b>Definition</b> CD_TracerParticleSolverImplem.H:339</div></div>
-<div class="ttc" id="aclassTracerParticleSolver_html_a4fa2ba84feb2e79304ef1d8c0aafd77d"><div class="ttname"><a href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">TracerParticleSolver::TracerParticleSolver</a></div><div class="ttdeci">TracerParticleSolver()</div><div class="ttdoc">Default constructor.</div><div class="ttdef"><b>Definition</b> CD_TracerParticleSolverImplem.H:26</div></div>
+<div class="ttc" id="aclassParticleContainer_html"><div class="ttname"><a href="classParticleContainer.html">ParticleContainer</a></div><div class="ttdoc">AMR-hierarchy container of computational particles, stored per patch in Struct-of-Arrays form.</div><div class="ttdef"><b>Definition</b> CD_ParticleContainer.H:122</div></div>
+<div class="ttc" id="aclassParticleContainer_html_a76b35ee8a07d588f7070ccd6f658ad47"><div class="ttname"><a href="classParticleContainer.html#a76b35ee8a07d588f7070ccd6f658ad47">ParticleContainer::define</a></div><div class="ttdeci">void define(const Vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const Vector&lt; ProblemDomain &gt; &amp;a_domains, const Vector&lt; Real &gt; &amp;a_dx, const Vector&lt; int &gt; &amp;a_refRat, const RealVect &amp;a_probLo, const int a_minBlockSize, const Vector&lt; RefCountedPtr&lt; LevelTiles &gt; &gt; &amp;a_levelTiles, const int a_finestLevel, const std::string &amp;a_realm, const Vector&lt; RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt; &gt; *a_validCells)</div><div class="ttdoc">Allocate the per-level holders and the per-level tile-ownership maps over the AMR grids.</div><div class="ttdef"><b>Definition</b> CD_ParticleContainer.H:192</div></div>
+<div class="ttc" id="aclassParticleContainer_html_a8123d5012822f5fafe8ee7198d594c3c"><div class="ttname"><a href="classParticleContainer.html#a8123d5012822f5fafe8ee7198d594c3c">ParticleContainer::getGrids</a></div><div class="ttdeci">const Vector&lt; DisjointBoxLayout &gt; &amp; getGrids() const</div><div class="ttdoc">Per-level AMR grids.</div><div class="ttdef"><b>Definition</b> CD_ParticleContainer.H:259</div></div>
+<div class="ttc" id="aclassParticleContainer_html_aad7d26975f869cee92354c1d14e16be1"><div class="ttname"><a href="classParticleContainer.html#aad7d26975f869cee92354c1d14e16be1">ParticleContainer::remap</a></div><div class="ttdeci">void remap()</div><div class="ttdoc">Redistribute every valid particle to the patch/level/rank that owns its cell.</div><div class="ttdef"><b>Definition</b> CD_ParticleContainerImplem.H:462</div></div>
+<div class="ttc" id="aclassParticleSoA_html"><div class="ttname"><a href="classParticleSoA.html">ParticleSoA</a></div><div class="ttdoc">Arena-backed Struct-of-Arrays particle container for a single grid patch.</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:637</div></div>
+<div class="ttc" id="aclassParticleSoA_html_a3a8d5e1e4128aab802b386b611d4f082"><div class="ttname"><a href="classParticleSoA.html#a3a8d5e1e4128aab802b386b611d4f082">ParticleSoA::position</a></div><div class="ttdeci">RealVect position(const std::size_t a_index) const noexcept</div><div class="ttdoc">Position of particle i as a RealVect (by value, assembled from the scalar columns).</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:1151</div></div>
+<div class="ttc" id="aclassParticleSoA_html_a4a1ed9474a75b6142f7fccebaf059d13"><div class="ttname"><a href="classParticleSoA.html#a4a1ed9474a75b6142f7fccebaf059d13">ParticleSoA::size</a></div><div class="ttdeci">std::size_t size() const noexcept</div><div class="ttdoc">Number of particles currently stored.</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:851</div></div>
 </div><!-- fragment --><dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">P</td><td>User payload struct contributing the per-particle payload columns; defaults to <a class="el" href="structNoPayload.html" title="Empty payload: ParticleSoA&lt;&gt; is a position+weight+metadata point particle.">NoPayload</a>. </td></tr>
@@ -422,15 +426,15 @@ class ParticleContainer&lt; P, Traits &gt;</div><p>AMR-hierarchy container of co
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = NoPayload, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a>  = ParticleTraits&lt;P&gt;&gt; </div>
+template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;::addParticlesDestructive </td>
+          <td class="memname">void <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::addParticlesDestructive </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; P, Traits &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_particles</em></td><td>)</td>
           <td></td>
         </tr>
@@ -443,9 +447,9 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 </div><div class="memdoc">
 
 <p>Add a free-standing buffer of particles to the container, routing each to its owner. </p>
-<p>The buffer (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">e.g</a>. filled by ParticleManagement::drawRandomParticles(ParticleSoA)) is catenated onto a local leaf &ndash; O(1) when that leaf is empty &ndash; and then <a class="el" href="classParticleContainer.html#aad7d26975f869cee92354c1d14e16be1" title="Redistribute every valid particle to the patch/level/rank that owns its cell.">remap()</a> routes every particle (including across ranks and levels) to the patch/level/rank that owns its position. a_particles is left empty. Assumes this rank owns at least one box (true whenever level 0 covers the domain). Unlike addParticlesLocal(), the positions need not already belong to this rank. </p><div class="fragment"><div class="line"><a class="code hl_class" href="classTracerParticleSolver.html">ParticleSoA&lt;P&gt;</a> <a class="code hl_class" href="classTracerParticleSolver.html">drawn</a>;</div>
-<div class="line">ParticleManagement::drawRandomParticles(<a class="code hl_class" href="classTracerParticleSolver.html">drawn</a>, ...);</div>
-<div class="line"><a class="code hl_class" href="classTracerParticleSolver.html">particles</a>.addParticlesDestructive(<a class="code hl_class" href="classTracerParticleSolver.html">drawn</a>); <span class="comment">// drawn is empty afterwards; particles are routed to owners</span></div>
+<p>The buffer (e.g. filled by ParticleManagement::drawRandomParticles(ParticleSoA)) is catenated onto a local leaf &ndash; O(1) when that leaf is empty &ndash; and then <a class="el" href="classParticleContainer.html#aad7d26975f869cee92354c1d14e16be1" title="Redistribute every valid particle to the patch/level/rank that owns its cell.">remap()</a> routes every particle (including across ranks and levels) to the patch/level/rank that owns its position. a_particles is left empty. Assumes this rank owns at least one box (true whenever level 0 covers the domain). Unlike addParticlesLocal(), the positions need not already belong to this rank. </p><div class="fragment"><div class="line"><a class="code hl_class" href="classParticleSoA.html">ParticleSoA&lt;P&gt;</a> drawn;</div>
+<div class="line">ParticleManagement::drawRandomParticles(drawn, ...);</div>
+<div class="line">particles.addParticlesDestructive(drawn); <span class="comment">// drawn is empty afterwards; particles are routed to owners</span></div>
 </div><!-- fragment --> <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_particles</td><td>Buffer of particles to ingest (emptied on return). </td></tr>
@@ -461,21 +465,21 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = NoPayload, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a>  = ParticleTraits&lt;P&gt;&gt; </div>
+template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">IntVect</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;::cellIndex </td>
+          <td class="memname">IntVect <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::cellIndex </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype">const int&#160;</td>
           <td class="paramname"><em>a_lvl</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;&#160;</td>
+          <td class="paramtype">const RealVect &amp;&#160;</td>
           <td class="paramname"><em>a_pos</em>&#160;</td>
         </tr>
         <tr>
@@ -509,21 +513,21 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; </div>
+template&lt;typename P , typename Traits &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;::copyMaskParticles </td>
+          <td class="memname">void <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::copyMaskParticles </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype">const int&#160;</td>
           <td class="paramname"><em>a_level</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">BaseFab</a>&lt; <a class="el" href="classTracerParticleSolver.html">bool</a> &gt; &gt; &amp;&#160;</td>
+          <td class="paramtype">const LevelData&lt; BaseFab&lt; bool &gt; &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_mask</em>&#160;</td>
         </tr>
         <tr>
@@ -556,15 +560,15 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; </div>
+template&lt;typename P , typename Traits &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;::copyMaskParticles </td>
+          <td class="memname">void <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::copyMaskParticles </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">BaseFab</a>&lt; <a class="el" href="classTracerParticleSolver.html">bool</a> &gt; &gt; &gt; &gt; &amp;&#160;</td>
+          <td class="paramtype">const Vector&lt; RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt; &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_mask</em></td><td>)</td>
           <td></td>
         </tr>
@@ -592,69 +596,69 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = NoPayload, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a>  = ParticleTraits&lt;P&gt;&gt; </div>
+template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;::define </td>
+          <td class="memname">void <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::define </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">DisjointBoxLayout</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const Vector&lt; DisjointBoxLayout &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_grids</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const Vector&lt; ProblemDomain &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_domains</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const Vector&lt; Real &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_dx</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">int</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const Vector&lt; int &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_refRat</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;&#160;</td>
+          <td class="paramtype">const RealVect &amp;&#160;</td>
           <td class="paramname"><em>a_probLo</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype">const int&#160;</td>
           <td class="paramname"><em>a_minBlockSize</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classLevelTiles.html">LevelTiles</a> &gt; &gt; &amp;&#160;</td>
+          <td class="paramtype">const Vector&lt; RefCountedPtr&lt; <a class="el" href="classLevelTiles.html">LevelTiles</a> &gt; &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_levelTiles</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype">const int&#160;</td>
           <td class="paramname"><em>a_finestLevel</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;&#160;</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
           <td class="paramname"><em>a_realm</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">BaseFab</a>&lt; <a class="el" href="classTracerParticleSolver.html">bool</a> &gt; &gt; &gt; &gt; *&#160;</td>
+          <td class="paramtype">const Vector&lt; RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt; &gt; *&#160;</td>
           <td class="paramname"><em>a_validCells</em>&#160;</td>
         </tr>
         <tr>
@@ -695,13 +699,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; </div>
+template&lt;typename P , typename Traits &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;::distributeFromPool </td>
+          <td class="memname">void <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::distributeFromPool </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="classParticleContainer.html#a55ca1dc0711b599cf86dc2e4036c832a">MoverPool</a> &amp;&#160;</td>
           <td class="paramname"><em>a_pool</em></td><td>)</td>
@@ -731,15 +735,15 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; </div>
+template&lt;typename P , typename Traits &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;::Destination <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;::findDestination </td>
+          <td class="memname"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::Destination <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::findDestination </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;&#160;</td>
+          <td class="paramtype">const RealVect &amp;&#160;</td>
           <td class="paramname"><em>a_pos</em></td><td>)</td>
           <td> const</td>
         </tr>
@@ -768,13 +772,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; </div>
+template&lt;typename P , typename Traits &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;<a class="el" href="classParticleContainer.html#a55ca1dc0711b599cf86dc2e4036c832a">::MoverPool</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;::gatherMoversToPool </td>
+          <td class="memname"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;<a class="el" href="classParticleContainer.html#a55ca1dc0711b599cf86dc2e4036c832a">::MoverPool</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::gatherMoversToPool </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -798,21 +802,21 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; </div>
+template&lt;typename P , typename Traits &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;<a class="el" href="classParticleContainer.html#a55ca1dc0711b599cf86dc2e4036c832a">::MoverPool</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;::gatherToPool </td>
+          <td class="memname"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;<a class="el" href="classParticleContainer.html#a55ca1dc0711b599cf86dc2e4036c832a">::MoverPool</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::gatherToPool </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__ParticleContainer_8H.html#aebe7aa617c4ebd39bc2093e596bdb0ad">AMRParticlesSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="CD__ParticleContainer_8H.html#aebe7aa617c4ebd39bc2093e596bdb0ad">AMRParticlesSoA</a>&lt; P, Traits &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_source</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">DisjointBoxLayout</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const Vector&lt; DisjointBoxLayout &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_sourceGrids</em>&#160;</td>
         </tr>
         <tr>
@@ -831,7 +835,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <p>Gather every particle of a source holder into a per-rank, per-destination-patch pool. </p>
 <p>Reads each particle, resolves its owning (level, grid index, rank) on the CURRENT tile maps, and copies it into the pool (ids preserved, rankID set to the new owner). Off-domain particles are counted into m_numOutcastLocal (which this resets). </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_source</td><td>Source holders (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">e.g</a>. the valid particles, or the regrid cache). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_source</td><td>Source holders (e.g. the valid particles, or the regrid cache). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_sourceGrids</td><td>The DisjointBoxLayouts the source holders are defined on. </td></tr>
   </table>
   </dd>
@@ -846,13 +850,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = NoPayload, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a>  = ParticleTraits&lt;P&gt;&gt; </div>
+template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="CD__ParticleContainer_8H.html#aebe7aa617c4ebd39bc2093e596bdb0ad">AMRParticlesSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;::getBufferParticles </td>
+          <td class="memname"><a class="el" href="CD__ParticleContainer_8H.html#aebe7aa617c4ebd39bc2093e596bdb0ad">AMRParticlesSoA</a>&lt; P, Traits &gt; &amp; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::getBufferParticles </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -876,13 +880,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = NoPayload, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a>  = ParticleTraits&lt;P&gt;&gt; </div>
+template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__ParticleContainer_8H.html#aebe7aa617c4ebd39bc2093e596bdb0ad">AMRParticlesSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;::getBufferParticles </td>
+          <td class="memname">const <a class="el" href="CD__ParticleContainer_8H.html#aebe7aa617c4ebd39bc2093e596bdb0ad">AMRParticlesSoA</a>&lt; P, Traits &gt; &amp; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::getBufferParticles </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -906,13 +910,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = NoPayload, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a>  = ParticleTraits&lt;P&gt;&gt; </div>
+template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RealVect</a> &gt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;::getDx </td>
+          <td class="memname">Vector&lt; RealVect &gt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::getDx </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -936,13 +940,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = NoPayload, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a>  = ParticleTraits&lt;P&gt;&gt; </div>
+template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;::getFinestLevel </td>
+          <td class="memname">int <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::getFinestLevel </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -966,13 +970,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = NoPayload, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a>  = ParticleTraits&lt;P&gt;&gt; </div>
+template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">DisjointBoxLayout</a> &gt; &amp; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;::getGrids </td>
+          <td class="memname">const Vector&lt; DisjointBoxLayout &gt; &amp; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::getGrids </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -996,13 +1000,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = NoPayload, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a>  = ParticleTraits&lt;P&gt;&gt; </div>
+template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">BoxLayout</a> &gt; &amp; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;::getGrownGrids </td>
+          <td class="memname">const Vector&lt; BoxLayout &gt; &amp; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::getGrownGrids </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -1026,13 +1030,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = NoPayload, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a>  = ParticleTraits&lt;P&gt;&gt; </div>
+template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="CD__ParticleContainer_8H.html#aebe7aa617c4ebd39bc2093e596bdb0ad">AMRParticlesSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;::getMaskParticles </td>
+          <td class="memname"><a class="el" href="CD__ParticleContainer_8H.html#aebe7aa617c4ebd39bc2093e596bdb0ad">AMRParticlesSoA</a>&lt; P, Traits &gt; &amp; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::getMaskParticles </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -1056,13 +1060,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = NoPayload, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a>  = ParticleTraits&lt;P&gt;&gt; </div>
+template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__ParticleContainer_8H.html#aebe7aa617c4ebd39bc2093e596bdb0ad">AMRParticlesSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;::getMaskParticles </td>
+          <td class="memname">const <a class="el" href="CD__ParticleContainer_8H.html#aebe7aa617c4ebd39bc2093e596bdb0ad">AMRParticlesSoA</a>&lt; P, Traits &gt; &amp; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::getMaskParticles </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -1086,13 +1090,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = NoPayload, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a>  = ParticleTraits&lt;P&gt;&gt; </div>
+template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">unsigned</a> <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;::getNumberOfOutcastParticlesGlobal </td>
+          <td class="memname">unsigned long long <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::getNumberOfOutcastParticlesGlobal </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -1116,13 +1120,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = NoPayload, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a>  = ParticleTraits&lt;P&gt;&gt; </div>
+template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">unsigned</a> <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;::getNumberOfOutcastParticlesLocal </td>
+          <td class="memname">unsigned long long <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::getNumberOfOutcastParticlesLocal </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -1146,13 +1150,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = NoPayload, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a>  = ParticleTraits&lt;P&gt;&gt; </div>
+template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">unsigned</a> <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;::getNumberOfValidParticlesGlobal </td>
+          <td class="memname">unsigned long long <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::getNumberOfValidParticlesGlobal </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -1176,13 +1180,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = NoPayload, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a>  = ParticleTraits&lt;P&gt;&gt; </div>
+template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">unsigned</a> <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;::getNumberOfValidParticlesLocal </td>
+          <td class="memname">unsigned long long <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::getNumberOfValidParticlesLocal </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -1206,13 +1210,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = NoPayload, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a>  = ParticleTraits&lt;P&gt;&gt; </div>
+template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="CD__ParticleContainer_8H.html#aebe7aa617c4ebd39bc2093e596bdb0ad">AMRParticlesSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;::getParticles </td>
+          <td class="memname"><a class="el" href="CD__ParticleContainer_8H.html#aebe7aa617c4ebd39bc2093e596bdb0ad">AMRParticlesSoA</a>&lt; P, Traits &gt; &amp; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::getParticles </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -1236,13 +1240,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = NoPayload, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a>  = ParticleTraits&lt;P&gt;&gt; </div>
+template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="CD__ParticleContainer_8H.html#aebe7aa617c4ebd39bc2093e596bdb0ad">AMRParticlesSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;::getParticles </td>
+          <td class="memname">const <a class="el" href="CD__ParticleContainer_8H.html#aebe7aa617c4ebd39bc2093e596bdb0ad">AMRParticlesSoA</a>&lt; P, Traits &gt; &amp; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::getParticles </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -1266,13 +1270,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = NoPayload, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a>  = ParticleTraits&lt;P&gt;&gt; </div>
+template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">RealVect</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;::getProbLo </td>
+          <td class="memname">RealVect <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::getProbLo </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -1296,13 +1300,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = NoPayload, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a>  = ParticleTraits&lt;P&gt;&gt; </div>
+template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;::getRealm </td>
+          <td class="memname">std::string <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::getRealm </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -1326,13 +1330,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = NoPayload, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a>  = ParticleTraits&lt;P&gt;&gt; </div>
+template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;::isDefined </td>
+          <td class="memname">bool <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::isDefined </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -1356,13 +1360,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = NoPayload, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a>  = ParticleTraits&lt;P&gt;&gt; </div>
+template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;::isOrganizedByCell </td>
+          <td class="memname">bool <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::isOrganizedByCell </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -1386,15 +1390,15 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = NoPayload, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a>  = ParticleTraits&lt;P&gt;&gt; </div>
+template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classParticleContainer.html">ParticleContainer</a> &amp; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;<a class="el" href="classTracerParticleSolver.html">::operator</a>= </td>
+          <td class="memname"><a class="el" href="classParticleContainer.html">ParticleContainer</a> &amp; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::operator= </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;&#160;</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
         </tr>
@@ -1417,15 +1421,15 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = NoPayload, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a>  = ParticleTraits&lt;P&gt;&gt; </div>
+template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classParticleContainer.html#ac062ccbae3ee7ce005703a85ec15e1a5">LevelParticles</a> &amp; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;<a class="el" href="classTracerParticleSolver.html">::operator</a>[] </td>
+          <td class="memname"><a class="el" href="classParticleContainer.html#ac062ccbae3ee7ce005703a85ec15e1a5">LevelParticles</a> &amp; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::operator[] </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype">const int&#160;</td>
           <td class="paramname"><em>a_lvl</em></td><td>)</td>
           <td></td>
         </tr>
@@ -1438,14 +1442,14 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 </div><div class="memdoc">
 
 <p>Valid particles on one level (index by DataIndex to reach a patch's Leaf). </p>
-<p>Chain a second index by <code>DataIndex</code> to reach the patch's <a class="el" href="classParticleSoA.html" title="Arena-backed Struct-of-Arrays particle container for a single grid patch.">ParticleSoA</a> leaf: </p><div class="fragment"><div class="line"><a class="code hl_class" href="classTracerParticleSolver.html">ParticleSoA&lt;P&gt;</a>&amp; <a class="code hl_class" href="classTracerParticleSolver.html">leaf</a> = <a class="code hl_class" href="classTracerParticleSolver.html">particles</a>[<a class="code hl_class" href="classTracerParticleSolver.html">lvl</a>][<a class="code hl_class" href="classTracerParticleSolver.html">din</a>];</div>
+<p>Chain a second index by <code>DataIndex</code> to reach the patch's <a class="el" href="classParticleSoA.html" title="Arena-backed Struct-of-Arrays particle container for a single grid patch.">ParticleSoA</a> leaf: </p><div class="fragment"><div class="line"><a class="code hl_class" href="classParticleSoA.html">ParticleSoA&lt;P&gt;</a>&amp; leaf = particles[lvl][din];</div>
 </div><!-- fragment --> <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_lvl</td><td>Level index. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Mutable per-level holder; <a class="el" href="classParticleContainer.html#a6fce205a588f7cd9f3f77dc5e2528d2c" title="Valid particles on one level (index by DataIndex to reach a patch&#39;s Leaf).">operator[](DataIndex)</a> yields the patch's <a class="el" href="classParticleSoA.html" title="Arena-backed Struct-of-Arrays particle container for a single grid patch.">ParticleSoA</a>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Mutable per-level holder; operator[](DataIndex) yields the patch's <a class="el" href="classParticleSoA.html" title="Arena-backed Struct-of-Arrays particle container for a single grid patch.">ParticleSoA</a>. </dd></dl>
 
 </div>
 </div>
@@ -1455,15 +1459,15 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = NoPayload, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a>  = ParticleTraits&lt;P&gt;&gt; </div>
+template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classParticleContainer.html#ac062ccbae3ee7ce005703a85ec15e1a5">LevelParticles</a> &amp; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;<a class="el" href="classTracerParticleSolver.html">::operator</a>[] </td>
+          <td class="memname">const <a class="el" href="classParticleContainer.html#ac062ccbae3ee7ce005703a85ec15e1a5">LevelParticles</a> &amp; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::operator[] </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype">const int&#160;</td>
           <td class="paramname"><em>a_lvl</em></td><td>)</td>
           <td> const</td>
         </tr>
@@ -1492,13 +1496,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = NoPayload, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a>  = ParticleTraits&lt;P&gt;&gt; </div>
+template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;::organizeParticlesByCell </td>
+          <td class="memname">void <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::organizeParticlesByCell </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -1522,13 +1526,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = NoPayload, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a>  = ParticleTraits&lt;P&gt;&gt; </div>
+template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;::organizeParticlesByPatch </td>
+          <td class="memname">void <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::organizeParticlesByPatch </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -1552,13 +1556,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; </div>
+template&lt;typename P , typename Traits &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;::preRegrid </td>
+          <td class="memname">void <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::preRegrid </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -1582,51 +1586,51 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; </div>
+template&lt;typename P , typename Traits &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;::regrid </td>
+          <td class="memname">void <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::regrid </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">DisjointBoxLayout</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const Vector&lt; DisjointBoxLayout &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_grids</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const Vector&lt; ProblemDomain &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_domains</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const Vector&lt; Real &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_dx</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">int</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const Vector&lt; int &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_refRat</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype">const int&#160;</td>
           <td class="paramname"><em>a_minBlockSize</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classLevelTiles.html">LevelTiles</a> &gt; &gt; &amp;&#160;</td>
+          <td class="paramtype">const Vector&lt; RefCountedPtr&lt; <a class="el" href="classLevelTiles.html">LevelTiles</a> &gt; &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_levelTiles</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype">const int&#160;</td>
           <td class="paramname"><em>a_newFinestLevel</em>&#160;</td>
         </tr>
         <tr>
@@ -1664,13 +1668,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; </div>
+template&lt;typename P , typename Traits &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;::remap </td>
+          <td class="memname">void <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::remap </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -1694,21 +1698,21 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; </div>
+template&lt;typename P , typename Traits &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;::transferMaskParticles </td>
+          <td class="memname">void <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::transferMaskParticles </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype">const int&#160;</td>
           <td class="paramname"><em>a_level</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">BaseFab</a>&lt; <a class="el" href="classTracerParticleSolver.html">bool</a> &gt; &gt; &amp;&#160;</td>
+          <td class="paramtype">const LevelData&lt; BaseFab&lt; bool &gt; &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_mask</em>&#160;</td>
         </tr>
         <tr>
@@ -1741,15 +1745,15 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; </div>
+template&lt;typename P , typename Traits &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;::transferMaskParticles </td>
+          <td class="memname">void <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::transferMaskParticles </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">BaseFab</a>&lt; <a class="el" href="classTracerParticleSolver.html">bool</a> &gt; &gt; &gt; &gt; &amp;&#160;</td>
+          <td class="paramtype">const Vector&lt; RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt; &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_mask</em></td><td>)</td>
           <td></td>
         </tr>
@@ -1777,15 +1781,15 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = NoPayload, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a>  = ParticleTraits&lt;P&gt;&gt; </div>
+template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;::transferParticles </td>
+          <td class="memname">void <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::transferParticles </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="CD__ParticleContainer_8H.html#aebe7aa617c4ebd39bc2093e596bdb0ad">AMRParticlesSoA</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt; &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="CD__ParticleContainer_8H.html#aebe7aa617c4ebd39bc2093e596bdb0ad">AMRParticlesSoA</a>&lt; P, Traits &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_source</em></td><td>)</td>
           <td></td>
         </tr>
@@ -1814,13 +1818,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = NoPayload, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">Traits</a>  = ParticleTraits&lt;P&gt;&gt; </div>
+template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt;<a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt;<a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt;<a class="el" href="classTracerParticleSolver.html">BaseFab</a>&lt;<a class="el" href="classTracerParticleSolver.html">bool</a>&gt; &gt; &gt; &gt;* <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">Traits</a> &gt;::m_validCells = <a class="el" href="classTracerParticleSolver.html">nullptr</a></td>
+          <td class="memname">const Vector&lt;RefCountedPtr&lt;LevelData&lt;BaseFab&lt;bool&gt; &gt; &gt; &gt;* <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::m_validCells = nullptr</td>
         </tr>
       </table>
   </td>

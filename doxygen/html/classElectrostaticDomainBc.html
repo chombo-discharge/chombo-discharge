@@ -97,15 +97,15 @@ Public Types</h2></td></tr>
  }</td></tr>
 <tr class="memdesc:a313bf6a5f5d16731a6b0349835ebb934"><td class="mdescLeft">&#160;</td><td class="mdescRight">Supported boundary condition types. <br /></td></tr>
 <tr class="separator:a313bf6a5f5d16731a6b0349835ebb934"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac70aabaa096724823b87222bf5bd8cb6" id="r_ac70aabaa096724823b87222bf5bd8cb6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">using</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElectrostaticDomainBc.html#ac70aabaa096724823b87222bf5bd8cb6">BcFunction</a> = <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> <a class="el" href="classTracerParticleSolver.html">a_position</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_time</a>)&gt;</td></tr>
+<tr class="memitem:ac70aabaa096724823b87222bf5bd8cb6" id="r_ac70aabaa096724823b87222bf5bd8cb6"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElectrostaticDomainBc.html#ac70aabaa096724823b87222bf5bd8cb6">BcFunction</a> = std::function&lt; Real(const RealVect a_position, const Real a_time)&gt;</td></tr>
 <tr class="memdesc:ac70aabaa096724823b87222bf5bd8cb6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function which maps f(R^3,t) : R. Used for setting the associated value and boundary condition type.  <br /></td></tr>
 <tr class="separator:ac70aabaa096724823b87222bf5bd8cb6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a969add9e24746f806ca9c1448013e45a" id="r_a969add9e24746f806ca9c1448013e45a"><td class="memItemLeft" align="right" valign="top"><a id="a969add9e24746f806ca9c1448013e45a" name="a969add9e24746f806ca9c1448013e45a"></a>
-<a class="el" href="classTracerParticleSolver.html">using</a>&#160;</td><td class="memItemRight" valign="bottom"><b>DomainSide</b> = <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt; <a class="el" href="classTracerParticleSolver.html">int</a>, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">Side::LoHiSide</a> &gt;</td></tr>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>DomainSide</b> = std::pair&lt; int, Side::LoHiSide &gt;</td></tr>
 <tr class="memdesc:a969add9e24746f806ca9c1448013e45a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Alias for mapping a direction and side. <br /></td></tr>
 <tr class="separator:a969add9e24746f806ca9c1448013e45a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a803cc8ad3f065f17090aa193798cc473" id="r_a803cc8ad3f065f17090aa193798cc473"><td class="memItemLeft" align="right" valign="top"><a id="a803cc8ad3f065f17090aa193798cc473" name="a803cc8ad3f065f17090aa193798cc473"></a>
-<a class="el" href="classTracerParticleSolver.html">using</a>&#160;</td><td class="memItemRight" valign="bottom"><b>Bc</b> = <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt; <a class="el" href="classElectrostaticDomainBc.html#a313bf6a5f5d16731a6b0349835ebb934">BcType</a>, <a class="el" href="classElectrostaticDomainBc.html#ac70aabaa096724823b87222bf5bd8cb6">BcFunction</a> &gt;</td></tr>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>Bc</b> = std::pair&lt; <a class="el" href="classElectrostaticDomainBc.html#a313bf6a5f5d16731a6b0349835ebb934">BcType</a>, <a class="el" href="classElectrostaticDomainBc.html#ac70aabaa096724823b87222bf5bd8cb6">BcFunction</a> &gt;</td></tr>
 <tr class="memdesc:a803cc8ad3f065f17090aa193798cc473"><td class="mdescLeft">&#160;</td><td class="mdescRight">Alias for mapping a bctype and function. <br /></td></tr>
 <tr class="separator:a803cc8ad3f065f17090aa193798cc473"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -115,33 +115,33 @@ Public Member Functions</h2></td></tr>
 &#160;</td><td class="memItemRight" valign="bottom"><b>ElectrostaticDomainBc</b> ()</td></tr>
 <tr class="memdesc:ac392c83ec5ddebe906dd81dad213a35d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializing constructor. This populates the BC functions with homogeneous Neumann boundary conditions. <br /></td></tr>
 <tr class="separator:ac392c83ec5ddebe906dd81dad213a35d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1ac3b770e374524a849bb8ece4465f39" id="r_a1ac3b770e374524a849bb8ece4465f39"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElectrostaticDomainBc.html#a1ac3b770e374524a849bb8ece4465f39">ElectrostaticDomainBc</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classElectrostaticDomainBc.html">ElectrostaticDomainBc</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_other</a>)=<a class="el" href="classTracerParticleSolver.html">default</a></td></tr>
+<tr class="memitem:a1ac3b770e374524a849bb8ece4465f39" id="r_a1ac3b770e374524a849bb8ece4465f39"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElectrostaticDomainBc.html#a1ac3b770e374524a849bb8ece4465f39">ElectrostaticDomainBc</a> (const <a class="el" href="classElectrostaticDomainBc.html">ElectrostaticDomainBc</a> &amp;a_other)=default</td></tr>
 <tr class="memdesc:a1ac3b770e374524a849bb8ece4465f39"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy constructor.  <br /></td></tr>
 <tr class="separator:a1ac3b770e374524a849bb8ece4465f39"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad539aed589a2989741f1b0a87a071fe3" id="r_ad539aed589a2989741f1b0a87a071fe3"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElectrostaticDomainBc.html#ad539aed589a2989741f1b0a87a071fe3">ElectrostaticDomainBc</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classElectrostaticDomainBc.html">ElectrostaticDomainBc</a> &amp;&amp;<a class="el" href="classTracerParticleSolver.html">a_other</a>)=<a class="el" href="classTracerParticleSolver.html">delete</a></td></tr>
+<tr class="memitem:ad539aed589a2989741f1b0a87a071fe3" id="r_ad539aed589a2989741f1b0a87a071fe3"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElectrostaticDomainBc.html#ad539aed589a2989741f1b0a87a071fe3">ElectrostaticDomainBc</a> (const <a class="el" href="classElectrostaticDomainBc.html">ElectrostaticDomainBc</a> &amp;&amp;a_other)=delete</td></tr>
 <tr class="memdesc:ad539aed589a2989741f1b0a87a071fe3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed move constructor.  <br /></td></tr>
 <tr class="separator:ad539aed589a2989741f1b0a87a071fe3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a800e59b71e94ddb8d0c0f30fc09a971d" id="r_a800e59b71e94ddb8d0c0f30fc09a971d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classElectrostaticDomainBc.html">ElectrostaticDomainBc</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElectrostaticDomainBc.html#a800e59b71e94ddb8d0c0f30fc09a971d">operator=</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classElectrostaticDomainBc.html">ElectrostaticDomainBc</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_other</a>)=<a class="el" href="classTracerParticleSolver.html">default</a></td></tr>
+<tr class="memitem:a800e59b71e94ddb8d0c0f30fc09a971d" id="r_a800e59b71e94ddb8d0c0f30fc09a971d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classElectrostaticDomainBc.html">ElectrostaticDomainBc</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElectrostaticDomainBc.html#a800e59b71e94ddb8d0c0f30fc09a971d">operator=</a> (const <a class="el" href="classElectrostaticDomainBc.html">ElectrostaticDomainBc</a> &amp;a_other)=default</td></tr>
 <tr class="memdesc:a800e59b71e94ddb8d0c0f30fc09a971d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy assignment.  <br /></td></tr>
 <tr class="separator:a800e59b71e94ddb8d0c0f30fc09a971d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac6d8c79033b19f79d68eddb74b171b72" id="r_ac6d8c79033b19f79d68eddb74b171b72"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classElectrostaticDomainBc.html">ElectrostaticDomainBc</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElectrostaticDomainBc.html#ac6d8c79033b19f79d68eddb74b171b72">operator=</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classElectrostaticDomainBc.html">ElectrostaticDomainBc</a> &amp;&amp;<a class="el" href="classTracerParticleSolver.html">a_other</a>)=<a class="el" href="classTracerParticleSolver.html">delete</a></td></tr>
+<tr class="memitem:ac6d8c79033b19f79d68eddb74b171b72" id="r_ac6d8c79033b19f79d68eddb74b171b72"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classElectrostaticDomainBc.html">ElectrostaticDomainBc</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElectrostaticDomainBc.html#ac6d8c79033b19f79d68eddb74b171b72">operator=</a> (const <a class="el" href="classElectrostaticDomainBc.html">ElectrostaticDomainBc</a> &amp;&amp;a_other)=delete</td></tr>
 <tr class="memdesc:ac6d8c79033b19f79d68eddb74b171b72"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed move assignment.  <br /></td></tr>
 <tr class="separator:ac6d8c79033b19f79d68eddb74b171b72"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0eb18a475043955bb41596ff545033bc" id="r_a0eb18a475043955bb41596ff545033bc"><td class="memItemLeft" align="right" valign="top"><a id="a0eb18a475043955bb41596ff545033bc" name="a0eb18a475043955bb41596ff545033bc"></a>
-<a class="el" href="classTracerParticleSolver.html">virtual</a>&#160;</td><td class="memItemRight" valign="bottom"><b>~ElectrostaticDomainBc</b> ()</td></tr>
+virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~ElectrostaticDomainBc</b> ()</td></tr>
 <tr class="memdesc:a0eb18a475043955bb41596ff545033bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. This. <br /></td></tr>
 <tr class="separator:a0eb18a475043955bb41596ff545033bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abf472091851315a490a39ea527e0b3d8" id="r_abf472091851315a490a39ea527e0b3d8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElectrostaticDomainBc.html#abf472091851315a490a39ea527e0b3d8">setBc</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classElectrostaticDomainBc.html#a969add9e24746f806ca9c1448013e45a">DomainSide</a> <a class="el" href="classTracerParticleSolver.html">a_domainSide</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classElectrostaticDomainBc.html#a803cc8ad3f065f17090aa193798cc473">Bc</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_bc</a>)</td></tr>
+<tr class="memitem:abf472091851315a490a39ea527e0b3d8" id="r_abf472091851315a490a39ea527e0b3d8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElectrostaticDomainBc.html#abf472091851315a490a39ea527e0b3d8">setBc</a> (const <a class="el" href="classElectrostaticDomainBc.html#a969add9e24746f806ca9c1448013e45a">DomainSide</a> a_domainSide, const <a class="el" href="classElectrostaticDomainBc.html#a803cc8ad3f065f17090aa193798cc473">Bc</a> &amp;a_bc)</td></tr>
 <tr class="memdesc:abf472091851315a490a39ea527e0b3d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the boundary condition on a domain side. You must set both the type, and the associated function.  <br /></td></tr>
 <tr class="separator:abf472091851315a490a39ea527e0b3d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a79bff96aacbca70739ef4cf6ba08875d" id="r_a79bff96aacbca70739ef4cf6ba08875d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classElectrostaticDomainBc.html#a803cc8ad3f065f17090aa193798cc473">Bc</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElectrostaticDomainBc.html#a79bff96aacbca70739ef4cf6ba08875d">getBc</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classElectrostaticDomainBc.html#a969add9e24746f806ca9c1448013e45a">DomainSide</a> <a class="el" href="classTracerParticleSolver.html">a_domainSide</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memitem:a79bff96aacbca70739ef4cf6ba08875d" id="r_a79bff96aacbca70739ef4cf6ba08875d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classElectrostaticDomainBc.html#a803cc8ad3f065f17090aa193798cc473">Bc</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElectrostaticDomainBc.html#a79bff96aacbca70739ef4cf6ba08875d">getBc</a> (const <a class="el" href="classElectrostaticDomainBc.html#a969add9e24746f806ca9c1448013e45a">DomainSide</a> a_domainSide) const</td></tr>
 <tr class="memdesc:a79bff96aacbca70739ef4cf6ba08875d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the boundary condition for a domain side.  <br /></td></tr>
 <tr class="separator:a79bff96aacbca70739ef4cf6ba08875d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
 <tr class="memitem:a335f69e235f4c0fb16e72d4e526d1c5c" id="r_a335f69e235f4c0fb16e72d4e526d1c5c"><td class="memItemLeft" align="right" valign="top"><a id="a335f69e235f4c0fb16e72d4e526d1c5c" name="a335f69e235f4c0fb16e72d4e526d1c5c"></a>
-<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::map</a>&lt; <a class="el" href="classElectrostaticDomainBc.html#a969add9e24746f806ca9c1448013e45a">DomainSide</a>, <a class="el" href="classElectrostaticDomainBc.html#a803cc8ad3f065f17090aa193798cc473">Bc</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_bcFunctions</b></td></tr>
+std::map&lt; <a class="el" href="classElectrostaticDomainBc.html#a969add9e24746f806ca9c1448013e45a">DomainSide</a>, <a class="el" href="classElectrostaticDomainBc.html#a803cc8ad3f065f17090aa193798cc473">Bc</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_bcFunctions</b></td></tr>
 <tr class="memdesc:a335f69e235f4c0fb16e72d4e526d1c5c"><td class="mdescLeft">&#160;</td><td class="mdescRight">This holds the map to the boundary condition type and side. The first entry in the map is the direction and side of the boundary condition. The other entry in the map is the BC type, and the associated function which returns the value in space and time of the BC. <br /></td></tr>
 <tr class="separator:a335f69e235f4c0fb16e72d4e526d1c5c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -156,7 +156,7 @@ Protected Attributes</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">using</a> <a class="el" href="classElectrostaticDomainBc.html#ac70aabaa096724823b87222bf5bd8cb6">ElectrostaticDomainBc::BcFunction</a> =  <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt;<a class="el" href="classTracerParticleSolver.html">Real</a>(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> <a class="el" href="classTracerParticleSolver.html">a_position</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_time</a>)&gt;</td>
+          <td class="memname">using <a class="el" href="classElectrostaticDomainBc.html#ac70aabaa096724823b87222bf5bd8cb6">ElectrostaticDomainBc::BcFunction</a> =  std::function&lt;Real(const RealVect a_position, const Real a_time)&gt;</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -185,7 +185,7 @@ Protected Attributes</h2></td></tr>
         <tr>
           <td class="memname">ElectrostaticDomainBc::ElectrostaticDomainBc </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classElectrostaticDomainBc.html">ElectrostaticDomainBc</a> &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="classElectrostaticDomainBc.html">ElectrostaticDomainBc</a> &amp;&#160;</td>
           <td class="paramname"><em>a_other</em></td><td>)</td>
           <td></td>
         </tr>
@@ -219,7 +219,7 @@ Protected Attributes</h2></td></tr>
         <tr>
           <td class="memname">ElectrostaticDomainBc::ElectrostaticDomainBc </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classElectrostaticDomainBc.html">ElectrostaticDomainBc</a> &amp;&amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="classElectrostaticDomainBc.html">ElectrostaticDomainBc</a> &amp;&amp;&#160;</td>
           <td class="paramname"><em>a_other</em></td><td>)</td>
           <td></td>
         </tr>
@@ -251,7 +251,7 @@ Protected Attributes</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="classElectrostaticDomainBc.html#a803cc8ad3f065f17090aa193798cc473">ElectrostaticDomainBc::Bc</a> ElectrostaticDomainBc::getBc </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classElectrostaticDomainBc.html#a969add9e24746f806ca9c1448013e45a">DomainSide</a>&#160;</td>
+          <td class="paramtype">const <a class="el" href="classElectrostaticDomainBc.html#a969add9e24746f806ca9c1448013e45a">DomainSide</a>&#160;</td>
           <td class="paramname"><em>a_domainSide</em></td><td>)</td>
           <td> const</td>
         </tr>
@@ -282,7 +282,7 @@ Protected Attributes</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="classElectrostaticDomainBc.html">ElectrostaticDomainBc</a> &amp; ElectrostaticDomainBc::operator= </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classElectrostaticDomainBc.html">ElectrostaticDomainBc</a> &amp;&amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="classElectrostaticDomainBc.html">ElectrostaticDomainBc</a> &amp;&amp;&#160;</td>
           <td class="paramname"><em>a_other</em></td><td>)</td>
           <td></td>
         </tr>
@@ -316,7 +316,7 @@ Protected Attributes</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="classElectrostaticDomainBc.html">ElectrostaticDomainBc</a> &amp; ElectrostaticDomainBc::operator= </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classElectrostaticDomainBc.html">ElectrostaticDomainBc</a> &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="classElectrostaticDomainBc.html">ElectrostaticDomainBc</a> &amp;&#160;</td>
           <td class="paramname"><em>a_other</em></td><td>)</td>
           <td></td>
         </tr>
@@ -346,15 +346,15 @@ Protected Attributes</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> ElectrostaticDomainBc::setBc </td>
+          <td class="memname">void ElectrostaticDomainBc::setBc </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classElectrostaticDomainBc.html#a969add9e24746f806ca9c1448013e45a">DomainSide</a>&#160;</td>
+          <td class="paramtype">const <a class="el" href="classElectrostaticDomainBc.html#a969add9e24746f806ca9c1448013e45a">DomainSide</a>&#160;</td>
           <td class="paramname"><em>a_domainSide</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classElectrostaticDomainBc.html#a803cc8ad3f065f17090aa193798cc473">Bc</a> &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="classElectrostaticDomainBc.html#a803cc8ad3f065f17090aa193798cc473">Bc</a> &amp;&#160;</td>
           <td class="paramname"><em>a_bc</em>&#160;</td>
         </tr>
         <tr>

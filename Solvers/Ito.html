@@ -198,21 +198,7 @@ The vector term <span class="math notranslate nohighlight">\(\mathbf{W}\)</span>
 <span id="chap-itoparticle"></span><h2>ItoParticle<a class="headerlink" href="#itoparticle" title="Permalink to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">ItoParticle</span></code> is used as the underlying particle type for running the Ito drift-diffusion solvers.
 It is a Struct-of-Arrays payload (see <a class="reference internal" href="../Source/Particles.html#chap-particlesoa"><span class="std std-ref">ParticleSoA</span></a>) whose columns are</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="w">  </span><span class="n">ParticleReal</span><span class="w"> </span><span class="n">mobility</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="c1">///&lt; Mobility coefficient.</span>
-<span class="w">  </span><span class="n">ParticleReal</span><span class="w"> </span><span class="n">diffusion</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="c1">///&lt; Diffusion coefficient.</span>
-<span class="w">  </span><span class="n">ParticleReal</span><span class="w"> </span><span class="n">energy</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="c1">///&lt; Average particle energy.</span>
-<span class="w">  </span><span class="n">ParticleReal</span><span class="w"> </span><span class="n">scratch</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="c1">///&lt; Scratch scalar storage.</span>
-
-<span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">old_x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="c1">///&lt; Previous position, x-component.</span>
-<span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">old_y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="c1">///&lt; Previous position, y-component.</span>
-<span class="cp">#if CH_SPACEDIM == 3</span>
-<span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">old_z</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="c1">///&lt; Previous position, z-component.</span>
-<span class="cp">#endif</span>
-
-<span class="w">  </span><span class="n">ParticleReal</span><span class="w"> </span><span class="n">vx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="c1">///&lt; Interpolated velocity, x-component.</span>
-<span class="w">  </span><span class="n">ParticleReal</span><span class="w"> </span><span class="n">vy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="c1">///&lt; Interpolated velocity, y-component.</span>
-<span class="cp">#if CH_SPACEDIM == 3</span>
-<span class="w">  </span><span class="n">ParticleReal</span><span class="w"> </span><span class="n">vz</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="c1">///&lt; Interpolated velocity, z-component.</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="w">  </span><span class="n">ParticleReal</span><span class="w"> </span><span class="n">vz</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="c1">///&lt; Interpolated velocity, z-component.</span>
 <span class="cp">#endif</span>
 
 <span class="w">  </span><span class="n">ParticleReal</span><span class="w"> </span><span class="n">scratch_x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="c1">///&lt; Scratch vector storage, x-component.</span>
@@ -220,6 +206,20 @@ It is a Struct-of-Arrays payload (see <a class="reference internal" href="../Sou
 <span class="cp">#if CH_SPACEDIM == 3</span>
 <span class="w">  </span><span class="n">ParticleReal</span><span class="w"> </span><span class="n">scratch_z</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="c1">///&lt; Scratch vector storage, z-component.</span>
 <span class="cp">#endif</span>
+<span class="p">};</span>
+
+<span class="cm">/**</span>
+<span class="cm">  @brief ParticleTraits specialization listing the payload columns of ItoParticle.</span>
+<span class="cm">  @details Only the velocity columns are written to HDF5 (h5Columns); position and weight are always</span>
+<span class="cm">  checkpointed by the container.</span>
+<span class="cm">*/</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;&gt;</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">ParticleTraits</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">     @brief Payload column member-pointers, listed one field group at a time (SpaceDim entries per vector group).</span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">columns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">make_tuple</span><span class="p">(</span>
 </pre></div>
 </div>
 <p>In addition to the container-owned position and weight, <code class="docutils literal notranslate"><span class="pre">ItoParticle</span></code> stores the payload columns above.

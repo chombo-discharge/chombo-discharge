@@ -94,13 +94,13 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a540f4db9a1514ac33dcb529d347d454a" id="r_a540f4db9a1514ac33dcb529d347d454a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structLevelTiles_1_1TileHasher.html#a540f4db9a1514ac33dcb529d347d454a">operator()</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_tile</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a540f4db9a1514ac33dcb529d347d454a" id="r_a540f4db9a1514ac33dcb529d347d454a"><td class="memItemLeft" align="right" valign="top">std::size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structLevelTiles_1_1TileHasher.html#a540f4db9a1514ac33dcb529d347d454a">operator()</a> (const IntVect &amp;a_tile) const noexcept</td></tr>
 <tr class="memdesc:a540f4db9a1514ac33dcb529d347d454a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hash operator.  <br /></td></tr>
 <tr class="separator:a540f4db9a1514ac33dcb529d347d454a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Hash functor for using IntVect tiles as unordered_map keys. </p>
-<p>Hashes all SpaceDim components (FNV-1a). Hash collisions are harmless: <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">std::unordered_map</a> distinguishes entries by key equality (IntVect::operator==), not by hash, so a collision only affects performance and never returns a wrong value. </p>
+<p>Hashes all SpaceDim components (FNV-1a). Hash collisions are harmless: std::unordered_map distinguishes entries by key equality (IntVect::operator==), not by hash, so a collision only affects performance and never returns a wrong value. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a540f4db9a1514ac33dcb529d347d454a" name="a540f4db9a1514ac33dcb529d347d454a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a540f4db9a1514ac33dcb529d347d454a">&#9670;&#160;</a></span>operator()()</h2>
@@ -112,9 +112,9 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::size_t</a> LevelTiles::TileHasher::operator() </td>
+          <td class="memname">std::size_t LevelTiles::TileHasher::operator() </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> &amp;&#160;</td>
+          <td class="paramtype">const IntVect &amp;&#160;</td>
           <td class="paramname"><em>a_tile</em></td><td>)</td>
           <td> const</td>
         </tr>

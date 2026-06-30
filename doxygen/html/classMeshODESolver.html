@@ -94,7 +94,7 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
 Public Types</h2></td></tr>
 <tr class="memitem:a2393941e9c299309ddaf8b67281ef0d2" id="r_a2393941e9c299309ddaf8b67281ef0d2"><td class="memItemLeft" align="right" valign="top"><a id="a2393941e9c299309ddaf8b67281ef0d2" name="a2393941e9c299309ddaf8b67281ef0d2"></a>
-<a class="el" href="classTracerParticleSolver.html">using</a>&#160;</td><td class="memItemRight" valign="bottom"><b>RHSFunction</b> = <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::array</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>, <a class="el" href="classTracerParticleSolver.html">N</a> &gt;(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::array</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>, <a class="el" href="classTracerParticleSolver.html">N</a> &gt; &amp;, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a>)&gt;</td></tr>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>RHSFunction</b> = std::function&lt; std::array&lt; Real, N &gt;(const std::array&lt; Real, N &gt; &amp;, const Real)&gt;</td></tr>
 <tr class="memdesc:a2393941e9c299309ddaf8b67281ef0d2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Alias for right-hand side. <br /></td></tr>
 <tr class="separator:a2393941e9c299309ddaf8b67281ef0d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -104,166 +104,166 @@ Public Member Functions</h2></td></tr>
 &#160;</td><td class="memItemRight" valign="bottom"><b>MeshODESolver</b> ()</td></tr>
 <tr class="memdesc:a5a824db056b2ce43bf99e12e5f0c41fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor. Must subsequently set everything through public member functions. <br /></td></tr>
 <tr class="separator:a5a824db056b2ce43bf99e12e5f0c41fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad8db7cd246e4a0f97d09aa272ccb1169" id="r_ad8db7cd246e4a0f97d09aa272ccb1169"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#ad8db7cd246e4a0f97d09aa272ccb1169">MeshODESolver</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classAmrMesh.html">AmrMesh</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_amr</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:ad8db7cd246e4a0f97d09aa272ccb1169" id="r_ad8db7cd246e4a0f97d09aa272ccb1169"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#ad8db7cd246e4a0f97d09aa272ccb1169">MeshODESolver</a> (const RefCountedPtr&lt; <a class="el" href="classAmrMesh.html">AmrMesh</a> &gt; &amp;a_amr) noexcept</td></tr>
 <tr class="memdesc:ad8db7cd246e4a0f97d09aa272ccb1169"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor.  <br /></td></tr>
 <tr class="separator:ad8db7cd246e4a0f97d09aa272ccb1169"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3082ff8876127d2bcfef15e9b624cb9f" id="r_a3082ff8876127d2bcfef15e9b624cb9f"><td class="memItemLeft" align="right" valign="top"><a id="a3082ff8876127d2bcfef15e9b624cb9f" name="a3082ff8876127d2bcfef15e9b624cb9f"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>MeshODESolver</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMeshODESolver.html">MeshODESolver</a> &amp;)=<a class="el" href="classTracerParticleSolver.html">delete</a></td></tr>
+&#160;</td><td class="memItemRight" valign="bottom"><b>MeshODESolver</b> (const <a class="el" href="classMeshODESolver.html">MeshODESolver</a> &amp;)=delete</td></tr>
 <tr class="memdesc:a3082ff8876127d2bcfef15e9b624cb9f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed copy constructor. <br /></td></tr>
 <tr class="separator:a3082ff8876127d2bcfef15e9b624cb9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0a1ee066bf51807649f95986829c7cee" id="r_a0a1ee066bf51807649f95986829c7cee"><td class="memItemLeft" align="right" valign="top"><a id="a0a1ee066bf51807649f95986829c7cee" name="a0a1ee066bf51807649f95986829c7cee"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>MeshODESolver</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMeshODESolver.html">MeshODESolver</a> &amp;&amp;)=<a class="el" href="classTracerParticleSolver.html">delete</a></td></tr>
+&#160;</td><td class="memItemRight" valign="bottom"><b>MeshODESolver</b> (const <a class="el" href="classMeshODESolver.html">MeshODESolver</a> &amp;&amp;)=delete</td></tr>
 <tr class="memdesc:a0a1ee066bf51807649f95986829c7cee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed move constructor. <br /></td></tr>
 <tr class="separator:a0a1ee066bf51807649f95986829c7cee"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab714fefe8a0e92d2fef58330654836d8" id="r_ab714fefe8a0e92d2fef58330654836d8"><td class="memItemLeft" align="right" valign="top"><a id="ab714fefe8a0e92d2fef58330654836d8" name="ab714fefe8a0e92d2fef58330654836d8"></a>
-<a class="el" href="classTracerParticleSolver.html">virtual</a>&#160;</td><td class="memItemRight" valign="bottom"><b>~MeshODESolver</b> ()</td></tr>
+virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~MeshODESolver</b> ()</td></tr>
 <tr class="memdesc:ab714fefe8a0e92d2fef58330654836d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. <br /></td></tr>
 <tr class="separator:ab714fefe8a0e92d2fef58330654836d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac63541e4604d065a8209b94f99851117" id="r_ac63541e4604d065a8209b94f99851117"><td class="memItemLeft" align="right" valign="top"><a id="ac63541e4604d065a8209b94f99851117" name="ac63541e4604d065a8209b94f99851117"></a>
-<a class="el" href="classMeshODESolver.html">MeshODESolver</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMeshODESolver.html">MeshODESolver</a> &amp;)=<a class="el" href="classTracerParticleSolver.html">delete</a></td></tr>
+<a class="el" href="classMeshODESolver.html">MeshODESolver</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (const <a class="el" href="classMeshODESolver.html">MeshODESolver</a> &amp;)=delete</td></tr>
 <tr class="memdesc:ac63541e4604d065a8209b94f99851117"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed assignment operator. <br /></td></tr>
 <tr class="separator:ac63541e4604d065a8209b94f99851117"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa90f4a8949e7cfda6739e553d743b8d6" id="r_aa90f4a8949e7cfda6739e553d743b8d6"><td class="memItemLeft" align="right" valign="top"><a id="aa90f4a8949e7cfda6739e553d743b8d6" name="aa90f4a8949e7cfda6739e553d743b8d6"></a>
-<a class="el" href="classMeshODESolver.html">MeshODESolver</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMeshODESolver.html">MeshODESolver</a> &amp;&amp;)=<a class="el" href="classTracerParticleSolver.html">delete</a></td></tr>
+<a class="el" href="classMeshODESolver.html">MeshODESolver</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (const <a class="el" href="classMeshODESolver.html">MeshODESolver</a> &amp;&amp;)=delete</td></tr>
 <tr class="memdesc:aa90f4a8949e7cfda6739e553d743b8d6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed move assignment operator. <br /></td></tr>
 <tr class="separator:aa90f4a8949e7cfda6739e553d743b8d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acce16f78874f00d5bcc39e2b95102797" id="r_acce16f78874f00d5bcc39e2b95102797"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#acce16f78874f00d5bcc39e2b95102797">setAmr</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classAmrMesh.html">AmrMesh</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_amrMesh</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:acce16f78874f00d5bcc39e2b95102797" id="r_acce16f78874f00d5bcc39e2b95102797"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#acce16f78874f00d5bcc39e2b95102797">setAmr</a> (const RefCountedPtr&lt; <a class="el" href="classAmrMesh.html">AmrMesh</a> &gt; &amp;a_amrMesh) noexcept</td></tr>
 <tr class="memdesc:acce16f78874f00d5bcc39e2b95102797"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set <a class="el" href="classAmrMesh.html" title="Class for handling spatial operations.">AmrMesh</a>.  <br /></td></tr>
 <tr class="separator:acce16f78874f00d5bcc39e2b95102797"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abc2da6e945d3e80d5aada35aeb4d3269" id="r_abc2da6e945d3e80d5aada35aeb4d3269"><td class="memItemLeft" align="right" valign="top"><a id="abc2da6e945d3e80d5aada35aeb4d3269" name="abc2da6e945d3e80d5aada35aeb4d3269"></a>
-<a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>parseOptions</b> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>parseOptions</b> () noexcept</td></tr>
 <tr class="memdesc:abc2da6e945d3e80d5aada35aeb4d3269"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse class options. <br /></td></tr>
 <tr class="separator:abc2da6e945d3e80d5aada35aeb4d3269"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a55a482201ddc7f943e66afea07621569" id="r_a55a482201ddc7f943e66afea07621569"><td class="memItemLeft" align="right" valign="top"><a id="a55a482201ddc7f943e66afea07621569" name="a55a482201ddc7f943e66afea07621569"></a>
-<a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>parseRuntimeOptions</b> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>parseRuntimeOptions</b> () noexcept</td></tr>
 <tr class="memdesc:a55a482201ddc7f943e66afea07621569"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse run-time configurable class options. <br /></td></tr>
 <tr class="separator:a55a482201ddc7f943e66afea07621569"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad88998487cf2298d72c04812331d64c8" id="r_ad88998487cf2298d72c04812331d64c8"><td class="memItemLeft" align="right" valign="top"><a id="ad88998487cf2298d72c04812331d64c8" name="ad88998487cf2298d72c04812331d64c8"></a>
-<a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>allocate</b> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>allocate</b> () noexcept</td></tr>
 <tr class="memdesc:ad88998487cf2298d72c04812331d64c8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocate internal storage. <br /></td></tr>
 <tr class="separator:ad88998487cf2298d72c04812331d64c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a73d88d8265d545cd88a642fc7e828b23" id="r_a73d88d8265d545cd88a642fc7e828b23"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#a73d88d8265d545cd88a642fc7e828b23">setPhi</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_pos</a>)&gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_phiFunc</a>, <a class="el" href="classTracerParticleSolver.html">size_t</a> <a class="el" href="classTracerParticleSolver.html">a_comp</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a73d88d8265d545cd88a642fc7e828b23" id="r_a73d88d8265d545cd88a642fc7e828b23"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#a73d88d8265d545cd88a642fc7e828b23">setPhi</a> (const std::function&lt; Real(const RealVect &amp;a_pos)&gt; &amp;a_phiFunc, size_t a_comp) noexcept</td></tr>
 <tr class="memdesc:a73d88d8265d545cd88a642fc7e828b23"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set phi for a specific component.  <br /></td></tr>
 <tr class="separator:a73d88d8265d545cd88a642fc7e828b23"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a724eb1b0c5bf19dcebe739d1aae85cdd" id="r_a724eb1b0c5bf19dcebe739d1aae85cdd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#a724eb1b0c5bf19dcebe739d1aae85cdd">setPhi</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::array</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>, <a class="el" href="classTracerParticleSolver.html">N</a> &gt;(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_pos</a>)&gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_phiFunc</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a724eb1b0c5bf19dcebe739d1aae85cdd" id="r_a724eb1b0c5bf19dcebe739d1aae85cdd"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#a724eb1b0c5bf19dcebe739d1aae85cdd">setPhi</a> (const std::function&lt; std::array&lt; Real, N &gt;(const RealVect &amp;a_pos)&gt; &amp;a_phiFunc) noexcept</td></tr>
 <tr class="memdesc:a724eb1b0c5bf19dcebe739d1aae85cdd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set phi everywhere.  <br /></td></tr>
 <tr class="separator:a724eb1b0c5bf19dcebe739d1aae85cdd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1065b964a742850fe83f0c2df6772468" id="r_a1065b964a742850fe83f0c2df6772468"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#a1065b964a742850fe83f0c2df6772468">setRHS</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_pos</a>)&gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_srcFunc</a>, <a class="el" href="classTracerParticleSolver.html">size_t</a> <a class="el" href="classTracerParticleSolver.html">a_comp</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a1065b964a742850fe83f0c2df6772468" id="r_a1065b964a742850fe83f0c2df6772468"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#a1065b964a742850fe83f0c2df6772468">setRHS</a> (const std::function&lt; Real(const RealVect &amp;a_pos)&gt; &amp;a_srcFunc, size_t a_comp) noexcept</td></tr>
 <tr class="memdesc:a1065b964a742850fe83f0c2df6772468"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set right-hand side for specified component.  <br /></td></tr>
 <tr class="separator:a1065b964a742850fe83f0c2df6772468"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aeea8a244495f50145d82db821dc54739" id="r_aeea8a244495f50145d82db821dc54739"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#aeea8a244495f50145d82db821dc54739">computeRHS</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMeshODESolver.html#a2393941e9c299309ddaf8b67281ef0d2">RHSFunction</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_rhsFunction</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:aeea8a244495f50145d82db821dc54739"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute right-hand side from left-hand side. <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">I.e</a>. compute f = f(y,t).  <br /></td></tr>
+<tr class="memitem:aeea8a244495f50145d82db821dc54739" id="r_aeea8a244495f50145d82db821dc54739"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#aeea8a244495f50145d82db821dc54739">computeRHS</a> (const <a class="el" href="classMeshODESolver.html#a2393941e9c299309ddaf8b67281ef0d2">RHSFunction</a> &amp;a_rhsFunction) noexcept</td></tr>
+<tr class="memdesc:aeea8a244495f50145d82db821dc54739"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute right-hand side from left-hand side. I.e. compute f = f(y,t).  <br /></td></tr>
 <tr class="separator:aeea8a244495f50145d82db821dc54739"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a29611cae331d812326d4de31cce1fe5c" id="r_a29611cae331d812326d4de31cce1fe5c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#a29611cae331d812326d4de31cce1fe5c">computeRHS</a> (<a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_rhs</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMeshODESolver.html#a2393941e9c299309ddaf8b67281ef0d2">RHSFunction</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_rhsFunction</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:a29611cae331d812326d4de31cce1fe5c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute right-hand side from left-hand side. <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">I.e</a>. compute f = f(y,t).  <br /></td></tr>
+<tr class="memitem:a29611cae331d812326d4de31cce1fe5c" id="r_a29611cae331d812326d4de31cce1fe5c"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#a29611cae331d812326d4de31cce1fe5c">computeRHS</a> (EBAMRCellData &amp;a_rhs, const <a class="el" href="classMeshODESolver.html#a2393941e9c299309ddaf8b67281ef0d2">RHSFunction</a> &amp;a_rhsFunction) const noexcept</td></tr>
+<tr class="memdesc:a29611cae331d812326d4de31cce1fe5c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute right-hand side from left-hand side. I.e. compute f = f(y,t).  <br /></td></tr>
 <tr class="separator:a29611cae331d812326d4de31cce1fe5c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa97388b2a48559af30639bfba9f8c212" id="r_aa97388b2a48559af30639bfba9f8c212"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#aa97388b2a48559af30639bfba9f8c212">getPhi</a> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:aa97388b2a48559af30639bfba9f8c212" id="r_aa97388b2a48559af30639bfba9f8c212"><td class="memItemLeft" align="right" valign="top">EBAMRCellData &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#aa97388b2a48559af30639bfba9f8c212">getPhi</a> () noexcept</td></tr>
 <tr class="memdesc:aa97388b2a48559af30639bfba9f8c212"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the solution vector (left-hand side of equation).  <br /></td></tr>
 <tr class="separator:aa97388b2a48559af30639bfba9f8c212"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab8fbf11cf47f3774970bf31f5679cd08" id="r_ab8fbf11cf47f3774970bf31f5679cd08"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#ab8fbf11cf47f3774970bf31f5679cd08">getPhi</a> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:ab8fbf11cf47f3774970bf31f5679cd08" id="r_ab8fbf11cf47f3774970bf31f5679cd08"><td class="memItemLeft" align="right" valign="top">const EBAMRCellData &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#ab8fbf11cf47f3774970bf31f5679cd08">getPhi</a> () const noexcept</td></tr>
 <tr class="memdesc:ab8fbf11cf47f3774970bf31f5679cd08"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the solution vector (left-hand side of equation). Const version.  <br /></td></tr>
 <tr class="separator:ab8fbf11cf47f3774970bf31f5679cd08"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acbbedb9a12c31f5f62ee99ef9f72fe81" id="r_acbbedb9a12c31f5f62ee99ef9f72fe81"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#acbbedb9a12c31f5f62ee99ef9f72fe81">getRHS</a> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:acbbedb9a12c31f5f62ee99ef9f72fe81" id="r_acbbedb9a12c31f5f62ee99ef9f72fe81"><td class="memItemLeft" align="right" valign="top">EBAMRCellData &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#acbbedb9a12c31f5f62ee99ef9f72fe81">getRHS</a> () noexcept</td></tr>
 <tr class="memdesc:acbbedb9a12c31f5f62ee99ef9f72fe81"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the right-hand side vector.  <br /></td></tr>
 <tr class="separator:acbbedb9a12c31f5f62ee99ef9f72fe81"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1edd9c0baf2e42ef5ba992f0d3afd2ea" id="r_a1edd9c0baf2e42ef5ba992f0d3afd2ea"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#a1edd9c0baf2e42ef5ba992f0d3afd2ea">getRHS</a> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a1edd9c0baf2e42ef5ba992f0d3afd2ea" id="r_a1edd9c0baf2e42ef5ba992f0d3afd2ea"><td class="memItemLeft" align="right" valign="top">const EBAMRCellData &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#a1edd9c0baf2e42ef5ba992f0d3afd2ea">getRHS</a> () const noexcept</td></tr>
 <tr class="memdesc:a1edd9c0baf2e42ef5ba992f0d3afd2ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the right-hand side vector. Const version.  <br /></td></tr>
 <tr class="separator:a1edd9c0baf2e42ef5ba992f0d3afd2ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abba3c963d9072f34aa09bb1f18fdc176" id="r_abba3c963d9072f34aa09bb1f18fdc176"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#abba3c963d9072f34aa09bb1f18fdc176">preRegrid</a> (<a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_lbase</a>, <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_oldFinestLevel</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:abba3c963d9072f34aa09bb1f18fdc176" id="r_abba3c963d9072f34aa09bb1f18fdc176"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#abba3c963d9072f34aa09bb1f18fdc176">preRegrid</a> (int a_lbase, int a_oldFinestLevel) noexcept</td></tr>
 <tr class="memdesc:abba3c963d9072f34aa09bb1f18fdc176"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform pre-regrid operations.  <br /></td></tr>
 <tr class="separator:abba3c963d9072f34aa09bb1f18fdc176"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae0a7155c598cc18b81e77bb37b943d8d" id="r_ae0a7155c598cc18b81e77bb37b943d8d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#ae0a7155c598cc18b81e77bb37b943d8d">regrid</a> (<a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_lmin</a>, <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_oldFinestLevel</a>, <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_newFinestLevel</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:ae0a7155c598cc18b81e77bb37b943d8d" id="r_ae0a7155c598cc18b81e77bb37b943d8d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#ae0a7155c598cc18b81e77bb37b943d8d">regrid</a> (int a_lmin, int a_oldFinestLevel, int a_newFinestLevel) noexcept</td></tr>
 <tr class="memdesc:ae0a7155c598cc18b81e77bb37b943d8d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Regrid this solver.  <br /></td></tr>
 <tr class="separator:ae0a7155c598cc18b81e77bb37b943d8d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0dc030771d3d941c7f1ef4d68aeb5571" id="r_a0dc030771d3d941c7f1ef4d68aeb5571"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#a0dc030771d3d941c7f1ef4d68aeb5571">getRealm</a> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a0dc030771d3d941c7f1ef4d68aeb5571" id="r_a0dc030771d3d941c7f1ef4d68aeb5571"><td class="memItemLeft" align="right" valign="top">virtual std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#a0dc030771d3d941c7f1ef4d68aeb5571">getRealm</a> () const noexcept</td></tr>
 <tr class="memdesc:a0dc030771d3d941c7f1ef4d68aeb5571"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the realm where this solver is registered.  <br /></td></tr>
 <tr class="separator:a0dc030771d3d941c7f1ef4d68aeb5571"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae8628a6202953a82b83652786520c1f8" id="r_ae8628a6202953a82b83652786520c1f8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#ae8628a6202953a82b83652786520c1f8">getName</a> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:ae8628a6202953a82b83652786520c1f8" id="r_ae8628a6202953a82b83652786520c1f8"><td class="memItemLeft" align="right" valign="top">virtual std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#ae8628a6202953a82b83652786520c1f8">getName</a> () const noexcept</td></tr>
 <tr class="memdesc:ae8628a6202953a82b83652786520c1f8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get solver name.  <br /></td></tr>
 <tr class="separator:ae8628a6202953a82b83652786520c1f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2fc1cb7d415c53e783cbbfde14512f31" id="r_a2fc1cb7d415c53e783cbbfde14512f31"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#a2fc1cb7d415c53e783cbbfde14512f31">setName</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_name</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a2fc1cb7d415c53e783cbbfde14512f31" id="r_a2fc1cb7d415c53e783cbbfde14512f31"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#a2fc1cb7d415c53e783cbbfde14512f31">setName</a> (const std::string &amp;a_name) noexcept</td></tr>
 <tr class="memdesc:a2fc1cb7d415c53e783cbbfde14512f31"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set solver name.  <br /></td></tr>
 <tr class="separator:a2fc1cb7d415c53e783cbbfde14512f31"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a771ffa68f99bcb130818abf1c4e2c6fe" id="r_a771ffa68f99bcb130818abf1c4e2c6fe"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#a771ffa68f99bcb130818abf1c4e2c6fe">registerOperators</a> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a771ffa68f99bcb130818abf1c4e2c6fe" id="r_a771ffa68f99bcb130818abf1c4e2c6fe"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#a771ffa68f99bcb130818abf1c4e2c6fe">registerOperators</a> () const noexcept</td></tr>
 <tr class="memdesc:a771ffa68f99bcb130818abf1c4e2c6fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register operators for AMR operations.  <br /></td></tr>
 <tr class="separator:a771ffa68f99bcb130818abf1c4e2c6fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab9f7d1f8cc77ee63130e616d55fc1330" id="r_ab9f7d1f8cc77ee63130e616d55fc1330"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#ab9f7d1f8cc77ee63130e616d55fc1330">setRealm</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_realm</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:ab9f7d1f8cc77ee63130e616d55fc1330" id="r_ab9f7d1f8cc77ee63130e616d55fc1330"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#ab9f7d1f8cc77ee63130e616d55fc1330">setRealm</a> (const std::string &amp;a_realm) noexcept</td></tr>
 <tr class="memdesc:ab9f7d1f8cc77ee63130e616d55fc1330"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the realm for this solver.  <br /></td></tr>
 <tr class="separator:ab9f7d1f8cc77ee63130e616d55fc1330"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad13f5a984fc1067d276d18896958976f" id="r_ad13f5a984fc1067d276d18896958976f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#ad13f5a984fc1067d276d18896958976f">setPhase</a> (<a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> <a class="el" href="classTracerParticleSolver.html">a_phase</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:ad13f5a984fc1067d276d18896958976f" id="r_ad13f5a984fc1067d276d18896958976f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#ad13f5a984fc1067d276d18896958976f">setPhase</a> (<a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) noexcept</td></tr>
 <tr class="memdesc:ad13f5a984fc1067d276d18896958976f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set phase.  <br /></td></tr>
 <tr class="separator:ad13f5a984fc1067d276d18896958976f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acef9e9a2695ea2de9abdcd6bf52386e6" id="r_acef9e9a2695ea2de9abdcd6bf52386e6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#acef9e9a2695ea2de9abdcd6bf52386e6">setVerbosity</a> (<a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_verbosity</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:acef9e9a2695ea2de9abdcd6bf52386e6" id="r_acef9e9a2695ea2de9abdcd6bf52386e6"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#acef9e9a2695ea2de9abdcd6bf52386e6">setVerbosity</a> (int a_verbosity) noexcept</td></tr>
 <tr class="memdesc:acef9e9a2695ea2de9abdcd6bf52386e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set verbosity.  <br /></td></tr>
 <tr class="separator:acef9e9a2695ea2de9abdcd6bf52386e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aec8195ea3914c15f91e42e616ff3fb2a" id="r_aec8195ea3914c15f91e42e616ff3fb2a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#aec8195ea3914c15f91e42e616ff3fb2a">setTime</a> (<a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_step</a>, <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_time</a>, <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_dt</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:aec8195ea3914c15f91e42e616ff3fb2a" id="r_aec8195ea3914c15f91e42e616ff3fb2a"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#aec8195ea3914c15f91e42e616ff3fb2a">setTime</a> (int a_step, Real a_time, Real a_dt) noexcept</td></tr>
 <tr class="memdesc:aec8195ea3914c15f91e42e616ff3fb2a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the time for this solver.  <br /></td></tr>
 <tr class="separator:aec8195ea3914c15f91e42e616ff3fb2a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a227be4c0de4afb7e9b68ebb2b4e0ee2c" id="r_a227be4c0de4afb7e9b68ebb2b4e0ee2c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#a227be4c0de4afb7e9b68ebb2b4e0ee2c">writePlotFile</a> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a227be4c0de4afb7e9b68ebb2b4e0ee2c" id="r_a227be4c0de4afb7e9b68ebb2b4e0ee2c"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#a227be4c0de4afb7e9b68ebb2b4e0ee2c">writePlotFile</a> () const noexcept</td></tr>
 <tr class="memdesc:a227be4c0de4afb7e9b68ebb2b4e0ee2c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot file.  <br /></td></tr>
 <tr class="separator:a227be4c0de4afb7e9b68ebb2b4e0ee2c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abb191f4e26ff88867474088658f3cf0c" id="r_abb191f4e26ff88867474088658f3cf0c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#abb191f4e26ff88867474088658f3cf0c">getNumberOfPlotVariables</a> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:abb191f4e26ff88867474088658f3cf0c" id="r_abb191f4e26ff88867474088658f3cf0c"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#abb191f4e26ff88867474088658f3cf0c">getNumberOfPlotVariables</a> () const noexcept</td></tr>
 <tr class="memdesc:abb191f4e26ff88867474088658f3cf0c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get number of output fields.  <br /></td></tr>
 <tr class="separator:abb191f4e26ff88867474088658f3cf0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a14272084bb398f800af6c9ec19d03aab" id="r_a14272084bb398f800af6c9ec19d03aab"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#a14272084bb398f800af6c9ec19d03aab">getPlotVariableNames</a> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a14272084bb398f800af6c9ec19d03aab" id="r_a14272084bb398f800af6c9ec19d03aab"><td class="memItemLeft" align="right" valign="top">virtual Vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#a14272084bb398f800af6c9ec19d03aab">getPlotVariableNames</a> () const noexcept</td></tr>
 <tr class="memdesc:a14272084bb398f800af6c9ec19d03aab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get output plot names.  <br /></td></tr>
 <tr class="separator:a14272084bb398f800af6c9ec19d03aab"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2bcf00560ad1cca232caf23d48c69077" id="r_a2bcf00560ad1cca232caf23d48c69077"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#a2bcf00560ad1cca232caf23d48c69077">writePlotData</a> (<a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_output</a>, <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_icomp</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_outputRealm</a>, <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_level</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a2bcf00560ad1cca232caf23d48c69077" id="r_a2bcf00560ad1cca232caf23d48c69077"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#a2bcf00560ad1cca232caf23d48c69077">writePlotData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_icomp, const std::string &amp;a_outputRealm, int a_level) const noexcept</td></tr>
 <tr class="memdesc:a2bcf00560ad1cca232caf23d48c69077"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data to output holder.  <br /></td></tr>
 <tr class="separator:a2bcf00560ad1cca232caf23d48c69077"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
-<tr class="memitem:a3ae0e4fab16a655428ff28a786324f5a" id="r_a3ae0e4fab16a655428ff28a786324f5a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#a3ae0e4fab16a655428ff28a786324f5a">writeData</a> (<a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_output</a>, <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_comp</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_data</a>, <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> <a class="el" href="classTracerParticleSolver.html">a_outputRealm</a>, <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_level</a>, <a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classTracerParticleSolver.html">a_interpToCentroids</a>, <a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classTracerParticleSolver.html">a_interpGhost</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a3ae0e4fab16a655428ff28a786324f5a" id="r_a3ae0e4fab16a655428ff28a786324f5a"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#a3ae0e4fab16a655428ff28a786324f5a">writeData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_comp, const EBAMRCellData &amp;a_data, std::string a_outputRealm, int a_level, bool a_interpToCentroids, bool a_interpGhost) const noexcept</td></tr>
 <tr class="memdesc:a3ae0e4fab16a655428ff28a786324f5a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write data to output. Convenience function.  <br /></td></tr>
 <tr class="separator:a3ae0e4fab16a655428ff28a786324f5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac3e7341aca6d11275f70d827101710ee" id="r_ac3e7341aca6d11275f70d827101710ee"><td class="memItemLeft" align="right" valign="top"><a id="ac3e7341aca6d11275f70d827101710ee" name="ac3e7341aca6d11275f70d827101710ee"></a>
-<a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>parsePlotVariables</b> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>parsePlotVariables</b> () noexcept</td></tr>
 <tr class="memdesc:ac3e7341aca6d11275f70d827101710ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse plot variables. <br /></td></tr>
 <tr class="separator:ac3e7341aca6d11275f70d827101710ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
-<tr class="memitem:a9efeab49a39205b4dd14b26bff9589c4" id="r_a9efeab49a39205b4dd14b26bff9589c4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classAmrMesh.html">AmrMesh</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#a9efeab49a39205b4dd14b26bff9589c4">m_amr</a></td></tr>
+<tr class="memitem:a9efeab49a39205b4dd14b26bff9589c4" id="r_a9efeab49a39205b4dd14b26bff9589c4"><td class="memItemLeft" align="right" valign="top">RefCountedPtr&lt; <a class="el" href="classAmrMesh.html">AmrMesh</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#a9efeab49a39205b4dd14b26bff9589c4">m_amr</a></td></tr>
 <tr class="memdesc:a9efeab49a39205b4dd14b26bff9589c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write checkpoint data into HDF5 file.  <br /></td></tr>
 <tr class="separator:a9efeab49a39205b4dd14b26bff9589c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a12fa8ed42ec623f2b6180f03b2313b11" id="r_a12fa8ed42ec623f2b6180f03b2313b11"><td class="memItemLeft" align="right" valign="top"><a id="a12fa8ed42ec623f2b6180f03b2313b11" name="a12fa8ed42ec623f2b6180f03b2313b11"></a>
-<a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_verbosity</b></td></tr>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>m_verbosity</b></td></tr>
 <tr class="memdesc:a12fa8ed42ec623f2b6180f03b2313b11"><td class="mdescLeft">&#160;</td><td class="mdescRight">Chattiness. <br /></td></tr>
 <tr class="separator:a12fa8ed42ec623f2b6180f03b2313b11"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac284ba3809b8059a86b9cadc4b57dfcc" id="r_ac284ba3809b8059a86b9cadc4b57dfcc"><td class="memItemLeft" align="right" valign="top"><a id="ac284ba3809b8059a86b9cadc4b57dfcc" name="ac284ba3809b8059a86b9cadc4b57dfcc"></a>
-<a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_timeStep</b></td></tr>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>m_timeStep</b></td></tr>
 <tr class="memdesc:ac284ba3809b8059a86b9cadc4b57dfcc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Time step. <br /></td></tr>
 <tr class="separator:ac284ba3809b8059a86b9cadc4b57dfcc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abf1c49886d7aed5ed93889acd0aae17a" id="r_abf1c49886d7aed5ed93889acd0aae17a"><td class="memItemLeft" align="right" valign="top"><a id="abf1c49886d7aed5ed93889acd0aae17a" name="abf1c49886d7aed5ed93889acd0aae17a"></a>
-<a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_time</b></td></tr>
+Real&#160;</td><td class="memItemRight" valign="bottom"><b>m_time</b></td></tr>
 <tr class="memdesc:abf1c49886d7aed5ed93889acd0aae17a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current time. <br /></td></tr>
 <tr class="separator:abf1c49886d7aed5ed93889acd0aae17a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a972f68e5ce8436b6de4c4eca9d07b2d0" id="r_a972f68e5ce8436b6de4c4eca9d07b2d0"><td class="memItemLeft" align="right" valign="top"><a id="a972f68e5ce8436b6de4c4eca9d07b2d0" name="a972f68e5ce8436b6de4c4eca9d07b2d0"></a>
-<a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_dt</b></td></tr>
+Real&#160;</td><td class="memItemRight" valign="bottom"><b>m_dt</b></td></tr>
 <tr class="memdesc:a972f68e5ce8436b6de4c4eca9d07b2d0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Last time step increment. <br /></td></tr>
 <tr class="separator:a972f68e5ce8436b6de4c4eca9d07b2d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a26027f96744a80cfe917ff7547e81fab" id="r_a26027f96744a80cfe917ff7547e81fab"><td class="memItemLeft" align="right" valign="top"><a id="a26027f96744a80cfe917ff7547e81fab" name="a26027f96744a80cfe917ff7547e81fab"></a>
-<a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_plotPhi</b></td></tr>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_plotPhi</b></td></tr>
 <tr class="memdesc:a26027f96744a80cfe917ff7547e81fab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Plot solution vector or not. <br /></td></tr>
 <tr class="separator:a26027f96744a80cfe917ff7547e81fab"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a42e8128eeceddde9b5a5bb5fe9472f08" id="r_a42e8128eeceddde9b5a5bb5fe9472f08"><td class="memItemLeft" align="right" valign="top"><a id="a42e8128eeceddde9b5a5bb5fe9472f08" name="a42e8128eeceddde9b5a5bb5fe9472f08"></a>
-<a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_plotRHS</b></td></tr>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_plotRHS</b></td></tr>
 <tr class="memdesc:a42e8128eeceddde9b5a5bb5fe9472f08"><td class="mdescLeft">&#160;</td><td class="mdescRight">Plot source term or not. <br /></td></tr>
 <tr class="separator:a42e8128eeceddde9b5a5bb5fe9472f08"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a234a2a9267f16cf3453b55665fc15a3d" id="r_a234a2a9267f16cf3453b55665fc15a3d"><td class="memItemLeft" align="right" valign="top"><a id="a234a2a9267f16cf3453b55665fc15a3d" name="a234a2a9267f16cf3453b55665fc15a3d"></a>
-<a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_regridSlopes</b></td></tr>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_regridSlopes</b></td></tr>
 <tr class="memdesc:a234a2a9267f16cf3453b55665fc15a3d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Use slopes when regridding. <br /></td></tr>
 <tr class="separator:a234a2a9267f16cf3453b55665fc15a3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a803fdb5ee685c4f3276f90d4e6352fcc" id="r_a803fdb5ee685c4f3276f90d4e6352fcc"><td class="memItemLeft" align="right" valign="top"><a id="a803fdb5ee685c4f3276f90d4e6352fcc" name="a803fdb5ee685c4f3276f90d4e6352fcc"></a>
-<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_name</b></td></tr>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><b>m_name</b></td></tr>
 <tr class="memdesc:a803fdb5ee685c4f3276f90d4e6352fcc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Solver name. <br /></td></tr>
 <tr class="separator:a803fdb5ee685c4f3276f90d4e6352fcc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a94a270bc75a6d3056c4aaaadacf72244" id="r_a94a270bc75a6d3056c4aaaadacf72244"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#a94a270bc75a6d3056c4aaaadacf72244">m_className</a></td></tr>
+<tr class="memitem:a94a270bc75a6d3056c4aaaadacf72244" id="r_a94a270bc75a6d3056c4aaaadacf72244"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#a94a270bc75a6d3056c4aaaadacf72244">m_className</a></td></tr>
 <tr class="memdesc:a94a270bc75a6d3056c4aaaadacf72244"><td class="mdescLeft">&#160;</td><td class="mdescRight">Class name.  <br /></td></tr>
 <tr class="separator:a94a270bc75a6d3056c4aaaadacf72244"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab969cc0829148f6c94c3dca9a506ba44" id="r_ab969cc0829148f6c94c3dca9a506ba44"><td class="memItemLeft" align="right" valign="top"><a id="ab969cc0829148f6c94c3dca9a506ba44" name="ab969cc0829148f6c94c3dca9a506ba44"></a>
-<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_realm</b></td></tr>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><b>m_realm</b></td></tr>
 <tr class="memdesc:ab969cc0829148f6c94c3dca9a506ba44"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> where solver is registered. <br /></td></tr>
 <tr class="separator:ab969cc0829148f6c94c3dca9a506ba44"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad94e0a27d7d78943214793198f745d04" id="r_ad94e0a27d7d78943214793198f745d04"><td class="memItemLeft" align="right" valign="top"><a id="ad94e0a27d7d78943214793198f745d04" name="ad94e0a27d7d78943214793198f745d04"></a>
@@ -271,20 +271,20 @@ Protected Attributes</h2></td></tr>
 <tr class="memdesc:ad94e0a27d7d78943214793198f745d04"><td class="mdescLeft">&#160;</td><td class="mdescRight">Phase where solver data lives. <br /></td></tr>
 <tr class="separator:ad94e0a27d7d78943214793198f745d04"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ace68febebec40061da147bc07ccdbebe" id="r_ace68febebec40061da147bc07ccdbebe"><td class="memItemLeft" align="right" valign="top"><a id="ace68febebec40061da147bc07ccdbebe" name="ace68febebec40061da147bc07ccdbebe"></a>
-<a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_phi</b></td></tr>
+EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><b>m_phi</b></td></tr>
 <tr class="memdesc:ace68febebec40061da147bc07ccdbebe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Solution vector (left hand side of equation). <br /></td></tr>
 <tr class="separator:ace68febebec40061da147bc07ccdbebe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab6d0d66a168e1e32d27351ac7e7801af" id="r_ab6d0d66a168e1e32d27351ac7e7801af"><td class="memItemLeft" align="right" valign="top"><a id="ab6d0d66a168e1e32d27351ac7e7801af" name="ab6d0d66a168e1e32d27351ac7e7801af"></a>
-<a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_rhs</b></td></tr>
+EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><b>m_rhs</b></td></tr>
 <tr class="memdesc:ab6d0d66a168e1e32d27351ac7e7801af"><td class="mdescLeft">&#160;</td><td class="mdescRight">Source term (right-hand side of equation). <br /></td></tr>
 <tr class="separator:ab6d0d66a168e1e32d27351ac7e7801af"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a65ff512e4df4889788c976add8a67666" id="r_a65ff512e4df4889788c976add8a67666"><td class="memItemLeft" align="right" valign="top"><a id="a65ff512e4df4889788c976add8a67666" name="a65ff512e4df4889788c976add8a67666"></a>
-<a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_cache</b></td></tr>
+EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><b>m_cache</b></td></tr>
 <tr class="memdesc:a65ff512e4df4889788c976add8a67666"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cache storage when doing regrids. <br /></td></tr>
 <tr class="separator:a65ff512e4df4889788c976add8a67666"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N = 1&gt;<br />
+<div class="textblock"><div class="compoundTemplParams">template&lt;size_t N = 1&gt;<br />
 class MeshODESolver&lt; N &gt;</div><p>Class for solving dy/dt = f on an AMR hierarchy. </p>
 <p>The template parameter is the number of variables in y and f. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
@@ -294,15 +294,15 @@ class MeshODESolver&lt; N &gt;</div><p>Class for solving dy/dt = f on an AMR hie
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt; </div>
+template&lt;size_t N&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; <a class="el" href="classTracerParticleSolver.html">N</a> &gt;<a class="el" href="classMeshODESolver.html">::MeshODESolver</a> </td>
+          <td class="memname"><a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; N &gt;<a class="el" href="classMeshODESolver.html">::MeshODESolver</a> </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classAmrMesh.html">AmrMesh</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const RefCountedPtr&lt; <a class="el" href="classAmrMesh.html">AmrMesh</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_amr</em></td><td>)</td>
           <td></td>
         </tr>
@@ -331,15 +331,15 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt;
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt; </div>
+template&lt;size_t N&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; <a class="el" href="classTracerParticleSolver.html">N</a> &gt;::computeRHS </td>
+          <td class="memname">void <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; N &gt;::computeRHS </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMeshODESolver.html#a2393941e9c299309ddaf8b67281ef0d2">RHSFunction</a> &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="classMeshODESolver.html#a2393941e9c299309ddaf8b67281ef0d2">RHSFunction</a> &amp;&#160;</td>
           <td class="paramname"><em>a_rhsFunction</em></td><td>)</td>
           <td></td>
         </tr>
@@ -351,7 +351,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt;
 </table>
 </div><div class="memdoc">
 
-<p>Compute right-hand side from left-hand side. <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">I.e</a>. compute f = f(y,t). </p>
+<p>Compute right-hand side from left-hand side. I.e. compute f = f(y,t). </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_rhsFunction</td><td>Function for computing the right-hand side. </td></tr>
@@ -367,21 +367,21 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt;
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt; </div>
+template&lt;size_t N&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; <a class="el" href="classTracerParticleSolver.html">N</a> &gt;::computeRHS </td>
+          <td class="memname">void <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; N &gt;::computeRHS </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype">EBAMRCellData &amp;&#160;</td>
           <td class="paramname"><em>a_rhs</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMeshODESolver.html#a2393941e9c299309ddaf8b67281ef0d2">RHSFunction</a> &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="classMeshODESolver.html#a2393941e9c299309ddaf8b67281ef0d2">RHSFunction</a> &amp;&#160;</td>
           <td class="paramname"><em>a_rhsFunction</em>&#160;</td>
         </tr>
         <tr>
@@ -397,7 +397,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt;
 </table>
 </div><div class="memdoc">
 
-<p>Compute right-hand side from left-hand side. <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">I.e</a>. compute f = f(y,t). </p>
+<p>Compute right-hand side from left-hand side. I.e. compute f = f(y,t). </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">a_rhs</td><td>Right-hand side on the mesh. </td></tr>
@@ -414,13 +414,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt;
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt; </div>
+template&lt;size_t N&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; <a class="el" href="classTracerParticleSolver.html">N</a> &gt;::getName </td>
+          <td class="memname">std::string <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; N &gt;::getName </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -445,13 +445,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt;
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt; </div>
+template&lt;size_t N&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; <a class="el" href="classTracerParticleSolver.html">N</a> &gt;::getNumberOfPlotVariables </td>
+          <td class="memname">int <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; N &gt;::getNumberOfPlotVariables </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -475,13 +475,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt;
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt; </div>
+template&lt;size_t N&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp; <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; <a class="el" href="classTracerParticleSolver.html">N</a> &gt;::getPhi </td>
+          <td class="memname">const EBAMRCellData &amp; <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; N &gt;::getPhi </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -505,13 +505,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt;
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt; </div>
+template&lt;size_t N&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp; <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; <a class="el" href="classTracerParticleSolver.html">N</a> &gt;::getPhi </td>
+          <td class="memname">EBAMRCellData &amp; <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; N &gt;::getPhi </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -535,13 +535,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt;
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt; </div>
+template&lt;size_t N&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &gt; <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; <a class="el" href="classTracerParticleSolver.html">N</a> &gt;::getPlotVariableNames </td>
+          <td class="memname">Vector&lt; std::string &gt; <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; N &gt;::getPlotVariableNames </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -565,13 +565,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt;
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt; </div>
+template&lt;size_t N&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; <a class="el" href="classTracerParticleSolver.html">N</a> &gt;::getRealm </td>
+          <td class="memname">std::string <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; N &gt;::getRealm </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -595,13 +595,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt;
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt; </div>
+template&lt;size_t N&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp; <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; <a class="el" href="classTracerParticleSolver.html">N</a> &gt;::getRHS </td>
+          <td class="memname">const EBAMRCellData &amp; <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; N &gt;::getRHS </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -625,13 +625,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt;
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt; </div>
+template&lt;size_t N&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp; <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; <a class="el" href="classTracerParticleSolver.html">N</a> &gt;::getRHS </td>
+          <td class="memname">EBAMRCellData &amp; <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; N &gt;::getRHS </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -655,21 +655,21 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt;
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt; </div>
+template&lt;size_t N&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; <a class="el" href="classTracerParticleSolver.html">N</a> &gt;::preRegrid </td>
+          <td class="memname">void <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; N &gt;::preRegrid </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype">int&#160;</td>
           <td class="paramname"><em>a_lbase</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype">int&#160;</td>
           <td class="paramname"><em>a_oldFinestLevel</em>&#160;</td>
         </tr>
         <tr>
@@ -703,13 +703,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt;
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt; </div>
+template&lt;size_t N&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; <a class="el" href="classTracerParticleSolver.html">N</a> &gt;::registerOperators </td>
+          <td class="memname">void <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; N &gt;::registerOperators </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -733,27 +733,27 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt;
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt; </div>
+template&lt;size_t N&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; <a class="el" href="classTracerParticleSolver.html">N</a> &gt;::regrid </td>
+          <td class="memname">void <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; N &gt;::regrid </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype">int&#160;</td>
           <td class="paramname"><em>a_lmin</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype">int&#160;</td>
           <td class="paramname"><em>a_oldFinestLevel</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype">int&#160;</td>
           <td class="paramname"><em>a_newFinestLevel</em>&#160;</td>
         </tr>
         <tr>
@@ -788,15 +788,15 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt;
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt; </div>
+template&lt;size_t N&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; <a class="el" href="classTracerParticleSolver.html">N</a> &gt;::setAmr </td>
+          <td class="memname">void <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; N &gt;::setAmr </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classAmrMesh.html">AmrMesh</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const RefCountedPtr&lt; <a class="el" href="classAmrMesh.html">AmrMesh</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_amrMesh</em></td><td>)</td>
           <td></td>
         </tr>
@@ -824,15 +824,15 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt;
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt; </div>
+template&lt;size_t N&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; <a class="el" href="classTracerParticleSolver.html">N</a> &gt;::setName </td>
+          <td class="memname">void <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; N &gt;::setName </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;&#160;</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
           <td class="paramname"><em>a_name</em></td><td>)</td>
           <td></td>
         </tr>
@@ -860,13 +860,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt;
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt; </div>
+template&lt;size_t N&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; <a class="el" href="classTracerParticleSolver.html">N</a> &gt;::setPhase </td>
+          <td class="memname">void <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; N &gt;::setPhase </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a>&#160;</td>
           <td class="paramname"><em>a_phase</em></td><td>)</td>
@@ -896,21 +896,21 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt;
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt; </div>
+template&lt;size_t N&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; <a class="el" href="classTracerParticleSolver.html">N</a> &gt;::setPhi </td>
+          <td class="memname">void <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; N &gt;::setPhi </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_pos</a>)&gt; &amp;&#160;</td>
+          <td class="paramtype">const std::function&lt; Real(const RealVect &amp;a_pos)&gt; &amp;&#160;</td>
           <td class="paramname"><em>a_phiFunc</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">size_t</a>&#160;</td>
+          <td class="paramtype">size_t&#160;</td>
           <td class="paramname"><em>a_comp</em>&#160;</td>
         </tr>
         <tr>
@@ -943,15 +943,15 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt;
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt; </div>
+template&lt;size_t N&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; <a class="el" href="classTracerParticleSolver.html">N</a> &gt;::setPhi </td>
+          <td class="memname">void <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; N &gt;::setPhi </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::array</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>, <a class="el" href="classTracerParticleSolver.html">N</a> &gt;(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_pos</a>)&gt; &amp;&#160;</td>
+          <td class="paramtype">const std::function&lt; std::array&lt; Real, N &gt;(const RealVect &amp;a_pos)&gt; &amp;&#160;</td>
           <td class="paramname"><em>a_phiFunc</em></td><td>)</td>
           <td></td>
         </tr>
@@ -979,15 +979,15 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt;
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt; </div>
+template&lt;size_t N&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; <a class="el" href="classTracerParticleSolver.html">N</a> &gt;::setRealm </td>
+          <td class="memname">void <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; N &gt;::setRealm </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;&#160;</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
           <td class="paramname"><em>a_realm</em></td><td>)</td>
           <td></td>
         </tr>
@@ -1015,21 +1015,21 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt;
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt; </div>
+template&lt;size_t N&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; <a class="el" href="classTracerParticleSolver.html">N</a> &gt;::setRHS </td>
+          <td class="memname">void <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; N &gt;::setRHS </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_pos</a>)&gt; &amp;&#160;</td>
+          <td class="paramtype">const std::function&lt; Real(const RealVect &amp;a_pos)&gt; &amp;&#160;</td>
           <td class="paramname"><em>a_srcFunc</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">size_t</a>&#160;</td>
+          <td class="paramtype">size_t&#160;</td>
           <td class="paramname"><em>a_comp</em>&#160;</td>
         </tr>
         <tr>
@@ -1062,27 +1062,27 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt;
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt; </div>
+template&lt;size_t N&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; <a class="el" href="classTracerParticleSolver.html">N</a> &gt;::setTime </td>
+          <td class="memname">void <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; N &gt;::setTime </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype">int&#160;</td>
           <td class="paramname"><em>a_step</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td>
+          <td class="paramtype">Real&#160;</td>
           <td class="paramname"><em>a_time</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td>
+          <td class="paramtype">Real&#160;</td>
           <td class="paramname"><em>a_dt</em>&#160;</td>
         </tr>
         <tr>
@@ -1117,15 +1117,15 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt;
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt; </div>
+template&lt;size_t N&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; <a class="el" href="classTracerParticleSolver.html">N</a> &gt;::setVerbosity </td>
+          <td class="memname">void <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; N &gt;::setVerbosity </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype">int&#160;</td>
           <td class="paramname"><em>a_verbosity</em></td><td>)</td>
           <td></td>
         </tr>
@@ -1153,51 +1153,51 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt;
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt; </div>
+template&lt;size_t N&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; <a class="el" href="classTracerParticleSolver.html">N</a> &gt;::writeData </td>
+          <td class="memname">void <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; N &gt;::writeData </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_output</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">int</a> &amp;&#160;</td>
+          <td class="paramtype">int &amp;&#160;</td>
           <td class="paramname"><em>a_comp</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramtype">const EBAMRCellData &amp;&#160;</td>
           <td class="paramname"><em>a_data</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a>&#160;</td>
+          <td class="paramtype">std::string&#160;</td>
           <td class="paramname"><em>a_outputRealm</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype">int&#160;</td>
           <td class="paramname"><em>a_level</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td>
+          <td class="paramtype">bool&#160;</td>
           <td class="paramname"><em>a_interpToCentroids</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td>
+          <td class="paramtype">bool&#160;</td>
           <td class="paramname"><em>a_interpGhost</em>&#160;</td>
         </tr>
         <tr>
@@ -1235,33 +1235,33 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt;
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt; </div>
+template&lt;size_t N&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; <a class="el" href="classTracerParticleSolver.html">N</a> &gt;::writePlotData </td>
+          <td class="memname">void <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; N &gt;::writePlotData </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_output</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">int</a> &amp;&#160;</td>
+          <td class="paramtype">int &amp;&#160;</td>
           <td class="paramname"><em>a_icomp</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> &amp;&#160;</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
           <td class="paramname"><em>a_outputRealm</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype">int&#160;</td>
           <td class="paramname"><em>a_level</em>&#160;</td>
         </tr>
         <tr>
@@ -1296,13 +1296,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt;
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt; </div>
+template&lt;size_t N&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; <a class="el" href="classTracerParticleSolver.html">N</a> &gt;::writePlotFile </td>
+          <td class="memname">void <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; N &gt;::writePlotFile </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -1327,13 +1327,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt;
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N = 1&gt; </div>
+template&lt;size_t N = 1&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt;<a class="el" href="classAmrMesh.html">AmrMesh</a>&gt; <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; <a class="el" href="classTracerParticleSolver.html">N</a> &gt;::m_amr</td>
+          <td class="memname">RefCountedPtr&lt;<a class="el" href="classAmrMesh.html">AmrMesh</a>&gt; <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; N &gt;::m_amr</td>
         </tr>
       </table>
   </td>
@@ -1368,13 +1368,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N = 1
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> N = 1&gt; </div>
+template&lt;size_t N = 1&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; <a class="el" href="classTracerParticleSolver.html">N</a> &gt;::m_className</td>
+          <td class="memname">std::string <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; N &gt;::m_className</td>
         </tr>
       </table>
   </td>

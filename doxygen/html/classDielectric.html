@@ -95,49 +95,49 @@ Public Member Functions</h2></td></tr>
 &#160;</td><td class="memItemRight" valign="bottom"><b>Dielectric</b> ()</td></tr>
 <tr class="memdesc:a93e25ce2a02b531dd2efa0970333ffcc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Weak constructor, must subsequently call one of the define methods. <br /></td></tr>
 <tr class="separator:a93e25ce2a02b531dd2efa0970333ffcc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac7aa8b73fe5fceda9738dc02c5cd7f6e" id="r_ac7aa8b73fe5fceda9738dc02c5cd7f6e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDielectric.html#ac7aa8b73fe5fceda9738dc02c5cd7f6e">Dielectric</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; BaseIF &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_baseIF</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_permittivity</a>)</td></tr>
+<tr class="memitem:ac7aa8b73fe5fceda9738dc02c5cd7f6e" id="r_ac7aa8b73fe5fceda9738dc02c5cd7f6e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDielectric.html#ac7aa8b73fe5fceda9738dc02c5cd7f6e">Dielectric</a> (const RefCountedPtr&lt; BaseIF &gt; &amp;a_baseIF, const Real a_permittivity)</td></tr>
 <tr class="memdesc:ac7aa8b73fe5fceda9738dc02c5cd7f6e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor which uses constant permittivity.  <br /></td></tr>
 <tr class="separator:ac7aa8b73fe5fceda9738dc02c5cd7f6e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aceecefa08b247db1df1236308c2a8134" id="r_aceecefa08b247db1df1236308c2a8134"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDielectric.html#aceecefa08b247db1df1236308c2a8134">Dielectric</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; BaseIF &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_baseIF</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> <a class="el" href="classTracerParticleSolver.html">a_pos</a>)&gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_permittivity</a>)</td></tr>
+<tr class="memitem:aceecefa08b247db1df1236308c2a8134" id="r_aceecefa08b247db1df1236308c2a8134"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDielectric.html#aceecefa08b247db1df1236308c2a8134">Dielectric</a> (const RefCountedPtr&lt; BaseIF &gt; &amp;a_baseIF, const std::function&lt; Real(const RealVect a_pos)&gt; &amp;a_permittivity)</td></tr>
 <tr class="memdesc:aceecefa08b247db1df1236308c2a8134"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor which uses variable permittivity.  <br /></td></tr>
 <tr class="separator:aceecefa08b247db1df1236308c2a8134"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7b8d0dcb3d6f2673d6c7a6d726ee2cab" id="r_a7b8d0dcb3d6f2673d6c7a6d726ee2cab"><td class="memItemLeft" align="right" valign="top"><a id="a7b8d0dcb3d6f2673d6c7a6d726ee2cab" name="a7b8d0dcb3d6f2673d6c7a6d726ee2cab"></a>
-<a class="el" href="classTracerParticleSolver.html">virtual</a>&#160;</td><td class="memItemRight" valign="bottom"><b>~Dielectric</b> ()</td></tr>
+virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~Dielectric</b> ()</td></tr>
 <tr class="memdesc:a7b8d0dcb3d6f2673d6c7a6d726ee2cab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor (does nothing). <br /></td></tr>
 <tr class="separator:a7b8d0dcb3d6f2673d6c7a6d726ee2cab"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a51f4a34749bac13dea8e477c5a747656" id="r_a51f4a34749bac13dea8e477c5a747656"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDielectric.html#a51f4a34749bac13dea8e477c5a747656">define</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; BaseIF &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_baseIF</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_permittivity</a>)</td></tr>
+<tr class="memitem:a51f4a34749bac13dea8e477c5a747656" id="r_a51f4a34749bac13dea8e477c5a747656"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDielectric.html#a51f4a34749bac13dea8e477c5a747656">define</a> (const RefCountedPtr&lt; BaseIF &gt; &amp;a_baseIF, const Real a_permittivity)</td></tr>
 <tr class="memdesc:a51f4a34749bac13dea8e477c5a747656"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define function.  <br /></td></tr>
 <tr class="separator:a51f4a34749bac13dea8e477c5a747656"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3fb805dc6a658d4a4b247617810019ef" id="r_a3fb805dc6a658d4a4b247617810019ef"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDielectric.html#a3fb805dc6a658d4a4b247617810019ef">define</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; BaseIF &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_baseIF</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> <a class="el" href="classTracerParticleSolver.html">a_pos</a>)&gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_permittivity</a>)</td></tr>
+<tr class="memitem:a3fb805dc6a658d4a4b247617810019ef" id="r_a3fb805dc6a658d4a4b247617810019ef"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDielectric.html#a3fb805dc6a658d4a4b247617810019ef">define</a> (const RefCountedPtr&lt; BaseIF &gt; &amp;a_baseIF, const std::function&lt; Real(const RealVect a_pos)&gt; &amp;a_permittivity)</td></tr>
 <tr class="memdesc:a3fb805dc6a658d4a4b247617810019ef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define function for variable permittivity.  <br /></td></tr>
 <tr class="separator:a3fb805dc6a658d4a4b247617810019ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0b54c7434a6bddd4f5d8c3f857c42ddb" id="r_a0b54c7434a6bddd4f5d8c3f857c42ddb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; BaseIF &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDielectric.html#a0b54c7434a6bddd4f5d8c3f857c42ddb">getImplicitFunction</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memitem:a0b54c7434a6bddd4f5d8c3f857c42ddb" id="r_a0b54c7434a6bddd4f5d8c3f857c42ddb"><td class="memItemLeft" align="right" valign="top">virtual const RefCountedPtr&lt; BaseIF &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDielectric.html#a0b54c7434a6bddd4f5d8c3f857c42ddb">getImplicitFunction</a> () const</td></tr>
 <tr class="memdesc:a0b54c7434a6bddd4f5d8c3f857c42ddb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get level-set function.  <br /></td></tr>
 <tr class="separator:a0b54c7434a6bddd4f5d8c3f857c42ddb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8fef4250602bec4fda20f4d1b85d89b4" id="r_a8fef4250602bec4fda20f4d1b85d89b4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDielectric.html#a8fef4250602bec4fda20f4d1b85d89b4">getPermittivity</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_pos</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memitem:a8fef4250602bec4fda20f4d1b85d89b4" id="r_a8fef4250602bec4fda20f4d1b85d89b4"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDielectric.html#a8fef4250602bec4fda20f4d1b85d89b4">getPermittivity</a> (const RealVect &amp;a_pos) const</td></tr>
 <tr class="memdesc:a8fef4250602bec4fda20f4d1b85d89b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get permittivity.  <br /></td></tr>
 <tr class="separator:a8fef4250602bec4fda20f4d1b85d89b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
 <tr class="memitem:a30cf1257115ba50e297179cf2ce8b08b" id="r_a30cf1257115ba50e297179cf2ce8b08b"><td class="memItemLeft" align="right" valign="top"><a id="a30cf1257115ba50e297179cf2ce8b08b" name="a30cf1257115ba50e297179cf2ce8b08b"></a>
-<a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; BaseIF &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_baseIF</b></td></tr>
+RefCountedPtr&lt; BaseIF &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_baseIF</b></td></tr>
 <tr class="memdesc:a30cf1257115ba50e297179cf2ce8b08b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Implicit function. <br /></td></tr>
 <tr class="separator:a30cf1257115ba50e297179cf2ce8b08b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9fd381b6bdd4da72a98cf6e85df1057a" id="r_a9fd381b6bdd4da72a98cf6e85df1057a"><td class="memItemLeft" align="right" valign="top"><a id="a9fd381b6bdd4da72a98cf6e85df1057a" name="a9fd381b6bdd4da72a98cf6e85df1057a"></a>
-<a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_constantPermittivity</b></td></tr>
+Real&#160;</td><td class="memItemRight" valign="bottom"><b>m_constantPermittivity</b></td></tr>
 <tr class="memdesc:a9fd381b6bdd4da72a98cf6e85df1057a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constant permittivity. <br /></td></tr>
 <tr class="separator:a9fd381b6bdd4da72a98cf6e85df1057a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae24bf31061fffbefddc61d4b1b014bf2" id="r_ae24bf31061fffbefddc61d4b1b014bf2"><td class="memItemLeft" align="right" valign="top"><a id="ae24bf31061fffbefddc61d4b1b014bf2" name="ae24bf31061fffbefddc61d4b1b014bf2"></a>
-<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> <a class="el" href="classTracerParticleSolver.html">a_pos</a>)&gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_variablePermittivity</b></td></tr>
+std::function&lt; Real(const RealVect a_pos)&gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_variablePermittivity</b></td></tr>
 <tr class="memdesc:ae24bf31061fffbefddc61d4b1b014bf2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Variable permittivity. <br /></td></tr>
 <tr class="separator:ae24bf31061fffbefddc61d4b1b014bf2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3877f10712b3e43eb6f786c389de1292" id="r_a3877f10712b3e43eb6f786c389de1292"><td class="memItemLeft" align="right" valign="top"><a id="a3877f10712b3e43eb6f786c389de1292" name="a3877f10712b3e43eb6f786c389de1292"></a>
-<a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_useConstant</b></td></tr>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_useConstant</b></td></tr>
 <tr class="memdesc:a3877f10712b3e43eb6f786c389de1292"><td class="mdescLeft">&#160;</td><td class="mdescRight">Use constant permittivity or not. <br /></td></tr>
 <tr class="separator:a3877f10712b3e43eb6f786c389de1292"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac4186332f63d2da4683ec3ea7dfe2f5d" id="r_ac4186332f63d2da4683ec3ea7dfe2f5d"><td class="memItemLeft" align="right" valign="top"><a id="ac4186332f63d2da4683ec3ea7dfe2f5d" name="ac4186332f63d2da4683ec3ea7dfe2f5d"></a>
-<a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_isDefined</b></td></tr>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_isDefined</b></td></tr>
 <tr class="memdesc:ac4186332f63d2da4683ec3ea7dfe2f5d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Is defined or not. <br /></td></tr>
 <tr class="separator:ac4186332f63d2da4683ec3ea7dfe2f5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -153,13 +153,13 @@ Protected Attributes</h2></td></tr>
         <tr>
           <td class="memname">Dielectric::Dielectric </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; BaseIF &gt; &amp;&#160;</td>
+          <td class="paramtype">const RefCountedPtr&lt; BaseIF &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_baseIF</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td>
+          <td class="paramtype">const Real&#160;</td>
           <td class="paramname"><em>a_permittivity</em>&#160;</td>
         </tr>
         <tr>
@@ -191,13 +191,13 @@ Protected Attributes</h2></td></tr>
         <tr>
           <td class="memname">Dielectric::Dielectric </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; BaseIF &gt; &amp;&#160;</td>
+          <td class="paramtype">const RefCountedPtr&lt; BaseIF &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_baseIF</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> <a class="el" href="classTracerParticleSolver.html">a_pos</a>)&gt; &amp;&#160;</td>
+          <td class="paramtype">const std::function&lt; Real(const RealVect a_pos)&gt; &amp;&#160;</td>
           <td class="paramname"><em>a_permittivity</em>&#160;</td>
         </tr>
         <tr>
@@ -231,15 +231,15 @@ Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> Dielectric::define </td>
+          <td class="memname">void Dielectric::define </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; BaseIF &gt; &amp;&#160;</td>
+          <td class="paramtype">const RefCountedPtr&lt; BaseIF &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_baseIF</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td>
+          <td class="paramtype">const Real&#160;</td>
           <td class="paramname"><em>a_permittivity</em>&#160;</td>
         </tr>
         <tr>
@@ -276,15 +276,15 @@ Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> Dielectric::define </td>
+          <td class="memname">void Dielectric::define </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; BaseIF &gt; &amp;&#160;</td>
+          <td class="paramtype">const RefCountedPtr&lt; BaseIF &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_baseIF</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> <a class="el" href="classTracerParticleSolver.html">a_pos</a>)&gt; &amp;&#160;</td>
+          <td class="paramtype">const std::function&lt; Real(const RealVect a_pos)&gt; &amp;&#160;</td>
           <td class="paramname"><em>a_permittivity</em>&#160;</td>
         </tr>
         <tr>
@@ -321,7 +321,7 @@ Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; BaseIF &gt; &amp; Dielectric::getImplicitFunction </td>
+          <td class="memname">const RefCountedPtr&lt; BaseIF &gt; &amp; Dielectric::getImplicitFunction </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -349,9 +349,9 @@ Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">Real</a> Dielectric::getPermittivity </td>
+          <td class="memname">Real Dielectric::getPermittivity </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;&#160;</td>
+          <td class="paramtype">const RealVect &amp;&#160;</td>
           <td class="paramname"><em>a_pos</em></td><td>)</td>
           <td> const</td>
         </tr>

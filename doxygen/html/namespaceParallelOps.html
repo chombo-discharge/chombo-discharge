@@ -88,79 +88,79 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:aed6a3c22b5ec18db26ece6fecf1ebf54" id="r_aed6a3c22b5ec18db26ece6fecf1ebf54"><td class="memItemLeft" align="right" valign="top"><a id="aed6a3c22b5ec18db26ece6fecf1ebf54" name="aed6a3c22b5ec18db26ece6fecf1ebf54"></a>
-<a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>barrier</b> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>barrier</b> () noexcept</td></tr>
 <tr class="memdesc:aed6a3c22b5ec18db26ece6fecf1ebf54"><td class="mdescLeft">&#160;</td><td class="mdescRight">MPI barrier. <br /></td></tr>
 <tr class="separator:aed6a3c22b5ec18db26ece6fecf1ebf54"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad88e3c8d09c0494b6256130ca40c7fe5" id="r_ad88e3c8d09c0494b6256130ca40c7fe5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt; <a class="el" href="classTracerParticleSolver.html">int</a>, <a class="el" href="classTracerParticleSolver.html">int</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#ad88e3c8d09c0494b6256130ca40c7fe5">partition</a> (<a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_N</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:ad88e3c8d09c0494b6256130ca40c7fe5" id="r_ad88e3c8d09c0494b6256130ca40c7fe5"><td class="memItemLeft" align="right" valign="top">std::pair&lt; int, int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#ad88e3c8d09c0494b6256130ca40c7fe5">partition</a> (int a_N) noexcept</td></tr>
 <tr class="memdesc:ad88e3c8d09c0494b6256130ca40c7fe5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Partition the input number such that each MPI rank gets an equal chunk. We assume that N is the length of some container whose indexing starts at 0.  <br /></td></tr>
 <tr class="separator:ad88e3c8d09c0494b6256130ca40c7fe5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac16673e77130f572bc01154b59829fd2" id="r_ac16673e77130f572bc01154b59829fd2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#ac16673e77130f572bc01154b59829fd2">min</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_input</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:ac16673e77130f572bc01154b59829fd2" id="r_ac16673e77130f572bc01154b59829fd2"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#ac16673e77130f572bc01154b59829fd2">min</a> (const Real &amp;a_input) noexcept</td></tr>
 <tr class="memdesc:ac16673e77130f572bc01154b59829fd2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the minimum of the input, reduced over MPI ranks (in the Chombo communicator)  <br /></td></tr>
 <tr class="separator:ac16673e77130f572bc01154b59829fd2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aac5897d9a1c558713c10f833929b16b4" id="r_aac5897d9a1c558713c10f833929b16b4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#aac5897d9a1c558713c10f833929b16b4">min</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_input</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:aac5897d9a1c558713c10f833929b16b4" id="r_aac5897d9a1c558713c10f833929b16b4"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#aac5897d9a1c558713c10f833929b16b4">min</a> (const int &amp;a_input) noexcept</td></tr>
 <tr class="memdesc:aac5897d9a1c558713c10f833929b16b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the minimum of the input, reduced over MPI ranks (in the Chombo communicator)  <br /></td></tr>
 <tr class="separator:aac5897d9a1c558713c10f833929b16b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a35c33057e271e684418c7be941c7c3b2" id="r_a35c33057e271e684418c7be941c7c3b2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#a35c33057e271e684418c7be941c7c3b2">min</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_input</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a35c33057e271e684418c7be941c7c3b2" id="r_a35c33057e271e684418c7be941c7c3b2"><td class="memItemLeft" align="right" valign="top">long long int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#a35c33057e271e684418c7be941c7c3b2">min</a> (const long long int &amp;a_input) noexcept</td></tr>
 <tr class="memdesc:a35c33057e271e684418c7be941c7c3b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the minimum of the input, reduced over MPI ranks (in the Chombo communicator)  <br /></td></tr>
 <tr class="separator:a35c33057e271e684418c7be941c7c3b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afef599d8b79dcc098862c6e90875ff6a" id="r_afef599d8b79dcc098862c6e90875ff6a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>, <a class="el" href="classTracerParticleSolver.html">RealVect</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#afef599d8b79dcc098862c6e90875ff6a">min</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_val</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_pos</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:afef599d8b79dcc098862c6e90875ff6a" id="r_afef599d8b79dcc098862c6e90875ff6a"><td class="memItemLeft" align="right" valign="top">std::pair&lt; Real, RealVect &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#afef599d8b79dcc098862c6e90875ff6a">min</a> (const Real &amp;a_val, const RealVect &amp;a_pos) noexcept</td></tr>
 <tr class="memdesc:afef599d8b79dcc098862c6e90875ff6a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the minimum value and the position corresponding to the minimum value of a_val.  <br /></td></tr>
 <tr class="separator:afef599d8b79dcc098862c6e90875ff6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1e1c7f162c522c6fecace086d6cdd10d" id="r_a1e1c7f162c522c6fecace086d6cdd10d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#a1e1c7f162c522c6fecace086d6cdd10d">max</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_input</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a1e1c7f162c522c6fecace086d6cdd10d" id="r_a1e1c7f162c522c6fecace086d6cdd10d"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#a1e1c7f162c522c6fecace086d6cdd10d">max</a> (const Real &amp;a_input) noexcept</td></tr>
 <tr class="memdesc:a1e1c7f162c522c6fecace086d6cdd10d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the maximum of the input, reduced over MPI ranks (in the Chombo communicator)  <br /></td></tr>
 <tr class="separator:a1e1c7f162c522c6fecace086d6cdd10d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5934b4dffbfb5bd0a2fdfe116b03153a" id="r_a5934b4dffbfb5bd0a2fdfe116b03153a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#a5934b4dffbfb5bd0a2fdfe116b03153a">max</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_input</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a5934b4dffbfb5bd0a2fdfe116b03153a" id="r_a5934b4dffbfb5bd0a2fdfe116b03153a"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#a5934b4dffbfb5bd0a2fdfe116b03153a">max</a> (const int &amp;a_input) noexcept</td></tr>
 <tr class="memdesc:a5934b4dffbfb5bd0a2fdfe116b03153a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the maximum of the input, reduced over MPI ranks (in the Chombo communicator)  <br /></td></tr>
 <tr class="separator:a5934b4dffbfb5bd0a2fdfe116b03153a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a21df6023971fd3af9bcf74dc202c9056" id="r_a21df6023971fd3af9bcf74dc202c9056"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#a21df6023971fd3af9bcf74dc202c9056">max</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_input</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a21df6023971fd3af9bcf74dc202c9056" id="r_a21df6023971fd3af9bcf74dc202c9056"><td class="memItemLeft" align="right" valign="top">long long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#a21df6023971fd3af9bcf74dc202c9056">max</a> (const long long &amp;a_input) noexcept</td></tr>
 <tr class="memdesc:a21df6023971fd3af9bcf74dc202c9056"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the maximum of the input, reduced over MPI ranks (in the Chombo communicator)  <br /></td></tr>
 <tr class="separator:a21df6023971fd3af9bcf74dc202c9056"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a706cd1392f38ac81041c6ac16c0d72ea" id="r_a706cd1392f38ac81041c6ac16c0d72ea"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>, <a class="el" href="classTracerParticleSolver.html">RealVect</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#a706cd1392f38ac81041c6ac16c0d72ea">max</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_val</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_pos</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a706cd1392f38ac81041c6ac16c0d72ea" id="r_a706cd1392f38ac81041c6ac16c0d72ea"><td class="memItemLeft" align="right" valign="top">std::pair&lt; Real, RealVect &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#a706cd1392f38ac81041c6ac16c0d72ea">max</a> (const Real &amp;a_val, const RealVect &amp;a_pos) noexcept</td></tr>
 <tr class="memdesc:a706cd1392f38ac81041c6ac16c0d72ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the maximum value and the position corresponding to the maximum value of a_val.  <br /></td></tr>
 <tr class="separator:a706cd1392f38ac81041c6ac16c0d72ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1f36b90ec81f1ce63e3dab287e85f7cc" id="r_a1f36b90ec81f1ce63e3dab287e85f7cc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>, <a class="el" href="classTracerParticleSolver.html">int</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#a1f36b90ec81f1ce63e3dab287e85f7cc">maxRank</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_val</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a1f36b90ec81f1ce63e3dab287e85f7cc" id="r_a1f36b90ec81f1ce63e3dab287e85f7cc"><td class="memItemLeft" align="right" valign="top">std::pair&lt; Real, int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#a1f36b90ec81f1ce63e3dab287e85f7cc">maxRank</a> (const Real &amp;a_val) noexcept</td></tr>
 <tr class="memdesc:a1f36b90ec81f1ce63e3dab287e85f7cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the maximum value and the rank having the maximum value.  <br /></td></tr>
 <tr class="separator:a1f36b90ec81f1ce63e3dab287e85f7cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa459c3ec399a69c70fcb9c01c3708f5d" id="r_aa459c3ec399a69c70fcb9c01c3708f5d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>, <a class="el" href="classTracerParticleSolver.html">int</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#aa459c3ec399a69c70fcb9c01c3708f5d">minRank</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_val</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:aa459c3ec399a69c70fcb9c01c3708f5d" id="r_aa459c3ec399a69c70fcb9c01c3708f5d"><td class="memItemLeft" align="right" valign="top">std::pair&lt; Real, int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#aa459c3ec399a69c70fcb9c01c3708f5d">minRank</a> (const Real &amp;a_val) noexcept</td></tr>
 <tr class="memdesc:aa459c3ec399a69c70fcb9c01c3708f5d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the minimum value and the rank having the minimum value.  <br /></td></tr>
 <tr class="separator:aa459c3ec399a69c70fcb9c01c3708f5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4215eb693b2f8c8890de11da436e0b43" id="r_a4215eb693b2f8c8890de11da436e0b43"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#a4215eb693b2f8c8890de11da436e0b43">average</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_val</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a4215eb693b2f8c8890de11da436e0b43" id="r_a4215eb693b2f8c8890de11da436e0b43"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#a4215eb693b2f8c8890de11da436e0b43">average</a> (const Real &amp;a_val) noexcept</td></tr>
 <tr class="memdesc:a4215eb693b2f8c8890de11da436e0b43"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the average (across MPI ranks) of the input value.  <br /></td></tr>
 <tr class="separator:a4215eb693b2f8c8890de11da436e0b43"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acee1ea4f1dc471622d322bef1c3e9028" id="r_acee1ea4f1dc471622d322bef1c3e9028"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#acee1ea4f1dc471622d322bef1c3e9028">sum</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_value</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:acee1ea4f1dc471622d322bef1c3e9028" id="r_acee1ea4f1dc471622d322bef1c3e9028"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#acee1ea4f1dc471622d322bef1c3e9028">sum</a> (const Real &amp;a_value) noexcept</td></tr>
 <tr class="memdesc:acee1ea4f1dc471622d322bef1c3e9028"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the sum across all MPI ranks.  <br /></td></tr>
 <tr class="separator:acee1ea4f1dc471622d322bef1c3e9028"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a53dfc97c615bab37c835aa4263733f84" id="r_a53dfc97c615bab37c835aa4263733f84"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#a53dfc97c615bab37c835aa4263733f84">sum</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_value</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a53dfc97c615bab37c835aa4263733f84" id="r_a53dfc97c615bab37c835aa4263733f84"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#a53dfc97c615bab37c835aa4263733f84">sum</a> (const int &amp;a_value) noexcept</td></tr>
 <tr class="memdesc:a53dfc97c615bab37c835aa4263733f84"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the sum across all MPI ranks.  <br /></td></tr>
 <tr class="separator:a53dfc97c615bab37c835aa4263733f84"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a95c99ace5c9cc4b5cffbf0d35d72e95a" id="r_a95c99ace5c9cc4b5cffbf0d35d72e95a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">long</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#a95c99ace5c9cc4b5cffbf0d35d72e95a">sum</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">long</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_value</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a95c99ace5c9cc4b5cffbf0d35d72e95a" id="r_a95c99ace5c9cc4b5cffbf0d35d72e95a"><td class="memItemLeft" align="right" valign="top">long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#a95c99ace5c9cc4b5cffbf0d35d72e95a">sum</a> (const long &amp;a_value) noexcept</td></tr>
 <tr class="memdesc:a95c99ace5c9cc4b5cffbf0d35d72e95a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the sum across all MPI ranks.  <br /></td></tr>
 <tr class="separator:a95c99ace5c9cc4b5cffbf0d35d72e95a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0a977877898b336cdaa8e0eb50025dde" id="r_a0a977877898b336cdaa8e0eb50025dde"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#a0a977877898b336cdaa8e0eb50025dde">sum</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_value</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a0a977877898b336cdaa8e0eb50025dde" id="r_a0a977877898b336cdaa8e0eb50025dde"><td class="memItemLeft" align="right" valign="top">long long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#a0a977877898b336cdaa8e0eb50025dde">sum</a> (const long long &amp;a_value) noexcept</td></tr>
 <tr class="memdesc:a0a977877898b336cdaa8e0eb50025dde"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the sum across all MPI ranks.  <br /></td></tr>
 <tr class="separator:a0a977877898b336cdaa8e0eb50025dde"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac20064da343a053ed86371356a0d0964" id="r_ac20064da343a053ed86371356a0d0964"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">unsigned</a> <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#ac20064da343a053ed86371356a0d0964">sum</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">unsigned</a> <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_value</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:ac20064da343a053ed86371356a0d0964" id="r_ac20064da343a053ed86371356a0d0964"><td class="memItemLeft" align="right" valign="top">unsigned long long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#ac20064da343a053ed86371356a0d0964">sum</a> (const unsigned long long &amp;a_value) noexcept</td></tr>
 <tr class="memdesc:ac20064da343a053ed86371356a0d0964"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the sum across all MPI ranks.  <br /></td></tr>
 <tr class="separator:ac20064da343a053ed86371356a0d0964"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4c675d741a615bbf836cff0e83f867e4" id="r_a4c675d741a615bbf836cff0e83f867e4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#a4c675d741a615bbf836cff0e83f867e4">standardDeviation</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_value</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a4c675d741a615bbf836cff0e83f867e4" id="r_a4c675d741a615bbf836cff0e83f867e4"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#a4c675d741a615bbf836cff0e83f867e4">standardDeviation</a> (const Real &amp;a_value) noexcept</td></tr>
 <tr class="memdesc:a4c675d741a615bbf836cff0e83f867e4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the standard deviation of the input value.  <br /></td></tr>
 <tr class="separator:a4c675d741a615bbf836cff0e83f867e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae99b766b1e66d6e1bfedc465ef4dadbd" id="r_ae99b766b1e66d6e1bfedc465ef4dadbd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#ae99b766b1e66d6e1bfedc465ef4dadbd">sum</a> (<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_data</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:ae99b766b1e66d6e1bfedc465ef4dadbd" id="r_ae99b766b1e66d6e1bfedc465ef4dadbd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#ae99b766b1e66d6e1bfedc465ef4dadbd">sum</a> (Vector&lt; Real &gt; &amp;a_data) noexcept</td></tr>
 <tr class="memdesc:ae99b766b1e66d6e1bfedc465ef4dadbd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform a summation of all the MPI ranks's input data.  <br /></td></tr>
 <tr class="separator:ae99b766b1e66d6e1bfedc465ef4dadbd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaa6dfad24cd307493660a5bf9daa8d00" id="r_aaa6dfad24cd307493660a5bf9daa8d00"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#aaa6dfad24cd307493660a5bf9daa8d00">sum</a> (<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">int</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_data</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:aaa6dfad24cd307493660a5bf9daa8d00" id="r_aaa6dfad24cd307493660a5bf9daa8d00"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#aaa6dfad24cd307493660a5bf9daa8d00">sum</a> (Vector&lt; int &gt; &amp;a_data) noexcept</td></tr>
 <tr class="memdesc:aaa6dfad24cd307493660a5bf9daa8d00"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform a summation of all the MPI ranks's input data.  <br /></td></tr>
 <tr class="separator:aaa6dfad24cd307493660a5bf9daa8d00"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6a8e4e2dea374f7b23c15413d53fca43" id="r_a6a8e4e2dea374f7b23c15413d53fca43"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#a6a8e4e2dea374f7b23c15413d53fca43">sum</a> (<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">int</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_data</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a6a8e4e2dea374f7b23c15413d53fca43" id="r_a6a8e4e2dea374f7b23c15413d53fca43"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#a6a8e4e2dea374f7b23c15413d53fca43">sum</a> (Vector&lt; long int &gt; &amp;a_data) noexcept</td></tr>
 <tr class="memdesc:a6a8e4e2dea374f7b23c15413d53fca43"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform a summation of all the MPI ranks's input data.  <br /></td></tr>
 <tr class="separator:a6a8e4e2dea374f7b23c15413d53fca43"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aeb8db80bb4cdd354d2cd24ccbefae604" id="r_aeb8db80bb4cdd354d2cd24ccbefae604"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#aeb8db80bb4cdd354d2cd24ccbefae604">sum</a> (<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">int</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_data</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:aeb8db80bb4cdd354d2cd24ccbefae604" id="r_aeb8db80bb4cdd354d2cd24ccbefae604"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#aeb8db80bb4cdd354d2cd24ccbefae604">sum</a> (Vector&lt; long long int &gt; &amp;a_data) noexcept</td></tr>
 <tr class="memdesc:aeb8db80bb4cdd354d2cd24ccbefae604"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform a summation of all the MPI ranks's input data.  <br /></td></tr>
 <tr class="separator:aeb8db80bb4cdd354d2cd24ccbefae604"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a591e504a4d50fd1d8aec80a8a1ef112b" id="r_a591e504a4d50fd1d8aec80a8a1ef112b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">int</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#a591e504a4d50fd1d8aec80a8a1ef112b">gather</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_localValue</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a591e504a4d50fd1d8aec80a8a1ef112b" id="r_a591e504a4d50fd1d8aec80a8a1ef112b"><td class="memItemLeft" align="right" valign="top">Vector&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#a591e504a4d50fd1d8aec80a8a1ef112b">gather</a> (const int &amp;a_localValue) noexcept</td></tr>
 <tr class="memdesc:a591e504a4d50fd1d8aec80a8a1ef112b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gather local values &ndash; return a vector of local values.  <br /></td></tr>
 <tr class="separator:a591e504a4d50fd1d8aec80a8a1ef112b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a21cc1cb7bb5ebe32d11262541d57d88e" id="r_a21cc1cb7bb5ebe32d11262541d57d88e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#a21cc1cb7bb5ebe32d11262541d57d88e">gather</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_localValue</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a21cc1cb7bb5ebe32d11262541d57d88e" id="r_a21cc1cb7bb5ebe32d11262541d57d88e"><td class="memItemLeft" align="right" valign="top">Vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#a21cc1cb7bb5ebe32d11262541d57d88e">gather</a> (const Real &amp;a_localValue) noexcept</td></tr>
 <tr class="memdesc:a21cc1cb7bb5ebe32d11262541d57d88e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gather local values &ndash; return a vector of local values.  <br /></td></tr>
 <tr class="separator:a21cc1cb7bb5ebe32d11262541d57d88e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -177,9 +177,9 @@ Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">Real</a> ParallelOps::average </td>
+          <td class="memname">Real ParallelOps::average </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;&#160;</td>
+          <td class="paramtype">const Real &amp;&#160;</td>
           <td class="paramname"><em>a_val</em></td><td>)</td>
           <td></td>
         </tr>
@@ -212,9 +212,9 @@ Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">int</a> &gt; ParallelOps::gather </td>
+          <td class="memname">Vector&lt; int &gt; ParallelOps::gather </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;&#160;</td>
+          <td class="paramtype">const int &amp;&#160;</td>
           <td class="paramname"><em>a_localValue</em></td><td>)</td>
           <td></td>
         </tr>
@@ -247,9 +247,9 @@ Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a> &gt; ParallelOps::gather </td>
+          <td class="memname">Vector&lt; Real &gt; ParallelOps::gather </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;&#160;</td>
+          <td class="paramtype">const Real &amp;&#160;</td>
           <td class="paramname"><em>a_localValue</em></td><td>)</td>
           <td></td>
         </tr>
@@ -282,9 +282,9 @@ Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">int</a> ParallelOps::max </td>
+          <td class="memname">int ParallelOps::max </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;&#160;</td>
+          <td class="paramtype">const int &amp;&#160;</td>
           <td class="paramname"><em>a_input</em></td><td>)</td>
           <td></td>
         </tr>
@@ -317,9 +317,9 @@ Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a> ParallelOps::max </td>
+          <td class="memname">long long ParallelOps::max </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a> &amp;&#160;</td>
+          <td class="paramtype">const long long &amp;&#160;</td>
           <td class="paramname"><em>a_input</em></td><td>)</td>
           <td></td>
         </tr>
@@ -352,9 +352,9 @@ Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">Real</a> ParallelOps::max </td>
+          <td class="memname">Real ParallelOps::max </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;&#160;</td>
+          <td class="paramtype">const Real &amp;&#160;</td>
           <td class="paramname"><em>a_input</em></td><td>)</td>
           <td></td>
         </tr>
@@ -387,15 +387,15 @@ Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>, <a class="el" href="classTracerParticleSolver.html">RealVect</a> &gt; ParallelOps::max </td>
+          <td class="memname">std::pair&lt; Real, RealVect &gt; ParallelOps::max </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;&#160;</td>
+          <td class="paramtype">const Real &amp;&#160;</td>
           <td class="paramname"><em>a_val</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;&#160;</td>
+          <td class="paramtype">const RealVect &amp;&#160;</td>
           <td class="paramname"><em>a_pos</em>&#160;</td>
         </tr>
         <tr>
@@ -433,9 +433,9 @@ Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>, <a class="el" href="classTracerParticleSolver.html">int</a> &gt; ParallelOps::maxRank </td>
+          <td class="memname">std::pair&lt; Real, int &gt; ParallelOps::maxRank </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;&#160;</td>
+          <td class="paramtype">const Real &amp;&#160;</td>
           <td class="paramname"><em>a_val</em></td><td>)</td>
           <td></td>
         </tr>
@@ -468,9 +468,9 @@ Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">int</a> ParallelOps::min </td>
+          <td class="memname">int ParallelOps::min </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;&#160;</td>
+          <td class="paramtype">const int &amp;&#160;</td>
           <td class="paramname"><em>a_input</em></td><td>)</td>
           <td></td>
         </tr>
@@ -503,9 +503,9 @@ Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">int</a> ParallelOps::min </td>
+          <td class="memname">long long int ParallelOps::min </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;&#160;</td>
+          <td class="paramtype">const long long int &amp;&#160;</td>
           <td class="paramname"><em>a_input</em></td><td>)</td>
           <td></td>
         </tr>
@@ -538,9 +538,9 @@ Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">Real</a> ParallelOps::min </td>
+          <td class="memname">Real ParallelOps::min </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;&#160;</td>
+          <td class="paramtype">const Real &amp;&#160;</td>
           <td class="paramname"><em>a_input</em></td><td>)</td>
           <td></td>
         </tr>
@@ -573,15 +573,15 @@ Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>, <a class="el" href="classTracerParticleSolver.html">RealVect</a> &gt; ParallelOps::min </td>
+          <td class="memname">std::pair&lt; Real, RealVect &gt; ParallelOps::min </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;&#160;</td>
+          <td class="paramtype">const Real &amp;&#160;</td>
           <td class="paramname"><em>a_val</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;&#160;</td>
+          <td class="paramtype">const RealVect &amp;&#160;</td>
           <td class="paramname"><em>a_pos</em>&#160;</td>
         </tr>
         <tr>
@@ -619,9 +619,9 @@ Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>, <a class="el" href="classTracerParticleSolver.html">int</a> &gt; ParallelOps::minRank </td>
+          <td class="memname">std::pair&lt; Real, int &gt; ParallelOps::minRank </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;&#160;</td>
+          <td class="paramtype">const Real &amp;&#160;</td>
           <td class="paramname"><em>a_val</em></td><td>)</td>
           <td></td>
         </tr>
@@ -654,9 +654,9 @@ Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt; <a class="el" href="classTracerParticleSolver.html">int</a>, <a class="el" href="classTracerParticleSolver.html">int</a> &gt; ParallelOps::partition </td>
+          <td class="memname">std::pair&lt; int, int &gt; ParallelOps::partition </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramtype">int&#160;</td>
           <td class="paramname"><em>a_N</em></td><td>)</td>
           <td></td>
         </tr>
@@ -689,9 +689,9 @@ Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">Real</a> ParallelOps::standardDeviation </td>
+          <td class="memname">Real ParallelOps::standardDeviation </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;&#160;</td>
+          <td class="paramtype">const Real &amp;&#160;</td>
           <td class="paramname"><em>a_value</em></td><td>)</td>
           <td></td>
         </tr>
@@ -724,9 +724,9 @@ Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">int</a> ParallelOps::sum </td>
+          <td class="memname">int ParallelOps::sum </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> &amp;&#160;</td>
+          <td class="paramtype">const int &amp;&#160;</td>
           <td class="paramname"><em>a_value</em></td><td>)</td>
           <td></td>
         </tr>
@@ -759,9 +759,9 @@ Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">long</a> ParallelOps::sum </td>
+          <td class="memname">long ParallelOps::sum </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">long</a> &amp;&#160;</td>
+          <td class="paramtype">const long &amp;&#160;</td>
           <td class="paramname"><em>a_value</em></td><td>)</td>
           <td></td>
         </tr>
@@ -794,9 +794,9 @@ Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a> ParallelOps::sum </td>
+          <td class="memname">long long ParallelOps::sum </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a> &amp;&#160;</td>
+          <td class="paramtype">const long long &amp;&#160;</td>
           <td class="paramname"><em>a_value</em></td><td>)</td>
           <td></td>
         </tr>
@@ -829,9 +829,9 @@ Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">Real</a> ParallelOps::sum </td>
+          <td class="memname">Real ParallelOps::sum </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;&#160;</td>
+          <td class="paramtype">const Real &amp;&#160;</td>
           <td class="paramname"><em>a_value</em></td><td>)</td>
           <td></td>
         </tr>
@@ -864,9 +864,9 @@ Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">unsigned</a> <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a> ParallelOps::sum </td>
+          <td class="memname">unsigned long long ParallelOps::sum </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">unsigned</a> <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a> &amp;&#160;</td>
+          <td class="paramtype">const unsigned long long &amp;&#160;</td>
           <td class="paramname"><em>a_value</em></td><td>)</td>
           <td></td>
         </tr>
@@ -899,9 +899,9 @@ Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> ParallelOps::sum </td>
+          <td class="memname">void ParallelOps::sum </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">int</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">Vector&lt; int &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_data</em></td><td>)</td>
           <td></td>
         </tr>
@@ -933,9 +933,9 @@ Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> ParallelOps::sum </td>
+          <td class="memname">void ParallelOps::sum </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">int</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">Vector&lt; long int &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_data</em></td><td>)</td>
           <td></td>
         </tr>
@@ -967,9 +967,9 @@ Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> ParallelOps::sum </td>
+          <td class="memname">void ParallelOps::sum </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">long</a> <a class="el" href="classTracerParticleSolver.html">int</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">Vector&lt; long long int &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_data</em></td><td>)</td>
           <td></td>
         </tr>
@@ -1001,9 +1001,9 @@ Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> ParallelOps::sum </td>
+          <td class="memname">void ParallelOps::sum </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">Vector&lt; Real &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_data</em></td><td>)</td>
           <td></td>
         </tr>

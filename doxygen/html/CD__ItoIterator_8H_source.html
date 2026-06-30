@@ -118,7 +118,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno"><a class="line" href="classItoIterator.html#ad03c4941ebe7eae0bfa93d43a5a4e87e">   42</a></span>  <a class="code hl_function" href="classItoIterator.html#ad03c4941ebe7eae0bfa93d43a5a4e87e">ItoIterator</a>() = <span class="keyword">delete</span>;</div>
 <div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>  <a class="code hl_function" href="classItoIterator.html#ad03c4941ebe7eae0bfa93d43a5a4e87e">ItoIterator</a>(<a class="code hl_class" href="classTracerParticleSolver.html">ItoLayout&lt;T&gt;</a>&amp; <a class="code hl_class" href="classTracerParticleSolver.html">a_layout</a>, <span class="keyword">const</span> <a class="code hl_enumeration" href="classItoIterator.html#afb0a904899fd33c81278a80cd71cddf3">SpeciesIteration</a> <a class="code hl_class" href="classTracerParticleSolver.html">a_mode</a> = SpeciesIteration::All);</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>  <a class="code hl_function" href="classItoIterator.html#ad03c4941ebe7eae0bfa93d43a5a4e87e">ItoIterator</a>(<a class="code hl_class" href="classItoLayout.html">ItoLayout&lt;T&gt;</a>&amp; a_layout, <span class="keyword">const</span> <a class="code hl_enumeration" href="classItoIterator.html#afb0a904899fd33c81278a80cd71cddf3">SpeciesIteration</a> a_mode = SpeciesIteration::All);</div>
 <div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
 <div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>  <span class="keyword">virtual</span> <a class="code hl_function" href="classItoIterator.html#a42e44cf74f5d155929285e7ba36c555c">~ItoIterator</a>();</div>
 <div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
@@ -137,10 +137,10 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>  <span class="keyword">virtual</span> <span class="keywordtype">void</span></div>
 <div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>  <a class="code hl_function" href="classItoIterator.html#a0c8abe7947e894689e63d7f501e42824">operator++</a>();</div>
 <div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span> </div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>  <span class="keyword">virtual</span> <a class="code hl_class" href="classTracerParticleSolver.html">RefCountedPtr&lt;T&gt;</a>&amp;</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>  <span class="keyword">virtual</span> RefCountedPtr&lt;T&gt;&amp;</div>
 <div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>  <a class="code hl_function" href="classItoIterator.html#a2e6d2f502e737f9d302a95d3e21baf81">operator()</a>();</div>
 <div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span> </div>
-<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>  <span class="keyword">virtual</span> <a class="code hl_class" href="classTracerParticleSolver.html">RefCountedPtr&lt;ItoSpecies&gt;</a>&amp;</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>  <span class="keyword">virtual</span> RefCountedPtr&lt;ItoSpecies&gt;&amp;</div>
 <div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>  <a class="code hl_function" href="classItoIterator.html#a7b3db8ac7ec499439a2130aa3f4a7bbd">getSpecies</a>();</div>
 <div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span> </div>
 <div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span><span class="keyword">protected</span>:</div>
@@ -152,9 +152,9 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span> </div>
 <div class="line"><a id="l00122" name="l00122"></a><span class="lineno"><a class="line" href="classItoIterator.html#a9307e3efcdd085fab30fc38b466ad59c">  122</a></span>  <span class="keywordtype">bool</span> <a class="code hl_variable" href="classItoIterator.html#a9307e3efcdd085fab30fc38b466ad59c">m_isDefined</a>;</div>
 <div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span> </div>
-<div class="line"><a id="l00127" name="l00127"></a><span class="lineno"><a class="line" href="classItoIterator.html#a960ee69f18c3f6fa1237b7e4d7acb8ed">  127</a></span>  <a class="code hl_class" href="classTracerParticleSolver.html">Vector&lt;RefCountedPtr&lt;T&gt;</a>&gt; <a class="code hl_variable" href="classItoIterator.html#a960ee69f18c3f6fa1237b7e4d7acb8ed">m_solvers</a>;</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno"><a class="line" href="classItoIterator.html#a960ee69f18c3f6fa1237b7e4d7acb8ed">  127</a></span>  Vector&lt;RefCountedPtr&lt;T&gt;&gt; <a class="code hl_variable" href="classItoIterator.html#a960ee69f18c3f6fa1237b7e4d7acb8ed">m_solvers</a>;</div>
 <div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span> </div>
-<div class="line"><a id="l00132" name="l00132"></a><span class="lineno"><a class="line" href="classItoIterator.html#a85d9627771f7246463439493e77e132b">  132</a></span>  <a class="code hl_class" href="classTracerParticleSolver.html">Vector&lt;RefCountedPtr&lt;ItoSpecies&gt;</a>&gt; <a class="code hl_variable" href="classItoIterator.html#a85d9627771f7246463439493e77e132b">m_species</a>;</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno"><a class="line" href="classItoIterator.html#a85d9627771f7246463439493e77e132b">  132</a></span>  Vector&lt;RefCountedPtr&lt;ItoSpecies&gt;&gt; <a class="code hl_variable" href="classItoIterator.html#a85d9627771f7246463439493e77e132b">m_species</a>;</div>
 <div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>};</div>
 </div>
 <div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span> </div>
@@ -182,7 +182,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="ttc" id="aclassItoIterator_html_ad03c4941ebe7eae0bfa93d43a5a4e87e"><div class="ttname"><a href="classItoIterator.html#ad03c4941ebe7eae0bfa93d43a5a4e87e">ItoIterator::ItoIterator</a></div><div class="ttdeci">ItoIterator()=delete</div><div class="ttdoc">Disallowed constructor – use the full constructor.</div></div>
 <div class="ttc" id="aclassItoIterator_html_ae285e0e5932e8b2ad461dd95ceaeddd4"><div class="ttname"><a href="classItoIterator.html#ae285e0e5932e8b2ad461dd95ceaeddd4">ItoIterator::m_mode</a></div><div class="ttdeci">SpeciesIteration m_mode</div><div class="ttdoc">Which species to iterate over.</div><div class="ttdef"><b>Definition</b> CD_ItoIterator.H:107</div></div>
 <div class="ttc" id="aclassItoIterator_html_afb0a904899fd33c81278a80cd71cddf3"><div class="ttname"><a href="classItoIterator.html#afb0a904899fd33c81278a80cd71cddf3">ItoIterator::SpeciesIteration</a></div><div class="ttdeci">SpeciesIteration</div><div class="ttdoc">Enum which specifies which species to iterate through.</div><div class="ttdef"><b>Definition</b> CD_ItoIterator.H:31</div></div>
-<div class="ttc" id="aclassTracerParticleSolver_html"><div class="ttname"><a href="classTracerParticleSolver.html">TracerParticleSolver</a></div><div class="ttdoc">Base class for a tracer particle solver. This solver can advance particles in a pre-defined velocity ...</div><div class="ttdef"><b>Definition</b> CD_TracerParticleSolver.H:39</div></div>
+<div class="ttc" id="aclassItoLayout_html"><div class="ttname"><a href="classItoLayout.html">ItoLayout</a></div><div class="ttdoc">Class for holding a set of ItoSolvers.</div><div class="ttdef"><b>Definition</b> CD_ItoLayout.H:31</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
