@@ -1228,22 +1228,26 @@ Realm::defineParticleGhostMaskFineToCoar(LayoutData<ParticleGhostMask>& a_mask,
   // inward and intersecting the box gives the inner halo. Independent of the coarse grid's box layout.
   // Thread-safe over boxes: distinct boxes write disjoint innerHalo storage, coFiLayout lookups are
   // read-only, and IntVectSet scratch and the NeighborIterator are declared per iteration (thread-private).
-  // coFiLayout shares this level's DataIndex (coarsen preserves it), so dit/nbox iterate it too.
+  // coFiLayout shares this level's DataIndex (coarsen preserves it), so dit/nbox iterate it too. This loop
+  // does both per-box setups at once: it inits the box's CSR (a_mask[din]) and its inner-halo mask
+  // (innerHalo[din]). Thread-safe over boxes: distinct boxes write disjoint storage, all layout lookups are
+  // read-only, and the IntVectSet scratch and NeighborIterator are declared per iteration (thread-private).
   LayoutData<BaseFab<bool>> innerHalo(coFiLayout);
 
 #pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din      = dit[mybox];
     const Box        coFiBox  = coFiLayout[din];
-    BaseFab<bool>&   haloMask = innerHalo[din];
+    const Box        grownBox = grow(coFiBox, a_ghost) & a_coarDomain;
+
+    BaseFab<bool>& haloMask = innerHalo[din];
 
     NeighborIterator nit(coFiLayout);
 
+    a_mask[din].define(a_thisLayout[din]);
+
     haloMask.resize(coFiBox, 1);
     haloMask.setVal(false);
-
-    Box grownBox = grow(coFiBox, a_ghost);
-    grownBox &= a_coarDomain;
 
     IntVectSet ring(grownBox);
     ring -= coFiBox;
@@ -1259,16 +1263,10 @@ Realm::defineParticleGhostMaskFineToCoar(LayoutData<ParticleGhostMask>& a_mask,
     }
   }
 
-  // Per-box CSR setup/teardown loops are embarrassingly parallel (each writes only its own box). The two
-  // motion-plan walks below stay serial: distinct motion items can target the same destination box, so
-  // their incrementCount/addTarget would race, and they iterate the Copier plan rather than the grid boxes.
-#pragma omp parallel for schedule(runtime)
-  for (int mybox = 0; mybox < nbox; mybox++) {
-    a_mask[dit[mybox]].define(a_thisLayout[dit[mybox]]);
-  }
-
   // Each retained (inner-halo) footprint cell refines to whole fine source cells; every such cell keeps
-  // ALL coarse target boxes reaching it. Two motion-plan walks (count, then packed fill).
+  // ALL coarse target boxes reaching it. Two motion-plan walks (count, then packed fill). These stay
+  // serial: distinct motion items can target the same destination box, so incrementCount/addTarget would
+  // race, and they iterate the Copier plan rather than the grid boxes.
   const auto forEachContribution = [&](auto&& a_emit) {
     const CopyIterator::local_from_to plans[2] = {CopyIterator::LOCAL, CopyIterator::TO};
     for (const auto plan : plans) {
