@@ -836,6 +836,118 @@ ParticleContainer<P, Traits>::fillGhostParticles()
 }
 
 template <typename P, typename Traits>
+inline typename ParticleContainer<P, Traits>::MoverPool
+ParticleContainer<P, Traits>::gatherGhostsFromMasks(const AMRParticleGhostMask& a_maskSame,
+                                                    const AMRParticleGhostMask& a_maskCoarToFine,
+                                                    const AMRParticleGhostMask& a_maskFineToCoar)
+{
+  CH_TIME("ParticleContainer::gatherGhostsFromMasks");
+
+  MoverPool pool(numProc());
+
+  // Bin one source leaf's valid particles as ghosts of every target box listed by its cell's masks. The
+  // three masks are all indexed by the SOURCE cell on the source level, so a single cell lookup drives all
+  // directions. GhostType is from the RECEIVER's view: same level -> SameLevel, coarse source scattered to
+  // a finer patch -> Coarse, fine source scattered to a coarser patch -> Fine.
+  auto binLeaf = [&](MoverPool& a_target, const Leaf& a_leaf, const int a_srcLvl, const DataIndex& a_din) {
+    const bool haveSame = (a_srcLvl < a_maskSame.size()) && !a_maskSame[a_srcLvl].isNull();
+    const bool haveC2F  = (a_srcLvl < m_finestLevel) && (a_srcLvl < a_maskCoarToFine.size()) &&
+                         !a_maskCoarToFine[a_srcLvl].isNull();
+    const bool haveF2C = (a_srcLvl >= 1) && (a_srcLvl < a_maskFineToCoar.size()) &&
+                         !a_maskFineToCoar[a_srcLvl].isNull();
+
+    const ParticleGhostMask* same = haveSame ? &((*a_maskSame[a_srcLvl])[a_din]) : nullptr;
+    const ParticleGhostMask* c2f  = haveC2F ? &((*a_maskCoarToFine[a_srcLvl])[a_din]) : nullptr;
+    const ParticleGhostMask* f2c  = haveF2C ? &((*a_maskFineToCoar[a_srcLvl])[a_din]) : nullptr;
+
+    if (same == nullptr && c2f == nullptr && f2c == nullptr) {
+      return;
+    }
+
+    for (std::size_t i = 0; i < a_leaf.size(); i++) {
+      const RealVect pos = a_leaf.position(i);
+      const IntVect  iv  = this->cellIndex(a_srcLvl, pos);
+
+      auto scatter = [&](const ParticleGhostMask* a_mask, const int a_dstLvl, const GhostType a_gt) {
+        if (a_mask == nullptr || !a_mask->box().contains(iv)) {
+          return;
+        }
+        const int nt = a_mask->numTargets(iv);
+        for (int k = 0; k < nt; k++) {
+          Leaf& bin = a_target[a_mask->targetRank(iv, k)][PoolKey(a_dstLvl, a_mask->targetGridIndex(iv, k))];
+
+          bin.append(pos, a_leaf.weight(i), a_leaf.gather(i));
+
+          const std::size_t j = bin.size() - 1;
+
+          bin.particleID(j) = a_leaf.particleID(i); // preserve id
+          bin.rankID(j)     = procID();             // owner is this rank (it owns its valid particles)
+          bin.ghost(j)      = a_gt;
+        }
+      };
+
+      scatter(same, a_srcLvl, GhostType::SameLevel);
+      scatter(c2f, a_srcLvl + 1, GhostType::Coarse);
+      scatter(f2c, a_srcLvl - 1, GhostType::Fine);
+    }
+  };
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    const LevelParticles& level = *m_particles[lvl];
+    const DataIterator&   dit   = m_grids[lvl].dataIterator();
+    const int             nbox  = dit.size();
+
+#ifdef _OPENMP
+#pragma omp parallel
+    {
+      MoverPool threadPool(numProc()); // thread-local; no locking while binning
+
+#pragma omp for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        binLeaf(threadPool, level[dit[mybox]], lvl, dit[mybox]);
+      }
+
+#pragma omp critical(ParticleContainer_gatherGhostsFromMasksMerge)
+      {
+        for (int r = 0; r < numProc(); r++) {
+          for (auto& kv : threadPool[r]) {
+            pool[r][kv.first].catenate(kv.second);
+          }
+        }
+      }
+    }
+#else
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      binLeaf(pool, level[dit[mybox]], lvl, dit[mybox]);
+    }
+#endif
+  }
+
+  return pool;
+}
+
+template <typename P, typename Traits>
+inline void
+ParticleContainer<P, Traits>::fillGhost(const AMRParticleGhostMask& a_maskSame,
+                                        const AMRParticleGhostMask& a_maskCoarToFine,
+                                        const AMRParticleGhostMask& a_maskFineToCoar)
+{
+  CH_TIME("ParticleContainer::fillGhost");
+
+  CH_assert(m_isDefined);
+
+  // Refill from a clean slate: drop any existing ghost halo first.
+  this->clearGhostParticles();
+
+  MoverPool pool = this->gatherGhostsFromMasks(a_maskSame, a_maskCoarToFine, a_maskFineToCoar);
+
+  // a_setOwnerToReceiver == false: ghost copies keep their true owner's rankID (not the receiver's).
+  this->distributeFromPool(pool, false);
+
+  m_isOrganizedByCell = false; // ghosts appended to the leaves invalidate any cell sort
+}
+
+template <typename P, typename Traits>
 inline void
 ParticleContainer<P, Traits>::setupGrownGrids()
 {

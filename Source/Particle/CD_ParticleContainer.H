@@ -42,6 +42,7 @@
 
 // Our includes
 #include <CD_LevelTiles.H>
+#include <CD_ParticleGhostMask.H>
 #include <CD_ParallelOps.H>
 #include <CD_ParticleSoA.H>
 #include <CD_NamespaceHeader.H>
@@ -647,6 +648,25 @@ public:
   fillGhostParticles();
 
   /**
+    @brief Fill each patch's ghost halo from prebuilt Realm particle ghost masks.
+    @details For every valid particle, scatters a copy to each destination patch listed by the masks for
+    the particle's cell: same-level targets from a_maskSame, next-finer targets from a_maskCoarToFine, and
+    next-coarser targets from a_maskFineToCoar. Copies are appended into the destination leaf (same-rank
+    directly, cross-rank via MPI), tagged with the GhostType from the receiver's view (SameLevel / Coarse /
+    Fine), and keep the source's particleID and owning rank. clearGhostParticles() is called first so it is
+    safe to refill. Pass AmrMesh::getTrivialParticleGhostMask() for a direction that should not scatter.
+    The masks must have been built on the same grids as this container (see AmrMesh::registerParticleGhostMask
+    and AmrMesh::getParticleGhostMask(realm, width)). Non-periodic.
+    @param[in] a_maskSame       Same-level ghost mask (source cell -> same-level target boxes).
+    @param[in] a_maskCoarToFine Coarse-to-fine ghost mask (source cell -> next-finer target boxes).
+    @param[in] a_maskFineToCoar Fine-to-coarse ghost mask (source cell -> next-coarser target boxes).
+  */
+  void
+  fillGhost(const AMRParticleGhostMask& a_maskSame,
+            const AMRParticleGhostMask& a_maskCoarToFine,
+            const AMRParticleGhostMask& a_maskFineToCoar);
+
+  /**
     @brief Remove every ghost particle (any non-Valid GhostType) from all levels and patches.
     @details Owned (Valid) particles are left untouched. Removal is by swap-and-pop, so particle
     order within a leaf is not preserved. Keeps leaf capacity.
@@ -900,6 +920,22 @@ protected:
   */
   MoverPool
   gatherGhostsToPool();
+
+  /**
+    @brief Gather ghost copies into a per-rank pool using prebuilt particle ghost masks.
+    @details For each valid particle, reads its cell's target boxes from the three masks and bins a copy
+    per (destination level, grid index, rank) with the GhostType from the receiver's view (SameLevel /
+    Coarse / Fine); particleID preserved, rankID set to this rank (the owner). Distribute the returned pool
+    with a_setOwnerToReceiver == false. A trivial (empty) mask contributes nothing.
+    @param[in] a_maskSame       Same-level mask.
+    @param[in] a_maskCoarToFine Coarse-to-fine mask (targets on the next-finer level).
+    @param[in] a_maskFineToCoar Fine-to-coarse mask (targets on the next-coarser level).
+    @return The per-rank ghost pool.
+  */
+  MoverPool
+  gatherGhostsFromMasks(const AMRParticleGhostMask& a_maskSame,
+                        const AMRParticleGhostMask& a_maskCoarToFine,
+                        const AMRParticleGhostMask& a_maskFineToCoar);
 
   /**
     @brief Assign a pool into the valid holders: local appends + MPI scatter.

@@ -144,12 +144,9 @@ RadiativeTransferStepper<T>::postInitialize()
     pout() << "RadiativeTransferStepper::postInitialize" << endl;
   }
 
-  // PARKED: the particle-scatter dev path (sample -> fillGhostParticles -> discard -> remap) is on hold
-  // while we develop and visualize the Realm ghost-target tables. m_ghostBoundaryTest now only gates the
-  // ghost-target plot fields (see writeGhostTargetPlotData / getNumberOfPlotVariables).
-  // if (m_ghostBoundaryTest) {
-  //   this->ghostBoundaryTest();
-  // }
+  if (m_ghostBoundaryTest) {
+    this->ghostBoundaryTest();
+  }
 }
 
 template <typename T>
@@ -176,11 +173,16 @@ RadiativeTransferStepper<T>::ghostBoundaryTest()
     }
     photons.addParticlesDestructive(sampled); // routes every particle to its owning patch/level/rank
 
-    // (2) Fill the ghost layer of every patch.
-    photons.fillGhostParticles();
+    // (2) Fill the ghost layer of every patch from the prebuilt Realm masks (registered width).
+    const AMRParticleGhostMask& same = m_amr->getParticleGhostMask(m_realm, m_ghostBoundaryTestWidth);
+    const AMRParticleGhostMask& c2f  = m_amr->getParticleGhostMaskCoarToFine(m_realm, m_ghostBoundaryTestWidth);
+    const AMRParticleGhostMask& f2c  = m_amr->getParticleGhostMaskFineToCoar(m_realm, m_ghostBoundaryTestWidth);
+
+    photons.fillGhost(same, c2f, f2c);
 
     // (3) Discard the valid particles, keeping only the ghosts, and turn the ghosts into ordinary
     //     (valid) particles so the subsequent remap() will route them rather than drop them.
+    long long numGhost = 0;
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       const DisjointBoxLayout& dbl  = m_amr->getGrids(m_realm)[lvl];
       const DataIterator&      dit  = dbl.dataIterator();
@@ -193,6 +195,7 @@ RadiativeTransferStepper<T>::ghostBoundaryTest()
         while (i < leaf.size()) {
           if (leaf.isGhost(i)) {
             leaf.ghost(i) = GhostType::Valid; // a former ghost becomes an ordinary particle
+            numGhost++;
             i++;
           }
           else {
@@ -200,6 +203,11 @@ RadiativeTransferStepper<T>::ghostBoundaryTest()
           }
         }
       }
+    }
+
+    ParallelOps::sum(numGhost);
+    if (procID() == 0) {
+      pout() << "RadiativeTransferStepper::ghostBoundaryTest - ghost copies filled = " << numGhost << endl;
     }
 
     // (4) Remap the former ghosts back to their owners. What remains are exactly the particles that lay
