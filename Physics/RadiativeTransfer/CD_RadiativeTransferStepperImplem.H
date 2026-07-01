@@ -205,18 +205,21 @@ RadiativeTransferStepper<T>::ghostBoundaryTest()
       }
     }
 
-    ParallelOps::sum(numGhost);
+    // ParallelOps::sum RETURNS the global sum (it does not modify its argument in place).
+    const long long numGhostGlobal = ParallelOps::sum(numGhost);
     if (procID() == 0) {
-      pout() << "RadiativeTransferStepper::ghostBoundaryTest - ghost copies filled = " << numGhost << endl;
+      pout() << "RadiativeTransferStepper::ghostBoundaryTest - ghost copies filled = " << numGhostGlobal << endl;
     }
 
     // (4) Remap the former ghosts back to their owners. What remains are exactly the particles that lay
     //     within a ghost layer of some patch boundary, duplicated once per patch that ghosted them.
     photons.remap();
 
+    // getNumberOfValidParticlesGlobal() is collective, so ALL ranks must call it (not just rank 0).
+    const long long numBoundary = photons.getNumberOfValidParticlesGlobal();
     if (procID() == 0) {
-      pout() << "RadiativeTransferStepper::ghostBoundaryTest - boundary particles after remap = "
-             << photons.getNumberOfValidParticlesGlobal() << endl;
+      pout() << "RadiativeTransferStepper::ghostBoundaryTest - boundary particles after remap = " << numBoundary
+             << endl;
     }
   }
   else {
