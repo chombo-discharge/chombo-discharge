@@ -172,7 +172,7 @@ Realm::regridBase(const int a_lmin)
   this->defineMFLevelGrid(a_lmin);
   this->defineValidCells();
   this->defineLevelTiles();
-  this->defineParticleGhostTargets();
+  this->defineParticleGhostMasks();
 }
 
 void
@@ -1063,11 +1063,11 @@ Realm::defineValidCells()
 }
 
 void
-Realm::defineParticleGhostTargets() noexcept
+Realm::defineParticleGhostMasks() noexcept
 {
-  CH_TIME("Realm::defineParticleGhostTargets");
+  CH_TIME("Realm::defineParticleGhostMasks");
   if (m_verbosity > 5) {
-    pout() << "Realm::defineParticleGhostTargets" << endl;
+    pout() << "Realm::defineParticleGhostMasks" << endl;
   }
 
   const int ghost = m_numGhost;

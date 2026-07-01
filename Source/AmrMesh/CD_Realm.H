@@ -634,7 +634,7 @@ protected:
 
   /**
     @brief Particle ghost-target lookup to SAME-level boxes. Indexed by source level; per source box,
-    maps a source cell to the same-level boxes whose ghosted region covers it. See defineParticleGhostTargets().
+    maps a source cell to the same-level boxes whose ghosted region covers it. See defineParticleGhostMasks().
   */
   AMRParticleGhostMask m_particleGhostMask;
 
@@ -787,7 +787,7 @@ protected:
     The ghost width is m_numGhost. Periodic boundaries are not handled.
   */
   void
-  defineParticleGhostTargets() noexcept;
+  defineParticleGhostMasks() noexcept;
 
   /**
     @brief Define the SAME-level particle ghost mask on one level.
