@@ -29,6 +29,7 @@
 #include <CD_Photon.H>
 #include <CD_ParticleContainer.H>
 #include <CD_ParticleSoA.H>
+#include <CD_DischargeIO.H>
 #include <CD_Random.H>
 #include <CD_NamespaceHeader.H>
 
@@ -221,6 +222,10 @@ RadiativeTransferStepper<T>::ghostBoundaryTest()
       pout() << "RadiativeTransferStepper::ghostBoundaryTest - boundary particles after remap = " << numBoundary
              << endl;
     }
+
+    // Write the boundary particles to an H5Part file so they can be visualized directly (positions +
+    // weight + id + the Photon h5 columns), rather than only as a deposited mesh density.
+    DischargeIO::writeH5Part("ghost_boundary_particles.h5part", photons, m_amr->getProbLo(), m_time);
   }
   else {
     MayDay::Warning("RadiativeTransferStepper::ghostBoundaryTest - only implemented for the McPhoto solver");
