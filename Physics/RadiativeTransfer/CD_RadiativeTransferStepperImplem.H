@@ -17,6 +17,7 @@
 // Chombo includes
 #include <CH_Timer.H>
 #include <DataIterator.H>
+#include <BoxIterator.H>
 #include <ParmParse.H>
 #include <PolyGeom.H>
 
@@ -322,20 +323,20 @@ RadiativeTransferStepper<T>::writeGhostTargetPlotData(LevelData<EBCellFAB>& a_ou
                                                       const std::string&    a_outputRealm,
                                                       const int             a_level) const
 {
-  // DEV visualization: write 0/1 per cell that has at least one ghost target in each of the three
-  // Realm tables (same/coarser/finer level). Assumes the output realm matches the stepper realm (true
-  // for the McPhoto example). The tables are mesh structures and need no particles.
+  // DEV visualization: write 1 in each cell that will SEND its particles (i.e. has >=1 target) for each
+  // of the three Realm ghost-target tables (same/coarser/finer), 0 elsewhere. Assumes the output realm
+  // matches the stepper realm (true for the McPhoto example). Receiving rank is not shown yet.
   CH_assert(a_outputRealm == m_realm);
 
-  const AMRGhostTargets& same = m_amr->getGhostTargetsSame(m_realm);
-  const AMRGhostTargets& coar = m_amr->getGhostTargetsCoar(m_realm);
-  const AMRGhostTargets& fine = m_amr->getGhostTargetsFine(m_realm);
+  const AMRParticleGhostTargets& same = m_amr->getParticleGhostTargetsSame(m_realm);
+  const AMRParticleGhostTargets& coar = m_amr->getParticleGhostTargetsCoar(m_realm);
+  const AMRParticleGhostTargets& fine = m_amr->getParticleGhostTargetsFine(m_realm);
 
   const DisjointBoxLayout& dbl  = m_amr->getGrids(m_realm)[a_level];
   const DataIterator&      dit  = dbl.dataIterator();
   const int                nbox = dit.size();
 
-  const AMRGhostTargets* tables[3] = {&same, &coar, &fine};
+  const AMRParticleGhostTargets* tables[3] = {&same, &coar, &fine};
 
 #pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nbox; mybox++) {
@@ -350,12 +351,12 @@ RadiativeTransferStepper<T>::writeGhostTargetPlotData(LevelData<EBCellFAB>& a_ou
 
       out.setVal(comp, 0.0);
 
-      const AMRGhostTargets& table = *tables[k];
+      const AMRParticleGhostTargets& table = *tables[k];
       if (a_level < table.size() && !table[a_level].isNull()) {
-        const GhostTargetMap& map = (*table[a_level])[din];
-        for (const auto& kv : map) {
-          if (validBox.contains(kv.first)) {
-            reg(kv.first, comp) = 1.0;
+        const ParticleGhostTargets& t = (*table[a_level])[din];
+        for (BoxIterator bit(validBox & t.m_count.box()); bit.ok(); ++bit) {
+          if (t.m_count(bit(), 0) > 0) {
+            reg(bit(), comp) = 1.0;
           }
         }
       }

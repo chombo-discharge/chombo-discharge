@@ -1804,28 +1804,28 @@ public:
   getLevelTiles(const std::string& a_realm) const;
 
   /**
-    @brief Get the same-level ghost-particle scatter targets on a realm.
+    @brief Get the same-level particle ghost-target lookup on a realm.
     @param[in] a_realm Realm name
-    @return Per-level, per-box source-cell -> same-level target boxes (grid index, rank).
+    @return Per-level, per-box CSR of source-cell -> same-level target boxes (grid index, rank).
   */
-  const AMRGhostTargets&
-  getGhostTargetsSame(const std::string& a_realm) const;
+  const AMRParticleGhostTargets&
+  getParticleGhostTargetsSame(const std::string& a_realm) const;
 
   /**
-    @brief Get the coarser-level ghost-particle scatter targets on a realm.
+    @brief Get the coarser-level particle ghost-target lookup on a realm.
     @param[in] a_realm Realm name
-    @return Per-level, per-box source-cell -> coarser-level target boxes (grid index, rank).
+    @return Per-level, per-box CSR of source-cell -> coarser-level target boxes (grid index, rank).
   */
-  const AMRGhostTargets&
-  getGhostTargetsCoar(const std::string& a_realm) const;
+  const AMRParticleGhostTargets&
+  getParticleGhostTargetsCoar(const std::string& a_realm) const;
 
   /**
-    @brief Get the finer-level ghost-particle scatter targets on a realm.
+    @brief Get the finer-level particle ghost-target lookup on a realm.
     @param[in] a_realm Realm name
-    @return Per-level, per-box source-cell -> finer-level target boxes (grid index, rank).
+    @return Per-level, per-box CSR of source-cell -> finer-level target boxes (grid index, rank).
   */
-  const AMRGhostTargets&
-  getGhostTargetsFine(const std::string& a_realm) const;
+  const AMRParticleGhostTargets&
+  getParticleGhostTargetsFine(const std::string& a_realm) const;
 
   /**
     @brief Get the EBLevelGrid for a Realm and phase
