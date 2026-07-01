@@ -1156,15 +1156,18 @@ Realm::defineParticleGhostMaskSameLevel(LayoutData<ParticleGhostMask>& a_mask,
   // A same-level neighbour N contributes a target to this box's cells that lie within a_ghost of N, i.e.
   // grow(N, a_ghost) & box. NeighborIterator yields the abutting boxes (never self), so the whole build
   // is box-local: each box fills its own CSR with no cross-box writes. Two passes per box (count, pack).
+  // Thread-safe over boxes: distinct boxes write disjoint LayoutData storage, all neighbour lookups are
+  // read-only, and NeighborIterator (mutable cursor) is declared per iteration so it is thread-private.
   const DataIterator& dit  = a_dbl.dataIterator();
   const int           nbox = dit.size();
 
-  NeighborIterator nit(a_dbl);
-
+#pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex&   din = dit[mybox];
     const Box          box = a_dbl[din];
     ParticleGhostMask& t   = a_mask[din];
+
+    NeighborIterator nit(a_dbl);
 
     t.define(box);
 
@@ -1222,14 +1225,20 @@ Realm::defineParticleGhostMaskFineToCoar(LayoutData<ParticleGhostMask>& a_mask,
   // coarse-fine interface. Built geometrically from the footprint layout -- the ring outside each footprint
   // box (minus the abutting footprint boxes = internal seams) is the valid coarse region; growing it back
   // inward and intersecting the box gives the inner halo. Independent of the coarse grid's box layout.
+  // Thread-safe over boxes: distinct boxes write disjoint innerHalo storage, coFiLayout lookups are
+  // read-only, and IntVectSet scratch and the NeighborIterator are declared per iteration (thread-private).
   LayoutData<BaseFab<bool>> innerHalo(coFiLayout);
 
-  NeighborIterator    nit(coFiLayout);
-  const DataIterator& wdit = coFiLayout.dataIterator();
-  for (int mybox = 0; mybox < wdit.size(); mybox++) {
+  const DataIterator& wdit  = coFiLayout.dataIterator();
+  const int           nwbox = wdit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nwbox; mybox++) {
     const DataIndex& din      = wdit[mybox];
     const Box        coFiBox  = coFiLayout[din];
     BaseFab<bool>&   haloMask = innerHalo[din];
+
+    NeighborIterator nit(coFiLayout);
 
     haloMask.resize(coFiBox, 1);
     haloMask.setVal(false);
@@ -1251,6 +1260,10 @@ Realm::defineParticleGhostMaskFineToCoar(LayoutData<ParticleGhostMask>& a_mask,
     }
   }
 
+  // Per-box CSR setup/teardown loops are embarrassingly parallel (each writes only its own box). The two
+  // motion-plan walks below stay serial: distinct motion items can target the same destination box, so
+  // their incrementCount/addTarget would race, and they iterate the Copier plan rather than the grid boxes.
+#pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nbox; mybox++) {
     a_mask[dit[mybox]].define(a_thisLayout[dit[mybox]]);
   }
@@ -1283,12 +1296,14 @@ Realm::defineParticleGhostMaskFineToCoar(LayoutData<ParticleGhostMask>& a_mask,
   forEachContribution([&](const DataIndex& a_di, const IntVect& a_iv, const LevelTiles::BoxIDs&) {
     a_mask[a_di].incrementCount(a_iv);
   });
+#pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nbox; mybox++) {
     a_mask[dit[mybox]].allocate();
   }
   forEachContribution([&](const DataIndex& a_di, const IntVect& a_iv, const LevelTiles::BoxIDs& a_tg) {
     a_mask[a_di].addTarget(a_iv, a_tg);
   });
+#pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nbox; mybox++) {
     a_mask[dit[mybox]].finalize();
   }
@@ -1322,6 +1337,10 @@ Realm::defineParticleGhostMaskCoarToFine(LayoutData<ParticleGhostMask>&  a_mask,
   const DataIterator& dit  = a_thisLayout.dataIterator();
   const int           nbox = dit.size();
 
+  // Per-box CSR setup/teardown loops are embarrassingly parallel (each writes only its own box). The two
+  // motion-plan walks below stay serial: distinct motion items can target the same destination box, so
+  // their incrementCount/addTarget would race, and they iterate the Copier plan rather than the grid boxes.
+#pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nbox; mybox++) {
     a_mask[dit[mybox]].define(a_thisLayout[dit[mybox]]);
   }
@@ -1331,6 +1350,7 @@ Realm::defineParticleGhostMaskCoarToFine(LayoutData<ParticleGhostMask>&  a_mask,
   // reaching it. Two motion-plan walks (count, then packed fill).
   const auto forEachContribution = [&](auto&& a_emit) {
     const CopyIterator::local_from_to plans[2] = {CopyIterator::LOCAL, CopyIterator::TO};
+
     for (const auto plan : plans) {
       for (CopyIterator cit(copier, plan); cit.ok(); ++cit) {
         const MotionItem&        item = cit();
@@ -1353,12 +1373,14 @@ Realm::defineParticleGhostMaskCoarToFine(LayoutData<ParticleGhostMask>&  a_mask,
   forEachContribution([&](const DataIndex& a_di, const IntVect& a_iv, const LevelTiles::BoxIDs&) {
     a_mask[a_di].incrementCount(a_iv);
   });
+#pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nbox; mybox++) {
     a_mask[dit[mybox]].allocate();
   }
   forEachContribution([&](const DataIndex& a_di, const IntVect& a_iv, const LevelTiles::BoxIDs& a_tg) {
     a_mask[a_di].addTarget(a_iv, a_tg);
   });
+#pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nbox; mybox++) {
     a_mask[dit[mybox]].finalize();
   }
