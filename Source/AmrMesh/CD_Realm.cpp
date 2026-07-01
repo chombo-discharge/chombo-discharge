@@ -1267,6 +1267,7 @@ Realm::defineParticleGhostMaskFineToCoar(LayoutData<ParticleGhostMask>& a_mask,
   // race, and they iterate the Copier plan rather than the grid boxes.
   const auto forEachContribution = [&](auto&& a_emit) {
     const CopyIterator::local_from_to plans[2] = {CopyIterator::LOCAL, CopyIterator::TO};
+
     for (const auto plan : plans) {
       for (CopyIterator cit(copier, plan); cit.ok(); ++cit) {
         const MotionItem&        item = cit();
@@ -1279,7 +1280,9 @@ Realm::defineParticleGhostMaskFineToCoar(LayoutData<ParticleGhostMask>& a_mask,
           if (!halo[cc]) {
             continue;
           }
+
           const Box fineCells = refine(Box(cc, cc), a_refRat) & thisBox;
+
           for (BoxIterator fit(fineCells); fit.ok(); ++fit) {
             a_emit(item.toIndex, fit(), target);
           }
@@ -1291,13 +1294,16 @@ Realm::defineParticleGhostMaskFineToCoar(LayoutData<ParticleGhostMask>& a_mask,
   forEachContribution([&](const DataIndex& a_di, const IntVect& a_iv, const LevelTiles::BoxIDs&) {
     a_mask[a_di].incrementCount(a_iv);
   });
+
 #pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nbox; mybox++) {
     a_mask[dit[mybox]].allocate();
   }
+
   forEachContribution([&](const DataIndex& a_di, const IntVect& a_iv, const LevelTiles::BoxIDs& a_tg) {
     a_mask[a_di].addTarget(a_iv, a_tg);
   });
+
 #pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nbox; mybox++) {
     a_mask[dit[mybox]].finalize();
@@ -1368,13 +1374,16 @@ Realm::defineParticleGhostMaskCoarToFine(LayoutData<ParticleGhostMask>&  a_mask,
   forEachContribution([&](const DataIndex& a_di, const IntVect& a_iv, const LevelTiles::BoxIDs&) {
     a_mask[a_di].incrementCount(a_iv);
   });
+
 #pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nbox; mybox++) {
     a_mask[dit[mybox]].allocate();
   }
+
   forEachContribution([&](const DataIndex& a_di, const IntVect& a_iv, const LevelTiles::BoxIDs& a_tg) {
     a_mask[a_di].addTarget(a_iv, a_tg);
   });
+
 #pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nbox; mybox++) {
     a_mask[dit[mybox]].finalize();

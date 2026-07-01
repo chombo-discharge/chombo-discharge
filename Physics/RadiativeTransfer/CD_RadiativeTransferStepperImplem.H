@@ -12,7 +12,6 @@
 
 // Std includes
 #include <math.h>
-#include <set>
 #include <type_traits>
 
 // Chombo includes
@@ -278,7 +277,7 @@ RadiativeTransferStepper<T>::getNumberOfPlotVariables() const
     pout() << "RadiativeTransferStepper::getNumberOfPlotVariables" << endl;
   }
 
-  // +3 dev fields (ghost_same/ghost_coar/ghost_fine) visualizing the Realm ghost-target tables.
+  // +3 dev fields (ghost_same/ghost_fine_to_coar/ghost_coar_to_fine) visualizing the Realm ghost masks.
   return m_solver->getNumberOfPlotVariables() + (m_ghostBoundaryTest ? 3 : 0);
 }
 
@@ -294,8 +293,8 @@ RadiativeTransferStepper<T>::getPlotVariableNames() const
   Vector<std::string> names = m_solver->getPlotVariableNames();
   if (m_ghostBoundaryTest) {
     names.push_back("ghost_same");
-    names.push_back("ghost_coar");
-    names.push_back("ghost_fine");
+    names.push_back("ghost_fine_to_coar");
+    names.push_back("ghost_coar_to_fine");
   }
   return names;
 }
@@ -326,11 +325,9 @@ RadiativeTransferStepper<T>::writeGhostTargetPlotData(LevelData<EBCellFAB>& a_ou
                                                       const std::string&    a_outputRealm,
                                                       const int             a_level) const
 {
-  // DEV visualization: in each cell that will SEND its particles, encode sender+receivers as
-  // sender.receivers -- the integer part is THIS (sending) rank and each decimal digit is a distinct
-  // receiving rank, sorted ascending. E.g. rank 1 -> {2,3} = 1.23; rank 9 -> {0,3,4} = 9.034. One field
-  // per Realm ghost-target table (same/coarser/finer); cells with no target are 0. Assumes single-digit
-  // ranks, and that the output realm matches the stepper realm (true for the McPhoto example).
+  // DEV visualization: write 1 in each cell that will SCATTER its particles (has >=1 target) and 0
+  // elsewhere, one field per Realm ghost mask (same / fine-to-coarse / coarse-to-fine). Assumes the
+  // output realm matches the stepper realm (true for the McPhoto example).
   CH_assert(a_outputRealm == m_realm);
 
   const AMRParticleGhostMask& same = m_amr->getParticleGhostMask(m_realm, m_ghostBoundaryTestWidth);
@@ -360,23 +357,8 @@ RadiativeTransferStepper<T>::writeGhostTargetPlotData(LevelData<EBCellFAB>& a_ou
       if (a_level < table.size() && !table[a_level].isNull()) {
         const ParticleGhostMask& t = (*table[a_level])[din];
         for (BoxIterator bit(validBox & t.box()); bit.ok(); ++bit) {
-          const IntVect iv         = bit();
-          const int     numTargets = t.numTargets(iv);
-          if (numTargets > 0) {
-            // Distinct receiving ranks, sorted ascending (std::set), packed onto the decimals.
-            std::set<unsigned int> receivers;
-            for (int i = 0; i < numTargets; i++) {
-              receivers.insert(t.targetRank(iv, i));
-            }
-
-            Real value = static_cast<Real>(procID());
-            Real place = 0.1;
-            for (const unsigned int rank : receivers) {
-              value += rank * place;
-              place *= 0.1;
-            }
-
-            reg(iv, comp) = value;
+          if (t.numTargets(bit()) > 0) {
+            reg(bit(), comp) = 1.0;
           }
         }
       }
