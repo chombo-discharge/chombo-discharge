@@ -2939,6 +2939,17 @@ AmrMesh::sanityCheck() const
     MayDay::Abort("AmrMesh::sanityCheck -- max_block_size must be an integer multiple of min_block_size");
   }
 
+  // The number of ghost cells must be strictly smaller than the blocking factor. Because every grid box
+  // is a union of min_block_size-aligned tiles, two non-abutting same-level boxes are always >=
+  // min_block_size apart; with num_ghost < min_block_size a box's ghost region can therefore only reach
+  // its ABUTTING neighbours. The particle ghost-target build (and Chombo's own halo/exchange machinery)
+  // relies on this, so it is a live requirement -- enforced in optimized builds too, not a CH_assert.
+  if (m_numGhostCells >= m_minBlockSize) {
+    const std::string msg = "AmrMesh::sanityCheck -- num_ghost = " + std::to_string(m_numGhostCells) +
+                            " must be < min_block_size = " + std::to_string(m_minBlockSize);
+    MayDay::Abort(msg.c_str());
+  }
+
   // The coarsest domain must be a whole number of minimum-size blocks in every direction. Refined
   // domains inherit this, and every grid box is then a union of aligned min_block_size tiles. Chombo's
   // domainSplit hard-errors otherwise; front-run it with a clear message.
@@ -3403,6 +3414,85 @@ AmrMesh::getLevelTiles(const std::string& a_realm) const
   }
 
   return m_realms[a_realm]->getLevelTiles();
+}
+
+void
+AmrMesh::registerParticleGhostMask(const std::string& a_realm, const int a_width)
+{
+  CH_TIME("AmrMesh::registerParticleGhostMask(string, int)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::registerParticleGhostMask(string, int)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::registerParticleGhostMask - could not find realm '" + a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  m_realms[a_realm]->registerParticleGhostMask(a_width);
+}
+
+const AMRParticleGhostMask&
+AmrMesh::getParticleGhostMask(const std::string& a_realm, const int a_width) const
+{
+  CH_TIME("AmrMesh::getParticleGhostMask(string, int)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getParticleGhostMask(string, int)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getParticleGhostMask(string, int) - could not find realm '" + a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getParticleGhostMask(a_width);
+}
+
+const AMRParticleGhostMask&
+AmrMesh::getParticleGhostMaskFineToCoar(const std::string& a_realm, const int a_width) const
+{
+  CH_TIME("AmrMesh::getParticleGhostMaskFineToCoar(string, int)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getParticleGhostMaskFineToCoar(string, int)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getParticleGhostMaskFineToCoar(string, int) - could not find realm '" + a_realm +
+                            "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getParticleGhostMaskFineToCoar(a_width);
+}
+
+const AMRParticleGhostMask&
+AmrMesh::getParticleGhostMaskCoarToFine(const std::string& a_realm, const int a_width) const
+{
+  CH_TIME("AmrMesh::getParticleGhostMaskCoarToFine(string, int)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getParticleGhostMaskCoarToFine(string, int)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getParticleGhostMaskCoarToFine(string, int) - could not find realm '" + a_realm +
+                            "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getParticleGhostMaskCoarToFine(a_width);
+}
+
+const AMRParticleGhostMask&
+AmrMesh::getTrivialParticleGhostMask() const
+{
+  CH_TIME("AmrMesh::getTrivialParticleGhostMask()");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getTrivialParticleGhostMask()" << endl;
+  }
+
+  static const AMRParticleGhostMask trivial;
+
+  return trivial;
 }
 
 const Vector<RefCountedPtr<EBLevelGrid>>&

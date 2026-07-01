@@ -16,6 +16,10 @@
 // Chombo includes
 #include <ParmParse.H>
 #include <NeighborIterator.H>
+#include <BoxIterator.H>
+#include <IntVectSet.H>
+#include <DenseIntVectSet.H>
+#include <Copier.H>
 
 // Our includes
 #include <CD_Realm.H>
@@ -169,6 +173,7 @@ Realm::regridBase(const int a_lmin)
   this->defineMFLevelGrid(a_lmin);
   this->defineValidCells();
   this->defineLevelTiles();
+  this->defineParticleGhostMasks();
 }
 
 void
@@ -1059,6 +1064,344 @@ Realm::defineValidCells()
 }
 
 void
+Realm::registerParticleGhostMask(const int a_width) noexcept
+{
+  CH_TIME("Realm::registerParticleGhostMask");
+  if (m_verbosity > 5) {
+    pout() << "Realm::registerParticleGhostMask" << endl;
+  }
+
+  if (a_width <= 0) {
+    MayDay::Abort("Realm::registerParticleGhostMask -- particle ghost-mask width must be > 0");
+  }
+
+  m_particleGhostMaskWidths.insert(a_width);
+}
+
+void
+Realm::defineParticleGhostMasks() noexcept
+{
+  CH_TIME("Realm::defineParticleGhostMasks");
+  if (m_verbosity > 5) {
+    pout() << "Realm::defineParticleGhostMasks" << endl;
+  }
+
+  m_particleGhostMask.clear();
+  m_particleGhostMaskFineToCoar.clear();
+  m_particleGhostMaskCoarToFine.clear();
+
+  // No particle ghost masks are built unless downstream code has registered at least one width.
+  for (const int ghost : m_particleGhostMaskWidths) {
+    if (ghost >= m_minBlockSize) {
+      const std::string msg = "Realm::defineParticleGhostMasks -- ghost width = " + std::to_string(ghost) +
+                              " must be < min_block_size = " + std::to_string(m_minBlockSize);
+      MayDay::Abort(msg.c_str());
+    }
+
+    AMRParticleGhostMask& same       = m_particleGhostMask[ghost];
+    AMRParticleGhostMask& fineToCoar = m_particleGhostMaskFineToCoar[ghost];
+    AMRParticleGhostMask& coarToFine = m_particleGhostMaskCoarToFine[ghost];
+
+    same.resize(1 + m_finestLevel);
+    fineToCoar.resize(1 + m_finestLevel);
+    coarToFine.resize(1 + m_finestLevel);
+
+    for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+      const DisjointBoxLayout& dbl    = m_grids[lvl];
+      const ProblemDomain&     domain = m_domains[lvl];
+
+      same[lvl]       = RefCountedPtr<LayoutData<ParticleGhostMask>>(new LayoutData<ParticleGhostMask>(dbl));
+      fineToCoar[lvl] = RefCountedPtr<LayoutData<ParticleGhostMask>>(new LayoutData<ParticleGhostMask>(dbl));
+      coarToFine[lvl] = RefCountedPtr<LayoutData<ParticleGhostMask>>(new LayoutData<ParticleGhostMask>(dbl));
+
+      // SAME level: targets are the abutting boxes on this level (each grown by 'ghost' at this resolution).
+      this->defineParticleGhostMaskSameLevel(*same[lvl], dbl, domain, ghost);
+
+      // COARSER (lvl -> lvl-1): fine cells that scatter DOWN to the coarse level. Restricted to the fine
+      // side of the coarse-fine halo; ghost width in destination (coarse) cells.
+      if (lvl > 0) {
+        this->defineParticleGhostMaskFineToCoar(*fineToCoar[lvl],
+                                                dbl,
+                                                m_grids[lvl - 1],
+                                                m_domains[lvl - 1],
+                                                m_refinementRatios[lvl - 1],
+                                                ghost);
+      }
+
+      // FINER (lvl -> lvl+1): coarse cells that scatter UP to the finer level. Restricted to the coarse
+      // side of the coarse-fine halo; ghost width in destination (fine) cells.
+      if (lvl < m_finestLevel) {
+        this->defineParticleGhostMaskCoarToFine(*coarToFine[lvl],
+                                                dbl,
+                                                m_grids[lvl + 1],
+                                                *m_validCells[lvl],
+                                                m_domains[lvl + 1],
+                                                m_refinementRatios[lvl],
+                                                ghost);
+      }
+    }
+  }
+}
+
+void
+Realm::defineParticleGhostMaskSameLevel(LayoutData<ParticleGhostMask>& a_mask,
+                                        const DisjointBoxLayout&       a_dbl,
+                                        const ProblemDomain&           a_domain,
+                                        const int                      a_ghost) noexcept
+{
+  CH_TIME("Realm::defineParticleGhostMaskSameLevel");
+  if (m_verbosity > 5) {
+    pout() << "Realm::defineParticleGhostMaskSameLevel" << endl;
+  }
+
+  // A same-level neighbour N contributes a target to this box's cells that lie within a_ghost of N, i.e.
+  // grow(N, a_ghost) & box. NeighborIterator yields the abutting boxes (never self), so the whole build
+  // is box-local: each box fills its own CSR with no cross-box writes. Two passes per box (count, pack).
+  // Thread-safe over boxes: distinct boxes write disjoint LayoutData storage, all neighbour lookups are
+  // read-only, and NeighborIterator (mutable cursor) is declared per iteration so it is thread-private.
+  const DataIterator& dit  = a_dbl.dataIterator();
+  const int           nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex&   din = dit[mybox];
+    const Box          box = a_dbl[din];
+    ParticleGhostMask& t   = a_mask[din];
+
+    NeighborIterator nit(a_dbl);
+
+    t.define(box);
+
+    // Count targets per cell.
+    for (nit.begin(din); nit.ok(); ++nit) {
+      const Box reach = grow(a_dbl[nit()], a_ghost) & box;
+      for (BoxIterator bit(reach); bit.ok(); ++bit) {
+        t.incrementCount(bit());
+      }
+    }
+
+    t.allocate();
+
+    // Pack the targets.
+    for (nit.begin(din); nit.ok(); ++nit) {
+      const LevelTiles::BoxIDs target(a_dbl.index(nit()), a_dbl.procID(nit()));
+      const Box                reach = grow(a_dbl[nit()], a_ghost) & box;
+
+      for (BoxIterator bit(reach); bit.ok(); ++bit) {
+        t.addTarget(bit(), target);
+      }
+    }
+
+    t.finalize();
+  }
+}
+
+void
+Realm::defineParticleGhostMaskFineToCoar(LayoutData<ParticleGhostMask>& a_mask,
+                                         const DisjointBoxLayout&       a_thisLayout,
+                                         const DisjointBoxLayout&       a_coarLayout,
+                                         const ProblemDomain&           a_coarDomain,
+                                         const int                      a_refRat,
+                                         const int                      a_ghost) noexcept
+{
+  CH_TIME("Realm::defineParticleGhostMaskFineToCoar");
+  if (m_verbosity > 5) {
+    pout() << "Realm::defineParticleGhostMaskFineToCoar" << endl;
+  }
+
+  // Work at the COARSE (target) resolution by coarsening this (fine) level; the ghost width is then
+  // measured in coarse cells. coarsen() preserves this level's DataIndex, so a motion item's toIndex also
+  // indexes a_mask/a_thisLayout.
+  DisjointBoxLayout coFiLayout;
+  coarsen(coFiLayout, a_thisLayout, a_refRat);
+
+  // ghostDefine: each coarse box's grown region (a_ghost coarse cells) -> the coarsened-fine footprint.
+  // Gives, per footprint cell, ALL coarse boxes whose ghosted box contains it (multi-target).
+  Copier copier;
+  copier.ghostDefine(a_coarLayout, coFiLayout, a_coarDomain, a_ghost * IntVect::Unit);
+
+  const DataIterator& dit  = a_thisLayout.dataIterator();
+  const int           nbox = dit.size();
+
+  // Restrict sources to the INNER coarse-fine halo: footprint cells within a_ghost coarse cells of the
+  // coarse-fine interface, built geometrically from the coarsened-fine footprint. Stored per box as a
+  // DenseIntVectSet (a bitmask over the footprint box), so the build needs no BaseFab conversion.
+  //
+  // This loop does both per-box setups at once (init the box's CSR a_mask[din] and its halo innerHalo[din]).
+  // Thread-safe over boxes: distinct boxes write disjoint storage, all layout lookups are read-only, and
+  // the DenseIntVectSet scratch and the NeighborIterator are declared per iteration (thread-private).
+  // coFiLayout shares this level's DataIndex (coarsen preserves it), so dit/nbox iterate it too.
+  LayoutData<DenseIntVectSet> innerHalo(coFiLayout);
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din      = dit[mybox];
+    const Box        coFiBox  = coFiLayout[din];
+    const Box        grownBox = grow(coFiBox, a_ghost) & a_coarDomain;
+
+    a_mask[din].define(a_thisLayout[din]);
+
+    // Ring = the VALID coarse cells surrounding this footprint box: reach OUT to grownBox, then remove the
+    // footprint box itself and its abutting footprint neighbours (internal seams).
+    DenseIntVectSet ring(grownBox, true);
+    ring -= coFiBox;
+
+    NeighborIterator nit(coFiLayout);
+    for (nit.begin(din); nit.ok(); ++nit) {
+      ring -= coFiLayout[nit()];
+    }
+
+    // Inner halo = footprint cells within a_ghost of that valid ring: grow the ring back IN, then keep the
+    // footprint cells (intersect a full DenseIntVectSet over coFiBox, which also fixes the halo's domain to
+    // the footprint box). The ring MUST be the subtracted one -- otherwise every footprint cell is kept.
+    ring.grow(a_ghost);
+
+    DenseIntVectSet& halo = innerHalo[din];
+    halo                  = DenseIntVectSet(coFiBox, true);
+    halo &= ring;
+  }
+
+  // Each retained (inner-halo) footprint cell refines to whole fine source cells; every such cell keeps
+  // ALL coarse target boxes reaching it. Two motion-plan walks (count, then packed fill). These stay
+  // serial: distinct motion items can target the same destination box, so incrementCount/addTarget would
+  // race, and they iterate the Copier plan rather than the grid boxes.
+  const auto forEachContribution = [&](auto&& a_emit) {
+    const CopyIterator::local_from_to plans[2] = {CopyIterator::LOCAL, CopyIterator::TO};
+
+    for (const auto plan : plans) {
+      for (CopyIterator cit(copier, plan); cit.ok(); ++cit) {
+        const MotionItem&        item = cit();
+        const LevelTiles::BoxIDs target(a_coarLayout.index(item.fromIndex), a_coarLayout.procID(item.fromIndex));
+        const Box                thisBox = a_thisLayout[item.toIndex]; // fine source box
+        const DenseIntVectSet&   halo    = innerHalo[item.toIndex];
+
+        for (BoxIterator bit(item.toRegion); bit.ok(); ++bit) {
+          const IntVect cc = bit();
+          if (!halo[cc]) {
+            continue;
+          }
+
+          const Box fineCells = refine(Box(cc, cc), a_refRat) & thisBox;
+
+          for (BoxIterator fit(fineCells); fit.ok(); ++fit) {
+            a_emit(item.toIndex, fit(), target);
+          }
+        }
+      }
+    }
+  };
+
+  forEachContribution([&](const DataIndex& a_di, const IntVect& a_iv, const LevelTiles::BoxIDs&) {
+    a_mask[a_di].incrementCount(a_iv);
+  });
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    a_mask[dit[mybox]].allocate();
+  }
+
+  forEachContribution([&](const DataIndex& a_di, const IntVect& a_iv, const LevelTiles::BoxIDs& a_tg) {
+    a_mask[a_di].addTarget(a_iv, a_tg);
+  });
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    a_mask[dit[mybox]].finalize();
+  }
+}
+
+void
+Realm::defineParticleGhostMaskCoarToFine(LayoutData<ParticleGhostMask>&  a_mask,
+                                         const DisjointBoxLayout&        a_thisLayout,
+                                         const DisjointBoxLayout&        a_fineLayout,
+                                         const LevelData<BaseFab<bool>>& a_validCells,
+                                         const ProblemDomain&            a_fineDomain,
+                                         const int                       a_refRat,
+                                         const int                       a_ghost) noexcept
+{
+  CH_TIME("Realm::defineParticleGhostMaskCoarToFine");
+  if (m_verbosity > 5) {
+    pout() << "Realm::defineParticleGhostMaskCoarToFine" << endl;
+  }
+
+  // Work at the FINE (target) resolution by refining this (coarse) level; the ghost width is then measured
+  // in fine cells. refine() preserves this level's DataIndex, so a motion item's toIndex also indexes
+  // a_mask/a_thisLayout.
+  DisjointBoxLayout refinedLayout;
+  refine(refinedLayout, a_thisLayout, a_refRat);
+
+  // ghostDefine: each fine box's grown region (a_ghost fine cells) -> this level's cells at fine res. Gives,
+  // per fine cell, ALL fine boxes whose ghosted box contains it (multi-target).
+  Copier copier;
+  copier.ghostDefine(a_fineLayout, refinedLayout, a_fineDomain, a_ghost * IntVect::Unit);
+
+  const DataIterator& dit  = a_thisLayout.dataIterator();
+  const int           nbox = dit.size();
+
+  // Per-box CSR setup/teardown loops are embarrassingly parallel (each writes only its own box). The two
+  // motion-plan walks below stay serial: distinct motion items can target the same destination box, so
+  // their incrementCount/addTarget would race, and they iterate the Copier plan rather than the grid boxes.
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    a_mask[dit[mybox]].define(a_thisLayout[dit[mybox]]);
+  }
+
+  // Coarsen the fine reach to whole coarse source cells and keep only VALID ones (covered cells have no
+  // particles) -- that is the coarse-side outer halo; every retained cell keeps ALL fine target boxes
+  // reaching it. Each contribution also carries an ACCEPTANCE BOX: the fine box's ghost region (grown by
+  // a_ghost fine cells) shifted into this level's index space by the motion item's periodic offset. The
+  // scatter uses it to prune whole-coarse-cell over-communication down to the exact fine shell (a coarse
+  // particle is scattered only if its FINE cell lies in the acceptance box). Two motion-plan walks.
+  const auto forEachContribution = [&](auto&& a_emit) {
+    const CopyIterator::local_from_to plans[2] = {CopyIterator::LOCAL, CopyIterator::TO};
+
+    for (const auto plan : plans) {
+      for (CopyIterator cit(copier, plan); cit.ok(); ++cit) {
+        const MotionItem&        item = cit();
+        const LevelTiles::BoxIDs target(a_fineLayout.index(item.fromIndex), a_fineLayout.procID(item.fromIndex));
+        const Box                thisBox     = a_thisLayout[item.toIndex]; // coarse source box
+        const BaseFab<bool>&     valid       = a_validCells[item.toIndex];
+        const Box                coarseCells = coarsen(item.toRegion, a_refRat) & thisBox;
+
+        // Acceptance box in fine (destination) cells: the fine box grown by the ghost width, shifted from
+        // the fine box's index space into this level's by the motion item's periodic offset (zero for
+        // non-periodic items, so the box is just grow(fineBox, a_ghost)).
+        Box acceptBox = grow(a_fineLayout[item.fromIndex], a_ghost);
+        acceptBox.shift(item.toRegion.smallEnd() - item.fromRegion.smallEnd());
+
+        for (BoxIterator bit(coarseCells); bit.ok(); ++bit) {
+          const IntVect cc = bit();
+          if (!valid(cc, 0)) {
+            continue;
+          }
+          a_emit(item.toIndex, cc, target, acceptBox);
+        }
+      }
+    }
+  };
+
+  forEachContribution([&](const DataIndex& a_di, const IntVect& a_iv, const LevelTiles::BoxIDs&, const Box&) {
+    a_mask[a_di].incrementCount(a_iv);
+  });
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    a_mask[dit[mybox]].allocate();
+    a_mask[dit[mybox]].allocateTargetBoxes();
+  }
+
+  forEachContribution(
+    [&](const DataIndex& a_di, const IntVect& a_iv, const LevelTiles::BoxIDs& a_tg, const Box& a_acceptBox) {
+      a_mask[a_di].addTarget(a_iv, a_tg, a_acceptBox);
+    });
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    a_mask[dit[mybox]].finalize();
+  }
+}
+
+void
 Realm::defineLevelTiles() noexcept
 {
   CH_TIME("Realm::defineLevelTiles");
@@ -1386,6 +1729,53 @@ const Vector<RefCountedPtr<LevelTiles>>&
 Realm::getLevelTiles() const noexcept
 {
   return m_levelTiles;
+}
+
+const AMRParticleGhostMask&
+Realm::getParticleGhostMask(const int a_width) const noexcept
+{
+  const auto it = m_particleGhostMask.find(a_width);
+  if (it == m_particleGhostMask.end()) {
+    const std::string msg = "Realm::getParticleGhostMask -- width = " + std::to_string(a_width) +
+                            " was not registered (call registerParticleGhostMask before regridding)";
+    MayDay::Abort(msg.c_str());
+  }
+
+  return it->second;
+}
+
+const AMRParticleGhostMask&
+Realm::getParticleGhostMaskFineToCoar(const int a_width) const noexcept
+{
+  const auto it = m_particleGhostMaskFineToCoar.find(a_width);
+  if (it == m_particleGhostMaskFineToCoar.end()) {
+    const std::string msg = "Realm::getParticleGhostMaskFineToCoar -- width = " + std::to_string(a_width) +
+                            " was not registered (call registerParticleGhostMask before regridding)";
+    MayDay::Abort(msg.c_str());
+  }
+
+  return it->second;
+}
+
+const AMRParticleGhostMask&
+Realm::getParticleGhostMaskCoarToFine(const int a_width) const noexcept
+{
+  const auto it = m_particleGhostMaskCoarToFine.find(a_width);
+  if (it == m_particleGhostMaskCoarToFine.end()) {
+    const std::string msg = "Realm::getParticleGhostMaskCoarToFine -- width = " + std::to_string(a_width) +
+                            " was not registered (call registerParticleGhostMask before regridding)";
+    MayDay::Abort(msg.c_str());
+  }
+
+  return it->second;
+}
+
+const AMRParticleGhostMask&
+Realm::getTrivialParticleGhostMask() const noexcept
+{
+  static const AMRParticleGhostMask trivial;
+
+  return trivial;
 }
 
 Realm::LevelAndBox

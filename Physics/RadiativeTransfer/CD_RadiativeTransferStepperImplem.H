@@ -12,15 +12,27 @@
 
 // Std includes
 #include <math.h>
+#include <string>
+#include <type_traits>
+#include <vector>
 
 // Chombo includes
 #include <CH_Timer.H>
+#include <DataIterator.H>
+#include <BoxIterator.H>
 #include <ParmParse.H>
 #include <PolyGeom.H>
 
 // Our includes
 #include <CD_RadiativeTransferStepper.H>
 #include <CD_RadiativeTransferSpecies.H>
+#include <CD_AmrMesh.H>
+#include <CD_McPhoto.H>
+#include <CD_Photon.H>
+#include <CD_ParticleContainer.H>
+#include <CD_ParticleSoA.H>
+#include <CD_DischargeIO.H>
+#include <CD_Random.H>
 #include <CD_NamespaceHeader.H>
 
 using namespace Physics::RadiativeTransfer;
@@ -39,6 +51,14 @@ RadiativeTransferStepper<T>::RadiativeTransferStepper()
   pp.get("dt", m_dt);
 
   m_forceDt = -1.0;
+
+  // Optional ghost-particle boundary verification (McPhoto only). Off unless explicitly requested.
+  m_ghostBoundaryTest          = false;
+  m_ghostBoundaryTestParticles = 100000;
+  m_ghostBoundaryTestWidth     = 1;
+  pp.query("ghost_boundary_test", m_ghostBoundaryTest);
+  pp.query("ghost_boundary_test_particles", m_ghostBoundaryTestParticles);
+  pp.query("ghost_boundary_test_width", m_ghostBoundaryTestWidth);
 }
 
 template <typename T>
@@ -126,6 +146,144 @@ RadiativeTransferStepper<T>::postInitialize()
   if (m_verbosity > 5) {
     pout() << "RadiativeTransferStepper::postInitialize" << endl;
   }
+
+  if (m_ghostBoundaryTest) {
+    this->ghostBoundaryTest();
+  }
+}
+
+template <typename T>
+void
+RadiativeTransferStepper<T>::ghostBoundaryTest()
+{
+  CH_TIME("RadiativeTransferStepper::ghostBoundaryTest");
+
+  // This verification needs the McPhoto particle container; it is a no-op for mesh-based solvers.
+  if constexpr (std::is_same_v<T, McPhoto>) {
+    ParticleContainer<Photon>& photons = static_cast<T*>(&(*m_solver))->getPhotons();
+
+    const RealVect probLo = m_amr->getProbLo();
+    const RealVect probHi = m_amr->getProbHi();
+
+    // Sample once on rank 0 and keep the positions; each ghost direction is filled from an identical
+    // source particle set (re-seeded below), so the three output files are directly comparable.
+    std::vector<RealVect> seedPos;
+    if (procID() == 0) {
+      seedPos.reserve(m_ghostBoundaryTestParticles);
+      for (int i = 0; i < m_ghostBoundaryTestParticles; i++) {
+        seedPos.push_back(Random::randomPosition(probLo, probHi));
+      }
+    }
+
+    const AMRParticleGhostMask& same = m_amr->getParticleGhostMask(m_realm, m_ghostBoundaryTestWidth);
+    const AMRParticleGhostMask& c2f  = m_amr->getParticleGhostMaskCoarToFine(m_realm, m_ghostBoundaryTestWidth);
+    const AMRParticleGhostMask& f2c  = m_amr->getParticleGhostMaskFineToCoar(m_realm, m_ghostBoundaryTestWidth);
+    const AMRParticleGhostMask& none = m_amr->getTrivialParticleGhostMask();
+
+    // Verify resetParticleIDs / resetRankIDs on a fresh seed: after remap every particle is a valid,
+    // in-box, non-ghost owned particle, so resetParticleIDs(true,0) must number them 0..n-1 uniquely and
+    // resetRankIDs(true) must stamp each with its owner rank. Check via reductions (count of assigned ids
+    // == n and their sum == n(n-1)/2 together imply a permutation of [0,n)).
+    {
+      photons.clearParticles();
+      ParticleSoA<Photon> seed;
+      for (const RealVect& p : seedPos) {
+        seed.append(p, 1.0);
+      }
+      photons.addParticlesDestructive(seed);
+
+      const long long n = photons.resetParticleIDs(true, 0);
+      photons.resetRankIDs(true);
+
+      long long localCount = 0;
+      long long localSum   = 0;
+      int       localBadRk = 0;
+      for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+        const DataIterator& dit  = m_amr->getGrids(m_realm)[lvl].dataIterator();
+        const int           nbox = dit.size();
+        for (int mybox = 0; mybox < nbox; mybox++) {
+          const ParticleSoA<Photon>& leaf = photons[lvl][dit[mybox]];
+          for (std::size_t i = 0; i < leaf.size(); i++) {
+            const ParticleID id = leaf.particleID(i);
+            if (id >= 0) {
+              localCount++;
+              localSum += id;
+            }
+            if (leaf.rankID(i) != static_cast<RankID>(procID())) {
+              localBadRk++;
+            }
+          }
+        }
+      }
+      const long long gCount = ParallelOps::sum(localCount);
+      const long long gSum   = ParallelOps::sum(localSum);
+      const long long gBadRk = ParallelOps::sum(static_cast<long long>(localBadRk));
+      if (procID() == 0) {
+        const long long expectedSum = (n > 0) ? (n * (n - 1)) / 2 : 0;
+        pout() << "RadiativeTransferStepper::ghostBoundaryTest - resetIDs check: n=" << n << " count(id>=0)=" << gCount
+               << " sum=" << gSum << " expectedSum=" << expectedSum << " wrongRank=" << gBadRk << endl;
+      }
+    }
+
+    // Fill only the requested direction's ghosts (the other two masks are the trivial/empty mask), keep
+    // the ghosts, remap them to their owners, and write them to an H5Part file for direct visualization
+    // (positions + weight + id + the Photon h5 columns kappa/v).
+    auto writeDirection = [&](const AMRParticleGhostMask& a_same,
+                              const AMRParticleGhostMask& a_c2f,
+                              const AMRParticleGhostMask& a_f2c,
+                              const std::string&          a_file) {
+      // (Re)seed the valid particles from the shared sample.
+      photons.clearParticles();
+      ParticleSoA<Photon> seed;
+      for (const RealVect& p : seedPos) {
+        seed.append(p, 1.0);
+      }
+      photons.addParticlesDestructive(seed); // routes every particle to its owning patch/level/rank
+
+      photons.fillGhost(a_same, a_c2f, a_f2c);
+
+      // Keep only the ghosts, turning them into ordinary particles so remap() routes them.
+      long long numGhost = 0;
+      for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+        const DataIterator& dit  = m_amr->getGrids(m_realm)[lvl].dataIterator();
+        const int           nbox = dit.size();
+
+        for (int mybox = 0; mybox < nbox; mybox++) {
+          ParticleSoA<Photon>& leaf = photons[lvl][dit[mybox]];
+
+          std::size_t i = 0;
+          while (i < leaf.size()) {
+            if (leaf.isGhost(i)) {
+              leaf.ghost(i) = GhostType::Valid; // a former ghost becomes an ordinary particle
+              numGhost++;
+              i++;
+            }
+            else {
+              leaf.remove(i); // discard the patch's own valid particle (swap-pop; do not advance)
+            }
+          }
+        }
+      }
+
+      photons.remap();
+
+      const long long numGhostGlobal = ParallelOps::sum(numGhost); // RETURNS the global sum
+      if (procID() == 0) {
+        pout() << "RadiativeTransferStepper::ghostBoundaryTest - " << a_file << " : " << numGhostGlobal
+               << " ghost particles" << endl;
+      }
+
+      DischargeIO::writeH5Part(a_file, photons, probLo, m_time);
+    };
+
+    // "Interlevel" (same-level) ghosts, coarse-to-fine ghosts, fine-to-coarse ghosts.
+    writeDirection(same, none, none, "ghost_same_level_particles.h5part");
+    writeDirection(none, c2f, none, "ghost_coarse_to_fine_particles.h5part");
+    writeDirection(none, none, f2c, "ghost_fine_to_coarse_particles.h5part");
+  }
+  else {
+    MayDay::Warning("RadiativeTransferStepper::ghostBoundaryTest - only implemented for the McPhoto solver");
+  }
 }
 
 template <typename T>
@@ -189,7 +347,8 @@ RadiativeTransferStepper<T>::getNumberOfPlotVariables() const
     pout() << "RadiativeTransferStepper::getNumberOfPlotVariables" << endl;
   }
 
-  return m_solver->getNumberOfPlotVariables();
+  // +3 dev fields (ghost_same/ghost_fine_to_coar/ghost_coar_to_fine) visualizing the Realm ghost masks.
+  return m_solver->getNumberOfPlotVariables() + (m_ghostBoundaryTest ? 3 : 0);
 }
 
 template <typename T>
@@ -201,7 +360,13 @@ RadiativeTransferStepper<T>::getPlotVariableNames() const
     pout() << "RadiativeTransferStepper::getPlotVariableNames" << endl;
   }
 
-  return m_solver->getPlotVariableNames();
+  Vector<std::string> names = m_solver->getPlotVariableNames();
+  if (m_ghostBoundaryTest) {
+    names.push_back("ghost_same");
+    names.push_back("ghost_fine_to_coar");
+    names.push_back("ghost_coar_to_fine");
+  }
+  return names;
 }
 
 template <typename T>
@@ -217,6 +382,60 @@ RadiativeTransferStepper<T>::writePlotData(LevelData<EBCellFAB>& a_output,
   }
 
   m_solver->writePlotData(a_output, a_icomp, a_outputRealm, a_level);
+
+  if (m_ghostBoundaryTest) {
+    this->writeGhostTargetPlotData(a_output, a_icomp, a_outputRealm, a_level);
+  }
+}
+
+template <typename T>
+void
+RadiativeTransferStepper<T>::writeGhostTargetPlotData(LevelData<EBCellFAB>& a_output,
+                                                      int&                  a_icomp,
+                                                      const std::string&    a_outputRealm,
+                                                      const int             a_level) const
+{
+  // DEV visualization: write 1 in each cell that will SCATTER its particles (has >=1 target) and 0
+  // elsewhere, one field per Realm ghost mask (same / fine-to-coarse / coarse-to-fine). Assumes the
+  // output realm matches the stepper realm (true for the McPhoto example).
+  CH_assert(a_outputRealm == m_realm);
+
+  const AMRParticleGhostMask& same = m_amr->getParticleGhostMask(m_realm, m_ghostBoundaryTestWidth);
+  const AMRParticleGhostMask& coar = m_amr->getParticleGhostMaskFineToCoar(m_realm, m_ghostBoundaryTestWidth);
+  const AMRParticleGhostMask& fine = m_amr->getParticleGhostMaskCoarToFine(m_realm, m_ghostBoundaryTestWidth);
+
+  const DisjointBoxLayout& dbl  = m_amr->getGrids(m_realm)[a_level];
+  const DataIterator&      dit  = dbl.dataIterator();
+  const int                nbox = dit.size();
+
+  const AMRParticleGhostMask* tables[3] = {&same, &coar, &fine};
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din      = dit[mybox];
+    const Box        validBox = dbl[din];
+
+    EBCellFAB&     out = a_output[din];
+    BaseFab<Real>& reg = out.getSingleValuedFAB();
+
+    for (int k = 0; k < 3; k++) {
+      const int comp = a_icomp + k;
+
+      out.setVal(comp, 0.0);
+
+      const AMRParticleGhostMask& table = *tables[k];
+      if (a_level < table.size() && !table[a_level].isNull()) {
+        const ParticleGhostMask& t = (*table[a_level])[din];
+        for (BoxIterator bit(validBox & t.box()); bit.ok(); ++bit) {
+          if (t.numTargets(bit()) > 0) {
+            reg(bit(), comp) = 1.0;
+          }
+        }
+      }
+    }
+  }
+
+  a_icomp += 3;
 }
 
 template <typename T>
@@ -287,6 +506,11 @@ RadiativeTransferStepper<T>::registerRealms()
   }
 
   m_amr->registerRealm(m_realm);
+
+  // DEV: register the ghost-mask width we visualize (see writeGhostTargetPlotData).
+  if (m_ghostBoundaryTest) {
+    m_amr->registerParticleGhostMask(m_realm, m_ghostBoundaryTestWidth);
+  }
 }
 
 template <typename T>

@@ -234,6 +234,14 @@ namespace ParallelOps {
   */
   inline Vector<Real>
   gather(const Real& a_localValue) noexcept;
+
+  /**
+    @brief Gather local values -- return a vector of local values.
+    @param[in] a_localValue Local value per MPI rank
+    @return Return value
+  */
+  inline Vector<long long>
+  gather(const long long& a_localValue) noexcept;
 } // namespace ParallelOps
 
 #include <CD_NamespaceFooter.H>
