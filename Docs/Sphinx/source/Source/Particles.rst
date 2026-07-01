@@ -119,7 +119,7 @@ _____________________
 To get the per-level holders from a ``ParticleContainer<P, Traits>`` one can call ``getParticles()``:
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 311-319
+   :lines: 316-324
    :language: c++
    :dedent: 2
 
@@ -253,7 +253,7 @@ Particles that move off their original grid patch must be remapped in order to e
 The remapping function for ``ParticleContainer<P, Traits>`` is
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 571-580
+   :lines: 583-592
    :language: c++
    :dedent: 2
 
@@ -288,7 +288,7 @@ This is done as follows:
 1. *Before* creating the new grids, each MPI rank caches its current particles by calling
 
    .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-      :lines: 582-589
+      :lines: 594-601
       :language: c++
       :dedent: 2
 
@@ -297,7 +297,7 @@ This is done as follows:
 2. When ``ParticleContainer<P, Traits>`` regrids, the cached particles are redistributed onto the new layout by calling the regrid function:
 
    .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-      :lines: 591-614
+      :lines: 603-626
       :language: c++
       :dedent: 2
 
@@ -322,7 +322,7 @@ To fill the masked particles, ``ParticleContainer<P, Traits>`` has member functi
 The function signature for this is
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 627-628
+   :lines: 717-718
    :language: c++
    :dedent: 2
 
@@ -330,7 +330,7 @@ The argument ``a_mask`` holds a bool at each cell in the AMR hierarchy.
 Particles that live in cells where ``a_mask`` is true will be copied to an internal holder which can be retrieved through
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 331-339
+   :lines: 336-344
    :language: c++
    :dedent: 2
 
@@ -338,7 +338,7 @@ In the above functions the mask particles are *copied*, and the original particl
 After the user is done with the particles, they should be released through
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 657-661
+   :lines: 747-751
    :language: c++
    :dedent: 2
 
@@ -357,6 +357,101 @@ An example pseudocode for working with masked particles is given below:
 
    // Release the mask particles
    myParticles.clearMaskParticles();
+
+.. _Chap:GhostParticles:
+
+Ghost particles
+---------------
+
+``ParticleContainer<P, Traits>`` can populate each patch with a halo of *ghost particles*: transient, non-owned copies of particles that live in an adjacent region and overlap the patch's ghosted/grown box.
+Ghosts let per-patch code (e.g. short-range interactions or custom deposition) see the relevant neighbour particles in place.
+A copy can come from three directions relative to the receiving patch, and the direction is recorded on each particle:
+
+* **Same level** -- a neighbouring patch on the same AMR level (``GhostType::SameLevel``).
+* **Coarse-to-fine** -- the next-coarser level (``GhostType::Coarse``).
+* **Fine-to-coarse** -- the next-finer level (``GhostType::Fine``).
+
+The copies are appended into the **same** ``ParticleSoA`` leaf as the valid particles and marked in place through the mandatory 1-byte ``GhostType`` column, queried with ``ParticleSoA::isGhost(i)`` (and ``ghost(i)``).
+Ghosts are *transient*: they exist only between a ``fillGhost`` and the next ``clearGhostParticles`` / ``remap`` / ``regrid``, and are never routed or counted as owned particles (``getNumberOfValidParticlesLocal()`` excludes them).
+
+:numref:`Fig:ParticleGhost` illustrates the three scatter directions for a single fine patch and its coarse/same-level neighbours.
+
+.. _Fig:ParticleGhost:
+.. figure:: /_static/figures/ParticleGhost.png
+   :width: 75%
+   :align: center
+
+   Ghost-particle scatter directions. A patch collects same-level, coarse-to-fine, and fine-to-coarse ghost copies within a user-selected ghost width.
+
+Ghost masks
+___________
+
+The scatter is driven by **prebuilt masks** rather than a per-fill geometric search.
+For each source cell a mask lists the destination boxes (grid index and receiving rank) whose ghost region the cell reaches, stored as a compact per-box CSR table (``ParticleGhostMask``).
+There is one mask per direction, and the collection type is
+
+.. literalinclude:: ../../../../Source/AmrMesh/CD_ParticleGhostMask.H
+   :lines: 210
+   :language: c++
+
+The masks live on the :ref:`Chap:Realm` and are rebuilt at every regrid.
+Downstream code must first *register* the ghost width(s) it needs; only registered widths are built.
+The ghost width is a **minimum**, measured in *destination* cells:
+
+.. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
+   :lines: 1812-1813
+   :language: c++
+   :dedent: 2
+
+and the per-direction masks for a registered width are then fetched with
+
+.. code-block:: c++
+
+   const AMRParticleGhostMask& same = amr->getParticleGhostMask(realm, width);
+   const AMRParticleGhostMask& c2f  = amr->getParticleGhostMaskCoarToFine(realm, width);
+   const AMRParticleGhostMask& f2c  = amr->getParticleGhostMaskFineToCoar(realm, width);
+
+For a direction that should not scatter, pass ``AmrMesh::getTrivialParticleGhostMask()`` (an empty mask).
+
+.. note::
+
+   Because coarse particles are stored per *coarse* cell but the coarse-to-fine ghost width is measured in *fine* cells, a whole boundary coarse cell would over-communicate by up to the refinement ratio.
+   The coarse-to-fine mask therefore stores, per target, an *acceptance box* (the fine box's ghost region), and the scatter keeps a coarse particle only if its fine cell lands in that box -- pruning the transfer to the exact fine shell.
+   Same-level and fine-to-coarse transfers are already exact and carry no acceptance box.
+
+Filling ghosts
+______________
+
+With the three masks in hand, the halo is filled with
+
+.. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
+   :lines: 664-667
+   :language: c++
+   :dedent: 2
+
+``fillGhost`` first clears any existing halo, then for every valid particle scatters a copy (same-rank directly, cross-rank via MPI) into each destination leaf listed by the masks, tagging it with the receiver-view ``GhostType`` and keeping the source's ``particleID``.
+A typical call, having registered ``width`` during ``registerRealms``/setup, is
+
+.. code-block:: c++
+
+   ParticleContainer<P>& particles = ...;
+
+   const AMRParticleGhostMask& same = amr->getParticleGhostMask(realm, width);
+   const AMRParticleGhostMask& c2f  = amr->getParticleGhostMaskCoarToFine(realm, width);
+   const AMRParticleGhostMask& f2c  = amr->getParticleGhostMaskFineToCoar(realm, width);
+
+   particles.fillGhost(same, c2f, f2c);   // pass getTrivialParticleGhostMask() to skip a direction
+
+The halo can be dropped at any time with
+
+.. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
+   :lines: 674-675
+   :language: c++
+   :dedent: 2
+
+.. tip::
+
+   The full ghost/mask C++ API is documented at `<https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classParticleContainer.html>`_ and `<https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classParticleGhostMask.html>`_.
 
 .. _Chap:ParticleEB:
 
