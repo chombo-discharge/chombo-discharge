@@ -37,9 +37,17 @@
   array m_flat and m_count the number of targets. A cell may map to several targets (overlapping ghosted
   boxes, e.g. diagonal coarse-fine cells) with no fixed cap; the sending rank is not stored.
 
-  The build API is a two-pass fill (define -> incrementCount per contribution -> allocate ->
-  addTarget per contribution -> finalize). The query API (numTargets/target/targetGridIndex/targetRank)
-  is inlined so downstream scatter code never touches the CSR internals.
+  Optionally (coarse-to-fine only) each target also carries an acceptance box: the destination box's
+  ghost region measured in DESTINATION cells (grown by the ghost width, periodic-shifted into the source
+  cell's index space). It lets the scatter prune whole-coarse-cell over-communication down to the exact
+  sub-cell shell -- a candidate particle is scattered only if its destination cell lies in the acceptance
+  box. This parallel array m_flatBox is populated only when allocateTargetBoxes()/addTarget(...,box) are
+  used; same-level and fine-to-coarse masks leave it empty (no per-target box, no memory cost).
+
+  The build API is a two-pass fill (define -> incrementCount per contribution -> allocate [->
+  allocateTargetBoxes] -> addTarget per contribution -> finalize). The query API (numTargets/target/
+  targetGridIndex/targetRank[/targetBox]) is inlined so downstream scatter code never touches the CSR
+  internals.
 */
 class ParticleGhostMask
 {
@@ -76,6 +84,14 @@ public:
   allocate() noexcept;
 
   /**
+    @brief Optional build step: size the per-target acceptance-box array to match the packed target array.
+    @details Call after allocate() and before any addTarget(...,box), only for masks that carry acceptance
+    boxes (coarse-to-fine). Masks that skip it leave m_flatBox empty.
+  */
+  inline void
+  allocateTargetBoxes() noexcept;
+
+  /**
     @brief Build pass 2: append one target for cell a_iv.
     @details Uses m_start as the advancing write head; call exactly numTargets(a_iv) times per cell (the
     same cells/counts as pass 1). finalize() restores m_start afterwards.
@@ -84,6 +100,17 @@ public:
   */
   inline void
   addTarget(const IntVect& a_iv, const LevelTiles::BoxIDs& a_target) noexcept;
+
+  /**
+    @brief Build pass 2 with an acceptance box: append one target and its acceptance box for cell a_iv.
+    @details Requires allocateTargetBoxes() to have been called. Writes the acceptance box at the same
+    packed slot as the target, then delegates to addTarget() to store the target and advance the head.
+    @param[in] a_iv        Source cell (must have been counted in pass 1).
+    @param[in] a_target    Destination (grid index, receiving rank).
+    @param[in] a_targetBox Acceptance box in destination cells (particle's dest cell must lie in it).
+  */
+  inline void
+  addTarget(const IntVect& a_iv, const LevelTiles::BoxIDs& a_target, const Box& a_targetBox) noexcept;
 
   /**
     @brief Finish the build: rewind m_start (advanced by addTarget) back to the CSR start offsets.
@@ -133,6 +160,23 @@ public:
   inline unsigned int
   targetRank(const IntVect& a_iv, const int a_i) const noexcept;
 
+  /**
+    @brief Get the acceptance box of the i-th target for a cell.
+    @details Only valid when the mask was built with acceptance boxes (hasTargetBoxes()).
+    @param[in] a_iv Source cell (must lie in box()).
+    @param[in] a_i  Target index in [0, numTargets(a_iv)).
+    @return Acceptance box in destination cells.
+  */
+  inline const Box&
+  targetBox(const IntVect& a_iv, const int a_i) const noexcept;
+
+  /**
+    @brief Whether this mask carries per-target acceptance boxes.
+    @return True if allocateTargetBoxes() was used (coarse-to-fine masks), false otherwise.
+  */
+  inline bool
+  hasTargetBoxes() const noexcept;
+
 protected:
   /**
     @brief Box that the source cells (and m_start/m_count) live on.
@@ -153,6 +197,11 @@ protected:
     @brief Packed targets, size == sum(m_count).
   */
   std::vector<LevelTiles::BoxIDs> m_flat;
+
+  /**
+    @brief Packed per-target acceptance boxes, parallel to m_flat. Empty unless the mask carries them.
+  */
+  std::vector<Box> m_flatBox;
 };
 
 /**

@@ -988,27 +988,38 @@ ParticleContainer<P, Traits>::gatherGhostsFromMasks(const AMRParticleGhostMask& 
       const RealVect pos = a_leaf.position(i);
       const IntVect  iv  = this->cellIndex(a_srcLvl, pos);
 
-      auto scatter = [&](const ParticleGhostMask* a_mask, const int a_dstLvl, const GhostType a_gt) {
-        if (a_mask == nullptr || !a_mask->box().contains(iv)) {
-          return;
-        }
-        const int nt = a_mask->numTargets(iv);
-        for (int k = 0; k < nt; k++) {
-          Leaf& bin = a_target[a_mask->targetRank(iv, k)][PoolKey(a_dstLvl, a_mask->targetGridIndex(iv, k))];
+      auto scatter =
+        [&](const ParticleGhostMask* a_mask, const int a_dstLvl, const GhostType a_gt, const bool a_pruneByTargetBox) {
+          if (a_mask == nullptr || !a_mask->box().contains(iv)) {
+            return;
+          }
+          const int nt = a_mask->numTargets(iv);
 
-          bin.append(pos, a_leaf.weight(i), a_leaf.gather(i));
+          // Coarse-to-fine only: the source (coarse) cell is coarser than the fine ghost width, so a whole
+          // coarse cell would over-scatter. Keep the particle for a target only if its DESTINATION (fine)
+          // cell lies in that target's acceptance box (the exact fine ghost shell).
+          const IntVect dstCell = a_pruneByTargetBox ? this->cellIndex(a_dstLvl, pos) : IntVect::Zero;
 
-          const std::size_t j = bin.size() - 1;
+          for (int k = 0; k < nt; k++) {
+            if (a_pruneByTargetBox && !a_mask->targetBox(iv, k).contains(dstCell)) {
+              continue;
+            }
 
-          bin.particleID(j) = a_leaf.particleID(i); // preserve id
-          bin.rankID(j)     = procID();             // owner is this rank (it owns its valid particles)
-          bin.ghost(j)      = a_gt;
-        }
-      };
+            Leaf& bin = a_target[a_mask->targetRank(iv, k)][PoolKey(a_dstLvl, a_mask->targetGridIndex(iv, k))];
 
-      scatter(same, a_srcLvl, GhostType::SameLevel);
-      scatter(c2f, a_srcLvl + 1, GhostType::Coarse);
-      scatter(f2c, a_srcLvl - 1, GhostType::Fine);
+            bin.append(pos, a_leaf.weight(i), a_leaf.gather(i));
+
+            const std::size_t j = bin.size() - 1;
+
+            bin.particleID(j) = a_leaf.particleID(i); // preserve id
+            bin.rankID(j)     = procID();             // owner is this rank (it owns its valid particles)
+            bin.ghost(j)      = a_gt;
+          }
+        };
+
+      scatter(same, a_srcLvl, GhostType::SameLevel, false);
+      scatter(c2f, a_srcLvl + 1, GhostType::Coarse, true);
+      scatter(f2c, a_srcLvl - 1, GhostType::Fine, false);
     }
   };
 

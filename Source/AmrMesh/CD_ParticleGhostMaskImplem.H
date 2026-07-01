@@ -50,6 +50,12 @@ ParticleGhostMask::allocate() noexcept
 }
 
 inline void
+ParticleGhostMask::allocateTargetBoxes() noexcept
+{
+  m_flatBox.resize(m_flat.size());
+}
+
+inline void
 ParticleGhostMask::addTarget(const IntVect& a_iv, const LevelTiles::BoxIDs& a_target) noexcept
 {
   CH_assert(m_start(a_iv, 0) >= 0);
@@ -58,6 +64,18 @@ ParticleGhostMask::addTarget(const IntVect& a_iv, const LevelTiles::BoxIDs& a_ta
   // m_start doubles as the per-cell write head during the fill; finalize() rewinds it.
   m_flat[m_start(a_iv, 0)] = a_target;
   m_start(a_iv, 0) += 1;
+}
+
+inline void
+ParticleGhostMask::addTarget(const IntVect& a_iv, const LevelTiles::BoxIDs& a_target, const Box& a_targetBox) noexcept
+{
+  CH_assert(m_flatBox.size() == m_flat.size());
+  CH_assert(m_start(a_iv, 0) >= 0 && m_start(a_iv, 0) < static_cast<int>(m_flatBox.size()));
+
+  // Write the acceptance box at the same packed slot the target will take, then let addTarget() store the
+  // target and advance the write head.
+  m_flatBox[m_start(a_iv, 0)] = a_targetBox;
+  this->addTarget(a_iv, a_target);
 }
 
 inline void
@@ -98,6 +116,21 @@ inline unsigned int
 ParticleGhostMask::targetRank(const IntVect& a_iv, const int a_i) const noexcept
 {
   return this->target(a_iv, a_i).second;
+}
+
+inline const Box&
+ParticleGhostMask::targetBox(const IntVect& a_iv, const int a_i) const noexcept
+{
+  CH_assert(a_i >= 0 && a_i < m_count(a_iv, 0));
+  CH_assert(m_flatBox.size() == m_flat.size());
+
+  return m_flatBox[m_start(a_iv, 0) + a_i];
+}
+
+inline bool
+ParticleGhostMask::hasTargetBoxes() const noexcept
+{
+  return !m_flatBox.empty();
 }
 
 #include <CD_NamespaceFooter.H>

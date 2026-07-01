@@ -1348,7 +1348,10 @@ Realm::defineParticleGhostMaskCoarToFine(LayoutData<ParticleGhostMask>&  a_mask,
 
   // Coarsen the fine reach to whole coarse source cells and keep only VALID ones (covered cells have no
   // particles) -- that is the coarse-side outer halo; every retained cell keeps ALL fine target boxes
-  // reaching it. Two motion-plan walks (count, then packed fill).
+  // reaching it. Each contribution also carries an ACCEPTANCE BOX: the fine box's ghost region (grown by
+  // a_ghost fine cells) shifted into this level's index space by the motion item's periodic offset. The
+  // scatter uses it to prune whole-coarse-cell over-communication down to the exact fine shell (a coarse
+  // particle is scattered only if its FINE cell lies in the acceptance box). Two motion-plan walks.
   const auto forEachContribution = [&](auto&& a_emit) {
     const CopyIterator::local_from_to plans[2] = {CopyIterator::LOCAL, CopyIterator::TO};
 
@@ -1360,29 +1363,37 @@ Realm::defineParticleGhostMaskCoarToFine(LayoutData<ParticleGhostMask>&  a_mask,
         const BaseFab<bool>&     valid       = a_validCells[item.toIndex];
         const Box                coarseCells = coarsen(item.toRegion, a_refRat) & thisBox;
 
+        // Acceptance box in fine (destination) cells: the fine box grown by the ghost width, shifted from
+        // the fine box's index space into this level's by the motion item's periodic offset (zero for
+        // non-periodic items, so the box is just grow(fineBox, a_ghost)).
+        Box acceptBox = grow(a_fineLayout[item.fromIndex], a_ghost);
+        acceptBox.shift(item.toRegion.smallEnd() - item.fromRegion.smallEnd());
+
         for (BoxIterator bit(coarseCells); bit.ok(); ++bit) {
           const IntVect cc = bit();
           if (!valid(cc, 0)) {
             continue;
           }
-          a_emit(item.toIndex, cc, target);
+          a_emit(item.toIndex, cc, target, acceptBox);
         }
       }
     }
   };
 
-  forEachContribution([&](const DataIndex& a_di, const IntVect& a_iv, const LevelTiles::BoxIDs&) {
+  forEachContribution([&](const DataIndex& a_di, const IntVect& a_iv, const LevelTiles::BoxIDs&, const Box&) {
     a_mask[a_di].incrementCount(a_iv);
   });
 
 #pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nbox; mybox++) {
     a_mask[dit[mybox]].allocate();
+    a_mask[dit[mybox]].allocateTargetBoxes();
   }
 
-  forEachContribution([&](const DataIndex& a_di, const IntVect& a_iv, const LevelTiles::BoxIDs& a_tg) {
-    a_mask[a_di].addTarget(a_iv, a_tg);
-  });
+  forEachContribution(
+    [&](const DataIndex& a_di, const IntVect& a_iv, const LevelTiles::BoxIDs& a_tg, const Box& a_acceptBox) {
+      a_mask[a_di].addTarget(a_iv, a_tg, a_acceptBox);
+    });
 
 #pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nbox; mybox++) {
