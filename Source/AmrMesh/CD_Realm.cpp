@@ -1089,20 +1089,28 @@ Realm::defineParticleGhostTargets() noexcept
     // SAME level: targets are the OTHER boxes on this level (each grown by 'ghost' at this resolution).
     this->buildParticleGhostTargetDirection(*m_particleGhostTargetsSame[lvl], dbl, dbl, domain, ghost, true);
 
-    // COARSER (lvl -> lvl-1): refine the coarse grids up to this (fine) resolution so their grown region
-    // can overlap this level's boxes; the recorded (grid index, rank) is that of the coarse box.
+    // COARSER (lvl -> lvl-1): fine cells that scatter DOWN to the coarse level. Restricted to the fine
+    // side of the coarse-fine halo; ghost width in destination (coarse) cells.
     if (lvl > 0) {
-      DisjointBoxLayout coarRefined;
-      refine(coarRefined, m_grids[lvl - 1], m_refinementRatios[lvl - 1]);
-      this->buildParticleGhostTargetDirection(*m_particleGhostTargetsCoar[lvl], coarRefined, dbl, domain, ghost, false);
+      this->buildCrossLevelGhostTargets(*m_particleGhostTargetsCoar[lvl],
+                                        dbl,
+                                        m_grids[lvl - 1],
+                                        m_domains[lvl - 1],
+                                        m_refinementRatios[lvl - 1],
+                                        ghost,
+                                        true);
     }
 
-    // FINER (lvl -> lvl+1): coarsen the fine grids down to this (coarse) resolution.
+    // FINER (lvl -> lvl+1): coarse cells that scatter UP to the finer level. Restricted to the coarse
+    // side of the coarse-fine halo; ghost width in destination (fine) cells.
     if (lvl < m_finestLevel) {
-      DisjointBoxLayout fineCoarsened;
-      coarsen(fineCoarsened, m_grids[lvl + 1], m_refinementRatios[lvl]);
-      this
-        ->buildParticleGhostTargetDirection(*m_particleGhostTargetsFine[lvl], fineCoarsened, dbl, domain, ghost, false);
+      this->buildCrossLevelGhostTargets(*m_particleGhostTargetsFine[lvl],
+                                        dbl,
+                                        m_grids[lvl + 1],
+                                        m_domains[lvl + 1],
+                                        m_refinementRatios[lvl],
+                                        ghost,
+                                        false);
     }
   }
 }
@@ -1193,6 +1201,122 @@ Realm::buildParticleGhostTargetDirection(LayoutData<ParticleGhostTargets>& a_tar
       }
     }
   }
+}
+
+void
+Realm::buildCrossLevelGhostTargets(LayoutData<ParticleGhostTargets>& a_targets,
+                                   const DisjointBoxLayout&          a_thisLayout,
+                                   const DisjointBoxLayout&          a_otherLayout,
+                                   const ProblemDomain&              a_otherDomain,
+                                   const int                         a_refRat,
+                                   const int                         a_ghost,
+                                   const bool                        a_coarserTarget) noexcept
+{
+  CH_TIME("Realm::buildCrossLevelGhostTargets");
+
+  // Work at the TARGET level's resolution so ghostDefine's ghost width is measured in destination cells:
+  // coarsen this level for a coarser target, refine it for a finer target. coarsen()/refine() preserve
+  // this level's DataIndex, so a motion item's toIndex also indexes a_targets/a_thisLayout.
+  DisjointBoxLayout workLayout;
+  if (a_coarserTarget) {
+    coarsen(workLayout, a_thisLayout, a_refRat);
+  }
+  else {
+    refine(workLayout, a_thisLayout, a_refRat);
+  }
+
+  // ghostDefine: each target box's grown region (a_ghost cells) -> this level's cells (at target res).
+  Copier copier;
+  copier.ghostDefine(a_otherLayout, workLayout, a_otherDomain, a_ghost * IntVect::Unit);
+
+  const DataIterator&               dit      = a_thisLayout.dataIterator();
+  const int                         nbox     = dit.size();
+  const CopyIterator::local_from_to plans[2] = {CopyIterator::LOCAL, CopyIterator::TO};
+
+  // Initialize per-source-box CSR (count = 0, start = -1) over this level's valid cells.
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    ParticleGhostTargets& t = a_targets[dit[mybox]];
+    const Box             b = a_thisLayout[dit[mybox]];
+
+    t.m_count.resize(b, 1);
+    t.m_count.setVal(0);
+    t.m_start.resize(b, 1);
+    t.m_start.setVal(-1);
+    t.m_flat.clear();
+  }
+
+  // Walk the motion plan and hand each (source cell -> target) contribution to a_emit. The "outside the
+  // target box's own footprint" filter is what restricts sources to the coarse-fine halo: the interior
+  // of the nest is never reached from outside a target box. Run once to count and once to pack.
+  const auto forEachContribution = [&](auto&& a_emit) {
+    for (const auto plan : plans) {
+      for (CopyIterator cit(copier, plan); cit.ok(); ++cit) {
+        const MotionItem&         item = cit();
+        const ParticleGhostTarget target(a_otherLayout.index(item.fromIndex), a_otherLayout.procID(item.fromIndex));
+        const Box                 otherBox = a_otherLayout[item.fromIndex]; // target box, target resolution
+        const Box                 thisBox  = a_thisLayout[item.toIndex];    // source box, this resolution
+
+        if (a_coarserTarget) {
+          // toRegion holds coarse (target-resolution) cells. Keep those OUTSIDE the coarse box (its ghost
+          // reach = the fine-side halo); each such coarse cell refines to whole fine source cells.
+          for (BoxIterator bit(item.toRegion); bit.ok(); ++bit) {
+            const IntVect cc = bit();
+            if (otherBox.contains(cc)) {
+              continue;
+            }
+            const Box fineCells = refine(Box(cc, cc), a_refRat) & thisBox;
+            for (BoxIterator fit(fineCells); fit.ok(); ++fit) {
+              a_emit(item.toIndex, fit(), target);
+            }
+          }
+        }
+        else {
+          // toRegion holds fine (target-resolution) cells. Coarsen to this level's coarse source cells and
+          // keep those OUTSIDE the fine box's footprint (the coarse-side outer halo).
+          const Box coarseCells = coarsen(item.toRegion, a_refRat) & thisBox;
+          const Box coveredCoar = coarsen(otherBox, a_refRat);
+          for (BoxIterator bit(coarseCells); bit.ok(); ++bit) {
+            const IntVect cc = bit();
+            if (coveredCoar.contains(cc)) {
+              continue;
+            }
+            a_emit(item.toIndex, cc, target);
+          }
+        }
+      }
+    }
+  };
+
+  // Pass 1: count targets per source cell.
+  forEachContribution([&](const DataIndex& a_di, const IntVect& a_iv, const ParticleGhostTarget&) {
+    a_targets[a_di].m_count(a_iv, 0) += 1;
+  });
+
+  // Prefix-sum counts into start offsets and size the packed target arrays.
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    ParticleGhostTargets& t      = a_targets[dit[mybox]];
+    int                   offset = 0;
+    for (BoxIterator bit(t.m_count.box()); bit.ok(); ++bit) {
+      const int c = t.m_count(bit(), 0);
+      if (c > 0) {
+        t.m_start(bit(), 0) = offset;
+        offset += c;
+      }
+    }
+    t.m_flat.resize(offset);
+  }
+
+  // Pass 2: pack the targets. 'cursor' holds the next free slot per cell (initialized to start).
+  LayoutData<BaseFab<int>> cursor(a_thisLayout);
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+    cursor[din].resize(a_thisLayout[din], 1);
+    cursor[din].copy(a_targets[din].m_start);
+  }
+  forEachContribution([&](const DataIndex& a_di, const IntVect& a_iv, const ParticleGhostTarget& a_tg) {
+    a_targets[a_di].m_flat[cursor[a_di](a_iv, 0)] = a_tg;
+    cursor[a_di](a_iv, 0) += 1;
+  });
 }
 
 void

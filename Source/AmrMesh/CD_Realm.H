@@ -815,10 +815,10 @@ protected:
   defineParticleGhostTargets() noexcept;
 
   /**
-    @brief Fill one direction's CSR ghost-target table from a Copier motion plan.
-    @details Builds a ghostDefine Copier from the (already coarsened/refined) target layout onto the
-    source layout and walks its local+to motion plans, recording for each destination (source) cell the
-    target boxes whose grown region covers it. Two passes: count, then packed fill.
+    @brief Fill the SAME-level CSR ghost-target table from a Copier motion plan.
+    @details Builds a ghostDefine Copier on a single layout and walks its local+to motion plans,
+    recording for each cell the neighbouring same-level boxes whose grown region (a_ghost cells) covers
+    it. Two passes: count, then packed fill. Self-overlaps are skipped.
     @param[out] a_targets   CSR table over a_dstLayout to fill.
     @param[in]  a_srcLayout Target-level grids at the source resolution (grown via a_ghost ghost cells).
     @param[in]  a_dstLayout Source-level grids (the cells that own the particles).
@@ -833,6 +833,32 @@ protected:
                                     const ProblemDomain&              a_domain,
                                     const int                         a_ghost,
                                     const bool                        a_sameLevel) noexcept;
+
+  /**
+    @brief Fill one CROSS-LEVEL CSR ghost-target table (coarser or finer target level).
+    @details Restricts sources to the coarse-fine halo: a source cell is recorded only where a target
+    box's grown region reaches it from OUTSIDE the target box's own footprint. This excludes the nested
+    interior (which a plain overlap test flags) and routes to the valid box across the interface. Built
+    via a ghostDefine Copier motion-plan walk at the TARGET level's resolution (coarsen this level for a
+    coarser target, refine it for a finer target); the halo cells are mapped to this level's resolution
+    with refine()/coarsen(). The ghost width is measured in DESTINATION (target-level) cells and is a
+    MINIMUM: whole source cells overlapping the halo are recorded (over-communication is acceptable).
+    @param[out] a_targets       CSR table over a_thisLayout to fill.
+    @param[in]  a_thisLayout    This (source) level's grids.
+    @param[in]  a_otherLayout   Target level's grids (coarser or finer than this level).
+    @param[in]  a_otherDomain   Problem domain at the target level's resolution.
+    @param[in]  a_refRat        Refinement ratio between this level and the target level.
+    @param[in]  a_ghost         Ghost width in target-level (destination) cells.
+    @param[in]  a_coarserTarget True if the target level is coarser than this level (fine->coarse).
+  */
+  void
+  buildCrossLevelGhostTargets(LayoutData<ParticleGhostTargets>& a_targets,
+                              const DisjointBoxLayout&          a_thisLayout,
+                              const DisjointBoxLayout&          a_otherLayout,
+                              const ProblemDomain&              a_otherDomain,
+                              const int                         a_refRat,
+                              const int                         a_ghost,
+                              const bool                        a_coarserTarget) noexcept;
 
   /**
     @brief Define the PETSc composite grid
