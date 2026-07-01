@@ -12,10 +12,10 @@ AmrMesh.fill_ratio           = 1.0            ## Fill ratio for grid generation
 AmrMesh.buffer_size          = 2              ## Number of cells between grid levels
 AmrMesh.grid_algorithm       = br             ## Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
 AmrMesh.box_sorting          = morton         ## Morton sorting
-AmrMesh.min_block_size       = 8              ## Default blocking factor (16 in 3D)
-AmrMesh.max_block_size       = 16             ## Maximum allowed box size
+AmrMesh.min_block_size       = 16             ## Blocking factor (larger => thinner relative ghost bands)
+AmrMesh.max_block_size       = 32             ## Maximum allowed box size
 AmrMesh.max_ebis_box         = 16             ## Maximum allowed box size
-AmrMesh.ref_rat              = 4 2 2 2 2 2    ## Refinement ratios (level 0 -> 1 is 4, level 1 -> 2 is 2)
+AmrMesh.ref_rat              = 4 2 2 2 2 2    ## Refinement ratios (level 0 -> 1 is 4, 1 -> 2 is 2)
 AmrMesh.lsf_ghost            = 3              ## Number of ghost cells when writing level-set to grid
 AmrMesh.num_ghost            = 3              ## Number of ghost cells. Default is 3
 AmrMesh.eb_ghost             = 4              ## Set number of of ghost cells for EB stuff
@@ -33,12 +33,12 @@ AmrMesh.load_balance         = volume         ## Load balancing algorithm. Valid
 Driver.verbosity                    = -1                  ## Engine verbosity
 Driver.geometry_generation          = chombo-discharge    ## Grid generation method, 'chombo-discharge' or 'chombo'
 Driver.geometry_scan_level          = 0                   ## Geometry scan level for chombo-discharge geometry generator
-Driver.plot_interval                = -1                  ## Plot interval
+Driver.plot_interval                = 1                   ## Plot interval
 Driver.regrid_interval              = -1                  ## Regrid interval
 Driver.checkpoint_interval          = -1                  ## Checkpoint interval
 Driver.write_regrid_files           = false               ## Write regrid files or not.
 Driver.write_restart_files          = false               ## Write restart files or not
-Driver.initial_regrids              = 1                   ## Number of initial regrids
+Driver.initial_regrids              = 0                   ## Number of initial regrids
 Driver.do_init_load_balance         = false               ## If true, load balance the first step in a fresh simulation.
 Driver.start_time                   = 0                   ## Start time (fresh simulations only)
 Driver.stop_time                    = 1.0                 ## Stop time
@@ -59,7 +59,7 @@ Driver.allow_coarsening             = true                ## Allows removal of g
 Driver.grow_geo_tags                = 2                   ## How much to grow tags when using geometry-based refinement.
 Driver.refine_angles                = 30.                 ## Refine cells if angle between elements exceed this value.
 Driver.refine_electrodes            = -1                  ## Refine electrode surfaces. -1 => equal to refine_geometry
-Driver.refine_dielectrics           = 2                   ## Refine dielectric surfaces to this level.
+Driver.refine_dielectrics           = 2                   ## Refine dielectric surfaces to this level
 
 # ====================================================================================================
 # MC_PHOTO CLASS OPTIONS
@@ -71,8 +71,8 @@ McPhoto.num_sampling_packets     = 1                ## Number of sub-sampling pa
 McPhoto.blend_conservation       = false            ## Switch for blending with the nonconservative divergence
 McPhoto.transparent_eb           = false            ## Turn on/off transparent boundaries. Only for instantaneous=true
 McPhoto.random_kappa             = true             ## Randomize absorption length (taken from Photon implementation)
-McPhoto.plt_vars                 = phi src phot     ## Available are 'phi' and 'src', 'phot', 'eb_phot', 'dom_phot', 'bulk_phot', 'src_phot'
-McPhoto.plot_deposition          = cic              ## Cloud-in-cell for plotting particles.
+McPhoto.plt_vars                 = phot             ## Plot the photon particles
+McPhoto.plot_deposition          = ngp              ## Nearest grid point
 McPhoto.intersection_alg         = bisection        ## EB intersection algorithm. Supported are: 'raycast' 'bisection'
 McPhoto.bisect_step              = 1.E-2            ## Bisection step length for intersection tests
 McPhoto.seed                     = 0                ## Seed for RNG
@@ -83,9 +83,16 @@ McPhoto.bc_y_high                = outflow          ## Boundary condition
 McPhoto.bc_z_low                 = outflow          ## Boundary condition
 McPhoto.bc_z_high                = outflow          ## Boundary condition
 McPhoto.photon_generation        = deterministic    ## Volumetric source term. 'deterministic' or 'stochastic'
-McPhoto.source_type              = number           ## Source term contains the number of Photons produced
-McPhoto.deposition               = cic              ## 'ngp' = nearest grid point, 'cic' = cloud-in-cell
+McPhoto.source_type              = number           ## 'number'       = Source term contains the number of Photons produced
+                                                    # 'volume'       = Source terms contains the number of Photons produced per unit volume
+                                                    # 'volume_rate'  = Source terms contains the volumetric rate
+                                                    # 'rate'         = Source terms contains the rate
+McPhoto.deposition               = ngp              ## Nearest grid point so duplicates show as counts
 McPhoto.deposition_cf            = transition       ## 'interp', 'halo', 'halo_ngp', 'transition'.
+                                                    # 'num'  = # of Photons per cell
+                                                    # 'cic'  = cloud-in-cell
+                                                    # 'tsc'  = triangle-shaped-cloud
+                                                    # 'w4'   = 3rd order interpolation
 
 # ====================================================================================================
 # ROD_DIELECTRIC CLASS OPTIONS
@@ -107,10 +114,13 @@ RodDielectric.sphere.radius     = 0.15     ## Radius
 # ====================================================================================================
 # RadiativeTransferStepper class options
 # ====================================================================================================
-RadiativeTransferStepper.verbosity          = -1        ## Verbosity
-RadiativeTransferStepper.realm              = primal    ## Realm
-RadiativeTransferStepper.kappa              = 0.1       ## Inverse absorption coefficient
-RadiativeTransferStepper.dt                 = 1.E-10    ## Time step
-RadiativeTransferStepper.blob_amplitude     = 1E2       ## Blob amplitude
-RadiativeTransferStepper.blob_radius        = 0.05      ## Blob radius
-RadiativeTransferStepper.blob_center        = 0 0 0     ## Blob center
+RadiativeTransferStepper.verbosity          = -1         ## Verbosity
+RadiativeTransferStepper.realm              = primal     ## Realm
+RadiativeTransferStepper.kappa              = 0.1        ## Inverse absorption coefficient
+RadiativeTransferStepper.dt                 = 1.E-10     ## Time step
+RadiativeTransferStepper.blob_amplitude     = 1E2        ## Blob amplitude
+RadiativeTransferStepper.blob_radius        = 0.05       ## Blob radius
+RadiativeTransferStepper.blob_center        = 0.5 0.5    ## Blob center
+
+RadiativeTransferStepper.ghost_boundary_test               = true      ## Run the ghost-particle boundary verification
+RadiativeTransferStepper.ghost_boundary_test_particles     = 100000    ## Particles sampled uniformly in the domain
