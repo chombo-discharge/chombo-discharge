@@ -1222,6 +1222,11 @@ public:
   }
 
   /**
+    @brief Sentinel for an unassigned/invalid global particle id.
+  */
+  static constexpr ParticleID s_invalidID = -1;
+
+  /**
     @brief Global id of particle i (container-owned metadata).
     @param[in] a_index Particle index.
     @return Reference to the particle id.
@@ -1553,11 +1558,6 @@ protected:
     @brief CSR cell offsets (size numCells+1 when sorted).
   */
   std::vector<std::size_t> m_cellStart;
-
-  /**
-    @brief Sentinel for an unassigned global particle id.
-  */
-  static constexpr ParticleID s_invalidID = -1;
 
   /**
     @brief Round a_x up to the next multiple of s_align.

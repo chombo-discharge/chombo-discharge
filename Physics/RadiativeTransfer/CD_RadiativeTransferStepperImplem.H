@@ -180,6 +180,51 @@ RadiativeTransferStepper<T>::ghostBoundaryTest()
     const AMRParticleGhostMask& f2c  = m_amr->getParticleGhostMaskFineToCoar(m_realm, m_ghostBoundaryTestWidth);
     const AMRParticleGhostMask& none = m_amr->getTrivialParticleGhostMask();
 
+    // Verify resetParticleIDs / resetRankIDs on a fresh seed: after remap every particle is a valid,
+    // in-box, non-ghost owned particle, so resetParticleIDs(true,0) must number them 0..n-1 uniquely and
+    // resetRankIDs(true) must stamp each with its owner rank. Check via reductions (count of assigned ids
+    // == n and their sum == n(n-1)/2 together imply a permutation of [0,n)).
+    {
+      photons.clearParticles();
+      ParticleSoA<Photon> seed;
+      for (const RealVect& p : seedPos) {
+        seed.append(p, 1.0);
+      }
+      photons.addParticlesDestructive(seed);
+
+      const long long n = photons.resetParticleIDs(true, 0);
+      photons.resetRankIDs(true);
+
+      long long localCount = 0;
+      long long localSum   = 0;
+      int       localBadRk = 0;
+      for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+        const DataIterator& dit  = m_amr->getGrids(m_realm)[lvl].dataIterator();
+        const int           nbox = dit.size();
+        for (int mybox = 0; mybox < nbox; mybox++) {
+          const ParticleSoA<Photon>& leaf = photons[lvl][dit[mybox]];
+          for (std::size_t i = 0; i < leaf.size(); i++) {
+            const ParticleID id = leaf.particleID(i);
+            if (id >= 0) {
+              localCount++;
+              localSum += id;
+            }
+            if (leaf.rankID(i) != static_cast<RankID>(procID())) {
+              localBadRk++;
+            }
+          }
+        }
+      }
+      const long long gCount = ParallelOps::sum(localCount);
+      const long long gSum   = ParallelOps::sum(localSum);
+      const long long gBadRk = ParallelOps::sum(static_cast<long long>(localBadRk));
+      if (procID() == 0) {
+        const long long expectedSum = (n > 0) ? (n * (n - 1)) / 2 : 0;
+        pout() << "RadiativeTransferStepper::ghostBoundaryTest - resetIDs check: n=" << n << " count(id>=0)=" << gCount
+               << " sum=" << gSum << " expectedSum=" << expectedSum << " wrongRank=" << gBadRk << endl;
+      }
+    }
+
     // Fill only the requested direction's ghosts (the other two masks are the trivial/empty mask), keep
     // the ghosts, remap them to their owners, and write them to an H5Part file for direct visualization
     // (positions + weight + id + the Photon h5 columns kappa/v).

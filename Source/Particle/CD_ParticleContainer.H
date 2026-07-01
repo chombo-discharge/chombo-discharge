@@ -674,6 +674,35 @@ public:
   void
   clearGhostParticles();
 
+  /**
+    @brief Set the owning rank (rankID = procID()) of the owned particles.
+    @details Ghost particles (isGhost()) are always left untouched, so a ghost keeps the owner rank it
+    carries. For non-ghost particles: when a_onlyValidRegion is true, only those whose cell lies inside
+    the leaf's own grid box are stamped and out-of-box strays are left untouched; when false, every
+    non-ghost particle is stamped. The region test is purely geometric on the ungrown patch box (it does
+    not consider finer-level coverage or GhostType). No MPI communication.
+    @param[in] a_onlyValidRegion Restrict to non-ghost particles inside the leaf's grid box.
+  */
+  void
+  resetRankIDs(const bool a_onlyValidRegion);
+
+  /**
+    @brief Assign globally-unique, contiguous particle IDs to the owned particles.
+    @details Ghost particles (isGhost()) are always left untouched, so a ghost keeps the source's id. A
+    non-ghost particle qualifies for a new id iff a_onlyValidRegion is false OR its cell lies inside the
+    leaf's own grid box; a non-ghost that does not qualify (an out-of-box stray, only possible when
+    a_onlyValidRegion is true) is set to ParticleSoA::s_invalidID. Qualifying particles receive contiguous
+    ids in rank order (rank 0 first) starting at a_startID, made unique across ranks via an all-gather of
+    the per-rank counts and an exclusive prefix. The region test is purely geometric on the ungrown patch
+    box. Note: the assigned ids are a numbering snapshot, not a persistent identity -- they depend on the
+    rank/box ordering and change across regrids and different rank counts.
+    @param[in] a_onlyValidRegion Restrict new ids to non-ghost particles inside the leaf's grid box.
+    @param[in] a_startID         Global id of the first assigned particle; ids occupy [a_startID, a_startID + return).
+    @return The global number of ids assigned (across all ranks).
+  */
+  long long
+  resetParticleIDs(const bool a_onlyValidRegion, const ParticleID a_startID);
+
   ///@}
 
   /**
@@ -1066,6 +1095,21 @@ protected:
       iv[dir] = static_cast<int>(std::floor((a_pos[dir] - m_probLo[dir]) / m_dx[a_lvl][dir]));
     }
     return iv;
+  }
+
+  /**
+    @brief True if a position's cell lies inside a (grid) box on a given level.
+    @details Purely geometric valid-region test shared by resetRankIDs/resetParticleIDs -- the box is the
+    leaf's ungrown patch box, so a particle in its patch's ghost shell tests false.
+    @param[in] a_lvl Level index.
+    @param[in] a_box Box (typically the leaf's grid box).
+    @param[in] a_pos Position.
+    @return True if cellIndex(a_lvl, a_pos) is contained in a_box.
+  */
+  inline bool
+  inValidBox(const int a_lvl, const Box& a_box, const RealVect& a_pos) const
+  {
+    return a_box.contains(this->cellIndex(a_lvl, a_pos));
   }
 
   /**

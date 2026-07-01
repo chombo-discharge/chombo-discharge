@@ -669,6 +669,128 @@ ParticleContainer<P, Traits>::clearGhostParticles()
 }
 
 template <typename P, typename Traits>
+inline void
+ParticleContainer<P, Traits>::resetRankIDs(const bool a_onlyValidRegion)
+{
+  CH_TIME("ParticleContainer::resetRankIDs");
+
+  CH_assert(m_isDefined);
+
+  const RankID myRank = static_cast<RankID>(procID());
+
+  // Ghosts are left untouched (they carry their true owner rank). Each non-ghost particle in the valid
+  // region (or all non-ghost particles when !a_onlyValidRegion) is stamped with this rank. Per-particle
+  // and box-local -> embarrassingly parallel.
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    LevelParticles&          level = *m_particles[lvl];
+    const DisjointBoxLayout& dbl   = m_grids[lvl];
+    const DataIterator&      dit   = dbl.dataIterator();
+    const int                nbox  = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din  = dit[mybox];
+      const Box        box  = dbl[din];
+      Leaf&            leaf = level[din];
+
+      for (std::size_t i = 0; i < leaf.size(); i++) {
+        if (leaf.isGhost(i)) {
+          continue;
+        }
+        if (!a_onlyValidRegion || this->inValidBox(lvl, box, leaf.position(i))) {
+          leaf.rankID(i) = myRank;
+        }
+      }
+    }
+  }
+}
+
+template <typename P, typename Traits>
+inline long long
+ParticleContainer<P, Traits>::resetParticleIDs(const bool a_onlyValidRegion, const ParticleID a_startID)
+{
+  CH_TIME("ParticleContainer::resetParticleIDs");
+
+  CH_assert(m_isDefined);
+
+  // A non-ghost particle qualifies for a new id iff (!a_onlyValidRegion) or its cell lies in the leaf's
+  // grid box. Ghosts never qualify (and are left untouched); non-qualifying non-ghost strays get
+  // s_invalidID. The predicate must be identical in the count and assign passes below.
+
+  // Flatten the local boxes in (level, box) order -- this fixes the local id ordering.
+  std::vector<std::pair<int, DataIndex>> boxes;
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    const DataIterator& dit  = m_grids[lvl].dataIterator();
+    const int           nbox = dit.size();
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      boxes.emplace_back(lvl, dit[mybox]);
+    }
+  }
+  const int numBoxes = static_cast<int>(boxes.size());
+
+  // Pass 1: count qualifying particles per box (parallel; each box independent).
+  std::vector<long long> boxCount(numBoxes, 0);
+#pragma omp parallel for schedule(runtime)
+  for (int b = 0; b < numBoxes; b++) {
+    const int        lvl  = boxes[b].first;
+    const DataIndex& din  = boxes[b].second;
+    const Box        box  = m_grids[lvl][din];
+    const Leaf&      leaf = (*m_particles[lvl])[din];
+
+    long long count = 0;
+    for (std::size_t i = 0; i < leaf.size(); i++) {
+      if (!leaf.isGhost(i) && (!a_onlyValidRegion || this->inValidBox(lvl, box, leaf.position(i)))) {
+        count++;
+      }
+    }
+    boxCount[b] = count;
+  }
+
+  // Local exclusive prefix over boxes + local total.
+  std::vector<long long> boxLocalOffset(numBoxes, 0);
+  long long              localTotal = 0;
+  for (int b = 0; b < numBoxes; b++) {
+    boxLocalOffset[b] = localTotal;
+    localTotal += boxCount[b];
+  }
+
+  // Per-rank exclusive offset: all-gather each rank's local total, then sum the ranks before this one.
+  // NOTE: ParallelOps::gather is int-typed, so a single rank must hold < 2^31 qualifying particles (the
+  // global total may exceed that and is returned via sum(long long)).
+  const Vector<int> perRankCount = ParallelOps::gather(static_cast<int>(localTotal));
+
+  ParticleID rankOffset = a_startID;
+  for (int r = 0; r < procID(); r++) {
+    rankOffset += perRankCount[r];
+  }
+
+  // Pass 2: assign ids (parallel; each box starts at its own offset). Ghosts untouched; qualifying get a
+  // contiguous id; non-qualifying non-ghost strays get s_invalidID.
+#pragma omp parallel for schedule(runtime)
+  for (int b = 0; b < numBoxes; b++) {
+    const int        lvl  = boxes[b].first;
+    const DataIndex& din  = boxes[b].second;
+    const Box        box  = m_grids[lvl][din];
+    Leaf&            leaf = (*m_particles[lvl])[din];
+
+    ParticleID id = rankOffset + static_cast<ParticleID>(boxLocalOffset[b]);
+    for (std::size_t i = 0; i < leaf.size(); i++) {
+      if (leaf.isGhost(i)) {
+        continue;
+      }
+      if (!a_onlyValidRegion || this->inValidBox(lvl, box, leaf.position(i))) {
+        leaf.particleID(i) = id++;
+      }
+      else {
+        leaf.particleID(i) = ParticleSoA<P, Traits>::s_invalidID;
+      }
+    }
+  }
+
+  return ParallelOps::sum(localTotal);
+}
+
+template <typename P, typename Traits>
 inline typename ParticleContainer<P, Traits>::MoverPool
 ParticleContainer<P, Traits>::gatherGhostsToPool()
 {
