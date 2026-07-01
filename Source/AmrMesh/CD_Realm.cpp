@@ -18,6 +18,7 @@
 #include <NeighborIterator.H>
 #include <BoxIterator.H>
 #include <IntVectSet.H>
+#include <DenseIntVectSet.H>
 #include <Copier.H>
 
 // Our includes
@@ -1223,16 +1224,14 @@ Realm::defineParticleGhostMaskFineToCoar(LayoutData<ParticleGhostMask>& a_mask,
   const int           nbox = dit.size();
 
   // Restrict sources to the INNER coarse-fine halo: footprint cells within a_ghost coarse cells of the
-  // coarse-fine interface. Built geometrically from the footprint layout -- the ring outside each footprint
-  // box (minus the abutting footprint boxes = internal seams) is the valid coarse region; growing it back
-  // inward and intersecting the box gives the inner halo. Independent of the coarse grid's box layout.
-  // Thread-safe over boxes: distinct boxes write disjoint innerHalo storage, coFiLayout lookups are
-  // read-only, and IntVectSet scratch and the NeighborIterator are declared per iteration (thread-private).
-  // coFiLayout shares this level's DataIndex (coarsen preserves it), so dit/nbox iterate it too. This loop
-  // does both per-box setups at once: it inits the box's CSR (a_mask[din]) and its inner-halo mask
-  // (innerHalo[din]). Thread-safe over boxes: distinct boxes write disjoint storage, all layout lookups are
-  // read-only, and the IntVectSet scratch and NeighborIterator are declared per iteration (thread-private).
-  LayoutData<BaseFab<bool>> innerHalo(coFiLayout);
+  // coarse-fine interface, built geometrically from the coarsened-fine footprint. Stored per box as a
+  // DenseIntVectSet (a bitmask over the footprint box), so the build needs no BaseFab conversion.
+  //
+  // This loop does both per-box setups at once (init the box's CSR a_mask[din] and its halo innerHalo[din]).
+  // Thread-safe over boxes: distinct boxes write disjoint storage, all layout lookups are read-only, and
+  // the DenseIntVectSet scratch and the NeighborIterator are declared per iteration (thread-private).
+  // coFiLayout shares this level's DataIndex (coarsen preserves it), so dit/nbox iterate it too.
+  LayoutData<DenseIntVectSet> innerHalo(coFiLayout);
 
 #pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nbox; mybox++) {
@@ -1240,27 +1239,26 @@ Realm::defineParticleGhostMaskFineToCoar(LayoutData<ParticleGhostMask>& a_mask,
     const Box        coFiBox  = coFiLayout[din];
     const Box        grownBox = grow(coFiBox, a_ghost) & a_coarDomain;
 
-    BaseFab<bool>& haloMask = innerHalo[din];
-
-    NeighborIterator nit(coFiLayout);
-
     a_mask[din].define(a_thisLayout[din]);
 
-    haloMask.resize(coFiBox, 1);
-    haloMask.setVal(false);
-
-    IntVectSet ring(grownBox);
+    // Ring = the VALID coarse cells surrounding this footprint box: reach OUT to grownBox, then remove the
+    // footprint box itself and its abutting footprint neighbours (internal seams).
+    DenseIntVectSet ring(grownBox, true);
     ring -= coFiBox;
+
+    NeighborIterator nit(coFiLayout);
     for (nit.begin(din); nit.ok(); ++nit) {
       ring -= coFiLayout[nit()];
     }
 
-    IntVectSet inner(ring);
-    inner.grow(a_ghost);
-    inner &= coFiBox;
-    for (IVSIterator ivs(inner); ivs.ok(); ++ivs) {
-      haloMask(ivs(), 0) = true;
-    }
+    // Inner halo = footprint cells within a_ghost of that valid ring: grow the ring back IN, then keep the
+    // footprint cells (intersect a full DenseIntVectSet over coFiBox, which also fixes the halo's domain to
+    // the footprint box). The ring MUST be the subtracted one -- otherwise every footprint cell is kept.
+    ring.grow(a_ghost);
+
+    DenseIntVectSet& halo = innerHalo[din];
+    halo                  = DenseIntVectSet(coFiBox, true);
+    halo &= ring;
   }
 
   // Each retained (inner-halo) footprint cell refines to whole fine source cells; every such cell keeps
@@ -1274,11 +1272,11 @@ Realm::defineParticleGhostMaskFineToCoar(LayoutData<ParticleGhostMask>& a_mask,
         const MotionItem&        item = cit();
         const LevelTiles::BoxIDs target(a_coarLayout.index(item.fromIndex), a_coarLayout.procID(item.fromIndex));
         const Box                thisBox = a_thisLayout[item.toIndex]; // fine source box
-        const BaseFab<bool>&     halo    = innerHalo[item.toIndex];
+        const DenseIntVectSet&   halo    = innerHalo[item.toIndex];
 
         for (BoxIterator bit(item.toRegion); bit.ok(); ++bit) {
           const IntVect cc = bit();
-          if (!halo(cc, 0)) {
+          if (!halo[cc]) {
             continue;
           }
           const Box fineCells = refine(Box(cc, cc), a_refRat) & thisBox;
