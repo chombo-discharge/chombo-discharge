@@ -3416,7 +3416,7 @@ AmrMesh::getLevelTiles(const std::string& a_realm) const
   return m_realms[a_realm]->getLevelTiles();
 }
 
-const AMRParticleGhostTargets&
+const AMRParticleGhostMask&
 AmrMesh::getParticleGhostMask(const std::string& a_realm) const
 {
   CH_TIME("AmrMesh::getParticleGhostMask(string)");
@@ -3432,7 +3432,7 @@ AmrMesh::getParticleGhostMask(const std::string& a_realm) const
   return m_realms[a_realm]->getParticleGhostMask();
 }
 
-const AMRParticleGhostTargets&
+const AMRParticleGhostMask&
 AmrMesh::getParticleGhostMaskFineToCoar(const std::string& a_realm) const
 {
   CH_TIME("AmrMesh::getParticleGhostMaskFineToCoar(string)");
@@ -3448,7 +3448,7 @@ AmrMesh::getParticleGhostMaskFineToCoar(const std::string& a_realm) const
   return m_realms[a_realm]->getParticleGhostMaskFineToCoar();
 }
 
-const AMRParticleGhostTargets&
+const AMRParticleGhostMask&
 AmrMesh::getParticleGhostMaskCoarToFine(const std::string& a_realm) const
 {
   CH_TIME("AmrMesh::getParticleGhostMaskCoarToFine(string)");

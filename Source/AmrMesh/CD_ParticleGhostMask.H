@@ -5,13 +5,13 @@
  */
 
 /**
-  @file   CD_ParticleGhostTargets.H
-  @brief  Declaration of ParticleGhostTargets, a per-box CSR lookup of particle ghost scatter targets
+  @file   CD_ParticleGhostMask.H
+  @brief  Declaration of ParticleGhostMask, a per-box CSR lookup of particle ghost scatter targets
   @author Robert Marskar
 */
 
-#ifndef CD_PARTICLEGHOSTTARGETS_H
-#define CD_PARTICLEGHOSTTARGETS_H
+#ifndef CD_PARTICLEGHOSTMASK_H
+#define CD_PARTICLEGHOSTMASK_H
 
 // Std includes
 #include <vector>
@@ -41,18 +41,18 @@
   addTarget per contribution -> finalize). The query API (numTargets/target/targetGridIndex/targetRank)
   is inlined so downstream scatter code never touches the CSR internals.
 */
-class ParticleGhostTargets
+class ParticleGhostMask
 {
 public:
   /**
     @brief Default constructor. Leaves the table undefined; call define() before use.
   */
-  ParticleGhostTargets() = default;
+  ParticleGhostMask() = default;
 
   /**
     @brief Destructor.
   */
-  ~ParticleGhostTargets() = default;
+  ~ParticleGhostMask() = default;
 
   /**
     @brief Reset to an empty table over a box (every cell has zero targets).
@@ -158,10 +158,10 @@ protected:
 /**
   @brief AMR-wide particle ghost-target lookup: one per-box CSR table per level, indexed by SOURCE level.
 */
-using AMRParticleGhostTargets = Vector<RefCountedPtr<LayoutData<ParticleGhostTargets>>>;
+using AMRParticleGhostMask = Vector<RefCountedPtr<LayoutData<ParticleGhostMask>>>;
 
 #include <CD_NamespaceFooter.H>
 
-#include <CD_ParticleGhostTargetsImplem.H>
+#include <CD_ParticleGhostMaskImplem.H>
 
 #endif

@@ -31,7 +31,7 @@
 #include <CD_DomainFluxIFFABFactory.H>
 #include <CD_ParticleContainer.H>
 #include <CD_Realm.H>
-#include <CD_ParticleGhostTargets.H>
+#include <CD_ParticleGhostMask.H>
 #include <CD_CopyStrategy.H>
 #include <CD_LoadBalancing.H>
 #include <CD_NamespaceHeader.H>
@@ -1809,7 +1809,7 @@ public:
     @param[in] a_realm Realm name
     @return Per-level, per-box CSR of source-cell -> same-level target boxes (grid index, rank).
   */
-  const AMRParticleGhostTargets&
+  const AMRParticleGhostMask&
   getParticleGhostMask(const std::string& a_realm) const;
 
   /**
@@ -1817,7 +1817,7 @@ public:
     @param[in] a_realm Realm name
     @return Per-level, per-box CSR of source-cell -> coarser-level target boxes (grid index, rank).
   */
-  const AMRParticleGhostTargets&
+  const AMRParticleGhostMask&
   getParticleGhostMaskFineToCoar(const std::string& a_realm) const;
 
   /**
@@ -1825,7 +1825,7 @@ public:
     @param[in] a_realm Realm name
     @return Per-level, per-box CSR of source-cell -> finer-level target boxes (grid index, rank).
   */
-  const AMRParticleGhostTargets&
+  const AMRParticleGhostMask&
   getParticleGhostMaskCoarToFine(const std::string& a_realm) const;
 
   /**

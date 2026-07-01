@@ -1080,51 +1080,50 @@ Realm::defineParticleGhostTargets() noexcept
     const DisjointBoxLayout& dbl    = m_grids[lvl];
     const ProblemDomain&     domain = m_domains[lvl];
 
-    m_particleGhostMask[lvl] = RefCountedPtr<LayoutData<ParticleGhostTargets>>(
-      new LayoutData<ParticleGhostTargets>(dbl));
-    m_particleGhostMaskFineToCoar[lvl] = RefCountedPtr<LayoutData<ParticleGhostTargets>>(
-      new LayoutData<ParticleGhostTargets>(dbl));
-    m_particleGhostMaskCoarToFine[lvl] = RefCountedPtr<LayoutData<ParticleGhostTargets>>(
-      new LayoutData<ParticleGhostTargets>(dbl));
+    m_particleGhostMask[lvl] = RefCountedPtr<LayoutData<ParticleGhostMask>>(new LayoutData<ParticleGhostMask>(dbl));
+    m_particleGhostMaskFineToCoar[lvl] = RefCountedPtr<LayoutData<ParticleGhostMask>>(
+      new LayoutData<ParticleGhostMask>(dbl));
+    m_particleGhostMaskCoarToFine[lvl] = RefCountedPtr<LayoutData<ParticleGhostMask>>(
+      new LayoutData<ParticleGhostMask>(dbl));
 
     // SAME level: targets are the abutting boxes on this level (each grown by 'ghost' at this resolution).
-    this->buildParticleGhostMaskSameLevel(*m_particleGhostMask[lvl], dbl, domain, ghost);
+    this->defineParticleGhostMaskSameLevel(*m_particleGhostMask[lvl], dbl, domain, ghost);
 
     // COARSER (lvl -> lvl-1): fine cells that scatter DOWN to the coarse level. Restricted to the fine
     // side of the coarse-fine halo; ghost width in destination (coarse) cells.
     if (lvl > 0) {
-      this->buildCrossLevelGhostTargets(*m_particleGhostMaskFineToCoar[lvl],
-                                        dbl,
-                                        m_grids[lvl - 1],
-                                        *m_validCells[lvl - 1],
-                                        m_domains[lvl - 1],
-                                        m_refinementRatios[lvl - 1],
-                                        ghost,
-                                        true);
+      this->defineParticleGhostMaskCrossLevel(*m_particleGhostMaskFineToCoar[lvl],
+                                              dbl,
+                                              m_grids[lvl - 1],
+                                              *m_validCells[lvl - 1],
+                                              m_domains[lvl - 1],
+                                              m_refinementRatios[lvl - 1],
+                                              ghost,
+                                              true);
     }
 
     // FINER (lvl -> lvl+1): coarse cells that scatter UP to the finer level. Restricted to the coarse
     // side of the coarse-fine halo; ghost width in destination (fine) cells.
     if (lvl < m_finestLevel) {
-      this->buildCrossLevelGhostTargets(*m_particleGhostMaskCoarToFine[lvl],
-                                        dbl,
-                                        m_grids[lvl + 1],
-                                        *m_validCells[lvl],
-                                        m_domains[lvl + 1],
-                                        m_refinementRatios[lvl],
-                                        ghost,
-                                        false);
+      this->defineParticleGhostMaskCrossLevel(*m_particleGhostMaskCoarToFine[lvl],
+                                              dbl,
+                                              m_grids[lvl + 1],
+                                              *m_validCells[lvl],
+                                              m_domains[lvl + 1],
+                                              m_refinementRatios[lvl],
+                                              ghost,
+                                              false);
     }
   }
 }
 
 void
-Realm::buildParticleGhostMaskSameLevel(LayoutData<ParticleGhostTargets>& a_mask,
-                                       const DisjointBoxLayout&          a_dbl,
-                                       const ProblemDomain&              a_domain,
-                                       const int                         a_ghost) noexcept
+Realm::defineParticleGhostMaskSameLevel(LayoutData<ParticleGhostMask>& a_mask,
+                                        const DisjointBoxLayout&       a_dbl,
+                                        const ProblemDomain&           a_domain,
+                                        const int                      a_ghost) noexcept
 {
-  CH_TIME("Realm::buildParticleGhostMaskSameLevel");
+  CH_TIME("Realm::defineParticleGhostMaskSameLevel");
 
   // A same-level neighbour N contributes a target to this box's cells that lie within a_ghost of N, i.e.
   // grow(N, a_ghost) & box. NeighborIterator yields the abutting boxes (never self), so the whole build
@@ -1135,9 +1134,9 @@ Realm::buildParticleGhostMaskSameLevel(LayoutData<ParticleGhostTargets>& a_mask,
   NeighborIterator nit(a_dbl);
 
   for (int mybox = 0; mybox < nbox; mybox++) {
-    const DataIndex&      din = dit[mybox];
-    const Box             box = a_dbl[din];
-    ParticleGhostTargets& t   = a_mask[din];
+    const DataIndex&   din = dit[mybox];
+    const Box          box = a_dbl[din];
+    ParticleGhostMask& t   = a_mask[din];
 
     t.define(box);
 
@@ -1165,16 +1164,16 @@ Realm::buildParticleGhostMaskSameLevel(LayoutData<ParticleGhostTargets>& a_mask,
 }
 
 void
-Realm::buildCrossLevelGhostTargets(LayoutData<ParticleGhostTargets>& a_targets,
-                                   const DisjointBoxLayout&          a_thisLayout,
-                                   const DisjointBoxLayout&          a_otherLayout,
-                                   const LevelData<BaseFab<bool>>&   a_validCells,
-                                   const ProblemDomain&              a_otherDomain,
-                                   const int                         a_refRat,
-                                   const int                         a_ghost,
-                                   const bool                        a_coarserTarget) noexcept
+Realm::defineParticleGhostMaskCrossLevel(LayoutData<ParticleGhostMask>&  a_targets,
+                                         const DisjointBoxLayout&        a_thisLayout,
+                                         const DisjointBoxLayout&        a_otherLayout,
+                                         const LevelData<BaseFab<bool>>& a_validCells,
+                                         const ProblemDomain&            a_otherDomain,
+                                         const int                       a_refRat,
+                                         const int                       a_ghost,
+                                         const bool                      a_coarserTarget) noexcept
 {
-  CH_TIME("Realm::buildCrossLevelGhostTargets");
+  CH_TIME("Realm::defineParticleGhostMaskCrossLevel");
 
   // Work at the TARGET level's resolution so ghostDefine's ghost width is measured in destination cells:
   // coarsen this level for a coarser target, refine it for a finer target. coarsen()/refine() preserve
@@ -1632,19 +1631,19 @@ Realm::getLevelTiles() const noexcept
   return m_levelTiles;
 }
 
-const AMRParticleGhostTargets&
+const AMRParticleGhostMask&
 Realm::getParticleGhostMask() const noexcept
 {
   return m_particleGhostMask;
 }
 
-const AMRParticleGhostTargets&
+const AMRParticleGhostMask&
 Realm::getParticleGhostMaskFineToCoar() const noexcept
 {
   return m_particleGhostMaskFineToCoar;
 }
 
-const AMRParticleGhostTargets&
+const AMRParticleGhostMask&
 Realm::getParticleGhostMaskCoarToFine() const noexcept
 {
   return m_particleGhostMaskCoarToFine;

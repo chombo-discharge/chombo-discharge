@@ -19,7 +19,7 @@
 #include <CD_MultiFluidIndexSpace.H>
 #include <CD_MFLevelGrid.H>
 #include <CD_LevelTiles.H>
-#include <CD_ParticleGhostTargets.H>
+#include <CD_ParticleGhostMask.H>
 #include <CD_PetscGrid.H>
 #include <CD_NamespaceHeader.H>
 
@@ -487,21 +487,21 @@ public:
     @brief Get the same-level particle ghost-target lookup.
     @return m_particleGhostMask
   */
-  const AMRParticleGhostTargets&
+  const AMRParticleGhostMask&
   getParticleGhostMask() const noexcept;
 
   /**
     @brief Get the coarser-level particle ghost-target lookup.
     @return m_particleGhostMaskFineToCoar
   */
-  const AMRParticleGhostTargets&
+  const AMRParticleGhostMask&
   getParticleGhostMaskFineToCoar() const noexcept;
 
   /**
     @brief Get the finer-level particle ghost-target lookup.
     @return m_particleGhostMaskCoarToFine
   */
-  const AMRParticleGhostTargets&
+  const AMRParticleGhostMask&
   getParticleGhostMaskCoarToFine() const noexcept;
 
   /**
@@ -636,19 +636,19 @@ protected:
     @brief Particle ghost-target lookup to SAME-level boxes. Indexed by source level; per source box,
     maps a source cell to the same-level boxes whose ghosted region covers it. See defineParticleGhostTargets().
   */
-  AMRParticleGhostTargets m_particleGhostMask;
+  AMRParticleGhostMask m_particleGhostMask;
 
   /**
     @brief Particle ghost-target lookup to the next-COARSER level. Indexed by source level (>=1); per
     source (fine) box, maps a source cell to the coarser-level boxes whose ghosted region covers it.
   */
-  AMRParticleGhostTargets m_particleGhostMaskFineToCoar;
+  AMRParticleGhostMask m_particleGhostMaskFineToCoar;
 
   /**
     @brief Particle ghost-target lookup to the next-FINER level. Indexed by source level (<finest); per
     source (coarse) box, maps a source cell to the finer-level boxes whose ghosted region covers it.
   */
-  AMRParticleGhostTargets m_particleGhostMaskCoarToFine;
+  AMRParticleGhostMask m_particleGhostMaskCoarToFine;
 
 #ifdef CH_USE_PETSC
   /**
@@ -778,65 +778,73 @@ protected:
   defineLevelTiles() noexcept;
 
   /**
-    @brief Build the same/coarser/finer particle ghost-target lookups (CSR).
-    @details For every level and box, records (per source cell) which boxes on the same level, the
-    next-coarser level, and the next-finer level have a ghosted region (box grown by m_numGhost at the
-    source resolution) that covers the cell, together with the owning (receiving) rank. Built via a
-    Copier motion-plan walk (only overlapping box pairs are visited), never a LayoutIterator over all
-    boxes. Cross-level targets are mapped to the source resolution with coarsen()/refine(). Periodic
-    boundaries are not handled (prototype).
+    @brief Define the same-level, fine-to-coarse, and coarse-to-fine particle ghost masks on every level.
+    @details Allocates and fills the three per-level masks (m_particleGhostMask,
+    m_particleGhostMaskFineToCoar, m_particleGhostMaskCoarToFine) by delegating to
+    defineParticleGhostMaskSameLevel and defineParticleGhostMaskCrossLevel. Each mask records, per source
+    cell, the target boxes (grid index + receiving rank) that a particle in that cell must be scattered
+    to in that direction. Called from regridBase after the valid-cell and level-tile structures exist.
+    The ghost width is m_numGhost. Periodic boundaries are not handled.
   */
   void
   defineParticleGhostTargets() noexcept;
 
   /**
-    @brief Fill the SAME-level CSR ghost-target mask using a NeighborIterator.
-    @details For each box, records (per cell) the abutting same-level boxes whose grown region (a_ghost
-    cells) covers the cell, together with the owning/receiving rank. Uses NeighborIterator to find the
-    abutting boxes, so the build is fully box-local (no coarsen/refine or Copier). Two passes per box:
-    count, then packed fill. NeighborIterator returns grow-by-one neighbours, so for a_ghost > 1 a
-    same-level box separated by a gap of 1..a_ghost-1 cells is not seen -- the same assumption the
-    coarse-fine halo masks (defineOuterCFMask) already make. Periodic boundaries are not handled.
-    @param[out] a_mask   CSR table over a_dbl to fill.
-    @param[in]  a_dbl    This level's grids (both the sources and the neighbour targets).
+    @brief Define the SAME-level particle ghost mask on one level.
+    @details For each box, records (per cell) the abutting same-level boxes whose grown region (the box
+    grown by a_ghost cells) covers the cell, together with the owning/receiving rank. Uses a
+    NeighborIterator to enumerate the abutting boxes, so the build is fully box-local -- no coarsen/refine
+    and no Copier -- and each box fills its own CSR in two passes (count, then packed fill).
+    NeighborIterator returns grow-by-one (abutting) neighbours only; this loses nothing because every box
+    is min_block_size-aligned and AmrMesh::sanityCheck enforces a_ghost < min_block_size, so two
+    non-abutting same-level boxes are always at least min_block_size (> a_ghost) apart and can never reach
+    into each other's ghost region. Periodic boundaries are not handled.
+    @param[out] a_mask   Per-box CSR ghost mask over a_dbl to fill.
+    @param[in]  a_dbl    This level's grids (both the source cells and the neighbour targets).
     @param[in]  a_domain Problem domain at this level's resolution.
     @param[in]  a_ghost  Ghost width (cells) defining each neighbour's grown region.
   */
   void
-  buildParticleGhostMaskSameLevel(LayoutData<ParticleGhostTargets>& a_mask,
-                                  const DisjointBoxLayout&          a_dbl,
-                                  const ProblemDomain&              a_domain,
-                                  const int                         a_ghost) noexcept;
+  defineParticleGhostMaskSameLevel(LayoutData<ParticleGhostMask>& a_mask,
+                                   const DisjointBoxLayout&       a_dbl,
+                                   const ProblemDomain&           a_domain,
+                                   const int                      a_ghost) noexcept;
 
   /**
-    @brief Fill one CROSS-LEVEL CSR ghost-target table (coarser or finer target level).
-    @details Restricts sources to the coarse-fine halo: a source cell is recorded only where a target
-    box's grown region reaches it from OUTSIDE the target box's own footprint. This excludes the nested
-    interior (which a plain overlap test flags) and routes to the valid box across the interface. Built
-    via a ghostDefine Copier motion-plan walk at the TARGET level's resolution (coarsen this level for a
-    coarser target, refine it for a finer target); the halo cells are mapped to this level's resolution
-    with refine()/coarsen(). The ghost width is measured in DESTINATION (target-level) cells and is a
-    MINIMUM: whole source cells overlapping the halo are recorded (over-communication is acceptable).
-    @param[out] a_targets       CSR table over a_thisLayout to fill.
+    @brief Define one CROSS-LEVEL particle ghost mask (targets on the next-coarser or next-finer level).
+    @details The mask is two separable pieces per source cell. (1) TARGETS: every box on the target level
+    whose ghosted region (grown by a_ghost cells at the target resolution) contains the cell. These are
+    found by walking a ghostDefine Copier motion plan -- only overlapping box pairs are visited (never a
+    LayoutIterator over all boxes) -- and are multi-valued, since a cell may scatter to several target
+    boxes (e.g. diagonal coarse-fine cells). (2) SOURCE restriction to the coarse-fine halo, so the nested
+    interior is not scattered: for a coarser target (fine->coarse) the inner halo is built geometrically
+    from the coarsened-fine layout (the ring outside each footprint box, minus the abutting footprint
+    boxes, grown back inward), independent of the coarse grid's box decomposition; for a finer target
+    (coarse->fine) only VALID source cells (those not covered by the finer level) are kept. The target
+    resolution is reached by coarsen()/refine() of this level (which preserve the DataIndex), and halo
+    cells are mapped back with refine()/coarsen(). The ghost width is measured in DESTINATION
+    (target-level) cells and is a MINIMUM: whole source cells overlapping the halo are recorded, i.e.
+    over-communication across the interface is accepted. Periodic boundaries are not handled.
+    @param[out] a_targets       Per-box CSR ghost mask over a_thisLayout to fill.
     @param[in]  a_thisLayout    This (source) level's grids.
     @param[in]  a_otherLayout   Target level's grids (coarser or finer than this level).
-    @param[in]  a_validCells    Valid-cell mask used for the coarse-fine halo restriction. For a finer
-                                target it is this level's mask (source cells kept only where valid); for
-                                a coarser target the inner halo is derived geometrically and this is unused.
+    @param[in]  a_validCells    Valid-cell mask for the halo restriction. For a finer target this is this
+                                level's mask (source cells are kept only where valid); for a coarser
+                                target the inner halo is derived geometrically and this argument is unused.
     @param[in]  a_otherDomain   Problem domain at the target level's resolution.
     @param[in]  a_refRat        Refinement ratio between this level and the target level.
     @param[in]  a_ghost         Ghost width in target-level (destination) cells.
     @param[in]  a_coarserTarget True if the target level is coarser than this level (fine->coarse).
   */
   void
-  buildCrossLevelGhostTargets(LayoutData<ParticleGhostTargets>& a_targets,
-                              const DisjointBoxLayout&          a_thisLayout,
-                              const DisjointBoxLayout&          a_otherLayout,
-                              const LevelData<BaseFab<bool>>&   a_validCells,
-                              const ProblemDomain&              a_otherDomain,
-                              const int                         a_refRat,
-                              const int                         a_ghost,
-                              const bool                        a_coarserTarget) noexcept;
+  defineParticleGhostMaskCrossLevel(LayoutData<ParticleGhostMask>&  a_targets,
+                                    const DisjointBoxLayout&        a_thisLayout,
+                                    const DisjointBoxLayout&        a_otherLayout,
+                                    const LevelData<BaseFab<bool>>& a_validCells,
+                                    const ProblemDomain&            a_otherDomain,
+                                    const int                       a_refRat,
+                                    const int                       a_ghost,
+                                    const bool                      a_coarserTarget) noexcept;
 
   /**
     @brief Define the PETSc composite grid

@@ -331,15 +331,15 @@ RadiativeTransferStepper<T>::writeGhostTargetPlotData(LevelData<EBCellFAB>& a_ou
   // ranks, and that the output realm matches the stepper realm (true for the McPhoto example).
   CH_assert(a_outputRealm == m_realm);
 
-  const AMRParticleGhostTargets& same = m_amr->getParticleGhostMask(m_realm);
-  const AMRParticleGhostTargets& coar = m_amr->getParticleGhostMaskFineToCoar(m_realm);
-  const AMRParticleGhostTargets& fine = m_amr->getParticleGhostMaskCoarToFine(m_realm);
+  const AMRParticleGhostMask& same = m_amr->getParticleGhostMask(m_realm);
+  const AMRParticleGhostMask& coar = m_amr->getParticleGhostMaskFineToCoar(m_realm);
+  const AMRParticleGhostMask& fine = m_amr->getParticleGhostMaskCoarToFine(m_realm);
 
   const DisjointBoxLayout& dbl  = m_amr->getGrids(m_realm)[a_level];
   const DataIterator&      dit  = dbl.dataIterator();
   const int                nbox = dit.size();
 
-  const AMRParticleGhostTargets* tables[3] = {&same, &coar, &fine};
+  const AMRParticleGhostMask* tables[3] = {&same, &coar, &fine};
 
 #pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nbox; mybox++) {
@@ -354,9 +354,9 @@ RadiativeTransferStepper<T>::writeGhostTargetPlotData(LevelData<EBCellFAB>& a_ou
 
       out.setVal(comp, 0.0);
 
-      const AMRParticleGhostTargets& table = *tables[k];
+      const AMRParticleGhostMask& table = *tables[k];
       if (a_level < table.size() && !table[a_level].isNull()) {
-        const ParticleGhostTargets& t = (*table[a_level])[din];
+        const ParticleGhostMask& t = (*table[a_level])[din];
         for (BoxIterator bit(validBox & t.box()); bit.ok(); ++bit) {
           const IntVect iv         = bit();
           const int     numTargets = t.numTargets(iv);

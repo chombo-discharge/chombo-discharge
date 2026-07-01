@@ -5,20 +5,20 @@
  */
 
 /**
-  @file   CD_ParticleGhostTargetsImplem.H
-  @brief  Implementation of CD_ParticleGhostTargets.H
+  @file   CD_ParticleGhostMaskImplem.H
+  @brief  Implementation of CD_ParticleGhostMask.H
   @author Robert Marskar
 */
 
-#ifndef CD_PARTICLEGHOSTTARGETSIMPLEM_H
-#define CD_PARTICLEGHOSTTARGETSIMPLEM_H
+#ifndef CD_PARTICLEGHOSTMASKIMPLEM_H
+#define CD_PARTICLEGHOSTMASKIMPLEM_H
 
 // Our includes
-#include <CD_ParticleGhostTargets.H>
+#include <CD_ParticleGhostMask.H>
 #include <CD_NamespaceHeader.H>
 
 inline void
-ParticleGhostTargets::define(const Box& a_box) noexcept
+ParticleGhostMask::define(const Box& a_box) noexcept
 {
   m_box = a_box;
 
@@ -30,13 +30,13 @@ ParticleGhostTargets::define(const Box& a_box) noexcept
 }
 
 inline void
-ParticleGhostTargets::incrementCount(const IntVect& a_iv) noexcept
+ParticleGhostMask::incrementCount(const IntVect& a_iv) noexcept
 {
   m_count(a_iv, 0) += 1;
 }
 
 inline void
-ParticleGhostTargets::allocate() noexcept
+ParticleGhostMask::allocate() noexcept
 {
   int offset = 0;
   for (BoxIterator bit(m_box); bit.ok(); ++bit) {
@@ -50,7 +50,7 @@ ParticleGhostTargets::allocate() noexcept
 }
 
 inline void
-ParticleGhostTargets::addTarget(const IntVect& a_iv, const LevelTiles::BoxIDs& a_target) noexcept
+ParticleGhostMask::addTarget(const IntVect& a_iv, const LevelTiles::BoxIDs& a_target) noexcept
 {
   CH_assert(m_start(a_iv, 0) >= 0);
   CH_assert(m_start(a_iv, 0) < static_cast<int>(m_flat.size()));
@@ -61,7 +61,7 @@ ParticleGhostTargets::addTarget(const IntVect& a_iv, const LevelTiles::BoxIDs& a
 }
 
 inline void
-ParticleGhostTargets::finalize() noexcept
+ParticleGhostMask::finalize() noexcept
 {
   for (BoxIterator bit(m_box); bit.ok(); ++bit) {
     m_start(bit(), 0) -= m_count(bit(), 0);
@@ -69,19 +69,19 @@ ParticleGhostTargets::finalize() noexcept
 }
 
 inline const Box&
-ParticleGhostTargets::box() const noexcept
+ParticleGhostMask::box() const noexcept
 {
   return m_box;
 }
 
 inline int
-ParticleGhostTargets::numTargets(const IntVect& a_iv) const noexcept
+ParticleGhostMask::numTargets(const IntVect& a_iv) const noexcept
 {
   return m_count(a_iv, 0);
 }
 
 inline const LevelTiles::BoxIDs&
-ParticleGhostTargets::target(const IntVect& a_iv, const int a_i) const noexcept
+ParticleGhostMask::target(const IntVect& a_iv, const int a_i) const noexcept
 {
   CH_assert(a_i >= 0 && a_i < m_count(a_iv, 0));
 
@@ -89,13 +89,13 @@ ParticleGhostTargets::target(const IntVect& a_iv, const int a_i) const noexcept
 }
 
 inline unsigned int
-ParticleGhostTargets::targetGridIndex(const IntVect& a_iv, const int a_i) const noexcept
+ParticleGhostMask::targetGridIndex(const IntVect& a_iv, const int a_i) const noexcept
 {
   return this->target(a_iv, a_i).first;
 }
 
 inline unsigned int
-ParticleGhostTargets::targetRank(const IntVect& a_iv, const int a_i) const noexcept
+ParticleGhostMask::targetRank(const IntVect& a_iv, const int a_i) const noexcept
 {
   return this->target(a_iv, a_i).second;
 }
