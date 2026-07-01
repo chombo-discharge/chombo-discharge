@@ -510,24 +510,24 @@ public:
 
   /**
     @brief Get the same-level particle ghost-target lookup.
-    @return m_particleGhostTargetsSame
+    @return m_particleGhostMask
   */
   const AMRParticleGhostTargets&
-  getParticleGhostTargetsSame() const noexcept;
+  getParticleGhostMask() const noexcept;
 
   /**
     @brief Get the coarser-level particle ghost-target lookup.
-    @return m_particleGhostTargetsCoar
+    @return m_particleGhostMaskFineToCoar
   */
   const AMRParticleGhostTargets&
-  getParticleGhostTargetsCoar() const noexcept;
+  getParticleGhostMaskFineToCoar() const noexcept;
 
   /**
     @brief Get the finer-level particle ghost-target lookup.
-    @return m_particleGhostTargetsFine
+    @return m_particleGhostMaskCoarToFine
   */
   const AMRParticleGhostTargets&
-  getParticleGhostTargetsFine() const noexcept;
+  getParticleGhostMaskCoarToFine() const noexcept;
 
   /**
     @brief Get the tiled space
@@ -661,19 +661,19 @@ protected:
     @brief Particle ghost-target lookup to SAME-level boxes. Indexed by source level; per source box,
     maps a source cell to the same-level boxes whose ghosted region covers it. See defineParticleGhostTargets().
   */
-  AMRParticleGhostTargets m_particleGhostTargetsSame;
+  AMRParticleGhostTargets m_particleGhostMask;
 
   /**
     @brief Particle ghost-target lookup to the next-COARSER level. Indexed by source level (>=1); per
     source (fine) box, maps a source cell to the coarser-level boxes whose ghosted region covers it.
   */
-  AMRParticleGhostTargets m_particleGhostTargetsCoar;
+  AMRParticleGhostTargets m_particleGhostMaskFineToCoar;
 
   /**
     @brief Particle ghost-target lookup to the next-FINER level. Indexed by source level (<finest); per
     source (coarse) box, maps a source cell to the finer-level boxes whose ghosted region covers it.
   */
-  AMRParticleGhostTargets m_particleGhostTargetsFine;
+  AMRParticleGhostTargets m_particleGhostMaskCoarToFine;
 
 #ifdef CH_USE_PETSC
   /**
@@ -815,24 +815,23 @@ protected:
   defineParticleGhostTargets() noexcept;
 
   /**
-    @brief Fill the SAME-level CSR ghost-target table from a Copier motion plan.
-    @details Builds a ghostDefine Copier on a single layout and walks its local+to motion plans,
-    recording for each cell the neighbouring same-level boxes whose grown region (a_ghost cells) covers
-    it. Two passes: count, then packed fill. Self-overlaps are skipped.
-    @param[out] a_targets   CSR table over a_dstLayout to fill.
-    @param[in]  a_srcLayout Target-level grids at the source resolution (grown via a_ghost ghost cells).
-    @param[in]  a_dstLayout Source-level grids (the cells that own the particles).
-    @param[in]  a_domain    Problem domain at the source resolution.
-    @param[in]  a_ghost     Ghost width (cells) defining each target's grown region.
-    @param[in]  a_sameLevel True when src and dst are the same layout (skip self-overlaps).
+    @brief Fill the SAME-level CSR ghost-target mask using a NeighborIterator.
+    @details For each box, records (per cell) the abutting same-level boxes whose grown region (a_ghost
+    cells) covers the cell, together with the owning/receiving rank. Uses NeighborIterator to find the
+    abutting boxes, so the build is fully box-local (no coarsen/refine or Copier). Two passes per box:
+    count, then packed fill. NeighborIterator returns grow-by-one neighbours, so for a_ghost > 1 a
+    same-level box separated by a gap of 1..a_ghost-1 cells is not seen -- the same assumption the
+    coarse-fine halo masks (defineOuterCFMask) already make. Periodic boundaries are not handled.
+    @param[out] a_mask   CSR table over a_dbl to fill.
+    @param[in]  a_dbl    This level's grids (both the sources and the neighbour targets).
+    @param[in]  a_domain Problem domain at this level's resolution.
+    @param[in]  a_ghost  Ghost width (cells) defining each neighbour's grown region.
   */
   void
-  buildParticleGhostTargetDirection(LayoutData<ParticleGhostTargets>& a_targets,
-                                    const DisjointBoxLayout&          a_srcLayout,
-                                    const DisjointBoxLayout&          a_dstLayout,
-                                    const ProblemDomain&              a_domain,
-                                    const int                         a_ghost,
-                                    const bool                        a_sameLevel) noexcept;
+  buildParticleGhostMaskSameLevel(LayoutData<ParticleGhostTargets>& a_mask,
+                                  const DisjointBoxLayout&          a_dbl,
+                                  const ProblemDomain&              a_domain,
+                                  const int                         a_ghost) noexcept;
 
   /**
     @brief Fill one CROSS-LEVEL CSR ghost-target table (coarser or finer target level).

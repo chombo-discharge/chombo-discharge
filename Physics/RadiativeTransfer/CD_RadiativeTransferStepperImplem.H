@@ -328,9 +328,9 @@ RadiativeTransferStepper<T>::writeGhostTargetPlotData(LevelData<EBCellFAB>& a_ou
   // matches the stepper realm (true for the McPhoto example). Receiving rank is not shown yet.
   CH_assert(a_outputRealm == m_realm);
 
-  const AMRParticleGhostTargets& same = m_amr->getParticleGhostTargetsSame(m_realm);
-  const AMRParticleGhostTargets& coar = m_amr->getParticleGhostTargetsCoar(m_realm);
-  const AMRParticleGhostTargets& fine = m_amr->getParticleGhostTargetsFine(m_realm);
+  const AMRParticleGhostTargets& same = m_amr->getParticleGhostMask(m_realm);
+  const AMRParticleGhostTargets& coar = m_amr->getParticleGhostMaskFineToCoar(m_realm);
+  const AMRParticleGhostTargets& fine = m_amr->getParticleGhostMaskCoarToFine(m_realm);
 
   const DisjointBoxLayout& dbl  = m_amr->getGrids(m_realm)[a_level];
   const DataIterator&      dit  = dbl.dataIterator();

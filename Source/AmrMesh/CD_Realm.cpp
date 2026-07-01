@@ -1072,28 +1072,28 @@ Realm::defineParticleGhostTargets() noexcept
 
   const int ghost = m_numGhost;
 
-  m_particleGhostTargetsSame.resize(1 + m_finestLevel);
-  m_particleGhostTargetsCoar.resize(1 + m_finestLevel);
-  m_particleGhostTargetsFine.resize(1 + m_finestLevel);
+  m_particleGhostMask.resize(1 + m_finestLevel);
+  m_particleGhostMaskFineToCoar.resize(1 + m_finestLevel);
+  m_particleGhostMaskCoarToFine.resize(1 + m_finestLevel);
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl    = m_grids[lvl];
     const ProblemDomain&     domain = m_domains[lvl];
 
-    m_particleGhostTargetsSame[lvl] = RefCountedPtr<LayoutData<ParticleGhostTargets>>(
+    m_particleGhostMask[lvl] = RefCountedPtr<LayoutData<ParticleGhostTargets>>(
       new LayoutData<ParticleGhostTargets>(dbl));
-    m_particleGhostTargetsCoar[lvl] = RefCountedPtr<LayoutData<ParticleGhostTargets>>(
+    m_particleGhostMaskFineToCoar[lvl] = RefCountedPtr<LayoutData<ParticleGhostTargets>>(
       new LayoutData<ParticleGhostTargets>(dbl));
-    m_particleGhostTargetsFine[lvl] = RefCountedPtr<LayoutData<ParticleGhostTargets>>(
+    m_particleGhostMaskCoarToFine[lvl] = RefCountedPtr<LayoutData<ParticleGhostTargets>>(
       new LayoutData<ParticleGhostTargets>(dbl));
 
-    // SAME level: targets are the OTHER boxes on this level (each grown by 'ghost' at this resolution).
-    this->buildParticleGhostTargetDirection(*m_particleGhostTargetsSame[lvl], dbl, dbl, domain, ghost, true);
+    // SAME level: targets are the abutting boxes on this level (each grown by 'ghost' at this resolution).
+    this->buildParticleGhostMaskSameLevel(*m_particleGhostMask[lvl], dbl, domain, ghost);
 
     // COARSER (lvl -> lvl-1): fine cells that scatter DOWN to the coarse level. Restricted to the fine
     // side of the coarse-fine halo; ghost width in destination (coarse) cells.
     if (lvl > 0) {
-      this->buildCrossLevelGhostTargets(*m_particleGhostTargetsCoar[lvl],
+      this->buildCrossLevelGhostTargets(*m_particleGhostMaskFineToCoar[lvl],
                                         dbl,
                                         m_grids[lvl - 1],
                                         *m_validCells[lvl - 1],
@@ -1106,7 +1106,7 @@ Realm::defineParticleGhostTargets() noexcept
     // FINER (lvl -> lvl+1): coarse cells that scatter UP to the finer level. Restricted to the coarse
     // side of the coarse-fine halo; ghost width in destination (fine) cells.
     if (lvl < m_finestLevel) {
-      this->buildCrossLevelGhostTargets(*m_particleGhostTargetsFine[lvl],
+      this->buildCrossLevelGhostTargets(*m_particleGhostMaskCoarToFine[lvl],
                                         dbl,
                                         m_grids[lvl + 1],
                                         *m_validCells[lvl],
@@ -1119,57 +1119,43 @@ Realm::defineParticleGhostTargets() noexcept
 }
 
 void
-Realm::buildParticleGhostTargetDirection(LayoutData<ParticleGhostTargets>& a_targets,
-                                         const DisjointBoxLayout&          a_srcLayout,
-                                         const DisjointBoxLayout&          a_dstLayout,
-                                         const ProblemDomain&              a_domain,
-                                         const int                         a_ghost,
-                                         const bool                        a_sameLevel) noexcept
+Realm::buildParticleGhostMaskSameLevel(LayoutData<ParticleGhostTargets>& a_mask,
+                                       const DisjointBoxLayout&          a_dbl,
+                                       const ProblemDomain&              a_domain,
+                                       const int                         a_ghost) noexcept
 {
-  CH_TIME("Realm::buildParticleGhostTargetDirection");
+  CH_TIME("Realm::buildParticleGhostMaskSameLevel");
 
-  // ghostDefine builds a Copier that maps a_srcLayout's valid+ghost (grown) region onto a_dstLayout's
-  // valid cells. Walking its motion plan visits ONLY overlapping (source-box, dest-box) pairs, so this
-  // is O(overlaps) and never a LayoutIterator over all boxes.
-  Copier copier;
-  copier.ghostDefine(a_srcLayout, a_dstLayout, a_domain, a_ghost * IntVect::Unit);
+  // A same-level neighbour N contributes a target to this box's cells that lie within a_ghost of N, i.e.
+  // grow(N, a_ghost) & box. NeighborIterator yields the abutting boxes (never self), so the whole build
+  // is box-local: each box fills its own CSR with no cross-box writes. Two passes per box (count, pack).
+  const DataIterator& dit  = a_dbl.dataIterator();
+  const int           nbox = dit.size();
 
-  const DataIterator&               dit      = a_dstLayout.dataIterator();
-  const int                         nbox     = dit.size();
-  const CopyIterator::local_from_to plans[2] = {CopyIterator::LOCAL, CopyIterator::TO};
+  NeighborIterator nit(a_dbl);
 
-  // Initialize per-destination-box CSR (count = 0, start = -1) over the valid box.
   for (int mybox = 0; mybox < nbox; mybox++) {
-    ParticleGhostTargets& t = a_targets[dit[mybox]];
-    const Box             b = a_dstLayout[dit[mybox]];
+    const DataIndex&      din = dit[mybox];
+    const Box             box = a_dbl[din];
+    ParticleGhostTargets& t   = a_mask[din];
 
-    t.m_count.resize(b, 1);
+    t.m_count.resize(box, 1);
     t.m_count.setVal(0);
-    t.m_start.resize(b, 1);
+    t.m_start.resize(box, 1);
     t.m_start.setVal(-1);
     t.m_flat.clear();
-  }
 
-  // Pass 1: count targets per destination cell.
-  for (const auto plan : plans) {
-    for (CopyIterator cit(copier, plan); cit.ok(); ++cit) {
-      const MotionItem& item = cit();
-      if (a_sameLevel && a_srcLayout.index(item.fromIndex) == a_dstLayout.index(item.toIndex)) {
-        continue; // a box is not its own ghost target
-      }
-      ParticleGhostTargets& t   = a_targets[item.toIndex];
-      const Box             reg = item.toRegion & t.m_count.box();
-      for (BoxIterator bit(reg); bit.ok(); ++bit) {
+    // Pass 1: count targets per cell.
+    for (nit.begin(din); nit.ok(); ++nit) {
+      const Box reach = grow(a_dbl[nit()], a_ghost) & box;
+      for (BoxIterator bit(reach); bit.ok(); ++bit) {
         t.m_count(bit(), 0) += 1;
       }
     }
-  }
 
-  // Prefix-sum counts into start offsets and size the packed target arrays.
-  for (int mybox = 0; mybox < nbox; mybox++) {
-    ParticleGhostTargets& t      = a_targets[dit[mybox]];
-    int                   offset = 0;
-    for (BoxIterator bit(t.m_count.box()); bit.ok(); ++bit) {
+    // Prefix-sum counts into start offsets; size the packed target array.
+    int offset = 0;
+    for (BoxIterator bit(box); bit.ok(); ++bit) {
       const int c = t.m_count(bit(), 0);
       if (c > 0) {
         t.m_start(bit(), 0) = offset;
@@ -1177,30 +1163,16 @@ Realm::buildParticleGhostTargetDirection(LayoutData<ParticleGhostTargets>& a_tar
       }
     }
     t.m_flat.resize(offset);
-  }
 
-  // Pass 2: pack the targets. 'cursor' holds the next free slot per cell (initialized to start).
-  LayoutData<BaseFab<int>> cursor(a_dstLayout);
-  for (int mybox = 0; mybox < nbox; mybox++) {
-    const DataIndex& din = dit[mybox];
-    cursor[din].resize(a_dstLayout[din], 1);
-    cursor[din].copy(a_targets[din].m_start);
-  }
-
-  for (const auto plan : plans) {
-    for (CopyIterator cit(copier, plan); cit.ok(); ++cit) {
-      const MotionItem& item = cit();
-      if (a_sameLevel && a_srcLayout.index(item.fromIndex) == a_dstLayout.index(item.toIndex)) {
-        continue;
-      }
-      const ParticleGhostTarget target(a_srcLayout.index(item.fromIndex), a_srcLayout.procID(item.fromIndex));
-
-      ParticleGhostTargets& t   = a_targets[item.toIndex];
-      BaseFab<int>&         cur = cursor[item.toIndex];
-      const Box             reg = item.toRegion & t.m_count.box();
-      for (BoxIterator bit(reg); bit.ok(); ++bit) {
-        t.m_flat[cur(bit(), 0)] = target;
-        cur(bit(), 0) += 1;
+    // Pass 2: pack the targets. 'cursor' holds the next free slot per cell (initialized to start).
+    BaseFab<int> cursor(box, 1);
+    cursor.copy(t.m_start);
+    for (nit.begin(din); nit.ok(); ++nit) {
+      const ParticleGhostTarget target(a_dbl.index(nit()), a_dbl.procID(nit()));
+      const Box                 reach = grow(a_dbl[nit()], a_ghost) & box;
+      for (BoxIterator bit(reach); bit.ok(); ++bit) {
+        t.m_flat[cursor(bit(), 0)] = target;
+        cursor(bit(), 0) += 1;
       }
     }
   }
@@ -1695,21 +1667,21 @@ Realm::getLevelTiles() const noexcept
 }
 
 const AMRParticleGhostTargets&
-Realm::getParticleGhostTargetsSame() const noexcept
+Realm::getParticleGhostMask() const noexcept
 {
-  return m_particleGhostTargetsSame;
+  return m_particleGhostMask;
 }
 
 const AMRParticleGhostTargets&
-Realm::getParticleGhostTargetsCoar() const noexcept
+Realm::getParticleGhostMaskFineToCoar() const noexcept
 {
-  return m_particleGhostTargetsCoar;
+  return m_particleGhostMaskFineToCoar;
 }
 
 const AMRParticleGhostTargets&
-Realm::getParticleGhostTargetsFine() const noexcept
+Realm::getParticleGhostMaskCoarToFine() const noexcept
 {
-  return m_particleGhostTargetsFine;
+  return m_particleGhostMaskCoarToFine;
 }
 
 Realm::LevelAndBox

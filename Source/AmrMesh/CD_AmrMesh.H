@@ -1809,7 +1809,7 @@ public:
     @return Per-level, per-box CSR of source-cell -> same-level target boxes (grid index, rank).
   */
   const AMRParticleGhostTargets&
-  getParticleGhostTargetsSame(const std::string& a_realm) const;
+  getParticleGhostMask(const std::string& a_realm) const;
 
   /**
     @brief Get the coarser-level particle ghost-target lookup on a realm.
@@ -1817,7 +1817,7 @@ public:
     @return Per-level, per-box CSR of source-cell -> coarser-level target boxes (grid index, rank).
   */
   const AMRParticleGhostTargets&
-  getParticleGhostTargetsCoar(const std::string& a_realm) const;
+  getParticleGhostMaskFineToCoar(const std::string& a_realm) const;
 
   /**
     @brief Get the finer-level particle ghost-target lookup on a realm.
@@ -1825,7 +1825,7 @@ public:
     @return Per-level, per-box CSR of source-cell -> finer-level target boxes (grid index, rank).
   */
   const AMRParticleGhostTargets&
-  getParticleGhostTargetsFine(const std::string& a_realm) const;
+  getParticleGhostMaskCoarToFine(const std::string& a_realm) const;
 
   /**
     @brief Get the EBLevelGrid for a Realm and phase
