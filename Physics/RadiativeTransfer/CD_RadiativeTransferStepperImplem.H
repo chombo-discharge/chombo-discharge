@@ -12,6 +12,7 @@
 
 // Std includes
 #include <math.h>
+#include <set>
 #include <type_traits>
 
 // Chombo includes
@@ -323,9 +324,11 @@ RadiativeTransferStepper<T>::writeGhostTargetPlotData(LevelData<EBCellFAB>& a_ou
                                                       const std::string&    a_outputRealm,
                                                       const int             a_level) const
 {
-  // DEV visualization: write 1 in each cell that will SEND its particles (i.e. has >=1 target) for each
-  // of the three Realm ghost-target tables (same/coarser/finer), 0 elsewhere. Assumes the output realm
-  // matches the stepper realm (true for the McPhoto example). Receiving rank is not shown yet.
+  // DEV visualization: in each cell that will SEND its particles, encode sender+receivers as
+  // sender.receivers -- the integer part is THIS (sending) rank and each decimal digit is a distinct
+  // receiving rank, sorted ascending. E.g. rank 1 -> {2,3} = 1.23; rank 9 -> {0,3,4} = 9.034. One field
+  // per Realm ghost-target table (same/coarser/finer); cells with no target are 0. Assumes single-digit
+  // ranks, and that the output realm matches the stepper realm (true for the McPhoto example).
   CH_assert(a_outputRealm == m_realm);
 
   const AMRParticleGhostTargets& same = m_amr->getParticleGhostMask(m_realm);
@@ -355,8 +358,23 @@ RadiativeTransferStepper<T>::writeGhostTargetPlotData(LevelData<EBCellFAB>& a_ou
       if (a_level < table.size() && !table[a_level].isNull()) {
         const ParticleGhostTargets& t = (*table[a_level])[din];
         for (BoxIterator bit(validBox & t.box()); bit.ok(); ++bit) {
-          if (t.numTargets(bit()) > 0) {
-            reg(bit(), comp) = 1.0;
+          const IntVect iv         = bit();
+          const int     numTargets = t.numTargets(iv);
+          if (numTargets > 0) {
+            // Distinct receiving ranks, sorted ascending (std::set), packed onto the decimals.
+            std::set<unsigned int> receivers;
+            for (int i = 0; i < numTargets; i++) {
+              receivers.insert(t.targetRank(iv, i));
+            }
+
+            Real value = static_cast<Real>(procID());
+            Real place = 0.1;
+            for (const unsigned int rank : receivers) {
+              value += rank * place;
+              place *= 0.1;
+            }
+
+            reg(iv, comp) = value;
           }
         }
       }
