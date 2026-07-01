@@ -12,7 +12,9 @@
 
 // Std includes
 #include <math.h>
+#include <string>
 #include <type_traits>
+#include <vector>
 
 // Chombo includes
 #include <CH_Timer.H>
@@ -160,72 +162,79 @@ RadiativeTransferStepper<T>::ghostBoundaryTest()
   if constexpr (std::is_same_v<T, McPhoto>) {
     ParticleContainer<Photon>& photons = static_cast<T*>(&(*m_solver))->getPhotons();
 
-    // (1) Sample particles uniformly in the domain box (on rank 0; remap distributes them to owners).
     const RealVect probLo = m_amr->getProbLo();
     const RealVect probHi = m_amr->getProbHi();
 
-    photons.clearParticles();
-
-    ParticleSoA<Photon> sampled;
+    // Sample once on rank 0 and keep the positions; each ghost direction is filled from an identical
+    // source particle set (re-seeded below), so the three output files are directly comparable.
+    std::vector<RealVect> seedPos;
     if (procID() == 0) {
+      seedPos.reserve(m_ghostBoundaryTestParticles);
       for (int i = 0; i < m_ghostBoundaryTestParticles; i++) {
-        sampled.append(Random::randomPosition(probLo, probHi), 1.0);
+        seedPos.push_back(Random::randomPosition(probLo, probHi));
       }
     }
-    photons.addParticlesDestructive(sampled); // routes every particle to its owning patch/level/rank
 
-    // (2) Fill the ghost layer of every patch from the prebuilt Realm masks (registered width).
     const AMRParticleGhostMask& same = m_amr->getParticleGhostMask(m_realm, m_ghostBoundaryTestWidth);
     const AMRParticleGhostMask& c2f  = m_amr->getParticleGhostMaskCoarToFine(m_realm, m_ghostBoundaryTestWidth);
     const AMRParticleGhostMask& f2c  = m_amr->getParticleGhostMaskFineToCoar(m_realm, m_ghostBoundaryTestWidth);
+    const AMRParticleGhostMask& none = m_amr->getTrivialParticleGhostMask();
 
-    photons.fillGhost(same, c2f, f2c);
+    // Fill only the requested direction's ghosts (the other two masks are the trivial/empty mask), keep
+    // the ghosts, remap them to their owners, and write them to an H5Part file for direct visualization
+    // (positions + weight + id + the Photon h5 columns kappa/v).
+    auto writeDirection = [&](const AMRParticleGhostMask& a_same,
+                              const AMRParticleGhostMask& a_c2f,
+                              const AMRParticleGhostMask& a_f2c,
+                              const std::string&          a_file) {
+      // (Re)seed the valid particles from the shared sample.
+      photons.clearParticles();
+      ParticleSoA<Photon> seed;
+      for (const RealVect& p : seedPos) {
+        seed.append(p, 1.0);
+      }
+      photons.addParticlesDestructive(seed); // routes every particle to its owning patch/level/rank
 
-    // (3) Discard the valid particles, keeping only the ghosts, and turn the ghosts into ordinary
-    //     (valid) particles so the subsequent remap() will route them rather than drop them.
-    long long numGhost = 0;
-    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      const DisjointBoxLayout& dbl  = m_amr->getGrids(m_realm)[lvl];
-      const DataIterator&      dit  = dbl.dataIterator();
-      const int                nbox = dit.size();
+      photons.fillGhost(a_same, a_c2f, a_f2c);
 
-      for (int mybox = 0; mybox < nbox; mybox++) {
-        ParticleSoA<Photon>& leaf = photons[lvl][dit[mybox]];
+      // Keep only the ghosts, turning them into ordinary particles so remap() routes them.
+      long long numGhost = 0;
+      for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+        const DataIterator& dit  = m_amr->getGrids(m_realm)[lvl].dataIterator();
+        const int           nbox = dit.size();
 
-        std::size_t i = 0;
-        while (i < leaf.size()) {
-          if (leaf.isGhost(i)) {
-            leaf.ghost(i) = GhostType::Valid; // a former ghost becomes an ordinary particle
-            numGhost++;
-            i++;
-          }
-          else {
-            leaf.remove(i); // discard the patch's own valid particle (swap-pop; do not advance)
+        for (int mybox = 0; mybox < nbox; mybox++) {
+          ParticleSoA<Photon>& leaf = photons[lvl][dit[mybox]];
+
+          std::size_t i = 0;
+          while (i < leaf.size()) {
+            if (leaf.isGhost(i)) {
+              leaf.ghost(i) = GhostType::Valid; // a former ghost becomes an ordinary particle
+              numGhost++;
+              i++;
+            }
+            else {
+              leaf.remove(i); // discard the patch's own valid particle (swap-pop; do not advance)
+            }
           }
         }
       }
-    }
 
-    // ParallelOps::sum RETURNS the global sum (it does not modify its argument in place).
-    const long long numGhostGlobal = ParallelOps::sum(numGhost);
-    if (procID() == 0) {
-      pout() << "RadiativeTransferStepper::ghostBoundaryTest - ghost copies filled = " << numGhostGlobal << endl;
-    }
+      photons.remap();
 
-    // (4) Remap the former ghosts back to their owners. What remains are exactly the particles that lay
-    //     within a ghost layer of some patch boundary, duplicated once per patch that ghosted them.
-    photons.remap();
+      const long long numGhostGlobal = ParallelOps::sum(numGhost); // RETURNS the global sum
+      if (procID() == 0) {
+        pout() << "RadiativeTransferStepper::ghostBoundaryTest - " << a_file << " : " << numGhostGlobal
+               << " ghost particles" << endl;
+      }
 
-    // getNumberOfValidParticlesGlobal() is collective, so ALL ranks must call it (not just rank 0).
-    const long long numBoundary = photons.getNumberOfValidParticlesGlobal();
-    if (procID() == 0) {
-      pout() << "RadiativeTransferStepper::ghostBoundaryTest - boundary particles after remap = " << numBoundary
-             << endl;
-    }
+      DischargeIO::writeH5Part(a_file, photons, probLo, m_time);
+    };
 
-    // Write the boundary particles to an H5Part file so they can be visualized directly (positions +
-    // weight + id + the Photon h5 columns), rather than only as a deposited mesh density.
-    DischargeIO::writeH5Part("ghost_boundary_particles.h5part", photons, m_amr->getProbLo(), m_time);
+    // "Interlevel" (same-level) ghosts, coarse-to-fine ghosts, fine-to-coarse ghosts.
+    writeDirection(same, none, none, "ghost_same_level_particles.h5part");
+    writeDirection(none, c2f, none, "ghost_coarse_to_fine_particles.h5part");
+    writeDirection(none, none, f2c, "ghost_fine_to_coarse_particles.h5part");
   }
   else {
     MayDay::Warning("RadiativeTransferStepper::ghostBoundaryTest - only implemented for the McPhoto solver");
