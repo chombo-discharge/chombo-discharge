@@ -1124,6 +1124,9 @@ Realm::defineParticleGhostMaskSameLevel(LayoutData<ParticleGhostMask>& a_mask,
                                         const int                      a_ghost) noexcept
 {
   CH_TIME("Realm::defineParticleGhostMaskSameLevel");
+  if (m_verbosity > 5) {
+    pout() << "Realm::defineParticleGhostMaskSameLevel" << endl;
+  }
 
   // A same-level neighbour N contributes a target to this box's cells that lie within a_ghost of N, i.e.
   // grow(N, a_ghost) & box. NeighborIterator yields the abutting boxes (never self), so the whole build
@@ -1174,6 +1177,9 @@ Realm::defineParticleGhostMaskCrossLevel(LayoutData<ParticleGhostMask>&  a_targe
                                          const bool                      a_coarserTarget) noexcept
 {
   CH_TIME("Realm::defineParticleGhostMaskCrossLevel");
+  if (m_verbosity > 5) {
+    pout() << "Realm::defineParticleGhostMaskCrossLevel" << endl;
+  }
 
   // Work at the TARGET level's resolution so ghostDefine's ghost width is measured in destination cells:
   // coarsen this level for a coarser target, refine it for a finer target. coarsen()/refine() preserve
