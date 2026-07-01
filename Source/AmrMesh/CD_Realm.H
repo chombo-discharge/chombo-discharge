@@ -19,6 +19,7 @@
 #include <CD_MultiFluidIndexSpace.H>
 #include <CD_MFLevelGrid.H>
 #include <CD_LevelTiles.H>
+#include <CD_ParticleGhostTargets.H>
 #include <CD_PetscGrid.H>
 #include <CD_NamespaceHeader.H>
 
@@ -26,32 +27,6 @@
   @brief Alias for cutting down on the typic of booleans defined over AMR grids.
 */
 using AMRMask = Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>;
-
-/**
-  @brief A particle scatter target: the (grid index, receiving rank) of a destination box.
-  @details Reuses the LevelTiles BoxIDs convention: first = grid index on the target level, second =
-  the rank that owns (and will receive) that box. The sending rank is intentionally not stored.
-*/
-using ParticleGhostTarget = LevelTiles::BoxIDs;
-
-/**
-  @brief CSR per-box lookup from a source cell to the destination boxes whose ghosted region covers it.
-  @details For each cell of the (source) box, m_start gives the offset into m_flat (-1 if the cell has
-  no target) and m_count the number of targets; the targets themselves are packed contiguously in
-  m_flat. A cell may map to several targets (overlapping ghosted boxes, e.g. diagonal coarse-fine
-  cells), which the CSR stores without a fixed cap.
-*/
-struct ParticleGhostTargets
-{
-  BaseFab<int>                     m_start; ///< per cell: first index into m_flat, or -1 if no targets
-  BaseFab<int>                     m_count; ///< per cell: number of targets
-  std::vector<ParticleGhostTarget> m_flat;  ///< packed targets, size == sum(m_count)
-};
-
-/**
-  @brief AMR-wide particle ghost-target lookup: one per-box CSR table per level, indexed by SOURCE level.
-*/
-using AMRParticleGhostTargets = Vector<RefCountedPtr<LayoutData<ParticleGhostTargets>>>;
 
 /**
   @brief Class for holding multifluid Realms, which are the Realms that we actually use. 

@@ -1168,8 +1168,8 @@ Realm::buildParticleGhostMaskSameLevel(LayoutData<ParticleGhostTargets>& a_mask,
     BaseFab<int> cursor(box, 1);
     cursor.copy(t.m_start);
     for (nit.begin(din); nit.ok(); ++nit) {
-      const ParticleGhostTarget target(a_dbl.index(nit()), a_dbl.procID(nit()));
-      const Box                 reach = grow(a_dbl[nit()], a_ghost) & box;
+      const LevelTiles::BoxIDs target(a_dbl.index(nit()), a_dbl.procID(nit()));
+      const Box                reach = grow(a_dbl[nit()], a_ghost) & box;
       for (BoxIterator bit(reach); bit.ok(); ++bit) {
         t.m_flat[cursor(bit(), 0)] = target;
         cursor(bit(), 0) += 1;
@@ -1268,9 +1268,9 @@ Realm::buildCrossLevelGhostTargets(LayoutData<ParticleGhostTargets>& a_targets,
   const auto forEachContribution = [&](auto&& a_emit) {
     for (const auto plan : plans) {
       for (CopyIterator cit(copier, plan); cit.ok(); ++cit) {
-        const MotionItem&         item = cit();
-        const ParticleGhostTarget target(a_otherLayout.index(item.fromIndex), a_otherLayout.procID(item.fromIndex));
-        const Box                 thisBox = a_thisLayout[item.toIndex]; // source box, this resolution
+        const MotionItem&        item = cit();
+        const LevelTiles::BoxIDs target(a_otherLayout.index(item.fromIndex), a_otherLayout.procID(item.fromIndex));
+        const Box                thisBox = a_thisLayout[item.toIndex]; // source box, this resolution
 
         if (a_coarserTarget) {
           // toRegion holds coarse (target-resolution) footprint cells. Keep only inner-halo cells; each
@@ -1305,7 +1305,7 @@ Realm::buildCrossLevelGhostTargets(LayoutData<ParticleGhostTargets>& a_targets,
   };
 
   // Pass 1: count targets per source cell.
-  forEachContribution([&](const DataIndex& a_di, const IntVect& a_iv, const ParticleGhostTarget&) {
+  forEachContribution([&](const DataIndex& a_di, const IntVect& a_iv, const LevelTiles::BoxIDs&) {
     a_targets[a_di].m_count(a_iv, 0) += 1;
   });
 
@@ -1330,7 +1330,7 @@ Realm::buildCrossLevelGhostTargets(LayoutData<ParticleGhostTargets>& a_targets,
     cursor[din].resize(a_thisLayout[din], 1);
     cursor[din].copy(a_targets[din].m_start);
   }
-  forEachContribution([&](const DataIndex& a_di, const IntVect& a_iv, const ParticleGhostTarget& a_tg) {
+  forEachContribution([&](const DataIndex& a_di, const IntVect& a_iv, const LevelTiles::BoxIDs& a_tg) {
     a_targets[a_di].m_flat[cursor[a_di](a_iv, 0)] = a_tg;
     cursor[a_di](a_iv, 0) += 1;
   });

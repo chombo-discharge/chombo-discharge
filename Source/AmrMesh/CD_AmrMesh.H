@@ -31,6 +31,7 @@
 #include <CD_DomainFluxIFFABFactory.H>
 #include <CD_ParticleContainer.H>
 #include <CD_Realm.H>
+#include <CD_ParticleGhostTargets.H>
 #include <CD_CopyStrategy.H>
 #include <CD_LoadBalancing.H>
 #include <CD_NamespaceHeader.H>
