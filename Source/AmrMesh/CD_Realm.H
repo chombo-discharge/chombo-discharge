@@ -846,6 +846,9 @@ protected:
     @param[out] a_targets       CSR table over a_thisLayout to fill.
     @param[in]  a_thisLayout    This (source) level's grids.
     @param[in]  a_otherLayout   Target level's grids (coarser or finer than this level).
+    @param[in]  a_validCells    Valid-cell mask used for the coarse-fine halo restriction. For a finer
+                                target it is this level's mask (source cells kept only where valid); for
+                                a coarser target the inner halo is derived geometrically and this is unused.
     @param[in]  a_otherDomain   Problem domain at the target level's resolution.
     @param[in]  a_refRat        Refinement ratio between this level and the target level.
     @param[in]  a_ghost         Ghost width in target-level (destination) cells.
@@ -855,6 +858,7 @@ protected:
   buildCrossLevelGhostTargets(LayoutData<ParticleGhostTargets>& a_targets,
                               const DisjointBoxLayout&          a_thisLayout,
                               const DisjointBoxLayout&          a_otherLayout,
+                              const LevelData<BaseFab<bool>>&   a_validCells,
                               const ProblemDomain&              a_otherDomain,
                               const int                         a_refRat,
                               const int                         a_ghost,

@@ -17,6 +17,7 @@
 #include <ParmParse.H>
 #include <NeighborIterator.H>
 #include <BoxIterator.H>
+#include <IntVectSet.H>
 #include <Copier.H>
 
 // Our includes
@@ -1095,6 +1096,7 @@ Realm::defineParticleGhostTargets() noexcept
       this->buildCrossLevelGhostTargets(*m_particleGhostTargetsCoar[lvl],
                                         dbl,
                                         m_grids[lvl - 1],
+                                        *m_validCells[lvl - 1],
                                         m_domains[lvl - 1],
                                         m_refinementRatios[lvl - 1],
                                         ghost,
@@ -1107,6 +1109,7 @@ Realm::defineParticleGhostTargets() noexcept
       this->buildCrossLevelGhostTargets(*m_particleGhostTargetsFine[lvl],
                                         dbl,
                                         m_grids[lvl + 1],
+                                        *m_validCells[lvl],
                                         m_domains[lvl + 1],
                                         m_refinementRatios[lvl],
                                         ghost,
@@ -1207,6 +1210,7 @@ void
 Realm::buildCrossLevelGhostTargets(LayoutData<ParticleGhostTargets>& a_targets,
                                    const DisjointBoxLayout&          a_thisLayout,
                                    const DisjointBoxLayout&          a_otherLayout,
+                                   const LevelData<BaseFab<bool>>&   a_validCells,
                                    const ProblemDomain&              a_otherDomain,
                                    const int                         a_refRat,
                                    const int                         a_ghost,
@@ -1226,12 +1230,53 @@ Realm::buildCrossLevelGhostTargets(LayoutData<ParticleGhostTargets>& a_targets,
   }
 
   // ghostDefine: each target box's grown region (a_ghost cells) -> this level's cells (at target res).
+  // This gives, per cell, ALL target boxes whose ghosted box contains it (multi-target). WHICH cells are
+  // actually sources is decided separately by the coarse-fine halo restriction below.
   Copier copier;
   copier.ghostDefine(a_otherLayout, workLayout, a_otherDomain, a_ghost * IntVect::Unit);
 
   const DataIterator&               dit      = a_thisLayout.dataIterator();
   const int                         nbox     = dit.size();
   const CopyIterator::local_from_to plans[2] = {CopyIterator::LOCAL, CopyIterator::TO};
+
+  // For a coarser target (fine->coarse) restrict sources to the INNER coarse-fine halo: footprint cells
+  // within a_ghost (destination) cells of the coarse-fine interface. Built geometrically from the
+  // coarsened-fine layout (workLayout): the ring OUTSIDE each footprint box, minus abutting footprint
+  // boxes (internal seams), is the valid coarse region; growing it back in and intersecting the box gives
+  // the inner halo. This is independent of the coarse grid's box decomposition (fixes the seam bug).
+  LayoutData<BaseFab<bool>> innerHalo;
+  if (a_coarserTarget) {
+    innerHalo.define(workLayout);
+
+    NeighborIterator   nit(workLayout);
+    const DataIterator wdit = workLayout.dataIterator();
+    for (int mybox = 0; mybox < wdit.size(); mybox++) {
+      const DataIndex& din      = wdit[mybox];
+      const Box        coFiBox  = workLayout[din];
+      BaseFab<bool>&   haloMask = innerHalo[din];
+
+      haloMask.resize(coFiBox, 1);
+      haloMask.setVal(false);
+
+      // Valid coarse cells within a_ghost of this footprint box, excluding internal footprint seams.
+      Box grownBox = grow(coFiBox, a_ghost);
+      grownBox &= a_otherDomain;
+
+      IntVectSet ring(grownBox);
+      ring -= coFiBox;
+      for (nit.begin(din); nit.ok(); ++nit) {
+        ring -= workLayout[nit()];
+      }
+
+      // Footprint cells within a_ghost of that valid region = the inner coarse-fine halo.
+      IntVectSet inner(ring);
+      inner.grow(a_ghost);
+      inner &= coFiBox;
+      for (IVSIterator ivs(inner); ivs.ok(); ++ivs) {
+        haloMask(ivs(), 0) = true;
+      }
+    }
+  }
 
   // Initialize per-source-box CSR (count = 0, start = -1) over this level's valid cells.
   for (int mybox = 0; mybox < nbox; mybox++) {
@@ -1245,23 +1290,23 @@ Realm::buildCrossLevelGhostTargets(LayoutData<ParticleGhostTargets>& a_targets,
     t.m_flat.clear();
   }
 
-  // Walk the motion plan and hand each (source cell -> target) contribution to a_emit. The "outside the
-  // target box's own footprint" filter is what restricts sources to the coarse-fine halo: the interior
-  // of the nest is never reached from outside a target box. Run once to count and once to pack.
+  // Walk the motion plan and hand each (source cell -> target) contribution to a_emit. The coarse-fine
+  // halo restriction (inner halo for a coarser target; validity for a finer target) is what selects the
+  // source cells; every retained cell keeps ALL target boxes reaching it. Run once to count, once to pack.
   const auto forEachContribution = [&](auto&& a_emit) {
     for (const auto plan : plans) {
       for (CopyIterator cit(copier, plan); cit.ok(); ++cit) {
         const MotionItem&         item = cit();
         const ParticleGhostTarget target(a_otherLayout.index(item.fromIndex), a_otherLayout.procID(item.fromIndex));
-        const Box                 otherBox = a_otherLayout[item.fromIndex]; // target box, target resolution
-        const Box                 thisBox  = a_thisLayout[item.toIndex];    // source box, this resolution
+        const Box                 thisBox = a_thisLayout[item.toIndex]; // source box, this resolution
 
         if (a_coarserTarget) {
-          // toRegion holds coarse (target-resolution) cells. Keep those OUTSIDE the coarse box (its ghost
-          // reach = the fine-side halo); each such coarse cell refines to whole fine source cells.
+          // toRegion holds coarse (target-resolution) footprint cells. Keep only inner-halo cells; each
+          // refines to whole fine source cells.
+          const BaseFab<bool>& halo = innerHalo[item.toIndex];
           for (BoxIterator bit(item.toRegion); bit.ok(); ++bit) {
             const IntVect cc = bit();
-            if (otherBox.contains(cc)) {
+            if (!halo(cc, 0)) {
               continue;
             }
             const Box fineCells = refine(Box(cc, cc), a_refRat) & thisBox;
@@ -1272,12 +1317,12 @@ Realm::buildCrossLevelGhostTargets(LayoutData<ParticleGhostTargets>& a_targets,
         }
         else {
           // toRegion holds fine (target-resolution) cells. Coarsen to this level's coarse source cells and
-          // keep those OUTSIDE the fine box's footprint (the coarse-side outer halo).
-          const Box coarseCells = coarsen(item.toRegion, a_refRat) & thisBox;
-          const Box coveredCoar = coarsen(otherBox, a_refRat);
+          // keep only VALID ones (covered cells have no particles); those form the coarse-side outer halo.
+          const BaseFab<bool>& valid       = a_validCells[item.toIndex];
+          const Box            coarseCells = coarsen(item.toRegion, a_refRat) & thisBox;
           for (BoxIterator bit(coarseCells); bit.ok(); ++bit) {
             const IntVect cc = bit();
-            if (coveredCoar.contains(cc)) {
+            if (!valid(cc, 0)) {
               continue;
             }
             a_emit(item.toIndex, cc, target);
