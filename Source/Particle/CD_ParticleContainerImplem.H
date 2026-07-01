@@ -755,9 +755,7 @@ ParticleContainer<P, Traits>::resetParticleIDs(const bool a_onlyValidRegion, con
   }
 
   // Per-rank exclusive offset: all-gather each rank's local total, then sum the ranks before this one.
-  // NOTE: ParallelOps::gather is int-typed, so a single rank must hold < 2^31 qualifying particles (the
-  // global total may exceed that and is returned via sum(long long)).
-  const Vector<int> perRankCount = ParallelOps::gather(static_cast<int>(localTotal));
+  const Vector<long long> perRankCount = ParallelOps::gather(localTotal);
 
   ParticleID rankOffset = a_startID;
   for (int r = 0; r < procID(); r++) {

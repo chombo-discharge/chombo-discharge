@@ -568,6 +568,22 @@ ParallelOps::gather(const Real& a_localValue) noexcept
 #endif
 }
 
+inline Vector<long long>
+ParallelOps::gather(const long long& a_localValue) noexcept
+{
+  CH_TIME("ParallelOps::gather(long long)");
+
+#ifdef CH_MPI
+  Vector<long long> ret(numProc());
+
+  MPI_Allgather(&a_localValue, 1, MPI_LONG_LONG, ret.stdVector().data(), 1, MPI_LONG_LONG, Chombo_MPI::comm);
+
+  return ret;
+#else
+  return Vector<long long>(1, a_localValue);
+#endif
+}
+
 #include <CD_NamespaceFooter.H>
 
 #endif
