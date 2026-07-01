@@ -1063,6 +1063,21 @@ Realm::defineValidCells()
 }
 
 void
+Realm::registerParticleGhostMask(const int a_width) noexcept
+{
+  CH_TIME("Realm::registerParticleGhostMask");
+  if (m_verbosity > 5) {
+    pout() << "Realm::registerParticleGhostMask" << endl;
+  }
+
+  if (a_width <= 0) {
+    MayDay::Abort("Realm::registerParticleGhostMask -- particle ghost-mask width must be > 0");
+  }
+
+  m_particleGhostMaskWidths.insert(a_width);
+}
+
+void
 Realm::defineParticleGhostMasks() noexcept
 {
   CH_TIME("Realm::defineParticleGhostMasks");
@@ -1070,49 +1085,62 @@ Realm::defineParticleGhostMasks() noexcept
     pout() << "Realm::defineParticleGhostMasks" << endl;
   }
 
-  const int ghost = m_numGhost;
+  m_particleGhostMask.clear();
+  m_particleGhostMaskFineToCoar.clear();
+  m_particleGhostMaskCoarToFine.clear();
 
-  m_particleGhostMask.resize(1 + m_finestLevel);
-  m_particleGhostMaskFineToCoar.resize(1 + m_finestLevel);
-  m_particleGhostMaskCoarToFine.resize(1 + m_finestLevel);
-
-  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    const DisjointBoxLayout& dbl    = m_grids[lvl];
-    const ProblemDomain&     domain = m_domains[lvl];
-
-    m_particleGhostMask[lvl] = RefCountedPtr<LayoutData<ParticleGhostMask>>(new LayoutData<ParticleGhostMask>(dbl));
-    m_particleGhostMaskFineToCoar[lvl] = RefCountedPtr<LayoutData<ParticleGhostMask>>(
-      new LayoutData<ParticleGhostMask>(dbl));
-    m_particleGhostMaskCoarToFine[lvl] = RefCountedPtr<LayoutData<ParticleGhostMask>>(
-      new LayoutData<ParticleGhostMask>(dbl));
-
-    // SAME level: targets are the abutting boxes on this level (each grown by 'ghost' at this resolution).
-    this->defineParticleGhostMaskSameLevel(*m_particleGhostMask[lvl], dbl, domain, ghost);
-
-    // COARSER (lvl -> lvl-1): fine cells that scatter DOWN to the coarse level. Restricted to the fine
-    // side of the coarse-fine halo; ghost width in destination (coarse) cells.
-    if (lvl > 0) {
-      this->defineParticleGhostMaskCrossLevel(*m_particleGhostMaskFineToCoar[lvl],
-                                              dbl,
-                                              m_grids[lvl - 1],
-                                              *m_validCells[lvl - 1],
-                                              m_domains[lvl - 1],
-                                              m_refinementRatios[lvl - 1],
-                                              ghost,
-                                              true);
+  // No particle ghost masks are built unless downstream code has registered at least one width.
+  for (const int ghost : m_particleGhostMaskWidths) {
+    if (ghost >= m_minBlockSize) {
+      const std::string msg = "Realm::defineParticleGhostMasks -- ghost width = " + std::to_string(ghost) +
+                              " must be < min_block_size = " + std::to_string(m_minBlockSize);
+      MayDay::Abort(msg.c_str());
     }
 
-    // FINER (lvl -> lvl+1): coarse cells that scatter UP to the finer level. Restricted to the coarse
-    // side of the coarse-fine halo; ghost width in destination (fine) cells.
-    if (lvl < m_finestLevel) {
-      this->defineParticleGhostMaskCrossLevel(*m_particleGhostMaskCoarToFine[lvl],
-                                              dbl,
-                                              m_grids[lvl + 1],
-                                              *m_validCells[lvl],
-                                              m_domains[lvl + 1],
-                                              m_refinementRatios[lvl],
-                                              ghost,
-                                              false);
+    AMRParticleGhostMask& same       = m_particleGhostMask[ghost];
+    AMRParticleGhostMask& fineToCoar = m_particleGhostMaskFineToCoar[ghost];
+    AMRParticleGhostMask& coarToFine = m_particleGhostMaskCoarToFine[ghost];
+
+    same.resize(1 + m_finestLevel);
+    fineToCoar.resize(1 + m_finestLevel);
+    coarToFine.resize(1 + m_finestLevel);
+
+    for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+      const DisjointBoxLayout& dbl    = m_grids[lvl];
+      const ProblemDomain&     domain = m_domains[lvl];
+
+      same[lvl]       = RefCountedPtr<LayoutData<ParticleGhostMask>>(new LayoutData<ParticleGhostMask>(dbl));
+      fineToCoar[lvl] = RefCountedPtr<LayoutData<ParticleGhostMask>>(new LayoutData<ParticleGhostMask>(dbl));
+      coarToFine[lvl] = RefCountedPtr<LayoutData<ParticleGhostMask>>(new LayoutData<ParticleGhostMask>(dbl));
+
+      // SAME level: targets are the abutting boxes on this level (each grown by 'ghost' at this resolution).
+      this->defineParticleGhostMaskSameLevel(*same[lvl], dbl, domain, ghost);
+
+      // COARSER (lvl -> lvl-1): fine cells that scatter DOWN to the coarse level. Restricted to the fine
+      // side of the coarse-fine halo; ghost width in destination (coarse) cells.
+      if (lvl > 0) {
+        this->defineParticleGhostMaskCrossLevel(*fineToCoar[lvl],
+                                                dbl,
+                                                m_grids[lvl - 1],
+                                                *m_validCells[lvl - 1],
+                                                m_domains[lvl - 1],
+                                                m_refinementRatios[lvl - 1],
+                                                ghost,
+                                                true);
+      }
+
+      // FINER (lvl -> lvl+1): coarse cells that scatter UP to the finer level. Restricted to the coarse
+      // side of the coarse-fine halo; ghost width in destination (fine) cells.
+      if (lvl < m_finestLevel) {
+        this->defineParticleGhostMaskCrossLevel(*coarToFine[lvl],
+                                                dbl,
+                                                m_grids[lvl + 1],
+                                                *m_validCells[lvl],
+                                                m_domains[lvl + 1],
+                                                m_refinementRatios[lvl],
+                                                ghost,
+                                                false);
+      }
     }
   }
 }
@@ -1638,21 +1666,50 @@ Realm::getLevelTiles() const noexcept
 }
 
 const AMRParticleGhostMask&
-Realm::getParticleGhostMask() const noexcept
+Realm::getParticleGhostMask(const int a_width) const noexcept
 {
-  return m_particleGhostMask;
+  const auto it = m_particleGhostMask.find(a_width);
+  if (it == m_particleGhostMask.end()) {
+    const std::string msg = "Realm::getParticleGhostMask -- width = " + std::to_string(a_width) +
+                            " was not registered (call registerParticleGhostMask before regridding)";
+    MayDay::Abort(msg.c_str());
+  }
+
+  return it->second;
 }
 
 const AMRParticleGhostMask&
-Realm::getParticleGhostMaskFineToCoar() const noexcept
+Realm::getParticleGhostMaskFineToCoar(const int a_width) const noexcept
 {
-  return m_particleGhostMaskFineToCoar;
+  const auto it = m_particleGhostMaskFineToCoar.find(a_width);
+  if (it == m_particleGhostMaskFineToCoar.end()) {
+    const std::string msg = "Realm::getParticleGhostMaskFineToCoar -- width = " + std::to_string(a_width) +
+                            " was not registered (call registerParticleGhostMask before regridding)";
+    MayDay::Abort(msg.c_str());
+  }
+
+  return it->second;
 }
 
 const AMRParticleGhostMask&
-Realm::getParticleGhostMaskCoarToFine() const noexcept
+Realm::getParticleGhostMaskCoarToFine(const int a_width) const noexcept
 {
-  return m_particleGhostMaskCoarToFine;
+  const auto it = m_particleGhostMaskCoarToFine.find(a_width);
+  if (it == m_particleGhostMaskCoarToFine.end()) {
+    const std::string msg = "Realm::getParticleGhostMaskCoarToFine -- width = " + std::to_string(a_width) +
+                            " was not registered (call registerParticleGhostMask before regridding)";
+    MayDay::Abort(msg.c_str());
+  }
+
+  return it->second;
+}
+
+const AMRParticleGhostMask&
+Realm::getTrivialParticleGhostMask() const noexcept
+{
+  static const AMRParticleGhostMask trivial;
+
+  return trivial;
 }
 
 Realm::LevelAndBox

@@ -3416,52 +3416,83 @@ AmrMesh::getLevelTiles(const std::string& a_realm) const
   return m_realms[a_realm]->getLevelTiles();
 }
 
-const AMRParticleGhostMask&
-AmrMesh::getParticleGhostMask(const std::string& a_realm) const
+void
+AmrMesh::registerParticleGhostMask(const std::string& a_realm, const int a_width)
 {
-  CH_TIME("AmrMesh::getParticleGhostMask(string)");
+  CH_TIME("AmrMesh::registerParticleGhostMask(string, int)");
   if (m_verbosity > 1) {
-    pout() << "AmrMesh::getParticleGhostMask(string)" << endl;
+    pout() << "AmrMesh::registerParticleGhostMask(string, int)" << endl;
   }
 
   if (!this->queryRealm(a_realm)) {
-    const std::string str = "AmrMesh::getParticleGhostMask(string) - could not find realm '" + a_realm + "'";
+    const std::string str = "AmrMesh::registerParticleGhostMask - could not find realm '" + a_realm + "'";
     MayDay::Abort(str.c_str());
   }
 
-  return m_realms[a_realm]->getParticleGhostMask();
+  m_realms[a_realm]->registerParticleGhostMask(a_width);
 }
 
 const AMRParticleGhostMask&
-AmrMesh::getParticleGhostMaskFineToCoar(const std::string& a_realm) const
+AmrMesh::getParticleGhostMask(const std::string& a_realm, const int a_width) const
 {
-  CH_TIME("AmrMesh::getParticleGhostMaskFineToCoar(string)");
+  CH_TIME("AmrMesh::getParticleGhostMask(string, int)");
   if (m_verbosity > 1) {
-    pout() << "AmrMesh::getParticleGhostMaskFineToCoar(string)" << endl;
+    pout() << "AmrMesh::getParticleGhostMask(string, int)" << endl;
   }
 
   if (!this->queryRealm(a_realm)) {
-    const std::string str = "AmrMesh::getParticleGhostMaskFineToCoar(string) - could not find realm '" + a_realm + "'";
+    const std::string str = "AmrMesh::getParticleGhostMask(string, int) - could not find realm '" + a_realm + "'";
     MayDay::Abort(str.c_str());
   }
 
-  return m_realms[a_realm]->getParticleGhostMaskFineToCoar();
+  return m_realms[a_realm]->getParticleGhostMask(a_width);
 }
 
 const AMRParticleGhostMask&
-AmrMesh::getParticleGhostMaskCoarToFine(const std::string& a_realm) const
+AmrMesh::getParticleGhostMaskFineToCoar(const std::string& a_realm, const int a_width) const
 {
-  CH_TIME("AmrMesh::getParticleGhostMaskCoarToFine(string)");
+  CH_TIME("AmrMesh::getParticleGhostMaskFineToCoar(string, int)");
   if (m_verbosity > 1) {
-    pout() << "AmrMesh::getParticleGhostMaskCoarToFine(string)" << endl;
+    pout() << "AmrMesh::getParticleGhostMaskFineToCoar(string, int)" << endl;
   }
 
   if (!this->queryRealm(a_realm)) {
-    const std::string str = "AmrMesh::getParticleGhostMaskCoarToFine(string) - could not find realm '" + a_realm + "'";
+    const std::string str = "AmrMesh::getParticleGhostMaskFineToCoar(string, int) - could not find realm '" + a_realm +
+                            "'";
     MayDay::Abort(str.c_str());
   }
 
-  return m_realms[a_realm]->getParticleGhostMaskCoarToFine();
+  return m_realms[a_realm]->getParticleGhostMaskFineToCoar(a_width);
+}
+
+const AMRParticleGhostMask&
+AmrMesh::getParticleGhostMaskCoarToFine(const std::string& a_realm, const int a_width) const
+{
+  CH_TIME("AmrMesh::getParticleGhostMaskCoarToFine(string, int)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getParticleGhostMaskCoarToFine(string, int)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getParticleGhostMaskCoarToFine(string, int) - could not find realm '" + a_realm +
+                            "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getParticleGhostMaskCoarToFine(a_width);
+}
+
+const AMRParticleGhostMask&
+AmrMesh::getTrivialParticleGhostMask() const
+{
+  CH_TIME("AmrMesh::getTrivialParticleGhostMask()");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getTrivialParticleGhostMask()" << endl;
+  }
+
+  static const AMRParticleGhostMask trivial;
+
+  return trivial;
 }
 
 const Vector<RefCountedPtr<EBLevelGrid>>&

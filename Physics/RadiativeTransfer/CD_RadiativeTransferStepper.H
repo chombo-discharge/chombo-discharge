@@ -288,6 +288,11 @@ namespace Physics {
 	@brief Number of particles to sample for ghostBoundaryTest().
       */
       int m_ghostBoundaryTestParticles = 0;
+
+      /**
+	@brief Ghost-mask width registered/visualized when m_ghostBoundaryTest is on.
+      */
+      int m_ghostBoundaryTestWidth = 1;
     };
   } // namespace RadiativeTransfer
 } // namespace Physics

@@ -53,8 +53,10 @@ RadiativeTransferStepper<T>::RadiativeTransferStepper()
   // Optional ghost-particle boundary verification (McPhoto only). Off unless explicitly requested.
   m_ghostBoundaryTest          = false;
   m_ghostBoundaryTestParticles = 100000;
+  m_ghostBoundaryTestWidth     = 1;
   pp.query("ghost_boundary_test", m_ghostBoundaryTest);
   pp.query("ghost_boundary_test_particles", m_ghostBoundaryTestParticles);
+  pp.query("ghost_boundary_test_width", m_ghostBoundaryTestWidth);
 }
 
 template <typename T>
@@ -331,9 +333,9 @@ RadiativeTransferStepper<T>::writeGhostTargetPlotData(LevelData<EBCellFAB>& a_ou
   // ranks, and that the output realm matches the stepper realm (true for the McPhoto example).
   CH_assert(a_outputRealm == m_realm);
 
-  const AMRParticleGhostMask& same = m_amr->getParticleGhostMask(m_realm);
-  const AMRParticleGhostMask& coar = m_amr->getParticleGhostMaskFineToCoar(m_realm);
-  const AMRParticleGhostMask& fine = m_amr->getParticleGhostMaskCoarToFine(m_realm);
+  const AMRParticleGhostMask& same = m_amr->getParticleGhostMask(m_realm, m_ghostBoundaryTestWidth);
+  const AMRParticleGhostMask& coar = m_amr->getParticleGhostMaskFineToCoar(m_realm, m_ghostBoundaryTestWidth);
+  const AMRParticleGhostMask& fine = m_amr->getParticleGhostMaskCoarToFine(m_realm, m_ghostBoundaryTestWidth);
 
   const DisjointBoxLayout& dbl  = m_amr->getGrids(m_realm)[a_level];
   const DataIterator&      dit  = dbl.dataIterator();
@@ -452,6 +454,11 @@ RadiativeTransferStepper<T>::registerRealms()
   }
 
   m_amr->registerRealm(m_realm);
+
+  // DEV: register the ghost-mask width we visualize (see writeGhostTargetPlotData).
+  if (m_ghostBoundaryTest) {
+    m_amr->registerParticleGhostMask(m_realm, m_ghostBoundaryTestWidth);
+  }
 }
 
 template <typename T>

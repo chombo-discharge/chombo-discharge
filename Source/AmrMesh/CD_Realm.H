@@ -13,6 +13,10 @@
 #ifndef CD_REALM_H
 #define CD_REALM_H
 
+// Std includes
+#include <map>
+#include <set>
+
 // Our includes
 #include <CD_PhaseRealm.H>
 #include <CD_EBAMRParticleMesh.H>
@@ -484,25 +488,47 @@ public:
   getValidCells() const;
 
   /**
-    @brief Get the same-level particle ghost-target lookup.
-    @return m_particleGhostMask
+    @brief Register a particle ghost-mask width so it is (re)built at every regrid.
+    @details Downstream code must register a width before it can fetch the corresponding masks. Widths
+    are deduplicated, so several consumers may safely request the same width. No masks are built at all
+    unless at least one width has been registered.
+    @param[in] a_width Ghost width (cells). Must be > 0; a run-time error is thrown otherwise.
   */
-  const AMRParticleGhostMask&
-  getParticleGhostMask() const noexcept;
+  void
+  registerParticleGhostMask(const int a_width) noexcept;
 
   /**
-    @brief Get the coarser-level particle ghost-target lookup.
-    @return m_particleGhostMaskFineToCoar
+    @brief Get the same-level particle ghost mask for a registered width.
+    @param[in] a_width Registered ghost width.
+    @return The per-level same-level mask for a_width. Aborts if the width was not registered.
   */
   const AMRParticleGhostMask&
-  getParticleGhostMaskFineToCoar() const noexcept;
+  getParticleGhostMask(const int a_width) const noexcept;
 
   /**
-    @brief Get the finer-level particle ghost-target lookup.
-    @return m_particleGhostMaskCoarToFine
+    @brief Get the fine-to-coarse particle ghost mask for a registered width.
+    @param[in] a_width Registered ghost width.
+    @return The per-level fine-to-coarse mask for a_width. Aborts if the width was not registered.
   */
   const AMRParticleGhostMask&
-  getParticleGhostMaskCoarToFine() const noexcept;
+  getParticleGhostMaskFineToCoar(const int a_width) const noexcept;
+
+  /**
+    @brief Get the coarse-to-fine particle ghost mask for a registered width.
+    @param[in] a_width Registered ghost width.
+    @return The per-level coarse-to-fine mask for a_width. Aborts if the width was not registered.
+  */
+  const AMRParticleGhostMask&
+  getParticleGhostMaskCoarToFine(const int a_width) const noexcept;
+
+  /**
+    @brief Get a trivial (empty) particle ghost mask that scatters no particles.
+    @details Pass this to ParticleContainer::fillGhost for a direction that should not scatter. It holds
+    no levels, so a fill over it is a no-op.
+    @return A static empty mask.
+  */
+  const AMRParticleGhostMask&
+  getTrivialParticleGhostMask() const noexcept;
 
   /**
     @brief Get the tiled space
@@ -633,22 +659,28 @@ protected:
   AMRMask m_validCells;
 
   /**
-    @brief Particle ghost-target lookup to SAME-level boxes. Indexed by source level; per source box,
-    maps a source cell to the same-level boxes whose ghosted region covers it. See defineParticleGhostMasks().
+    @brief Registered particle ghost-mask widths (>0). Persist across regrids; the masks below are
+    (re)built for exactly these widths in defineParticleGhostMasks().
   */
-  AMRParticleGhostMask m_particleGhostMask;
+  std::set<int> m_particleGhostMaskWidths;
 
   /**
-    @brief Particle ghost-target lookup to the next-COARSER level. Indexed by source level (>=1); per
-    source (fine) box, maps a source cell to the coarser-level boxes whose ghosted region covers it.
+    @brief Same-level particle ghost masks, keyed by ghost width. Per width: indexed by source level, and
+    per source box maps a source cell to the same-level boxes whose ghosted region covers it.
   */
-  AMRParticleGhostMask m_particleGhostMaskFineToCoar;
+  std::map<int, AMRParticleGhostMask> m_particleGhostMask;
 
   /**
-    @brief Particle ghost-target lookup to the next-FINER level. Indexed by source level (<finest); per
-    source (coarse) box, maps a source cell to the finer-level boxes whose ghosted region covers it.
+    @brief Fine-to-coarse particle ghost masks, keyed by ghost width. Per width: indexed by source level
+    (>=1); per source (fine) box maps a source cell to the coarser-level boxes whose ghosted region covers it.
   */
-  AMRParticleGhostMask m_particleGhostMaskCoarToFine;
+  std::map<int, AMRParticleGhostMask> m_particleGhostMaskFineToCoar;
+
+  /**
+    @brief Coarse-to-fine particle ghost masks, keyed by ghost width. Per width: indexed by source level
+    (<finest); per source (coarse) box maps a source cell to the finer-level boxes whose ghosted region covers it.
+  */
+  std::map<int, AMRParticleGhostMask> m_particleGhostMaskCoarToFine;
 
 #ifdef CH_USE_PETSC
   /**
