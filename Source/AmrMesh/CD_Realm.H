@@ -843,40 +843,57 @@ protected:
                                    const int                      a_ghost) noexcept;
 
   /**
-    @brief Define one CROSS-LEVEL particle ghost mask (targets on the next-coarser or next-finer level).
-    @details The mask is two separable pieces per source cell. (1) TARGETS: every box on the target level
-    whose ghosted region (grown by a_ghost cells at the target resolution) contains the cell. These are
-    found by walking a ghostDefine Copier motion plan -- only overlapping box pairs are visited (never a
-    LayoutIterator over all boxes) -- and are multi-valued, since a cell may scatter to several target
-    boxes (e.g. diagonal coarse-fine cells). (2) SOURCE restriction to the coarse-fine halo, so the nested
-    interior is not scattered: for a coarser target (fine->coarse) the inner halo is built geometrically
-    from the coarsened-fine layout (the ring outside each footprint box, minus the abutting footprint
-    boxes, grown back inward), independent of the coarse grid's box decomposition; for a finer target
-    (coarse->fine) only VALID source cells (those not covered by the finer level) are kept. The target
-    resolution is reached by coarsen()/refine() of this level (which preserve the DataIndex), and halo
-    cells are mapped back with refine()/coarsen(). The ghost width is measured in DESTINATION
-    (target-level) cells and is a MINIMUM: whole source cells overlapping the halo are recorded, i.e.
-    over-communication across the interface is accepted. Periodic boundaries are not handled.
-    @param[out] a_targets       Per-box CSR ghost mask over a_thisLayout to fill.
-    @param[in]  a_thisLayout    This (source) level's grids.
-    @param[in]  a_otherLayout   Target level's grids (coarser or finer than this level).
-    @param[in]  a_validCells    Valid-cell mask for the halo restriction. For a finer target this is this
-                                level's mask (source cells are kept only where valid); for a coarser
-                                target the inner halo is derived geometrically and this argument is unused.
-    @param[in]  a_otherDomain   Problem domain at the target level's resolution.
-    @param[in]  a_refRat        Refinement ratio between this level and the target level.
-    @param[in]  a_ghost         Ghost width in target-level (destination) cells.
-    @param[in]  a_coarserTarget True if the target level is coarser than this level (fine->coarse).
+    @brief Define the FINE-to-COARSE particle ghost mask on one level (targets on the next-coarser level).
+    @details Per source (fine) cell the mask holds every coarse box whose ghosted region (grown by a_ghost
+    COARSE cells) contains the cell's coarse footprint -- found by walking a ghostDefine Copier motion plan
+    (only overlapping box pairs are visited), and multi-valued since a cell may scatter to several coarse
+    boxes (e.g. diagonal coarse-fine cells). Sources are restricted to the INNER coarse-fine halo so the
+    nested interior is not scattered: the halo is built geometrically from the coarsened-fine footprint
+    (the ring outside each footprint box, minus the abutting footprint boxes = internal seams, grown back
+    inward), independent of the coarse grid's box decomposition. The ghost width is measured in coarse
+    (destination) cells and is a MINIMUM: each halo coarse cell refines to all its fine source children
+    (over-communication across the interface is accepted). Periodic boundaries are not handled.
+    @param[out] a_mask       Per-box CSR ghost mask over a_thisLayout (the fine level) to fill.
+    @param[in]  a_thisLayout This (fine, source) level's grids.
+    @param[in]  a_coarLayout The next-coarser (target) level's grids.
+    @param[in]  a_coarDomain Problem domain at the coarse (target) resolution.
+    @param[in]  a_refRat     Refinement ratio between the coarse level and this level.
+    @param[in]  a_ghost      Ghost width in coarse (destination) cells.
   */
   void
-  defineParticleGhostMaskCrossLevel(LayoutData<ParticleGhostMask>&  a_targets,
+  defineParticleGhostMaskFineToCoar(LayoutData<ParticleGhostMask>& a_mask,
+                                    const DisjointBoxLayout&       a_thisLayout,
+                                    const DisjointBoxLayout&       a_coarLayout,
+                                    const ProblemDomain&           a_coarDomain,
+                                    const int                      a_refRat,
+                                    const int                      a_ghost) noexcept;
+
+  /**
+    @brief Define the COARSE-to-FINE particle ghost mask on one level (targets on the next-finer level).
+    @details Per source (coarse) cell the mask holds every fine box whose ghosted region (grown by a_ghost
+    FINE cells) contains any of the cell's fine children -- found by walking a ghostDefine Copier motion
+    plan (only overlapping box pairs are visited), and multi-valued since a cell may scatter to several
+    fine boxes. The fine reach is coarsened to whole coarse source cells, and only VALID coarse cells
+    (those not covered by the finer level) are kept -- that is the coarse-side outer halo. The ghost width
+    is measured in fine (destination) cells and is a MINIMUM: whole coarse source cells overlapping the
+    halo are recorded (over-communication across the interface is accepted). Periodic boundaries are not
+    handled.
+    @param[out] a_mask       Per-box CSR ghost mask over a_thisLayout (the coarse level) to fill.
+    @param[in]  a_thisLayout This (coarse, source) level's grids.
+    @param[in]  a_fineLayout The next-finer (target) level's grids.
+    @param[in]  a_validCells This (coarse) level's valid-cell mask; source cells are kept only where valid.
+    @param[in]  a_fineDomain Problem domain at the fine (target) resolution.
+    @param[in]  a_refRat     Refinement ratio between this level and the fine level.
+    @param[in]  a_ghost      Ghost width in fine (destination) cells.
+  */
+  void
+  defineParticleGhostMaskCoarToFine(LayoutData<ParticleGhostMask>&  a_mask,
                                     const DisjointBoxLayout&        a_thisLayout,
-                                    const DisjointBoxLayout&        a_otherLayout,
+                                    const DisjointBoxLayout&        a_fineLayout,
                                     const LevelData<BaseFab<bool>>& a_validCells,
-                                    const ProblemDomain&            a_otherDomain,
+                                    const ProblemDomain&            a_fineDomain,
                                     const int                       a_refRat,
-                                    const int                       a_ghost,
-                                    const bool                      a_coarserTarget) noexcept;
+                                    const int                       a_ghost) noexcept;
 
   /**
     @brief Define the PETSc composite grid
