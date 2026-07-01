@@ -1139,42 +1139,28 @@ Realm::buildParticleGhostMaskSameLevel(LayoutData<ParticleGhostTargets>& a_mask,
     const Box             box = a_dbl[din];
     ParticleGhostTargets& t   = a_mask[din];
 
-    t.m_count.resize(box, 1);
-    t.m_count.setVal(0);
-    t.m_start.resize(box, 1);
-    t.m_start.setVal(-1);
-    t.m_flat.clear();
+    t.define(box);
 
     // Pass 1: count targets per cell.
     for (nit.begin(din); nit.ok(); ++nit) {
       const Box reach = grow(a_dbl[nit()], a_ghost) & box;
       for (BoxIterator bit(reach); bit.ok(); ++bit) {
-        t.m_count(bit(), 0) += 1;
+        t.incrementCount(bit());
       }
     }
 
-    // Prefix-sum counts into start offsets; size the packed target array.
-    int offset = 0;
-    for (BoxIterator bit(box); bit.ok(); ++bit) {
-      const int c = t.m_count(bit(), 0);
-      if (c > 0) {
-        t.m_start(bit(), 0) = offset;
-        offset += c;
-      }
-    }
-    t.m_flat.resize(offset);
+    t.allocate();
 
-    // Pass 2: pack the targets. 'cursor' holds the next free slot per cell (initialized to start).
-    BaseFab<int> cursor(box, 1);
-    cursor.copy(t.m_start);
+    // Pass 2: pack the targets.
     for (nit.begin(din); nit.ok(); ++nit) {
       const LevelTiles::BoxIDs target(a_dbl.index(nit()), a_dbl.procID(nit()));
       const Box                reach = grow(a_dbl[nit()], a_ghost) & box;
       for (BoxIterator bit(reach); bit.ok(); ++bit) {
-        t.m_flat[cursor(bit(), 0)] = target;
-        cursor(bit(), 0) += 1;
+        t.addTarget(bit(), target);
       }
     }
+
+    t.finalize();
   }
 }
 
@@ -1250,16 +1236,9 @@ Realm::buildCrossLevelGhostTargets(LayoutData<ParticleGhostTargets>& a_targets,
     }
   }
 
-  // Initialize per-source-box CSR (count = 0, start = -1) over this level's valid cells.
+  // Initialize per-source-box CSR over this level's valid cells.
   for (int mybox = 0; mybox < nbox; mybox++) {
-    ParticleGhostTargets& t = a_targets[dit[mybox]];
-    const Box             b = a_thisLayout[dit[mybox]];
-
-    t.m_count.resize(b, 1);
-    t.m_count.setVal(0);
-    t.m_start.resize(b, 1);
-    t.m_start.setVal(-1);
-    t.m_flat.clear();
+    a_targets[dit[mybox]].define(a_thisLayout[dit[mybox]]);
   }
 
   // Walk the motion plan and hand each (source cell -> target) contribution to a_emit. The coarse-fine
@@ -1306,34 +1285,21 @@ Realm::buildCrossLevelGhostTargets(LayoutData<ParticleGhostTargets>& a_targets,
 
   // Pass 1: count targets per source cell.
   forEachContribution([&](const DataIndex& a_di, const IntVect& a_iv, const LevelTiles::BoxIDs&) {
-    a_targets[a_di].m_count(a_iv, 0) += 1;
+    a_targets[a_di].incrementCount(a_iv);
   });
 
-  // Prefix-sum counts into start offsets and size the packed target arrays.
+  // Turn counts into CSR offsets and size the packed target arrays.
   for (int mybox = 0; mybox < nbox; mybox++) {
-    ParticleGhostTargets& t      = a_targets[dit[mybox]];
-    int                   offset = 0;
-    for (BoxIterator bit(t.m_count.box()); bit.ok(); ++bit) {
-      const int c = t.m_count(bit(), 0);
-      if (c > 0) {
-        t.m_start(bit(), 0) = offset;
-        offset += c;
-      }
-    }
-    t.m_flat.resize(offset);
+    a_targets[dit[mybox]].allocate();
   }
 
-  // Pass 2: pack the targets. 'cursor' holds the next free slot per cell (initialized to start).
-  LayoutData<BaseFab<int>> cursor(a_thisLayout);
-  for (int mybox = 0; mybox < nbox; mybox++) {
-    const DataIndex& din = dit[mybox];
-    cursor[din].resize(a_thisLayout[din], 1);
-    cursor[din].copy(a_targets[din].m_start);
-  }
+  // Pass 2: pack the targets, then rewind the write heads.
   forEachContribution([&](const DataIndex& a_di, const IntVect& a_iv, const LevelTiles::BoxIDs& a_tg) {
-    a_targets[a_di].m_flat[cursor[a_di](a_iv, 0)] = a_tg;
-    cursor[a_di](a_iv, 0) += 1;
+    a_targets[a_di].addTarget(a_iv, a_tg);
   });
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    a_targets[dit[mybox]].finalize();
+  }
 }
 
 void

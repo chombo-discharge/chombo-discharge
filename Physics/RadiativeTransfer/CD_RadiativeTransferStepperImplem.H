@@ -354,8 +354,8 @@ RadiativeTransferStepper<T>::writeGhostTargetPlotData(LevelData<EBCellFAB>& a_ou
       const AMRParticleGhostTargets& table = *tables[k];
       if (a_level < table.size() && !table[a_level].isNull()) {
         const ParticleGhostTargets& t = (*table[a_level])[din];
-        for (BoxIterator bit(validBox & t.m_count.box()); bit.ok(); ++bit) {
-          if (t.m_count(bit(), 0) > 0) {
+        for (BoxIterator bit(validBox & t.box()); bit.ok(); ++bit) {
+          if (t.numTargets(bit()) > 0) {
             reg(bit(), comp) = 1.0;
           }
         }
