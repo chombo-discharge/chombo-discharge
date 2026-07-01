@@ -2939,6 +2939,17 @@ AmrMesh::sanityCheck() const
     MayDay::Abort("AmrMesh::sanityCheck -- max_block_size must be an integer multiple of min_block_size");
   }
 
+  // The number of ghost cells must be strictly smaller than the blocking factor. Because every grid box
+  // is a union of min_block_size-aligned tiles, two non-abutting same-level boxes are always >=
+  // min_block_size apart; with num_ghost < min_block_size a box's ghost region can therefore only reach
+  // its ABUTTING neighbours. The particle ghost-target build (and Chombo's own halo/exchange machinery)
+  // relies on this, so it is a live requirement -- enforced in optimized builds too, not a CH_assert.
+  if (m_numGhostCells >= m_minBlockSize) {
+    const std::string msg = "AmrMesh::sanityCheck -- num_ghost = " + std::to_string(m_numGhostCells) +
+                            " must be < min_block_size = " + std::to_string(m_minBlockSize);
+    MayDay::Abort(msg.c_str());
+  }
+
   // The coarsest domain must be a whole number of minimum-size blocks in every direction. Refined
   // domains inherit this, and every grid box is then a union of aligned min_block_size tiles. Chombo's
   // domainSplit hard-errors otherwise; front-run it with a clear message.
