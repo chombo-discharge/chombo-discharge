@@ -1171,7 +1171,7 @@ Realm::defineParticleGhostMaskSameLevel(LayoutData<ParticleGhostMask>& a_mask,
 
     t.define(box);
 
-    // Pass 1: count targets per cell.
+    // Count targets per cell.
     for (nit.begin(din); nit.ok(); ++nit) {
       const Box reach = grow(a_dbl[nit()], a_ghost) & box;
       for (BoxIterator bit(reach); bit.ok(); ++bit) {
@@ -1181,10 +1181,11 @@ Realm::defineParticleGhostMaskSameLevel(LayoutData<ParticleGhostMask>& a_mask,
 
     t.allocate();
 
-    // Pass 2: pack the targets.
+    // Pack the targets.
     for (nit.begin(din); nit.ok(); ++nit) {
       const LevelTiles::BoxIDs target(a_dbl.index(nit()), a_dbl.procID(nit()));
       const Box                reach = grow(a_dbl[nit()], a_ghost) & box;
+
       for (BoxIterator bit(reach); bit.ok(); ++bit) {
         t.addTarget(bit(), target);
       }
@@ -1227,14 +1228,12 @@ Realm::defineParticleGhostMaskFineToCoar(LayoutData<ParticleGhostMask>& a_mask,
   // inward and intersecting the box gives the inner halo. Independent of the coarse grid's box layout.
   // Thread-safe over boxes: distinct boxes write disjoint innerHalo storage, coFiLayout lookups are
   // read-only, and IntVectSet scratch and the NeighborIterator are declared per iteration (thread-private).
+  // coFiLayout shares this level's DataIndex (coarsen preserves it), so dit/nbox iterate it too.
   LayoutData<BaseFab<bool>> innerHalo(coFiLayout);
 
-  const DataIterator& wdit  = coFiLayout.dataIterator();
-  const int           nwbox = wdit.size();
-
 #pragma omp parallel for schedule(runtime)
-  for (int mybox = 0; mybox < nwbox; mybox++) {
-    const DataIndex& din      = wdit[mybox];
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din      = dit[mybox];
     const Box        coFiBox  = coFiLayout[din];
     BaseFab<bool>&   haloMask = innerHalo[din];
 
