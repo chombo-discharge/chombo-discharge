@@ -238,7 +238,7 @@ Allocating particles
 ``AmrMesh`` has a simple function for allocating a ``ParticleContainer<P, Traits>``:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 212-221
+   :lines: 212-222
    :language: c++
    :dedent: 2
 
@@ -338,7 +338,7 @@ In the above functions the mask particles are *copied*, and the original particl
 After the user is done with the particles, they should be released through
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 732-736
+   :lines: 733-737
    :language: c++
    :dedent: 2
 
@@ -425,7 +425,7 @@ ______________
 With the three masks in hand, the ghost particles are filled with
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 649-652
+   :lines: 650-653
    :language: c++
    :dedent: 2
 
@@ -445,7 +445,7 @@ A typical call, having registered ``width`` during ``registerRealms``/setup, is
 The halo can be dropped at any time with
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 659-660
+   :lines: 660-661
    :language: c++
    :dedent: 2
 
