@@ -2,7 +2,7 @@ var searchData=
 [
   ['barrier_0',['barrier',['../namespaceParallelOps.html#aed6a3c22b5ec18db26ece6fecf1ebf54',1,'ParallelOps::barrier()'],['../classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html#af019b6bba203b000f080fdf6c859f131',1,'Physics::ItoKMC::ItoKMCGodunovStepper::barrier()']]],
   ['boundednoiseplane_1',['boundednoiseplane',['../classBoundedNoisePlane.html#a05f0a57ef5163aa74473288e29a73e29',1,'BoundedNoisePlane::BoundedNoisePlane(const std::string &amp;a_orientation, const RealVect &amp;a_point, const RealVect &amp;a_clampLo, const RealVect &amp;a_clampHi, const Real a_clampK, const Real a_noiseAmp, const RealVect &amp;a_noiseFreq, const Real a_persistence, const int a_octaves, const bool a_reseed=false)'],['../classBoundedNoisePlane.html#a1c5f68061d75bd672df5070b9b5cf662',1,'BoundedNoisePlane::BoundedNoisePlane(const BoundedNoisePlane &amp;a_inputIF)']]],
-  ['box_2',['box',['../classDomainFluxIFFAB.html#ae6a150ba1a55b21cc799e9495230ace0',1,'DomainFluxIFFAB']]],
+  ['box_2',['box',['../classDomainFluxIFFAB.html#ae6a150ba1a55b21cc799e9495230ace0',1,'DomainFluxIFFAB::box()'],['../classParticleGhostMask.html#a154eabc6d391b95a598f020c13a44aaa',1,'ParticleGhostMask::box()']]],
   ['boxsdf_3',['boxsdf',['../classBoxSdf.html#a00246df0e96b19cc7c917f1e9b6f4877',1,'BoxSdf::BoxSdf(const RealVect &amp;a_loCorner, const RealVect &amp;a_hiCorner, const bool &amp;a_fluidInside)'],['../classBoxSdf.html#ab1fa83184dd22fb61d4146704c62842f',1,'BoxSdf::BoxSdf(const BoxSdf &amp;a_inputIF)']]],
   ['brentrootfinder_4',['brentRootFinder',['../namespacePolyUtils.html#a554dcb29bb180400d8d3f7a9c4db57a5',1,'PolyUtils']]],
   ['brentsolve_5',['brentSolve',['../namespacePolyUtils.html#a54737623b93191fb61fc6962e181f912',1,'PolyUtils']]],

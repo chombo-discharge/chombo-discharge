@@ -221,6 +221,19 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>clearParticles</b> ()
 <tr class="memitem:a0d300b45ec1be0ec77b4350653429d1f" id="r_a0d300b45ec1be0ec77b4350653429d1f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a0d300b45ec1be0ec77b4350653429d1f">regrid</a> (const Vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const Vector&lt; ProblemDomain &gt; &amp;a_domains, const Vector&lt; Real &gt; &amp;a_dx, const Vector&lt; int &gt; &amp;a_refRat, const int a_minBlockSize, const Vector&lt; RefCountedPtr&lt; <a class="el" href="classLevelTiles.html">LevelTiles</a> &gt; &gt; &amp;a_levelTiles, const int a_newFinestLevel)</td></tr>
 <tr class="memdesc:a0d300b45ec1be0ec77b4350653429d1f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rebuild over a new AMR layout and redistribute the <a class="el" href="classParticleContainer.html#a59356226c69f0aaad9bbb1a36756ee9f" title="Cache the current valid particles ahead of a regrid.">preRegrid()</a>-cached particles onto it.  <br /></td></tr>
 <tr class="separator:a0d300b45ec1be0ec77b4350653429d1f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr><td colspan="2"><div class="groupHeader">Ghost particles</div></td></tr>
+<tr class="memitem:a04c20c602a6b1670451440e21d5ce87b" id="r_a04c20c602a6b1670451440e21d5ce87b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a04c20c602a6b1670451440e21d5ce87b">fillGhostParticles</a> (const <a class="el" href="CD__ParticleGhostMask_8H.html#a214d48ca297864a2f2241774b3324c0a">AMRParticleGhostMask</a> &amp;a_maskSame, const <a class="el" href="CD__ParticleGhostMask_8H.html#a214d48ca297864a2f2241774b3324c0a">AMRParticleGhostMask</a> &amp;a_maskCoarToFine, const <a class="el" href="CD__ParticleGhostMask_8H.html#a214d48ca297864a2f2241774b3324c0a">AMRParticleGhostMask</a> &amp;a_maskFineToCoar)</td></tr>
+<tr class="memdesc:a04c20c602a6b1670451440e21d5ce87b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill each patch's ghost halo from prebuilt <a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> particle ghost masks.  <br /></td></tr>
+<tr class="separator:a04c20c602a6b1670451440e21d5ce87b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4e9dd5a2f8637551bb1dfbc7d5239380" id="r_a4e9dd5a2f8637551bb1dfbc7d5239380"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a4e9dd5a2f8637551bb1dfbc7d5239380">clearGhostParticles</a> ()</td></tr>
+<tr class="memdesc:a4e9dd5a2f8637551bb1dfbc7d5239380"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove every ghost particle (any non-Valid GhostType) from all levels and patches.  <br /></td></tr>
+<tr class="separator:a4e9dd5a2f8637551bb1dfbc7d5239380"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a70dca850979d671abcb3990e6b77cf2b" id="r_a70dca850979d671abcb3990e6b77cf2b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a70dca850979d671abcb3990e6b77cf2b">claimOwnership</a> (const bool a_onlyValidRegion)</td></tr>
+<tr class="memdesc:a70dca850979d671abcb3990e6b77cf2b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Claim ownership of this rank's particles by stamping their owner rank (rankID = procID()).  <br /></td></tr>
+<tr class="separator:a70dca850979d671abcb3990e6b77cf2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa18fe48ab05c6389d89f829285cf80bf" id="r_aa18fe48ab05c6389d89f829285cf80bf"><td class="memItemLeft" align="right" valign="top">long long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#aa18fe48ab05c6389d89f829285cf80bf">resetParticleIDs</a> (const bool a_onlyValidRegion, const <a class="el" href="CD__ParticleSoA_8H.html#afec4fd5f60cd0dd55574084c6276a49e">ParticleID</a> a_startID)</td></tr>
+<tr class="memdesc:aa18fe48ab05c6389d89f829285cf80bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Assign globally-unique, contiguous particle IDs to the owned particles.  <br /></td></tr>
+<tr class="separator:aa18fe48ab05c6389d89f829285cf80bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Halo and buffer particles</div></td></tr>
 <tr class="memitem:ad12fc7d10652f6aa1b9e543517c64279" id="r_ad12fc7d10652f6aa1b9e543517c64279"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#ad12fc7d10652f6aa1b9e543517c64279">copyMaskParticles</a> (const Vector&lt; RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt; &gt; &amp;a_mask)</td></tr>
 <tr class="memdesc:ad12fc7d10652f6aa1b9e543517c64279"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy the valid particles selected by a per-cell mask into the mask holder, all levels.  <br /></td></tr>
@@ -279,12 +292,18 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>setupGrownGrids</b> (
 <tr class="memitem:a3f0a8ff5bd653a029d686fc83c511f34" id="r_a3f0a8ff5bd653a029d686fc83c511f34"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classParticleContainer.html#a55ca1dc0711b599cf86dc2e4036c832a">MoverPool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a3f0a8ff5bd653a029d686fc83c511f34">gatherMoversToPool</a> ()</td></tr>
 <tr class="memdesc:a3f0a8ff5bd653a029d686fc83c511f34"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mask fast path for <a class="el" href="classParticleContainer.html#aad7d26975f869cee92354c1d14e16be1" title="Redistribute every valid particle to the patch/level/rank that owns its cell.">remap()</a>: pool ONLY the movers, leaving stayers in place.  <br /></td></tr>
 <tr class="separator:a3f0a8ff5bd653a029d686fc83c511f34"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaf178d7d1d1f57ed09880a214d2372a2" id="r_aaf178d7d1d1f57ed09880a214d2372a2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#aaf178d7d1d1f57ed09880a214d2372a2">distributeFromPool</a> (<a class="el" href="classParticleContainer.html#a55ca1dc0711b599cf86dc2e4036c832a">MoverPool</a> &amp;a_pool)</td></tr>
-<tr class="memdesc:aaf178d7d1d1f57ed09880a214d2372a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Assign a mover pool into the (assumed empty) valid holders: local appends + MPI scatter.  <br /></td></tr>
-<tr class="separator:aaf178d7d1d1f57ed09880a214d2372a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aec5c8dabea7fd0f167d6ef8999f14e6a" id="r_aec5c8dabea7fd0f167d6ef8999f14e6a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classParticleContainer.html#a55ca1dc0711b599cf86dc2e4036c832a">MoverPool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#aec5c8dabea7fd0f167d6ef8999f14e6a">gatherGhostsFromMasks</a> (const <a class="el" href="CD__ParticleGhostMask_8H.html#a214d48ca297864a2f2241774b3324c0a">AMRParticleGhostMask</a> &amp;a_maskSame, const <a class="el" href="CD__ParticleGhostMask_8H.html#a214d48ca297864a2f2241774b3324c0a">AMRParticleGhostMask</a> &amp;a_maskCoarToFine, const <a class="el" href="CD__ParticleGhostMask_8H.html#a214d48ca297864a2f2241774b3324c0a">AMRParticleGhostMask</a> &amp;a_maskFineToCoar)</td></tr>
+<tr class="memdesc:aec5c8dabea7fd0f167d6ef8999f14e6a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gather ghost copies into a per-rank pool using prebuilt particle ghost masks.  <br /></td></tr>
+<tr class="separator:aec5c8dabea7fd0f167d6ef8999f14e6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a875be5d3149509f288985a60387c3bc5" id="r_a875be5d3149509f288985a60387c3bc5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a875be5d3149509f288985a60387c3bc5">distributeFromPool</a> (<a class="el" href="classParticleContainer.html#a55ca1dc0711b599cf86dc2e4036c832a">MoverPool</a> &amp;a_pool, const bool a_setOwnerToReceiver)</td></tr>
+<tr class="memdesc:a875be5d3149509f288985a60387c3bc5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Assign a pool into the valid holders: local appends + MPI scatter.  <br /></td></tr>
+<tr class="separator:a875be5d3149509f288985a60387c3bc5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a17bf7a1b121571660081516bb3650c33" id="r_a17bf7a1b121571660081516bb3650c33"><td class="memItemLeft" align="right" valign="top">IntVect&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a17bf7a1b121571660081516bb3650c33">cellIndex</a> (const int a_lvl, const RealVect &amp;a_pos) const</td></tr>
 <tr class="memdesc:a17bf7a1b121571660081516bb3650c33"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cell index containing a position on a given level (floor((x - probLo)/dx)).  <br /></td></tr>
 <tr class="separator:a17bf7a1b121571660081516bb3650c33"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae5d2b7253a850abaa2752709ef603fb8" id="r_ae5d2b7253a850abaa2752709ef603fb8"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#ae5d2b7253a850abaa2752709ef603fb8">inValidBox</a> (const int a_lvl, const Box &amp;a_box, const RealVect &amp;a_pos) const</td></tr>
+<tr class="memdesc:ae5d2b7253a850abaa2752709ef603fb8"><td class="mdescLeft">&#160;</td><td class="mdescRight">True if a position's cell lies inside a (grid) box on a given level.  <br /></td></tr>
+<tr class="separator:ae5d2b7253a850abaa2752709ef603fb8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2503981971f7735e94f3d64d4f372d4b" id="r_a2503981971f7735e94f3d64d4f372d4b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structParticleContainer_1_1Destination.html">Destination</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a2503981971f7735e94f3d64d4f372d4b">findDestination</a> (const RealVect &amp;a_pos) const</td></tr>
 <tr class="memdesc:a2503981971f7735e94f3d64d4f372d4b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Map a position to its owning (level, grid index, rank) via the finest containing tile.  <br /></td></tr>
 <tr class="separator:a2503981971f7735e94f3d64d4f372d4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -404,13 +423,13 @@ class ParticleContainer&lt; P, Traits &gt;</div><p>AMR-hierarchy container of co
 <div class="line">        <span class="comment">// ... use x, leaf.weight(i), payload columns ...</span></div>
 <div class="line">      }</div>
 <div class="line">    }</div>
-<div class="ttc" id="aclassParticleContainer_html"><div class="ttname"><a href="classParticleContainer.html">ParticleContainer</a></div><div class="ttdoc">AMR-hierarchy container of computational particles, stored per patch in Struct-of-Arrays form.</div><div class="ttdef"><b>Definition</b> CD_ParticleContainer.H:122</div></div>
-<div class="ttc" id="aclassParticleContainer_html_a76b35ee8a07d588f7070ccd6f658ad47"><div class="ttname"><a href="classParticleContainer.html#a76b35ee8a07d588f7070ccd6f658ad47">ParticleContainer::define</a></div><div class="ttdeci">void define(const Vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const Vector&lt; ProblemDomain &gt; &amp;a_domains, const Vector&lt; Real &gt; &amp;a_dx, const Vector&lt; int &gt; &amp;a_refRat, const RealVect &amp;a_probLo, const int a_minBlockSize, const Vector&lt; RefCountedPtr&lt; LevelTiles &gt; &gt; &amp;a_levelTiles, const int a_finestLevel, const std::string &amp;a_realm, const Vector&lt; RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt; &gt; *a_validCells)</div><div class="ttdoc">Allocate the per-level holders and the per-level tile-ownership maps over the AMR grids.</div><div class="ttdef"><b>Definition</b> CD_ParticleContainer.H:192</div></div>
-<div class="ttc" id="aclassParticleContainer_html_a8123d5012822f5fafe8ee7198d594c3c"><div class="ttname"><a href="classParticleContainer.html#a8123d5012822f5fafe8ee7198d594c3c">ParticleContainer::getGrids</a></div><div class="ttdeci">const Vector&lt; DisjointBoxLayout &gt; &amp; getGrids() const</div><div class="ttdoc">Per-level AMR grids.</div><div class="ttdef"><b>Definition</b> CD_ParticleContainer.H:259</div></div>
-<div class="ttc" id="aclassParticleContainer_html_aad7d26975f869cee92354c1d14e16be1"><div class="ttname"><a href="classParticleContainer.html#aad7d26975f869cee92354c1d14e16be1">ParticleContainer::remap</a></div><div class="ttdeci">void remap()</div><div class="ttdoc">Redistribute every valid particle to the patch/level/rank that owns its cell.</div><div class="ttdef"><b>Definition</b> CD_ParticleContainerImplem.H:462</div></div>
-<div class="ttc" id="aclassParticleSoA_html"><div class="ttname"><a href="classParticleSoA.html">ParticleSoA</a></div><div class="ttdoc">Arena-backed Struct-of-Arrays particle container for a single grid patch.</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:637</div></div>
-<div class="ttc" id="aclassParticleSoA_html_a3a8d5e1e4128aab802b386b611d4f082"><div class="ttname"><a href="classParticleSoA.html#a3a8d5e1e4128aab802b386b611d4f082">ParticleSoA::position</a></div><div class="ttdeci">RealVect position(const std::size_t a_index) const noexcept</div><div class="ttdoc">Position of particle i as a RealVect (by value, assembled from the scalar columns).</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:1151</div></div>
-<div class="ttc" id="aclassParticleSoA_html_a4a1ed9474a75b6142f7fccebaf059d13"><div class="ttname"><a href="classParticleSoA.html#a4a1ed9474a75b6142f7fccebaf059d13">ParticleSoA::size</a></div><div class="ttdeci">std::size_t size() const noexcept</div><div class="ttdoc">Number of particles currently stored.</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:851</div></div>
+<div class="ttc" id="aclassParticleContainer_html"><div class="ttname"><a href="classParticleContainer.html">ParticleContainer</a></div><div class="ttdoc">AMR-hierarchy container of computational particles, stored per patch in Struct-of-Arrays form.</div><div class="ttdef"><b>Definition</b> CD_ParticleContainer.H:123</div></div>
+<div class="ttc" id="aclassParticleContainer_html_a76b35ee8a07d588f7070ccd6f658ad47"><div class="ttname"><a href="classParticleContainer.html#a76b35ee8a07d588f7070ccd6f658ad47">ParticleContainer::define</a></div><div class="ttdeci">void define(const Vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const Vector&lt; ProblemDomain &gt; &amp;a_domains, const Vector&lt; Real &gt; &amp;a_dx, const Vector&lt; int &gt; &amp;a_refRat, const RealVect &amp;a_probLo, const int a_minBlockSize, const Vector&lt; RefCountedPtr&lt; LevelTiles &gt; &gt; &amp;a_levelTiles, const int a_finestLevel, const std::string &amp;a_realm, const Vector&lt; RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt; &gt; *a_validCells)</div><div class="ttdoc">Allocate the per-level holders and the per-level tile-ownership maps over the AMR grids.</div><div class="ttdef"><b>Definition</b> CD_ParticleContainer.H:193</div></div>
+<div class="ttc" id="aclassParticleContainer_html_a8123d5012822f5fafe8ee7198d594c3c"><div class="ttname"><a href="classParticleContainer.html#a8123d5012822f5fafe8ee7198d594c3c">ParticleContainer::getGrids</a></div><div class="ttdeci">const Vector&lt; DisjointBoxLayout &gt; &amp; getGrids() const</div><div class="ttdoc">Per-level AMR grids.</div><div class="ttdef"><b>Definition</b> CD_ParticleContainer.H:260</div></div>
+<div class="ttc" id="aclassParticleContainer_html_aad7d26975f869cee92354c1d14e16be1"><div class="ttname"><a href="classParticleContainer.html#aad7d26975f869cee92354c1d14e16be1">ParticleContainer::remap</a></div><div class="ttdeci">void remap()</div><div class="ttdoc">Redistribute every valid particle to the patch/level/rank that owns its cell.</div><div class="ttdef"><b>Definition</b> CD_ParticleContainerImplem.H:470</div></div>
+<div class="ttc" id="aclassParticleSoA_html"><div class="ttname"><a href="classParticleSoA.html">ParticleSoA</a></div><div class="ttdoc">Arena-backed Struct-of-Arrays particle container for a single grid patch.</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:653</div></div>
+<div class="ttc" id="aclassParticleSoA_html_a3a8d5e1e4128aab802b386b611d4f082"><div class="ttname"><a href="classParticleSoA.html#a3a8d5e1e4128aab802b386b611d4f082">ParticleSoA::position</a></div><div class="ttdeci">RealVect position(const std::size_t a_index) const noexcept</div><div class="ttdoc">Position of particle i as a RealVect (by value, assembled from the scalar columns).</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:1172</div></div>
+<div class="ttc" id="aclassParticleSoA_html_a4a1ed9474a75b6142f7fccebaf059d13"><div class="ttname"><a href="classParticleSoA.html#a4a1ed9474a75b6142f7fccebaf059d13">ParticleSoA::size</a></div><div class="ttdeci">std::size_t size() const noexcept</div><div class="ttdoc">Number of particles currently stored.</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:872</div></div>
 </div><!-- fragment --><dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">P</td><td>User payload struct contributing the per-particle payload columns; defaults to <a class="el" href="structNoPayload.html" title="Empty payload: ParticleSoA&lt;&gt; is a position+weight+metadata point particle.">NoPayload</a>. </td></tr>
@@ -504,6 +523,72 @@ template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The containing cell IntVect. </dd></dl>
+
+</div>
+</div>
+<a id="a70dca850979d671abcb3990e6b77cf2b" name="a70dca850979d671abcb3990e6b77cf2b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a70dca850979d671abcb3990e6b77cf2b">&#9670;&#160;</a></span>claimOwnership()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P , typename Traits &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::claimOwnership </td>
+          <td>(</td>
+          <td class="paramtype">const bool&#160;</td>
+          <td class="paramname"><em>a_onlyValidRegion</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Claim ownership of this rank's particles by stamping their owner rank (rankID = procID()). </p>
+<p>Ghost particles (isGhost()) are always left untouched, so a ghost keeps the owner rank it carries. For non-ghost particles: when a_onlyValidRegion is true, only those whose cell lies inside the leaf's own grid box are claimed and out-of-box strays are left untouched; when false, every non-ghost particle is claimed. The region test is purely geometric on the ungrown patch box (it does not consider finer-level coverage or GhostType). No MPI communication. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_onlyValidRegion</td><td>Restrict to non-ghost particles inside the leaf's grid box. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a4e9dd5a2f8637551bb1dfbc7d5239380" name="a4e9dd5a2f8637551bb1dfbc7d5239380"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4e9dd5a2f8637551bb1dfbc7d5239380">&#9670;&#160;</a></span>clearGhostParticles()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P , typename Traits &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::clearGhostParticles </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Remove every ghost particle (any non-Valid GhostType) from all levels and patches. </p>
+<p>Owned (Valid) particles are left untouched. Removal is by swap-and-pop, so particle order within a leaf is not preserved. Keeps leaf capacity. </p>
 
 </div>
 </div>
@@ -693,8 +778,8 @@ template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&
 
 </div>
 </div>
-<a id="aaf178d7d1d1f57ed09880a214d2372a2" name="aaf178d7d1d1f57ed09880a214d2372a2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aaf178d7d1d1f57ed09880a214d2372a2">&#9670;&#160;</a></span>distributeFromPool()</h2>
+<a id="a875be5d3149509f288985a60387c3bc5" name="a875be5d3149509f288985a60387c3bc5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a875be5d3149509f288985a60387c3bc5">&#9670;&#160;</a></span>distributeFromPool()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -708,8 +793,18 @@ template&lt;typename P , typename Traits &gt; </div>
           <td class="memname">void <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::distributeFromPool </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="classParticleContainer.html#a55ca1dc0711b599cf86dc2e4036c832a">MoverPool</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_pool</em></td><td>)</td>
+          <td class="paramname"><em>a_pool</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const bool&#160;</td>
+          <td class="paramname"><em>a_setOwnerToReceiver</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
   </td>
@@ -719,10 +814,65 @@ template&lt;typename P , typename Traits &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Assign a mover pool into the (assumed empty) valid holders: local appends + MPI scatter. </p>
+<p>Assign a pool into the valid holders: local appends + MPI scatter. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_pool</td><td>Per-rank mover pool produced by gatherToPool (consumed). </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_pool</td><td>Per-rank pool (consumed). Same-rank bins are catenated into the destination leaf; cross-rank bins are linearized and Alltoallv'd. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_setOwnerToReceiver</td><td>If true, every cross-rank particle's rankID is set to the receiving rank (remap/regrid ownership). If false, the rankID carried in the pool is preserved (ghost particles keep their owner). </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a04c20c602a6b1670451440e21d5ce87b" name="a04c20c602a6b1670451440e21d5ce87b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a04c20c602a6b1670451440e21d5ce87b">&#9670;&#160;</a></span>fillGhostParticles()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P , typename Traits &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::fillGhostParticles </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="CD__ParticleGhostMask_8H.html#a214d48ca297864a2f2241774b3324c0a">AMRParticleGhostMask</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_maskSame</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="CD__ParticleGhostMask_8H.html#a214d48ca297864a2f2241774b3324c0a">AMRParticleGhostMask</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_maskCoarToFine</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="CD__ParticleGhostMask_8H.html#a214d48ca297864a2f2241774b3324c0a">AMRParticleGhostMask</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_maskFineToCoar</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Fill each patch's ghost halo from prebuilt <a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> particle ghost masks. </p>
+<p>A ghost particle is a transient, non-owned copy of a particle that lives in an adjacent region (a neighbouring patch on the same level, the next-coarser level, or the next-finer level) and overlaps this patch's ghosted box. For every valid particle, this scatters a copy to each destination patch listed by the masks for the particle's cell: same-level targets from a_maskSame, next-finer targets from a_maskCoarToFine, and next-coarser targets from a_maskFineToCoar. Copies are appended into the destination leaf (same-rank directly, cross-rank via MPI), tagged with the GhostType from the receiver's view (SameLevel / Coarse / Fine) so consumers can tell them from owned particles via <a class="el" href="classParticleSoA.html#a1b4c2d21ee2a818ad13f9d429d5849b4" title="Whether particle i is a ghost particle (any non-Valid designation).">ParticleSoA::isGhost()</a>, and keep the source's particleID. <a class="el" href="classParticleContainer.html#a4e9dd5a2f8637551bb1dfbc7d5239380" title="Remove every ghost particle (any non-Valid GhostType) from all levels and patches.">clearGhostParticles()</a> is called first so it is safe to refill; ghosts are transient (<a class="el" href="classParticleContainer.html#aad7d26975f869cee92354c1d14e16be1" title="Redistribute every valid particle to the patch/level/rank that owns its cell.">remap()</a>/preRegrid()/regrid() drop them). Pass <a class="el" href="classAmrMesh.html#a0291d6eb18a9cc1192aff8af2ebdacce" title="Get a trivial (empty) particle ghost mask that scatters no particles.">AmrMesh::getTrivialParticleGhostMask()</a> for a direction that should not scatter. The masks must have been built on the same grids as this container (see <a class="el" href="classAmrMesh.html#a2a417fbc6790fdb11f759bf88f066405" title="Register a particle ghost-mask width on a realm so it is (re)built at every regrid.">AmrMesh::registerParticleGhostMask</a> and AmrMesh::getParticleGhostMask(realm, width)). Periodic domains are not supported (mask construction aborts on them). </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_maskSame</td><td>Same-level ghost mask (source cell -&gt; same-level target boxes). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_maskCoarToFine</td><td>Coarse-to-fine ghost mask (source cell -&gt; next-finer target boxes). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_maskFineToCoar</td><td>Fine-to-coarse ghost mask (source cell -&gt; next-coarser target boxes). </td></tr>
   </table>
   </dd>
 </dl>
@@ -763,6 +913,61 @@ template&lt;typename P , typename Traits &gt; </div>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The resolved destination; found==false if no tile on any level owns the cell. </dd></dl>
+
+</div>
+</div>
+<a id="aec5c8dabea7fd0f167d6ef8999f14e6a" name="aec5c8dabea7fd0f167d6ef8999f14e6a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aec5c8dabea7fd0f167d6ef8999f14e6a">&#9670;&#160;</a></span>gatherGhostsFromMasks()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P , typename Traits &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;<a class="el" href="classParticleContainer.html#a55ca1dc0711b599cf86dc2e4036c832a">::MoverPool</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::gatherGhostsFromMasks </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="CD__ParticleGhostMask_8H.html#a214d48ca297864a2f2241774b3324c0a">AMRParticleGhostMask</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_maskSame</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="CD__ParticleGhostMask_8H.html#a214d48ca297864a2f2241774b3324c0a">AMRParticleGhostMask</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_maskCoarToFine</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="CD__ParticleGhostMask_8H.html#a214d48ca297864a2f2241774b3324c0a">AMRParticleGhostMask</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_maskFineToCoar</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Gather ghost copies into a per-rank pool using prebuilt particle ghost masks. </p>
+<p>For each valid particle, reads its cell's target boxes from the three masks and bins a copy per (destination level, grid index, rank) with the GhostType from the receiver's view (SameLevel / Coarse / Fine); particleID preserved, rankID set to this rank (the owner). Distribute the returned pool with a_setOwnerToReceiver == false. A trivial (empty) mask contributes nothing. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_maskSame</td><td>Same-level mask. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_maskCoarToFine</td><td>Coarse-to-fine mask (targets on the next-finer level). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_maskFineToCoar</td><td>Fine-to-coarse mask (targets on the next-coarser level). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The per-rank ghost pool. </dd></dl>
 
 </div>
 </div>
@@ -1200,7 +1405,7 @@ template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&
 </div><div class="memdoc">
 
 <p>Number of valid particles owned by this rank. </p>
-<dl class="section return"><dt>Returns</dt><dd>Local valid particle count summed over all levels and patches. </dd></dl>
+<p>Ghost particles (any non-Valid GhostType) are excluded &ndash; only owned, valid particles are counted, even if a transient ghost halo is currently present in the leaves. </p><dl class="section return"><dt>Returns</dt><dd>Local valid particle count summed over all levels and patches. </dd></dl>
 
 </div>
 </div>
@@ -1321,6 +1526,61 @@ template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&
 
 <p><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> label. </p>
 <dl class="section return"><dt>Returns</dt><dd>The realm string. </dd></dl>
+
+</div>
+</div>
+<a id="ae5d2b7253a850abaa2752709ef603fb8" name="ae5d2b7253a850abaa2752709ef603fb8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae5d2b7253a850abaa2752709ef603fb8">&#9670;&#160;</a></span>inValidBox()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::inValidBox </td>
+          <td>(</td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_lvl</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Box &amp;&#160;</td>
+          <td class="paramname"><em>a_box</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;&#160;</td>
+          <td class="paramname"><em>a_pos</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>True if a position's cell lies inside a (grid) box on a given level. </p>
+<p>Purely geometric valid-region test shared by claimOwnership/resetParticleIDs &ndash; the box is the leaf's ungrown patch box, so a particle in its patch's ghost shell tests false. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_lvl</td><td>Level index. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_box</td><td>Box (typically the leaf's grid box). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_pos</td><td>Position. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if cellIndex(a_lvl, a_pos) is contained in a_box. </dd></dl>
 
 </div>
 </div>
@@ -1689,6 +1949,54 @@ template&lt;typename P , typename Traits &gt; </div>
 
 <p>Redistribute every valid particle to the patch/level/rank that owns its cell. </p>
 <p>Pool model: collect all valid particles, map each to its destination via the finest-level tile that contains it (<a class="el" href="classLevelTiles.html" title="Class for storing the AMR hierarchy as a collection of tiles.">LevelTiles</a>), append same-rank movers into the destination leaf and scatter cross-rank movers with MPI. Particles whose cell is not owned by any tile on any level (off-domain) are dropped and counted in getNumberOfOutcastParticles*(). Invalidates any cell-sort. Particle ids are preserved; rankID is set to the new owning rank. </p>
+
+</div>
+</div>
+<a id="aa18fe48ab05c6389d89f829285cf80bf" name="aa18fe48ab05c6389d89f829285cf80bf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa18fe48ab05c6389d89f829285cf80bf">&#9670;&#160;</a></span>resetParticleIDs()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P , typename Traits &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">long long <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::resetParticleIDs </td>
+          <td>(</td>
+          <td class="paramtype">const bool&#160;</td>
+          <td class="paramname"><em>a_onlyValidRegion</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="CD__ParticleSoA_8H.html#afec4fd5f60cd0dd55574084c6276a49e">ParticleID</a>&#160;</td>
+          <td class="paramname"><em>a_startID</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Assign globally-unique, contiguous particle IDs to the owned particles. </p>
+<p>Ghost particles (isGhost()) are always left untouched, so a ghost keeps the source's id. A non-ghost particle qualifies for a new id iff a_onlyValidRegion is false OR its cell lies inside the leaf's own grid box; a non-ghost that does not qualify (an out-of-box stray, only possible when a_onlyValidRegion is true) is set to <a class="el" href="classParticleSoA.html#aaeea9c9d0dcec5322e4c45be2370a378" title="Sentinel for an unassigned/invalid global particle id.">ParticleSoA::s_invalidID</a>. Qualifying particles receive contiguous ids in rank order (rank 0 first) starting at a_startID, made unique across ranks via an all-gather of the per-rank counts and an exclusive prefix. The region test is purely geometric on the ungrown patch box. Note: the assigned ids are a numbering snapshot, not a persistent identity &ndash; they depend on the rank/box ordering and change across regrids and different rank counts. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_onlyValidRegion</td><td>Restrict new ids to non-ghost particles inside the leaf's grid box. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_startID</td><td>Global id of the first assigned particle; ids occupy [a_startID, a_startID + return). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The global number of ids assigned (across all ranks). </dd></dl>
 
 </div>
 </div>

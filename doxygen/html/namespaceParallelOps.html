@@ -163,6 +163,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>barrier</b> () noexce
 <tr class="memitem:a21cc1cb7bb5ebe32d11262541d57d88e" id="r_a21cc1cb7bb5ebe32d11262541d57d88e"><td class="memItemLeft" align="right" valign="top">Vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#a21cc1cb7bb5ebe32d11262541d57d88e">gather</a> (const Real &amp;a_localValue) noexcept</td></tr>
 <tr class="memdesc:a21cc1cb7bb5ebe32d11262541d57d88e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gather local values &ndash; return a vector of local values.  <br /></td></tr>
 <tr class="separator:a21cc1cb7bb5ebe32d11262541d57d88e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6e82d53c196631c2fe1796cdd905c4fb" id="r_a6e82d53c196631c2fe1796cdd905c4fb"><td class="memItemLeft" align="right" valign="top">Vector&lt; long long &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#a6e82d53c196631c2fe1796cdd905c4fb">gather</a> (const long long &amp;a_localValue) noexcept</td></tr>
+<tr class="memdesc:a6e82d53c196631c2fe1796cdd905c4fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gather local values &ndash; return a vector of local values.  <br /></td></tr>
+<tr class="separator:a6e82d53c196631c2fe1796cdd905c4fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>For putting a bunch of often-used MPI reductions in one place. </p>
@@ -203,7 +206,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>barrier</b> () noexce
 </div>
 </div>
 <a id="a591e504a4d50fd1d8aec80a8a1ef112b" name="a591e504a4d50fd1d8aec80a8a1ef112b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a591e504a4d50fd1d8aec80a8a1ef112b">&#9670;&#160;</a></span>gather() <span class="overload">[1/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a591e504a4d50fd1d8aec80a8a1ef112b">&#9670;&#160;</a></span>gather() <span class="overload">[1/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -237,8 +240,43 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>barrier</b> () noexce
 
 </div>
 </div>
+<a id="a6e82d53c196631c2fe1796cdd905c4fb" name="a6e82d53c196631c2fe1796cdd905c4fb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6e82d53c196631c2fe1796cdd905c4fb">&#9670;&#160;</a></span>gather() <span class="overload">[2/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector&lt; long long &gt; ParallelOps::gather </td>
+          <td>(</td>
+          <td class="paramtype">const long long &amp;&#160;</td>
+          <td class="paramname"><em>a_localValue</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Gather local values &ndash; return a vector of local values. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_localValue</td><td>Local value per MPI rank </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Return value </dd></dl>
+
+</div>
+</div>
 <a id="a21cc1cb7bb5ebe32d11262541d57d88e" name="a21cc1cb7bb5ebe32d11262541d57d88e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a21cc1cb7bb5ebe32d11262541d57d88e">&#9670;&#160;</a></span>gather() <span class="overload">[2/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a21cc1cb7bb5ebe32d11262541d57d88e">&#9670;&#160;</a></span>gather() <span class="overload">[3/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">

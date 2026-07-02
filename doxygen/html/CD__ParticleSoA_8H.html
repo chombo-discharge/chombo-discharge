@@ -85,6 +85,7 @@ $(function() {
 <a href="#namespaces">Namespaces</a> &#124;
 <a href="#define-members">Macros</a> &#124;
 <a href="#typedef-members">Typedefs</a> &#124;
+<a href="#enum-members">Enumerations</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle"><div class="title">CD_ParticleSoA.H File Reference</div></div>
 </div><!--header-->
@@ -395,6 +396,16 @@ template&lt;typename... Ts&gt; </td></tr>
 <tr class="memdesc:a7e8fe8105591d202a0463f206d815173"><td class="mdescLeft">&#160;</td><td class="mdescRight">Alias yielding void for any type pack (SFINAE helper, like std::void_t). <br /></td></tr>
 <tr class="separator:a7e8fe8105591d202a0463f206d815173"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
+Enumerations</h2></td></tr>
+<tr class="memitem:ad9d0c73e301514a9f3b3aa0c23d98b8f" id="r_ad9d0c73e301514a9f3b3aa0c23d98b8f"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="CD__ParticleSoA_8H.html#ad9d0c73e301514a9f3b3aa0c23d98b8f">GhostType</a> : std::uint8_t { <a class="el" href="CD__ParticleSoA_8H.html#ad9d0c73e301514a9f3b3aa0c23d98b8fa3ac705f2acd51a4613f9188c05c91d0d">Valid</a> = 0
+, <a class="el" href="CD__ParticleSoA_8H.html#ad9d0c73e301514a9f3b3aa0c23d98b8fa01984fc837b5005aa130f08922a73de5">SameLevel</a> = 1
+, <a class="el" href="CD__ParticleSoA_8H.html#ad9d0c73e301514a9f3b3aa0c23d98b8fa1fb282a269a2bc94abc136c0511daa59">Coarse</a> = 2
+, <a class="el" href="CD__ParticleSoA_8H.html#ad9d0c73e301514a9f3b3aa0c23d98b8fa5999b8900bb8b90cfa1af137d355ff14">Fine</a> = 3
+ }</td></tr>
+<tr class="memdesc:ad9d0c73e301514a9f3b3aa0c23d98b8f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ghost designation of a particle (container-owned metadata column).  <a href="CD__ParticleSoA_8H.html#ad9d0c73e301514a9f3b3aa0c23d98b8f">More...</a><br /></td></tr>
+<tr class="separator:ad9d0c73e301514a9f3b3aa0c23d98b8f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:a5db2cfab2ed062100895a893f90396b5" id="r_a5db2cfab2ed062100895a893f90396b5"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="structH5Part_1_1Vector.html">typename</a> <a class="el" href="structH5Part_1_1Vector.html">M</a> &gt; </td></tr>
@@ -452,7 +463,7 @@ Functions</h2></td></tr>
 <p>. It is the single source of truth for one grid patch worth of particles; the AMR machinery (the <a class="el" href="classParticleContainer.html" title="AMR-hierarchy container of computational particles, stored per patch in Struct-of-Arrays form.">ParticleContainer</a> equivalent) owns a <code>LayoutData&lt;ParticleSoA&lt;P&gt;&gt;</code> per level.</p>
 <h2>The data model </h2>
 <p>The container stores particles column-major (Struct-of-Arrays): one contiguous array per field. ALL columns live in ONE aligned allocation (the "arena"), laid out as offset slices. Position and weight are stored in <code>double</code> precision &ndash; they index the grid and are summed/conserved across the whole population, so they must not lose precision to float roundoff (and must stay double even in a CH_USE_FLOAT build, hence <code>double</code>, not <code>Real</code>). Only the user payload columns may use the narrower <code>ParticleReal</code>.</p>
-<pre class="fragment">    [ x | pad | y | pad | z | pad | weight | pad | id | pad | rank | pad | payload... ]
+<pre class="fragment">    [ x | pad | y | pad | z | pad | weight | pad | id | pad | rank | pad | ghost | pad | payload... ]
 </pre><p>Column base pointers are cached, so element access is as cheap as a plain array. Bulk operations over a compact (size == capacity) container are then a SINGLE contiguous span: one allocation to build, one <code>memcpy</code> (or a zero-copy <code>MPI_Send</code> of data()) to transfer.</p>
 <h2>Mandatory columns are container-owned; the user supplies only a payload</h2>
 <p>Every particle in chombo-discharge has a position, a weight, and metadata (a global id + the owning rank). <a class="el" href="classParticleSoA.html" title="Arena-backed Struct-of-Arrays particle container for a single grid patch.">ParticleSoA</a> OWNS those columns and the user does NOT declare them:</p>
@@ -481,7 +492,7 @@ Functions</h2></td></tr>
 <div class="line">                                                  &amp;MyPayload::mobility,</div>
 <div class="line">                                                  &amp;MyPayload::energy);</div>
 <div class="line">};</div>
-<div class="ttc" id="astructParticleTraits_html"><div class="ttname"><a href="structParticleTraits.html">ParticleTraits</a></div><div class="ttdoc">Traits class that a user specializes to describe the PAYLOAD columns of a particle type....</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:174</div></div>
+<div class="ttc" id="astructParticleTraits_html"><div class="ttname"><a href="structParticleTraits.html">ParticleTraits</a></div><div class="ttdoc">Traits class that a user specializes to describe the PAYLOAD columns of a particle type....</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:190</div></div>
 </div><!-- fragment --><p>Step 3 (optional) &ndash; restrict which PAYLOAD columns go to HDF5 by declaring an <code>h5Columns</code> tuple of member pointers. Position and weight are ALWAYS checkpointed; id/rank NEVER are. If <code>h5Columns</code> is omitted, every payload column is checkpointed.</p>
 <div class="fragment"><div class="line"><span class="keyword">static</span> <span class="keyword">constexpr</span> <span class="keyword">auto</span> h5Columns = std::make_tuple(&amp;MyPayload::energy);</div>
 </div><!-- fragment --><p>That is all &ndash; <code>ParticleSoA&lt;MyPayload&gt;</code> now works. Payload fields are selected by member pointer, e.g. <code>soa.column&lt;&amp;MyPayload::energy&gt;()</code>; the column index is DERIVED from the pointer at compile time, so reordering <code>columns</code> keeps name-based access correct.</p>
@@ -511,6 +522,42 @@ Functions</h2></td></tr>
 
 <p>Compile-time precision of particle PAYLOAD data. Defaults to double; define CD_PARTICLE_REAL (e.g. to float) for mixed-precision payload columns. </p>
 <dl class="section note"><dt>Note</dt><dd>Position and weight are NOT governed by this &ndash; they are always double; see <a class="el" href="classParticleSoA.html" title="Arena-backed Struct-of-Arrays particle container for a single grid patch.">ParticleSoA</a>'s data-model documentation. </dd></dl>
+
+</div>
+</div>
+<h2 class="groupheader">Enumeration Type Documentation</h2>
+<a id="ad9d0c73e301514a9f3b3aa0c23d98b8f" name="ad9d0c73e301514a9f3b3aa0c23d98b8f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad9d0c73e301514a9f3b3aa0c23d98b8f">&#9670;&#160;</a></span>GhostType</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum class <a class="el" href="CD__ParticleSoA_8H.html#ad9d0c73e301514a9f3b3aa0c23d98b8f">GhostType</a> : std::uint8_t</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Ghost designation of a particle (container-owned metadata column). </p>
+<p>A valid particle (the patch's own, owned particle) has <a class="el" href="CD__ParticleSoA_8H.html#ad9d0c73e301514a9f3b3aa0c23d98b8fa3ac705f2acd51a4613f9188c05c91d0d" title="Owned, valid particle of this patch (not a ghost).">GhostType::Valid</a>. A ghost particle is a transient copy that overlaps the patch's ghosted/grown box and is owned elsewhere; the non-Valid enumerators record where it came from so the remap routines (and any per-patch consumer) know its provenance. Stored as a single byte to keep the per-particle footprint minimal. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ad9d0c73e301514a9f3b3aa0c23d98b8fa3ac705f2acd51a4613f9188c05c91d0d" name="ad9d0c73e301514a9f3b3aa0c23d98b8fa3ac705f2acd51a4613f9188c05c91d0d"></a>Valid&#160;</td><td class="fielddoc"><p>Owned, valid particle of this patch (not a ghost). </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ad9d0c73e301514a9f3b3aa0c23d98b8fa01984fc837b5005aa130f08922a73de5" name="ad9d0c73e301514a9f3b3aa0c23d98b8fa01984fc837b5005aa130f08922a73de5"></a>SameLevel&#160;</td><td class="fielddoc"><p>Ghost from an adjacent patch on the same level. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ad9d0c73e301514a9f3b3aa0c23d98b8fa1fb282a269a2bc94abc136c0511daa59" name="ad9d0c73e301514a9f3b3aa0c23d98b8fa1fb282a269a2bc94abc136c0511daa59"></a>Coarse&#160;</td><td class="fielddoc"><p>Ghost from the next-coarser level (level l-1). </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ad9d0c73e301514a9f3b3aa0c23d98b8fa5999b8900bb8b90cfa1af137d355ff14" name="ad9d0c73e301514a9f3b3aa0c23d98b8fa5999b8900bb8b90cfa1af137d355ff14"></a>Fine&#160;</td><td class="fielddoc"><p>Ghost from the next-finer level (level l+1). </p>
+</td></tr>
+</table>
 
 </div>
 </div>

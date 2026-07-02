@@ -25,5 +25,6 @@ var searchData=
   ['numberfmt_22',['numberfmt',['../namespaceDischargeIO.html#a957da12ee406f8da1ebe1a2f4395012b',1,'DischargeIO::numberFmt(long long n, char a_sep=&apos;,&apos;) noexcept'],['../namespaceDischargeIO.html#a215905b464e4689a2e0b98b560857c5c',1,'DischargeIO::numberFmt(const Vector&lt; long long &gt; &amp;a_numbers, char a_sep=&apos;,&apos;) noexcept']]],
   ['numcells_23',['numCells',['../classParticleSoA.html#a3c2e3fbb225f6b4206da89e395e75ca8',1,'ParticleSoA']]],
   ['numphases_24',['numphases',['../classMFBaseIVFAB.html#aaa7cfd4e909ded32eeed0168a7dccbdc',1,'MFBaseIVFAB::numPhases()'],['../classMFInterfaceFAB.html#a138646c4e07a444c2df1cbad4472a47c',1,'MFInterfaceFAB::numPhases()'],['../classMFLevelGrid.html#a366f6d82adca13fed2c7ddbda373921c',1,'MFLevelGrid::numPhases()'],['../classMultiFluidIndexSpace.html#ad18408c9a12e804dc6cd5f71e72966e1',1,'MultiFluidIndexSpace::numPhases()'],['../namespacephase.html#a965aed3a4db1ca0ede347ad9a49b8683',1,'phase::numPhases']]],
-  ['numvcycles_25',['numVCycles',['../structEllipticSolverChain_1_1Settings.html#a991739628129b983ffd01a8326c21ecc',1,'EllipticSolverChain::Settings']]]
+  ['numtargets_25',['numTargets',['../classParticleGhostMask.html#a402a9bac8b70b84602846882664a5d56',1,'ParticleGhostMask']]],
+  ['numvcycles_26',['numVCycles',['../structEllipticSolverChain_1_1Settings.html#a991739628129b983ffd01a8326c21ecc',1,'EllipticSolverChain::Settings']]]
 ];

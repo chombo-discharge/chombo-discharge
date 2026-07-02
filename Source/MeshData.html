@@ -331,6 +331,7 @@ Multiple signatures for this functionality exist, see the code-block below.</p>
 <span class="cm">*/</span>
 <span class="kt">void</span>
 <span class="nf">average</span><span class="p">(</span><span class="n">MFAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_data</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_realm</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Average</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_average</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+
 <span class="cm">/**</span>
 <span class="cm">  @brief Average multifluid data over a specified realm</span>
 <span class="cm">  @param[in,out] a_data    Data to be coarsened.</span>
@@ -339,6 +340,7 @@ Multiple signatures for this functionality exist, see the code-block below.</p>
 <span class="cm">*/</span>
 <span class="kt">void</span>
 <span class="nf">average</span><span class="p">(</span><span class="n">MFAMRFluxData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_data</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_realm</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Average</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_average</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+
 <span class="cm">/**</span>
 <span class="cm">  @brief Average down on specific realm and phase. </span>
 <span class="cm">  @param[in,out] a_data  Data to be coarsened.</span>

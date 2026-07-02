@@ -96,6 +96,11 @@
 <li class="toctree-l2"><a class="reference internal" href="#particle-mapping">Particle mapping</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#regridding">Regridding</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#masked-particles">Masked particles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ghost-particles">Ghost particles</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ghost-masks">Ghost masks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#filling-ghosts">Filling ghosts</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#boundary-interaction">Boundary interaction</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#signed-distance-function">Signed distance function</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#domain-edges">Domain edges</a></li>
@@ -568,8 +573,8 @@ This functionality is unlikely to be used directly by users of chombo-discharge,
 This functionality is for example used for some of the particle deposition methods in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> where we deposit particles that live near the refinement boundary with special deposition functions.</p>
 <p>To fill the masked particles, <code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P,</span> <span class="pre">Traits&gt;</span></code> has member functions for copying the particles into internal data containers which the user can later fetch.
 The function signature for this is</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
-<span class="nf">copyMaskParticles</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">LevelData</span><span class="o">&lt;</span><span class="n">BaseFab</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;&gt;&gt;&gt;&amp;</span><span class="w"> </span><span class="n">a_mask</span><span class="p">);</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="o">*/</span>
+<span class="kt">void</span>
 </pre></div>
 </div>
 <p>The argument <code class="docutils literal notranslate"><span class="pre">a_mask</span></code> holds a bool at each cell in the AMR hierarchy.
@@ -608,6 +613,85 @@ After the user is done with the particles, they should be released through</p>
 <span class="n">myParticles</span><span class="p">.</span><span class="n">clearMaskParticles</span><span class="p">();</span>
 </pre></div>
 </div>
+</section>
+<section id="ghost-particles">
+<span id="chap-ghostparticles"></span><h2>Ghost particles<a class="headerlink" href="#ghost-particles" title="Permalink to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P,</span> <span class="pre">Traits&gt;</span></code> can populate each patch with a halo of <em>ghost particles</em>: transient, non-owned copies of particles that live in an adjacent region and overlap the patch’s ghosted/grown box.
+Ghosts let per-patch code (e.g. short-range interactions or custom deposition) see the relevant neighbour particles in place.
+A copy can come from three directions relative to the receiving patch, and the direction is recorded on each particle:</p>
+<ul class="simple">
+<li><p><strong>Same level</strong> – a neighbouring patch on the same AMR level (<code class="docutils literal notranslate"><span class="pre">GhostType::SameLevel</span></code>).</p></li>
+<li><p><strong>Coarse-to-fine</strong> – the next-coarser level (<code class="docutils literal notranslate"><span class="pre">GhostType::Coarse</span></code>).</p></li>
+<li><p><strong>Fine-to-coarse</strong> – the next-finer level (<code class="docutils literal notranslate"><span class="pre">GhostType::Fine</span></code>).</p></li>
+</ul>
+<p>The copies are appended into the <strong>same</strong> <code class="docutils literal notranslate"><span class="pre">ParticleSoA</span></code> leaf as the valid particles and marked in place through the mandatory 1-byte <code class="docutils literal notranslate"><span class="pre">GhostType</span></code> column, queried with <code class="docutils literal notranslate"><span class="pre">ParticleSoA::isGhost(i)</span></code> (and <code class="docutils literal notranslate"><span class="pre">ghost(i)</span></code>).
+Ghosts are <em>transient</em>: they exist only between a <code class="docutils literal notranslate"><span class="pre">fillGhostParticles</span></code> and the next <code class="docutils literal notranslate"><span class="pre">clearGhostParticles</span></code> / <code class="docutils literal notranslate"><span class="pre">remap</span></code> / <code class="docutils literal notranslate"><span class="pre">regrid</span></code>, and are never routed or counted as owned particles (<code class="docutils literal notranslate"><span class="pre">getNumberOfValidParticlesLocal()</span></code> excludes them).</p>
+<p><a class="reference internal" href="#fig-particleghost"><span class="std std-numref">Fig. 11</span></a> illustrates the three scatter directions for a single fine patch and its coarse/same-level neighbours.</p>
+<figure class="align-center" id="id2">
+<span id="fig-particleghost"></span><a class="reference internal image-reference" href="../_images/ParticleGhost.png"><img alt="../_images/ParticleGhost.png" src="../_images/ParticleGhost.png" style="width: 75%;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 11 </span><span class="caption-text">Ghost-particle scatter directions. A patch collects same-level, coarse-to-fine, and fine-to-coarse ghost copies within a user-selected ghost width.</span><a class="headerlink" href="#id2" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+<section id="ghost-masks">
+<h3>Ghost masks<a class="headerlink" href="#ghost-masks" title="Permalink to this heading"></a></h3>
+<p>The scatter is driven by <strong>prebuilt masks</strong> rather than a per-fill geometric search.
+For each source cell a mask lists the destination boxes (grid index and receiving rank) whose ghost region the cell reaches, stored as a compact per-box CSR table (<code class="docutils literal notranslate"><span class="pre">ParticleGhostMask</span></code>).
+There is one mask per direction, and the collection type is</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">AMRParticleGhostMask</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">LayoutData</span><span class="o">&lt;</span><span class="n">ParticleGhostMask</span><span class="o">&gt;&gt;&gt;</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The masks live on the <a class="reference internal" href="Realm.html#chap-realm"><span class="std std-ref">Realm</span></a> and are rebuilt at every regrid.
+Downstream code must first <em>register</em> the ghost width(s) it needs; only registered widths are built.
+The ghost width is a <strong>minimum</strong>, measured in <em>destination</em> cells:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
+<span class="nf">registerParticleGhostMask</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_realm</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_width</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>and the per-direction masks for a registered width are then fetched with</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">const</span><span class="w"> </span><span class="n">AMRParticleGhostMask</span><span class="o">&amp;</span><span class="w"> </span><span class="n">same</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">amr</span><span class="o">-&gt;</span><span class="n">getParticleGhostMask</span><span class="p">(</span><span class="n">realm</span><span class="p">,</span><span class="w"> </span><span class="n">width</span><span class="p">);</span>
+<span class="k">const</span><span class="w"> </span><span class="n">AMRParticleGhostMask</span><span class="o">&amp;</span><span class="w"> </span><span class="n">c2f</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">amr</span><span class="o">-&gt;</span><span class="n">getParticleGhostMaskCoarToFine</span><span class="p">(</span><span class="n">realm</span><span class="p">,</span><span class="w"> </span><span class="n">width</span><span class="p">);</span>
+<span class="k">const</span><span class="w"> </span><span class="n">AMRParticleGhostMask</span><span class="o">&amp;</span><span class="w"> </span><span class="n">f2c</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">amr</span><span class="o">-&gt;</span><span class="n">getParticleGhostMaskFineToCoar</span><span class="p">(</span><span class="n">realm</span><span class="p">,</span><span class="w"> </span><span class="n">width</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>For a direction that should not scatter, pass <code class="docutils literal notranslate"><span class="pre">AmrMesh::getTrivialParticleGhostMask()</span></code> (an empty mask).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Because coarse particles are stored per <em>coarse</em> cell but the coarse-to-fine ghost width is measured in <em>fine</em> cells, a whole boundary coarse cell would over-communicate by up to the refinement ratio.
+The coarse-to-fine mask therefore stores, per target, an <em>acceptance box</em> (the fine box’s ghost region), and the scatter keeps a coarse particle only if its fine cell lands in that box – pruning the transfer to the exact fine shell.
+Same-level and fine-to-coarse transfers are already exact and carry no acceptance box.</p>
+</div>
+</section>
+<section id="filling-ghosts">
+<h3>Filling ghosts<a class="headerlink" href="#filling-ghosts" title="Permalink to this heading"></a></h3>
+<p>With the three masks in hand, the ghost particles are filled with</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
+<span class="nf">fillGhostParticles</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">AMRParticleGhostMask</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_maskSame</span><span class="p">,</span>
+<span class="w">                   </span><span class="k">const</span><span class="w"> </span><span class="n">AMRParticleGhostMask</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_maskCoarToFine</span><span class="p">,</span>
+<span class="w">                   </span><span class="k">const</span><span class="w"> </span><span class="n">AMRParticleGhostMask</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_maskFineToCoar</span><span class="p">);</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">fillGhostParticles</span></code> first clears any existing halo, then for every valid particle scatters a copy (same-rank directly, cross-rank via MPI) into each destination leaf listed by the masks, tagging it with the receiver-view <code class="docutils literal notranslate"><span class="pre">GhostType</span></code> and keeping the source’s <code class="docutils literal notranslate"><span class="pre">particleID</span></code>.
+A typical call, having registered <code class="docutils literal notranslate"><span class="pre">width</span></code> during <code class="docutils literal notranslate"><span class="pre">registerRealms</span></code>/setup, is</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">particles</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span>
+
+<span class="k">const</span><span class="w"> </span><span class="n">AMRParticleGhostMask</span><span class="o">&amp;</span><span class="w"> </span><span class="n">same</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">amr</span><span class="o">-&gt;</span><span class="n">getParticleGhostMask</span><span class="p">(</span><span class="n">realm</span><span class="p">,</span><span class="w"> </span><span class="n">width</span><span class="p">);</span>
+<span class="k">const</span><span class="w"> </span><span class="n">AMRParticleGhostMask</span><span class="o">&amp;</span><span class="w"> </span><span class="n">c2f</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">amr</span><span class="o">-&gt;</span><span class="n">getParticleGhostMaskCoarToFine</span><span class="p">(</span><span class="n">realm</span><span class="p">,</span><span class="w"> </span><span class="n">width</span><span class="p">);</span>
+<span class="k">const</span><span class="w"> </span><span class="n">AMRParticleGhostMask</span><span class="o">&amp;</span><span class="w"> </span><span class="n">f2c</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">amr</span><span class="o">-&gt;</span><span class="n">getParticleGhostMaskFineToCoar</span><span class="p">(</span><span class="n">realm</span><span class="p">,</span><span class="w"> </span><span class="n">width</span><span class="p">);</span>
+
+<span class="n">particles</span><span class="p">.</span><span class="n">fillGhostParticles</span><span class="p">(</span><span class="n">same</span><span class="p">,</span><span class="w"> </span><span class="n">c2f</span><span class="p">,</span><span class="w"> </span><span class="n">f2c</span><span class="p">);</span><span class="w">   </span><span class="c1">// pass getTrivialParticleGhostMask() to skip a direction</span>
+</pre></div>
+</div>
+<p>The halo can be dropped at any time with</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
+<span class="nf">clearGhostParticles</span><span class="p">();</span>
+</pre></div>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>The full ghost/mask C++ API is documented at <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classParticleContainer.html">https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classParticleContainer.html</a> and <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classParticleGhostMask.html">https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classParticleGhostMask.html</a>.</p>
+</div>
+</section>
 </section>
 <section id="boundary-interaction">
 <span id="chap-particleeb"></span><h2>Boundary interaction<a class="headerlink" href="#boundary-interaction" title="Permalink to this heading"></a></h2>
@@ -747,20 +831,20 @@ Refinement boundaries introduce additional complications in the deposition schem
 <li><p>Coarse-grid particles whose deposition clouds stick underneath the fine-level.</p></li>
 </ol>
 <p>In addition, there can be complications near physical boundaries, such as domain or embedded boundaries.</p>
-<figure class="align-center" id="id1">
+<figure class="align-center" id="id3">
 <span id="fig-particledeposition"></span><a class="reference internal image-reference" href="../_images/ParticleDeposition.png"><img alt="../_images/ParticleDeposition.png" src="../_images/ParticleDeposition.png" style="width: 75%;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 11 </span><span class="caption-text">Sketch of deposition schemes near refinement boundaries and cut-cells.</span><a class="headerlink" href="#id1" title="Permalink to this image"></a></p>
+<p><span class="caption-number">Fig. 12 </span><span class="caption-text">Sketch of deposition schemes near refinement boundaries and cut-cells.</span><a class="headerlink" href="#id3" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> supports various ways of handling deposition across the refinement boundary.
 In all of these methods, the mass on the fine grid particles whose deposition clouds hang over the refinement boundaries is simply added to the coarse grid.
-The main modifications to the deposition scheme are performed for the coarse-grid particles that live around the refinement boundary (see <a class="reference internal" href="#fig-halomask"><span class="std std-numref">Fig. 12</span></a>).
+The main modifications to the deposition scheme are performed for the coarse-grid particles that live around the refinement boundary (see <a class="reference internal" href="#fig-halomask"><span class="std std-numref">Fig. 13</span></a>).
 For the coarse-grid particles the following processes then occur:</p>
-<figure class="align-center" id="id2">
+<figure class="align-center" id="id4">
 <span id="fig-halomask"></span><a class="reference internal image-reference" href="../_images/HaloMask.png"><img alt="../_images/HaloMask.png" src="../_images/HaloMask.png" style="width: 40%;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 12 </span><span class="caption-text">Example regions containing coarse-grid particles that deposit with custom deposition rules.</span><a class="headerlink" href="#id2" title="Permalink to this image"></a></p>
+<p><span class="caption-number">Fig. 13 </span><span class="caption-text">Example regions containing coarse-grid particles that deposit with custom deposition rules.</span><a class="headerlink" href="#id4" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
 <p>The following coarse-fine deposition methods are currently supported:</p>
@@ -768,13 +852,13 @@ For the coarse-grid particles the following processes then occur:</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">CoarseFineDeposition::Interp</span></code>
 This method permits the coarse-grid particles to deposit into the region underneath the fine grid.
 The deposited mass that falls underneath the fine grid is then interpolated from the coarse grid to the fine grid.
-For example, see the indicated coarse-grid particle cloud in the left panel <a class="reference internal" href="#fig-particledeposition"><span class="std std-numref">Fig. 11</span></a>.
+For example, see the indicated coarse-grid particle cloud in the left panel <a class="reference internal" href="#fig-particledeposition"><span class="std std-numref">Fig. 12</span></a>.
 While this particle has a width given by the coarse-grid cell size, it will deposit into the coarse grid cells underneath the fine grid.
 The mass that ends up in these cells is interpolated to the fine grid, which in this case will inject mass into two layers of fine-grid cells.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">CoarseFineDeposition::Halo</span></code>
 This method extracts the coarse-grid particles that live on the refinement boundary and deposit them with their original width on both the coarse and fine levels.
 This is done by first depositing the particles on the coarse level, and then transferring them to the fine level and redepositing them there with the original particle width.
-Taking the left panel in <a class="reference internal" href="#fig-particledeposition"><span class="std std-numref">Fig. 11</span></a> as an example, the green particle will then deposit into the coarse-grid cell as well as the first layer of fine-grid cells.</p></li>
+Taking the left panel in <a class="reference internal" href="#fig-particledeposition"><span class="std std-numref">Fig. 12</span></a> as an example, the green particle will then deposit into the coarse-grid cell as well as the first layer of fine-grid cells.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">CoarseFineDeposition::HaloNGP</span></code>
 Similar to <code class="docutils literal notranslate"><span class="pre">CoarseFineDeposition::Halo</span></code> discussed above, this method also extracts the coarse-grid particles on the coarse side of the refinement boundary.
 However, rather than using the original deposition scheme, these particles are deposited with an NGP scheme.</p></li>
@@ -859,18 +943,29 @@ The argument <code class="docutils literal notranslate"><span class="pre">a_shif
 <p>Often, merging or splitting of particles is required.
 The recommended pattern operates on one cell at a time: cell-sort the leaf, extract a cell’s particles into a small scratch <code class="docutils literal notranslate"><span class="pre">ParticleSoA</span></code>, merge/split them, and rebuild the leaf.
 <code class="docutils literal notranslate"><span class="pre">ParticleSoA&lt;P&gt;::extractCell</span></code> performs the per-cell extraction</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @name Cell sorting (CSR)</span>
-<span class="cm">  */</span>
-<span class="w">  </span><span class="c1">///@{</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
+<span class="cm">  @brief Extract cell c&#39;s particles (the CSR range [cellStart(c), cellStart(c+1))) into a_out.</span>
+<span class="cm">  @details a_out is cleared first, then this cell&#39;s particles are appended (all columns, including</span>
+<span class="cm">  id/rank). Requires the container to be cell-sorted. This is the building block of the per-cell</span>
+<span class="cm">  extract-&gt;process-&gt;rebuild idiom that replaces the AoS BinFab&lt;List&lt;P&gt;&gt; per-cell pattern: extract a</span>
+<span class="cm">  cell into a reusable scratch container, mutate it (append/remove), accumulate it into an output</span>
+<span class="cm">  container via append(const ParticleSoA&amp;), and finally swap() the output into the leaf. See</span>
+<span class="cm">  ItoSolver::makeSuperparticles for the canonical use.</span>
+<span class="cm">  @param[in]  a_cell Cell index.</span>
+<span class="cm">  @param[out] a_out  Destination scratch container (cleared on entry; reuse it across cells).</span>
+<span class="cm">*/</span>
+<span class="kt">void</span>
+<span class="nf">extractCell</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">a_cell</span><span class="p">,</span><span class="w"> </span><span class="n">ParticleSoA</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_out</span><span class="p">)</span><span class="w"> </span><span class="k">const</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="n">CH_assert</span><span class="p">(</span><span class="n">m_sorted</span><span class="p">);</span>
 
-<span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @brief Counting-sort the columns into Fortran cell order and build CSR cell offsets.</span>
-<span class="cm">    @details After this, cell c owns the contiguous particle range [cellStart(c), cellStart(c+1)).</span>
-<span class="cm">    Particles must lie within a_box; out-of-range positions are clamped to the boundary cells.</span>
-<span class="cm">    @param[in] a_box    Patch box defining the cells.</span>
-<span class="cm">    @param[in] a_dx     Grid spacing per direction.</span>
-<span class="cm">    @param[in] a_probLo Physical coordinate of the lower domain corner.</span>
+<span class="w">  </span><span class="n">a_out</span><span class="p">.</span><span class="n">clear</span><span class="p">();</span>
+
+<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">range</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">this</span><span class="o">-&gt;</span><span class="n">cellRange</span><span class="p">(</span><span class="n">a_cell</span><span class="p">);</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">range</span><span class="p">.</span><span class="n">first</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">range</span><span class="p">.</span><span class="n">second</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">a_out</span><span class="p">.</span><span class="n">appendParticle</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>and the merged result is accumulated into an output <code class="docutils literal notranslate"><span class="pre">ParticleSoA</span></code> (via <code class="docutils literal notranslate"><span class="pre">append</span></code>) which finally replaces the leaf with <code class="docutils literal notranslate"><span class="pre">swap</span></code>.
@@ -882,11 +977,11 @@ Each factory accepts user-supplied lambdas for the particle-type-specific gather
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> has functionality for spatially partitioning particles using kD-trees, which can be used as a basis for particle merging and splitting.
 kD-trees operate by partitioning a set of input primitives into spatially coherent subsets.
 At each level in the tree recursion one chooses an axis for partitioning one subset into two new subsets, and the recursion continues until the partitioning is complete.
-<a class="reference internal" href="#fig-partitionkd"><span class="std std-numref">Fig. 13</span></a> shows an example where a set of initial particles are partitioned using such a tree.</p>
-<figure class="align-center" id="id3">
+<a class="reference internal" href="#fig-partitionkd"><span class="std std-numref">Fig. 14</span></a> shows an example where a set of initial particles are partitioned using such a tree.</p>
+<figure class="align-center" id="id5">
 <span id="fig-partitionkd"></span><a class="reference internal image-reference" href="../_images/PartitionKD.png"><img alt="../_images/PartitionKD.png" src="../_images/PartitionKD.png" style="width: 90%;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 13 </span><span class="caption-text">Example of a kD-tree partitioning of particles in a single cell.</span><a class="headerlink" href="#id3" title="Permalink to this image"></a></p>
+<p><span class="caption-number">Fig. 14 </span><span class="caption-text">Example of a kD-tree partitioning of particles in a single cell.</span><a class="headerlink" href="#id5" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
 <div class="admonition tip">
@@ -903,12 +998,12 @@ In this case any other members in the particle type are copied over into the new
 </div>
 <p>The particles in each leaf of the kD-tree can then be merged into new particles.
 Since the weight in the nodes of the tree differ by at most one, the resulting computational particles also have weights that differ by at most one.</p>
-<figure class="align-center" id="id4">
+<figure class="align-center" id="id6">
 <span id="fig-superkd"></span><a class="reference internal image-reference" href="../_images/SuperKD.png"><img alt="../_images/SuperKD.png" src="../_images/SuperKD.png" style="width: 75%;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 14 </span><span class="caption-text">kD-tree partitioning of particles into new particles whose weight differ by at most one.
+<p><span class="caption-number">Fig. 15 </span><span class="caption-text">kD-tree partitioning of particles into new particles whose weight differ by at most one.
 Left: Original particles with weights between 1 and 100.
-Right: Merged particles.</span><a class="headerlink" href="#id4" title="Permalink to this image"></a></p>
+Right: Merged particles.</span><a class="headerlink" href="#id6" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
 </section>
@@ -921,18 +1016,6 @@ The caller provides three lambdas:</p>
 <li><p>A <em>reconcile</em> function (<code class="docutils literal notranslate"><span class="pre">BinaryParticleReconcile</span></code>) that propagates payload fields to both daughter particles when the median particle is split across a KD boundary.</p></li>
 <li><p>A <em>scatter-leaf</em> function that receives the raw <code class="docutils literal notranslate"><span class="pre">[first,</span> <span class="pre">last)</span></code> pointer range of one leaf and appends exactly one merged particle to the SoA.</p></li>
 </ul>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Packed</span><span class="p">,</span>
-<span class="w">          </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">Packed</span><span class="o">::*</span><span class="n">packWeight</span><span class="p">)(),</span>
-<span class="w">          </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">Packed</span><span class="o">::*</span><span class="n">packPosition</span><span class="p">)()</span><span class="w"> </span><span class="k">const</span><span class="p">,</span>
-<span class="w">          </span><span class="k">class</span><span class="w"> </span><span class="nc">P</span><span class="p">,</span>
-<span class="w">          </span><span class="k">class</span><span class="w"> </span><span class="nc">Traits</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ParticleTraits</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&gt;</span>
-<span class="kr">inline</span><span class="w"> </span><span class="n">ParticleMerger</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">Traits</span><span class="o">&gt;</span>
-<span class="n">makeEqualWeightKDMerger</span><span class="p">(</span>
-<span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Packed</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">ParticleSoA</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">Traits</span><span class="o">&gt;&amp;</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="p">)</span><span class="o">&gt;</span><span class="w">                           </span><span class="n">a_gather</span><span class="p">,</span>
-<span class="w">  </span><span class="n">BinaryParticleReconcile</span><span class="o">&lt;</span><span class="n">Packed</span><span class="o">&gt;</span><span class="w">                                                             </span><span class="n">a_reconcile</span><span class="p">,</span>
-<span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="kt">void</span><span class="p">(</span><span class="n">ParticleSoA</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">Traits</span><span class="o">&gt;&amp;</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Packed</span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Packed</span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">CellInfo</span><span class="o">&amp;</span><span class="p">)</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_scatterLeaf</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
-</pre></div>
-</div>
 <p>In the weighted-centroid variant (<code class="docutils literal notranslate"><span class="pre">equal_weight_kd</span></code> in <code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code>), the scatter-leaf computes the weight-averaged position and energy over all particles in the leaf.
 Particle weights need not be integers, but <code class="docutils literal notranslate"><span class="pre">buildEqualWeightKDLeaves</span></code> may create new particles at the KD boundaries (see warning above), so the total computational-particle count may exceed the target by a small amount during the build before being reduced.</p>
 </section>
@@ -953,12 +1036,12 @@ This is intentional and matches the original <code class="docutils literal notra
 <section id="reinitialization-reinitialize">
 <h3>Reinitialization (<code class="docutils literal notranslate"><span class="pre">reinitialize</span></code>)<a class="headerlink" href="#reinitialization-reinitialize" title="Permalink to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">ParticleManagement::makeReinitializeMerger</span></code> discards all spatial information and rebuilds the cell from scratch.</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="o">*/</span>
-<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Context</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">P</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">Traits</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ParticleTraits</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&gt;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Context</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">P</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">Traits</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ParticleTraits</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&gt;</span>
 <span class="kr">inline</span><span class="w"> </span><span class="n">ParticleMerger</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">Traits</span><span class="o">&gt;</span>
 <span class="n">makeReinitializeMerger</span><span class="p">(</span>
 <span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="p">,</span><span class="w"> </span><span class="n">Context</span><span class="o">&gt;</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">ParticleSoA</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">Traits</span><span class="o">&gt;&amp;</span><span class="p">)</span><span class="o">&gt;</span><span class="w">              </span><span class="n">a_aggregate</span><span class="p">,</span>
 <span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="kt">void</span><span class="p">(</span><span class="n">ParticleSoA</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">Traits</span><span class="o">&gt;&amp;</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="p">,</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Context</span><span class="o">&amp;</span><span class="p">)</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_emit</span><span class="p">,</span>
+<span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="p">()</span><span class="o">&gt;</span><span class="w">                                                                </span><span class="n">a_probLo</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>The returned functor proceeds as follows:</p>
