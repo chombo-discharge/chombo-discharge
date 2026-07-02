@@ -119,7 +119,7 @@ _____________________
 To get the per-level holders from a ``ParticleContainer<P, Traits>`` one can call ``getParticles()``:
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 316-324
+   :lines: 312-320
    :language: c++
    :dedent: 2
 
@@ -253,7 +253,7 @@ Particles that move off their original grid patch must be remapped in order to e
 The remapping function for ``ParticleContainer<P, Traits>`` is
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 583-592
+   :lines: 579-588
    :language: c++
    :dedent: 2
 
@@ -288,7 +288,7 @@ This is done as follows:
 1. *Before* creating the new grids, each MPI rank caches its current particles by calling
 
    .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-      :lines: 594-601
+      :lines: 590-597
       :language: c++
       :dedent: 2
 
@@ -297,7 +297,7 @@ This is done as follows:
 2. When ``ParticleContainer<P, Traits>`` regrids, the cached particles are redistributed onto the new layout by calling the regrid function:
 
    .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-      :lines: 603-626
+      :lines: 599-622
       :language: c++
       :dedent: 2
 
@@ -322,7 +322,7 @@ To fill the masked particles, ``ParticleContainer<P, Traits>`` has member functi
 The function signature for this is
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 717-718
+   :lines: 702-703
    :language: c++
    :dedent: 2
 
@@ -330,7 +330,7 @@ The argument ``a_mask`` holds a bool at each cell in the AMR hierarchy.
 Particles that live in cells where ``a_mask`` is true will be copied to an internal holder which can be retrieved through
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 336-344
+   :lines: 332-340
    :language: c++
    :dedent: 2
 
@@ -338,7 +338,7 @@ In the above functions the mask particles are *copied*, and the original particl
 After the user is done with the particles, they should be released through
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 747-751
+   :lines: 732-736
    :language: c++
    :dedent: 2
 
@@ -372,7 +372,7 @@ A copy can come from three directions relative to the receiving patch, and the d
 * **Fine-to-coarse** -- the next-finer level (``GhostType::Fine``).
 
 The copies are appended into the **same** ``ParticleSoA`` leaf as the valid particles and marked in place through the mandatory 1-byte ``GhostType`` column, queried with ``ParticleSoA::isGhost(i)`` (and ``ghost(i)``).
-Ghosts are *transient*: they exist only between a ``fillGhost`` and the next ``clearGhostParticles`` / ``remap`` / ``regrid``, and are never routed or counted as owned particles (``getNumberOfValidParticlesLocal()`` excludes them).
+Ghosts are *transient*: they exist only between a ``fillGhostParticles`` and the next ``clearGhostParticles`` / ``remap`` / ``regrid``, and are never routed or counted as owned particles (``getNumberOfValidParticlesLocal()`` excludes them).
 
 :numref:`Fig:ParticleGhost` illustrates the three scatter directions for a single fine patch and its coarse/same-level neighbours.
 
@@ -425,11 +425,11 @@ ______________
 With the three masks in hand, the halo is filled with
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 664-667
+   :lines: 649-652
    :language: c++
    :dedent: 2
 
-``fillGhost`` first clears any existing halo, then for every valid particle scatters a copy (same-rank directly, cross-rank via MPI) into each destination leaf listed by the masks, tagging it with the receiver-view ``GhostType`` and keeping the source's ``particleID``.
+``fillGhostParticles`` first clears any existing halo, then for every valid particle scatters a copy (same-rank directly, cross-rank via MPI) into each destination leaf listed by the masks, tagging it with the receiver-view ``GhostType`` and keeping the source's ``particleID``.
 A typical call, having registered ``width`` during ``registerRealms``/setup, is
 
 .. code-block:: c++
@@ -440,12 +440,12 @@ A typical call, having registered ``width`` during ``registerRealms``/setup, is
    const AMRParticleGhostMask& c2f  = amr->getParticleGhostMaskCoarToFine(realm, width);
    const AMRParticleGhostMask& f2c  = amr->getParticleGhostMaskFineToCoar(realm, width);
 
-   particles.fillGhost(same, c2f, f2c);   // pass getTrivialParticleGhostMask() to skip a direction
+   particles.fillGhostParticles(same, c2f, f2c);   // pass getTrivialParticleGhostMask() to skip a direction
 
 The halo can be dropped at any time with
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 674-675
+   :lines: 659-660
    :language: c++
    :dedent: 2
 

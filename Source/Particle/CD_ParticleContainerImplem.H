@@ -35,31 +35,6 @@
 #include <CD_ParticleContainer.H>
 #include <CD_NamespaceHeader.H>
 
-// Debug tripwires for localizing MPI stalls in the ghost/remap paths. Off unless the environment
-// variable CD_PARTICLE_TRIPWIRE is set, so production runs are silent. Each marker is written to
-// the per-rank pout file and flushed, so the last marker in each file localizes where a rank stalled.
-namespace {
-  inline bool
-  cdParticleTripwireOn()
-  {
-    static const bool s_on = (std::getenv("CD_PARTICLE_TRIPWIRE") != nullptr);
-    return s_on;
-  }
-} // namespace
-
-/**
-  @brief Debug tripwire macro for localizing MPI stalls in the ghost/remap paths.
-  @details Emits a flushed marker line to the per-rank pout file only when the environment variable
-  CD_PARTICLE_TRIPWIRE is set, so production runs are silent. Temporary development aid.
-  @param msg A stream-insertable expression appended to the marker.
-*/
-#define CD_TRIPWIRE(msg)                      \
-  do {                                        \
-    if (cdParticleTripwireOn()) {             \
-      pout() << "[tripwire] " << msg << endl; \
-    }                                         \
-  } while (0)
-
 template <typename P, typename Traits>
 inline typename ParticleContainer<P, Traits>::Destination
 ParticleContainer<P, Traits>::findDestination(const RealVect& a_pos) const
@@ -300,18 +275,6 @@ ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool, const bool a
   const int myRank   = procID();
   const int numRanks = numProc();
 
-  CD_TRIPWIRE("distributeFromPool: enter setOwnerToReceiver=" << a_setOwnerToReceiver);
-  if (cdParticleTripwireOn()) {
-    std::size_t nSame  = 0;
-    std::size_t nCross = 0;
-    for (int r = 0; r < numRanks; r++) {
-      for (auto& kv : a_pool[r]) {
-        (r == myRank ? nSame : nCross) += kv.second.size();
-      }
-    }
-    CD_TRIPWIRE("distributeFromPool: pool same-rank=" << nSame << " cross-rank=" << nCross);
-  }
-
   // ---- same-rank movers: catenate each pooled leaf into its destination leaf ----
   // On the gather-all path the destination leaves are empty (remap clears them; regrid allocates them
   // fresh) so catenate() takes the O(1) arena-swap fast path. On the mask fast path the destinations
@@ -320,15 +283,10 @@ ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool, const bool a
   for (auto& kv : a_pool[myRank]) {
     const int          lvl  = kv.first.first;
     const unsigned int gidx = kv.first.second;
-    if (cdParticleTripwireOn() && m_levelTiles[lvl]->getMyGrids().count(gidx) == 0) {
-      CD_TRIPWIRE("distributeFromPool: SAME-RANK dest lvl=" << lvl << " gidx=" << gidx << " NOT owned here!");
-    }
-    const DataIndex din = m_levelTiles[lvl]->getMyGrids().at(gidx);
+    const DataIndex    din  = m_levelTiles[lvl]->getMyGrids().at(gidx);
 
     (*m_particles[lvl])[din].catenate(kv.second);
   }
-
-  CD_TRIPWIRE("distributeFromPool: same-rank done");
 
 #ifdef CH_MPI
   // ---- cross-rank movers: one Alltoallv of linearized particles ----
@@ -385,9 +343,7 @@ ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool, const bool a
     sendCounts[r] = static_cast<int>(sendBuf[r].size());
   }
 
-  CD_TRIPWIRE("distributeFromPool: before MPI_Alltoall");
   MPI_Alltoall(sendCounts.data(), 1, MPI_INT, recvCounts.data(), 1, MPI_INT, Chombo_MPI::comm);
-  CD_TRIPWIRE("distributeFromPool: after MPI_Alltoall");
 
   std::vector<int> sdispl(numRanks, 0);
   std::vector<int> rdispl(numRanks, 0);
@@ -417,7 +373,6 @@ ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool, const bool a
     }
   }
 
-  CD_TRIPWIRE("distributeFromPool: before MPI_Alltoallv stot=" << stot << " rtot=" << rtot);
   MPI_Alltoallv(sflat.data(),
                 sendCounts.data(),
                 sdispl.data(),
@@ -427,7 +382,6 @@ ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool, const bool a
                 rdispl.data(),
                 MPI_BYTE,
                 Chombo_MPI::comm);
-  CD_TRIPWIRE("distributeFromPool: after MPI_Alltoallv");
 
   // ---- unpack: group received chunks by destination leaf, then append in parallel ----
   // Pass 1 (serial, header-only walk): record each chunk's payload pointer + count, grouped by its
@@ -485,17 +439,6 @@ ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool, const bool a
 
   const int numGroups = static_cast<int>(groups.size());
 
-  if (cdParticleTripwireOn()) {
-    for (const DestGroup& g : groups) {
-      const bool ownedHere = m_levelTiles[g.level]->getMyGrids().count(g.gridIndex) > 0;
-      if (!ownedHere) {
-        CD_TRIPWIRE("distributeFromPool: RECEIVED group lvl=" << g.level << " gidx=" << g.gridIndex
-                                                              << " count=" << g.total << " NOT owned here!");
-      }
-    }
-    CD_TRIPWIRE("distributeFromPool: unpacking " << numGroups << " groups");
-  }
-
 #ifdef _OPENMP
 #pragma omp parallel for schedule(runtime)
 #endif
@@ -519,11 +462,7 @@ ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool, const bool a
       }
     }
   }
-
-  CD_TRIPWIRE("distributeFromPool: unpack done");
 #endif
-
-  CD_TRIPWIRE("distributeFromPool: return");
 }
 
 template <typename P, typename Traits>
@@ -790,173 +729,6 @@ ParticleContainer<P, Traits>::resetParticleIDs(const bool a_onlyValidRegion, con
 
 template <typename P, typename Traits>
 inline typename ParticleContainer<P, Traits>::MoverPool
-ParticleContainer<P, Traits>::gatherGhostsToPool()
-{
-  CH_TIME("ParticleContainer::gatherGhostsToPool");
-
-  CD_TRIPWIRE("gatherGhostsToPool: enter");
-
-  // A candidate destination patch: its own (ungrown) box, the box grown by m_numGhost and clamped to
-  // the domain, and its global (gridIndex, rank) identity (matching LevelTiles / distributeFromPool).
-  struct GhostBox
-  {
-    Box          box;       // ungrown box; a particle inside it is the patch's own, not a ghost
-    Box          grownBox;  // grow(box, m_numGhost) & domain -- shell + interior
-    unsigned int gridIndex; // global box index
-    int          rank;      // owning rank of this box
-  };
-  using GhostTileMap = std::unordered_map<IntVect, std::vector<GhostBox>, LevelTiles::TileHasher>;
-
-  // Build, per level, a tile -> grown-boxes map from the GLOBAL grids. The DisjointBoxLayout is global
-  // metadata on every rank, so a source particle can be matched against destination patches on any rank
-  // with no communication. A grown box is registered under every min-tile it covers (the same tiling as
-  // findDestination), so a particle's tile lookup yields all candidate destinations.
-  std::vector<GhostTileMap> ghostTiles(m_finestLevel + 1);
-  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    const DisjointBoxLayout& dbl       = m_grids[lvl];
-    const Box                domainBox = m_domains[lvl].domainBox();
-
-    for (LayoutIterator lit = dbl.layoutIterator(); lit.ok(); ++lit) {
-      const Box          box  = dbl[lit()];
-      const unsigned int gidx = dbl.index(lit());
-      const int          rank = dbl.procID(lit());
-
-      Box grownBox = grow(box, m_numGhost);
-      grownBox &= domainBox;
-
-      const Box tileRange = coarsen(grownBox, m_minBlockSize);
-      for (BoxIterator bit(tileRange); bit.ok(); ++bit) {
-        ghostTiles[lvl][bit()].push_back(GhostBox{box, grownBox, gidx, rank});
-      }
-    }
-  }
-
-  MoverPool pool(numProc());
-
-  // Bin one source leaf's particles as ghosts of every destination patch whose shell contains them.
-  auto binLeaf = [this, &ghostTiles](MoverPool& a_target, const Leaf& a_leaf, const int a_srcLvl) {
-    for (std::size_t i = 0; i < a_leaf.size(); i++) {
-      const RealVect pos = a_leaf.position(i);
-
-      // A source particle can only be a ghost of patches at most one level away (coarse/same/fine).
-      for (int dstLvl = a_srcLvl - 1; dstLvl <= a_srcLvl + 1; dstLvl++) {
-        if (dstLvl < 0 || dstLvl > m_finestLevel) {
-          continue;
-        }
-
-        IntVect tile;
-        for (int dir = 0; dir < SpaceDim; dir++) {
-          tile[dir] = static_cast<int>(std::floor((pos[dir] - m_probLo[dir]) / (m_minBlockSize * m_dx[dstLvl][dir])));
-        }
-
-        const auto mit = ghostTiles[dstLvl].find(tile);
-        if (mit == ghostTiles[dstLvl].end()) {
-          continue;
-        }
-
-        const IntVect cellIv = this->cellIndex(dstLvl, pos);
-
-        // GhostType is from the destination's view: a source on a coarser level is a Coarse ghost, on a
-        // finer level a Fine ghost, on the same level a SameLevel ghost.
-        const GhostType gt = (a_srcLvl == dstLvl)  ? GhostType::SameLevel
-                             : (a_srcLvl < dstLvl) ? GhostType::Coarse
-                                                   : GhostType::Fine;
-
-        for (const GhostBox& gb : mit->second) {
-          // A ghost lies in the patch's shell: inside the grown box but outside the patch's own box.
-          if (gb.grownBox.contains(cellIv) && !gb.box.contains(cellIv)) {
-            Leaf& bin = a_target[gb.rank][PoolKey(dstLvl, gb.gridIndex)];
-
-            bin.append(pos, a_leaf.weight(i), a_leaf.gather(i));
-
-            const std::size_t k = bin.size() - 1;
-
-            bin.particleID(k) = a_leaf.particleID(i); // preserve id
-            bin.rankID(k)     = procID();             // owner is this rank (it owns its valid particles)
-            bin.ghost(k)      = gt;
-          }
-        }
-      }
-    }
-  };
-
-  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    const LevelParticles& level = *m_particles[lvl];
-    const DataIterator&   dit   = m_grids[lvl].dataIterator();
-    const int             nbox  = dit.size();
-
-#ifdef _OPENMP
-#pragma omp parallel
-    {
-      MoverPool threadPool(numProc()); // thread-local; no locking while binning
-
-#pragma omp for schedule(runtime)
-      for (int mybox = 0; mybox < nbox; mybox++) {
-        binLeaf(threadPool, level[dit[mybox]], lvl);
-      }
-
-#pragma omp critical(ParticleContainer_gatherGhostsMerge)
-      {
-        for (int r = 0; r < numProc(); r++) {
-          for (auto& kv : threadPool[r]) {
-            pool[r][kv.first].catenate(kv.second);
-          }
-        }
-      }
-    }
-#else
-    for (int mybox = 0; mybox < nbox; mybox++) {
-      binLeaf(pool, level[dit[mybox]], lvl);
-    }
-#endif
-  }
-
-  if (cdParticleTripwireOn()) {
-    std::size_t nbins = 0;
-    std::size_t npart = 0;
-    for (int r = 0; r < numProc(); r++) {
-      nbins += pool[r].size();
-      for (auto& kv : pool[r]) {
-        npart += kv.second.size();
-      }
-    }
-    CD_TRIPWIRE("gatherGhostsToPool: done, " << nbins << " dest bins, " << npart << " ghost copies");
-  }
-
-  return pool;
-}
-
-template <typename P, typename Traits>
-inline void
-ParticleContainer<P, Traits>::fillGhostParticles()
-{
-  CH_TIME("ParticleContainer::fillGhostParticles");
-
-  CH_assert(m_isDefined);
-
-  CD_TRIPWIRE("fillGhostParticles: enter numGhost=" << m_numGhost);
-
-  // Refill from a clean slate: drop any existing ghost halo first.
-  this->clearGhostParticles();
-
-  if (m_numGhost <= 0) {
-    return; // no ghost layer requested
-  }
-
-  CD_TRIPWIRE("fillGhostParticles: gathering ghosts");
-  MoverPool pool = this->gatherGhostsToPool();
-
-  CD_TRIPWIRE("fillGhostParticles: distributing ghosts");
-  // a_setOwnerToReceiver == false: ghost copies keep their true owner's rankID (not the receiver's).
-  this->distributeFromPool(pool, false);
-
-  CD_TRIPWIRE("fillGhostParticles: done");
-
-  m_isOrganizedByCell = false; // ghosts appended to the leaves invalidate any cell sort
-}
-
-template <typename P, typename Traits>
-inline typename ParticleContainer<P, Traits>::MoverPool
 ParticleContainer<P, Traits>::gatherGhostsFromMasks(const AMRParticleGhostMask& a_maskSame,
                                                     const AMRParticleGhostMask& a_maskCoarToFine,
                                                     const AMRParticleGhostMask& a_maskFineToCoar)
@@ -1059,11 +831,11 @@ ParticleContainer<P, Traits>::gatherGhostsFromMasks(const AMRParticleGhostMask& 
 
 template <typename P, typename Traits>
 inline void
-ParticleContainer<P, Traits>::fillGhost(const AMRParticleGhostMask& a_maskSame,
-                                        const AMRParticleGhostMask& a_maskCoarToFine,
-                                        const AMRParticleGhostMask& a_maskFineToCoar)
+ParticleContainer<P, Traits>::fillGhostParticles(const AMRParticleGhostMask& a_maskSame,
+                                                 const AMRParticleGhostMask& a_maskCoarToFine,
+                                                 const AMRParticleGhostMask& a_maskFineToCoar)
 {
-  CH_TIME("ParticleContainer::fillGhost");
+  CH_TIME("ParticleContainer::fillGhostParticles");
 
   CH_assert(m_isDefined);
 

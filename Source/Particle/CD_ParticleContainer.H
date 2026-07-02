@@ -180,8 +180,6 @@ public:
     @param[in] a_probLo         Lower-left corner of the physical domain.
     @param[in] a_minBlockSize Grid blocking factor (tile size); the grids must be unions of
                                 minBlockSize-sized boxes for the tile ownership to be exact.
-    @param[in] a_numGhost       Width (in cells, at each destination patch's own level) of the ghost
-                                layer filled by fillGhostParticles(). Zero disables ghost filling.
     @param[in] a_levelTiles     The owning Realm's per-level tile->box maps, aliased (never built locally)
                                 as the patch-locating structure used by remap(). Must correspond to
                                 a_grids. Not owned; must outlive this container.
@@ -198,7 +196,6 @@ public:
          const Vector<int>&                                     a_refRat,
          const RealVect&                                        a_probLo,
          const int                                              a_minBlockSize,
-         const int                                              a_numGhost,
          const Vector<RefCountedPtr<LevelTiles>>&               a_levelTiles,
          const int                                              a_finestLevel,
          const std::string&                                     a_realm,
@@ -217,7 +214,6 @@ public:
     m_refRat          = a_refRat;
     m_probLo          = a_probLo;
     m_minBlockSize    = a_minBlockSize;
-    m_numGhost        = a_numGhost;
     m_finestLevel     = a_finestLevel;
     m_realm           = a_realm;
     m_validCells      = a_validCells;
@@ -633,38 +629,27 @@ public:
   ///@{
 
   /**
-    @brief Fill each patch's ghost halo with copies of particles that overlap its ghosted box.
-    @details A ghost particle is a transient, non-owned copy of a particle that lives in an adjacent
-    region (a neighbouring patch on the same level, the next-coarser level, or the next-finer level)
-    and overlaps this patch's ghosted/grown box. The copies are appended into the SAME leaf as the
-    valid particles and tagged with the appropriate GhostType (SameLevel/Coarse/Fine) so consumers
-    can tell them from the owned particles via ParticleSoA::isGhost(). Ghosts are transient: this
-    routine first calls clearGhostParticles() so it is safe to refill, and remap()/preRegrid()/
-    regrid() drop ghosts so they are never routed or cached as if valid.
-    @note The cross-patch/cross-level routing is not yet implemented -- this currently only clears any
-    existing ghost halo. See the Phase-2 remap work.
-  */
-  void
-  fillGhostParticles();
-
-  /**
     @brief Fill each patch's ghost halo from prebuilt Realm particle ghost masks.
-    @details For every valid particle, scatters a copy to each destination patch listed by the masks for
-    the particle's cell: same-level targets from a_maskSame, next-finer targets from a_maskCoarToFine, and
-    next-coarser targets from a_maskFineToCoar. Copies are appended into the destination leaf (same-rank
-    directly, cross-rank via MPI), tagged with the GhostType from the receiver's view (SameLevel / Coarse /
-    Fine), and keep the source's particleID and owning rank. clearGhostParticles() is called first so it is
-    safe to refill. Pass AmrMesh::getTrivialParticleGhostMask() for a direction that should not scatter.
-    The masks must have been built on the same grids as this container (see AmrMesh::registerParticleGhostMask
-    and AmrMesh::getParticleGhostMask(realm, width)). Non-periodic.
+    @details A ghost particle is a transient, non-owned copy of a particle that lives in an adjacent
+    region (a neighbouring patch on the same level, the next-coarser level, or the next-finer level) and
+    overlaps this patch's ghosted box. For every valid particle, this scatters a copy to each destination
+    patch listed by the masks for the particle's cell: same-level targets from a_maskSame, next-finer
+    targets from a_maskCoarToFine, and next-coarser targets from a_maskFineToCoar. Copies are appended
+    into the destination leaf (same-rank directly, cross-rank via MPI), tagged with the GhostType from the
+    receiver's view (SameLevel / Coarse / Fine) so consumers can tell them from owned particles via
+    ParticleSoA::isGhost(), and keep the source's particleID. clearGhostParticles() is called first so it
+    is safe to refill; ghosts are transient (remap()/preRegrid()/regrid() drop them). Pass
+    AmrMesh::getTrivialParticleGhostMask() for a direction that should not scatter. The masks must have
+    been built on the same grids as this container (see AmrMesh::registerParticleGhostMask and
+    AmrMesh::getParticleGhostMask(realm, width)). Non-periodic.
     @param[in] a_maskSame       Same-level ghost mask (source cell -> same-level target boxes).
     @param[in] a_maskCoarToFine Coarse-to-fine ghost mask (source cell -> next-finer target boxes).
     @param[in] a_maskFineToCoar Fine-to-coarse ghost mask (source cell -> next-coarser target boxes).
   */
   void
-  fillGhost(const AMRParticleGhostMask& a_maskSame,
-            const AMRParticleGhostMask& a_maskCoarToFine,
-            const AMRParticleGhostMask& a_maskFineToCoar);
+  fillGhostParticles(const AMRParticleGhostMask& a_maskSame,
+                     const AMRParticleGhostMask& a_maskCoarToFine,
+                     const AMRParticleGhostMask& a_maskFineToCoar);
 
   /**
     @brief Remove every ghost particle (any non-Valid GhostType) from all levels and patches.
@@ -937,20 +922,6 @@ protected:
   gatherMoversToPool();
 
   /**
-    @brief Gather ghost copies of every valid particle into a per-rank, per-destination-patch pool.
-    @details For every valid particle, finds all patches on levels [l-1, l, l+1] whose ghost layer
-    (grow(box, m_numGhost), clamped to the domain) contains the particle's cell but whose own box does
-    not -- i.e. the particle lies in that patch's ghost shell. A copy is binned for each such patch with
-    the appropriate GhostType (SameLevel/Coarse/Fine from the destination's view), the source's
-    particleID preserved, and rankID set to the owning rank (this rank, which owns its valid particles)
-    so a ghost records its true owner rather than the receiver. A particle may be a ghost of several
-    patches, so it can be binned more than once. Non-periodic.
-    @return The per-rank ghost pool (distribute it with a_setOwnerToReceiver == false).
-  */
-  MoverPool
-  gatherGhostsToPool();
-
-  /**
     @brief Gather ghost copies into a per-rank pool using prebuilt particle ghost masks.
     @details For each valid particle, reads its cell's target boxes from the three masks and bins a copy
     per (destination level, grid index, rank) with the GhostType from the receiver's view (SameLevel /
@@ -1011,11 +982,6 @@ protected:
     @brief Grid blocking factor (tile size).
   */
   int m_minBlockSize;
-
-  /**
-    @brief Width (in cells, at each patch's own level) of the ghost layer filled by fillGhostParticles().
-  */
-  int m_numGhost;
 
   /**
     @brief Finest AMR level index.
