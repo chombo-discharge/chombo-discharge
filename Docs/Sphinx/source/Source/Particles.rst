@@ -422,7 +422,7 @@ For a direction that should not scatter, pass ``AmrMesh::getTrivialParticleGhost
 Filling ghosts
 ______________
 
-With the three masks in hand, the halo is filled with
+With the three masks in hand, the ghost particles are filled with
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
    :lines: 649-652
@@ -526,7 +526,7 @@ Conversely, if the particle is close to the EB a small step will be used.
 The algorithms that intersect the particles are part of :ref:`Chap:AmrMesh`, and the ray-casting variant is called as follows:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 1195-1204
+   :lines: 1196-1205
    :language: c++
    :dedent: 2
 
@@ -560,7 +560,7 @@ ___________________
 To deposit the particle weight on the mesh, the user can call ``AmrMesh::depositWeight``:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 967-975
+   :lines: 968-976
    :language: c++
    :dedent: 2
 
@@ -571,7 +571,7 @@ To deposit a *derived* per-particle quantity (e.g. weight times a payload column
 Surface (EB) deposition of the weight column onto an ``EBAMRIVData`` is available through an overload of ``AmrMesh::depositParticles``:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 948-953
+   :lines: 949-954
    :language: c++
    :dedent: 2
 
@@ -656,7 +656,7 @@ ______________________
 To interpolate mesh data onto a payload column, the user can call ``AmrMesh::interpolateParticles``:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 1063-1070
+   :lines: 1064-1071
    :language: c++
    :dedent: 2
 
@@ -718,7 +718,8 @@ The recommended pattern operates on one cell at a time: cell-sort the leaf, extr
 ``ParticleSoA<P>::extractCell`` performs the per-cell extraction
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleSoA.H
-   :lines: 1362-1373
+   :lines: 1505-1527
+   :dedent: 2
    :language: c++
 
 and the merged result is accumulated into an output ``ParticleSoA`` (via ``append``) which finally replaces the leaf with ``swap``.
@@ -777,11 +778,6 @@ The caller provides three lambdas:
 * A *reconcile* function (``BinaryParticleReconcile``) that propagates payload fields to both daughter particles when the median particle is split across a KD boundary.
 * A *scatter-leaf* function that receives the raw ``[first, last)`` pointer range of one leaf and appends exactly one merged particle to the SoA.
 
-.. literalinclude:: ../../../../Source/Particle/CD_ParticleManagement.H
-   :language: c++
-   :lines: 191-200
-   :dedent: 2
-
 In the weighted-centroid variant (``equal_weight_kd`` in ``ItoSolver``), the scatter-leaf computes the weight-averaged position and energy over all particles in the leaf.
 Particle weights need not be integers, but ``buildEqualWeightKDLeaves`` may create new particles at the KD boundaries (see warning above), so the total computational-particle count may exceed the target by a small amount during the build before being reduced.
 
@@ -807,7 +803,7 @@ _____________________________________
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleManagement.H
    :language: c++
-   :lines: 231-236
+   :lines: 232-237
    :dedent: 2
 
 The returned functor proceeds as follows:
