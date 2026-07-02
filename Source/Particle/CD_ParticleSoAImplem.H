@@ -167,6 +167,7 @@ ParticleSoA<P, Traits>::append(const RealVect& a_position, const double a_weight
   this->template columnByIndex<s_weightCol>()[m_size] = a_weight;
   this->template columnByIndex<s_idCol>()[m_size]     = s_invalidID;
   this->template columnByIndex<s_rankCol>()[m_size]   = static_cast<RankID>(-1);
+  this->template columnByIndex<s_ghostCol>()[m_size]  = GhostType::Valid;
   this->writePayload(a_payload, std::make_index_sequence<s_numPayloadColumns>{});
   m_size++;
   m_sorted = false;
@@ -217,8 +218,9 @@ ParticleSoA<P, Traits>::h5DelinearizeAndAppend(const void* a_buffer)
     detail::pullBytes(p, this->positionColumn(dir)[m_size]);
   }
   detail::pullBytes(p, this->template columnByIndex<s_weightCol>()[m_size]);
-  this->template columnByIndex<s_idCol>()[m_size]   = s_invalidID;
-  this->template columnByIndex<s_rankCol>()[m_size] = static_cast<RankID>(-1);
+  this->template columnByIndex<s_idCol>()[m_size]    = s_invalidID;
+  this->template columnByIndex<s_rankCol>()[m_size]  = static_cast<RankID>(-1);
+  this->template columnByIndex<s_ghostCol>()[m_size] = GhostType::Valid;
 
   // Non-checkpointed payload columns default-construct; then overwrite the checkpointed subset.
   const P def{};

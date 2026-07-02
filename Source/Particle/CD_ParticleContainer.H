@@ -42,6 +42,7 @@
 
 // Our includes
 #include <CD_LevelTiles.H>
+#include <CD_ParticleGhostMask.H>
 #include <CD_ParallelOps.H>
 #include <CD_ParticleSoA.H>
 #include <CD_NamespaceHeader.H>
@@ -500,6 +501,8 @@ public:
 
   /**
     @brief Number of valid particles owned by this rank.
+    @details Ghost particles (any non-Valid GhostType) are excluded -- only owned, valid particles
+    are counted, even if a transient ghost halo is currently present in the leaves.
     @return Local valid particle count summed over all levels and patches.
   */
   unsigned long long
@@ -518,9 +521,14 @@ public:
 
 #pragma omp parallel for schedule(runtime) reduction(+ : n)
       for (int mybox = 0; mybox < nbox; mybox++) {
-        const DataIndex& din = dit[mybox];
+        const DataIndex& din  = dit[mybox];
+        const Leaf&      leaf = level[din];
 
-        n += static_cast<unsigned long long>(level[din].size());
+        for (std::size_t i = 0; i < leaf.size(); i++) {
+          if (!leaf.isGhost(i)) {
+            n++;
+          }
+        }
       }
     }
 
@@ -612,6 +620,74 @@ public:
          const int                                a_minBlockSize,
          const Vector<RefCountedPtr<LevelTiles>>& a_levelTiles,
          const int                                a_newFinestLevel);
+
+  ///@}
+
+  /**
+    @name Ghost particles
+  */
+  ///@{
+
+  /**
+    @brief Fill each patch's ghost halo from prebuilt Realm particle ghost masks.
+    @details A ghost particle is a transient, non-owned copy of a particle that lives in an adjacent
+    region (a neighbouring patch on the same level, the next-coarser level, or the next-finer level) and
+    overlaps this patch's ghosted box. For every valid particle, this scatters a copy to each destination
+    patch listed by the masks for the particle's cell: same-level targets from a_maskSame, next-finer
+    targets from a_maskCoarToFine, and next-coarser targets from a_maskFineToCoar. Copies are appended
+    into the destination leaf (same-rank directly, cross-rank via MPI), tagged with the GhostType from the
+    receiver's view (SameLevel / Coarse / Fine) so consumers can tell them from owned particles via
+    ParticleSoA::isGhost(), and keep the source's particleID. clearGhostParticles() is called first so it
+    is safe to refill; ghosts are transient (remap()/preRegrid()/regrid() drop them). Pass
+    AmrMesh::getTrivialParticleGhostMask() for a direction that should not scatter. The masks must have
+    been built on the same grids as this container (see AmrMesh::registerParticleGhostMask and
+    AmrMesh::getParticleGhostMask(realm, width)). Periodic domains are not supported (mask construction
+    aborts on them).
+    @param[in] a_maskSame       Same-level ghost mask (source cell -> same-level target boxes).
+    @param[in] a_maskCoarToFine Coarse-to-fine ghost mask (source cell -> next-finer target boxes).
+    @param[in] a_maskFineToCoar Fine-to-coarse ghost mask (source cell -> next-coarser target boxes).
+  */
+  void
+  fillGhostParticles(const AMRParticleGhostMask& a_maskSame,
+                     const AMRParticleGhostMask& a_maskCoarToFine,
+                     const AMRParticleGhostMask& a_maskFineToCoar);
+
+  /**
+    @brief Remove every ghost particle (any non-Valid GhostType) from all levels and patches.
+    @details Owned (Valid) particles are left untouched. Removal is by swap-and-pop, so particle
+    order within a leaf is not preserved. Keeps leaf capacity.
+  */
+  void
+  clearGhostParticles();
+
+  /**
+    @brief Claim ownership of this rank's particles by stamping their owner rank (rankID = procID()).
+    @details Ghost particles (isGhost()) are always left untouched, so a ghost keeps the owner rank it
+    carries. For non-ghost particles: when a_onlyValidRegion is true, only those whose cell lies inside
+    the leaf's own grid box are claimed and out-of-box strays are left untouched; when false, every
+    non-ghost particle is claimed. The region test is purely geometric on the ungrown patch box (it does
+    not consider finer-level coverage or GhostType). No MPI communication.
+    @param[in] a_onlyValidRegion Restrict to non-ghost particles inside the leaf's grid box.
+  */
+  void
+  claimOwnership(const bool a_onlyValidRegion);
+
+  /**
+    @brief Assign globally-unique, contiguous particle IDs to the owned particles.
+    @details Ghost particles (isGhost()) are always left untouched, so a ghost keeps the source's id. A
+    non-ghost particle qualifies for a new id iff a_onlyValidRegion is false OR its cell lies inside the
+    leaf's own grid box; a non-ghost that does not qualify (an out-of-box stray, only possible when
+    a_onlyValidRegion is true) is set to ParticleSoA::s_invalidID. Qualifying particles receive contiguous
+    ids in rank order (rank 0 first) starting at a_startID, made unique across ranks via an all-gather of
+    the per-rank counts and an exclusive prefix. The region test is purely geometric on the ungrown patch
+    box. Note: the assigned ids are a numbering snapshot, not a persistent identity -- they depend on the
+    rank/box ordering and change across regrids and different rank counts.
+    @param[in] a_onlyValidRegion Restrict new ids to non-ghost particles inside the leaf's grid box.
+    @param[in] a_startID         Global id of the first assigned particle; ids occupy [a_startID, a_startID + return).
+    @return The global number of ids assigned (across all ranks).
+  */
+  long long
+  resetParticleIDs(const bool a_onlyValidRegion, const ParticleID a_startID);
 
   ///@}
 
@@ -847,11 +923,31 @@ protected:
   gatherMoversToPool();
 
   /**
-    @brief Assign a mover pool into the (assumed empty) valid holders: local appends + MPI scatter.
-    @param[in,out] a_pool Per-rank mover pool produced by gatherToPool (consumed).
+    @brief Gather ghost copies into a per-rank pool using prebuilt particle ghost masks.
+    @details For each valid particle, reads its cell's target boxes from the three masks and bins a copy
+    per (destination level, grid index, rank) with the GhostType from the receiver's view (SameLevel /
+    Coarse / Fine); particleID preserved, rankID set to this rank (the owner). Distribute the returned pool
+    with a_setOwnerToReceiver == false. A trivial (empty) mask contributes nothing.
+    @param[in] a_maskSame       Same-level mask.
+    @param[in] a_maskCoarToFine Coarse-to-fine mask (targets on the next-finer level).
+    @param[in] a_maskFineToCoar Fine-to-coarse mask (targets on the next-coarser level).
+    @return The per-rank ghost pool.
+  */
+  MoverPool
+  gatherGhostsFromMasks(const AMRParticleGhostMask& a_maskSame,
+                        const AMRParticleGhostMask& a_maskCoarToFine,
+                        const AMRParticleGhostMask& a_maskFineToCoar);
+
+  /**
+    @brief Assign a pool into the valid holders: local appends + MPI scatter.
+    @param[in,out] a_pool              Per-rank pool (consumed). Same-rank bins are catenated into the
+                                       destination leaf; cross-rank bins are linearized and Alltoallv'd.
+    @param[in] a_setOwnerToReceiver    If true, every cross-rank particle's rankID is set to the
+                                       receiving rank (remap/regrid ownership). If false, the rankID
+                                       carried in the pool is preserved (ghost particles keep their owner).
   */
   void
-  distributeFromPool(MoverPool& a_pool);
+  distributeFromPool(MoverPool& a_pool, const bool a_setOwnerToReceiver);
 
   /**
     @brief Per-level AMR grids.
@@ -966,6 +1062,21 @@ protected:
       iv[dir] = static_cast<int>(std::floor((a_pos[dir] - m_probLo[dir]) / m_dx[a_lvl][dir]));
     }
     return iv;
+  }
+
+  /**
+    @brief True if a position's cell lies inside a (grid) box on a given level.
+    @details Purely geometric valid-region test shared by claimOwnership/resetParticleIDs -- the box is the
+    leaf's ungrown patch box, so a particle in its patch's ghost shell tests false.
+    @param[in] a_lvl Level index.
+    @param[in] a_box Box (typically the leaf's grid box).
+    @param[in] a_pos Position.
+    @return True if cellIndex(a_lvl, a_pos) is contained in a_box.
+  */
+  inline bool
+  inValidBox(const int a_lvl, const Box& a_box, const RealVect& a_pos) const
+  {
+    return a_box.contains(this->cellIndex(a_lvl, a_pos));
   }
 
   /**

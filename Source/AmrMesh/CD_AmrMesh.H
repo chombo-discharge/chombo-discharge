@@ -31,6 +31,7 @@
 #include <CD_DomainFluxIFFABFactory.H>
 #include <CD_ParticleContainer.H>
 #include <CD_Realm.H>
+#include <CD_ParticleGhostMask.H>
 #include <CD_CopyStrategy.H>
 #include <CD_LoadBalancing.H>
 #include <CD_NamespaceHeader.H>
@@ -1802,6 +1803,53 @@ public:
   */
   const Vector<RefCountedPtr<LevelTiles>>&
   getLevelTiles(const std::string& a_realm) const;
+
+  /**
+    @brief Register a particle ghost-mask width on a realm so it is (re)built at every regrid.
+    @param[in] a_realm Realm name
+    @param[in] a_width Ghost width (cells). Must be > 0.
+  */
+  void
+  registerParticleGhostMask(const std::string& a_realm, const int a_width);
+
+  /**
+    @brief Get the same-level particle ghost mask on a realm for a registered width.
+    @param[in] a_realm Realm name
+    @param[in] a_width Registered ghost width.
+    @return Per-level, per-box CSR of source-cell -> same-level target boxes (grid index, rank).
+  */
+  const AMRParticleGhostMask&
+  getParticleGhostMask(const std::string& a_realm, const int a_width) const;
+
+  /**
+    @brief Get the fine-to-coarse particle ghost mask on a realm for a registered width.
+    @details Contract: the level-0 entry is allocated but left undefined (level 0 has no coarser level);
+    callers must only query levels >= 1.
+    @param[in] a_realm Realm name
+    @param[in] a_width Registered ghost width.
+    @return Per-level, per-box CSR of source-cell -> coarser-level target boxes (grid index, rank).
+  */
+  const AMRParticleGhostMask&
+  getParticleGhostMaskFineToCoar(const std::string& a_realm, const int a_width) const;
+
+  /**
+    @brief Get the coarse-to-fine particle ghost mask on a realm for a registered width.
+    @details Contract: the finest-level entry is allocated but left undefined (the finest level has no
+    finer level); callers must only query levels < the finest level.
+    @param[in] a_realm Realm name
+    @param[in] a_width Registered ghost width.
+    @return Per-level, per-box CSR of source-cell -> finer-level target boxes (grid index, rank).
+  */
+  const AMRParticleGhostMask&
+  getParticleGhostMaskCoarToFine(const std::string& a_realm, const int a_width) const;
+
+  /**
+    @brief Get a trivial (empty) particle ghost mask that scatters no particles.
+    @details Pass this to ParticleContainer::fillGhost for a direction that should not scatter.
+    @return A static empty mask.
+  */
+  const AMRParticleGhostMask&
+  getTrivialParticleGhostMask() const;
 
   /**
     @brief Get the EBLevelGrid for a Realm and phase

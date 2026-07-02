@@ -17,15 +17,19 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <cstdlib>
 #include <cstring>
 #include <limits>
 #include <map>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
 // Chombo includes
 #include <CH_Timer.H>
 #include <CH_assert.H>
+#include <BoxIterator.H>
+#include <parstream.H>
 
 // Our includes
 #include <CD_ParticleContainer.H>
@@ -264,7 +268,7 @@ ParticleContainer<P, Traits>::gatherMoversToPool()
 
 template <typename P, typename Traits>
 inline void
-ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool)
+ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool, const bool a_setOwnerToReceiver)
 {
   CH_TIME("ParticleContainer::distributeFromPool");
 
@@ -434,6 +438,7 @@ ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool)
   }
 
   const int numGroups = static_cast<int>(groups.size());
+
 #ifdef _OPENMP
 #pragma omp parallel for schedule(runtime)
 #endif
@@ -450,7 +455,10 @@ ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool)
       for (std::uint64_t c = 0; c < chunk.count; c++) {
         tgt.delinearizeAndAppend(q);
         q += pp;
-        tgt.rankID(tgt.size() - 1) = myRank; // owner is the receiving rank
+        if (a_setOwnerToReceiver) {
+          tgt.rankID(tgt.size() - 1) = myRank; // remap/regrid: owner is the receiving rank
+        }
+        // else: keep the rankID carried in the buffer (ghost particles record their true owner)
       }
     }
   }
@@ -465,13 +473,16 @@ ParticleContainer<P, Traits>::remap()
 
   CH_assert(m_isDefined);
 
+  // Ghost particles are transient, non-owned copies; drop them so they are never routed as if owned.
+  this->clearGhostParticles();
+
   if (m_validCells != nullptr && static_cast<int>(m_validCells->size()) >= m_finestLevel + 1) {
     // Mask fast path: a particle still in its box and not under a finer grid cannot change owner, so we
     // leave those "stayers" in place and pool only the movers. Destinations therefore keep their stayers
     // -- do NOT clearParticles() here; distributeFromPool() appends the movers onto the existing leaves.
     MoverPool pool = this->gatherMoversToPool();
 
-    this->distributeFromPool(pool);
+    this->distributeFromPool(pool, true); // remap: the receiving rank becomes the new owner
   }
   else {
     // Fallback: re-pool every valid particle (used when no mask is available, e.g. addParticlesDestructive
@@ -479,7 +490,7 @@ ParticleContainer<P, Traits>::remap()
     MoverPool pool = this->gatherToPool(m_particles, m_grids);
 
     this->clearParticles();
-    this->distributeFromPool(pool);
+    this->distributeFromPool(pool, true); // remap: the receiving rank becomes the new owner
   }
 
   m_isOrganizedByCell = false;
@@ -492,6 +503,9 @@ ParticleContainer<P, Traits>::preRegrid()
   CH_TIME("ParticleContainer::preRegrid");
 
   CH_assert(m_isDefined);
+
+  // Ghost particles are transient, non-owned copies; drop them so they are never cached/regridded.
+  this->clearGhostParticles();
 
   // Share the current holders (RefCountedPtr) so regrid() can rebuild m_particles while the old
   // particles stay alive in the cache. Remember the old layout for iterating the cache.
@@ -548,13 +562,292 @@ ParticleContainer<P, Traits>::regrid(const Vector<DisjointBoxLayout>&         a_
 
   // ---- redistribute the cached particles onto the new layout ----
   MoverPool pool = this->gatherToPool(m_cacheParticles, m_cacheGrids);
-  this->distributeFromPool(pool);
+  this->distributeFromPool(pool, true); // regrid: the receiving rank becomes the new owner
 
   // ---- release the cache ----
   m_cacheParticles.resize(0);
   m_cacheGrids.resize(0);
 
   m_isOrganizedByCell = false;
+}
+
+template <typename P, typename Traits>
+inline void
+ParticleContainer<P, Traits>::clearGhostParticles()
+{
+  CH_TIME("ParticleContainer::clearGhostParticles");
+
+  CH_assert(m_isDefined);
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    LevelParticles&          level = *m_particles[lvl];
+    const DisjointBoxLayout& dbl   = m_grids[lvl];
+    const DataIterator&      dit   = dbl.dataIterator();
+
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din  = dit[mybox];
+      Leaf&            leaf = level[din];
+
+      // Swap-and-pop every ghost; the swapped-in particle now occupies index i, so do NOT advance on a hit.
+      std::size_t i = 0;
+      while (i < leaf.size()) {
+        if (leaf.isGhost(i)) {
+          leaf.remove(i);
+        }
+        else {
+          i++;
+        }
+      }
+    }
+  }
+
+  m_isOrganizedByCell = false; // swap-pop reorders the surviving valid particles
+}
+
+template <typename P, typename Traits>
+inline void
+ParticleContainer<P, Traits>::claimOwnership(const bool a_onlyValidRegion)
+{
+  CH_TIME("ParticleContainer::claimOwnership");
+
+  CH_assert(m_isDefined);
+
+  const RankID myRank = static_cast<RankID>(procID());
+
+  // Ghosts are left untouched (they carry their true owner rank). Each non-ghost particle in the valid
+  // region (or all non-ghost particles when !a_onlyValidRegion) is stamped with this rank. Per-particle
+  // and box-local -> embarrassingly parallel.
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    LevelParticles&          level = *m_particles[lvl];
+    const DisjointBoxLayout& dbl   = m_grids[lvl];
+    const DataIterator&      dit   = dbl.dataIterator();
+    const int                nbox  = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din  = dit[mybox];
+      const Box        box  = dbl[din];
+      Leaf&            leaf = level[din];
+
+      for (std::size_t i = 0; i < leaf.size(); i++) {
+        if (leaf.isGhost(i)) {
+          continue;
+        }
+        if (!a_onlyValidRegion || this->inValidBox(lvl, box, leaf.position(i))) {
+          leaf.rankID(i) = myRank;
+        }
+      }
+    }
+  }
+}
+
+template <typename P, typename Traits>
+inline long long
+ParticleContainer<P, Traits>::resetParticleIDs(const bool a_onlyValidRegion, const ParticleID a_startID)
+{
+  CH_TIME("ParticleContainer::resetParticleIDs");
+
+  CH_assert(m_isDefined);
+
+  // A non-ghost particle qualifies for a new id iff (!a_onlyValidRegion) or its cell lies in the leaf's
+  // grid box. Ghosts never qualify (and are left untouched); non-qualifying non-ghost strays get
+  // s_invalidID. The predicate must be identical in the count and assign passes below.
+
+  // Flatten the local boxes in (level, box) order -- this fixes the local id ordering.
+  std::vector<std::pair<int, DataIndex>> boxes;
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    const DataIterator& dit  = m_grids[lvl].dataIterator();
+    const int           nbox = dit.size();
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      boxes.emplace_back(lvl, dit[mybox]);
+    }
+  }
+  const int numBoxes = static_cast<int>(boxes.size());
+
+  // Pass 1: count qualifying particles per box (parallel; each box independent).
+  std::vector<long long> boxCount(numBoxes, 0);
+#pragma omp parallel for schedule(runtime)
+  for (int b = 0; b < numBoxes; b++) {
+    const int        lvl  = boxes[b].first;
+    const DataIndex& din  = boxes[b].second;
+    const Box        box  = m_grids[lvl][din];
+    const Leaf&      leaf = (*m_particles[lvl])[din];
+
+    long long count = 0;
+    for (std::size_t i = 0; i < leaf.size(); i++) {
+      if (!leaf.isGhost(i) && (!a_onlyValidRegion || this->inValidBox(lvl, box, leaf.position(i)))) {
+        count++;
+      }
+    }
+    boxCount[b] = count;
+  }
+
+  // Local exclusive prefix over boxes + local total.
+  std::vector<long long> boxLocalOffset(numBoxes, 0);
+  long long              localTotal = 0;
+  for (int b = 0; b < numBoxes; b++) {
+    boxLocalOffset[b] = localTotal;
+    localTotal += boxCount[b];
+  }
+
+  // Per-rank exclusive offset: all-gather each rank's local total, then sum the ranks before this one.
+  const Vector<long long> perRankCount = ParallelOps::gather(localTotal);
+
+  ParticleID rankOffset = a_startID;
+  for (int r = 0; r < procID(); r++) {
+    rankOffset += perRankCount[r];
+  }
+
+  // Pass 2: assign ids (parallel; each box starts at its own offset). Ghosts untouched; qualifying get a
+  // contiguous id; non-qualifying non-ghost strays get s_invalidID.
+#pragma omp parallel for schedule(runtime)
+  for (int b = 0; b < numBoxes; b++) {
+    const int        lvl  = boxes[b].first;
+    const DataIndex& din  = boxes[b].second;
+    const Box        box  = m_grids[lvl][din];
+    Leaf&            leaf = (*m_particles[lvl])[din];
+
+    ParticleID id = rankOffset + static_cast<ParticleID>(boxLocalOffset[b]);
+    for (std::size_t i = 0; i < leaf.size(); i++) {
+      if (leaf.isGhost(i)) {
+        continue;
+      }
+      if (!a_onlyValidRegion || this->inValidBox(lvl, box, leaf.position(i))) {
+        leaf.particleID(i) = id++;
+      }
+      else {
+        leaf.particleID(i) = ParticleSoA<P, Traits>::s_invalidID;
+      }
+    }
+  }
+
+  return ParallelOps::sum(localTotal);
+}
+
+template <typename P, typename Traits>
+inline typename ParticleContainer<P, Traits>::MoverPool
+ParticleContainer<P, Traits>::gatherGhostsFromMasks(const AMRParticleGhostMask& a_maskSame,
+                                                    const AMRParticleGhostMask& a_maskCoarToFine,
+                                                    const AMRParticleGhostMask& a_maskFineToCoar)
+{
+  CH_TIME("ParticleContainer::gatherGhostsFromMasks");
+
+  MoverPool pool(numProc());
+
+  // Bin one source leaf's valid particles as ghosts of every target box listed by its cell's masks. The
+  // three masks are all indexed by the SOURCE cell on the source level, so a single cell lookup drives all
+  // directions. GhostType is from the RECEIVER's view: same level -> SameLevel, coarse source scattered to
+  // a finer patch -> Coarse, fine source scattered to a coarser patch -> Fine.
+  auto binLeaf = [&](MoverPool& a_target, const Leaf& a_leaf, const int a_srcLvl, const DataIndex& a_din) {
+    const bool haveSame = (a_srcLvl < a_maskSame.size()) && !a_maskSame[a_srcLvl].isNull();
+    const bool haveC2F  = (a_srcLvl < m_finestLevel) && (a_srcLvl < a_maskCoarToFine.size()) &&
+                         !a_maskCoarToFine[a_srcLvl].isNull();
+    const bool haveF2C = (a_srcLvl >= 1) && (a_srcLvl < a_maskFineToCoar.size()) &&
+                         !a_maskFineToCoar[a_srcLvl].isNull();
+
+    const ParticleGhostMask* same = haveSame ? &((*a_maskSame[a_srcLvl])[a_din]) : nullptr;
+    const ParticleGhostMask* c2f  = haveC2F ? &((*a_maskCoarToFine[a_srcLvl])[a_din]) : nullptr;
+    const ParticleGhostMask* f2c  = haveF2C ? &((*a_maskFineToCoar[a_srcLvl])[a_din]) : nullptr;
+
+    if (same == nullptr && c2f == nullptr && f2c == nullptr) {
+      return;
+    }
+
+    for (std::size_t i = 0; i < a_leaf.size(); i++) {
+      const RealVect pos = a_leaf.position(i);
+      const IntVect  iv  = this->cellIndex(a_srcLvl, pos);
+
+      auto scatter =
+        [&](const ParticleGhostMask* a_mask, const int a_dstLvl, const GhostType a_gt, const bool a_pruneByTargetBox) {
+          if (a_mask == nullptr || !a_mask->box().contains(iv)) {
+            return;
+          }
+          const int nt = a_mask->numTargets(iv);
+
+          // Coarse-to-fine only: the source (coarse) cell is coarser than the fine ghost width, so a whole
+          // coarse cell would over-scatter. Keep the particle for a target only if its DESTINATION (fine)
+          // cell lies in that target's acceptance box (the exact fine ghost shell).
+          const IntVect dstCell = a_pruneByTargetBox ? this->cellIndex(a_dstLvl, pos) : IntVect::Zero;
+
+          for (int k = 0; k < nt; k++) {
+            if (a_pruneByTargetBox && !a_mask->targetBox(iv, k).contains(dstCell)) {
+              continue;
+            }
+
+            Leaf& bin = a_target[a_mask->targetRank(iv, k)][PoolKey(a_dstLvl, a_mask->targetGridIndex(iv, k))];
+
+            bin.append(pos, a_leaf.weight(i), a_leaf.gather(i));
+
+            const std::size_t j = bin.size() - 1;
+
+            bin.particleID(j) = a_leaf.particleID(i); // preserve id
+            bin.rankID(j)     = procID();             // owner is this rank (it owns its valid particles)
+            bin.ghost(j)      = a_gt;
+          }
+        };
+
+      scatter(same, a_srcLvl, GhostType::SameLevel, false);
+      scatter(c2f, a_srcLvl + 1, GhostType::Coarse, true);
+      scatter(f2c, a_srcLvl - 1, GhostType::Fine, false);
+    }
+  };
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    const LevelParticles& level = *m_particles[lvl];
+    const DataIterator&   dit   = m_grids[lvl].dataIterator();
+    const int             nbox  = dit.size();
+
+#ifdef _OPENMP
+#pragma omp parallel
+    {
+      MoverPool threadPool(numProc()); // thread-local; no locking while binning
+
+#pragma omp for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        binLeaf(threadPool, level[dit[mybox]], lvl, dit[mybox]);
+      }
+
+#pragma omp critical(ParticleContainer_gatherGhostsFromMasksMerge)
+      {
+        for (int r = 0; r < numProc(); r++) {
+          for (auto& kv : threadPool[r]) {
+            pool[r][kv.first].catenate(kv.second);
+          }
+        }
+      }
+    }
+#else
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      binLeaf(pool, level[dit[mybox]], lvl, dit[mybox]);
+    }
+#endif
+  }
+
+  return pool;
+}
+
+template <typename P, typename Traits>
+inline void
+ParticleContainer<P, Traits>::fillGhostParticles(const AMRParticleGhostMask& a_maskSame,
+                                                 const AMRParticleGhostMask& a_maskCoarToFine,
+                                                 const AMRParticleGhostMask& a_maskFineToCoar)
+{
+  CH_TIME("ParticleContainer::fillGhostParticles");
+
+  CH_assert(m_isDefined);
+
+  // Refill from a clean slate: drop any existing ghost halo first.
+  this->clearGhostParticles();
+
+  MoverPool pool = this->gatherGhostsFromMasks(a_maskSame, a_maskCoarToFine, a_maskFineToCoar);
+
+  // a_setOwnerToReceiver == false: ghost copies keep their true owner's rankID (not the receiver's).
+  this->distributeFromPool(pool, false);
+
+  m_isOrganizedByCell = false; // ghosts appended to the leaves invalidate any cell sort
 }
 
 template <typename P, typename Traits>

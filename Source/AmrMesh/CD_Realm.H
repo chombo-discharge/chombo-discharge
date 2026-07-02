@@ -13,17 +13,22 @@
 #ifndef CD_REALM_H
 #define CD_REALM_H
 
+// Std includes
+#include <map>
+#include <set>
+
 // Our includes
 #include <CD_PhaseRealm.H>
 #include <CD_EBAMRParticleMesh.H>
 #include <CD_MultiFluidIndexSpace.H>
 #include <CD_MFLevelGrid.H>
 #include <CD_LevelTiles.H>
+#include <CD_ParticleGhostMask.H>
 #include <CD_PetscGrid.H>
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Alias for cutting down on the typic of booleans defined over AMR grids. 
+  @brief Alias for cutting down on the typic of booleans defined over AMR grids.
 */
 using AMRMask = Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>;
 
@@ -483,6 +488,49 @@ public:
   getValidCells() const;
 
   /**
+    @brief Register a particle ghost-mask width so it is (re)built at every regrid.
+    @details Downstream code must register a width before it can fetch the corresponding masks. Widths
+    are deduplicated, so several consumers may safely request the same width. No masks are built at all
+    unless at least one width has been registered.
+    @param[in] a_width Ghost width (cells). Must be > 0; a run-time error is thrown otherwise.
+  */
+  void
+  registerParticleGhostMask(const int a_width) noexcept;
+
+  /**
+    @brief Get the same-level particle ghost mask for a registered width.
+    @param[in] a_width Registered ghost width.
+    @return The per-level same-level mask for a_width. Aborts if the width was not registered.
+  */
+  const AMRParticleGhostMask&
+  getParticleGhostMask(const int a_width) const noexcept;
+
+  /**
+    @brief Get the fine-to-coarse particle ghost mask for a registered width.
+    @param[in] a_width Registered ghost width.
+    @return The per-level fine-to-coarse mask for a_width. Aborts if the width was not registered.
+  */
+  const AMRParticleGhostMask&
+  getParticleGhostMaskFineToCoar(const int a_width) const noexcept;
+
+  /**
+    @brief Get the coarse-to-fine particle ghost mask for a registered width.
+    @param[in] a_width Registered ghost width.
+    @return The per-level coarse-to-fine mask for a_width. Aborts if the width was not registered.
+  */
+  const AMRParticleGhostMask&
+  getParticleGhostMaskCoarToFine(const int a_width) const noexcept;
+
+  /**
+    @brief Get a trivial (empty) particle ghost mask that scatters no particles.
+    @details Pass this to ParticleContainer::fillGhost for a direction that should not scatter. It holds
+    no levels, so a fill over it is a no-op.
+    @return A static empty mask.
+  */
+  const AMRParticleGhostMask&
+  getTrivialParticleGhostMask() const noexcept;
+
+  /**
     @brief Get the tiled space
     @return Level tiles
   */
@@ -610,6 +658,30 @@ protected:
   */
   AMRMask m_validCells;
 
+  /**
+    @brief Registered particle ghost-mask widths (>0). Persist across regrids; the masks below are
+    (re)built for exactly these widths in defineParticleGhostMasks().
+  */
+  std::set<int> m_particleGhostMaskWidths;
+
+  /**
+    @brief Same-level particle ghost masks, keyed by ghost width. Per width: indexed by source level, and
+    per source box maps a source cell to the same-level boxes whose ghosted region covers it.
+  */
+  std::map<int, AMRParticleGhostMask> m_particleGhostMask;
+
+  /**
+    @brief Fine-to-coarse particle ghost masks, keyed by ghost width. Per width: indexed by source level
+    (>=1); per source (fine) box maps a source cell to the coarser-level boxes whose ghosted region covers it.
+  */
+  std::map<int, AMRParticleGhostMask> m_particleGhostMaskFineToCoar;
+
+  /**
+    @brief Coarse-to-fine particle ghost masks, keyed by ghost width. Per width: indexed by source level
+    (<finest); per source (coarse) box maps a source cell to the finer-level boxes whose ghosted region covers it.
+  */
+  std::map<int, AMRParticleGhostMask> m_particleGhostMaskCoarToFine;
+
 #ifdef CH_USE_PETSC
   /**
     @brief PETSc grid
@@ -736,6 +808,92 @@ protected:
   */
   void
   defineLevelTiles() noexcept;
+
+  /**
+    @brief Define the same-level, fine-to-coarse, and coarse-to-fine particle ghost masks on every level.
+    @details Allocates and fills the three per-level masks (m_particleGhostMask,
+    m_particleGhostMaskFineToCoar, m_particleGhostMaskCoarToFine) by delegating to
+    defineParticleGhostMaskSameLevel and defineParticleGhostMaskCrossLevel. Each mask records, per source
+    cell, the target boxes (grid index + receiving rank) that a particle in that cell must be scattered
+    to in that direction. Called from regridBase after the valid-cell and level-tile structures exist.
+    The ghost width is m_numGhost. Periodic boundaries are not handled.
+  */
+  void
+  defineParticleGhostMasks() noexcept;
+
+  /**
+    @brief Define the SAME-level particle ghost mask on one level.
+    @details For each box, records (per cell) the abutting same-level boxes whose grown region (the box
+    grown by a_ghost cells) covers the cell, together with the owning/receiving rank. Uses a
+    NeighborIterator to enumerate the abutting boxes, so the build is fully box-local -- no coarsen/refine
+    and no Copier -- and each box fills its own CSR in two passes (count, then packed fill).
+    NeighborIterator returns grow-by-one (abutting) neighbours only; this loses nothing because every box
+    is min_block_size-aligned and AmrMesh::sanityCheck enforces a_ghost < min_block_size, so two
+    non-abutting same-level boxes are always at least min_block_size (> a_ghost) apart and can never reach
+    into each other's ghost region. Periodic boundaries are not handled.
+    @param[out] a_mask   Per-box CSR ghost mask over a_dbl to fill.
+    @param[in]  a_dbl    This level's grids (both the source cells and the neighbour targets).
+    @param[in]  a_domain Problem domain at this level's resolution.
+    @param[in]  a_ghost  Ghost width (cells) defining each neighbour's grown region.
+  */
+  void
+  defineParticleGhostMaskSameLevel(LayoutData<ParticleGhostMask>& a_mask,
+                                   const DisjointBoxLayout&       a_dbl,
+                                   const ProblemDomain&           a_domain,
+                                   const int                      a_ghost) noexcept;
+
+  /**
+    @brief Define the FINE-to-COARSE particle ghost mask on one level (targets on the next-coarser level).
+    @details Per source (fine) cell the mask holds every coarse box whose ghosted region (grown by a_ghost
+    COARSE cells) contains the cell's coarse footprint -- found by walking a ghostDefine Copier motion plan
+    (only overlapping box pairs are visited), and multi-valued since a cell may scatter to several coarse
+    boxes (e.g. diagonal coarse-fine cells). Sources are restricted to the INNER coarse-fine halo so the
+    nested interior is not scattered: the halo is built geometrically from the coarsened-fine footprint
+    (the ring outside each footprint box, minus the abutting footprint boxes = internal seams, grown back
+    inward), independent of the coarse grid's box decomposition. The ghost width is measured in coarse
+    (destination) cells and is a MINIMUM: each halo coarse cell refines to all its fine source children
+    (over-communication across the interface is accepted). Periodic boundaries are not handled.
+    @param[out] a_mask       Per-box CSR ghost mask over a_thisLayout (the fine level) to fill.
+    @param[in]  a_thisLayout This (fine, source) level's grids.
+    @param[in]  a_coarLayout The next-coarser (target) level's grids.
+    @param[in]  a_coarDomain Problem domain at the coarse (target) resolution.
+    @param[in]  a_refRat     Refinement ratio between the coarse level and this level.
+    @param[in]  a_ghost      Ghost width in coarse (destination) cells.
+  */
+  void
+  defineParticleGhostMaskFineToCoar(LayoutData<ParticleGhostMask>& a_mask,
+                                    const DisjointBoxLayout&       a_thisLayout,
+                                    const DisjointBoxLayout&       a_coarLayout,
+                                    const ProblemDomain&           a_coarDomain,
+                                    const int                      a_refRat,
+                                    const int                      a_ghost) noexcept;
+
+  /**
+    @brief Define the COARSE-to-FINE particle ghost mask on one level (targets on the next-finer level).
+    @details Per source (coarse) cell the mask holds every fine box whose ghosted region (grown by a_ghost
+    FINE cells) contains any of the cell's fine children -- found by walking a ghostDefine Copier motion
+    plan (only overlapping box pairs are visited), and multi-valued since a cell may scatter to several
+    fine boxes. The fine reach is coarsened to whole coarse source cells, and only VALID coarse cells
+    (those not covered by the finer level) are kept -- that is the coarse-side outer halo. The ghost width
+    is measured in fine (destination) cells and is a MINIMUM: whole coarse source cells overlapping the
+    halo are recorded (over-communication across the interface is accepted). Periodic boundaries are not
+    handled.
+    @param[out] a_mask       Per-box CSR ghost mask over a_thisLayout (the coarse level) to fill.
+    @param[in]  a_thisLayout This (coarse, source) level's grids.
+    @param[in]  a_fineLayout The next-finer (target) level's grids.
+    @param[in]  a_validCells This (coarse) level's valid-cell mask; source cells are kept only where valid.
+    @param[in]  a_fineDomain Problem domain at the fine (target) resolution.
+    @param[in]  a_refRat     Refinement ratio between this level and the fine level.
+    @param[in]  a_ghost      Ghost width in fine (destination) cells.
+  */
+  void
+  defineParticleGhostMaskCoarToFine(LayoutData<ParticleGhostMask>&  a_mask,
+                                    const DisjointBoxLayout&        a_thisLayout,
+                                    const DisjointBoxLayout&        a_fineLayout,
+                                    const LevelData<BaseFab<bool>>& a_validCells,
+                                    const ProblemDomain&            a_fineDomain,
+                                    const int                       a_refRat,
+                                    const int                       a_ghost) noexcept;
 
   /**
     @brief Define the PETSc composite grid
