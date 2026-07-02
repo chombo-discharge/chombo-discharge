@@ -670,9 +670,9 @@ ParticleContainer<P, Traits>::clearGhostParticles()
 
 template <typename P, typename Traits>
 inline void
-ParticleContainer<P, Traits>::resetRankIDs(const bool a_onlyValidRegion)
+ParticleContainer<P, Traits>::claimOwnership(const bool a_onlyValidRegion)
 {
-  CH_TIME("ParticleContainer::resetRankIDs");
+  CH_TIME("ParticleContainer::claimOwnership");
 
   CH_assert(m_isDefined);
 

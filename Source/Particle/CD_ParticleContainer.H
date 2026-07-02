@@ -675,16 +675,16 @@ public:
   clearGhostParticles();
 
   /**
-    @brief Set the owning rank (rankID = procID()) of the owned particles.
+    @brief Claim ownership of this rank's particles by stamping their owner rank (rankID = procID()).
     @details Ghost particles (isGhost()) are always left untouched, so a ghost keeps the owner rank it
     carries. For non-ghost particles: when a_onlyValidRegion is true, only those whose cell lies inside
-    the leaf's own grid box are stamped and out-of-box strays are left untouched; when false, every
-    non-ghost particle is stamped. The region test is purely geometric on the ungrown patch box (it does
+    the leaf's own grid box are claimed and out-of-box strays are left untouched; when false, every
+    non-ghost particle is claimed. The region test is purely geometric on the ungrown patch box (it does
     not consider finer-level coverage or GhostType). No MPI communication.
     @param[in] a_onlyValidRegion Restrict to non-ghost particles inside the leaf's grid box.
   */
   void
-  resetRankIDs(const bool a_onlyValidRegion);
+  claimOwnership(const bool a_onlyValidRegion);
 
   /**
     @brief Assign globally-unique, contiguous particle IDs to the owned particles.
@@ -1099,7 +1099,7 @@ protected:
 
   /**
     @brief True if a position's cell lies inside a (grid) box on a given level.
-    @details Purely geometric valid-region test shared by resetRankIDs/resetParticleIDs -- the box is the
+    @details Purely geometric valid-region test shared by claimOwnership/resetParticleIDs -- the box is the
     leaf's ungrown patch box, so a particle in its patch's ghost shell tests false.
     @param[in] a_lvl Level index.
     @param[in] a_box Box (typically the leaf's grid box).
