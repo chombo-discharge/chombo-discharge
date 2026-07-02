@@ -251,48 +251,6 @@ namespace Physics {
       */
       void
       setGaussianSource();
-
-      /**
-	@brief Ghost-particle boundary verification (McPhoto only; no-op otherwise).
-	@details A visual self-consistency check of ParticleContainer::fillGhostParticles(): samples
-	particles uniformly in the domain box, fills the ghost layer, discards the valid particles
-	(keeping only the ghosts), and remaps the ghosts back to their owners. The result holds only
-	the particles that lie within a ghost layer of some patch boundary, with multiplicity equal to
-	the number of patches that ghosted each one -- so a plot shows particles along the patch
-	boundaries, with extra weight at corners/coarse-fine boundaries. Gated by the
-	'ghost_boundary_test' input (default false), so normal runs are unaffected.
-      */
-      void
-      ghostBoundaryTest();
-
-      /**
-	@brief DEV visualization: append 0/1 plot fields marking cells that have same/coarser/finer ghost
-	targets in the Realm ghost-target tables.
-	@param[in,out] a_output      Output data holder.
-	@param[in,out] a_icomp       Starting component (advanced by 3 on return).
-	@param[in]     a_outputRealm Output realm (must equal m_realm).
-	@param[in]     a_level       Grid level.
-      */
-      void
-      writeGhostTargetPlotData(LevelData<EBCellFAB>& a_output,
-                               int&                  a_icomp,
-                               const std::string&    a_outputRealm,
-                               const int             a_level) const;
-
-      /**
-	@brief Whether to run ghostBoundaryTest() in postInitialize(). Default false.
-      */
-      bool m_ghostBoundaryTest = false;
-
-      /**
-	@brief Number of particles to sample for ghostBoundaryTest().
-      */
-      int m_ghostBoundaryTestParticles = 0;
-
-      /**
-	@brief Ghost-mask width registered/visualized when m_ghostBoundaryTest is on.
-      */
-      int m_ghostBoundaryTestWidth = 1;
     };
   } // namespace RadiativeTransfer
 } // namespace Physics
