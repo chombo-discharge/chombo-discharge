@@ -38,11 +38,11 @@
   boxes, e.g. diagonal coarse-fine cells) with no fixed cap; the sending rank is not stored.
 
   Optionally (coarse-to-fine only) each target also carries an acceptance box: the destination box's
-  ghost region measured in DESTINATION cells (grown by the ghost width, periodic-shifted into the source
-  cell's index space). It lets the scatter prune whole-coarse-cell over-communication down to the exact
-  sub-cell shell -- a candidate particle is scattered only if its destination cell lies in the acceptance
-  box. This parallel array m_flatBox is populated only when allocateTargetBoxes()/addTarget(...,box) are
-  used; same-level and fine-to-coarse masks leave it empty (no per-target box, no memory cost).
+  ghost region measured in DESTINATION cells (grown by the ghost width). It lets the scatter prune
+  whole-coarse-cell over-communication down to the exact sub-cell shell -- a candidate particle is
+  scattered only if its destination cell lies in the acceptance box. This parallel array m_flatBox is
+  populated only when allocateTargetBoxes()/addTarget(...,box) are used; same-level and fine-to-coarse
+  masks leave it empty (no per-target box, no memory cost).
 
   The build API is a two-pass fill (define -> incrementCount per contribution -> allocate [->
   allocateTargetBoxes] -> addTarget per contribution -> finalize). The query API (numTargets/target/

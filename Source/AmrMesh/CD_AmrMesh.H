@@ -1823,6 +1823,8 @@ public:
 
   /**
     @brief Get the fine-to-coarse particle ghost mask on a realm for a registered width.
+    @details Contract: the level-0 entry is allocated but left undefined (level 0 has no coarser level);
+    callers must only query levels >= 1.
     @param[in] a_realm Realm name
     @param[in] a_width Registered ghost width.
     @return Per-level, per-box CSR of source-cell -> coarser-level target boxes (grid index, rank).
@@ -1832,6 +1834,8 @@ public:
 
   /**
     @brief Get the coarse-to-fine particle ghost mask on a realm for a registered width.
+    @details Contract: the finest-level entry is allocated but left undefined (the finest level has no
+    finer level); callers must only query levels < the finest level.
     @param[in] a_realm Realm name
     @param[in] a_width Registered ghost width.
     @return Per-level, per-box CSR of source-cell -> finer-level target boxes (grid index, rank).

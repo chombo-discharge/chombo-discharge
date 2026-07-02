@@ -89,12 +89,18 @@ ParticleGhostMask::finalize() noexcept
 inline const Box&
 ParticleGhostMask::box() const noexcept
 {
+  // An allocated-but-undefined mask (e.g. a boundary-level fineToCoar[0]/coarToFine[finestLevel]) has an
+  // empty box and must never be queried -- callers must respect the level bounds. See Realm build site.
+  CH_assert(!m_box.isEmpty());
+
   return m_box;
 }
 
 inline int
 ParticleGhostMask::numTargets(const IntVect& a_iv) const noexcept
 {
+  CH_assert(!m_box.isEmpty()); // guard against querying an undefined (boundary-level) mask; see box()
+
   return m_count(a_iv, 0);
 }
 

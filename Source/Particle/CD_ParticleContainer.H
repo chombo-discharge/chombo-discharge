@@ -641,7 +641,8 @@ public:
     is safe to refill; ghosts are transient (remap()/preRegrid()/regrid() drop them). Pass
     AmrMesh::getTrivialParticleGhostMask() for a direction that should not scatter. The masks must have
     been built on the same grids as this container (see AmrMesh::registerParticleGhostMask and
-    AmrMesh::getParticleGhostMask(realm, width)). Non-periodic.
+    AmrMesh::getParticleGhostMask(realm, width)). Periodic domains are not supported (mask construction
+    aborts on them).
     @param[in] a_maskSame       Same-level ghost mask (source cell -> same-level target boxes).
     @param[in] a_maskCoarToFine Coarse-to-fine ghost mask (source cell -> next-finer target boxes).
     @param[in] a_maskFineToCoar Fine-to-coarse ghost mask (source cell -> next-coarser target boxes).

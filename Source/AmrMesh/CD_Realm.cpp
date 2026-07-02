@@ -1090,6 +1090,17 @@ Realm::defineParticleGhostMasks() noexcept
   m_particleGhostMaskFineToCoar.clear();
   m_particleGhostMaskCoarToFine.clear();
 
+  // Particle ghost filling is intentionally NOT supported on periodic domains (a periodic ghost would
+  // require wrapping particle copies across the domain). Abort rather than silently mis-fill if a width
+  // is registered on a periodic domain.
+  if (!m_particleGhostMaskWidths.empty()) {
+    for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+      if (m_domains[lvl].isPeriodic()) {
+        MayDay::Abort("Realm::defineParticleGhostMasks -- particle ghost masks do not support periodic domains");
+      }
+    }
+  }
+
   // No particle ghost masks are built unless downstream code has registered at least one width.
   for (const int ghost : m_particleGhostMaskWidths) {
     if (ghost >= m_minBlockSize) {
@@ -1118,7 +1129,9 @@ Realm::defineParticleGhostMasks() noexcept
       this->defineParticleGhostMaskSameLevel(*same[lvl], dbl, domain, ghost);
 
       // COARSER (lvl -> lvl-1): fine cells that scatter DOWN to the coarse level. Restricted to the fine
-      // side of the coarse-fine halo; ghost width in destination (coarse) cells.
+      // side of the coarse-fine halo; ghost width in destination (coarse) cells. CONTRACT: fineToCoar[0]
+      // is intentionally left allocated-but-undefined (level 0 has no coarser level); callers must not
+      // query it (gatherGhostsFromMasks guards with a_srcLvl >= 1).
       if (lvl > 0) {
         this->defineParticleGhostMaskFineToCoar(*fineToCoar[lvl],
                                                 dbl,
@@ -1129,7 +1142,9 @@ Realm::defineParticleGhostMasks() noexcept
       }
 
       // FINER (lvl -> lvl+1): coarse cells that scatter UP to the finer level. Restricted to the coarse
-      // side of the coarse-fine halo; ghost width in destination (fine) cells.
+      // side of the coarse-fine halo; ghost width in destination (fine) cells. CONTRACT: coarToFine
+      // [m_finestLevel] is intentionally left allocated-but-undefined (the finest level has no finer
+      // level); callers must not query it (gatherGhostsFromMasks guards with a_srcLvl < m_finestLevel).
       if (lvl < m_finestLevel) {
         this->defineParticleGhostMaskCoarToFine(*coarToFine[lvl],
                                                 dbl,
@@ -1349,9 +1364,10 @@ Realm::defineParticleGhostMaskCoarToFine(LayoutData<ParticleGhostMask>&  a_mask,
   // Coarsen the fine reach to whole coarse source cells and keep only VALID ones (covered cells have no
   // particles) -- that is the coarse-side outer halo; every retained cell keeps ALL fine target boxes
   // reaching it. Each contribution also carries an ACCEPTANCE BOX: the fine box's ghost region (grown by
-  // a_ghost fine cells) shifted into this level's index space by the motion item's periodic offset. The
-  // scatter uses it to prune whole-coarse-cell over-communication down to the exact fine shell (a coarse
-  // particle is scattered only if its FINE cell lies in the acceptance box). Two motion-plan walks.
+  // a_ghost fine cells). The scatter uses it to prune whole-coarse-cell over-communication down to the
+  // exact fine shell (a coarse particle is scattered only if its FINE cell lies in the acceptance box).
+  // Domains are non-periodic here (see defineParticleGhostMasks), so the fine and this-level index spaces
+  // coincide -- no periodic shift is needed. Two motion-plan walks.
   const auto forEachContribution = [&](auto&& a_emit) {
     const CopyIterator::local_from_to plans[2] = {CopyIterator::LOCAL, CopyIterator::TO};
 
@@ -1363,11 +1379,8 @@ Realm::defineParticleGhostMaskCoarToFine(LayoutData<ParticleGhostMask>&  a_mask,
         const BaseFab<bool>&     valid       = a_validCells[item.toIndex];
         const Box                coarseCells = coarsen(item.toRegion, a_refRat) & thisBox;
 
-        // Acceptance box in fine (destination) cells: the fine box grown by the ghost width, shifted from
-        // the fine box's index space into this level's by the motion item's periodic offset (zero for
-        // non-periodic items, so the box is just grow(fineBox, a_ghost)).
-        Box acceptBox = grow(a_fineLayout[item.fromIndex], a_ghost);
-        acceptBox.shift(item.toRegion.smallEnd() - item.fromRegion.smallEnd());
+        // Acceptance box in fine (destination) cells: the fine box grown by the ghost width.
+        const Box acceptBox = grow(a_fineLayout[item.fromIndex], a_ghost);
 
         for (BoxIterator bit(coarseCells); bit.ok(); ++bit) {
           const IntVect cc = bit();
