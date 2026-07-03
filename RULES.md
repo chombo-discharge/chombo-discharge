@@ -119,6 +119,11 @@ cross-rank MPI-received proposals, uniformly, in one accounting pass:
   dynamic per-target threshold recheck (mirroring the trivial tier's discipline exactly) fixes
   this, and also closes a related gap where the mutual-match path had skipped that dynamic recheck
   entirely.
+- **No N-way corner limitation**: this handles any number of simultaneous suitors for one
+  particle, not just pairwise boundaries — every proposal naming a given target funnels to the
+  same judge regardless of how many neighbors it comes from, so a corner where 3+ patches meet is
+  resolved by the exact same logic as an ordinary two-patch boundary, with no special-casing.
+  Verified concretely by the 8-rank 3D corner and mixed-ownership scenarios in the prototype sweep.
 
 ## Verdict and placement
 
