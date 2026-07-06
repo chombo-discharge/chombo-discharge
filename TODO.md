@@ -18,28 +18,69 @@ neither of us has to re-derive them from scratch later.
   signature and behavior are already specified independently of how the search is done, so nothing
   else needs to change.
 
-  **Which spatial index is NOT yet decided, and is its own open design question.** Two candidates,
-  with a real tradeoff, not an obvious winner:
-  - *Fixed grid/bucket, Moore-neighborhood search* (reusing the cell-bucketing machinery the
-    crowding trigger already builds, `NNCellKey`/`liveCellCount`). Cheap to build (O(n)), and a
-    natural fit since the algorithm already buckets particles by cell for the crowding check. BUT:
-    query cost is O(k), k = particles across the neighborhood (27 cells in 3D), not truly O(1) --
-    this degrades badly under bursty/clustered particle creation (e.g. an avalanche dumping many
-    particles into one cell before the next merge pass catches up: 27 cells x 64 particles/cell =
-    1728 candidate checks per query, for every one of those 64 particles). Bucket size need not
-    match the AMR cell size -- a finer, search-only bucket grid (independent of dx) sized to keep
-    occupancy-per-bucket low would blunt this, at the cost of an extra tunable parameter.
-  - *KD-tree* (or similar adaptive structure). O(n log n) to build, O(log n) expected per query
-    even inside a dense cluster, since it recurses deeper into crowded regions rather than using a
-    flat, fixed-size bucket -- handles the bursty/clustered case above gracefully. More complex to
-    implement and to keep allocation-light/thread-local-scratch-friendly (see
-    `buildEqualWeightKDLeaves()`'s existing style) than a fixed grid.
+  **Spatial index design is now LOCKED (design only -- not yet implemented).** Settled on a
+  hybrid structure, not a from-scratch per-patch KD-tree and not a naive fixed grid either:
 
-  Given neither obviously dominates for every regime this code will run in, we may end up
-  supporting BOTH, selected via a ParmParse option, e.g.:
-  `ItoSolver.merge_algorithm = bucket_nearest_neighbor <bucket_size_relative_to_dx>` or
-  `ItoSolver.merge_algorithm = kd_nearest_neighbor`. Not yet decided; noted here so the choice (or
-  the decision to support both) isn't lost before this item is actually picked up.
+  1. *Static geometric skeleton, built once per regrid, lives in `Realm`.* Patch dimensions are
+     fixed multiples of the minimum block size, so the hierarchy from patch down to individual
+     cells (patch -> minBlockSize blocks -> ... -> cells) is pure integer arithmetic on a cell
+     index -- it has no dependency on which particles currently exist, so there is nothing to
+     rebuild per round or per timestep. Same pattern as `LevelTiles`: a single source of truth in
+     `Realm`, aliased by reference into every `ParticleContainer` on that realm (bulk, EB, domain,
+     per-species -- all identical, since the geometry doesn't care which container), never
+     duplicated. Rebuilt exactly when `LevelTiles`/ghost masks are (`Realm::regridBase()`).
+
+  2. *Dynamic per-round bucketing: one O(n) counting sort, not O(n log n) partitioning.*
+     Immediately after ghost-fill, bucket every particle (local valid AND all ghosts, same-level
+     AND cross-level -- no carve-out; see point 5 below for why) into its cell via `cellKeyOf` (one
+     pass: compute cell key, count, prefix-sum, scatter into a sorted index array -- ties directly
+     into the `std::map` -> `std::unordered_map` item below for the offset table). This replaces
+     the dominant cost of real KD-tree construction (recursive partitioning across O(log n)
+     levels) outright. While bucketing, roll per-cell counts up through the static block hierarchy
+     from point 1 to get per-block counts too, for free (O(1) extra work per particle, not a
+     second pass) -- this is what lets the walk prune whole blocks as "empty, skip" cheaply.
+
+  3. *Per-cell candidate resolution is adaptive, not a fixed sub-tree.* Default to brute-force
+     within a cell (typical occupancy is small, since the crowding trigger keeps it bounded in
+     steady state). Only build an actual data-dependent sub-partition within a single cell if its
+     occupancy exceeds a leaf-bucket-style threshold -- this is where a bursty cell (e.g. an
+     avalanche dumping many particles into one cell before the next merge pass catches up) pays its
+     own extra cost, without inflating its 26 neighbors' costs the way a naive
+     "per-cell-tree-including-neighbors" design would. When a sub-partition IS needed, split on the
+     spatial midpoint, not the median -- particles distribute close to uniformly per patch, so
+     median-balancing buys little for the extra cost of a partial sort/`nth_element` per level.
+
+  4. *The walk is a bounded K-nearest search (heap of size `1 + a_maxFallbackCandidates`), not
+     single-nearest,* since the fallback-retry logic needs the whole ordered candidate list, not
+     just the closest. It expands outward ring by ring from the query's own cell (Moore-
+     neighborhood style), maintaining the current worst-of-K distance. A ring/cell/block is
+     discarded once the (trivial to compute) point-to-axis-aligned-bounding-box distance exceeds
+     EITHER the current worst-of-K distance OR a maximum-merge-distance bound -- whichever is
+     tighter at that point in the walk. Block-level bounding boxes (point 1/2) let the walk skip
+     entire blocks at once via the same comparison, not just individual cells.
+
+  5. *No carve-out for cross-level ghosts -- they get indexed exactly like everything else.*
+     Cross-level *merges* are rare, but cross-level *ghost candidate counts* are not (confirmed
+     fine-to-coarse ghost over-delivery ships all `refRat^D` fine children of a qualifying coarse
+     halo cell -- see the refinement-ratio performance item below), so excluding them from the
+     index would leave brute-force cost exactly on the patches this redesign is meant to fix.
+     `a_maxCellDistance`'s level-awareness (`nnMergeCrossLevelTooFar` re-expresses cell distance in
+     the finer participant's dx) is handled without making the walk itself level-aware: for a query
+     at level L, `a_maxCellDistance * dx_L` is always a safe, conservative pruning bound (a finer
+     candidate only ever has a *tighter* effective radius, never looser), so the walk prunes with
+     that single, level-oblivious radius, and the exact, per-pair `nnMergeCrossLevelTooFar` check
+     is applied as a final filter on the K candidates the walk actually returns -- same eligibility
+     logic as today, just moved from "baked into candidate generation" to "post-filter on a
+     shortlist."
+
+  Implementation hygiene carried over from the rest of this codebase's style, all still binding:
+  index-array-based throughout (partition/bucket indices into the existing position array, never
+  copy particle data into new nodes -- matches `buildEqualWeightKDLeaves()`'s allocation-light,
+  thread-local-scratch style); scratch buffers (index arrays, offset tables, per-block counts)
+  reused across calls, not freshly allocated per round; and within one
+  `mergeNearestNeighborsRound()` call, avoid rebuilding between `a_iterateLocalTierToConvergence`'s
+  internal passes via lazy deletion (mark consumed ids, skip during traversal) rather than a full
+  rebuild per pass, since passes only remove particles, never add.
 
 - **`std::map` used throughout instead of `std::unordered_map`.** `particlesByID`, `liveCellCount`,
   `exposed`, `outgoingTargetOf`, and `myParticlesByID` in `mergeNearestNeighborsRound()` (and the
