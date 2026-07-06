@@ -7,80 +7,51 @@ neither of us has to re-derive them from scratch later.
 
 ## Performance
 
-- **`findNearestNeighborCandidates()` is brute-force O(n^2) per patch.** It currently checks every
-  local-valid particle against every other local-valid particle and every ghost, rather than using
-  a spatial index (the original "kd-tree over the particles in the patch" framing this feature
-  started from). Correct, but will become a real bottleneck as particles-per-patch grows. A real
-  spatial index (mirroring the allocation-light, thread-local-scratch style already used by
-  `ParticleManagement::buildEqualWeightKDLeaves()` in `CD_ParticleManagementImplem.H`, though that
-  one builds a different kind of tree -- see `CD_NearestNeighborParticleMerge.H`'s own docs) should
-  replace it. This is a pure implementation-detail swap: `findNearestNeighborCandidates()`'s
-  signature and behavior are already specified independently of how the search is done, so nothing
-  else needs to change.
+- ~~`findNearestNeighborCandidates()` is brute-force O(n^2) per patch.~~ **DONE.** Replaced with the
+  hybrid spatial index design locked earlier in this file's history, implemented in five
+  incremental, independently-verified phases (each landed as its own commit):
 
-  **Spatial index design is now LOCKED (design only -- not yet implemented).** Settled on a
-  hybrid structure, not a from-scratch per-patch KD-tree and not a naive fixed grid either:
+  1. **`MergeBlockGrid`** (new `Source/AmrMesh/CD_MergeBlockGrid.H`/`.cpp`) -- a static, purely
+     geometric per-patch structure (patch box -> block-index-space bounds plus a 1-block halo),
+     modeled exactly on `LevelTiles`'s lifecycle: built once per regrid in `Realm::regridBase()`
+     (`Realm::defineMergeBlockGrid()`, right after `defineLevelTiles()`), aliased out via
+     `Realm::getMergeBlockGrid()`/`AmrMesh::getMergeBlockGrid(realm)`.
+  2. **`buildNNCellBuckets()`** (`CD_NearestNeighborParticleMerge.H`/`...Implem.H`) -- an O(n)
+     counting sort (tally -> prefix-sum -> scatter) that buckets a patch's full local-valid and
+     ghost sets (no cross-level carve-out) by cell into a flat `NNIndexedParticle` array
+     (`NNCellBuckets`), rolling per-cell counts up into per-block counts (`blockCounts`) for free.
+     Built once per patch per `mergeNearestNeighborsRound()` call (not per internal
+     `a_iterateLocalTierToConvergence` pass -- those reuse it via lazy deletion against
+     `a_consumedIDs` instead, since ghosts are always fresh every round and natives may have moved
+     between rounds, so there was never a valid reason to cache across rounds anyway).
+  3. **`findNearestNeighborCandidates()`** now walks that index via Moore-ring expansion from the
+     query's own cell, pruned by point-to-AABB distance against whichever is tighter: the current
+     worst-of-K distance, or a new `a_maxCellDistance` parameter (level-oblivious by construction,
+     since a finer candidate only ever has a *tighter* exact radius, never looser -- the exact,
+     level-aware check still runs downstream in `resolveTrivialTier()`/`judgeProposals()`,
+     unchanged). Ring expansion is capped by two independent conditions: a distance-based one (pure
+     speed) and a coverage-based one -- a new `NNCellBuckets::observedCellBox` field bounds every
+     cell that actually has a particle, guaranteeing no candidate is ever missed even if the
+     "expected" 1-block halo geometry is ever violated.
+  4. **Adaptive per-cell midpoint-split sub-partition** (`NNSubNode`, `NNSpatialIndex::subPartitions`,
+     built lazily via `buildNNSpatialIndex()`) -- only for cells whose occupancy exceeds a new,
+     independent `a_subPartitionThresh` (a performance knob, deliberately separate from the
+     physics-facing `a_numParticlesPerCellThresh`). Splits on the spatial midpoint of the longest
+     axis (not a weighted median, unlike `buildEqualWeightKDLeaves()`), so a bursty cell (e.g. an
+     avalanche) pays its own extra cost without inflating its neighbors'.
+  5. `a_localValid`/`a_ghosts` in `findNearestNeighborCandidates()` now mean the patch's FULL set
+     for the round, not a pre-filtered alive subset -- a deliberate, explicitly-documented contract
+     change (the function does its own lazy-deletion filtering now, via a new `a_consumedIDs`
+     parameter), which is what lets the index be built once per round instead of once per pass.
 
-  1. *Static geometric skeleton, built once per regrid, lives in `Realm`.* Patch dimensions are
-     fixed multiples of the minimum block size, so the hierarchy from patch down to individual
-     cells (patch -> minBlockSize blocks -> ... -> cells) is pure integer arithmetic on a cell
-     index -- it has no dependency on which particles currently exist, so there is nothing to
-     rebuild per round or per timestep. Same pattern as `LevelTiles`: a single source of truth in
-     `Realm`, aliased by reference into every `ParticleContainer` on that realm (bulk, EB, domain,
-     per-species -- all identical, since the geometry doesn't care which container), never
-     duplicated. Rebuilt exactly when `LevelTiles`/ghost masks are (`Realm::regridBase()`).
-
-  2. *Dynamic per-round bucketing: one O(n) counting sort, not O(n log n) partitioning.*
-     Immediately after ghost-fill, bucket every particle (local valid AND all ghosts, same-level
-     AND cross-level -- no carve-out; see point 5 below for why) into its cell via `cellKeyOf` (one
-     pass: compute cell key, count, prefix-sum, scatter into a sorted index array -- ties directly
-     into the `std::map` -> `std::unordered_map` item below for the offset table). This replaces
-     the dominant cost of real KD-tree construction (recursive partitioning across O(log n)
-     levels) outright. While bucketing, roll per-cell counts up through the static block hierarchy
-     from point 1 to get per-block counts too, for free (O(1) extra work per particle, not a
-     second pass) -- this is what lets the walk prune whole blocks as "empty, skip" cheaply.
-
-  3. *Per-cell candidate resolution is adaptive, not a fixed sub-tree.* Default to brute-force
-     within a cell (typical occupancy is small, since the crowding trigger keeps it bounded in
-     steady state). Only build an actual data-dependent sub-partition within a single cell if its
-     occupancy exceeds a leaf-bucket-style threshold -- this is where a bursty cell (e.g. an
-     avalanche dumping many particles into one cell before the next merge pass catches up) pays its
-     own extra cost, without inflating its 26 neighbors' costs the way a naive
-     "per-cell-tree-including-neighbors" design would. When a sub-partition IS needed, split on the
-     spatial midpoint, not the median -- particles distribute close to uniformly per patch, so
-     median-balancing buys little for the extra cost of a partial sort/`nth_element` per level.
-
-  4. *The walk is a bounded K-nearest search (heap of size `1 + a_maxFallbackCandidates`), not
-     single-nearest,* since the fallback-retry logic needs the whole ordered candidate list, not
-     just the closest. It expands outward ring by ring from the query's own cell (Moore-
-     neighborhood style), maintaining the current worst-of-K distance. A ring/cell/block is
-     discarded once the (trivial to compute) point-to-axis-aligned-bounding-box distance exceeds
-     EITHER the current worst-of-K distance OR a maximum-merge-distance bound -- whichever is
-     tighter at that point in the walk. Block-level bounding boxes (point 1/2) let the walk skip
-     entire blocks at once via the same comparison, not just individual cells.
-
-  5. *No carve-out for cross-level ghosts -- they get indexed exactly like everything else.*
-     Cross-level *merges* are rare, but cross-level *ghost candidate counts* are not (confirmed
-     fine-to-coarse ghost over-delivery ships all `refRat^D` fine children of a qualifying coarse
-     halo cell -- see the refinement-ratio performance item below), so excluding them from the
-     index would leave brute-force cost exactly on the patches this redesign is meant to fix.
-     `a_maxCellDistance`'s level-awareness (`nnMergeCrossLevelTooFar` re-expresses cell distance in
-     the finer participant's dx) is handled without making the walk itself level-aware: for a query
-     at level L, `a_maxCellDistance * dx_L` is always a safe, conservative pruning bound (a finer
-     candidate only ever has a *tighter* effective radius, never looser), so the walk prunes with
-     that single, level-oblivious radius, and the exact, per-pair `nnMergeCrossLevelTooFar` check
-     is applied as a final filter on the K candidates the walk actually returns -- same eligibility
-     logic as today, just moved from "baked into candidate generation" to "post-filter on a
-     shortlist."
-
-  Implementation hygiene carried over from the rest of this codebase's style, all still binding:
-  index-array-based throughout (partition/bucket indices into the existing position array, never
-  copy particle data into new nodes -- matches `buildEqualWeightKDLeaves()`'s allocation-light,
-  thread-local-scratch style); scratch buffers (index arrays, offset tables, per-block counts)
-  reused across calls, not freshly allocated per round; and within one
-  `mergeNearestNeighborsRound()` call, avoid rebuilding between `a_iterateLocalTierToConvergence`'s
-  internal passes via lazy deletion (mark consumed ids, skip during traversal) rather than a full
-  rebuild per pass, since passes only remove particles, never add.
+  **Verification**: acceptance bar during development was byte-for-byte identical merge edges
+  (same query -> candidate/distance/fallback list) against the old brute force, not just "mass
+  still conserves" -- confirmed on the smoke test at every phase, including with aggressive,
+  artificially-forced sub-partitioning (threshold as low as 1) and combinations of
+  `a_iterateLocalTierToConvergence`, `a_maxFallbackCandidates`, and `a_maxCellDistance`. Tested at
+  1/4/8/16 MPI ranks, single- and multi-level, refRat 2 and 4 (the scenario that originally
+  motivated this work). Mass conservation exact and centerline deviation ~0 throughout every
+  phase. 2D/3D compiles clean, doxygen 0 warnings.
 
 - **`std::map` used throughout instead of `std::unordered_map`.** `particlesByID`, `liveCellCount`,
   `exposed`, `outgoingTargetOf`, and `myParticlesByID` in `mergeNearestNeighborsRound()` (and the
@@ -97,24 +68,25 @@ neither of us has to re-derive them from scratch later.
   site inside `judgeProposals()`. Should be removed: pass `particlesByID` + `consumedIDs` through
   and check membership at the point of use instead.
 
-- **Higher AMR refinement ratios make the O(n^2) search (item above) much worse, not just
-  linearly worse, because of the confirmed `Realm::defineParticleGhostMaskFineToCoar` ghost
-  over-delivery** (see the ghost-mask investigation earlier in this branch's history: unlike
-  coarse-to-fine, which filters ghosts down to an exact fine-resolution acceptance box,
-  fine-to-coarse ships ALL `refRat^D` fine children of every qualifying coarse halo cell
-  unconditionally, with no per-particle distance filter afterward). For a fixed coarse-fine
-  boundary, the ghost volume crossing it scales as `refRat^D` -- going from `refRat=2` to
-  `refRat=4` multiplies it by `2^D` (4x in 2D, 8x in 3D) for the exact same physical geometry.
-  Since that inflated ghost count feeds directly into `findNearestNeighborCandidates()`'s O(n^2)
-  search as extra candidates, a coarse patch near the boundary doesn't get linearly more
-  expensive -- it gets quadratically more expensive with the (already inflated) candidate count.
-  Observed directly: variable-sized-patch (8-32 cells) configs with `refRat=4` take much longer to
-  run than an equivalent `refRat=2` config. Fixing the O(n^2) search (spatial index, item above)
-  would blunt this; fixing the ghost over-delivery itself (adding a fine-resolution acceptance-box
-  filter to `defineParticleGhostMaskFineToCoar`, mirroring what coarse-to-fine already does) would
-  fix it at the source and also reduce raw MPI communication volume, independent of the merge
-  algorithm. Neither has been done -- this is a new item, not a duplicate of the O(n^2) one above,
-  since it's specifically about why refinement ratio matters, not just particle count.
+- **PARTIALLY ADDRESSED: higher AMR refinement ratios inflate ghost candidate counts because of
+  the confirmed `Realm::defineParticleGhostMaskFineToCoar` ghost over-delivery** (see the
+  ghost-mask investigation earlier in this branch's history: unlike coarse-to-fine, which filters
+  ghosts down to an exact fine-resolution acceptance box, fine-to-coarse ships ALL `refRat^D` fine
+  children of every qualifying coarse halo cell unconditionally, with no per-particle distance
+  filter afterward). For a fixed coarse-fine boundary, the ghost volume crossing it scales as
+  `refRat^D` -- going from `refRat=2` to `refRat=4` multiplies it by `2^D` (4x in 2D, 8x in 3D) for
+  the exact same physical geometry. Before the spatial-index rewrite (item above, now done), this
+  inflated count fed directly into a literal O(n^2) scan, so a coarse patch near the boundary got
+  quadratically more expensive, not just linearly -- confirmed directly (variable-sized-patch,
+  8-32 cells, `refRat=4` configs took much longer to run than an equivalent `refRat=2` config). The
+  spatial index (bucketed + pruned search, not brute force) blunts this significantly -- the same
+  inflated candidate count no longer drives a quadratic cost. What remains open: the ghost
+  over-delivery itself is still unfixed at the source, so MPI communication volume and per-patch
+  candidate-pool size are still larger than strictly necessary at high refinement ratios, even
+  though the search cost scaling is no longer quadratic in it. Fixing
+  `defineParticleGhostMaskFineToCoar` itself (adding a fine-resolution acceptance-box filter,
+  mirroring what coarse-to-fine already does) would address this at the source and reduce raw
+  communication volume too, independent of the merge algorithm -- not done.
 
 ## Design / correctness coverage
 

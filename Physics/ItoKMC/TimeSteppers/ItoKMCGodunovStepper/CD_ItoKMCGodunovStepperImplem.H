@@ -2181,22 +2181,47 @@ ItoKMCGodunovStepper<I, C, R, F>::postInitialize() noexcept
       }
     }
 
-    // Phase 0 standalone check for the new hybrid spatial-index design (see TODO.md's "Performance"
-    // section): buildNNCellBuckets() is not consumed by anything yet, so exercise it directly here
-    // against the freshly-sampled particles. blockSize/haloBlockBox are constructed inline (not via
-    // MergeBlockGrid, which doesn't exist until Phase 1) purely for this standalone check.
+    // Defensive, permanent self-consistency checks for the hybrid spatial index (see TODO.md's
+    // "Performance" section for the full design): these check the building blocks directly
+    // (bucket construction, block geometry), independent of whether the merge decisions built on
+    // top of them come out correct -- the real merge test below already exercises both far more
+    // thoroughly (byte-for-byte edge equivalence was the acceptance bar during development), but
+    // these are cheap enough to keep running as an extra layer of defense given this feature's
+    // history of subtle bugs.
     {
-      const int          blockSize       = this->m_amr->getMinBlockSize();
+      const int blockSize = this->m_amr->getMinBlockSize();
+
       unsigned long long totalChecked    = 0;
       unsigned long long totalMismatched = 0;
 
       for (int lvl = 0; lvl <= this->m_amr->getFinestLevel(); lvl++) {
-        const DisjointBoxLayout& dbl      = this->m_amr->getGrids(solver->getRealm())[lvl];
-        const Real               dxScalar = this->m_amr->getDx()[lvl];
-        const RealVect           dx       = RealVect(D_DECL(dxScalar, dxScalar, dxScalar));
-        const RealVect           probLo   = this->m_amr->getProbLo();
+        const DisjointBoxLayout&             dbl      = this->m_amr->getGrids(solver->getRealm())[lvl];
+        const RefCountedPtr<MergeBlockGrid>& grid     = this->m_amr->getMergeBlockGrid(solver->getRealm())[lvl];
+        const Real                           dxScalar = this->m_amr->getDx()[lvl];
+        const RealVect                       dx       = RealVect(D_DECL(dxScalar, dxScalar, dxScalar));
+        const RealVect                       probLo   = this->m_amr->getProbLo();
+
+        if (grid->getBlockSize() != blockSize) {
+          MayDay::Error("ItoKMCGodunovStepper::postInitialize -- MergeBlockGrid self-consistency "
+                        "check failed: getBlockSize() mismatch");
+        }
 
         for (DataIterator dit(dbl); dit.ok(); ++dit) {
+          const MergeBlockGrid::PatchBlocks& pb = grid->getPatchBlocks(dit());
+
+          if (pb.cellBox != dbl[dit()]) {
+            MayDay::Error("ItoKMCGodunovStepper::postInitialize -- MergeBlockGrid self-consistency "
+                          "check failed: cellBox != this patch's own box");
+          }
+          if (pb.blockBox != coarsen(pb.cellBox, blockSize)) {
+            MayDay::Error("ItoKMCGodunovStepper::postInitialize -- MergeBlockGrid self-consistency "
+                          "check failed: blockBox != coarsen(cellBox, blockSize)");
+          }
+          if (pb.haloBlockBox != grow(pb.blockBox, 1)) {
+            MayDay::Error("ItoKMCGodunovStepper::postInitialize -- MergeBlockGrid self-consistency "
+                          "check failed: haloBlockBox != grow(blockBox, 1)");
+          }
+
           ParticleSoA<ItoParticle>& leaf = particles[lvl][dit()];
 
           std::vector<ParticleManagement::NNMergeParticle<Real>> localValid;
@@ -2213,14 +2238,12 @@ ItoKMCGodunovStepper<I, C, R, F>::postInitialize() noexcept
             localValid.push_back(p);
           }
 
-          const Box haloBlockBox = grow(coarsen(dbl[dit()], blockSize), 1);
-
           ParticleManagement::NNCellBuckets<Real> buckets;
-          ParticleManagement::buildNNCellBuckets(localValid, ghosts, probLo, dx, blockSize, haloBlockBox, buckets);
+          ParticleManagement::buildNNCellBuckets(localValid, ghosts, probLo, dx, blockSize, pb.haloBlockBox, buckets);
 
           if (buckets.sorted.size() != localValid.size()) {
-            MayDay::Error("ItoKMCGodunovStepper::postInitialize -- buildNNCellBuckets() Phase 0 "
-                          "check failed: total indexed count != input count");
+            MayDay::Error("ItoKMCGodunovStepper::postInitialize -- buildNNCellBuckets() "
+                          "self-consistency check failed: total indexed count != input count");
           }
 
           unsigned long long blockCountSum = 0;
@@ -2228,8 +2251,8 @@ ItoKMCGodunovStepper<I, C, R, F>::postInitialize() noexcept
             blockCountSum += static_cast<unsigned long long>(c);
           }
           if (blockCountSum != localValid.size()) {
-            MayDay::Error("ItoKMCGodunovStepper::postInitialize -- buildNNCellBuckets() Phase 0 "
-                          "check failed: blockCounts does not sum to input count");
+            MayDay::Error("ItoKMCGodunovStepper::postInitialize -- buildNNCellBuckets() "
+                          "self-consistency check failed: blockCounts does not sum to input count");
           }
 
           for (std::size_t i = 0; i < localValid.size(); i++) {
@@ -2259,52 +2282,13 @@ ItoKMCGodunovStepper<I, C, R, F>::postInitialize() noexcept
       const unsigned long long totalCheckedGlobal    = ParallelOps::sum(totalChecked);
       const unsigned long long totalMismatchedGlobal = ParallelOps::sum(totalMismatched);
       if (procID() == 0) {
-        pout() << this->m_name + "::postInitialize -- buildNNCellBuckets() Phase 0 check for solver '"
+        pout() << this->m_name + "::postInitialize -- spatial-index self-consistency check for solver '"
                << solver->getName() << "': " << totalCheckedGlobal << " particles checked, " << totalMismatchedGlobal
                << " mismatched (should be 0)" << endl;
       }
       if (totalMismatchedGlobal != 0) {
-        MayDay::Error("ItoKMCGodunovStepper::postInitialize -- buildNNCellBuckets() Phase 0 check "
-                      "found mismatched particles");
-      }
-    }
-
-    // Phase 1 standalone check: MergeBlockGrid has no consumer yet -- verify its own geometric
-    // self-consistency directly (haloBlockBox == grow(blockBox, 1), coarsen(cellBox, blockSize) ==
-    // blockBox, and that every one of this rank's own patches has a reachable entry).
-    {
-      const int blockSize = this->m_amr->getMinBlockSize();
-
-      for (int lvl = 0; lvl <= this->m_amr->getFinestLevel(); lvl++) {
-        const DisjointBoxLayout&             dbl  = this->m_amr->getGrids(solver->getRealm())[lvl];
-        const RefCountedPtr<MergeBlockGrid>& grid = this->m_amr->getMergeBlockGrid(solver->getRealm())[lvl];
-
-        if (grid->getBlockSize() != blockSize) {
-          MayDay::Error("ItoKMCGodunovStepper::postInitialize -- MergeBlockGrid Phase 1 check "
-                        "failed: getBlockSize() mismatch");
-        }
-
-        for (DataIterator dit(dbl); dit.ok(); ++dit) {
-          const MergeBlockGrid::PatchBlocks& pb = grid->getPatchBlocks(dit());
-
-          if (pb.cellBox != dbl[dit()]) {
-            MayDay::Error("ItoKMCGodunovStepper::postInitialize -- MergeBlockGrid Phase 1 check "
-                          "failed: cellBox != this patch's own box");
-          }
-          if (pb.blockBox != coarsen(pb.cellBox, blockSize)) {
-            MayDay::Error("ItoKMCGodunovStepper::postInitialize -- MergeBlockGrid Phase 1 check "
-                          "failed: blockBox != coarsen(cellBox, blockSize)");
-          }
-          if (pb.haloBlockBox != grow(pb.blockBox, 1)) {
-            MayDay::Error("ItoKMCGodunovStepper::postInitialize -- MergeBlockGrid Phase 1 check "
-                          "failed: haloBlockBox != grow(blockBox, 1)");
-          }
-        }
-      }
-
-      if (procID() == 0) {
-        pout() << this->m_name + "::postInitialize -- MergeBlockGrid Phase 1 check for solver '" << solver->getName()
-               << "': geometric self-consistency OK" << endl;
+        MayDay::Error("ItoKMCGodunovStepper::postInitialize -- buildNNCellBuckets() self-consistency "
+                      "check found mismatched particles");
       }
     }
 
