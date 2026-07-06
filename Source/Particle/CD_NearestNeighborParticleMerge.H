@@ -18,12 +18,12 @@
 #include <map>
 #include <optional>
 #include <set>
+#include <utility>
 #include <vector>
 
 // Chombo includes
 #include <RealVect.H>
 #include <IntVect.H>
-#include <Box.H>
 
 // Our includes
 #include <CD_ParticleSoA.H>
@@ -786,71 +786,81 @@ namespace ParticleManagement {
   applyVerdicts(const std::vector<NNMergeVerdict>& a_incomingVerdicts, std::set<ParticleID>& a_consumedIDs) noexcept;
 
   /**
-    @brief One patch's box, owning rank, and (if owned by this rank) local index into
-    a_localByPatch -- see placeMergedParticles().
-    @details A DisjointBoxLayout is globally known/replicated in Chombo (every rank can answer
-    "who owns box i" for any box, not just its own), so point-locating a merged particle against
-    the FULL set of patches -- not just this rank's own -- is a purely local computation with no
-    communication needed to determine the destination (only to actually ship the particle there
-    if it isn't local). This struct is exactly that: one entry per patch in the relevant level(s),
-    covering every rank, not just this one.
+    @brief Result of locating a physical position against the AMR grid -- see placeMergedParticles().
+    @details Deliberately independent of any AmrMesh/Realm/ParticleContainer type (this header
+    stays Amr-agnostic, see RULES.md) -- mirrors ParticleContainer::Destination's fields exactly,
+    since that IS the intended real implementation: an O(1) point->block query on the realm's
+    LevelTiles tile->box hash (the SAME lookup a ParticleContainer already uses internally to
+    route its own particles during remap()), never a linear scan over patches. Reusing
+    ParticleContainer::findDestination() rather than adding a second, parallel point-location
+    method keeps this one mapping the single source of truth for "which box owns this position".
   */
-  struct PatchLocation
+  struct NNParticleLocation
   {
     /**
-      @brief The patch's box, in the SAME index space a_probLo/a_dx convert positions into.
+      @brief True iff a covering box was found (false near/outside the domain boundary).
     */
-    Box box;
+    bool valid;
 
     /**
-      @brief The rank that owns this patch.
+      @brief AMR level containing the point.
+    */
+    int level;
+
+    /**
+      @brief Global grid index of the covering box within that level (NOT a local DataIndex --
+      the caller is expected to convert this to whatever local indexing it needs, e.g. via
+      LevelTiles::getMyGrids(), only when ownerRank is this rank).
+    */
+    unsigned int gridIndex;
+
+    /**
+      @brief The rank that owns the covering box.
     */
     int ownerRank;
-
-    /**
-      @brief If ownerRank is this rank: the key to use in a_localByPatch. Meaningless (never
-      read) for a patch owned by a different rank.
-    */
-    int localPatchIndex;
   };
 
   /**
-    @brief Point-locate a newly created merged particle against every patch in the relevant
-    level(s), and bucket it for a scatter exchange if it belongs to someone else.
+    @brief Locate-by-position callback -- see NNParticleLocation and placeMergedParticles().
+    @details Deliberately a template parameter wherever consumed, NOT required to be exactly this
+    std::function type -- this alias exists purely to document the expected signature (mirrors
+    PayloadCombine's role). Unlike PayloadCombine, call frequency here is bounded by the number of
+    MERGE RESULTS this round (not by the number of candidate pairs squared), so a non-inlined
+    indirect call is an acceptable cost -- this is not a hot inner-loop path.
+    @param[in] a_position Physical position to locate.
+    @return Which box (level, global grid index) and rank covers it.
+  */
+  using PositionLocator = std::function<NNParticleLocation(const RealVect& a_position)>;
+
+  /**
+    @brief Point-locate a newly created merged particle against the AMR grid, and bucket it for a
+    scatter exchange if it belongs to someone else.
     @details Applied UNIFORMLY to every merge result, trivial-tier and judge-decided alike -- see
     RULES.md, "Placement": the union of two patches is not generally convex (T-junctions,
     corners, refinement boundaries), so even a purely local (same-rank) merge's result can
-    legitimately belong to a third patch, possibly owned by a different rank.
+    legitimately belong to a third patch, possibly owned by a different rank. Point-location must
+    be O(1) per result (see PositionLocator/NNParticleLocation) -- NEVER a linear scan over every
+    patch, which would turn this function into a real bottleneck at large patch counts.
     @tparam Packed See NNMergeParticle.
     @param[in]  a_results        Every merge result produced this round by resolveTrivialTier()
                                   and judgeProposals(), pooled together.
-    @param[in]  a_allPatches     Every patch in the relevant level(s) -- see PatchLocation --
-                                  covering every rank, not just this one (whatever spatial index
-                                  the real DisjointBoxLayout/AmrMesh integration exposes for point
-                                  location -- left abstract here; see
-                                  mergeNearestNeighborsRound()).
-    @param[in]  a_probLo         Physical position of the domain's low corner (see cellKeyOf()),
-                                  needed to convert a merged particle's position into a cell index
-                                  for the point-location test against a_allPatches.
-    @param[in]  a_dx             Cell spacing (see cellKeyOf()).
-    @param[in]  a_thisRank       This rank's own number -- a patch in a_allPatches whose
-                                  ownerRank equals this is what makes a result "local" rather than
-                                  needing a scatter.
+    @param[in]  a_locate         Locate-by-position callback (see PositionLocator).
+    @param[in]  a_thisRank       This rank's own number -- an NNParticleLocation whose ownerRank
+                                  equals this is what makes a result "local" rather than needing a
+                                  scatter.
     @param[out] a_localByPatch   Results whose merged particle lands in one of this rank's own
-                                  patches, bucketed by PatchLocation::localPatchIndex.
+                                  patches, bucketed by (level, NNParticleLocation::gridIndex).
     @param[out] a_scatterByDestRank Results whose merged particle belongs to a different rank,
                                   bucketed by destination rank (pre-sized to the total rank count
                                   by the caller), for one final exchange.
   */
   template <typename Packed>
   inline void
-  placeMergedParticles(const std::vector<NNMergeResult<Packed>>&            a_results,
-                       const std::vector<PatchLocation>&                    a_allPatches,
-                       const RealVect&                                      a_probLo,
-                       const RealVect&                                      a_dx,
-                       const int                                            a_thisRank,
-                       std::map<int, std::vector<NNMergeParticle<Packed>>>& a_localByPatch,
-                       std::vector<std::vector<NNMergeParticle<Packed>>>&   a_scatterByDestRank) noexcept;
+  placeMergedParticles(const std::vector<NNMergeResult<Packed>>&                                     a_results,
+                       const PositionLocator&                                                        a_locate,
+                       const int                                                                     a_thisRank,
+                       std::map<std::pair<int, unsigned int>, std::vector<NNMergeParticle<Packed>>>& a_localByPatch,
+                       std::vector<std::vector<NNMergeParticle<Packed>>>& a_scatterByDestRank) noexcept;
 
   /**
     @brief Run one full round (one timestep's worth) of the nearest-neighbor merge algorithm.

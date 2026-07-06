@@ -2102,9 +2102,11 @@ ItoKMCGodunovStepper<I, C, R, F>::postInitialize() noexcept
   int  debugNumSamplesPerRank      = 200;
   int  debugParticlesPerCellThresh = 4;
   Real debugMaxCellDistanceReal    = -1.0;
+  int  debugNumMergeRounds         = 1;
   pp.query("debug_nn_merge_samples_per_rank", debugNumSamplesPerRank);
   pp.query("debug_nn_merge_particles_per_cell_thresh", debugParticlesPerCellThresh);
   pp.query("debug_nn_merge_max_cell_distance", debugMaxCellDistanceReal);
+  pp.query("debug_nn_merge_num_rounds", debugNumMergeRounds);
 
   const std::optional<int> debugMaxCellDistance = (debugMaxCellDistanceReal < 0.0)
                                                     ? std::nullopt
@@ -2216,17 +2218,33 @@ ItoKMCGodunovStepper<I, C, R, F>::postInitialize() noexcept
       a_leaf.rankID(a_leaf.size() - 1)     = a_p.ownerRank;
     };
 
-    ParticleManagement::mergeNearestNeighborsRound<ItoParticle, Real>(*this->m_amr,
-                                                                      particles,
-                                                                      debugParticlesPerCellThresh,
-                                                                      gather,
-                                                                      combine,
-                                                                      scatter,
-                                                                      allocateID,
-                                                                      false,
-                                                                      0,
-                                                                      debugMaxCellDistance,
-                                                                      isPositionValid);
+    // Repeated rounds are what RULES.md's "Single pass, caller loops for convergence" design
+    // expects -- one call does a SINGLE cross-patch exchange and is not guaranteed to drain a
+    // crowded cell down to the threshold; debug_nn_merge_num_rounds exists so the effect of
+    // repeated calls (with no particle motion between them here, unlike a real timestep) can be
+    // observed directly.
+    for (int round = 0; round < debugNumMergeRounds; round++) {
+      ParticleManagement::mergeNearestNeighborsRound<ItoParticle, Real>(*this->m_amr,
+                                                                        particles,
+                                                                        debugParticlesPerCellThresh,
+                                                                        gather,
+                                                                        combine,
+                                                                        scatter,
+                                                                        allocateID,
+                                                                        false,
+                                                                        0,
+                                                                        debugMaxCellDistance,
+                                                                        isPositionValid);
+
+      // getNumberOfValidParticlesGlobal() is an MPI-collective (all-reduce) -- must be called by
+      // every rank unconditionally; only the PRINTING is rank-0-only.
+      const unsigned long long nRound = particles.getNumberOfValidParticlesGlobal();
+      if (procID() == 0) {
+        pout() << this->m_name + "::postInitialize -- nearest-neighbor merge debug test for solver '"
+               << solver->getName() << "', round " << (round + 1) << "/" << debugNumMergeRounds
+               << ": particles = " << nRound << endl;
+      }
+    }
 
     const unsigned long long nAfter = particles.getNumberOfValidParticlesGlobal();
     Real                     wAfter = 0.0;

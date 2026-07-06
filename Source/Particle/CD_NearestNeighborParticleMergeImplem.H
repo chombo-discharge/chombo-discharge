@@ -23,7 +23,6 @@
 #include <MayDay.H>
 #include <SPMD.H>
 #include <DataIterator.H>
-#include <LayoutIterator.H>
 
 // Our includes
 #include <CD_NearestNeighborParticleMerge.H>
@@ -676,13 +675,11 @@ namespace ParticleManagement {
 
   template <typename Packed>
   inline void
-  placeMergedParticles(const std::vector<NNMergeResult<Packed>>&            a_results,
-                       const std::vector<PatchLocation>&                    a_allPatches,
-                       const RealVect&                                      a_probLo,
-                       const RealVect&                                      a_dx,
-                       const int                                            a_thisRank,
-                       std::map<int, std::vector<NNMergeParticle<Packed>>>& a_localByPatch,
-                       std::vector<std::vector<NNMergeParticle<Packed>>>&   a_scatterByDestRank) noexcept
+  placeMergedParticles(const std::vector<NNMergeResult<Packed>>&                                     a_results,
+                       const PositionLocator&                                                        a_locate,
+                       const int                                                                     a_thisRank,
+                       std::map<std::pair<int, unsigned int>, std::vector<NNMergeParticle<Packed>>>& a_localByPatch,
+                       std::vector<std::vector<NNMergeParticle<Packed>>>& a_scatterByDestRank) noexcept
   {
     CH_TIME("ParticleManagement::placeMergedParticles");
 
@@ -690,28 +687,23 @@ namespace ParticleManagement {
     // a_scatterByDestRank is APPENDED to, never resized here -- see its own docs.
 
     for (const auto& result : a_results) {
-      const IntVect cell = cellKeyOf(result.merged.position, a_probLo, a_dx);
-
-      bool found = false;
-      for (const PatchLocation& patch : a_allPatches) {
-        if (patch.box.contains(cell)) {
-          if (patch.ownerRank == a_thisRank) {
-            a_localByPatch[patch.localPatchIndex].push_back(result.merged);
-          }
-          else {
-            a_scatterByDestRank[patch.ownerRank].push_back(result.merged);
-          }
-          found = true;
-          break;
-        }
-      }
+      // O(1) point->block query -- see PositionLocator/NNParticleLocation. NEVER a linear scan
+      // over patches here; that is exactly the bottleneck this design avoids at large patch counts.
+      const NNParticleLocation loc = a_locate(result.merged.position);
 
       // A merged particle landing outside every known patch (e.g. exactly on/outside the domain
       // boundary due to floating-point roundoff in the weighted centroid) is not expected in
       // normal operation; MayDay rather than silently dropping mass.
-      if (!found) {
+      if (!loc.valid) {
         MayDay::Error("ParticleManagement::placeMergedParticles -- merged particle position not "
                       "found in any patch");
+      }
+
+      if (loc.ownerRank == a_thisRank) {
+        a_localByPatch[std::make_pair(loc.level, loc.gridIndex)].push_back(result.merged);
+      }
+      else {
+        a_scatterByDestRank[loc.ownerRank].push_back(result.merged);
       }
     }
   }
@@ -779,23 +771,10 @@ namespace ParticleManagement {
     std::map<ParticleID, bool>                    exposed;       // pooled, this rank's own valid particles
     std::map<IntVect, int>                        liveCellCount; // pooled, GLOBAL cell key
 
-    std::vector<PatchLocation> allPatches; // GLOBAL, every rank -- for placeMergedParticles()
-
     for (int lvl = 0; lvl <= finestLevel; lvl++) {
       const RealVect dx(D_DECL(dxScalar[lvl], dxScalar[lvl], dxScalar[lvl]));
 
       const DisjointBoxLayout& dbl = a_amr.getGrids(realm)[lvl];
-
-      // Global patch list (every rank) for placeMergedParticles() -- a DisjointBoxLayout's box
-      // list and owning ranks are globally known/replicated, so this needs no communication.
-      LayoutIterator lit = dbl.layoutIterator();
-      for (lit.begin(); lit.ok(); ++lit) {
-        PatchLocation loc;
-        loc.box             = dbl[lit()];
-        loc.ownerRank       = dbl.procID(lit());
-        loc.localPatchIndex = -1; // filled in below for patches this rank owns
-        allPatches.push_back(loc);
-      }
 
       const AMRParticleGhostMask& maskSame = a_amr.getParticleGhostMask(realm, ghostWidth);
       const AMRParticleGhostMask& maskC2F  = a_amr.getParticleGhostMaskCoarToFine(realm, ghostWidth);
@@ -808,16 +787,6 @@ namespace ParticleManagement {
         const DataIndex& din = dit[mybox];
 
         ParticleSoA<P, Traits>& leaf = a_particles[lvl][din];
-
-        const int localPatchIndex = static_cast<int>(patchWork.size());
-
-        // Record this patch's own global location (owned by this rank) with its local index.
-        for (auto& loc : allPatches) {
-          if (loc.ownerRank == myRank && loc.box == dbl[din]) {
-            loc.localPatchIndex = localPatchIndex;
-            break;
-          }
-        }
 
         std::vector<NNMergeParticle<Packed>> localValid;
         std::vector<NNMergeParticle<Packed>> ghosts;
@@ -867,8 +836,18 @@ namespace ParticleManagement {
     std::vector<NNMergeResult<Packed>> allResults;
 
     // 2. Per-patch candidate search + trivial-tier resolution, pooled rank-wide.
+    //
+    // lastPooledEdges deliberately survives past the loop below: it is reused (NOT
+    // recomputed) for outgoingTargetOf/generateProposals afterward. findNearestNeighborCandidates()
+    // is a brute-force O(n^2) scan per patch (a real spatial index is a separate, still-pending
+    // hardening item -- see TODO.md), so re-running it a second time over the same alive set
+    // purely to re-derive edges already computed here would double the single most expensive step
+    // in this function for no new information: nothing consumes any more particles between the
+    // last runLocalTierPass() and generateProposals(), so the edges are still exactly current.
+    std::vector<NNMergeEdge<Packed>> lastPooledEdges;
+
     auto runLocalTierPass = [&]() -> bool {
-      std::vector<NNMergeEdge<Packed>> pooledEdges;
+      lastPooledEdges.clear();
 
       for (std::size_t pw = 0; pw < patchWork.size(); pw++) {
         std::vector<NNMergeParticle<Packed>> aliveLocal;
@@ -896,11 +875,11 @@ namespace ParticleManagement {
                                       patchEdges,
                                       a_maxFallbackCandidates);
 
-        pooledEdges.insert(pooledEdges.end(), patchEdges.begin(), patchEdges.end());
+        lastPooledEdges.insert(lastPooledEdges.end(), patchEdges.begin(), patchEdges.end());
       }
 
       std::vector<NNMergeResult<Packed>> passResults;
-      resolveTrivialTier(pooledEdges,
+      resolveTrivialTier(lastPooledEdges,
                          exposed,
                          particlesByID,
                          a_combine,
@@ -937,34 +916,12 @@ namespace ParticleManagement {
     }
 
     // outgoingTargetOf: for every query id with an outgoing commitment, remember its own true
-    // nearest-neighbor candidate id (needed by judgeProposals()'s mutual-match rule). Re-derive
-    // via one more candidate search over the currently-alive set.
-    std::vector<NNMergeEdge<Packed>> pooledEdgesForProposals;
-    for (std::size_t pw = 0; pw < patchWork.size(); pw++) {
-      std::vector<NNMergeParticle<Packed>> aliveLocal;
-      for (const auto& p : patchLocalValid[pw]) {
-        if (consumedIDs.count(p.globalID) == 0) {
-          aliveLocal.push_back(p);
-        }
-      }
-      std::vector<NNMergeParticle<Packed>> aliveGhosts;
-      for (const auto& p : patchGhosts[pw]) {
-        if (consumedIDs.count(p.globalID) == 0) {
-          aliveGhosts.push_back(p);
-        }
-      }
-      std::vector<NNMergeEdge<Packed>> patchEdges;
-      findNearestNeighborCandidates(aliveLocal,
-                                    aliveGhosts,
-                                    liveCellCount,
-                                    probLo,
-                                    patchWork[pw].dx,
-                                    a_numParticlesPerCellThresh,
-                                    patchEdges,
-                                    a_maxFallbackCandidates);
-      pooledEdgesForProposals.insert(pooledEdgesForProposals.end(), patchEdges.begin(), patchEdges.end());
-    }
-    for (const auto& edge : pooledEdgesForProposals) {
+    // nearest-neighbor candidate id (needed by judgeProposals()'s mutual-match rule). Reuses
+    // lastPooledEdges from the local-tier pass above -- see the comment there for why this is
+    // correct without a fresh search: resolveTrivialTier() only ever adds a queryID to
+    // hasOutgoingCommitment when its edge's candidate was valid (not stale) at the moment that
+    // edge was processed, and nothing gets consumed between then and here.
+    for (const auto& edge : lastPooledEdges) {
       if (hasOutgoingCommitment.count(edge.queryID) > 0) {
         outgoingTargetOf[edge.queryID] = edge.candidateID;
       }
@@ -972,7 +929,7 @@ namespace ParticleManagement {
 
     // 3. generateProposals() for everything the trivial tier could not resolve.
     std::vector<std::vector<NNMergeProposal<Packed>>> proposalsByDestRank;
-    generateProposals(pooledEdgesForProposals, hasOutgoingCommitment, particlesByID, numRanks, proposalsByDestRank);
+    generateProposals(lastPooledEdges, hasOutgoingCommitment, particlesByID, numRanks, proposalsByDestRank);
 
     // 4. Exchange proposals.
     const std::vector<NNMergeProposal<Packed>> incomingProposals = nnMergeExchangeByRank(proposalsByDestRank);
@@ -1013,10 +970,22 @@ namespace ParticleManagement {
     applyVerdicts(incomingVerdicts, consumedIDs);
 
     // 7. placeMergedParticles(), then exchange and apply the scatter bucket.
-    std::map<int, std::vector<NNMergeParticle<Packed>>> localByPatch;
-    std::vector<std::vector<NNMergeParticle<Packed>>>   scatterByDestRank(numRanks);
+    //
+    // O(1) point->block query -- see NNParticleLocation/PositionLocator's docs. This is precisely
+    // what avoids the "linear scan over every patch" bottleneck: ParticleContainer::findDestination()
+    // is the SAME tile-hash lookup a_particles already uses internally to route its own particles
+    // during remap() -- reusing it here (rather than adding a parallel AmrMesh/Realm-level
+    // forwarding method) keeps this one mapping the single source of truth for "which box owns
+    // this position", instead of a second implementation that could drift from it.
+    const PositionLocator locate = [&a_particles](const RealVect& a_pos) -> NNParticleLocation {
+      const auto dst = a_particles.findDestination(a_pos);
+      return NNParticleLocation{dst.found, dst.level, dst.gridIndex, dst.rank};
+    };
 
-    placeMergedParticles(allResults, allPatches, probLo, dxLevel0, myRank, localByPatch, scatterByDestRank);
+    std::map<std::pair<int, unsigned int>, std::vector<NNMergeParticle<Packed>>> localByPatch;
+    std::vector<std::vector<NNMergeParticle<Packed>>>                            scatterByDestRank(numRanks);
+
+    placeMergedParticles(allResults, locate, myRank, localByPatch, scatterByDestRank);
 
     const std::vector<NNMergeParticle<Packed>> incomingScattered = nnMergeExchangeByRank(scatterByDestRank);
 
@@ -1037,32 +1006,39 @@ namespace ParticleManagement {
     }
     a_particles.clearGhostParticles();
 
-    // Scatter in every locally-placed merged particle.
+    // Scatter in every locally-placed merged particle. (level, gridIndex) -> DataIndex is a single
+    // O(1) hash lookup via LevelTiles::getMyGrids() (global grid index -> local DataIndex, for
+    // this rank's own boxes only), done once per bucket here -- not per particle, and never a scan.
     for (const auto& kv : localByPatch) {
-      ParticleSoA<P, Traits>& leaf = a_particles[patchWork[kv.first].level][patchWork[kv.first].din];
+      const int          level     = kv.first.first;
+      const unsigned int gridIndex = kv.first.second;
+
+      const DataIndex din = a_amr.getLevelTiles(realm)[level]->getMyGrids().at(gridIndex);
+
+      ParticleSoA<P, Traits>& leaf = a_particles[level][din];
       for (const auto& merged : kv.second) {
         a_scatter(leaf, merged);
       }
     }
 
-    // Ingest every merged particle that was shipped in from another rank.
+    // Ingest every merged particle that was shipped in from another rank -- same O(1) locate, no
+    // scan over this rank's patches.
     for (const auto& merged : incomingScattered) {
-      bool placed = false;
-      for (std::size_t pw = 0; pw < patchWork.size(); pw++) {
-        const RealVect& dx   = patchWork[pw].dx;
-        const Box       box  = a_amr.getGrids(realm)[patchWork[pw].level][patchWork[pw].din];
-        const IntVect   cell = cellKeyOf(merged.position, probLo, dx);
-        if (box.contains(cell)) {
-          ParticleSoA<P, Traits>& leaf = a_particles[patchWork[pw].level][patchWork[pw].din];
-          a_scatter(leaf, merged);
-          placed = true;
-          break;
-        }
-      }
-      if (!placed) {
+      const NNParticleLocation loc = locate(merged.position);
+
+      if (!loc.valid || loc.ownerRank != myRank) {
+        // placeMergedParticles() already routed this to this rank via loc.ownerRank; a result
+        // that no longer locates to this rank (or locates nowhere) here indicates an inconsistency
+        // between the two locate() calls, which must never happen since the grid does not change
+        // mid-round -- MayDay rather than silently dropping mass.
         MayDay::Error("ParticleManagement::mergeNearestNeighborsRound -- incoming scattered "
                       "particle not found in any of this rank's own patches");
       }
+
+      const DataIndex din = a_amr.getLevelTiles(realm)[loc.level]->getMyGrids().at(loc.gridIndex);
+
+      ParticleSoA<P, Traits>& leaf = a_particles[loc.level][din];
+      a_scatter(leaf, merged);
     }
   }
 
