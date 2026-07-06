@@ -660,6 +660,14 @@ namespace ParticleManagement {
                                       otherwise left unmatched with no side effects.
     @param[in]     a_allocateID      Fresh-id allocator (see IDAllocator), called once per
                                       committed trivial-tier merge.
+    @param[in,out] a_crossLevelMergeCount Optional diagnostic counter (nullptr, the default,
+                                      disables it entirely -- zero cost when not needed):
+                                      incremented once per committed merge whose two participants
+                                      were on DIFFERENT AMR levels (query.level != cand.level).
+                                      NOT reset by this function -- the caller owns its lifetime,
+                                      so counts can be accumulated across a_iterateLocalTierToConvergence's
+                                      internal iterations, or across this rank's judgeProposals()
+                                      acceptances too (see that function's own parameter).
   */
   template <typename Packed, typename Combine, typename PosValid, typename Allocator>
   inline void
@@ -677,7 +685,8 @@ namespace ParticleManagement {
                      const PosValid&                                      a_isPositionValid,
                      const Allocator&                                     a_allocateID,
                      const int                                            a_maxFallbackCandidates = 0,
-                     const std::optional<int>                             a_maxCellDistance = std::nullopt) noexcept;
+                     const std::optional<int>                             a_maxCellDistance       = std::nullopt,
+                     unsigned long long*                                  a_crossLevelMergeCount  = nullptr) noexcept;
 
   /**
     @brief Package one outgoing proposal for every edge that resolveTrivialTier() could not
@@ -793,6 +802,9 @@ namespace ParticleManagement {
                                        count by the caller); every proposal (accepted or not) gets
                                        exactly one verdict, addressed back to
                                        NNMergeProposal::source's owning rank.
+    @param[in,out] a_crossLevelMergeCount Optional diagnostic counter -- see
+                                       resolveTrivialTier()'s docs; incremented once per accepted
+                                       target whose target/source were on different AMR levels.
   */
   template <typename Packed, typename Combine, typename PosValid, typename Allocator>
   inline void
@@ -809,7 +821,8 @@ namespace ParticleManagement {
                  const Allocator&                                     a_allocateID,
                  std::vector<NNMergeResult<Packed>>&                  a_results,
                  std::vector<std::vector<NNMergeVerdict>>&            a_verdictsByDestRank,
-                 const std::optional<int>                             a_maxCellDistance = std::nullopt) noexcept;
+                 const std::optional<int>                             a_maxCellDistance      = std::nullopt,
+                 unsigned long long*                                  a_crossLevelMergeCount = nullptr) noexcept;
 
   /**
     @brief Apply every verdict addressed to one of this rank's own outgoing proposals: remove
@@ -1083,6 +1096,15 @@ namespace ParticleManagement {
                                                 there is no universally safe default; the caller
                                                 must supply a scheme that stays collision-free
                                                 across every rank and every past/future call.
+    @param[in,out] a_crossLevelMergeCount      Optional diagnostic counter (nullptr, the default,
+                                                disables it entirely): incremented once for every
+                                                merge this call commits (trivial-tier or judge-side)
+                                                whose two participants were on DIFFERENT AMR levels.
+                                                NOT reset by this function -- accumulates across
+                                                a_iterateLocalTierToConvergence's internal
+                                                iterations and across repeated calls if the caller
+                                                keeps reusing the same counter, so it is safe to use
+                                                to track cross-level activity over several rounds.
   */
   template <typename P,
             typename Packed,
@@ -1104,9 +1126,11 @@ namespace ParticleManagement {
     const bool                    a_iterateLocalTierToConvergence = false,
     const int                     a_maxFallbackCandidates         = 0,
     const std::optional<int>      a_maxCellDistance               = std::nullopt,
-    const PosValid&               a_isPositionValid               = [](const RealVect&) {
-      return true;
-    });
+    const PosValid&               a_isPositionValid =
+      [](const RealVect&) {
+        return true;
+      },
+    unsigned long long* a_crossLevelMergeCount = nullptr);
 
 } // namespace ParticleManagement
 

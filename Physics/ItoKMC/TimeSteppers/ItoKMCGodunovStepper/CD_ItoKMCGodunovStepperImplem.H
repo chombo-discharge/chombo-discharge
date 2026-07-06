@@ -2253,12 +2253,24 @@ ItoKMCGodunovStepper<I, C, R, F>::postInitialize() noexcept
       a_leaf.rankID(a_leaf.size() - 1)     = a_p.ownerRank;
     };
 
+    // Cross-level merge count -- see ParticleManagement::mergeNearestNeighborsRound()'s
+    // a_crossLevelMergeCount docs. NOT reset by the library between calls, so this single counter
+    // (passed by pointer to every round below) accumulates over the whole debug test. This is a
+    // PER-RANK count (each rank only counts the merges IT committed, whether as a trivial-tier
+    // participant or as judge) -- like nBefore/nAfter/wBefore/wAfter, it needs an explicit
+    // ParallelOps::sum() (a collective, called by every rank) to get the true cross-rank total
+    // before printing; printing the raw per-rank value would silently miss activity on every rank
+    // but rank 0.
+    unsigned long long crossLevelMergeCount = 0;
+
     // Repeated rounds are what RULES.md's "Single pass, caller loops for convergence" design
     // expects -- one call does a SINGLE cross-patch exchange and is not guaranteed to drain a
     // crowded cell down to the threshold; debug_nn_merge_num_rounds exists so the effect of
     // repeated calls (with no particle motion between them here, unlike a real timestep) can be
     // observed directly.
     for (int round = 0; round < debugNumMergeRounds; round++) {
+      const unsigned long long crossLevelMergeCountBefore = crossLevelMergeCount;
+
       ParticleManagement::mergeNearestNeighborsRound<ItoParticle, Real>(*this->m_amr,
                                                                         particles,
                                                                         debugParticlesPerCellThresh,
@@ -2269,15 +2281,19 @@ ItoKMCGodunovStepper<I, C, R, F>::postInitialize() noexcept
                                                                         false,
                                                                         0,
                                                                         debugMaxCellDistance,
-                                                                        isPositionValid);
+                                                                        isPositionValid,
+                                                                        &crossLevelMergeCount);
 
-      // getNumberOfValidParticlesGlobal() is an MPI-collective (all-reduce) -- must be called by
-      // every rank unconditionally; only the PRINTING is rank-0-only.
-      const unsigned long long nRound = particles.getNumberOfValidParticlesGlobal();
+      // getNumberOfValidParticlesGlobal() and ParallelOps::sum() are both MPI-collectives -- must
+      // be called by every rank unconditionally; only the PRINTING is rank-0-only.
+      const unsigned long long nRound                          = particles.getNumberOfValidParticlesGlobal();
+      const unsigned long long crossLevelMergesThisRoundGlobal = ParallelOps::sum(crossLevelMergeCount -
+                                                                                  crossLevelMergeCountBefore);
       if (procID() == 0) {
         pout() << this->m_name + "::postInitialize -- nearest-neighbor merge debug test for solver '"
                << solver->getName() << "', round " << (round + 1) << "/" << debugNumMergeRounds
-               << ": particles = " << nRound << endl;
+               << ": particles = " << nRound << ", cross-level merges this round = " << crossLevelMergesThisRoundGlobal
+               << endl;
       }
     }
 
@@ -2307,6 +2323,9 @@ ItoKMCGodunovStepper<I, C, R, F>::postInitialize() noexcept
                                this->m_time);
     }
 
+    // Collective -- must be called by every rank unconditionally.
+    const unsigned long long crossLevelMergeCountGlobal = ParallelOps::sum(crossLevelMergeCount);
+
     if (procID() == 0) {
       const Real massError = std::abs(wAfter - wBefore);
       pout() << this->m_name + "::postInitialize -- nearest-neighbor merge debug test for solver '" << solver->getName()
@@ -2317,6 +2336,7 @@ ItoKMCGodunovStepper<I, C, R, F>::postInitialize() noexcept
              << endl;
       printPerLevel("particles per level before merge", countsBefore);
       printPerLevel("particles per level after merge ", countsAfter);
+      pout() << "  cross-level merges (total, all rounds) = " << crossLevelMergeCountGlobal << endl;
       pout() << "  total weight before = " << wBefore << endl;
       pout() << "  total weight after  = " << wAfter << endl;
       pout() << "  mass conservation error = " << massError << endl;

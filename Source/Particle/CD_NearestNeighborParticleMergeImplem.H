@@ -340,7 +340,8 @@ namespace ParticleManagement {
                      const PosValid&                                      a_isPositionValid,
                      const Allocator&                                     a_allocateID,
                      const int                                            a_maxFallbackCandidates,
-                     const std::optional<int>                             a_maxCellDistance) noexcept
+                     const std::optional<int>                             a_maxCellDistance,
+                     unsigned long long*                                  a_crossLevelMergeCount) noexcept
   {
     CH_TIME("ParticleManagement::resolveTrivialTier");
 
@@ -487,6 +488,10 @@ namespace ParticleManagement {
             a_liveCellCount[qKey] -= 1;
             a_liveCellCount[cKey] -= 1;
 
+            if (a_crossLevelMergeCount != nullptr && query.level != cand.level) {
+              (*a_crossLevelMergeCount)++;
+            }
+
             resolved = true;
             break;
           }
@@ -561,7 +566,8 @@ namespace ParticleManagement {
                  const Allocator&                                     a_allocateID,
                  std::vector<NNMergeResult<Packed>>&                  a_results,
                  std::vector<std::vector<NNMergeVerdict>>&            a_verdictsByDestRank,
-                 const std::optional<int>                             a_maxCellDistance) noexcept
+                 const std::optional<int>                             a_maxCellDistance,
+                 unsigned long long*                                  a_crossLevelMergeCount) noexcept
   {
     CH_TIME("ParticleManagement::judgeProposals");
 
@@ -714,6 +720,10 @@ namespace ParticleManagement {
 
       a_liveCellCount[tKey] -= 1;
 
+      if (a_crossLevelMergeCount != nullptr && target.level != source.level) {
+        (*a_crossLevelMergeCount)++;
+      }
+
       a_verdictsByDestRank[sourceDestRank].push_back(NNMergeVerdict{source.globalID, true});
     }
   }
@@ -784,7 +794,8 @@ namespace ParticleManagement {
                              const bool                    a_iterateLocalTierToConvergence,
                              const int                     a_maxFallbackCandidates,
                              const std::optional<int>      a_maxCellDistance,
-                             const PosValid&               a_isPositionValid)
+                             const PosValid&               a_isPositionValid,
+                             unsigned long long*           a_crossLevelMergeCount)
   {
     CH_TIME("ParticleManagement::mergeNearestNeighborsRound");
 
@@ -979,7 +990,8 @@ namespace ParticleManagement {
                          a_isPositionValid,
                          a_allocateID,
                          a_maxFallbackCandidates,
-                         a_maxCellDistance);
+                         a_maxCellDistance,
+                         a_crossLevelMergeCount);
 
       allResults.insert(allResults.end(), passResults.begin(), passResults.end());
 
@@ -1044,7 +1056,8 @@ namespace ParticleManagement {
                    a_allocateID,
                    judgeResults,
                    verdictsByDestRank,
-                   a_maxCellDistance);
+                   a_maxCellDistance,
+                   a_crossLevelMergeCount);
 
     allResults.insert(allResults.end(), judgeResults.begin(), judgeResults.end());
     for (const auto& r : judgeResults) {
