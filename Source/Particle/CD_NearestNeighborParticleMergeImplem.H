@@ -52,18 +52,32 @@ namespace ParticleManagement {
                                 const std::vector<NNMergeParticle<Packed>>& a_ghosts,
                                 const std::map<IntVect, int>&               a_liveCellCount,
                                 const int                                   a_numParticlesPerCellThresh,
-                                std::vector<NNMergeEdge<Packed>>&           a_edges) noexcept
+                                std::vector<NNMergeEdge<Packed>>&           a_edges,
+                                const int                                   a_maxFallbackCandidates) noexcept
   {
     CH_TIME("ParticleManagement::findNearestNeighborCandidates");
 
     a_edges.clear();
 
-    // 1. Build a single spatial index (e.g. a flat, scratch-buffer KD-tree in the style of
-    //    ParticleManagement::buildEqualWeightKDLeaves in CD_ParticleManagementImplem.H -- no
-    //    per-node heap allocation, reused thread_local scratch across calls) over the COMBINED
-    //    position set: every particle in a_localValid, followed by every particle in a_ghosts.
-    //    Remember which half of the combined index each entry came from (local vs ghost) and its
-    //    original NNMergeParticle, so results can be reported back by id.
+    // 1. Build a single spatial index over the COMBINED position set: every particle in
+    //    a_localValid, followed by every particle in a_ghosts. NOT the same tree type as
+    //    ParticleManagement::buildEqualWeightKDLeaves in CD_ParticleManagementImplem.H (that one
+    //    builds equal-weight spatial PARTITIONS -- groups of particles -- not point-query
+    //    results; only its underlying philosophy carries over here, not its leaf type): no
+    //    per-node heap allocation, reused thread_local scratch across calls.
+    //
+    //    Each leaf/point in the index stores ONLY: the position itself (duplicated inline --
+    //    that's what traversal actually compares, the whole reason to build an index rather than
+    //    follow pointers), and a single index tagged local-vs-ghost referring back into
+    //    a_localValid or a_ghosts. Nothing else needs to be duplicated -- id, owner rank, opaque
+    //    payload are all recoverable in O(1) from that index once a query returns. Deliberately
+    //    NOT tagged with any busy/consumed status: that status doesn't exist yet at this point in
+    //    the round (nothing has been resolved), and it changes continuously as
+    //    resolveTrivialTier() processes its sorted edge list afterward -- baking it into the tree
+    //    would mean mutating tree data on every commit, defeating the purpose of a static index.
+    //    Busy/consumed status lives externally (a_consumedIDs, a_hasOutgoingCommitment in
+    //    resolveTrivialTier()) and is rechecked dynamically wherever a candidate is about to be
+    //    used, never trusted from anything attached to the tree.
     //
     // 2. For each particle p in a_localValid (query sources -- ghosts never query):
     //      a. cellKey = cellKeyOf(p.position)   -- unclamped, position-derived (see RULES.md,
@@ -71,15 +85,21 @@ namespace ParticleManagement {
     //         into its true origin cell).
     //      b. if a_liveCellCount.at(cellKey) <= a_numParticlesPerCellThresh: skip -- p's own
     //         cell is not (yet) crowded enough to be a candidate query source.
-    //      c. Query the spatial index for p's single nearest OTHER point (excluding itself),
-    //         among the combined local+ghost set. This is the ONE nearest-neighbor query per
-    //         particle this whole algorithm performs -- see the file-level docs for why it is
-    //         always run against the FULL neighborhood, never a restricted one.
-    //      d. If a candidate was found, append one NNMergeEdge: distanceSquared, p's id, the
-    //         candidate's id, and whether the candidate came from the local half of the index
-    //         (NNMergeEdge::candidateIsLocal).
+    //      c. Query the spatial index for p's K=1+a_maxFallbackCandidates nearest OTHER points
+    //         (excluding itself), among the combined local+ghost set -- a single traversal
+    //         regardless of K, since a K-nearest query naturally returns its results already
+    //         distance-sorted. If a_maxFallbackCandidates is 0, K=1: an ordinary single-nearest
+    //         query, matching this function's original behavior exactly. This is the ONLY place
+    //         a nearest-neighbor search happens, and it is ALWAYS run against the FULL
+    //         neighborhood -- see the file-level docs for why restricting it for some particles
+    //         reintroduces the "compression toward patch interior" bug this design closed.
+    //      d. If at least one candidate was found: append one NNMergeEdge using the CLOSEST
+    //         result (distanceSquared, p's id, the candidate's id, and whether it came from the
+    //         local half of the index -- NNMergeEdge::candidateIsLocal). If K>1, populate
+    //         fallbackCandidates from results 2..K, in the same distance order the query already
+    //         returned them in -- no separate sort needed.
     //
-    // 3. Do NOT filter on the CANDIDATE's own cell threshold here -- that is deliberately
+    // 3. Do NOT filter on any candidate's own cell threshold here -- that is deliberately
     //    deferred to resolveTrivialTier()/judgeProposals(), which re-check it dynamically at
     //    processing time against live counts that may already reflect earlier merges this round
     //    (see RULES.md, "Crowding trigger").
@@ -159,22 +179,26 @@ namespace ParticleManagement {
     //         particle from using it as an ordinary trivial candidate later, even though queryID
     //         hasn't committed to anything. If a_maxFallbackCandidates > 0 and queryID is not
     //         itself exposed (if it is, no local candidate could ever be trivially eligible, so
-    //         don't bother): immediately re-query for the next-nearest still-available candidate,
-    //         excluding every candidate already tried for this edge, and go back to step (b) with
-    //         that new candidate (consuming one of a_maxFallbackCandidates attempts). If no
-    //         further candidate is found, or attempts are exhausted: queryID is left unmatched
-    //         this round, same as (e) -- no proposal. Note that whether a PROPOSAL is generated at
-    //         the end depends only on the ORIGINAL candidate (the one from
-    //         findNearestNeighborCandidates(), before any fallback retries) being stale or too
-    //         far -- a fallback candidate that is itself too far only ends that ONE retry attempt
-    //         (try the next fallback instead), it does not by itself suppress the eventual
-    //         proposal if the original candidate was otherwise propose-eligible.
+    //         don't bother): try the edge's own fallbackCandidates[i] (i starting at 0), and go
+    //         back to step (b) with that candidate (advancing i, up to a_maxFallbackCandidates
+    //         entries). This is NOT a fresh spatial-index query -- fallbackCandidates was already
+    //         fetched once, up front, by findNearestNeighborCandidates() via a single K-nearest
+    //         query (see its docs); there is nothing to "exclude" since the pre-fetched list is
+    //         already distance-sorted with no duplicates possible. If fallbackCandidates is
+    //         exhausted (i reaches its size, or a_maxFallbackCandidates): queryID is left
+    //         unmatched this round, same as (e) -- no proposal. Note that whether a PROPOSAL is
+    //         generated at the end depends only on the ORIGINAL candidate (the one from
+    //         findNearestNeighborCandidates(), before any fallback candidates are tried) being
+    //         stale or too far -- a fallback candidate that is itself too far only ends that ONE
+    //         attempt (advance to the next fallbackCandidates entry instead), it does not by
+    //         itself suppress the eventual proposal if the original candidate was otherwise
+    //         propose-eligible.
     //      g. else (candidateIsBusy, or candidate is exposed, or candidate is a ghost -- i.e.
     //         trivialOk was false for a reason OTHER than staleness or distance): if
     //         a_maxFallbackCandidates > 0 and queryID is not itself exposed: same fallback retry
-    //         as (f) -- try the next candidate instead of giving up immediately. Once fallback
-    //         attempts are exhausted (or a_maxFallbackCandidates is 0): insert queryID into
-    //         a_hasOutgoingCommitment, so generateProposals() picks it up -- using queryID's
+    //         as (f) -- try fallbackCandidates[i] instead of giving up immediately. Once
+    //         fallbackCandidates is exhausted (or a_maxFallbackCandidates is 0): insert queryID
+    //         into a_hasOutgoingCommitment, so generateProposals() picks it up -- using queryID's
     //         ORIGINAL edge (the one from findNearestNeighborCandidates(), NOT any fallback
     //         candidate that was also tried and rejected) as the proposal target. The candidate
     //         genuinely still exists (and is within range) in every one of these cases, so
@@ -401,7 +425,9 @@ namespace ParticleManagement {
     //      c. Compute isBoundaryExposed() for every locally-valid particle, OR-ing across all
     //         three ghost masks from step 1 (a particle exposed toward EITHER a same-level,
     //         coarser, or finer neighbor counts as exposed).
-    //      d. findNearestNeighborCandidates() for this patch.
+    //      d. findNearestNeighborCandidates() for this patch, forwarding a_maxFallbackCandidates
+    //         unchanged (so it fetches K=1+a_maxFallbackCandidates nearest candidates per query
+    //         particle instead of just 1 -- see its own docs and resolveTrivialTier()'s).
     //      e. Pool this patch's edges into one rank-wide edge list (do NOT resolve per-patch in
     //         isolation -- resolveTrivialTier() needs the full, rank-wide, globally
     //         distance-sorted pass; see that function's docs).

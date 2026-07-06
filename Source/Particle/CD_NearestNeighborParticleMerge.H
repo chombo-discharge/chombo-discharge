@@ -112,6 +112,35 @@ namespace ParticleManagement {
   };
 
   /**
+    @brief One additional ranked candidate beyond a query's primary nearest neighbor.
+    @details Only ever populated when a_maxFallbackCandidates > 0 is requested from
+    findNearestNeighborCandidates() -- see NNMergeEdge::fallbackCandidates and
+    resolveTrivialTier()'s docs for how this is consumed. Fetched via a single K-nearest spatial
+    query at candidate-generation time (K = 1 + a_maxFallbackCandidates), NOT via a fresh query
+    per retry attempt -- resolveTrivialTier() simply walks further down this pre-fetched,
+    already-distance-sorted list when a closer candidate turns out to be blocked, which avoids
+    re-traversing the spatial index on every retry.
+  */
+  struct NNFallbackCandidate
+  {
+    /**
+      @brief Global id of this candidate.
+    */
+    ParticleID candidateID;
+
+    /**
+      @brief Squared distance between the query particle and this candidate.
+    */
+    Real distanceSquared;
+
+    /**
+      @brief True iff this candidate is a locally-valid particle in the SAME patch as the query
+      (i.e. not a ghost) -- same meaning as NNMergeEdge::candidateIsLocal.
+    */
+    bool candidateIsLocal;
+  };
+
+  /**
     @brief One candidate merge edge: a single particle's own nearest-neighbor query result.
     @details Produced once per over-threshold, still-unconsumed valid particle by
     findNearestNeighborCandidates() -- exactly one edge per query particle, its single TRUE
@@ -152,6 +181,21 @@ namespace ParticleManagement {
       participant is boundary-exposed.
     */
     bool candidateIsLocal;
+
+    /**
+      @brief Next-nearest candidates beyond candidateID, in ascending distanceSquared order.
+      @details Empty unless a_maxFallbackCandidates > 0 was passed to
+      findNearestNeighborCandidates(); size at most a_maxFallbackCandidates. See
+      resolveTrivialTier() for how these are consumed: if candidateID turns out to be blocked
+      (stale, busy, exposed, a ghost, or too far -- see a_maxCellDistance), the query particle
+      tries fallbackCandidates[0], then [1], and so on, before giving up -- never re-querying the
+      spatial index for this edge. This member's own content is never re-derived or refreshed once
+      populated; it reflects the position/ownership snapshot at generation time, same as
+      candidateID itself -- validity (still alive, not busy) is always rechecked dynamically
+      against a_consumedIDs/a_hasOutgoingCommitment when a candidate is actually tried, never
+      trusted from anything computed here.
+    */
+    std::vector<NNFallbackCandidate> fallbackCandidates;
   };
 
   /**
@@ -311,7 +355,34 @@ namespace ParticleManagement {
     local-valid-plus-ghost position set once per patch per round, then query it once per
     over-threshold valid particle -- mirroring the allocation-light, thread-local-scratch style
     already used by the existing mergers in CD_ParticleManagementImplem.H (e.g.
-    buildEqualWeightKDLeaves(), mergeAdjacentNearest()).
+    buildEqualWeightKDLeaves(), mergeAdjacentNearest()). That existing infrastructure builds a
+    DIFFERENT kind of tree, though (equal-weight spatial partitioning -- its "leaves" are groups
+    of particles, not point-query results), so it isn't directly reusable here; only its
+    underlying philosophy carries over (no per-node heap allocation, no pointer-chasing, reused
+    thread-local scratch across calls).
+
+    @b Leaf contents: each point entered into the spatial index needs only its position
+    (duplicated inline, since that's what the traversal actually compares -- the entire point of
+    building an index rather than following pointers) plus a single index tagged local-vs-ghost,
+    referring back into a_localValid or a_ghosts. Nothing else needs to be duplicated into the
+    tree -- id, owner rank, and the opaque payload are all already available in O(1) from that
+    index once a query returns, since a_localValid/a_ghosts are already the small, purpose-built
+    NNMergeParticle records this decision layer needs (not the full ParticleSoA column set).
+    Deliberately NOT tagged with anything about a candidate's current busy/consumed status: that
+    status doesn't exist yet when the tree is built (nothing has been resolved at this point in
+    the round), and it changes continuously as resolveTrivialTier() processes its sorted edge
+    list afterward -- baking it into the tree would mean mutating tree data on every single
+    commit, which defeats the purpose of building a static index once. Busy/consumed status is
+    tracked externally (a_consumedIDs, a_hasOutgoingCommitment) and rechecked dynamically wherever
+    a candidate is actually about to be used, never trusted from anything attached to the tree.
+
+    When a_maxFallbackCandidates (forwarded from resolveTrivialTier(), see its own docs) is
+    greater than zero: query the tree for the K=1+a_maxFallbackCandidates nearest points instead
+    of just 1, and populate NNMergeEdge::fallbackCandidates with candidates 2..K (already
+    distance-sorted by construction of a K-nearest query). This is a single spatial-index
+    traversal per query particle regardless of K -- resolveTrivialTier() walks the pre-fetched
+    fallbackCandidates list when the primary candidate is blocked, rather than this function (or
+    the tree) being asked again per retry attempt.
 
     @tparam Packed See NNMergeParticle.
     @param[in]  a_localValid       This patch's own valid particles (candidates AND query
@@ -323,6 +394,9 @@ namespace ParticleManagement {
                                     (see cellKeyOf()).
     @param[in]  a_numParticlesPerCellThresh Crowding threshold N -- a cell is eligible while it
                                     holds strictly more than this many particles.
+    @param[in]  a_maxFallbackCandidates Forwarded from resolveTrivialTier() (see its docs); 0
+                                    (default) means an ordinary single-nearest query and every
+                                    edge's fallbackCandidates stays empty.
     @param[out] a_edges            One entry per over-threshold, currently-alive query particle
                                     that has at least one candidate (empty if none found).
   */
@@ -332,7 +406,8 @@ namespace ParticleManagement {
                                 const std::vector<NNMergeParticle<Packed>>& a_ghosts,
                                 const std::map<IntVect, int>&               a_liveCellCount,
                                 const int                                   a_numParticlesPerCellThresh,
-                                std::vector<NNMergeEdge<Packed>>&           a_edges) noexcept;
+                                std::vector<NNMergeEdge<Packed>>&           a_edges,
+                                const int                                   a_maxFallbackCandidates = 0) noexcept;
 
   /**
     @brief Resolve every candidate edge that is safely mergeable with zero cross-rank
@@ -409,17 +484,23 @@ namespace ParticleManagement {
                                       blocked -- already consumed, OR already has its own outgoing
                                       commitment, OR exposed/a ghost -- and the query particle
                                       itself is NOT exposed (if it is, no local candidate could
-                                      ever be trivially eligible, so retrying is pointless):
-                                      immediately query for the next-nearest still-available
-                                      candidate (excluding every candidate already tried this
-                                      edge), up to this many extra attempts, before giving up.
-                                      Retries are resolved immediately at the point of failure,
-                                      not deferred to preserve strict global distance-sort order
-                                      across every particle's retries -- a deliberate
-                                      simplification, justified because a retry only ever fires
-                                      for an edge whose first choice already failed, so it was
-                                      never competing on equal footing with anyone's first
-                                      attempt anyway. The proposal generated for a query particle
+                                      ever be trivially eligible, so retrying is pointless): try
+                                      the edge's own NNMergeEdge::fallbackCandidates in order
+                                      (already fetched by findNearestNeighborCandidates() via one
+                                      K-nearest spatial-index query, K = 1+a_maxFallbackCandidates
+                                      -- see its docs), up to this many extra attempts, before
+                                      giving up. There is no fresh spatial-index query here, and
+                                      no "excluding every candidate already tried" bookkeeping to
+                                      maintain -- the pre-fetched list is already in ascending
+                                      distance order with duplicates impossible, so trying the
+                                      next one is just advancing an index. Retries are resolved
+                                      immediately at the point of failure, not deferred to
+                                      preserve strict global distance-sort order across every
+                                      particle's retries -- a deliberate simplification, justified
+                                      because a retry only ever fires for an edge whose first
+                                      choice already failed, so it was never competing on equal
+                                      footing with anyone's first attempt anyway. The proposal
+                                      generated for a query particle
                                       that exhausts every fallback (see a_hasOutgoingCommitment
                                       above) still uses its TRUE, original nearest neighbor --
                                       fallbacks only affect local trivial-tier eligibility, never
