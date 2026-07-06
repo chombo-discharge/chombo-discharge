@@ -909,6 +909,18 @@ namespace ParticleManagement {
           if (isGhost) {
             ghosts.push_back(p);
             liveCellCount[key] += 1;
+            // REQUIRED -- see generateProposals()'s own documented contract for a_particlesByID:
+            // "every currently-alive local valid particle and every ghost". Without this, a
+            // genuinely cross-rank ghost candidate (one whose true owning patch is NOT among this
+            // rank's own patches, so it's never seen as "native" anywhere in this loop) has no
+            // entry here at all, generateProposals()'s lookup silently fails, and the whole
+            // proposal is dropped -- confirmed empirically: this masks itself as "correct" at 1
+            // rank purely because every patch (hence every ghost's true owner too) happens to be
+            // this same rank, so the ghost's id is ALSO reachable via its owning patch's OWN
+            // native entry processed elsewhere in this same loop; at higher rank counts, a ghost
+            // whose owner is a genuinely different rank has no such fallback and the proposal is
+            // silently lost.
+            particlesByID[p.globalID] = p;
           }
           else {
             localValid.push_back(p);
