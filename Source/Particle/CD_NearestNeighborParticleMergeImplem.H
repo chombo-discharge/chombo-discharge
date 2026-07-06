@@ -1136,7 +1136,21 @@ namespace ParticleManagement {
 
       ParticleSoA<P, Traits>& leaf = a_particles[level][din];
       for (const auto& merged : kv.second) {
-        a_scatter(leaf, merged);
+        // Correct the provisional ownerRank (see resolveTrivialTier()/judgeProposals()'s own
+        // "Provisional" comments -- it's inherited from whichever parent committed the merge, NOT
+        // the true final destination) to the TRUE rank now that placeMergedParticles() has
+        // resolved it via findDestination(): this IS that rank. Leaving the stale, provisional
+        // value here is a real bug -- confirmed empirically as the root cause of a mass
+        // conservation failure that only appeared with BOTH more than one MPI rank AND more than
+        // one round: if this particle later becomes a proposer in a subsequent round and its
+        // proposal is accepted, judgeProposals() routes the acceptance verdict to
+        // NNMergeParticle::ownerRank, which -- left uncorrected -- could be a rank other than the
+        // one that actually holds this particle. That true owner then never learns to remove it,
+        // so it survives un-consumed while its weight has ALSO been folded into a new merged
+        // particle elsewhere: mass is silently created.
+        NNMergeParticle<Packed> corrected = merged;
+        corrected.ownerRank               = myRank;
+        a_scatter(leaf, corrected);
       }
     }
 
@@ -1156,8 +1170,14 @@ namespace ParticleManagement {
 
       const DataIndex din = a_amr.getLevelTiles(realm)[loc.level]->getMyGrids().at(loc.gridIndex);
 
+      // Same ownerRank correction as the locally-placed loop above -- this rank is the TRUE owner
+      // (already checked via loc.ownerRank == myRank above), not whatever provisional value the
+      // committing rank happened to stamp on it.
+      NNMergeParticle<Packed> corrected = merged;
+      corrected.ownerRank               = myRank;
+
       ParticleSoA<P, Traits>& leaf = a_particles[loc.level][din];
-      a_scatter(leaf, merged);
+      a_scatter(leaf, corrected);
     }
   }
 
