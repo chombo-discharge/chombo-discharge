@@ -173,6 +173,7 @@ Realm::regridBase(const int a_lmin)
   this->defineMFLevelGrid(a_lmin);
   this->defineValidCells();
   this->defineLevelTiles();
+  this->defineMergeBlockGrid();
   this->defineParticleGhostMasks();
 }
 
@@ -1430,6 +1431,21 @@ Realm::defineLevelTiles() noexcept
 }
 
 void
+Realm::defineMergeBlockGrid() noexcept
+{
+  CH_TIME("Realm::defineMergeBlockGrid");
+  if (m_verbosity > 5) {
+    pout() << "Realm::defineMergeBlockGrid" << endl;
+  }
+
+  m_mergeBlockGrids.resize(1 + m_finestLevel);
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    m_mergeBlockGrids[lvl] = RefCountedPtr<MergeBlockGrid>(new MergeBlockGrid(m_grids[lvl], m_minBlockSize));
+  }
+}
+
+void
 Realm::definePetscGrid() noexcept
 {
 #ifdef CH_USE_PETSC
@@ -1742,6 +1758,12 @@ const Vector<RefCountedPtr<LevelTiles>>&
 Realm::getLevelTiles() const noexcept
 {
   return m_levelTiles;
+}
+
+const Vector<RefCountedPtr<MergeBlockGrid>>&
+Realm::getMergeBlockGrid() const noexcept
+{
+  return m_mergeBlockGrids;
 }
 
 const AMRParticleGhostMask&

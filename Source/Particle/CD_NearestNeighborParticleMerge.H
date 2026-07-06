@@ -18,6 +18,7 @@
 #include <map>
 #include <optional>
 #include <set>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -413,6 +414,128 @@ namespace ParticleManagement {
     judgeProposals()/findNearestNeighborCandidates()).
   */
   using NNCellKey = std::pair<int, IntVect>;
+
+  /**
+    @brief A cell index for the spatial-index bucketing/walk used by findNearestNeighborCandidates()
+    (see TODO.md's locked spatial-index design at the repository root).
+    @details Deliberately a DIFFERENT type alias than NNCellKey, even though both currently resolve
+    to the same underlying representation, so a reviewer or future maintainer can never accidentally
+    pass one where the other is expected. NNCellKey is level-qualified (pairs a level with a cell,
+    used for the crowding-count map, which pools cells from every level together). NNWalkCell is
+    NOT level-qualified -- it is always computed with the QUERY PATCH's OWN level's dx (the same
+    dx findNearestNeighborCandidates() itself already receives), even when bucketing a cross-level
+    ghost candidate, because the walk only ever needs candidates expressed in one consistent frame
+    (this patch's own level) to be geometrically comparable to the query. This split naming is a
+    deliberate defense given this feature's history of level/cell-key conflation bugs (see
+    cellKeyOf()'s warning).
+  */
+  using NNWalkCell = IntVect;
+
+  /**
+    @brief One entry in a spatial-index bucket: a reference back to a particle in the caller's own
+    a_localValid or a_ghosts vector, tagged local-vs-ghost.
+    @details Deliberately just an index plus a flag, not a copy of any particle data or even its
+    position -- see NNCellBuckets's own docs for why nothing more needs to be duplicated here.
+  */
+  struct NNIndexedParticle
+  {
+    /**
+      @brief Index into the a_localValid vector (if isLocal) or the a_ghosts vector (if not),
+      whichever buildNNCellBuckets() was given.
+    */
+    std::size_t idx;
+
+    /**
+      @brief True iff this entry refers to a_localValid[idx]; false iff a_ghosts[idx].
+    */
+    bool isLocal;
+  };
+
+  /**
+    @brief A per-patch, per-round spatial bucketing of every particle (local valid AND every
+    ghost) by cell, built once via buildNNCellBuckets().
+    @details This is the per-round counting-sort output described in TODO.md's locked spatial-index
+    design: an O(n) tally + prefix-sum + scatter pass (same shape as ParticleSoA::sortByCell(), but
+    hash-bucketed rather than dense-CSR, since the ghost-reachable cell range is not tightly
+    boundable the way sortByCell()'s single box is -- a ghost's true origin cell can lie well
+    outside this patch's own box). Never copies or reorders the caller's own NNMergeParticle
+    vectors -- only this flat index array is built/reordered, so a_localValid/a_ghosts remain
+    exactly as the caller passed them.
+    @note This bucketing structure is rebuilt fresh once per mergeNearestNeighborsRound() call, not
+    cached across rounds and not rebuilt again within a round's internal
+    a_iterateLocalTierToConvergence passes (those reuse it via lazy deletion against a_consumedIDs
+    instead) -- see findNearestNeighborCandidates()'s own docs.
+  */
+  template <typename Packed>
+  struct NNCellBuckets
+  {
+    /**
+      @brief Flat, cell-contiguous index array -- every particle's NNIndexedParticle entry, grouped
+      so that all entries belonging to one cell are contiguous. Use cellOffsets to find a cell's
+      own sub-range.
+    */
+    std::vector<NNIndexedParticle> sorted;
+
+    /**
+      @brief Cell -> half-open [begin, end) range into sorted. A cell with no particles has no
+      entry here at all (never an entry with begin == end), so absence and emptiness are the same
+      thing -- callers should treat a missing key as "no particles in this cell", not an error.
+    */
+    std::unordered_map<NNWalkCell, std::pair<std::size_t, std::size_t>, LevelTiles::TileHasher> cellOffsets;
+
+    /**
+      @brief Per-block particle counts, dense and linearly indexed within haloBlockBox -- rolled up
+      from the same pass that builds sorted/cellOffsets, at O(1) extra cost per particle (not a
+      second pass). Lets the walk skip an entire empty block in one check, independent of distance
+      pruning.
+    */
+    std::vector<int> blockCounts;
+
+    /**
+      @brief The block-index-space box (this patch's own blocks plus a 1-block halo) blockCounts is
+      linearly indexed within -- see MergeBlockGrid::PatchBlocks::haloBlockBox.
+    */
+    Box haloBlockBox;
+
+    /**
+      @brief Block size (in cells) used to compute blockCounts's indexing -- see
+      MergeBlockGrid::getBlockSize().
+    */
+    int blockSize = 0;
+  };
+
+  /**
+    @brief Build a per-patch, per-round NNCellBuckets from a patch's own full local-valid and ghost
+    particle sets.
+    @details Two-pass counting sort: pass 1 tallies each particle's cell (via cellKeyOf(), using
+    THIS patch's own level's dx for every particle -- including ghosts, see NNWalkCell's docs) and
+    rolls counts up into blockCounts; pass 2 converts tallies into per-cell ranges and scatters
+    every particle's NNIndexedParticle entry into its final slot in a_buckets.sorted. Never touches
+    a_localValid/a_ghosts themselves.
+    @tparam Packed See NNMergeParticle.
+    @param[in]  a_localValid   This patch's own full valid-particle set (not pre-filtered by
+                               consumed status -- see findNearestNeighborCandidates()'s own docs
+                               for why the caller no longer filters before calling in).
+    @param[in]  a_ghosts       Every ghost shipped to this patch this round.
+    @param[in]  a_probLo       Physical position of the domain's low corner (see cellKeyOf()).
+    @param[in]  a_dx           Cell spacing of THIS PATCH's own level (see cellKeyOf()'s warning).
+    @param[in]  a_blockSize    Block size in cells (see MergeBlockGrid::getBlockSize()).
+    @param[in]  a_haloBlockBox This patch's own block-index-space box plus a 1-block halo (see
+                               MergeBlockGrid::PatchBlocks::haloBlockBox).
+    @param[out] a_buckets      The resulting bucketed index. Cleared and rebuilt from scratch;
+                               passing the same instance across calls (e.g. a caller-owned
+                               thread_local) reuses its existing capacity/bucket allocation rather
+                               than reallocating.
+  */
+  template <typename Packed>
+  inline void
+  buildNNCellBuckets(const std::vector<NNMergeParticle<Packed>>& a_localValid,
+                     const std::vector<NNMergeParticle<Packed>>& a_ghosts,
+                     const RealVect&                             a_probLo,
+                     const RealVect&                             a_dx,
+                     const int                                   a_blockSize,
+                     const Box&                                  a_haloBlockBox,
+                     NNCellBuckets<Packed>&                      a_buckets) noexcept;
 
   /**
     @brief Whether a particle is boundary-exposed -- i.e. would be shipped as a ghost to at

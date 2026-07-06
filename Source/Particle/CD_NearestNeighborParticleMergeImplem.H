@@ -234,6 +234,104 @@ namespace ParticleManagement {
     return a_ghostMask.numTargets(a_cellIndex) > 0;
   }
 
+  /**
+    @brief Component-wise floor-division block index for a cell -- pure arithmetic, no lookup.
+    @details Deliberately duplicated here rather than depending on MergeBlockGrid (which lives in
+    Source/AmrMesh): this header stays AmrMesh-agnostic by design (see its own docs), so only plain
+    primitives (blockSize, a Box) cross that boundary -- never the MergeBlockGrid type itself. This
+    one-line computation is translation-invariant and stateless, so duplicating it here rather than
+    introducing a dependency is the cheaper and more honest option.
+    @param[in] a_cell      Cell index.
+    @param[in] a_blockSize Block size in cells.
+    @return floor(a_cell / a_blockSize), component-wise.
+  */
+  inline IntVect
+  nnMergeBlockIndexOf(const IntVect& a_cell, const int a_blockSize) noexcept
+  {
+    IntVect block;
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      block[dir] = (a_cell[dir] >= 0) ? (a_cell[dir] / a_blockSize) : -(((-a_cell[dir] - 1) / a_blockSize) + 1);
+    }
+    return block;
+  }
+
+  template <typename Packed>
+  inline void
+  buildNNCellBuckets(const std::vector<NNMergeParticle<Packed>>& a_localValid,
+                     const std::vector<NNMergeParticle<Packed>>& a_ghosts,
+                     const RealVect&                             a_probLo,
+                     const RealVect&                             a_dx,
+                     const int                                   a_blockSize,
+                     const Box&                                  a_haloBlockBox,
+                     NNCellBuckets<Packed>&                      a_buckets) noexcept
+  {
+    CH_TIME("ParticleManagement::buildNNCellBuckets");
+
+    a_buckets.sorted.clear();
+    a_buckets.cellOffsets.clear();
+    a_buckets.blockCounts.assign(a_haloBlockBox.numPts(), 0);
+    a_buckets.haloBlockBox = a_haloBlockBox;
+    a_buckets.blockSize    = a_blockSize;
+
+    const std::size_t nLocal = a_localValid.size();
+    const std::size_t nGhost = a_ghosts.size();
+    const std::size_t total  = nLocal + nGhost;
+
+    if (total == 0) {
+      return;
+    }
+
+    // Pass 1: tally per-cell counts (as a temporary map -- number of DISTINCT cells is typically
+    // far smaller than a dense range would require, hence a hash map rather than a dense array)
+    // and roll counts up into blockCounts at O(1) extra cost per particle.
+    std::unordered_map<NNWalkCell, std::size_t, LevelTiles::TileHasher> tally;
+    tally.reserve(total);
+
+    auto tallyOne = [&](const RealVect& a_pos) {
+      const IntVect cell  = cellKeyOf(a_pos, a_probLo, a_dx);
+      const IntVect block = nnMergeBlockIndexOf(cell, a_blockSize);
+
+      tally[cell]++;
+
+      if (a_haloBlockBox.contains(block)) {
+        a_buckets.blockCounts[static_cast<std::size_t>(a_haloBlockBox.index(block))]++;
+      }
+      // else: this cell's block lies outside the expected 1-block halo -- see MergeBlockGrid's own
+      // docs for the geometric assumption this relies on. Not fatal here (the cell is still
+      // correctly tallied/bucketed below); the caller is responsible for asserting this never
+      // happens in debug builds.
+    };
+
+    for (const auto& p : a_localValid) {
+      tallyOne(p.position);
+    }
+    for (const auto& p : a_ghosts) {
+      tallyOne(p.position);
+    }
+
+    // Convert tallies into contiguous [begin, end) ranges.
+    a_buckets.sorted.resize(total);
+    std::unordered_map<NNWalkCell, std::size_t, LevelTiles::TileHasher> cursor;
+    cursor.reserve(tally.size());
+
+    std::size_t running = 0;
+    for (const auto& kv : tally) {
+      a_buckets.cellOffsets[kv.first] = std::make_pair(running, running + kv.second);
+      cursor[kv.first]                = running;
+      running += kv.second;
+    }
+
+    // Pass 2: scatter every particle's indexed entry into its cell's next open slot.
+    for (std::size_t i = 0; i < nLocal; i++) {
+      const IntVect cell               = cellKeyOf(a_localValid[i].position, a_probLo, a_dx);
+      a_buckets.sorted[cursor[cell]++] = NNIndexedParticle{i, true};
+    }
+    for (std::size_t i = 0; i < nGhost; i++) {
+      const IntVect cell               = cellKeyOf(a_ghosts[i].position, a_probLo, a_dx);
+      a_buckets.sorted[cursor[cell]++] = NNIndexedParticle{i, false};
+    }
+  }
+
   template <typename Packed>
   inline void
   findNearestNeighborCandidates(const std::vector<NNMergeParticle<Packed>>& a_localValid,

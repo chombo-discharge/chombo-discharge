@@ -3416,6 +3416,22 @@ AmrMesh::getLevelTiles(const std::string& a_realm) const
   return m_realms[a_realm]->getLevelTiles();
 }
 
+const Vector<RefCountedPtr<MergeBlockGrid>>&
+AmrMesh::getMergeBlockGrid(const std::string& a_realm) const
+{
+  CH_TIME("AmrMesh::getMergeBlockGrid(string)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getMergeBlockGrid(string)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getMergeBlockGrid(string) - could not find realm '" + a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getMergeBlockGrid();
+}
+
 void
 AmrMesh::registerParticleGhostMask(const std::string& a_realm, const int a_width)
 {
