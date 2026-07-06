@@ -2258,8 +2258,8 @@ ItoKMCGodunovStepper<I, C, R, F>::postInitialize() noexcept
              << "':" << endl;
       pout() << "  particles before merge = " << nBefore << endl;
       pout() << "  particles after merge  = " << nAfter << endl;
-      pout() << "  particle count reduction = " << (nBefore - nAfter) << " ("
-             << (nBefore > 0 ? (100.0 * (nBefore - nAfter)) / nBefore : 0.0) << "%)" << endl;
+      pout() << "  difference             = " << (static_cast<long long>(nBefore) - static_cast<long long>(nAfter))
+             << endl;
       pout() << "  total weight before = " << wBefore << endl;
       pout() << "  total weight after  = " << wAfter << endl;
       pout() << "  mass conservation error = " << massError << endl;
