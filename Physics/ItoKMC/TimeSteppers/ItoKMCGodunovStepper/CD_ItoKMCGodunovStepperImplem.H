@@ -2152,6 +2152,13 @@ ItoKMCGodunovStepper<I, C, R, F>::postInitialize() noexcept
                                          this->m_amr->getProbHi());
     particles.addParticlesDestructive(drawn);
 
+    // drawBoxParticles() samples uniformly over the domain's bounding box with no EB awareness --
+    // discard whatever landed inside the solid before anything else touches these particles.
+    // Reusing ItoSolver's own, already-existing removeCoveredParticles() rather than
+    // reimplementing an EB check here (see also isPositionValid below, which handles the
+    // SEPARATE concern of a merge RESULT's position, not the initial sample).
+    solver->removeCoveredParticles(particles, EBRepresentation::ImplicitFunction, this->m_toleranceEB);
+
     // Assign every particle a real, globally-unique id (both pre-existing particles that may
     // still carry ParticleSoA::s_invalidID, and the newly-sampled ones above).
     for (int lvl = 0; lvl <= this->m_amr->getFinestLevel(); lvl++) {
@@ -2397,6 +2404,21 @@ ItoKMCGodunovStepper<I, C, R, F>::postInitialize() noexcept
                << ": particles = " << nRound << ", cross-level merges this round = " << crossLevelMergesThisRoundGlobal
                << endl;
       }
+    }
+
+    // Defensive cleanup: isPositionValid above already rejects a merge whose RESULT would fall
+    // inside the EB, so this should normally find nothing -- but reuse the same
+    // removeCoveredParticles() here too (rather than trust that check alone) so nothing merged
+    // ends up sitting inside the solid in the final, written-out state.
+    const unsigned long long nBeforeEBCleanup = particles.getNumberOfValidParticlesGlobal();
+    solver->removeCoveredParticles(particles, EBRepresentation::ImplicitFunction, this->m_toleranceEB);
+    const unsigned long long nAfterEBCleanup = particles.getNumberOfValidParticlesGlobal();
+    if (procID() == 0 && nAfterEBCleanup != nBeforeEBCleanup) {
+      pout() << this->m_name + "::postInitialize -- nearest-neighbor merge debug test for solver '" << solver->getName()
+             << "': removeCoveredParticles() discarded " << (nBeforeEBCleanup - nAfterEBCleanup)
+             << " merged particle(s) that ended up inside the EB (isPositionValid should normally have "
+                "prevented this)"
+             << endl;
     }
 
     const std::vector<unsigned long long> countsAfter = countPerLevel(particles);
