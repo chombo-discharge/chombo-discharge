@@ -336,6 +336,8 @@ namespace ParticleManagement {
   inline void
   findNearestNeighborCandidates(const std::vector<NNMergeParticle<Packed>>& a_localValid,
                                 const std::vector<NNMergeParticle<Packed>>& a_ghosts,
+                                const std::set<ParticleID>&                 a_consumedIDs,
+                                const NNSpatialIndex<Packed>&               a_spatialIndex,
                                 const std::map<NNCellKey, int>&             a_liveCellCount,
                                 const RealVect&                             a_probLo,
                                 const RealVect&                             a_dx,
@@ -348,7 +350,6 @@ namespace ParticleManagement {
     a_edges.clear();
 
     const std::size_t nLocal = a_localValid.size();
-    const std::size_t nGhost = a_ghosts.size();
     const int         K      = 1 + a_maxFallbackCandidates;
 
     struct RankedCandidate
@@ -360,6 +361,14 @@ namespace ParticleManagement {
 
     for (std::size_t qi = 0; qi < nLocal; qi++) {
       const NNMergeParticle<Packed>& q = a_localValid[qi];
+
+      // Lazy deletion -- a_localValid is the FULL per-patch set (see this function's own
+      // contract-change docs), so a query already consumed by an earlier pass/query this round
+      // must be skipped explicitly here (the old design's pre-filtered aliveLocal made this
+      // implicit).
+      if (a_consumedIDs.count(q.globalID) > 0) {
+        continue;
+      }
 
       // a_dx is this patch's own level's dx -- correct here since every query in a_localValid is
       // necessarily on this same level (see this function's a_dx docs).
@@ -390,14 +399,32 @@ namespace ParticleManagement {
         }
       };
 
-      for (std::size_t li = 0; li < nLocal; li++) {
-        if (li == qi) {
-          continue;
+      // Phase 2 of the locked spatial-index design (see TODO.md): visit every cell in the index
+      // unconditionally -- functionally the same candidate universe as the old brute-force scan,
+      // just organized via buckets instead of two flat vectors. Ring-expansion/AABB pruning (a
+      // pure performance change on top of this, not a behavior change) is a separate, later step.
+      for (const auto& kv : a_spatialIndex.buckets.cellOffsets) {
+        const std::size_t begin = kv.second.first;
+        const std::size_t end   = kv.second.second;
+
+        for (std::size_t s = begin; s < end; s++) {
+          const NNIndexedParticle& entry = a_spatialIndex.buckets.sorted[s];
+
+          if (entry.isLocal && entry.idx == qi) {
+            continue; // self
+          }
+
+          const NNMergeParticle<Packed>& cand = entry.isLocal ? a_localValid[entry.idx] : a_ghosts[entry.idx];
+
+          // Lazy deletion for candidates too -- a_spatialIndex was built once, before any
+          // consumption this round, so a candidate consumed since then must be skipped here
+          // (again, implicit in the old design's pre-filtered aliveLocal/aliveGhosts).
+          if (a_consumedIDs.count(cand.globalID) > 0) {
+            continue;
+          }
+
+          considerCandidate(nnMergeDistSquared(q.position, cand.position), entry.idx, entry.isLocal);
         }
-        considerCandidate(nnMergeDistSquared(q.position, a_localValid[li].position), li, true);
-      }
-      for (std::size_t gi = 0; gi < nGhost; gi++) {
-        considerCandidate(nnMergeDistSquared(q.position, a_ghosts[gi].position), gi, false);
       }
 
       if (best.empty()) {
@@ -933,11 +960,14 @@ namespace ParticleManagement {
       int       level;
       DataIndex din;
       RealVect  dx;
+      int       blockSize;
+      Box       haloBlockBox;
     };
 
     std::vector<PatchWork>                            patchWork;
-    std::vector<std::vector<NNMergeParticle<Packed>>> patchLocalValid; // parallel to patchWork
-    std::vector<std::vector<NNMergeParticle<Packed>>> patchGhosts;     // parallel to patchWork
+    std::vector<std::vector<NNMergeParticle<Packed>>> patchLocalValid;   // parallel to patchWork
+    std::vector<std::vector<NNMergeParticle<Packed>>> patchGhosts;       // parallel to patchWork
+    std::vector<NNSpatialIndex<Packed>>               patchSpatialIndex; // parallel to patchWork
 
     std::map<ParticleID, NNMergeParticle<Packed>> particlesByID; // pooled, this rank's own patches
     std::map<ParticleID, bool>                    exposed;       // pooled, this rank's own valid particles
@@ -959,6 +989,8 @@ namespace ParticleManagement {
       const AMRParticleGhostMask& maskSame = a_amr.getParticleGhostMask(realm, ghostWidth);
       const AMRParticleGhostMask& maskC2F  = a_amr.getParticleGhostMaskCoarToFine(realm, ghostWidth);
       const AMRParticleGhostMask& maskF2C  = a_amr.getParticleGhostMaskFineToCoar(realm, ghostWidth);
+
+      const RefCountedPtr<MergeBlockGrid>& mergeBlockGrid = a_amr.getMergeBlockGrid(realm)[lvl];
 
       const DataIterator& dit  = dbl.dataIterator();
       const int           nbox = dit.size();
@@ -1036,9 +1068,26 @@ namespace ParticleManagement {
           }
         }
 
-        patchWork.push_back(PatchWork{lvl, din, dx});
+        // Built once here, per patch, per round -- over the FULL localValid/ghosts sets, before
+        // any consumption happens this round -- and reused across every internal
+        // a_iterateLocalTierToConvergence pass via lazy deletion (see
+        // findNearestNeighborCandidates()'s own docs for why rebuilding per pass would reintroduce
+        // real, avoidable cost on the up-to-1000x-per-round loop this redesign exists to speed up).
+        const MergeBlockGrid::PatchBlocks& patchBlocks = mergeBlockGrid->getPatchBlocks(din);
+
+        NNSpatialIndex<Packed> spatialIndex;
+        buildNNCellBuckets(localValid,
+                           ghosts,
+                           probLo,
+                           dx,
+                           mergeBlockGrid->getBlockSize(),
+                           patchBlocks.haloBlockBox,
+                           spatialIndex.buckets);
+
+        patchWork.push_back(PatchWork{lvl, din, dx, mergeBlockGrid->getBlockSize(), patchBlocks.haloBlockBox});
         patchLocalValid.push_back(std::move(localValid));
         patchGhosts.push_back(std::move(ghosts));
+        patchSpatialIndex.push_back(std::move(spatialIndex));
       }
     }
 
@@ -1063,24 +1112,16 @@ namespace ParticleManagement {
       lastPooledEdges.clear();
 
       for (std::size_t pw = 0; pw < patchWork.size(); pw++) {
-        std::vector<NNMergeParticle<Packed>> aliveLocal;
-        aliveLocal.reserve(patchLocalValid[pw].size());
-        for (const auto& p : patchLocalValid[pw]) {
-          if (consumedIDs.count(p.globalID) == 0) {
-            aliveLocal.push_back(p);
-          }
-        }
-        std::vector<NNMergeParticle<Packed>> aliveGhosts;
-        aliveGhosts.reserve(patchGhosts[pw].size());
-        for (const auto& p : patchGhosts[pw]) {
-          if (consumedIDs.count(p.globalID) == 0) {
-            aliveGhosts.push_back(p);
-          }
-        }
-
+        // patchLocalValid[pw]/patchGhosts[pw] are this patch's FULL sets (not pre-filtered) and
+        // patchSpatialIndex[pw] was built once, over those same full sets, before this round's
+        // local-tier passes began -- findNearestNeighborCandidates() does its own lazy-deletion
+        // filtering against consumedIDs internally now (see its own docs), so nothing needs to be
+        // rebuilt or re-filtered here on every pass.
         std::vector<NNMergeEdge<Packed>> patchEdges;
-        findNearestNeighborCandidates(aliveLocal,
-                                      aliveGhosts,
+        findNearestNeighborCandidates(patchLocalValid[pw],
+                                      patchGhosts[pw],
+                                      consumedIDs,
+                                      patchSpatialIndex[pw],
                                       liveCellCount,
                                       probLo,
                                       patchWork[pw].dx,

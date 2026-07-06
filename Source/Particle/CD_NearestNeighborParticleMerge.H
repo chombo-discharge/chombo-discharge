@@ -538,6 +538,25 @@ namespace ParticleManagement {
                      NNCellBuckets<Packed>&                      a_buckets) noexcept;
 
   /**
+    @brief A patch's complete spatial index for one round: its cell buckets (see NNCellBuckets),
+    built once via buildNNCellBuckets() and reused across every internal
+    a_iterateLocalTierToConvergence pass within that round via lazy deletion (see
+    findNearestNeighborCandidates()'s own docs).
+    @details Currently just a thin wrapper over NNCellBuckets -- kept as its own type (rather than
+    using NNCellBuckets directly) because a later, per-cell adaptive sub-partition structure (for
+    cells whose occupancy bursts past a threshold -- see TODO.md's locked design) is added here,
+    without disturbing findNearestNeighborCandidates()'s own signature again.
+  */
+  template <typename Packed>
+  struct NNSpatialIndex
+  {
+    /**
+      @brief This patch's cell buckets for this round.
+    */
+    NNCellBuckets<Packed> buckets;
+  };
+
+  /**
     @brief Whether a particle is boundary-exposed -- i.e. would be shipped as a ghost to at
     least one neighboring patch.
     @details This is the eligibility test for the trivial tier (see resolveTrivialTier()) -- NOT
@@ -580,45 +599,46 @@ namespace ParticleManagement {
     processing time, by resolveTrivialTier() and judgeProposals(), since earlier merges within
     the same round can change it (see RULES.md, "Crowding trigger").
 
-    Implementation is expected to build a spatial index (e.g. a KD-tree, matching the "kd-tree
-    over the particles in the patch" framing this whole feature started from) over the combined
-    local-valid-plus-ghost position set once per patch per round, then query it once per
-    over-threshold valid particle -- mirroring the allocation-light, thread-local-scratch style
-    already used by the existing mergers in CD_ParticleManagementImplem.H (e.g.
-    buildEqualWeightKDLeaves(), mergeAdjacentNearest()). That existing infrastructure builds a
-    DIFFERENT kind of tree, though (equal-weight spatial partitioning -- its "leaves" are groups
-    of particles, not point-query results), so it isn't directly reusable here; only its
-    underlying philosophy carries over (no per-node heap allocation, no pointer-chasing, reused
-    thread-local scratch across calls).
+    @b Deliberate contract change (see TODO.md's "Performance" section for the full locked
+    design): a_localValid/a_ghosts are now this patch's FULL, unfiltered particle sets for the
+    round -- NOT pre-filtered down to only currently-alive (unconsumed) entries the way earlier
+    callers used to do before calling in. This function now does that filtering itself, via
+    a_consumedIDs, checked against BOTH the query and every candidate encountered. The reason:
+    a_spatialIndex (see NNSpatialIndex) is built ONCE per patch per mergeNearestNeighborsRound()
+    call, over the full set, and reused across every internal a_iterateLocalTierToConvergence
+    pass via this same lazy-deletion check -- rebuilding it per pass (as the old pre-filtered-
+    input design implicitly required) would reintroduce real, avoidable cost on exactly the
+    up-to-1000x-per-round loop this redesign exists to speed up. See a_spatialIndex's own docs for
+    why this rebuild-once-per-round (never across rounds) is unavoidable and still cheap.
 
-    @b Leaf contents: each point entered into the spatial index needs only its position
-    (duplicated inline, since that's what the traversal actually compares -- the entire point of
-    building an index rather than following pointers) plus a single index tagged local-vs-ghost,
-    referring back into a_localValid or a_ghosts. Nothing else needs to be duplicated into the
-    tree -- id, owner rank, and the opaque payload are all already available in O(1) from that
-    index once a query returns, since a_localValid/a_ghosts are already the small, purpose-built
-    NNMergeParticle records this decision layer needs (not the full ParticleSoA column set).
-    Deliberately NOT tagged with anything about a candidate's current busy/consumed status: that
-    status doesn't exist yet when the tree is built (nothing has been resolved at this point in
-    the round), and it changes continuously as resolveTrivialTier() processes its sorted edge
-    list afterward -- baking it into the tree would mean mutating tree data on every single
-    commit, which defeats the purpose of building a static index once. Busy/consumed status is
-    tracked externally (a_consumedIDs, a_hasOutgoingCommitment) and rechecked dynamically wherever
-    a candidate is actually about to be used, never trusted from anything attached to the tree.
+    Implementation walks a_spatialIndex's cell buckets rather than scanning two flat vectors --
+    see NNCellBuckets/buildNNCellBuckets() for how that index is built (once per patch per round,
+    index-array-based, never copying particle data), matching the allocation-light,
+    thread-local-scratch philosophy already used by the existing mergers in
+    CD_ParticleManagementImplem.H (e.g. buildEqualWeightKDLeaves(), mergeAdjacentNearest()), though
+    those build a philosophically similar but structurally different kind of tree (equal-weight
+    spatial partitioning, not a point-query index) and are not directly reusable here.
 
     When a_maxFallbackCandidates (forwarded from resolveTrivialTier(), see its own docs) is
-    greater than zero: query the tree for the K=1+a_maxFallbackCandidates nearest points instead
-    of just 1, and populate NNMergeEdge::fallbackCandidates with candidates 2..K (already
-    distance-sorted by construction of a K-nearest query). This is a single spatial-index
-    traversal per query particle regardless of K -- resolveTrivialTier() walks the pre-fetched
-    fallbackCandidates list when the primary candidate is blocked, rather than this function (or
-    the tree) being asked again per retry attempt.
+    greater than zero: the walk returns the K=1+a_maxFallbackCandidates nearest points instead of
+    just 1, and NNMergeEdge::fallbackCandidates is populated with candidates 2..K (already
+    distance-sorted). This is a single index traversal per query particle regardless of K --
+    resolveTrivialTier() walks the pre-fetched fallbackCandidates list when the primary candidate
+    is blocked, rather than this function (or the index) being asked again per retry attempt.
 
     @tparam Packed See NNMergeParticle.
-    @param[in]  a_localValid       This patch's own valid particles (candidates AND query
-                                    sources).
+    @param[in]  a_localValid       This patch's own FULL valid-particle set for this round (query
+                                    sources AND candidates) -- see the contract-change note above;
+                                    not pre-filtered by a_consumedIDs.
     @param[in]  a_ghosts           Every ghost shipped to this patch this round (candidates
-                                    only; ghosts never initiate a query).
+                                    only; ghosts never initiate a query) -- also not pre-filtered.
+    @param[in]  a_consumedIDs      Lazy-deletion skip set: ids already consumed earlier this
+                                    round (by an earlier a_iterateLocalTierToConvergence pass, or
+                                    an earlier query within this same pass). Checked against both
+                                    the query and every candidate encountered during the walk.
+    @param[in]  a_spatialIndex     This patch's spatial index for this round (see NNSpatialIndex),
+                                    built once via buildNNCellBuckets() over the FULL a_localValid/
+                                    a_ghosts sets before any consumption happens.
     @param[in]  a_liveCellCount    Live particle count (valid + ghost) per level-qualified cell
                                     key (see NNCellKey), already reflecting this round's frozen
                                     ghost-fill snapshot.
@@ -640,6 +660,8 @@ namespace ParticleManagement {
   inline void
   findNearestNeighborCandidates(const std::vector<NNMergeParticle<Packed>>& a_localValid,
                                 const std::vector<NNMergeParticle<Packed>>& a_ghosts,
+                                const std::set<ParticleID>&                 a_consumedIDs,
+                                const NNSpatialIndex<Packed>&               a_spatialIndex,
                                 const std::map<NNCellKey, int>&             a_liveCellCount,
                                 const RealVect&                             a_probLo,
                                 const RealVect&                             a_dx,

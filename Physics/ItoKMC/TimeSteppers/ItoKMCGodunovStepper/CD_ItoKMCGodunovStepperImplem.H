@@ -2103,10 +2103,14 @@ ItoKMCGodunovStepper<I, C, R, F>::postInitialize() noexcept
   int  debugParticlesPerCellThresh = 4;
   Real debugMaxCellDistanceReal    = -1.0;
   int  debugNumMergeRounds         = 1;
+  bool debugIterateToConvergence   = false;
+  int  debugMaxFallbackCandidates  = 0;
   pp.query("debug_nn_merge_samples_per_rank", debugNumSamplesPerRank);
   pp.query("debug_nn_merge_particles_per_cell_thresh", debugParticlesPerCellThresh);
   pp.query("debug_nn_merge_max_cell_distance", debugMaxCellDistanceReal);
   pp.query("debug_nn_merge_num_rounds", debugNumMergeRounds);
+  pp.query("debug_nn_merge_iterate_to_convergence", debugIterateToConvergence);
+  pp.query("debug_nn_merge_max_fallback_candidates", debugMaxFallbackCandidates);
 
   const std::optional<int> debugMaxCellDistance = (debugMaxCellDistanceReal < 0.0)
                                                     ? std::nullopt
@@ -2513,8 +2517,8 @@ ItoKMCGodunovStepper<I, C, R, F>::postInitialize() noexcept
                                                                         combine,
                                                                         scatter,
                                                                         allocateID,
-                                                                        false,
-                                                                        0,
+                                                                        debugIterateToConvergence,
+                                                                        debugMaxFallbackCandidates,
                                                                         debugMaxCellDistance,
                                                                         isPositionValid,
                                                                         &crossLevelMergeCount,
