@@ -18,6 +18,29 @@ neither of us has to re-derive them from scratch later.
   signature and behavior are already specified independently of how the search is done, so nothing
   else needs to change.
 
+  **Which spatial index is NOT yet decided, and is its own open design question.** Two candidates,
+  with a real tradeoff, not an obvious winner:
+  - *Fixed grid/bucket, Moore-neighborhood search* (reusing the cell-bucketing machinery the
+    crowding trigger already builds, `NNCellKey`/`liveCellCount`). Cheap to build (O(n)), and a
+    natural fit since the algorithm already buckets particles by cell for the crowding check. BUT:
+    query cost is O(k), k = particles across the neighborhood (27 cells in 3D), not truly O(1) --
+    this degrades badly under bursty/clustered particle creation (e.g. an avalanche dumping many
+    particles into one cell before the next merge pass catches up: 27 cells x 64 particles/cell =
+    1728 candidate checks per query, for every one of those 64 particles). Bucket size need not
+    match the AMR cell size -- a finer, search-only bucket grid (independent of dx) sized to keep
+    occupancy-per-bucket low would blunt this, at the cost of an extra tunable parameter.
+  - *KD-tree* (or similar adaptive structure). O(n log n) to build, O(log n) expected per query
+    even inside a dense cluster, since it recurses deeper into crowded regions rather than using a
+    flat, fixed-size bucket -- handles the bursty/clustered case above gracefully. More complex to
+    implement and to keep allocation-light/thread-local-scratch-friendly (see
+    `buildEqualWeightKDLeaves()`'s existing style) than a fixed grid.
+
+  Given neither obviously dominates for every regime this code will run in, we may end up
+  supporting BOTH, selected via a ParmParse option, e.g.:
+  `ItoSolver.merge_algorithm = bucket_nearest_neighbor <bucket_size_relative_to_dx>` or
+  `ItoSolver.merge_algorithm = kd_nearest_neighbor`. Not yet decided; noted here so the choice (or
+  the decision to support both) isn't lost before this item is actually picked up.
+
 - **`std::map` used throughout instead of `std::unordered_map`.** `particlesByID`, `liveCellCount`,
   `exposed`, `outgoingTargetOf`, and `myParticlesByID` in `mergeNearestNeighborsRound()` (and the
   corresponding parameters threaded into `resolveTrivialTier()`/`judgeProposals()`) are all
