@@ -15,6 +15,7 @@
 
 // Chombo includes
 #include <ParmParse.H>
+#include <BaseIF.H>
 
 // Our includes
 #include <CD_ItoKMCGodunovStepper.H>
@@ -25,6 +26,8 @@
 #include <CD_Units.H>
 #include <CD_Photon.H>
 #include <CD_DischargeIO.H>
+#include <CD_ParticleManagement.H>
+#include <CD_NearestNeighborParticleMerge.H>
 #include <CD_NamespaceHeader.H>
 
 using namespace Physics::ItoKMC;
@@ -92,6 +95,34 @@ ItoKMCGodunovStepper<I, C, R, F>::registerOperators() noexcept
 
   // Register this because we must be able to deposit particles inside dielectrics (due to particle diffusion across the EB).
   (this->m_amr)->registerOperator(s_particle_mesh, this->m_particleRealm, phase::solid);
+}
+
+template <typename I, typename C, typename R, typename F>
+void
+ItoKMCGodunovStepper<I, C, R, F>::registerRealms() noexcept
+{
+  CH_TIME("ItoKMCGodunovStepper::registerRealms");
+  if (this->m_verbosity > 5) {
+    pout() << "ItoKMCGodunovStepper::registerRealms" << endl;
+  }
+
+  ItoKMCStepper<I, C, R, F>::registerRealms();
+
+  // Nearest-neighbor merge debug test (see postInitialize()) -- the ghost-mask width it needs
+  // must be registered here, BEFORE Driver::setupFresh() builds the initial grids
+  // (Driver::setupFresh() calls registerRealms() before m_amr->regridAmr(), but
+  // registerOperators() only after -- so this is the earliest hook available). A particle ghost
+  // mask is only actually built during a regrid (AmrMesh::registerParticleGhostMask() itself just
+  // records that a width should be tracked from here on); registering it any later would leave
+  // the mask undefined for the initial grid.
+  bool debugTestNNMerge = false;
+
+  ParmParse pp(this->m_name.c_str());
+  pp.query("debug_test_nn_merge", debugTestNNMerge);
+
+  if (debugTestNNMerge) {
+    (this->m_amr)->registerParticleGhostMask(this->m_particleRealm, 1);
+  }
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -2044,6 +2075,199 @@ ItoKMCGodunovStepper<I, C, R, F>::plotParticles() const noexcept
       // Plot the particles directly from the live SoA container. The output datasets (id, position, weight
       // and the selected ItoParticle payload columns) are derived from ParticleTraits<ItoParticle>::h5PartColumns.
       DischargeIO::writeH5Part(std::string(fileChar), particles, this->m_amr->getProbLo(), this->m_time);
+    }
+  }
+}
+
+template <typename I, typename C, typename R, typename F>
+void
+ItoKMCGodunovStepper<I, C, R, F>::postInitialize() noexcept
+{
+  CH_TIME("ItoKMCGodunovStepper::postInitialize");
+  if (this->m_verbosity > 5) {
+    pout() << this->m_name + "::postInitialize" << endl;
+  }
+
+  ItoKMCStepper<I, C, R, F>::postInitialize();
+
+  bool debugTestNNMerge = false;
+
+  ParmParse pp(this->m_name.c_str());
+  pp.query("debug_test_nn_merge", debugTestNNMerge);
+
+  if (!debugTestNNMerge) {
+    return;
+  }
+
+  int  debugNumSamplesPerRank      = 200;
+  int  debugParticlesPerCellThresh = 4;
+  Real debugMaxCellDistanceReal    = -1.0;
+  pp.query("debug_nn_merge_samples_per_rank", debugNumSamplesPerRank);
+  pp.query("debug_nn_merge_particles_per_cell_thresh", debugParticlesPerCellThresh);
+  pp.query("debug_nn_merge_max_cell_distance", debugMaxCellDistanceReal);
+
+  const std::optional<int> debugMaxCellDistance = (debugMaxCellDistanceReal < 0.0)
+                                                    ? std::nullopt
+                                                    : std::optional<int>(static_cast<int>(debugMaxCellDistanceReal));
+
+  const RefCountedPtr<BaseIF>& implicitFunction = this->m_computationalGeometry->getImplicitFunction(
+    this->m_plasmaPhase);
+
+  // Rejects a merge whose weighted-centroid position would fall inside the embedded boundary --
+  // BaseIF::value() >= 0 means inside the solid (Chombo convention: negative is inside the
+  // fluid). If this geometry has no analytic implicit function (e.g. a DCEL/STL geometry), there
+  // is nothing to check against, so every position is accepted rather than silently rejecting
+  // everything.
+  auto isPositionValid = [&implicitFunction](const RealVect& a_pos) -> bool {
+    if (implicitFunction.isNull()) {
+      return true;
+    }
+    return implicitFunction->value(a_pos) < 0.0;
+  };
+
+  // Rank-namespaced, monotonically increasing id counter -- shared between the initial sample
+  // (so newly-drawn particles get real ids, since ParticleManagement::drawBoxParticles/
+  // ParticleContainer::addParticlesDestructive leave id at ParticleSoA::s_invalidID) and the
+  // merge's own fresh-id allocation, so the two can never collide. See
+  // CD_NearestNeighborParticleMerge.H's IDAllocator docs -- there is no existing general-purpose
+  // global-id allocation scheme elsewhere in the particle infrastructure to reuse instead.
+  constexpr ParticleID rankStride = 100000000LL;
+  ParticleID           nextID     = static_cast<ParticleID>(procID()) * rankStride;
+  auto                 allocateID = [&nextID]() -> ParticleID {
+    return nextID++;
+  };
+
+  for (auto solverIt = (this->m_ito)->iterator(); solverIt.ok(); ++solverIt) {
+    const RefCountedPtr<ItoSolver>& solver = solverIt();
+
+    ParticleContainer<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
+
+    // Sample new ItoParticle particles uniformly across the domain.
+    ParticleSoA<ItoParticle> drawn;
+    ParticleManagement::drawBoxParticles(drawn,
+                                         debugNumSamplesPerRank,
+                                         this->m_amr->getProbLo(),
+                                         this->m_amr->getProbHi());
+    particles.addParticlesDestructive(drawn);
+
+    // Assign every particle a real, globally-unique id (both pre-existing particles that may
+    // still carry ParticleSoA::s_invalidID, and the newly-sampled ones above).
+    for (int lvl = 0; lvl <= this->m_amr->getFinestLevel(); lvl++) {
+      const DisjointBoxLayout& dbl = this->m_amr->getGrids(solver->getRealm())[lvl];
+      for (DataIterator dit(dbl); dit.ok(); ++dit) {
+        ParticleSoA<ItoParticle>& leaf = particles[lvl][dit()];
+        for (std::size_t i = 0; i < leaf.size(); i++) {
+          leaf.particleID(i) = allocateID();
+          leaf.rankID(i)     = procID();
+        }
+      }
+    }
+
+    const unsigned long long nBefore = particles.getNumberOfValidParticlesGlobal();
+    Real                     wBefore = 0.0;
+    for (int lvl = 0; lvl <= this->m_amr->getFinestLevel(); lvl++) {
+      const DisjointBoxLayout& dbl = this->m_amr->getGrids(solver->getRealm())[lvl];
+      for (DataIterator dit(dbl); dit.ok(); ++dit) {
+        ParticleSoA<ItoParticle>& leaf = particles[lvl][dit()];
+        for (std::size_t i = 0; i < leaf.size(); i++) {
+          if (!leaf.isGhost(i)) {
+            wBefore += leaf.weight(i);
+          }
+        }
+      }
+    }
+    wBefore = ParallelOps::sum(wBefore);
+
+    // Write the ORIGINAL (pre-merge) particles.
+    {
+      std::string cmd     = "mkdir -p particles/" + solver->getName();
+      int         success = 0;
+      if (procID() == 0) {
+        success = system(cmd.c_str());
+      }
+      if (success != 0) {
+        MayDay::Error("ItoKMCGodunovStepper::postInitialize -- could not create 'particles' directory");
+      }
+
+      const std::string prefix = "./particles/" + solver->getName() + "/" + solver->getName() + ".nn_merge_original";
+      DischargeIO::writeH5Part(prefix + "." + std::to_string(SpaceDim) + "d.h5part",
+                               particles,
+                               this->m_amr->getProbLo(),
+                               this->m_time);
+    }
+
+    // The opaque reconciliation payload is just the particle's energy -- mobility/diffusion/
+    // velocity are safe to drop across a merge since they are recomputed from field
+    // interpolation before they are next used.
+    auto gather = [](const ParticleSoA<ItoParticle>& a_leaf, std::size_t a_idx) -> Real {
+      return a_leaf.template get<&ItoParticle::energy>(a_idx);
+    };
+    auto combine = [](const Real a_firstEnergy,
+                      const Real a_firstWeight,
+                      const Real a_secondEnergy,
+                      const Real a_secondWeight) -> Real {
+      return (a_firstWeight * a_firstEnergy + a_secondWeight * a_secondEnergy) / (a_firstWeight + a_secondWeight);
+    };
+    auto scatter = [](ParticleSoA<ItoParticle>& a_leaf, const ParticleManagement::NNMergeParticle<Real>& a_p) -> void {
+      ItoParticle payload;
+      payload.energy = a_p.payload;
+      a_leaf.append(a_p.position, a_p.weight, payload);
+      a_leaf.particleID(a_leaf.size() - 1) = a_p.globalID;
+      a_leaf.rankID(a_leaf.size() - 1)     = a_p.ownerRank;
+    };
+
+    ParticleManagement::mergeNearestNeighborsRound<ItoParticle, Real>(*this->m_amr,
+                                                                      particles,
+                                                                      debugParticlesPerCellThresh,
+                                                                      gather,
+                                                                      combine,
+                                                                      scatter,
+                                                                      allocateID,
+                                                                      false,
+                                                                      0,
+                                                                      debugMaxCellDistance,
+                                                                      isPositionValid);
+
+    const unsigned long long nAfter = particles.getNumberOfValidParticlesGlobal();
+    Real                     wAfter = 0.0;
+    for (int lvl = 0; lvl <= this->m_amr->getFinestLevel(); lvl++) {
+      const DisjointBoxLayout& dbl = this->m_amr->getGrids(solver->getRealm())[lvl];
+      for (DataIterator dit(dbl); dit.ok(); ++dit) {
+        ParticleSoA<ItoParticle>& leaf = particles[lvl][dit()];
+        for (std::size_t i = 0; i < leaf.size(); i++) {
+          if (!leaf.isGhost(i)) {
+            wAfter += leaf.weight(i);
+          }
+        }
+      }
+    }
+    wAfter = ParallelOps::sum(wAfter);
+
+    // Write the MERGED (post-merge) particles.
+    {
+      const std::string prefix = "./particles/" + solver->getName() + "/" + solver->getName() + ".nn_merge_merged";
+      DischargeIO::writeH5Part(prefix + "." + std::to_string(SpaceDim) + "d.h5part",
+                               particles,
+                               this->m_amr->getProbLo(),
+                               this->m_time);
+    }
+
+    if (procID() == 0) {
+      const Real massError = std::abs(wAfter - wBefore);
+      pout() << this->m_name + "::postInitialize -- nearest-neighbor merge debug test for solver '" << solver->getName()
+             << "':" << endl;
+      pout() << "  particles before merge = " << nBefore << endl;
+      pout() << "  particles after merge  = " << nAfter << endl;
+      pout() << "  particle count reduction = " << (nBefore - nAfter) << " ("
+             << (nBefore > 0 ? (100.0 * (nBefore - nAfter)) / nBefore : 0.0) << "%)" << endl;
+      pout() << "  total weight before = " << wBefore << endl;
+      pout() << "  total weight after  = " << wAfter << endl;
+      pout() << "  mass conservation error = " << massError << endl;
+
+      if (massError > 1.E-6 * std::max(wBefore, 1.0)) {
+        MayDay::Error(
+          "ItoKMCGodunovStepper::postInitialize -- nearest-neighbor merge debug test failed mass conservation");
+      }
     }
   }
 }

@@ -15,35 +15,188 @@
 
 // Std includes
 #include <algorithm>
+#include <cmath>
+#include <cstdlib>
 
 // Chombo includes
 #include <CH_Timer.H>
 #include <MayDay.H>
+#include <SPMD.H>
+#include <DataIterator.H>
+#include <LayoutIterator.H>
 
 // Our includes
 #include <CD_NearestNeighborParticleMerge.H>
+#include <CD_AmrMesh.H>
 #include <CD_NamespaceHeader.H>
 
 namespace ParticleManagement {
 
+  // ---------------------------------------------------------------------------------------------
+  // Private helpers (not declared in CD_NearestNeighborParticleMerge.H -- implementation details
+  // only, consumed exclusively within this file).
+  // ---------------------------------------------------------------------------------------------
+
+  /**
+    @brief Squared Euclidean distance between two physical positions.
+    @param[in] a_a First position.
+    @param[in] a_b Second position.
+    @return Squared distance between a_a and a_b.
+  */
+  inline Real
+  nnMergeDistSquared(const RealVect& a_a, const RealVect& a_b) noexcept
+  {
+    Real d2 = 0.0;
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      const Real delta = a_a[dir] - a_b[dir];
+      d2 += delta * delta;
+    }
+    return d2;
+  }
+
+  /**
+    @brief Chebyshev (max-per-axis) distance between two cell-index vectors -- see
+    CD_NearestNeighborParticleMerge.H's a_maxCellDistance docs.
+    @param[in] a_a First cell index.
+    @param[in] a_b Second cell index.
+    @return Max-per-axis distance between a_a and a_b.
+  */
+  inline int
+  nnMergeChebyshevCellDistance(const IntVect& a_a, const IntVect& a_b) noexcept
+  {
+    int dist = 0;
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      dist = std::max(dist, std::abs(a_a[dir] - a_b[dir]));
+    }
+    return dist;
+  }
+
+  /**
+    @brief Weighted-centroid merge of two positions/weights -- shared by resolveTrivialTier() and
+    judgeProposals() so the formula is written exactly once.
+    @param[in]  a_posA        First particle's position.
+    @param[in]  a_weightA     First particle's weight.
+    @param[in]  a_posB        Second particle's position.
+    @param[in]  a_weightB     Second particle's weight.
+    @param[out] a_mergedPos   Weighted-centroid position.
+    @param[out] a_mergedWeight Summed weight.
+  */
+  inline void
+  nnMergeWeightedCentroid(const RealVect& a_posA,
+                          const Real      a_weightA,
+                          const RealVect& a_posB,
+                          const Real      a_weightB,
+                          RealVect&       a_mergedPos,
+                          Real&           a_mergedWeight) noexcept
+  {
+    a_mergedWeight = a_weightA + a_weightB;
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      a_mergedPos[dir] = (a_posA[dir] * a_weightA + a_posB[dir] * a_weightB) / a_mergedWeight;
+    }
+  }
+
+  /**
+    @brief Generic alltoallv-style exchange: send a per-destination-rank bucket of trivially-
+    copyable records, return the flat concatenation of everything received.
+    @details This is the "new general-purpose alltoallv-style utility" the header's own docs
+    flagged as an open implementation question -- a minimal, self-contained one, matching the
+    packing/MPI_Alltoall(byte counts)/MPI_Alltoallv(payload) style already used by
+    ParticleContainer's own cross-rank particle exchange (CD_ParticleContainerImplem.H). In a
+    serial (non-MPI) build, or when there is only one rank, this degenerates to "my own bucket,
+    unchanged".
+    @tparam T Trivially-copyable record type (NNMergeProposal<Packed>, NNMergeVerdict, or
+    NNMergeParticle<Packed> -- all satisfy this given Packed itself is required to).
+    @param[in] a_sendByRank One bucket per destination rank (size == number of ranks).
+    @return Flat vector of every record received from every rank (including this rank's own
+    bucket addressed to itself).
+  */
+  template <typename T>
+  inline std::vector<T>
+  nnMergeExchangeByRank(const std::vector<std::vector<T>>& a_sendByRank)
+  {
+    const int numRanks = static_cast<int>(a_sendByRank.size());
+
+#ifdef CH_MPI
+    if (numRanks <= 1) {
+      return a_sendByRank.empty() ? std::vector<T>() : a_sendByRank[0];
+    }
+
+    std::vector<int> sendCounts(numRanks, 0);
+    for (int r = 0; r < numRanks; r++) {
+      sendCounts[r] = static_cast<int>(a_sendByRank[r].size());
+    }
+
+    std::vector<int> recvCounts(numRanks, 0);
+    MPI_Alltoall(sendCounts.data(), 1, MPI_INT, recvCounts.data(), 1, MPI_INT, Chombo_MPI::comm);
+
+    std::vector<int> sdispl(numRanks, 0);
+    std::vector<int> rdispl(numRanks, 0);
+
+    long stot = 0;
+    long rtot = 0;
+    for (int r = 0; r < numRanks; r++) {
+      sdispl[r] = static_cast<int>(stot);
+      stot += sendCounts[r];
+
+      rdispl[r] = static_cast<int>(rtot);
+      rtot += recvCounts[r];
+    }
+
+    std::vector<T> sflat(stot);
+    for (int r = 0; r < numRanks; r++) {
+      if (sendCounts[r] > 0) {
+        std::copy(a_sendByRank[r].begin(), a_sendByRank[r].end(), sflat.begin() + sdispl[r]);
+      }
+    }
+
+    std::vector<T> rflat(rtot);
+
+    // Scale record counts/displacements up to bytes -- MPI only knows bytes.
+    std::vector<int> sendBytes(numRanks);
+    std::vector<int> recvBytes(numRanks);
+    std::vector<int> sdisplBytes(numRanks);
+    std::vector<int> rdisplBytes(numRanks);
+    for (int r = 0; r < numRanks; r++) {
+      sendBytes[r]   = sendCounts[r] * static_cast<int>(sizeof(T));
+      recvBytes[r]   = recvCounts[r] * static_cast<int>(sizeof(T));
+      sdisplBytes[r] = sdispl[r] * static_cast<int>(sizeof(T));
+      rdisplBytes[r] = rdispl[r] * static_cast<int>(sizeof(T));
+    }
+
+    MPI_Alltoallv(sflat.data(),
+                  sendBytes.data(),
+                  sdisplBytes.data(),
+                  MPI_BYTE,
+                  rflat.data(),
+                  recvBytes.data(),
+                  rdisplBytes.data(),
+                  MPI_BYTE,
+                  Chombo_MPI::comm);
+
+    return rflat;
+#else
+    return a_sendByRank.empty() ? std::vector<T>() : a_sendByRank[0];
+#endif
+  }
+
+  // ---------------------------------------------------------------------------------------------
+  // Public API (declared in CD_NearestNeighborParticleMerge.H).
+  // ---------------------------------------------------------------------------------------------
+
+  inline IntVect
+  cellKeyOf(const RealVect& a_position, const RealVect& a_probLo, const RealVect& a_dx) noexcept
+  {
+    IntVect iv;
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      iv[dir] = static_cast<int>(std::floor((a_position[dir] - a_probLo[dir]) / a_dx[dir]));
+    }
+    return iv;
+  }
+
   inline bool
   isBoundaryExposed(const IntVect& a_cellIndex, const ParticleGhostMask& a_ghostMask) noexcept
   {
-    // A particle is boundary-exposed iff its own cell has at least one outgoing ghost-shipment
-    // target registered on the mask that drives THIS patch's own ghost-fill. See RULES.md,
-    // "Boundary-exposed classification" -- this is deliberately a lookup, not a geometric
-    // recomputation:
-    //
-    //   return a_ghostMask.numTargets(a_cellIndex) > 0;
-    //
-    // Note for mergeNearestNeighborsRound(): a particle can be exposed toward a same-level
-    // neighbor, a coarser level, or a finer level -- three DIFFERENT masks
-    // (AmrMesh::getParticleGhostMask()/getParticleGhostMaskCoarToFine()/
-    // getParticleGhostMaskFineToCoar()). This function only tests ONE mask; the orchestrator is
-    // responsible for OR-ing all three together per particle (exposed iff ANY of the three say
-    // so), not this function.
-    MayDay::Error("ParticleManagement::isBoundaryExposed -- not yet implemented, see RULES.md");
-    return false;
+    return a_ghostMask.numTargets(a_cellIndex) > 0;
   }
 
   template <typename Packed>
@@ -51,6 +204,8 @@ namespace ParticleManagement {
   findNearestNeighborCandidates(const std::vector<NNMergeParticle<Packed>>& a_localValid,
                                 const std::vector<NNMergeParticle<Packed>>& a_ghosts,
                                 const std::map<IntVect, int>&               a_liveCellCount,
+                                const RealVect&                             a_probLo,
+                                const RealVect&                             a_dx,
                                 const int                                   a_numParticlesPerCellThresh,
                                 std::vector<NNMergeEdge<Packed>>&           a_edges,
                                 const int                                   a_maxFallbackCandidates) noexcept
@@ -59,167 +214,253 @@ namespace ParticleManagement {
 
     a_edges.clear();
 
-    // 1. Build a single spatial index over the COMBINED position set: every particle in
-    //    a_localValid, followed by every particle in a_ghosts. NOT the same tree type as
-    //    ParticleManagement::buildEqualWeightKDLeaves in CD_ParticleManagementImplem.H (that one
-    //    builds equal-weight spatial PARTITIONS -- groups of particles -- not point-query
-    //    results; only its underlying philosophy carries over here, not its leaf type): no
-    //    per-node heap allocation, reused thread_local scratch across calls.
-    //
-    //    Each leaf/point in the index stores ONLY: the position itself (duplicated inline --
-    //    that's what traversal actually compares, the whole reason to build an index rather than
-    //    follow pointers), and a single index tagged local-vs-ghost referring back into
-    //    a_localValid or a_ghosts. Nothing else needs to be duplicated -- id, owner rank, opaque
-    //    payload are all recoverable in O(1) from that index once a query returns. Deliberately
-    //    NOT tagged with any busy/consumed status: that status doesn't exist yet at this point in
-    //    the round (nothing has been resolved), and it changes continuously as
-    //    resolveTrivialTier() processes its sorted edge list afterward -- baking it into the tree
-    //    would mean mutating tree data on every commit, defeating the purpose of a static index.
-    //    Busy/consumed status lives externally (a_consumedIDs, a_hasOutgoingCommitment in
-    //    resolveTrivialTier()) and is rechecked dynamically wherever a candidate is about to be
-    //    used, never trusted from anything attached to the tree.
-    //
-    // 2. For each particle p in a_localValid (query sources -- ghosts never query):
-    //      a. cellKey = cellKeyOf(p.position)   -- unclamped, position-derived (see RULES.md,
-    //         "Crowding trigger": must NOT be clamped to any one patch's box, so a ghost bucket
-    //         into its true origin cell).
-    //      b. if a_liveCellCount.at(cellKey) <= a_numParticlesPerCellThresh: skip -- p's own
-    //         cell is not (yet) crowded enough to be a candidate query source.
-    //      c. Query the spatial index for p's K=1+a_maxFallbackCandidates nearest OTHER points
-    //         (excluding itself), among the combined local+ghost set -- a single traversal
-    //         regardless of K, since a K-nearest query naturally returns its results already
-    //         distance-sorted. If a_maxFallbackCandidates is 0, K=1: an ordinary single-nearest
-    //         query, matching this function's original behavior exactly. This is the ONLY place
-    //         a nearest-neighbor search happens, and it is ALWAYS run against the FULL
-    //         neighborhood -- see the file-level docs for why restricting it for some particles
-    //         reintroduces the "compression toward patch interior" bug this design closed.
-    //      d. If at least one candidate was found: append one NNMergeEdge using the CLOSEST
-    //         result (distanceSquared, p's id, the candidate's id, and whether it came from the
-    //         local half of the index -- NNMergeEdge::candidateIsLocal). If K>1, populate
-    //         fallbackCandidates from results 2..K, in the same distance order the query already
-    //         returned them in -- no separate sort needed.
-    //
-    // 3. Do NOT filter on any candidate's own cell threshold here -- that is deliberately
-    //    deferred to resolveTrivialTier()/judgeProposals(), which re-check it dynamically at
-    //    processing time against live counts that may already reflect earlier merges this round
-    //    (see RULES.md, "Crowding trigger").
-    MayDay::Error("ParticleManagement::findNearestNeighborCandidates -- not yet implemented, see RULES.md");
+    const std::size_t nLocal = a_localValid.size();
+    const std::size_t nGhost = a_ghosts.size();
+    const int         K      = 1 + a_maxFallbackCandidates;
+
+    struct RankedCandidate
+    {
+      Real        d2;
+      std::size_t idx;
+      bool        isLocal;
+    };
+
+    for (std::size_t qi = 0; qi < nLocal; qi++) {
+      const NNMergeParticle<Packed>& q = a_localValid[qi];
+
+      const IntVect qCell = cellKeyOf(q.position, a_probLo, a_dx);
+      const auto    cntIt = a_liveCellCount.find(qCell);
+      const int     count = (cntIt != a_liveCellCount.end()) ? cntIt->second : 0;
+
+      if (count <= a_numParticlesPerCellThresh) {
+        continue;
+      }
+
+      std::vector<RankedCandidate> best;
+      best.reserve(static_cast<std::size_t>(K) + 1);
+
+      auto considerCandidate = [&](const Real a_d2, const std::size_t a_idx, const bool a_isLocal) {
+        if (static_cast<int>(best.size()) == K && a_d2 >= best.back().d2) {
+          return;
+        }
+        const auto insertPos = std::upper_bound(best.begin(),
+                                                best.end(),
+                                                a_d2,
+                                                [](const Real a_val, const RankedCandidate& a_c) {
+                                                  return a_val < a_c.d2;
+                                                });
+        best.insert(insertPos, RankedCandidate{a_d2, a_idx, a_isLocal});
+        if (static_cast<int>(best.size()) > K) {
+          best.pop_back();
+        }
+      };
+
+      for (std::size_t li = 0; li < nLocal; li++) {
+        if (li == qi) {
+          continue;
+        }
+        considerCandidate(nnMergeDistSquared(q.position, a_localValid[li].position), li, true);
+      }
+      for (std::size_t gi = 0; gi < nGhost; gi++) {
+        considerCandidate(nnMergeDistSquared(q.position, a_ghosts[gi].position), gi, false);
+      }
+
+      if (best.empty()) {
+        continue;
+      }
+
+      NNMergeEdge<Packed> edge;
+      edge.distanceSquared  = best[0].d2;
+      edge.queryID          = q.globalID;
+      edge.candidateID      = best[0].isLocal ? a_localValid[best[0].idx].globalID : a_ghosts[best[0].idx].globalID;
+      edge.candidateIsLocal = best[0].isLocal;
+
+      for (std::size_t k = 1; k < best.size(); k++) {
+        NNFallbackCandidate fc;
+        fc.candidateID      = best[k].isLocal ? a_localValid[best[k].idx].globalID : a_ghosts[best[k].idx].globalID;
+        fc.distanceSquared  = best[k].d2;
+        fc.candidateIsLocal = best[k].isLocal;
+        edge.fallbackCandidates.push_back(fc);
+      }
+
+      a_edges.push_back(std::move(edge));
+    }
   }
 
-  template <typename Packed, typename Combine>
+  template <typename Packed, typename Combine, typename PosValid, typename Allocator>
   inline void
-  resolveTrivialTier(const std::vector<NNMergeEdge<Packed>>& a_edges,
-                     const std::map<ParticleID, bool>&       a_exposed,
-                     const Combine&                          a_combine,
-                     std::map<IntVect, int>&                 a_liveCellCount,
-                     std::set<ParticleID>&                   a_consumedIDs,
-                     std::set<ParticleID>&                   a_hasOutgoingCommitment,
-                     std::vector<NNMergeResult<Packed>>&     a_results,
-                     const int                               a_maxFallbackCandidates,
-                     const std::optional<int>                a_maxCellDistance) noexcept
+  resolveTrivialTier(const std::vector<NNMergeEdge<Packed>>&              a_edges,
+                     const std::map<ParticleID, bool>&                    a_exposed,
+                     const std::map<ParticleID, NNMergeParticle<Packed>>& a_particlesByID,
+                     const Combine&                                       a_combine,
+                     std::map<IntVect, int>&                              a_liveCellCount,
+                     std::set<ParticleID>&                                a_consumedIDs,
+                     const int                                            a_numParticlesPerCellThresh,
+                     std::set<ParticleID>&                                a_hasOutgoingCommitment,
+                     std::vector<NNMergeResult<Packed>>&                  a_results,
+                     const RealVect&                                      a_probLo,
+                     const RealVect&                                      a_dx,
+                     const PosValid&                                      a_isPositionValid,
+                     const Allocator&                                     a_allocateID,
+                     const int                                            a_maxFallbackCandidates,
+                     const std::optional<int>                             a_maxCellDistance) noexcept
   {
     CH_TIME("ParticleManagement::resolveTrivialTier");
 
     a_results.clear();
 
-    // 1. Sort a COPY of a_edges by (distanceSquared, queryID, candidateID) -- the deterministic
-    //    tiebreak on ids is required, not optional: an unbroken exact-distance tie (e.g. two
-    //    true mutual nearest neighbors) left to whatever order the edges happened to be
-    //    generated/inserted in is a real, observed source of nondeterminism that cascades into
-    //    unrelated pairs several hops away (see RULES.md, "Trivial tier").
-    //
-    // 2. For each edge (queryID, candidateID, d2, candidateIsLocal), in that sorted order:
-    //      a. if queryID is already in a_consumedIDs: stale (already consumed by an earlier,
-    //         closer edge in this same pass) -- skip.
-    //      b. Evaluate the CURRENT candidate (initially candidateID, possibly replaced by a
-    //         fallback below) with the following per-candidate check, "evalCandidate":
-    //           candidateIsStale = candidateIsLocal && candidate already in a_consumedIDs.
-    //           candidateIsBusy  = candidateIsLocal && !candidateIsStale &&
-    //                              candidate is in a_hasOutgoingCommitment.
-    //           candidateTooFar  = a_maxCellDistance.has_value() &&
-    //                              cellChebyshevDistance(cellKeyOf(query.position),
-    //                                                     cellKeyOf(candidate.position))
-    //                                > *a_maxCellDistance
-    //             -- cellKeyOf() here is the SAME unclamped, position-derived cell key used for
-    //             the crowding trigger (floor(pos/dx)), NOT either particle's own patch-local
-    //             IntVect cell index -- using a shared, position-derived key is what makes this
-    //             comparison meaningful across a patch boundary at all. cellChebyshevDistance is
-    //             the max-per-axis difference between the two integer cell-index vectors.
-    //           trivialOk = candidateIsLocal && !candidateIsStale && !candidateIsBusy &&
-    //                       !candidateTooFar &&
-    //                       !a_exposed.at(queryID) && !a_exposed.at(candidate).
-    //         (a ghost candidate, i.e. !candidateIsLocal, is never trivial-tier eligible --
-    //         trivialOk stays false; this is unaffected by any of the above.)
-    //      c. If trivialOk: dynamic per-cell threshold recheck, using a_liveCellCount AS IT
-    //         CURRENTLY STANDS (i.e. already reflecting decrements from edges processed earlier
-    //         in this SAME sorted pass, not the generation-time snapshot) -- both queryID's and
-    //         the candidate's current cell counts must still exceed the threshold.
-    //      d. if trivialOk and the threshold recheck passed: COMMIT --
-    //           - merged = a_combine(query, candidate) folded with the position/weight
-    //             weighted-centroid formula (position/weight are handled directly by this
-    //             function, not by the Combine callback -- see PayloadCombine's docs).
-    //           - append {queryID, candidateID, merged} to a_results.
-    //           - insert queryID and candidateID into a_consumedIDs.
-    //           - decrement a_liveCellCount at both of their cells.
-    //           - done with this edge, move to the next.
-    //      e. else if the threshold recheck failed specifically (trivialOk was true but crowding
-    //         no longer holds): queryID is simply left unmatched this round -- neither a trivial
-    //         merge nor a proposal; NOT a fallback-eligible case (a different candidate wouldn't
-    //         change the query's OWN cell occupancy). See RULES.md, "Crowding trigger" for why
-    //         this is a legitimate, expected outcome, and "What's proven vs. what's empirically
-    //         validated" for the caveat that a persistently isolated crowded cell is possible and
-    //         correct when nothing moves between rounds. Done with this edge.
-    //      f. else if candidateIsStale OR candidateTooFar (evaluated against the ORIGINAL,
-    //         un-retried candidate -- see below): do NOT insert queryID into
-    //         a_hasOutgoingCommitment, do NOT generate a proposal for it. For candidateIsStale,
-    //         there is no meaningful id to propose to. For candidateTooFar, the pair is exactly
-    //         as physically invalid via judgeProposals() as it would be trivially -- there is
-    //         nothing valid to hand off to a judge either, so a proposal would be meaningless.
-    //         Either way, marking queryID "busy" here would incorrectly block some OTHER
-    //         particle from using it as an ordinary trivial candidate later, even though queryID
-    //         hasn't committed to anything. If a_maxFallbackCandidates > 0 and queryID is not
-    //         itself exposed (if it is, no local candidate could ever be trivially eligible, so
-    //         don't bother): try the edge's own fallbackCandidates[i] (i starting at 0), and go
-    //         back to step (b) with that candidate (advancing i, up to a_maxFallbackCandidates
-    //         entries). This is NOT a fresh spatial-index query -- fallbackCandidates was already
-    //         fetched once, up front, by findNearestNeighborCandidates() via a single K-nearest
-    //         query (see its docs); there is nothing to "exclude" since the pre-fetched list is
-    //         already distance-sorted with no duplicates possible. If fallbackCandidates is
-    //         exhausted (i reaches its size, or a_maxFallbackCandidates): queryID is left
-    //         unmatched this round, same as (e) -- no proposal. Note that whether a PROPOSAL is
-    //         generated at the end depends only on the ORIGINAL candidate (the one from
-    //         findNearestNeighborCandidates(), before any fallback candidates are tried) being
-    //         stale or too far -- a fallback candidate that is itself too far only ends that ONE
-    //         attempt (advance to the next fallbackCandidates entry instead), it does not by
-    //         itself suppress the eventual proposal if the original candidate was otherwise
-    //         propose-eligible.
-    //      g. else (candidateIsBusy, or candidate is exposed, or candidate is a ghost -- i.e.
-    //         trivialOk was false for a reason OTHER than staleness or distance): if
-    //         a_maxFallbackCandidates > 0 and queryID is not itself exposed: same fallback retry
-    //         as (f) -- try fallbackCandidates[i] instead of giving up immediately. Once
-    //         fallbackCandidates is exhausted (or a_maxFallbackCandidates is 0): insert queryID
-    //         into a_hasOutgoingCommitment, so generateProposals() picks it up -- using queryID's
-    //         ORIGINAL edge (the one from findNearestNeighborCandidates(), NOT any fallback
-    //         candidate that was also tried and rejected) as the proposal target. The candidate
-    //         genuinely still exists (and is within range) in every one of these cases, so
-    //         judgeProposals() -- which already has a rule for "target has its own outgoing
-    //         commitment" (accept only on a mutual match) -- should get a chance to decide, not
-    //         be silently bypassed.
-    //
-    // Empirical note (Python prototype, Scripts/ParticleMergePrototype/): instrumenting exactly
-    // why edges failed to commit in a deliberately extreme single-round test (a cell seeded at
-    // 64 particles against a threshold of 16) found "candidate already busy" (case g) to be the
-    // SINGLE LARGEST loss category -- larger than genuine boundary exposure. An earlier revision
-    // of this design treated case (g)'s busy sub-case the same as case (f) (silent skip, no
-    // proposal) -- this was a real completeness gap relative to what's documented above, found
-    // and fixed empirically. Enabling a_maxFallbackCandidates (even just 1) recovered the large
-    // majority of the resulting loss; see RULES.md for the full writeup.
-    //
-    // a_maxCellDistance verified directly with a hand-placed pair 2 cells apart (Chebyshev):
-    // uncapped, they merge trivially at the exact weighted centroid; capped at 1 cell, both
-    // survive completely untouched (no merge, no proposal, no side effects); capped at exactly 2
-    // cells, they merge again -- confirming the cap is inclusive (<=, not <).
-    MayDay::Error("ParticleManagement::resolveTrivialTier -- not yet implemented, see RULES.md");
+    // 1. Sort a copy of a_edges by (distanceSquared, queryID, candidateID) -- see this function's
+    //    docs for why the deterministic tiebreak is required, not optional.
+    std::vector<const NNMergeEdge<Packed>*> sorted;
+    sorted.reserve(a_edges.size());
+    for (const auto& e : a_edges) {
+      sorted.push_back(&e);
+    }
+    std::sort(sorted.begin(), sorted.end(), [](const NNMergeEdge<Packed>* a_a, const NNMergeEdge<Packed>* a_b) {
+      if (a_a->distanceSquared != a_b->distanceSquared) {
+        return a_a->distanceSquared < a_b->distanceSquared;
+      }
+      if (a_a->queryID != a_b->queryID) {
+        return a_a->queryID < a_b->queryID;
+      }
+      return a_a->candidateID < a_b->candidateID;
+    });
+
+    for (const NNMergeEdge<Packed>* edgePtr : sorted) {
+      const NNMergeEdge<Packed>& edge = *edgePtr;
+
+      // a. Stale query -- already consumed by an earlier, closer edge this same pass.
+      if (a_consumedIDs.count(edge.queryID) > 0) {
+        continue;
+      }
+
+      const auto queryExposedIt = a_exposed.find(edge.queryID);
+      const bool queryExposed   = (queryExposedIt != a_exposed.end()) && queryExposedIt->second;
+
+      const auto queryDataIt = a_particlesByID.find(edge.queryID);
+      if (queryDataIt == a_particlesByID.end()) {
+        continue;
+      }
+      const NNMergeParticle<Packed>& query = queryDataIt->second;
+
+      bool resolved           = false; // an outcome (commit, or a legitimate "leave unmatched") was reached
+      bool originalStale      = false;
+      bool originalIneligible = false; // too far or invalid position, evaluated on the ORIGINAL candidate
+
+      const int numAttempts = a_maxFallbackCandidates + 1;
+      for (int attempt = 0; attempt < numAttempts; attempt++) {
+        ParticleID candidateID;
+        bool       candidateIsLocal;
+
+        if (attempt == 0) {
+          candidateID      = edge.candidateID;
+          candidateIsLocal = edge.candidateIsLocal;
+        }
+        else {
+          const std::size_t fbIdx = static_cast<std::size_t>(attempt - 1);
+          if (fbIdx >= edge.fallbackCandidates.size()) {
+            break;
+          }
+          candidateID      = edge.fallbackCandidates[fbIdx].candidateID;
+          candidateIsLocal = edge.fallbackCandidates[fbIdx].candidateIsLocal;
+        }
+
+        const bool candidateStale = candidateIsLocal && (a_consumedIDs.count(candidateID) > 0);
+        const bool candidateBusy  = candidateIsLocal && !candidateStale &&
+                                   (a_hasOutgoingCommitment.count(candidateID) > 0);
+
+        bool candidateExposed = false;
+        if (candidateIsLocal) {
+          const auto exposedIt = a_exposed.find(candidateID);
+          candidateExposed     = (exposedIt != a_exposed.end()) && exposedIt->second;
+        }
+
+        const auto candDataIt      = a_particlesByID.find(candidateID);
+        const bool candidateExists = candDataIt != a_particlesByID.end();
+
+        bool     tooFar     = false;
+        bool     invalidPos = false;
+        RealVect mergedPos(D_DECL(0.0, 0.0, 0.0));
+        Real     mergedWeight = 0.0;
+
+        if (!candidateStale && candidateExists) {
+          const NNMergeParticle<Packed>& cand = candDataIt->second;
+
+          if (a_maxCellDistance.has_value()) {
+            const IntVect qCell = cellKeyOf(query.position, a_probLo, a_dx);
+            const IntVect cCell = cellKeyOf(cand.position, a_probLo, a_dx);
+            tooFar              = nnMergeChebyshevCellDistance(qCell, cCell) > a_maxCellDistance.value();
+          }
+
+          if (!tooFar) {
+            nnMergeWeightedCentroid(query.position, query.weight, cand.position, cand.weight, mergedPos, mergedWeight);
+            invalidPos = !a_isPositionValid(mergedPos);
+          }
+        }
+
+        const bool ineligible = tooFar || invalidPos;
+
+        if (attempt == 0) {
+          originalStale      = candidateStale;
+          originalIneligible = ineligible;
+        }
+
+        const bool trivialOk = candidateIsLocal && candidateExists && !candidateStale && !candidateBusy &&
+                               !candidateExposed && !queryExposed && !ineligible;
+
+        if (trivialOk) {
+          const NNMergeParticle<Packed>& cand = candDataIt->second;
+
+          const IntVect qCell = cellKeyOf(query.position, a_probLo, a_dx);
+          const IntVect cCell = cellKeyOf(cand.position, a_probLo, a_dx);
+
+          const auto qCountIt = a_liveCellCount.find(qCell);
+          const auto cCountIt = a_liveCellCount.find(cCell);
+          const int  qCount   = (qCountIt != a_liveCellCount.end()) ? qCountIt->second : 0;
+          const int  cCount   = (cCountIt != a_liveCellCount.end()) ? cCountIt->second : 0;
+
+          if (qCount > a_numParticlesPerCellThresh && cCount > a_numParticlesPerCellThresh) {
+            // d. COMMIT.
+            NNMergeResult<Packed> result;
+            result.firstID  = query.globalID;
+            result.secondID = cand.globalID;
+
+            result.merged.position  = mergedPos;
+            result.merged.weight    = mergedWeight;
+            result.merged.globalID  = a_allocateID();
+            result.merged.ownerRank = query.ownerRank;
+            result.merged.payload   = a_combine(query.payload, query.weight, cand.payload, cand.weight);
+
+            a_results.push_back(result);
+
+            a_consumedIDs.insert(query.globalID);
+            a_consumedIDs.insert(cand.globalID);
+
+            a_liveCellCount[qCell] -= 1;
+            a_liveCellCount[cCell] -= 1;
+
+            resolved = true;
+            break;
+          }
+          else {
+            // e. Threshold recheck failed -- legitimately left unmatched, NOT fallback-eligible
+            //    (a different candidate wouldn't change the query's own cell occupancy).
+            resolved = true;
+            break;
+          }
+        }
+        // else: fall through to the next fallback attempt, if any remain.
+      } // end attempt loop
+
+      if (!resolved) {
+        // f./g.: not resolved trivially -- see this function's docs for why only the ORIGINAL
+        // candidate's staleness/ineligibility (not any fallback's) decides whether a proposal is
+        // generated.
+        if (!originalStale && !originalIneligible) {
+          a_hasOutgoingCommitment.insert(query.globalID);
+        }
+      }
+    }
   }
 
   template <typename Packed>
@@ -235,26 +476,29 @@ namespace ParticleManagement {
     a_proposalsByDestRank.clear();
     a_proposalsByDestRank.resize(a_numRanks);
 
-    // For each edge whose queryID is in a_hasOutgoingCommitment (i.e. resolveTrivialTier()
-    // could not resolve it locally):
-    //   - look up the full NNMergeParticle for queryID in a_particlesByID -- this becomes
-    //     NNMergeProposal::source.
-    //   - look up the candidate's owning rank via a_particlesByID.at(candidateID).ownerRank --
-    //     THIS, not any id comparison, determines the destination bucket (see NNMergeProposal's
-    //     docs for why an id-based routing rule was tried and found unsound: it can send the two
-    //     directions of a genuinely mutual pair to two different, uncoordinated judges).
-    //   - append {source, candidateID, distanceSquared} to
-    //     a_proposalsByDestRank[candidate's owning rank] -- including when that rank equals this
-    //     rank's own (see this function's header docs: the caller hands that specific bucket to
-    //     judgeProposals() directly, in-process, rather than shipping it over MPI).
-    //
-    // Each queryID appears in at most ONE outgoing proposal (exactly the single edge
-    // findNearestNeighborCandidates() produced for it) -- this function does not aggregate or
-    // deduplicate across queries, since each query already has at most one edge by construction.
-    MayDay::Error("ParticleManagement::generateProposals -- not yet implemented, see RULES.md");
+    for (const auto& edge : a_edges) {
+      if (a_hasOutgoingCommitment.count(edge.queryID) == 0) {
+        continue;
+      }
+
+      const auto sourceIt = a_particlesByID.find(edge.queryID);
+      const auto targetIt = a_particlesByID.find(edge.candidateID);
+      if (sourceIt == a_particlesByID.end() || targetIt == a_particlesByID.end()) {
+        continue;
+      }
+
+      NNMergeProposal<Packed> proposal;
+      proposal.source          = sourceIt->second;
+      proposal.targetID        = edge.candidateID;
+      proposal.distanceSquared = edge.distanceSquared;
+
+      const int destRank = static_cast<int>(targetIt->second.ownerRank);
+      CH_assert(destRank >= 0 && destRank < a_numRanks);
+      a_proposalsByDestRank[destRank].push_back(proposal);
+    }
   }
 
-  template <typename Packed, typename Combine>
+  template <typename Packed, typename Combine, typename PosValid, typename Allocator>
   inline void
   judgeProposals(const std::vector<NNMergeProposal<Packed>>&          a_incomingProposals,
                  const std::map<ParticleID, NNMergeParticle<Packed>>& a_myParticlesByID,
@@ -263,73 +507,159 @@ namespace ParticleManagement {
                  const Combine&                                       a_combine,
                  std::map<IntVect, int>&                              a_liveCellCount,
                  const int                                            a_numParticlesPerCellThresh,
+                 const RealVect&                                      a_probLo,
+                 const RealVect&                                      a_dx,
+                 const PosValid&                                      a_isPositionValid,
+                 const Allocator&                                     a_allocateID,
                  std::vector<NNMergeResult<Packed>>&                  a_results,
-                 std::vector<std::vector<NNMergeVerdict>>&            a_verdictsByDestRank) noexcept
+                 std::vector<std::vector<NNMergeVerdict>>&            a_verdictsByDestRank,
+                 const std::optional<int>                             a_maxCellDistance) noexcept
   {
-    CH_TIMERS("ParticleManagement::judgeProposals");
-    CH_TIMER("ParticleManagement::judgeProposals::phase1_candidates", t1);
-    CH_TIMER("ParticleManagement::judgeProposals::phase2_sortedAccept", t2);
-    CH_TIMER("ParticleManagement::judgeProposals::phase3_verdicts", t3);
+    CH_TIME("ParticleManagement::judgeProposals");
 
     a_results.clear();
+    // NOTE: a_verdictsByDestRank is APPENDED to, never resized here -- the caller must have
+    // already sized it to the total rank count (same convention as placeMergedParticles's
+    // a_scatterByDestRank).
 
-    CH_START(t1);
-    // Phase 1: group a_incomingProposals by targetID, then for EACH target determine its
-    // candidate winner and sort key WITHOUT committing anything yet:
-    //   - if targetID is not in a_myParticlesByID (shouldn't normally happen -- a proposal was
-    //     addressed here by construction -- but guard it anyway): every incoming proposal for it
-    //     is rejected immediately (append {source.id=proposer, accepted=false} to
-    //     a_verdictsByDestRank[proposer's rank] for each), do not add a phase-2 candidate.
-    //   - else if targetID is in a_hasOutgoingCommitment (this target is itself proposing to
-    //     someone else this round):
-    //       myTarget = a_outgoingTargetOf.at(targetID)
-    //       mutual = the subset of this target's incoming proposals whose source id == myTarget
-    //       if mutual is non-empty AND targetID < myTarget (deterministic lower-id-performs-the-
-    //         accept tiebreak -- see this function's header docs for why the mutual-match
-    //         exception exists at all, and why exactly one side must act on it):
-    //           record a phase-2 candidate (distanceSquared = mutual[0]'s, targetID, winner =
-    //           mutual[0], target's data).
-    //       else:
-    //           reject every incoming proposal for this target immediately (same as the
-    //           not-in-a_myParticlesByID branch above) -- either it is genuinely spoken for
-    //           elsewhere with no reciprocity, or the reciprocal match will be accepted by the
-    //           OTHER side (myTarget's own rank), which independently reaches the same
-    //           conclusion from the mirrored data it has.
-    //   - else (no outgoing commitment): record a phase-2 candidate using the plain
-    //     minimum-(distanceSquared, source.id) proposal among this target's incoming proposals.
-    CH_STOP(t1);
+    // 1. Group incoming proposals by target id.
+    std::map<ParticleID, std::vector<const NNMergeProposal<Packed>*>> byTarget;
+    for (const auto& p : a_incomingProposals) {
+      byTarget[p.targetID].push_back(&p);
+    }
 
-    CH_START(t2);
-    // Phase 2: sort ALL phase-1 candidates (mutual-match and plain alike, across every target
-    // this rank is judging) by (distanceSquared, targetID) and process them in that order:
-    //   - re-check targetID has not already been consumed (should not happen within this single
-    //     phase-2 pass since each target appears at most once, but mirrors the discipline in
-    //     resolveTrivialTier() for symmetry/robustness).
-    //   - dynamic per-cell threshold recheck on targetID's CURRENT cell count in a_liveCellCount
-    //     (already reflecting decrements from candidates accepted earlier in this same sorted
-    //     pass -- this is the fix for the bug where accepting one target could silently push a
-    //     DIFFERENT target sharing its cell below threshold, and the outcome depended on
-    //     whatever arbitrary order targets were iterated in).
-    //   - if the recheck passes: commit -- combine target + winner's source into a merged
-    //     particle (weighted centroid/weight directly, a_combine for the opaque payload), append
-    //     {targetID, winner.source.id, merged} to a_results, decrement a_liveCellCount at
-    //     targetID's cell, and remember that this target's winning proposal is `winner` (for
-    //     phase 3).
-    //   - if the recheck fails: this target is not accepted after all -- every one of its
-    //     incoming proposals gets a rejected verdict in phase 3, including the one that looked
-    //     like the winner in phase 1.
-    CH_STOP(t2);
+    struct TargetDecision
+    {
+      ParticleID                     targetID;
+      const NNMergeProposal<Packed>* winner;
+    };
 
-    CH_START(t3);
-    // Phase 3: for every target that had at least one phase-1 candidate (i.e. was NOT rejected
-    // immediately in phase 1 -- those already got their verdicts emitted directly), emit exactly
-    // one verdict per ORIGINAL incoming proposal for that target: accepted=true for the specific
-    // proposal recorded as the winner in phase 2 (only if that target was actually committed),
-    // accepted=false for every other proposal against the same target. Route each verdict to
-    // a_verdictsByDestRank[that proposal's source.ownerRank].
-    CH_STOP(t3);
+    std::vector<TargetDecision> decisions;
+    decisions.reserve(byTarget.size());
 
-    MayDay::Error("ParticleManagement::judgeProposals -- not yet implemented, see RULES.md");
+    for (auto& kv : byTarget) {
+      const ParticleID targetID  = kv.first;
+      auto&            proposals = kv.second;
+
+      const auto targetDataIt = a_myParticlesByID.find(targetID);
+      if (targetDataIt == a_myParticlesByID.end()) {
+        // Target no longer alive -- defensive skip, reject every incoming proposal.
+        for (const NNMergeProposal<Packed>* p : proposals) {
+          const int destRank = static_cast<int>(p->source.ownerRank);
+          a_verdictsByDestRank[destRank].push_back(NNMergeVerdict{p->source.globalID, false});
+        }
+        continue;
+      }
+
+      const bool targetHasOutgoing = a_hasOutgoingCommitment.count(targetID) > 0;
+
+      const NNMergeProposal<Packed>* winner = nullptr;
+
+      if (!targetHasOutgoing) {
+        // 2. Argmin over incoming proposals, deterministic id tiebreak.
+        for (const NNMergeProposal<Packed>* p : proposals) {
+          if (winner == nullptr || p->distanceSquared < winner->distanceSquared ||
+              (p->distanceSquared == winner->distanceSquared && p->source.globalID < winner->source.globalID)) {
+            winner = p;
+          }
+        }
+      }
+      else {
+        // 3. Normally reject everything, UNLESS a mutual-match proposer is present.
+        const auto ownTargetIt = a_outgoingTargetOf.find(targetID);
+        if (ownTargetIt != a_outgoingTargetOf.end()) {
+          const ParticleID ownTarget = ownTargetIt->second;
+          for (const NNMergeProposal<Packed>* p : proposals) {
+            if (p->source.globalID == ownTarget) {
+              if (targetID < ownTarget) {
+                winner = p;
+              }
+              break;
+            }
+          }
+        }
+      }
+
+      if (winner != nullptr) {
+        decisions.push_back(TargetDecision{targetID, winner});
+      }
+
+      // Reject every OTHER proposal to this target immediately -- a rejection is never
+      // contingent on processing order, only an ACCEPT is (see rule 4).
+      for (const NNMergeProposal<Packed>* p : proposals) {
+        if (p != winner) {
+          const int destRank = static_cast<int>(p->source.ownerRank);
+          a_verdictsByDestRank[destRank].push_back(NNMergeVerdict{p->source.globalID, false});
+        }
+      }
+    }
+
+    // 4. Resolve all target decisions in ONE globally distance-sorted pass.
+    std::sort(decisions.begin(), decisions.end(), [](const TargetDecision& a_a, const TargetDecision& a_b) {
+      if (a_a.winner->distanceSquared != a_b.winner->distanceSquared) {
+        return a_a.winner->distanceSquared < a_b.winner->distanceSquared;
+      }
+      return a_a.targetID < a_b.targetID;
+    });
+
+    for (const TargetDecision& decision : decisions) {
+      const NNMergeProposal<Packed>& proposal = *decision.winner;
+      const auto                     targetIt = a_myParticlesByID.find(decision.targetID);
+      CH_assert(targetIt != a_myParticlesByID.end());
+      const NNMergeParticle<Packed>& target = targetIt->second;
+      const NNMergeParticle<Packed>& source = proposal.source;
+
+      const int sourceDestRank = static_cast<int>(source.ownerRank);
+
+      // 6. a_maxCellDistance / a_isPositionValid: a physical-validity rule, applies here exactly
+      // as in resolveTrivialTier(), regardless of the mutual-match exception above.
+      bool tooFar = false;
+      if (a_maxCellDistance.has_value()) {
+        const IntVect tCell = cellKeyOf(target.position, a_probLo, a_dx);
+        const IntVect sCell = cellKeyOf(source.position, a_probLo, a_dx);
+        tooFar              = nnMergeChebyshevCellDistance(tCell, sCell) > a_maxCellDistance.value();
+      }
+      if (tooFar) {
+        a_verdictsByDestRank[sourceDestRank].push_back(NNMergeVerdict{source.globalID, false});
+        continue;
+      }
+
+      RealVect mergedPos(D_DECL(0.0, 0.0, 0.0));
+      Real     mergedWeight = 0.0;
+      nnMergeWeightedCentroid(target.position, target.weight, source.position, source.weight, mergedPos, mergedWeight);
+
+      if (!a_isPositionValid(mergedPos)) {
+        a_verdictsByDestRank[sourceDestRank].push_back(NNMergeVerdict{source.globalID, false});
+        continue;
+      }
+
+      // Dynamic per-target threshold recheck (mirrors resolveTrivialTier()'s discipline).
+      const IntVect tCell    = cellKeyOf(target.position, a_probLo, a_dx);
+      const auto    tCountIt = a_liveCellCount.find(tCell);
+      const int     tCount   = (tCountIt != a_liveCellCount.end()) ? tCountIt->second : 0;
+
+      if (tCount <= a_numParticlesPerCellThresh) {
+        a_verdictsByDestRank[sourceDestRank].push_back(NNMergeVerdict{source.globalID, false});
+        continue;
+      }
+
+      // Accept.
+      NNMergeResult<Packed> result;
+      result.firstID  = target.globalID;
+      result.secondID = source.globalID;
+
+      result.merged.position  = mergedPos;
+      result.merged.weight    = mergedWeight;
+      result.merged.globalID  = a_allocateID();
+      result.merged.ownerRank = target.ownerRank;
+      result.merged.payload   = a_combine(target.payload, target.weight, source.payload, source.weight);
+
+      a_results.push_back(result);
+
+      a_liveCellCount[tCell] -= 1;
+
+      a_verdictsByDestRank[sourceDestRank].push_back(NNMergeVerdict{source.globalID, true});
+    }
   }
 
   inline void
@@ -337,50 +667,63 @@ namespace ParticleManagement {
   {
     CH_TIME("ParticleManagement::applyVerdicts");
 
-    // For each verdict in a_incomingVerdicts:
-    //   if verdict.accepted: insert verdict.proposerID into a_consumedIDs.
-    //   else: no-op -- the proposer's particle is simply left alone (see RULES.md, "Single pass,
-    //   caller loops for convergence": reconsidered next round's fresh candidate search, never
-    //   retried against a second-best candidate within this round).
-    //
-    // The caller (mergeNearestNeighborsRound()) is responsible for actually removing every id in
-    // a_consumedIDs from its own valid particle lists after this call returns.
-    MayDay::Error("ParticleManagement::applyVerdicts -- not yet implemented, see RULES.md");
+    for (const auto& v : a_incomingVerdicts) {
+      if (v.accepted) {
+        a_consumedIDs.insert(v.proposerID);
+      }
+    }
   }
 
   template <typename Packed>
   inline void
   placeMergedParticles(const std::vector<NNMergeResult<Packed>>&            a_results,
-                       const std::vector<Box>&                              a_myPatchBoxes,
+                       const std::vector<PatchLocation>&                    a_allPatches,
+                       const RealVect&                                      a_probLo,
+                       const RealVect&                                      a_dx,
+                       const int                                            a_thisRank,
                        std::map<int, std::vector<NNMergeParticle<Packed>>>& a_localByPatch,
                        std::vector<std::vector<NNMergeParticle<Packed>>>&   a_scatterByDestRank) noexcept
   {
     CH_TIME("ParticleManagement::placeMergedParticles");
 
     a_localByPatch.clear();
+    // a_scatterByDestRank is APPENDED to, never resized here -- see its own docs.
 
-    // For each result in a_results (pooled from BOTH resolveTrivialTier() and judgeProposals()
-    // -- placement makes no distinction between the two, see this function's header docs):
-    //   - point-locate result.merged.position against a_myPatchBoxes (a linear scan is fine at
-    //     small patch counts; the real AmrMesh/DisjointBoxLayout integration may expose a
-    //     cheaper spatial index -- left to the implementation).
-    //   - if found in patch index i: append result.merged to a_localByPatch[i].
-    //   - if not found in ANY of a_myPatchBoxes: this rank does not own the destination patch --
-    //     the caller (mergeNearestNeighborsRound()) is expected to have a way to resolve "which
-    //     rank owns the patch containing this position" globally (mirroring how a
-    //     DisjointBoxLayout is already globally known/replicated) and bucket the particle into
-    //     a_scatterByDestRank accordingly. This function signature intentionally leaves that
-    //     global patch-to-rank lookup abstract (only local point-location against a_myPatchBoxes
-    //     is done here) since it depends on whatever the real AmrMesh integration exposes for
-    //     it.
-    //
-    // Note this runs even for trivial-tier (same-rank) results: the union of two patches is not
-    // generally convex (T-junctions, corners, refinement boundaries), so a locally-decided
-    // merge's centroid can still legitimately fall outside every one of a_myPatchBoxes.
-    MayDay::Error("ParticleManagement::placeMergedParticles -- not yet implemented, see RULES.md");
+    for (const auto& result : a_results) {
+      const IntVect cell = cellKeyOf(result.merged.position, a_probLo, a_dx);
+
+      bool found = false;
+      for (const PatchLocation& patch : a_allPatches) {
+        if (patch.box.contains(cell)) {
+          if (patch.ownerRank == a_thisRank) {
+            a_localByPatch[patch.localPatchIndex].push_back(result.merged);
+          }
+          else {
+            a_scatterByDestRank[patch.ownerRank].push_back(result.merged);
+          }
+          found = true;
+          break;
+        }
+      }
+
+      // A merged particle landing outside every known patch (e.g. exactly on/outside the domain
+      // boundary due to floating-point roundoff in the weighted centroid) is not expected in
+      // normal operation; MayDay rather than silently dropping mass.
+      if (!found) {
+        MayDay::Error("ParticleManagement::placeMergedParticles -- merged particle position not "
+                      "found in any patch");
+      }
+    }
   }
 
-  template <typename P, typename Packed, typename Traits, typename Gather, typename Combine, typename Scatter>
+  template <typename P,
+            typename Packed,
+            typename Traits,
+            typename Gather,
+            typename Combine,
+            typename Scatter,
+            typename Allocator,
+            typename PosValid>
   inline void
   mergeNearestNeighborsRound(AmrMesh&                      a_amr,
                              ParticleContainer<P, Traits>& a_particles,
@@ -388,127 +731,339 @@ namespace ParticleManagement {
                              const Gather&                 a_gather,
                              const Combine&                a_combine,
                              const Scatter&                a_scatter,
+                             const Allocator&              a_allocateID,
                              const bool                    a_iterateLocalTierToConvergence,
                              const int                     a_maxFallbackCandidates,
-                             const std::optional<int>      a_maxCellDistance)
+                             const std::optional<int>      a_maxCellDistance,
+                             const PosValid&               a_isPositionValid)
   {
-    CH_TIMERS("ParticleManagement::mergeNearestNeighborsRound");
-    CH_TIMER("ParticleManagement::mergeNearestNeighborsRound::ghostFill", t1);
-    CH_TIMER("ParticleManagement::mergeNearestNeighborsRound::localPhase", t2);
-    CH_TIMER("ParticleManagement::mergeNearestNeighborsRound::exchangeProposals", t3);
-    CH_TIMER("ParticleManagement::mergeNearestNeighborsRound::judge", t4);
-    CH_TIMER("ParticleManagement::mergeNearestNeighborsRound::exchangeVerdicts", t5);
-    CH_TIMER("ParticleManagement::mergeNearestNeighborsRound::placement", t6);
+    CH_TIME("ParticleManagement::mergeNearestNeighborsRound");
 
-    CH_START(t1);
-    // 1. Ghost-fill, fresh, exactly once, strictly before anything below (see RULES.md,
-    //    "Sequencing" -- this is a hard invariant, not an optimization detail):
-    //      - fetch the three ghost masks this merge needs from a_amr: same-level
-    //        (getParticleGhostMask), coarse-to-fine, and fine-to-coarse, all at whatever ghost
-    //        width was registered via a_amr.registerParticleGhostMask() for this particle
-    //        container's realm (the CALLER's responsibility to have registered a width at least
-    //        as large as this merge's own search radius -- this function does not register
-    //        anything itself).
-    //      - a_particles.fillGhostParticles(maskSame, maskCoarToFine, maskFineToCoar).
-    //      - a_particles.clearGhostParticles() must NOT be called again until after THIS round's
-    //        placement step has fully committed -- ghosts from this fill are read throughout
-    //        steps 2-3 below.
-    CH_STOP(t1);
+    const int myRank   = procID();
+    const int numRanks = static_cast<int>(numProc());
 
-    CH_START(t2);
-    // 2. Per patch this rank owns:
-    //      a. Gather a_particles' valid particles (via a_gather, packed into NNMergeParticle<
-    //         Packed>) and its ghosts (same gather, applied to the ghost-tagged slots
-    //         ParticleSoA already carries -- see ParticleSoA::isGhost()/ghost()).
-    //      b. Compute per-cell live counts (valid + ghost) using the SAME unclamped cellKeyOf()
-    //         used everywhere else this round.
-    //      c. Compute isBoundaryExposed() for every locally-valid particle, OR-ing across all
-    //         three ghost masks from step 1 (a particle exposed toward EITHER a same-level,
-    //         coarser, or finer neighbor counts as exposed).
-    //      d. findNearestNeighborCandidates() for this patch, forwarding a_maxFallbackCandidates
-    //         unchanged (so it fetches K=1+a_maxFallbackCandidates nearest candidates per query
-    //         particle instead of just 1 -- see its own docs and resolveTrivialTier()'s).
-    //      e. Pool this patch's edges into one rank-wide edge list (do NOT resolve per-patch in
-    //         isolation -- resolveTrivialTier() needs the full, rank-wide, globally
-    //         distance-sorted pass; see that function's docs).
-    //    After all of this rank's own patches have been processed: resolveTrivialTier() over the
-    //    pooled edge list, applying its results directly to the corresponding ParticleSoA
-    //    containers via a_scatter for merged particles and ordinary removal for consumed ids
-    //    (removal mechanics -- e.g. swap-and-pop via ParticleSoA::remove() -- are the caller's
-    //    responsibility, not resolveTrivialTier()'s, which only reports which ids were consumed).
-    //
-    //    resolveTrivialTier() is always called with a_maxFallbackCandidates and a_maxCellDistance
-    //    forwarded unchanged (see their own docs -- both are orthogonal to the iteration option
-    //    below and combine with it rather than competing with it).
-    //
-    //    If a_iterateLocalTierToConvergence is false (the default): steps (a)-(e) plus the one
-    //    resolveTrivialTier() call run exactly once, as above.
-    //
-    //    If a_iterateLocalTierToConvergence is true: after that first resolveTrivialTier() call,
-    //    check whether it committed at least one merge. If so, repeat steps (a)-(e) plus
-    //    resolveTrivialTier() again -- re-gathering valid particles (now reflecting the previous
-    //    local iteration's removals/insertions), reusing the SAME ghosts and SAME boundary-exposed
-    //    flags from step 1/this function's own first pass (neither changes between local
-    //    iterations: ghost data depends only on the ghost-fill from step 1, which is not redone,
-    //    and a particle's exposure is a fixed geometric property of its cell, not of who else is
-    //    still alive) -- until a full local iteration commits zero further trivial merges.
-    //    Terminate the loop as soon as one full iteration yields zero commits (not a fixed
-    //    iteration count), since further iterations after that point cannot change anything
-    //    without new ghost data. generateProposals()/judgeProposals() (steps 3-5 below) still run
-    //    exactly once regardless of this option -- only the LOCAL portion loops.
-    //
-    //    NOTE on the ACTUAL measured relationship between these two options (see RULES.md for the
-    //    full writeup): a_iterateLocalTierToConvergence was originally hypothesized to close most
-    //    of the single-round completion gap by itself, on the reasoning that a particle whose
-    //    candidate gets consumed by a closer commit elsewhere is left unmatched for the rest of
-    //    that pass even if a different partner exists, and re-running the search should let it
-    //    find one. Measured effect was much smaller than that reasoning predicted (~5% more
-    //    merges in the validation scenario) -- re-running the search only helps when a
-    //    particle's BEST choice actually changes between iterations, which turned out to be rare.
-    //    The dominant loss mechanism was instead a STABLE condition (a candidate marked "busy" by
-    //    its own separate, unrelated merge attempt) that persists identically across iterations,
-    //    which a_maxFallbackCandidates (via resolveTrivialTier(), see its docs) is what actually
-    //    addresses, and recovers far more of the gap. Both options remain independently useful
-    //    and compose (this function applies a_maxFallbackCandidates on every local iteration,
-    //    however many there are), but a_maxFallbackCandidates is the higher-value one.
-    CH_STOP(t2);
+    const std::string   realm       = a_particles.getRealm();
+    const int           finestLevel = a_amr.getFinestLevel();
+    const RealVect      probLo      = a_amr.getProbLo();
+    const Vector<Real>& dxScalar    = a_amr.getDx();
 
-    CH_START(t3);
-    // 3. generateProposals() over whatever resolveTrivialTier() left as
-    //    a_hasOutgoingCommitment. Exchange: hand a_proposalsByDestRank[this rank] to
-    //    judgeProposals() directly, in-process; ship every other bucket to its destination rank
-    //    and collect the incoming proposals addressed to this rank's own particles. See this
-    //    file's header-level @details for the open question this step depends on: no existing
-    //    general-purpose "ship arbitrary payloads to a specific rank" primitive is currently
-    //    exposed outside ParticleContainer's own protected, ParticleSoA-specific
-    //    gatherToPool()/gatherGhostsFromMasks()/distributeFromPool() machinery -- this exchange
-    //    needs either a new general utility, or NNMergeProposal records represented as
-    //    specially-tagged particles riding the existing transport. Resolve this before writing
-    //    real code here.
-    CH_STOP(t3);
+    // 1. Ghost-fill -- fresh, exactly once, strictly before anything below. The search radius
+    // this algorithm needs is one cell in every direction (the crowding trigger and the trivial-
+    // tier candidate search only ever look at a particle's own cell and its immediate
+    // neighborhood), so a width of 1 must already have been registered -- see this function's own
+    // docs: registration is deliberately the CALLER's responsibility, not done here. A particle
+    // ghost mask is only actually built during a regrid (AmrMesh::registerParticleGhostMask()
+    // itself just records that a width should be tracked from then on); registering it here,
+    // inside a function that runs long after grid setup, would be too late unless a regrid
+    // happened to follow immediately afterward. The caller must register width 1 on this realm
+    // BEFORE the relevant grids are (re)built (e.g. from a stepper's registerOperators()).
+    constexpr int ghostWidth = 1;
 
-    CH_START(t4);
-    // 4. judgeProposals() over the pooled incoming proposals from step 3, using this rank's own
-    //    currently-alive valid particles (post-step-2 removals already applied) as
-    //    a_myParticlesByID.
-    CH_STOP(t4);
+    a_particles.clearGhostParticles();
+    a_particles.fillGhostParticles(a_amr.getParticleGhostMask(realm, ghostWidth),
+                                   a_amr.getParticleGhostMaskCoarToFine(realm, ghostWidth),
+                                   a_amr.getParticleGhostMaskFineToCoar(realm, ghostWidth));
 
-    CH_START(t5);
-    // 5. Exchange verdicts (same open transport question as step 3, mirrored: this rank's own
-    //    in-process bucket plus real MPI for everyone else) and applyVerdicts() against this
-    //    rank's own outgoing proposals from step 3. Remove every consumed id from the real
-    //    ParticleSoA containers.
-    CH_STOP(t5);
+    struct PatchWork
+    {
+      int       level;
+      DataIndex din;
+      RealVect  dx;
+    };
 
-    CH_START(t6);
-    // 6. Pool every NNMergeResult from steps 2 and 4 and call placeMergedParticles(). Append
-    //    every locally-placed merged particle into the correct ParticleSoA via a_scatter.
-    //    Exchange the scatter bucket (same open transport question again) and apply incoming
-    //    scattered particles the same way. Only after this step completes may
-    //    a_particles.clearGhostParticles() be called for the next round's fresh fill.
-    CH_STOP(t6);
+    std::vector<PatchWork>                            patchWork;
+    std::vector<std::vector<NNMergeParticle<Packed>>> patchLocalValid; // parallel to patchWork
+    std::vector<std::vector<NNMergeParticle<Packed>>> patchGhosts;     // parallel to patchWork
 
-    MayDay::Error("ParticleManagement::mergeNearestNeighborsRound -- not yet implemented, see RULES.md");
+    std::map<ParticleID, NNMergeParticle<Packed>> particlesByID; // pooled, this rank's own patches
+    std::map<ParticleID, bool>                    exposed;       // pooled, this rank's own valid particles
+    std::map<IntVect, int>                        liveCellCount; // pooled, GLOBAL cell key
+
+    std::vector<PatchLocation> allPatches; // GLOBAL, every rank -- for placeMergedParticles()
+
+    for (int lvl = 0; lvl <= finestLevel; lvl++) {
+      const RealVect dx(D_DECL(dxScalar[lvl], dxScalar[lvl], dxScalar[lvl]));
+
+      const DisjointBoxLayout& dbl = a_amr.getGrids(realm)[lvl];
+
+      // Global patch list (every rank) for placeMergedParticles() -- a DisjointBoxLayout's box
+      // list and owning ranks are globally known/replicated, so this needs no communication.
+      LayoutIterator lit = dbl.layoutIterator();
+      for (lit.begin(); lit.ok(); ++lit) {
+        PatchLocation loc;
+        loc.box             = dbl[lit()];
+        loc.ownerRank       = dbl.procID(lit());
+        loc.localPatchIndex = -1; // filled in below for patches this rank owns
+        allPatches.push_back(loc);
+      }
+
+      const AMRParticleGhostMask& maskSame = a_amr.getParticleGhostMask(realm, ghostWidth);
+      const AMRParticleGhostMask& maskC2F  = a_amr.getParticleGhostMaskCoarToFine(realm, ghostWidth);
+      const AMRParticleGhostMask& maskF2C  = a_amr.getParticleGhostMaskFineToCoar(realm, ghostWidth);
+
+      const DataIterator& dit  = dbl.dataIterator();
+      const int           nbox = dit.size();
+
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        ParticleSoA<P, Traits>& leaf = a_particles[lvl][din];
+
+        const int localPatchIndex = static_cast<int>(patchWork.size());
+
+        // Record this patch's own global location (owned by this rank) with its local index.
+        for (auto& loc : allPatches) {
+          if (loc.ownerRank == myRank && loc.box == dbl[din]) {
+            loc.localPatchIndex = localPatchIndex;
+            break;
+          }
+        }
+
+        std::vector<NNMergeParticle<Packed>> localValid;
+        std::vector<NNMergeParticle<Packed>> ghosts;
+
+        for (std::size_t i = 0; i < leaf.size(); i++) {
+          NNMergeParticle<Packed> p;
+          p.position  = leaf.position(i);
+          p.weight    = leaf.weight(i);
+          p.globalID  = leaf.particleID(i);
+          p.ownerRank = leaf.rankID(i);
+          p.payload   = a_gather(leaf, i);
+
+          const IntVect cell = cellKeyOf(p.position, probLo, dx);
+
+          if (leaf.isGhost(i)) {
+            ghosts.push_back(p);
+            liveCellCount[cell] += 1;
+          }
+          else {
+            localValid.push_back(p);
+            liveCellCount[cell] += 1;
+            particlesByID[p.globalID] = p;
+
+            bool isExposed = !maskSame[lvl].isNull() && isBoundaryExposed(cell, (*maskSame[lvl])[din]);
+            if (!isExposed && lvl < finestLevel && !maskC2F[lvl].isNull()) {
+              isExposed = isBoundaryExposed(cell, (*maskC2F[lvl])[din]);
+            }
+            if (!isExposed && lvl > 0 && !maskF2C[lvl].isNull()) {
+              isExposed = isBoundaryExposed(cell, (*maskF2C[lvl])[din]);
+            }
+            exposed[p.globalID] = isExposed;
+          }
+        }
+
+        patchWork.push_back(PatchWork{lvl, din, dx});
+        patchLocalValid.push_back(std::move(localValid));
+        patchGhosts.push_back(std::move(ghosts));
+      }
+    }
+
+    const RealVect dxLevel0(D_DECL(dxScalar[0], dxScalar[0], dxScalar[0]));
+
+    std::set<ParticleID>             consumedIDs;
+    std::set<ParticleID>             hasOutgoingCommitment;
+    std::map<ParticleID, ParticleID> outgoingTargetOf;
+
+    std::vector<NNMergeResult<Packed>> allResults;
+
+    // 2. Per-patch candidate search + trivial-tier resolution, pooled rank-wide.
+    auto runLocalTierPass = [&]() -> bool {
+      std::vector<NNMergeEdge<Packed>> pooledEdges;
+
+      for (std::size_t pw = 0; pw < patchWork.size(); pw++) {
+        std::vector<NNMergeParticle<Packed>> aliveLocal;
+        aliveLocal.reserve(patchLocalValid[pw].size());
+        for (const auto& p : patchLocalValid[pw]) {
+          if (consumedIDs.count(p.globalID) == 0) {
+            aliveLocal.push_back(p);
+          }
+        }
+        std::vector<NNMergeParticle<Packed>> aliveGhosts;
+        aliveGhosts.reserve(patchGhosts[pw].size());
+        for (const auto& p : patchGhosts[pw]) {
+          if (consumedIDs.count(p.globalID) == 0) {
+            aliveGhosts.push_back(p);
+          }
+        }
+
+        std::vector<NNMergeEdge<Packed>> patchEdges;
+        findNearestNeighborCandidates(aliveLocal,
+                                      aliveGhosts,
+                                      liveCellCount,
+                                      probLo,
+                                      patchWork[pw].dx,
+                                      a_numParticlesPerCellThresh,
+                                      patchEdges,
+                                      a_maxFallbackCandidates);
+
+        pooledEdges.insert(pooledEdges.end(), patchEdges.begin(), patchEdges.end());
+      }
+
+      std::vector<NNMergeResult<Packed>> passResults;
+      resolveTrivialTier(pooledEdges,
+                         exposed,
+                         particlesByID,
+                         a_combine,
+                         liveCellCount,
+                         consumedIDs,
+                         a_numParticlesPerCellThresh,
+                         hasOutgoingCommitment,
+                         passResults,
+                         probLo,
+                         dxLevel0,
+                         a_isPositionValid,
+                         a_allocateID,
+                         a_maxFallbackCandidates,
+                         a_maxCellDistance);
+
+      allResults.insert(allResults.end(), passResults.begin(), passResults.end());
+
+      return !passResults.empty();
+    };
+
+    if (a_iterateLocalTierToConvergence) {
+      constexpr int safetyCap = 1000;
+      for (int iter = 0; iter < safetyCap; iter++) {
+        // hasOutgoingCommitment must NOT accumulate across internal iterations -- each iteration
+        // re-derives it from scratch via a fresh candidate search over the currently-alive set.
+        hasOutgoingCommitment.clear();
+        if (!runLocalTierPass()) {
+          break;
+        }
+      }
+    }
+    else {
+      runLocalTierPass();
+    }
+
+    // outgoingTargetOf: for every query id with an outgoing commitment, remember its own true
+    // nearest-neighbor candidate id (needed by judgeProposals()'s mutual-match rule). Re-derive
+    // via one more candidate search over the currently-alive set.
+    std::vector<NNMergeEdge<Packed>> pooledEdgesForProposals;
+    for (std::size_t pw = 0; pw < patchWork.size(); pw++) {
+      std::vector<NNMergeParticle<Packed>> aliveLocal;
+      for (const auto& p : patchLocalValid[pw]) {
+        if (consumedIDs.count(p.globalID) == 0) {
+          aliveLocal.push_back(p);
+        }
+      }
+      std::vector<NNMergeParticle<Packed>> aliveGhosts;
+      for (const auto& p : patchGhosts[pw]) {
+        if (consumedIDs.count(p.globalID) == 0) {
+          aliveGhosts.push_back(p);
+        }
+      }
+      std::vector<NNMergeEdge<Packed>> patchEdges;
+      findNearestNeighborCandidates(aliveLocal,
+                                    aliveGhosts,
+                                    liveCellCount,
+                                    probLo,
+                                    patchWork[pw].dx,
+                                    a_numParticlesPerCellThresh,
+                                    patchEdges,
+                                    a_maxFallbackCandidates);
+      pooledEdgesForProposals.insert(pooledEdgesForProposals.end(), patchEdges.begin(), patchEdges.end());
+    }
+    for (const auto& edge : pooledEdgesForProposals) {
+      if (hasOutgoingCommitment.count(edge.queryID) > 0) {
+        outgoingTargetOf[edge.queryID] = edge.candidateID;
+      }
+    }
+
+    // 3. generateProposals() for everything the trivial tier could not resolve.
+    std::vector<std::vector<NNMergeProposal<Packed>>> proposalsByDestRank;
+    generateProposals(pooledEdgesForProposals, hasOutgoingCommitment, particlesByID, numRanks, proposalsByDestRank);
+
+    // 4. Exchange proposals.
+    const std::vector<NNMergeProposal<Packed>> incomingProposals = nnMergeExchangeByRank(proposalsByDestRank);
+
+    // 5. judgeProposals() over the pooled incoming proposals.
+    std::map<ParticleID, NNMergeParticle<Packed>> myParticlesByID;
+    for (const auto& kv : particlesByID) {
+      if (consumedIDs.count(kv.first) == 0) {
+        myParticlesByID[kv.first] = kv.second;
+      }
+    }
+
+    std::vector<NNMergeResult<Packed>>       judgeResults;
+    std::vector<std::vector<NNMergeVerdict>> verdictsByDestRank(numRanks);
+
+    judgeProposals(incomingProposals,
+                   myParticlesByID,
+                   hasOutgoingCommitment,
+                   outgoingTargetOf,
+                   a_combine,
+                   liveCellCount,
+                   a_numParticlesPerCellThresh,
+                   probLo,
+                   dxLevel0,
+                   a_isPositionValid,
+                   a_allocateID,
+                   judgeResults,
+                   verdictsByDestRank,
+                   a_maxCellDistance);
+
+    allResults.insert(allResults.end(), judgeResults.begin(), judgeResults.end());
+    for (const auto& r : judgeResults) {
+      consumedIDs.insert(r.firstID);
+    }
+
+    // 6. Exchange verdicts and applyVerdicts().
+    const std::vector<NNMergeVerdict> incomingVerdicts = nnMergeExchangeByRank(verdictsByDestRank);
+    applyVerdicts(incomingVerdicts, consumedIDs);
+
+    // 7. placeMergedParticles(), then exchange and apply the scatter bucket.
+    std::map<int, std::vector<NNMergeParticle<Packed>>> localByPatch;
+    std::vector<std::vector<NNMergeParticle<Packed>>>   scatterByDestRank(numRanks);
+
+    placeMergedParticles(allResults, allPatches, probLo, dxLevel0, myRank, localByPatch, scatterByDestRank);
+
+    const std::vector<NNMergeParticle<Packed>> incomingScattered = nnMergeExchangeByRank(scatterByDestRank);
+
+    // ---- Apply everything to the real ParticleSoA containers ----
+    // Remove every consumed id (trivial-tier participants and accepted judge-side participants --
+    // applyVerdicts() already folded accepted proposers into consumedIDs above).
+    for (std::size_t pw = 0; pw < patchWork.size(); pw++) {
+      ParticleSoA<P, Traits>& leaf = a_particles[patchWork[pw].level][patchWork[pw].din];
+
+      for (std::size_t i = 0; i < leaf.size();) {
+        if (!leaf.isGhost(i) && consumedIDs.count(leaf.particleID(i)) > 0) {
+          leaf.remove(i);
+        }
+        else {
+          i++;
+        }
+      }
+    }
+    a_particles.clearGhostParticles();
+
+    // Scatter in every locally-placed merged particle.
+    for (const auto& kv : localByPatch) {
+      ParticleSoA<P, Traits>& leaf = a_particles[patchWork[kv.first].level][patchWork[kv.first].din];
+      for (const auto& merged : kv.second) {
+        a_scatter(leaf, merged);
+      }
+    }
+
+    // Ingest every merged particle that was shipped in from another rank.
+    for (const auto& merged : incomingScattered) {
+      bool placed = false;
+      for (std::size_t pw = 0; pw < patchWork.size(); pw++) {
+        const RealVect& dx   = patchWork[pw].dx;
+        const Box       box  = a_amr.getGrids(realm)[patchWork[pw].level][patchWork[pw].din];
+        const IntVect   cell = cellKeyOf(merged.position, probLo, dx);
+        if (box.contains(cell)) {
+          ParticleSoA<P, Traits>& leaf = a_particles[patchWork[pw].level][patchWork[pw].din];
+          a_scatter(leaf, merged);
+          placed = true;
+          break;
+        }
+      }
+      if (!placed) {
+        MayDay::Error("ParticleManagement::mergeNearestNeighborsRound -- incoming scattered "
+                      "particle not found in any of this rank's own patches");
+      }
+    }
   }
 
 } // namespace ParticleManagement
