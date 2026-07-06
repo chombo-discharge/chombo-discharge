@@ -64,3 +64,44 @@ neither of us has to re-derive them from scratch later.
   keys in the finer participant's cell-size units, reducing exactly to the original same-level
   definition when levels match. Verified: both levels now merge (e.g. level 0 5420->3407, level 1
   3413->2284 in one test), exact mass conservation preserved, on 1 and 4 MPI ranks.
+
+- ~~Cross-rank proposals for ghost candidates were silently dropped.~~ **DONE, found via a
+  cross-level merge diagnostic counter that stayed at exactly 0 for MPI runs with >1 rank while
+  nonzero at 1 rank.** Root cause: `generateProposals()`'s own documented contract requires
+  `a_particlesByID` to contain "every currently-alive local valid particle and every ghost", but
+  `mergeNearestNeighborsRound()` only ever added NATIVE particles to that map. A ghost candidate
+  can never resolve via the trivial tier (requires `candidateIsLocal`), so every cross-rank
+  candidate (cross-level ones especially, since a cross-level candidate is *always* a ghost) had
+  to go through `generateProposals()`, whose lookup then silently failed and dropped the proposal
+  via a bare `continue` -- no error, just a lost merge. Masked itself as correct at 1 rank (every
+  patch, hence every ghost's true owner too, is on rank 0, so the id is reachable via its owning
+  patch's own native entry processed elsewhere in the same loop). Fixed by adding the missing
+  `particlesByID[p.globalID] = p` entry to the ghost branch. Verified: the same multi-level config
+  run at 1/4/8/16 ranks went from 0 cross-level merges at every rank count above 1 to a consistent
+  nonzero count at every rank count.
+
+- ~~Merged particles carried a stale, provisional `ownerRank`, causing mass creation at >1 rank
+  and >1 round simultaneously.~~ **DONE.** `resolveTrivialTier()`/`judgeProposals()` set
+  `NNMergeParticle::ownerRank` on a freshly merged particle to the committing parent's own rank --
+  explicitly documented as provisional, since `placeMergedParticles()` determines the TRUE
+  destination (level/patch/rank) from the merged position via `findDestination()` afterward. That
+  provisional value was never corrected before being handed to the caller's scatter callback,
+  which persists it into the new particle's own `rankID` column. Whenever the true destination
+  rank differed from the provisional one (only possible with >1 rank), the newly created particle
+  carried a wrong recorded owner rank -- silently wrong until that SAME particle later became a
+  proposer in a SUBSEQUENT round: `judgeProposals()` routes an acceptance verdict to
+  `NNMergeParticle::ownerRank`, so a stale value sends the verdict to the wrong rank, and the true
+  owner never learns to remove the since-accepted source. The source survives un-consumed while
+  its weight is ALSO folded into the new merged particle elsewhere -- mass is silently created.
+  Reproduced by the user running the debug hook at 16 ranks with 2 rounds (mass conservation error
+  of 142, vs. exact at 1 rank or 1 round). Fixed by correcting `ownerRank` to the current rank
+  immediately before both scatter call sites in `mergeNearestNeighborsRound()`. Verified exact mass
+  conservation at 16 ranks through 4 rounds and at ~125k particles.
+
+- **Both bugs above were only found by testing at real physics-run scale (many ranks, many
+  rounds) outside the committed smoke test, which only ever exercised 1/4 ranks and 1-2 rounds at
+  small particle counts.** This is exactly the gap the "has not been stress-tested" item above
+  already flagged, now with two concrete, confirmed examples of bugs that specifically required
+  testing the CROSS PRODUCT of dimensions (rank count x round count), not each independently --
+  1 round at 16 ranks was fine, 2 rounds at 1 rank was fine, only 2+ rounds at >1 rank failed.
+  Worth keeping in mind for any future correctness pass: test combinations, not just axes.
