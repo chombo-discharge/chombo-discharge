@@ -119,12 +119,25 @@ def main():
     det_ok = check_determinism(all_results)
 
     print()
+    print("Pressure test: asymmetric ghost visibility (proposal source never a pre-existing ghost)")
+    pressure_proc = subprocess.run(
+        ["mpirun", "--oversubscribe", "-np", "2", VENV_PY, "pressure_test_asymmetric_visibility.py"],
+        cwd=HERE, capture_output=True, text=True,
+    )
+    print(pressure_proc.stdout.strip())
+    pressure_ok = pressure_proc.returncode == 0
+    if not pressure_ok:
+        print(pressure_proc.stderr)
+
+    print()
     if any_run_failed:
         print("SUMMARY: per-run invariant FAILURES present -- see above.")
     if not det_ok:
         print("SUMMARY: determinism FAILURES present -- see above.")
-    if not any_run_failed and det_ok:
-        print("SUMMARY: all runs passed, all determinism checks passed.")
+    if not pressure_ok:
+        print("SUMMARY: asymmetric-visibility pressure test FAILED -- see above.")
+    if not any_run_failed and det_ok and pressure_ok:
+        print("SUMMARY: all runs passed, all determinism checks passed, pressure test passed.")
         sys.exit(0)
     sys.exit(1)
 

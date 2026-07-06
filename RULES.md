@@ -145,6 +145,140 @@ particle within the same round — that's deferred to the next round's fresh gho
 candidate generation. Deliberate, accepted conservatism: not globally optimal in one pass, but
 nothing incorrect happens.
 
+### Optional: iterate the local (trivial) tier to convergence within a round
+
+A caller-selectable option (`a_iterateLocalTierToConvergence`, default `false`) partially relaxes
+this for the LOCAL portion only — the cross-patch propose/judge/verdict exchange is unaffected,
+still exactly once per call, always.
+
+- **The gap this closes**: `findNearestNeighborCandidates()` fixes each query particle's
+  nearest-neighbor edge once, at the start of a pass. If that candidate gets consumed by a
+  different, closer edge before this one is reached in the sorted processing order, the query
+  particle is left unmatched for the *rest* of that pass — even if a different, still-alive
+  partner exists nearby. There is no second query within the same pass.
+- **Measured severity (Python prototype)**: a single isolated, non-exposed cell seeded at 64
+  particles against a threshold of 16 — i.e. trivial tier alone has everything it needs to fully
+  drain the cell, no cross-patch coordination required at all — completed only ~12 merges in one
+  un-iterated pass. That's far below the 24 merges needed to reach 16, and even below the
+  **32-merge hard ceiling a single non-iterated pass can ever reach regardless of match quality**
+  (each participant gets exactly one query per pass, so one pass can never do better than n/2
+  merges — going from 64 all the way to 16 needs at least two full halvings, i.e. at least two
+  *something* — either two external timesteps, or, with this option, two internal local
+  iterations within the same call).
+- **The fix**: when enabled, the candidate-search-plus-trivial-tier-resolve step repeats — reusing
+  the SAME ghost-fill and the SAME per-particle boundary-exposed flags (neither depends on which
+  local particles are still alive, so neither needs recomputing) — until one full local iteration
+  commits zero further merges. This is cheap (no new ghost-fill, no new MPI) precisely because
+  nothing about local re-matching requires new data, only a fresh look at who's still alive.
+- **Measured effect turned out much smaller than the reasoning above predicts**: enabling this
+  option in the same 64-vs-16 test recovered only ~5% more merges, converging in 3-4 internal
+  iterations (the vast majority of the gain happens in the very first iteration; each subsequent
+  one contributes only a handful more before hitting zero). Re-running the search only helps a
+  particle whose actual BEST choice changes between iterations, and that turns out to be rare —
+  most particles left unmatched after the first pass keep re-discovering the exact same
+  unavailable candidate every time, because nothing about that candidate's situation changes
+  either. The dominant loss mechanism is a different, *stable* condition that iteration cannot
+  fix at all — see the next section, which is what was actually needed to close most of the gap.
+- **Tradeoff**: more local re-search compute per call, in exchange for a real but modest reduction
+  in how many external timesteps are needed to clear a severe local backlog. Left off by default
+  so existing documented behavior doesn't change silently. Still worth having — it composes with
+  the fallback-candidate option below rather than competing with it — just not the primary lever.
+
+### Optional: retry with a fallback candidate when the first choice is blocked
+
+A second, independent caller-selectable option (`a_maxFallbackCandidates`, default `0`, forwarded
+to `resolveTrivialTier()`) turned out to be the one that actually closes most of the single-round
+completion gap.
+
+- **What it does**: when a query particle's chosen candidate is blocked — already consumed, OR
+  already has its own outgoing commitment, OR exposed/a ghost — and the query particle itself is
+  not exposed (if it is, no local candidate could ever help, so don't bother retrying):
+  immediately re-query for the next-nearest still-available candidate, excluding every candidate
+  already tried for this edge, up to this many extra attempts, before giving up. Resolved
+  immediately at the point of failure rather than deferred to preserve strict global
+  distance-sort order across every particle's retries — a deliberate simplification, justified
+  because a retry only ever fires for an edge whose first choice already failed, so it was never
+  competing on equal footing with anyone's first attempt anyway. A particle that exhausts every
+  fallback still proposes (if it proposes at all) using its TRUE, original nearest neighbor —
+  fallbacks only affect local trivial-tier eligibility, never what gets proposed cross-patch.
+- **Why this is the dominant lever, not iteration**: instrumenting exactly why edges failed to
+  commit in the same 64-vs-16 test found "candidate already has its own outgoing commitment" to
+  be the single largest loss category — larger than genuine boundary exposure. A particle whose
+  own best candidate happens to be exposed or a ghost gets marked "busy"; any OTHER particle whose
+  nearest neighbor is that same busy particle then loses its edge too, even though the busy
+  particle was never actually consumed — it's just reserved. This is a *stable* condition (the
+  busy particle's own true nearest neighbor doesn't change), which is exactly why iterating the
+  whole search doesn't fix it — only giving the BLOCKED particle a fallback candidate does.
+- **A real bug found and fixed along the way**: implementing and measuring this surfaced a
+  genuine discrepancy between the design as documented (`resolveTrivialTier()`: a query whose
+  candidate turns out to already have its own outgoing commitment should be marked as having an
+  outgoing commitment itself, so it gets a chance at `judgeProposals()`'s existing mutual-match
+  rule) and what the prototype actually did (silently dropped it — no trivial merge, no proposal,
+  no outcome at all for the round). This bug predates this option; it was present in the original
+  `run_scenario.py` too, just never surfaced because nothing had previously exercised this path
+  hard enough to make its effect visible. Fixing it in isolation (still `max_fallback_candidates`
+  = 0) initially made completion measurably *worse* (`n_trivial` dropped from the buggy 7258 to
+  7176) — correctly marking more particles "busy" makes the blocking cascade above fire *more*
+  often, not less. The fallback option is what recovers from that regression and then some.
+  Genuinely-stale candidates (already fully consumed, not just busy) are deliberately excluded
+  from this fix — there's no meaningful id to propose to there, and marking the query particle
+  "busy" in that case would incorrectly block others from claiming it, since it hasn't actually
+  committed to anything.
+- **Measured result** (same 64-vs-16 test, corrected baseline):
+
+  | `max_fallback_candidates` | trivial merges | final count |
+  |---|---|---|
+  | 0 | 7176 | 26248 |
+  | 1 | 7672 | 25838 |
+  | 2 | 7771 | 25789 |
+  | 3 | 7824 | 25759 |
+  | 5 | 7871 | 25735 |
+  | 10 | 7914 | 25707 |
+
+  A single fallback candidate recovers most of the achievable gain (+496 merges, +6.9%); pushing
+  from 1 to 10 adds only another +242 (+3.2%). `max_fallback_candidates = 1` or `2` is the
+  practical choice — an open-ended search buys very little beyond that.
+- **Tradeoff**: a handful of extra nearest-neighbor queries per blocked particle (bounded by the
+  cap), in exchange for a real, substantial improvement in single-round completion — cheaper and
+  more effective than `a_iterateLocalTierToConvergence` for the specific problem that motivated
+  both options. The two compose freely and don't interfere with each other.
+
+### Optional: a physical distance cap on merge eligibility
+
+A third, independent caller-selectable option (`a_maxCellDistance`, default `std::nullopt` =
+disabled) addresses a different concern entirely from the two above: nothing before this point
+puts any limit on how physically far apart two merged particles can be — the search always finds
+the TRUE nearest neighbor across the whole local+ghost neighborhood, however far that turns out to
+be, and merges it if eligible. For a PIC-style code this is a real physical concern: merging two
+particles separated by several grid cells represents a large, potentially non-physical
+displacement of charge/mass, not the local coarse-graining a merge is meant to be.
+
+- **What it does**: caps merge eligibility at a whole-number-of-cells Chebyshev (max-per-axis)
+  distance between the query's and candidate's cell — same cell = 0, any of the 8 (2D) / 26 (3D)
+  Moore-neighborhood-adjacent cells (including diagonals) = 1, and so on. Chebyshev distance on
+  cell *indices* was chosen deliberately over a raw Euclidean position cutoff: "closest grid cell
+  is OK, two cells is not" is a statement about which cells are adjacent, and a Euclidean cutoff
+  would inconsistently include or exclude diagonal neighbors depending on exactly where within
+  each cell the two particles happen to sit. The comparison uses the SAME unclamped,
+  position-derived cell key already used for the crowding trigger (`floor(pos/dx)`) — not either
+  particle's own patch-local cell index — which is what makes the comparison meaningful at all
+  across a patch boundary.
+- **Where it's enforced**: a candidate beyond the cap is treated as ineligible at the exact same
+  point in `resolveTrivialTier()` as a stale or busy candidate — before trivial-tier eligibility
+  is even checked. Critically, unlike the busy/exposed/ghost cases, a too-far candidate does
+  **not** trigger a proposal either: the pair is exactly as physically invalid via
+  `judgeProposals()` as it would be trivially, so there's nothing valid to hand a judge. If
+  `a_maxFallbackCandidates` is enabled, the query gets a fallback retry for a closer candidate
+  instead; otherwise it's simply left unmatched this round, with no side effects on anyone else's
+  processing (same treatment as a stale candidate).
+- **Verified directly** (Python prototype) with a hand-placed pair 2 cells apart and nothing else
+  nearby, so they're unambiguously each other's only candidate: uncapped, they merge trivially at
+  the exact weighted centroid. Capped at 1 cell, both survive completely untouched — no merge, no
+  proposal, positions unchanged. Capped at exactly 2 cells (the boundary itself), they merge
+  again — confirming the cap is inclusive (`<=`, not `<`).
+- **Composes freely** with both options above — independent concern, no interaction either was
+  found to have with it.
+
 ## What's proven vs. what's empirically validated
 
 - **Mass conservation, no double-consumption, order-independence**: verified two ways — exact
@@ -164,6 +298,54 @@ nothing incorrect happens.
   read as strong theoretical plus empirical support, not an exhaustive proof covering every
   possible asymmetric-visibility configuration in the real system — worth staying alert to during
   real integration, not something to treat as fully closed.
+
+## Spatial aliasing — empirical findings (separate investigation, Python prototype)
+
+Beyond the correctness properties above, a follow-up investigation checked whether repeated
+merging distorts the *spatial* distribution of surviving particles — the classic failure mode
+here is a cell-based merge scheme that snaps merged particles toward cell centers, stamping a
+periodic comb onto the density field (visible as spurious spectral peaks at the cell frequency).
+Method: repeatedly (1) inject fresh uniformly-sampled particles, (2) merge (old and new together),
+(3) repeat for many generations, then compare the surviving particles' spatial power spectrum
+against a never-merged uniform reference of the same count.
+
+- **Our algorithm has no cell-frequency aliasing.** Confirmed at multiple harmonics, including a
+  deliberately "safe" high-order one (17 cells/patch, 11×11 patches, so the cell frequency is the
+  17th patch harmonic and shares no small-integer relationship with the patch tiling or domain
+  size) — spike factor 1.16×, z=1.59, indistinguishable from noise. This makes sense mechanically:
+  merge position is always a true weighted pairwise centroid, never snapped to any grid point.
+- **Our algorithm *does* have a patch-frequency artifact, but only tied to the true, finite
+  simulation domain boundary — not the interior.** A finite (non-periodic) domain showed a strong,
+  unambiguous spike at the patch tiling frequency (z up to ~54) because corner/edge patches have
+  fewer real neighbors than interior ones and complete fewer merges per round as a result. Switched
+  to periodic BCs (removing the true edge, making every patch topologically identical) at matched
+  grid sizes (5×5 through 20×20): the spike collapsed by roughly an order of magnitude and further
+  scaling up (10×10, 20×20) showed no growth — consistent with a boundary-of-the-whole-domain
+  effect, not something that compounds throughout a large interior.
+- **Reference/control points measured for calibration**: a classic cell-based merge that snaps to
+  the cell center is the true pathological case (z≈290–330 at the cell frequency — two orders of
+  magnitude worse than anything our algorithm produces). A milder scheme — nearest-neighbor
+  pairing *restricted to within one cell*, but positioned at the true centroid (not snapped) — does
+  show a real but much smaller cell-frequency artifact (z≈12–15 at standard cycle counts), which
+  *shrinks* rather than grows with more generations. Our algorithm never restricts its search to a
+  single cell, so this doesn't apply to it directly, but it's a useful calibration point for how
+  much search-scope restriction alone (independent of a bad position rule) can bias things.
+
+**Methodological note, corrected after a follow-up check**: an earlier version of this note
+warned against using a small-integer cells-per-patch ratio (e.g. 4 or 5), reasoning that a
+coincidence between the cell frequency and a low patch harmonic would make a real cell-frequency
+effect and a patch-harmonic artifact numerically indistinguishable — this was true, but only
+because the original coincidence (5 cells/patch, 5×5 finite domain) was checked in a *finite*
+domain, where low patch harmonics still carry real power. Re-tested directly at 4 cells/patch on
+a much larger *periodic* 40×40 domain: the cell frequency read completely clean (z=−0.11), no
+ambiguity at all. The reasoning failure was generalizing from the finite-domain case — under
+periodic BCs, patch-frequency power is already near baseline at every harmonic (see above), so
+there's no real patch signal left to be confused with, regardless of which harmonic the cell
+frequency happens to coincide with. **The coincidence only matters when checking a finite,
+non-periodic domain; it is a non-issue under periodic BCs, at any cells-per-patch ratio.** Any
+future spatial-aliasing check on a finite domain should still pick a cells-per-patch ratio with no
+low-order common structure with the patch grid (or just run under periodic BCs, which sidesteps
+the question entirely).
 
 ## Explicit scope limitations
 
