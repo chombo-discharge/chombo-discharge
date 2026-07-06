@@ -45,9 +45,22 @@ neither of us has to re-derive them from scratch later.
   cases, boundary-exposed particles specifically) the way the prototype was. Worth doing before
   trusting this in a real physics run at scale.
 
-- **Multi-level AMR (coarse-fine ghost masks) is untested.** The smoke test runs with
-  `AmrMesh.max_amr_depth = 0` (single level) specifically to keep the first end-to-end validation
-  simple. The coarse-to-fine/fine-to-coarse particle ghost mask paths in
-  `mergeNearestNeighborsRound()` (`maskC2F`/`maskF2C` in the gather loop, and the
-  `isBoundaryExposed()` OR-across-three-masks logic) have never actually been exercised. Needs a
-  multi-level test before relying on this near a refinement boundary.
+- ~~Multi-level AMR (coarse-fine ghost masks) is untested.~~ **DONE, and it found a real bug**:
+  tested by locally bumping `AmrMesh.max_amr_depth` to 1 in the smoke test and adding a per-level
+  particle-count diagnostic (`ItoKMCGodunovStepper::postInitialize`'s `countPerLevel`/`printPerLevel`).
+  Found that merges were only ever committing on the coarsest level. Root cause: `liveCellCount`
+  was keyed by a bare `IntVect`, pooled across ALL levels, even though each cell key had been
+  computed with THAT level's own dx -- a coarse-level cell key and an unrelated fine-level cell key
+  could collide on the same `IntVect` by coincidence. Compounding this,
+  `resolveTrivialTier()`/`judgeProposals()` hardcoded level-0's dx for every participant regardless
+  of which level it actually lived on, so even without the collision, a fine-level particle's
+  dynamic crowding recheck used the wrong cell key and almost always failed. Fixed by adding
+  `NNMergeParticle::level`, introducing a level-qualified `NNCellKey = std::pair<int, IntVect>` for
+  every pooled per-cell count, and threading a per-level `dx` array (`a_dxByLevel`) through
+  `findNearestNeighborCandidates()`/`resolveTrivialTier()`/`judgeProposals()` so every cell key is
+  always computed with the correct level's dx -- including for cross-level ghosts (a `GhostType::
+  Coarse`/`Fine` ghost's true origin level is `lvl-1`/`lvl+1`, not the receiving patch's own level).
+  `a_maxCellDistance`'s cross-level comparison (`nnMergeCrossLevelTooFar`) re-expresses both cell
+  keys in the finer participant's cell-size units, reducing exactly to the original same-level
+  definition when levels match. Verified: both levels now merge (e.g. level 0 5420->3407, level 1
+  3413->2284 in one test), exact mass conservation preserved, on 1 and 4 MPI ranks.

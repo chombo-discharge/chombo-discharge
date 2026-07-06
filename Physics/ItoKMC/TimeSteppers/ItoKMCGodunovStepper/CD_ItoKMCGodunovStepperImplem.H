@@ -2165,6 +2165,41 @@ ItoKMCGodunovStepper<I, C, R, F>::postInitialize() noexcept
       }
     }
 
+    // Per-level valid particle counts (each ParallelOps::sum() is a collective -- called
+    // unconditionally by every rank, same iteration count everywhere, since m_amr->getFinestLevel()
+    // is identical on every rank). Added specifically so multi-level behavior (e.g. "are merges
+    // happening on every level, or only the coarsest") is directly visible, not just a global total.
+    auto countPerLevel = [this,
+                          &solver](ParticleContainer<ItoParticle>& a_particles) -> std::vector<unsigned long long> {
+      std::vector<unsigned long long> counts(this->m_amr->getFinestLevel() + 1, 0);
+      for (int lvl = 0; lvl <= this->m_amr->getFinestLevel(); lvl++) {
+        const DisjointBoxLayout& dbl        = this->m_amr->getGrids(solver->getRealm())[lvl];
+        unsigned long long       localCount = 0;
+        for (DataIterator dit(dbl); dit.ok(); ++dit) {
+          ParticleSoA<ItoParticle>& leaf = a_particles[lvl][dit()];
+          for (std::size_t i = 0; i < leaf.size(); i++) {
+            if (!leaf.isGhost(i)) {
+              localCount++;
+            }
+          }
+        }
+        counts[lvl] = ParallelOps::sum(localCount);
+      }
+      return counts;
+    };
+
+    auto printPerLevel = [](const std::string& a_label, const std::vector<unsigned long long>& a_counts) {
+      if (procID() == 0) {
+        pout() << "  " << a_label << " = [";
+        for (std::size_t lvl = 0; lvl < a_counts.size(); lvl++) {
+          pout() << a_counts[lvl] << (lvl + 1 < a_counts.size() ? ", " : "");
+        }
+        pout() << "]" << endl;
+      }
+    };
+
+    const std::vector<unsigned long long> countsBefore = countPerLevel(particles);
+
     const unsigned long long nBefore = particles.getNumberOfValidParticlesGlobal();
     Real                     wBefore = 0.0;
     for (int lvl = 0; lvl <= this->m_amr->getFinestLevel(); lvl++) {
@@ -2246,6 +2281,8 @@ ItoKMCGodunovStepper<I, C, R, F>::postInitialize() noexcept
       }
     }
 
+    const std::vector<unsigned long long> countsAfter = countPerLevel(particles);
+
     const unsigned long long nAfter = particles.getNumberOfValidParticlesGlobal();
     Real                     wAfter = 0.0;
     for (int lvl = 0; lvl <= this->m_amr->getFinestLevel(); lvl++) {
@@ -2278,6 +2315,8 @@ ItoKMCGodunovStepper<I, C, R, F>::postInitialize() noexcept
       pout() << "  particles after merge  = " << nAfter << endl;
       pout() << "  difference             = " << (static_cast<long long>(nBefore) - static_cast<long long>(nAfter))
              << endl;
+      printPerLevel("particles per level before merge", countsBefore);
+      printPerLevel("particles per level after merge ", countsAfter);
       pout() << "  total weight before = " << wBefore << endl;
       pout() << "  total weight after  = " << wAfter << endl;
       pout() << "  mass conservation error = " << massError << endl;

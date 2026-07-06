@@ -105,6 +105,18 @@ namespace ParticleManagement {
     RankID ownerRank;
 
     /**
+      @brief The AMR level this particle currently lives on.
+      @details REQUIRED for correct multi-level behavior: cellKeyOf() needs the cell spacing (dx)
+      of the LEVEL A PARTICLE ACTUALLY LIVES ON to produce a meaningful cell index, and a ghost
+      candidate can legitimately be on a different level than the querying patch (a
+      GhostType::Coarse or GhostType::Fine ghost, not just GhostType::SameLevel -- see
+      ParticleSoA::GhostType). Every function that computes a cell key for crowding/threshold
+      purposes must look up the per-level dx for THIS field, never assume a single global dx --
+      see resolveTrivialTier()/judgeProposals()'s a_dxByLevel parameter.
+    */
+    int level;
+
+    /**
       @brief Opaque, caller-defined reconciliation payload. Never inspected by this algorithm's
       matching/decision logic -- only carried through to the caller-supplied combine callback.
     */
@@ -349,13 +361,30 @@ namespace ParticleManagement {
     trigger and a_maxCellDistance (see RULES.md, "Crowding trigger") -- deliberately NOT clamped to
     any one patch's own box, so that a ghost particle buckets into its true origin cell and two
     particles in different patches' own local frames remain directly comparable.
+    @warning a_dx MUST be the cell spacing of the AMR level the position's particle actually lives
+    on (see NNMergeParticle::level) -- NEVER a single fixed dx shared across every level. An
+    IntVect returned by this function is only meaningful together with the level it was computed
+    for; see NNCellKey, which pairs the two so they can never be silently conflated (a bug found
+    empirically: pooling bare IntVect cell keys from different levels into one crowding-count map,
+    or computing a dynamic recheck with the wrong level's dx, causes coarse- and fine-level cells
+    to alias each other's counts, silently suppressing merges on every level but one).
     @param[in] a_position Physical position.
     @param[in] a_probLo   Physical position of the domain's low corner.
-    @param[in] a_dx       Cell spacing (per direction).
+    @param[in] a_dx       Cell spacing (per direction) of the position's OWN level.
     @return floor((a_position - a_probLo) / a_dx), component-wise.
   */
   inline IntVect
   cellKeyOf(const RealVect& a_position, const RealVect& a_probLo, const RealVect& a_dx) noexcept;
+
+  /**
+    @brief A cell key together with the AMR level it was computed on -- see cellKeyOf()'s warning.
+    @details Two NNCellKeys are equal only if BOTH the level and the cell index match; a coarse-
+    level cell and an unrelated fine-level cell that happen to share the same bare IntVect are
+    correctly kept distinct because their level differs. This is the key type for every live
+    per-cell count pooled across multiple levels (see a_liveCellCount in resolveTrivialTier()/
+    judgeProposals()/findNearestNeighborCandidates()).
+  */
+  using NNCellKey = std::pair<int, IntVect>;
 
   /**
     @brief Whether a particle is boundary-exposed -- i.e. would be shipped as a ghost to at
@@ -439,11 +468,15 @@ namespace ParticleManagement {
                                     sources).
     @param[in]  a_ghosts           Every ghost shipped to this patch this round (candidates
                                     only; ghosts never initiate a query).
-    @param[in]  a_liveCellCount    Live particle count (valid + ghost) per unclamped cell key,
-                                    already reflecting this round's frozen ghost-fill snapshot
-                                    (see cellKeyOf()).
+    @param[in]  a_liveCellCount    Live particle count (valid + ghost) per level-qualified cell
+                                    key (see NNCellKey), already reflecting this round's frozen
+                                    ghost-fill snapshot.
     @param[in]  a_probLo           Physical position of the domain's low corner (see cellKeyOf()).
-    @param[in]  a_dx               Cell spacing (see cellKeyOf()).
+    @param[in]  a_dx               Cell spacing of THIS PATCH's own level (see cellKeyOf()'s
+                                    warning) -- valid here because every query in a_localValid is
+                                    necessarily on this same level; candidates never have their
+                                    crowding checked by this function, so a cross-level ghost
+                                    candidate needs no dx here.
     @param[in]  a_numParticlesPerCellThresh Crowding threshold N -- a cell is eligible while it
                                     holds strictly more than this many particles.
     @param[in]  a_maxFallbackCandidates Forwarded from resolveTrivialTier() (see its docs); 0
@@ -456,7 +489,7 @@ namespace ParticleManagement {
   inline void
   findNearestNeighborCandidates(const std::vector<NNMergeParticle<Packed>>& a_localValid,
                                 const std::vector<NNMergeParticle<Packed>>& a_ghosts,
-                                const std::map<IntVect, int>&               a_liveCellCount,
+                                const std::map<NNCellKey, int>&             a_liveCellCount,
                                 const RealVect&                             a_probLo,
                                 const RealVect&                             a_dx,
                                 const int                                   a_numParticlesPerCellThresh,
@@ -612,7 +645,13 @@ namespace ParticleManagement {
     @param[in]     a_probLo          Physical position of the domain's low corner (see
                                       cellKeyOf()); needed for the dynamic crowding recheck and
                                       a_maxCellDistance.
-    @param[in]     a_dx              Cell spacing (see cellKeyOf()).
+    @param[in]     a_dxByLevel       Cell spacing PER AMR LEVEL (index 0 = level 0, etc.) -- see
+                                      cellKeyOf()'s warning. Each participant's OWN cell key is
+                                      computed with a_dxByLevel[participant.level], never a single
+                                      shared dx: a candidate can legitimately be a ghost from a
+                                      coarser or finer level than the query's own patch, and
+                                      getting this wrong silently breaks the dynamic crowding
+                                      recheck for every level but one (confirmed empirically).
     @param[in]     a_isPositionValid Position-validity predicate (see PositionValid), called once
                                       per otherwise-eligible pair with the weighted-centroid
                                       position already computed. Treated exactly like
@@ -628,13 +667,13 @@ namespace ParticleManagement {
                      const std::map<ParticleID, bool>&                    a_exposed,
                      const std::map<ParticleID, NNMergeParticle<Packed>>& a_particlesByID,
                      const Combine&                                       a_combine,
-                     std::map<IntVect, int>&                              a_liveCellCount,
+                     std::map<NNCellKey, int>&                            a_liveCellCount,
                      std::set<ParticleID>&                                a_consumedIDs,
                      const int                                            a_numParticlesPerCellThresh,
                      std::set<ParticleID>&                                a_hasOutgoingCommitment,
                      std::vector<NNMergeResult<Packed>>&                  a_results,
                      const RealVect&                                      a_probLo,
-                     const RealVect&                                      a_dx,
+                     const std::vector<RealVect>&                         a_dxByLevel,
                      const PosValid&                                      a_isPositionValid,
                      const Allocator&                                     a_allocateID,
                      const int                                            a_maxFallbackCandidates = 0,
@@ -737,7 +776,10 @@ namespace ParticleManagement {
                                        else this round).
     @param[in]     a_probLo            Physical position of the domain's low corner (see
                                        cellKeyOf()).
-    @param[in]     a_dx                Cell spacing (see cellKeyOf()).
+    @param[in]     a_dxByLevel         Cell spacing PER AMR LEVEL -- see resolveTrivialTier()'s
+                                       a_dxByLevel docs for why this must never be a single shared
+                                       dx (a proposal's source and this rank's target can be on
+                                       different levels).
     @param[in]     a_isPositionValid   Position-validity predicate (see PositionValid and rule 6
                                        above).
     @param[in]     a_allocateID        Fresh-id allocator (see IDAllocator), called once per
@@ -759,10 +801,10 @@ namespace ParticleManagement {
                  const std::set<ParticleID>&                          a_hasOutgoingCommitment,
                  const std::map<ParticleID, ParticleID>&              a_outgoingTargetOf,
                  const Combine&                                       a_combine,
-                 std::map<IntVect, int>&                              a_liveCellCount,
+                 std::map<NNCellKey, int>&                            a_liveCellCount,
                  const int                                            a_numParticlesPerCellThresh,
                  const RealVect&                                      a_probLo,
-                 const RealVect&                                      a_dx,
+                 const std::vector<RealVect>&                         a_dxByLevel,
                  const PosValid&                                      a_isPositionValid,
                  const Allocator&                                     a_allocateID,
                  std::vector<NNMergeResult<Packed>>&                  a_results,
