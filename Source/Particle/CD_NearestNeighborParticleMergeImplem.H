@@ -23,6 +23,7 @@
 #include <MayDay.H>
 #include <SPMD.H>
 #include <DataIterator.H>
+#include <BoxIterator.H>
 
 // Our includes
 #include <CD_NearestNeighborParticleMerge.H>
@@ -270,8 +271,9 @@ namespace ParticleManagement {
     a_buckets.sorted.clear();
     a_buckets.cellOffsets.clear();
     a_buckets.blockCounts.assign(a_haloBlockBox.numPts(), 0);
-    a_buckets.haloBlockBox = a_haloBlockBox;
-    a_buckets.blockSize    = a_blockSize;
+    a_buckets.haloBlockBox    = a_haloBlockBox;
+    a_buckets.blockSize       = a_blockSize;
+    a_buckets.observedCellBox = Box();
 
     const std::size_t nLocal = a_localValid.size();
     const std::size_t nGhost = a_ghosts.size();
@@ -283,9 +285,14 @@ namespace ParticleManagement {
 
     // Pass 1: tally per-cell counts (as a temporary map -- number of DISTINCT cells is typically
     // far smaller than a dense range would require, hence a hash map rather than a dense array)
-    // and roll counts up into blockCounts at O(1) extra cost per particle.
+    // and roll counts up into blockCounts at O(1) extra cost per particle. Also tracks the
+    // observed cell range (min/max per direction), for observedCellBox -- see its own docs.
     std::unordered_map<NNWalkCell, std::size_t, LevelTiles::TileHasher> tally;
     tally.reserve(total);
+
+    IntVect obsLo   = IntVect::Zero;
+    IntVect obsHi   = IntVect::Zero;
+    bool    haveObs = false;
 
     auto tallyOne = [&](const RealVect& a_pos) {
       const IntVect cell  = cellKeyOf(a_pos, a_probLo, a_dx);
@@ -293,13 +300,26 @@ namespace ParticleManagement {
 
       tally[cell]++;
 
+      if (!haveObs) {
+        obsLo   = cell;
+        obsHi   = cell;
+        haveObs = true;
+      }
+      else {
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          obsLo[dir] = std::min(obsLo[dir], cell[dir]);
+          obsHi[dir] = std::max(obsHi[dir], cell[dir]);
+        }
+      }
+
       if (a_haloBlockBox.contains(block)) {
         a_buckets.blockCounts[static_cast<std::size_t>(a_haloBlockBox.index(block))]++;
       }
       // else: this cell's block lies outside the expected 1-block halo -- see MergeBlockGrid's own
       // docs for the geometric assumption this relies on. Not fatal here (the cell is still
-      // correctly tallied/bucketed below); the caller is responsible for asserting this never
-      // happens in debug builds.
+      // correctly tallied/bucketed below, and observedCellBox still correctly bounds it, so ring
+      // expansion in findNearestNeighborCandidates() remains correct even if this assumption is
+      // ever violated); the caller is responsible for asserting this never happens in debug builds.
     };
 
     for (const auto& p : a_localValid) {
@@ -307,6 +327,10 @@ namespace ParticleManagement {
     }
     for (const auto& p : a_ghosts) {
       tallyOne(p.position);
+    }
+
+    if (haveObs) {
+      a_buckets.observedCellBox = Box(obsLo, obsHi);
     }
 
     // Convert tallies into contiguous [begin, end) ranges.
@@ -343,7 +367,8 @@ namespace ParticleManagement {
                                 const RealVect&                             a_dx,
                                 const int                                   a_numParticlesPerCellThresh,
                                 std::vector<NNMergeEdge<Packed>>&           a_edges,
-                                const int                                   a_maxFallbackCandidates) noexcept
+                                const int                                   a_maxFallbackCandidates,
+                                const std::optional<int>                    a_maxCellDistance) noexcept
   {
     CH_TIME("ParticleManagement::findNearestNeighborCandidates");
 
@@ -351,6 +376,17 @@ namespace ParticleManagement {
 
     const std::size_t nLocal = a_localValid.size();
     const int         K      = 1 + a_maxFallbackCandidates;
+
+    const NNCellBuckets<Packed>& buckets      = a_spatialIndex.buckets;
+    const bool                   haveObserved = !buckets.observedCellBox.isEmpty();
+
+    // Smallest cell dimension -- a conservative (never-too-generous) physical lower bound on how
+    // close the NEXT ring could possibly be, regardless of direction. See the ring-expansion
+    // stopping condition below.
+    Real minDx = a_dx[0];
+    for (int dir = 1; dir < SpaceDim; dir++) {
+      minDx = std::min(minDx, a_dx[dir]);
+    }
 
     struct RankedCandidate
     {
@@ -399,16 +435,25 @@ namespace ParticleManagement {
         }
       };
 
-      // Phase 2 of the locked spatial-index design (see TODO.md): visit every cell in the index
-      // unconditionally -- functionally the same candidate universe as the old brute-force scan,
-      // just organized via buckets instead of two flat vectors. Ring-expansion/AABB pruning (a
-      // pure performance change on top of this, not a behavior change) is a separate, later step.
-      for (const auto& kv : a_spatialIndex.buckets.cellOffsets) {
-        const std::size_t begin = kv.second.first;
-        const std::size_t end   = kv.second.second;
+      auto visitCell = [&](const IntVect& a_cell) {
+        // Skip an entire empty block in one dense-array check, without even hashing cellOffsets --
+        // see NNCellBuckets::blockCounts's own docs. Only valid within the expected halo; outside
+        // it, fall through to the exact (always-correct) cellOffsets lookup below.
+        const IntVect block = nnMergeBlockIndexOf(a_cell, buckets.blockSize);
+        if (buckets.haloBlockBox.contains(block)) {
+          const std::size_t blockLin = static_cast<std::size_t>(buckets.haloBlockBox.index(block));
+          if (buckets.blockCounts[blockLin] == 0) {
+            return;
+          }
+        }
 
-        for (std::size_t s = begin; s < end; s++) {
-          const NNIndexedParticle& entry = a_spatialIndex.buckets.sorted[s];
+        const auto it = buckets.cellOffsets.find(a_cell);
+        if (it == buckets.cellOffsets.end()) {
+          return;
+        }
+
+        for (std::size_t s = it->second.first; s < it->second.second; s++) {
+          const NNIndexedParticle& entry = buckets.sorted[s];
 
           if (entry.isLocal && entry.idx == qi) {
             continue; // self
@@ -424,6 +469,52 @@ namespace ParticleManagement {
           }
 
           considerCandidate(nnMergeDistSquared(q.position, cand.position), entry.idx, entry.isLocal);
+        }
+      };
+
+      // Correctness-guaranteeing ring cap: the Chebyshev distance from this query's own cell to
+      // the farthest corner of observedCellBox -- see that field's own docs. Ring expansion never
+      // needs to go beyond this; nothing else exists in the index at all.
+      int coverageRingCap = 0;
+      if (haveObserved) {
+        const IntVect& obsLo = buckets.observedCellBox.smallEnd();
+        const IntVect& obsHi = buckets.observedCellBox.bigEnd();
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          coverageRingCap = std::max(coverageRingCap,
+                                     std::max(std::abs(qCell[dir] - obsLo[dir]), std::abs(qCell[dir] - obsHi[dir])));
+        }
+      }
+
+      // a_maxCellDistance is an exact ring cap on its own (see this function's own docs on why
+      // using it here, unqualified by level, is always safe/conservative) -- never expand past it.
+      const int hardRingCap = a_maxCellDistance.has_value() ? std::min(coverageRingCap, a_maxCellDistance.value())
+                                                            : coverageRingCap;
+
+      for (int ring = 0; ring <= hardRingCap; ring++) {
+        if (ring == 0) {
+          visitCell(qCell);
+        }
+        else {
+          const Box outer = grow(Box(qCell, qCell), ring);
+          const Box inner = grow(Box(qCell, qCell), ring - 1);
+          for (BoxIterator bit(outer); bit.ok(); ++bit) {
+            const IntVect cell = bit();
+            if (inner.contains(cell)) {
+              continue; // interior, already visited by an earlier ring
+            }
+            visitCell(cell);
+          }
+        }
+
+        // Distance-based early exit -- purely a speed optimization on top of the coverage
+        // guarantee above, always safe: minDx * ring is a conservative (never too large) lower
+        // bound on the physical distance to ring+1 (see this function's own docs).
+        if (ring < hardRingCap && static_cast<int>(best.size()) == K) {
+          const Real nextRingMinDist  = static_cast<Real>(ring) * minDx;
+          const Real nextRingMinDist2 = nextRingMinDist * nextRingMinDist;
+          if (nextRingMinDist2 >= best.back().d2) {
+            break;
+          }
         }
       }
 
@@ -1127,7 +1218,8 @@ namespace ParticleManagement {
                                       patchWork[pw].dx,
                                       a_numParticlesPerCellThresh,
                                       patchEdges,
-                                      a_maxFallbackCandidates);
+                                      a_maxFallbackCandidates,
+                                      a_maxCellDistance);
 
         lastPooledEdges.insert(lastPooledEdges.end(), patchEdges.begin(), patchEdges.end());
       }

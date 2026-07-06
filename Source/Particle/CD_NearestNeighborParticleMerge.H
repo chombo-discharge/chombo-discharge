@@ -502,6 +502,20 @@ namespace ParticleManagement {
       MergeBlockGrid::getBlockSize().
     */
     int blockSize = 0;
+
+    /**
+      @brief Bounding box (in cell-index space) of every cell that actually has at least one
+      particle -- i.e. the smallest box containing every key in cellOffsets.
+      @details This is the CORRECTNESS-guaranteeing bound the ring-expansion walk uses to know it
+      has covered every possible candidate, independent of the (expected, but not hard-guaranteed)
+      1-block halo assumption haloBlockBox/blockCounts rely on: a ghost whose true origin cell
+      falls outside that expected halo (were that geometric assumption to ever be violated) is
+      still correctly present in cellOffsets/sorted, and this box still bounds it. Ring expansion
+      stops once it has covered this box in full, regardless of any distance-based early exit --
+      see findNearestNeighborCandidates()'s own docs.
+      @note Empty (default-constructed) if there are no particles at all.
+    */
+    Box observedCellBox;
   };
 
   /**
@@ -611,13 +625,36 @@ namespace ParticleManagement {
     up-to-1000x-per-round loop this redesign exists to speed up. See a_spatialIndex's own docs for
     why this rebuild-once-per-round (never across rounds) is unavoidable and still cheap.
 
-    Implementation walks a_spatialIndex's cell buckets rather than scanning two flat vectors --
-    see NNCellBuckets/buildNNCellBuckets() for how that index is built (once per patch per round,
-    index-array-based, never copying particle data), matching the allocation-light,
-    thread-local-scratch philosophy already used by the existing mergers in
+    Implementation walks a_spatialIndex's cell buckets via Moore-neighborhood ring expansion,
+    outward from the query's own cell, rather than scanning two flat vectors or every occupied
+    cell unconditionally -- see NNCellBuckets/buildNNCellBuckets() for how that index is built
+    (once per patch per round, index-array-based, never copying particle data), matching the
+    allocation-light, thread-local-scratch philosophy already used by the existing mergers in
     CD_ParticleManagementImplem.H (e.g. buildEqualWeightKDLeaves(), mergeAdjacentNearest()), though
     those build a philosophically similar but structurally different kind of tree (equal-weight
     spatial partitioning, not a point-query index) and are not directly reusable here.
+
+    @b Ring expansion and pruning: after each ring is fully processed, the walk decides whether to
+    expand to the next ring using TWO independent stopping conditions, either of which alone is
+    sufficient to stop -- see this function's own docs at the top of the implementation for the
+    exact distance formula:
+    - @e Distance-based (a performance optimization): once the current worst-of-K distance (once
+      K candidates have been found) is closer than the next ring could possibly be, going further
+      cannot improve the result. a_maxCellDistance (see below), a hard cutoff, is folded into the
+      SAME comparison as an independent, always-safe bound: for a query at level L,
+      a_maxCellDistance * a_dx is always a conservative (never too tight) radius regardless of a
+      candidate's own level -- see nnMergeCrossLevelTooFar()'s own docs for why a finer candidate
+      only ever has a TIGHTER effective radius, never looser -- so pruning with it here can only
+      ever be a superset of the exact per-pair eligibility check resolveTrivialTier()/
+      judgeProposals() already apply downstream, never wrongly excluding something they would
+      still accept.
+    - @e Coverage-based (a correctness guarantee, independent of the above): ring expansion also
+      stops once it has covered a_spatialIndex.buckets.observedCellBox in full -- the actual
+      bounding box of every cell that has any particle at all, regardless of the "expected"
+      1-block halo MergeBlockGrid/blockCounts assume. This guarantees no real candidate is ever
+      missed even if that geometric assumption is ever violated (see observedCellBox's own docs) --
+      the distance-based condition above is purely a speed optimization on top of this guarantee,
+      never a substitute for it.
 
     When a_maxFallbackCandidates (forwarded from resolveTrivialTier(), see its own docs) is
     greater than zero: the walk returns the K=1+a_maxFallbackCandidates nearest points instead of
@@ -650,11 +687,16 @@ namespace ParticleManagement {
                                     candidate needs no dx here.
     @param[in]  a_numParticlesPerCellThresh Crowding threshold N -- a cell is eligible while it
                                     holds strictly more than this many particles.
+    @param[out] a_edges            One entry per over-threshold, currently-alive query particle
+                                    that has at least one candidate (empty if none found).
     @param[in]  a_maxFallbackCandidates Forwarded from resolveTrivialTier() (see its docs); 0
                                     (default) means an ordinary single-nearest query and every
                                     edge's fallbackCandidates stays empty.
-    @param[out] a_edges            One entry per over-threshold, currently-alive query particle
-                                    that has at least one candidate (empty if none found).
+    @param[in]  a_maxCellDistance  Same hard cutoff as resolveTrivialTier()'s own a_maxCellDistance
+                                    (see its docs); std::nullopt (default) disables it. Folded in
+                                    here purely as an additional, always-safe pruning bound during
+                                    the walk -- resolveTrivialTier()/judgeProposals() still apply
+                                    the exact, level-aware check downstream regardless, unchanged.
   */
   template <typename Packed>
   inline void
@@ -667,7 +709,8 @@ namespace ParticleManagement {
                                 const RealVect&                             a_dx,
                                 const int                                   a_numParticlesPerCellThresh,
                                 std::vector<NNMergeEdge<Packed>>&           a_edges,
-                                const int                                   a_maxFallbackCandidates = 0) noexcept;
+                                const int                                   a_maxFallbackCandidates = 0,
+                                const std::optional<int>                    a_maxCellDistance = std::nullopt) noexcept;
 
   /**
     @brief Resolve every candidate edge that is safely mergeable with zero cross-rank
