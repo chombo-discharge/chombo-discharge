@@ -33,6 +33,25 @@ neither of us has to re-derive them from scratch later.
   site inside `judgeProposals()`. Should be removed: pass `particlesByID` + `consumedIDs` through
   and check membership at the point of use instead.
 
+- **Higher AMR refinement ratios make the O(n^2) search (item above) much worse, not just
+  linearly worse, because of the confirmed `Realm::defineParticleGhostMaskFineToCoar` ghost
+  over-delivery** (see the ghost-mask investigation earlier in this branch's history: unlike
+  coarse-to-fine, which filters ghosts down to an exact fine-resolution acceptance box,
+  fine-to-coarse ships ALL `refRat^D` fine children of every qualifying coarse halo cell
+  unconditionally, with no per-particle distance filter afterward). For a fixed coarse-fine
+  boundary, the ghost volume crossing it scales as `refRat^D` -- going from `refRat=2` to
+  `refRat=4` multiplies it by `2^D` (4x in 2D, 8x in 3D) for the exact same physical geometry.
+  Since that inflated ghost count feeds directly into `findNearestNeighborCandidates()`'s O(n^2)
+  search as extra candidates, a coarse patch near the boundary doesn't get linearly more
+  expensive -- it gets quadratically more expensive with the (already inflated) candidate count.
+  Observed directly: variable-sized-patch (8-32 cells) configs with `refRat=4` take much longer to
+  run than an equivalent `refRat=2` config. Fixing the O(n^2) search (spatial index, item above)
+  would blunt this; fixing the ghost over-delivery itself (adding a fine-resolution acceptance-box
+  filter to `defineParticleGhostMaskFineToCoar`, mirroring what coarse-to-fine already does) would
+  fix it at the source and also reduce raw MPI communication volume, independent of the merge
+  algorithm. Neither has been done -- this is a new item, not a duplicate of the O(n^2) one above,
+  since it's specifically about why refinement ratio matters, not just particle count.
+
 ## Design / correctness coverage
 
 - **The real C++ implementation has not been stress-tested the way the Python prototype was.** The
