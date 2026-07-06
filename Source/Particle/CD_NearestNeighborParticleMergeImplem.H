@@ -356,6 +356,274 @@ namespace ParticleManagement {
     }
   }
 
+  /**
+    @brief Minimum possible squared distance from a point to any point inside an axis-aligned box.
+    @param[in] a_point  Query point.
+    @param[in] a_aabbLo Box's low corner.
+    @param[in] a_aabbHi Box's high corner.
+    @return 0 if a_point is inside the box; otherwise the squared distance to the nearest face.
+  */
+  inline Real
+  nnMergePointToAABBDistSquared(const RealVect& a_point, const RealVect& a_aabbLo, const RealVect& a_aabbHi) noexcept
+  {
+    Real d2 = 0.0;
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      Real delta = 0.0;
+      if (a_point[dir] < a_aabbLo[dir]) {
+        delta = a_aabbLo[dir] - a_point[dir];
+      }
+      else if (a_point[dir] > a_aabbHi[dir]) {
+        delta = a_point[dir] - a_aabbHi[dir];
+      }
+      d2 += delta * delta;
+    }
+    return d2;
+  }
+
+  /**
+    @brief Recursively build a cell's midpoint-split sub-partition tree in place.
+    @details Only NNIndexedParticle entries in a_sorted[a_lo, a_hi) are ever reordered (via
+    std::partition against the longest-axis midpoint of the current node's own bounding box) --
+    never NNMergeParticle data. See NNSubNode/buildNNSpatialIndex()'s own docs for the rationale
+    (midpoint, not median; recursion stops at a_subPartitionThresh or a_maxDepth).
+    @tparam Packed See NNMergeParticle.
+    @param[in,out] a_sorted             The patch's full index array (see NNCellBuckets::sorted);
+                                         only the sub-range [a_lo, a_hi) is ever reordered.
+    @param[in]     a_localValid         This patch's own full valid-particle set.
+    @param[in]     a_ghosts             Every ghost shipped to this patch this round.
+    @param[in]     a_lo                 Start of this node's half-open range into a_sorted.
+    @param[in]     a_hi                 End of this node's half-open range into a_sorted.
+    @param[in]     a_aabbLo             This node's own bounding box, low corner.
+    @param[in]     a_aabbHi             This node's own bounding box, high corner.
+    @param[in]     a_subPartitionThresh Occupancy at/below which a node becomes a leaf.
+    @param[in]     a_depth              This node's depth (0 for the cell's own root node).
+    @param[in]     a_maxDepth           Hard recursion depth cap (defensive; see
+                                         buildNNSpatialIndex()'s docs).
+    @param[in,out] a_nodes              The flat node vector this tree is being built into; node 0
+                                         is the tree's root.
+    @return Index of the node just created (in a_nodes) for this range.
+  */
+  template <typename Packed>
+  inline int
+  buildNNSubNodeRecursive(std::vector<NNIndexedParticle>&             a_sorted,
+                          const std::vector<NNMergeParticle<Packed>>& a_localValid,
+                          const std::vector<NNMergeParticle<Packed>>& a_ghosts,
+                          const std::size_t                           a_lo,
+                          const std::size_t                           a_hi,
+                          const RealVect&                             a_aabbLo,
+                          const RealVect&                             a_aabbHi,
+                          const int                                   a_subPartitionThresh,
+                          const int                                   a_depth,
+                          const int                                   a_maxDepth,
+                          std::vector<NNSubNode>&                     a_nodes) noexcept
+  {
+    const std::size_t nodeIdx = a_nodes.size();
+    a_nodes.push_back(NNSubNode{a_lo, a_hi, a_aabbLo, a_aabbHi, -1, -1});
+
+    const std::size_t count = a_hi - a_lo;
+    if (static_cast<int>(count) <= a_subPartitionThresh || a_depth >= a_maxDepth) {
+      return static_cast<int>(nodeIdx); // leaf
+    }
+
+    int  axis = 0;
+    Real span = a_aabbHi[0] - a_aabbLo[0];
+    for (int dir = 1; dir < SpaceDim; dir++) {
+      const Real s = a_aabbHi[dir] - a_aabbLo[dir];
+      if (s > span) {
+        span = s;
+        axis = dir;
+      }
+    }
+    const Real mid = 0.5 * (a_aabbLo[axis] + a_aabbHi[axis]);
+
+    auto getPos = [&](const NNIndexedParticle& a_entry) -> const RealVect& {
+      return a_entry.isLocal ? a_localValid[a_entry.idx].position : a_ghosts[a_entry.idx].position;
+    };
+
+    const auto        splitIt  = std::partition(a_sorted.begin() + static_cast<std::ptrdiff_t>(a_lo),
+                                        a_sorted.begin() + static_cast<std::ptrdiff_t>(a_hi),
+                                        [&](const NNIndexedParticle& a_entry) {
+                                          return getPos(a_entry)[axis] < mid;
+                                        });
+    const std::size_t splitPos = static_cast<std::size_t>(splitIt - a_sorted.begin());
+
+    // Degenerate split (e.g. every particle sits at the exact same position, so nothing ever moves
+    // to one side) -- stop recursing rather than looping with no progress.
+    if (splitPos == a_lo || splitPos == a_hi) {
+      return static_cast<int>(nodeIdx); // leaf
+    }
+
+    RealVect leftHi  = a_aabbHi;
+    leftHi[axis]     = mid;
+    RealVect rightLo = a_aabbLo;
+    rightLo[axis]    = mid;
+
+    const int left  = buildNNSubNodeRecursive(a_sorted,
+                                             a_localValid,
+                                             a_ghosts,
+                                             a_lo,
+                                             splitPos,
+                                             a_aabbLo,
+                                             leftHi,
+                                             a_subPartitionThresh,
+                                             a_depth + 1,
+                                             a_maxDepth,
+                                             a_nodes);
+    const int right = buildNNSubNodeRecursive(a_sorted,
+                                              a_localValid,
+                                              a_ghosts,
+                                              splitPos,
+                                              a_hi,
+                                              rightLo,
+                                              a_aabbHi,
+                                              a_subPartitionThresh,
+                                              a_depth + 1,
+                                              a_maxDepth,
+                                              a_nodes);
+
+    a_nodes[nodeIdx].leftChild  = left;
+    a_nodes[nodeIdx].rightChild = right;
+
+    return static_cast<int>(nodeIdx);
+  }
+
+  template <typename Packed>
+  inline void
+  buildNNSpatialIndex(const std::vector<NNMergeParticle<Packed>>& a_localValid,
+                      const std::vector<NNMergeParticle<Packed>>& a_ghosts,
+                      const RealVect&                             a_probLo,
+                      const RealVect&                             a_dx,
+                      const int                                   a_blockSize,
+                      const Box&                                  a_haloBlockBox,
+                      const int                                   a_subPartitionThresh,
+                      NNSpatialIndex<Packed>&                     a_index) noexcept
+  {
+    CH_TIME("ParticleManagement::buildNNSpatialIndex");
+
+    buildNNCellBuckets(a_localValid, a_ghosts, a_probLo, a_dx, a_blockSize, a_haloBlockBox, a_index.buckets);
+
+    a_index.subPartitions.clear();
+
+    constexpr int maxDepth = 24; // generous -- reaching this depth is not a realistic occupancy
+
+    for (const auto& kv : a_index.buckets.cellOffsets) {
+      const IntVect     cell  = kv.first;
+      const std::size_t lo    = kv.second.first;
+      const std::size_t hi    = kv.second.second;
+      const std::size_t count = hi - lo;
+
+      if (static_cast<int>(count) <= a_subPartitionThresh) {
+        continue;
+      }
+
+      RealVect aabbLo, aabbHi;
+      for (int dir = 0; dir < SpaceDim; dir++) {
+        aabbLo[dir] = a_probLo[dir] + cell[dir] * a_dx[dir];
+        aabbHi[dir] = aabbLo[dir] + a_dx[dir];
+      }
+
+      std::vector<NNSubNode> nodes;
+      buildNNSubNodeRecursive(a_index.buckets.sorted,
+                              a_localValid,
+                              a_ghosts,
+                              lo,
+                              hi,
+                              aabbLo,
+                              aabbHi,
+                              a_subPartitionThresh,
+                              0,
+                              maxDepth,
+                              nodes);
+
+      a_index.subPartitions[cell] = std::move(nodes);
+    }
+  }
+
+  /**
+    @brief Recursively walk a cell's sub-partition tree, pruning subtrees by point-to-AABB
+    distance and brute-forcing leaves.
+    @details a_shouldPrune is re-evaluated fresh at every node (it closes over the caller's own,
+    continuously-improving candidate buffer), so pruning gets more aggressive as better candidates
+    are found deeper in the tree -- never a stale snapshot from before the walk started.
+    @tparam Packed See NNMergeParticle.
+    @tparam ConsiderCallback Deliberately a template parameter (see PayloadCombine's own docs for
+    the inlining rationale) -- called once per non-consumed, non-self candidate encountered.
+    @tparam PruneCheck Deliberately a template parameter, same reason -- given a node's AABB,
+    returns true iff the whole subtree can be skipped.
+    @param[in] a_nodes             The cell's sub-partition tree (see NNSpatialIndex::subPartitions).
+    @param[in] a_nodeIdx           Index of the node to visit (0 for the tree's root).
+    @param[in] a_queryPos          The query particle's own position.
+    @param[in] a_qi                The query particle's own index into a_localValid (for
+                                    self-exclusion).
+    @param[in] a_localValid        This patch's own full valid-particle set.
+    @param[in] a_ghosts            Every ghost shipped to this patch this round.
+    @param[in] a_sorted            The patch's full index array (see NNCellBuckets::sorted).
+    @param[in] a_consumedIDs       Lazy-deletion skip set (see findNearestNeighborCandidates()'s
+                                    own docs).
+    @param[in] a_considerCandidate Called once per non-consumed, non-self candidate found in a leaf.
+    @param[in] a_shouldPrune       Given a node's AABB, returns true iff its whole subtree can be
+                                    skipped.
+  */
+  template <typename Packed, typename ConsiderCallback, typename PruneCheck>
+  inline void
+  nnMergeWalkSubNodes(const std::vector<NNSubNode>&               a_nodes,
+                      const int                                   a_nodeIdx,
+                      const RealVect&                             a_queryPos,
+                      const std::size_t                           a_qi,
+                      const std::vector<NNMergeParticle<Packed>>& a_localValid,
+                      const std::vector<NNMergeParticle<Packed>>& a_ghosts,
+                      const std::vector<NNIndexedParticle>&       a_sorted,
+                      const std::set<ParticleID>&                 a_consumedIDs,
+                      const ConsiderCallback&                     a_considerCandidate,
+                      const PruneCheck&                           a_shouldPrune) noexcept
+  {
+    const NNSubNode& node = a_nodes[static_cast<std::size_t>(a_nodeIdx)];
+
+    if (a_shouldPrune(node.aabbLo, node.aabbHi)) {
+      return;
+    }
+
+    if (node.leftChild < 0) {
+      for (std::size_t s = node.lo; s < node.hi; s++) {
+        const NNIndexedParticle& entry = a_sorted[s];
+
+        if (entry.isLocal && entry.idx == a_qi) {
+          continue; // self
+        }
+
+        const NNMergeParticle<Packed>& cand = entry.isLocal ? a_localValid[entry.idx] : a_ghosts[entry.idx];
+
+        if (a_consumedIDs.count(cand.globalID) > 0) {
+          continue;
+        }
+
+        a_considerCandidate(nnMergeDistSquared(a_queryPos, cand.position), entry.idx, entry.isLocal);
+      }
+      return;
+    }
+
+    nnMergeWalkSubNodes(a_nodes,
+                        node.leftChild,
+                        a_queryPos,
+                        a_qi,
+                        a_localValid,
+                        a_ghosts,
+                        a_sorted,
+                        a_consumedIDs,
+                        a_considerCandidate,
+                        a_shouldPrune);
+    nnMergeWalkSubNodes(a_nodes,
+                        node.rightChild,
+                        a_queryPos,
+                        a_qi,
+                        a_localValid,
+                        a_ghosts,
+                        a_sorted,
+                        a_consumedIDs,
+                        a_considerCandidate,
+                        a_shouldPrune);
+  }
+
   template <typename Packed>
   inline void
   findNearestNeighborCandidates(const std::vector<NNMergeParticle<Packed>>& a_localValid,
@@ -449,6 +717,30 @@ namespace ParticleManagement {
 
         const auto it = buckets.cellOffsets.find(a_cell);
         if (it == buckets.cellOffsets.end()) {
+          return;
+        }
+
+        // If this cell's occupancy burst past the sub-partition threshold at build time, walk its
+        // own small midpoint-split tree (pruned by point-to-AABB distance) instead of brute-forcing
+        // the whole range -- see NNSpatialIndex::subPartitions's own docs. Empty in the common case.
+        const auto subIt = a_spatialIndex.subPartitions.find(a_cell);
+        if (subIt != a_spatialIndex.subPartitions.end() && !subIt->second.empty()) {
+          auto shouldPrune = [&](const RealVect& a_aabbLo, const RealVect& a_aabbHi) -> bool {
+            if (static_cast<int>(best.size()) < K) {
+              return false;
+            }
+            return nnMergePointToAABBDistSquared(q.position, a_aabbLo, a_aabbHi) >= best.back().d2;
+          };
+          nnMergeWalkSubNodes(subIt->second,
+                              0,
+                              q.position,
+                              qi,
+                              a_localValid,
+                              a_ghosts,
+                              buckets.sorted,
+                              a_consumedIDs,
+                              considerCandidate,
+                              shouldPrune);
           return;
         }
 
@@ -1017,7 +1309,8 @@ namespace ParticleManagement {
                              const std::optional<int>      a_maxCellDistance,
                              const PosValid&               a_isPositionValid,
                              unsigned long long*           a_crossLevelMergeCount,
-                             const OnMerge&                a_onMergeCommitted)
+                             const OnMerge&                a_onMergeCommitted,
+                             const int                     a_subPartitionThresh)
   {
     CH_TIME("ParticleManagement::mergeNearestNeighborsRound");
 
@@ -1167,13 +1460,14 @@ namespace ParticleManagement {
         const MergeBlockGrid::PatchBlocks& patchBlocks = mergeBlockGrid->getPatchBlocks(din);
 
         NNSpatialIndex<Packed> spatialIndex;
-        buildNNCellBuckets(localValid,
-                           ghosts,
-                           probLo,
-                           dx,
-                           mergeBlockGrid->getBlockSize(),
-                           patchBlocks.haloBlockBox,
-                           spatialIndex.buckets);
+        buildNNSpatialIndex(localValid,
+                            ghosts,
+                            probLo,
+                            dx,
+                            mergeBlockGrid->getBlockSize(),
+                            patchBlocks.haloBlockBox,
+                            a_subPartitionThresh,
+                            spatialIndex);
 
         patchWork.push_back(PatchWork{lvl, din, dx, mergeBlockGrid->getBlockSize(), patchBlocks.haloBlockBox});
         patchLocalValid.push_back(std::move(localValid));

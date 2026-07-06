@@ -15,6 +15,7 @@
 
 // Std includes
 #include <functional>
+#include <limits>
 #include <map>
 #include <optional>
 #include <set>
@@ -552,14 +553,55 @@ namespace ParticleManagement {
                      NNCellBuckets<Packed>&                      a_buckets) noexcept;
 
   /**
+    @brief One node of a per-cell midpoint-split sub-partition tree (see NNSpatialIndex::subPartitions).
+    @details A binary tree stored as a flat vector; node 0 is the root. lo/hi is a half-open range
+    into the SAME NNCellBuckets::sorted array the cell's own (unsplit) range would have used --
+    only NNIndexedParticle entries are ever reordered to build this, never NNMergeParticle data.
+    leftChild/rightChild are indices into the SAME vector this node lives in; -1 means "no child",
+    i.e. this node is a leaf and [lo, hi) should be brute-forced directly. aabbLo/aabbHi is this
+    node's own physical bounding box, used to prune the whole subtree by point-to-AABB distance
+    during the walk (see nnMergePointToAABBDistSquared() in the implementation) -- exactly the
+    same pruning principle as block-level pruning (see NNCellBuckets::blockCounts), just recursing
+    further within an individual cell.
+  */
+  struct NNSubNode
+  {
+    /**
+      @brief Half-open range start [lo, hi) into NNCellBuckets::sorted.
+    */
+    std::size_t lo;
+
+    /**
+      @brief Half-open range end [lo, hi) into NNCellBuckets::sorted.
+    */
+    std::size_t hi;
+
+    /**
+      @brief This node's own physical axis-aligned bounding box, low corner.
+    */
+    RealVect aabbLo;
+
+    /**
+      @brief This node's own physical axis-aligned bounding box, high corner.
+    */
+    RealVect aabbHi;
+
+    /**
+      @brief Index of the left child in the same node vector, or -1 if this node is a leaf.
+    */
+    int leftChild = -1;
+
+    /**
+      @brief Index of the right child in the same node vector, or -1 if this node is a leaf.
+    */
+    int rightChild = -1;
+  };
+
+  /**
     @brief A patch's complete spatial index for one round: its cell buckets (see NNCellBuckets),
-    built once via buildNNCellBuckets() and reused across every internal
+    built once via buildNNSpatialIndex() and reused across every internal
     a_iterateLocalTierToConvergence pass within that round via lazy deletion (see
     findNearestNeighborCandidates()'s own docs).
-    @details Currently just a thin wrapper over NNCellBuckets -- kept as its own type (rather than
-    using NNCellBuckets directly) because a later, per-cell adaptive sub-partition structure (for
-    cells whose occupancy bursts past a threshold -- see TODO.md's locked design) is added here,
-    without disturbing findNearestNeighborCandidates()'s own signature again.
   */
   template <typename Packed>
   struct NNSpatialIndex
@@ -568,7 +610,58 @@ namespace ParticleManagement {
       @brief This patch's cell buckets for this round.
     */
     NNCellBuckets<Packed> buckets;
+
+    /**
+      @brief Per-cell midpoint-split sub-partition trees, ONLY for cells whose occupancy exceeded
+      the sub-partition threshold at build time (see buildNNSpatialIndex()'s a_subPartitionThresh).
+      @details Empty for every cell in the common case (crowding-trigger-driven occupancy is
+      usually small) -- a cell with no entry here should be brute-forced directly via its
+      NNCellBuckets::cellOffsets range, exactly as if this structure didn't exist at all. This is
+      a pure performance optimization for the rare "bursty" cell (e.g. an avalanche dumping many
+      particles into one cell before the next merge pass catches up): it lets that one cell pay
+      its own extra cost via its own small sub-tree, without inflating its neighbors' costs the way
+      a fixed-size neighbor-inclusive tree would.
+    */
+    std::unordered_map<NNWalkCell, std::vector<NNSubNode>, LevelTiles::TileHasher> subPartitions;
   };
+
+  /**
+    @brief Build a patch's complete spatial index for one round: buildNNCellBuckets() followed by
+    an adaptive, per-cell midpoint-split sub-partition for any cell whose occupancy exceeds
+    a_subPartitionThresh.
+    @details Splitting rule is the spatial MIDPOINT of the node's own bounding box along its
+    longest axis -- NOT buildEqualWeightKDLeaves()'s weighted-median rule -- since the midpoint
+    needs no data scan to choose (just std::partition against a known coordinate), cheaper per
+    level than a partial sort/nth_element, and this algorithm's crowding trigger already keeps
+    occupancy close to uniform per patch, so median-balancing buys little for the extra cost (see
+    TODO.md's locked design). Recurses until a node's own occupancy is at/below
+    a_subPartitionThresh, or a generous hard depth cap is hit (defensive against many particles at
+    the exact same position, which would make midpoint splitting fail to shrink groups).
+    @tparam Packed See NNMergeParticle.
+    @param[in]  a_localValid          This patch's own full valid-particle set (see
+                                      buildNNCellBuckets()'s own docs).
+    @param[in]  a_ghosts              Every ghost shipped to this patch this round.
+    @param[in]  a_probLo              Physical position of the domain's low corner.
+    @param[in]  a_dx                  Cell spacing of THIS PATCH's own level.
+    @param[in]  a_blockSize           Block size in cells (see MergeBlockGrid::getBlockSize()).
+    @param[in]  a_haloBlockBox        This patch's own block-index-space box plus a 1-block halo.
+    @param[in]  a_subPartitionThresh  Occupancy above which a cell gets its own sub-partition tree
+                                      instead of being brute-forced directly. Deliberately
+                                      independent of a_numParticlesPerCellThresh (that is a
+                                      physics-facing crowding threshold; this is a pure performance
+                                      knob).
+    @param[out] a_index               The resulting spatial index.
+  */
+  template <typename Packed>
+  inline void
+  buildNNSpatialIndex(const std::vector<NNMergeParticle<Packed>>& a_localValid,
+                      const std::vector<NNMergeParticle<Packed>>& a_ghosts,
+                      const RealVect&                             a_probLo,
+                      const RealVect&                             a_dx,
+                      const int                                   a_blockSize,
+                      const Box&                                  a_haloBlockBox,
+                      const int                                   a_subPartitionThresh,
+                      NNSpatialIndex<Packed>&                     a_index) noexcept;
 
   /**
     @brief Whether a particle is boundary-exposed -- i.e. would be shipped as a ghost to at
@@ -1336,6 +1429,13 @@ namespace ParticleManagement {
                                                 to track cross-level activity over several rounds.
     @param[in]     a_onMergeCommitted          Optional per-merge diagnostic callback (see
                                                 MergeCommittedCallback); default is a no-op.
+    @param[in]     a_subPartitionThresh        Forwarded to buildNNSpatialIndex() (see its own
+                                                docs) -- occupancy above which a cell gets its own
+                                                midpoint-split sub-partition tree instead of being
+                                                brute-forced directly. Default is effectively
+                                                "never" (matches the original, always-brute-force-
+                                                within-a-cell behavior); a pure performance knob,
+                                                independent of a_numParticlesPerCellThresh.
   */
   template <typename P,
             typename Packed,
@@ -1366,7 +1466,8 @@ namespace ParticleManagement {
     unsigned long long* a_crossLevelMergeCount = nullptr,
     const OnMerge&      a_onMergeCommitted =
       [](const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&) {
-      });
+      },
+    const int a_subPartitionThresh = std::numeric_limits<int>::max());
 
 } // namespace ParticleManagement
 

@@ -13,6 +13,9 @@
 #ifndef CD_ITOKMCGODUNOVSTEPPERIMPLEM_H
 #define CD_ITOKMCGODUNOVSTEPPERIMPLEM_H
 
+// Std includes
+#include <limits>
+
 // Chombo includes
 #include <ParmParse.H>
 #include <BaseIF.H>
@@ -2105,12 +2108,14 @@ ItoKMCGodunovStepper<I, C, R, F>::postInitialize() noexcept
   int  debugNumMergeRounds         = 1;
   bool debugIterateToConvergence   = false;
   int  debugMaxFallbackCandidates  = 0;
+  int  debugSubPartitionThresh     = std::numeric_limits<int>::max();
   pp.query("debug_nn_merge_samples_per_rank", debugNumSamplesPerRank);
   pp.query("debug_nn_merge_particles_per_cell_thresh", debugParticlesPerCellThresh);
   pp.query("debug_nn_merge_max_cell_distance", debugMaxCellDistanceReal);
   pp.query("debug_nn_merge_num_rounds", debugNumMergeRounds);
   pp.query("debug_nn_merge_iterate_to_convergence", debugIterateToConvergence);
   pp.query("debug_nn_merge_max_fallback_candidates", debugMaxFallbackCandidates);
+  pp.query("debug_nn_merge_sub_partition_thresh", debugSubPartitionThresh);
 
   const std::optional<int> debugMaxCellDistance = (debugMaxCellDistanceReal < 0.0)
                                                     ? std::nullopt
@@ -2522,7 +2527,8 @@ ItoKMCGodunovStepper<I, C, R, F>::postInitialize() noexcept
                                                                         debugMaxCellDistance,
                                                                         isPositionValid,
                                                                         &crossLevelMergeCount,
-                                                                        onMergeCommitted);
+                                                                        onMergeCommitted,
+                                                                        debugSubPartitionThresh);
 
       // getNumberOfValidParticlesGlobal() and ParallelOps::sum() are both MPI-collectives -- must
       // be called by every rank unconditionally; only the PRINTING is rank-0-only.
