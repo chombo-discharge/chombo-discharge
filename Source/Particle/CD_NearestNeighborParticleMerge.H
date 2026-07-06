@@ -356,6 +356,34 @@ namespace ParticleManagement {
   using IDAllocator = std::function<ParticleID()>;
 
   /**
+    @brief Optional per-merge diagnostic callback: observe every individual merge as it commits.
+    @details Deliberately a template parameter wherever consumed (see resolveTrivialTier(),
+    judgeProposals()), NOT required to be exactly this std::function type, for the same reason as
+    PayloadCombine -- though call frequency here is bounded by the number of merges actually
+    committed, not by the number of candidate pairs considered, so a non-inlined call is an
+    acceptable cost (this is not the O(n^2) search's hot path). Called exactly once per committed
+    merge (trivial-tier or judge-side), with BOTH parents' full pre-merge data and the resulting
+    merged particle (already fully finalized -- position/weight/payload/id/level -- but not yet
+    placed; see placeMergedParticles()). Default is a no-op (matches the original, uninstrumented
+    behavior exactly). Intended for exactly the kind of invariant-checking a real merge bug (as
+    opposed to a candidate-search issue) would violate: e.g. recomputing the weighted centroid
+    from a_first/a_second's own position/weight and comparing against a_merged.position, which
+    must match exactly (up to floating-point rounding) by construction -- any deviation would mean
+    a_merged's data was NOT actually derived from a_first/a_second, a real bug distinguishable from
+    "the true nearest neighbor search legitimately found a distant candidate" (which leaves this
+    check passing, since the centroid of two distant points still lies exactly on the segment
+    between them -- see also NNMergeParticle::level on a_first/a_second for spotting suspiciously
+    far cross-level pairs specifically).
+    @param[in] a_first  First parent (pre-merge, full data).
+    @param[in] a_second Second parent (pre-merge, full data).
+    @param[in] a_merged The resulting merged particle.
+  */
+  template <typename Packed>
+  using MergeCommittedCallback = std::function<void(const NNMergeParticle<Packed>& a_first,
+                                                    const NNMergeParticle<Packed>& a_second,
+                                                    const NNMergeParticle<Packed>& a_merged)>;
+
+  /**
     @brief The unclamped, position-derived cell index a given physical position falls in.
     @details This is the SAME cell-key convention used throughout this algorithm for the crowding
     trigger and a_maxCellDistance (see RULES.md, "Crowding trigger") -- deliberately NOT clamped to
@@ -668,25 +696,31 @@ namespace ParticleManagement {
                                       so counts can be accumulated across a_iterateLocalTierToConvergence's
                                       internal iterations, or across this rank's judgeProposals()
                                       acceptances too (see that function's own parameter).
+    @param[in]     a_onMergeCommitted Optional per-merge diagnostic callback (see
+                                      MergeCommittedCallback); default is a no-op.
   */
-  template <typename Packed, typename Combine, typename PosValid, typename Allocator>
+  template <typename Packed, typename Combine, typename PosValid, typename Allocator, typename OnMerge>
   inline void
-  resolveTrivialTier(const std::vector<NNMergeEdge<Packed>>&              a_edges,
-                     const std::map<ParticleID, bool>&                    a_exposed,
-                     const std::map<ParticleID, NNMergeParticle<Packed>>& a_particlesByID,
-                     const Combine&                                       a_combine,
-                     std::map<NNCellKey, int>&                            a_liveCellCount,
-                     std::set<ParticleID>&                                a_consumedIDs,
-                     const int                                            a_numParticlesPerCellThresh,
-                     std::set<ParticleID>&                                a_hasOutgoingCommitment,
-                     std::vector<NNMergeResult<Packed>>&                  a_results,
-                     const RealVect&                                      a_probLo,
-                     const std::vector<RealVect>&                         a_dxByLevel,
-                     const PosValid&                                      a_isPositionValid,
-                     const Allocator&                                     a_allocateID,
-                     const int                                            a_maxFallbackCandidates = 0,
-                     const std::optional<int>                             a_maxCellDistance       = std::nullopt,
-                     unsigned long long*                                  a_crossLevelMergeCount  = nullptr) noexcept;
+  resolveTrivialTier(
+    const std::vector<NNMergeEdge<Packed>>&              a_edges,
+    const std::map<ParticleID, bool>&                    a_exposed,
+    const std::map<ParticleID, NNMergeParticle<Packed>>& a_particlesByID,
+    const Combine&                                       a_combine,
+    std::map<NNCellKey, int>&                            a_liveCellCount,
+    std::set<ParticleID>&                                a_consumedIDs,
+    const int                                            a_numParticlesPerCellThresh,
+    std::set<ParticleID>&                                a_hasOutgoingCommitment,
+    std::vector<NNMergeResult<Packed>>&                  a_results,
+    const RealVect&                                      a_probLo,
+    const std::vector<RealVect>&                         a_dxByLevel,
+    const PosValid&                                      a_isPositionValid,
+    const Allocator&                                     a_allocateID,
+    const int                                            a_maxFallbackCandidates = 0,
+    const std::optional<int>                             a_maxCellDistance       = std::nullopt,
+    unsigned long long*                                  a_crossLevelMergeCount  = nullptr,
+    const OnMerge&                                       a_onMergeCommitted =
+      [](const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&) {
+      }) noexcept;
 
   /**
     @brief Package one outgoing proposal for every edge that resolveTrivialTier() could not
@@ -805,24 +839,31 @@ namespace ParticleManagement {
     @param[in,out] a_crossLevelMergeCount Optional diagnostic counter -- see
                                        resolveTrivialTier()'s docs; incremented once per accepted
                                        target whose target/source were on different AMR levels.
+    @param[in]     a_onMergeCommitted  Optional per-merge diagnostic callback -- see
+                                       resolveTrivialTier()'s docs; called with (target, source,
+                                       merged) for every accepted target.
   */
-  template <typename Packed, typename Combine, typename PosValid, typename Allocator>
+  template <typename Packed, typename Combine, typename PosValid, typename Allocator, typename OnMerge>
   inline void
-  judgeProposals(const std::vector<NNMergeProposal<Packed>>&          a_incomingProposals,
-                 const std::map<ParticleID, NNMergeParticle<Packed>>& a_myParticlesByID,
-                 const std::set<ParticleID>&                          a_hasOutgoingCommitment,
-                 const std::map<ParticleID, ParticleID>&              a_outgoingTargetOf,
-                 const Combine&                                       a_combine,
-                 std::map<NNCellKey, int>&                            a_liveCellCount,
-                 const int                                            a_numParticlesPerCellThresh,
-                 const RealVect&                                      a_probLo,
-                 const std::vector<RealVect>&                         a_dxByLevel,
-                 const PosValid&                                      a_isPositionValid,
-                 const Allocator&                                     a_allocateID,
-                 std::vector<NNMergeResult<Packed>>&                  a_results,
-                 std::vector<std::vector<NNMergeVerdict>>&            a_verdictsByDestRank,
-                 const std::optional<int>                             a_maxCellDistance      = std::nullopt,
-                 unsigned long long*                                  a_crossLevelMergeCount = nullptr) noexcept;
+  judgeProposals(
+    const std::vector<NNMergeProposal<Packed>>&          a_incomingProposals,
+    const std::map<ParticleID, NNMergeParticle<Packed>>& a_myParticlesByID,
+    const std::set<ParticleID>&                          a_hasOutgoingCommitment,
+    const std::map<ParticleID, ParticleID>&              a_outgoingTargetOf,
+    const Combine&                                       a_combine,
+    std::map<NNCellKey, int>&                            a_liveCellCount,
+    const int                                            a_numParticlesPerCellThresh,
+    const RealVect&                                      a_probLo,
+    const std::vector<RealVect>&                         a_dxByLevel,
+    const PosValid&                                      a_isPositionValid,
+    const Allocator&                                     a_allocateID,
+    std::vector<NNMergeResult<Packed>>&                  a_results,
+    std::vector<std::vector<NNMergeVerdict>>&            a_verdictsByDestRank,
+    const std::optional<int>                             a_maxCellDistance      = std::nullopt,
+    unsigned long long*                                  a_crossLevelMergeCount = nullptr,
+    const OnMerge&                                       a_onMergeCommitted =
+      [](const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&) {
+      }) noexcept;
 
   /**
     @brief Apply every verdict addressed to one of this rank's own outgoing proposals: remove
@@ -1105,6 +1146,8 @@ namespace ParticleManagement {
                                                 iterations and across repeated calls if the caller
                                                 keeps reusing the same counter, so it is safe to use
                                                 to track cross-level activity over several rounds.
+    @param[in]     a_onMergeCommitted          Optional per-merge diagnostic callback (see
+                                                MergeCommittedCallback); default is a no-op.
   */
   template <typename P,
             typename Packed,
@@ -1113,7 +1156,9 @@ namespace ParticleManagement {
             typename Combine,
             typename Scatter,
             typename Allocator,
-            typename PosValid = std::function<bool(const RealVect&)>>
+            typename PosValid = std::function<bool(const RealVect&)>,
+            typename OnMerge  = std::function<
+               void(const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&)>>
   inline void
   mergeNearestNeighborsRound(
     AmrMesh&                      a_amr,
@@ -1130,7 +1175,10 @@ namespace ParticleManagement {
       [](const RealVect&) {
         return true;
       },
-    unsigned long long* a_crossLevelMergeCount = nullptr);
+    unsigned long long* a_crossLevelMergeCount = nullptr,
+    const OnMerge&      a_onMergeCommitted =
+      [](const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&) {
+      });
 
 } // namespace ParticleManagement
 

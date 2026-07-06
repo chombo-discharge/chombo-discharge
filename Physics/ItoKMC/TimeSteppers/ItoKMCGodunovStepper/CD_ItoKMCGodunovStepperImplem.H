@@ -2233,6 +2233,63 @@ ItoKMCGodunovStepper<I, C, R, F>::postInitialize() noexcept
                                this->m_time);
     }
 
+    // Ghost-only diagnostic snapshot: copy the sampled (pre-merge) particles into a SEPARATE
+    // container -- never touching `particles`, which the merge below still needs completely
+    // untouched -- fill ITS ghosts using the already-registered mask, strip out everything that
+    // is NOT a ghost, and write what's left. Lets the actual ghost region (and how far a ghost
+    // travels, e.g. across a coarse-fine boundary) be inspected directly in the visualization,
+    // independent of any merge decision.
+    {
+      ParticleContainer<ItoParticle> ghostOnlyParticles;
+      ghostOnlyParticles.define(this->m_amr->getGrids(solver->getRealm()),
+                                this->m_amr->getDomains(),
+                                this->m_amr->getDx(),
+                                this->m_amr->getRefinementRatios(),
+                                this->m_amr->getProbLo(),
+                                this->m_amr->getMinBlockSize(),
+                                this->m_amr->getLevelTiles(solver->getRealm()),
+                                this->m_amr->getFinestLevel(),
+                                solver->getRealm(),
+                                nullptr);
+
+      // Direct per-patch copy -- ghostOnlyParticles shares the EXACT SAME grid layout as
+      // `particles` (defined from the same AmrMesh/realm), so this is index-for-index exact
+      // (id/rank/position/weight/payload all preserved). Deliberately NOT
+      // addParticlesDestructive(), which would remap particles and lose that direct
+      // per-patch correspondence.
+      for (int lvl = 0; lvl <= this->m_amr->getFinestLevel(); lvl++) {
+        const DisjointBoxLayout& dbl = this->m_amr->getGrids(solver->getRealm())[lvl];
+        for (DataIterator dit(dbl); dit.ok(); ++dit) {
+          ghostOnlyParticles[lvl][dit()].append(particles[lvl][dit()]);
+        }
+      }
+
+      ghostOnlyParticles.fillGhostParticles(this->m_amr->getParticleGhostMask(solver->getRealm(), 1),
+                                            this->m_amr->getParticleGhostMaskCoarToFine(solver->getRealm(), 1),
+                                            this->m_amr->getParticleGhostMaskFineToCoar(solver->getRealm(), 1));
+
+      for (int lvl = 0; lvl <= this->m_amr->getFinestLevel(); lvl++) {
+        const DisjointBoxLayout& dbl = this->m_amr->getGrids(solver->getRealm())[lvl];
+        for (DataIterator dit(dbl); dit.ok(); ++dit) {
+          ParticleSoA<ItoParticle>& leaf = ghostOnlyParticles[lvl][dit()];
+          for (std::size_t i = 0; i < leaf.size();) {
+            if (!leaf.isGhost(i)) {
+              leaf.remove(i);
+            }
+            else {
+              i++;
+            }
+          }
+        }
+      }
+
+      const std::string prefix = "./particles/" + solver->getName() + "/" + solver->getName() + ".nn_merge_ghosts_only";
+      DischargeIO::writeH5Part(prefix + "." + std::to_string(SpaceDim) + "d.h5part",
+                               ghostOnlyParticles,
+                               this->m_amr->getProbLo(),
+                               this->m_time);
+    }
+
     // The opaque reconciliation payload is just the particle's energy -- mobility/diffusion/
     // velocity are safe to drop across a merge since they are recomputed from field
     // interpolation before they are next used.
@@ -2263,6 +2320,50 @@ ItoKMCGodunovStepper<I, C, R, F>::postInitialize() noexcept
     // but rank 0.
     unsigned long long crossLevelMergeCount = 0;
 
+    // Per-merge diagnostic: recompute the weighted centroid from (first, second)'s OWN recorded
+    // position/weight and compare against the merged particle's actual position. These must
+    // match exactly (up to floating-point rounding) by construction -- any real deviation would
+    // mean the merged particle's data was NOT actually derived from the two ids recorded as its
+    // parents, a genuine bug distinct from "the nearest-neighbor search legitimately found a
+    // distant candidate" (the centroid of two distant points still lies exactly on the segment
+    // between them, so a large maxPartnerDistance with a tiny maxCenterlineDeviation means the
+    // MERGE math is fine and any surprising-looking merges are a candidate-search/ghost-reach
+    // question, not a centroid bug). All three are per-rank local; reduced via ParallelOps::max()
+    // before printing.
+    Real maxCenterlineDeviation       = 0.0;
+    Real maxPartnerDistance           = 0.0;
+    Real maxCrossLevelPartnerDistance = 0.0;
+
+    auto onMergeCommitted = [&maxCenterlineDeviation, &maxPartnerDistance, &maxCrossLevelPartnerDistance](
+                              const ParticleManagement::NNMergeParticle<Real>& a_first,
+                              const ParticleManagement::NNMergeParticle<Real>& a_second,
+                              const ParticleManagement::NNMergeParticle<Real>& a_merged) -> void {
+      const Real wSum = a_first.weight + a_second.weight;
+
+      RealVect expectedPos(D_DECL(0.0, 0.0, 0.0));
+      Real     partnerDist2 = 0.0;
+      for (int dir = 0; dir < SpaceDim; dir++) {
+        expectedPos[dir] = (a_first.weight * a_first.position[dir] + a_second.weight * a_second.position[dir]) / wSum;
+        const Real d     = a_first.position[dir] - a_second.position[dir];
+        partnerDist2 += d * d;
+      }
+
+      Real deviation2 = 0.0;
+      for (int dir = 0; dir < SpaceDim; dir++) {
+        const Real d = expectedPos[dir] - a_merged.position[dir];
+        deviation2 += d * d;
+      }
+
+      const Real deviation   = std::sqrt(deviation2);
+      const Real partnerDist = std::sqrt(partnerDist2);
+
+      maxCenterlineDeviation = std::max(maxCenterlineDeviation, deviation);
+      maxPartnerDistance     = std::max(maxPartnerDistance, partnerDist);
+      if (a_first.level != a_second.level) {
+        maxCrossLevelPartnerDistance = std::max(maxCrossLevelPartnerDistance, partnerDist);
+      }
+    };
+
     // Repeated rounds are what RULES.md's "Single pass, caller loops for convergence" design
     // expects -- one call does a SINGLE cross-patch exchange and is not guaranteed to drain a
     // crowded cell down to the threshold; debug_nn_merge_num_rounds exists so the effect of
@@ -2282,7 +2383,8 @@ ItoKMCGodunovStepper<I, C, R, F>::postInitialize() noexcept
                                                                         0,
                                                                         debugMaxCellDistance,
                                                                         isPositionValid,
-                                                                        &crossLevelMergeCount);
+                                                                        &crossLevelMergeCount,
+                                                                        onMergeCommitted);
 
       // getNumberOfValidParticlesGlobal() and ParallelOps::sum() are both MPI-collectives -- must
       // be called by every rank unconditionally; only the PRINTING is rank-0-only.
@@ -2324,7 +2426,10 @@ ItoKMCGodunovStepper<I, C, R, F>::postInitialize() noexcept
     }
 
     // Collective -- must be called by every rank unconditionally.
-    const unsigned long long crossLevelMergeCountGlobal = ParallelOps::sum(crossLevelMergeCount);
+    const unsigned long long crossLevelMergeCountGlobal         = ParallelOps::sum(crossLevelMergeCount);
+    const Real               maxCenterlineDeviationGlobal       = ParallelOps::max(maxCenterlineDeviation);
+    const Real               maxPartnerDistanceGlobal           = ParallelOps::max(maxPartnerDistance);
+    const Real               maxCrossLevelPartnerDistanceGlobal = ParallelOps::max(maxCrossLevelPartnerDistance);
 
     if (procID() == 0) {
       const Real massError = std::abs(wAfter - wBefore);
@@ -2337,6 +2442,9 @@ ItoKMCGodunovStepper<I, C, R, F>::postInitialize() noexcept
       printPerLevel("particles per level before merge", countsBefore);
       printPerLevel("particles per level after merge ", countsAfter);
       pout() << "  cross-level merges (total, all rounds) = " << crossLevelMergeCountGlobal << endl;
+      pout() << "  max centerline deviation (should be ~0) = " << maxCenterlineDeviationGlobal << endl;
+      pout() << "  max merge-partner distance              = " << maxPartnerDistanceGlobal << endl;
+      pout() << "  max CROSS-LEVEL merge-partner distance  = " << maxCrossLevelPartnerDistanceGlobal << endl;
       pout() << "  total weight before = " << wBefore << endl;
       pout() << "  total weight after  = " << wAfter << endl;
       pout() << "  mass conservation error = " << massError << endl;

@@ -324,7 +324,7 @@ namespace ParticleManagement {
     }
   }
 
-  template <typename Packed, typename Combine, typename PosValid, typename Allocator>
+  template <typename Packed, typename Combine, typename PosValid, typename Allocator, typename OnMerge>
   inline void
   resolveTrivialTier(const std::vector<NNMergeEdge<Packed>>&              a_edges,
                      const std::map<ParticleID, bool>&                    a_exposed,
@@ -341,7 +341,8 @@ namespace ParticleManagement {
                      const Allocator&                                     a_allocateID,
                      const int                                            a_maxFallbackCandidates,
                      const std::optional<int>                             a_maxCellDistance,
-                     unsigned long long*                                  a_crossLevelMergeCount) noexcept
+                     unsigned long long*                                  a_crossLevelMergeCount,
+                     const OnMerge&                                       a_onMergeCommitted) noexcept
   {
     CH_TIME("ParticleManagement::resolveTrivialTier");
 
@@ -491,6 +492,7 @@ namespace ParticleManagement {
             if (a_crossLevelMergeCount != nullptr && query.level != cand.level) {
               (*a_crossLevelMergeCount)++;
             }
+            a_onMergeCommitted(query, cand, result.merged);
 
             resolved = true;
             break;
@@ -551,7 +553,7 @@ namespace ParticleManagement {
     }
   }
 
-  template <typename Packed, typename Combine, typename PosValid, typename Allocator>
+  template <typename Packed, typename Combine, typename PosValid, typename Allocator, typename OnMerge>
   inline void
   judgeProposals(const std::vector<NNMergeProposal<Packed>>&          a_incomingProposals,
                  const std::map<ParticleID, NNMergeParticle<Packed>>& a_myParticlesByID,
@@ -567,7 +569,8 @@ namespace ParticleManagement {
                  std::vector<NNMergeResult<Packed>>&                  a_results,
                  std::vector<std::vector<NNMergeVerdict>>&            a_verdictsByDestRank,
                  const std::optional<int>                             a_maxCellDistance,
-                 unsigned long long*                                  a_crossLevelMergeCount) noexcept
+                 unsigned long long*                                  a_crossLevelMergeCount,
+                 const OnMerge&                                       a_onMergeCommitted) noexcept
   {
     CH_TIME("ParticleManagement::judgeProposals");
 
@@ -723,6 +726,7 @@ namespace ParticleManagement {
       if (a_crossLevelMergeCount != nullptr && target.level != source.level) {
         (*a_crossLevelMergeCount)++;
       }
+      a_onMergeCommitted(target, source, result.merged);
 
       a_verdictsByDestRank[sourceDestRank].push_back(NNMergeVerdict{source.globalID, true});
     }
@@ -782,7 +786,8 @@ namespace ParticleManagement {
             typename Combine,
             typename Scatter,
             typename Allocator,
-            typename PosValid>
+            typename PosValid,
+            typename OnMerge>
   inline void
   mergeNearestNeighborsRound(AmrMesh&                      a_amr,
                              ParticleContainer<P, Traits>& a_particles,
@@ -795,7 +800,8 @@ namespace ParticleManagement {
                              const int                     a_maxFallbackCandidates,
                              const std::optional<int>      a_maxCellDistance,
                              const PosValid&               a_isPositionValid,
-                             unsigned long long*           a_crossLevelMergeCount)
+                             unsigned long long*           a_crossLevelMergeCount,
+                             const OnMerge&                a_onMergeCommitted)
   {
     CH_TIME("ParticleManagement::mergeNearestNeighborsRound");
 
@@ -991,7 +997,8 @@ namespace ParticleManagement {
                          a_allocateID,
                          a_maxFallbackCandidates,
                          a_maxCellDistance,
-                         a_crossLevelMergeCount);
+                         a_crossLevelMergeCount,
+                         a_onMergeCommitted);
 
       allResults.insert(allResults.end(), passResults.begin(), passResults.end());
 
@@ -1057,7 +1064,8 @@ namespace ParticleManagement {
                    judgeResults,
                    verdictsByDestRank,
                    a_maxCellDistance,
-                   a_crossLevelMergeCount);
+                   a_crossLevelMergeCount,
+                   a_onMergeCommitted);
 
     allResults.insert(allResults.end(), judgeResults.begin(), judgeResults.end());
     for (const auto& r : judgeResults) {
