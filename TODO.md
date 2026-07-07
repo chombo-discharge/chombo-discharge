@@ -68,25 +68,29 @@ neither of us has to re-derive them from scratch later.
   site inside `judgeProposals()`. Should be removed: pass `particlesByID` + `consumedIDs` through
   and check membership at the point of use instead.
 
-- **PARTIALLY ADDRESSED: higher AMR refinement ratios inflate ghost candidate counts because of
-  the confirmed `Realm::defineParticleGhostMaskFineToCoar` ghost over-delivery** (see the
-  ghost-mask investigation earlier in this branch's history: unlike coarse-to-fine, which filters
-  ghosts down to an exact fine-resolution acceptance box, fine-to-coarse ships ALL `refRat^D` fine
-  children of every qualifying coarse halo cell unconditionally, with no per-particle distance
-  filter afterward). For a fixed coarse-fine boundary, the ghost volume crossing it scales as
-  `refRat^D` -- going from `refRat=2` to `refRat=4` multiplies it by `2^D` (4x in 2D, 8x in 3D) for
-  the exact same physical geometry. Before the spatial-index rewrite (item above, now done), this
-  inflated count fed directly into a literal O(n^2) scan, so a coarse patch near the boundary got
-  quadratically more expensive, not just linearly -- confirmed directly (variable-sized-patch,
-  8-32 cells, `refRat=4` configs took much longer to run than an equivalent `refRat=2` config). The
-  spatial index (bucketed + pruned search, not brute force) blunts this significantly -- the same
-  inflated candidate count no longer drives a quadratic cost. What remains open: the ghost
-  over-delivery itself is still unfixed at the source, so MPI communication volume and per-patch
-  candidate-pool size are still larger than strictly necessary at high refinement ratios, even
-  though the search cost scaling is no longer quadratic in it. Fixing
-  `defineParticleGhostMaskFineToCoar` itself (adding a fine-resolution acceptance-box filter,
-  mirroring what coarse-to-fine already does) would address this at the source and reduce raw
-  communication volume too, independent of the merge algorithm -- not done.
+- ~~Higher AMR refinement ratios inflate ghost candidate counts because of a ghost over-delivery
+  bug in `Realm::defineParticleGhostMaskFineToCoar`.~~ **CORRECTED -- this was a misdiagnosis, not
+  a bug.** Earlier investigation this branch's history found that fine-to-coarse ghosts ship ALL
+  `refRat^D` fine children of a qualifying coarse halo cell, and framed this as "over-delivery" by
+  comparing that reach against what a same-level, fine-level width-1 ghost would cover. That is the
+  wrong baseline. The correct baseline is what the CONSUMING (coarse-side) query itself needs: its
+  default search radius is 1 cell of *its own* level, i.e. 1 coarse cell -- which physically spans
+  `refRat` fine cells in width. Shipping every fine particle inside that region is exactly the
+  right amount, not excess; the coarse→fine direction does the mirror-image thing (delivers
+  exactly 1 *fine* cell deep, matching a fine query's own 1-fine-cell radius). Both directions
+  already deliver precisely "1 cell of the receiving level's own size" -- there is no missing
+  acceptance-box filter to add, and adding one (as previously proposed) would be actively wrong: it
+  would cut off fine particles a coarse query is legitimately entitled to see.
+
+  What DOES still hold: at higher refinement ratios, a coarse cell's "1 cell" neighborhood
+  genuinely contains more fine-level particles (`refRat^D` worth), so the candidate pool a
+  coarse-side query must consider legitimately grows with `refRat` -- this is just AMR geometry,
+  not a defect anywhere. This is exactly why the old O(n^2) brute-force search got so much worse at
+  higher refinement ratios (confirmed directly: variable-sized-patch, 8-32 cells, `refRat=4`
+  configs took much longer than an equivalent `refRat=2` config), and exactly why the spatial index
+  (item above, now done) is the right fix: it makes searching a larger, legitimate candidate pool
+  cheap, rather than trying to shrink the pool itself, which was never actually oversized. No
+  further action needed here.
 
 ## Design / correctness coverage
 
