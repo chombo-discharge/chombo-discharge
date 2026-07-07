@@ -417,6 +417,39 @@ namespace ParticleManagement {
   using NNCellKey = std::pair<int, IntVect>;
 
   /**
+    @brief Hash functor for NNCellKey -- REQUIRED whenever NNCellKey is used as a hash-map key;
+    NNCellKey must never be used as an ORDERED (%std::map or %std::set) key.
+    @details IntVect::operator< (used by std::less<IntVect>, which std::pair<int,IntVect>::operator<
+    calls into for its second component) is a component-wise "strictly dominates in every direction"
+    partial order, not a valid strict weak ordering/total order -- it is designed for box/geometry
+    containment logic elsewhere in Chombo, not for use as a std::map comparator. Two distinct,
+    unrelated cells that don't dominate each other in every direction (the common case: e.g.
+    (76,104) vs (80,101), where neither strictly dominates) compare as neither-less-than-the-other,
+    which std::map interprets as EQUAL keys -- silently pooling two unrelated cells' live counts
+    into one entry (a real, confirmed bug found empirically: committed merges whose participant
+    cells' true populations were below the configured crowding threshold, reproducing independent
+    of AMR level, MPI rank count, and ghost/boundary exposure -- exactly what this aliasing predicts,
+    since it is a plain key-comparison defect with nothing to do with any of those). Hashing (via
+    this functor, with std::unordered_map) sidesteps the issue entirely: it depends only on
+    IntVect::operator==, which Chombo defines correctly as full component-wise equality.
+  */
+  struct NNCellKeyHasher
+  {
+    /**
+      @brief Hash operator.
+      @param[in] a_key Cell key to hash.
+      @return Hash value.
+    */
+    std::size_t
+    operator()(const NNCellKey& a_key) const noexcept
+    {
+      std::size_t hash = LevelTiles::TileHasher()(a_key.second);
+      hash ^= static_cast<std::size_t>(static_cast<unsigned int>(a_key.first)) + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+      return hash;
+    }
+  };
+
+  /**
     @brief A cell index for the spatial-index bucketing/walk used by findNearestNeighborCandidates()
     (see TODO.md's locked spatial-index design at the repository root).
     @details Deliberately a DIFFERENT type alias than NNCellKey, even though both currently resolve
@@ -553,16 +586,14 @@ namespace ParticleManagement {
                      NNCellBuckets<Packed>&                      a_buckets) noexcept;
 
   /**
-    @brief One node of a per-cell midpoint-split sub-partition tree (see NNSpatialIndex::subPartitions).
+    @brief One node of the whole-patch count-median-split tree (see NNSpatialIndex::tree).
     @details A binary tree stored as a flat vector; node 0 is the root. lo/hi is a half-open range
-    into the SAME NNCellBuckets::sorted array the cell's own (unsplit) range would have used --
-    only NNIndexedParticle entries are ever reordered to build this, never NNMergeParticle data.
-    leftChild/rightChild are indices into the SAME vector this node lives in; -1 means "no child",
-    i.e. this node is a leaf and [lo, hi) should be brute-forced directly. aabbLo/aabbHi is this
-    node's own physical bounding box, used to prune the whole subtree by point-to-AABB distance
-    during the walk (see nnMergePointToAABBDistSquared() in the implementation) -- exactly the
-    same pruning principle as block-level pruning (see NNCellBuckets::blockCounts), just recursing
-    further within an individual cell.
+    into NNCellBuckets::sorted -- only NNIndexedParticle entries are ever reordered to build this,
+    never NNMergeParticle data. leftChild/rightChild are indices into the SAME vector this node
+    lives in; -1 means "no child", i.e. this node is a leaf and [lo, hi) should be brute-forced
+    directly. aabbLo/aabbHi is this node's own physical bounding box, used to prune the whole
+    subtree by point-to-AABB distance during the walk (see nnMergePointToAABBDistSquared() in the
+    implementation).
   */
   struct NNSubNode
   {
@@ -612,31 +643,57 @@ namespace ParticleManagement {
     NNCellBuckets<Packed> buckets;
 
     /**
-      @brief Per-cell midpoint-split sub-partition trees, ONLY for cells whose occupancy exceeded
-      the sub-partition threshold at build time (see buildNNSpatialIndex()'s a_subPartitionThresh).
-      @details Empty for every cell in the common case (crowding-trigger-driven occupancy is
-      usually small) -- a cell with no entry here should be brute-forced directly via its
-      NNCellBuckets::cellOffsets range, exactly as if this structure didn't exist at all. This is
-      a pure performance optimization for the rare "bursty" cell (e.g. an avalanche dumping many
-      particles into one cell before the next merge pass catches up): it lets that one cell pay
-      its own extra cost via its own small sub-tree, without inflating its neighbors' costs the way
-      a fixed-size neighbor-inclusive tree would.
+      @brief A single count-median-split tree spanning EVERY particle in this patch (local valid
+      AND every ghost) -- node 0 is the root, empty iff there were no particles at all (or this
+      patch's average density is at/below the crowding threshold -- see buildNNSpatialIndex()'s
+      own docs).
+      @details Deliberately one tree per PATCH, not one per over-threshold CELL (an earlier design
+      this branch tried and moved away from -- see TODO.md's history for why). A query's own cell
+      being crowded is still what makes it a query at all (that check is unchanged, still against
+      a_liveCellCount), but ONCE it is one, its candidate search walks this single tree rather than
+      a cell-by-cell ring expansion: a query near a cell boundary that would otherwise require
+      visiting several neighboring cells' OWN separate sub-structures (each paying its own
+      root-to-leaf descent) instead prunes and descends ONE tree that already spans all of them, so
+      a whole neighboring region can be skipped in a single AABB check regardless of how many
+      original cells it spans. See buildNNSpatialIndex()'s own docs for the build.
     */
-    std::unordered_map<NNWalkCell, std::vector<NNSubNode>, LevelTiles::TileHasher> subPartitions;
+    std::vector<NNSubNode> tree;
   };
 
   /**
-    @brief Build a patch's complete spatial index for one round: buildNNCellBuckets() followed by
-    an adaptive, per-cell midpoint-split sub-partition for any cell whose occupancy exceeds
-    a_subPartitionThresh.
-    @details Splitting rule is the spatial MIDPOINT of the node's own bounding box along its
-    longest axis -- NOT buildEqualWeightKDLeaves()'s weighted-median rule -- since the midpoint
-    needs no data scan to choose (just std::partition against a known coordinate), cheaper per
-    level than a partial sort/nth_element, and this algorithm's crowding trigger already keeps
-    occupancy close to uniform per patch, so median-balancing buys little for the extra cost (see
-    TODO.md's locked design). Recurses until a node's own occupancy is at/below
-    a_subPartitionThresh, or a generous hard depth cap is hit (defensive against many particles at
-    the exact same position, which would make midpoint splitting fail to shrink groups).
+    @brief Build a patch's complete spatial index for one round: buildNNCellBuckets() followed,
+    UNLESS this patch's average density is at/below the crowding threshold, by a single
+    count-median-split tree over the WHOLE patch (every local valid particle and every ghost).
+    @details Splitting rule is the COUNT MEDIAN along the node's own longest-AABB axis (via
+    std::nth_element, an exact 50/50-by-count split regardless of data distribution) -- NOT a pure
+    geometric midpoint of the bounding box (this function's own original design, abandoned after it
+    was found to produce wildly unbalanced leaves for data clustered unevenly across a wide
+    bounding box -- see buildNNSubNodeRecursive()'s own docs for the full story and the empirical
+    numbers). Recurses until a node's own occupancy is at/below a_subPartitionThresh, or a generous
+    hard depth cap is hit (defensive, in case count-median splitting ever needs it) -- the SAME
+    leaf-size role a_subPartitionThresh always had, just no longer also deciding whether a tree
+    exists at all: a non-empty, over-average-density patch gets exactly one tree, and a patch whose
+    total population is already at/below a_subPartitionThresh (but still above the average-density
+    gate below) simply gets a single-node tree (root == leaf), which degenerates to a plain
+    brute-force scan with no meaningful extra cost over not having a tree at all.
+
+    @b Average-density pre-filter: if a_numCellsInPatch * a_numParticlesPerCellThresh >= the
+    patch's total particle count (local valid + ghost), NO tree is built at all (a_index.tree
+    stays empty, exactly as if the patch had zero particles) -- this is the SAME cheap, O(1)
+    "is this even worth it" check the equal_weight_kd merge algorithm effectively gets for free by
+    dispatching per cell (a cell already at/below its own target does no work at all); without it,
+    building a tree for a patch where not a single cell could ever be crowded would be pure waste,
+    and specifically an UNFAIR asymmetry in any timing comparison against equal_weight_kd. This is
+    a rank-based heuristic, not a hard correctness guarantee: it is possible (though expected to be
+    rare, and never seen in practice at the block sizes this codebase uses) for a patch to have a
+    low AVERAGE density yet still contain one genuinely over-threshold cell, if occupancy is
+    heavily clustered into a small part of the patch. findNearestNeighborCandidates() falls back to
+    a direct, untreed scan of buckets.sorted (always correct, just not fast) if a query ever does
+    turn out to exist despite a skipped tree, so this heuristic can only ever cost performance in
+    that rare case, never correctness.
+    The root's own bounding box (when a tree IS built) is the physical extent of every particle
+    actually present (via NNCellBuckets::observedCellBox, not just this patch's own box, since
+    ghosts can extend beyond it).
     @tparam Packed See NNMergeParticle.
     @param[in]  a_localValid          This patch's own full valid-particle set (see
                                       buildNNCellBuckets()'s own docs).
@@ -645,11 +702,19 @@ namespace ParticleManagement {
     @param[in]  a_dx                  Cell spacing of THIS PATCH's own level.
     @param[in]  a_blockSize           Block size in cells (see MergeBlockGrid::getBlockSize()).
     @param[in]  a_haloBlockBox        This patch's own block-index-space box plus a 1-block halo.
-    @param[in]  a_subPartitionThresh  Occupancy above which a cell gets its own sub-partition tree
-                                      instead of being brute-forced directly. Deliberately
-                                      independent of a_numParticlesPerCellThresh (that is a
-                                      physics-facing crowding threshold; this is a pure performance
-                                      knob).
+    @param[in]  a_subPartitionThresh  Occupancy at/below which a tree node becomes a leaf.
+                                      Deliberately independent of a_numParticlesPerCellThresh below
+                                      (that is a physics-facing crowding threshold; this is a pure
+                                      performance knob) -- unrelated to the average-density
+                                      pre-filter above, which uses a_numParticlesPerCellThresh, not
+                                      this.
+    @param[in]  a_numParticlesPerCellThresh The SAME physics-facing crowding threshold used
+                                      elsewhere this round (see mergeNearestNeighborsRound()'s own
+                                      a_numParticlesPerCellThresh) -- used ONLY for the
+                                      average-density pre-filter above, nothing else here.
+    @param[in]  a_numCellsInPatch     This patch's own native cell count (its valid box's own
+                                      numPts(), NOT including the ghost halo) -- the denominator
+                                      for the average-density pre-filter above.
     @param[out] a_index               The resulting spatial index.
   */
   template <typename Packed>
@@ -661,6 +726,8 @@ namespace ParticleManagement {
                       const int                                   a_blockSize,
                       const Box&                                  a_haloBlockBox,
                       const int                                   a_subPartitionThresh,
+                      const int                                   a_numParticlesPerCellThresh,
+                      const long                                  a_numCellsInPatch,
                       NNSpatialIndex<Packed>&                     a_index) noexcept;
 
   /**
@@ -718,36 +785,25 @@ namespace ParticleManagement {
     up-to-1000x-per-round loop this redesign exists to speed up. See a_spatialIndex's own docs for
     why this rebuild-once-per-round (never across rounds) is unavoidable and still cheap.
 
-    Implementation walks a_spatialIndex's cell buckets via Moore-neighborhood ring expansion,
-    outward from the query's own cell, rather than scanning two flat vectors or every occupied
-    cell unconditionally -- see NNCellBuckets/buildNNCellBuckets() for how that index is built
-    (once per patch per round, index-array-based, never copying particle data), matching the
-    allocation-light, thread-local-scratch philosophy already used by the existing mergers in
-    CD_ParticleManagementImplem.H (e.g. buildEqualWeightKDLeaves(), mergeAdjacentNearest()), though
-    those build a philosophically similar but structurally different kind of tree (equal-weight
-    spatial partitioning, not a point-query index) and are not directly reusable here.
+    Implementation walks a_spatialIndex's single, whole-patch tree (see NNSpatialIndex::tree /
+    buildNNSpatialIndex()) once per query, root to leaves, pruning subtrees by point-to-AABB
+    distance -- NOT a cell-by-cell Moore-neighborhood ring expansion (an earlier design this branch
+    tried and moved away from; see TODO.md's history). A query near a cell boundary that would
+    otherwise require visiting several neighboring cells' own separate sub-structures, each paying
+    its own root-to-leaf descent, instead prunes and descends ONE tree that already spans every
+    particle in the patch: an entire neighboring region can be skipped in a single AABB check
+    regardless of how many original cells it spans, rather than being visited cell by cell. See
+    NNCellBuckets/buildNNCellBuckets() for how the underlying index array is built (once per patch
+    per round, index-array-based, never copying particle data).
 
-    @b Ring expansion and pruning: after each ring is fully processed, the walk decides whether to
-    expand to the next ring using TWO independent stopping conditions, either of which alone is
-    sufficient to stop -- see this function's own docs at the top of the implementation for the
-    exact distance formula:
-    - @e Distance-based (a performance optimization): once the current worst-of-K distance (once
-      K candidates have been found) is closer than the next ring could possibly be, going further
-      cannot improve the result. a_maxCellDistance (see below), a hard cutoff, is folded into the
-      SAME comparison as an independent, always-safe bound: for a query at level L,
-      a_maxCellDistance * a_dx is always a conservative (never too tight) radius regardless of a
-      candidate's own level -- see nnMergeCrossLevelTooFar()'s own docs for why a finer candidate
-      only ever has a TIGHTER effective radius, never looser -- so pruning with it here can only
-      ever be a superset of the exact per-pair eligibility check resolveTrivialTier()/
-      judgeProposals() already apply downstream, never wrongly excluding something they would
-      still accept.
-    - @e Coverage-based (a correctness guarantee, independent of the above): ring expansion also
-      stops once it has covered a_spatialIndex.buckets.observedCellBox in full -- the actual
-      bounding box of every cell that has any particle at all, regardless of the "expected"
-      1-block halo MergeBlockGrid/blockCounts assume. This guarantees no real candidate is ever
-      missed even if that geometric assumption is ever violated (see observedCellBox's own docs) --
-      the distance-based condition above is purely a speed optimization on top of this guarantee,
-      never a substitute for it.
+    @b Pruning: a subtree is skipped once the query's current worst-of-K distance (once K
+    candidates have been found) is provably closer than anything the subtree could contain (exact
+    point-to-AABB distance -- see nnMergePointToAABBDistSquared() in the implementation), the same
+    principle buildNNSpatialIndex()'s tree construction already documents. a_maxCellDistance (see
+    below), when set, is folded in as an independent, always-safe additional prune condition,
+    checked regardless of whether K candidates have been found yet (so it can prune even before any
+    candidate exists) -- see its own param docs for the exact bound used and why it is safe but not
+    maximally tight.
 
     When a_maxFallbackCandidates (forwarded from resolveTrivialTier(), see its own docs) is
     greater than zero: the walk returns the K=1+a_maxFallbackCandidates nearest points instead of
@@ -788,22 +844,36 @@ namespace ParticleManagement {
     @param[in]  a_maxCellDistance  Same hard cutoff as resolveTrivialTier()'s own a_maxCellDistance
                                     (see its docs); std::nullopt (default) disables it. Folded in
                                     here purely as an additional, always-safe pruning bound during
-                                    the walk -- resolveTrivialTier()/judgeProposals() still apply
-                                    the exact, level-aware check downstream regardless, unchanged.
+                                    the tree walk -- resolveTrivialTier()/judgeProposals() still
+                                    apply the exact, level-aware, per-axis Chebyshev check
+                                    (nnMergeCrossLevelTooFar()) downstream regardless, unchanged.
+                                    The bound used here is deliberately looser: a subtree is pruned
+                                    only once its EUCLIDEAN point-to-AABB distance exceeds
+                                    a_maxCellDistance * min(a_dx) * sqrt(SpaceDim) -- the
+                                    sqrt(SpaceDim) factor is required because a per-axis Chebyshev
+                                    cell distance of N does not bound Euclidean physical distance by
+                                    N * dx alone (a diagonal candidate exactly N cells away in both
+                                    directions is N * dx * sqrt(SpaceDim) away in a straight line),
+                                    and this bound must never be tighter than the true Chebyshev
+                                    cutoff or it could wrongly prune a candidate resolveTrivialTier()/
+                                    judgeProposals() would still have accepted. Safe but not
+                                    maximally tight: may walk slightly more of the tree than a true
+                                    per-axis Chebyshev-aware prune would when a_maxCellDistance is
+                                    actually set (currently unexercised by any caller).
   */
   template <typename Packed>
   inline void
-  findNearestNeighborCandidates(const std::vector<NNMergeParticle<Packed>>& a_localValid,
-                                const std::vector<NNMergeParticle<Packed>>& a_ghosts,
-                                const std::set<ParticleID>&                 a_consumedIDs,
-                                const NNSpatialIndex<Packed>&               a_spatialIndex,
-                                const std::map<NNCellKey, int>&             a_liveCellCount,
-                                const RealVect&                             a_probLo,
-                                const RealVect&                             a_dx,
-                                const int                                   a_numParticlesPerCellThresh,
-                                std::vector<NNMergeEdge<Packed>>&           a_edges,
-                                const int                                   a_maxFallbackCandidates = 0,
-                                const std::optional<int>                    a_maxCellDistance = std::nullopt) noexcept;
+  findNearestNeighborCandidates(const std::vector<NNMergeParticle<Packed>>&                a_localValid,
+                                const std::vector<NNMergeParticle<Packed>>&                a_ghosts,
+                                const std::set<ParticleID>&                                a_consumedIDs,
+                                const NNSpatialIndex<Packed>&                              a_spatialIndex,
+                                const std::unordered_map<NNCellKey, int, NNCellKeyHasher>& a_liveCellCount,
+                                const RealVect&                                            a_probLo,
+                                const RealVect&                                            a_dx,
+                                const int                                                  a_numParticlesPerCellThresh,
+                                std::vector<NNMergeEdge<Packed>>&                          a_edges,
+                                const int                                                  a_maxFallbackCandidates = 0,
+                                const std::optional<int> a_maxCellDistance = std::nullopt) noexcept;
 
   /**
     @brief Resolve every candidate edge that is safely mergeable with zero cross-rank
@@ -987,7 +1057,7 @@ namespace ParticleManagement {
     const std::map<ParticleID, bool>&                    a_exposed,
     const std::map<ParticleID, NNMergeParticle<Packed>>& a_particlesByID,
     const Combine&                                       a_combine,
-    std::map<NNCellKey, int>&                            a_liveCellCount,
+    std::unordered_map<NNCellKey, int, NNCellKeyHasher>& a_liveCellCount,
     std::set<ParticleID>&                                a_consumedIDs,
     const int                                            a_numParticlesPerCellThresh,
     std::set<ParticleID>&                                a_hasOutgoingCommitment,
@@ -1095,7 +1165,17 @@ namespace ParticleManagement {
     @param[in]     a_combine           Opaque-payload combine callback (see PayloadCombine).
     @param[in,out] a_liveCellCount     Live per-cell counts for this rank's own patches;
                                        decremented in place as targets are accepted, in the same
-                                       distance-sorted processing order (see rule 4 above).
+                                       distance-sorted processing order (see rule 4 above). Used to
+                                       dynamically recheck BOTH the target's AND the source's own
+                                       cell -- mirrors resolveTrivialTier()'s symmetric recheck
+                                       exactly; accepting a proposal whose source's own cell is no
+                                       longer over threshold (e.g. drained by an earlier merge
+                                       within this same round) would silently violate the crowding
+                                       trigger on the source side. If this rank has no live
+                                       visibility into the source's cell (it was never shipped here
+                                       as a ghost), the source count defaults to 0 -- i.e. rejected
+                                       -- the same conservative default already used when a
+                                       target's own count is unknown.
     @param[in]     a_numParticlesPerCellThresh Crowding threshold N (same value used everywhere
                                        else this round).
     @param[in]     a_probLo            Physical position of the domain's low corner (see
@@ -1132,7 +1212,7 @@ namespace ParticleManagement {
     const std::set<ParticleID>&                          a_hasOutgoingCommitment,
     const std::map<ParticleID, ParticleID>&              a_outgoingTargetOf,
     const Combine&                                       a_combine,
-    std::map<NNCellKey, int>&                            a_liveCellCount,
+    std::unordered_map<NNCellKey, int, NNCellKeyHasher>& a_liveCellCount,
     const int                                            a_numParticlesPerCellThresh,
     const RealVect&                                      a_probLo,
     const std::vector<RealVect>&                         a_dxByLevel,
@@ -1430,12 +1510,24 @@ namespace ParticleManagement {
     @param[in]     a_onMergeCommitted          Optional per-merge diagnostic callback (see
                                                 MergeCommittedCallback); default is a no-op.
     @param[in]     a_subPartitionThresh        Forwarded to buildNNSpatialIndex() (see its own
-                                                docs) -- occupancy above which a cell gets its own
-                                                midpoint-split sub-partition tree instead of being
-                                                brute-forced directly. Default is effectively
-                                                "never" (matches the original, always-brute-force-
-                                                within-a-cell behavior); a pure performance knob,
-                                                independent of a_numParticlesPerCellThresh.
+                                                docs) -- occupancy at/below which a node of the
+                                                single whole-patch tree becomes a leaf. A pure
+                                                performance knob, independent of
+                                                a_numParticlesPerCellThresh. Default
+                                                is 32 -- picked empirically (repeated timing runs on
+                                                a multi-level, variable-block-size configuration with
+                                                uniform particle sampling, where unrefined coarse
+                                                cells cover far more physical area than fine ones and
+                                                so can accumulate a disproportionate particle count)
+                                                after finding the OLD default (effectively "never
+                                                sub-partition", matching the original always-brute-
+                                                force-within-a-cell behavior) left occasional
+                                                pathologically crowded cells brute-forced directly,
+                                                costing roughly 2.4x this function's total wall-clock
+                                                time in that scenario. No caller had ever overridden
+                                                the old default before this change (this function
+                                                had exactly one caller, a debug/test hook, at the
+                                                time this default was picked).
   */
   template <typename P,
             typename Packed,
@@ -1467,7 +1559,7 @@ namespace ParticleManagement {
     const OnMerge&      a_onMergeCommitted =
       [](const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&) {
       },
-    const int a_subPartitionThresh = std::numeric_limits<int>::max());
+    const int a_subPartitionThresh = 32);
 
 } // namespace ParticleManagement
 

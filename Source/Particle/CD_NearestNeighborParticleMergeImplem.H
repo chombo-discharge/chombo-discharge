@@ -15,6 +15,7 @@
 
 // Std includes
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <cstdlib>
 
@@ -31,6 +32,17 @@
 #include <CD_NamespaceHeader.H>
 
 namespace ParticleManagement {
+
+  // TEMPORARY DIAGNOSTIC -- do not commit.
+  static unsigned long long g_nnDiagQueries        = 0;
+  static unsigned long long g_nnDiagNodeVisits     = 0;
+  static unsigned long long g_nnDiagLeafCandidates = 0;
+  static unsigned long long g_nnDiagTreeSizeSum    = 0;
+  static unsigned long long g_nnDiagTreeCount      = 0;
+  static unsigned long long g_nnDiagLeavesVisited  = 0;
+  static unsigned long long g_nnDiagLeafSizeSum    = 0;
+  static unsigned long long g_nnDiagLeafSizeCount  = 0;
+  static unsigned long long g_nnDiagMaxLeafSize    = 0;
 
   // ---------------------------------------------------------------------------------------------
   // Private helpers (not declared in CD_NearestNeighborParticleMerge.H -- implementation details
@@ -381,11 +393,20 @@ namespace ParticleManagement {
   }
 
   /**
-    @brief Recursively build a cell's midpoint-split sub-partition tree in place.
+    @brief Recursively build a node's count-median-split subtree in place, over the range given.
     @details Only NNIndexedParticle entries in a_sorted[a_lo, a_hi) are ever reordered (via
-    std::partition against the longest-axis midpoint of the current node's own bounding box) --
-    never NNMergeParticle data. See NNSubNode/buildNNSpatialIndex()'s own docs for the rationale
-    (midpoint, not median; recursion stops at a_subPartitionThresh or a_maxDepth).
+    std::nth_element against the longest-axis COUNT median of the current node's own particles) --
+    never NNMergeParticle data. See NNSubNode/buildNNSpatialIndex()'s own docs for why a count
+    median, not a pure geometric midpoint (this function's own original design): a midpoint split
+    chooses its boundary from the node's bounding box alone, blind to where the particles actually
+    are, and for data clustered unevenly across a wide bounding box (crowded cells beside sparse
+    ones -- confirmed the norm, not an edge case, for a whole-patch tree) it can carve off only a
+    couple of outliers per level while leaving a dense cluster nearly intact, producing wildly
+    unbalanced leaves (empirically: leaf sizes from 1 up to 3211 particles in one test, against a
+    target of 32). std::nth_element is O(n) per level (same order as std::partition, just a larger
+    constant) and guarantees an exact (within 1) 50/50 split by COUNT regardless of how the
+    underlying positions are distributed, so it cannot degenerate this way. Recursion stops at
+    a_subPartitionThresh or a_maxDepth.
     @tparam Packed See NNMergeParticle.
     @param[in,out] a_sorted             The patch's full index array (see NNCellBuckets::sorted);
                                          only the sub-range [a_lo, a_hi) is ever reordered.
@@ -422,6 +443,9 @@ namespace ParticleManagement {
 
     const std::size_t count = a_hi - a_lo;
     if (static_cast<int>(count) <= a_subPartitionThresh || a_depth >= a_maxDepth) {
+      g_nnDiagLeafSizeSum += count;
+      g_nnDiagLeafSizeCount++;
+      g_nnDiagMaxLeafSize = std::max(g_nnDiagMaxLeafSize, static_cast<unsigned long long>(count));
       return static_cast<int>(nodeIdx); // leaf
     }
 
@@ -434,29 +458,42 @@ namespace ParticleManagement {
         axis = dir;
       }
     }
-    const Real mid = 0.5 * (a_aabbLo[axis] + a_aabbHi[axis]);
-
     auto getPos = [&](const NNIndexedParticle& a_entry) -> const RealVect& {
       return a_entry.isLocal ? a_localValid[a_entry.idx].position : a_ghosts[a_entry.idx].position;
     };
 
-    const auto        splitIt  = std::partition(a_sorted.begin() + static_cast<std::ptrdiff_t>(a_lo),
-                                        a_sorted.begin() + static_cast<std::ptrdiff_t>(a_hi),
-                                        [&](const NNIndexedParticle& a_entry) {
-                                          return getPos(a_entry)[axis] < mid;
-                                        });
-    const std::size_t splitPos = static_cast<std::size_t>(splitIt - a_sorted.begin());
+    // Count-median split via nth_element: after this call, every entry in [a_lo, splitPos) has an
+    // axis-value <= the entry now AT splitPos, and every entry in [splitPos, a_hi) has one >= it --
+    // an exact (within 1) 50/50 split by COUNT, regardless of how the underlying positions are
+    // distributed (see this function's own docs for why this replaced a pure geometric midpoint).
+    const std::size_t splitPos = a_lo + count / 2;
 
-    // Degenerate split (e.g. every particle sits at the exact same position, so nothing ever moves
-    // to one side) -- stop recursing rather than looping with no progress.
-    if (splitPos == a_lo || splitPos == a_hi) {
+    std::nth_element(a_sorted.begin() + static_cast<std::ptrdiff_t>(a_lo),
+                     a_sorted.begin() + static_cast<std::ptrdiff_t>(splitPos),
+                     a_sorted.begin() + static_cast<std::ptrdiff_t>(a_hi),
+                     [&](const NNIndexedParticle& a_a, const NNIndexedParticle& a_b) {
+                       return getPos(a_a)[axis] < getPos(a_b)[axis];
+                     });
+
+    // Defensive only -- nth_element's split is exact by construction (within 1), so this can only
+    // trigger for a degenerate a_subPartitionThresh of 0 with count == 1, not a realistic setting.
+    if (splitPos <= a_lo || splitPos >= a_hi) {
+      g_nnDiagLeafSizeSum += count;
+      g_nnDiagLeafSizeCount++;
+      g_nnDiagMaxLeafSize = std::max(g_nnDiagMaxLeafSize, static_cast<unsigned long long>(count));
       return static_cast<int>(nodeIdx); // leaf
     }
 
+    // Safe (never too loose in the wrong direction) child AABBs: nth_element's own guarantee (see
+    // above) means using the split entry's own axis-value as the shared boundary correctly bounds
+    // BOTH children, even though it is not necessarily either child's tightest possible extent
+    // (ties at the split value can land on either side).
+    const Real splitValue = getPos(a_sorted[splitPos])[axis];
+
     RealVect leftHi  = a_aabbHi;
-    leftHi[axis]     = mid;
+    leftHi[axis]     = splitValue;
     RealVect rightLo = a_aabbLo;
-    rightLo[axis]    = mid;
+    rightLo[axis]    = splitValue;
 
     const int left  = buildNNSubNodeRecursive(a_sorted,
                                              a_localValid,
@@ -496,52 +533,62 @@ namespace ParticleManagement {
                       const int                                   a_blockSize,
                       const Box&                                  a_haloBlockBox,
                       const int                                   a_subPartitionThresh,
+                      const int                                   a_numParticlesPerCellThresh,
+                      const long                                  a_numCellsInPatch,
                       NNSpatialIndex<Packed>&                     a_index) noexcept
   {
     CH_TIME("ParticleManagement::buildNNSpatialIndex");
 
     buildNNCellBuckets(a_localValid, a_ghosts, a_probLo, a_dx, a_blockSize, a_haloBlockBox, a_index.buckets);
 
-    a_index.subPartitions.clear();
+    a_index.tree.clear();
+
+    const std::size_t total = a_index.buckets.sorted.size();
+    if (total == 0) {
+      return;
+    }
+
+    // Average-density pre-filter -- see this function's own docs. A cheap, O(1) "is this even
+    // worth it" check mirroring what equal_weight_kd effectively gets for free via its per-cell
+    // dispatch: if this patch's own particles, spread evenly over its own cells, wouldn't even
+    // reach the crowding threshold on average, building a tree that (overwhelmingly likely) never
+    // gets walked by a single query would be pure waste.
+    if (static_cast<long>(total) <= a_numCellsInPatch * static_cast<long>(a_numParticlesPerCellThresh)) {
+      return;
+    }
+
+    // Root AABB: the physical extent of every particle actually present (via observedCellBox,
+    // which already tracks this in cell-index space -- see its own docs), NOT just this patch's
+    // own box, since ghosts can extend beyond it.
+    const IntVect& obsLo = a_index.buckets.observedCellBox.smallEnd();
+    const IntVect& obsHi = a_index.buckets.observedCellBox.bigEnd();
+
+    RealVect aabbLo, aabbHi;
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      aabbLo[dir] = a_probLo[dir] + obsLo[dir] * a_dx[dir];
+      aabbHi[dir] = a_probLo[dir] + (obsHi[dir] + 1) * a_dx[dir];
+    }
 
     constexpr int maxDepth = 24; // generous -- reaching this depth is not a realistic occupancy
 
-    for (const auto& kv : a_index.buckets.cellOffsets) {
-      const IntVect     cell  = kv.first;
-      const std::size_t lo    = kv.second.first;
-      const std::size_t hi    = kv.second.second;
-      const std::size_t count = hi - lo;
-
-      if (static_cast<int>(count) <= a_subPartitionThresh) {
-        continue;
-      }
-
-      RealVect aabbLo, aabbHi;
-      for (int dir = 0; dir < SpaceDim; dir++) {
-        aabbLo[dir] = a_probLo[dir] + cell[dir] * a_dx[dir];
-        aabbHi[dir] = aabbLo[dir] + a_dx[dir];
-      }
-
-      std::vector<NNSubNode> nodes;
-      buildNNSubNodeRecursive(a_index.buckets.sorted,
-                              a_localValid,
-                              a_ghosts,
-                              lo,
-                              hi,
-                              aabbLo,
-                              aabbHi,
-                              a_subPartitionThresh,
-                              0,
-                              maxDepth,
-                              nodes);
-
-      a_index.subPartitions[cell] = std::move(nodes);
-    }
+    buildNNSubNodeRecursive(a_index.buckets.sorted,
+                            a_localValid,
+                            a_ghosts,
+                            0,
+                            total,
+                            aabbLo,
+                            aabbHi,
+                            a_subPartitionThresh,
+                            0,
+                            maxDepth,
+                            a_index.tree);
+    g_nnDiagTreeSizeSum += a_index.tree.size();
+    g_nnDiagTreeCount++;
   }
 
   /**
-    @brief Recursively walk a cell's sub-partition tree, pruning subtrees by point-to-AABB
-    distance and brute-forcing leaves.
+    @brief Recursively walk the whole-patch tree, pruning subtrees by point-to-AABB distance and
+    brute-forcing leaves.
     @details a_shouldPrune is re-evaluated fresh at every node (it closes over the caller's own,
     continuously-improving candidate buffer), so pruning gets more aggressive as better candidates
     are found deeper in the tree -- never a stale snapshot from before the walk started.
@@ -550,7 +597,7 @@ namespace ParticleManagement {
     the inlining rationale) -- called once per non-consumed, non-self candidate encountered.
     @tparam PruneCheck Deliberately a template parameter, same reason -- given a node's AABB,
     returns true iff the whole subtree can be skipped.
-    @param[in] a_nodes             The cell's sub-partition tree (see NNSpatialIndex::subPartitions).
+    @param[in] a_nodes             The patch's whole-patch tree (see NNSpatialIndex::tree).
     @param[in] a_nodeIdx           Index of the node to visit (0 for the tree's root).
     @param[in] a_queryPos          The query particle's own position.
     @param[in] a_qi                The query particle's own index into a_localValid (for
@@ -577,6 +624,7 @@ namespace ParticleManagement {
                       const ConsiderCallback&                     a_considerCandidate,
                       const PruneCheck&                           a_shouldPrune) noexcept
   {
+    g_nnDiagNodeVisits++;
     const NNSubNode& node = a_nodes[static_cast<std::size_t>(a_nodeIdx)];
 
     if (a_shouldPrune(node.aabbLo, node.aabbHi)) {
@@ -584,7 +632,9 @@ namespace ParticleManagement {
     }
 
     if (node.leftChild < 0) {
+      g_nnDiagLeavesVisited++;
       for (std::size_t s = node.lo; s < node.hi; s++) {
+        g_nnDiagLeafCandidates++;
         const NNIndexedParticle& entry = a_sorted[s];
 
         if (entry.isLocal && entry.idx == a_qi) {
@@ -602,8 +652,29 @@ namespace ParticleManagement {
       return;
     }
 
+    // Visit whichever child is nearer to the query FIRST -- standard nearest-neighbor KD-tree
+    // practice, and NECESSARY here (not just a minor optimization): visiting an arbitrary,
+    // unconditional left-then-right order meant a query could descend deep into a subtree nowhere
+    // near it before finding any candidate at all, leaving a_considerCandidate's own "worst-of-K"
+    // baseline too weak to prune anything for a long time afterward. This mattered little for the
+    // small, single-cell trees this walk originally served (a handful of leaves at most), but
+    // becomes the dominant cost once the same walk serves a whole-patch tree spanning thousands of
+    // particles (confirmed empirically: average node visits per query matched the ENTIRE tree size
+    // before this fix). Visiting the near child first means its own results are already available
+    // -- via a_considerCandidate's closure over the caller's "best" buffer -- by the time the far
+    // child's own a_shouldPrune check runs, at the START of its own recursive call, letting it
+    // correctly skip the far side whenever the near side already found something good enough.
+    const NNSubNode& left  = a_nodes[static_cast<std::size_t>(node.leftChild)];
+    const NNSubNode& right = a_nodes[static_cast<std::size_t>(node.rightChild)];
+
+    const Real leftD2  = nnMergePointToAABBDistSquared(a_queryPos, left.aabbLo, left.aabbHi);
+    const Real rightD2 = nnMergePointToAABBDistSquared(a_queryPos, right.aabbLo, right.aabbHi);
+
+    const int nearChild = (leftD2 <= rightD2) ? node.leftChild : node.rightChild;
+    const int farChild  = (leftD2 <= rightD2) ? node.rightChild : node.leftChild;
+
     nnMergeWalkSubNodes(a_nodes,
-                        node.leftChild,
+                        nearChild,
                         a_queryPos,
                         a_qi,
                         a_localValid,
@@ -613,7 +684,7 @@ namespace ParticleManagement {
                         a_considerCandidate,
                         a_shouldPrune);
     nnMergeWalkSubNodes(a_nodes,
-                        node.rightChild,
+                        farChild,
                         a_queryPos,
                         a_qi,
                         a_localValid,
@@ -626,17 +697,17 @@ namespace ParticleManagement {
 
   template <typename Packed>
   inline void
-  findNearestNeighborCandidates(const std::vector<NNMergeParticle<Packed>>& a_localValid,
-                                const std::vector<NNMergeParticle<Packed>>& a_ghosts,
-                                const std::set<ParticleID>&                 a_consumedIDs,
-                                const NNSpatialIndex<Packed>&               a_spatialIndex,
-                                const std::map<NNCellKey, int>&             a_liveCellCount,
-                                const RealVect&                             a_probLo,
-                                const RealVect&                             a_dx,
-                                const int                                   a_numParticlesPerCellThresh,
-                                std::vector<NNMergeEdge<Packed>>&           a_edges,
-                                const int                                   a_maxFallbackCandidates,
-                                const std::optional<int>                    a_maxCellDistance) noexcept
+  findNearestNeighborCandidates(const std::vector<NNMergeParticle<Packed>>&                a_localValid,
+                                const std::vector<NNMergeParticle<Packed>>&                a_ghosts,
+                                const std::set<ParticleID>&                                a_consumedIDs,
+                                const NNSpatialIndex<Packed>&                              a_spatialIndex,
+                                const std::unordered_map<NNCellKey, int, NNCellKeyHasher>& a_liveCellCount,
+                                const RealVect&                                            a_probLo,
+                                const RealVect&                                            a_dx,
+                                const int                                                  a_numParticlesPerCellThresh,
+                                std::vector<NNMergeEdge<Packed>>&                          a_edges,
+                                const int                                                  a_maxFallbackCandidates,
+                                const std::optional<int>                                   a_maxCellDistance) noexcept
   {
     CH_TIME("ParticleManagement::findNearestNeighborCandidates");
 
@@ -645,15 +716,21 @@ namespace ParticleManagement {
     const std::size_t nLocal = a_localValid.size();
     const int         K      = 1 + a_maxFallbackCandidates;
 
-    const NNCellBuckets<Packed>& buckets      = a_spatialIndex.buckets;
-    const bool                   haveObserved = !buckets.observedCellBox.isEmpty();
+    const NNCellBuckets<Packed>& buckets = a_spatialIndex.buckets;
 
-    // Smallest cell dimension -- a conservative (never-too-generous) physical lower bound on how
-    // close the NEXT ring could possibly be, regardless of direction. See the ring-expansion
-    // stopping condition below.
-    Real minDx = a_dx[0];
-    for (int dir = 1; dir < SpaceDim; dir++) {
-      minDx = std::min(minDx, a_dx[dir]);
+    // a_maxCellDistance's physical bound, computed once (patch/round-level, not per query) -- see
+    // this function's own a_maxCellDistance docs for why the sqrt(SpaceDim) factor is required for
+    // safety (a Euclidean-distance prune must never be tighter than the true per-axis Chebyshev
+    // cutoff resolveTrivialTier()/judgeProposals() apply downstream, or it could wrongly exclude a
+    // candidate they would still have accepted).
+    std::optional<Real> maxDistBoundSquared;
+    if (a_maxCellDistance.has_value()) {
+      Real minDx = a_dx[0];
+      for (int dir = 1; dir < SpaceDim; dir++) {
+        minDx = std::min(minDx, a_dx[dir]);
+      }
+      const Real bound = static_cast<Real>(a_maxCellDistance.value()) * minDx * std::sqrt(static_cast<Real>(SpaceDim));
+      maxDistBoundSquared = bound * bound;
     }
 
     struct RankedCandidate
@@ -703,110 +780,51 @@ namespace ParticleManagement {
         }
       };
 
-      auto visitCell = [&](const IntVect& a_cell) {
-        // Skip an entire empty block in one dense-array check, without even hashing cellOffsets --
-        // see NNCellBuckets::blockCounts's own docs. Only valid within the expected halo; outside
-        // it, fall through to the exact (always-correct) cellOffsets lookup below.
-        const IntVect block = nnMergeBlockIndexOf(a_cell, buckets.blockSize);
-        if (buckets.haloBlockBox.contains(block)) {
-          const std::size_t blockLin = static_cast<std::size_t>(buckets.haloBlockBox.index(block));
-          if (buckets.blockCounts[blockLin] == 0) {
-            return;
+      g_nnDiagQueries++;
+
+      // Single, whole-patch tree walk -- see NNSpatialIndex::tree/buildNNSpatialIndex()'s own
+      // docs. Empty either because this patch had no particles at all, or because
+      // buildNNSpatialIndex()'s average-density pre-filter decided this patch wasn't worth a tree
+      // -- the latter is a heuristic, not a guarantee (see its own docs), so a query CAN still
+      // legitimately exist here despite it.
+      if (!a_spatialIndex.tree.empty()) {
+        auto shouldPrune = [&](const RealVect& a_aabbLo, const RealVect& a_aabbHi) -> bool {
+          const Real d2 = nnMergePointToAABBDistSquared(q.position, a_aabbLo, a_aabbHi);
+          if (maxDistBoundSquared.has_value() && d2 > maxDistBoundSquared.value()) {
+            return true;
           }
-        }
-
-        const auto it = buckets.cellOffsets.find(a_cell);
-        if (it == buckets.cellOffsets.end()) {
-          return;
-        }
-
-        // If this cell's occupancy burst past the sub-partition threshold at build time, walk its
-        // own small midpoint-split tree (pruned by point-to-AABB distance) instead of brute-forcing
-        // the whole range -- see NNSpatialIndex::subPartitions's own docs. Empty in the common case.
-        const auto subIt = a_spatialIndex.subPartitions.find(a_cell);
-        if (subIt != a_spatialIndex.subPartitions.end() && !subIt->second.empty()) {
-          auto shouldPrune = [&](const RealVect& a_aabbLo, const RealVect& a_aabbHi) -> bool {
-            if (static_cast<int>(best.size()) < K) {
-              return false;
-            }
-            return nnMergePointToAABBDistSquared(q.position, a_aabbLo, a_aabbHi) >= best.back().d2;
-          };
-          nnMergeWalkSubNodes(subIt->second,
-                              0,
-                              q.position,
-                              qi,
-                              a_localValid,
-                              a_ghosts,
-                              buckets.sorted,
-                              a_consumedIDs,
-                              considerCandidate,
-                              shouldPrune);
-          return;
-        }
-
-        for (std::size_t s = it->second.first; s < it->second.second; s++) {
-          const NNIndexedParticle& entry = buckets.sorted[s];
-
+          if (static_cast<int>(best.size()) < K) {
+            return false;
+          }
+          return d2 >= best.back().d2;
+        };
+        nnMergeWalkSubNodes(a_spatialIndex.tree,
+                            0,
+                            q.position,
+                            qi,
+                            a_localValid,
+                            a_ghosts,
+                            buckets.sorted,
+                            a_consumedIDs,
+                            considerCandidate,
+                            shouldPrune);
+      }
+      else if (!buckets.sorted.empty()) {
+        // Fallback: no tree was built for this patch (the average-density pre-filter said skip),
+        // but this specific query turned out to be over-threshold anyway -- always correct, just
+        // not fast; expected to almost never trigger (see buildNNSpatialIndex()'s own docs).
+        for (const NNIndexedParticle& entry : buckets.sorted) {
           if (entry.isLocal && entry.idx == qi) {
             continue; // self
           }
 
           const NNMergeParticle<Packed>& cand = entry.isLocal ? a_localValid[entry.idx] : a_ghosts[entry.idx];
 
-          // Lazy deletion for candidates too -- a_spatialIndex was built once, before any
-          // consumption this round, so a candidate consumed since then must be skipped here
-          // (again, implicit in the old design's pre-filtered aliveLocal/aliveGhosts).
           if (a_consumedIDs.count(cand.globalID) > 0) {
             continue;
           }
 
           considerCandidate(nnMergeDistSquared(q.position, cand.position), entry.idx, entry.isLocal);
-        }
-      };
-
-      // Correctness-guaranteeing ring cap: the Chebyshev distance from this query's own cell to
-      // the farthest corner of observedCellBox -- see that field's own docs. Ring expansion never
-      // needs to go beyond this; nothing else exists in the index at all.
-      int coverageRingCap = 0;
-      if (haveObserved) {
-        const IntVect& obsLo = buckets.observedCellBox.smallEnd();
-        const IntVect& obsHi = buckets.observedCellBox.bigEnd();
-        for (int dir = 0; dir < SpaceDim; dir++) {
-          coverageRingCap = std::max(coverageRingCap,
-                                     std::max(std::abs(qCell[dir] - obsLo[dir]), std::abs(qCell[dir] - obsHi[dir])));
-        }
-      }
-
-      // a_maxCellDistance is an exact ring cap on its own (see this function's own docs on why
-      // using it here, unqualified by level, is always safe/conservative) -- never expand past it.
-      const int hardRingCap = a_maxCellDistance.has_value() ? std::min(coverageRingCap, a_maxCellDistance.value())
-                                                            : coverageRingCap;
-
-      for (int ring = 0; ring <= hardRingCap; ring++) {
-        if (ring == 0) {
-          visitCell(qCell);
-        }
-        else {
-          const Box outer = grow(Box(qCell, qCell), ring);
-          const Box inner = grow(Box(qCell, qCell), ring - 1);
-          for (BoxIterator bit(outer); bit.ok(); ++bit) {
-            const IntVect cell = bit();
-            if (inner.contains(cell)) {
-              continue; // interior, already visited by an earlier ring
-            }
-            visitCell(cell);
-          }
-        }
-
-        // Distance-based early exit -- purely a speed optimization on top of the coverage
-        // guarantee above, always safe: minDx * ring is a conservative (never too large) lower
-        // bound on the physical distance to ring+1 (see this function's own docs).
-        if (ring < hardRingCap && static_cast<int>(best.size()) == K) {
-          const Real nextRingMinDist  = static_cast<Real>(ring) * minDx;
-          const Real nextRingMinDist2 = nextRingMinDist * nextRingMinDist;
-          if (nextRingMinDist2 >= best.back().d2) {
-            break;
-          }
         }
       }
 
@@ -838,7 +856,7 @@ namespace ParticleManagement {
                      const std::map<ParticleID, bool>&                    a_exposed,
                      const std::map<ParticleID, NNMergeParticle<Packed>>& a_particlesByID,
                      const Combine&                                       a_combine,
-                     std::map<NNCellKey, int>&                            a_liveCellCount,
+                     std::unordered_map<NNCellKey, int, NNCellKeyHasher>& a_liveCellCount,
                      std::set<ParticleID>&                                a_consumedIDs,
                      const int                                            a_numParticlesPerCellThresh,
                      std::set<ParticleID>&                                a_hasOutgoingCommitment,
@@ -1068,7 +1086,7 @@ namespace ParticleManagement {
                  const std::set<ParticleID>&                          a_hasOutgoingCommitment,
                  const std::map<ParticleID, ParticleID>&              a_outgoingTargetOf,
                  const Combine&                                       a_combine,
-                 std::map<NNCellKey, int>&                            a_liveCellCount,
+                 std::unordered_map<NNCellKey, int, NNCellKeyHasher>& a_liveCellCount,
                  const int                                            a_numParticlesPerCellThresh,
                  const RealVect&                                      a_probLo,
                  const std::vector<RealVect>&                         a_dxByLevel,
@@ -1202,13 +1220,23 @@ namespace ParticleManagement {
         continue;
       }
 
-      // Dynamic per-target threshold recheck (mirrors resolveTrivialTier()'s discipline) -- the
-      // TARGET's own level's dx, see a_dxByLevel's docs.
+      // Dynamic crowding recheck for BOTH participants (mirrors resolveTrivialTier()'s symmetric
+      // "qCount > thresh && cCount > thresh" discipline exactly -- each participant's OWN level's
+      // dx, see a_dxByLevel's docs). Checking only the target here was a real bug: a source
+      // particle's own cell can drop below threshold between proposal generation and judging (an
+      // earlier merge within this same round can drain it, same reasoning as resolveTrivialTier()'s
+      // own recheck), and accepting anyway would silently violate the crowding trigger on the
+      // source side. If this rank has no live visibility into the source's cell (never shipped
+      // here as a ghost), sCount defaults to 0 -- rejected -- the same conservative default already
+      // used when a target's own count is unknown.
       const NNCellKey tKey(target.level, cellKeyOf(target.position, a_probLo, a_dxByLevel[target.level]));
+      const NNCellKey sKey(source.level, cellKeyOf(source.position, a_probLo, a_dxByLevel[source.level]));
       const auto      tCountIt = a_liveCellCount.find(tKey);
+      const auto      sCountIt = a_liveCellCount.find(sKey);
       const int       tCount   = (tCountIt != a_liveCellCount.end()) ? tCountIt->second : 0;
+      const int       sCount   = (sCountIt != a_liveCellCount.end()) ? sCountIt->second : 0;
 
-      if (tCount <= a_numParticlesPerCellThresh) {
+      if (tCount <= a_numParticlesPerCellThresh || sCount <= a_numParticlesPerCellThresh) {
         a_verdictsByDestRank[sourceDestRank].push_back(NNMergeVerdict{source.globalID, false});
         continue;
       }
@@ -1229,7 +1257,15 @@ namespace ParticleManagement {
 
       a_results.push_back(result);
 
+      // Symmetric decrement (mirrors resolveTrivialTier()'s own commit) -- only meaningful when
+      // this rank actually has a live entry for the source's cell (sCountIt found above); if it
+      // doesn't, there is nothing here to decrement (the source's own rank's copy of its cell
+      // count, if it has one, is this rank's problem to worry about only via the accepted verdict
+      // it will receive, not via a_liveCellCount here).
       a_liveCellCount[tKey] -= 1;
+      if (sCountIt != a_liveCellCount.end()) {
+        a_liveCellCount[sKey] -= 1;
+      }
 
       if (a_crossLevelMergeCount != nullptr && target.level != source.level) {
         (*a_crossLevelMergeCount)++;
@@ -1314,6 +1350,23 @@ namespace ParticleManagement {
   {
     CH_TIME("ParticleManagement::mergeNearestNeighborsRound");
 
+    // TEMPORARY PERF INSTRUMENTATION -- do not commit. Per-phase wall-clock timing, requested to
+    // locate the bottleneck behind mergeNearestNeighborsRound()'s cost relative to
+    // ItoSolver::makeSuperparticles() (equal_weight_kd). Deliberately raw std::chrono, NOT
+    // CH_TIME/CH_TIMER (Chombo's own TraceTimer profiler is reportedly slow enough itself to
+    // distort a comparison like this) and not even this codebase's own Timer::wallClock()
+    // wrapper -- std::chrono::steady_clock directly, per-rank, printed unconditionally (no
+    // ParallelOps reduction -- this is a 1-rank investigation; would need one to be meaningful at
+    // >1 rank).
+    using NNPerfClock = std::chrono::steady_clock;
+    auto nnPerfNow    = []() {
+      return NNPerfClock::now();
+    };
+    auto nnPerfSeconds = [](const NNPerfClock::time_point& a_t0, const NNPerfClock::time_point& a_t1) -> double {
+      return std::chrono::duration<double>(a_t1 - a_t0).count();
+    };
+    const NNPerfClock::time_point nnPerfRoundStart = nnPerfNow();
+
     const int myRank   = procID();
     const int numRanks = static_cast<int>(numProc());
 
@@ -1334,10 +1387,12 @@ namespace ParticleManagement {
     // BEFORE the relevant grids are (re)built (e.g. from a stepper's registerOperators()).
     constexpr int ghostWidth = 1;
 
+    const NNPerfClock::time_point nnPerfGhostFillStart = nnPerfNow();
     a_particles.clearGhostParticles();
     a_particles.fillGhostParticles(a_amr.getParticleGhostMask(realm, ghostWidth),
                                    a_amr.getParticleGhostMaskCoarToFine(realm, ghostWidth),
                                    a_amr.getParticleGhostMaskFineToCoar(realm, ghostWidth));
+    const double nnPerfGhostFillSeconds = nnPerfSeconds(nnPerfGhostFillStart, nnPerfNow());
 
     struct PatchWork
     {
@@ -1353,9 +1408,9 @@ namespace ParticleManagement {
     std::vector<std::vector<NNMergeParticle<Packed>>> patchGhosts;       // parallel to patchWork
     std::vector<NNSpatialIndex<Packed>>               patchSpatialIndex; // parallel to patchWork
 
-    std::map<ParticleID, NNMergeParticle<Packed>> particlesByID; // pooled, this rank's own patches
-    std::map<ParticleID, bool>                    exposed;       // pooled, this rank's own valid particles
-    std::map<NNCellKey, int>                      liveCellCount; // pooled, level-qualified cell key
+    std::map<ParticleID, NNMergeParticle<Packed>>       particlesByID; // pooled, this rank's own patches
+    std::map<ParticleID, bool>                          exposed;       // pooled, this rank's own valid particles
+    std::unordered_map<NNCellKey, int, NNCellKeyHasher> liveCellCount; // pooled, level-qualified cell key
 
     // Per-level dx, indexed by level -- every cell-key computation below and downstream (in
     // resolveTrivialTier()/judgeProposals()) MUST use the dx of the PARTICLE'S OWN level (see
@@ -1365,6 +1420,7 @@ namespace ParticleManagement {
       dxByLevel[lvl] = RealVect(D_DECL(dxScalar[lvl], dxScalar[lvl], dxScalar[lvl]));
     }
 
+    const NNPerfClock::time_point nnPerfGatherStart = nnPerfNow();
     for (int lvl = 0; lvl <= finestLevel; lvl++) {
       const RealVect& dx = dxByLevel[lvl];
 
@@ -1417,12 +1473,10 @@ namespace ParticleManagement {
           p.level     = originLevel;
           p.payload   = a_gather(leaf, i);
 
-          const IntVect   cell = cellKeyOf(p.position, probLo, dxByLevel[originLevel]);
-          const NNCellKey key(originLevel, cell);
+          const IntVect cell = cellKeyOf(p.position, probLo, dxByLevel[originLevel]);
 
           if (isGhost) {
             ghosts.push_back(p);
-            liveCellCount[key] += 1;
             // REQUIRED -- see generateProposals()'s own documented contract for a_particlesByID:
             // "every currently-alive local valid particle and every ghost". Without this, a
             // genuinely cross-rank ghost candidate (one whose true owning patch is NOT among this
@@ -1438,7 +1492,6 @@ namespace ParticleManagement {
           }
           else {
             localValid.push_back(p);
-            liveCellCount[key] += 1;
             particlesByID[p.globalID] = p;
 
             bool isExposed = !maskSame[lvl].isNull() && isBoundaryExposed(cell, (*maskSame[lvl])[din]);
@@ -1467,6 +1520,8 @@ namespace ParticleManagement {
                             mergeBlockGrid->getBlockSize(),
                             patchBlocks.haloBlockBox,
                             a_subPartitionThresh,
+                            a_numParticlesPerCellThresh,
+                            static_cast<long>(dbl[din].numPts()),
                             spatialIndex);
 
         patchWork.push_back(PatchWork{lvl, din, dx, mergeBlockGrid->getBlockSize(), patchBlocks.haloBlockBox});
@@ -1475,6 +1530,23 @@ namespace ParticleManagement {
         patchSpatialIndex.push_back(std::move(spatialIndex));
       }
     }
+
+    // Populate liveCellCount from particlesByID -- deliberately NOT incremented inline during the
+    // per-particle gather loop above. A single physical particle can appear as a ghost in MULTIPLE
+    // of this rank's own patches at once (e.g. any particle near a corner/edge shared by several
+    // patches this rank happens to own -- routine with tiled grid generation, which favors keeping
+    // neighboring patches on the same rank), so incrementing a counter once per occurrence there
+    // would double- (or triple-, quadruple-...) count that one particle's contribution to its own
+    // cell's live count. particlesByID has no such problem: it is a map keyed by globalID, so
+    // repeated occurrences of the same particle (native once, ghost N times) collapse to exactly
+    // one entry -- deriving the count from it here, in one pass after the map is fully built,
+    // counts every distinct particle exactly once regardless of how many patches it was seen in.
+    for (const auto& kv : particlesByID) {
+      const NNMergeParticle<Packed>& p    = kv.second;
+      const IntVect                  cell = cellKeyOf(p.position, probLo, dxByLevel[p.level]);
+      liveCellCount[NNCellKey(p.level, cell)] += 1;
+    }
+    const double nnPerfGatherSeconds = nnPerfSeconds(nnPerfGatherStart, nnPerfNow());
 
     std::set<ParticleID>             consumedIDs;
     std::set<ParticleID>             hasOutgoingCommitment;
@@ -1542,6 +1614,7 @@ namespace ParticleManagement {
       return !passResults.empty();
     };
 
+    const NNPerfClock::time_point nnPerfLocalTierStart = nnPerfNow();
     if (a_iterateLocalTierToConvergence) {
       constexpr int safetyCap = 1000;
       for (int iter = 0; iter < safetyCap; iter++) {
@@ -1556,6 +1629,7 @@ namespace ParticleManagement {
     else {
       runLocalTierPass();
     }
+    const double nnPerfLocalTierSeconds = nnPerfSeconds(nnPerfLocalTierStart, nnPerfNow());
 
     // outgoingTargetOf: for every query id with an outgoing commitment, remember its own true
     // nearest-neighbor candidate id (needed by judgeProposals()'s mutual-match rule). Reuses
@@ -1570,23 +1644,30 @@ namespace ParticleManagement {
     }
 
     // 3. generateProposals() for everything the trivial tier could not resolve.
+    const NNPerfClock::time_point                     nnPerfGenProposalsStart = nnPerfNow();
     std::vector<std::vector<NNMergeProposal<Packed>>> proposalsByDestRank;
     generateProposals(lastPooledEdges, hasOutgoingCommitment, particlesByID, numRanks, proposalsByDestRank);
+    const double nnPerfGenProposalsSeconds = nnPerfSeconds(nnPerfGenProposalsStart, nnPerfNow());
 
     // 4. Exchange proposals.
-    const std::vector<NNMergeProposal<Packed>> incomingProposals = nnMergeExchangeByRank(proposalsByDestRank);
+    const NNPerfClock::time_point              nnPerfExchProposalsStart = nnPerfNow();
+    const std::vector<NNMergeProposal<Packed>> incomingProposals        = nnMergeExchangeByRank(proposalsByDestRank);
+    const double nnPerfExchProposalsSeconds = nnPerfSeconds(nnPerfExchProposalsStart, nnPerfNow());
 
     // 5. judgeProposals() over the pooled incoming proposals.
+    const NNPerfClock::time_point                 nnPerfMyParticlesCopyStart = nnPerfNow();
     std::map<ParticleID, NNMergeParticle<Packed>> myParticlesByID;
     for (const auto& kv : particlesByID) {
       if (consumedIDs.count(kv.first) == 0) {
         myParticlesByID[kv.first] = kv.second;
       }
     }
+    const double nnPerfMyParticlesCopySeconds = nnPerfSeconds(nnPerfMyParticlesCopyStart, nnPerfNow());
 
     std::vector<NNMergeResult<Packed>>       judgeResults;
     std::vector<std::vector<NNMergeVerdict>> verdictsByDestRank(numRanks);
 
+    const NNPerfClock::time_point nnPerfJudgeStart = nnPerfNow();
     judgeProposals(incomingProposals,
                    myParticlesByID,
                    hasOutgoingCommitment,
@@ -1603,6 +1684,7 @@ namespace ParticleManagement {
                    a_maxCellDistance,
                    a_crossLevelMergeCount,
                    a_onMergeCommitted);
+    const double nnPerfJudgeSeconds = nnPerfSeconds(nnPerfJudgeStart, nnPerfNow());
 
     allResults.insert(allResults.end(), judgeResults.begin(), judgeResults.end());
     for (const auto& r : judgeResults) {
@@ -1610,8 +1692,10 @@ namespace ParticleManagement {
     }
 
     // 6. Exchange verdicts and applyVerdicts().
-    const std::vector<NNMergeVerdict> incomingVerdicts = nnMergeExchangeByRank(verdictsByDestRank);
+    const NNPerfClock::time_point     nnPerfVerdictsStart = nnPerfNow();
+    const std::vector<NNMergeVerdict> incomingVerdicts    = nnMergeExchangeByRank(verdictsByDestRank);
     applyVerdicts(incomingVerdicts, consumedIDs);
+    const double nnPerfVerdictsSeconds = nnPerfSeconds(nnPerfVerdictsStart, nnPerfNow());
 
     // 7. placeMergedParticles(), then exchange and apply the scatter bucket.
     //
@@ -1626,13 +1710,16 @@ namespace ParticleManagement {
       return NNParticleLocation{dst.found, dst.level, dst.gridIndex, dst.rank};
     };
 
+    const NNPerfClock::time_point                                                nnPerfPlaceStart = nnPerfNow();
     std::map<std::pair<int, unsigned int>, std::vector<NNMergeParticle<Packed>>> localByPatch;
     std::vector<std::vector<NNMergeParticle<Packed>>>                            scatterByDestRank(numRanks);
 
     placeMergedParticles(allResults, locate, myRank, localByPatch, scatterByDestRank);
 
-    const std::vector<NNMergeParticle<Packed>> incomingScattered = nnMergeExchangeByRank(scatterByDestRank);
+    const std::vector<NNMergeParticle<Packed>> incomingScattered  = nnMergeExchangeByRank(scatterByDestRank);
+    const double                               nnPerfPlaceSeconds = nnPerfSeconds(nnPerfPlaceStart, nnPerfNow());
 
+    const NNPerfClock::time_point nnPerfApplyStart = nnPerfNow();
     // ---- Apply everything to the real ParticleSoA containers ----
     // Remove every consumed id (trivial-tier participants and accepted judge-side participants --
     // applyVerdicts() already folded accepted proposers into consumedIDs above).
@@ -1704,6 +1791,45 @@ namespace ParticleManagement {
       ParticleSoA<P, Traits>& leaf = a_particles[loc.level][din];
       a_scatter(leaf, corrected);
     }
+    const double nnPerfApplySeconds = nnPerfSeconds(nnPerfApplyStart, nnPerfNow());
+    const double nnPerfTotalSeconds = nnPerfSeconds(nnPerfRoundStart, nnPerfNow());
+
+    pout() << "NNPERF rank=" << myRank << " ghostFill=" << nnPerfGhostFillSeconds
+           << " gatherAndIndex=" << nnPerfGatherSeconds << " localTier=" << nnPerfLocalTierSeconds
+           << " generateProposals=" << nnPerfGenProposalsSeconds << " exchangeProposals=" << nnPerfExchProposalsSeconds
+           << " myParticlesCopy=" << nnPerfMyParticlesCopySeconds << " judgeProposals=" << nnPerfJudgeSeconds
+           << " exchangeVerdicts=" << nnPerfVerdictsSeconds << " placeAndExchange=" << nnPerfPlaceSeconds
+           << " applyToContainers=" << nnPerfApplySeconds << " TOTAL=" << nnPerfTotalSeconds << endl;
+
+    // TEMPORARY DIAGNOSTIC -- do not commit.
+    pout() << "NNTREEDIAG queries=" << g_nnDiagQueries << " nodeVisits=" << g_nnDiagNodeVisits
+           << " leafCandidateScans=" << g_nnDiagLeafCandidates << " leavesVisited=" << g_nnDiagLeavesVisited
+           << " avgNodeVisitsPerQuery="
+           << (g_nnDiagQueries > 0 ? static_cast<double>(g_nnDiagNodeVisits) / static_cast<double>(g_nnDiagQueries)
+                                   : 0.0)
+           << " avgLeafScansPerQuery="
+           << (g_nnDiagQueries > 0 ? static_cast<double>(g_nnDiagLeafCandidates) / static_cast<double>(g_nnDiagQueries)
+                                   : 0.0)
+           << " avgLeavesVisitedPerQuery="
+           << (g_nnDiagQueries > 0 ? static_cast<double>(g_nnDiagLeavesVisited) / static_cast<double>(g_nnDiagQueries)
+                                   : 0.0)
+           << " avgLeafSizeInTree="
+           << (g_nnDiagLeafSizeCount > 0
+                 ? static_cast<double>(g_nnDiagLeafSizeSum) / static_cast<double>(g_nnDiagLeafSizeCount)
+                 : 0.0)
+           << " maxLeafSizeInTree=" << g_nnDiagMaxLeafSize << " avgTreeSize="
+           << (g_nnDiagTreeCount > 0 ? static_cast<double>(g_nnDiagTreeSizeSum) / static_cast<double>(g_nnDiagTreeCount)
+                                     : 0.0)
+           << " numTrees=" << g_nnDiagTreeCount << endl;
+    g_nnDiagQueries        = 0;
+    g_nnDiagNodeVisits     = 0;
+    g_nnDiagLeafCandidates = 0;
+    g_nnDiagLeavesVisited  = 0;
+    g_nnDiagLeafSizeSum    = 0;
+    g_nnDiagLeafSizeCount  = 0;
+    g_nnDiagMaxLeafSize    = 0;
+    g_nnDiagTreeSizeSum    = 0;
+    g_nnDiagTreeCount      = 0;
   }
 
 } // namespace ParticleManagement

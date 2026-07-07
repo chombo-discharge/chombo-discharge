@@ -53,13 +53,20 @@ neither of us has to re-derive them from scratch later.
   motivated this work). Mass conservation exact and centerline deviation ~0 throughout every
   phase. 2D/3D compiles clean, doxygen 0 warnings.
 
-- **`std::map` used throughout instead of `std::unordered_map`.** `particlesByID`, `liveCellCount`,
-  `exposed`, `outgoingTargetOf`, and `myParticlesByID` in `mergeNearestNeighborsRound()` (and the
-  corresponding parameters threaded into `resolveTrivialTier()`/`judgeProposals()`) are all
-  `std::map` (red-black tree, O(log n) lookup, poor cache locality) on what is a hot path -- looked
-  up per particle, per edge, per fallback attempt. Should be `std::unordered_map` throughout for
-  O(1) amortized lookups. `IntVect` and `ParticleID` both need a hash function if not already
-  provided elsewhere in the codebase (check before writing a new one).
+- ~~`std::map` used throughout instead of `std::unordered_map`.~~ **`liveCellCount` DONE -- and it
+  turned out to be a correctness bug, not just a performance one** (see the below-threshold-merge
+  entry in "Design / correctness coverage"). `particlesByID`, `exposed`, `outgoingTargetOf`, and
+  `myParticlesByID` are still `std::map`, but those are keyed by `ParticleID` (an integral type with
+  a genuine total order), so they only have the original, purely-performance motivation -- O(log n)
+  lookup, poor cache locality, on a hot path looked up per particle/edge/fallback attempt. Should
+  still become `std::unordered_map` for O(1) amortized lookups. `consumedIDs` and
+  `hasOutgoingCommitment` (`std::set<ParticleID>`, same underlying issue -- ordered tree, O(log n)
+  membership check) belong on this same list; not yet fixed. Confirmed via phase timing (see the
+  `a_subPartitionThresh` entry below) that this doesn't matter for `a_iterateLocalTierToConvergence
+  = false` (the common case so far -- `consumedIDs` stays empty for the only
+  `findNearestNeighborCandidates()` call that round, so lookups are O(1) in practice regardless of
+  container type), but would start costing real time once multi-pass convergence is actually used
+  (`consumedIDs` grows across passes then).
 
 - **`myParticlesByID` is a full copy of `particlesByID`, rebuilt every round.**
   (`mergeNearestNeighborsRound()`, the "5. judgeProposals()" section.) Built by iterating
@@ -67,6 +74,100 @@ neither of us has to re-derive them from scratch later.
   and a full memory duplication every call, purely to avoid checking `consumedIDs` at each lookup
   site inside `judgeProposals()`. Should be removed: pass `particlesByID` + `consumedIDs` through
   and check membership at the point of use instead.
+
+- ~~`a_subPartitionThresh` defaulted to effectively "never sub-partition"
+  (`std::numeric_limits<int>::max()`), and no caller had ever overridden it.~~ **DONE -- default
+  changed to 32.** Triggered by a rough wall-clock comparison against `ItoSolver`'s existing
+  `equal_weight_kd` merge algorithm (`makeSuperparticles()`), which came back roughly 10-18x faster
+  for a single round/call on a realistic multi-level, variable-block-size, refRat-4 configuration
+  (~97k particles/rank, threshold/target 16). Added temporary per-phase wall-clock timing to
+  `mergeNearestNeighborsRound()` (raw `std::chrono`, deliberately NOT `CH_TIME`/`CH_TIMER` --
+  Chombo's own `TraceTimer` profiler is reportedly too slow itself for a comparison like this) and
+  found the local-tier pass (`findNearestNeighborCandidates()` + `resolveTrivialTier()`) accounts
+  for ~90% of total time regardless. Root cause: since this function has had exactly one caller (a
+  debug/test hook) so far, the adaptive midpoint-split sub-partition -- built specifically to avoid
+  brute-forcing a crowded cell -- had literally never been exercised. Uniform particle sampling
+  combined with unrefined coarse cells covering far more physical area than fine ones produces a
+  handful of pathologically crowded cells that were each paying full brute-force cost. Repeated
+  timing runs (3x each, to average out sampling noise from `drawBoxParticles()` not being seeded)
+  confirmed enabling sub-partitioning at a reasonable threshold cuts total time by ~2.4x (~0.53s ->
+  ~0.22s for the scenario above) with zero other code changes -- purely a matter of the config knob
+  actually being used. Narrows the gap against `equal_weight_kd` from ~18x to ~7-8x for the
+  single-round comparison, but does not close it: `findNearestNeighborCandidates()` runs one
+  independent nearest-neighbor query per over-threshold particle (needed so the cross-rank
+  propose/judge protocol always knows each particle's true nearest neighbor), whereas
+  `equal_weight_kd` never computes "who is my neighbor" at all -- it recursively splits a cell's
+  particles by weighted median in one shared O(k log k) pass to hit an exact target count. That is
+  a structural difference between the two algorithms' approaches, not a bug, and further closing the
+  remaining gap (if wanted) means rethinking that structural cost, not just tuning knobs. The
+  temporary per-phase timing instrumentation (`NNPERF ...` pout() lines) and the equal_weight_kd
+  comparison block (in `ItoKMCGodunovStepper::postInitialize()`'s debug hook, gated on
+  `debug_test_nn_merge`) were left in place for further tuning work, at the user's request -- not
+  yet removed.
+
+- **Tried and reverted: replacing the per-cell midpoint-split sub-partition TREE
+  (`NNSubNode`/`buildNNSubNodeRecursive()`/`nnMergeWalkSubNodes()`) with a flat, non-recursive
+  regular sub-GRID (`gridRes^SpaceDim` sub-cells, direct O(1) arithmetic assignment instead of
+  recursive `std::partition`).** Motivated by the item above's own finding that `localTier` still
+  dominates even with sub-partitioning enabled, plus the observation that a midpoint split is
+  purely geometric (never data-dependent), so a cell's sub-partition is mathematically identical to
+  a uniform grid refinement -- no tree/recursion should be structurally necessary. Implemented,
+  verified correct (exact mass conservation and `maxCenterlineDeviation ~ 0` throughout, at 1 and 8
+  ranks), but consistently SLOWER than the tree, not faster -- `localTier` roughly 0.63-0.68s vs
+  the tree's ~0.17s at `a_subPartitionThresh=32` on the same multi-level test config. Root cause,
+  confirmed via temporary per-query instrumentation (ring/sub-cell-visit counters): the grid's
+  formula splits every axis simultaneously (`gridRes = ceil((count/thresh)^(1/SpaceDim))`), so even
+  a cell only barely over threshold gets ALL axes split at once (`gridRes=2` was the overwhelmingly
+  common case at this test's actual population sizes, 33-256ish particles per crowded cell). The
+  tree, by contrast, splits only the single longest axis per level, so a comparable "one split"
+  treats "the other half" as ONE region with ONE exact AABB check; the grid instead breaks that
+  same region into multiple separate sub-cells (3, for `gridRes=2`), each paying its own lookup
+  cost even under a subsequently-added EXACT (not ring-count-heuristic) distance-to-boundary prune
+  check -- recreating the recursion-style overhead the flat design was meant to eliminate, just
+  redistributed into per-sub-cell lookups. Adding a minimum-worthwhile-`gridRes` gate (skip
+  building a grid below `gridRes=4`) made it fail safe (falls back to plain brute force, ~0.49-
+  0.53s) rather than actively regressing, but never actually fired at this test's population range,
+  so it didn't deliver a win either. Fully reverted (tree restored byte-for-byte against the
+  pre-attempt version, confirmed via diff) rather than left half-working behind a flag. The
+  underlying idea (avoid data-dependent recursion since the split is geometric) may still be sound,
+  but a naive "split every axis via one formula" flat grid does not reproduce the tree's actual
+  advantage -- closing this gap for real would need a design closer to the tree's own adaptive,
+  single-axis-at-a-time semantics (or a genuinely different approach), not just "make the tree
+  flat". Left as an open idea, not a dead end -- revisit only with a concretely different design.
+
+- **Planned: migrate the whole-patch spatial index onto `EBGeometry::BVH::PackedBVH`, once
+  EBGeometry gains the constructors/leaf layout this needs.** Tracked upstream at
+  [rmrsk/EBGeometry#92](https://github.com/rmrsk/EBGeometry/issues/92). `PackedBVH`'s SIMD node
+  traversal (SoA child-AABB cache, dispatching to SSE/AVX/AVX-512 depending on `(T,K)`) is
+  structurally the same pruned-descent walk `nnMergeWalkSubNodes()` already does by hand, just
+  vectorized -- but its only build path today goes through `TreeBVH`, which is `shared_ptr`-per-node
+  and `shared_ptr`-per-primitive, and its `signedDistance()` leaf evaluation pays a `std::sqrt` per
+  candidate that a plain nearest-neighbor search never needs. Benchmarked standalone (not committed
+  anywhere in this repo) against our own count-median build/leaf-scan to quantify exactly what's
+  blocking a direct swap:
+  - Building via `TreeBVH`+`pack()` was 4.5-17x slower than our own flat-array build across
+    N=1,000-90,441 (worse at small N), almost entirely `shared_ptr<TreeBVH>`-per-node allocation --
+    `BVCentroidPartitioner`'s count-split is the same algorithm we use, so it isn't the
+    partitioning logic costing this. A prototype building straight into a `PackedBVH::Node`-shaped
+    flat array (still individually `shared_ptr`-wrapping primitives) closed this to ~6-9% slower
+    than our own build at realistic sizes (20K-90K particles) -- i.e. nearly the whole gap is the
+    `TreeBVH` node allocation specifically, not primitive allocation.
+  - Isolated at the leaf-scan level (leaf sizes 8-32, matching this tree's own typical leaf
+    occupancy): `shared_ptr`-per-primitive scanning (dereference + `->signedDistance()`) was 3.4x
+    slower than our current flat-array-with-indices leaf scan, and 6.4x slower than an SoA-packed
+    leaf scan (`TriangleSoAT<T,W>`-shaped, position-only), at leaf size 24 -- split between scattered
+    heap allocation (poor cache locality on every subsequent query, not just at build) and the
+    per-candidate `sqrt` `signedDistance()`'s contract forces.
+  - Net: once EBGeometry has (a) a direct-to-`PackedBVH` constructor (skip `TreeBVH` entirely), (b)
+    `shared_ptr`-free primitive storage, and (c) either a squared-distance leaf contract or a
+    templatized leaf-eval callback (`PackedBVH::signedDistance()`'s internal `evalLeaf` lambda is
+    already factored out identically across every SIMD-width branch -- a natural seam to make it a
+    template parameter instead of hardcoding `->signedDistance()`), replacing `NNSubNode`/
+    `buildNNSubNodeRecursive()`/`nnMergeWalkSubNodes()` with `PackedBVH` should get SIMD node
+    traversal essentially for free at current build cost, plus the leaf-scan SoA win on top. Full
+    list of requested changes is on the linked issue. Not started -- blocked on that EBGeometry work
+    landing (expected within days as of this writing) and updating
+    `Submodules/EBGeometry` (or wherever it ends up living) to a version that has it.
 
 - ~~Higher AMR refinement ratios inflate ghost candidate counts because of a ghost over-delivery
   bug in `Realm::defineParticleGhostMaskFineToCoar`.~~ **CORRECTED -- this was a misdiagnosis, not
@@ -164,3 +265,57 @@ neither of us has to re-derive them from scratch later.
   testing the CROSS PRODUCT of dimensions (rank count x round count), not each independently --
   1 round at 16 ranks was fine, 2 rounds at 1 rank was fine, only 2+ rounds at >1 rank failed.
   Worth keeping in mind for any future correctness pass: test combinations, not just axes.
+
+- ~~`liveCellCount` double-counted a particle once per patch it was VISIBLE in, not once per
+  distinct particle.~~ **DONE.** Found via the user reporting cells with fewer than the configured
+  crowding threshold still merging. A single physical particle can be ghost-shipped to MULTIPLE
+  patches this same rank owns at once (routine with tiled grid generation, which favors keeping
+  neighboring patches co-located on a rank); `liveCellCount[key] += 1` was incremented once per
+  occurrence in the per-patch gather loop (once per patch that saw it, native or ghost), inflating
+  a crowded cell's count above its true population. `particlesByID` (keyed by `globalID`) has no
+  such problem -- repeated occurrences collapse to one entry. Fixed by removing the inline
+  increments and deriving `liveCellCount` in one pass, after the full gather loop, from
+  `particlesByID`.
+
+- ~~`judgeProposals()`'s dynamic crowding recheck only verified the TARGET's own cell, never the
+  SOURCE's.~~ **DONE.** `resolveTrivialTier()`'s own commit condition requires BOTH participants'
+  cells to dynamically recheck over threshold (`qCount > thresh && cCount > thresh`) at commit time,
+  since an earlier merge within the same round can drain either side. `judgeProposals()` (the
+  cross-rank propose/judge/verdict path) only ever checked the target's side -- a source particle
+  whose own cell had since dropped to/below threshold could still be accepted, silently violating
+  the crowding trigger on the source side. Fixed to check both symmetrically, defaulting an unknown
+  source-cell count (this rank has no live ghost visibility into it) to 0 -- i.e. reject -- matching
+  the existing conservative default already used for an unknown target count.
+
+- ~~Cells could still merge below the configured crowding threshold, reproducing independent of AMR
+  level, MPI rank count, and ghost/boundary exposure -- surviving both bugs immediately above.~~
+  **DONE -- root cause was a fundamental key-comparison bug, not anything specific to levels, ranks,
+  or ghosts.** `NNCellKey = std::pair<int, IntVect>` was used as the key of `std::map<NNCellKey,
+  int> liveCellCount` (an ORDERED map, relying on `operator<`). `IntVect::operator<`
+  (`Submodules/Chombo-3.3/lib/src/BoxTools/IntVect.H`) is a component-wise "strictly dominates in
+  every direction" PARTIAL order -- built for box/geometry containment logic elsewhere in Chombo,
+  not a valid strict-weak-ordering/total-order suitable for use as a map comparator.
+  `std::pair<T1,T2>::operator<` calls `T2::operator<` directly on the second component, bypassing
+  Chombo's own `std::less<IntVect>` specialization (which correctly uses `lexLT()`, a true
+  lexicographic order) entirely. Result: two distinct, unrelated cells that don't dominate each
+  other in every direction (the common case -- e.g. `(76,104)` vs `(80,101)`: neither `a<b` nor
+  `b<a` holds) compare as neither-less-than-the-other, which `std::map` treats as an EQUAL key,
+  silently pooling their live counts into one shared entry. This explains why the bug survived both
+  fixes immediately above and reproduced identically at 1 rank, multi-level or single-level, deep
+  in a patch's interior or at a boundary: it is a plain C++ comparator defect with nothing to do
+  with any of those axes, only with which specific cells happen to collide in the map's underlying
+  tree for a given insertion order -- confirmed empirically (a standalone reproduction using actual
+  cell coordinates pulled from a real run's log collapsed 10 distinct cells into 2 map buckets; an
+  independently-maintained ground-truth counter, checked at every commit, showed impossible
+  negative populations that only make sense if multiple unrelated cells were sharing one counter).
+  Fixed by adding `NNCellKeyHasher` (FNV-1a over the `IntVect`, reusing `LevelTiles::TileHasher`,
+  folded with the level) and switching every `std::map<NNCellKey, int>` (`liveCellCount`, and the
+  corresponding parameters in `findNearestNeighborCandidates()`/`resolveTrivialTier()`/
+  `judgeProposals()`) to `std::unordered_map<NNCellKey, int, NNCellKeyHasher>`, which depends only
+  on `IntVect::operator==` (correct, full component-wise equality) rather than `operator<`.
+  Verified: a properly-hash-keyed ground-truth check (same idea as the standalone reproduction, but
+  correct this time) found zero violations at 1/4/8 ranks, 1-3 rounds, on the exact multi-level,
+  variable-block-size, refRat-4 configuration that originally reproduced the bug; exact mass
+  conservation and `maxCenterlineDeviation ~ 0` throughout. `NNWalkCell`-keyed structures
+  (`NNCellBuckets`, `NNSpatialIndex`) were never affected -- they already used `std::unordered_map`
+  with `LevelTiles::TileHasher`, not `operator<`.

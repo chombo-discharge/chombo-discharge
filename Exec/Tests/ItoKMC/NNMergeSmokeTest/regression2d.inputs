@@ -11,16 +11,16 @@ AmrMesh.lo_corner            = -4E-2 -4E-2 -4E-2    ## Low corner of problem dom
 AmrMesh.hi_corner            = 4E-2  4E-2  4E-2     ## High corner of problem domain
 AmrMesh.verbosity            = -1                   ## Controls verbosity.
 AmrMesh.coarsest_domain      = 32 32 32             ## Number of cells on coarsest domain
-AmrMesh.max_amr_depth        = 0                    ## Maximum amr depth -- single level, keeps this smoke test simple
+AmrMesh.max_amr_depth        = 2                    ## Maximum amr depth -- single level, keeps this smoke test simple
 AmrMesh.max_sim_depth        = -1                   ## Maximum simulation depth
 AmrMesh.fill_ratio           = 1.0                  ## Fill ratio for grid generation
 AmrMesh.buffer_size          = 2                    ## Number of cells between grid levels
 AmrMesh.grid_algorithm       = tiled                ## Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
 AmrMesh.box_sorting          = morton               ## 'none', 'shuffle', 'morton'
-AmrMesh.min_block_size       = 16                   ## Blocking factor.
-AmrMesh.max_block_size       = 16                   ## Maximum allowed box size
+AmrMesh.min_block_size       = 4                    ## Blocking factor.
+AmrMesh.max_block_size       = 32                   ## Maximum allowed box size
 AmrMesh.max_ebis_box         = 16                   ## Maximum allowed box size for EBIS generation.
-AmrMesh.ref_rat              = 2 2 2 2 2 2          ## Refinement ratios (mixed ratios are allowed).
+AmrMesh.ref_rat              = 4 2 2 2 2 2          ## Refinement ratios (mixed ratios are allowed).
 AmrMesh.num_ghost            = 2                    ## Number of ghost cells.
 AmrMesh.lsf_ghost            = 2                    ## Number of ghost cells when writing level-set to grid
 AmrMesh.eb_ghost             = 2                    ## Set number of of ghost cells for EB stuff
@@ -285,11 +285,12 @@ ItoKMCGodunovStepper.algorithm                                = euler_maruyama  
 # Development-only nearest-neighbor particle-merge smoke test (see
 # Source/Particle/CD_NearestNeighborParticleMerge.H). Enabled here specifically to exercise it
 # end to end with 0 real timesteps.
-ItoKMCGodunovStepper.debug_test_nn_merge                          = true    ## Turn on/off the nearest-neighbor merge smoke test
-ItoKMCGodunovStepper.debug_nn_merge_samples_per_rank              = 8000    ## Number of particles sampled uniformly per rank
-ItoKMCGodunovStepper.debug_nn_merge_particles_per_cell_thresh     = 2       ## Crowding threshold for the merge
-ItoKMCGodunovStepper.debug_nn_merge_max_cell_distance             = -1      ## Physical merge-eligibility cap in whole cells (< 0 = unrestricted)
-ItoKMCGodunovStepper.debug_nn_merge_num_rounds                    = 1       ## Number of consecutive merge rounds to run (see RULES.md, "Single pass, caller loops for convergence")
+ItoKMCGodunovStepper.debug_test_nn_merge                          = true      ## Turn on/off the nearest-neighbor merge smoke test
+ItoKMCGodunovStepper.debug_nn_merge_samples_per_rank              = 100000    ## Number of particles sampled uniformly per rank
+ItoKMCGodunovStepper.debug_nn_merge_particles_per_cell_thresh     = 16        ## Crowding threshold for the merge
+ItoKMCGodunovStepper.debug_nn_merge_max_cell_distance             = 1         ## Physical merge-eligibility cap in whole cells (< 0 = unrestricted)
+ItoKMCGodunovStepper.debug_nn_merge_num_rounds                    = 1         ## Number of consecutive merge rounds to run (see RULES.md, "Single pass, caller loops for convergence")
+ItoKMCGodunovStepper.debug_nn_merge_sub_partition_thresh          = 4         ## Occupancy at/below which a node of the whole-patch tree becomes a leaf
 
 # ====================================================================================================
 # ItoKMCJSON class options

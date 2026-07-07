@@ -2108,7 +2108,7 @@ ItoKMCGodunovStepper<I, C, R, F>::postInitialize() noexcept
   int  debugNumMergeRounds         = 1;
   bool debugIterateToConvergence   = false;
   int  debugMaxFallbackCandidates  = 0;
-  int  debugSubPartitionThresh     = std::numeric_limits<int>::max();
+  int  debugSubPartitionThresh     = 32; // matches mergeNearestNeighborsRound()'s own new default
   pp.query("debug_nn_merge_samples_per_rank", debugNumSamplesPerRank);
   pp.query("debug_nn_merge_particles_per_cell_thresh", debugParticlesPerCellThresh);
   pp.query("debug_nn_merge_max_cell_distance", debugMaxCellDistanceReal);
@@ -2417,6 +2417,46 @@ ItoKMCGodunovStepper<I, C, R, F>::postInitialize() noexcept
                                this->m_time);
     }
 
+    // Rough wall-clock comparison against the existing equal_weight_kd merge algorithm
+    // (ItoSolver::makeSuperparticles(), the default configured via ItoSolver.merge_algorithm).
+    // Runs on a full COPY of the current (sampled, id-assigned, EB-cleaned) population in
+    // WhichContainer::Scratch -- a container that exists specifically for this kind of temporary
+    // use, never touching `particles` (Bulk), which the nearest-neighbor round loop below still
+    // needs completely untouched. SCOPE CAVEAT: equal_weight_kd is a purely per-cell/per-patch,
+    // OpenMP-parallel algorithm with NO ghost-fill and NO cross-rank communication at all, and it
+    // targets an EXACT particle count per cell (m_particlesPerCell) rather than draining a crowded
+    // cell toward a threshold the way mergeNearestNeighborsRound() does -- the two algorithms are
+    // not doing equivalent work at patch/rank boundaries, so this is a rough timing comparison, not
+    // a rigorous apples-to-apples benchmark.
+    {
+      ParticleContainer<ItoParticle>& scratch = solver->getParticles(ItoSolver::WhichContainer::Scratch);
+      for (int lvl = 0; lvl <= this->m_amr->getFinestLevel(); lvl++) {
+        const DisjointBoxLayout& dbl = this->m_amr->getGrids(solver->getRealm())[lvl];
+        for (DataIterator dit(dbl); dit.ok(); ++dit) {
+          scratch[lvl][dit()].append(particles[lvl][dit()]);
+        }
+      }
+
+      const unsigned long long kdBefore = scratch.getNumberOfValidParticlesGlobal();
+
+      const Real kdStart = Timer::wallClock();
+      solver->organizeParticlesByCell(ItoSolver::WhichContainer::Scratch);
+      solver->makeSuperparticles(ItoSolver::WhichContainer::Scratch, this->m_particlesPerCell);
+      solver->organizeParticlesByPatch(ItoSolver::WhichContainer::Scratch);
+      const Real kdElapsedLocal = Timer::wallClock() - kdStart;
+
+      const unsigned long long kdAfter         = scratch.getNumberOfValidParticlesGlobal();
+      const Real               kdElapsedGlobal = ParallelOps::max(kdElapsedLocal);
+
+      if (procID() == 0) {
+        pout() << this->m_name + "::postInitialize -- equal_weight_kd timing for solver '" << solver->getName()
+               << "': particles before = " << kdBefore << ", after = " << kdAfter
+               << ", wall-clock (max over ranks) = " << kdElapsedGlobal << " s" << endl;
+      }
+
+      solver->clear(ItoSolver::WhichContainer::Scratch);
+    }
+
     // The opaque reconciliation payload is just the particle's energy -- mobility/diffusion/
     // velocity are safe to drop across a merge since they are recomputed from field
     // interpolation before they are next used.
@@ -2496,6 +2536,7 @@ ItoKMCGodunovStepper<I, C, R, F>::postInitialize() noexcept
     // crowded cell down to the threshold; debug_nn_merge_num_rounds exists so the effect of
     // repeated calls (with no particle motion between them here, unlike a real timestep) can be
     // observed directly.
+    const Real nnStart = Timer::wallClock();
     for (int round = 0; round < debugNumMergeRounds; round++) {
       const unsigned long long crossLevelMergeCountBefore = crossLevelMergeCount;
 
@@ -2525,6 +2566,12 @@ ItoKMCGodunovStepper<I, C, R, F>::postInitialize() noexcept
                << ": particles = " << nRound << ", cross-level merges this round = " << crossLevelMergesThisRoundGlobal
                << endl;
       }
+    }
+    const Real nnElapsedGlobal = ParallelOps::max(Timer::wallClock() - nnStart);
+    if (procID() == 0) {
+      pout() << this->m_name + "::postInitialize -- nearest-neighbor merge timing for solver '" << solver->getName()
+             << "': " << debugNumMergeRounds << " round(s), wall-clock (max over ranks) = " << nnElapsedGlobal << " s"
+             << endl;
     }
 
     // Defensive cleanup: isPositionValid above already rejects a merge whose RESULT would fall
