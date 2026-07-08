@@ -534,7 +534,6 @@ namespace ParticleManagement {
                       const Box&                                  a_haloBlockBox,
                       const int                                   a_subPartitionThresh,
                       const int                                   a_numParticlesPerCellThresh,
-                      const long                                  a_numCellsInPatch,
                       NNSpatialIndex<Packed>&                     a_index) noexcept
   {
     CH_TIME("ParticleManagement::buildNNSpatialIndex");
@@ -548,12 +547,25 @@ namespace ParticleManagement {
       return;
     }
 
-    // Average-density pre-filter -- see this function's own docs. A cheap, O(1) "is this even
-    // worth it" check mirroring what equal_weight_kd effectively gets for free via its per-cell
-    // dispatch: if this patch's own particles, spread evenly over its own cells, wouldn't even
-    // reach the crowding threshold on average, building a tree that (overwhelmingly likely) never
-    // gets walked by a single query would be pure waste.
-    if (static_cast<long>(total) <= a_numCellsInPatch * static_cast<long>(a_numParticlesPerCellThresh)) {
+    // Exact per-cell pre-filter -- see this function's own docs. NOT an average-density heuristic
+    // (an earlier version of this check compared total/numCellsInPatch against the threshold, which
+    // is unsafe: a patch can have a low AVERAGE density while still containing one badly clustered
+    // cell with far more than a_numParticlesPerCellThresh particles in it -- exactly the case this
+    // whole tree exists to handle cheaply, so silently skipping it there would be actively wrong,
+    // not just a rare performance miss). This is exact instead: cellOffsets was already built,
+    // unconditionally, by buildNNCellBuckets() above, so every occupied cell's own population
+    // (hi - lo) is already known at zero extra cost -- just walk it and check the real maximum,
+    // mirroring the crowding trigger's own "count > thresh" test exactly (same operator, same
+    // threshold). Skip the tree build only if NO cell could possibly generate a query.
+    bool anyCellCrowded = false;
+    for (const auto& kv : a_index.buckets.cellOffsets) {
+      const std::size_t cellCount = kv.second.second - kv.second.first;
+      if (static_cast<int>(cellCount) > a_numParticlesPerCellThresh) {
+        anyCellCrowded = true;
+        break;
+      }
+    }
+    if (!anyCellCrowded) {
       return;
     }
 
@@ -784,9 +796,9 @@ namespace ParticleManagement {
 
       // Single, whole-patch tree walk -- see NNSpatialIndex::tree/buildNNSpatialIndex()'s own
       // docs. Empty either because this patch had no particles at all, or because
-      // buildNNSpatialIndex()'s average-density pre-filter decided this patch wasn't worth a tree
-      // -- the latter is a heuristic, not a guarantee (see its own docs), so a query CAN still
-      // legitimately exist here despite it.
+      // buildNNSpatialIndex()'s per-cell pre-filter found no cell over threshold -- that check is
+      // exact (not a heuristic, see its own docs), so this should be effectively unreachable for a
+      // genuine query in practice; the fallback below exists as a defensive safety net regardless.
       if (!a_spatialIndex.tree.empty()) {
         auto shouldPrune = [&](const RealVect& a_aabbLo, const RealVect& a_aabbHi) -> bool {
           const Real d2 = nnMergePointToAABBDistSquared(q.position, a_aabbLo, a_aabbHi);
@@ -810,9 +822,8 @@ namespace ParticleManagement {
                             shouldPrune);
       }
       else if (!buckets.sorted.empty()) {
-        // Fallback: no tree was built for this patch (the average-density pre-filter said skip),
-        // but this specific query turned out to be over-threshold anyway -- always correct, just
-        // not fast; expected to almost never trigger (see buildNNSpatialIndex()'s own docs).
+        // Defensive fallback, not expected to trigger given the pre-filter is exact -- always
+        // correct, just not fast, if it ever does (see buildNNSpatialIndex()'s own docs).
         for (const NNIndexedParticle& entry : buckets.sorted) {
           if (entry.isLocal && entry.idx == qi) {
             continue; // self
@@ -852,23 +863,23 @@ namespace ParticleManagement {
 
   template <typename Packed, typename Combine, typename PosValid, typename Allocator, typename OnMerge>
   inline void
-  resolveTrivialTier(const std::vector<NNMergeEdge<Packed>>&              a_edges,
-                     const std::map<ParticleID, bool>&                    a_exposed,
-                     const std::map<ParticleID, NNMergeParticle<Packed>>& a_particlesByID,
-                     const Combine&                                       a_combine,
-                     std::unordered_map<NNCellKey, int, NNCellKeyHasher>& a_liveCellCount,
-                     std::set<ParticleID>&                                a_consumedIDs,
-                     const int                                            a_numParticlesPerCellThresh,
-                     std::set<ParticleID>&                                a_hasOutgoingCommitment,
-                     std::vector<NNMergeResult<Packed>>&                  a_results,
-                     const RealVect&                                      a_probLo,
-                     const std::vector<RealVect>&                         a_dxByLevel,
-                     const PosValid&                                      a_isPositionValid,
-                     const Allocator&                                     a_allocateID,
-                     const int                                            a_maxFallbackCandidates,
-                     const std::optional<int>                             a_maxCellDistance,
-                     unsigned long long*                                  a_crossLevelMergeCount,
-                     const OnMerge&                                       a_onMergeCommitted) noexcept
+  resolveTrivialTier(const std::vector<NNMergeEdge<Packed>>&                        a_edges,
+                     const std::unordered_map<ParticleID, bool>&                    a_exposed,
+                     const std::unordered_map<ParticleID, NNMergeParticle<Packed>>& a_particlesByID,
+                     const Combine&                                                 a_combine,
+                     std::unordered_map<NNCellKey, int, NNCellKeyHasher>&           a_liveCellCount,
+                     std::set<ParticleID>&                                          a_consumedIDs,
+                     const int                                                      a_numParticlesPerCellThresh,
+                     std::set<ParticleID>&                                          a_hasOutgoingCommitment,
+                     std::vector<NNMergeResult<Packed>>&                            a_results,
+                     const RealVect&                                                a_probLo,
+                     const std::vector<RealVect>&                                   a_dxByLevel,
+                     const PosValid&                                                a_isPositionValid,
+                     const Allocator&                                               a_allocateID,
+                     const int                                                      a_maxFallbackCandidates,
+                     const std::optional<int>                                       a_maxCellDistance,
+                     unsigned long long*                                            a_crossLevelMergeCount,
+                     const OnMerge&                                                 a_onMergeCommitted) noexcept
   {
     CH_TIME("ParticleManagement::resolveTrivialTier");
 
@@ -1046,11 +1057,11 @@ namespace ParticleManagement {
 
   template <typename Packed>
   inline void
-  generateProposals(const std::vector<NNMergeEdge<Packed>>&              a_edges,
-                    const std::set<ParticleID>&                          a_hasOutgoingCommitment,
-                    const std::map<ParticleID, NNMergeParticle<Packed>>& a_particlesByID,
-                    const int                                            a_numRanks,
-                    std::vector<std::vector<NNMergeProposal<Packed>>>&   a_proposalsByDestRank) noexcept
+  generateProposals(const std::vector<NNMergeEdge<Packed>>&                        a_edges,
+                    const std::set<ParticleID>&                                    a_hasOutgoingCommitment,
+                    const std::unordered_map<ParticleID, NNMergeParticle<Packed>>& a_particlesByID,
+                    const int                                                      a_numRanks,
+                    std::vector<std::vector<NNMergeProposal<Packed>>>&             a_proposalsByDestRank) noexcept
   {
     CH_TIME("ParticleManagement::generateProposals");
 
@@ -1081,22 +1092,23 @@ namespace ParticleManagement {
 
   template <typename Packed, typename Combine, typename PosValid, typename Allocator, typename OnMerge>
   inline void
-  judgeProposals(const std::vector<NNMergeProposal<Packed>>&          a_incomingProposals,
-                 const std::map<ParticleID, NNMergeParticle<Packed>>& a_myParticlesByID,
-                 const std::set<ParticleID>&                          a_hasOutgoingCommitment,
-                 const std::map<ParticleID, ParticleID>&              a_outgoingTargetOf,
-                 const Combine&                                       a_combine,
-                 std::unordered_map<NNCellKey, int, NNCellKeyHasher>& a_liveCellCount,
-                 const int                                            a_numParticlesPerCellThresh,
-                 const RealVect&                                      a_probLo,
-                 const std::vector<RealVect>&                         a_dxByLevel,
-                 const PosValid&                                      a_isPositionValid,
-                 const Allocator&                                     a_allocateID,
-                 std::vector<NNMergeResult<Packed>>&                  a_results,
-                 std::vector<std::vector<NNMergeVerdict>>&            a_verdictsByDestRank,
-                 const std::optional<int>                             a_maxCellDistance,
-                 unsigned long long*                                  a_crossLevelMergeCount,
-                 const OnMerge&                                       a_onMergeCommitted) noexcept
+  judgeProposals(const std::vector<NNMergeProposal<Packed>>&                    a_incomingProposals,
+                 const std::unordered_map<ParticleID, NNMergeParticle<Packed>>& a_particlesByID,
+                 const std::set<ParticleID>&                                    a_consumedIDs,
+                 const std::set<ParticleID>&                                    a_hasOutgoingCommitment,
+                 const std::map<ParticleID, ParticleID>&                        a_outgoingTargetOf,
+                 const Combine&                                                 a_combine,
+                 std::unordered_map<NNCellKey, int, NNCellKeyHasher>&           a_liveCellCount,
+                 const int                                                      a_numParticlesPerCellThresh,
+                 const RealVect&                                                a_probLo,
+                 const std::vector<RealVect>&                                   a_dxByLevel,
+                 const PosValid&                                                a_isPositionValid,
+                 const Allocator&                                               a_allocateID,
+                 std::vector<NNMergeResult<Packed>>&                            a_results,
+                 std::vector<std::vector<NNMergeVerdict>>&                      a_verdictsByDestRank,
+                 const std::optional<int>                                       a_maxCellDistance,
+                 unsigned long long*                                            a_crossLevelMergeCount,
+                 const OnMerge&                                                 a_onMergeCommitted) noexcept
   {
     CH_TIME("ParticleManagement::judgeProposals");
 
@@ -1124,8 +1136,8 @@ namespace ParticleManagement {
       const ParticleID targetID  = kv.first;
       auto&            proposals = kv.second;
 
-      const auto targetDataIt = a_myParticlesByID.find(targetID);
-      if (targetDataIt == a_myParticlesByID.end()) {
+      const auto targetDataIt = a_particlesByID.find(targetID);
+      if (targetDataIt == a_particlesByID.end() || a_consumedIDs.count(targetID) > 0) {
         // Target no longer alive -- defensive skip, reject every incoming proposal.
         for (const NNMergeProposal<Packed>* p : proposals) {
           const int destRank = static_cast<int>(p->source.ownerRank);
@@ -1187,8 +1199,8 @@ namespace ParticleManagement {
 
     for (const TargetDecision& decision : decisions) {
       const NNMergeProposal<Packed>& proposal = *decision.winner;
-      const auto                     targetIt = a_myParticlesByID.find(decision.targetID);
-      CH_assert(targetIt != a_myParticlesByID.end());
+      const auto                     targetIt = a_particlesByID.find(decision.targetID);
+      CH_assert(targetIt != a_particlesByID.end() && a_consumedIDs.count(decision.targetID) == 0);
       const NNMergeParticle<Packed>& target = targetIt->second;
       const NNMergeParticle<Packed>& source = proposal.source;
 
@@ -1408,9 +1420,9 @@ namespace ParticleManagement {
     std::vector<std::vector<NNMergeParticle<Packed>>> patchGhosts;       // parallel to patchWork
     std::vector<NNSpatialIndex<Packed>>               patchSpatialIndex; // parallel to patchWork
 
-    std::map<ParticleID, NNMergeParticle<Packed>>       particlesByID; // pooled, this rank's own patches
-    std::map<ParticleID, bool>                          exposed;       // pooled, this rank's own valid particles
-    std::unordered_map<NNCellKey, int, NNCellKeyHasher> liveCellCount; // pooled, level-qualified cell key
+    std::unordered_map<ParticleID, NNMergeParticle<Packed>> particlesByID; // pooled, this rank's own patches
+    std::unordered_map<ParticleID, bool>                    exposed;       // pooled, this rank's own valid particles
+    std::unordered_map<NNCellKey, int, NNCellKeyHasher>     liveCellCount; // pooled, level-qualified cell key
 
     // Per-level dx, indexed by level -- every cell-key computation below and downstream (in
     // resolveTrivialTier()/judgeProposals()) MUST use the dx of the PARTICLE'S OWN level (see
@@ -1419,6 +1431,11 @@ namespace ParticleManagement {
     for (int lvl = 0; lvl <= finestLevel; lvl++) {
       dxByLevel[lvl] = RealVect(D_DECL(dxScalar[lvl], dxScalar[lvl], dxScalar[lvl]));
     }
+
+    // TEMPORARY DIAGNOSTIC -- do not commit.
+    static double nnDiagGatherLoopSeconds = 0.0;
+    static double nnDiagBuildIndexSeconds = 0.0;
+    static double nnDiagLiveCellSeconds   = 0.0;
 
     const NNPerfClock::time_point nnPerfGatherStart = nnPerfNow();
     for (int lvl = 0; lvl <= finestLevel; lvl++) {
@@ -1442,7 +1459,19 @@ namespace ParticleManagement {
 
         std::vector<NNMergeParticle<Packed>> localValid;
         std::vector<NNMergeParticle<Packed>> ghosts;
+        localValid.reserve(leaf.size());
+        ghosts.reserve(leaf.size());
 
+        // Incrementally reserved to the running total rather than left to grow organically --
+        // particlesByID/exposed are pooled across EVERY patch this rank owns (up to ~10^5
+        // particles in a realistic run), and an unreserved std::unordered_map pays for that via
+        // repeated whole-bucket-array rehashes as it grows, on top of the per-insert hashing cost
+        // every entry pays regardless. leaf.size() is a cheap O(1) call (a stored counter, not a
+        // scan), so this costs nothing to compute per patch.
+        particlesByID.reserve(particlesByID.size() + leaf.size());
+        exposed.reserve(exposed.size() + leaf.size());
+
+        const NNPerfClock::time_point nnDiagLoopStart = nnPerfNow(); // TEMPORARY DIAGNOSTIC
         for (std::size_t i = 0; i < leaf.size(); i++) {
           const bool isGhost = leaf.isGhost(i);
 
@@ -1504,6 +1533,7 @@ namespace ParticleManagement {
             exposed[p.globalID] = isExposed;
           }
         }
+        nnDiagGatherLoopSeconds += nnPerfSeconds(nnDiagLoopStart, nnPerfNow()); // TEMPORARY DIAGNOSTIC
 
         // Built once here, per patch, per round -- over the FULL localValid/ghosts sets, before
         // any consumption happens this round -- and reused across every internal
@@ -1512,7 +1542,8 @@ namespace ParticleManagement {
         // real, avoidable cost on the up-to-1000x-per-round loop this redesign exists to speed up).
         const MergeBlockGrid::PatchBlocks& patchBlocks = mergeBlockGrid->getPatchBlocks(din);
 
-        NNSpatialIndex<Packed> spatialIndex;
+        const NNPerfClock::time_point nnDiagBuildStart = nnPerfNow(); // TEMPORARY DIAGNOSTIC
+        NNSpatialIndex<Packed>        spatialIndex;
         buildNNSpatialIndex(localValid,
                             ghosts,
                             probLo,
@@ -1521,8 +1552,8 @@ namespace ParticleManagement {
                             patchBlocks.haloBlockBox,
                             a_subPartitionThresh,
                             a_numParticlesPerCellThresh,
-                            static_cast<long>(dbl[din].numPts()),
                             spatialIndex);
+        nnDiagBuildIndexSeconds += nnPerfSeconds(nnDiagBuildStart, nnPerfNow()); // TEMPORARY DIAGNOSTIC
 
         patchWork.push_back(PatchWork{lvl, din, dx, mergeBlockGrid->getBlockSize(), patchBlocks.haloBlockBox});
         patchLocalValid.push_back(std::move(localValid));
@@ -1541,12 +1572,21 @@ namespace ParticleManagement {
     // repeated occurrences of the same particle (native once, ghost N times) collapse to exactly
     // one entry -- deriving the count from it here, in one pass after the map is fully built,
     // counts every distinct particle exactly once regardless of how many patches it was seen in.
+    const NNPerfClock::time_point nnDiagLiveCellStart = nnPerfNow(); // TEMPORARY DIAGNOSTIC
     for (const auto& kv : particlesByID) {
       const NNMergeParticle<Packed>& p    = kv.second;
       const IntVect                  cell = cellKeyOf(p.position, probLo, dxByLevel[p.level]);
       liveCellCount[NNCellKey(p.level, cell)] += 1;
     }
+    nnDiagLiveCellSeconds += nnPerfSeconds(nnDiagLiveCellStart, nnPerfNow()); // TEMPORARY DIAGNOSTIC
     const double nnPerfGatherSeconds = nnPerfSeconds(nnPerfGatherStart, nnPerfNow());
+    pout() << "NNGATHERDIAG loopSeconds=" << nnDiagGatherLoopSeconds << " buildIndexSeconds=" << nnDiagBuildIndexSeconds
+           << " liveCellSeconds=" << nnDiagLiveCellSeconds << " other="
+           << (nnPerfGatherSeconds - nnDiagGatherLoopSeconds - nnDiagBuildIndexSeconds - nnDiagLiveCellSeconds)
+           << endl; // TEMPORARY DIAGNOSTIC -- do not commit.
+    nnDiagGatherLoopSeconds = 0.0;
+    nnDiagBuildIndexSeconds = 0.0;
+    nnDiagLiveCellSeconds   = 0.0;
 
     std::set<ParticleID>             consumedIDs;
     std::set<ParticleID>             hasOutgoingCommitment;
@@ -1654,22 +1694,18 @@ namespace ParticleManagement {
     const std::vector<NNMergeProposal<Packed>> incomingProposals        = nnMergeExchangeByRank(proposalsByDestRank);
     const double nnPerfExchProposalsSeconds = nnPerfSeconds(nnPerfExchProposalsStart, nnPerfNow());
 
-    // 5. judgeProposals() over the pooled incoming proposals.
-    const NNPerfClock::time_point                 nnPerfMyParticlesCopyStart = nnPerfNow();
-    std::map<ParticleID, NNMergeParticle<Packed>> myParticlesByID;
-    for (const auto& kv : particlesByID) {
-      if (consumedIDs.count(kv.first) == 0) {
-        myParticlesByID[kv.first] = kv.second;
-      }
-    }
-    const double nnPerfMyParticlesCopySeconds = nnPerfSeconds(nnPerfMyParticlesCopyStart, nnPerfNow());
-
+    // 5. judgeProposals() over the pooled incoming proposals. Judge targets are looked up directly
+    // in particlesByID, filtered against consumedIDs at the point of use inside judgeProposals()
+    // itself -- deliberately NOT a separate, pre-filtered myParticlesByID copy (a full O(n log n)
+    // rebuild every round, purely to avoid that same check at each lookup site -- removed once
+    // profiling showed it costing real time for no benefit over checking consumedIDs directly).
     std::vector<NNMergeResult<Packed>>       judgeResults;
     std::vector<std::vector<NNMergeVerdict>> verdictsByDestRank(numRanks);
 
     const NNPerfClock::time_point nnPerfJudgeStart = nnPerfNow();
     judgeProposals(incomingProposals,
-                   myParticlesByID,
+                   particlesByID,
+                   consumedIDs,
                    hasOutgoingCommitment,
                    outgoingTargetOf,
                    a_combine,
@@ -1797,9 +1833,9 @@ namespace ParticleManagement {
     pout() << "NNPERF rank=" << myRank << " ghostFill=" << nnPerfGhostFillSeconds
            << " gatherAndIndex=" << nnPerfGatherSeconds << " localTier=" << nnPerfLocalTierSeconds
            << " generateProposals=" << nnPerfGenProposalsSeconds << " exchangeProposals=" << nnPerfExchProposalsSeconds
-           << " myParticlesCopy=" << nnPerfMyParticlesCopySeconds << " judgeProposals=" << nnPerfJudgeSeconds
-           << " exchangeVerdicts=" << nnPerfVerdictsSeconds << " placeAndExchange=" << nnPerfPlaceSeconds
-           << " applyToContainers=" << nnPerfApplySeconds << " TOTAL=" << nnPerfTotalSeconds << endl;
+           << " judgeProposals=" << nnPerfJudgeSeconds << " exchangeVerdicts=" << nnPerfVerdictsSeconds
+           << " placeAndExchange=" << nnPerfPlaceSeconds << " applyToContainers=" << nnPerfApplySeconds
+           << " TOTAL=" << nnPerfTotalSeconds << endl;
 
     // TEMPORARY DIAGNOSTIC -- do not commit.
     pout() << "NNTREEDIAG queries=" << g_nnDiagQueries << " nodeVisits=" << g_nnDiagNodeVisits

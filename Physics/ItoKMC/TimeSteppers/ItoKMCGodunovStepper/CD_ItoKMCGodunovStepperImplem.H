@@ -2428,7 +2428,16 @@ ItoKMCGodunovStepper<I, C, R, F>::postInitialize() noexcept
     // cell toward a threshold the way mergeNearestNeighborsRound() does -- the two algorithms are
     // not doing equivalent work at patch/rank boundaries, so this is a rough timing comparison, not
     // a rigorous apples-to-apples benchmark.
+    //
+    // Timed window deliberately starts BEFORE the copy into `scratch`, not after: the equivalent
+    // step on the nearest-neighbor side (mergeNearestNeighborsRound()'s own gather-into-working-
+    // structures loop, NNPERF's "gatherAndIndex") is fully inside ITS timed window, so excluding
+    // this copy here would make the two numbers not actually comparable -- one side would be
+    // charged for gathering its working data and the other would not.
     {
+      const unsigned long long kdBefore = particles.getNumberOfValidParticlesGlobal();
+
+      const Real                      kdStart = Timer::wallClock();
       ParticleContainer<ItoParticle>& scratch = solver->getParticles(ItoSolver::WhichContainer::Scratch);
       for (int lvl = 0; lvl <= this->m_amr->getFinestLevel(); lvl++) {
         const DisjointBoxLayout& dbl = this->m_amr->getGrids(solver->getRealm())[lvl];
@@ -2436,10 +2445,6 @@ ItoKMCGodunovStepper<I, C, R, F>::postInitialize() noexcept
           scratch[lvl][dit()].append(particles[lvl][dit()]);
         }
       }
-
-      const unsigned long long kdBefore = scratch.getNumberOfValidParticlesGlobal();
-
-      const Real kdStart = Timer::wallClock();
       solver->organizeParticlesByCell(ItoSolver::WhichContainer::Scratch);
       solver->makeSuperparticles(ItoSolver::WhichContainer::Scratch, this->m_particlesPerCell);
       solver->organizeParticlesByPatch(ItoSolver::WhichContainer::Scratch);

@@ -644,9 +644,8 @@ namespace ParticleManagement {
 
     /**
       @brief A single count-median-split tree spanning EVERY particle in this patch (local valid
-      AND every ghost) -- node 0 is the root, empty iff there were no particles at all (or this
-      patch's average density is at/below the crowding threshold -- see buildNNSpatialIndex()'s
-      own docs).
+      AND every ghost) -- node 0 is the root, empty iff there were no particles at all (or no cell
+      in this patch could possibly be crowded -- see buildNNSpatialIndex()'s own docs).
       @details Deliberately one tree per PATCH, not one per over-threshold CELL (an earlier design
       this branch tried and moved away from -- see TODO.md's history for why). A query's own cell
       being crowded is still what makes it a query at all (that check is unchanged, still against
@@ -662,8 +661,8 @@ namespace ParticleManagement {
 
   /**
     @brief Build a patch's complete spatial index for one round: buildNNCellBuckets() followed,
-    UNLESS this patch's average density is at/below the crowding threshold, by a single
-    count-median-split tree over the WHOLE patch (every local valid particle and every ghost).
+    UNLESS no cell in this patch could possibly be crowded, by a single count-median-split tree
+    over the WHOLE patch (every local valid particle and every ghost).
     @details Splitting rule is the COUNT MEDIAN along the node's own longest-AABB axis (via
     std::nth_element, an exact 50/50-by-count split regardless of data distribution) -- NOT a pure
     geometric midpoint of the bounding box (this function's own original design, abandoned after it
@@ -672,25 +671,29 @@ namespace ParticleManagement {
     numbers). Recurses until a node's own occupancy is at/below a_subPartitionThresh, or a generous
     hard depth cap is hit (defensive, in case count-median splitting ever needs it) -- the SAME
     leaf-size role a_subPartitionThresh always had, just no longer also deciding whether a tree
-    exists at all: a non-empty, over-average-density patch gets exactly one tree, and a patch whose
-    total population is already at/below a_subPartitionThresh (but still above the average-density
-    gate below) simply gets a single-node tree (root == leaf), which degenerates to a plain
-    brute-force scan with no meaningful extra cost over not having a tree at all.
+    exists at all: a patch containing at least one crowded cell gets exactly one tree, and a patch
+    whose total population is already at/below a_subPartitionThresh (but still contains a crowded
+    cell) simply gets a single-node tree (root == leaf), which degenerates to a plain brute-force
+    scan with no meaningful extra cost over not having a tree at all.
 
-    @b Average-density pre-filter: if a_numCellsInPatch * a_numParticlesPerCellThresh >= the
-    patch's total particle count (local valid + ghost), NO tree is built at all (a_index.tree
-    stays empty, exactly as if the patch had zero particles) -- this is the SAME cheap, O(1)
-    "is this even worth it" check the equal_weight_kd merge algorithm effectively gets for free by
-    dispatching per cell (a cell already at/below its own target does no work at all); without it,
-    building a tree for a patch where not a single cell could ever be crowded would be pure waste,
-    and specifically an UNFAIR asymmetry in any timing comparison against equal_weight_kd. This is
-    a rank-based heuristic, not a hard correctness guarantee: it is possible (though expected to be
-    rare, and never seen in practice at the block sizes this codebase uses) for a patch to have a
-    low AVERAGE density yet still contain one genuinely over-threshold cell, if occupancy is
-    heavily clustered into a small part of the patch. findNearestNeighborCandidates() falls back to
-    a direct, untreed scan of buckets.sorted (always correct, just not fast) if a query ever does
-    turn out to exist despite a skipped tree, so this heuristic can only ever cost performance in
-    that rare case, never correctness.
+    @b Per-cell pre-filter: if NO cell in this patch has more than a_numParticlesPerCellThresh
+    particles, NO tree is built at all (a_index.tree stays empty, exactly as if the patch had zero
+    particles) -- the SAME cheap "is this even worth it" check the equal_weight_kd merge algorithm
+    effectively gets for free by dispatching per cell (a cell already at/below its own target does
+    no work at all); without it, building a tree for a patch where not a single cell could ever be
+    crowded would be pure waste, and specifically an UNFAIR asymmetry in any timing comparison
+    against equal_weight_kd. This is an EXACT check, not a heuristic: buildNNCellBuckets() above
+    already computes every occupied cell's own population via cellOffsets (a hi-lo range per cell)
+    as an unconditional part of building the buckets, so the true per-cell maximum is available at
+    zero extra cost -- no need to approximate it via the patch's average density. (An earlier
+    version of this function did exactly that -- compared total particle count against
+    a_numCellsInPatch * a_numParticlesPerCellThresh -- and it was a real bug, not just a looser
+    heuristic: a patch can have a low AVERAGE density while still containing one badly clustered
+    cell far over threshold, and the average check would silently skip the tree for that entire
+    patch, leaving that one cell's queries to fall back to an unpruned brute-force scan every round,
+    indefinitely -- exactly the pathological case this whole tree exists to handle cheaply.) This
+    exact check costs nothing beyond what buildNNCellBuckets() already computed, so there is no
+    reason to prefer the unsafe average-based approximation over it.
     The root's own bounding box (when a tree IS built) is the physical extent of every particle
     actually present (via NNCellBuckets::observedCellBox, not just this patch's own box, since
     ghosts can extend beyond it).
@@ -705,16 +708,12 @@ namespace ParticleManagement {
     @param[in]  a_subPartitionThresh  Occupancy at/below which a tree node becomes a leaf.
                                       Deliberately independent of a_numParticlesPerCellThresh below
                                       (that is a physics-facing crowding threshold; this is a pure
-                                      performance knob) -- unrelated to the average-density
-                                      pre-filter above, which uses a_numParticlesPerCellThresh, not
-                                      this.
+                                      performance knob) -- unrelated to the per-cell pre-filter
+                                      above, which uses a_numParticlesPerCellThresh, not this.
     @param[in]  a_numParticlesPerCellThresh The SAME physics-facing crowding threshold used
                                       elsewhere this round (see mergeNearestNeighborsRound()'s own
-                                      a_numParticlesPerCellThresh) -- used ONLY for the
-                                      average-density pre-filter above, nothing else here.
-    @param[in]  a_numCellsInPatch     This patch's own native cell count (its valid box's own
-                                      numPts(), NOT including the ghost halo) -- the denominator
-                                      for the average-density pre-filter above.
+                                      a_numParticlesPerCellThresh) -- used ONLY for the per-cell
+                                      pre-filter above, nothing else here.
     @param[out] a_index               The resulting spatial index.
   */
   template <typename Packed>
@@ -727,7 +726,6 @@ namespace ParticleManagement {
                       const Box&                                  a_haloBlockBox,
                       const int                                   a_subPartitionThresh,
                       const int                                   a_numParticlesPerCellThresh,
-                      const long                                  a_numCellsInPatch,
                       NNSpatialIndex<Packed>&                     a_index) noexcept;
 
   /**
@@ -1053,23 +1051,23 @@ namespace ParticleManagement {
   template <typename Packed, typename Combine, typename PosValid, typename Allocator, typename OnMerge>
   inline void
   resolveTrivialTier(
-    const std::vector<NNMergeEdge<Packed>>&              a_edges,
-    const std::map<ParticleID, bool>&                    a_exposed,
-    const std::map<ParticleID, NNMergeParticle<Packed>>& a_particlesByID,
-    const Combine&                                       a_combine,
-    std::unordered_map<NNCellKey, int, NNCellKeyHasher>& a_liveCellCount,
-    std::set<ParticleID>&                                a_consumedIDs,
-    const int                                            a_numParticlesPerCellThresh,
-    std::set<ParticleID>&                                a_hasOutgoingCommitment,
-    std::vector<NNMergeResult<Packed>>&                  a_results,
-    const RealVect&                                      a_probLo,
-    const std::vector<RealVect>&                         a_dxByLevel,
-    const PosValid&                                      a_isPositionValid,
-    const Allocator&                                     a_allocateID,
-    const int                                            a_maxFallbackCandidates = 0,
-    const std::optional<int>                             a_maxCellDistance       = std::nullopt,
-    unsigned long long*                                  a_crossLevelMergeCount  = nullptr,
-    const OnMerge&                                       a_onMergeCommitted =
+    const std::vector<NNMergeEdge<Packed>>&                        a_edges,
+    const std::unordered_map<ParticleID, bool>&                    a_exposed,
+    const std::unordered_map<ParticleID, NNMergeParticle<Packed>>& a_particlesByID,
+    const Combine&                                                 a_combine,
+    std::unordered_map<NNCellKey, int, NNCellKeyHasher>&           a_liveCellCount,
+    std::set<ParticleID>&                                          a_consumedIDs,
+    const int                                                      a_numParticlesPerCellThresh,
+    std::set<ParticleID>&                                          a_hasOutgoingCommitment,
+    std::vector<NNMergeResult<Packed>>&                            a_results,
+    const RealVect&                                                a_probLo,
+    const std::vector<RealVect>&                                   a_dxByLevel,
+    const PosValid&                                                a_isPositionValid,
+    const Allocator&                                               a_allocateID,
+    const int                                                      a_maxFallbackCandidates = 0,
+    const std::optional<int>                                       a_maxCellDistance       = std::nullopt,
+    unsigned long long*                                            a_crossLevelMergeCount  = nullptr,
+    const OnMerge&                                                 a_onMergeCommitted =
       [](const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&) {
       }) noexcept;
 
@@ -1102,11 +1100,11 @@ namespace ParticleManagement {
   */
   template <typename Packed>
   inline void
-  generateProposals(const std::vector<NNMergeEdge<Packed>>&              a_edges,
-                    const std::set<ParticleID>&                          a_hasOutgoingCommitment,
-                    const std::map<ParticleID, NNMergeParticle<Packed>>& a_particlesByID,
-                    const int                                            a_numRanks,
-                    std::vector<std::vector<NNMergeProposal<Packed>>>&   a_proposalsByDestRank) noexcept;
+  generateProposals(const std::vector<NNMergeEdge<Packed>>&                        a_edges,
+                    const std::set<ParticleID>&                                    a_hasOutgoingCommitment,
+                    const std::unordered_map<ParticleID, NNMergeParticle<Packed>>& a_particlesByID,
+                    const int                                                      a_numRanks,
+                    std::vector<std::vector<NNMergeProposal<Packed>>>&             a_proposalsByDestRank) noexcept;
 
   /**
     @brief Judge every incoming proposal that targets a particle this rank owns, and produce the
@@ -1155,10 +1153,21 @@ namespace ParticleManagement {
     @param[in]     a_incomingProposals All proposals targeting a particle this rank owns, pooled
                                        from every source rank (including this rank's own
                                        in-process bucket).
-    @param[in]     a_myParticlesByID   This rank's own currently-alive valid particles, keyed by
-                                       id (i.e. potential judge targets).
-    @param[in]     a_hasOutgoingCommitment Ids (among a_myParticlesByID) that have their own
-                                       outgoing commitment this round (needed for rule 3 above).
+    @param[in]     a_particlesByID     Full particle data (position/weight/id/rank/payload) for
+                                       every currently-alive local valid particle and every ghost
+                                       across all of this rank's patches, keyed by id -- a target
+                                       is a potential judge target only if its id is present here
+                                       AND absent from a_consumedIDs (see that param).
+    @param[in]     a_consumedIDs       Ids already consumed this round (by an earlier trivial or
+                                       judged merge). A target id present in a_particlesByID but
+                                       ALSO in a_consumedIDs is treated as not-alive -- this
+                                       replaces what used to be a separate, pre-filtered
+                                       a_myParticlesByID copy of a_particlesByID; checking both
+                                       containers at the point of use instead avoids rebuilding
+                                       that copy every round.
+    @param[in]     a_hasOutgoingCommitment Ids (among a_particlesByID, not in a_consumedIDs) that
+                                       have their own outgoing commitment this round (needed for
+                                       rule 3 above).
     @param[in]     a_outgoingTargetOf  For an id in a_hasOutgoingCommitment, the id of the
                                        particle it is itself proposing to (needed to detect the
                                        mutual-match exception in rule 3).
@@ -1207,22 +1216,23 @@ namespace ParticleManagement {
   template <typename Packed, typename Combine, typename PosValid, typename Allocator, typename OnMerge>
   inline void
   judgeProposals(
-    const std::vector<NNMergeProposal<Packed>>&          a_incomingProposals,
-    const std::map<ParticleID, NNMergeParticle<Packed>>& a_myParticlesByID,
-    const std::set<ParticleID>&                          a_hasOutgoingCommitment,
-    const std::map<ParticleID, ParticleID>&              a_outgoingTargetOf,
-    const Combine&                                       a_combine,
-    std::unordered_map<NNCellKey, int, NNCellKeyHasher>& a_liveCellCount,
-    const int                                            a_numParticlesPerCellThresh,
-    const RealVect&                                      a_probLo,
-    const std::vector<RealVect>&                         a_dxByLevel,
-    const PosValid&                                      a_isPositionValid,
-    const Allocator&                                     a_allocateID,
-    std::vector<NNMergeResult<Packed>>&                  a_results,
-    std::vector<std::vector<NNMergeVerdict>>&            a_verdictsByDestRank,
-    const std::optional<int>                             a_maxCellDistance      = std::nullopt,
-    unsigned long long*                                  a_crossLevelMergeCount = nullptr,
-    const OnMerge&                                       a_onMergeCommitted =
+    const std::vector<NNMergeProposal<Packed>>&                    a_incomingProposals,
+    const std::unordered_map<ParticleID, NNMergeParticle<Packed>>& a_particlesByID,
+    const std::set<ParticleID>&                                    a_consumedIDs,
+    const std::set<ParticleID>&                                    a_hasOutgoingCommitment,
+    const std::map<ParticleID, ParticleID>&                        a_outgoingTargetOf,
+    const Combine&                                                 a_combine,
+    std::unordered_map<NNCellKey, int, NNCellKeyHasher>&           a_liveCellCount,
+    const int                                                      a_numParticlesPerCellThresh,
+    const RealVect&                                                a_probLo,
+    const std::vector<RealVect>&                                   a_dxByLevel,
+    const PosValid&                                                a_isPositionValid,
+    const Allocator&                                               a_allocateID,
+    std::vector<NNMergeResult<Packed>>&                            a_results,
+    std::vector<std::vector<NNMergeVerdict>>&                      a_verdictsByDestRank,
+    const std::optional<int>                                       a_maxCellDistance      = std::nullopt,
+    unsigned long long*                                            a_crossLevelMergeCount = nullptr,
+    const OnMerge&                                                 a_onMergeCommitted =
       [](const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&) {
       }) noexcept;
 
