@@ -169,6 +169,62 @@ neither of us has to re-derive them from scratch later.
     landing (expected within days as of this writing) and updating
     `Submodules/EBGeometry` (or wherever it ends up living) to a version that has it.
 
+  **Update, since the above was written** -- EBGeometry now has a working direct-to-`PackedBVH`
+  constructor: build cost is at parity with our own build at realistic sizes (N=10K: EBGeometry
+  actually faster, 795µs vs our 841µs; N=100K: 11.58ms vs our 11.43ms, ~1% slower). A real
+  SAH-partitioned, SIMD-traversed (traversal + leaf eval both vectorized) prototype is measuring
+  ~600-700ns/query, vs. our own production `localTier`/queries figure of ~1090ns -- roughly a 1.6-1.7x
+  win, not the 3-5x initially speculated (see below for why that speculation didn't pan out).
+
+  Two controlled experiments this branch ran to explain WHERE the win actually comes from, since
+  the first two guesses were wrong:
+  - **Recursion vs. iteration, isolated on our own K=2 tree**: a naive explicit-stack rewrite of
+    `nnMergeWalkSubNodes()`'s exact algorithm was consistently ~18-25% SLOWER than the existing
+    recursive version, not faster, at every N tested (1K-90K). Likely explanation: shallow, regular
+    recursion (our tree depth is only ~12-24 levels) is well handled by the CPU's own hardware
+    return-address prediction; a software array-based stack doesn't get that acceleration. So
+    `PackedBVH::traverse()` being iterative is NOT where its advantage comes from -- whatever wins
+    it delivers are from SIMD batching and cache-friendly layout, not iteration itself.
+  - **Redundant AABB-distance recomputation** (the parent computes each child's distance to pick
+    near/far order; the child then recomputes the identical distance at the top of its own visit,
+    in both our code and this experiment) -- removing it gave a real, repeatable ~10-18% win,
+    correctness-verified. Judged not worth applying to `nnMergeWalkSubNodes()` on its own: this
+    function has already been through several bug-fix cycles this session, and if the `PackedBVH`
+    migration lands in days and replaces it outright, spending verification effort on a
+    soon-to-be-superseded double-digit-percent tweak isn't the right place to put it.
+
+  **Point-cloud leaf design, agreed**: the SIMD-hot leaf primitive needs only **position + particle
+  id** -- nothing else. Self-exclusion and the `consumedIDs` lazy-deletion check are both id-based
+  (not index-based, unlike today's `NNIndexedParticle` scheme). Weight, payload, owner rank, AMR
+  level, and even the local-vs-ghost flag are all looked up once per query AFTER a winner is
+  selected, via the existing `particlesByID` map -- local-vs-ghost specifically via
+  `exposed.count(id) > 0` (already built during the gather pass, populated only for locally-valid
+  particles), not via anything carried in the tree at all.
+
+  **Precision idea for the point cloud, not yet implemented**: since `CD_PARTICLE_REAL` is `double`
+  throughout this codebase, storing `float` positions in the point cloud is a deliberate, scoped
+  precision reduction -- but a low-risk one, since the actual merge computation (weighted centroid,
+  mass) still reads the authoritative `double` record via id after the search, never the float copy.
+  `float`'s ~7 decimal digits is far more than needed to correctly order candidates by distance at
+  this codebase's typical domain scales. Goes further: store each particle's position NORMALIZED to
+  the patch's own physical extent (patch size is already known), not the absolute domain position --
+  `float` precision is relative (~7 significant digits regardless of magnitude), so normalizing to a
+  patch-local, roughly-O(1) range maximizes the *absolute* precision available for
+  particle-to-particle distance discrimination, regardless of where in the domain the patch sits.
+  Implementation detail to get right if this is built: leaf AABBs derived from `double` positions
+  truncated to `float` must round the low corner DOWN and the high corner UP (not naive
+  round-to-nearest), or a genuine boundary particle could end up just outside its own leaf's
+  `float`-rounded AABB and get wrongly pruned -- same safety-margin principle already used for
+  `a_maxCellDistance`'s own `sqrt(SpaceDim)` bound.
+
+  **Branching factor under consideration**: K=4 (AVX/plain, `double`) -> K=8 (AVX-512, `double`) ->
+  K=16 (AVX-512, `float`) -- each step roughly matches SIMD width to element size, each halving (or
+  better) tree depth for the same leaf count. Not verified: whether pruning effectiveness holds up
+  as branching factor widens -- more children per level means more breadth to potentially visit,
+  and while SIMD makes checking them cheap, whether `avgNodeVisitsPerQuery` actually drops
+  proportionally to the depth reduction (rather than partially eating the win back via wider
+  per-level breadth) hasn't been measured at K=8 or K=16 specifically.
+
 - ~~Higher AMR refinement ratios inflate ghost candidate counts because of a ghost over-delivery
   bug in `Realm::defineParticleGhostMaskFineToCoar`.~~ **CORRECTED -- this was a misdiagnosis, not
   a bug.** Earlier investigation this branch's history found that fine-to-coarse ghosts ship ALL
