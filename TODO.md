@@ -259,6 +259,48 @@ neither of us has to re-derive them from scratch later.
   larger sample count, a much lower crowding threshold, or (better) a sampling pattern that
   actually resembles real streamer/avalanche density concentration, not uniform spread.
 
+- **Idea, not yet attempted: reciprocal-nearest-neighbor caching to reduce the NUMBER of tree
+  descents needed, not just the cost of each one.** Came up in discussion after the `PackedBVH`
+  work above; a different, complementary lever -- that work makes each descent cheaper, this would
+  reduce how many full descents are needed at all, so the two should compound rather than compete.
+  Distance is symmetric: if query A's search discovers candidate B at distance d, that's
+  simultaneously proof that A is a candidate of B at the same distance d. Idea: when a query's
+  search finds its winning candidate(s), also record a reverse entry (candidate id -> (finder id,
+  distance)) in a small cache. When that candidate itself comes up as a query later (every
+  over-threshold particle is its own query, so this is most of them), seed its search's pruning
+  bound from that cache BEFORE descending the tree at all -- if the two turn out to be mutual
+  nearest neighbors, the root-level prune check alone could reject the rest of the tree
+  immediately, no real descent needed.
+  Measured directly (temporary diagnostic, not committed): of ~85,900 queries in the smoke test's
+  standard config, **62.1-62.3% have a true mutual top-choice relationship** with their own
+  candidate (query A's own best candidate is B, AND B's own best candidate is A), consistent
+  across all 4 solvers. Since exactly one member of each mutual pair is always processed before
+  the other (only the second-processed one can be seeded from the cache), the theoretical ceiling
+  is roughly half of that -- ~31% of all queries getting a near-free shortcut, the other ~69%
+  unaffected. Working through to a speedup estimate: if a shortcut costs close to nothing (best
+  case, root-level prune rejects everything) that's roughly a 1.45x speedup on the search;
+  if a shortcut still needs a few levels of verification near the root before the prune fully
+  kicks in (more realistic, call it ~15% of a full descent's cost), roughly 1.36x. So **~1.3-1.5x
+  on the search specifically** -- a real, second lever independent of and additive with
+  `PackedBVH`'s per-descent cost reduction, not a game-changer on its own but not negligible either.
+  Correctness-critical constraint: the cached hint is ONLY a pruning bound, never an assumed
+  answer -- the search still must actually visit enough of the tree to confirm nothing closer
+  exists; a tight seed just makes that verification cheap instead of skipping it.
+  Two real complications, neither fatal: (1) benefit depends on processing order -- a particle
+  only benefits if its finder was processed first, so this could compound with an SFC/cell-sorted
+  query order (spatially coherent processing means candidate pairs get discovered close together
+  in time, maximizing how often the cache has something useful by the time it's needed) -- see the
+  cell-sort experiment above, which helped the search but was reverted for cost elsewhere in the
+  round, for a related but distinct idea; (2) scoping across patches/ranks is genuinely harder than
+  within one patch -- a hint discovered via a ghost from a different rank's patch would need
+  cross-rank communication before that rank's own search runs, which isn't how the current
+  propose/judge protocol is structured (everything computed locally, then proposed/judged
+  afterward). Scope any first attempt to within-patch only, where a query and its reciprocal
+  candidate live in the same tree -- useful without touching the cross-rank protocol at all.
+  Not started -- deliberately deferred behind the `PackedBVH` migration and production profiling
+  above; worth revisiting once real profiling shows whether search volume/redundancy (as opposed
+  to per-descent cost, which `PackedBVH` targets) is actually worth attacking in practice.
+
 - ~~Higher AMR refinement ratios inflate ghost candidate counts because of a ghost over-delivery
   bug in `Realm::defineParticleGhostMaskFineToCoar`.~~ **CORRECTED -- this was a misdiagnosis, not
   a bug.** Earlier investigation this branch's history found that fine-to-coarse ghosts ship ALL
