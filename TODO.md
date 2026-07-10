@@ -170,11 +170,15 @@ neither of us has to re-derive them from scratch later.
     `Submodules/EBGeometry` (or wherever it ends up living) to a version that has it.
 
   **Update, since the above was written** -- EBGeometry now has a working direct-to-`PackedBVH`
-  constructor: build cost is at parity with our own build at realistic sizes (N=10K: EBGeometry
-  actually faster, 795µs vs our 841µs; N=100K: 11.58ms vs our 11.43ms, ~1% slower). A real
-  SAH-partitioned, SIMD-traversed (traversal + leaf eval both vectorized) prototype is measuring
-  ~600-700ns/query, vs. our own production `localTier`/queries figure of ~1090ns -- roughly a 1.6-1.7x
-  win, not the 3-5x initially speculated (see below for why that speculation didn't pan out).
+  constructor. Numbers improved twice as the SAH-partitioned, SIMD-traversed (build, traversal, AND
+  leaf eval all vectorized) prototype matured -- final, settled figures at plain AVX2 (no AVX-512):
+  **build ~5ms vs. our own ~11.43ms at N=100K (~2.3x faster)**, **query ~500-600ns vs. our own
+  production `localTier`/queries figure of ~1090ns (~2x faster)**. Combined across a full round
+  (weighting by how much of `gatherAndIndex`/`localTier` is build/query vs. other work), that's
+  roughly a 35-40% reduction in total round time -- a real, substantial win, not the 3-5x initially
+  speculated, but not the disappointing outcome the two experiments below might have suggested
+  either (see them for why that speculation didn't pan out, and why the ACTUAL win came from
+  SIMD+SAH instead).
 
   Two controlled experiments this branch ran to explain WHERE the win actually comes from, since
   the first two guesses were wrong:
@@ -217,13 +221,43 @@ neither of us has to re-derive them from scratch later.
   `float`-rounded AABB and get wrongly pruned -- same safety-margin principle already used for
   `a_maxCellDistance`'s own `sqrt(SpaceDim)` bound.
 
-  **Branching factor under consideration**: K=4 (AVX/plain, `double`) -> K=8 (AVX-512, `double`) ->
-  K=16 (AVX-512, `float`) -- each step roughly matches SIMD width to element size, each halving (or
-  better) tree depth for the same leaf count. Not verified: whether pruning effectiveness holds up
-  as branching factor widens -- more children per level means more breadth to potentially visit,
-  and while SIMD makes checking them cheap, whether `avgNodeVisitsPerQuery` actually drops
-  proportionally to the depth reduction (rather than partially eating the win back via wider
-  per-level breadth) hasn't been measured at K=8 or K=16 specifically.
+  **Branching factor: K=4 (AVX2) judged likely good enough, not planning to push further.**
+  Considered but probably not worth chasing: K=8 (AVX-512, `double`) and K=16 (AVX-512, `float`)
+  each roughly match SIMD width to element size and would further reduce tree depth for the same
+  leaf count -- but the benefit of wider branching shrinks as K grows (`log_2->log_4` halves depth,
+  `log_4->log_8` only cuts it to two-thirds, `log_8->log_16` only to three-quarters of that), and
+  the settled ~500-600ns query figure above is already reported as close to its own estimated
+  hardware floor (~2x off, by the same measurement). Real diminishing returns, not an easy win left
+  on the table -- would also need AVX-512 hardware, which the AVX2 numbers above don't assume.
+  Separately, the `float`/patch-normalized-position idea two paragraphs up is orthogonal to
+  branching factor (leaf density/cache-line packing, not tree depth) and doesn't run into the same
+  diminishing-returns math -- worth a quick look even if branching factor itself is settled at K=4.
+
+  **Final call, end of this stretch of work: stop chasing synthetic benchmark numbers, land
+  `PackedBVH`, profile in production instead.** Two build-time figures came up in discussion
+  (SAH ~50ms / query ~300-400ns vs. Morton ~10ms / query ~1us) and were provisionally compared
+  against this test's own numbers to reason about a SAH-vs-Morton crossover -- worth flagging that
+  comparison explicitly as UNRELIABLE, not just provisional, for the reason below. Do not treat
+  any specific ns/ms figure earlier in this entry as validated for 3D; only the qualitative
+  conclusions (per-cell pre-filter is exact and correctness-safe, point-cloud needs only
+  position+id, recursion-vs-iteration and redundant-AABB-recompute findings) are dimension-agnostic.
+
+  **Real discovery, worth not re-learning the hard way later**: this smoke test's crowding
+  threshold and sample count, tuned against the 2D config, do not produce a valid 3D workload at
+  all. Ran the debug hook's 3D build against the *same* `regression2d.inputs` (no dedicated 3D
+  inputs file exists for this test) with no other changes: `NNTREEDIAG` showed `queries=0`,
+  `numTrees=0` -- not a single cell crossed the crowding threshold. The same particle count spread
+  across a 32^3 domain instead of 32^2 (~32x more coarsest-level cells, before AMR refinement even
+  adds more) drops density per cell far below threshold. Meanwhile `equal_weight_kd` has no
+  crowding gate at all -- it unconditionally reduces every cell regardless of density, so it kept
+  doing real work (~2.4s, vs. our own ~30-34ms of pure overhead with the search doing nothing).
+  The resulting "34ms vs 2.4s" comparison is not a valid speedup claim in either direction --
+  it's "did nothing" vs. "did its full unconditional job," not the same task measured twice.
+  Also means: this smoke test's uniform random sampling is not a stand-in for real 3D discharge
+  crowding patterns (concentrated at a streamer head, not spread evenly) -- a real 3D performance
+  comparison, if ever needed again outside of production profiling, would need either a much
+  larger sample count, a much lower crowding threshold, or (better) a sampling pattern that
+  actually resembles real streamer/avalanche density concentration, not uniform spread.
 
 - ~~Higher AMR refinement ratios inflate ghost candidate counts because of a ghost over-delivery
   bug in `Realm::defineParticleGhostMaskFineToCoar`.~~ **CORRECTED -- this was a misdiagnosis, not
