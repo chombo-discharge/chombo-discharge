@@ -23,6 +23,7 @@
 #include <CD_MultiFluidIndexSpace.H>
 #include <CD_MFLevelGrid.H>
 #include <CD_LevelTiles.H>
+#include <CD_MergeBlockGrid.H>
 #include <CD_ParticleGhostMask.H>
 #include <CD_PetscGrid.H>
 #include <CD_NamespaceHeader.H>
@@ -538,6 +539,14 @@ public:
   getLevelTiles() const noexcept;
 
   /**
+    @brief Get the per-patch block-index-space geometry used by the nearest-neighbor particle-merge
+    spatial index (see MergeBlockGrid).
+    @return Level merge-block grids.
+  */
+  const Vector<RefCountedPtr<MergeBlockGrid>>&
+  getMergeBlockGrid() const noexcept;
+
+  /**
     @brief Result of a point->block query. See getLevelAndBox.
   */
   struct LevelAndBox
@@ -647,6 +656,12 @@ protected:
     @brief Level "tiles" -- i.e. the grids viewed as constant-size boxes.
   */
   Vector<RefCountedPtr<LevelTiles>> m_levelTiles;
+
+  /**
+    @brief Per-patch block-index-space geometry for the nearest-neighbor particle-merge spatial
+    index -- see MergeBlockGrid.
+  */
+  Vector<RefCountedPtr<MergeBlockGrid>> m_mergeBlockGrids;
 
   /**
     @brief Index spaces
@@ -808,6 +823,18 @@ protected:
   */
   void
   defineLevelTiles() noexcept;
+
+  /**
+    @brief Define the per-patch block-index-space geometry for the nearest-neighbor particle-merge
+    spatial index.
+    @details Purely geometric (patch box -> block-index-space bounds plus a 1-block halo, see
+    MergeBlockGrid) -- has no dependency on level-tiles or particle ghost masks, so its exact
+    position relative to defineLevelTiles()/defineParticleGhostMasks() in regridBase() is not load-
+    bearing; kept immediately after defineLevelTiles() since both are static, per-regrid geometric
+    structures built the same way.
+  */
+  void
+  defineMergeBlockGrid() noexcept;
 
   /**
     @brief Define the same-level, fine-to-coarse, and coarse-to-fine particle ghost masks on every level.

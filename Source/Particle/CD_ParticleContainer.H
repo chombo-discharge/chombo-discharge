@@ -302,6 +302,45 @@ public:
     return m_realm;
   }
 
+  /**
+    @brief Resolved remap destination of a particle: owning (level, grid index, rank).
+  */
+  struct Destination
+  {
+    /**
+      @brief Owning level (finest tile that contains the particle).
+    */
+    int level;
+
+    /**
+      @brief Owning grid index within that level's LevelTiles.
+    */
+    unsigned int gridIndex;
+
+    /**
+      @brief Owning rank.
+    */
+    int rank;
+
+    /**
+      @brief False if the particle is off-domain (owned by no tile).
+    */
+    bool found;
+  };
+
+  /**
+    @brief Map a position to its owning (level, grid index, rank) via the finest containing tile.
+    @details O(1) point->block query on this container's own tile maps (the SAME lookup remap()
+    uses internally to route particles) -- not a linear scan over patches. Public so that other
+    algorithms needing "which box owns this position" (e.g.
+    ParticleManagement::mergeNearestNeighborsRound()'s placement step) can reuse this single
+    source of truth rather than re-implementing the same tile-hash lookup a second time.
+    @param[in] a_pos Particle position.
+    @return The resolved destination; found==false if no tile on any level owns the cell.
+  */
+  Destination
+  findDestination(const RealVect& a_pos) const;
+
   ///@}
 
   /**
@@ -1078,40 +1117,6 @@ protected:
   {
     return a_box.contains(this->cellIndex(a_lvl, a_pos));
   }
-
-  /**
-    @brief Resolved remap destination of a particle: owning (level, grid index, rank).
-  */
-  struct Destination
-  {
-    /**
-      @brief Owning level (finest tile that contains the particle).
-    */
-    int level;
-
-    /**
-      @brief Owning grid index within that level's LevelTiles.
-    */
-    unsigned int gridIndex;
-
-    /**
-      @brief Owning rank.
-    */
-    int rank;
-
-    /**
-      @brief False if the particle is off-domain (owned by no tile).
-    */
-    bool found;
-  };
-
-  /**
-    @brief Map a position to its owning (level, grid index, rank) via the finest containing tile.
-    @param[in] a_pos Particle position.
-    @return The resolved destination; found==false if no tile on any level owns the cell.
-  */
-  Destination
-  findDestination(const RealVect& a_pos) const;
 };
 
 #include <CD_NamespaceFooter.H>

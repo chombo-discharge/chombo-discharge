@@ -97,6 +97,17 @@ namespace Physics {
       registerOperators() noexcept override;
 
       /**
+	@brief Register realms used for the simulation.
+	@details Also registers the particle ghost-mask width needed by the nearest-neighbor merge
+	debug test (see postInitialize()), gated behind ItoKMCGodunovStepper.debug_test_nn_merge.
+	This must happen here rather than in registerOperators(): Driver::setupFresh() calls
+	registerRealms() before building the initial grids, but registerOperators() only after, and
+	a particle ghost mask is only actually built during a regrid.
+      */
+      virtual void
+      registerRealms() noexcept override;
+
+      /**
 	@brief Regrid methods -- puts all data on the new mesh. 
 	@param[in] a_lmin           The coarsest level that changed. 
 	@param[in] a_oldFinestLevel The finest level before the regrid. 
@@ -148,6 +159,19 @@ namespace Physics {
       */
       virtual void
       postPlot() noexcept override;
+
+      /**
+	@brief Perform post-initialization operations.
+	@details Calls the base class implementation first. Additionally hosts a development-only
+	nearest-neighbor particle-merge smoke test (see
+	Source/Particle/CD_NearestNeighborParticleMerge.H), gated behind the
+	ItoKMCGodunovStepper.debug_test_nn_merge input flag: samples new ItoParticle particles
+	uniformly across the domain, writes them to an H5Part file, merges them via
+	ParticleManagement::mergeNearestNeighborsRound(), writes the merged particles to a second
+	H5Part file, and checks/prints mass conservation and the particle-count reduction.
+      */
+      virtual void
+      postInitialize() noexcept override;
 
     protected:
       /**

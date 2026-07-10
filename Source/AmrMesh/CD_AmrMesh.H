@@ -1805,6 +1805,15 @@ public:
   getLevelTiles(const std::string& a_realm) const;
 
   /**
+    @brief Get the per-patch block-index-space geometry used by the nearest-neighbor particle-merge
+    spatial index (see MergeBlockGrid).
+    @param[in] a_realm Realm name
+    @return Level merge-block grids
+  */
+  const Vector<RefCountedPtr<MergeBlockGrid>>&
+  getMergeBlockGrid(const std::string& a_realm) const;
+
+  /**
     @brief Register a particle ghost-mask width on a realm so it is (re)built at every regrid.
     @param[in] a_realm Realm name
     @param[in] a_width Ghost width (cells). Must be > 0.

@@ -13,8 +13,12 @@
 #ifndef CD_ITOKMCGODUNOVSTEPPERIMPLEM_H
 #define CD_ITOKMCGODUNOVSTEPPERIMPLEM_H
 
+// Std includes
+#include <limits>
+
 // Chombo includes
 #include <ParmParse.H>
+#include <BaseIF.H>
 
 // Our includes
 #include <CD_ItoKMCGodunovStepper.H>
@@ -25,6 +29,8 @@
 #include <CD_Units.H>
 #include <CD_Photon.H>
 #include <CD_DischargeIO.H>
+#include <CD_ParticleManagement.H>
+#include <CD_NearestNeighborParticleMerge.H>
 #include <CD_NamespaceHeader.H>
 
 using namespace Physics::ItoKMC;
@@ -92,6 +98,34 @@ ItoKMCGodunovStepper<I, C, R, F>::registerOperators() noexcept
 
   // Register this because we must be able to deposit particles inside dielectrics (due to particle diffusion across the EB).
   (this->m_amr)->registerOperator(s_particle_mesh, this->m_particleRealm, phase::solid);
+}
+
+template <typename I, typename C, typename R, typename F>
+void
+ItoKMCGodunovStepper<I, C, R, F>::registerRealms() noexcept
+{
+  CH_TIME("ItoKMCGodunovStepper::registerRealms");
+  if (this->m_verbosity > 5) {
+    pout() << "ItoKMCGodunovStepper::registerRealms" << endl;
+  }
+
+  ItoKMCStepper<I, C, R, F>::registerRealms();
+
+  // Nearest-neighbor merge debug test (see postInitialize()) -- the ghost-mask width it needs
+  // must be registered here, BEFORE Driver::setupFresh() builds the initial grids
+  // (Driver::setupFresh() calls registerRealms() before m_amr->regridAmr(), but
+  // registerOperators() only after -- so this is the earliest hook available). A particle ghost
+  // mask is only actually built during a regrid (AmrMesh::registerParticleGhostMask() itself just
+  // records that a width should be tracked from here on); registering it any later would leave
+  // the mask undefined for the initial grid.
+  bool debugTestNNMerge = false;
+
+  ParmParse pp(this->m_name.c_str());
+  pp.query("debug_test_nn_merge", debugTestNNMerge);
+
+  if (debugTestNNMerge) {
+    (this->m_amr)->registerParticleGhostMask(this->m_particleRealm, 1);
+  }
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -2044,6 +2078,576 @@ ItoKMCGodunovStepper<I, C, R, F>::plotParticles() const noexcept
       // Plot the particles directly from the live SoA container. The output datasets (id, position, weight
       // and the selected ItoParticle payload columns) are derived from ParticleTraits<ItoParticle>::h5PartColumns.
       DischargeIO::writeH5Part(std::string(fileChar), particles, this->m_amr->getProbLo(), this->m_time);
+    }
+  }
+}
+
+template <typename I, typename C, typename R, typename F>
+void
+ItoKMCGodunovStepper<I, C, R, F>::postInitialize() noexcept
+{
+  CH_TIME("ItoKMCGodunovStepper::postInitialize");
+  if (this->m_verbosity > 5) {
+    pout() << this->m_name + "::postInitialize" << endl;
+  }
+
+  ItoKMCStepper<I, C, R, F>::postInitialize();
+
+  bool debugTestNNMerge = false;
+
+  ParmParse pp(this->m_name.c_str());
+  pp.query("debug_test_nn_merge", debugTestNNMerge);
+
+  if (!debugTestNNMerge) {
+    return;
+  }
+
+  int  debugNumSamplesPerRank      = 200;
+  int  debugParticlesPerCellThresh = 4;
+  Real debugMaxCellDistanceReal    = -1.0;
+  int  debugNumMergeRounds         = 1;
+  bool debugIterateToConvergence   = false;
+  int  debugMaxFallbackCandidates  = 0;
+  int  debugSubPartitionThresh     = 32; // matches mergeNearestNeighborsRound()'s own new default
+  pp.query("debug_nn_merge_samples_per_rank", debugNumSamplesPerRank);
+  pp.query("debug_nn_merge_particles_per_cell_thresh", debugParticlesPerCellThresh);
+  pp.query("debug_nn_merge_max_cell_distance", debugMaxCellDistanceReal);
+  pp.query("debug_nn_merge_num_rounds", debugNumMergeRounds);
+  pp.query("debug_nn_merge_iterate_to_convergence", debugIterateToConvergence);
+  pp.query("debug_nn_merge_max_fallback_candidates", debugMaxFallbackCandidates);
+  pp.query("debug_nn_merge_sub_partition_thresh", debugSubPartitionThresh);
+
+  const std::optional<int> debugMaxCellDistance = (debugMaxCellDistanceReal < 0.0)
+                                                    ? std::nullopt
+                                                    : std::optional<int>(static_cast<int>(debugMaxCellDistanceReal));
+
+  const RefCountedPtr<BaseIF>& implicitFunction = this->m_computationalGeometry->getImplicitFunction(
+    this->m_plasmaPhase);
+
+  // Rejects a merge whose weighted-centroid position would fall inside the embedded boundary --
+  // BaseIF::value() >= 0 means inside the solid (Chombo convention: negative is inside the
+  // fluid). If this geometry has no analytic implicit function (e.g. a DCEL/STL geometry), there
+  // is nothing to check against, so every position is accepted rather than silently rejecting
+  // everything.
+  auto isPositionValid = [&implicitFunction](const RealVect& a_pos) -> bool {
+    if (implicitFunction.isNull()) {
+      return true;
+    }
+    return implicitFunction->value(a_pos) < 0.0;
+  };
+
+  // Rank-namespaced, monotonically increasing id counter -- shared between the initial sample
+  // (so newly-drawn particles get real ids, since ParticleManagement::drawBoxParticles/
+  // ParticleContainer::addParticlesDestructive leave id at ParticleSoA::s_invalidID) and the
+  // merge's own fresh-id allocation, so the two can never collide. See
+  // CD_NearestNeighborParticleMerge.H's IDAllocator docs -- there is no existing general-purpose
+  // global-id allocation scheme elsewhere in the particle infrastructure to reuse instead.
+  constexpr ParticleID rankStride = 100000000LL;
+  ParticleID           nextID     = static_cast<ParticleID>(procID()) * rankStride;
+  auto                 allocateID = [&nextID]() -> ParticleID {
+    return nextID++;
+  };
+
+  for (auto solverIt = (this->m_ito)->iterator(); solverIt.ok(); ++solverIt) {
+    const RefCountedPtr<ItoSolver>& solver = solverIt();
+
+    ParticleContainer<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
+
+    // Sample new ItoParticle particles uniformly across the domain.
+    ParticleSoA<ItoParticle> drawn;
+    ParticleManagement::drawBoxParticles(drawn,
+                                         debugNumSamplesPerRank,
+                                         this->m_amr->getProbLo(),
+                                         this->m_amr->getProbHi());
+    particles.addParticlesDestructive(drawn);
+
+    // drawBoxParticles() samples uniformly over the domain's bounding box with no EB awareness --
+    // discard whatever landed inside the solid before anything else touches these particles.
+    // Reusing ItoSolver's own, already-existing removeCoveredParticles() rather than
+    // reimplementing an EB check here (see also isPositionValid below, which handles the
+    // SEPARATE concern of a merge RESULT's position, not the initial sample).
+    solver->removeCoveredParticles(particles, EBRepresentation::ImplicitFunction, this->m_toleranceEB);
+
+    // Assign every particle a real, globally-unique id (both pre-existing particles that may
+    // still carry ParticleSoA::s_invalidID, and the newly-sampled ones above).
+    for (int lvl = 0; lvl <= this->m_amr->getFinestLevel(); lvl++) {
+      const DisjointBoxLayout& dbl = this->m_amr->getGrids(solver->getRealm())[lvl];
+      for (DataIterator dit(dbl); dit.ok(); ++dit) {
+        ParticleSoA<ItoParticle>& leaf = particles[lvl][dit()];
+        for (std::size_t i = 0; i < leaf.size(); i++) {
+          leaf.particleID(i) = allocateID();
+          leaf.rankID(i)     = procID();
+        }
+      }
+    }
+
+    // Defensive, permanent self-consistency checks for the hybrid spatial index (see TODO.md's
+    // "Performance" section for the full design): these check the building blocks directly
+    // (bucket construction, block geometry), independent of whether the merge decisions built on
+    // top of them come out correct -- the real merge test below already exercises both far more
+    // thoroughly (byte-for-byte edge equivalence was the acceptance bar during development), but
+    // these are cheap enough to keep running as an extra layer of defense given this feature's
+    // history of subtle bugs.
+    {
+      const int blockSize = this->m_amr->getMinBlockSize();
+
+      unsigned long long totalChecked    = 0;
+      unsigned long long totalMismatched = 0;
+
+      for (int lvl = 0; lvl <= this->m_amr->getFinestLevel(); lvl++) {
+        const DisjointBoxLayout&             dbl      = this->m_amr->getGrids(solver->getRealm())[lvl];
+        const RefCountedPtr<MergeBlockGrid>& grid     = this->m_amr->getMergeBlockGrid(solver->getRealm())[lvl];
+        const Real                           dxScalar = this->m_amr->getDx()[lvl];
+        const RealVect                       dx       = RealVect(D_DECL(dxScalar, dxScalar, dxScalar));
+        const RealVect                       probLo   = this->m_amr->getProbLo();
+
+        if (grid->getBlockSize() != blockSize) {
+          MayDay::Error("ItoKMCGodunovStepper::postInitialize -- MergeBlockGrid self-consistency "
+                        "check failed: getBlockSize() mismatch");
+        }
+
+        for (DataIterator dit(dbl); dit.ok(); ++dit) {
+          const MergeBlockGrid::PatchBlocks& pb = grid->getPatchBlocks(dit());
+
+          if (pb.cellBox != dbl[dit()]) {
+            MayDay::Error("ItoKMCGodunovStepper::postInitialize -- MergeBlockGrid self-consistency "
+                          "check failed: cellBox != this patch's own box");
+          }
+          if (pb.blockBox != coarsen(pb.cellBox, blockSize)) {
+            MayDay::Error("ItoKMCGodunovStepper::postInitialize -- MergeBlockGrid self-consistency "
+                          "check failed: blockBox != coarsen(cellBox, blockSize)");
+          }
+          if (pb.haloBlockBox != grow(pb.blockBox, 1)) {
+            MayDay::Error("ItoKMCGodunovStepper::postInitialize -- MergeBlockGrid self-consistency "
+                          "check failed: haloBlockBox != grow(blockBox, 1)");
+          }
+
+          ParticleSoA<ItoParticle>& leaf = particles[lvl][dit()];
+
+          std::vector<ParticleManagement::NNMergeParticle<Real>> localValid;
+          std::vector<ParticleManagement::NNMergeParticle<Real>> ghosts; // empty -- no ghost-fill yet
+          localValid.reserve(leaf.size());
+          for (std::size_t i = 0; i < leaf.size(); i++) {
+            if (leaf.isGhost(i)) {
+              continue;
+            }
+            ParticleManagement::NNMergeParticle<Real> p;
+            p.position = leaf.position(i);
+            p.weight   = leaf.weight(i);
+            p.globalID = leaf.particleID(i);
+            localValid.push_back(p);
+          }
+
+          ParticleManagement::NNCellBuckets<Real> buckets;
+          ParticleManagement::buildNNCellBuckets(localValid, ghosts, probLo, dx, blockSize, pb.haloBlockBox, buckets);
+
+          if (buckets.sorted.size() != localValid.size()) {
+            MayDay::Error("ItoKMCGodunovStepper::postInitialize -- buildNNCellBuckets() "
+                          "self-consistency check failed: total indexed count != input count");
+          }
+
+          unsigned long long blockCountSum = 0;
+          for (const int c : buckets.blockCounts) {
+            blockCountSum += static_cast<unsigned long long>(c);
+          }
+          if (blockCountSum != localValid.size()) {
+            MayDay::Error("ItoKMCGodunovStepper::postInitialize -- buildNNCellBuckets() "
+                          "self-consistency check failed: blockCounts does not sum to input count");
+          }
+
+          for (std::size_t i = 0; i < localValid.size(); i++) {
+            totalChecked++;
+
+            const IntVect cell = ParticleManagement::cellKeyOf(localValid[i].position, probLo, dx);
+            const auto    it   = buckets.cellOffsets.find(cell);
+            if (it == buckets.cellOffsets.end()) {
+              totalMismatched++;
+              continue;
+            }
+
+            bool found = false;
+            for (std::size_t s = it->second.first; s < it->second.second; s++) {
+              if (buckets.sorted[s].isLocal && buckets.sorted[s].idx == i) {
+                found = true;
+                break;
+              }
+            }
+            if (!found) {
+              totalMismatched++;
+            }
+          }
+        }
+      }
+
+      const unsigned long long totalCheckedGlobal    = ParallelOps::sum(totalChecked);
+      const unsigned long long totalMismatchedGlobal = ParallelOps::sum(totalMismatched);
+      if (procID() == 0) {
+        pout() << this->m_name + "::postInitialize -- spatial-index self-consistency check for solver '"
+               << solver->getName() << "': " << totalCheckedGlobal << " particles checked, " << totalMismatchedGlobal
+               << " mismatched (should be 0)" << endl;
+      }
+      if (totalMismatchedGlobal != 0) {
+        MayDay::Error("ItoKMCGodunovStepper::postInitialize -- buildNNCellBuckets() self-consistency "
+                      "check found mismatched particles");
+      }
+    }
+
+    // Per-level valid particle counts (each ParallelOps::sum() is a collective -- called
+    // unconditionally by every rank, same iteration count everywhere, since m_amr->getFinestLevel()
+    // is identical on every rank). Added specifically so multi-level behavior (e.g. "are merges
+    // happening on every level, or only the coarsest") is directly visible, not just a global total.
+    auto countPerLevel = [this,
+                          &solver](ParticleContainer<ItoParticle>& a_particles) -> std::vector<unsigned long long> {
+      std::vector<unsigned long long> counts(this->m_amr->getFinestLevel() + 1, 0);
+      for (int lvl = 0; lvl <= this->m_amr->getFinestLevel(); lvl++) {
+        const DisjointBoxLayout& dbl        = this->m_amr->getGrids(solver->getRealm())[lvl];
+        unsigned long long       localCount = 0;
+        for (DataIterator dit(dbl); dit.ok(); ++dit) {
+          ParticleSoA<ItoParticle>& leaf = a_particles[lvl][dit()];
+          for (std::size_t i = 0; i < leaf.size(); i++) {
+            if (!leaf.isGhost(i)) {
+              localCount++;
+            }
+          }
+        }
+        counts[lvl] = ParallelOps::sum(localCount);
+      }
+      return counts;
+    };
+
+    auto printPerLevel = [](const std::string& a_label, const std::vector<unsigned long long>& a_counts) {
+      if (procID() == 0) {
+        pout() << "  " << a_label << " = [";
+        for (std::size_t lvl = 0; lvl < a_counts.size(); lvl++) {
+          pout() << a_counts[lvl] << (lvl + 1 < a_counts.size() ? ", " : "");
+        }
+        pout() << "]" << endl;
+      }
+    };
+
+    const std::vector<unsigned long long> countsBefore = countPerLevel(particles);
+
+    const unsigned long long nBefore = particles.getNumberOfValidParticlesGlobal();
+    Real                     wBefore = 0.0;
+    for (int lvl = 0; lvl <= this->m_amr->getFinestLevel(); lvl++) {
+      const DisjointBoxLayout& dbl = this->m_amr->getGrids(solver->getRealm())[lvl];
+      for (DataIterator dit(dbl); dit.ok(); ++dit) {
+        ParticleSoA<ItoParticle>& leaf = particles[lvl][dit()];
+        for (std::size_t i = 0; i < leaf.size(); i++) {
+          if (!leaf.isGhost(i)) {
+            wBefore += leaf.weight(i);
+          }
+        }
+      }
+    }
+    wBefore = ParallelOps::sum(wBefore);
+
+    // Write the ORIGINAL (pre-merge) particles.
+    {
+      std::string cmd     = "mkdir -p particles/" + solver->getName();
+      int         success = 0;
+      if (procID() == 0) {
+        success = system(cmd.c_str());
+      }
+      if (success != 0) {
+        MayDay::Error("ItoKMCGodunovStepper::postInitialize -- could not create 'particles' directory");
+      }
+
+      const std::string prefix = "./particles/" + solver->getName() + "/" + solver->getName() + ".nn_merge_original";
+      DischargeIO::writeH5Part(prefix + "." + std::to_string(SpaceDim) + "d.h5part",
+                               particles,
+                               this->m_amr->getProbLo(),
+                               this->m_time);
+    }
+
+    // Ghost-only diagnostic snapshot: copy the sampled (pre-merge) particles into a SEPARATE
+    // container -- never touching `particles`, which the merge below still needs completely
+    // untouched -- fill ITS ghosts using the already-registered mask, strip out everything that
+    // is NOT a ghost, and write what's left. Lets the actual ghost region (and how far a ghost
+    // travels, e.g. across a coarse-fine boundary) be inspected directly in the visualization,
+    // independent of any merge decision.
+    {
+      ParticleContainer<ItoParticle> ghostOnlyParticles;
+      ghostOnlyParticles.define(this->m_amr->getGrids(solver->getRealm()),
+                                this->m_amr->getDomains(),
+                                this->m_amr->getDx(),
+                                this->m_amr->getRefinementRatios(),
+                                this->m_amr->getProbLo(),
+                                this->m_amr->getMinBlockSize(),
+                                this->m_amr->getLevelTiles(solver->getRealm()),
+                                this->m_amr->getFinestLevel(),
+                                solver->getRealm(),
+                                nullptr);
+
+      // Direct per-patch copy -- ghostOnlyParticles shares the EXACT SAME grid layout as
+      // `particles` (defined from the same AmrMesh/realm), so this is index-for-index exact
+      // (id/rank/position/weight/payload all preserved). Deliberately NOT
+      // addParticlesDestructive(), which would remap particles and lose that direct
+      // per-patch correspondence.
+      for (int lvl = 0; lvl <= this->m_amr->getFinestLevel(); lvl++) {
+        const DisjointBoxLayout& dbl = this->m_amr->getGrids(solver->getRealm())[lvl];
+        for (DataIterator dit(dbl); dit.ok(); ++dit) {
+          ghostOnlyParticles[lvl][dit()].append(particles[lvl][dit()]);
+        }
+      }
+
+      ghostOnlyParticles.fillGhostParticles(this->m_amr->getParticleGhostMask(solver->getRealm(), 1),
+                                            this->m_amr->getParticleGhostMaskCoarToFine(solver->getRealm(), 1),
+                                            this->m_amr->getParticleGhostMaskFineToCoar(solver->getRealm(), 1));
+
+      for (int lvl = 0; lvl <= this->m_amr->getFinestLevel(); lvl++) {
+        const DisjointBoxLayout& dbl = this->m_amr->getGrids(solver->getRealm())[lvl];
+        for (DataIterator dit(dbl); dit.ok(); ++dit) {
+          ParticleSoA<ItoParticle>& leaf = ghostOnlyParticles[lvl][dit()];
+          for (std::size_t i = 0; i < leaf.size();) {
+            if (!leaf.isGhost(i)) {
+              leaf.remove(i);
+            }
+            else {
+              i++;
+            }
+          }
+        }
+      }
+
+      const std::string prefix = "./particles/" + solver->getName() + "/" + solver->getName() + ".nn_merge_ghosts_only";
+      DischargeIO::writeH5Part(prefix + "." + std::to_string(SpaceDim) + "d.h5part",
+                               ghostOnlyParticles,
+                               this->m_amr->getProbLo(),
+                               this->m_time);
+    }
+
+    // Rough wall-clock comparison against the existing equal_weight_kd merge algorithm
+    // (ItoSolver::makeSuperparticles(), the default configured via ItoSolver.merge_algorithm).
+    // Runs on a full COPY of the current (sampled, id-assigned, EB-cleaned) population in
+    // WhichContainer::Scratch -- a container that exists specifically for this kind of temporary
+    // use, never touching `particles` (Bulk), which the nearest-neighbor round loop below still
+    // needs completely untouched. SCOPE CAVEAT: equal_weight_kd is a purely per-cell/per-patch,
+    // OpenMP-parallel algorithm with NO ghost-fill and NO cross-rank communication at all, and it
+    // targets an EXACT particle count per cell (m_particlesPerCell) rather than draining a crowded
+    // cell toward a threshold the way mergeNearestNeighborsRound() does -- the two algorithms are
+    // not doing equivalent work at patch/rank boundaries, so this is a rough timing comparison, not
+    // a rigorous apples-to-apples benchmark.
+    //
+    // Timed window deliberately starts BEFORE the copy into `scratch`, not after: the equivalent
+    // step on the nearest-neighbor side (mergeNearestNeighborsRound()'s own gather-into-working-
+    // structures loop, NNPERF's "gatherAndIndex") is fully inside ITS timed window, so excluding
+    // this copy here would make the two numbers not actually comparable -- one side would be
+    // charged for gathering its working data and the other would not.
+    {
+      const unsigned long long kdBefore = particles.getNumberOfValidParticlesGlobal();
+
+      const Real                      kdStart = Timer::wallClock();
+      ParticleContainer<ItoParticle>& scratch = solver->getParticles(ItoSolver::WhichContainer::Scratch);
+      for (int lvl = 0; lvl <= this->m_amr->getFinestLevel(); lvl++) {
+        const DisjointBoxLayout& dbl = this->m_amr->getGrids(solver->getRealm())[lvl];
+        for (DataIterator dit(dbl); dit.ok(); ++dit) {
+          scratch[lvl][dit()].append(particles[lvl][dit()]);
+        }
+      }
+      solver->organizeParticlesByCell(ItoSolver::WhichContainer::Scratch);
+      solver->makeSuperparticles(ItoSolver::WhichContainer::Scratch, this->m_particlesPerCell);
+      solver->organizeParticlesByPatch(ItoSolver::WhichContainer::Scratch);
+      const Real kdElapsedLocal = Timer::wallClock() - kdStart;
+
+      const unsigned long long kdAfter         = scratch.getNumberOfValidParticlesGlobal();
+      const Real               kdElapsedGlobal = ParallelOps::max(kdElapsedLocal);
+
+      if (procID() == 0) {
+        pout() << this->m_name + "::postInitialize -- equal_weight_kd timing for solver '" << solver->getName()
+               << "': particles before = " << kdBefore << ", after = " << kdAfter
+               << ", wall-clock (max over ranks) = " << kdElapsedGlobal << " s" << endl;
+      }
+
+      solver->clear(ItoSolver::WhichContainer::Scratch);
+    }
+
+    // The opaque reconciliation payload is just the particle's energy -- mobility/diffusion/
+    // velocity are safe to drop across a merge since they are recomputed from field
+    // interpolation before they are next used.
+    auto gather = [](const ParticleSoA<ItoParticle>& a_leaf, std::size_t a_idx) -> Real {
+      return a_leaf.template get<&ItoParticle::energy>(a_idx);
+    };
+    auto combine = [](const Real a_firstEnergy,
+                      const Real a_firstWeight,
+                      const Real a_secondEnergy,
+                      const Real a_secondWeight) -> Real {
+      return (a_firstWeight * a_firstEnergy + a_secondWeight * a_secondEnergy) / (a_firstWeight + a_secondWeight);
+    };
+    auto scatter = [](ParticleSoA<ItoParticle>& a_leaf, const ParticleManagement::NNMergeParticle<Real>& a_p) -> void {
+      ItoParticle payload;
+      payload.energy = a_p.payload;
+      a_leaf.append(a_p.position, a_p.weight, payload);
+      a_leaf.particleID(a_leaf.size() - 1) = a_p.globalID;
+      a_leaf.rankID(a_leaf.size() - 1)     = a_p.ownerRank;
+    };
+
+    // Cross-level merge count -- see ParticleManagement::mergeNearestNeighborsRound()'s
+    // a_crossLevelMergeCount docs. NOT reset by the library between calls, so this single counter
+    // (passed by pointer to every round below) accumulates over the whole debug test. This is a
+    // PER-RANK count (each rank only counts the merges IT committed, whether as a trivial-tier
+    // participant or as judge) -- like nBefore/nAfter/wBefore/wAfter, it needs an explicit
+    // ParallelOps::sum() (a collective, called by every rank) to get the true cross-rank total
+    // before printing; printing the raw per-rank value would silently miss activity on every rank
+    // but rank 0.
+    unsigned long long crossLevelMergeCount = 0;
+
+    // Per-merge diagnostic: recompute the weighted centroid from (first, second)'s OWN recorded
+    // position/weight and compare against the merged particle's actual position. These must
+    // match exactly (up to floating-point rounding) by construction -- any real deviation would
+    // mean the merged particle's data was NOT actually derived from the two ids recorded as its
+    // parents, a genuine bug distinct from "the nearest-neighbor search legitimately found a
+    // distant candidate" (the centroid of two distant points still lies exactly on the segment
+    // between them, so a large maxPartnerDistance with a tiny maxCenterlineDeviation means the
+    // MERGE math is fine and any surprising-looking merges are a candidate-search/ghost-reach
+    // question, not a centroid bug). All three are per-rank local; reduced via ParallelOps::max()
+    // before printing.
+    Real maxCenterlineDeviation       = 0.0;
+    Real maxPartnerDistance           = 0.0;
+    Real maxCrossLevelPartnerDistance = 0.0;
+
+    auto onMergeCommitted = [&maxCenterlineDeviation, &maxPartnerDistance, &maxCrossLevelPartnerDistance](
+                              const ParticleManagement::NNMergeParticle<Real>& a_first,
+                              const ParticleManagement::NNMergeParticle<Real>& a_second,
+                              const ParticleManagement::NNMergeParticle<Real>& a_merged) -> void {
+      const Real wSum = a_first.weight + a_second.weight;
+
+      RealVect expectedPos(D_DECL(0.0, 0.0, 0.0));
+      Real     partnerDist2 = 0.0;
+      for (int dir = 0; dir < SpaceDim; dir++) {
+        expectedPos[dir] = (a_first.weight * a_first.position[dir] + a_second.weight * a_second.position[dir]) / wSum;
+        const Real d     = a_first.position[dir] - a_second.position[dir];
+        partnerDist2 += d * d;
+      }
+
+      Real deviation2 = 0.0;
+      for (int dir = 0; dir < SpaceDim; dir++) {
+        const Real d = expectedPos[dir] - a_merged.position[dir];
+        deviation2 += d * d;
+      }
+
+      const Real deviation   = std::sqrt(deviation2);
+      const Real partnerDist = std::sqrt(partnerDist2);
+
+      maxCenterlineDeviation = std::max(maxCenterlineDeviation, deviation);
+      maxPartnerDistance     = std::max(maxPartnerDistance, partnerDist);
+      if (a_first.level != a_second.level) {
+        maxCrossLevelPartnerDistance = std::max(maxCrossLevelPartnerDistance, partnerDist);
+      }
+    };
+
+    // Repeated rounds are what RULES.md's "Single pass, caller loops for convergence" design
+    // expects -- one call does a SINGLE cross-patch exchange and is not guaranteed to drain a
+    // crowded cell down to the threshold; debug_nn_merge_num_rounds exists so the effect of
+    // repeated calls (with no particle motion between them here, unlike a real timestep) can be
+    // observed directly.
+    const Real nnStart = Timer::wallClock();
+    for (int round = 0; round < debugNumMergeRounds; round++) {
+      const unsigned long long crossLevelMergeCountBefore = crossLevelMergeCount;
+
+      ParticleManagement::mergeNearestNeighborsRound<ItoParticle, Real>(*this->m_amr,
+                                                                        particles,
+                                                                        debugParticlesPerCellThresh,
+                                                                        gather,
+                                                                        combine,
+                                                                        scatter,
+                                                                        allocateID,
+                                                                        debugIterateToConvergence,
+                                                                        debugMaxFallbackCandidates,
+                                                                        debugMaxCellDistance,
+                                                                        isPositionValid,
+                                                                        &crossLevelMergeCount,
+                                                                        onMergeCommitted,
+                                                                        debugSubPartitionThresh);
+
+      // getNumberOfValidParticlesGlobal() and ParallelOps::sum() are both MPI-collectives -- must
+      // be called by every rank unconditionally; only the PRINTING is rank-0-only.
+      const unsigned long long nRound                          = particles.getNumberOfValidParticlesGlobal();
+      const unsigned long long crossLevelMergesThisRoundGlobal = ParallelOps::sum(crossLevelMergeCount -
+                                                                                  crossLevelMergeCountBefore);
+      if (procID() == 0) {
+        pout() << this->m_name + "::postInitialize -- nearest-neighbor merge debug test for solver '"
+               << solver->getName() << "', round " << (round + 1) << "/" << debugNumMergeRounds
+               << ": particles = " << nRound << ", cross-level merges this round = " << crossLevelMergesThisRoundGlobal
+               << endl;
+      }
+    }
+    const Real nnElapsedGlobal = ParallelOps::max(Timer::wallClock() - nnStart);
+    if (procID() == 0) {
+      pout() << this->m_name + "::postInitialize -- nearest-neighbor merge timing for solver '" << solver->getName()
+             << "': " << debugNumMergeRounds << " round(s), wall-clock (max over ranks) = " << nnElapsedGlobal << " s"
+             << endl;
+    }
+
+    // Defensive cleanup: isPositionValid above already rejects a merge whose RESULT would fall
+    // inside the EB, so this should normally find nothing -- but reuse the same
+    // removeCoveredParticles() here too (rather than trust that check alone) so nothing merged
+    // ends up sitting inside the solid in the final, written-out state.
+    const unsigned long long nBeforeEBCleanup = particles.getNumberOfValidParticlesGlobal();
+    solver->removeCoveredParticles(particles, EBRepresentation::ImplicitFunction, this->m_toleranceEB);
+    const unsigned long long nAfterEBCleanup = particles.getNumberOfValidParticlesGlobal();
+    if (procID() == 0 && nAfterEBCleanup != nBeforeEBCleanup) {
+      pout() << this->m_name + "::postInitialize -- nearest-neighbor merge debug test for solver '" << solver->getName()
+             << "': removeCoveredParticles() discarded " << (nBeforeEBCleanup - nAfterEBCleanup)
+             << " merged particle(s) that ended up inside the EB (isPositionValid should normally have "
+                "prevented this)"
+             << endl;
+    }
+
+    const std::vector<unsigned long long> countsAfter = countPerLevel(particles);
+
+    const unsigned long long nAfter = particles.getNumberOfValidParticlesGlobal();
+    Real                     wAfter = 0.0;
+    for (int lvl = 0; lvl <= this->m_amr->getFinestLevel(); lvl++) {
+      const DisjointBoxLayout& dbl = this->m_amr->getGrids(solver->getRealm())[lvl];
+      for (DataIterator dit(dbl); dit.ok(); ++dit) {
+        ParticleSoA<ItoParticle>& leaf = particles[lvl][dit()];
+        for (std::size_t i = 0; i < leaf.size(); i++) {
+          if (!leaf.isGhost(i)) {
+            wAfter += leaf.weight(i);
+          }
+        }
+      }
+    }
+    wAfter = ParallelOps::sum(wAfter);
+
+    // Write the MERGED (post-merge) particles.
+    {
+      const std::string prefix = "./particles/" + solver->getName() + "/" + solver->getName() + ".nn_merge_merged";
+      DischargeIO::writeH5Part(prefix + "." + std::to_string(SpaceDim) + "d.h5part",
+                               particles,
+                               this->m_amr->getProbLo(),
+                               this->m_time);
+    }
+
+    // Collective -- must be called by every rank unconditionally.
+    const unsigned long long crossLevelMergeCountGlobal         = ParallelOps::sum(crossLevelMergeCount);
+    const Real               maxCenterlineDeviationGlobal       = ParallelOps::max(maxCenterlineDeviation);
+    const Real               maxPartnerDistanceGlobal           = ParallelOps::max(maxPartnerDistance);
+    const Real               maxCrossLevelPartnerDistanceGlobal = ParallelOps::max(maxCrossLevelPartnerDistance);
+
+    if (procID() == 0) {
+      const Real massError = std::abs(wAfter - wBefore);
+      pout() << this->m_name + "::postInitialize -- nearest-neighbor merge debug test for solver '" << solver->getName()
+             << "':" << endl;
+      pout() << "  particles before merge = " << nBefore << endl;
+      pout() << "  particles after merge  = " << nAfter << endl;
+      pout() << "  difference             = " << (static_cast<long long>(nBefore) - static_cast<long long>(nAfter))
+             << endl;
+      printPerLevel("particles per level before merge", countsBefore);
+      printPerLevel("particles per level after merge ", countsAfter);
+      pout() << "  cross-level merges (total, all rounds) = " << crossLevelMergeCountGlobal << endl;
+      pout() << "  max centerline deviation (should be ~0) = " << maxCenterlineDeviationGlobal << endl;
+      pout() << "  max merge-partner distance              = " << maxPartnerDistanceGlobal << endl;
+      pout() << "  max CROSS-LEVEL merge-partner distance  = " << maxCrossLevelPartnerDistanceGlobal << endl;
+      pout() << "  total weight before = " << wBefore << endl;
+      pout() << "  total weight after  = " << wAfter << endl;
+      pout() << "  mass conservation error = " << massError << endl;
+
+      if (massError > 1.E-6 * std::max(wBefore, 1.0)) {
+        MayDay::Error(
+          "ItoKMCGodunovStepper::postInitialize -- nearest-neighbor merge debug test failed mass conservation");
+      }
     }
   }
 }
