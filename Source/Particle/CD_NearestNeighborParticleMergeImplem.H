@@ -686,7 +686,7 @@ namespace ParticleManagement {
                       const std::vector<NNMergeParticle<Packed>>& a_localValid,
                       const std::vector<NNMergeParticle<Packed>>& a_ghosts,
                       const std::vector<NNIndexedParticle>&       a_sorted,
-                      const std::set<ParticleID>&                 a_consumedIDs,
+                      const std::unordered_set<ParticleID>&       a_consumedIDs,
                       const ConsiderCallback&                     a_considerCandidate,
                       const PruneCheck&                           a_shouldPrune) noexcept
   {
@@ -765,7 +765,7 @@ namespace ParticleManagement {
   inline void
   findNearestNeighborCandidates(const std::vector<NNMergeParticle<Packed>>&                a_localValid,
                                 const std::vector<NNMergeParticle<Packed>>&                a_ghosts,
-                                const std::set<ParticleID>&                                a_consumedIDs,
+                                const std::unordered_set<ParticleID>&                      a_consumedIDs,
                                 const NNSpatialIndex<Packed>&                              a_spatialIndex,
                                 const std::unordered_map<NNCellKey, int, NNCellKeyHasher>& a_liveCellCount,
                                 const RealVect&                                            a_probLo,
@@ -959,9 +959,9 @@ namespace ParticleManagement {
                      const std::unordered_map<ParticleID, NNMergeParticle<Packed>>& a_particlesByID,
                      const Combine&                                                 a_combine,
                      std::unordered_map<NNCellKey, int, NNCellKeyHasher>&           a_liveCellCount,
-                     std::set<ParticleID>&                                          a_consumedIDs,
+                     std::unordered_set<ParticleID>&                                a_consumedIDs,
                      const int                                                      a_numParticlesPerCellThresh,
-                     std::set<ParticleID>&                                          a_hasOutgoingCommitment,
+                     std::unordered_set<ParticleID>&                                a_hasOutgoingCommitment,
                      std::vector<NNMergeResult<Packed>>&                            a_results,
                      const RealVect&                                                a_probLo,
                      const std::vector<RealVect>&                                   a_dxByLevel,
@@ -1149,7 +1149,7 @@ namespace ParticleManagement {
   template <typename Packed>
   inline void
   generateProposals(const std::vector<NNMergeEdge<Packed>>&                        a_edges,
-                    const std::set<ParticleID>&                                    a_hasOutgoingCommitment,
+                    const std::unordered_set<ParticleID>&                          a_hasOutgoingCommitment,
                     const std::unordered_map<ParticleID, NNMergeParticle<Packed>>& a_particlesByID,
                     const int                                                      a_numRanks,
                     std::vector<std::vector<NNMergeProposal<Packed>>>&             a_proposalsByDestRank) noexcept
@@ -1185,8 +1185,8 @@ namespace ParticleManagement {
   inline void
   judgeProposals(const std::vector<NNMergeProposal<Packed>>&                    a_incomingProposals,
                  const std::unordered_map<ParticleID, NNMergeParticle<Packed>>& a_particlesByID,
-                 const std::set<ParticleID>&                                    a_consumedIDs,
-                 const std::set<ParticleID>&                                    a_hasOutgoingCommitment,
+                 const std::unordered_set<ParticleID>&                          a_consumedIDs,
+                 const std::unordered_set<ParticleID>&                          a_hasOutgoingCommitment,
                  const std::map<ParticleID, ParticleID>&                        a_outgoingTargetOf,
                  const Combine&                                                 a_combine,
                  std::unordered_map<NNCellKey, int, NNCellKeyHasher>&           a_liveCellCount,
@@ -1380,7 +1380,8 @@ namespace ParticleManagement {
   }
 
   inline void
-  applyVerdicts(const std::vector<NNMergeVerdict>& a_incomingVerdicts, std::set<ParticleID>& a_consumedIDs) noexcept
+  applyVerdicts(const std::vector<NNMergeVerdict>& a_incomingVerdicts,
+                std::unordered_set<ParticleID>&    a_consumedIDs) noexcept
   {
     CH_TIME("ParticleManagement::applyVerdicts");
 
@@ -1680,8 +1681,8 @@ namespace ParticleManagement {
     nnDiagBuildIndexSeconds = 0.0;
     nnDiagLiveCellSeconds   = 0.0;
 
-    std::set<ParticleID>             consumedIDs;
-    std::set<ParticleID>             hasOutgoingCommitment;
+    std::unordered_set<ParticleID>   consumedIDs;
+    std::unordered_set<ParticleID>   hasOutgoingCommitment;
     std::map<ParticleID, ParticleID> outgoingTargetOf;
 
     std::vector<NNMergeResult<Packed>> allResults;

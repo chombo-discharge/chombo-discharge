@@ -53,20 +53,21 @@ neither of us has to re-derive them from scratch later.
   motivated this work). Mass conservation exact and centerline deviation ~0 throughout every
   phase. 2D/3D compiles clean, doxygen 0 warnings.
 
-- ~~`std::map` used throughout instead of `std::unordered_map`.~~ **`liveCellCount` DONE -- and it
-  turned out to be a correctness bug, not just a performance one** (see the below-threshold-merge
-  entry in "Design / correctness coverage"). `particlesByID`, `exposed`, `outgoingTargetOf`, and
-  `myParticlesByID` are still `std::map`, but those are keyed by `ParticleID` (an integral type with
-  a genuine total order), so they only have the original, purely-performance motivation -- O(log n)
-  lookup, poor cache locality, on a hot path looked up per particle/edge/fallback attempt. Should
-  still become `std::unordered_map` for O(1) amortized lookups. `consumedIDs` and
-  `hasOutgoingCommitment` (`std::set<ParticleID>`, same underlying issue -- ordered tree, O(log n)
-  membership check) belong on this same list; not yet fixed. Confirmed via phase timing (see the
-  `a_subPartitionThresh` entry below) that this doesn't matter for `a_iterateLocalTierToConvergence
-  = false` (the common case so far -- `consumedIDs` stays empty for the only
-  `findNearestNeighborCandidates()` call that round, so lookups are O(1) in practice regardless of
-  container type), but would start costing real time once multi-pass convergence is actually used
-  (`consumedIDs` grows across passes then).
+- ~~`std::map`/`std::set` used throughout instead of the unordered variants.~~ **DONE.**
+  `liveCellCount` came first and turned out to be a correctness bug, not just a performance one (see
+  the below-threshold-merge entry in "Design / correctness coverage"). `particlesByID`/`exposed`
+  became `std::unordered_map` and `myParticlesByID` was removed outright in a later commit. Finally
+  `consumedIDs` and `hasOutgoingCommitment` (`std::set<ParticleID>`) became `std::unordered_set`
+  (all keyed by `ParticleID`, an integral type -- only ever membership-tested, never iterated in
+  order, so the swap is safe). This last one was measured as the single biggest `resolveTrivialTier`
+  win: it roughly HALVED that phase (~37 ms -> ~19 ms at ~86k edges, 2D), and also helped
+  `judgeProposals`/`applyToContainers` (both do membership tests against these sets). An earlier
+  version of this note claimed the set container "doesn't matter for
+  `a_iterateLocalTierToConvergence = false` because `consumedIDs` stays empty" -- that was WRONG and
+  the measurement disproves it: `resolveTrivialTier()` POPULATES `consumedIDs` (and
+  `hasOutgoingCommitment`) as it commits merges within a single pass, so every later edge in the
+  same sorted pass is already testing membership against a set that has grown to tens of thousands
+  of entries -- exactly where the ordered-tree O(log n) + cache-miss cost was being paid.
 
 - **`myParticlesByID` is a full copy of `particlesByID`, rebuilt every round.**
   (`mergeNearestNeighborsRound()`, the "5. judgeProposals()" section.) Built by iterating
@@ -284,18 +285,23 @@ neither of us has to re-derive them from scratch later.
   form to keep. Net: ~1.31x faster round overall, ~2.15x on the search-equivalent work specifically
   (2D; 3D search win is larger but the smoke test can't exercise 3D queries, see above).
 
-  Why the round-level win is "only" 1.31x despite a 2-3x search win -- the search is no longer the
-  bottleneck. Measured `localTier` split (tree): search ~56 ms, `resolveTrivialTier` ~37 ms. Once
-  the batched graph makes search cheap, the two remaining big costs are:
-    - `resolveTrivialTier` (~36 ms) -- the global edge sort + commit. BACKEND-INDEPENDENT (identical
-      for tree and PointCloudBVH), so it helps both equally and does not move the comparison, but it
-      is now co-dominant. NEXT TARGET (being looked at now).
-    - `buildNNCellBuckets` (~7 ms) -- in PointCloudBVH mode only its `cellOffsets` (for the exact
-      crowded-cell pre-filter) is used; the full counting-sort scatter (`sorted`) is dead weight
-      since the tree walk is gone. A tally-only variant could reclaim ~3-4 ms. Deferred.
-  vs. `equal_weight_kd` (~32 ms, full merge, 2D): tree was ~4.1x slower, batched PointCloudBVH is
-  ~3.1x. The residual gap is `resolveTrivialTier` + build + the propose/judge/place protocol that
-  `equal_weight_kd` structurally does not have -- not the search. Parity was never the target.
+  Why the round-level win was "only" 1.31x despite a 2-3x search win -- the search was no longer the
+  bottleneck. Measured `localTier` split (tree): search ~56 ms, `resolveTrivialTier` ~37 ms. So the
+  next target was `resolveTrivialTier`, which led to the `std::set` -> `std::unordered_set` fix (see
+  the "std::map/std::set" item above): that HALVED resolve (~37 -> ~19 ms) and helps BOTH backends.
+  Updated progression, TOTAL round time, with that fix in:
+    - tree, unordered_set resolve:            ~112 ms
+    - PointCloudBVH batched + unordered_set:  ~80 ms
+  So the batched PointCloudBVH backend plus the resolve fix is **~1.63x faster than the original
+  tree/`std::set` round (~130 -> ~80 ms)**. Remaining big pieces at ~80 ms: `gatherAndIndex` ~39 ms
+  (of which the batched `allNearestNeighbors` ~16 ms IS the search, plus `buildNNCellBuckets` ~7 ms
+  and the PointCloudBVH construction ~7 ms) and `resolveTrivialTier` ~19 ms.
+  Still-deferred smaller win: in PointCloudBVH mode only `buildNNCellBuckets`'s `cellOffsets` (for
+  the exact crowded-cell pre-filter) is used; the full counting-sort scatter (`sorted`) is dead
+  weight since the tree walk is gone -- a tally-only variant could reclaim ~3-4 ms.
+  vs. `equal_weight_kd` (~32 ms, full merge, 2D): originally ~4.1x slower, now ~2.5x. The residual
+  gap is the build + `resolveTrivialTier` + the propose/judge/place protocol that `equal_weight_kd`
+  structurally does not have -- not the search. Parity was never the target.
 
 - **Idea, not yet attempted: reciprocal-nearest-neighbor caching to reduce the NUMBER of tree
   descents needed, not just the cost of each one.** Came up in discussion after the `PackedBVH`
