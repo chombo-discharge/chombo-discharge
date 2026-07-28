@@ -40,7 +40,7 @@ Tessellation::Tessellation()
   pp.get("flip_inside", flipInside);
 
   // Read the PLY file and put it in a linearized BVH hierarchy.
-  auto implicitFunction = EBGeometry::Parser::readIntoLinearBVH<T>(filename);
+  auto implicitFunction = EBGeometry::Parser::readIntoTriangleBVH<T>(filename);
 
   // Put our level-set into Chombo datastructures.
   RefCountedPtr<BaseIF> baseIF = RefCountedPtr<BaseIF>(new EBGeometryIF<T>(implicitFunction, flipInside, zCoord));
