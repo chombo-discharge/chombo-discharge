@@ -60,6 +60,37 @@ namespace ParticleManagement {
     return s_use;
   }
 
+  // TEMPORARY DIAGNOSTIC -- do not commit. Namespace-scope build-phase split accumulators (the
+  // NNPERF clock lambdas are local to mergeNearestNeighborsRound and out of scope in
+  // buildNNSpatialIndex), printed and reset once per round via NNBUILDSPLIT.
+  static double g_nnDiagBucketsSeconds = 0.0;
+  static double g_nnDiagAsmSeconds     = 0.0;
+  static double g_nnDiagPcbvhSeconds   = 0.0;
+  static double g_nnDiagGraphSeconds   = 0.0;
+
+  /**
+    @brief TEMPORARY DIAGNOSTIC: current steady-clock time point (namespace-scope so
+    buildNNSpatialIndex can use it, unlike the round-local NNPERF lambdas).
+    @return The current std::chrono::steady_clock time point.
+  */
+  inline std::chrono::steady_clock::time_point
+  nnDiagNow() noexcept
+  {
+    return std::chrono::steady_clock::now();
+  }
+  /**
+    @brief TEMPORARY DIAGNOSTIC: elapsed seconds between two steady-clock time points.
+    @param[in] a_t0 Start time point.
+    @param[in] a_t1 End time point.
+    @return Elapsed wall-clock seconds (a_t1 - a_t0).
+  */
+  inline double
+  nnDiagSec(const std::chrono::steady_clock::time_point& a_t0,
+            const std::chrono::steady_clock::time_point& a_t1) noexcept
+  {
+    return std::chrono::duration<double>(a_t1 - a_t0).count();
+  }
+
   // ---------------------------------------------------------------------------------------------
   // Private helpers (not declared in CD_NearestNeighborParticleMerge.H -- implementation details
   // only, consumed exclusively within this file).
@@ -555,43 +586,45 @@ namespace ParticleManagement {
   {
     CH_TIME("ParticleManagement::buildNNSpatialIndex");
 
-    buildNNCellBuckets(a_localValid, a_ghosts, a_probLo, a_dx, a_blockSize, a_haloBlockBox, a_index.buckets);
-
     a_index.tree.clear();
 
-    const std::size_t total = a_index.buckets.sorted.size();
-    if (total == 0) {
-      return;
-    }
-
-    // Exact per-cell pre-filter -- see this function's own docs. NOT an average-density heuristic
-    // (an earlier version of this check compared total/numCellsInPatch against the threshold, which
-    // is unsafe: a patch can have a low AVERAGE density while still containing one badly clustered
-    // cell with far more than a_numParticlesPerCellThresh particles in it -- exactly the case this
-    // whole tree exists to handle cheaply, so silently skipping it there would be actively wrong,
-    // not just a rare performance miss). This is exact instead: cellOffsets was already built,
-    // unconditionally, by buildNNCellBuckets() above, so every occupied cell's own population
-    // (hi - lo) is already known at zero extra cost -- just walk it and check the real maximum,
-    // mirroring the crowding trigger's own "count > thresh" test exactly (same operator, same
-    // threshold). Skip the tree build only if NO cell could possibly generate a query.
-    bool anyCellCrowded = false;
-    for (const auto& kv : a_index.buckets.cellOffsets) {
-      const std::size_t cellCount = kv.second.second - kv.second.first;
-      if (static_cast<int>(cellCount) > a_numParticlesPerCellThresh) {
-        anyCellCrowded = true;
-        break;
-      }
-    }
-    if (!anyCellCrowded) {
-      return;
-    }
-
-    // TEMPORARY MEASUREMENT PATH -- do not commit. Build an EBGeometry SIMD PointCloudBVH over the
-    // whole-patch point set (local valid first, then ghosts) instead of the hand-rolled tree, when
-    // NN_USE_PCBVH is set. Metadata is each point's globalID; a hit's cloud index decodes ownership
-    // (< pointCloudNLocal => local valid, else ghost). See findNearestNeighborCandidates().
+    // TEMPORARY MEASUREMENT PATH -- do not commit. PointCloudBVH path: self-contained, and
+    // deliberately does NOT call buildNNCellBuckets -- the SIMD search reads none of its outputs
+    // (sorted/blockCounts/observedCellBox), only WHETHER any cell is crowded. That question is
+    // answered here by a lightweight count-only tally using the exact same per-cell keying
+    // (cellKeyOf(pos, probLo, dx), local and ghost alike) as buildNNCellBuckets, skipping its
+    // counting-sort scatter entirely. Build an EBGeometry SIMD PointCloudBVH over the whole-patch
+    // point set (local valid first, then ghosts); metadata is each point's globalID; a hit's cloud
+    // index decodes ownership (< pointCloudNLocal => local valid, else ghost).
     if (nnUsePackedBVH()) {
-      const std::size_t                    nLocal = a_localValid.size();
+      const std::size_t total = a_localValid.size() + a_ghosts.size();
+      if (total == 0) {
+        return;
+      }
+
+      const auto nnDiagBucketsStart = nnDiagNow(); // TEMPORARY DIAGNOSTIC
+      std::unordered_map<NNWalkCell, int, LevelTiles::TileHasher> cellCount;
+      cellCount.reserve(total);
+      for (const auto& p : a_localValid) {
+        cellCount[cellKeyOf(p.position, a_probLo, a_dx)]++;
+      }
+      for (const auto& p : a_ghosts) {
+        cellCount[cellKeyOf(p.position, a_probLo, a_dx)]++;
+      }
+      bool anyCellCrowded = false;
+      for (const auto& kv : cellCount) {
+        if (kv.second > a_numParticlesPerCellThresh) {
+          anyCellCrowded = true;
+          break;
+        }
+      }
+      g_nnDiagBucketsSeconds += nnDiagSec(nnDiagBucketsStart, nnDiagNow()); // TEMPORARY DIAGNOSTIC
+      if (!anyCellCrowded) {
+        return;
+      }
+
+      const auto                           nnDiagAsmStart = nnDiagNow(); // TEMPORARY DIAGNOSTIC
+      const std::size_t                    nLocal         = a_localValid.size();
       std::vector<EBGeometry::Vec3T<Real>> positions;
       std::vector<ParticleID>              metadata;
       positions.reserve(a_localValid.size() + a_ghosts.size());
@@ -610,7 +643,11 @@ namespace ParticleManagement {
       for (const auto& p : a_ghosts) {
         pushPoint(p);
       }
-      a_index.pointCloud       = std::make_shared<EBGeometry::PointCloudBVH<Real, ParticleID>>(positions, metadata);
+      g_nnDiagAsmSeconds += nnDiagSec(nnDiagAsmStart, nnDiagNow()); // TEMPORARY DIAGNOSTIC
+
+      const auto nnDiagPcbvhStart = nnDiagNow(); // TEMPORARY DIAGNOSTIC
+      a_index.pointCloud          = std::make_shared<EBGeometry::PointCloudBVH<Real, ParticleID>>(positions, metadata);
+      g_nnDiagPcbvhSeconds += nnDiagSec(nnDiagPcbvhStart, nnDiagNow()); // TEMPORARY DIAGNOSTIC
       a_index.pointCloudNLocal = nLocal;
       a_index.pointCloudK      = a_kNearest;
       // Precompute the whole kNN graph in one batched, leaf-order (cache-warm), own-leaf-seeded
@@ -618,8 +655,38 @@ namespace ParticleManagement {
       // otherwise make, and reusable across every internal a_iterateLocalTierToConvergence pass
       // (positions never change within a round; only consumed status does, and that is filtered at
       // lookup time). Ghost rows are computed but never read; see NNSpatialIndex::pointCloudGraph.
-      a_index.pointCloudGraph = a_index.pointCloud->allNearestNeighbors(static_cast<std::size_t>(a_kNearest));
+      const auto nnDiagGraphStart = nnDiagNow(); // TEMPORARY DIAGNOSTIC
+      a_index.pointCloudGraph     = a_index.pointCloud->allNearestNeighbors(static_cast<std::size_t>(a_kNearest));
+      g_nnDiagGraphSeconds += nnDiagSec(nnDiagGraphStart, nnDiagNow()); // TEMPORARY DIAGNOSTIC
       g_nnDiagTreeCount++;
+      return;
+    }
+
+    // Tree path: the hand-rolled whole-patch tree needs the full cell buckets (the sorted index
+    // array for the walk, observedCellBox for the root AABB).
+    const auto nnDiagBucketsStart = nnDiagNow(); // TEMPORARY DIAGNOSTIC
+    buildNNCellBuckets(a_localValid, a_ghosts, a_probLo, a_dx, a_blockSize, a_haloBlockBox, a_index.buckets);
+    g_nnDiagBucketsSeconds += nnDiagSec(nnDiagBucketsStart, nnDiagNow()); // TEMPORARY DIAGNOSTIC
+
+    const std::size_t total = a_index.buckets.sorted.size();
+    if (total == 0) {
+      return;
+    }
+
+    // Exact per-cell pre-filter -- see this function's own docs. NOT an average-density heuristic
+    // (unsafe: a low-average patch can still hold one badly clustered over-threshold cell). cellOffsets
+    // already carries every occupied cell's population (hi - lo) at zero extra cost -- walk it and
+    // check the real maximum, mirroring the crowding trigger's own "count > thresh" test exactly.
+    // Skip the tree build only if NO cell could possibly generate a query.
+    bool anyCellCrowded = false;
+    for (const auto& kv : a_index.buckets.cellOffsets) {
+      const std::size_t cellCount = kv.second.second - kv.second.first;
+      if (static_cast<int>(cellCount) > a_numParticlesPerCellThresh) {
+        anyCellCrowded = true;
+        break;
+      }
+    }
+    if (!anyCellCrowded) {
       return;
     }
 
@@ -1940,6 +2007,13 @@ namespace ParticleManagement {
            << " TOTAL=" << nnPerfTotalSeconds << endl;
     pout() << "NNLOCALTIERSPLIT search=" << nnDiagSearchSeconds << " resolve=" << nnDiagResolveSeconds
            << endl; // TEMPORARY DIAGNOSTIC -- do not commit.
+    pout() << "NNBUILDSPLIT buckets=" << g_nnDiagBucketsSeconds << " assembly=" << g_nnDiagAsmSeconds
+           << " pcbvh=" << g_nnDiagPcbvhSeconds << " graph=" << g_nnDiagGraphSeconds
+           << endl; // TEMPORARY DIAGNOSTIC -- do not commit.
+    g_nnDiagBucketsSeconds = 0.0;
+    g_nnDiagAsmSeconds     = 0.0;
+    g_nnDiagPcbvhSeconds   = 0.0;
+    g_nnDiagGraphSeconds   = 0.0;
 
     // TEMPORARY DIAGNOSTIC -- do not commit.
     pout() << "NNTREEDIAG queries=" << g_nnDiagQueries << " nodeVisits=" << g_nnDiagNodeVisits
