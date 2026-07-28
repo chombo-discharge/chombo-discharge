@@ -44,6 +44,22 @@ namespace ParticleManagement {
   static unsigned long long g_nnDiagLeafSizeCount  = 0;
   static unsigned long long g_nnDiagMaxLeafSize    = 0;
 
+  /**
+    @brief EXPERIMENTAL measurement switch: whether to use the EBGeometry PointCloudBVH search
+    backend instead of the hand-rolled whole-patch tree.
+    @details True iff the NN_USE_PCBVH environment variable is set (to anything). Read once. When
+    true, buildNNSpatialIndex() builds a PointCloudBVH (and its precomputed kNN graph) instead of
+    the tree, and findNearestNeighborCandidates() queries that graph instead of walking the tree.
+    Lets the same binary A/B the two backends via the environment; default (unset) is the tree.
+    @return True iff the PointCloudBVH backend is selected.
+  */
+  inline bool
+  nnUsePackedBVH() noexcept
+  {
+    static const bool s_use = (std::getenv("NN_USE_PCBVH") != nullptr);
+    return s_use;
+  }
+
   // ---------------------------------------------------------------------------------------------
   // Private helpers (not declared in CD_NearestNeighborParticleMerge.H -- implementation details
   // only, consumed exclusively within this file).
@@ -534,6 +550,7 @@ namespace ParticleManagement {
                       const Box&                                  a_haloBlockBox,
                       const int                                   a_subPartitionThresh,
                       const int                                   a_numParticlesPerCellThresh,
+                      const int                                   a_kNearest,
                       NNSpatialIndex<Packed>&                     a_index) noexcept
   {
     CH_TIME("ParticleManagement::buildNNSpatialIndex");
@@ -566,6 +583,43 @@ namespace ParticleManagement {
       }
     }
     if (!anyCellCrowded) {
+      return;
+    }
+
+    // TEMPORARY MEASUREMENT PATH -- do not commit. Build an EBGeometry SIMD PointCloudBVH over the
+    // whole-patch point set (local valid first, then ghosts) instead of the hand-rolled tree, when
+    // NN_USE_PCBVH is set. Metadata is each point's globalID; a hit's cloud index decodes ownership
+    // (< pointCloudNLocal => local valid, else ghost). See findNearestNeighborCandidates().
+    if (nnUsePackedBVH()) {
+      const std::size_t                    nLocal = a_localValid.size();
+      std::vector<EBGeometry::Vec3T<Real>> positions;
+      std::vector<ParticleID>              metadata;
+      positions.reserve(a_localValid.size() + a_ghosts.size());
+      metadata.reserve(a_localValid.size() + a_ghosts.size());
+      auto pushPoint = [&](const NNMergeParticle<Packed>& a_p) {
+        EBGeometry::Vec3T<Real> v(0.0, 0.0, 0.0);
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          v[dir] = a_p.position[dir];
+        }
+        positions.push_back(v);
+        metadata.push_back(a_p.globalID);
+      };
+      for (const auto& p : a_localValid) {
+        pushPoint(p);
+      }
+      for (const auto& p : a_ghosts) {
+        pushPoint(p);
+      }
+      a_index.pointCloud       = std::make_shared<EBGeometry::PointCloudBVH<Real, ParticleID>>(positions, metadata);
+      a_index.pointCloudNLocal = nLocal;
+      a_index.pointCloudK      = a_kNearest;
+      // Precompute the whole kNN graph in one batched, leaf-order (cache-warm), own-leaf-seeded
+      // pass -- strictly cheaper than the per-query nearestNeighbors() calls the search would
+      // otherwise make, and reusable across every internal a_iterateLocalTierToConvergence pass
+      // (positions never change within a round; only consumed status does, and that is filtered at
+      // lookup time). Ghost rows are computed but never read; see NNSpatialIndex::pointCloudGraph.
+      a_index.pointCloudGraph = a_index.pointCloud->allNearestNeighbors(static_cast<std::size_t>(a_kNearest));
+      g_nnDiagTreeCount++;
       return;
     }
 
@@ -794,12 +848,49 @@ namespace ParticleManagement {
 
       g_nnDiagQueries++;
 
+      // TEMPORARY MEASUREMENT PATH -- do not commit. Query the EBGeometry SIMD PointCloudBVH
+      // instead of walking the hand-rolled tree, when it was built (NN_USE_PCBVH). The query's own
+      // cloud index equals qi (local valid points are packed first); nearestNeighbors() excludes it
+      // as self. Each hit's cloud index decodes ownership (< pointCloudNLocal => local valid, else
+      // ghost), and we apply the same a_maxCellDistance bound and a_consumedIDs skip as the tree
+      // path before feeding survivors into the shared top-K logic. Requesting exactly K and then
+      // filtering by the distance bound yields the within-bound top-K (an out-of-bound candidate is
+      // farther than the bound and so can never displace a within-bound one from the K nearest);
+      // consumedIDs is empty during the search in the single-pass configuration this measures.
+      if (a_spatialIndex.pointCloud) {
+        using PCBVH                = EBGeometry::PointCloudBVH<Real, ParticleID>;
+        const std::size_t nLocalPC = a_spatialIndex.pointCloudNLocal;
+        const int         Kgraph   = a_spatialIndex.pointCloudK;
+        // Read this query's precomputed kNN row (batched at build time); apply the same
+        // a_maxCellDistance bound and a_consumedIDs skip as the tree path before feeding survivors
+        // into the shared top-K logic. A hit with distanceSquared == max() is an empty slot (fewer
+        // than k neighbors existed) -- stop at the first one.
+        const std::size_t rowStart = qi * static_cast<std::size_t>(Kgraph);
+        for (int h = 0; h < Kgraph; h++) {
+          const typename PCBVH::Hit& hit = a_spatialIndex.pointCloudGraph[rowStart + static_cast<std::size_t>(h)];
+          if (hit.distanceSquared == std::numeric_limits<Real>::max()) {
+            break;
+          }
+          const std::size_t c       = hit.index;
+          const bool        isLocal = c < nLocalPC;
+          const std::size_t idx     = isLocal ? c : c - nLocalPC;
+          const Real        d2      = hit.distanceSquared;
+          if (maxDistBoundSquared.has_value() && d2 > maxDistBoundSquared.value()) {
+            continue;
+          }
+          const ParticleID gid = isLocal ? a_localValid[idx].globalID : a_ghosts[idx].globalID;
+          if (a_consumedIDs.count(gid) > 0) {
+            continue;
+          }
+          considerCandidate(d2, idx, isLocal);
+        }
+      }
       // Single, whole-patch tree walk -- see NNSpatialIndex::tree/buildNNSpatialIndex()'s own
       // docs. Empty either because this patch had no particles at all, or because
       // buildNNSpatialIndex()'s per-cell pre-filter found no cell over threshold -- that check is
       // exact (not a heuristic, see its own docs), so this should be effectively unreachable for a
       // genuine query in practice; the fallback below exists as a defensive safety net regardless.
-      if (!a_spatialIndex.tree.empty()) {
+      else if (!a_spatialIndex.tree.empty()) {
         auto shouldPrune = [&](const RealVect& a_aabbLo, const RealVect& a_aabbHi) -> bool {
           const Real d2 = nnMergePointToAABBDistSquared(q.position, a_aabbLo, a_aabbHi);
           if (maxDistBoundSquared.has_value() && d2 > maxDistBoundSquared.value()) {
@@ -1552,6 +1643,7 @@ namespace ParticleManagement {
                             patchBlocks.haloBlockBox,
                             a_subPartitionThresh,
                             a_numParticlesPerCellThresh,
+                            1 + a_maxFallbackCandidates,
                             spatialIndex);
         nnDiagBuildIndexSeconds += nnPerfSeconds(nnDiagBuildStart, nnPerfNow()); // TEMPORARY DIAGNOSTIC
 
@@ -1605,9 +1697,14 @@ namespace ParticleManagement {
     // last runLocalTierPass() and generateProposals(), so the edges are still exactly current.
     std::vector<NNMergeEdge<Packed>> lastPooledEdges;
 
+    // TEMPORARY DIAGNOSTIC -- do not commit. Split localTier into pure search vs. resolveTrivialTier.
+    double nnDiagSearchSeconds  = 0.0;
+    double nnDiagResolveSeconds = 0.0;
+
     auto runLocalTierPass = [&]() -> bool {
       lastPooledEdges.clear();
 
+      const NNPerfClock::time_point nnDiagSearchStart = nnPerfNow(); // TEMPORARY DIAGNOSTIC
       for (std::size_t pw = 0; pw < patchWork.size(); pw++) {
         // patchLocalValid[pw]/patchGhosts[pw] are this patch's FULL sets (not pre-filtered) and
         // patchSpatialIndex[pw] was built once, over those same full sets, before this round's
@@ -1629,7 +1726,9 @@ namespace ParticleManagement {
 
         lastPooledEdges.insert(lastPooledEdges.end(), patchEdges.begin(), patchEdges.end());
       }
+      nnDiagSearchSeconds += nnPerfSeconds(nnDiagSearchStart, nnPerfNow()); // TEMPORARY DIAGNOSTIC
 
+      const NNPerfClock::time_point      nnDiagResolveStart = nnPerfNow(); // TEMPORARY DIAGNOSTIC
       std::vector<NNMergeResult<Packed>> passResults;
       resolveTrivialTier(lastPooledEdges,
                          exposed,
@@ -1648,6 +1747,8 @@ namespace ParticleManagement {
                          a_maxCellDistance,
                          a_crossLevelMergeCount,
                          a_onMergeCommitted);
+
+      nnDiagResolveSeconds += nnPerfSeconds(nnDiagResolveStart, nnPerfNow()); // TEMPORARY DIAGNOSTIC
 
       allResults.insert(allResults.end(), passResults.begin(), passResults.end());
 
@@ -1836,6 +1937,8 @@ namespace ParticleManagement {
            << " judgeProposals=" << nnPerfJudgeSeconds << " exchangeVerdicts=" << nnPerfVerdictsSeconds
            << " placeAndExchange=" << nnPerfPlaceSeconds << " applyToContainers=" << nnPerfApplySeconds
            << " TOTAL=" << nnPerfTotalSeconds << endl;
+    pout() << "NNLOCALTIERSPLIT search=" << nnDiagSearchSeconds << " resolve=" << nnDiagResolveSeconds
+           << endl; // TEMPORARY DIAGNOSTIC -- do not commit.
 
     // TEMPORARY DIAGNOSTIC -- do not commit.
     pout() << "NNTREEDIAG queries=" << g_nnDiagQueries << " nodeVisits=" << g_nnDiagNodeVisits

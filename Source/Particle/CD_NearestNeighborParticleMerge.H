@@ -27,6 +27,9 @@
 #include <RealVect.H>
 #include <IntVect.H>
 
+// EBGeometry includes
+#include <EBGeometry.hpp>
+
 // Our includes
 #include <CD_ParticleSoA.H>
 #include <CD_ParticleContainer.H>
@@ -657,6 +660,38 @@ namespace ParticleManagement {
       original cells it spans. See buildNNSpatialIndex()'s own docs for the build.
     */
     std::vector<NNSubNode> tree;
+
+    /**
+      @brief EXPERIMENTAL alternative to `tree`: an EBGeometry SIMD PointCloudBVH over the same
+      whole-patch point set (local valid followed by ghosts), built instead of `tree` when the
+      NN_USE_PCBVH environment variable is set. Null otherwise. Its metadata is each point's
+      globalID; a hit's cloud index c decodes ownership directly (c < pointCloudNLocal => local
+      valid a_localValid[c], else ghost a_ghosts[c - pointCloudNLocal]). See buildNNSpatialIndex()
+      and findNearestNeighborCandidates() for the (temporary, measurement-only) selection logic.
+    */
+    std::shared_ptr<EBGeometry::PointCloudBVH<Real, ParticleID>> pointCloud;
+
+    /**
+      @brief Number of local-valid points at the front of the PointCloudBVH's cloud order (used to
+      decode a hit's local-vs-ghost ownership from its cloud index). Only meaningful when
+      pointCloud is non-null.
+    */
+    std::size_t pointCloudNLocal = 0;
+
+    /**
+      @brief The whole k-nearest-neighbor graph, precomputed once via PointCloudBVH::
+      allNearestNeighbors(pointCloudK) at build time (batched, leaf-order / cache-warm, seeded from
+      each point's own leaf -- strictly cheaper than per-query calls). Row-major: entry
+      [c * pointCloudK + j] is the j-th nearest OTHER point of cloud index c. Only the local-valid
+      rows (c < pointCloudNLocal) are ever read by findNearestNeighborCandidates(); ghost rows are
+      computed but unused. Empty unless pointCloud is non-null.
+    */
+    std::vector<typename EBGeometry::PointCloudBVH<Real, ParticleID>::Hit> pointCloudGraph;
+
+    /**
+      @brief k used to build pointCloudGraph (= 1 + a_maxFallbackCandidates); the row stride.
+    */
+    int pointCloudK = 0;
   };
 
   /**
@@ -714,6 +749,10 @@ namespace ParticleManagement {
                                       elsewhere this round (see mergeNearestNeighborsRound()'s own
                                       a_numParticlesPerCellThresh) -- used ONLY for the per-cell
                                       pre-filter above, nothing else here.
+    @param[in]  a_kNearest            (EXPERIMENTAL PointCloudBVH path only) k = 1 +
+                                      a_maxFallbackCandidates -- the neighbor count to precompute
+                                      per point into NNSpatialIndex::pointCloudGraph. Ignored by the
+                                      hand-rolled tree path.
     @param[out] a_index               The resulting spatial index.
   */
   template <typename Packed>
@@ -726,6 +765,7 @@ namespace ParticleManagement {
                       const Box&                                  a_haloBlockBox,
                       const int                                   a_subPartitionThresh,
                       const int                                   a_numParticlesPerCellThresh,
+                      const int                                   a_kNearest,
                       NNSpatialIndex<Packed>&                     a_index) noexcept;
 
   /**

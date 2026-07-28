@@ -259,6 +259,44 @@ neither of us has to re-derive them from scratch later.
   larger sample count, a much lower crowding threshold, or (better) a sampling pattern that
   actually resembles real streamer/avalanche density concentration, not uniform spread.
 
+  **DONE (experimental, env-gated): EBGeometry updated, and PointCloudBVH actually wired in and
+  MEASURED as the merge search backend.** The submodule now points at the branch with the new
+  `PackedBVH`/`PointCloudBVH` (all chombo-discharge call sites adapted to its renamed API in a
+  separate commit; that adaptation partially breaks other EBGeometry-consuming functionality's
+  expectations and will need its own coordinated PR later). `PointCloudBVH<Real, ParticleID>` is now
+  an alternative backend inside `mergeNearestNeighborsRound()`, selected at runtime by the
+  `NN_USE_PCBVH` environment variable so the same binary A/Bs it against the hand-rolled tree. Leaf
+  design is exactly the agreed one: the cloud is (local valid, then ghosts); metadata is each
+  point's globalID; a hit's cloud index decodes ownership (< nLocal => local valid, else ghost).
+  Correctness verified byte-for-byte: identical per-level merge counts to the tree path, exact mass
+  conservation and zero centerline deviation, at 1 and 8 ranks, 2D; 3D compiles clean.
+
+  Standalone head-to-head (3D, AVX2, this machine) confirmed PointCloudBVH beats our own direct
+  count-median build on BOTH axes: build ~1.7x faster, query ~3x faster (at N=97082: build 7.0 vs
+  11.9 ms, query 0.20 vs 0.60 us/pt). But the INTEGRATED (2D, real round, ~97k particles) picture is
+  more nuanced -- measured progression, TOTAL round time:
+    - tree backend:                    ~130 ms   (localTier ~93 ms of which pure search ~56 ms; gatherAndIndex ~24 ms)
+    - PointCloudBVH, per-query calls:  ~108 ms   (search ~35 ms -- 1.6x on search alone, 2D)
+    - PointCloudBVH, batched graph:    ~99 ms    (search-equivalent ~26 ms = ~16 ms allNearestNeighbors + ~10 ms lookups)
+  The batched-graph form precomputes the whole kNN graph once per patch via
+  `allNearestNeighbors(K)` (leaf-order/cache-warm, own-leaf-seeded, reused across every
+  iterate-to-convergence pass) and reduces per-pass search to a row lookup + filter. That is the
+  form to keep. Net: ~1.31x faster round overall, ~2.15x on the search-equivalent work specifically
+  (2D; 3D search win is larger but the smoke test can't exercise 3D queries, see above).
+
+  Why the round-level win is "only" 1.31x despite a 2-3x search win -- the search is no longer the
+  bottleneck. Measured `localTier` split (tree): search ~56 ms, `resolveTrivialTier` ~37 ms. Once
+  the batched graph makes search cheap, the two remaining big costs are:
+    - `resolveTrivialTier` (~36 ms) -- the global edge sort + commit. BACKEND-INDEPENDENT (identical
+      for tree and PointCloudBVH), so it helps both equally and does not move the comparison, but it
+      is now co-dominant. NEXT TARGET (being looked at now).
+    - `buildNNCellBuckets` (~7 ms) -- in PointCloudBVH mode only its `cellOffsets` (for the exact
+      crowded-cell pre-filter) is used; the full counting-sort scatter (`sorted`) is dead weight
+      since the tree walk is gone. A tally-only variant could reclaim ~3-4 ms. Deferred.
+  vs. `equal_weight_kd` (~32 ms, full merge, 2D): tree was ~4.1x slower, batched PointCloudBVH is
+  ~3.1x. The residual gap is `resolveTrivialTier` + build + the propose/judge/place protocol that
+  `equal_weight_kd` structurally does not have -- not the search. Parity was never the target.
+
 - **Idea, not yet attempted: reciprocal-nearest-neighbor caching to reduce the NUMBER of tree
   descents needed, not just the cost of each one.** Came up in discussion after the `PackedBVH`
   work above; a different, complementary lever -- that work makes each descent cheaper, this would
