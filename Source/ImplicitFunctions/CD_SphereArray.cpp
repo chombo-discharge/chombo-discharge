@@ -57,7 +57,7 @@ SphereArray::SphereArray(const Real      a_radius,
         const Vec3 center(x, y, z);
 
         spheres.emplace_back(std::make_shared<Sphere>(center, a_radius));
-        boundingVolumes.emplace_back(center - a_radius * Vec3::one(), center + a_radius * Vec3::one());
+        boundingVolumes.emplace_back(center - a_radius * Vec3::ones(), center + a_radius * Vec3::ones());
 #if CH_SPACEDIM == 3
       }
 #endif
@@ -66,7 +66,7 @@ SphereArray::SphereArray(const Real      a_radius,
 
   // Make the slow and fast unions.
   m_slowUnion  = EBGeometry::Union<Real>(spheres);
-  m_fastUnion  = EBGeometry::FastUnion<Real, Sphere, AABB, K>(spheres, boundingVolumes);
+  m_fastUnion  = std::make_shared<EBGeometry::BVHUnionIF<Real, Sphere, AABB, K>>(spheres, boundingVolumes);
   m_useFast    = a_useFast;
   m_flipInside = a_flipInside;
 }

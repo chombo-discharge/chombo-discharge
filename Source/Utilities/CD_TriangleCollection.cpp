@@ -54,13 +54,13 @@ TriangleCollection::define(const std::vector<std::shared_ptr<Triangle>>& a_trian
   }
 
   // Create the root BVH node.
-  auto bvh = std::make_shared<EBGeometry::BVH::NodeT<Real, Triangle, BV, K>>(triList);
+  auto bvh = std::make_shared<EBGeometry::BVH::TreeBVH<Real, Triangle, BV, K>>(triList);
 
   // Sort the BVH tree.
   bvh->topDownSortAndPartition();
 
   // Flatten the tree onto a linear representation.
-  m_bvh = bvh->flattenTree();
+  m_bvh = bvh->pack();
 
   m_isDefined = true;
 }
@@ -72,7 +72,7 @@ TriangleCollection::getClosestTriangles(const Vec3& a_point) const noexcept
 
   using BVHMeta    = Real;
   using TriAndDist = std::pair<std::shared_ptr<const Triangle>, Real>;
-  using Node       = EBGeometry::BVH::LinearNodeT<Real, Triangle, BV, K>;
+  using Node       = EBGeometry::BVH::PackedBVH<Real, Triangle, K>::Node;
 
   BVHMeta shortestDistanceSoFar = std::numeric_limits<Real>::max();
 
@@ -80,38 +80,39 @@ TriangleCollection::getClosestTriangles(const Vec3& a_point) const noexcept
 
   // Visitation pattern. Go into the node if the point is inside or the distance to the BV is shorter than the shortest distance
   // that we've found so far.
-  EBGeometry::BVH::Visiter<Node, Real> visiter = [&shortestDistanceSoFar](const Node& /*a_node*/,
-                                                                          const BVHMeta& a_bvDist) noexcept -> bool {
+  EBGeometry::BVH::PrunePredicate<Node, Real> prunePredicate =
+    [&shortestDistanceSoFar](const Node& /*a_node*/, const BVHMeta& a_bvDist) noexcept -> bool {
     return a_bvDist <= 0.0 || a_bvDist <= shortestDistanceSoFar;
   };
 
-  // Sorter for BVH nodes. When visiting an internal node, we sort its children based on the distance to the respective bounding volumes. In
+  // Ordering for BVH nodes. When visiting an internal node, we sort its children based on the distance to the respective bounding volumes. In
   // the BVH traversel, we then visit the closest nodes first.
-  EBGeometry::BVH::Sorter<Node, Real, K> sorter =
-    [](std::array<std::pair<std::shared_ptr<const Node>, Real>, K>& a_leaves) noexcept -> void {
+  EBGeometry::BVH::PackedChildOrderer<Real, K> childOrderer =
+    [](std::array<std::pair<uint32_t, Real>, K>& a_leaves) noexcept -> void {
     std::sort(a_leaves.begin(),
               a_leaves.end(),
-              [](const std::pair<std::shared_ptr<const Node>, Real>& n1,
-                 const std::pair<std::shared_ptr<const Node>, Real>& n2) -> bool {
+              [](const std::pair<uint32_t, Real>& n1, const std::pair<uint32_t, Real>& n2) -> bool {
                 return n1.second > n2.second;
               });
   };
 
-  // Meta-data updater for the BVH nodes. This enters into the visitor pattern where we attach the distance to each
+  // Node-key factory for the BVH nodes. This enters into the traversal where we attach the distance to each
   // BVH node. This is important when we want to check if we should actually go into the node.
-  EBGeometry::BVH::MetaUpdater<Node, BVHMeta> metaUpdater = [&a_point](const Node& a_node) noexcept -> BVHMeta {
+  EBGeometry::BVH::NodeKeyFactory<Node, BVHMeta> nodeKeyFactory = [&a_point](const Node& a_node) noexcept -> BVHMeta {
     return a_node.getDistanceToBoundingVolume(a_point);
   };
 
-  // Update rule for the BVH leaf nodes. This is called at each leaf node, and provides some logic as to what to do
+  // Evaluation rule for the BVH leaf nodes. This is called at each leaf node, and provides some logic as to what to do
   // when we finally get to the bottom of the tree. Here, we compute the distance to the triangles and if the distance
   // is shorter than the smallest distance we've found so far, we append those triangles to the list of triangles that
   // will be returned to the user.
-  EBGeometry::BVH::Updater<Triangle> updater =
-    [&shortestDistanceSoFar, &a_point, &candidates](
-      const std::vector<std::shared_ptr<const Triangle>>& a_triangles) noexcept -> void {
-    for (const auto& f : a_triangles) {
-      const Real distToTri = std::abs(f->signedDistance(a_point));
+  EBGeometry::BVH::PackedLeafEvaluator<Triangle> leafEvaluator =
+    [&shortestDistanceSoFar, &a_point, &candidates](const std::vector<std::shared_ptr<const Triangle>>& a_triangles,
+                                                    size_t                                              a_offset,
+                                                    size_t a_count) noexcept -> void {
+    for (size_t i = a_offset; i < a_offset + a_count; i++) {
+      const auto& f         = a_triangles[i];
+      const Real  distToTri = std::abs(f->signedDistance(a_point));
 
       if (distToTri <= shortestDistanceSoFar) {
         candidates.emplace_back(f, distToTri);
@@ -121,7 +122,7 @@ TriangleCollection::getClosestTriangles(const Vec3& a_point) const noexcept
   };
 
   // Traverse the BVH tree with the above rules. This builds the candidate list.
-  m_bvh->traverse(updater, visiter, sorter, metaUpdater);
+  m_bvh->traverse(leafEvaluator, prunePredicate, childOrderer, nodeKeyFactory);
 
   // Sort the candidate triangles based on their distance.
   std::sort(candidates.begin(), candidates.end(), [](const TriAndDist& a, const TriAndDist& b) {

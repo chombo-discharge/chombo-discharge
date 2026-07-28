@@ -82,7 +82,7 @@ DiskProfiledPlane::defineElectrode() noexcept
   // Create disk electrode using EBGeometry. This is an elongation of the union of a torus and a cylinder. Created
   // in the xy-plane and then put into place later.
 
-  auto torus    = std::make_shared<TorusSDF<Real>>(Vec3::zero(), wheelRadius, wheelCurvature);
+  auto torus    = std::make_shared<TorusSDF<Real>>(Vec3::zeros(), wheelRadius, wheelCurvature);
   auto cylinder = std::make_shared<CylinderSDF<Real>>(Vec3::unit(2) * wheelCurvature,
                                                       -Vec3::unit(2) * wheelCurvature,
                                                       wheelRadius);
@@ -90,7 +90,7 @@ DiskProfiledPlane::defineElectrode() noexcept
   // Make smooth union and put into place.
   auto wheel = Union<Real>(torus, cylinder);
   if (stemRadius > 0.0) {
-    auto holder = std::make_shared<CapsuleSDF<Real>>(Vec3::zero(), 1.E10 * Vec3::unit(1), stemRadius);
+    auto holder = std::make_shared<CapsuleSDF<Real>>(Vec3::zeros(), 1.E10 * Vec3::unit(1), stemRadius);
     wheel       = SmoothUnion<Real>(wheel, holder, wheelSmooth);
   }
   if (wheelThickness > 0.0) {
@@ -169,18 +169,18 @@ DiskProfiledPlane::defineDielectric() noexcept
     profile = std::make_shared<RoundedBoxSDF<Real>>(squareDim, boxCurvature);
   }
   else if (str == "sphere") {
-    profile = std::make_shared<SphereSDF<Real>>(Vec3::zero(), sphereRadius);
+    profile = std::make_shared<SphereSDF<Real>>(Vec3::zeros(), sphereRadius);
   }
   else if (str == "cylinder_x") {
-    profile = std::make_shared<SphereSDF<Real>>(Vec3::zero(), cylinderRadius);
+    profile = std::make_shared<SphereSDF<Real>>(Vec3::zeros(), cylinderRadius);
     profile = Elongate<Real>(profile, std::numeric_limits<Real>::max() * Vec3::unit(0));
   }
   else if (str == "cylinder_y") {
-    profile = std::make_shared<SphereSDF<Real>>(Vec3::zero(), cylinderRadius);
+    profile = std::make_shared<SphereSDF<Real>>(Vec3::zeros(), cylinderRadius);
     profile = Elongate<Real>(profile, std::numeric_limits<Real>::max() * Vec3::unit(1));
   }
   else if (str == "cylinder_z") {
-    profile = std::make_shared<SphereSDF<Real>>(Vec3::zero(), cylinderRadius);
+    profile = std::make_shared<SphereSDF<Real>>(Vec3::zeros(), cylinderRadius);
     profile = Elongate<Real>(profile, std::numeric_limits<Real>::max() * Vec3::unit(2));
   }
   else if (str == "none") {
