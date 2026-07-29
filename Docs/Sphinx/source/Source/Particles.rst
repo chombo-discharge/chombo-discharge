@@ -803,7 +803,7 @@ _____________________________________
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleManagement.H
    :language: c++
-   :lines: 232-237
+   :lines: 247-252
    :dedent: 2
 
 The returned functor proceeds as follows:
@@ -827,7 +827,7 @@ ___________________________________________
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleManagement.H
    :language: c++
-   :lines: 147-155
+   :lines: 162-170
    :dedent: 2
 
 The caller provides three lambdas:
