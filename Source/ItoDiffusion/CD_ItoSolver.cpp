@@ -734,6 +734,16 @@ ItoSolver::registerOperators() const
     if (m_useRedistribution) {
       m_amr->registerOperator(s_eb_redist, m_realm, m_phase);
     }
+
+    // The distributed nearest-neighbor merge reads a width-1 particle ghost halo as merge candidates
+    // (see mergeSuperparticlesNearestNeighbor()/ParticleManagement::mergeNearestNeighborsRound()).
+    // Register the width here, alongside the other operators; the mask itself is built in the
+    // operator/mask regrid phase (AmrMesh::regridOperators -> Realm::defineParticleGhostMasks), which
+    // runs right after this. Only the AMR-granularity merge needs it; the per-cell algorithms never
+    // fill ghosts.
+    if (m_mergeKind == ParticleManagement::ParticleMergeKind::AMR) {
+      m_amr->registerParticleGhostMask(m_realm, 1);
+    }
   }
 }
 
