@@ -1326,6 +1326,23 @@ protected:
   parseParticleMerger();
 
   /**
+    @brief Run the distributed nearest-neighbor super-particle merge over an entire container.
+    @details This is the AMR-granularity merge path (see ParticleManagement::ParticleMergeKind and
+    parseParticleMerger()): a single cross-patch/cross-rank collective call to
+    ParticleManagement::mergeNearestNeighborsRound(), not a per-cell reduction. It assigns
+    globally-unique particle ids, fills a width-1 ghost halo (both preconditions the round requires
+    of its caller), supplies the ItoParticle gather/combine/scatter/id-allocation callbacks and an
+    EB-aware position-validity predicate, then runs one merge round. Selected via
+    ItoSolver.merge_algorithm = nearest_neighbor and dispatched from
+    makeSuperparticles(WhichContainer, int)/(WhichContainer, Vector<int>).
+    @param[in] a_container                 Which container to merge.
+    @param[in] a_numParticlesPerCellThresh Crowding threshold -- a cell is merged while it holds
+                                           strictly more than this many particles.
+  */
+  void
+  mergeSuperparticlesNearestNeighbor(WhichContainer a_container, int a_numParticlesPerCellThresh);
+
+  /**
     @brief Parse EB intersection algorithms
   */
   void

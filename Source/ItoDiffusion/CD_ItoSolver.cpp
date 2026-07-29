@@ -30,6 +30,7 @@
 #include <CD_ParticleLoops.H>
 #include <CD_DischargeIO.H>
 #include <CD_ParticleManagement.H>
+#include <CD_NearestNeighborParticleMerge.H>
 #include <CD_EBParticleMesh.H>
 #include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
@@ -634,6 +635,18 @@ ItoSolver::parseParticleMerger()
 
     m_particleCellMerger = ParticleManagement::
       makeSfcNearestNeighborMerger<PType, &PType::template real<0>, &PType::template vect<0>>(gather, combine, scatter);
+  }
+  else if (str == "nearest_neighbor") {
+    // Distributed, MPI-safe nearest-neighbor super-particle merge (ParticleManagement::
+    // mergeNearestNeighborsRound). Unlike every other algorithm above, this is NOT a per-cell
+    // merger: it matches particles against their true neighborhood across patch and rank
+    // boundaries, so it is dispatched over the whole container at once rather than cell by cell.
+    // It is therefore flagged as an AMR-granularity merge (see ParticleManagement::ParticleMergeKind
+    // and makeSuperparticles(WhichContainer, int)), and the per-cell m_particleCellMerger is left as
+    // a no-op -- it is never invoked on the AMR path.
+    m_mergeKind          = ParticleManagement::ParticleMergeKind::AMR;
+    m_particleCellMerger = [](ParticleSoA<ItoParticle>& a_particles, const CellInfo& a_cellInfo, const int a_ppc) {
+    };
   }
   else if (str == "external") {
     // Do nothing, because the user will set the merger algorithm through setParticleCellMerger
@@ -3404,6 +3417,16 @@ ItoSolver::makeSuperparticles(const WhichContainer a_container, const int a_part
     pout() << m_name + "::makeSuperparticles(WhichContainer, int)" << endl;
   }
 
+  // The distributed nearest-neighbor merge is a whole-container, cross-patch/cross-rank collective
+  // (see parseParticleMerger()/ParticleManagement::ParticleMergeKind) -- it does not decompose into
+  // independent per-cell/per-patch work, so it runs once over the entire container instead of the
+  // per-level loop the cell-based algorithms use.
+  if (m_mergeKind == ParticleManagement::ParticleMergeKind::AMR) {
+    this->mergeSuperparticlesNearestNeighbor(a_container, a_particlesPerCell);
+
+    return;
+  }
+
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     this->makeSuperparticles(a_container, a_particlesPerCell, lvl);
   }
@@ -3419,6 +3442,16 @@ ItoSolver::makeSuperparticles(const WhichContainer a_container, const Vector<int
 
   if (a_particlesPerCell.size() < 1) {
     MayDay::Error("ItoSolver::makeSuperParticles(Container, Vector<int>) -logic bust");
+  }
+
+  // The nearest-neighbor merge operates on the whole AMR hierarchy at once with a SINGLE crowding
+  // threshold (it has no per-level notion -- see ParticleManagement::mergeNearestNeighborsRound),
+  // so a per-level particle count does not map onto it. Use the coarsest level's value; in practice
+  // this vector is uniform across levels wherever the nearest-neighbor merge is used.
+  if (m_mergeKind == ParticleManagement::ParticleMergeKind::AMR) {
+    this->mergeSuperparticlesNearestNeighbor(a_container, a_particlesPerCell[0]);
+
+    return;
   }
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
@@ -3532,6 +3565,107 @@ ItoSolver::makeSuperparticles(const WhichContainer a_container,
 
   // Replace the leaf contents with the merged particles.
   leaf.swap(merged);
+}
+
+void
+ItoSolver::mergeSuperparticlesNearestNeighbor(const WhichContainer a_container, const int a_numParticlesPerCellThresh)
+{
+  CH_TIME("ItoSolver::mergeSuperparticlesNearestNeighbor");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::mergeSuperparticlesNearestNeighbor" << endl;
+  }
+
+  ParticleContainer<ItoParticle>& particles = this->getParticles(a_container);
+
+  // Every particle needs a GLOBALLY-unique id for the round to route cross-rank proposals/verdicts,
+  // and the merge's own fresh ids must never collide with those. A single rank-namespaced counter
+  // (this rank's index times a large stride, then a monotonically increasing local count) supplies
+  // both: existing particles are (re)numbered first, then the same counter keeps handing out ids for
+  // merged particles -- see ParticleManagement::mergeNearestNeighborsRound()'s IDAllocator docs.
+  // Reassigning every round is fine: the algorithm only requires ids unique WITHIN a round, never
+  // stable across rounds. rankStride caps this rank at that many ids per round (valid + merged),
+  // comfortably above any realistic per-rank particle count.
+  constexpr ParticleID rankStride = 100000000LL;
+
+  ParticleID nextID     = static_cast<ParticleID>(procID()) * rankStride;
+  auto       allocateID = [&nextID]() -> ParticleID {
+    return nextID++;
+  };
+
+  // Assign ids before ghosts exist so that fillGhostParticles() below copies each ghost's id from
+  // its (now-numbered) source particle. rankID is set to this rank -- these are all locally-owned
+  // valid particles.
+  particles.clearGhostParticles();
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
+
+    const int nbox = dit.size();
+
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      ParticleSoA<ItoParticle>& leaf = particles[lvl][dit[mybox]];
+
+      for (std::size_t i = 0; i < leaf.size(); i++) {
+        leaf.particleID(i) = allocateID();
+        leaf.rankID(i)     = procID();
+      }
+    }
+  }
+
+  // The round reads a width-1 ghost halo as merge candidates but does NOT fill it -- filling is the
+  // caller's responsibility, on equal footing with a cell-based merge requiring the caller to
+  // cell-sort first (see mergeNearestNeighborsRound()). The width-1 particle ghost mask must have
+  // been registered on this realm before the grids were (re)built.
+  particles.fillGhostParticles(m_amr->getParticleGhostMask(m_realm, 1),
+                               m_amr->getParticleGhostMaskCoarToFine(m_realm, 1),
+                               m_amr->getParticleGhostMaskFineToCoar(m_realm, 1));
+
+  // The opaque reconciliation payload is just the particle's energy -- mobility/diffusion/velocity
+  // are safe to drop across a merge since they are recomputed from field interpolation before they
+  // are next used.
+  auto gather = [](const ParticleSoA<ItoParticle>& a_leaf, const std::size_t a_idx) -> Real {
+    return a_leaf.template get<&ItoParticle::energy>(a_idx);
+  };
+  auto combine = [](const Real a_firstEnergy,
+                    const Real a_firstWeight,
+                    const Real a_secondEnergy,
+                    const Real a_secondWeight) -> Real {
+    return (a_firstWeight * a_firstEnergy + a_secondWeight * a_secondEnergy) / (a_firstWeight + a_secondWeight);
+  };
+  auto scatter = [](ParticleSoA<ItoParticle>& a_leaf, const ParticleManagement::NNMergeParticle<Real>& a_p) -> void {
+    ItoParticle payload;
+    payload.energy = a_p.payload;
+
+    a_leaf.append(a_p.position, a_p.weight, payload);
+    a_leaf.particleID(a_leaf.size() - 1) = a_p.globalID;
+    a_leaf.rankID(a_leaf.size() - 1)     = a_p.ownerRank;
+  };
+
+  // Reject a merge whose weighted-centroid position would fall inside the embedded boundary --
+  // BaseIF::value() >= 0 is inside the solid (Chombo convention: negative is inside the fluid). A
+  // geometry with no analytic implicit function (e.g. DCEL/STL) has nothing to test against, so
+  // every position is accepted rather than silently rejecting all merges.
+  const RefCountedPtr<BaseIF>& implicitFunction = m_computationalGeometry->getImplicitFunction(m_phase);
+
+  auto isPositionValid = [&implicitFunction](const RealVect& a_pos) -> bool {
+    if (implicitFunction.isNull()) {
+      return true;
+    }
+
+    return implicitFunction->value(a_pos) < 0.0;
+  };
+
+  ParticleManagement::mergeNearestNeighborsRound<ItoParticle, Real>(*m_amr,
+                                                                    particles,
+                                                                    a_numParticlesPerCellThresh,
+                                                                    gather,
+                                                                    combine,
+                                                                    scatter,
+                                                                    allocateID,
+                                                                    true,         // iterate local tier to convergence
+                                                                    1,            // one fallback candidate
+                                                                    std::nullopt, // no merge-distance cap
+                                                                    isPositionValid);
 }
 
 void
