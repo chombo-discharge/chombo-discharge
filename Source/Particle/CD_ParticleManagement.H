@@ -33,6 +33,21 @@
 namespace ParticleManagement {
 
   /**
+    @brief Granularity of a particle-merge algorithm.
+    @details Cell: a per-cell merger (see ParticleMerger) applied cell-by-cell; requires the
+    particles to be cell-sorted first (the caller's responsibility). AMR: a whole-container,
+    cross-rank collective merge (the distributed nearest-neighbor merge) run once over the entire
+    AMR hierarchy; requires the caller to have filled ghost particles first, and does NOT require
+    cell sorting. Consumers (e.g. ItoSolver) store this alongside the chosen algorithm to decide
+    which merge path and pre-merge preparation to use.
+  */
+  enum class ParticleMergeKind
+  {
+    Cell,
+    AMR
+  };
+
+  /**
     @brief Concept for splitting/merging particles
     @param[in,out] a_particles Particles to be merged/split
     @param[in] a_cellInfo Cell info
@@ -142,7 +157,7 @@ namespace ParticleManagement {
     @param[in] a_gather   Per-slot gather: `(const ParticleSoA<P,Traits>&, std::size_t) -> Packed`.
     @param[in] a_combine  In-place merge: `(Packed& first, const Packed& second) -> void`.
     @param[in] a_scatter  Append one merged particle: `(ParticleSoA<P,Traits>&, const Packed&) -> void`.
-    @return A ParticleMerger<P, Traits> ready to be stored in e.g. ItoSolver::m_particleMerger.
+    @return A ParticleMerger<P, Traits> ready to be stored in e.g. ItoSolver::m_particleCellMerger.
   */
   template <class Packed,
             Real& (Packed::*packWeight)(),
@@ -186,7 +201,7 @@ namespace ParticleManagement {
     @param[in] a_scatterLeaf Leaf reducer: `(ParticleSoA<P,Traits>&, const Packed* first,
                              const Packed* last, const CellInfo&) -> void`.  Appends exactly one merged
                              particle per call.
-    @return A ParticleMerger<P, Traits> ready to be stored in e.g. ItoSolver::m_particleMerger.
+    @return A ParticleMerger<P, Traits> ready to be stored in e.g. ItoSolver::m_particleCellMerger.
   */
   template <class Packed,
             Real& (Packed::*packWeight)(),
@@ -227,7 +242,7 @@ namespace ParticleManagement {
     @param[in] a_probLo    Lazy supplier of the domain lower-left corner (from AmrMesh::getProbLo).
                            Called on every merge invocation; capture the solver's AmrMesh reference
                            so the call is deferred until after AMR setup completes.
-    @return A ParticleMerger<P, Traits> ready to be stored in e.g. ItoSolver::m_particleMerger.
+    @return A ParticleMerger<P, Traits> ready to be stored in e.g. ItoSolver::m_particleCellMerger.
   */
   template <class Context, class P, class Traits = ParticleTraits<P>>
   inline ParticleMerger<P, Traits>

@@ -89,14 +89,25 @@ public:
   operator=(ItoSolver&&) = default;
 
   /**
-    @brief Set the particle merger. This will get called when merging particles using makeSuperparticles.
-    @param[in] a_particleMerger Particle merger
+    @brief Set the per-cell particle merger. This gets called cell-by-cell when merging particles
+    using makeSuperparticles with a cell-based merge algorithm.
+    @param[in] a_particleCellMerger Per-cell particle merger
   */
   virtual void
-  setParticleMerger(const ParticleManagement::ParticleMerger<ItoParticle>& a_particleMerger) noexcept;
+  setParticleCellMerger(const ParticleManagement::ParticleMerger<ItoParticle>& a_particleCellMerger) noexcept;
 
   /**
-    @brief Get this solver's name 
+    @brief Get the granularity of the configured merge algorithm (cell-based vs. AMR-collective).
+    @details Callers use this to decide the required pre-merge preparation: a Cell merge needs the
+    particles cell-sorted (organizeParticlesByCell()) first; an AMR merge (nearest_neighbor) needs
+    ghost particles filled first and must NOT be cell-sorted internally.
+    @return m_mergeKind.
+  */
+  virtual ParticleManagement::ParticleMergeKind
+  getMergeKind() const noexcept;
+
+  /**
+    @brief Get this solver's name
     @return Returns m_name
   */
   virtual std::string
@@ -1067,9 +1078,16 @@ protected:
   WhichMobilityInterpolation m_mobilityInterp;
 
   /**
-    @brief Particle merger
+    @brief Per-cell particle merger (used for cell-based merge algorithms; see m_mergeKind)
   */
-  ParticleManagement::ParticleMerger<ItoParticle> m_particleMerger;
+  ParticleManagement::ParticleMerger<ItoParticle> m_particleCellMerger;
+
+  /**
+    @brief Granularity of the configured merge algorithm (cell-based vs. AMR-collective).
+    @details Set by parseParticleMerger(); read by makeSuperparticles() to choose the merge path.
+    Defaults to Cell.
+  */
+  ParticleManagement::ParticleMergeKind m_mergeKind = ParticleManagement::ParticleMergeKind::Cell;
 
   /**
     @brief Number of particles used when restarting a simulation -- this is relevant only when restarting from a "fluid" checkpoint file. 

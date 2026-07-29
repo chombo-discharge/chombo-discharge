@@ -52,7 +52,7 @@ ItoSolver::ItoSolver()
   CH_TIME("ItoSolver::ItoSolver");
 
   // Default is to not merge particles
-  m_particleMerger = [](ParticleSoA<ItoParticle>& a_particles, const CellInfo& a_cellInfo, const int a_ppc) {
+  m_particleCellMerger = [](ParticleSoA<ItoParticle>& a_particles, const CellInfo& a_cellInfo, const int a_ppc) {
 
   };
 }
@@ -86,12 +86,18 @@ ItoSolver::setRealm(const std::string& a_realm)
   m_realm = a_realm;
 }
 
-void
-ItoSolver::setParticleMerger(const ParticleManagement::ParticleMerger<ItoParticle>& a_particleMerger) noexcept
+ParticleManagement::ParticleMergeKind
+ItoSolver::getMergeKind() const noexcept
 {
-  CH_TIME("ItoSolver::setParticleMerger");
+  return m_mergeKind;
+}
 
-  m_particleMerger = a_particleMerger;
+void
+ItoSolver::setParticleCellMerger(const ParticleManagement::ParticleMerger<ItoParticle>& a_particleCellMerger) noexcept
+{
+  CH_TIME("ItoSolver::setParticleCellMerger");
+
+  m_particleCellMerger = a_particleCellMerger;
 }
 
 const RefCountedPtr<ItoSpecies>&
@@ -407,9 +413,14 @@ ItoSolver::parseParticleMerger()
   std::string str;
 
   pp.get("merge_algorithm", str);
+
+  // Default granularity is per-cell; only the distributed nearest-neighbor algorithm overrides this
+  // to AMR (see ParticleManagement::ParticleMergeKind / makeSuperparticles()).
+  m_mergeKind = ParticleManagement::ParticleMergeKind::Cell;
+
   if (str == "none") {
     // No merging: the merger is a no-op and particles are left unchanged.
-    m_particleMerger = [](ParticleSoA<ItoParticle>& a_particles, const CellInfo& a_cellInfo, const int a_ppc) {
+    m_particleCellMerger = [](ParticleSoA<ItoParticle>& a_particles, const CellInfo& a_cellInfo, const int a_ppc) {
     };
   }
   else if (str == "equal_weight_kd") {
@@ -457,7 +468,7 @@ ItoSolver::parseParticleMerger()
       a.append(x, w, payload);
     };
 
-    m_particleMerger = ParticleManagement::
+    m_particleCellMerger = ParticleManagement::
       makeEqualWeightKDMerger<PType, &PType::template real<0>, &PType::template vect<0>>(gather,
                                                                                          reconcile,
                                                                                          scatterLeaf);
@@ -495,11 +506,11 @@ ItoSolver::parseParticleMerger()
       a.append(x, static_cast<double>(wt), payload);
     };
 
-    m_particleMerger = ParticleManagement::makeReinitializeMerger<Real, ItoParticle>(aggregate,
-                                                                                     emit,
-                                                                                     [this]() noexcept {
-                                                                                       return m_amr->getProbLo();
-                                                                                     });
+    m_particleCellMerger = ParticleManagement::makeReinitializeMerger<Real, ItoParticle>(aggregate,
+                                                                                         emit,
+                                                                                         [this]() noexcept {
+                                                                                           return m_amr->getProbLo();
+                                                                                         });
   }
   else if (str == "reinitialize_bvh") {
     // Same KD partition as equal_weight_kd, but leaf positions are reinitialized: cut-cells use the
@@ -579,7 +590,7 @@ ItoSolver::parseParticleMerger()
       }
     };
 
-    m_particleMerger = ParticleManagement::
+    m_particleCellMerger = ParticleManagement::
       makeEqualWeightKDMerger<PType, &PType::template real<0>, &PType::template vect<0>>(gather,
                                                                                          reconcile,
                                                                                          scatterLeaf);
@@ -621,11 +632,11 @@ ItoSolver::parseParticleMerger()
       a.append(p.template vect<0>(), p.template real<0>(), payload);
     };
 
-    m_particleMerger = ParticleManagement::
+    m_particleCellMerger = ParticleManagement::
       makeSfcNearestNeighborMerger<PType, &PType::template real<0>, &PType::template vect<0>>(gather, combine, scatter);
   }
   else if (str == "external") {
-    // Do nothing, because the user will set the merger algorithm through setParticleMerger
+    // Do nothing, because the user will set the merger algorithm through setParticleCellMerger
   }
   else {
     MayDay::Abort("ItoSolver::parseParticleMerger - unknown particle merging algorithm requested");
@@ -3458,7 +3469,7 @@ ItoSolver::makeSuperparticles(const WhichContainer a_container,
 
   // TLDR (SoA): The leaf is cell-sorted (the caller runs organizeParticlesByCell), so each cell owns the
   //       contiguous particle range [cellStart(c), cellStart(c+1)). For each non-empty cell we extract its
-  //       particles into an AoS seed scratch list, run the user-configurable m_particleMerger on it, then
+  //       particles into an AoS seed scratch list, run the user-configurable m_particleCellMerger on it, then
   //       collect the merged particles. Finally we rebuild the leaf from the merged particles. The merge
   //       discards velocity/mobility/diffusion (only weight/position/energy survive), which is fine because
   //       these are recomputed (interpolated) after super-particle creation.
@@ -3470,9 +3481,14 @@ ItoSolver::makeSuperparticles(const WhichContainer a_container,
   const EBISBox& ebisbox = m_amr->getEBISLayout(m_realm, m_phase)[a_level][a_dit];
   const Box      cellBox = m_amr->getGrids(m_realm)[a_level][a_dit];
 
-  // The leaf must be cell-sorted for the CSR cell ranges to be valid.
+  // The leaf must be cell-sorted for the CSR cell ranges to be valid. Sorting is deliberately NOT
+  // done here -- it is the caller's responsibility to organizeParticlesByCell() before a cell-based
+  // merge (see parseParticleMerger()/makeSuperparticles(WhichContainer, int); the container-level
+  // nearest-neighbor merge takes a different, non-cell-sorted path and never reaches here). Fail
+  // loudly rather than silently sorting, so a missing organize call is caught, not masked.
   if (!leaf.isSorted()) {
-    leaf.sortByCell(cellBox, dx * RealVect::Unit, probLo);
+    MayDay::Error("ItoSolver::makeSuperparticles - particles are not cell-sorted; call "
+                  "organizeParticlesByCell() before a cell-based merge");
   }
 
   CH_assert(leaf.numCells() == static_cast<std::size_t>(cellBox.numPts()));
@@ -3497,7 +3513,7 @@ ItoSolver::makeSuperparticles(const WhichContainer a_container,
 
     // Merge in this cell using the configured strategy.
     if (ebisbox.isRegular(iv)) {
-      m_particleMerger(scratch, CellInfo(iv, dx), a_particlesPerCell);
+      m_particleCellMerger(scratch, CellInfo(iv, dx), a_particlesPerCell);
     }
     else if (ebisbox.isIrregular(iv)) {
       // Multi-valued cells are not supported -- use the (single) VoF in the cell.
@@ -3506,7 +3522,7 @@ ItoSolver::makeSuperparticles(const WhichContainer a_container,
       const RealVect& bndryCentroid = ebisbox.bndryCentroid(vof);
       const RealVect& bndryNormal   = ebisbox.normal(vof);
 
-      m_particleMerger(scratch, CellInfo(iv, dx, kappa, bndryCentroid, bndryNormal), a_particlesPerCell);
+      m_particleCellMerger(scratch, CellInfo(iv, dx, kappa, bndryCentroid, bndryNormal), a_particlesPerCell);
     }
     // Covered cells should not contain particles; if they do, they pass through unchanged.
 
@@ -3525,7 +3541,7 @@ ItoSolver::mergeParticles(ParticleSoA<ItoParticle>& a_particles,
 {
   CH_TIMERS("ItoSolver::mergeParticles");
 
-  m_particleMerger(a_particles, a_cellInfo, a_ppc);
+  m_particleCellMerger(a_particles, a_cellInfo, a_ppc);
 }
 
 void
