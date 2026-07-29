@@ -133,7 +133,7 @@ protected:
   /**
     @brief Triangle collection -- stored in a BVH-tree for faster lookup
   */
-  std::shared_ptr<EBGeometry::BVH::LinearBVH<Real, Triangle, BV, K>> m_bvh;
+  std::shared_ptr<EBGeometry::BVH::PackedBVH<Real, Triangle, K>> m_bvh;
 };
 
 #include <CD_NamespaceFooter.H>

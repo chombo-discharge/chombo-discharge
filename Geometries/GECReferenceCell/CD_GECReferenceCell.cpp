@@ -34,7 +34,7 @@ GECReferenceCell::GECReferenceCell()
   const Real eps = 2.1;
 
   // Construct the lower (non-powered) electrode parts.
-  const Vec3 zero = Vec3::zero();
+  const Vec3 zero = Vec3::zeros();
   const Vec3 yhat = Vec3::unit(1);
 
   ImpFunc innerElectrodeLo, insulatorLo, outerElectrodeLo;

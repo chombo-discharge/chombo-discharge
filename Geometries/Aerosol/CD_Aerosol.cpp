@@ -67,7 +67,7 @@ Aerosol::Aerosol()
       pp2.get("radius", radius);
       pp2.getarr("center", v, 0, SpaceDim);
 
-      auto c = EBGeometry::Vec3T<Real>::zero();
+      auto c = EBGeometry::Vec3T<Real>::zeros();
       for (int dir = 0; dir < SpaceDim; dir++) {
         c[dir] = v[dir];
       }

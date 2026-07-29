@@ -69,7 +69,7 @@ RodNeedleDisk::defineRodNeedle() noexcept
 
   Vector<Real> v;
   std::string  orientation = "+z";
-  Vec3         translate   = Vec3::zero();
+  Vec3         translate   = Vec3::zeros();
 
   pp.get("rod_live", rodLive);
   pp.get("use_rod", useRod);
@@ -208,7 +208,7 @@ RodNeedleDisk::defineDisk()
 
   Vector<Real> v;
   std::string  orientation = "+z";
-  Vec3         translate   = Vec3::zero();
+  Vec3         translate   = Vec3::zeros();
 
   pp.get("use_disk", useDisk);
   pp.get("disk_live", diskLive);
@@ -236,7 +236,7 @@ RodNeedleDisk::defineDisk()
     std::shared_ptr<ImpFunc> disk;
 
     cylinder = std::make_shared<EBGeometry::CylinderSDF<Real>>(zLo, zHi, diskRadius);
-    torus    = std::make_shared<EBGeometry::TorusSDF<Real>>(Vec3::zero(), diskRadius, 0.5 * diskCurvature);
+    torus    = std::make_shared<EBGeometry::TorusSDF<Real>>(Vec3::zeros(), diskRadius, 0.5 * diskCurvature);
     disk     = EBGeometry::Union<Real>(cylinder, torus);
     disk     = EBGeometry::Elongate<Real>(disk, Vec3(0.0, 0.0, 0.5 * diskThickness));
     disk     = EBGeometry::Translate<Real>(disk, Vec3(0.0, 0.0, -diskPoint));

@@ -107,23 +107,23 @@ RandomInterface::RandomInterface() noexcept
   int noiseOctaves1 = 0;
   int noiseOctaves2 = 0;
 
-  Vec3 noiseFrequency1 = Vec3::zero();
-  Vec3 noiseFrequency2 = Vec3::zero();
+  Vec3 noiseFrequency1 = Vec3::zeros();
+  Vec3 noiseFrequency2 = Vec3::zeros();
 
-  Vec3 point1 = Vec3::zero();
-  Vec3 point2 = Vec3::zero();
+  Vec3 point1 = Vec3::zeros();
+  Vec3 point2 = Vec3::zeros();
 
-  Vec3 normal1 = Vec3::zero();
-  Vec3 normal2 = Vec3::zero();
+  Vec3 normal1 = Vec3::zeros();
+  Vec3 normal2 = Vec3::zeros();
 
-  Vec3 clampLo1 = Vec3::zero();
-  Vec3 clampLo2 = Vec3::zero();
+  Vec3 clampLo1 = Vec3::zeros();
+  Vec3 clampLo2 = Vec3::zeros();
 
-  Vec3 clampHi1 = Vec3::zero();
-  Vec3 clampHi2 = Vec3::zero();
+  Vec3 clampHi1 = Vec3::zeros();
+  Vec3 clampHi2 = Vec3::zeros();
 
-  Vec3 clampDx1 = Vec3::zero();
-  Vec3 clampDx2 = Vec3::zero();
+  Vec3 clampDx1 = Vec3::zeros();
+  Vec3 clampDx2 = Vec3::zeros();
 
   pp.get("reseed", reseed);
   pp.get("smooth_len", smoothLength);

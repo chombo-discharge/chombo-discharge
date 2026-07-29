@@ -77,8 +77,8 @@ SpherePlane::SpherePlane() noexcept
     std::shared_ptr<ImpFunc> holder;
     std::shared_ptr<ImpFunc> arrangement;
 
-    sphere = std::make_shared<EBGeometry::SphereSDF<Real>>(Vec3::zero(), sphereRadius);
-    holder = std::make_shared<EBGeometry::CylinderSDF<Real>>(Vec3::zero(),
+    sphere = std::make_shared<EBGeometry::SphereSDF<Real>>(Vec3::zeros(), sphereRadius);
+    holder = std::make_shared<EBGeometry::CylinderSDF<Real>>(Vec3::zeros(),
                                                              sphereHolderLength * Vec3::unit(1),
                                                              sphereHolderRadius);
 
@@ -96,7 +96,7 @@ SpherePlane::SpherePlane() noexcept
     disk   = std::make_shared<EBGeometry::RoundedCylinderSDF<Real>>(0.5 * (diskRadius + diskCurvature),
                                                                   diskCurvature,
                                                                   diskThickness);
-    holder = std::make_shared<EBGeometry::CylinderSDF<Real>>(Vec3::zero(),
+    holder = std::make_shared<EBGeometry::CylinderSDF<Real>>(Vec3::zeros(),
                                                              -diskHolderLength * Vec3::unit(1),
                                                              diskHolderRadius);
 
