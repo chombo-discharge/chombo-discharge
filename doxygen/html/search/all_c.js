@@ -85,7 +85,7 @@ var searchData=
   ['m_5fbufferparticles_82',['m_bufferParticles',['../classParticleContainer.html#a5c725b4975be1479b9b845e7d2d32c6a',1,'ParticleContainer']]],
   ['m_5fbuffersizebr_83',['m_bufferSizeBR',['../classAmrMesh.html#a3496bd4e53289c5636ea90b97b837545',1,'AmrMesh']]],
   ['m_5fbulkphotons_84',['m_bulkPhotons',['../classMcPhoto.html#a743c50fe97ea70605d7ad5290cf48634',1,'McPhoto']]],
-  ['m_5fbvh_85',['m_bvh',['../classTriangleCollection.html#ad9eb200fb6cb43a193df7fd5d299a149',1,'TriangleCollection']]],
+  ['m_5fbvh_85',['m_bvh',['../classTriangleCollection.html#a3459e0d96df5c4bc6943b282ecac10f7',1,'TriangleCollection']]],
   ['m_5fc_86',['m_c',['../classKrylovGMRES.html#aa10dd71eb0f139645275e39971f74e84',1,'KrylovGMRES']]],
   ['m_5fcache_87',['m_cache',['../classFieldSolver.html#a3340d3b7c5e9d97e5d0e40c2bfe1e9c4',1,'FieldSolver::m_cache'],['../classMeshODESolver.html#a65ff512e4df4889788c976add8a67666',1,'MeshODESolver::m_cache'],['../classSurfaceODESolver.html#a4d81fd22931eec4043d706fb1996f369',1,'SurfaceODESolver::m_cache']]],
   ['m_5fcachedtags_88',['m_cachedTags',['../classDriver.html#a3079d174fba043b2c3b5bcef0528d64c',1,'Driver']]],
