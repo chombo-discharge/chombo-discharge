@@ -408,7 +408,7 @@ In the code above, ``ParticleManagement::ParticleMerger<P>`` is an alias:
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleManagement.H
    :language: c++
-   :lines: 50-58
+   :lines: 74-82
    :dedent: 2
 
 .. tip::
