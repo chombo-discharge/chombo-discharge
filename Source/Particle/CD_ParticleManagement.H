@@ -28,7 +28,31 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Namespace for various particle management tools. 
+  @brief Namespace for various particle management tools.
+  @details This namespace is the single home for chombo-discharge's super-particle merge algorithms.
+  They come in two granularities (see ParticleMergeKind) and are split across two header pairs BY
+  DEPENDENCY WEIGHT -- deliberately, not incidentally: the per-cell mergers declared here are
+  lightweight (only ParticleSoA/CellInfo), whereas the AMR merge pulls in EBGeometry's SIMD BVH,
+  AmrMesh, and MPI. Keeping them apart spares this file's many consumers those heavy includes; a
+  caller that wants every merger at once includes CD_ParticleMergers.H (which pulls in both). The
+  string selectors below are resolved by the consuming solver -- e.g. ItoSolver::parseParticleMerger
+  -- which is the single point that maps a merge_algorithm name to one of these.
+
+  Catalog of merge algorithms:
+
+  Cell-granularity (this file + CD_ParticleManagementImplem.H) -- each is a factory returning a
+  ParticleMerger applied cell-by-cell to a cell-sorted container:
+    - makeEqualWeightKDMerger      : KD-tree equal-weight partition; conserves the cell center-of-mass.
+                                     Backs the 'equal_weight_kd' and 'reinitialize_bvh' selectors.
+    - makeReinitializeMerger       : re-initializes a cell's particles with as-uniform-as-possible
+                                     integer weights. Backs 'reinitialize'.
+    - makeSfcNearestNeighborMerger : space-filling-curve nearest-neighbour clustering. Backs 'sfc_nn'.
+
+  AMR-granularity (CD_NearestNeighborParticleMerge.H / ...Implem.H, same namespace) -- a
+  whole-container, cross-rank collective run once over the entire AMR hierarchy:
+    - mergeNearestNeighborsRound   : distributed, MPI-safe nearest-neighbour merge that matches
+                                     particles across patch and rank boundaries. Backs
+                                     'nearest_neighbor'.
 */
 namespace ParticleManagement {
 
