@@ -72,13 +72,9 @@ namespace ParticleManagement {
 
   /**
     @brief a_maxCellDistance check for two positions that may be on DIFFERENT AMR levels.
-    @details When both participants share a level, this is IDENTICAL to the original,
-    already-validated definition: Chebyshev distance between each participant's own cell index,
-    both computed with that level's dx. Comparing raw cell indices computed with two DIFFERENT dx
-    values has no consistent meaning on its own, so for a genuinely cross-level pair, both
-    positions are re-expressed in the FINER of the two levels' own cell-size units first (higher
-    AMR level number = finer, by this codebase's convention) -- the more conservative/precise
-    common reference -- before comparing. Reduces exactly to the same-level case when
+    @details Raw cell indices computed with two different dx values are not directly comparable, so
+    both positions are re-expressed in the finer of the two levels' cell-size units (higher AMR
+    level = finer) before taking the Chebyshev distance. Reduces to the same-level case when
     a_levelA == a_levelB.
     @param[in] a_posA         First participant's position.
     @param[in] a_levelA       First participant's AMR level.
@@ -133,12 +129,9 @@ namespace ParticleManagement {
   /**
     @brief Generic alltoallv-style exchange: send a per-destination-rank bucket of trivially-
     copyable records, return the flat concatenation of everything received.
-    @details This is the "new general-purpose alltoallv-style utility" the header's own docs
-    flagged as an open implementation question -- a minimal, self-contained one, matching the
-    packing/MPI_Alltoall(byte counts)/MPI_Alltoallv(payload) style already used by
-    ParticleContainer's own cross-rank particle exchange (CD_ParticleContainerImplem.H). In a
-    serial (non-MPI) build, or when there is only one rank, this degenerates to "my own bucket,
-    unchanged".
+    @details Packs one bucket per rank and exchanges via MPI_Alltoall (byte counts) + MPI_Alltoallv
+    (payload). In a serial (non-MPI) build, or with a single rank, this returns this rank's own
+    bucket unchanged.
     @tparam T Trivially-copyable record type (NNMergeProposal<Packed>, NNMergeVerdict, or
     NNMergeParticle<Packed> -- all satisfy this given Packed itself is required to).
     @param[in] a_sendByRank One bucket per destination rank (size == number of ranks).
@@ -256,11 +249,10 @@ namespace ParticleManagement {
       return;
     }
 
-    // Exact per-cell pre-filter (see this function's own docs): a lightweight count-only tally of
-    // the patch's own particles, keyed exactly as the crowding trigger (cellKeyOf(pos, probLo, dx),
-    // local and ghost alike). Build nothing if no cell could possibly generate a query. This is
-    // NOT an average-density heuristic (unsafe: a low-average patch can still hold one badly
-    // clustered over-threshold cell) -- it checks the true per-cell maximum directly.
+    // Exact per-cell pre-filter (see this function's own docs): a count-only tally keyed as the
+    // crowding trigger (cellKeyOf(pos, probLo, dx), local and ghost alike). Build nothing unless
+    // some cell is over threshold. Checks the true per-cell maximum, not an average density (a
+    // low-average patch can still hold one over-threshold cell).
     std::unordered_map<NNWalkCell, int, LevelTiles::TileHasher> cellCount;
     cellCount.reserve(total);
     for (const auto& p : a_localValid) {
@@ -306,8 +298,7 @@ namespace ParticleManagement {
     a_index.pointCloud       = std::make_shared<EBGeometry::PointCloudBVH<Real, ParticleID>>(positions, metadata);
     a_index.pointCloudNLocal = nLocal;
 
-    // Precompute the whole kNN graph in one batched, leaf-order (cache-warm), own-leaf-seeded pass
-    // -- strictly cheaper than per-query calls, and reusable across every internal
+    // Precompute the whole kNN graph in one batched pass, reused across every internal
     // a_iterateLocalTierToConvergence pass (positions never change within a round; only consumed
     // status does, and that is filtered at lookup time). Ghost rows are computed but never read;
     // see NNSpatialIndex::pointCloudGraph.
@@ -335,11 +326,10 @@ namespace ParticleManagement {
     const std::size_t nLocal = a_localValid.size();
     const int         K      = 1 + a_maxFallbackCandidates;
 
-    // a_maxCellDistance's physical bound, computed once (patch/round-level, not per query) -- see
-    // this function's own a_maxCellDistance docs for why the sqrt(SpaceDim) factor is required for
-    // safety (a Euclidean-distance prune must never be tighter than the true per-axis Chebyshev
-    // cutoff resolveTrivialTier()/judgeProposals() apply downstream, or it could wrongly exclude a
-    // candidate they would still have accepted).
+    // a_maxCellDistance's physical bound, computed once per call. The sqrt(SpaceDim) factor keeps
+    // this Euclidean prune no tighter than the per-axis Chebyshev cutoff applied downstream by
+    // resolveTrivialTier()/judgeProposals(), so it never excludes a candidate they would accept
+    // (see this function's own a_maxCellDistance docs).
     std::optional<Real> maxDistBoundSquared;
     if (a_maxCellDistance.has_value()) {
       Real minDx = a_dx[0];
@@ -360,10 +350,8 @@ namespace ParticleManagement {
     for (std::size_t qi = 0; qi < nLocal; qi++) {
       const NNMergeParticle<Packed>& q = a_localValid[qi];
 
-      // Lazy deletion -- a_localValid is the FULL per-patch set (see this function's own
-      // contract-change docs), so a query already consumed by an earlier pass/query this round
-      // must be skipped explicitly here (the old design's pre-filtered aliveLocal made this
-      // implicit).
+      // Lazy deletion -- a_localValid is the FULL per-patch set (see this function's own docs), so
+      // a query already consumed by an earlier pass/query this round is skipped explicitly here.
       if (a_consumedIDs.count(q.globalID) > 0) {
         continue;
       }
@@ -397,15 +385,13 @@ namespace ParticleManagement {
         }
       };
 
-      // Read this query's precomputed kNN row out of the PointCloudBVH graph (batched at build
-      // time -- see buildNNSpatialIndex()). The query's own cloud index equals qi (local valid
-      // points are packed first); allNearestNeighbors() already excluded it as self. Each hit's
-      // cloud index decodes ownership (< pointCloudNLocal => local valid, else ghost); apply the
-      // a_maxCellDistance bound and a_consumedIDs skip before feeding survivors into the shared
-      // top-K logic. Filtering the k-nearest by the distance bound yields the within-bound k-nearest
-      // (an out-of-bound candidate is farther than the bound and so can never displace a within-
-      // bound one). pointCloud is null only for a patch with no crowded cell, which generates no
-      // query, so this branch is effectively always taken for a genuine query.
+      // Read this query's precomputed kNN row out of the PointCloudBVH graph (see
+      // buildNNSpatialIndex()). The query's own cloud index equals qi (local valid points packed
+      // first); allNearestNeighbors() already excluded it as self. Each hit's cloud index decodes
+      // ownership (< pointCloudNLocal => local valid, else ghost); apply the a_maxCellDistance bound
+      // and the a_consumedIDs skip before feeding survivors into the shared top-K logic. Filtering
+      // the distance-sorted k-nearest by the bound yields exactly the within-bound k-nearest.
+      // pointCloud is null only for a patch with no crowded cell, which generates no query.
       if (a_spatialIndex.pointCloud) {
         using PCBVH                = EBGeometry::PointCloudBVH<Real, ParticleID>;
         const std::size_t nLocalPC = a_spatialIndex.pointCloudNLocal;
@@ -584,10 +570,9 @@ namespace ParticleManagement {
         if (trivialOk) {
           const NNMergeParticle<Packed>& cand = candDataIt->second;
 
-          // Each participant's OWN level's dx -- see a_dxByLevel's docs. Using the wrong level's
-          // dx here (e.g. a single shared dx) silently breaks this recheck for every level but
-          // one, since the resulting cell key would not match the one a_liveCellCount was
-          // actually populated under for that participant.
+          // Each participant's OWN level's dx -- see a_dxByLevel's docs. The cell key must match
+          // the one a_liveCellCount was populated under for that participant, so a single shared
+          // dx would break the recheck for every level but one.
           const NNCellKey qKey(query.level, cellKeyOf(query.position, a_probLo, a_dxByLevel[query.level]));
           const NNCellKey cKey(cand.level, cellKeyOf(cand.position, a_probLo, a_dxByLevel[cand.level]));
 
@@ -826,14 +811,12 @@ namespace ParticleManagement {
       }
 
       // Dynamic crowding recheck for BOTH participants (mirrors resolveTrivialTier()'s symmetric
-      // "qCount > thresh && cCount > thresh" discipline exactly -- each participant's OWN level's
-      // dx, see a_dxByLevel's docs). Checking only the target here was a real bug: a source
-      // particle's own cell can drop below threshold between proposal generation and judging (an
-      // earlier merge within this same round can drain it, same reasoning as resolveTrivialTier()'s
-      // own recheck), and accepting anyway would silently violate the crowding trigger on the
-      // source side. If this rank has no live visibility into the source's cell (never shipped
-      // here as a ghost), sCount defaults to 0 -- rejected -- the same conservative default already
-      // used when a target's own count is unknown.
+      // recheck -- each participant's OWN level's dx, see a_dxByLevel's docs). The source's cell
+      // must be rechecked too: an earlier merge this round can drain it below threshold between
+      // proposal generation and judging, and accepting anyway would violate the crowding trigger on
+      // the source side. If this rank has no live entry for the source's cell (never shipped here as
+      // a ghost), sCount defaults to 0 -- rejected -- the same conservative default used for an
+      // unknown target count.
       const NNCellKey tKey(target.level, cellKeyOf(target.position, a_probLo, a_dxByLevel[target.level]));
       const NNCellKey sKey(source.level, cellKeyOf(source.position, a_probLo, a_dxByLevel[source.level]));
       const auto      tCountIt = a_liveCellCount.find(tKey);
@@ -862,11 +845,9 @@ namespace ParticleManagement {
 
       a_results.push_back(result);
 
-      // Symmetric decrement (mirrors resolveTrivialTier()'s own commit) -- only meaningful when
-      // this rank actually has a live entry for the source's cell (sCountIt found above); if it
-      // doesn't, there is nothing here to decrement (the source's own rank's copy of its cell
-      // count, if it has one, is this rank's problem to worry about only via the accepted verdict
-      // it will receive, not via a_liveCellCount here).
+      // Symmetric decrement (mirrors resolveTrivialTier()'s commit), but only when this rank has a
+      // live entry for the source's cell (sCountIt found above); otherwise there is nothing local
+      // to decrement -- the source's owning rank updates its own copy on the accepted verdict.
       a_liveCellCount[tKey] -= 1;
       if (sCountIt != a_liveCellCount.end()) {
         a_liveCellCount[sKey] -= 1;
@@ -908,8 +889,8 @@ namespace ParticleManagement {
     // a_scatterByDestRank is APPENDED to, never resized here -- see its own docs.
 
     for (const auto& result : a_results) {
-      // O(1) point->block query -- see PositionLocator/NNParticleLocation. NEVER a linear scan
-      // over patches here; that is exactly the bottleneck this design avoids at large patch counts.
+      // O(1) point->block query -- see PositionLocator/NNParticleLocation. Never a linear scan over
+      // patches (the bottleneck this avoids at large patch counts).
       const NNParticleLocation loc = a_locate(result.merged.position);
 
       // A merged particle landing outside every known patch (e.g. exactly on/outside the domain
@@ -1017,12 +998,9 @@ namespace ParticleManagement {
         localValid.reserve(leaf.size());
         ghosts.reserve(leaf.size());
 
-        // Incrementally reserved to the running total rather than left to grow organically --
-        // particlesByID/exposed are pooled across EVERY patch this rank owns (up to ~10^5
-        // particles in a realistic run), and an unreserved std::unordered_map pays for that via
-        // repeated whole-bucket-array rehashes as it grows, on top of the per-insert hashing cost
-        // every entry pays regardless. leaf.size() is a cheap O(1) call (a stored counter, not a
-        // scan), so this costs nothing to compute per patch.
+        // Reserve to the running total -- particlesByID/exposed are pooled across every patch this
+        // rank owns, so reserving up front avoids repeated rehashes as they grow. leaf.size() is
+        // O(1).
         particlesByID.reserve(particlesByID.size() + leaf.size());
         exposed.reserve(exposed.size() + leaf.size());
 
@@ -1030,9 +1008,8 @@ namespace ParticleManagement {
           const bool isGhost = leaf.isGhost(i);
 
           // A ghost's TRUE origin level is NOT this receiving patch's level `lvl` -- it is
-          // lvl-1/lvl+1 for a Coarse/Fine ghost (see ParticleSoA::GhostType). Getting this wrong
-          // computes the ghost's cell key with the WRONG dx, exactly the bug that motivated
-          // NNMergeParticle::level existing at all.
+          // lvl-1/lvl+1 for a Coarse/Fine ghost (see ParticleSoA::GhostType). Its cell key must be
+          // computed with that origin level's dx (see NNMergeParticle::level).
           int originLevel = lvl;
           if (isGhost) {
             switch (leaf.ghost(i)) {
@@ -1060,17 +1037,10 @@ namespace ParticleManagement {
 
           if (isGhost) {
             ghosts.push_back(p);
-            // REQUIRED -- see generateProposals()'s own documented contract for a_particlesByID:
-            // "every currently-alive local valid particle and every ghost". Without this, a
-            // genuinely cross-rank ghost candidate (one whose true owning patch is NOT among this
-            // rank's own patches, so it's never seen as "native" anywhere in this loop) has no
-            // entry here at all, generateProposals()'s lookup silently fails, and the whole
-            // proposal is dropped -- confirmed empirically: this masks itself as "correct" at 1
-            // rank purely because every patch (hence every ghost's true owner too) happens to be
-            // this same rank, so the ghost's id is ALSO reachable via its owning patch's OWN
-            // native entry processed elsewhere in this same loop; at higher rank counts, a ghost
-            // whose owner is a genuinely different rank has no such fallback and the proposal is
-            // silently lost.
+            // REQUIRED -- generateProposals()'s a_particlesByID contract is "every currently-alive
+            // local valid particle AND every ghost". A ghost whose true owning patch is not among
+            // this rank's own patches has no native entry anywhere in this loop, so without this
+            // insert generateProposals()'s lookup fails and the proposal is dropped.
             particlesByID[p.globalID] = p;
           }
           else {
@@ -1088,11 +1058,9 @@ namespace ParticleManagement {
           }
         }
 
-        // Built once here, per patch, per round -- over the FULL localValid/ghosts sets, before
-        // any consumption happens this round -- and reused across every internal
-        // a_iterateLocalTierToConvergence pass via lazy deletion (see
-        // findNearestNeighborCandidates()'s own docs for why rebuilding per pass would reintroduce
-        // real, avoidable cost on the up-to-1000x-per-round loop this redesign exists to speed up).
+        // Built once here, per patch, per round -- over the FULL localValid/ghosts sets, before any
+        // consumption this round -- and reused across every internal a_iterateLocalTierToConvergence
+        // pass via lazy deletion (see findNearestNeighborCandidates()'s docs).
         NNSpatialIndex<Packed> spatialIndex;
         buildNNSpatialIndex(localValid,
                             ghosts,
@@ -1109,16 +1077,10 @@ namespace ParticleManagement {
       }
     }
 
-    // Populate liveCellCount from particlesByID -- deliberately NOT incremented inline during the
-    // per-particle gather loop above. A single physical particle can appear as a ghost in MULTIPLE
-    // of this rank's own patches at once (e.g. any particle near a corner/edge shared by several
-    // patches this rank happens to own -- routine with tiled grid generation, which favors keeping
-    // neighboring patches on the same rank), so incrementing a counter once per occurrence there
-    // would double- (or triple-, quadruple-...) count that one particle's contribution to its own
-    // cell's live count. particlesByID has no such problem: it is a map keyed by globalID, so
-    // repeated occurrences of the same particle (native once, ghost N times) collapse to exactly
-    // one entry -- deriving the count from it here, in one pass after the map is fully built,
-    // counts every distinct particle exactly once regardless of how many patches it was seen in.
+    // Populate liveCellCount from particlesByID, NOT inline in the gather loop above. A single
+    // particle can appear as a ghost in several of this rank's own patches at once, so counting per
+    // occurrence would multiply-count it. particlesByID is keyed by globalID, so those repeated
+    // occurrences collapse to one entry -- deriving the count from it counts each particle once.
     for (const auto& kv : particlesByID) {
       const NNMergeParticle<Packed>& p    = kv.second;
       const IntVect                  cell = cellKeyOf(p.position, probLo, dxByLevel[p.level]);
@@ -1133,24 +1095,20 @@ namespace ParticleManagement {
 
     // 2. Per-patch candidate search + trivial-tier resolution, pooled rank-wide.
     //
-    // lastPooledEdges deliberately survives past the loop below: it is reused (NOT
-    // recomputed) for outgoingTargetOf/generateProposals afterward. findNearestNeighborCandidates()
-    // is a brute-force O(n^2) scan per patch (a real spatial index is a separate, still-pending
-    // hardening item -- see TODO.md), so re-running it a second time over the same alive set
-    // purely to re-derive edges already computed here would double the single most expensive step
-    // in this function for no new information: nothing consumes any more particles between the
-    // last runLocalTierPass() and generateProposals(), so the edges are still exactly current.
+    // lastPooledEdges deliberately survives past the loop below: it is reused (NOT recomputed) for
+    // outgoingTargetOf/generateProposals afterward. Nothing consumes any particles between the last
+    // runLocalTierPass() and generateProposals(), so the edges are still exactly current; re-running
+    // the candidate search purely to re-derive them would repeat the most expensive step for no new
+    // information.
     std::vector<NNMergeEdge<Packed>> lastPooledEdges;
 
     auto runLocalTierPass = [&]() -> bool {
       lastPooledEdges.clear();
 
       for (std::size_t pw = 0; pw < patchWork.size(); pw++) {
-        // patchLocalValid[pw]/patchGhosts[pw] are this patch's FULL sets (not pre-filtered) and
-        // patchSpatialIndex[pw] was built once, over those same full sets, before this round's
-        // local-tier passes began -- findNearestNeighborCandidates() does its own lazy-deletion
-        // filtering against consumedIDs internally now (see its own docs), so nothing needs to be
-        // rebuilt or re-filtered here on every pass.
+        // patchLocalValid[pw]/patchGhosts[pw] are this patch's FULL sets and patchSpatialIndex[pw]
+        // was built once over them before the local-tier passes began. findNearestNeighborCandidates()
+        // filters against consumedIDs itself (see its docs), so nothing is rebuilt or re-filtered here.
         std::vector<NNMergeEdge<Packed>> patchEdges;
         findNearestNeighborCandidates(patchLocalValid[pw],
                                       patchGhosts[pw],
@@ -1206,12 +1164,10 @@ namespace ParticleManagement {
       runLocalTierPass();
     }
 
-    // outgoingTargetOf: for every query id with an outgoing commitment, remember its own true
-    // nearest-neighbor candidate id (needed by judgeProposals()'s mutual-match rule). Reuses
-    // lastPooledEdges from the local-tier pass above -- see the comment there for why this is
-    // correct without a fresh search: resolveTrivialTier() only ever adds a queryID to
-    // hasOutgoingCommitment when its edge's candidate was valid (not stale) at the moment that
-    // edge was processed, and nothing gets consumed between then and here.
+    // outgoingTargetOf: for every query id with an outgoing commitment, remember its own nearest-
+    // neighbor candidate id (needed by judgeProposals()'s mutual-match rule). Reuses lastPooledEdges
+    // (see above) -- correct without a fresh search since nothing is consumed between the last pass
+    // and here.
     for (const auto& edge : lastPooledEdges) {
       if (hasOutgoingCommitment.count(edge.queryID) > 0) {
         outgoingTargetOf[edge.queryID] = edge.candidateID;
@@ -1226,10 +1182,8 @@ namespace ParticleManagement {
     const std::vector<NNMergeProposal<Packed>> incomingProposals = nnMergeExchangeByRank(proposalsByDestRank);
 
     // 5. judgeProposals() over the pooled incoming proposals. Judge targets are looked up directly
-    // in particlesByID, filtered against consumedIDs at the point of use inside judgeProposals()
-    // itself -- deliberately NOT a separate, pre-filtered myParticlesByID copy (a full O(n log n)
-    // rebuild every round, purely to avoid that same check at each lookup site -- removed once
-    // profiling showed it costing real time for no benefit over checking consumedIDs directly).
+    // in particlesByID and filtered against consumedIDs at the point of use inside judgeProposals(),
+    // rather than from a separate pre-filtered copy.
     std::vector<NNMergeResult<Packed>>       judgeResults;
     std::vector<std::vector<NNMergeVerdict>> verdictsByDestRank(numRanks);
 
@@ -1262,12 +1216,10 @@ namespace ParticleManagement {
 
     // 7. placeMergedParticles(), then exchange and apply the scatter bucket.
     //
-    // O(1) point->block query -- see NNParticleLocation/PositionLocator's docs. This is precisely
-    // what avoids the "linear scan over every patch" bottleneck: ParticleContainer::findDestination()
-    // is the SAME tile-hash lookup a_particles already uses internally to route its own particles
-    // during remap() -- reusing it here (rather than adding a parallel AmrMesh/Realm-level
-    // forwarding method) keeps this one mapping the single source of truth for "which box owns
-    // this position", instead of a second implementation that could drift from it.
+    // O(1) point->block query (see NNParticleLocation/PositionLocator). ParticleContainer::
+    // findDestination() is the same tile-hash lookup a_particles uses to route its own particles
+    // during remap(); reusing it keeps one source of truth for "which box owns this position"
+    // instead of a linear scan or a parallel implementation that could drift.
     const PositionLocator locate = [&a_particles](const RealVect& a_pos) -> NNParticleLocation {
       const auto dst = a_particles.findDestination(a_pos);
       return NNParticleLocation{dst.found, dst.level, dst.gridIndex, dst.rank};
@@ -1308,18 +1260,12 @@ namespace ParticleManagement {
 
       ParticleSoA<P, Traits>& leaf = a_particles[level][din];
       for (const auto& merged : kv.second) {
-        // Correct the provisional ownerRank (see resolveTrivialTier()/judgeProposals()'s own
-        // "Provisional" comments -- it's inherited from whichever parent committed the merge, NOT
-        // the true final destination) to the TRUE rank now that placeMergedParticles() has
-        // resolved it via findDestination(): this IS that rank. Leaving the stale, provisional
-        // value here is a real bug -- confirmed empirically as the root cause of a mass
-        // conservation failure that only appeared with BOTH more than one MPI rank AND more than
-        // one round: if this particle later becomes a proposer in a subsequent round and its
-        // proposal is accepted, judgeProposals() routes the acceptance verdict to
-        // NNMergeParticle::ownerRank, which -- left uncorrected -- could be a rank other than the
-        // one that actually holds this particle. That true owner then never learns to remove it,
-        // so it survives un-consumed while its weight has ALSO been folded into a new merged
-        // particle elsewhere: mass is silently created.
+        // Correct the provisional ownerRank to this rank -- placeMergedParticles() has resolved the
+        // TRUE owner via findDestination() and it is this rank. The provisional value (inherited
+        // from a parent, see resolveTrivialTier()/judgeProposals()) must not survive: if this
+        // particle later proposes and is accepted, judgeProposals() routes the verdict to
+        // NNMergeParticle::ownerRank, so a stale rank would send the removal to the wrong rank and
+        // the particle would survive while its weight is also merged elsewhere -- created mass.
         NNMergeParticle<Packed> corrected = merged;
         corrected.ownerRank               = myRank;
         a_scatter(leaf, corrected);

@@ -3597,8 +3597,14 @@ ItoSolver::mergeSuperparticlesNearestNeighbor(const WhichContainer a_container, 
   // comfortably above any realistic per-rank particle count.
   constexpr ParticleID rankStride = 100000000LL;
 
-  ParticleID nextID     = static_cast<ParticleID>(procID()) * rankStride;
-  auto       allocateID = [&nextID]() -> ParticleID {
+  const ParticleID rankBase   = static_cast<ParticleID>(procID()) * rankStride;
+  ParticleID       nextID     = rankBase;
+  auto             allocateID = [&nextID, rankBase]() -> ParticleID {
+    // This rank's ids must stay inside its own [rankBase, rankBase + rankStride) namespace, or they
+    // would collide with the next rank's. rankStride is far above any realistic per-rank particle
+    // count (valid + merged) in one round; fail loudly if that ever stops being true.
+    CH_assert(nextID < rankBase + rankStride);
+
     return nextID++;
   };
 
