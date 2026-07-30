@@ -99,7 +99,7 @@ public:
   /**
     @brief Get the granularity of the configured merge algorithm (cell-based vs. AMR-collective).
     @details Callers use this to decide the required pre-merge preparation: a Cell merge needs the
-    particles cell-sorted (organizeParticlesByCell()) first; an AMR merge (nearest_neighbor) needs
+    particles cell-sorted (organizeParticlesByCell()) first; an AMR merge (nn_pair) needs
     ghost particles filled first and must NOT be cell-sorted internally.
     @return m_mergeKind.
   */
@@ -1090,6 +1090,25 @@ protected:
   ParticleManagement::ParticleMergeKind m_mergeKind = ParticleManagement::ParticleMergeKind::Cell;
 
   /**
+    @brief nn_pair: iterate the local trivial tier to convergence within each round.
+    @details Forwarded to ParticleManagement::mergeNearestNeighborsRound(). Only used when
+    m_mergeKind == AMR.
+  */
+  bool m_nnPairIterate = true;
+
+  /**
+    @brief nn_pair: number of fallback candidates per query. The k-nearest graph is
+    built with k = 1 + this. Only used when m_mergeKind == AMR.
+  */
+  int m_nnPairFallback = 1;
+
+  /**
+    @brief nn_pair: maximum merge distance in whole cells (Chebyshev). A negative
+    value means unbounded (std::nullopt). Only used when m_mergeKind == AMR.
+  */
+  int m_nnPairMaxCellDistance = -1;
+
+  /**
     @brief Number of particles used when restarting a simulation -- this is relevant only when restarting from a "fluid" checkpoint file. 
   */
   int m_restartPPC;
@@ -1333,7 +1352,7 @@ protected:
     globally-unique particle ids, fills a width-1 ghost halo (both preconditions the round requires
     of its caller), supplies the ItoParticle gather/combine/scatter/id-allocation callbacks and an
     EB-aware position-validity predicate, then runs one merge round. Selected via
-    ItoSolver.merge_algorithm = nearest_neighbor and dispatched from
+    ItoSolver.merge_algorithm = nn_pair and dispatched from
     makeSuperparticles(WhichContainer, int)/(WhichContainer, Vector<int>).
     @param[in] a_container                 Which container to merge.
     @param[in] a_numParticlesPerCellThresh Crowding threshold -- a cell is merged while it holds

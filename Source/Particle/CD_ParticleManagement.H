@@ -52,7 +52,7 @@
   whole-container, cross-rank collective run once over the entire AMR hierarchy:
     - mergeNearestNeighborsRound   : distributed, MPI-safe nearest-neighbour merge that matches
                                      particles across patch and rank boundaries. Backs
-                                     'nearest_neighbor'.
+                                     'nn_pair'.
 */
 namespace ParticleManagement {
 

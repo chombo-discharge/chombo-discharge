@@ -382,7 +382,7 @@ Calling this function will merge/split the particles.
 .. important::
 
    Most merging algorithms are performed within each grid cell, and particles must therefore be sorted by their cell index (``organizeParticlesByCell``) before calling the merging routine.
-   The exception is ``nearest_neighbor``, which is a distributed AMR-level merge that matches particles across patch and rank boundaries; it instead requires that a width-1 particle ghost halo has been filled, and is dispatched over the whole container rather than cell by cell.
+   The exception is ``nn_pair``, which is a distributed AMR-level merge that matches particles across patch and rank boundaries; it instead requires that a width-1 particle ghost halo has been filled, and is dispatched over the whole container rather than cell by cell.
 
 
 	    
@@ -393,7 +393,7 @@ In order to specify the merging algorithm the user must set the ``ItoSolver.merg
 * ``reinitialize`` Re-initialize the particles in each grid cell, ensuring that weights are as uniform as possible.
 * ``reinitialize_bvh`` Re-initialize the particles in each node of a kD tree. Weights are as uniform as possible.
 * ``sfc_nn`` Reach the target particle count by space-filling-curve nearest-neighbour clustering: when there are more particles than the target the nearest neighbours (along a Hilbert curve) are merged until the target count is reached, and when there are fewer the highest-weight particles are split. This gives spatially tight groups but does not equalize the weights.
-* ``nearest_neighbor`` A distributed, MPI-safe nearest-neighbour merge that matches each over-crowded particle with its true nearest neighbour across patch and rank boundaries. Unlike the per-cell algorithms above it operates on the whole AMR hierarchy at once (it fills a width-1 particle ghost halo and runs a propose/judge/verdict protocol), and merges to the pairwise weighted centroid rather than a per-cell target count.
+* ``nn_pair`` A distributed, MPI-safe nearest-neighbour *pair* merge that reaches the target particle count over the whole AMR hierarchy. Over-full cells are drained by matching each over-crowded particle with its true nearest neighbour across patch and rank boundaries (a propose/judge/verdict protocol over a width-1 particle ghost halo) and merging the pair to its weighted centroid; because a single round merges pairs, the round is repeated until every cell reaches the target. Under-full cells are then brought up to the target by splitting the heaviest particle into two co-located daughters (floor/ceil weights, so integer weights stay integer). Tunable through ``ItoSolver.nn_pair_iterate``, ``ItoSolver.nn_pair_fallback`` and ``ItoSolver.nn_pair_max_cell_dist``.
 * ``external`` Use an externally injected particle merging algorithm. In order to use this feature the user must supply one through ``setParticleCellMerger``.
 
 The user can set the merging algorithm through the input script (see :ref:`Chap:ItoInput`), or supply one externally by setting the merge algorithm to ``external``.

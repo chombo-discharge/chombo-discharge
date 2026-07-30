@@ -636,15 +636,23 @@ ItoSolver::parseParticleMerger()
     m_particleCellMerger = ParticleManagement::
       makeSfcNearestNeighborMerger<PType, &PType::template real<0>, &PType::template vect<0>>(gather, combine, scatter);
   }
-  else if (str == "nearest_neighbor") {
+  else if (str == "nn_pair") {
     // Distributed, MPI-safe nearest-neighbor super-particle merge (ParticleManagement::
-    // mergeNearestNeighborsRound). Unlike every other algorithm above, this is NOT a per-cell
-    // merger: it matches particles against their true neighborhood across patch and rank
-    // boundaries, so it is dispatched over the whole container at once rather than cell by cell.
-    // It is therefore flagged as an AMR-granularity merge (see ParticleManagement::ParticleMergeKind
-    // and makeSuperparticles(WhichContainer, int)), and the per-cell m_particleCellMerger is left as
-    // a no-op -- it is never invoked on the AMR path.
-    m_mergeKind          = ParticleManagement::ParticleMergeKind::AMR;
+    // mergeNearestNeighborsRound). Unlike every other algorithm above, the MERGE half is NOT a
+    // per-cell operation: it matches particles against their true neighborhood across patch and rank
+    // boundaries, so it is dispatched over the whole container at once (AMR granularity, see
+    // ParticleManagement::ParticleMergeKind and makeSuperparticles(WhichContainer, int)).
+    m_mergeKind = ParticleManagement::ParticleMergeKind::AMR;
+
+    pp.get("nn_pair_iterate", m_nnPairIterate);
+    pp.get("nn_pair_fallback", m_nnPairFallback);
+    pp.get("nn_pair_max_cell_dist", m_nnPairMaxCellDistance);
+
+    // The per-cell m_particleCellMerger is a no-op for nn_pair: both the merge (AMR-collective) and
+    // the below-target split are driven from mergeSuperparticlesNearestNeighbor(), not cell by cell.
+    // In particular m_particleCellMerger must NOT do the split here -- it is also invoked directly by
+    // ItoKMCStepper::reconcileParticles() (via mergeParticles()), a context that expects a merge, not
+    // a split.
     m_particleCellMerger = [](ParticleSoA<ItoParticle>& a_particles, const CellInfo& a_cellInfo, const int a_ppc) {
     };
   }
@@ -3587,58 +3595,9 @@ ItoSolver::mergeSuperparticlesNearestNeighbor(const WhichContainer a_container, 
 
   ParticleContainer<ItoParticle>& particles = this->getParticles(a_container);
 
-  // Every particle needs a GLOBALLY-unique id for the round to route cross-rank proposals/verdicts,
-  // and the merge's own fresh ids must never collide with those. A single rank-namespaced counter
-  // (this rank's index times a large stride, then a monotonically increasing local count) supplies
-  // both: existing particles are (re)numbered first, then the same counter keeps handing out ids for
-  // merged particles -- see ParticleManagement::mergeNearestNeighborsRound()'s IDAllocator docs.
-  // Reassigning every round is fine: the algorithm only requires ids unique WITHIN a round, never
-  // stable across rounds. rankStride caps this rank at that many ids per round (valid + merged),
-  // comfortably above any realistic per-rank particle count.
-  constexpr ParticleID rankStride = 100000000LL;
-
-  const ParticleID rankBase   = static_cast<ParticleID>(procID()) * rankStride;
-  ParticleID       nextID     = rankBase;
-  auto             allocateID = [&nextID, rankBase]() -> ParticleID {
-    // This rank's ids must stay inside its own [rankBase, rankBase + rankStride) namespace, or they
-    // would collide with the next rank's. rankStride is far above any realistic per-rank particle
-    // count (valid + merged) in one round; fail loudly if that ever stops being true.
-    CH_assert(nextID < rankBase + rankStride);
-
-    return nextID++;
-  };
-
-  // Assign ids before ghosts exist so that fillGhostParticles() below copies each ghost's id from
-  // its (now-numbered) source particle. rankID is set to this rank -- these are all locally-owned
-  // valid particles.
-  particles.clearGhostParticles();
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-    const DataIterator&      dit = dbl.dataIterator();
-
-    const int nbox = dit.size();
-
-    for (int mybox = 0; mybox < nbox; mybox++) {
-      ParticleSoA<ItoParticle>& leaf = particles[lvl][dit[mybox]];
-
-      for (std::size_t i = 0; i < leaf.size(); i++) {
-        leaf.particleID(i) = allocateID();
-        leaf.rankID(i)     = procID();
-      }
-    }
-  }
-
-  // The round reads a width-1 ghost halo as merge candidates but does NOT fill it -- filling is the
-  // caller's responsibility, on equal footing with a cell-based merge requiring the caller to
-  // cell-sort first (see mergeNearestNeighborsRound()). The width-1 particle ghost mask must have
-  // been registered on this realm before the grids were (re)built.
-  particles.fillGhostParticles(m_amr->getParticleGhostMask(m_realm, 1),
-                               m_amr->getParticleGhostMaskCoarToFine(m_realm, 1),
-                               m_amr->getParticleGhostMaskFineToCoar(m_realm, 1));
-
-  // The opaque reconciliation payload is just the particle's energy -- mobility/diffusion/velocity
-  // are safe to drop across a merge since they are recomputed from field interpolation before they
-  // are next used.
+  // ---- Reconciliation callbacks (built once, reused across every drain round below) ----
+  // The opaque payload is just the particle's energy -- mobility/diffusion/velocity are safe to drop
+  // across a merge since they are recomputed from field interpolation before they are next used.
   auto gather = [](const ParticleSoA<ItoParticle>& a_leaf, const std::size_t a_idx) -> Real {
     return a_leaf.template get<&ItoParticle::energy>(a_idx);
   };
@@ -3671,17 +3630,152 @@ ItoSolver::mergeSuperparticlesNearestNeighbor(const WhichContainer a_container, 
     return implicitFunction->value(a_pos) < 0.0;
   };
 
-  ParticleManagement::mergeNearestNeighborsRound<ItoParticle, Real>(*m_amr,
-                                                                    particles,
-                                                                    a_numParticlesPerCellThresh,
-                                                                    gather,
-                                                                    combine,
-                                                                    scatter,
-                                                                    allocateID,
-                                                                    true,         // iterate local tier to convergence
-                                                                    1,            // one fallback candidate
-                                                                    std::nullopt, // no merge-distance cap
-                                                                    isPositionValid);
+  // A negative nn_pair_max_cell_dist means "no cap" (std::nullopt).
+  const std::optional<int> maxCellDistance = (m_nnPairMaxCellDistance < 0)
+                                               ? std::nullopt
+                                               : std::optional<int>(m_nnPairMaxCellDistance);
+
+  // Rank-namespaced fresh-id allocator (see mergeNearestNeighborsRound()'s IDAllocator docs). Ids need
+  // to be unique only WITHIN a round, so nextID is reset at the top of every drain round below.
+  constexpr ParticleID rankStride = 100000000LL;
+  const ParticleID     rankBase   = static_cast<ParticleID>(procID()) * rankStride;
+  ParticleID           nextID     = rankBase;
+  auto                 allocateID = [&nextID, rankBase]() -> ParticleID {
+    // Ids must stay inside this rank's own [rankBase, rankBase + rankStride) namespace, or they would
+    // collide with the next rank's. rankStride is far above any realistic per-rank particle count
+    // (valid + merged) in one round; fail loudly if that ever stops being true.
+    CH_assert(nextID < rankBase + rankStride);
+
+    return nextID++;
+  };
+
+  // ================================= MERGE PHASE =================================
+  // A single mergeNearestNeighborsRound() does ONE cross-patch propose/judge/verdict exchange and
+  // merges nearest-neighbor pairs; merged particles only become candidates on the NEXT round, so one
+  // round roughly halves an over-full cell's surplus above the target. Loop until a round merges
+  // nothing (the global valid-particle count stops decreasing), which drains every over-full cell down
+  // to the target. maxDrainRounds is only a safety net -- the loop terminates on its own because the
+  // count strictly decreases while any merge happens.
+  constexpr int      maxDrainRounds = 100;
+  unsigned long long nAfter         = particles.getNumberOfValidParticlesGlobal();
+  for (int round = 0; round < maxDrainRounds; round++) {
+    const unsigned long long nBefore = nAfter;
+
+    // Fresh, globally-unique ids each round, assigned before ghosts exist so fillGhostParticles()
+    // copies each ghost's id from its (now-numbered) source. rankID is this rank (all owned valid
+    // particles).
+    nextID = rankBase;
+    particles.clearGhostParticles();
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+      const DataIterator&      dit = dbl.dataIterator();
+
+      const int nbox = dit.size();
+
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        ParticleSoA<ItoParticle>& leaf = particles[lvl][dit[mybox]];
+
+        for (std::size_t i = 0; i < leaf.size(); i++) {
+          leaf.particleID(i) = allocateID();
+          leaf.rankID(i)     = procID();
+        }
+      }
+    }
+
+    // The round reads a width-1 ghost halo as candidates but does NOT fill it -- filling is the
+    // caller's responsibility (see mergeNearestNeighborsRound()). The width-1 mask was registered on
+    // this realm in registerOperators().
+    particles.fillGhostParticles(m_amr->getParticleGhostMask(m_realm, 1),
+                                 m_amr->getParticleGhostMaskCoarToFine(m_realm, 1),
+                                 m_amr->getParticleGhostMaskFineToCoar(m_realm, 1));
+
+    ParticleManagement::mergeNearestNeighborsRound<ItoParticle, Real>(*m_amr,
+                                                                      particles,
+                                                                      a_numParticlesPerCellThresh,
+                                                                      gather,
+                                                                      combine,
+                                                                      scatter,
+                                                                      allocateID,
+                                                                      m_nnPairIterate,
+                                                                      m_nnPairFallback,
+                                                                      maxCellDistance,
+                                                                      isPositionValid);
+
+    // getNumberOfValidParticlesGlobal() is an MPI collective -- every rank calls it and breaks on the
+    // same global value, so the loop stays in lockstep across ranks.
+    nAfter = particles.getNumberOfValidParticlesGlobal();
+    if (nAfter >= nBefore) {
+      break;
+    }
+  }
+
+  // ================================= SPLIT PHASE =================================
+  // The merge only drains over-full cells. A cell BELOW the target is brought up to it by splitting.
+  // This is purely per-cell, so it is done directly here (NOT through m_particleCellMerger, which is a
+  // no-op for nn_pair and is also used by reconcileParticles() as a merger). The merge left the
+  // container patch-organized; cell-sort so the per-cell CSR ranges are valid. The caller organizes
+  // back to patches afterwards, exactly as for a cell-based merge.
+  //
+  // Greedy heaviest-split (same rule as sfc_nn): repeatedly halve the heaviest particle into two
+  // co-located daughters -- floor/ceil so integer weights stay integer and both daughters keep weight
+  // >= 1 -- until the cell reaches the target or no particle can be split (heaviest weight < 2).
+  // Daughters sit at the parent's position and inherit its energy, so the spatial distribution and the
+  // weighted centroid are preserved. No EB check is needed: a daughter is co-located with a parent that
+  // already lives at a valid position.
+  this->organizeParticlesByCell(a_container);
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
+
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din  = dit[mybox];
+      const Box        cbox = dbl[din];
+
+      ParticleSoA<ItoParticle>& leaf = particles[lvl][din];
+
+      ParticleSoA<ItoParticle> split;
+      ParticleSoA<ItoParticle> scratch;
+
+      // BoxIterator visits cells in the same (x-fastest) order as sortByCell's CSR cell index.
+      std::size_t cellIndex = 0;
+      for (BoxIterator bit(cbox); bit.ok(); ++bit, ++cellIndex) {
+        leaf.extractCell(cellIndex, scratch);
+
+        if (scratch.size() == 0) {
+          continue;
+        }
+
+        while (scratch.size() < static_cast<std::size_t>(a_numParticlesPerCellThresh)) {
+          std::size_t hi = 0;
+          for (std::size_t i = 1; i < scratch.size(); i++) {
+            if (scratch.weight(i) > scratch.weight(hi)) {
+              hi = i;
+            }
+          }
+
+          if (scratch.weight(hi) < 2.0) {
+            break;
+          }
+
+          const Real     halfWeight = std::floor(scratch.weight(hi) * 0.5);
+          const RealVect x          = scratch.position(hi);
+
+          ItoParticle daughter;
+          daughter.energy = static_cast<ParticleReal>(scratch.template get<&ItoParticle::energy>(hi));
+
+          scratch.weight(hi) -= halfWeight;
+          scratch.append(x, halfWeight, daughter);
+        }
+
+        split.append(scratch);
+      }
+
+      leaf.swap(split);
+    }
+  }
 }
 
 void
