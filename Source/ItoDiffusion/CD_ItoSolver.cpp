@@ -3752,8 +3752,10 @@ ItoSolver::makeSuperparticlesNnPair(const WhichContainer a_container, const Vect
   // (valid + merged) and stays int64-safe up to ~9.2e6 ranks (numRanks * rankStride < INT64_MAX).
   constexpr ParticleID rankStride = 1000000000000LL;
   const ParticleID     rankBase   = static_cast<ParticleID>(procID()) * rankStride;
-  ParticleID           nextID     = rankBase;
-  auto                 allocateID = [&nextID, rankBase]() -> ParticleID {
+
+  ParticleID nextID = rankBase;
+
+  auto allocateID = [&nextID, rankBase]() -> ParticleID {
     // Ids must stay inside this rank's own [rankBase, rankBase + rankStride) block, or they would collide
     // with the next rank's. Fail loudly (debug builds) if that invariant is ever violated.
     CH_assert(nextID < rankBase + rankStride);
@@ -3837,6 +3839,7 @@ ItoSolver::makeSuperparticlesNnPair(const WhichContainer a_container, const Vect
   // weighted centroid are preserved. No EB check is needed: a daughter is co-located with a parent that
   // already lives at a valid position.
   merge.organizeParticlesByCell();
+
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
     const DataIterator&      dit = dbl.dataIterator();
@@ -3902,7 +3905,8 @@ ItoSolver::makeSuperparticlesNnPair(const WhichContainer a_container, const Vect
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex&                     din       = dit[mybox];
       const ParticleSoA<ItoMergeParticle>& mergeLeaf = merge[lvl][din];
-      ParticleSoA<ItoParticle>&            itoLeaf   = particles[lvl][din];
+
+      ParticleSoA<ItoParticle>& itoLeaf = particles[lvl][din];
 
       for (std::size_t i = 0; i < mergeLeaf.size(); i++) {
         ItoParticle p;
