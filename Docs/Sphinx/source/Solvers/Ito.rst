@@ -27,7 +27,7 @@ It is a Struct-of-Arrays payload (see :ref:`Chap:ParticleSoA`) whose columns are
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoParticle.H
    :language: c++
-   :lines: 46-67
+   :lines: 30-54
 
 In addition to the container-owned position and weight, ``ItoParticle`` stores the payload columns above.
 These extra fields are used for storing the following information in the particle:
@@ -408,7 +408,7 @@ In the code above, ``ParticleManagement::ParticleMerger<P>`` is an alias:
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleManagement.H
    :language: c++
-   :lines: 133-141
+   :lines: 66-74
    :dedent: 2
 
 .. tip::

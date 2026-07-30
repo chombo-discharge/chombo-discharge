@@ -30,7 +30,7 @@ The payload is described by a ``ParticleTraits<P>`` specialization that lists th
 A representative payload (the tracer-particle velocity + Runge-Kutta scratch) looks like
 
 .. literalinclude:: ../../../../Source/TracerParticles/CD_TracerParticle.H
-   :lines: 20-73
+   :lines: 20-81
    :language: c++
 
 Per-component vectors are declared as individual scalar columns (there is no ``RealVect`` column type); the ``D_DECL`` macro expands to the ``SpaceDim`` components.
