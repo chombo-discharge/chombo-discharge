@@ -440,40 +440,16 @@ ItoSolver::parseParticleMerger()
 
   pp.get("merge_algorithm", str);
 
-  // Map the selector to the merge METHOD. parseParticleMerger only records which method was chosen;
-  // the per-cell merger for each cell-based method is built locally in the corresponding
-  // makeSuperparticlesXxx() (see makeSuperparticles()). 'external' leaves the merger to the user
-  // (setParticleCellMerger); 'none' does nothing.
-  if (str == "none") {
-    m_mergeMethod = ParticleManagement::ParticleMergeMethod::None;
-  }
-  else if (str == "equal_weight_kd") {
-    m_mergeMethod = ParticleManagement::ParticleMergeMethod::EqualWeightKD;
-  }
-  else if (str == "reinitialize") {
-    m_mergeMethod = ParticleManagement::ParticleMergeMethod::Reinitialize;
-  }
-  else if (str == "reinitialize_bvh") {
-    m_mergeMethod = ParticleManagement::ParticleMergeMethod::ReinitializeBVH;
-  }
-  else if (str == "nn_sfc") {
-    m_mergeMethod = ParticleManagement::ParticleMergeMethod::NnSfc;
-  }
-  else if (str == "nn_pair") {
-    // Distributed, MPI-safe nearest-neighbor super-particle merge -- an AMR-wide collective, see
-    // makeSuperparticlesNnPair() / ParticleManagement::mergeNearestNeighborsRound().
-    m_mergeMethod = ParticleManagement::ParticleMergeMethod::NnPair;
+  // The per-cell merger for each cell-based method is built locally in the corresponding
+  // makeSuperparticlesXxx() (see makeSuperparticles()); parseParticleMerger only records the method.
+  // 'external' leaves the merger to the user (setParticleCellMerger); 'none' does nothing.
+  m_mergeMethod = ParticleManagement::mergeMethodFromString(str);
 
+  // The distributed nearest-neighbor pair merge has extra tunables.
+  if (m_mergeMethod == ParticleManagement::ParticleMergeMethod::NnPair) {
     pp.get("nn_pair_iterate", m_nnPairIterate);
     pp.get("nn_pair_fallback", m_nnPairFallback);
     pp.get("nn_pair_max_cell_dist", m_nnPairMaxCellDistance);
-  }
-  else if (str == "external") {
-    // The user supplies the per-cell merger through setParticleCellMerger().
-    m_mergeMethod = ParticleManagement::ParticleMergeMethod::External;
-  }
-  else {
-    MayDay::Abort("ItoSolver::parseParticleMerger - unknown particle merging algorithm requested");
   }
 
   // Granularity follows from the method: only the distributed nearest-neighbor pair merge is an
@@ -3266,13 +3242,26 @@ ItoSolver::makeSuperparticles(const WhichContainer a_container, const Vector<int
     pout() << m_name + "::makeSuperparticles(WhichContainer, Vector<int>)" << endl;
   }
 
+  this->makeSuperparticles(a_container, a_particlesPerCell, m_mergeMethod);
+}
+
+void
+ItoSolver::makeSuperparticles(const WhichContainer                          a_container,
+                              const Vector<int>&                            a_particlesPerCell,
+                              const ParticleManagement::ParticleMergeMethod a_method)
+{
+  CH_TIME("ItoSolver::makeSuperparticles(WhichContainer, Vector<int>, ParticleMergeMethod)");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::makeSuperparticles(WhichContainer, Vector<int>, ParticleMergeMethod)" << endl;
+  }
+
   if (a_particlesPerCell.size() < 1) {
     MayDay::Error("ItoSolver::makeSuperparticles(WhichContainer, Vector<int>) - empty particles-per-cell vector");
   }
 
-  // Route to the specific method configured through ItoSolver.merge_algorithm. Each method below is
-  // also a public entry point the user can call directly.
-  switch (m_mergeMethod) {
+  // Route to the requested method. Each method below is also a public entry point the user can call
+  // directly.
+  switch (a_method) {
   case ParticleManagement::ParticleMergeMethod::None: {
     break;
   }

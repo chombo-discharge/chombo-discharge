@@ -755,11 +755,21 @@ ItoKMCGodunovStepper<I, C, R, F>::regrid(const int a_lmin,
   }
   m_timer.stopEvent("Solve Poisson");
 
-  // Regrid superparticles.
-  if (this->m_regridSuperparticles) {
+  // Regrid super-particle merge. m_regridMergeMethod: nullopt => each solver's own merge_algorithm;
+  // a value => that specific method (ParticleMergeMethod::None => off).
+  if (!this->m_regridMergeMethod.has_value() ||
+      this->m_regridMergeMethod.value() != ParticleManagement::ParticleMergeMethod::None) {
     m_timer.startEvent("Make superparticles");
     (this->m_ito)->organizeParticlesByCell(ItoSolver::WhichContainer::Bulk);
-    (this->m_ito)->makeSuperparticles(ItoSolver::WhichContainer::Bulk, (this->m_particlesPerCell));
+    if (this->m_regridMergeMethod.has_value()) {
+      (this->m_ito)
+        ->makeSuperparticles(ItoSolver::WhichContainer::Bulk,
+                             (this->m_particlesPerCell),
+                             this->m_regridMergeMethod.value());
+    }
+    else {
+      (this->m_ito)->makeSuperparticles(ItoSolver::WhichContainer::Bulk, (this->m_particlesPerCell));
+    }
     (this->m_ito)->organizeParticlesByPatch(ItoSolver::WhichContainer::Bulk);
     m_timer.stopEvent("Make superparticles");
   }

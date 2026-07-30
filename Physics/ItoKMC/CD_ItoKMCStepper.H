@@ -15,6 +15,7 @@
 
 // Std includes
 #include <functional>
+#include <optional>
 
 // Our includes
 #include <CD_TimeStepper.H>
@@ -22,6 +23,7 @@
 #include <CD_ItoLayout.H>
 #include <CD_CdrLayout.H>
 #include <CD_ParticleContainer.H>
+#include <CD_ParticleManagement.H>
 #include <CD_RtLayout.H>
 #include <CD_McPhoto.H>
 #include <CD_FieldSolver.H>
@@ -463,9 +465,14 @@ namespace Physics {
       bool m_profile;
 
       /**
-	@brief Do or do not superparticle merging/splitting on regrids.
+	@brief Super-particle merge method used on regrids.
+	@details Set from ItoKMCGodunovStepper.regrid_superparticles, mirroring the
+	ItoSolver.merge_algorithm selectors plus a 'solver' value. std::nullopt means "solver" -- defer
+	to whatever each ItoSolver has configured; a value means run that specific method
+	(ParticleMergeMethod::None turns the regrid merge off). Lets the regrid-time merge use a different
+	(e.g. cheaper) method than the per-step merge.
       */
-      bool m_regridSuperparticles;
+      std::optional<ParticleManagement::ParticleMergeMethod> m_regridMergeMethod;
 
       /**
 	@brief Load balance particle realm or not

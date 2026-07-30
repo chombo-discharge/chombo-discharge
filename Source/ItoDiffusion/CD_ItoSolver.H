@@ -810,12 +810,28 @@ public:
   makeSuperparticles(WhichContainer a_container, int a_particlesPerCell);
 
   /**
-    @brief Make superparticles for a full container -- this is the AMR version that users will usually call. 
+    @brief Make superparticles for a full container -- this is the AMR version that users will usually call.
     @param[in] a_container        Which container to repartition into new superparticles
-    @param[in] a_particlesPerCell Target number of particles per cell. Vector indicates grid levels. 
+    @param[in] a_particlesPerCell Target number of particles per cell. Vector indicates grid levels.
   */
   virtual void
   makeSuperparticles(WhichContainer a_container, const Vector<int>& a_particlesPerCell);
+
+  /**
+    @brief Make superparticles with an explicitly chosen method, ignoring the configured
+    merge_algorithm.
+    @details Lets a caller run a different method than the solver's own (e.g. a stepper choosing a
+    regrid-time merge). Routes to the matching makeSuperparticlesXxx(); ParticleMergeMethod::None is a
+    no-op.
+    @param[in] a_container        Which container to repartition.
+    @param[in] a_particlesPerCell Target particle count per cell (per-level; the last entry applies to
+                                  any finer level).
+    @param[in] a_method           The merge method to run.
+  */
+  virtual void
+  makeSuperparticles(WhichContainer                                a_container,
+                     const Vector<int>&                            a_particlesPerCell,
+                     const ParticleManagement::ParticleMergeMethod a_method);
 
   /**
     @brief Make superparticles with the equal-weight KD-tree merge, regardless of merge_algorithm.

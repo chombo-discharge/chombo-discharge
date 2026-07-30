@@ -100,7 +100,7 @@ ItoKMCStepper<I, C, R, F>::ItoKMCStepper() noexcept
   m_timeStep                         = 0;
   m_loadPerCell                      = 1.0;
   m_redistributeCDR                  = true;
-  m_regridSuperparticles             = true;
+  m_regridMergeMethod                = std::nullopt; // "solver" -- overwritten by parseSuperParticles()
   m_fluidRealm                       = Realm::Primal;
   m_particleRealm                    = Realm::Primal;
   m_minParticleAdvectionCFL          = 0.0;
@@ -276,7 +276,16 @@ ItoKMCStepper<I, C, R, F>::parseSuperParticles() noexcept
   m_particlesPerCell.resize(pp.countval("particles_per_cell"));
 
   pp.get("merge_interval", m_mergeInterval);
-  pp.get("regrid_superparticles", m_regridSuperparticles);
+
+  // regrid_superparticles selects the merge method run on regrids: one of the ItoSolver.merge_algorithm
+  // selectors (incl. 'none' to turn it off), or 'solver' to defer to whatever each ItoSolver has
+  // configured.
+  std::string regridMerge;
+  pp.get("regrid_superparticles", regridMerge);
+  m_regridMergeMethod = (regridMerge == "solver") ? std::optional<ParticleManagement::ParticleMergeMethod>(std::nullopt)
+                                                  : std::optional<ParticleManagement::ParticleMergeMethod>(
+                                                      ParticleManagement::mergeMethodFromString(regridMerge));
+
   pp.getarr("particles_per_cell", m_particlesPerCell, 0, m_particlesPerCell.size());
 
   for (int lvl = 0; lvl < m_particlesPerCell.size(); lvl++) {
@@ -1615,6 +1624,15 @@ ItoKMCStepper<I, C, R, F>::registerOperators() noexcept
   m_fieldSolver->registerOperators();
   m_rte->registerOperators();
   m_sigmaSolver->registerOperators();
+
+  // If the regrid merge explicitly uses nn_pair, its width-1 particle ghost mask must be registered
+  // here (before the grids build), even when the per-step merge_algorithm is not nn_pair -- the
+  // ItoSolver only registers it for its own configured method. The 'solver' case (nullopt) needs
+  // nothing extra: each ItoSolver already registered whatever its own method requires.
+  if (m_regridMergeMethod.has_value() &&
+      m_regridMergeMethod.value() == ParticleManagement::ParticleMergeMethod::NnPair) {
+    m_amr->registerParticleGhostMask(m_particleRealm, 1);
+  }
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -1765,9 +1783,17 @@ ItoKMCStepper<I, C, R, F>::regrid(const int a_lmin, const int a_oldFinestLevel, 
   m_rte->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   m_sigmaSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
 
-  if (m_regridSuperparticles) {
+  // Regrid super-particle merge. m_regridMergeMethod: nullopt => each solver's own merge_algorithm;
+  // a value => that specific method (ParticleMergeMethod::None => off).
+  if (!m_regridMergeMethod.has_value() ||
+      m_regridMergeMethod.value() != ParticleManagement::ParticleMergeMethod::None) {
     m_ito->organizeParticlesByCell(ItoSolver::WhichContainer::Bulk);
-    m_ito->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_particlesPerCell);
+    if (m_regridMergeMethod.has_value()) {
+      m_ito->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_particlesPerCell, m_regridMergeMethod.value());
+    }
+    else {
+      m_ito->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_particlesPerCell);
+    }
     m_ito->organizeParticlesByPatch(ItoSolver::WhichContainer::Bulk);
   }
 

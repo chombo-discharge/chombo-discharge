@@ -15,6 +15,7 @@
 
 // Std includes
 #include <functional>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -89,6 +90,45 @@ namespace ParticleManagement {
     NnPair,          ///< AMR: mergeNearestNeighborsRound.
     External         ///< Cell: caller-supplied per-cell merger.
   };
+
+  /**
+    @brief Map a merge-algorithm selector string to a ParticleMergeMethod -- the single source of
+    truth for the string<->method mapping (used by ItoSolver.merge_algorithm and, e.g.,
+    ItoKMCGodunovStepper.regrid_superparticles).
+    @param[in] a_str One of "none", "equal_weight_kd", "reinitialize", "reinitialize_bvh", "nn_sfc",
+                     "nn_pair", "external".
+    @return The corresponding method; aborts on an unknown selector.
+  */
+  inline ParticleMergeMethod
+  mergeMethodFromString(const std::string& a_str) noexcept
+  {
+    if (a_str == "none") {
+      return ParticleMergeMethod::None;
+    }
+    else if (a_str == "equal_weight_kd") {
+      return ParticleMergeMethod::EqualWeightKD;
+    }
+    else if (a_str == "reinitialize") {
+      return ParticleMergeMethod::Reinitialize;
+    }
+    else if (a_str == "reinitialize_bvh") {
+      return ParticleMergeMethod::ReinitializeBVH;
+    }
+    else if (a_str == "nn_sfc") {
+      return ParticleMergeMethod::NnSfc;
+    }
+    else if (a_str == "nn_pair") {
+      return ParticleMergeMethod::NnPair;
+    }
+    else if (a_str == "external") {
+      return ParticleMergeMethod::External;
+    }
+    else {
+      MayDay::Abort(("ParticleManagement::mergeMethodFromString - unknown merge method '" + a_str + "'").c_str());
+
+      return ParticleMergeMethod::None;
+    }
+  }
 
   /**
     @brief Concept for splitting/merging particles
