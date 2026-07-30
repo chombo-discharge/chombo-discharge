@@ -1147,6 +1147,14 @@ protected:
   int m_nnPairMaxCellDistance = -1;
 
   /**
+    @brief nn_pair: maximum number of drain rounds run per makeSuperparticles() call.
+    @details Each round merges nearest-neighbor pairs and roughly halves an over-full cell's surplus; the
+    loop also stops early once a round merges nothing. This caps the round count so the cost stays bounded
+    and predictable rather than running to full convergence. Only used for nn_pair.
+  */
+  int m_nnPairMaxRounds = 3;
+
+  /**
     @brief Number of particles used when restarting a simulation -- this is relevant only when restarting from a "fluid" checkpoint file. 
   */
   int m_restartPPC;

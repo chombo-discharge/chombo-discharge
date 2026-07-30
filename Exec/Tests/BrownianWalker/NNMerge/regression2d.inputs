@@ -69,6 +69,7 @@ ItoSolver.merge_algorithm           = nn_pair        ## Particle merging algorit
 ItoSolver.nn_pair_iterate           = true           ## nn_pair: iterate the local tier to convergence within each round
 ItoSolver.nn_pair_fallback          = 1              ## nn_pair: fallback candidates per query (k-NN graph built with k = 1 + this)
 ItoSolver.nn_pair_max_cell_dist     = -1             ## nn_pair: max merge distance in cells (Chebyshev); < 0 = unbounded
+ItoSolver.nn_pair_max_rounds        = 3              ## nn_pair: max drain rounds per merge (stops early on convergence)
 ItoSolver.plt_vars                  = phi vel dco    ## 'phi', 'vel', 'dco', 'part', 'eb_part', 'dom_part', 'src_part', 'energy_density', 'energy'
 ItoSolver.intersection_alg          = bisection      ## Intersection algorithm for EB-particle intersections.
 ItoSolver.bisect_step               = 1.E-4          ## Bisection step length for intersection tests

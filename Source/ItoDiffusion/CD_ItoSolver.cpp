@@ -444,6 +444,19 @@ ItoSolver::parseParticleMerger()
     pp.get("nn_pair_iterate", m_nnPairIterate);
     pp.get("nn_pair_fallback", m_nnPairFallback);
     pp.get("nn_pair_max_cell_dist", m_nnPairMaxCellDistance);
+    pp.get("nn_pair_max_rounds", m_nnPairMaxRounds);
+
+    // Validate the tunables up front -- a bad value here silently produces a degenerate merge, so fail
+    // loudly (in every build, not just DEBUG) rather than assert.
+    if (m_nnPairFallback < 0) {
+      MayDay::Abort("ItoSolver::parseParticleMerger - 'nn_pair_fallback' must be >= 0");
+    }
+    if (m_nnPairMaxCellDistance == 0) {
+      MayDay::Abort("ItoSolver::parseParticleMerger - 'nn_pair_max_cell_dist' must be >= 1 (or < 0 for unbounded)");
+    }
+    if (m_nnPairMaxRounds < 1) {
+      MayDay::Abort("ItoSolver::parseParticleMerger - 'nn_pair_max_rounds' must be >= 1");
+    }
   }
 }
 
@@ -528,13 +541,8 @@ ItoSolver::registerOperators() const
 
     // The nn_pair merge reads a width-1 particle ghost halo as merge candidates (see
     // makeSuperparticlesNnPair()/ParticleManagement::mergeNearestNeighborsRound()). Register
-    // the width here, alongside the other operators; the mask itself is built in the operator/mask
-    // regrid phase (AmrMesh::regridOperators -> Realm::defineParticleGhostMasks), which runs right
-    // after this. Gate on the specific method, not just the AMR granularity: a future AMR method may
-    // need a different (or no) ghost width.
-    if (m_mergeMethod == ParticleManagement::ParticleMergeMethod::NnPair) {
-      m_amr->registerParticleGhostMask(m_realm, 1);
-    }
+    // the width here, alongside the other operators.
+    m_amr->registerParticleGhostMask(m_realm, 1);
   }
 }
 
@@ -3284,6 +3292,11 @@ ItoSolver::makeSuperparticles(const WhichContainer                          a_co
 
     break;
   }
+  default: {
+    MayDay::Abort("ItoSolver::makeSuperparticles -- unsupported method requested");
+
+    break;
+  }
   }
 }
 
@@ -3630,6 +3643,21 @@ ItoSolver::makeSuperparticlesNnPair(const WhichContainer a_container, const Vect
     pout() << m_name + "::makeSuperparticlesNnPair" << endl;
   }
 
+  // Reduce every over-full cell to a_particlesPerCell superparticles (and refill under-full cells) using
+  // the distributed nearest-neighbor pair merge, in five steps:
+  //
+  //   1. Extract the ItoParticles into a minimal ItoMergeParticle container (position + weight + energy)
+  //      on the same realm/patch, then clear the ItoParticles -- so the repeated cross-rank ghost
+  //      exchange moves a couple of reals per particle, not the full ItoParticle.
+  //   2. Build the merge callbacks (gather/combine/scatter), the EB position-validity predicate, and the
+  //      rank-namespaced fresh-id allocator.
+  //   3. Merge phase: drain over-full cells by looping mergeNearestNeighborsRound() until a round merges
+  //      nothing (each round roughly halves a cell's surplus above the target).
+  //   4. Split phase: bring under-full cells up to the target by repeatedly halving the heaviest particle
+  //      into two co-located daughters.
+  //   5. Rebuild the ItoParticles from the merged/split particles into the same patch;
+  //      velocity/mobility/diffusion default to zero and are recomputed from the field before use.
+
   // The distributed nearest-neighbor merge has no per-level notion -- it uses a SINGLE crowding
   // threshold over the whole AMR hierarchy. Use the coarsest level's value; in practice this vector is
   // uniform wherever nn_pair is used.
@@ -3637,7 +3665,7 @@ ItoSolver::makeSuperparticlesNnPair(const WhichContainer a_container, const Vect
 
   ParticleContainer<ItoParticle>& particles = this->getParticles(a_container);
 
-  // ---- Merge on a minimal particle (position + weight owned by the leaf, energy the only payload) ----
+  // 1. Extract into a minimal merge particle (position + weight owned by the leaf, energy the only payload).
   // ItoParticle carries far more than the merge needs; its mobility/diffusion/velocity/... are
   // recomputed from the field right after merging. Copy the few columns the merge uses into a small
   // ItoMergeParticle container on the SAME realm, kill the ItoParticles, run the whole merge+split on
@@ -3668,16 +3696,18 @@ ItoSolver::makeSuperparticlesNnPair(const WhichContainer a_container, const Vect
   }
   particles.clearParticles();
 
-  // ---- Reconciliation callbacks (on the small particle) ----
+  // 2. Merge callbacks (on the small particle), plus the EB position check and id allocator below.
   auto gather = [](const ParticleSoA<ItoMergeParticle>& a_leaf, const std::size_t a_idx) -> Real {
     return a_leaf.template get<&ItoMergeParticle::energy>(a_idx);
   };
+
   auto combine = [](const Real a_firstEnergy,
                     const Real a_firstWeight,
                     const Real a_secondEnergy,
                     const Real a_secondWeight) -> Real {
     return (a_firstWeight * a_firstEnergy + a_secondWeight * a_secondEnergy) / (a_firstWeight + a_secondWeight);
   };
+
   auto scatter = [](ParticleSoA<ItoMergeParticle>&                   a_leaf,
                     const ParticleManagement::NNMergeParticle<Real>& a_p) -> void {
     ItoMergeParticle p;
@@ -3707,43 +3737,59 @@ ItoSolver::makeSuperparticlesNnPair(const WhichContainer a_container, const Vect
                                                ? std::nullopt
                                                : std::optional<int>(m_nnPairMaxCellDistance);
 
-  // Rank-namespaced fresh-id allocator (see mergeNearestNeighborsRound()'s IDAllocator docs). Ids need
-  // to be unique only WITHIN a round, so nextID is reset at the top of every drain round below.
-  constexpr ParticleID rankStride = 100000000LL;
+  // Fresh-id allocator handed to mergeNearestNeighborsRound() below (its IDAllocator argument). Why an
+  // allocator at all: the merge fabricates brand-new particles (each merged pair becomes one new
+  // particle) that need globally-unique ids, and it does so on every rank independently, mid-round, with
+  // no cross-rank communication -- so each rank must be able to mint ids that can never collide with any
+  // other rank's, without asking anyone. The scheme: give rank r the disjoint id block
+  // [r * rankStride, (r+1) * rankStride) and hand out ids sequentially within it. Different ranks live in
+  // different blocks, so their ids are automatically unique with zero coordination. Ids only need to be
+  // unique WITHIN one round (they are a per-round labelling, not a persistent identity), so nextID is
+  // reset to rankBase at the top of every drain round below. The same allocator also renumbers the
+  // existing valid particles at the start of each round, so a particle and its ghosts share one id.
+  //
+  // rankStride caps a rank at rankStride ids per round; 1e12 is ~1e6x above any realistic per-rank count
+  // (valid + merged) and stays int64-safe up to ~9.2e6 ranks (numRanks * rankStride < INT64_MAX).
+  constexpr ParticleID rankStride = 1000000000000LL;
   const ParticleID     rankBase   = static_cast<ParticleID>(procID()) * rankStride;
   ParticleID           nextID     = rankBase;
   auto                 allocateID = [&nextID, rankBase]() -> ParticleID {
-    // Ids must stay inside this rank's own [rankBase, rankBase + rankStride) namespace, or they would
-    // collide with the next rank's. rankStride is far above any realistic per-rank particle count
-    // (valid + merged) in one round; fail loudly if that ever stops being true.
+    // Ids must stay inside this rank's own [rankBase, rankBase + rankStride) block, or they would collide
+    // with the next rank's. Fail loudly (debug builds) if that invariant is ever violated.
     CH_assert(nextID < rankBase + rankStride);
 
     return nextID++;
   };
 
-  // ================================= MERGE PHASE =================================
+  // 3. Merge phase.
   // A single mergeNearestNeighborsRound() does ONE cross-patch propose/judge/verdict exchange and
   // merges nearest-neighbor pairs; merged particles only become candidates on the NEXT round, so one
-  // round roughly halves an over-full cell's surplus above the target. Loop until a round merges
-  // nothing (the global valid-particle count stops decreasing), which drains every over-full cell down
-  // to the target. maxDrainRounds is only a safety net -- the loop terminates on its own because the
-  // count strictly decreases while any merge happens.
-  constexpr int      maxDrainRounds = 100;
-  unsigned long long nAfter         = merge.getNumberOfValidParticlesGlobal();
-  for (int round = 0; round < maxDrainRounds; round++) {
+  // round roughly halves an over-full cell's surplus above the target. The loop stops early once a round
+  // merges nothing (the global valid-particle count stops decreasing), i.e. once every over-full cell has
+  // drained to the target. m_nnPairMaxRounds (ItoSolver.nn_pair_max_rounds) caps the number of rounds so
+  // the cost stays bounded and predictable instead of running to full convergence.
+  unsigned long long nAfter = merge.getNumberOfValidParticlesGlobal();
+
+  for (int round = 0; round < m_nnPairMaxRounds; round++) {
     const unsigned long long nBefore = nAfter;
 
     // Fresh, globally-unique ids each round, assigned before ghosts exist so fillGhostParticles()
     // copies each ghost's id from its (now-numbered) source. rankID is this rank (all owned valid
     // particles).
     nextID = rankBase;
-    merge.clearGhostParticles();
+
+    if (round > 0) {
+      merge.clearGhostParticles();
+    }
+
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
       const DataIterator&      dit = dbl.dataIterator();
 
       const int nbox = dit.size();
 
+      // Serial (no omp): allocateID() hands out ids from a single shared counter, so parallelising the
+      // box loop would race on it and mint duplicate ids.
       for (int mybox = 0; mybox < nbox; mybox++) {
         ParticleSoA<ItoMergeParticle>& leaf = merge[lvl][dit[mybox]];
 
@@ -3754,9 +3800,7 @@ ItoSolver::makeSuperparticlesNnPair(const WhichContainer a_container, const Vect
       }
     }
 
-    // The round reads a width-1 ghost halo as candidates but does NOT fill it -- filling is the
-    // caller's responsibility (see mergeNearestNeighborsRound()). The width-1 mask was registered on
-    // this realm in registerOperators() and is geometric, so it drives any container on the realm.
+    // Fill a width-1 layer of ghost particles.
     merge.fillGhostParticles(m_amr->getParticleGhostMask(m_realm, 1),
                              m_amr->getParticleGhostMaskCoarToFine(m_realm, 1),
                              m_amr->getParticleGhostMaskFineToCoar(m_realm, 1));
@@ -3776,12 +3820,13 @@ ItoSolver::makeSuperparticlesNnPair(const WhichContainer a_container, const Vect
     // getNumberOfValidParticlesGlobal() is an MPI collective -- every rank calls it and breaks on the
     // same global value, so the loop stays in lockstep across ranks.
     nAfter = merge.getNumberOfValidParticlesGlobal();
+
     if (nAfter >= nBefore) {
       break;
     }
   }
 
-  // ================================= SPLIT PHASE =================================
+  // 4. Split phase.
   // The merge only drains over-full cells. A cell BELOW the target is brought up to it by splitting.
   // The merge left the small container patch-organized; cell-sort so the per-cell CSR ranges are valid.
   //
@@ -3846,7 +3891,7 @@ ItoSolver::makeSuperparticlesNnPair(const WhichContainer a_container, const Vect
     }
   }
 
-  // ---- Rebuild ItoParticles from the merged/split small particles, into the SAME patch (no remap) ----
+  // 5. Rebuild ItoParticles from the merged/split small particles, into the same patch (no remap).
   // velocity/mobility/diffusion/... default to zero and are recomputed from the field before use.
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl  = m_amr->getGrids(m_realm)[lvl];
