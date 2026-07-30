@@ -188,16 +188,7 @@ Realm::regridOperators(const int a_lmin)
   }
 
   this->defineMasks(a_lmin);
-
-  // Particle ghost masks are a registered resource, like the operators above: they are only built
-  // for widths that downstream code has registered via registerParticleGhostMask(). Building them
-  // here (in the operator/mask phase) rather than in regridBase() is deliberate -- regridBase()
-  // runs before the solvers' registerOperators(), so a solver that registers a width there (e.g. the
-  // ItoSolver nearest-neighbor merge) would otherwise have its mask silently skipped until the next
-  // regrid. This phase runs after registerOperators(), so a freshly registered width is honored on
-  // the very first grid build.
   this->defineParticleGhostMasks();
-
   this->definePetscGrid();
 }
 

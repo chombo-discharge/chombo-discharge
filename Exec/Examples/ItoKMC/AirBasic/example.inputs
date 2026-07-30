@@ -17,7 +17,7 @@ AmrMesh.fill_ratio           = 1.0                  ## Fill ratio for grid gener
 AmrMesh.buffer_size          = 2                    ## Number of cells between grid levels
 AmrMesh.grid_algorithm       = tiled                ## Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
 AmrMesh.box_sorting          = morton               ## 'none', 'shuffle', 'morton'
-AmrMesh.min_block_size       = 16                   ## Blocking factor.
+AmrMesh.min_block_size       = 8                    ## Blocking factor.
 AmrMesh.max_block_size       = 16                   ## Maximum allowed box size
 AmrMesh.max_ebis_box         = 16                   ## Maximum allowed box size for EBIS generation.
 AmrMesh.ref_rat              = 2 2 2 2 2 2          ## Refinement ratios (mixed ratios are allowed).
@@ -116,22 +116,25 @@ FieldSolverGMG.gmg_reflux_free              = false        ## If true, use reflu
 # ====================================================================================================
 # ItoSolver class options
 # ====================================================================================================
-ItoSolver.verbosity              = -1                 ## Class verbosity
-ItoSolver.merge_algorithm        = equal_weight_kd    ## Particle merging algorithm (see documentation)
-ItoSolver.plt_vars               = phi mu vel dco     ## 'phi', 'vel', 'dco', 'part', 'eb_part', 'dom_part', 'src_part', 'energy_density', 'energy'
-ItoSolver.intersection_alg       = bisection          ## Intersection algorithm for EB-particle intersections.
-ItoSolver.bisect_step            = 1.E-3              ## Bisection step length for intersection tests
-ItoSolver.normal_max             = 5.0                ## Maximum value (absolute) that can be drawn from the exponential distribution.
-ItoSolver.redistribute           = false              ## Turn on/off redistribution.
-ItoSolver.blend_conservation     = false              ## Turn on/off blending with nonconservative divergenceo
-ItoSolver.checkpointing          = particles          ## 'particles' or 'numbers'
-ItoSolver.ppc_restart            = 32                 ## Maximum number of computational particles to generate for restarts.
-ItoSolver.irr_ngp_deposition     = false              ## Force irregular deposition in cut cells or not
-ItoSolver.irr_ngp_interp         = true               ## Force irregular interpolation in cut cells or not
-ItoSolver.mobility_interp        = direct             ## How to interpolate mobility, 'direct' or 'velocity', i.e. either mu_p = mu(X_p) or mu_p = (mu*E)(X_p)/E(X_p)
-ItoSolver.plot_deposition        = cic                ## Cloud-in-cell for plotting particles.
-ItoSolver.deposition             = cic                ## Deposition type.
-ItoSolver.deposition_cf          = transition         ## 'interp', 'halo', 'halo_ngp', 'transition'.
+ItoSolver.verbosity                 = -1                 ## Class verbosity
+ItoSolver.merge_algorithm           = equal_weight_kd    ## Particle merging algorithm (see documentation)
+ItoSolver.nn_pair_iterate           = false              ## nn_pair: iterate the local tier to convergence within each round
+ItoSolver.nn_pair_fallback          = 1                  ## nn_pair: fallback candidates per query (k-NN graph built with k = 1 + this)
+ItoSolver.nn_pair_max_cell_dist     = 1                  ## nn_pair: max merge distance in cells (Chebyshev); < 0 = unbounded
+ItoSolver.plt_vars                  = phi mu vel dco     ## 'phi', 'vel', 'dco', 'part', 'eb_part', 'dom_part', 'src_part', 'energy_density', 'energy'
+ItoSolver.intersection_alg          = bisection          ## Intersection algorithm for EB-particle intersections.
+ItoSolver.bisect_step               = 1.E-3              ## Bisection step length for intersection tests
+ItoSolver.normal_max                = 5.0                ## Maximum value (absolute) that can be drawn from the exponential distribution.
+ItoSolver.redistribute              = false              ## Turn on/off redistribution.
+ItoSolver.blend_conservation        = false              ## Turn on/off blending with nonconservative divergenceo
+ItoSolver.checkpointing             = particles          ## 'particles' or 'numbers'
+ItoSolver.ppc_restart               = 32                 ## Maximum number of computational particles to generate for restarts.
+ItoSolver.irr_ngp_deposition        = false              ## Force irregular deposition in cut cells or not
+ItoSolver.irr_ngp_interp            = true               ## Force irregular interpolation in cut cells or not
+ItoSolver.mobility_interp           = direct             ## How to interpolate mobility, 'direct' or 'velocity', i.e. either mu_p = mu(X_p) or mu_p = (mu*E)(X_p)/E(X_p)
+ItoSolver.plot_deposition           = cic                ## Cloud-in-cell for plotting particles.
+ItoSolver.deposition                = cic                ## Deposition type.
+ItoSolver.deposition_cf             = transition         ## 'interp', 'halo', 'halo_ngp', 'transition'.
 
 # ====================================================================================================
 # CdrCTU solver settings.
@@ -248,7 +251,7 @@ ItoKMCGodunovStepper.secondary_emission                       = after_reactions 
 ItoKMCGodunovStepper.abort_on_failure                         = true               ## Abort on Poisson solver failure or not
 ItoKMCGodunovStepper.abort_max_field                          = 10000              ## Abort if reduced field exceeds this value
 ItoKMCGodunovStepper.redistribute_cdr                         = true               ## Turn on/off reactive redistribution
-ItoKMCGodunovStepper.profile                                  = false              ## Turn on/off run-time profiling
+ItoKMCGodunovStepper.profile                                  = true               ## Turn on/off run-time profiling
 ItoKMCGodunovStepper.plt_vars                                 = none               ## 'conductivity', 'current_density', 'particles_per_patch'
 ItoKMCGodunovStepper.dual_grid                                = false              ## Turn on/off dual-grid functionality
 ItoKMCGodunovStepper.load_balance_fluid                       = false              ## Turn on/off fluid realm load balancing.
@@ -258,7 +261,7 @@ ItoKMCGodunovStepper.load_per_cell                            = 1.0             
 ItoKMCGodunovStepper.box_sorting                              = morton             ## Box sorting when load balancing
 ItoKMCGodunovStepper.particles_per_cell                       = 16                 ## Max computational particles per cell
 ItoKMCGodunovStepper.merge_interval                           = 1                  ## Time steps between superparticle merging
-ItoKMCGodunovStepper.regrid_superparticles                    = false              ## Make superparticles during regrids
+ItoKMCGodunovStepper.regrid_superparticles                    = solver             ## Regrid merge: none/solver/equal_weight_kd/etc.
 ItoKMCGodunovStepper.physics_dt_factor                        = 2.0                ## Physics-based time step factor
 ItoKMCGodunovStepper.min_particle_advection_cfl               = 0.1                ## Advective time step CFL restriction
 ItoKMCGodunovStepper.max_particle_advection_cfl               = 10.0               ## Advective time step CFL restriction
@@ -314,5 +317,5 @@ ItoKMCStreamerTagger.buffer            = 4              ## Grow tagged cells
 ItoKMCStreamerTagger.refine_curvature      = 1.E99    ## Curvature refinement
 ItoKMCStreamerTagger.coarsen_curvature     = 1.E99    ## Curvature coarsening
 ItoKMCStreamerTagger.refine_alpha          = 0.8      ## Set alpha refinement. Lower  => More mesh
-ItoKMCStreamerTagger.coarsen_alpha         = 0.1      ## Set alpha coarsening. Higher => Less mesh
-ItoKMCStreamerTagger.max_coarsen_lvl       = 5        ## Set max coarsening depth
+ItoKMCStreamerTagger.coarsen_alpha         = 0.2      ## Set alpha coarsening. Higher => Less mesh
+ItoKMCStreamerTagger.max_coarsen_lvl       = 4        ## Set max coarsening depth
