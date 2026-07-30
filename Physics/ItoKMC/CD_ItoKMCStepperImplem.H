@@ -3933,16 +3933,9 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(const Real a_dt) noexcept
 
   this->advanceReactionNetwork(m_electricFieldFluid, a_dt);
 
-  // Merge super-particles down to the target after the chemistry advance created/removed particles.
-  // This is deliberately a SEPARATE step from the per-cell reconciliation above (it used to be folded
-  // into it while the particles were cell-sorted): routing it through the public ItoSolver::
-  // makeSuperparticles() lets both per-cell (equal_weight_kd, ...) and AMR-wide (nn_pair) merge
-  // algorithms run, chosen by ItoSolver.merge_algorithm.
-  if (m_mergeInterval > 0 && (m_timeStep + 1) % m_mergeInterval == 0) {
-    m_ito->organizeParticlesByCell(ItoSolver::WhichContainer::Bulk);
-    m_ito->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_particlesPerCell);
-    m_ito->organizeParticlesByPatch(ItoSolver::WhichContainer::Bulk);
-  }
+  // NOTE: super-particle merging is NOT done here. Chemistry creates/removes particles; the caller
+  //       (e.g. ItoKMCGodunovStepper::advance()) merges afterwards through
+  //       ItoSolver::makeSuperparticles(), where it can be timed as its own step.
 }
 
 template <typename I, typename C, typename R, typename F>
