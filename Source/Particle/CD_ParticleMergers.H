@@ -20,13 +20,9 @@
 /**
   @brief Convenience header that makes ALL ParticleManagement merge algorithms available in one
   include.
-  @details The merge algorithms live in two header pairs split by dependency weight (see the
-  ParticleManagement namespace docs in CD_ParticleManagement.H): the lightweight per-cell mergers in
-  CD_ParticleManagement.H, and the AMR-granularity distributed nearest-neighbor merge in
-  CD_NearestNeighborParticleMerge.H (which additionally pulls in EBGeometry, AmrMesh, and MPI).
-  Include THIS header only when a translation unit genuinely needs both families; a consumer that
-  uses only the per-cell mergers should include CD_ParticleManagement.H directly to avoid the heavy
-  transitive includes.
+  @details Include THIS header only when a translation unit needs all merge families; a consumer
+  that uses only the per-cell mergers should include CD_ParticleManagement.H directly to avoid the
+  heavy transitive includes caused by some of the other merge classes.
 */
 
 #endif
