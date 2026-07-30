@@ -46,7 +46,7 @@
                                      Backs the 'equal_weight_kd' and 'reinitialize_bvh' selectors.
     - makeReinitializeMerger       : re-initializes a cell's particles with as-uniform-as-possible
                                      integer weights. Backs 'reinitialize'.
-    - makeSfcNearestNeighborMerger : space-filling-curve nearest-neighbour clustering. Backs 'sfc_nn'.
+    - makeSfcNearestNeighborMerger : space-filling-curve nearest-neighbour clustering. Backs 'nn_sfc'.
 
   AMR-granularity (CD_NearestNeighborParticleMerge.H / ...Implem.H, same namespace) -- a
   whole-container, cross-rank collective run once over the entire AMR hierarchy:
@@ -69,6 +69,25 @@ namespace ParticleManagement {
   {
     Cell,
     AMR
+  };
+
+  /**
+    @brief The specific super-particle merge method.
+    @details Finer than ParticleMergeKind (which only says whether a method is per-cell or an
+    AMR-wide collective). A consumer that dispatches AMR-granularity merges stores this so it can pick
+    the right algorithm once more than one AMR method exists. The selector strings a solver maps onto
+    these live with the solver (e.g. ItoSolver.merge_algorithm); see the catalog in this namespace's
+    docs for what each backs.
+  */
+  enum class ParticleMergeMethod
+  {
+    None,            ///< No merging.
+    EqualWeightKD,   ///< Cell: makeEqualWeightKDMerger.
+    Reinitialize,    ///< Cell: makeReinitializeMerger.
+    ReinitializeBVH, ///< Cell: makeEqualWeightKDMerger with reinitialized leaf positions.
+    NnSfc,           ///< Cell: makeSfcNearestNeighborMerger.
+    NnPair,          ///< AMR: mergeNearestNeighborsRound.
+    External         ///< Cell: caller-supplied per-cell merger.
   };
 
   /**

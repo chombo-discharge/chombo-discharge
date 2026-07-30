@@ -1084,10 +1084,18 @@ protected:
 
   /**
     @brief Granularity of the configured merge algorithm (cell-based vs. AMR-collective).
-    @details Set by parseParticleMerger(); read by makeSuperparticles() to choose the merge path.
-    Defaults to Cell.
+    @details Derived from m_mergeMethod by parseParticleMerger(); read by makeSuperparticles() to
+    choose the cell-based vs. AMR path. Defaults to Cell.
   */
   ParticleManagement::ParticleMergeKind m_mergeKind = ParticleManagement::ParticleMergeKind::Cell;
+
+  /**
+    @brief The configured merge method (which specific algorithm, finer than m_mergeKind).
+    @details Set by parseParticleMerger() from ItoSolver.merge_algorithm. makeSuperparticles()
+    dispatches AMR-granularity merges on this so the right algorithm runs once more than one AMR
+    method exists. Defaults to EqualWeightKD (the default merge_algorithm).
+  */
+  ParticleManagement::ParticleMergeMethod m_mergeMethod = ParticleManagement::ParticleMergeMethod::EqualWeightKD;
 
   /**
     @brief nn_pair: iterate the local trivial tier to convergence within each round.

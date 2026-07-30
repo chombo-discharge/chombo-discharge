@@ -440,16 +440,17 @@ ItoSolver::parseParticleMerger()
 
   pp.get("merge_algorithm", str);
 
-  // Default granularity is per-cell; only the distributed nearest-neighbor algorithm overrides this
-  // to AMR (see ParticleManagement::ParticleMergeKind / makeSuperparticles()).
-  m_mergeKind = ParticleManagement::ParticleMergeKind::Cell;
-
+  // Each branch records the specific method (m_mergeMethod); m_mergeKind is derived from it below.
   if (str == "none") {
+    m_mergeMethod = ParticleManagement::ParticleMergeMethod::None;
+
     // No merging: the merger is a no-op and particles are left unchanged.
     m_particleCellMerger = [](ParticleSoA<ItoParticle>& a_particles, const CellInfo& a_cellInfo, const int a_ppc) {
     };
   }
   else if (str == "equal_weight_kd") {
+    m_mergeMethod = ParticleManagement::ParticleMergeMethod::EqualWeightKD;
+
     // Recursively partition particles into at most a_ppc equal-weight KD leaves, then reduce each leaf
     // to one particle at the weighted-centroid position. Requires particle weights >= 1 to split.
     using PType = NonCommParticle<2, 1>; // real<0>=weight, real<1>=energy, vect<0>=position
@@ -500,6 +501,8 @@ ItoSolver::parseParticleMerger()
                                                                                          scatterLeaf);
   }
   else if (str == "reinitialize") {
+    m_mergeMethod = ParticleManagement::ParticleMergeMethod::Reinitialize;
+
     // Sums the total number of physical particles in the cell, then redistributes them into at most a_ppc
     // computational particles with as-equal-as-possible integer weights, placed at random cell positions.
     // All output particles carry the same weight-averaged energy. Requires integer-valued weights.
@@ -539,6 +542,8 @@ ItoSolver::parseParticleMerger()
                                                                                          });
   }
   else if (str == "reinitialize_bvh") {
+    m_mergeMethod = ParticleManagement::ParticleMergeMethod::ReinitializeBVH;
+
     // Same KD partition as equal_weight_kd, but leaf positions are reinitialized: cut-cells use the
     // weighted centroid (to stay inside the EB), full cells draw a random point in the leaf bounding box.
     // Requires particle weights >= 1 to split.
@@ -621,7 +626,9 @@ ItoSolver::parseParticleMerger()
                                                                                          reconcile,
                                                                                          scatterLeaf);
   }
-  else if (str == "sfc_nn") {
+  else if (str == "nn_sfc") {
+    m_mergeMethod = ParticleManagement::ParticleMergeMethod::NnSfc;
+
     // Sorts particles along a Hilbert curve, then merges adjacent pairs until the count reaches a_ppc.
     // Produces better spatial locality than the KD methods and does not require integer weights.
     using PType = NonCommParticle<2, 1>; // real<0>=weight, real<1>=energy, vect<0>=position
@@ -667,7 +674,7 @@ ItoSolver::parseParticleMerger()
     // per-cell operation: it matches particles against their true neighborhood across patch and rank
     // boundaries, so it is dispatched over the whole container at once (AMR granularity, see
     // ParticleManagement::ParticleMergeKind and makeSuperparticles(WhichContainer, int)).
-    m_mergeKind = ParticleManagement::ParticleMergeKind::AMR;
+    m_mergeMethod = ParticleManagement::ParticleMergeMethod::NnPair;
 
     pp.get("nn_pair_iterate", m_nnPairIterate);
     pp.get("nn_pair_fallback", m_nnPairFallback);
@@ -682,11 +689,19 @@ ItoSolver::parseParticleMerger()
     };
   }
   else if (str == "external") {
+    m_mergeMethod = ParticleManagement::ParticleMergeMethod::External;
+
     // Do nothing, because the user will set the merger algorithm through setParticleCellMerger
   }
   else {
     MayDay::Abort("ItoSolver::parseParticleMerger - unknown particle merging algorithm requested");
   }
+
+  // Granularity follows from the method: only the distributed nearest-neighbor pair merge is an
+  // AMR-wide collective; every other method is per-cell.
+  m_mergeKind = (m_mergeMethod == ParticleManagement::ParticleMergeMethod::NnPair)
+                  ? ParticleManagement::ParticleMergeKind::AMR
+                  : ParticleManagement::ParticleMergeKind::Cell;
 }
 
 EBIntersection
@@ -768,13 +783,13 @@ ItoSolver::registerOperators() const
       m_amr->registerOperator(s_eb_redist, m_realm, m_phase);
     }
 
-    // The distributed nearest-neighbor merge reads a width-1 particle ghost halo as merge candidates
-    // (see mergeSuperparticlesNearestNeighbor()/ParticleManagement::mergeNearestNeighborsRound()).
-    // Register the width here, alongside the other operators; the mask itself is built in the
-    // operator/mask regrid phase (AmrMesh::regridOperators -> Realm::defineParticleGhostMasks), which
-    // runs right after this. Only the AMR-granularity merge needs it; the per-cell algorithms never
-    // fill ghosts.
-    if (m_mergeKind == ParticleManagement::ParticleMergeKind::AMR) {
+    // The nn_pair merge reads a width-1 particle ghost halo as merge candidates (see
+    // mergeSuperparticlesNearestNeighbor()/ParticleManagement::mergeNearestNeighborsRound()). Register
+    // the width here, alongside the other operators; the mask itself is built in the operator/mask
+    // regrid phase (AmrMesh::regridOperators -> Realm::defineParticleGhostMasks), which runs right
+    // after this. Gate on the specific method, not just the AMR granularity: a future AMR method may
+    // need a different (or no) ghost width.
+    if (m_mergeMethod == ParticleManagement::ParticleMergeMethod::NnPair) {
       m_amr->registerParticleGhostMask(m_realm, 1);
     }
   }
@@ -3460,12 +3475,22 @@ ItoSolver::makeSuperparticles(const WhichContainer a_container, const int a_part
     pout() << m_name + "::makeSuperparticles(WhichContainer, int)" << endl;
   }
 
-  // The distributed nearest-neighbor merge is a whole-container, cross-patch/cross-rank collective
-  // (see parseParticleMerger()/ParticleManagement::ParticleMergeKind) -- it does not decompose into
+  // An AMR-granularity merge is a whole-container, cross-patch/cross-rank collective (see
+  // parseParticleMerger()/ParticleManagement::ParticleMergeKind) -- it does not decompose into
   // independent per-cell/per-patch work, so it runs once over the entire container instead of the
-  // per-level loop the cell-based algorithms use.
+  // per-level loop the cell-based algorithms use. Dispatch on the specific method so the right
+  // algorithm runs once more than one AMR method exists.
   if (m_mergeKind == ParticleManagement::ParticleMergeKind::AMR) {
-    this->mergeSuperparticlesNearestNeighbor(a_container, a_particlesPerCell);
+    switch (m_mergeMethod) {
+    case ParticleManagement::ParticleMergeMethod::NnPair: {
+      this->mergeSuperparticlesNearestNeighbor(a_container, a_particlesPerCell);
+
+      break;
+    }
+    default: {
+      MayDay::Error("ItoSolver::makeSuperparticles - unhandled AMR merge method");
+    }
+    }
 
     return;
   }
@@ -3487,12 +3512,21 @@ ItoSolver::makeSuperparticles(const WhichContainer a_container, const Vector<int
     MayDay::Error("ItoSolver::makeSuperParticles(Container, Vector<int>) -logic bust");
   }
 
-  // The nearest-neighbor merge operates on the whole AMR hierarchy at once with a SINGLE crowding
-  // threshold (it has no per-level notion -- see ParticleManagement::mergeNearestNeighborsRound),
-  // so a per-level particle count does not map onto it. Use the coarsest level's value; in practice
-  // this vector is uniform across levels wherever the nearest-neighbor merge is used.
+  // An AMR-granularity merge operates on the whole hierarchy at once with a SINGLE crowding threshold
+  // (it has no per-level notion -- see ParticleManagement::mergeNearestNeighborsRound), so a per-level
+  // particle count does not map onto it. Use the coarsest level's value; in practice this vector is
+  // uniform across levels wherever an AMR merge is used. Dispatch on the specific method.
   if (m_mergeKind == ParticleManagement::ParticleMergeKind::AMR) {
-    this->mergeSuperparticlesNearestNeighbor(a_container, a_particlesPerCell[0]);
+    switch (m_mergeMethod) {
+    case ParticleManagement::ParticleMergeMethod::NnPair: {
+      this->mergeSuperparticlesNearestNeighbor(a_container, a_particlesPerCell[0]);
+
+      break;
+    }
+    default: {
+      MayDay::Error("ItoSolver::makeSuperparticles - unhandled AMR merge method");
+    }
+    }
 
     return;
   }
@@ -3768,7 +3802,7 @@ ItoSolver::mergeSuperparticlesNearestNeighbor(const WhichContainer a_container, 
   // The merge only drains over-full cells. A cell BELOW the target is brought up to it by splitting.
   // The merge left the small container patch-organized; cell-sort so the per-cell CSR ranges are valid.
   //
-  // Greedy heaviest-split (same rule as sfc_nn): repeatedly halve the heaviest particle into two
+  // Greedy heaviest-split (same rule as nn_sfc): repeatedly halve the heaviest particle into two
   // co-located daughters -- floor/ceil so integer weights stay integer and both daughters keep weight
   // >= 1 -- until the cell reaches the target or no particle can be split (heaviest weight < 2).
   // Daughters sit at the parent's position and inherit its energy, so the spatial distribution and the
