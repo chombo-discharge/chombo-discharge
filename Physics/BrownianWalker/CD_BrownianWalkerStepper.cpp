@@ -19,6 +19,7 @@
 #include <CD_BrownianWalkerSpecies.H>
 #include <CD_Random.H>
 #include <CD_ParticleLoops.H>
+#include <CD_ParticleOps.H>
 #include <CD_ParallelOps.H>
 #include <CD_EBCoarseToFineInterp.H>
 #include <CD_NamespaceHeader.H>
@@ -41,6 +42,7 @@ BrownianWalkerStepper::BrownianWalkerStepper() : m_phase(phase::gas)
   pp.get("cfl", m_cfl);
   pp.get("load_balance", m_loadBalance);
   pp.get("which_balance", str);
+  pp.get("verify_conservation", m_verifyConservation);
 
   if (str == "mesh") {
     m_whichLoadBalance = LoadBalancingMethod::Mesh;
@@ -585,9 +587,25 @@ BrownianWalkerStepper::makeSuperParticles()
   //       need to call cell/patch sorting methods.
 
   if (m_ppc > 0) {
+    ParticleContainer<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::Bulk);
+
+    // A merge redistributes weight but must never create or destroy it. When requested, bracket the
+    // merge with a global weight sum and abort if the total drifts by more than round-off.
+    const Real weightBefore = m_verifyConservation ? ParticleOps::sum(particles) : 0.0;
+
     m_solver->organizeParticlesByCell(ItoSolver::WhichContainer::Bulk);
     m_solver->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_ppc);
     m_solver->organizeParticlesByPatch(ItoSolver::WhichContainer::Bulk);
+
+    if (m_verifyConservation) {
+      const Real weightAfter = ParticleOps::sum(particles);
+      const Real absDrift    = std::abs(weightAfter - weightBefore);
+
+      if (absDrift > 1.E-9 * std::max(1.0, std::abs(weightBefore))) {
+        MayDay::Abort("BrownianWalkerStepper::makeSuperParticles -- superparticle merge did not conserve "
+                      "total particle weight");
+      }
+    }
   }
 }
 
