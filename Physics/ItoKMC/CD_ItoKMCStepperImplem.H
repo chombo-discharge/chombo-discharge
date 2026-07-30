@@ -3932,6 +3932,17 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(const Real a_dt) noexcept
   CH_assert(a_dt > 0.0);
 
   this->advanceReactionNetwork(m_electricFieldFluid, a_dt);
+
+  // Merge super-particles down to the target after the chemistry advance created/removed particles.
+  // This is deliberately a SEPARATE step from the per-cell reconciliation above (it used to be folded
+  // into it while the particles were cell-sorted): routing it through the public ItoSolver::
+  // makeSuperparticles() lets both per-cell (equal_weight_kd, ...) and AMR-wide (nn_pair) merge
+  // algorithms run, chosen by ItoSolver.merge_algorithm.
+  if (m_mergeInterval > 0 && (m_timeStep + 1) % m_mergeInterval == 0) {
+    m_ito->organizeParticlesByCell(ItoSolver::WhichContainer::Bulk);
+    m_ito->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_particlesPerCell);
+    m_ito->organizeParticlesByPatch(ItoSolver::WhichContainer::Bulk);
+  }
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -4398,9 +4409,6 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
   const RealVect probLo  = m_amr->getProbLo();
   const EBISBox& ebisbox = m_amr->getEBISLayout(m_particleRealm, m_plasmaPhase)[a_level][a_din];
 
-  // Number of computational particles to make on this level
-  const int ppc = (a_level < m_particlesPerCell.size()) ? m_particlesPerCell[a_level] : m_particlesPerCell.back();
-
   CH_START(t1);
   // List of valid grid cells
   const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_particleRealm)[a_level])[a_din];
@@ -4527,16 +4535,11 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
       // Add the photoionization term. This will adds new particles from the photoionization reactions.
       m_physics->reconcilePhotoionization(itoParticles, cdrParticles, bulkPhotons);
 
-      // Merge the particles together.
-      if (this->m_mergeInterval > 0) {
-        if ((this->m_timeStep + 1) % this->m_mergeInterval == 0) {
-          for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-            const int idx = solverIt.index();
-
-            solverIt()->mergeParticles(*itoParticles[idx], CellInfo(iv, a_dx), ppc);
-          }
-        }
-      }
+      // NOTE: Super-particle merging is NOT done here anymore. It is a separate step run after the
+      //       whole chemistry advance (see advanceReactionNetwork(Real)), through the public
+      //       ItoSolver::makeSuperparticles(), so that both per-cell and AMR-wide merge algorithms
+      //       are supported. It used to be done here only because the particles happened to be
+      //       cell-sorted for the reaction kernels.
     }
   };
 
@@ -4614,18 +4617,8 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
       // Add the photoionization term. This will adds new particles from the photoionization reactions.
       m_physics->reconcilePhotoionization(itoParticles, cdrParticles, bulkPhotons);
 
-      // Merge the particles together.
-      if (this->m_mergeInterval > 0) {
-        if ((this->m_timeStep + 1) % this->m_mergeInterval == 0) {
-          for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-            const int idx = solverIt.index();
-
-            const CellInfo cellInfo(iv, a_dx, kappa, bndryCentroid, bndryNormal);
-
-            solverIt()->mergeParticles(*itoParticles[idx], cellInfo, ppc);
-          }
-        }
-      }
+      // NOTE: Super-particle merging is done after the chemistry advance -- see the regular kernel
+      //       above and advanceReactionNetwork(Real).
     }
   };
 
