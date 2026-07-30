@@ -112,12 +112,6 @@ ItoSolver::setRealm(const std::string& a_realm)
   m_realm = a_realm;
 }
 
-ParticleManagement::ParticleMergeKind
-ItoSolver::getMergeKind() const noexcept
-{
-  return m_mergeKind;
-}
-
 void
 ItoSolver::setParticleCellMerger(const ParticleManagement::ParticleMerger<ItoParticle>& a_particleCellMerger) noexcept
 {
@@ -451,12 +445,6 @@ ItoSolver::parseParticleMerger()
     pp.get("nn_pair_fallback", m_nnPairFallback);
     pp.get("nn_pair_max_cell_dist", m_nnPairMaxCellDistance);
   }
-
-  // Granularity follows from the method: only the distributed nearest-neighbor pair merge is an
-  // AMR-wide collective; every other method is per-cell.
-  m_mergeKind = (m_mergeMethod == ParticleManagement::ParticleMergeMethod::NnPair)
-                  ? ParticleManagement::ParticleMergeKind::AMR
-                  : ParticleManagement::ParticleMergeKind::Cell;
 }
 
 EBIntersection

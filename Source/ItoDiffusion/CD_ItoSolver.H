@@ -98,16 +98,6 @@ public:
   setParticleCellMerger(const ParticleManagement::ParticleMerger<ItoParticle>& a_particleCellMerger) noexcept;
 
   /**
-    @brief Get the granularity of the configured merge algorithm (cell-based vs. AMR-collective).
-    @details Callers use this to decide the required pre-merge preparation: a Cell merge needs the
-    particles cell-sorted (organizeParticlesByCell()) first; an AMR merge (nn_pair) needs
-    ghost particles filled first and must NOT be cell-sorted internally.
-    @return m_mergeKind.
-  */
-  virtual ParticleManagement::ParticleMergeKind
-  getMergeKind() const noexcept;
-
-  /**
     @brief Get this solver's name
     @return Returns m_name
   */
@@ -1131,36 +1121,28 @@ protected:
   ParticleManagement::ParticleMerger<ItoParticle> m_particleCellMerger;
 
   /**
-    @brief Granularity of the configured merge algorithm (cell-based vs. AMR-collective).
-    @details Derived from m_mergeMethod by parseParticleMerger(); read by makeSuperparticles() to
-    choose the cell-based vs. AMR path. Defaults to Cell.
-  */
-  ParticleManagement::ParticleMergeKind m_mergeKind = ParticleManagement::ParticleMergeKind::Cell;
-
-  /**
-    @brief The configured merge method (which specific algorithm, finer than m_mergeKind).
+    @brief The configured merge method (which specific algorithm).
     @details Set by parseParticleMerger() from ItoSolver.merge_algorithm. makeSuperparticles()
-    dispatches AMR-granularity merges on this so the right algorithm runs once more than one AMR
-    method exists. Defaults to EqualWeightKD (the default merge_algorithm).
+    dispatches on this to run the right algorithm. Defaults to EqualWeightKD (the default
+    merge_algorithm).
   */
   ParticleManagement::ParticleMergeMethod m_mergeMethod = ParticleManagement::ParticleMergeMethod::EqualWeightKD;
 
   /**
     @brief nn_pair: iterate the local trivial tier to convergence within each round.
-    @details Forwarded to ParticleManagement::mergeNearestNeighborsRound(). Only used when
-    m_mergeKind == AMR.
+    @details Forwarded to ParticleManagement::mergeNearestNeighborsRound(). Only used for nn_pair.
   */
   bool m_nnPairIterate = true;
 
   /**
     @brief nn_pair: number of fallback candidates per query. The k-nearest graph is
-    built with k = 1 + this. Only used when m_mergeKind == AMR.
+    built with k = 1 + this. Only used for nn_pair.
   */
   int m_nnPairFallback = 1;
 
   /**
     @brief nn_pair: maximum merge distance in whole cells (Chebyshev). A negative
-    value means unbounded (std::nullopt). Only used when m_mergeKind == AMR.
+    value means unbounded (std::nullopt). Only used for nn_pair.
   */
   int m_nnPairMaxCellDistance = -1;
 
