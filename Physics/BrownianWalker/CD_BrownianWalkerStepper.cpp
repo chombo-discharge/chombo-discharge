@@ -19,7 +19,6 @@
 #include <CD_BrownianWalkerSpecies.H>
 #include <CD_Random.H>
 #include <CD_ParticleLoops.H>
-#include <CD_ParticleOps.H>
 #include <CD_ParallelOps.H>
 #include <CD_EBCoarseToFineInterp.H>
 #include <CD_NamespaceHeader.H>
@@ -587,23 +586,17 @@ BrownianWalkerStepper::makeSuperParticles()
   //       need to call cell/patch sorting methods.
 
   if (m_ppc > 0) {
-    ParticleContainer<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::Bulk);
+    // A merge redistributes weight but must never create or destroy it. When requested, compute the
+    // total particle weight on the container before and after the merge -- independent of the merge
+    // scheme and of how the container is organized -- and abort if it drifts by more than round-off.
+    const Real weightBefore = m_verifyConservation ? this->computeTotalWeight() : 0.0;
 
-    // A merge redistributes weight but must never create or destroy it. When requested, bracket the
-    // merge with a global weight sum and abort if the total drifts by more than round-off. Both sums
-    // read the particles in the cell-sorted state: organizeParticlesByCell() rebuilds each leaf into a
-    // contiguous, freshly-allocated buffer, which is the consistent view ParticleOps::sum expects (the
-    // by-patch view straight out of the merge is not).
     m_solver->organizeParticlesByCell(ItoSolver::WhichContainer::Bulk);
-
-    const Real weightBefore = m_verifyConservation ? ParticleOps::sum(particles) : 0.0;
-
     m_solver->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_ppc);
+    m_solver->organizeParticlesByPatch(ItoSolver::WhichContainer::Bulk);
 
     if (m_verifyConservation) {
-      m_solver->organizeParticlesByCell(ItoSolver::WhichContainer::Bulk);
-
-      const Real weightAfter = ParticleOps::sum(particles);
+      const Real weightAfter = this->computeTotalWeight();
       const Real absDrift    = std::abs(weightAfter - weightBefore);
 
       if (absDrift > 1.E-9 * std::max(1.0, std::abs(weightBefore))) {
@@ -611,9 +604,35 @@ BrownianWalkerStepper::makeSuperParticles()
                       "total particle weight");
       }
     }
-
-    m_solver->organizeParticlesByPatch(ItoSolver::WhichContainer::Bulk);
   }
+}
+
+Real
+BrownianWalkerStepper::computeTotalWeight()
+{
+  CH_TIME("BrownianWalkerStepper::computeTotalWeight");
+  if (m_verbosity > 5) {
+    pout() << "BrownianWalkerStepper::computeTotalWeight" << endl;
+  }
+
+  const ParticleContainer<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::Bulk);
+
+  Real weight = 0.0;
+
+  for (int lvl = 0; lvl <= particles.getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl = particles.getGrids()[lvl];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      const auto&         leaf = particles[lvl][dit()];
+      const double* const w    = leaf.weightColumn();
+
+      weight = ParticleLoops::reduce(leaf, weight, [&](const Real a_acc, const std::size_t a_i) {
+        return a_acc + w[a_i];
+      });
+    }
+  }
+
+  return ParallelOps::sum(weight);
 }
 
 void

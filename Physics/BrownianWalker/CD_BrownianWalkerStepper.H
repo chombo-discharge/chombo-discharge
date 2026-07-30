@@ -357,6 +357,16 @@ namespace Physics {
       makeSuperParticles();
 
       /**
+         @brief Compute the global total weight of the bulk particles.
+         @details Folds the weight column over every leaf of the bulk container with
+         ParticleLoops::reduce and MPI-reduces the result. Reads the container as-is, independent of
+         whether it is organized by cell or by patch. Used by the conservation check.
+         @return Global (MPI-reduced) sum of all bulk particle weights.
+      */
+      Real
+      computeTotalWeight();
+
+      /**
          @brief Load balance using particle counts estimated from mesh-deposited data.
          @details Uses the particle-per-cell data deposited during preRegrid to estimate the
          post-regrid particle distribution without remapping particles. Faster than
