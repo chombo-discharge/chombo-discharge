@@ -3310,12 +3310,16 @@ ItoSolver::applyCellMerger(const WhichContainer                                 
     pout() << m_name + "::applyCellMerger" << endl;
   }
 
-  // TLDR (SoA): each leaf is cell-sorted (the caller runs organizeParticlesByCell), so each cell owns
-  //       the contiguous range [cellStart(c), cellStart(c+1)). For each non-empty cell we extract its
-  //       particles into an SoA scratch, run a_merger on it, and collect the result; then we rebuild
-  //       the leaf. The merge discards velocity/mobility/diffusion (only weight/position/energy
-  //       survive), which is fine because those are recomputed (interpolated) after the merge.
+  // TLDR (SoA): cell-sort so each leaf's cells own a contiguous CSR range [cellStart(c), cellStart(c+1)).
+  //       For each non-empty cell we extract its particles into an SoA scratch, run a_merger on it, and
+  //       collect the result; then we rebuild the leaf and return the container to a by-patch view. The
+  //       merge discards velocity/mobility/diffusion (only weight/position/energy survive), which is fine
+  //       because those are recomputed (interpolated) after the merge.
   ParticleContainer<ItoParticle>& particles = this->getParticles(a_container);
+
+  // A cell-based merge needs the leaves cell-sorted for the CSR ranges. Own that here rather than pushing
+  // it onto every caller -- the AMR-collective nn_pair merge does not use this path and needs no sort.
+  particles.organizeParticlesByCell();
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const int ppc = (lvl < a_particlesPerCell.size()) ? a_particlesPerCell[lvl] : a_particlesPerCell.back();
@@ -3334,14 +3338,7 @@ ItoSolver::applyCellMerger(const WhichContainer                                 
       const EBISBox&            ebisbox = m_amr->getEBISLayout(m_realm, m_phase)[lvl][din];
       const Box                 cellBox = dbl[din];
 
-      // The leaf must be cell-sorted for the CSR cell ranges to be valid -- deliberately the caller's
-      // responsibility (organizeParticlesByCell()), so a missing organize call fails loudly here
-      // rather than being silently masked.
-      if (!leaf.isSorted()) {
-        MayDay::Error("ItoSolver::applyCellMerger - particles are not cell-sorted; call "
-                      "organizeParticlesByCell() before a cell-based merge");
-      }
-
+      CH_assert(leaf.isSorted()); // organizeParticlesByCell() above sorted every leaf
       CH_assert(leaf.numCells() == static_cast<std::size_t>(cellBox.numPts()));
 
       // Accumulate the merged particles of every cell here, then swap them into the leaf. The per-cell
@@ -3380,6 +3377,10 @@ ItoSolver::applyCellMerger(const WhichContainer                                 
       leaf.swap(merged);
     }
   }
+
+  // Restore the by-patch view -- the merged leaves are no longer cell-sorted, and callers expect the
+  // container patch-organized on return.
+  particles.organizeParticlesByPatch();
 }
 
 void
@@ -3682,9 +3683,10 @@ ItoSolver::makeSuperparticlesNnPair(const WhichContainer a_container, const Vect
 
 #pragma omp parallel for schedule(runtime)
     for (int mybox = 0; mybox < nbox; mybox++) {
-      const DataIndex&                din       = dit[mybox];
-      const ParticleSoA<ItoParticle>& itoLeaf   = particles[lvl][din];
-      ParticleSoA<ItoMergeParticle>&  mergeLeaf = merge[lvl][din];
+      const DataIndex&                din     = dit[mybox];
+      const ParticleSoA<ItoParticle>& itoLeaf = particles[lvl][din];
+
+      ParticleSoA<ItoMergeParticle>& mergeLeaf = merge[lvl][din];
 
       for (std::size_t i = 0; i < itoLeaf.size(); i++) {
         ItoMergeParticle p;
@@ -3807,6 +3809,7 @@ ItoSolver::makeSuperparticlesNnPair(const WhichContainer a_container, const Vect
                              m_amr->getParticleGhostMaskCoarToFine(m_realm, 1),
                              m_amr->getParticleGhostMaskFineToCoar(m_realm, 1));
 
+    // Merge particles -- this is the most expensive part of the merge algorithm.
     ParticleManagement::mergeNearestNeighborsRound<ItoMergeParticle, Real>(*m_amr,
                                                                            merge,
                                                                            a_numParticlesPerCellThresh,
@@ -3916,6 +3919,9 @@ ItoSolver::makeSuperparticlesNnPair(const WhichContainer a_container, const Vect
       }
     }
   }
+
+  // Leave the bulk container patch-organized, matching the cell-based merge path's contract.
+  particles.organizeParticlesByPatch();
 }
 
 void

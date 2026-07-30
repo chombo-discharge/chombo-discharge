@@ -582,18 +582,15 @@ BrownianWalkerStepper::makeSuperParticles()
     pout() << "BrownianWalkerStepper::makeSuperParticles" << endl;
   }
 
-  // TLDR: ItoSolver requires the particles to be sorted by cell when making superparticles. So we explicitly
-  //       need to call cell/patch sorting methods.
-
   if (m_ppc > 0) {
     // A merge redistributes weight but must never create or destroy it. When requested, compute the
     // total particle weight on the container before and after the merge -- independent of the merge
     // scheme and of how the container is organized -- and abort if it drifts by more than round-off.
+    // (makeSuperparticles() does any cell-sorting it needs internally and returns the container
+    // patch-organized.)
     const Real weightBefore = m_verifyConservation ? this->computeTotalWeight() : 0.0;
 
-    m_solver->organizeParticlesByCell(ItoSolver::WhichContainer::Bulk);
     m_solver->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_ppc);
-    m_solver->organizeParticlesByPatch(ItoSolver::WhichContainer::Bulk);
 
     if (m_verifyConservation) {
       const Real weightAfter = this->computeTotalWeight();

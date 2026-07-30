@@ -743,10 +743,9 @@ ItoKMCStepper<I, C, R, F>::initialData() noexcept
   m_rte->initialData();
   this->initialSigma();
 
-  // Make superparticles.
-  m_ito->organizeParticlesByCell(ItoSolver::WhichContainer::Bulk);
+  // Make superparticles (makeSuperparticles() cell-sorts internally as needed and returns the containers
+  // patch-organized).
   m_ito->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_particlesPerCell);
-  m_ito->organizeParticlesByPatch(ItoSolver::WhichContainer::Bulk);
 
   // Solve Poisson equation and compute the E-field
   m_fieldSolver->setPermittivities();
@@ -1625,14 +1624,8 @@ ItoKMCStepper<I, C, R, F>::registerOperators() noexcept
   m_rte->registerOperators();
   m_sigmaSolver->registerOperators();
 
-  // If the regrid merge explicitly uses nn_pair, its width-1 particle ghost mask must be registered
-  // here (before the grids build), even when the per-step merge_algorithm is not nn_pair -- the
-  // ItoSolver only registers it for its own configured method. The 'solver' case (nullopt) needs
-  // nothing extra: each ItoSolver already registered whatever its own method requires.
-  if (m_regridMergeMethod.has_value() &&
-      m_regridMergeMethod.value() == ParticleManagement::ParticleMergeMethod::NnPair) {
-    m_amr->registerParticleGhostMask(m_particleRealm, 1);
-  }
+  // Required for non-cell-based particle mergers.
+  m_amr->registerParticleGhostMask(m_particleRealm, 1);
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -1783,18 +1776,20 @@ ItoKMCStepper<I, C, R, F>::regrid(const int a_lmin, const int a_oldFinestLevel, 
   m_rte->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   m_sigmaSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
 
-  // Regrid super-particle merge. m_regridMergeMethod: nullopt => each solver's own merge_algorithm;
-  // a value => that specific method (ParticleMergeMethod::None => off).
-  if (!m_regridMergeMethod.has_value() ||
-      m_regridMergeMethod.value() != ParticleManagement::ParticleMergeMethod::None) {
-    m_ito->organizeParticlesByCell(ItoSolver::WhichContainer::Bulk);
-    if (m_regridMergeMethod.has_value()) {
-      m_ito->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_particlesPerCell, m_regridMergeMethod.value());
-    }
-    else {
+  // Regrid super-particle merge. m_regridMergeMethod: nullopt => "solver", each solver uses its own
+  // configured merge_algorithm; a value => that specific method (ParticleMergeMethod::None => off).
+  // makeSuperparticles() cell-sorts internally as needed and returns the containers patch-organized.
+  const bool useSolverMethod = !m_regridMergeMethod.has_value();
+  const bool mergeIsOff      = m_regridMergeMethod.has_value() &&
+                          m_regridMergeMethod.value() == ParticleManagement::ParticleMergeMethod::None;
+
+  if (!mergeIsOff) {
+    if (useSolverMethod) {
       m_ito->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_particlesPerCell);
     }
-    m_ito->organizeParticlesByPatch(ItoSolver::WhichContainer::Bulk);
+    else {
+      m_ito->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_particlesPerCell, m_regridMergeMethod.value());
+    }
   }
 
   // Redeposit particles and update the electric field on the new mesh.

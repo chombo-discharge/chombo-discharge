@@ -536,12 +536,11 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
 
   // Merge super-particles down to the target after the chemistry advance created/removed particles.
   // Routed through the public ItoSolver::makeSuperparticles() so both per-cell and AMR-wide (nn_pair)
-  // merge algorithms run, chosen by ItoSolver.merge_algorithm. The reaction step left the leaves
-  // unsorted, so cell-sort first; the "Sort by patch" step below returns to the patch view.
+  // merge algorithms run, chosen by ItoSolver.merge_algorithm. makeSuperparticles() cell-sorts
+  // internally as needed and returns the container patch-organized.
   this->barrier();
   m_timer.startEvent("Make superparticles");
   if (this->m_mergeInterval > 0 && (this->m_timeStep + 1) % this->m_mergeInterval == 0) {
-    (this->m_ito)->organizeParticlesByCell(ItoSolver::WhichContainer::Bulk);
     (this->m_ito)->makeSuperparticles(ItoSolver::WhichContainer::Bulk, this->m_particlesPerCell);
   }
   m_timer.stopEvent("Make superparticles");
@@ -755,22 +754,24 @@ ItoKMCGodunovStepper<I, C, R, F>::regrid(const int a_lmin,
   }
   m_timer.stopEvent("Solve Poisson");
 
-  // Regrid super-particle merge. m_regridMergeMethod: nullopt => each solver's own merge_algorithm;
-  // a value => that specific method (ParticleMergeMethod::None => off).
-  if (!this->m_regridMergeMethod.has_value() ||
-      this->m_regridMergeMethod.value() != ParticleManagement::ParticleMergeMethod::None) {
+  // Regrid super-particle merge. m_regridMergeMethod: nullopt => "solver", each solver uses its own
+  // configured merge_algorithm; a value => that specific method (ParticleMergeMethod::None => off).
+  // makeSuperparticles() cell-sorts internally as needed and returns the containers patch-organized.
+  const bool useSolverMethod = !this->m_regridMergeMethod.has_value();
+  const bool mergeIsOff      = this->m_regridMergeMethod.has_value() &&
+                          this->m_regridMergeMethod.value() == ParticleManagement::ParticleMergeMethod::None;
+
+  if (!mergeIsOff) {
     m_timer.startEvent("Make superparticles");
-    (this->m_ito)->organizeParticlesByCell(ItoSolver::WhichContainer::Bulk);
-    if (this->m_regridMergeMethod.has_value()) {
+    if (useSolverMethod) {
+      (this->m_ito)->makeSuperparticles(ItoSolver::WhichContainer::Bulk, (this->m_particlesPerCell));
+    }
+    else {
       (this->m_ito)
         ->makeSuperparticles(ItoSolver::WhichContainer::Bulk,
                              (this->m_particlesPerCell),
                              this->m_regridMergeMethod.value());
     }
-    else {
-      (this->m_ito)->makeSuperparticles(ItoSolver::WhichContainer::Bulk, (this->m_particlesPerCell));
-    }
-    (this->m_ito)->organizeParticlesByPatch(ItoSolver::WhichContainer::Bulk);
     m_timer.stopEvent("Make superparticles");
   }
 
