@@ -590,14 +590,19 @@ BrownianWalkerStepper::makeSuperParticles()
     ParticleContainer<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
     // A merge redistributes weight but must never create or destroy it. When requested, bracket the
-    // merge with a global weight sum and abort if the total drifts by more than round-off.
+    // merge with a global weight sum and abort if the total drifts by more than round-off. Both sums
+    // read the particles in the cell-sorted state: organizeParticlesByCell() rebuilds each leaf into a
+    // contiguous, freshly-allocated buffer, which is the consistent view ParticleOps::sum expects (the
+    // by-patch view straight out of the merge is not).
+    m_solver->organizeParticlesByCell(ItoSolver::WhichContainer::Bulk);
+
     const Real weightBefore = m_verifyConservation ? ParticleOps::sum(particles) : 0.0;
 
-    m_solver->organizeParticlesByCell(ItoSolver::WhichContainer::Bulk);
     m_solver->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_ppc);
-    m_solver->organizeParticlesByPatch(ItoSolver::WhichContainer::Bulk);
 
     if (m_verifyConservation) {
+      m_solver->organizeParticlesByCell(ItoSolver::WhichContainer::Bulk);
+
       const Real weightAfter = ParticleOps::sum(particles);
       const Real absDrift    = std::abs(weightAfter - weightBefore);
 
@@ -606,6 +611,8 @@ BrownianWalkerStepper::makeSuperParticles()
                       "total particle weight");
       }
     }
+
+    m_solver->organizeParticlesByPatch(ItoSolver::WhichContainer::Bulk);
   }
 }
 
