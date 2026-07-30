@@ -127,6 +127,16 @@ It does not run the executables; it only checks that compilation succeeds.
 - Template implementations that are `#include`-d from a header use `*Implem.H`.
 - All files are prefixed with `CD_` (e.g. `CD_AmrMesh.H`, `CD_AmrMesh.cpp`).
 
+### Whitespace conventions clang-format does not enforce
+
+clang-format handles indentation, brace placement, and line wrapping, but it cannot insert blank
+lines to group statements, so a few readability conventions are maintained by hand:
+
+- **A blank line both before and after every loop** (`for`/`while`), not just after it, so the loop
+  reads as its own block separated from the surrounding statements. Do not stack the blank line
+  directly against an enclosing closing brace (a loop that is the last statement in its block needs
+  no blank line between it and that closing brace).
+
 ### Header guards
 
 Header guards must be fully uppercased. A file `CD_FooBar.H` uses:
