@@ -34,6 +34,37 @@
 
 namespace ParticleManagement {
 
+  inline ParticleMergeMethod
+  mergeMethodFromString(const std::string& a_str) noexcept
+  {
+    if (a_str == "none") {
+      return ParticleMergeMethod::None;
+    }
+    else if (a_str == "equal_weight_kd") {
+      return ParticleMergeMethod::EqualWeightKD;
+    }
+    else if (a_str == "reinitialize") {
+      return ParticleMergeMethod::Reinitialize;
+    }
+    else if (a_str == "reinitialize_bvh") {
+      return ParticleMergeMethod::ReinitializeBVH;
+    }
+    else if (a_str == "nn_sfc") {
+      return ParticleMergeMethod::NnSfc;
+    }
+    else if (a_str == "nn_pair") {
+      return ParticleMergeMethod::NnPair;
+    }
+    else if (a_str == "external") {
+      return ParticleMergeMethod::External;
+    }
+    else {
+      MayDay::Abort(("ParticleManagement::mergeMethodFromString - unknown merge method '" + a_str + "'").c_str());
+
+      return ParticleMergeMethod::None;
+    }
+  }
+
   template <class P, Real& (P::*weight)(), const RealVect& (P::*position)() const>
   inline void
   buildEqualWeightKDLeaves(const std::vector<P>&                       a_particles,

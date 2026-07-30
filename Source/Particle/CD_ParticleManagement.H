@@ -30,55 +30,11 @@
 
 /**
   @brief Namespace for various particle management tools.
-  @details This namespace is the single home for chombo-discharge's super-particle merge algorithms.
-  They come in two granularities (see ParticleMergeKind) and are split across two header pairs BY
-  DEPENDENCY WEIGHT -- deliberately, not incidentally: the per-cell mergers declared here are
-  lightweight (only ParticleSoA/CellInfo), whereas the AMR merge pulls in EBGeometry's SIMD BVH,
-  AmrMesh, and MPI. Keeping them apart spares this file's many consumers those heavy includes; a
-  caller that wants every merger at once includes CD_ParticleMergers.H (which pulls in both). The
-  string selectors below are resolved by the consuming solver -- e.g. ItoSolver::parseParticleMerger
-  -- which is the single point that maps a merge_algorithm name to one of these.
-
-  Catalog of merge algorithms:
-
-  Cell-granularity (this file + CD_ParticleManagementImplem.H) -- each is a factory returning a
-  ParticleMerger applied cell-by-cell to a cell-sorted container:
-    - makeEqualWeightKDMerger      : KD-tree equal-weight partition; conserves the cell center-of-mass.
-                                     Backs the 'equal_weight_kd' and 'reinitialize_bvh' selectors.
-    - makeReinitializeMerger       : re-initializes a cell's particles with as-uniform-as-possible
-                                     integer weights. Backs 'reinitialize'.
-    - makeSfcNearestNeighborMerger : space-filling-curve nearest-neighbour clustering. Backs 'nn_sfc'.
-
-  AMR-granularity (CD_NearestNeighborParticleMerge.H / ...Implem.H, same namespace) -- a
-  whole-container, cross-rank collective run once over the entire AMR hierarchy:
-    - mergeNearestNeighborsRound   : distributed, MPI-safe nearest-neighbour merge that matches
-                                     particles across patch and rank boundaries. Backs
-                                     'nn_pair'.
 */
 namespace ParticleManagement {
 
   /**
-    @brief Granularity of a particle-merge algorithm.
-    @details Cell: a per-cell merger (see ParticleMerger) applied cell-by-cell; requires the
-    particles to be cell-sorted first (the caller's responsibility). AMR: a whole-container,
-    cross-rank collective merge (the distributed nearest-neighbor merge) run once over the entire
-    AMR hierarchy; requires the caller to have filled ghost particles first, and does NOT require
-    cell sorting. Consumers (e.g. ItoSolver) store this alongside the chosen algorithm to decide
-    which merge path and pre-merge preparation to use.
-  */
-  enum class ParticleMergeKind
-  {
-    Cell,
-    AMR
-  };
-
-  /**
-    @brief The specific super-particle merge method.
-    @details Finer than ParticleMergeKind (which only says whether a method is per-cell or an
-    AMR-wide collective). A consumer that dispatches AMR-granularity merges stores this so it can pick
-    the right algorithm once more than one AMR method exists. The selector strings a solver maps onto
-    these live with the solver (e.g. ItoSolver.merge_algorithm); see the catalog in this namespace's
-    docs for what each backs.
+    @brief The specific super-particle merge methods.
   */
   enum class ParticleMergeMethod
   {
@@ -92,43 +48,20 @@ namespace ParticleManagement {
   };
 
   /**
-    @brief Map a merge-algorithm selector string to a ParticleMergeMethod -- the single source of
-    truth for the string<->method mapping (used by ItoSolver.merge_algorithm and, e.g.,
-    ItoKMCGodunovStepper.regrid_superparticles).
-    @param[in] a_str One of "none", "equal_weight_kd", "reinitialize", "reinitialize_bvh", "nn_sfc",
-                     "nn_pair", "external".
+    @brief Map a merge-algorithm selector string to a ParticleMergeMethod.
+    @details Valid input options are:
+    'none' -> None
+    'equal_weight_kd' -> EqualWeightKD
+    'reinitialize' -> Reinitialize
+    'reinitialize_bvh' -> ReinitializeBVH
+    'nn_sfc' -> NnSfc
+    'nn_pair' -> NnPair
+    'external' -> External
+    @param[in] a_str String selector. Must take one of the above strings.
     @return The corresponding method; aborts on an unknown selector.
   */
   inline ParticleMergeMethod
-  mergeMethodFromString(const std::string& a_str) noexcept
-  {
-    if (a_str == "none") {
-      return ParticleMergeMethod::None;
-    }
-    else if (a_str == "equal_weight_kd") {
-      return ParticleMergeMethod::EqualWeightKD;
-    }
-    else if (a_str == "reinitialize") {
-      return ParticleMergeMethod::Reinitialize;
-    }
-    else if (a_str == "reinitialize_bvh") {
-      return ParticleMergeMethod::ReinitializeBVH;
-    }
-    else if (a_str == "nn_sfc") {
-      return ParticleMergeMethod::NnSfc;
-    }
-    else if (a_str == "nn_pair") {
-      return ParticleMergeMethod::NnPair;
-    }
-    else if (a_str == "external") {
-      return ParticleMergeMethod::External;
-    }
-    else {
-      MayDay::Abort(("ParticleManagement::mergeMethodFromString - unknown merge method '" + a_str + "'").c_str());
-
-      return ParticleMergeMethod::None;
-    }
-  }
+  mergeMethodFromString(const std::string& a_str) noexcept;
 
   /**
     @brief Concept for splitting/merging particles
