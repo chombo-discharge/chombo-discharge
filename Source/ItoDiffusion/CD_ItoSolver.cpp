@@ -35,6 +35,31 @@
 #include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
+/**
+  @brief Minimal particle payload for the nn_pair merge -- only the energy has to survive.
+  @details mergeSuperparticlesNearestNeighbor() reduces particles by weight and position, carrying a
+  single reconciliation scalar (energy). ItoParticle's other columns (mobility, diffusion, velocity,
+  ...) are recomputed from the field immediately after merging, so they need not ride the repeated,
+  cross-rank ghost exchange. Merging on this much smaller particle -- then rebuilding ItoParticles --
+  keeps the per-round ghost fill and container churn proportional to what the merge actually needs.
+*/
+struct ItoMergeParticle
+{
+  ParticleReal energy = 0.0; ///< Average particle energy -- the only payload the nn_pair merge carries.
+};
+
+/**
+  @brief ParticleTraits for ItoMergeParticle: a single energy payload column.
+*/
+template <>
+struct ParticleTraits<ItoMergeParticle>
+{
+  /**
+    @brief The one payload column.
+  */
+  static constexpr auto columns = std::make_tuple(&ItoMergeParticle::energy);
+};
+
 constexpr int ItoSolver::m_comp;
 constexpr int ItoSolver::m_nComp;
 
@@ -3595,11 +3620,40 @@ ItoSolver::mergeSuperparticlesNearestNeighbor(const WhichContainer a_container, 
 
   ParticleContainer<ItoParticle>& particles = this->getParticles(a_container);
 
-  // ---- Reconciliation callbacks (built once, reused across every drain round below) ----
-  // The opaque payload is just the particle's energy -- mobility/diffusion/velocity are safe to drop
-  // across a merge since they are recomputed from field interpolation before they are next used.
-  auto gather = [](const ParticleSoA<ItoParticle>& a_leaf, const std::size_t a_idx) -> Real {
-    return a_leaf.template get<&ItoParticle::energy>(a_idx);
+  // ---- Merge on a minimal particle (position + weight owned by the leaf, energy the only payload) ----
+  // ItoParticle carries far more than the merge needs; its mobility/diffusion/velocity/... are
+  // recomputed from the field right after merging. Copy the few columns the merge uses into a small
+  // ItoMergeParticle container on the SAME realm, kill the ItoParticles, run the whole merge+split on
+  // the small type -- so the repeated cross-rank ghost exchange and container churn move only a couple
+  // of reals per particle instead of the full ItoParticle -- then rebuild the ItoParticles.
+  ParticleContainer<ItoMergeParticle> merge;
+  m_amr->allocate(merge, m_realm);
+
+  // Extract into the SAME patch (positions unchanged => ownership unchanged => no remap needed).
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl  = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit  = dbl.dataIterator();
+    const int                nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex&                din       = dit[mybox];
+      const ParticleSoA<ItoParticle>& itoLeaf   = particles[lvl][din];
+      ParticleSoA<ItoMergeParticle>&  mergeLeaf = merge[lvl][din];
+
+      for (std::size_t i = 0; i < itoLeaf.size(); i++) {
+        ItoMergeParticle p;
+        p.energy = itoLeaf.template get<&ItoParticle::energy>(i);
+
+        mergeLeaf.append(itoLeaf.position(i), itoLeaf.weight(i), p);
+      }
+    }
+  }
+  particles.clearParticles();
+
+  // ---- Reconciliation callbacks (on the small particle) ----
+  auto gather = [](const ParticleSoA<ItoMergeParticle>& a_leaf, const std::size_t a_idx) -> Real {
+    return a_leaf.template get<&ItoMergeParticle::energy>(a_idx);
   };
   auto combine = [](const Real a_firstEnergy,
                     const Real a_firstWeight,
@@ -3607,11 +3661,12 @@ ItoSolver::mergeSuperparticlesNearestNeighbor(const WhichContainer a_container, 
                     const Real a_secondWeight) -> Real {
     return (a_firstWeight * a_firstEnergy + a_secondWeight * a_secondEnergy) / (a_firstWeight + a_secondWeight);
   };
-  auto scatter = [](ParticleSoA<ItoParticle>& a_leaf, const ParticleManagement::NNMergeParticle<Real>& a_p) -> void {
-    ItoParticle payload;
-    payload.energy = a_p.payload;
+  auto scatter = [](ParticleSoA<ItoMergeParticle>&                   a_leaf,
+                    const ParticleManagement::NNMergeParticle<Real>& a_p) -> void {
+    ItoMergeParticle p;
+    p.energy = a_p.payload;
 
-    a_leaf.append(a_p.position, a_p.weight, payload);
+    a_leaf.append(a_p.position, a_p.weight, p);
     a_leaf.particleID(a_leaf.size() - 1) = a_p.globalID;
     a_leaf.rankID(a_leaf.size() - 1)     = a_p.ownerRank;
   };
@@ -3657,7 +3712,7 @@ ItoSolver::mergeSuperparticlesNearestNeighbor(const WhichContainer a_container, 
   // to the target. maxDrainRounds is only a safety net -- the loop terminates on its own because the
   // count strictly decreases while any merge happens.
   constexpr int      maxDrainRounds = 100;
-  unsigned long long nAfter         = particles.getNumberOfValidParticlesGlobal();
+  unsigned long long nAfter         = merge.getNumberOfValidParticlesGlobal();
   for (int round = 0; round < maxDrainRounds; round++) {
     const unsigned long long nBefore = nAfter;
 
@@ -3665,7 +3720,7 @@ ItoSolver::mergeSuperparticlesNearestNeighbor(const WhichContainer a_container, 
     // copies each ghost's id from its (now-numbered) source. rankID is this rank (all owned valid
     // particles).
     nextID = rankBase;
-    particles.clearGhostParticles();
+    merge.clearGhostParticles();
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
       const DataIterator&      dit = dbl.dataIterator();
@@ -3673,7 +3728,7 @@ ItoSolver::mergeSuperparticlesNearestNeighbor(const WhichContainer a_container, 
       const int nbox = dit.size();
 
       for (int mybox = 0; mybox < nbox; mybox++) {
-        ParticleSoA<ItoParticle>& leaf = particles[lvl][dit[mybox]];
+        ParticleSoA<ItoMergeParticle>& leaf = merge[lvl][dit[mybox]];
 
         for (std::size_t i = 0; i < leaf.size(); i++) {
           leaf.particleID(i) = allocateID();
@@ -3684,26 +3739,26 @@ ItoSolver::mergeSuperparticlesNearestNeighbor(const WhichContainer a_container, 
 
     // The round reads a width-1 ghost halo as candidates but does NOT fill it -- filling is the
     // caller's responsibility (see mergeNearestNeighborsRound()). The width-1 mask was registered on
-    // this realm in registerOperators().
-    particles.fillGhostParticles(m_amr->getParticleGhostMask(m_realm, 1),
-                                 m_amr->getParticleGhostMaskCoarToFine(m_realm, 1),
-                                 m_amr->getParticleGhostMaskFineToCoar(m_realm, 1));
+    // this realm in registerOperators() and is geometric, so it drives any container on the realm.
+    merge.fillGhostParticles(m_amr->getParticleGhostMask(m_realm, 1),
+                             m_amr->getParticleGhostMaskCoarToFine(m_realm, 1),
+                             m_amr->getParticleGhostMaskFineToCoar(m_realm, 1));
 
-    ParticleManagement::mergeNearestNeighborsRound<ItoParticle, Real>(*m_amr,
-                                                                      particles,
-                                                                      a_numParticlesPerCellThresh,
-                                                                      gather,
-                                                                      combine,
-                                                                      scatter,
-                                                                      allocateID,
-                                                                      m_nnPairIterate,
-                                                                      m_nnPairFallback,
-                                                                      maxCellDistance,
-                                                                      isPositionValid);
+    ParticleManagement::mergeNearestNeighborsRound<ItoMergeParticle, Real>(*m_amr,
+                                                                           merge,
+                                                                           a_numParticlesPerCellThresh,
+                                                                           gather,
+                                                                           combine,
+                                                                           scatter,
+                                                                           allocateID,
+                                                                           m_nnPairIterate,
+                                                                           m_nnPairFallback,
+                                                                           maxCellDistance,
+                                                                           isPositionValid);
 
     // getNumberOfValidParticlesGlobal() is an MPI collective -- every rank calls it and breaks on the
     // same global value, so the loop stays in lockstep across ranks.
-    nAfter = particles.getNumberOfValidParticlesGlobal();
+    nAfter = merge.getNumberOfValidParticlesGlobal();
     if (nAfter >= nBefore) {
       break;
     }
@@ -3711,10 +3766,7 @@ ItoSolver::mergeSuperparticlesNearestNeighbor(const WhichContainer a_container, 
 
   // ================================= SPLIT PHASE =================================
   // The merge only drains over-full cells. A cell BELOW the target is brought up to it by splitting.
-  // This is purely per-cell, so it is done directly here (NOT through m_particleCellMerger, which is a
-  // no-op for nn_pair and is also used by reconcileParticles() as a merger). The merge left the
-  // container patch-organized; cell-sort so the per-cell CSR ranges are valid. The caller organizes
-  // back to patches afterwards, exactly as for a cell-based merge.
+  // The merge left the small container patch-organized; cell-sort so the per-cell CSR ranges are valid.
   //
   // Greedy heaviest-split (same rule as sfc_nn): repeatedly halve the heaviest particle into two
   // co-located daughters -- floor/ceil so integer weights stay integer and both daughters keep weight
@@ -3722,7 +3774,7 @@ ItoSolver::mergeSuperparticlesNearestNeighbor(const WhichContainer a_container, 
   // Daughters sit at the parent's position and inherit its energy, so the spatial distribution and the
   // weighted centroid are preserved. No EB check is needed: a daughter is co-located with a parent that
   // already lives at a valid position.
-  this->organizeParticlesByCell(a_container);
+  merge.organizeParticlesByCell();
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
     const DataIterator&      dit = dbl.dataIterator();
@@ -3734,10 +3786,10 @@ ItoSolver::mergeSuperparticlesNearestNeighbor(const WhichContainer a_container, 
       const DataIndex& din  = dit[mybox];
       const Box        cbox = dbl[din];
 
-      ParticleSoA<ItoParticle>& leaf = particles[lvl][din];
+      ParticleSoA<ItoMergeParticle>& leaf = merge[lvl][din];
 
-      ParticleSoA<ItoParticle> split;
-      ParticleSoA<ItoParticle> scratch;
+      ParticleSoA<ItoMergeParticle> split;
+      ParticleSoA<ItoMergeParticle> scratch;
 
       // BoxIterator visits cells in the same (x-fastest) order as sortByCell's CSR cell index.
       std::size_t cellIndex = 0;
@@ -3763,8 +3815,8 @@ ItoSolver::mergeSuperparticlesNearestNeighbor(const WhichContainer a_container, 
           const Real     halfWeight = std::floor(scratch.weight(hi) * 0.5);
           const RealVect x          = scratch.position(hi);
 
-          ItoParticle daughter;
-          daughter.energy = static_cast<ParticleReal>(scratch.template get<&ItoParticle::energy>(hi));
+          ItoMergeParticle daughter;
+          daughter.energy = scratch.template get<&ItoMergeParticle::energy>(hi);
 
           scratch.weight(hi) -= halfWeight;
           scratch.append(x, halfWeight, daughter);
@@ -3774,6 +3826,28 @@ ItoSolver::mergeSuperparticlesNearestNeighbor(const WhichContainer a_container, 
       }
 
       leaf.swap(split);
+    }
+  }
+
+  // ---- Rebuild ItoParticles from the merged/split small particles, into the SAME patch (no remap) ----
+  // velocity/mobility/diffusion/... default to zero and are recomputed from the field before use.
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl  = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit  = dbl.dataIterator();
+    const int                nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex&                     din       = dit[mybox];
+      const ParticleSoA<ItoMergeParticle>& mergeLeaf = merge[lvl][din];
+      ParticleSoA<ItoParticle>&            itoLeaf   = particles[lvl][din];
+
+      for (std::size_t i = 0; i < mergeLeaf.size(); i++) {
+        ItoParticle p;
+        p.energy = mergeLeaf.template get<&ItoMergeParticle::energy>(i);
+
+        itoLeaf.append(mergeLeaf.position(i), mergeLeaf.weight(i), p);
+      }
     }
   }
 }
