@@ -41,11 +41,10 @@ class AmrMesh;
 /**
   @brief Namespace for various particle management tools.
   @details This file adds a nearest-neighbor super-particle merge that is safe across patch and rank
-  boundaries -- see RULES.md at the repository root for the design rationale and the rules this
-  implementation follows. Candidates are found against a particle's full neighborhood (its own patch
-  plus every ghost, filled once per round); a pair where neither participant is reachable from
-  outside the patch resolves immediately (the "trivial tier"), and everything else goes through a
-  propose/judge/verdict protocol that is safe for any number of simultaneous cross-patch suitors.
+  boundaries. Candidates are found against a particle's full neighborhood (its own patch plus every
+  ghost, filled once per round); a pair where neither participant is reachable from outside the patch
+  resolves immediately (the "trivial tier"), and everything else goes through a propose/judge/verdict
+  protocol that is safe for any number of simultaneous cross-patch suitors.
 */
 namespace ParticleManagement {
 
@@ -81,9 +80,8 @@ namespace ParticleManagement {
     ParticleID globalID;
 
     /**
-      @brief The rank that currently owns this particle. Always read from the particle's own data
-      (see RULES.md, "Data model"): the single source of truth, never inferred from MPI
-      transport/source-rank metadata.
+      @brief The rank that currently owns this particle. Always read from the particle's own data --
+      the single source of truth, never inferred from MPI transport/source-rank metadata.
     */
     RankID ownerRank;
 
@@ -137,8 +135,7 @@ namespace ParticleManagement {
     findNearestNeighborCandidates() -- exactly one edge per query particle, its single nearest
     neighbor among {this patch's own other valid particles} union {every ghost}. Distance is carried
     explicitly (never recomputed downstream) so trivial-tier resolution and the judge apply the same
-    "closest-first, with a deterministic id tiebreak on exact ties" ordering (see RULES.md, "Trivial
-    tier" and "Judge").
+    "closest-first, with a deterministic id tiebreak on exact ties" ordering.
     @tparam Packed See NNMergeParticle.
   */
   template <typename Packed>
@@ -151,7 +148,7 @@ namespace ParticleManagement {
 
     /**
       @brief Global id of the query particle (always locally valid/owned -- ghosts never
-      initiate a query, see RULES.md, "Propose").
+      initiate a query).
     */
     ParticleID queryID;
 
@@ -164,9 +161,8 @@ namespace ParticleManagement {
     /**
       @brief True iff the candidate is a locally-valid particle in the SAME patch as the query
       (i.e. not a ghost). Note this is NOT sufficient on its own to decide trivial-tier
-      eligibility -- see isBoundaryExposed() and RULES.md, "Boundary-exposed classification": a
-      same-patch candidate can still require the propose/judge/verdict protocol if either
-      participant is boundary-exposed.
+      eligibility -- see isBoundaryExposed(): a same-patch candidate can still require the
+      propose/judge/verdict protocol if either participant is boundary-exposed.
     */
     bool candidateIsLocal;
 
@@ -186,8 +182,8 @@ namespace ParticleManagement {
     bundled as a self-contained, atomic pair for shipment to whichever rank owns the candidate.
     @details Carries full data for both participants (not a bare id reference) so the judge's
     decision is self-contained and it can never recombine pieces across different incoming
-    proposals. See RULES.md, "Propose". Routing rule (see generateProposals()): a proposal is always
-    sent to the owner of the querying particle's best candidate, never by any id comparison.
+    proposals. Routing rule (see generateProposals()): a proposal is always sent to the owner of the
+    querying particle's best candidate, never by any id comparison.
     @tparam Packed See NNMergeParticle.
   */
   template <typename Packed>
@@ -213,10 +209,10 @@ namespace ParticleManagement {
 
   /**
     @brief The judge's reply to one proposal.
-    @details See RULES.md, "Verdict and placement": accepted implies the judge has already
-    created the merged particle and removed its own (target) particle; the proposer, on
-    receiving an accepted verdict, removes its own (source) particle. Rejected implies no action
-    on either side -- the proposer's particle is simply reconsidered next round.
+    @details Accepted implies the judge has already created the merged particle and removed its own
+    (target) particle; the proposer, on receiving an accepted verdict, removes its own (source)
+    particle. Rejected implies no action on either side -- the proposer's particle is simply
+    reconsidered next round.
   */
   struct NNMergeVerdict
   {
@@ -325,9 +321,9 @@ namespace ParticleManagement {
 
   /**
     @brief The unclamped, position-derived cell index a given physical position falls in.
-    @details The cell-key convention used throughout for the crowding trigger and a_maxCellDistance
-    (see RULES.md, "Crowding trigger"). Not clamped to any patch's box, so a ghost buckets into its
-    true origin cell and particles in different patches' local frames stay directly comparable.
+    @details The cell-key convention used throughout for the crowding trigger and a_maxCellDistance.
+    Not clamped to any patch's box, so a ghost buckets into its true origin cell and particles in
+    different patches' local frames stay directly comparable.
     @warning a_dx MUST be the cell spacing of the AMR level the position's particle lives on (see
     NNMergeParticle::level), never a single fixed dx shared across levels. The returned IntVect is
     only meaningful together with that level; NNCellKey pairs the two so they cannot be conflated
@@ -480,7 +476,7 @@ namespace ParticleManagement {
     against the patch's own outgoing ghost mask -- whether this particle's cell has any registered
     destination (@c ParticleGhostMask::numTargets()) -- not "same rank" and not "same ParticleSoA": a
     particle can be exposed to a different patch owned by the same rank, and can be exposed while its
-    candidate sits in the same ParticleSoA (see RULES.md, "Boundary-exposed classification").
+    candidate sits in the same ParticleSoA.
     @param[in] a_cellIndex Cell index (IntVect) of the particle, in this patch's own local frame
                             -- i.e. whatever a_ghostMask itself is keyed by (see
                             ParticleGhostMask::define()/addTarget()).
@@ -501,12 +497,11 @@ namespace ParticleManagement {
     TRUE nearest neighbor among {this patch's own other valid particles} union {every ghost
     shipped to this patch}.
     @details This is the only place a nearest-neighbor search happens, and it always runs against
-    the full (local + ghost) view, never a local-only view (see RULES.md, "Sequencing"): restricting
-    it biases boundary-adjacent particles toward worse matches than interior ones. Crowding
-    eligibility (is the query's own cell over threshold) is checked here at generation time from the
-    live per-cell counts over valid + ghost occupancy; the symmetric check on the candidate's cell is
-    done later, dynamically, by resolveTrivialTier()/judgeProposals(), since earlier merges this round
-    can change it (see RULES.md, "Crowding trigger").
+    the full (local + ghost) view, never a local-only view: restricting it biases boundary-adjacent
+    particles toward worse matches than interior ones. Crowding eligibility (is the query's own cell
+    over threshold) is checked here at generation time from the live per-cell counts over valid +
+    ghost occupancy; the symmetric check on the candidate's cell is done later, dynamically, by
+    resolveTrivialTier()/judgeProposals(), since earlier merges this round can change it.
 
     a_localValid/a_ghosts are this patch's full, unfiltered sets for the round; this function does the
     alive-filtering itself via a_consumedIDs (checked against both the query and every candidate).
@@ -596,9 +591,8 @@ namespace ParticleManagement {
     coordination, and mark which remaining particles have committed to a non-trivial outgoing
     proposal.
     @details An edge is trivial-tier eligible iff NEITHER the query nor the candidate is
-    boundary-exposed (see isBoundaryExposed()) -- evaluated per RULES.md, "Trivial tier": this
-    check happens AFTER finding the true nearest neighbor, never as a restriction on the search
-    itself.
+    boundary-exposed (see isBoundaryExposed()) -- this check happens AFTER finding the true nearest
+    neighbor, never as a restriction on the search itself.
 
     All eligible edges (across every patch this rank owns) are processed in ONE globally
     distance-sorted order, with a deterministic secondary tiebreak on participant ids -- exact
@@ -755,8 +749,8 @@ namespace ParticleManagement {
     caller (mergeNearestNeighborsRound()) is expected to hand the "bucket addressed to myself"
     directly to judgeProposals() in-process, without an actual MPI round-trip, while every other
     bucket goes out over MPI. This keeps the decision logic in judgeProposals() completely
-    unaware of whether a given proposal arrived locally or over the network -- see RULES.md,
-    "Propose": "this still goes through the exact same pooled judge logic ... never a shortcut."
+    unaware of whether a given proposal arrived locally or over the network -- it still goes through
+    the exact same pooled judge logic, never a shortcut.
     @tparam Packed See NNMergeParticle.
     @param[in]  a_edges                 Candidate edges from findNearestNeighborCandidates(), for
                                          all of this rank's patches.
@@ -782,7 +776,7 @@ namespace ParticleManagement {
   /**
     @brief Judge every incoming proposal that targets a particle this rank owns, and produce the
     verdicts to send back.
-    @details See RULES.md, "Judge", for the full rule set this implements; summarized:
+    @details The full rule set this function implements, summarized:
       1. Group incoming proposals by target id.
       2. For a target with NO outgoing commitment of its own: the eligible candidate is the
          minimum-distance incoming proposal (deterministic id tiebreak on exact ties).
@@ -913,9 +907,8 @@ namespace ParticleManagement {
     @brief Apply every verdict addressed to one of this rank's own outgoing proposals: remove
     the source particle for every accepted proposal, do nothing for rejected ones.
     @details Rejected proposals are deliberately a no-op -- the source particle is simply left
-    alone and reconsidered next round's fresh candidate search (see RULES.md, "Single pass,
-    caller loops for convergence": this algorithm never internally retries a rejected proposal
-    against a second-best candidate within the same round).
+    alone and reconsidered in next round's fresh candidate search. This algorithm never internally
+    retries a rejected proposal against a second-best candidate within the same round.
     @param[in]  a_incomingVerdicts All verdicts addressed to this rank, pooled from every judge
                                    rank (including this rank's own in-process verdict for
                                    proposals it judged for itself).
@@ -929,7 +922,7 @@ namespace ParticleManagement {
   /**
     @brief Result of locating a physical position against the AMR grid -- see placeMergedParticles().
     @details Deliberately independent of any AmrMesh/Realm/ParticleContainer type (this header
-    stays Amr-agnostic, see RULES.md) -- mirrors ParticleContainer::Destination's fields exactly,
+    stays Amr-agnostic) -- mirrors ParticleContainer::Destination's fields exactly,
     since that IS the intended real implementation: an O(1) point->block query on the realm's
     LevelTiles tile->box hash (the SAME lookup a ParticleContainer already uses internally to
     route its own particles during remap()), never a linear scan over patches. Reusing
@@ -976,12 +969,12 @@ namespace ParticleManagement {
   /**
     @brief Point-locate a newly created merged particle against the AMR grid, and bucket it for a
     scatter exchange if it belongs to someone else.
-    @details Applied UNIFORMLY to every merge result, trivial-tier and judge-decided alike -- see
-    RULES.md, "Placement": the union of two patches is not generally convex (T-junctions,
-    corners, refinement boundaries), so even a purely local (same-rank) merge's result can
-    legitimately belong to a third patch, possibly owned by a different rank. Point-location must
-    be O(1) per result (see PositionLocator/NNParticleLocation) -- NEVER a linear scan over every
-    patch, which would turn this function into a real bottleneck at large patch counts.
+    @details Applied UNIFORMLY to every merge result, trivial-tier and judge-decided alike: the
+    union of two patches is not generally convex (T-junctions, corners, refinement boundaries), so
+    even a purely local (same-rank) merge's result can legitimately belong to a third patch,
+    possibly owned by a different rank. Point-location must be O(1) per result (see
+    PositionLocator/NNParticleLocation) -- NEVER a linear scan over every patch, which would turn
+    this function into a real bottleneck at large patch counts.
     @tparam Packed See NNMergeParticle.
     @param[in]  a_results        Every merge result produced this round by resolveTrivialTier()
                                   and judgeProposals(), pooled together.
@@ -1005,7 +998,7 @@ namespace ParticleManagement {
 
   /**
     @brief Run one full round (one timestep's worth) of the nearest-neighbor merge algorithm.
-    @details Orchestrates, in order (see RULES.md for the rationale behind this sequencing):
+    @details Orchestrates, in order:
       1. Ghost-fill -- fresh, exactly once, strictly before any of the below, via
          ParticleContainer::fillGhostParticles() with the AmrMesh particle ghost masks. This
          function does not fill ghosts itself: the caller fills them first, and must have registered
@@ -1028,13 +1021,12 @@ namespace ParticleManagement {
     within the same round; a rank-namespaced counter suffices (see a_allocateID / IDAllocator).
 
     This function does a SINGLE cross-patch exchange (propose/judge/verdict happens exactly
-    once) regardless of a_iterateLocalTierToConvergence -- see RULES.md, "Single pass, caller
-    loops for convergence": a cell more than roughly 2x over threshold is not necessarily fully
-    drained by the cross-patch protocol in one call, and the caller is still expected to invoke
-    this once per timestep, relying on repeated calls (and, in a real simulation, particle motion
-    between them) for further convergence of anything the cross-patch protocol itself left
-    unresolved. What a_iterateLocalTierToConvergence changes is only the LOCAL (trivial-tier)
-    portion of a single call -- see its own documentation below.
+    once) regardless of a_iterateLocalTierToConvergence: a cell more than roughly 2x over threshold
+    is not necessarily fully drained by the cross-patch protocol in one call, and the caller is
+    still expected to invoke this once per timestep, relying on repeated calls (and, in a real
+    simulation, particle motion between them) for further convergence of anything the cross-patch
+    protocol itself left unresolved. What a_iterateLocalTierToConvergence changes is only the LOCAL
+    (trivial-tier) portion of a single call -- see its own documentation below.
 
     @tparam P       SoA payload type (e.g. ItoParticle).
     @tparam Packed  Opaque reconciliation payload type for the merge decision layer (see
@@ -1074,8 +1066,7 @@ namespace ParticleManagement {
                                                 gain is modest -- re-running only helps when a
                                                 particle's best available choice actually changes
                                                 between iterations; a_maxFallbackCandidates below
-                                                addresses the more common, stable loss. See RULES.md,
-                                                "Single pass, caller loops for convergence".
+                                                addresses the more common, stable loss.
     @param[in]     a_maxFallbackCandidates     Forwarded to resolveTrivialTier() (see its docs).
                                                 Default 0 (disabled). Lets a query blocked from a good
                                                 local partner (because that partner is already "busy"
