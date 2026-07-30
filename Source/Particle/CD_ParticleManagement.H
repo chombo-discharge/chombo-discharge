@@ -102,8 +102,8 @@ namespace ParticleManagement {
        P::*position -> Member function returning a const reference to the particle position.
 
     P must be an AoS-style particle type with weight()/position() member functions (e.g. NonCommParticle).
-    SoA payload types (ItoParticle, ...) have no such methods; pack their columns into such an intermediary
-    first (as ItoSolver::makeSuperparticlesEqualWeightKD does).
+    ParticleSoA payload types (ItoParticle, ...) have no such methods; pack their columns into such an
+    intermediary AoS structure first.
 
     @param[in]  a_particles         Input particles (copied into internal scratch; not modified).
     @param[in]  a_maxLeaves         Maximum number of leaf nodes (the per-cell target particle count).
