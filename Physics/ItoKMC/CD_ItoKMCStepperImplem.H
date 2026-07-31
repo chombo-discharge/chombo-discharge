@@ -37,49 +37,49 @@
 using namespace Physics::ItoKMC;
 
 namespace {
-  // SoA per-cell extract/rebuild bridge for the ItoKMC reaction kernels. The reaction interface operates on
-  // per-cell SoA scratch containers (one small ParticleSoA<P> per grid cell) extracted from the leaves; the
-  // mutated scratches are concatenated back into the leaf. Mirrors ItoSolver::makeSuperparticles. The per-cell
-  // vector is indexed by the box's Fortran cell offset (Box::index), which matches ParticleSoA::sortByCell.
+// SoA per-cell extract/rebuild bridge for the ItoKMC reaction kernels. The reaction interface operates on
+// per-cell SoA scratch containers (one small ParticleSoA<P> per grid cell) extracted from the leaves; the
+// mutated scratches are concatenated back into the leaf. Mirrors ItoSolver::makeSuperparticles. The per-cell
+// vector is indexed by the box's Fortran cell offset (Box::index), which matches ParticleSoA::sortByCell.
 
-  // Cell-sort a_leaf and extract each cell into a_cells[Box::index(iv)] (one ParticleSoA<P> per cell).
-  template <typename P, typename Traits>
-  inline void
-  binLeafToCells(std::vector<ParticleSoA<P, Traits>>& a_cells,
-                 ParticleSoA<P, Traits>&              a_leaf,
-                 const Box&                           a_box,
-                 const Real                           a_dx,
-                 const RealVect&                      a_probLo) noexcept
-  {
-    a_leaf.sortByCell(a_box, a_dx * RealVect::Unit, a_probLo);
+// Cell-sort a_leaf and extract each cell into a_cells[Box::index(iv)] (one ParticleSoA<P> per cell).
+template <typename P, typename Traits>
+inline void
+binLeafToCells(std::vector<ParticleSoA<P, Traits>>& a_cells,
+               ParticleSoA<P, Traits>&              a_leaf,
+               const Box&                           a_box,
+               const Real                           a_dx,
+               const RealVect&                      a_probLo) noexcept
+{
+  a_leaf.sortByCell(a_box, a_dx * RealVect::Unit, a_probLo);
 
-    a_cells.clear();
-    a_cells.resize(a_box.numPts());
-    for (std::size_t c = 0; c < a_leaf.numCells(); c++) {
-      a_leaf.extractCell(c, a_cells[c]);
-    }
+  a_cells.clear();
+  a_cells.resize(a_box.numPts());
+  for (std::size_t c = 0; c < a_leaf.numCells(); c++) {
+    a_leaf.extractCell(c, a_cells[c]);
   }
+}
 
-  // Rebuild a_leaf from the per-cell scratch vector (concatenate all cells, then swap into the leaf).
-  template <typename P, typename Traits>
-  inline void
-  rebuildLeafFromCells(ParticleSoA<P, Traits>& a_leaf, const std::vector<ParticleSoA<P, Traits>>& a_cells) noexcept
-  {
-    ParticleSoA<P, Traits> rebuilt;
+// Rebuild a_leaf from the per-cell scratch vector (concatenate all cells, then swap into the leaf).
+template <typename P, typename Traits>
+inline void
+rebuildLeafFromCells(ParticleSoA<P, Traits>& a_leaf, const std::vector<ParticleSoA<P, Traits>>& a_cells) noexcept
+{
+  ParticleSoA<P, Traits> rebuilt;
 
-    // Pre-reserve the known total so the append loop allocates once instead of growing
-    // geometrically (O(log N) reallocations) on every reaction-kernel step.
-    std::size_t total = 0;
-    for (const ParticleSoA<P, Traits>& cell : a_cells) {
-      total += cell.size();
-    }
-    rebuilt.reserve(total);
-
-    for (const ParticleSoA<P, Traits>& cell : a_cells) {
-      rebuilt.append(cell);
-    }
-    a_leaf.swap(rebuilt);
+  // Pre-reserve the known total so the append loop allocates once instead of growing
+  // geometrically (O(log N) reallocations) on every reaction-kernel step.
+  std::size_t total = 0;
+  for (const ParticleSoA<P, Traits>& cell : a_cells) {
+    total += cell.size();
   }
+  rebuilt.reserve(total);
+
+  for (const ParticleSoA<P, Traits>& cell : a_cells) {
+    rebuilt.append(cell);
+  }
+  a_leaf.swap(rebuilt);
+}
 
 } // namespace
 

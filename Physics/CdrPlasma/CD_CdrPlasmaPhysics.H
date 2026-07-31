@@ -24,9 +24,9 @@
 #include <CD_NamespaceHeader.H>
 
 namespace Physics {
-  namespace CdrPlasma {
+namespace CdrPlasma {
 
-    /**
+/**
        @brief Abstract interface for specifying plasma kinetics in the CdrPlasma physics module.
        @details This class defines the coupling functions required by CdrPlasmaStepper to advance
        a system of convection-diffusion-reaction (CDR) equations for charged and neutral species
@@ -48,52 +48,52 @@ namespace Physics {
        The ordering of species in all input/output vectors throughout this interface matches the
        ordering in those two containers.
     */
-    class CdrPlasmaPhysics
-    {
-    public:
-      /**
+class CdrPlasmaPhysics
+{
+public:
+  /**
          @brief Default constructor. Does nothing.
       */
-      CdrPlasmaPhysics()
-      {}
+  CdrPlasmaPhysics()
+  {}
 
-      /**
+  /**
          @brief Destructor. Does nothing.
       */
-      virtual ~CdrPlasmaPhysics()
-      {}
+  virtual ~CdrPlasmaPhysics()
+  {}
 
-      /**
+  /**
          @brief Parse runtime options. Default implementation does nothing.
       */
-      virtual void
-      parseRuntimeOptions() {};
+  virtual void
+  parseRuntimeOptions() {};
 
-      /**
+  /**
          @brief Return the number of plot variables provided by this physics class.
          @details CdrPlasmaStepper calls this to pre-allocate output storage. The returned value must
          match the length of the vectors returned by getPlotVariableNames() and getPlotVariables().
          @return Number of extra plot variables. Default is 0.
       */
-      virtual int
-      getNumberOfPlotVariables() const
-      {
-        return 0;
-      }
+  virtual int
+  getNumberOfPlotVariables() const
+  {
+    return 0;
+  }
 
-      /**
+  /**
          @brief Return the names of the extra plot variables.
          @details The length of the returned vector must match getNumberOfPlotVariables(). The
          ordering must be consistent with getPlotVariables().
          @return Vector of variable names.
       */
-      virtual Vector<std::string>
-      getPlotVariableNames() const
-      {
-        return Vector<std::string>(this->getNumberOfPlotVariables(), std::string("empty data"));
-      }
+  virtual Vector<std::string>
+  getPlotVariableNames() const
+  {
+    return Vector<std::string>(this->getNumberOfPlotVariables(), std::string("empty data"));
+  }
 
-      /**
+  /**
          @brief Evaluate the extra plot variables at a single grid point.
          @details Called by CdrPlasmaStepper when writing plot files. The length of the returned
          vector must match getNumberOfPlotVariables().
@@ -108,41 +108,41 @@ namespace Physics {
          @param[in] a_kappa         Volume fraction of the grid cell.
          @return Vector of plot variable values.
       */
-      virtual Vector<Real>
-      getPlotVariables(const Vector<Real>&     a_cdrDensities,
-                       const Vector<RealVect>& a_cdrGradients,
-                       const Vector<Real>&     a_rteDensities,
-                       const RealVect&         a_E,
-                       const RealVect&         a_position,
-                       const Real              a_dx,
-                       const Real              a_dt,
-                       const Real              a_time,
-                       const Real              a_kappa) const
-      {
-        return Vector<Real>(this->getNumberOfPlotVariables(), 1.0);
-      }
+  virtual Vector<Real>
+  getPlotVariables(const Vector<Real>&     a_cdrDensities,
+                   const Vector<RealVect>& a_cdrGradients,
+                   const Vector<Real>&     a_rteDensities,
+                   const RealVect&         a_E,
+                   const RealVect&         a_position,
+                   const Real              a_dx,
+                   const Real              a_dt,
+                   const Real              a_time,
+                   const Real              a_kappa) const
+  {
+    return Vector<Real>(this->getNumberOfPlotVariables(), 1.0);
+  }
 
-      /**
+  /**
          @brief Compute the Townsend ionization coefficient alpha.
          @details Used primarily by cell tagging classes to identify high-ionization regions.
          @param[in] a_E        Electric field magnitude (V/m).
          @param[in] a_position Physical position.
          @return Townsend ionization coefficient (1/m).
       */
-      virtual Real
-      computeAlpha(const Real a_E, const RealVect& a_position) const = 0;
+  virtual Real
+  computeAlpha(const Real a_E, const RealVect& a_position) const = 0;
 
-      /**
+  /**
          @brief Compute the Townsend attachment coefficient eta.
          @details Used primarily by cell tagging classes to identify attachment-dominated regions.
          @param[in] a_E        Electric field magnitude (V/m).
          @param[in] a_position Physical position.
          @return Townsend attachment coefficient (1/m).
       */
-      virtual Real
-      computeEta(const Real a_E, const RealVect& a_position) const = 0;
+  virtual Real
+  computeEta(const Real a_E, const RealVect& a_position) const = 0;
 
-      /**
+  /**
          @brief Advance the reaction network over a time interval and return source terms.
          @details The advance is assumed to take the form phi^{k+1} = phi^k + S * dt. Implementations
          may either fill a_cdrSources and a_rteSources directly (explicit rule), or perform a
@@ -159,20 +159,20 @@ namespace Physics {
          @param[in]  a_time         Current simulation time.
          @param[in]  a_kappa        Volume fraction of the grid cell.
       */
-      virtual void
-      advanceReactionNetwork(Vector<Real>&           a_cdrSources,
-                             Vector<Real>&           a_rteSources,
-                             const Vector<Real>&     a_cdrDensities,
-                             const Vector<RealVect>& a_cdrGradients,
-                             const Vector<Real>&     a_rteDensities,
-                             const RealVect&         a_E,
-                             const RealVect&         a_pos,
-                             const Real              a_dx,
-                             const Real              a_dt,
-                             const Real              a_time,
-                             const Real              a_kappa) const = 0;
+  virtual void
+  advanceReactionNetwork(Vector<Real>&           a_cdrSources,
+                         Vector<Real>&           a_rteSources,
+                         const Vector<Real>&     a_cdrDensities,
+                         const Vector<RealVect>& a_cdrGradients,
+                         const Vector<Real>&     a_rteDensities,
+                         const RealVect&         a_E,
+                         const RealVect&         a_pos,
+                         const Real              a_dx,
+                         const Real              a_dt,
+                         const Real              a_time,
+                         const Real              a_kappa) const = 0;
 
-      /**
+  /**
          @brief Compute drift velocities for all CDR species.
          @param[in] a_time         Current simulation time.
          @param[in] a_pos          Physical position.
@@ -180,13 +180,13 @@ namespace Physics {
          @param[in] a_cdrDensities CDR species densities.
          @return Drift velocity vectors in the same order as m_cdrSpecies.
       */
-      virtual Vector<RealVect>
-      computeCdrDriftVelocities(const Real          a_time,
-                                const RealVect&     a_pos,
-                                const RealVect&     a_E,
-                                const Vector<Real>& a_cdrDensities) const = 0;
+  virtual Vector<RealVect>
+  computeCdrDriftVelocities(const Real          a_time,
+                            const RealVect&     a_pos,
+                            const RealVect&     a_E,
+                            const Vector<Real>& a_cdrDensities) const = 0;
 
-      /**
+  /**
          @brief Compute diffusion coefficients for all CDR species.
          @param[in] a_time         Current simulation time.
          @param[in] a_pos          Physical position.
@@ -194,13 +194,13 @@ namespace Physics {
          @param[in] a_cdrDensities CDR species densities.
          @return Scalar diffusion coefficients in the same order as m_cdrSpecies.
       */
-      virtual Vector<Real>
-      computeCdrDiffusionCoefficients(const Real          a_time,
-                                      const RealVect&     a_pos,
-                                      const RealVect&     a_E,
-                                      const Vector<Real>& a_cdrDensities) const = 0;
+  virtual Vector<Real>
+  computeCdrDiffusionCoefficients(const Real          a_time,
+                                  const RealVect&     a_pos,
+                                  const RealVect&     a_E,
+                                  const Vector<Real>& a_cdrDensities) const = 0;
 
-      /**
+  /**
          @brief Compute CDR species fluxes on electrode-gas EB interfaces.
          @details Used as a boundary condition on electrode EB cells. A positive flux is directed
          into the gas phase (outward from the electrode).
@@ -215,18 +215,18 @@ namespace Physics {
          @param[in] a_extrapCdrFluxes CDR fluxes extrapolated from the gas-phase interior.
          @return Boundary fluxes in the same order as m_cdrSpecies.
       */
-      virtual Vector<Real>
-      computeCdrElectrodeFluxes(const Real          a_time,
-                                const RealVect&     a_pos,
-                                const RealVect&     a_normal,
-                                const RealVect&     a_E,
-                                const Vector<Real>& a_cdrDensities,
-                                const Vector<Real>& a_cdrVelocities,
-                                const Vector<Real>& a_cdrGradients,
-                                const Vector<Real>& a_rteFluxes,
-                                const Vector<Real>& a_extrapCdrFluxes) const = 0;
+  virtual Vector<Real>
+  computeCdrElectrodeFluxes(const Real          a_time,
+                            const RealVect&     a_pos,
+                            const RealVect&     a_normal,
+                            const RealVect&     a_E,
+                            const Vector<Real>& a_cdrDensities,
+                            const Vector<Real>& a_cdrVelocities,
+                            const Vector<Real>& a_cdrGradients,
+                            const Vector<Real>& a_rteFluxes,
+                            const Vector<Real>& a_extrapCdrFluxes) const = 0;
 
-      /**
+  /**
          @brief Compute CDR species fluxes on dielectric-gas EB interfaces.
          @details Used as a boundary condition on dielectric EB cells. A positive flux is directed
          into the gas phase (outward from the dielectric).
@@ -241,18 +241,18 @@ namespace Physics {
          @param[in] a_extrapCdrFluxes CDR fluxes extrapolated from the gas-phase interior.
          @return Boundary fluxes in the same order as m_cdrSpecies.
       */
-      virtual Vector<Real>
-      computeCdrDielectricFluxes(const Real          a_time,
-                                 const RealVect&     a_pos,
-                                 const RealVect&     a_normal,
-                                 const RealVect&     a_E,
-                                 const Vector<Real>& a_cdrDensities,
-                                 const Vector<Real>& a_cdrVelocities,
-                                 const Vector<Real>& a_cdrGradients,
-                                 const Vector<Real>& a_rteFluxes,
-                                 const Vector<Real>& a_extrapCdrFluxes) const = 0;
+  virtual Vector<Real>
+  computeCdrDielectricFluxes(const Real          a_time,
+                             const RealVect&     a_pos,
+                             const RealVect&     a_normal,
+                             const RealVect&     a_E,
+                             const Vector<Real>& a_cdrDensities,
+                             const Vector<Real>& a_cdrVelocities,
+                             const Vector<Real>& a_cdrGradients,
+                             const Vector<Real>& a_rteFluxes,
+                             const Vector<Real>& a_extrapCdrFluxes) const = 0;
 
-      /**
+  /**
          @brief Compute CDR species fluxes through computational domain boundaries.
          @details A positive flux is directed into the domain.
          @param[in] a_time            Current simulation time.
@@ -267,89 +267,89 @@ namespace Physics {
          @param[in] a_extrapCdrFluxes CDR fluxes extrapolated from the interior.
          @return Boundary fluxes in the same order as m_cdrSpecies.
       */
-      virtual Vector<Real>
-      computeCdrDomainFluxes(const Real           a_time,
-                             const RealVect&      a_pos,
-                             const int            a_dir,
-                             const Side::LoHiSide a_side,
-                             const RealVect&      a_E,
-                             const Vector<Real>&  a_cdrDensities,
-                             const Vector<Real>&  a_cdrVelocities,
-                             const Vector<Real>&  a_cdrGradients,
-                             const Vector<Real>&  a_rteFluxes,
-                             const Vector<Real>&  a_extrapCdrFluxes) const = 0;
+  virtual Vector<Real>
+  computeCdrDomainFluxes(const Real           a_time,
+                         const RealVect&      a_pos,
+                         const int            a_dir,
+                         const Side::LoHiSide a_side,
+                         const RealVect&      a_E,
+                         const Vector<Real>&  a_cdrDensities,
+                         const Vector<Real>&  a_cdrVelocities,
+                         const Vector<Real>&  a_cdrGradients,
+                         const Vector<Real>&  a_rteFluxes,
+                         const Vector<Real>&  a_extrapCdrFluxes) const = 0;
 
-      /**
+  /**
          @brief Return the initial surface charge density on dielectric surfaces.
          @param[in] a_time Current simulation time (typically 0).
          @param[in] a_pos  Physical position on the dielectric surface.
          @return Initial surface charge density (C/m^2 in 3D, C/m in 2D).
       */
-      virtual Real
-      initialSigma(const Real a_time, const RealVect& a_pos) const = 0;
+  virtual Real
+  initialSigma(const Real a_time, const RealVect& a_pos) const = 0;
 
-      /**
+  /**
          @brief Return the list of CDR species.
          @return Const reference to the CDR species vector.
       */
-      const Vector<RefCountedPtr<CdrSpecies>>&
-      getCdrSpecies() const
-      {
-        return m_cdrSpecies;
-      }
+  const Vector<RefCountedPtr<CdrSpecies>>&
+  getCdrSpecies() const
+  {
+    return m_cdrSpecies;
+  }
 
-      /**
+  /**
          @brief Return the list of RTE species.
          @return Const reference to the RTE species vector.
       */
-      const Vector<RefCountedPtr<RtSpecies>>&
-      getRtSpecies() const
-      {
-        return m_rtSpecies;
-      }
+  const Vector<RefCountedPtr<RtSpecies>>&
+  getRtSpecies() const
+  {
+    return m_rtSpecies;
+  }
 
-      /**
+  /**
          @brief Return the number of CDR species.
          @return Number of CDR species.
       */
-      int
-      getNumCdrSpecies() const
-      {
-        return m_cdrSpecies.size();
-      }
+  int
+  getNumCdrSpecies() const
+  {
+    return m_cdrSpecies.size();
+  }
 
-      /**
+  /**
          @brief Return the number of RTE equations.
          @return Number of RTE species.
       */
-      int
-      getNumRtSpecies() const
-      {
-        return m_rtSpecies.size();
-      }
+  int
+  getNumRtSpecies() const
+  {
+    return m_rtSpecies.size();
+  }
 
-    protected:
-      /**
+protected:
+  /**
          @brief CDR species definitions. Subclasses populate this in their constructor.
       */
-      Vector<RefCountedPtr<CdrSpecies>> m_cdrSpecies;
+  Vector<RefCountedPtr<CdrSpecies>> m_cdrSpecies;
 
-      /**
+  /**
          @brief RTE species definitions. Subclasses populate this in their constructor.
       */
-      Vector<RefCountedPtr<RtSpecies>> m_rtSpecies;
+  Vector<RefCountedPtr<RtSpecies>> m_rtSpecies;
 
-      /**
+  /**
          @brief Number of CDR species.
       */
-      int m_numCdrSpecies;
+  int m_numCdrSpecies;
 
-      /**
+  /**
          @brief Number of RTE species.
       */
-      int m_numRtSpecies;
-    };
-  } // namespace CdrPlasma
+  int m_numRtSpecies;
+};
+} // namespace CdrPlasma
 } // namespace Physics
 
 #include <CD_NamespaceFooter.H>

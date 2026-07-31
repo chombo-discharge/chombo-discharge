@@ -30,23 +30,23 @@
 using namespace Physics::ItoKMC;
 
 namespace {
-  // Deposit an SoA particle container's weight onto a_phi using an Ito solver's configured deposition scheme.
-  inline void
-  depositPointParticlesLikeSolver(const RefCountedPtr<AmrMesh>&   a_amr,
-                                  const std::string&              a_realm,
-                                  const phase::which_phase        a_phase,
-                                  const RefCountedPtr<ItoSolver>& a_solver,
-                                  EBAMRCellData&                  a_phi,
-                                  ParticleContainer<NoPayload>&   a_particles) noexcept
-  {
-    a_amr->depositWeight(a_phi,
-                         a_realm,
-                         a_phase,
-                         a_particles,
-                         a_solver->getDeposition(),
-                         a_solver->getCoarseFineDeposition(),
-                         false);
-  }
+// Deposit an SoA particle container's weight onto a_phi using an Ito solver's configured deposition scheme.
+inline void
+depositPointParticlesLikeSolver(const RefCountedPtr<AmrMesh>&   a_amr,
+                                const std::string&              a_realm,
+                                const phase::which_phase        a_phase,
+                                const RefCountedPtr<ItoSolver>& a_solver,
+                                EBAMRCellData&                  a_phi,
+                                ParticleContainer<NoPayload>&   a_particles) noexcept
+{
+  a_amr->depositWeight(a_phi,
+                       a_realm,
+                       a_phase,
+                       a_particles,
+                       a_solver->getDeposition(),
+                       a_solver->getCoarseFineDeposition(),
+                       false);
+}
 
 } // namespace
 

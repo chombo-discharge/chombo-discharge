@@ -24,60 +24,60 @@
 */
 namespace Units {
 
-  /**
+/**
     @brief Permittivity of free space
   */
-  constexpr Real eps0 = 8.854187817E-12;
+constexpr Real eps0 = 8.854187817E-12;
 
-  /**
+/**
     @brief Elementary charge 
   */
-  constexpr Real Qe = 1.6021766208E-19;
+constexpr Real Qe = 1.6021766208E-19;
 
-  /**
+/**
     @brief Speed of light
   */
-  constexpr Real c = 299792458;
+constexpr Real c = 299792458;
 
-  /**
+/**
     @brief Boltzmann constant
   */
-  constexpr Real kb = 1.38084852E-23;
+constexpr Real kb = 1.38084852E-23;
 
-  /**
+/**
     @brief Towsend unit
   */
-  constexpr Real Td = 1.E-21;
+constexpr Real Td = 1.E-21;
 
-  /**
+/**
     @brief Electron volt
   */
-  constexpr Real eV = 1.6021766208E-19;
+constexpr Real eV = 1.6021766208E-19;
 
-  /**
+/**
     @brief Avogadro number
   */
-  constexpr Real Na = 6.022140857E23;
+constexpr Real Na = 6.022140857E23;
 
-  /**
+/**
     @brief Universal gas constant
   */
-  constexpr Real R = 8.3144598;
+constexpr Real R = 8.3144598;
 
-  /**
+/**
     @brief Conversion from atm to pascal
   */
-  constexpr Real atm2pascal = 101325;
+constexpr Real atm2pascal = 101325;
 
-  /**
+/**
     @brief pi
   */
-  constexpr Real pi = 3.14159265359;
+constexpr Real pi = 3.14159265359;
 
-  /**
+/**
     @brief Electron mass
   */
-  constexpr Real me = 9.109383E-31;
+constexpr Real me = 9.109383E-31;
 } // namespace Units
 
 #include <CD_NamespaceFooter.H>

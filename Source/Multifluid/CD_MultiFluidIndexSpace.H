@@ -26,19 +26,19 @@
   @brief Phase names namespace.
 */
 namespace phase {
-  /**
+/**
     @brief Number of supported phases.
   */
-  const int numPhases = 2;
+const int numPhases = 2;
 
-  /**
+/**
     @brief Enumeration of supported phases.
   */
-  enum which_phase
-  {
-    gas   = 0, ///< Gas phase.
-    solid = 1  ///< Solid (dielectric) phase.
-  };
+enum which_phase
+{
+  gas   = 0, ///< Gas phase.
+  solid = 1  ///< Solid (dielectric) phase.
+};
 } // namespace phase
 
 /**

@@ -24,25 +24,25 @@
 #include <CD_NamespaceHeader.H>
 
 namespace Physics {
-  namespace CdrPlasma {
+namespace CdrPlasma {
 
-    /**
+/**
        @brief Encapsulation of species settings and initial conditions for CDR species in CdrPlasma. 
     */
-    class CdrSpeciesJSON : public CdrSpecies
-    {
-    public:
-      /**
+class CdrSpeciesJSON : public CdrSpecies
+{
+public:
+  /**
          @brief Alias for initial data function.
       */
-      using InitFunction = std::function<Real(const RealVect a_pos, const Real a_time)>;
+  using InitFunction = std::function<Real(const RealVect a_pos, const Real a_time)>;
 
-      /**
+  /**
          @brief Default constructor. Must subsequently call define.
       */
-      CdrSpeciesJSON() = default;
+  CdrSpeciesJSON() = default;
 
-      /**
+  /**
          @brief Full constructor. Calls the define function. 
          @param[in] a_name        Species name
          @param[in] a_Z           Charge number
@@ -50,44 +50,44 @@ namespace Physics {
          @param[in] a_diffusive   Diffusive species or not
          @param[in] a_initialData Initial data function
       */
-      CdrSpeciesJSON(const std::string&  a_name,
-                     const int           a_Z,
-                     const bool          a_diffusive,
-                     const bool          a_mobile,
-                     const InitFunction& a_initialData);
+  CdrSpeciesJSON(const std::string&  a_name,
+                 const int           a_Z,
+                 const bool          a_diffusive,
+                 const bool          a_mobile,
+                 const InitFunction& a_initialData);
 
-      /**
+  /**
          @brief Disallowed constructor.
          @param[in] a_other Other species
       */
-      CdrSpeciesJSON(const CdrSpeciesJSON& a_other) = delete;
+  CdrSpeciesJSON(const CdrSpeciesJSON& a_other) = delete;
 
-      /**
+  /**
          @brief Disallowed move constructor.
          @param[in] a_other Other species
       */
-      CdrSpeciesJSON(const CdrSpeciesJSON&& a_other) = delete;
+  CdrSpeciesJSON(const CdrSpeciesJSON&& a_other) = delete;
 
-      /**
+  /**
          @brief Disallowed copy assignment. 
          @param[in] a_other Other species
       */
-      CdrSpeciesJSON&
-      operator=(const CdrSpeciesJSON& a_other) = delete;
+  CdrSpeciesJSON&
+  operator=(const CdrSpeciesJSON& a_other) = delete;
 
-      /**
+  /**
          @brief Disallowed move assignment
          @param[in] a_other Other species
       */
-      CdrSpeciesJSON&
-      operator=(const CdrSpeciesJSON&& a_other) = delete;
+  CdrSpeciesJSON&
+  operator=(const CdrSpeciesJSON&& a_other) = delete;
 
-      /**
+  /**
          @brief Destructor
       */
-      virtual ~CdrSpeciesJSON();
+  virtual ~CdrSpeciesJSON();
 
-      /**
+  /**
          @brief Define function.
          @param[in] a_name        Species name
          @param[in] a_Z           Charge number
@@ -95,34 +95,34 @@ namespace Physics {
          @param[in] a_diffusive   Diffusive species or not
          @param[in] a_initialData Initial data function
       */
-      void
-      define(const std::string&  a_name,
-             const int           a_Z,
-             const bool          a_diffusive,
-             const bool          a_mobile,
-             const InitFunction& a_initialData);
+  void
+  define(const std::string&  a_name,
+         const int           a_Z,
+         const bool          a_diffusive,
+         const bool          a_mobile,
+         const InitFunction& a_initialData);
 
-      /**
+  /**
          @brief Initial data function. 
          @param[in] a_pos  Physical coordinates 
          @param[in] a_time Time
         @return Return value
       */
-      Real
-      initialData(const RealVect& a_pos, const Real a_time) const override final;
+  Real
+  initialData(const RealVect& a_pos, const Real a_time) const override final;
 
-    protected:
-      /**
+protected:
+  /**
          @brief Make sure model has initial data
       */
-      bool m_isDefined;
+  bool m_isDefined;
 
-      /**
+  /**
          @brief Initial data function. 
       */
-      InitFunction m_initFunction;
-    };
-  } // namespace CdrPlasma
+  InitFunction m_initFunction;
+};
+} // namespace CdrPlasma
 } // namespace Physics
 
 #include <CD_NamespaceFooter.H>

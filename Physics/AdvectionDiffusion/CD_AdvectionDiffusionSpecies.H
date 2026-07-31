@@ -18,85 +18,85 @@
 #include <CD_NamespaceHeader.H>
 
 namespace Physics {
-  namespace AdvectionDiffusion {
+namespace AdvectionDiffusion {
 
-    /**
+/**
        @brief Concrete CdrSpecies implementation for the advection-diffusion test problem.
        @details This class defines a single passive scalar species for use with
        AdvectionDiffusionStepper. The initial data, mobility, and diffusivity are set at
        construction time. The species carries no net charge.
     */
-    class AdvectionDiffusionSpecies : public CdrSpecies
-    {
-    public:
-      /**
+class AdvectionDiffusionSpecies : public CdrSpecies
+{
+public:
+  /**
          @brief Full constructor.
          @param[in] a_initialData Functor returning the initial scalar concentration at a given position.
          @param[in] a_mobile      If true, the species is advected by the velocity field.
          @param[in] a_diffusive   If true, the species undergoes diffusion.
       */
-      AdvectionDiffusionSpecies(const std::function<Real(const RealVect& a_pos)>& a_initialData,
-                                const bool                                        a_mobile,
-                                const bool                                        a_diffusive)
-        : m_initialData(a_initialData)
-      {
-        m_isMobile     = a_mobile;
-        m_isDiffusive  = a_diffusive;
-        m_chargeNumber = 0;
-        m_name         = "AdvectionDiffusionSpecies";
-      }
+  AdvectionDiffusionSpecies(const std::function<Real(const RealVect& a_pos)>& a_initialData,
+                            const bool                                        a_mobile,
+                            const bool                                        a_diffusive)
+    : m_initialData(a_initialData)
+  {
+    m_isMobile     = a_mobile;
+    m_isDiffusive  = a_diffusive;
+    m_chargeNumber = 0;
+    m_name         = "AdvectionDiffusionSpecies";
+  }
 
-      /**
+  /**
          @brief Destructor.
       */
-      ~AdvectionDiffusionSpecies() override = default;
+  ~AdvectionDiffusionSpecies() override = default;
 
-      /**
+  /**
          @brief Copy constructor.
          @param[in] a_other Object to copy.
       */
-      AdvectionDiffusionSpecies(const AdvectionDiffusionSpecies& a_other) = default;
+  AdvectionDiffusionSpecies(const AdvectionDiffusionSpecies& a_other) = default;
 
-      /**
+  /**
          @brief Copy assignment operator.
          @param[in] a_other Object to copy.
          @return Reference to this object.
       */
-      AdvectionDiffusionSpecies&
-      operator=(const AdvectionDiffusionSpecies& a_other) = default;
+  AdvectionDiffusionSpecies&
+  operator=(const AdvectionDiffusionSpecies& a_other) = default;
 
-      /**
+  /**
          @brief Move constructor.
          @param[in,out] a_other Object to move from.
       */
-      AdvectionDiffusionSpecies(AdvectionDiffusionSpecies&& a_other) = default;
+  AdvectionDiffusionSpecies(AdvectionDiffusionSpecies&& a_other) = default;
 
-      /**
+  /**
          @brief Move assignment operator.
          @param[in,out] a_other Object to move from.
          @return Reference to this object.
       */
-      AdvectionDiffusionSpecies&
-      operator=(AdvectionDiffusionSpecies&& a_other) = default;
+  AdvectionDiffusionSpecies&
+  operator=(AdvectionDiffusionSpecies&& a_other) = default;
 
-      /**
+  /**
          @brief Return the initial scalar concentration at a given position and time.
          @param[in] a_pos Physical position.
          @return Initial concentration evaluated at a_pos.
       */
-      Real
-      initialData(const RealVect& a_pos, const Real /*a_time*/) const override
-      {
-        return m_initialData(a_pos);
-      }
+  Real
+  initialData(const RealVect& a_pos, const Real /*a_time*/) const override
+  {
+    return m_initialData(a_pos);
+  }
 
-    protected:
-      /**
+protected:
+  /**
          @brief Functor encoding the initial concentration profile.
       */
-      std::function<Real(const RealVect& a_pos)> m_initialData;
-    };
-  } // namespace AdvectionDiffusion
+  std::function<Real(const RealVect& a_pos)> m_initialData;
+};
+} // namespace AdvectionDiffusion
 } // namespace Physics
 
 #include <CD_NamespaceFooter.H>

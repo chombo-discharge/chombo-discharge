@@ -33,21 +33,21 @@
 */
 namespace ParticleManagement {
 
-  /**
+/**
     @brief The specific super-particle merge methods.
   */
-  enum class ParticleMergeMethod
-  {
-    None,            ///< No merging.
-    EqualWeightKD,   ///< Cell: makeEqualWeightKDMerger.
-    Reinitialize,    ///< Cell: makeReinitializeMerger.
-    ReinitializeBVH, ///< Cell: makeEqualWeightKDMerger with reinitialized leaf positions.
-    NnSfc,           ///< Cell: makeSfcNearestNeighborMerger.
-    NnPair,          ///< AMR: mergeNearestNeighborsRound.
-    External         ///< Cell: caller-supplied per-cell merger.
-  };
+enum class ParticleMergeMethod
+{
+  None,            ///< No merging.
+  EqualWeightKD,   ///< Cell: makeEqualWeightKDMerger.
+  Reinitialize,    ///< Cell: makeReinitializeMerger.
+  ReinitializeBVH, ///< Cell: makeEqualWeightKDMerger with reinitialized leaf positions.
+  NnSfc,           ///< Cell: makeSfcNearestNeighborMerger.
+  NnPair,          ///< AMR: mergeNearestNeighborsRound.
+  External         ///< Cell: caller-supplied per-cell merger.
+};
 
-  /**
+/**
     @brief Map a merge-algorithm selector string to a ParticleMergeMethod.
     @details Valid input options are:
     'none' -> None
@@ -60,30 +60,30 @@ namespace ParticleManagement {
     @param[in] a_str String selector. Must take one of the above strings.
     @return The corresponding method; aborts on an unknown selector.
   */
-  inline ParticleMergeMethod
-  mergeMethodFromString(const std::string& a_str) noexcept;
+inline ParticleMergeMethod
+mergeMethodFromString(const std::string& a_str) noexcept;
 
-  /**
+/**
     @brief Concept for splitting/merging particles
     @param[in,out] a_particles Particles to be merged/split
     @param[in] a_cellInfo Cell info
     @param[in] a_numTargetParticles Number of target particles
   */
-  template <class P, class Traits = ParticleTraits<P>>
-  using ParticleMerger = std::function<
-    void(ParticleSoA<P, Traits>& a_particles, const CellInfo& a_cellInfo, const int a_numTargetParticles)>;
+template <class P, class Traits = ParticleTraits<P>>
+using ParticleMerger = std::function<
+  void(ParticleSoA<P, Traits>& a_particles, const CellInfo& a_cellInfo, const int a_numTargetParticles)>;
 
-  /**
+/**
     @brief Declaration of a reconciliation function when splitting particles.
     @details This is, for example, passed into the KD-tree equal-weight partitioning structure, which may split a particle
     such that the weight of the two nodes differ by at most one physical particle. By default, that method will call the
     particle copy constructor, but this function permits the user to input a reconciliation function that manipulates other
     class members in the split particles. 
   */
-  template <class P>
-  using BinaryParticleReconcile = std::function<void(P& p1, P& p2, const P& p0)>;
+template <class P>
+using BinaryParticleReconcile = std::function<void(P& p1, P& p2, const P& p0)>;
 
-  /**
+/**
     @brief Build an equal-weight KD partition of a list of particles and return the leaf particle ranges.
     @details Partitions the input particles into at most @c a_maxLeaves spatial groups ("leaves") whose total
     weights are as equal as possible (they differ by at most one physical particle between sibling nodes). At
@@ -112,14 +112,14 @@ namespace ParticleManagement {
     @warning The returned ranges alias an internal thread-local buffer that is overwritten on the next call to
              this function on the same thread. Consume them (reduce each leaf) before calling again.
   */
-  template <class P, Real& (P::*weight)(), const RealVect& (P::*position)() const>
-  inline void
-  buildEqualWeightKDLeaves(const std::vector<P>&                       a_particles,
-                           const int                                   a_maxLeaves,
-                           const BinaryParticleReconcile<P>&           a_particleReconcile,
-                           std::vector<std::pair<const P*, const P*>>& a_leaves) noexcept;
+template <class P, Real& (P::*weight)(), const RealVect& (P::*position)() const>
+inline void
+buildEqualWeightKDLeaves(const std::vector<P>&                       a_particles,
+                         const int                                   a_maxLeaves,
+                         const BinaryParticleReconcile<P>&           a_particleReconcile,
+                         std::vector<std::pair<const P*, const P*>>& a_leaves) noexcept;
 
-  /**
+/**
     @brief Merge an already spatially-ordered particle list down to a target count by repeatedly combining
     the nearest adjacent pair.
     @details The particles are assumed to be in a spatially coherent order (e.g. sorted along a space-filling
@@ -134,13 +134,13 @@ namespace ParticleManagement {
     @param[in]     a_target    Desired number of particles.
     @param[in]     a_combine   Callback that combines the second particle into the first.
   */
-  template <class P, const RealVect& (P::*position)() const>
-  inline void
-  mergeAdjacentNearest(std::vector<P>&                          a_particles,
-                       const std::size_t                        a_target,
-                       const std::function<void(P&, const P&)>& a_combine) noexcept;
+template <class P, const RealVect& (P::*position)() const>
+inline void
+mergeAdjacentNearest(std::vector<P>&                          a_particles,
+                     const std::size_t                        a_target,
+                     const std::function<void(P&, const P&)>& a_combine) noexcept;
 
-  /**
+/**
     @brief Create a space-filling-curve nearest-neighbor super-particle merger as a reusable ParticleMerger.
     @details Returns a merger functor that reduces (or grows) the particle set in a single SoA cell to the
     target count without forcing equal weights.
@@ -175,17 +175,17 @@ namespace ParticleManagement {
     @param[in] a_scatter  Append one merged particle: `(ParticleSoA<P,Traits>&, const Packed&) -> void`.
     @return A ParticleMerger<P, Traits> ready to be stored in e.g. ItoSolver::m_particleCellMerger.
   */
-  template <class Packed,
-            Real& (Packed::*packWeight)(),
-            const RealVect& (Packed::*packPosition)() const,
-            class P,
-            class Traits = ParticleTraits<P>>
-  inline ParticleMerger<P, Traits>
-  makeSfcNearestNeighborMerger(std::function<Packed(const ParticleSoA<P, Traits>&, std::size_t)> a_gather,
-                               std::function<void(Packed&, const Packed&)>                       a_combine,
-                               std::function<void(ParticleSoA<P, Traits>&, const Packed&)>       a_scatter) noexcept;
+template <class Packed,
+          Real& (Packed::*packWeight)(),
+          const RealVect& (Packed::*packPosition)() const,
+          class P,
+          class Traits = ParticleTraits<P>>
+inline ParticleMerger<P, Traits>
+makeSfcNearestNeighborMerger(std::function<Packed(const ParticleSoA<P, Traits>&, std::size_t)> a_gather,
+                             std::function<void(Packed&, const Packed&)>                       a_combine,
+                             std::function<void(ParticleSoA<P, Traits>&, const Packed&)>       a_scatter) noexcept;
 
-  /**
+/**
     @brief Create an equal-weight KD-tree super-particle merger as a reusable ParticleMerger.
     @details Returns a merger functor that partitions the particle set in a single SoA cell into at most
     @c a_numTargetParticles equal-weight KD leaves and reduces each leaf to one output particle.
@@ -219,18 +219,18 @@ namespace ParticleManagement {
                              particle per call.
     @return A ParticleMerger<P, Traits> ready to be stored in e.g. ItoSolver::m_particleCellMerger.
   */
-  template <class Packed,
-            Real& (Packed::*packWeight)(),
-            const RealVect& (Packed::*packPosition)() const,
-            class P,
-            class Traits = ParticleTraits<P>>
-  inline ParticleMerger<P, Traits>
-  makeEqualWeightKDMerger(
-    std::function<Packed(const ParticleSoA<P, Traits>&, std::size_t)>                           a_gather,
-    BinaryParticleReconcile<Packed>                                                             a_reconcile,
-    std::function<void(ParticleSoA<P, Traits>&, const Packed*, const Packed*, const CellInfo&)> a_scatterLeaf) noexcept;
+template <class Packed,
+          Real& (Packed::*packWeight)(),
+          const RealVect& (Packed::*packPosition)() const,
+          class P,
+          class Traits = ParticleTraits<P>>
+inline ParticleMerger<P, Traits>
+makeEqualWeightKDMerger(
+  std::function<Packed(const ParticleSoA<P, Traits>&, std::size_t)>                           a_gather,
+  BinaryParticleReconcile<Packed>                                                             a_reconcile,
+  std::function<void(ParticleSoA<P, Traits>&, const Packed*, const Packed*, const CellInfo&)> a_scatterLeaf) noexcept;
 
-  /**
+/**
     @brief Create a reinitialize super-particle merger as a reusable ParticleMerger.
     @details Returns a merger functor that collapses all physical particles in a cell into at most
     @c a_numTargetParticles new computational particles, placing them at random positions within the cell.
@@ -260,14 +260,13 @@ namespace ParticleManagement {
                            so the call is deferred until after AMR setup completes.
     @return A ParticleMerger<P, Traits> ready to be stored in e.g. ItoSolver::m_particleCellMerger.
   */
-  template <class Context, class P, class Traits = ParticleTraits<P>>
-  inline ParticleMerger<P, Traits>
-  makeReinitializeMerger(
-    std::function<std::pair<long long, Context>(const ParticleSoA<P, Traits>&)>              a_aggregate,
-    std::function<void(ParticleSoA<P, Traits>&, const RealVect&, long long, const Context&)> a_emit,
-    std::function<RealVect()>                                                                a_probLo) noexcept;
+template <class Context, class P, class Traits = ParticleTraits<P>>
+inline ParticleMerger<P, Traits>
+makeReinitializeMerger(std::function<std::pair<long long, Context>(const ParticleSoA<P, Traits>&)> a_aggregate,
+                       std::function<void(ParticleSoA<P, Traits>&, const RealVect&, long long, const Context&)> a_emit,
+                       std::function<RealVect()> a_probLo) noexcept;
 
-  /**
+/**
     @brief Remove physical particles from an SoA container (operates on the container-owned weight column).
     @param[in,out] a_particles           Input SoA particle container.
     @param[in]    a_numPhysPartToRemove Number of physical particles to remove.
@@ -276,41 +275,41 @@ namespace ParticleManagement {
     @tparam Traits Column descriptor for the payload.
     @tparam T      Integral type for the physical-particle count.
   */
-  template <typename P, typename Traits, typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
-  static inline void
-  removePhysicalParticles(ParticleSoA<P, Traits>& a_particles, const T a_numPhysPartToRemove) noexcept;
+template <typename P, typename Traits, typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
+static inline void
+removePhysicalParticles(ParticleSoA<P, Traits>& a_particles, const T a_numPhysPartToRemove) noexcept;
 
-  /**
+/**
     @brief Remove particles from an SoA container if their weight is below the threshold (swap-and-pop).
     @param[in,out] a_particles    Input SoA particle container.
     @param[in]    a_weightThresh Weight threshold for removal.
     @tparam P      Payload type.
     @tparam Traits Column descriptor for the payload.
   */
-  template <typename P, typename Traits>
-  static inline void
-  deleteParticles(ParticleSoA<P, Traits>& a_particles, const Real a_weightThresh) noexcept;
+template <typename P, typename Traits>
+static inline void
+deleteParticles(ParticleSoA<P, Traits>& a_particles, const Real a_weightThresh) noexcept;
 
-  /**
+/**
     @brief Partition particle weights among a number of computational particles
     @param[in] a_numPhysicalParticles Number of physical particles. 
     @param[in] a_maxCompParticles     Maximum number of computational particles
     @return Return value
   */
-  template <typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
-  static inline std::vector<T>
-  partitionParticleWeights(const T a_numPhysicalParticles, const T a_maxCompParticles) noexcept;
+template <typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
+static inline std::vector<T>
+partitionParticleWeights(const T a_numPhysicalParticles, const T a_maxCompParticles) noexcept;
 
-  /**
+/**
     @brief Partition particles so that all MPI rank draw a cumulative number of particles equal to a_numParticles
     @param[in] a_numParticles Total number of particles to be drawn. 
     @return Returns the number of particles drawn by each rank. 
   */
-  template <typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
-  static inline T
-  partitionParticles(const T a_numParticles);
+template <typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
+static inline T
+partitionParticles(const T a_numParticles);
 
-  /**
+/**
     @brief Draw random SoA particles into a free buffer, distributed according to a predefined distribution.
     @details Fills a free-standing ParticleSoA leaf (a buffer) rather than an AMR container. MPI-aware --
     it partitions a_numParticles across ranks (total = a_numParticles) and each rank draws its own share
@@ -324,13 +323,13 @@ namespace ParticleManagement {
     @tparam Traits Column descriptor for the payload.
     @tparam T      Integral count type.
   */
-  template <typename P, typename Traits, typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
-  static inline void
-  drawRandomParticles(ParticleSoA<P, Traits>&          a_particles,
-                      const T                          a_numParticles,
-                      const std::function<RealVect()>& a_distribution);
+template <typename P, typename Traits, typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
+static inline void
+drawRandomParticles(ParticleSoA<P, Traits>&          a_particles,
+                    const T                          a_numParticles,
+                    const std::function<RealVect()>& a_distribution);
 
-  /**
+/**
     @brief Draw Gaussian-distributed particles into an SoA container (unit weight; positions only).
     @details Each rank draws its own a_numParticles share with weight 1; routing to owners happens when
     the buffer is added to a ParticleContainer.
@@ -342,14 +341,14 @@ namespace ParticleManagement {
     @tparam Traits Column descriptor for the payload.
     @tparam T      Integral count type.
   */
-  template <typename P, typename Traits, typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
-  static inline void
-  drawGaussianParticles(ParticleSoA<P, Traits>& a_particles,
-                        const T                 a_numParticles,
-                        const RealVect&         a_center,
-                        const Real              a_radius) noexcept;
+template <typename P, typename Traits, typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
+static inline void
+drawGaussianParticles(ParticleSoA<P, Traits>& a_particles,
+                      const T                 a_numParticles,
+                      const RealVect&         a_center,
+                      const Real              a_radius) noexcept;
 
-  /**
+/**
     @brief Draw box-distributed particles into an SoA container (unit weight; positions only).
     @details Each rank draws its own a_numParticles share with weight 1; routing to owners happens when
     the buffer is added to a ParticleContainer.
@@ -361,14 +360,14 @@ namespace ParticleManagement {
     @tparam Traits Column descriptor for the payload.
     @tparam T      Integral count type.
   */
-  template <typename P, typename Traits, typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
-  static inline void
-  drawBoxParticles(ParticleSoA<P, Traits>& a_particles,
-                   const T                 a_numParticles,
-                   const RealVect&         a_loCorner,
-                   const RealVect&         a_hiCorner) noexcept;
+template <typename P, typename Traits, typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
+static inline void
+drawBoxParticles(ParticleSoA<P, Traits>& a_particles,
+                 const T                 a_numParticles,
+                 const RealVect&         a_loCorner,
+                 const RealVect&         a_hiCorner) noexcept;
 
-  /**
+/**
     @brief Draw sphere-distributed particles into an SoA container (unit weight; positions only).
     @details Each rank draws its own a_numParticles share with weight 1; routing to owners happens when
     the buffer is added to a ParticleContainer.
@@ -380,12 +379,12 @@ namespace ParticleManagement {
     @tparam Traits Column descriptor for the payload.
     @tparam T      Integral count type.
   */
-  template <typename P, typename Traits, typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
-  static inline void
-  drawSphereParticles(ParticleSoA<P, Traits>& a_particles,
-                      const T                 a_numParticles,
-                      const RealVect&         a_center,
-                      const Real              a_radius) noexcept;
+template <typename P, typename Traits, typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
+static inline void
+drawSphereParticles(ParticleSoA<P, Traits>& a_particles,
+                    const T                 a_numParticles,
+                    const RealVect&         a_center,
+                    const Real              a_radius) noexcept;
 
 } // namespace ParticleManagement
 

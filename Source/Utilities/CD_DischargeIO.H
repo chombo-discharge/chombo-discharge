@@ -40,26 +40,26 @@
   @brief Namespace which encapsulates chombo-discharge IO functionality. 
 */
 namespace DischargeIO {
-  /**
+/**
     @brief Number formatting method -- writes big numbers using an input separator. E.g. the number 123456 is written as 123,456
     @param[in] n Number to format as string with separator
     @param[in] a_sep    Separator
     @return Return value
   */
-  std::string
-  numberFmt(long long n, char a_sep = ',') noexcept;
+std::string
+numberFmt(long long n, char a_sep = ',') noexcept;
 
-  /**
+/**
     @brief Number formatting game. This just prints the number 123456 as 123,456
     @param[in] a_numbers Numbers to format as string with separator
     @param[in] a_sep     Separator
     @return Return value
   */
-  Vector<std::string>
-  numberFmt(const Vector<long long>& a_numbers, char a_sep = ',') noexcept;
+Vector<std::string>
+numberFmt(const Vector<long long>& a_numbers, char a_sep = ',') noexcept;
 
 #ifdef CH_USE_HDF5
-  /**
+/**
     @brief A shameless copy of Chombo's writeEBHDF5 but including the lower-left corner of the physical domain as well.
     @details User are not supported to call this. Driver will perform calls to writeEBHDF5Header and writeEBHDF5Level
     @param[in] a_filename         File name
@@ -75,39 +75,39 @@ namespace DischargeIO {
     @param[in] a_numLevels        Number of AMR levels
     @param[in] a_numGhost         Number of ghost cells included in the output.
   */
-  void
-  writeEBHDF5(const std::string&                   a_filename,
-              const Vector<std::string>&           a_variableNames,
-              const Vector<DisjointBoxLayout>&     a_grids,
-              const Vector<LevelData<EBCellFAB>*>& a_data,
-              const Vector<ProblemDomain>&         a_domains,
-              const Vector<Real>&                  a_dx,
-              const Vector<int>&                   a_refinementRatios,
-              Real                                 a_dt,
-              Real                                 a_time,
-              const RealVect&                      a_probLo,
-              int                                  a_numLevels,
-              int                                  a_numGhost) noexcept;
+void
+writeEBHDF5(const std::string&                   a_filename,
+            const Vector<std::string>&           a_variableNames,
+            const Vector<DisjointBoxLayout>&     a_grids,
+            const Vector<LevelData<EBCellFAB>*>& a_data,
+            const Vector<ProblemDomain>&         a_domains,
+            const Vector<Real>&                  a_dx,
+            const Vector<int>&                   a_refinementRatios,
+            Real                                 a_dt,
+            Real                                 a_time,
+            const RealVect&                      a_probLo,
+            int                                  a_numLevels,
+            int                                  a_numGhost) noexcept;
 #endif
 
 #ifdef CH_USE_HDF5
-  /**
+/**
     @brief Write HDF5 header to the input handle
     @param[in,out] a_handleH5 Handle to HDF5 file
     @param[in] a_numLevels Number of levels to write
     @param[in] a_probLo Lower-left corner of problem domain
     @param[in] a_variableNames Variable names
   */
-  void
-  writeEBHDF5Header(HDF5Handle&                a_handleH5,
-                    int                        a_numLevels,
-                    const RealVect&            a_probLo,
-                    const Vector<std::string>& a_variableNames) noexcept;
+void
+writeEBHDF5Header(HDF5Handle&                a_handleH5,
+                  int                        a_numLevels,
+                  const RealVect&            a_probLo,
+                  const Vector<std::string>& a_variableNames) noexcept;
 
 #endif
 
 #ifdef CH_USE_HDF5
-  /**
+/**
     @brief Write data to output handle. Meant to be called on each level after calling writeEBHDF5 header.
     @param[in] a_handleH5 Handle to HDF5 data
     @param[in] a_outputData Data to write
@@ -119,29 +119,29 @@ namespace DischargeIO {
     @param[in] a_refRatio Refinement ratio
     @param[in] a_numGhost Number of ghost cells to fill. 
   */
-  void
-  writeEBHDF5Level(HDF5Handle&                 a_handleH5,
-                   const LevelData<EBCellFAB>& a_outputData,
-                   const ProblemDomain&        a_domain,
-                   Real                        a_dx,
-                   Real                        a_dt,
-                   Real                        a_time,
-                   int                         a_level,
-                   int                         a_refRatio,
-                   int                         a_numGhost) noexcept;
+void
+writeEBHDF5Level(HDF5Handle&                 a_handleH5,
+                 const LevelData<EBCellFAB>& a_outputData,
+                 const ProblemDomain&        a_domain,
+                 Real                        a_dx,
+                 Real                        a_dt,
+                 Real                        a_time,
+                 int                         a_level,
+                 int                         a_refRatio,
+                 int                         a_numGhost) noexcept;
 #endif
 
 #ifdef CH_USE_HDF5
-  /**
+/**
     @brief Debugging function for quickly writing EBAMRCellData to HDF5
     @param[in] a_data Cell-centered EB+AMR data
     @param[in] a_file File name
   */
-  void
-  writeEBHDF5(const EBAMRCellData& a_data, const std::string& a_file);
+void
+writeEBHDF5(const EBAMRCellData& a_data, const std::string& a_file);
 #endif
 
-  /**
+/**
     @brief Write an SoA particle container to an H5Part file (quick visualization).
     @details Position, id and weight are taken from the container-owned columns and written
     automatically. The payload datasets are derived declaratively from the optional
@@ -156,15 +156,15 @@ namespace DischargeIO {
     @tparam P      Payload type of the container.
     @tparam Traits Column descriptor for the payload.
   */
-  template <typename P, typename Traits>
-  void
-  writeH5Part(std::string                         a_filename,
-              const ParticleContainer<P, Traits>& a_particles,
-              RealVect                            a_shift,
-              Real                                a_time) noexcept;
+template <typename P, typename Traits>
+void
+writeH5Part(std::string                         a_filename,
+            const ParticleContainer<P, Traits>& a_particles,
+            RealVect                            a_shift,
+            Real                                a_time) noexcept;
 
 #ifdef CH_USE_HDF5
-  /**
+/**
     @brief Write checkpointed SoA particles (one level) to HDF5.
     @details SoA analogue of writeCheckParticlesToHDF(ParticleData<P>): the per-particle HDF5 record is
     position + weight + the payload h5-column subset (all doubles), via ParticleSoA::h5LinearizeParticle.
@@ -174,13 +174,13 @@ namespace DischargeIO {
     @tparam P      Payload type of the particles.
     @tparam Traits Column descriptor for the payload.
   */
-  template <typename P, typename Traits>
-  void
-  writeCheckParticlesToHDF(HDF5Handle&                               a_handle,
-                           const LayoutData<ParticleSoA<P, Traits>>& a_particles,
-                           const std::string&                        a_dataType);
+template <typename P, typename Traits>
+void
+writeCheckParticlesToHDF(HDF5Handle&                               a_handle,
+                         const LayoutData<ParticleSoA<P, Traits>>& a_particles,
+                         const std::string&                        a_dataType);
 
-  /**
+/**
     @brief Read checkpointed SoA particles (one level) from HDF5.
     @details SoA analogue of readCheckParticlesFromHDF(ParticleData<P>): each record is delinearized and
     appended via ParticleSoA::h5DelinearizeAndAppend. The destination layout must match the checkpoint.
@@ -190,11 +190,11 @@ namespace DischargeIO {
     @tparam P      Payload type of the particles.
     @tparam Traits Column descriptor for the payload.
   */
-  template <typename P, typename Traits>
-  void
-  readCheckParticlesFromHDF(HDF5Handle&                         a_handle,
-                            LayoutData<ParticleSoA<P, Traits>>& a_particles,
-                            const std::string&                  a_dataType);
+template <typename P, typename Traits>
+void
+readCheckParticlesFromHDF(HDF5Handle&                         a_handle,
+                          LayoutData<ParticleSoA<P, Traits>>& a_particles,
+                          const std::string&                  a_dataType);
 #endif
 } // namespace DischargeIO
 

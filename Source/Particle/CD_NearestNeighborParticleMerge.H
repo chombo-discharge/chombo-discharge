@@ -45,7 +45,7 @@ class AmrMesh;
 
 namespace ParticleManagement {
 
-  /**
+/**
     @brief Minimal, payload-agnostic description of one particle as input to the nearest-neighbor merge.
     @details Carries what the matching/decision logic needs -- position, weight, a globally unique
     id, the particle's current owning rank, and its AMR level -- plus an opaque, caller-defined
@@ -55,33 +55,33 @@ namespace ParticleManagement {
     type-specific reconciliation data is required). Must be copyable and trivially linearizable (NNMergeProposal ships
     two of these as one atomic pair).
   */
-  template <typename Packed>
-  struct NNMergeParticle
-  {
-    /**
+template <typename Packed>
+struct NNMergeParticle
+{
+  /**
       @brief Particle position.
     */
-    RealVect position;
+  RealVect position;
 
-    /**
+  /**
       @brief Particle weight (used for the crowding count and the merged-particle centroid; not
       required to be an integer).
     */
-    Real weight;
+  Real weight;
 
-    /**
+  /**
       @brief Globally unique particle id. Used to break cross-patch merge ties deterministically
       (see judgeProposals()).
     */
-    ParticleID globalID;
+  ParticleID globalID;
 
-    /**
+  /**
       @brief The rank that currently owns this particle. Always read from the particle's own data --
       the single source of truth, never inferred from MPI transport/source-rank metadata.
     */
-    RankID ownerRank;
+  RankID ownerRank;
 
-    /**
+  /**
       @brief The AMR level this particle currently lives on.
       @details Required for multi-level correctness: cellKeyOf() needs the dx of the level the
       particle lives on, and a ghost candidate can be on a different level than the querying patch
@@ -89,18 +89,18 @@ namespace ParticleManagement {
       for this field, never a single global dx (see a_dxByLevel in resolveTrivialTier()/
       judgeProposals()).
     */
-    int level;
+  int level;
 
-    /**
+  /**
       @brief Opaque, caller-defined reconciliation payload. Never inspected by this algorithm's
       matching/decision logic -- only carried through to the caller-supplied combine callback.
     */
-    Packed payload;
-  };
+  Packed payload;
+};
 
-  namespace detail {
+namespace detail {
 
-    /**
+/**
       @brief Pooled per-round record for one particle: the particle plus its cached boundary-exposure
       flag.
       @details particlesByID maps every local valid particle and every ghost to one of these. Folding
@@ -111,22 +111,22 @@ namespace ParticleManagement {
       on locality).
       @tparam Packed Caller-defined payload type (see NNMergeParticle).
     */
-    template <typename Packed>
-    struct NNPooledParticle
-    {
-      /**
+template <typename Packed>
+struct NNPooledParticle
+{
+  /**
         @brief The pooled particle (position/weight/ids/level/payload).
       */
-      NNMergeParticle<Packed> particle;
+  NNMergeParticle<Packed> particle;
 
-      /**
+  /**
         @brief Whether this local valid particle's cell touches a patch boundary (has ghost targets).
         Always false for ghosts.
       */
-      bool exposed = false;
-    };
+  bool exposed = false;
+};
 
-    /**
+/**
       @brief One additional ranked candidate beyond a query's primary nearest neighbor.
       @details Populated only when a_maxFallbackCandidates > 0 is requested from
       findNearestNeighborCandidates() (see NNMergeEdge::fallbackCandidates). Fetched via a single
@@ -134,26 +134,26 @@ namespace ParticleManagement {
       this pre-fetched, distance-sorted list when a closer candidate is blocked, without re-querying
       the spatial index.
     */
-    struct NNFallbackCandidate
-    {
-      /**
+struct NNFallbackCandidate
+{
+  /**
         @brief Global id of this candidate.
       */
-      ParticleID candidateID;
+  ParticleID candidateID;
 
-      /**
+  /**
         @brief Squared distance between the query particle and this candidate.
       */
-      Real distanceSquared;
+  Real distanceSquared;
 
-      /**
+  /**
         @brief True iff this candidate is a locally-valid particle in the SAME patch as the query
         (i.e. not a ghost) -- same meaning as NNMergeEdge::candidateIsLocal.
       */
-      bool candidateIsLocal;
-    };
+  bool candidateIsLocal;
+};
 
-    /**
+/**
       @brief One candidate merge edge: a single particle's own nearest-neighbor query result.
       @details Produced once per over-threshold, unconsumed valid particle by
       findNearestNeighborCandidates() -- exactly one edge per query particle, its single nearest
@@ -162,35 +162,35 @@ namespace ParticleManagement {
       "closest-first, with a deterministic id tiebreak on exact ties" ordering.
       @tparam Packed See NNMergeParticle.
     */
-    template <typename Packed>
-    struct NNMergeEdge
-    {
-      /**
+template <typename Packed>
+struct NNMergeEdge
+{
+  /**
         @brief Squared distance between the query particle and its candidate.
       */
-      Real distanceSquared;
+  Real distanceSquared;
 
-      /**
+  /**
         @brief Global id of the query particle (always locally valid/owned -- ghosts never
         initiate a query).
       */
-      ParticleID queryID;
+  ParticleID queryID;
 
-      /**
+  /**
         @brief Global id of the candidate (query's nearest neighbor). May be a local valid
         particle (same patch) or a ghost.
       */
-      ParticleID candidateID;
+  ParticleID candidateID;
 
-      /**
+  /**
         @brief True iff the candidate is a locally-valid particle in the SAME patch as the query
         (i.e. not a ghost). Note this is NOT sufficient on its own to decide trivial-tier
         eligibility -- see isBoundaryExposed(): a same-patch candidate can still require the
         propose/judge/verdict protocol if either participant is boundary-exposed.
       */
-      bool candidateIsLocal;
+  bool candidateIsLocal;
 
-      /**
+  /**
         @brief Next-nearest candidates beyond candidateID, in ascending distanceSquared order.
         @details Empty unless a_maxFallbackCandidates > 0 was passed to
         findNearestNeighborCandidates(); size at most a_maxFallbackCandidates. resolveTrivialTier()
@@ -198,10 +198,10 @@ namespace ParticleManagement {
         without re-querying the spatial index. Content is a generation-time snapshot; a candidate's
         validity is rechecked against a_consumedIDs/a_hasOutgoingCommitment when it is actually tried.
       */
-      std::vector<NNFallbackCandidate> fallbackCandidates;
-    };
+  std::vector<NNFallbackCandidate> fallbackCandidates;
+};
 
-    /**
+/**
       @brief A cross-patch merge proposal: one particle's own nearest-neighbor query result,
       bundled as a self-contained, atomic pair for shipment to whichever rank owns the candidate.
       @details Carries full data for both participants (not a bare id reference) so the judge's
@@ -210,82 +210,82 @@ namespace ParticleManagement {
       querying particle's best candidate, never by any id comparison.
       @tparam Packed See NNMergeParticle.
     */
-    template <typename Packed>
-    struct NNMergeProposal
-    {
-      /**
+template <typename Packed>
+struct NNMergeProposal
+{
+  /**
         @brief The proposer's own particle (full data) -- always locally valid/owned by the
         sending rank.
       */
-      NNMergeParticle<Packed> source;
+  NNMergeParticle<Packed> source;
 
-      /**
+  /**
         @brief Global id of the particle being proposed to. Owned by the receiving (judge) rank.
       */
-      ParticleID targetID;
+  ParticleID targetID;
 
-      /**
+  /**
         @brief Squared distance between @c source and the target. Duplicated from the originating
         NNMergeEdge so the judge never needs to look anything up to sort/compare proposals.
       */
-      Real distanceSquared;
-    };
+  Real distanceSquared;
+};
 
-    /**
+/**
       @brief The judge's reply to one proposal.
       @details Accepted implies the judge has already created the merged particle and removed its own
       (target) particle; the proposer, on receiving an accepted verdict, removes its own (source)
       particle. Rejected implies no action on either side -- the proposer's particle is simply
       reconsidered next round.
     */
-    struct NNMergeVerdict
-    {
-      /**
+struct NNMergeVerdict
+{
+  /**
         @brief Global id of the proposer this verdict is a reply to (i.e. NNMergeProposal::source's
         id). Used by the proposer to match an incoming verdict back to one of its own outgoing
         proposals.
       */
-      ParticleID proposerID;
+  ParticleID proposerID;
 
-      /**
+  /**
         @brief True iff the judge accepted this specific proposal (i.e. it was the winning
         candidate for its target -- see judgeProposals()).
       */
-      bool accepted;
-    };
+  bool accepted;
+};
 
-    /**
+/**
       @brief One resolved merge: the two consumed particles' ids and the newly created merged
       particle (not yet placed into any patch -- see placeMergedParticles()).
       @tparam Packed See NNMergeParticle.
     */
-    template <typename Packed>
-    struct NNMergeResult
-    {
-      /**
+template <typename Packed>
+struct NNMergeResult
+{
+  /**
         @brief Global id of the first consumed particle. For a trivial-tier result, this is the
         query particle. For a judge-side result, this is the target.
       */
-      ParticleID firstID;
+  ParticleID firstID;
 
-      /**
+  /**
         @brief Global id of the second consumed particle. For a trivial-tier result, this is the
         local candidate. For a judge-side result, this is the winning proposer.
       */
-      ParticleID secondID;
+  ParticleID secondID;
 
-      /**
+  /**
         @brief The newly created merged particle: weighted-centroid position, weighted-average
         opaque payload (computed by the caller-supplied combine callback), summed weight, and a
         FRESH globally-unique id (never colliding with any existing particle's id -- see
         mergeNearestNeighborsRound() for the id-allocation requirement this implies).
       */
-      NNMergeParticle<Packed> merged;
-    };
+  NNMergeParticle<Packed> merged;
+};
 
-  } // namespace detail
+} // namespace detail
 
-  /**
+/**
     @brief Illustrative signature of the combine callback: produce a merged particle's opaque
     payload from its two parents' payloads and weights.
     @details This alias documents the expected callback shape only; it is NOT the type used at the
@@ -299,11 +299,11 @@ namespace ParticleManagement {
     @param[in] a_secondWeight Second parent's weight.
     @return The merged particle's payload.
   */
-  template <typename Packed>
-  using PayloadCombine = std::function<
-    Packed(const Packed& a_first, const Real a_firstWeight, const Packed& a_second, const Real a_secondWeight)>;
+template <typename Packed>
+using PayloadCombine = std::function<
+  Packed(const Packed& a_first, const Real a_firstWeight, const Packed& a_second, const Real a_secondWeight)>;
 
-  /**
+/**
     @brief Illustrative signature of the position-validity predicate for a would-be merged particle.
     @details Documents the expected callback shape; consumed as a template parameter (not this
     std::function) at the call sites, for the same inlining reason as PayloadCombine. Called with the
@@ -315,9 +315,9 @@ namespace ParticleManagement {
     @param[in] a_mergedPosition The candidate merge's weighted-centroid position.
     @return True iff a particle may exist at this position (e.g. false inside an embedded boundary).
   */
-  using PositionValid = std::function<bool(const RealVect& a_mergedPosition)>;
+using PositionValid = std::function<bool(const RealVect& a_mergedPosition)>;
 
-  /**
+/**
     @brief Illustrative signature of the fresh-id allocator: produce one globally-unique id for a
     newly created merged particle.
     @details Documents the expected callback shape; consumed as a template parameter (not this
@@ -327,9 +327,9 @@ namespace ParticleManagement {
     times a stride plus a monotonically increasing local count) suffices.
     @return A fresh globally-unique particle id.
   */
-  using IDAllocator = std::function<ParticleID()>;
+using IDAllocator = std::function<ParticleID()>;
 
-  /**
+/**
     @brief Optional per-merge diagnostic callback: observe every individual merge as it commits.
     @details Consumed as a template parameter (not required to be exactly this std::function).
     Called once per committed merge (trivial-tier or judge-side) with both parents' full pre-merge
@@ -340,14 +340,14 @@ namespace ParticleManagement {
     @param[in] a_second Second parent (pre-merge, full data).
     @param[in] a_merged The resulting merged particle.
   */
-  template <typename Packed>
-  using MergeCommittedCallback = std::function<void(const NNMergeParticle<Packed>& a_first,
-                                                    const NNMergeParticle<Packed>& a_second,
-                                                    const NNMergeParticle<Packed>& a_merged)>;
+template <typename Packed>
+using MergeCommittedCallback = std::function<void(const NNMergeParticle<Packed>& a_first,
+                                                  const NNMergeParticle<Packed>& a_second,
+                                                  const NNMergeParticle<Packed>& a_merged)>;
 
-  namespace detail {
+namespace detail {
 
-    /**
+/**
       @brief The unclamped, position-derived cell index a given physical position falls in.
       @details The cell-key convention used throughout for the crowding trigger and a_maxCellDistance.
       Not clamped to any patch's box, so a ghost buckets into its true origin cell and particles in
@@ -361,10 +361,10 @@ namespace ParticleManagement {
       @param[in] a_dx Cell spacing (per direction) of the position's OWN level.
       @return floor((a_position - a_probLo) / a_dx), component-wise.
     */
-    inline IntVect
-    cellKeyOf(const RealVect& a_position, const RealVect& a_probLo, const RealVect& a_dx) noexcept;
+inline IntVect
+cellKeyOf(const RealVect& a_position, const RealVect& a_probLo, const RealVect& a_dx) noexcept;
 
-    /**
+/**
       @brief A cell key together with the AMR level it was computed on -- see cellKeyOf()'s warning.
       @details Two NNCellKeys are equal only if BOTH the level and the cell index match; a coarse-
       level cell and an unrelated fine-level cell that happen to share the same bare IntVect are
@@ -372,9 +372,9 @@ namespace ParticleManagement {
       per-cell count pooled across multiple levels (see a_liveCellCount in resolveTrivialTier()/
       judgeProposals()/findNearestNeighborCandidates()).
     */
-    using NNCellKey = std::pair<int, IntVect>;
+using NNCellKey = std::pair<int, IntVect>;
 
-    /**
+/**
       @brief Hash functor for NNCellKey -- REQUIRED whenever NNCellKey is used as a hash-map key;
       NNCellKey must never be used as an ordered (%std::map or %std::set) key.
       @details IntVect::operator< (which std::pair<int,IntVect>::operator< calls for the second
@@ -384,24 +384,23 @@ namespace ParticleManagement {
       unrelated cells' counts into one entry. Hashing depends only on IntVect::operator== (full
       component-wise equality), which is correct.
     */
-    struct NNCellKeyHasher
-    {
-      /**
+struct NNCellKeyHasher
+{
+  /**
         @brief Hash operator.
         @param[in] a_key Cell key to hash.
         @return Hash value.
       */
-      std::size_t
-      operator()(const NNCellKey& a_key) const noexcept
-      {
-        std::size_t hash = LevelTiles::TileHasher()(a_key.second);
-        hash ^= static_cast<std::size_t>(static_cast<unsigned int>(a_key.first)) + 0x9e3779b9 + (hash << 6) +
-                (hash >> 2);
-        return hash;
-      }
-    };
+  std::size_t
+  operator()(const NNCellKey& a_key) const noexcept
+  {
+    std::size_t hash = LevelTiles::TileHasher()(a_key.second);
+    hash ^= static_cast<std::size_t>(static_cast<unsigned int>(a_key.first)) + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+    return hash;
+  }
+};
 
-    /**
+/**
       @brief A non-level-qualified cell index, distinct from NNCellKey, used where a cell is expressed
       in a single consistent frame (the query patch's own level).
       @details A separate alias from NNCellKey (which is level-qualified for the cross-level
@@ -409,9 +408,9 @@ namespace ParticleManagement {
       with the query patch's own level's dx, even for a cross-level ghost, so candidates are
       geometrically comparable to the query in one frame (see cellKeyOf()'s warning).
     */
-    using NNWalkCell = IntVect;
+using NNWalkCell = IntVect;
 
-    /**
+/**
       @brief A patch's spatial index for one round: an EBGeometry SIMD PointCloudBVH over the whole
       patch (every local valid particle followed by every ghost) plus its precomputed k-nearest-
       neighbor graph.
@@ -422,24 +421,24 @@ namespace ParticleManagement {
       metadata is each point's globalID; a hit's cloud index c decodes ownership directly:
       c < pointCloudNLocal => local valid a_localValid[c], else ghost a_ghosts[c - pointCloudNLocal].
     */
-    template <typename Packed>
-    struct NNSpatialIndex
-    {
-      /**
+template <typename Packed>
+struct NNSpatialIndex
+{
+  /**
         @brief The SIMD PointCloudBVH over this patch's whole point set (local valid first, then
         ghosts). Null iff there were no particles at all, or no cell in this patch could possibly be
         crowded (see buildNNSpatialIndex()'s per-cell pre-filter).
       */
-      std::shared_ptr<EBGeometry::PointCloudBVH<Real, ParticleID>> pointCloud;
+  std::shared_ptr<EBGeometry::PointCloudBVH<Real, ParticleID>> pointCloud;
 
-      /**
+  /**
         @brief Number of local-valid points at the front of the PointCloudBVH's cloud order (used to
         decode a hit's local-vs-ghost ownership from its cloud index). Only meaningful when
         pointCloud is non-null.
       */
-      std::size_t pointCloudNLocal = 0;
+  std::size_t pointCloudNLocal = 0;
 
-      /**
+  /**
         @brief The whole k-nearest-neighbor graph, precomputed once via PointCloudBVH::
         allNearestNeighbors(pointCloudK) at build time (batched, leaf-order / cache-warm, seeded from
         each point's own leaf -- strictly cheaper than per-query calls). Row-major: entry
@@ -447,15 +446,15 @@ namespace ParticleManagement {
         rows (c < pointCloudNLocal) are ever read by findNearestNeighborCandidates(); ghost rows are
         computed but unused. Empty iff pointCloud is null.
       */
-      std::vector<typename EBGeometry::PointCloudBVH<Real, ParticleID>::Hit> pointCloudGraph;
+  std::vector<typename EBGeometry::PointCloudBVH<Real, ParticleID>::Hit> pointCloudGraph;
 
-      /**
+  /**
         @brief k used to build pointCloudGraph (= 1 + a_maxFallbackCandidates); the row stride.
       */
-      int pointCloudK = 0;
-    };
+  int pointCloudK = 0;
+};
 
-    /**
+/**
       @brief Build a patch's spatial index for one round: an EBGeometry SIMD PointCloudBVH over the
       whole patch (every local valid particle then every ghost) plus its precomputed k-nearest-
       neighbor graph -- UNLESS no cell in this patch could possibly be crowded, in which case nothing
@@ -486,17 +485,17 @@ namespace ParticleManagement {
       NNSpatialIndex::pointCloudGraph.
       @param[out] a_index The resulting spatial index.
     */
-    template <typename Packed>
-    inline void
-    buildNNSpatialIndex(const std::vector<NNMergeParticle<Packed>>& a_localValid,
-                        const std::vector<NNMergeParticle<Packed>>& a_ghosts,
-                        const RealVect&                             a_probLo,
-                        const RealVect&                             a_dx,
-                        const int                                   a_numParticlesPerCellThresh,
-                        const int                                   a_kNearest,
-                        NNSpatialIndex<Packed>&                     a_index) noexcept;
+template <typename Packed>
+inline void
+buildNNSpatialIndex(const std::vector<NNMergeParticle<Packed>>& a_localValid,
+                    const std::vector<NNMergeParticle<Packed>>& a_ghosts,
+                    const RealVect&                             a_probLo,
+                    const RealVect&                             a_dx,
+                    const int                                   a_numParticlesPerCellThresh,
+                    const int                                   a_kNearest,
+                    NNSpatialIndex<Packed>&                     a_index) noexcept;
 
-    /**
+/**
       @brief Whether a particle is boundary-exposed -- i.e. would be shipped as a ghost to at
       least one neighboring patch.
       @details The eligibility test for the trivial tier (see resolveTrivialTier()). A direct lookup
@@ -512,10 +511,10 @@ namespace ParticleManagement {
       level; see mergeNearestNeighborsRound() for how the three mask kinds are combined into one boundary-exposed test).
       @return True iff the particle's cell has at least one outgoing ghost-shipment target.
     */
-    inline bool
-    isBoundaryExposed(const IntVect& a_cellIndex, const ParticleGhostMask& a_ghostMask) noexcept;
+inline bool
+isBoundaryExposed(const IntVect& a_cellIndex, const ParticleGhostMask& a_ghostMask) noexcept;
 
-    /**
+/**
       @brief For every over-threshold, currently-alive valid particle in a patch, find its single
       TRUE nearest neighbor among {this patch's own other valid particles} union {every ghost
       shipped to this patch}.
@@ -582,21 +581,21 @@ namespace ParticleManagement {
       could wrongly drop a candidate resolveTrivialTier()/judgeProposals() would still have accepted. Safe but not
       maximally tight.
     */
-    template <typename Packed>
-    inline void
-    findNearestNeighborCandidates(const std::vector<NNMergeParticle<Packed>>&                a_localValid,
-                                  const std::vector<NNMergeParticle<Packed>>&                a_ghosts,
-                                  const std::unordered_set<ParticleID>&                      a_consumedIDs,
-                                  const NNSpatialIndex<Packed>&                              a_spatialIndex,
-                                  const std::unordered_map<NNCellKey, int, NNCellKeyHasher>& a_liveCellCount,
-                                  const RealVect&                                            a_probLo,
-                                  const RealVect&                                            a_dx,
-                                  const int                         a_numParticlesPerCellThresh,
-                                  std::vector<NNMergeEdge<Packed>>& a_edges,
-                                  const int                         a_maxFallbackCandidates = 0,
-                                  const std::optional<int>          a_maxCellDistance       = std::nullopt) noexcept;
+template <typename Packed>
+inline void
+findNearestNeighborCandidates(const std::vector<NNMergeParticle<Packed>>&                a_localValid,
+                              const std::vector<NNMergeParticle<Packed>>&                a_ghosts,
+                              const std::unordered_set<ParticleID>&                      a_consumedIDs,
+                              const NNSpatialIndex<Packed>&                              a_spatialIndex,
+                              const std::unordered_map<NNCellKey, int, NNCellKeyHasher>& a_liveCellCount,
+                              const RealVect&                                            a_probLo,
+                              const RealVect&                                            a_dx,
+                              const int                                                  a_numParticlesPerCellThresh,
+                              std::vector<NNMergeEdge<Packed>>&                          a_edges,
+                              const int                                                  a_maxFallbackCandidates = 0,
+                              const std::optional<int> a_maxCellDistance = std::nullopt) noexcept;
 
-    /**
+/**
       @brief Resolve every candidate edge that is safely mergeable with zero cross-rank
       coordination, and mark which remaining particles have committed to a non-trivial outgoing
       proposal.
@@ -694,29 +693,29 @@ namespace ParticleManagement {
       @param[in] a_onMergeCommitted Optional per-merge diagnostic callback (see MergeCommittedCallback); default is a
       no-op.
     */
-    template <typename Packed, typename Combine, typename PosValid, typename Allocator, typename OnMerge>
-    inline void
-    resolveTrivialTier(
-      const std::vector<NNMergeEdge<Packed>>&                         a_edges,
-      const std::unordered_map<ParticleID, NNPooledParticle<Packed>>& a_particlesByID,
-      const Combine&                                                  a_combine,
-      std::unordered_map<NNCellKey, int, NNCellKeyHasher>&            a_liveCellCount,
-      std::unordered_set<ParticleID>&                                 a_consumedIDs,
-      const int                                                       a_numParticlesPerCellThresh,
-      std::unordered_set<ParticleID>&                                 a_hasOutgoingCommitment,
-      std::vector<NNMergeResult<Packed>>&                             a_results,
-      const RealVect&                                                 a_probLo,
-      const std::vector<RealVect>&                                    a_dxByLevel,
-      const PosValid&                                                 a_isPositionValid,
-      const Allocator&                                                a_allocateID,
-      const int                                                       a_maxFallbackCandidates = 0,
-      const std::optional<int>                                        a_maxCellDistance       = std::nullopt,
-      unsigned long long*                                             a_crossLevelMergeCount  = nullptr,
-      const OnMerge&                                                  a_onMergeCommitted =
-        [](const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&) {
-        }) noexcept;
+template <typename Packed, typename Combine, typename PosValid, typename Allocator, typename OnMerge>
+inline void
+resolveTrivialTier(
+  const std::vector<NNMergeEdge<Packed>>&                         a_edges,
+  const std::unordered_map<ParticleID, NNPooledParticle<Packed>>& a_particlesByID,
+  const Combine&                                                  a_combine,
+  std::unordered_map<NNCellKey, int, NNCellKeyHasher>&            a_liveCellCount,
+  std::unordered_set<ParticleID>&                                 a_consumedIDs,
+  const int                                                       a_numParticlesPerCellThresh,
+  std::unordered_set<ParticleID>&                                 a_hasOutgoingCommitment,
+  std::vector<NNMergeResult<Packed>>&                             a_results,
+  const RealVect&                                                 a_probLo,
+  const std::vector<RealVect>&                                    a_dxByLevel,
+  const PosValid&                                                 a_isPositionValid,
+  const Allocator&                                                a_allocateID,
+  const int                                                       a_maxFallbackCandidates = 0,
+  const std::optional<int>                                        a_maxCellDistance       = std::nullopt,
+  unsigned long long*                                             a_crossLevelMergeCount  = nullptr,
+  const OnMerge&                                                  a_onMergeCommitted =
+    [](const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&) {
+    }) noexcept;
 
-    /**
+/**
       @brief Package one outgoing proposal for every edge that resolveTrivialTier() could not
       resolve locally, bucketed by destination rank.
       @details Routing rule: ALWAYS to the owner of the candidate (NNMergeEdge::candidateID's
@@ -739,15 +738,15 @@ namespace ParticleManagement {
       @param[out] a_proposalsByDestRank One bucket per rank; a_proposalsByDestRank[r] holds every proposal whose
       candidate is owned by rank r (including r == this rank's own).
     */
-    template <typename Packed>
-    inline void
-    generateProposals(const std::vector<NNMergeEdge<Packed>>&                         a_edges,
-                      const std::unordered_set<ParticleID>&                           a_hasOutgoingCommitment,
-                      const std::unordered_map<ParticleID, NNPooledParticle<Packed>>& a_particlesByID,
-                      const int                                                       a_numRanks,
-                      std::vector<std::vector<NNMergeProposal<Packed>>>&              a_proposalsByDestRank) noexcept;
+template <typename Packed>
+inline void
+generateProposals(const std::vector<NNMergeEdge<Packed>>&                         a_edges,
+                  const std::unordered_set<ParticleID>&                           a_hasOutgoingCommitment,
+                  const std::unordered_map<ParticleID, NNPooledParticle<Packed>>& a_particlesByID,
+                  const int                                                       a_numRanks,
+                  std::vector<std::vector<NNMergeProposal<Packed>>>&              a_proposalsByDestRank) noexcept;
 
-    /**
+/**
       @brief Judge every incoming proposal that targets a particle this rank owns, and produce the
       verdicts to send back.
       @details The full rule set this function implements, summarized:
@@ -829,30 +828,30 @@ namespace ParticleManagement {
       @param[in] a_onMergeCommitted Optional per-merge diagnostic callback -- see resolveTrivialTier()'s docs; called
       with (target, source, merged) for every accepted target.
     */
-    template <typename Packed, typename Combine, typename PosValid, typename Allocator, typename OnMerge>
-    inline void
-    judgeProposals(
-      const std::vector<NNMergeProposal<Packed>>&                     a_incomingProposals,
-      const std::unordered_map<ParticleID, NNPooledParticle<Packed>>& a_particlesByID,
-      const std::unordered_set<ParticleID>&                           a_consumedIDs,
-      const std::unordered_set<ParticleID>&                           a_hasOutgoingCommitment,
-      const std::map<ParticleID, ParticleID>&                         a_outgoingTargetOf,
-      const Combine&                                                  a_combine,
-      std::unordered_map<NNCellKey, int, NNCellKeyHasher>&            a_liveCellCount,
-      const int                                                       a_numParticlesPerCellThresh,
-      const RealVect&                                                 a_probLo,
-      const std::vector<RealVect>&                                    a_dxByLevel,
-      const PosValid&                                                 a_isPositionValid,
-      const Allocator&                                                a_allocateID,
-      std::vector<NNMergeResult<Packed>>&                             a_results,
-      std::vector<std::vector<NNMergeVerdict>>&                       a_verdictsByDestRank,
-      const std::optional<int>                                        a_maxCellDistance      = std::nullopt,
-      unsigned long long*                                             a_crossLevelMergeCount = nullptr,
-      const OnMerge&                                                  a_onMergeCommitted =
-        [](const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&) {
-        }) noexcept;
+template <typename Packed, typename Combine, typename PosValid, typename Allocator, typename OnMerge>
+inline void
+judgeProposals(
+  const std::vector<NNMergeProposal<Packed>>&                     a_incomingProposals,
+  const std::unordered_map<ParticleID, NNPooledParticle<Packed>>& a_particlesByID,
+  const std::unordered_set<ParticleID>&                           a_consumedIDs,
+  const std::unordered_set<ParticleID>&                           a_hasOutgoingCommitment,
+  const std::map<ParticleID, ParticleID>&                         a_outgoingTargetOf,
+  const Combine&                                                  a_combine,
+  std::unordered_map<NNCellKey, int, NNCellKeyHasher>&            a_liveCellCount,
+  const int                                                       a_numParticlesPerCellThresh,
+  const RealVect&                                                 a_probLo,
+  const std::vector<RealVect>&                                    a_dxByLevel,
+  const PosValid&                                                 a_isPositionValid,
+  const Allocator&                                                a_allocateID,
+  std::vector<NNMergeResult<Packed>>&                             a_results,
+  std::vector<std::vector<NNMergeVerdict>>&                       a_verdictsByDestRank,
+  const std::optional<int>                                        a_maxCellDistance      = std::nullopt,
+  unsigned long long*                                             a_crossLevelMergeCount = nullptr,
+  const OnMerge&                                                  a_onMergeCommitted =
+    [](const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&) {
+    }) noexcept;
 
-    /**
+/**
       @brief Apply every verdict addressed to one of this rank's own outgoing proposals: remove
       the source particle for every accepted proposal, do nothing for rejected ones.
       @details Rejected proposals are deliberately a no-op -- the source particle is simply left
@@ -863,11 +862,11 @@ namespace ParticleManagement {
       @param[out] a_consumedIDs Ids of every source particle whose proposal was accepted -- the caller removes these
       from its own valid particle lists.
     */
-    inline void
-    applyVerdicts(const std::vector<NNMergeVerdict>& a_incomingVerdicts,
-                  std::unordered_set<ParticleID>&    a_consumedIDs) noexcept;
+inline void
+applyVerdicts(const std::vector<NNMergeVerdict>& a_incomingVerdicts,
+              std::unordered_set<ParticleID>&    a_consumedIDs) noexcept;
 
-    /**
+/**
       @brief Result of locating a physical position against the AMR grid -- see placeMergedParticles().
       @details Deliberately independent of any AmrMesh/Realm/ParticleContainer type (this header
       stays Amr-agnostic) -- mirrors ParticleContainer::Destination's fields exactly,
@@ -877,32 +876,32 @@ namespace ParticleManagement {
       ParticleContainer::findDestination() rather than adding a second, parallel point-location
       method keeps this one mapping the single source of truth for "which box owns this position".
     */
-    struct NNParticleLocation
-    {
-      /**
+struct NNParticleLocation
+{
+  /**
         @brief True iff a covering box was found (false near/outside the domain boundary).
       */
-      bool valid;
+  bool valid;
 
-      /**
+  /**
         @brief AMR level containing the point.
       */
-      int level;
+  int level;
 
-      /**
+  /**
         @brief Global grid index of the covering box within that level (NOT a local DataIndex --
         the caller is expected to convert this to whatever local indexing it needs, e.g. via
         LevelTiles::getMyGrids(), only when ownerRank is this rank).
       */
-      unsigned int gridIndex;
+  unsigned int gridIndex;
 
-      /**
+  /**
         @brief The rank that owns the covering box.
       */
-      int ownerRank;
-    };
+  int ownerRank;
+};
 
-    /**
+/**
       @brief Locate-by-position callback -- see NNParticleLocation and placeMergedParticles().
       @details Deliberately a template parameter wherever consumed, NOT required to be exactly this
       std::function type -- this alias exists purely to document the expected signature (mirrors
@@ -912,9 +911,9 @@ namespace ParticleManagement {
       @param[in] a_position Physical position to locate.
       @return Which box (level, global grid index) and rank covers it.
     */
-    using PositionLocator = std::function<NNParticleLocation(const RealVect& a_position)>;
+using PositionLocator = std::function<NNParticleLocation(const RealVect& a_position)>;
 
-    /**
+/**
       @brief Point-locate a newly created merged particle against the AMR grid, and bucket it for a
       scatter exchange if it belongs to someone else.
       @details Applied UNIFORMLY to every merge result, trivial-tier and judge-decided alike: the
@@ -934,17 +933,17 @@ namespace ParticleManagement {
       @param[out] a_scatterByDestRank Results whose merged particle belongs to a different rank, bucketed by destination
       rank (pre-sized to the total rank count by the caller), for one final exchange.
     */
-    template <typename Packed>
-    inline void
-    placeMergedParticles(const std::vector<NNMergeResult<Packed>>&                                     a_results,
-                         const PositionLocator&                                                        a_locate,
-                         const int                                                                     a_thisRank,
-                         std::map<std::pair<int, unsigned int>, std::vector<NNMergeParticle<Packed>>>& a_localByPatch,
-                         std::vector<std::vector<NNMergeParticle<Packed>>>& a_scatterByDestRank) noexcept;
+template <typename Packed>
+inline void
+placeMergedParticles(const std::vector<NNMergeResult<Packed>>&                                     a_results,
+                     const PositionLocator&                                                        a_locate,
+                     const int                                                                     a_thisRank,
+                     std::map<std::pair<int, unsigned int>, std::vector<NNMergeParticle<Packed>>>& a_localByPatch,
+                     std::vector<std::vector<NNMergeParticle<Packed>>>& a_scatterByDestRank) noexcept;
 
-  } // namespace detail
+} // namespace detail
 
-  /**
+/**
     @brief Run one full round (one timestep's worth) of the nearest-neighbor merge algorithm.
     @details Orchestrates, in order:
       1. Ghost-fill -- fresh, exactly once, strictly before any of the below, via
@@ -1029,37 +1028,37 @@ namespace ParticleManagement {
     @param[in] a_onMergeCommitted Optional per-merge diagnostic callback (see MergeCommittedCallback); default is a
     no-op.
   */
-  template <typename P,
-            typename Packed,
-            typename Traits = ParticleTraits<P>,
-            typename Gather,
-            typename Combine,
-            typename Scatter,
-            typename Allocator,
-            typename PosValid = std::function<bool(const RealVect&)>,
-            typename OnMerge  = std::function<
-               void(const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&)>>
-  inline void
-  mergeNearestNeighborsRound(
-    AmrMesh&                      a_amr,
-    ParticleContainer<P, Traits>& a_particles,
-    const int                     a_numParticlesPerCellThresh,
-    const Gather&                 a_gather,
-    const Combine&                a_combine,
-    const Scatter&                a_scatter,
-    const Allocator&              a_allocateID,
-    const bool                    a_iterateLocalTierToConvergence = false,
-    const int                     a_maxFallbackCandidates         = 0,
-    const std::optional<int>      a_maxCellDistance               = std::nullopt,
-    const int                     a_ghostWidth                    = 1,
-    const PosValid&               a_isPositionValid =
-      [](const RealVect&) {
-        return true;
-      },
-    unsigned long long* a_crossLevelMergeCount = nullptr,
-    const OnMerge&      a_onMergeCommitted =
-      [](const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&) {
-      });
+template <typename P,
+          typename Packed,
+          typename Traits = ParticleTraits<P>,
+          typename Gather,
+          typename Combine,
+          typename Scatter,
+          typename Allocator,
+          typename PosValid = std::function<bool(const RealVect&)>,
+          typename OnMerge  = std::function<
+             void(const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&)>>
+inline void
+mergeNearestNeighborsRound(
+  AmrMesh&                      a_amr,
+  ParticleContainer<P, Traits>& a_particles,
+  const int                     a_numParticlesPerCellThresh,
+  const Gather&                 a_gather,
+  const Combine&                a_combine,
+  const Scatter&                a_scatter,
+  const Allocator&              a_allocateID,
+  const bool                    a_iterateLocalTierToConvergence = false,
+  const int                     a_maxFallbackCandidates         = 0,
+  const std::optional<int>      a_maxCellDistance               = std::nullopt,
+  const int                     a_ghostWidth                    = 1,
+  const PosValid&               a_isPositionValid =
+    [](const RealVect&) {
+      return true;
+    },
+  unsigned long long* a_crossLevelMergeCount = nullptr,
+  const OnMerge&      a_onMergeCommitted =
+    [](const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&) {
+    });
 
 } // namespace ParticleManagement
 

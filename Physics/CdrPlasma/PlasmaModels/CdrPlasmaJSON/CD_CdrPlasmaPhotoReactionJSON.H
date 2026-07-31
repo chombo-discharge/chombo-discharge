@@ -23,21 +23,21 @@
 #include <CD_NamespaceHeader.H>
 
 namespace Physics {
-  namespace CdrPlasma {
+namespace CdrPlasma {
 
-    /**
+/**
        @brief Class for encapsulating reactive process of type A + B + Y -> X3 +  for CdrPlasmaPhysics. This class just stores a list
        of product target species.
     */
-    class CdrPlasmaPhotoReactionJSON
-    {
-    public:
-      /**
+class CdrPlasmaPhotoReactionJSON
+{
+public:
+  /**
          @brief Disallowed weak construction.
       */
-      CdrPlasmaPhotoReactionJSON();
+  CdrPlasmaPhotoReactionJSON();
 
-      /**
+  /**
          @brief Full constructor.
          @param[in] a_plasmaReactants  Plasma species on the left-hand side of the reaction
          @param[in] a_neutralReactants Neutral species on the left-hand side of the reaction
@@ -45,79 +45,79 @@ namespace Physics {
          @param[in] a_plasmaProducts   Plasma species on the right-hand side of the reaction.
          @param[in] a_neutralProducts  Neutral species on the right-hand side of the reaction.
       */
-      CdrPlasmaPhotoReactionJSON(const std::list<int>& a_plasmaReactants,
-                                 const std::list<int>& a_neutralReactants,
-                                 const std::list<int>& a_photonReactants,
-                                 const std::list<int>& a_plasmaProducts,
-                                 const std::list<int>& a_neutralProducts);
+  CdrPlasmaPhotoReactionJSON(const std::list<int>& a_plasmaReactants,
+                             const std::list<int>& a_neutralReactants,
+                             const std::list<int>& a_photonReactants,
+                             const std::list<int>& a_plasmaProducts,
+                             const std::list<int>& a_neutralProducts);
 
-      /**
+  /**
          @brief Destructor
       */
-      virtual ~CdrPlasmaPhotoReactionJSON();
+  virtual ~CdrPlasmaPhotoReactionJSON();
 
-      /**
+  /**
          @brief Get the plasma reactants
          @return Returns m_plasmaReactants
       */
-      const std::list<int>&
-      getPlasmaReactants() const;
+  const std::list<int>&
+  getPlasmaReactants() const;
 
-      /**
+  /**
          @brief Get the neutral reactants
          @return Returns m_neutralReactants
       */
-      const std::list<int>&
-      getNeutralReactants() const;
+  const std::list<int>&
+  getNeutralReactants() const;
 
-      /**
+  /**
          @brief Get the photo-reactants
          @return Returns m_photonReactants
       */
-      const std::list<int>&
-      getPhotonReactants() const;
+  const std::list<int>&
+  getPhotonReactants() const;
 
-      /**
+  /**
          @brief Get the plasma products
          @return Returns m_plasmaProducts
       */
-      const std::list<int>&
-      getPlasmaProducts() const;
+  const std::list<int>&
+  getPlasmaProducts() const;
 
-      /**
+  /**
          @brief Get the neutral products
          @return Returns m_neutralProducts
       */
-      const std::list<int>&
-      getNeutralProducts() const;
+  const std::list<int>&
+  getNeutralProducts() const;
 
-    protected:
-      /**
+protected:
+  /**
          @brief Plasma species on the left-hand side of the reaction
       */
-      std::list<int> m_plasmaReactants;
+  std::list<int> m_plasmaReactants;
 
-      /**
+  /**
          @brief Neutral species on the left-hand side of the reaction
       */
-      std::list<int> m_neutralReactants;
+  std::list<int> m_neutralReactants;
 
-      /**
+  /**
          @brief Photon species on the left-hand side of the reaction
       */
-      std::list<int> m_photonReactants;
+  std::list<int> m_photonReactants;
 
-      /**
+  /**
          @brief Plasma species on the right-hand side of the reaction
       */
-      std::list<int> m_plasmaProducts;
+  std::list<int> m_plasmaProducts;
 
-      /**
+  /**
          @brief Neutral species on the right-hand side of the reaction
       */
-      std::list<int> m_neutralProducts;
-    };
-  } // namespace CdrPlasma
+  std::list<int> m_neutralProducts;
+};
+} // namespace CdrPlasma
 } // namespace Physics
 
 #include <CD_NamespaceFooter.H>

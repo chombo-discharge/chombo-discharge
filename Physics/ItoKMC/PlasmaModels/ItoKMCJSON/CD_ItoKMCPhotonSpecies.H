@@ -18,76 +18,76 @@
 #include <CD_NamespaceHeader.H>
 
 namespace Physics {
-  namespace ItoKMC {
+namespace ItoKMC {
 
-    /**
+/**
       @brief Simple RtSpecies class for usage with ItoKMCJSON
     */
-    class ItoKMCPhotonSpecies : public RtSpecies
-    {
-    public:
-      /**
+class ItoKMCPhotonSpecies : public RtSpecies
+{
+public:
+  /**
 	@brief Full constructor
 	@param[in] a_name          Name of the species
 	@param[in] a_kappaFunction Absorption function
       */
-      ItoKMCPhotonSpecies(const std::string& a_name, const std::function<Real(const RealVect& a_pos)>& a_kappaFunction)
-        : m_kappa(a_kappaFunction)
-      {
-        m_name = a_name;
-      }
+  ItoKMCPhotonSpecies(const std::string& a_name, const std::function<Real(const RealVect& a_pos)>& a_kappaFunction)
+    : m_kappa(a_kappaFunction)
+  {
+    m_name = a_name;
+  }
 
-      /**
+  /**
 	@brief Destructor. Does nothing
       */
-      ~ItoKMCPhotonSpecies() noexcept override = default;
+  ~ItoKMCPhotonSpecies() noexcept override = default;
 
-      /**
+  /**
          @brief Copy constructor.
          @param[in] a_other Object to copy.
       */
-      ItoKMCPhotonSpecies(const ItoKMCPhotonSpecies& a_other) = default;
+  ItoKMCPhotonSpecies(const ItoKMCPhotonSpecies& a_other) = default;
 
-      /**
+  /**
          @brief Copy assignment operator.
          @param[in] a_other Object to copy.
          @return Reference to this object.
       */
-      ItoKMCPhotonSpecies&
-      operator=(const ItoKMCPhotonSpecies& a_other) = default;
+  ItoKMCPhotonSpecies&
+  operator=(const ItoKMCPhotonSpecies& a_other) = default;
 
-      /**
+  /**
          @brief Move constructor.
          @param[in,out] a_other Object to move from.
       */
-      ItoKMCPhotonSpecies(ItoKMCPhotonSpecies&& a_other) = default;
+  ItoKMCPhotonSpecies(ItoKMCPhotonSpecies&& a_other) = default;
 
-      /**
+  /**
          @brief Move assignment operator.
          @param[in,out] a_other Object to move from.
          @return Reference to this object.
       */
-      ItoKMCPhotonSpecies&
-      operator=(ItoKMCPhotonSpecies&& a_other) = default;
+  ItoKMCPhotonSpecies&
+  operator=(ItoKMCPhotonSpecies&& a_other) = default;
 
-      /**
+  /**
 	@brief Get absorption coefficient at a physical position.
 	@param[in] a_pos Physical position.
 	@return Absorption coefficient (inverse absorption length) at a_pos.
       */
-      Real
-      getAbsorptionCoefficient(const RealVect& a_pos) const final
-      {
-        return m_kappa(a_pos);
-      }
+  Real
+  getAbsorptionCoefficient(const RealVect& a_pos) const final
+  {
+    return m_kappa(a_pos);
+  }
 
-    protected:
-      /**
+protected:
+  /**
 	@brief Absorption function
       */
-      std::function<Real(const RealVect& a_position)> m_kappa;
-    };
-  } // namespace ItoKMC
+  std::function<Real(const RealVect& a_position)> m_kappa;
+};
+} // namespace ItoKMC
 } // namespace Physics
 
 #include <CD_NamespaceFooter.H>

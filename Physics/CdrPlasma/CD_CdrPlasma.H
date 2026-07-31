@@ -15,7 +15,7 @@
 
 namespace Physics {
 
-  /**
+/**
      @brief Namespace for encapsulating CDR plasma physics.
      @details This namespace contains a physics module for simulating weakly ionized plasmas
      in the drift-diffusion (CDR) approximation, self-consistently coupled to Poisson's equation
@@ -23,7 +23,7 @@ namespace Physics {
      abstract and concrete time steppers, cell taggers, plasma kinetics interfaces, and JSON-driven
      plasma models.
   */
-  namespace CdrPlasma {};
+namespace CdrPlasma {};
 
 } // namespace Physics
 

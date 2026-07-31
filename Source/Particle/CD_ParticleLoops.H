@@ -63,7 +63,7 @@
 */
 namespace ParticleLoops {
 
-  /**
+/**
     @brief Launch a kernel over every particle in a ParticleSoA, decorating the loop with CD_PRAGMA_SIMD.
     @details The kernel is invoked as @c a_kernel(i) for each particle index i in [0, a_soa.size()).
     The trip count is taken from the container, so it always matches the columns the kernel captured
@@ -82,19 +82,19 @@ namespace ParticleLoops {
     @param[in]     a_soa    Particle container to iterate over (read for its size only).
     @param[in,out] a_kernel Callable taking a std::size_t particle index.
   */
-  template <typename P, typename Traits, typename Functor>
-  ALWAYS_INLINE void
-  loop(const ParticleSoA<P, Traits>& a_soa, Functor&& a_kernel)
-  {
-    const std::size_t numParticles = a_soa.size();
+template <typename P, typename Traits, typename Functor>
+ALWAYS_INLINE void
+loop(const ParticleSoA<P, Traits>& a_soa, Functor&& a_kernel)
+{
+  const std::size_t numParticles = a_soa.size();
 
-    CD_PRAGMA_SIMD
-    for (std::size_t i = 0; i < numParticles; i++) {
-      a_kernel(i);
-    }
+  CD_PRAGMA_SIMD
+  for (std::size_t i = 0; i < numParticles; i++) {
+    a_kernel(i);
   }
+}
 
-  /**
+/**
     @brief Fold a kernel over every particle in a ParticleSoA, accumulating a reduction value.
     @details The accumulator is threaded sequentially through the particles: for each particle index
     i in [0, a_soa.size()) the accumulator is updated as @c acc = a_kernel(acc, i), and the final value
@@ -117,18 +117,18 @@ namespace ParticleLoops {
                              updated accumulator.
     @return The accumulator after folding over every particle.
   */
-  template <typename P, typename Traits, typename T, typename Functor>
-  ALWAYS_INLINE T
-  reduce(const ParticleSoA<P, Traits>& a_soa, T a_initial, Functor&& a_kernel)
-  {
-    const std::size_t numParticles = a_soa.size();
+template <typename P, typename Traits, typename T, typename Functor>
+ALWAYS_INLINE T
+reduce(const ParticleSoA<P, Traits>& a_soa, T a_initial, Functor&& a_kernel)
+{
+  const std::size_t numParticles = a_soa.size();
 
-    for (std::size_t i = 0; i < numParticles; i++) {
-      a_initial = a_kernel(a_initial, i);
-    }
-
-    return a_initial;
+  for (std::size_t i = 0; i < numParticles; i++) {
+    a_initial = a_kernel(a_initial, i);
   }
+
+  return a_initial;
+}
 
 } // namespace ParticleLoops
 

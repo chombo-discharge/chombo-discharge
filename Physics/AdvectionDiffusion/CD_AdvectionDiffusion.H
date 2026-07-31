@@ -15,13 +15,13 @@
 
 namespace Physics {
 
-  /**
+/**
      @brief Namespace for encapsulating advection-diffusion physics.
 
      @details This namespace contains a simple model for advection-diffusion of a passive scalar on
      an adaptive mesh. It includes a time stepper, a species definition, and a cell tagger.
   */
-  namespace AdvectionDiffusion {};
+namespace AdvectionDiffusion {};
 
 } // namespace Physics
 

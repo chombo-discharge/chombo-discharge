@@ -61,7 +61,7 @@
 */
 namespace BoxLoops {
 
-  /**
+/**
     @brief Launch a C++ kernel over a regular grid with compile-time per-dimension strides.
     @details Strides are encoded as non-type template parameters, making them visible to the
     compiler as constants and enabling auto-vectorization of the innermost loop. All strides must
@@ -78,59 +78,59 @@ namespace BoxLoops {
     @param[in] kernel Kernel
   */
 #if CH_SPACEDIM == 2
-  template <int Si, int Sj, typename Functor>
-  ALWAYS_INLINE void
-  loop(const Box& a_computeBox, Functor&& kernel);
+template <int Si, int Sj, typename Functor>
+ALWAYS_INLINE void
+loop(const Box& a_computeBox, Functor&& kernel);
 #else
-  template <int Si, int Sj, int Sk, typename Functor>
-  ALWAYS_INLINE void
-  loop(const Box& a_computeBox, Functor&& kernel);
+template <int Si, int Sj, int Sk, typename Functor>
+ALWAYS_INLINE void
+loop(const Box& a_computeBox, Functor&& kernel);
 #endif
 
-  /**
+/**
     @brief Launch a C++ kernel over a subset of cells.
     @param[in,out] a_kernel  Kernel to launch
     @param[in] a_ivs Ivs
   */
-  template <typename Functor>
-  ALWAYS_INLINE void
-  loop(const IntVectSet& a_ivs, Functor&& a_kernel);
+template <typename Functor>
+ALWAYS_INLINE void
+loop(const IntVectSet& a_ivs, Functor&& a_kernel);
 
-  /**
+/**
     @brief Launch a C++ kernel over a subset of cells.
     @param[in,out] a_kernel  Kernel to launch
     @param[in] a_ivs Ivs
   */
-  template <typename Functor>
-  ALWAYS_INLINE void
-  loop(const DenseIntVectSet& a_ivs, Functor&& a_kernel);
+template <typename Functor>
+ALWAYS_INLINE void
+loop(const DenseIntVectSet& a_ivs, Functor&& a_kernel);
 
-  /**
+/**
     @brief Launch a C++ kernel over cut-cells.
     @param[in,out] a_kernel  Kernel to launch
     @param[in] a_iter Iter
   */
-  template <typename Functor>
-  ALWAYS_INLINE void
-  loop(VoFIterator& a_iter, Functor&& a_kernel);
+template <typename Functor>
+ALWAYS_INLINE void
+loop(VoFIterator& a_iter, Functor&& a_kernel);
 
-  /**
+/**
     @brief Launch a C++ kernel over faces
     @param[in,out] a_kernel  Kernel to launch
     @param[in] a_iter Iter
   */
-  template <typename Functor>
-  ALWAYS_INLINE void
-  loop(FaceIterator& a_iter, Functor&& a_kernel);
+template <typename Functor>
+ALWAYS_INLINE void
+loop(FaceIterator& a_iter, Functor&& a_kernel);
 
-  /**
+/**
     @brief Launch a C++ kernel over a specified subset of something.
     @param[in,out] a_subset Subset. E.g. a std::vector<VolIndex>
     @param[in,out] a_kernel Kernel to launch
   */
-  template <typename T, typename Functor>
-  ALWAYS_INLINE void
-  loop(const Vector<T>& a_subset, Functor&& a_kernel);
+template <typename T, typename Functor>
+ALWAYS_INLINE void
+loop(const Vector<T>& a_subset, Functor&& a_kernel);
 } // namespace BoxLoops
 
 #include <CD_NamespaceFooter.H>

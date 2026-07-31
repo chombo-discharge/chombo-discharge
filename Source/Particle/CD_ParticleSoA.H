@@ -209,74 +209,74 @@ struct ParticleTraits;
 */
 namespace H5Part {
 
-  /**
+/**
     @brief Descriptor of a single scalar payload column written to one H5Part dataset.
     @tparam M Pointer-to-member type selecting the payload column.
   */
-  template <typename M>
-  struct Scalar
-  {
-    /**
+template <typename M>
+struct Scalar
+{
+  /**
       @brief Tag identifying this descriptor as a scalar (single-component) column.
     */
-    static constexpr bool s_isVector = false;
-
-    /**
-      @brief H5Part dataset name.
-    */
-    const char* name;
-
-    /**
-      @brief Pointer-to-member selecting the payload column.
-    */
-    M member;
-  };
+  static constexpr bool s_isVector = false;
 
   /**
+      @brief H5Part dataset name.
+    */
+  const char* name;
+
+  /**
+      @brief Pointer-to-member selecting the payload column.
+    */
+  M member;
+};
+
+/**
     @brief Deduction guide so that @c Scalar{"name", &P::m} deduces the member-pointer type.
     @tparam M Pointer-to-member type.
   */
-  template <typename M>
-  Scalar(const char*, M) -> Scalar<M>;
+template <typename M>
+Scalar(const char*, M) -> Scalar<M>;
 
-  /**
+/**
     @brief Descriptor of a SpaceDim-component vector payload column, written as name-x/name-y/name-z.
     @tparam Ms Pointer-to-member types of the per-component payload columns (SpaceDim of them).
   */
-  template <typename... Ms>
-  struct Vector
-  {
-    /**
+template <typename... Ms>
+struct Vector
+{
+  /**
       @brief Tag identifying this descriptor as a vector (multi-component) column.
     */
-    static constexpr bool s_isVector = true;
+  static constexpr bool s_isVector = true;
 
-    /**
+  /**
       @brief H5Part dataset base name (datasets are name-x/name-y/name-z).
     */
-    const char* name;
+  const char* name;
 
-    /**
+  /**
       @brief Pointers-to-member selecting the per-component payload columns.
     */
-    std::tuple<Ms...> members;
+  std::tuple<Ms...> members;
 
-    /**
+  /**
       @brief Constructor.
       @param[in] a_name    Dataset base name.
       @param[in] a_members Per-component payload member pointers (SpaceDim of them).
     */
-    constexpr Vector(const char* a_name, Ms... a_members) noexcept : name(a_name), members(a_members...)
-    {}
-  };
+  constexpr Vector(const char* a_name, Ms... a_members) noexcept : name(a_name), members(a_members...)
+  {}
+};
 
-  /**
+/**
     @brief Deduction guide so that @c Vector{"name", D_DECL(&P::x, &P::y, &P::z)} deduces the
            member-pointer types.
     @tparam Ms Pointer-to-member types.
   */
-  template <typename... Ms>
-  Vector(const char*, Ms...) -> Vector<Ms...>;
+template <typename... Ms>
+Vector(const char*, Ms...) -> Vector<Ms...>;
 
 } // namespace H5Part
 
@@ -301,72 +301,72 @@ struct ParticleTraits<NoPayload>
 
 namespace detail {
 
-  /**
+/**
     @brief Primary template that extracts the class and value type from a pointer-to-member type.
     @tparam M Pointer-to-member type to decompose.
   */
-  template <typename M>
-  struct MemberPointerTraits;
+template <typename M>
+struct MemberPointerTraits;
 
-  /**
+/**
     @brief Specialization that extracts the class and value type from a pointer-to-member type.
     @tparam C Class that owns the member.
     @tparam T Value type of the member.
   */
-  template <typename C, typename T>
-  struct MemberPointerTraits<T C::*>
-  {
-    /**
+template <typename C, typename T>
+struct MemberPointerTraits<T C::*>
+{
+  /**
       @brief Class that owns the member.
     */
-    using ClassType = C;
-    /**
+  using ClassType = C;
+  /**
       @brief Value type of the member.
     */
-    using ValueType = T;
-  };
+  using ValueType = T;
+};
 
-  /**
+/**
     @brief Type-mismatched overload of the pointer-to-member equality (always false).
     @tparam A Type of the left-hand member pointer.
     @tparam B Type of the right-hand member pointer.
     @return Always false (the two member pointers have different types).
   */
-  template <typename A, typename B>
-  constexpr bool
-  eqMember(A, B) noexcept
-  {
-    return false;
-  }
+template <typename A, typename B>
+constexpr bool
+eqMember(A, B) noexcept
+{
+  return false;
+}
 
-  /**
+/**
     @brief Same-type overload of the pointer-to-member equality.
     @tparam A Common type of both member pointers.
     @param[in] a_lhs Left-hand member pointer.
     @param[in] a_rhs Right-hand member pointer.
     @return True iff the two member pointers are equal.
   */
-  template <typename A>
-  constexpr bool
-  eqMember(A a_lhs, A a_rhs) noexcept
-  {
-    return a_lhs == a_rhs;
-  }
+template <typename A>
+constexpr bool
+eqMember(A a_lhs, A a_rhs) noexcept
+{
+  return a_lhs == a_rhs;
+}
 
-  /**
+/**
     @brief Base case of the compile-time member-pointer index search (empty sequence).
     @tparam Tup Tuple-of-member-pointer type being searched.
     @tparam M   Member-pointer type being searched for.
     @return The tuple size, signalling "not found".
   */
-  template <typename Tup, typename M>
-  constexpr std::size_t
-  indexOfImpl(const Tup&, M, std::index_sequence<>) noexcept
-  {
-    return std::tuple_size<Tup>::value;
-  }
+template <typename Tup, typename M>
+constexpr std::size_t
+indexOfImpl(const Tup&, M, std::index_sequence<>) noexcept
+{
+  return std::tuple_size<Tup>::value;
+}
 
-  /**
+/**
     @brief Recursive step of the compile-time member-pointer index search.
     @tparam Tup  Tuple-of-member-pointer type being searched.
     @tparam M    Member-pointer type being searched for.
@@ -376,14 +376,14 @@ namespace detail {
     @param[in] a_target Member pointer being searched for.
     @return Index of a_target in a_t, or the tuple size if absent.
   */
-  template <typename Tup, typename M, std::size_t I, std::size_t... Rest>
-  constexpr std::size_t
-  indexOfImpl(const Tup& a_t, M a_target, std::index_sequence<I, Rest...>) noexcept
-  {
-    return eqMember(std::get<I>(a_t), a_target) ? I : indexOfImpl(a_t, a_target, std::index_sequence<Rest...>{});
-  }
+template <typename Tup, typename M, std::size_t I, std::size_t... Rest>
+constexpr std::size_t
+indexOfImpl(const Tup& a_t, M a_target, std::index_sequence<I, Rest...>) noexcept
+{
+  return eqMember(std::get<I>(a_t), a_target) ? I : indexOfImpl(a_t, a_target, std::index_sequence<Rest...>{});
+}
 
-  /**
+/**
     @brief Compile-time index of a member pointer within a tuple (tuple size if absent).
     @tparam Tup Tuple-of-member-pointer type being searched.
     @tparam M   Member-pointer type being searched for.
@@ -391,145 +391,145 @@ namespace detail {
     @param[in] a_target Member pointer being searched for.
     @return Index of a_target in a_t, or the tuple size if absent.
   */
-  template <typename Tup, typename M>
-  constexpr std::size_t
-  indexOf(const Tup& a_t, M a_target) noexcept
-  {
-    return indexOfImpl(a_t, a_target, std::make_index_sequence<std::tuple_size<Tup>::value>{});
-  }
+template <typename Tup, typename M>
+constexpr std::size_t
+indexOf(const Tup& a_t, M a_target) noexcept
+{
+  return indexOfImpl(a_t, a_target, std::make_index_sequence<std::tuple_size<Tup>::value>{});
+}
 
-  /**
+/**
     @brief std::tuple of N copies of T (used to build the SpaceDim position columns).
     @tparam T Element type to repeat.
     @tparam N Number of repetitions.
   */
-  template <typename T, std::size_t N>
-  struct RepeatTuple
-  {
-    /**
+template <typename T, std::size_t N>
+struct RepeatTuple
+{
+  /**
        @brief Helper alias that maps any index to T.
     */
-    template <std::size_t>
-    using Always = T;
+  template <std::size_t>
+  using Always = T;
 
-    /**
+  /**
       @brief Deduce the repeated-tuple type from an index sequence (declaration only).
       @tparam I Indices [0, N).
       @return A std::tuple of N copies of T.
     */
-    template <std::size_t... I>
-    static std::tuple<Always<I>...> make(std::index_sequence<I...>);
-
-    /**
-      @brief The resulting std::tuple type.
-    */
-    using Type = decltype(make(std::make_index_sequence<N>{}));
-  };
+  template <std::size_t... I>
+  static std::tuple<Always<I>...> make(std::index_sequence<I...>);
 
   /**
+      @brief The resulting std::tuple type.
+    */
+  using Type = decltype(make(std::make_index_sequence<N>{}));
+};
+
+/**
     @brief Primary template mapping a tuple of pointer-to-member to the tuple of value types.
     @tparam Tuple Tuple-of-member-pointer type.
   */
-  template <typename Tuple>
-  struct ValueTuple;
+template <typename Tuple>
+struct ValueTuple;
 
-  /**
+/**
     @brief Specialization mapping a tuple of pointer-to-member to the tuple of value types.
     @tparam Ms Member-pointer types.
   */
-  template <typename... Ms>
-  struct ValueTuple<std::tuple<Ms...>>
-  {
-    /**
+template <typename... Ms>
+struct ValueTuple<std::tuple<Ms...>>
+{
+  /**
       @brief Tuple of member value types.
     */
-    using Type = std::tuple<typename MemberPointerTraits<Ms>::ValueType...>;
-  };
+  using Type = std::tuple<typename MemberPointerTraits<Ms>::ValueType...>;
+};
 
-  /**
+/**
     @brief Base case of the variadic constexpr size sum (no arguments).
     @return Zero.
   */
-  constexpr std::size_t
-  sumSizes() noexcept
-  {
-    return 0;
-  }
+constexpr std::size_t
+sumSizes() noexcept
+{
+  return 0;
+}
 
-  /**
+/**
     @brief Variadic constexpr sum of std::size_t values.
     @tparam Rest Types of the trailing arguments (all std::size_t).
     @param[in] a_first First value to add.
     @param[in] a_rest  Remaining values to add.
     @return The sum of all arguments.
   */
-  template <typename... Rest>
-  constexpr std::size_t
-  sumSizes(std::size_t a_first, Rest... a_rest) noexcept
-  {
-    return a_first + sumSizes(a_rest...);
-  }
+template <typename... Rest>
+constexpr std::size_t
+sumSizes(std::size_t a_first, Rest... a_rest) noexcept
+{
+  return a_first + sumSizes(a_rest...);
+}
 
-  /**
+/**
     @brief Primary template for the compile-time sum of sizeof() over a value tuple.
     @tparam Tuple Tuple of value types.
   */
-  template <typename Tuple>
-  struct SumSizeof;
+template <typename Tuple>
+struct SumSizeof;
 
-  /**
+/**
     @brief Specialization computing the compile-time sum of sizeof() over a value tuple.
     @tparam Ts Value types in the tuple.
   */
-  template <typename... Ts>
-  struct SumSizeof<std::tuple<Ts...>>
-  {
-    /**
+template <typename... Ts>
+struct SumSizeof<std::tuple<Ts...>>
+{
+  /**
       @brief Sum of sizeof(Ts).
     */
-    static constexpr std::size_t s_value = sumSizes(sizeof(Ts)...);
-  };
+  static constexpr std::size_t s_value = sumSizes(sizeof(Ts)...);
+};
 
-  /**
+/**
     @brief Primary template for "every type in a value tuple is trivially copyable".
     @tparam Tuple Tuple of value types.
   */
-  template <typename Tuple>
-  struct AllTriviallyCopyable;
+template <typename Tuple>
+struct AllTriviallyCopyable;
 
-  /**
+/**
     @brief Specialization testing that every type in a value tuple is trivially copyable.
     @tparam Ts Value types in the tuple.
   */
-  template <typename... Ts>
-  struct AllTriviallyCopyable<std::tuple<Ts...>>
-  {
-    /**
+template <typename... Ts>
+struct AllTriviallyCopyable<std::tuple<Ts...>>
+{
+  /**
       @brief True iff all Ts are trivially copyable.
     */
-    static constexpr bool s_value = (std::is_trivially_copyable<Ts>::value && ...);
-  };
+  static constexpr bool s_value = (std::is_trivially_copyable<Ts>::value && ...);
+};
 
-  /**
+/**
     @brief Stand-in for std::void_t (maps any type pack to void).
     @tparam ... Ignored type pack.
   */
-  template <typename...>
-  struct MakeVoid
-  {
-    /**
+template <typename...>
+struct MakeVoid
+{
+  /**
       @brief Always void.
     */
-    using Type = void;
-  };
+  using Type = void;
+};
 
-  /**
+/**
      @brief Alias yielding void for any type pack (SFINAE helper, like std::void_t).
   */
-  template <typename... Ts>
-  using Void = typename MakeVoid<Ts...>::Type;
+template <typename... Ts>
+using Void = typename MakeVoid<Ts...>::Type;
 
-  /**
+/**
     @brief Turn a tuple of HDF5 payload member pointers into a std::index_sequence of
            DERIVED payload-column indices (each via indexOf against the payload columns).
     @tparam Traits Payload traits type providing @c columns and @c h5Columns.
@@ -537,75 +537,75 @@ namespace detail {
     @param[in] a_seq Index sequence [0, size(h5Columns)) selecting the h5 columns.
     @return An index_sequence of the derived payload-column indices.
   */
-  template <typename Traits, std::size_t... I>
-  constexpr std::index_sequence<indexOf(Traits::columns, std::get<I>(Traits::h5Columns))...>
-  deriveH5Seq([[maybe_unused]] std::index_sequence<I...> a_seq) noexcept
-  {
-    return {};
-  }
+template <typename Traits, std::size_t... I>
+constexpr std::index_sequence<indexOf(Traits::columns, std::get<I>(Traits::h5Columns))...>
+deriveH5Seq([[maybe_unused]] std::index_sequence<I...> a_seq) noexcept
+{
+  return {};
+}
 
-  /**
+/**
     @brief Primary template resolving the HDF5 payload column subset; defaults to all columns.
     @tparam Traits   Payload traits type.
     @tparam Fallback Index sequence used when no @c h5Columns is declared.
     @tparam (anon)   SFINAE slot detecting @c Traits::h5Columns.
   */
-  template <typename Traits, typename Fallback, typename = void>
-  struct H5ColumnSubset
-  {
-    /**
+template <typename Traits, typename Fallback, typename = void>
+struct H5ColumnSubset
+{
+  /**
       @brief The resolved subset (all payload columns).
     */
-    using Type = Fallback;
-  };
+  using Type = Fallback;
+};
 
-  /**
+/**
     @brief Specialization selecting the declared HDF5 payload subset when @c Traits::h5Columns exists.
     @tparam Traits   Payload traits type declaring @c h5Columns.
     @tparam Fallback Index sequence used when no @c h5Columns is declared (unused here).
   */
-  template <typename Traits, typename Fallback>
-  struct H5ColumnSubset<Traits, Fallback, Void<decltype(Traits::h5Columns)>>
-  {
-    /**
+template <typename Traits, typename Fallback>
+struct H5ColumnSubset<Traits, Fallback, Void<decltype(Traits::h5Columns)>>
+{
+  /**
       @brief The declared h5Columns tuple type.
     */
-    using H5Tuple = std::remove_cv_t<std::remove_reference_t<decltype(Traits::h5Columns)>>;
-    /**
+  using H5Tuple = std::remove_cv_t<std::remove_reference_t<decltype(Traits::h5Columns)>>;
+  /**
       @brief Derived payload-column index subset.
     */
-    using Type = decltype(deriveH5Seq<Traits>(std::make_index_sequence<std::tuple_size<H5Tuple>::value>{}));
-  };
+  using Type = decltype(deriveH5Seq<Traits>(std::make_index_sequence<std::tuple_size<H5Tuple>::value>{}));
+};
 
-  /**
+/**
     @brief memcpy one trivially-copyable value onto a byte buffer and advance the buffer pointer.
     @tparam T Trivially-copyable value type.
     @param[in,out] a_buf   Buffer pointer, advanced by sizeof(T) on return.
     @param[in]     a_value Value to copy into the buffer.
   */
-  template <typename T>
-  inline void
-  pushBytes(unsigned char*& a_buf, const T& a_value) noexcept
-  {
-    static_assert(std::is_trivially_copyable<T>::value, "SoA columns must be trivially copyable");
-    std::memcpy(a_buf, &a_value, sizeof(T));
-    a_buf += sizeof(T);
-  }
+template <typename T>
+inline void
+pushBytes(unsigned char*& a_buf, const T& a_value) noexcept
+{
+  static_assert(std::is_trivially_copyable<T>::value, "SoA columns must be trivially copyable");
+  std::memcpy(a_buf, &a_value, sizeof(T));
+  a_buf += sizeof(T);
+}
 
-  /**
+/**
     @brief memcpy one trivially-copyable value off a byte buffer and advance the buffer pointer.
     @tparam T Trivially-copyable value type.
     @param[in,out] a_buf   Buffer pointer, advanced by sizeof(T) on return.
     @param[out]    a_value Value filled from the buffer.
   */
-  template <typename T>
-  inline void
-  pullBytes(const unsigned char*& a_buf, T& a_value) noexcept
-  {
-    static_assert(std::is_trivially_copyable<T>::value, "SoA columns must be trivially copyable");
-    std::memcpy(&a_value, a_buf, sizeof(T));
-    a_buf += sizeof(T);
-  }
+template <typename T>
+inline void
+pullBytes(const unsigned char*& a_buf, T& a_value) noexcept
+{
+  static_assert(std::is_trivially_copyable<T>::value, "SoA columns must be trivially copyable");
+  std::memcpy(&a_value, a_buf, sizeof(T));
+  a_buf += sizeof(T);
+}
 
 } // namespace detail
 
