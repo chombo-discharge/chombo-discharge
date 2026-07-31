@@ -5,11 +5,11 @@
  */
 
 /**
-   @file   CD_AdvectionDiffusionStepper.cpp
-   @brief  Implementation of CD_AdvectionDiffusionStepper.H
-   @author Robert Marskar
-   @date   March 2020
-*/
+ * @file   CD_AdvectionDiffusionStepper.cpp
+ * @brief  Implementation of CD_AdvectionDiffusionStepper.H
+ * @author Robert Marskar
+ * @date   March 2020
+ */
 
 // Chombo includes
 #include <ParmParse.H>
@@ -404,8 +404,8 @@ AdvectionDiffusionStepper::advance(const Real a_dt)
 
     if (m_solver->isDiffusive()) {
 
-      // Compute the finite volume approximation to kappa*div(F). The second "hook" is a debugging hook that includes redistribution when computing kappa*div(F). It
-      // exists only for debugging/assurance reasons.
+      // Compute the finite volume approximation to kappa*div(F). The second "hook" is a debugging hook that includes
+      // redistribution when computing kappa*div(F). It exists only for debugging/assurance reasons.
       if (false) {
         const bool conservativeOnly = true;
 

@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_ElectrostaticEbBc.cpp
-  @brief  Implementation of CD_ElectrostaticEbBc.H
-  @author Robert Marskar
-*/
+ * @file   CD_ElectrostaticEbBc.cpp
+ * @brief  Implementation of CD_ElectrostaticEbBc.H
+ * @author Robert Marskar
+ */
 
 // Our includes
 #include <CD_ElectrostaticEbBc.H>

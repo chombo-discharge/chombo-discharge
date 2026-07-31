@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_EBCoarseToFineInterp.cpp
-  @brief  Implementation of EBCoarseToFineInterp.H
-  @author Robert Marskar
-*/
+ * @file   CD_EBCoarseToFineInterp.cpp
+ * @brief  Implementation of EBCoarseToFineInterp.H
+ * @author Robert Marskar
+ */
 
 // Std includes
 #include <limits>

@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_RoundedBoxIF.H
-  @brief  Declaration of an implicit function describing a rectangle with rounded corners (and edges in 3D)
-  @author Robert Marskar
-*/
+ * @file   CD_RoundedBoxIF.H
+ * @brief  Declaration of an implicit function describing a rectangle with rounded corners (and edges in 3D)
+ * @author Robert Marskar
+ */
 
 #ifndef CD_ROUNDEDBOXIF_H
 #define CD_ROUNDEDBOXIF_H
@@ -21,63 +21,63 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief A box with rounded corners and edges
-*/
+ * @brief A box with rounded corners and edges
+ */
 class RoundedBoxIF : public BaseIF
 {
 public:
   /**
-    @brief Disallowed weak construction
-  */
+   * @brief Disallowed weak construction
+   */
   RoundedBoxIF() = delete;
 
   /**
-    @brief Constructor
-    @param[in] a_loCorner    Upper right corner of the object
-    @param[in] a_hiCorner    Lower left corner of the object
-    @param[in] a_curvature   Radius of curvature on edges and corners
-    @param[in] a_fluidInside Fluid on inside (true) or outside (false)
-  */
+   * @brief Constructor
+   * @param[in] a_loCorner    Upper right corner of the object
+   * @param[in] a_hiCorner    Lower left corner of the object
+   * @param[in] a_curvature   Radius of curvature on edges and corners
+   * @param[in] a_fluidInside Fluid on inside (true) or outside (false)
+   */
   RoundedBoxIF(const RealVect& a_loCorner,
                const RealVect& a_hiCorner,
                const Real      a_curvature,
                const bool      a_fluidInside);
 
   /**
-    @brief Copy constructor
-    @param[in] a_inputIF Other box
-  */
+   * @brief Copy constructor
+   * @param[in] a_inputIF Other box
+   */
   RoundedBoxIF(const RoundedBoxIF& a_inputIF);
 
   /**
-    @brief Destructor
-  */
+   * @brief Destructor
+   */
   virtual ~RoundedBoxIF();
 
   /**
-    @brief Get distance to object. 
-    @param[in] a_point Physical position. 
-    @return Function value at the given point
-  */
+   * @brief Get distance to object.
+   * @param[in] a_point Physical position.
+   * @return Function value at the given point
+   */
   virtual Real
   value(const RealVect& a_point) const override;
 
   /**
-    @brief IF factory method
-    @return New copy of this implicit function
-  */
+   * @brief IF factory method
+   * @return New copy of this implicit function
+   */
   virtual BaseIF*
   newImplicitFunction() const override;
 
 protected:
   /**
-    @brief Fluid on inside or not
-  */
+   * @brief Fluid on inside or not
+   */
   bool m_fluidInside;
 
   /**
-    @brief Implicit function (which is union between planes)
-  */
+   * @brief Implicit function (which is union between planes)
+   */
   RefCountedPtr<BaseIF> m_baseIF;
 };
 

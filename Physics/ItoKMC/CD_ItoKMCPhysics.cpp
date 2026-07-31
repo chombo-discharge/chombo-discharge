@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_ItoKMCPhysics.cpp
-  @brief  Implementation of CD_ItoKMCPhysics.H
-  @author Robert Marskar
-*/
+ * @file   CD_ItoKMCPhysics.cpp
+ * @brief  Implementation of CD_ItoKMCPhysics.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <CH_Timer.H>

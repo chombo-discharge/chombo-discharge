@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_MFHelmholtzSaturationChargeJumpBC.cpp
-  @brief  Implementation of CD_MFHelmholtzSaturationChargeJumpBC.H
-  @author Robert Marskar
-*/
+ * @file   CD_MFHelmholtzSaturationChargeJumpBC.cpp
+ * @brief  Implementation of CD_MFHelmholtzSaturationChargeJumpBC.H
+ * @author Robert Marskar
+ */
 
 // Our includes
 #include <CD_MFHelmholtzSaturationChargeJumpBC.H>
@@ -53,22 +53,24 @@ MFHelmholtzSaturationChargeJumpBC::matchBC(BaseIVFAB<Real>& a_jump,
 {
   CH_assert(m_multiPhase);
 
-  // TLDR: Normally, the boundary potential would be computed from dphi/dn1 + dphi/dn2 = sigma and since dphi/dn can be represented as
+  // TLDR: Normally, the boundary potential would be computed from dphi/dn1 + dphi/dn2 = sigma and since dphi/dn can be
+  // represented as
   //
   //          dphi/dn = wb*phiB + sum[wi * phi(i)]
   //
-  //       we would have an equation which could be solved for phiB. That value would be used by MFHelmholtzEBBC for putting in the finite
-  //       volume fluxes.
+  //       we would have an equation which could be solved for phiB. That value would be used by MFHelmholtzEBBC for
+  //       putting in the finite volume fluxes.
   //
-  //       This function overrides that functionality and computes phiB by assuming that dphi/dn=0 on one of the phases (m_phase), and rather
-  //       that a_jump is the free parameter. In this form we have
+  //       This function overrides that functionality and computes phiB by assuming that dphi/dn=0 on one of the phases
+  //       (m_phase), and rather that a_jump is the free parameter. In this form we have
   //
   //           phiB = -sum[wi * phi(i)]/wb.
   //
-  //       We happen to know that the stencils were stored in "flux-form" by multiplying by the b-coefficient AND the denominator
-  //       1/(wq*bq + wp*bp). So, what we have stored in the weights are actually b*wB and for the stencils we have stored b*wi/(bq*wq + bp*wp).
-  //       So, both the weight and the stencil were multiplied by the b-coefficient so we don't have to worry about the coefficient when we divide
-  //       that out. But, the term (bq*wq + bp*wp) has been multiplied into the stencil weights so we need to divide that back out.
+  //       We happen to know that the stencils were stored in "flux-form" by multiplying by the b-coefficient AND the
+  //       denominator 1/(wq*bq + wp*bp). So, what we have stored in the weights are actually b*wB and for the stencils
+  //       we have stored b*wi/(bq*wq + bp*wp). So, both the weight and the stencil were multiplied by the b-coefficient
+  //       so we don't have to worry about the coefficient when we divide that out. But, the term (bq*wq + bp*wp) has
+  //       been multiplied into the stencil weights so we need to divide that back out.
 
   constexpr int vofComp     = 0;
   constexpr int firstPhase  = 0;
@@ -106,7 +108,8 @@ MFHelmholtzSaturationChargeJumpBC::matchBC(BaseIVFAB<Real>& a_jump,
       phiBndry = contribPhase0 / denomPhase0; // Divide because we multiplied the stencil by bq/(wq*bq + wp*bp)
       phiBndry *= -1. / weightPhase0;         // Divide by boundary weight, which is actually bq*wq.
 
-      // BC is b*dphi/dn = sigma so compute the jump from that. Recall that the stencil is denominator-weighted so divide that out.
+      // BC is b*dphi/dn = sigma so compute the jump from that. Recall that the stencil is denominator-weighted so
+      // divide that out.
       jump += weightPhase1 * phiBndry;
       jump += contribPhase1 / denomPhase0;
     }

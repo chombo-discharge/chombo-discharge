@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_Cylinder.cpp
-  @brief  Implementation of CD_Cylinder.H
-  @author Robert Marskar
-*/
+ * @file   CD_Cylinder.cpp
+ * @brief  Implementation of CD_Cylinder.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <ParmParse.H>

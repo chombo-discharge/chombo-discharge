@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_SphereSdf.cpp
-  @brief  Implementation of CD_SphereSdf.H
-  @author Robert Marskar
-*/
+ * @file   CD_SphereSdf.cpp
+ * @brief  Implementation of CD_SphereSdf.H
+ * @author Robert Marskar
+ */
 
 // Our includes
 #include <CD_SphereSdf.H>

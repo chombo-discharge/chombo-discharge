@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_ItoKMCPhotoReactionImplem.H
-  @brief  Implementation of CD_ItoKMCPhotoReaction.H
-  @author Robert Marskar
-*/
+ * @file   CD_ItoKMCPhotoReactionImplem.H
+ * @brief  Implementation of CD_ItoKMCPhotoReaction.H
+ * @author Robert Marskar
+ */
 
 // Our includes
 #ifndef CD_ITOKMCPHOTOREACTIONIMPLEM_H

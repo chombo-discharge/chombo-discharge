@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_KMCDualStateImplem.H
-  @brief  Implementation of CD_KMCDualState.H
-  @author Robert Marskar
-*/
+ * @file   CD_KMCDualStateImplem.H
+ * @brief  Implementation of CD_KMCDualState.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_KMCDUALSTATEIMPLEM_H
 #define CD_KMCDUALSTATEIMPLEM_H

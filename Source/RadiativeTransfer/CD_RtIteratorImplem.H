@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_RtIteratorImplem.H
-  @brief  Implementation of RtIterator.H
-  @author Robert Marskar
-*/
+ * @file   CD_RtIteratorImplem.H
+ * @brief  Implementation of RtIterator.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_RTITERATORIMPLEM_H
 #define CD_RTITERATORIMPLEM_H
@@ -18,9 +18,9 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Iterator class for RtLayout
-  @param[in,out] a_layout Description
-*/
+ * @brief Iterator class for RtLayout
+ * @param[in,out] a_layout Description
+ */
 template <class T>
 RtIterator<T>::RtIterator(RtLayout<T>& a_layout)
 {

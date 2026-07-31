@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_RandomInterface.H
-  @brief  Random interface geometry
-  @author Robert Marskar
-*/
+ * @file   CD_RandomInterface.H
+ * @brief  Random interface geometry
+ * @author Robert Marskar
+ */
 
 #ifndef CD_RANDOMINTERFACE_H
 #define CD_RANDOMINTERFACE_H
@@ -18,50 +18,50 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Class that represents two random interface smooshed together
-*/
+ * @brief Class that represents two random interface smooshed together
+ */
 class RandomInterface : public ComputationalGeometry
 {
 public:
   /**
-    @brief Constructor.
-  */
+   * @brief Constructor.
+   */
   RandomInterface() noexcept;
 
   /**
-    @brief Destructor (does nothing)
-  */
+   * @brief Destructor (does nothing)
+   */
   virtual ~RandomInterface() noexcept;
 
 protected:
   /**
-    @brief Alias for 3D vector type
-  */
+   * @brief Alias for 3D vector type
+   */
   using Vec3 = EBGeometry::Vec3T<Real>;
 
   /**
-    @brief Clamped noisy plane signed distance function. 
-  */
+   * @brief Clamped noisy plane signed distance function.
+   */
   class ClampedNoisePlane : public EBGeometry::SignedDistanceFunction<Real>
   {
   public:
     /**
-      @brief Disallowed weak construction
-    */
+     * @brief Disallowed weak construction
+     */
     ClampedNoisePlane() = delete;
 
     /**
-      @brief Full constructor
-      @param[in] a_point Point on plane
-      @param[in] a_normal Plane normal vector
-      @param[in] a_clampLo Clamping at low end
-      @param[in] a_clampHi Clamping at high
-      @param[in] a_clampDx Clamping length
-      @param[in] a_noiseFrequency Noise frequency
-      @param[in] a_noiseAmplitude Noise amplitude
-      @param[in] a_noisePersistence Noise persistence
-      @param[in] a_noiseOctaves Number of noise octaves
-    */
+     * @brief Full constructor
+     * @param[in] a_point Point on plane
+     * @param[in] a_normal Plane normal vector
+     * @param[in] a_clampLo Clamping at low end
+     * @param[in] a_clampHi Clamping at high
+     * @param[in] a_clampDx Clamping length
+     * @param[in] a_noiseFrequency Noise frequency
+     * @param[in] a_noiseAmplitude Noise amplitude
+     * @param[in] a_noisePersistence Noise persistence
+     * @param[in] a_noiseOctaves Number of noise octaves
+     */
     ClampedNoisePlane(const Vec3& a_point,
                       const Vec3& a_normal,
                       const Vec3& a_clampLo,
@@ -73,60 +73,60 @@ protected:
                       const int   a_noiseOctaves) noexcept;
 
     /**
-      @brief Destructor (does nothing)
-    */
+     * @brief Destructor (does nothing)
+     */
     ~ClampedNoisePlane() = default;
 
     /**
-      @brief Shuffle the permutation array.
-      @param[in,out] a_rng Uniform random number generator.
-    */
+     * @brief Shuffle the permutation array.
+     * @param[in,out] a_rng Uniform random number generator.
+     */
     template <class URNG>
     void
     shuffle(URNG& a_rng) noexcept;
 
     /**
-      @brief Signed distance function.
-      @param[in] a_point Input point.
-      @return Signed distance to the noisy plane surface.
-    */
+     * @brief Signed distance function.
+     * @param[in] a_point Input point.
+     * @return Signed distance to the noisy plane surface.
+     */
     virtual Real
     signedDistance(const Vec3& a_point) const noexcept override;
 
   protected:
     /**
-      @brief Point on plane
-    */
+     * @brief Point on plane
+     */
     Vec3 m_point;
 
     /**
-      @brief Plane normal vector
-    */
+     * @brief Plane normal vector
+     */
     Vec3 m_normal;
 
     /**
-      @brief Low-end clamping
-    */
+     * @brief Low-end clamping
+     */
     Vec3 m_clampLo;
 
     /**
-      @brief High-end clamping
-    */
+     * @brief High-end clamping
+     */
     Vec3 m_clampHi;
 
     /**
-      @brief Clamping length
-    */
+     * @brief Clamping length
+     */
     Vec3 m_clampDx;
 
     /**
-      @brief Base implicit function
-    */
+     * @brief Base implicit function
+     */
     std::shared_ptr<EBGeometry::PlaneSDF<Real>> m_plane;
 
     /**
-      @brief Noise function
-    */
+     * @brief Noise function
+     */
     std::shared_ptr<EBGeometry::PerlinSDF<Real>> m_perlin;
   };
 };

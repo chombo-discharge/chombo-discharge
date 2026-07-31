@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_EBNonConservativeDivergence.cpp
-  @brief  Implementation of CD_EBNonConservativeDiverge.cpp
-  @author Robert Marskar
-*/
+ * @file   CD_EBNonConservativeDivergence.cpp
+ * @brief  Implementation of CD_EBNonConservativeDiverge.cpp
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <CH_Timer.H>

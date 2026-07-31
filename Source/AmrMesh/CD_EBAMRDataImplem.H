@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_EBAMRDataImplem.H
-  @brief  Implementation of EBAMRData.H
-  @author Robert Marskar
-*/
+ * @file   CD_EBAMRDataImplem.H
+ * @brief  Implementation of EBAMRData.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_EBAMRDATAIMPLEM_H
 #define CD_EBAMRDATAIMPLEM_H

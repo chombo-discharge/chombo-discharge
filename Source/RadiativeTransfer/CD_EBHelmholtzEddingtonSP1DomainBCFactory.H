@@ -6,7 +6,8 @@
 
 /*
   @file   CD_EBHelmholtzEddingtonSP1DomainBCFactory.H
-  @brief  Declaration of a factory class for wrapping domain boundary conditions for multigrid in the EddingtonSP1 solver
+  @brief  Declaration of a factory class for wrapping domain boundary conditions for multigrid in the EddingtonSP1
+  solver
   @author Robert Marskar
 */
 
@@ -20,92 +21,92 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Base class for passing EddingtonSP1 domain boundary conditions into EBHelmholtzOp
-*/
+ * @brief Base class for passing EddingtonSP1 domain boundary conditions into EBHelmholtzOp
+ */
 class EBHelmholtzEddingtonSP1DomainBCFactory : public EBHelmholtzDomainBCFactory
 {
 public:
   /**
-    @brief Weak construction is bad. Use the full constructor. 
-  */
+   * @brief Weak construction is bad. Use the full constructor.
+   */
   EBHelmholtzEddingtonSP1DomainBCFactory() = delete;
 
   /**
-    @brief Full constructor
-    @param[in] a_eddingtonBCs EddingtonSP1 boundary conditions on domain sides
-    @param[in] a_species      Radiative transfer species
-    @param[in] a_r1           "First reflection coefficient"
-    @param[in] a_r2           "Second reflection coefficient"
-  */
+   * @brief Full constructor
+   * @param[in] a_eddingtonBCs EddingtonSP1 boundary conditions on domain sides
+   * @param[in] a_species      Radiative transfer species
+   * @param[in] a_r1           "First reflection coefficient"
+   * @param[in] a_r2           "Second reflection coefficient"
+   */
   EBHelmholtzEddingtonSP1DomainBCFactory(const EddingtonSP1DomainBc&     a_eddingtonBCs,
                                          const RefCountedPtr<RtSpecies>& a_species,
                                          const Real                      a_r1,
                                          const Real                      a_r2);
 
   /**
-    @brief Disallowed copy constructor
-  */
+   * @brief Disallowed copy constructor
+   */
   EBHelmholtzEddingtonSP1DomainBCFactory(EBHelmholtzEddingtonSP1DomainBCFactory& a_other) = delete;
 
   /**
-    @brief Disallowed move constructor
-  */
+   * @brief Disallowed move constructor
+   */
   EBHelmholtzEddingtonSP1DomainBCFactory(EBHelmholtzEddingtonSP1DomainBCFactory&& a_other) = delete;
 
   /**
-    @brief Disallowed copy assignment
-  */
+   * @brief Disallowed copy assignment
+   */
   EBHelmholtzEddingtonSP1DomainBCFactory&
   operator=(EBHelmholtzEddingtonSP1DomainBCFactory& a_other) = delete;
 
   /**
-    @brief Disallowed move assignment
-  */
+   * @brief Disallowed move assignment
+   */
   EBHelmholtzEddingtonSP1DomainBCFactory&
   operator=(EBHelmholtzEddingtonSP1DomainBCFactory&& a_other) = delete;
 
   /**
-    @brief Destructor
-  */
+   * @brief Destructor
+   */
   virtual ~EBHelmholtzEddingtonSP1DomainBCFactory();
 
   /**
-    @brief Disallowed -- don't see why you would need it.
-  */
+   * @brief Disallowed -- don't see why you would need it.
+   */
   EBHelmholtzEddingtonSP1DomainBCFactory(const EBHelmholtzEddingtonSP1DomainBCFactory& a_other) = delete;
 
   /**
-    @brief Disallowed - don't see why you would need it.
-  */
+   * @brief Disallowed - don't see why you would need it.
+   */
   EBHelmholtzEddingtonSP1DomainBCFactory&
   operator=(const EBHelmholtzEddingtonSP1DomainBCFactory& a_other) = delete;
 
   /**
-    @brief Factory method
-    @return Return value
-  */
+   * @brief Factory method
+   * @return Return value
+   */
   RefCountedPtr<EBHelmholtzDomainBC>
   create() const override final;
 
 protected:
   /**
-    @brief Domain boundary conditions
-  */
+   * @brief Domain boundary conditions
+   */
   EddingtonSP1DomainBc m_eddingtonBCs;
 
   /**
-    @brief Radiative transfer species
-  */
+   * @brief Radiative transfer species
+   */
   RefCountedPtr<RtSpecies> m_species;
 
   /**
-    @brief "First reflection coefficient"
-  */
+   * @brief "First reflection coefficient"
+   */
   Real m_r1;
 
   /**
-    @brief "Second reflection coefficient"
-  */
+   * @brief "Second reflection coefficient"
+   */
   Real m_r2;
 };
 

@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_NonCommParticleImplem.H
-  @brief  Implementation of CD_NonCommParticle.H
-  @author Robert Marskar
-*/
+ * @file   CD_NonCommParticleImplem.H
+ * @brief  Implementation of CD_NonCommParticle.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_NONCOMMPARTICLEIMPLEM_H
 #define CD_NONCOMMPARTICLEIMPLEM_H

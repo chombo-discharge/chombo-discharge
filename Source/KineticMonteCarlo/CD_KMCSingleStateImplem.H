@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_KMCSingleStateImplem.H
-  @brief  Implementation of CD_KMCSingleState.H
-  @author Robert Marskar
-*/
+ * @file   CD_KMCSingleStateImplem.H
+ * @brief  Implementation of CD_KMCSingleState.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_KMCSINGLESTATEIMPLEM_H
 #define CD_KMCSINGLESTATEIMPLEM_H

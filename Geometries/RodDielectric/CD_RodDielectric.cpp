@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_RodDielectric.cpp
-  @brief  Implementation of CD_RodDielectric.H
-  @author Robert Marskar
-*/
+ * @file   CD_RodDielectric.cpp
+ * @brief  Implementation of CD_RodDielectric.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <PlaneIF.H>

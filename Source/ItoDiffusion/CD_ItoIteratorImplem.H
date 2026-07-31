@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_ItoIteratorImplem.H
-  @brief  Implementation of CD_ItoIterator.H
-  @author Robert Marskar
-*/
+ * @file   CD_ItoIteratorImplem.H
+ * @brief  Implementation of CD_ItoIterator.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_ITOITERATORIMPLEM_H
 #define CD_ITOITERATORIMPLEM_H

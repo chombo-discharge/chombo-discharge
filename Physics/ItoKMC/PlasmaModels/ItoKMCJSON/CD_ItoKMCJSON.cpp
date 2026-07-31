@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_ItoKMCJSON.cpp
-  @brief  Implementation of CD_ItoKMCJSON.H
-  @author Robert Marskar
-*/
+ * @file   CD_ItoKMCJSON.cpp
+ * @brief  Implementation of CD_ItoKMCJSON.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <CH_Timer.H>
@@ -313,8 +313,10 @@ ItoKMCJSON::initializeGasLaw()
 
   const std::string baseError = m_className + "::initializeGasLaw";
 
+  // clang-format off
   // TLDR: This routine exists for populating m_gasPressure, m_gasTemperature, and m_gasNumberDensity. If you want to add a new gas law, this
   //       routine is where you would do it.
+  // clang-format on
 
   if (!(m_json["gas"]["law"].contains("id"))) {
     this->throwParserError(baseError + " but field 'gas/law/id' is missing");
@@ -567,7 +569,8 @@ ItoKMCJSON::initializeBackgroundSpecies()
     }
   }
 
-  // Do a dummy test to see if molar fractions sum to one like they should. This may break if the user inputs function-based values.
+  // Do a dummy test to see if molar fractions sum to one like they should. This may break if the user inputs
+  // function-based values.
   this->checkMolarFraction(RealVect::Zero);
 }
 
@@ -874,8 +877,10 @@ ItoKMCJSON::initializeAutomaticTownsend(const std::string& a_coeff)
     pout() << m_className + "::initializeAutomaticTownsend" << endl;
   }
 
+  // clang-format off
   // TLDR: This computes the alpha-coefficient as alpha/N = k_k/(mu * E) where k_k is the rate coefficient for purely ionizing reactions that
   //       lead to electron growth (similarly is done for eta)
+  // clang-format on
 
   std::pair<bool, std::string> whichCoeff;
 
@@ -1886,8 +1891,8 @@ ItoKMCJSON::initializePlasmaReactions()
 
     const std::string reaction = this->trim(reactionJSON["reaction"].get<std::string>());
 
-    // Parse the reaction string to figure out the species involved in the reaction. This CAN involve the species wildcard, in which
-    // case we also build the reaction superset;
+    // Parse the reaction string to figure out the species involved in the reaction. This CAN involve the species
+    // wildcard, in which case we also build the reaction superset;
     std::vector<std::string> reactants;
     std::vector<std::string> products;
 
@@ -1911,7 +1916,8 @@ ItoKMCJSON::initializePlasmaReactions()
       // Make sure the reaction makes sense
       this->sanctifyPlasmaReaction(curReactants, trimmedProducts, reaction);
 
-      // Build the KMC reaction. Note that this does not involve the "background species", which are absorbed into the transition rates.
+      // Build the KMC reaction. Note that this does not involve the "background species", which are absorbed into the
+      // transition rates.
       std::list<size_t> backgroundReactants;
       std::list<size_t> plasmaReactants;
       std::list<size_t> photonReactants;
@@ -1986,8 +1992,8 @@ ItoKMCJSON::initializePhotoReactions()
 
     const std::string reaction = this->trim(reactionJSON["reaction"].get<std::string>());
 
-    // Parse the reaction string to figure out the species involved in the reaction. This CAN involve the species wildcard, in which
-    // case we also build the reaction superset;
+    // Parse the reaction string to figure out the species involved in the reaction. This CAN involve the species
+    // wildcard, in which case we also build the reaction superset;
     std::vector<std::string> reactants;
     std::vector<std::string> products;
 
@@ -2367,7 +2373,8 @@ ItoKMCJSON::sanctifyPlasmaReaction(const std::vector<std::string>& a_reactants,
     }
   }
 
-  // All products should be in the list of plasma or photon species. It's ok if users include a neutral species -- we will ignore it (but tell the user about it).
+  // All products should be in the list of plasma or photon species. It's ok if users include a neutral species -- we
+  // will ignore it (but tell the user about it).
   for (const auto& p : a_products) {
     const bool isBackground = this->isBackgroundSpecies(p);
     const bool isPlasma     = this->isPlasmaSpecies(p);
@@ -2495,7 +2502,8 @@ ItoKMCJSON::sanctifyPhotoReaction(const std::vector<std::string>& a_reactants,
     }
   }
 
-  // All products should be in the list of plasma. It's ok if users include a neutral species -- we will ignore it (but tell the user about it).
+  // All products should be in the list of plasma. It's ok if users include a neutral species -- we will ignore it (but
+  // tell the user about it).
   for (const auto& p : a_products) {
     const bool isBackground = this->isBackgroundSpecies(p);
     const bool isPlasma     = this->isPlasmaSpecies(p);
@@ -2677,6 +2685,7 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
     pout() << m_className + "::parsePlasmaReactionRate" << endl;
   }
 
+  // clang-format off
   // TLDR: ItoKMCPhysics uses KMCDualStateReaction which computes propensities for reactions S + S -> null as a = 0.5 * c * X * (X-1), where c is the
   //       "rate" in the KMC sense. This is correct since there are 0.5 * X * (X-1) distinct pairs of particles. But ItoKMCJSON expects that the input
   //       rates corresponding to the rates in the reaction rate equation, so for S + S -> null we would have dn/dt = -2*k*n*n, or dX/dt = -(2k/dV) * X * X.
@@ -2687,6 +2696,7 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
   //       This subtle scaling is important for consistency between the KMC algorithm and the reaction rate equation. Because KMCDualStateReaction operates
   //       using the microscopic rates, we must add this scaling back in. Also note that this scaling does not matter if background species enter on the left
   //       hand side because the rates are simply absorbed into the rate itself.
+  // clang-format on
 
   FunctionEX fluidRate = [](const Real /*E*/, const RealVect& /*x*/) -> Real {
     return 0.0;
@@ -3352,8 +3362,8 @@ ItoKMCJSON::parseReactionWildcards(const std::vector<std::string>& a_reactants,
   const std::string reaction  = a_reactionJSON["reaction"].get<std::string>();
   const std::string baseError = "ItoKMCJSON::parseReactionWildcards for reaction '" + reaction + "'";
 
-  // Check if reaction string had a wildcard '@'. If it did we replace the wildcard with the corresponding species. This means that we need to
-  // build additional reactions.
+  // Check if reaction string had a wildcard '@'. If it did we replace the wildcard with the corresponding species. This
+  // means that we need to build additional reactions.
   const bool containsWildcard = this->containsWildcard(reaction);
 
   if (containsWildcard) {

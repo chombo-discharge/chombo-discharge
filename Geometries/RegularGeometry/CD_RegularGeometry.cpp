@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_RegularGeometry.cpp
-  @brief  Implementation of CD_RegularGeometry.H
-  @author Robert Marskar
-*/
+ * @file   CD_RegularGeometry.cpp
+ * @brief  Implementation of CD_RegularGeometry.H
+ * @author Robert Marskar
+ */
 
 // Our includes
 #include <CD_RegularGeometry.H>

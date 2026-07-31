@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_LookupTable1DImplem.H
-  @brief  Declaration of a lookup table in one independent variable.
-  @author Robert Marskar
-*/
+ * @file   CD_LookupTable1DImplem.H
+ * @brief  Declaration of a lookup table in one independent variable.
+ * @author Robert Marskar
+ */
 
 #ifndef CD_LOOKUPTABLEIMPLEM_H
 #define CD_LOOKUPTABLEIMPLEM_H

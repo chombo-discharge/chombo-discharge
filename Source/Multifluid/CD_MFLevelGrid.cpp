@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_MFLevelGrid.cpp
-  @brief  Implementation of CD_MFLevelGrid.H
-  @author Robert Marskar
-*/
+ * @file   CD_MFLevelGrid.cpp
+ * @brief  Implementation of CD_MFLevelGrid.H
+ * @author Robert Marskar
+ */
 
 // Our includes
 #include <CD_MultiFluidIndexSpace.H>

@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_ParticleSoAImplem.H
-  @brief  Implementation of CD_ParticleSoA.H
-  @author Robert Marskar
-*/
+ * @file   CD_ParticleSoAImplem.H
+ * @brief  Implementation of CD_ParticleSoA.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_PARTICLESOAIMPLEM_H
 #define CD_PARTICLESOAIMPLEM_H

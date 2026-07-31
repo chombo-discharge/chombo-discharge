@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_EBMGProlong.cpp
-  @brief  Implementation of CD_EBMGProlong.H
-  @author Robert Marskar
-*/
+ * @file   CD_EBMGProlong.cpp
+ * @brief  Implementation of CD_EBMGProlong.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <EBCellFactory.H>

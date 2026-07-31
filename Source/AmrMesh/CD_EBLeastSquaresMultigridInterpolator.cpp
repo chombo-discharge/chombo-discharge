@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_EBLeastSquaresMultigridInterpolator.cpp
-  @brief  Implementation of CD_EBLeastSquaresMultigridInterpolator.H
-  @author Robert Marskar
-*/
+ * @file   CD_EBLeastSquaresMultigridInterpolator.cpp
+ * @brief  Implementation of CD_EBLeastSquaresMultigridInterpolator.H
+ * @author Robert Marskar
+ */
 
 // Std includes
 #include <sstream>
@@ -51,14 +51,15 @@ EBLeastSquaresMultigridInterpolator::EBLeastSquaresMultigridInterpolator(const E
   CH_assert(a_refRat % 2 == 0);
   CH_assert(a_eblgFine.getGhost() >= a_ghostVector.max());
 
-  // Not enough ghost cells in input eblg. I don't know why anyone would do that, but make sure we abort if it happens. This is a more
-  // transparent error message than the assertion.
+  // Not enough ghost cells in input eblg. I don't know why anyone would do that, but make sure we abort if it happens.
+  // This is a more transparent error message than the assertion.
   if (a_eblgFine.getGhost() < a_ghostVector.max()) {
     MayDay::Error("EBLeastSquaresMultigridInterpolator::EBLeastSquaresMultigridInterpolator - not enough ghost cells!");
   }
 
-  // Build the regular stencil objects for regular-grid interpolation. I also leave a timer in place until performance and
-  // scalability has been investigated. To check performance, add EBLeastSquaresMultigridInterpolator.profile=true to your input script.
+  // Build the regular stencil objects for regular-grid interpolation. I also leave a timer in place until performance
+  // and scalability has been investigated. To check performance, add EBLeastSquaresMultigridInterpolator.profile=true
+  // to your input script.
   CH_START(t1);
   m_refRat          = a_refRat;
   m_ghostCF         = a_ghostCF;
@@ -207,8 +208,9 @@ EBLeastSquaresMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>&     
 
   LevelData<EBCellFAB> phiCoFi(m_eblgCoFi.getDBL(), 1, m_ghostVectorCoFi, EBCellFactory(m_eblgCoFi.getEBISL()));
 
-  // Interpolate all variables near the EB. We will copy a_phiCoar to phiCoFi which holds the data on the coarse grid cells around each fine-grid
-  // patch. Note that phiCoFi provides a LOCAL view of the coarse grid around each fine-level patch, so we can apply the stencils directly.
+  // Interpolate all variables near the EB. We will copy a_phiCoar to phiCoFi which holds the data on the coarse grid
+  // cells around each fine-grid patch. Note that phiCoFi provides a LOCAL view of the coarse grid around each
+  // fine-level patch, so we can apply the stencils directly.
   for (int icomp = a_variables.begin(); icomp <= a_variables.end(); icomp++) {
     const Interval srcInterv = Interval(icomp, icomp);
     const Interval dstInterv = Interval(m_comp, m_comp);
@@ -278,9 +280,11 @@ EBLeastSquaresMultigridInterpolator::coarseFineInterpH(EBCellFAB&       a_phi,
 
   CH_assert(a_phi.nComp() > a_variables.end());
 
+  // clang-format off
   // TLDR: This routine does the coarse-fine interpolation with the coarse-grid data set to zero. This is the kernel version,
   //       operating on a grid patch. It first does a direct kernel for regular data, and then does the interpolation near the
   //       EB after that.
+  // clang-format on
   const Real dxFine = 1.0;
   const Real dxCoar = 1.0 * m_refRat;
   const Real c1     = 2 * (dxCoar - dxFine) / (dxCoar + dxFine);
@@ -313,9 +317,9 @@ EBLeastSquaresMultigridInterpolator::coarseFineInterpH(EBCellFAB&       a_phi,
     }
     CH_STOP(t1);
 
-    // Apply fine stencil near the EB. It might look weird that we apply the stencil to a_phi AND put the result in a_phi. This
-    // is because the stencils are defined in the ghost cells we will fill, but the stencils only reach into valid data. So, we
-    // are, in fact, not writing to data that is used by the other stencils
+    // Apply fine stencil near the EB. It might look weird that we apply the stencil to a_phi AND put the result in
+    // a_phi. This is because the stencils are defined in the ghost cells we will fill, but the stencils only reach into
+    // valid data. So, we are, in fact, not writing to data that is used by the other stencils
     CH_START(t2);
     constexpr int numComp = 1;
     m_aggFineStencils[a_din]->apply(a_phi, a_phi, ivar, ivar, numComp, false);
@@ -483,8 +487,8 @@ EBLeastSquaresMultigridInterpolator::defineStencilsEBCF() noexcept
     const Box ghostedFineBox = grow(origFineBox, m_ghostVectorFine);
     const Box grownCoarBox   = grow(origCoarBox, m_ghostVectorCoFi);
 
-    // Define the valid regions such that the interpolation does not include coarse grid cells that fall beneath the fine level,
-    // and no fine cells outside the CF.
+    // Define the valid regions such that the interpolation does not include coarse grid cells that fall beneath the
+    // fine level, and no fine cells outside the CF.
     CH_START(t2);
     DenseIntVectSet validFineCells(origFineBox, true);
     DenseIntVectSet validCoarCells(grownCoarBox, true);
@@ -614,9 +618,10 @@ EBLeastSquaresMultigridInterpolator::getStencil(VoFStencil&            a_stencil
   CH_TIMER("compute_displacements", t3);
   CH_TIMER("compute_stencil", t4);
 
-  // On input, we know which ghost cell we want to interpolate to, and we happen to have a map of valid cells in a_validFineCells and a_validCoarCells. We use
-  // that information to build an overdetermined linear system of equations that interpolate to a_ghostVofFine to order a_order. If we don't have enough equations,
-  // this routine will return false, and will not create stencils.
+  // On input, we know which ghost cell we want to interpolate to, and we happen to have a map of valid cells in
+  // a_validFineCells and a_validCoarCells. We use that information to build an overdetermined linear system of
+  // equations that interpolate to a_ghostVofFine to order a_order. If we don't have enough equations, this routine will
+  // return false, and will not create stencils.
 
   bool foundStencil = true;
 
@@ -724,9 +729,10 @@ EBLeastSquaresMultigridInterpolator::getStencil(VoFStencil&            a_stencil
     }
     CH_STOP(t3);
 
-    // LeastSquares computes all unknown terms in a Taylor expansion up to specified order. We want the 0th order term, i.e. the interpolated value,
-    // which in multi-index notation is the term (0,0), i.e. IntVect::Zero. The format of the two-level least squares routine is such that the
-    // fine stencil lies on the first index. This can be confusing, but the LeastSquares uses a very compact notation.
+    // LeastSquares computes all unknown terms in a Taylor expansion up to specified order. We want the 0th order term,
+    // i.e. the interpolated value, which in multi-index notation is the term (0,0), i.e. IntVect::Zero. The format of
+    // the two-level least squares routine is such that the fine stencil lies on the first index. This can be confusing,
+    // but the LeastSquares uses a very compact notation.
     CH_START(t4);
     IntVect    interpStenIndex = IntVect::Zero;
     IntVectSet derivs          = IntVectSet(interpStenIndex);

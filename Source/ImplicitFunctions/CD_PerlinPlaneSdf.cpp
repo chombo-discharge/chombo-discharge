@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_PerlinPlaneSdf.cpp
-  @brief  CD_Implementation of CD_PerlinPlaneSdf.H
-  @author Robert Marskar
-*/
+ * @file   CD_PerlinPlaneSdf.cpp
+ * @brief  CD_Implementation of CD_PerlinPlaneSdf.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <PlaneIF.H>
@@ -51,7 +51,8 @@ PerlinPlaneSdf::~PerlinPlaneSdf() = default;
 Real
 PerlinPlaneSdf::value(const RealVect& a_pos) const
 {
-  // TLDR: To elevate the noise we displace the value along the normal (by an amount given by the Perlin noise function).
+  // TLDR: To elevate the noise we displace the value along the normal (by an amount given by the Perlin noise
+  // function).
 
   const RealVect  x0 = m_point;
   const RealVect& x1 = a_pos;

@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_MFHelmholtzRobinEBBCFactory.cpp
-  @brief  Implementation of CD_MFHelmholtzRobinEBBCFactory.H
-  @author Robert Marskar
-*/
+ * @file   CD_MFHelmholtzRobinEBBCFactory.cpp
+ * @brief  Implementation of CD_MFHelmholtzRobinEBBCFactory.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <CH_Timer.H>

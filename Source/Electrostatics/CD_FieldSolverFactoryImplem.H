@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_FieldSolverFactoryImplem.H
-  @brief  Implementation of CD_FieldSolverFactory.H
-  @author Robert Marskar
-*/
+ * @file   CD_FieldSolverFactoryImplem.H
+ * @brief  Implementation of CD_FieldSolverFactory.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_FIELDSOLVERFACTORYIMPLEM_H
 #define CD_FIELDSOLVERFACTORYIMPLEM_H

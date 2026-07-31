@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_CdrDomainBCImplem.H
-  @brief  Implementation of CD_CdrDomainBC.H
-  @author Robert Marskar
-*/
+ * @file   CD_CdrDomainBCImplem.H
+ * @brief  Implementation of CD_CdrDomainBC.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_CDRDOMAINBCIMPLEM_H
 #define CD_CDRDOMAINBCIMPLEM_H

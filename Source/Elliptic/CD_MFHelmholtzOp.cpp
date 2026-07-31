@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_MFHelmholtzOp.cpp
-  @brief  Implementation of CD_MFHelmholtzOp.H
-  @author Robert Marskar
-*/
+ * @file   CD_MFHelmholtzOp.cpp
+ * @brief  Implementation of CD_MFHelmholtzOp.H
+ * @author Robert Marskar
+ */
 
 // Std includes
 #include <chrono>
@@ -710,12 +710,15 @@ MFHelmholtzOp::interpolateCF(const LevelData<MFCellFAB>& a_phi,
 {
   CH_TIME("MFHelmholtzOp::interpolateCF");
 
+  // clang-format off
   // TLDR: This is a wrapper for interpolating ghost cells on each phase. The user can put a_homogeneousCF = false if he wants inhomogeneous interpolation. This routine
   //       was written so that we avoid calling Multifluid::aliasMF, since that tends to be expensive to call during every smoothing step.
+  // clang-format on
 
   if (m_hasCoar) {
     if (a_homogeneousCF) {
-      // The homogeneous version will be called on every relaxation so we use a format which avoid having to alias data (which can be expensive).
+      // The homogeneous version will be called on every relaxation so we use a format which avoid having to alias data
+      // (which can be expensive).
       const DataIterator& dit  = a_phi.dataIterator();
       const int           nbox = dit.size();
 
@@ -860,8 +863,10 @@ MFHelmholtzOp::relaxPointJacobi(LevelData<MFCellFAB>&       a_correction,
 {
   CH_TIME("MFHelmholtzOp::relaxPointJacobi");
 
+  // clang-format off
   // TLDR: This function performs point Jacobi relaxation in the form phi^(k+1) = phi^k - (res - L(phi))/|diag(L)|. Here, diag(L) is captured
   //       in m_relCoef. For performance integration, EBHelmholtzOp has a public function for the kernel.
+  // clang-format on
 
   LevelData<MFCellFAB> Lcorr;
   this->create(Lcorr, a_correction);
@@ -912,10 +917,12 @@ MFHelmholtzOp::relaxGSRedBlack(LevelData<MFCellFAB>&       a_correction,
 {
   CH_TIME("MFHelmholtzOp::relaxGSRedBlack");
 
+  // clang-format off
   // TLDR: This function performs red-black Gauss-Seidel relaxation. As always, this occurs in the form phi^(k+1) = phi^k - (res - L(phi))/|diag(L)| but
   //       for a red-black update pattern:
   //
   //       For performance integration, this calls the EBHelmholtzOp red-black kernel directly.
+  // clang-format on
 
   LevelData<MFCellFAB> Lcorr;
   this->create(Lcorr, a_correction);
@@ -1029,11 +1036,13 @@ MFHelmholtzOp::relaxGSMultiColor(LevelData<MFCellFAB>&       a_correction,
 {
   CH_TIME("MFHelmholtzOp::relaxGSMultiColor");
 
+  // clang-format off
   // TLDR: This function performs multi-colored Gauss-Seidel relaxation. As always, this occurs in the form phi^(k+1) = phi^k - (res - L(phi))/|diag(L)| but
   //       using more colors than just red-black. The update pattern here cycles through quadrants/octants in 2D/3D. This is just like red-black except that
   //       we have four/eight colors in 2D/3D.
   //
   //       For performance integration, this calls the EBHelmholtzOp multi-color kernel directly.
+  // clang-format on
 
   LevelData<MFCellFAB> Lcorr;
   this->create(Lcorr, a_correction);
@@ -1466,9 +1475,9 @@ MFHelmholtzOp::AMROperator(LevelData<MFCellFAB>&             a_Lphi,
 
     auto* finerOp = (MFHelmholtzOp*)(a_finerOp);
 
-    // Don't need to update ghost cells again, coarsen, or exchange data. Our ability to turn off coarse-fine interpolation comes from
-    // the fact that EBHelmholtzOp will interpolate the ghost cells on the finer level during the reflux stage. When we enter this routine
-    // we already have updated our ghost cells!
+    // Don't need to update ghost cells again, coarsen, or exchange data. Our ability to turn off coarse-fine
+    // interpolation comes from the fact that EBHelmholtzOp will interpolate the ghost cells on the finer level during
+    // the reflux stage. When we enter this routine we already have updated our ghost cells!
     op.second->turnOffCFInterp();
     op.second->turnOffCoarsening();
     op.second->turnOffExchange();

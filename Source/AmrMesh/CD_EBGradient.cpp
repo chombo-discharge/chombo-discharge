@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_EBGradient.cpp
-  @brief  Implementation of CD_EBGradient.H
-  @author Robert Marskar
-*/
+ * @file   CD_EBGradient.cpp
+ * @brief  Implementation of CD_EBGradient.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <ParmParse.H>
@@ -200,8 +200,8 @@ EBGradient::computeNormalDerivative(LevelData<EBFluxFAB>& a_gradient, const Leve
   CH_assert(a_gradient.nComp() == SpaceDim);
   CH_assert(a_phi.nComp() == 1);
 
-  // TLDR: This routine computes the level gradient, i.e. using finite difference stencils isolated to this level. It only does this for interior
-  // faces, and it only computes the component of the gradient that is normal to the face.
+  // TLDR: This routine computes the level gradient, i.e. using finite difference stencils isolated to this level. It
+  // only does this for interior faces, and it only computes the component of the gradient that is normal to the face.
   const DisjointBoxLayout& dbl    = m_eblg.getDBL();
   const DataIterator&      dit    = dbl.dataIterator();
   const EBISLayout&        ebisl  = m_eblg.getEBISL();
@@ -229,8 +229,9 @@ EBGradient::computeNormalDerivative(LevelData<EBFluxFAB>& a_gradient, const Leve
       interiorCells &= domain;
       interiorCells.grow(dir, -1);
 
-      // Turn the interiorCells Box to a face-centered box in the dir-direction. When we do this we get all faces that are oriented along the direction
-      // dir, but which are not boundary faces. Also fetch the pre-built multi-cut face iterator for this direction.
+      // Turn the interiorCells Box to a face-centered box in the dir-direction. When we do this we get all faces that
+      // are oriented along the direction dir, but which are not boundary faces. Also fetch the pre-built multi-cut face
+      // iterator for this direction.
       const Box     interiorFaces = surroundingNodes(interiorCells, dir);
       FaceIterator& faceit        = m_multiCutFaceIter[din][dir];
 
@@ -345,8 +346,10 @@ EBGradient::defineLevelStencils() noexcept
   CH_TIMER("EBGradient::defineLevelStencils::define_iterators", t3);
   CH_TIMER("EBGradient::defineLevelStencils::irreg_loop", t4);
 
+  // clang-format off
   // TLDR: This just defines finite-difference stencils on this level. We need explicit stencils at the domain boundary AND at
   //       the EB. There are other cases, too, but those are handled by defineStencilsEBCF.
+  // clang-format on
   CH_START(t1);
   const DisjointBoxLayout& dbl    = m_eblg.getDBL();
   const DataIterator&      dit    = dbl.dataIterator();
@@ -461,10 +464,10 @@ EBGradient::defineMasks(LevelData<FArrayBox>& a_coarMaskCF, LevelData<FArrayBox>
     const Box  cellBox     = dblCoFi[din];
     const Box  ghostedBox  = maskCF.box();
 
-    // Set the "coarse-fine" mask. It is set to 1 in cells that are not valid cells. We do this by setting the FArrayBox data to one
-    // in the entire patch, and then we iterate through the parts of the patch that overlap with valid grid boxes. That part of the
-    // data is set to zero. We end up with a bunch of grid patches which hold a value of 1 in ghost cells that do not overlap with
-    // the valid region of the grid.
+    // Set the "coarse-fine" mask. It is set to 1 in cells that are not valid cells. We do this by setting the FArrayBox
+    // data to one in the entire patch, and then we iterate through the parts of the patch that overlap with valid grid
+    // boxes. That part of the data is set to zero. We end up with a bunch of grid patches which hold a value of 1 in
+    // ghost cells that do not overlap with the valid region of the grid.
     maskCF.setVal(one);
     maskCF.setVal(zero, cellBox, m_comp, m_nComp);
 
@@ -477,13 +480,14 @@ EBGradient::defineMasks(LevelData<FArrayBox>& a_coarMaskCF, LevelData<FArrayBox>
       }
     }
 
-    // Set the invalid cell mask on the coarsened fine grids. We set it to 1 everywhere on the fine grid and 0 elsewhere. When we add this to the coarse
-    // level we will add 1 into every cell that is covered by a finer level.
+    // Set the invalid cell mask on the coarsened fine grids. We set it to 1 everywhere on the fine grid and 0
+    // elsewhere. When we add this to the coarse level we will add 1 into every cell that is covered by a finer level.
     maskInvalid.setVal(one, cellBox, m_comp, m_nComp);
   }
 
-  // Define the input masks. After this, coarMaskCF will have a value of 1 in all cells that abut the fine level. Likewise, coarMaskInvalid
-  // will have a value of 1 in all cells that are covered by a finer level, including one layer of ghost cells.
+  // Define the input masks. After this, coarMaskCF will have a value of 1 in all cells that abut the fine level.
+  // Likewise, coarMaskInvalid will have a value of 1 in all cells that are covered by a finer level, including one
+  // layer of ghost cells.
   a_coarMaskCF.define(dblCoar, m_nComp, IntVect::Zero);      // Does not need ghost cells
   a_coarMaskInvalid.define(dblCoar, m_nComp, IntVect::Unit); // Needs one ghost cell.
 
@@ -562,9 +566,11 @@ EBGradient::defineIteratorsEBCF(const LevelData<FArrayBox>& a_coarMaskCF,
   CH_TIMER("EBGradient::defineIteratorsEBCF::define_patch", t4);
   CH_TIMER("EBGradient::defineIteratorsEBCF::reduce_ebcf", t5);
 
+  // clang-format off
   // TLDR: This defines which cells need explicit two-level stencils. We move along the refinement boundary on the coarse
   //       level and check if we can use finite-differencing. If not, we flag the cell and the box. We then generate the
   //       buffer grids, which consist of all boxes that contain at least one cell that requires a least squares stencil.
+  // clang-format on
 
   constexpr Real zero = 0.0;
 
@@ -780,8 +786,10 @@ EBGradient::getFiniteDifferenceStencil(VoFStencil&            a_stencil,
 {
   CH_TIME("EBGradient::getFiniteDifferenceStencil");
 
+  // clang-format off
   // TLDR: This routine computes a finite difference stencil. If it does not have any valid cells to use (defined by a_validRegion)
   //       it will not return a stencil.
+  // clang-format on
 
   a_stencil.clear();
 
@@ -872,12 +880,14 @@ EBGradient::getLeastSquaresStencil(VoFStencil&            a_stencilCoar,
 {
   CH_TIME("EBGradient::getLeastSquaresStencil");
 
+  // clang-format off
   // TLDR: This routine computes a two-level least squares stencil. We include cells that are within a range of 1 on the coarse level, but only
   //       those in a monotone path from the input vof. The fine cells are defined as the cells that are available through a coarsening of the
   //       coarse cells. Since the resulting system might sometimes be too big, we trim the system down to a specified size. Once the least squares
   //       system has been "solved", i.e. a minimization of the truncation order for the various expansions has been achieved, we formulate the stencil
   //       using the output of LeastSquares::computeDualLevelStencils. Note that the solution on the input vof is known, so it is pruned from the
   //       system of equations.
+  // clang-format on
 
   bool foundStencil;
 
@@ -890,7 +900,8 @@ EBGradient::getLeastSquaresStencil(VoFStencil&            a_stencilCoar,
   // Get all coarse cells within radius 1.
   const int coarRadius = 1;
 
-  // Get coar vofs in range. The fine VoFs are defined as the VoFs that are available through refinement of the coarse vofs.
+  // Get coar vofs in range. The fine VoFs are defined as the VoFs that are available through refinement of the coarse
+  // vofs.
   Vector<VolIndex> coarVoFs = VofUtils::getVofsInRadius(a_vofCoar,
                                                         ebisBoxCoar,
                                                         coarRadius,
@@ -909,8 +920,8 @@ EBGradient::getLeastSquaresStencil(VoFStencil&            a_stencilCoar,
   VofUtils::includeCells(coarVoFs, a_validCellsCoar);
   VofUtils::includeCells(fineVoFs, a_validCellsFine);
 
-  // See if we have enough cells to solve the system of equations. The "-1" is because we interpolate to the cell center/centroid, but we already know
-  // phi at this point.
+  // See if we have enough cells to solve the system of equations. The "-1" is because we interpolate to the cell
+  // center/centroid, but we already know phi at this point.
   const int numEquations = static_cast<int>(fineVoFs.size() + coarVoFs.size());
   const int numUnknowns  = LeastSquares::getTaylorExpansionSize(a_order) - 1;
 
@@ -989,10 +1000,10 @@ EBGradient::getLeastSquaresStencil(VoFStencil&            a_stencilCoar,
                                                              a_dxFine));
     }
 
-    // Now solve the least squares system for the gradient at the input VoF. After this we have found an expression which minimizes the
-    // truncation error in the neighborhood of the VoF. The result is is a two-level stencil consisting of cells on both the fine and
-    // the coarse levels.
-    // These are the unknown terms that we want stencils for.
+    // Now solve the least squares system for the gradient at the input VoF. After this we have found an expression
+    // which minimizes the truncation error in the neighborhood of the VoF. The result is is a two-level stencil
+    // consisting of cells on both the fine and the coarse levels. These are the unknown terms that we want stencils
+    // for.
     IntVectSet derivTerms;
     IntVectSet knownTerms;
 
@@ -1015,9 +1026,9 @@ EBGradient::getLeastSquaresStencil(VoFStencil&            a_stencilCoar,
                                                                        a_order);
 
     // LeastSquares returns a map over all derivatives (unknowns) in the Taylor series. These are stored
-    // as IntVects so that IntVect(1,1) = d^2/(dxdy) and so on. We are after IntVect(1,0) = d/dx, IntVect(0,1) = d/dy. We fetch
-    // those and place them in a_stencilFine and a_stencilCoar. We encode the direction in the stencil variable (in a_stencilFine) and
-    // a_stencilCoar.
+    // as IntVects so that IntVect(1,1) = d^2/(dxdy) and so on. We are after IntVect(1,0) = d/dx, IntVect(0,1) = d/dy.
+    // We fetch those and place them in a_stencilFine and a_stencilCoar. We encode the direction in the stencil variable
+    // (in a_stencilFine) and a_stencilCoar.
     for (int dir = 0; dir < SpaceDim; dir++) {
       const IntVect deriv = BASISV(dir);
 
@@ -1039,16 +1050,16 @@ EBGradient::getLeastSquaresStencil(VoFStencil&            a_stencilCoar,
       }
     }
 
-    // We have modified the right-hand side of the least squares system by pruning a_vofCoar from the system of equations (it's value is known). So,
-    // our least squares solution is actually something like
+    // We have modified the right-hand side of the least squares system by pruning a_vofCoar from the system of
+    // equations (it's value is known). So, our least squares solution is actually something like
     //
     //    [df/dx]     [A11 A12 ... ] [f(x0) - f(x)]
     //    [df/dy]  =  [A21 A22 ... ] [f(x1) - f(x)]
     //    [df/dz]     [A31 A32 ... ] [f(x2) - f(x)]
     //
-    // where f(x) = phi(a_vofCoar). LeastSquares::computeGradSten does not case about the modified right-hand side and the stencils it returns
-    // only account for f(x0), f(x1) etc. We need to add in the contribution from a_vofCoar, which is fortunately just the sum of the weights for
-    // each derivative.
+    // where f(x) = phi(a_vofCoar). LeastSquares::computeGradSten does not case about the modified right-hand side and
+    // the stencils it returns only account for f(x0), f(x1) etc. We need to add in the contribution from a_vofCoar,
+    // which is fortunately just the sum of the weights for each derivative.
     for (int dir = 0; dir < SpaceDim; dir++) {
       Real coarVofWeight = 0.0;
 

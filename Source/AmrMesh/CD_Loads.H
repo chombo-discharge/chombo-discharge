@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_Loads.H
-  @brief  Declaration of a simple class for holding computational loads
-  @author Robert Marskar
-*/
+ * @file   CD_Loads.H
+ * @brief  Declaration of a simple class for holding computational loads
+ * @author Robert Marskar
+ */
 
 #ifndef CD_LOADS_H
 #define CD_LOADS_H
@@ -24,105 +24,106 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Class for holding computational loads. 
-  @details This is typically used in the context of load-balancing with AMR. The class is, however, standalone.
-*/
+ * @brief Class for holding computational loads.
+ * @details This is typically used in the context of load-balancing with AMR. The class is, however, standalone.
+ */
 class Loads
 {
 public:
   /**
-    @brief Constructor. Assigns zero loads
-  */
+   * @brief Constructor. Assigns zero loads
+   */
   Loads() noexcept;
 
   /**
-    @brief Destructor (does nothing).
-  */
+   * @brief Destructor (does nothing).
+   */
   virtual ~Loads() noexcept;
 
   /**
-    @brief Get the computational loads
-    @return m_loads
-  */
+   * @brief Get the computational loads
+   * @return m_loads
+   */
   virtual std::map<int, Real>&
   getLoads() noexcept;
 
   /**
-    @brief Get the computational loads
-    @return m_loads
-  */
+   * @brief Get the computational loads
+   * @return m_loads
+   */
   virtual const std::map<int, Real>&
   getLoads() const noexcept;
 
   /**
-    @brief Reset loads. Sets all loads to 0.
-  */
+   * @brief Reset loads. Sets all loads to 0.
+   */
   virtual void
   resetLoads() noexcept;
 
   /**
-    @brief Assign loads.
-    @param[in] a_assignedLoads Loads assigned to ranks.
-  */
+   * @brief Assign loads.
+   * @param[in] a_assignedLoads Loads assigned to ranks.
+   */
   virtual void
   assignLoads(const std::map<int, Real>& a_assignedLoads) noexcept;
 
   /**
-    @brief Assign loads. In this version a_assignedLoads[0] is the load assigned to rank 0, and so on. 
-    @param[in] a_assignedLoads Loads assigned to ranks.
-  */
+   * @brief Assign loads. In this version a_assignedLoads[0] is the load assigned to rank 0, and so on.
+   * @param[in] a_assignedLoads Loads assigned to ranks.
+   */
   virtual void
   assignLoads(const std::vector<Real>& a_assignedLoads) noexcept;
 
   /**
-    @brief Assign loads. In this version a_assignedLoads[0] is the load assigned to rank 0, and so on. 
-    @param[in] a_assignedLoads Loads assigned to ranks.
-  */
+   * @brief Assign loads. In this version a_assignedLoads[0] is the load assigned to rank 0, and so on.
+   * @param[in] a_assignedLoads Loads assigned to ranks.
+   */
   virtual void
   assignLoads(const Vector<Real>& a_assignedLoads) noexcept;
 
   /**
-    @brief Increment loads. In this version a_increments[0] is the load increment for rank 0, and so on. 
-    @param[in] a_increments Loads to increment by.
-  */
+   * @brief Increment loads. In this version a_increments[0] is the load increment for rank 0, and so on.
+   * @param[in] a_increments Loads to increment by.
+   */
   virtual void
   incrementLoads(const std::map<int, Real>& a_increments) noexcept;
 
   /**
-    @brief Increment loads. In this version a_increments[0] is the load increment for rank 0, and so on. 
-    @param[in] a_increments Loads to increment by.
-  */
+   * @brief Increment loads. In this version a_increments[0] is the load increment for rank 0, and so on.
+   * @param[in] a_increments Loads to increment by.
+   */
   virtual void
   incrementLoads(const std::vector<Real>& a_increments) noexcept;
 
   /**
-    @brief Increment loads. In this version a_increments[0] is the load increment for rank 0, and so on. 
-    @param[in] a_increments Loads to increment by.
-  */
+   * @brief Increment loads. In this version a_increments[0] is the load increment for rank 0, and so on.
+   * @param[in] a_increments Loads to increment by.
+   */
   virtual void
   incrementLoads(const Vector<Real>& a_increments) noexcept;
 
   /**
-    @brief Increment load on rank
-    @param[in] a_rank MPI rank where load is incremented
-    @param[in] a_increment Load increment
-  */
+   * @brief Increment load on rank
+   * @param[in] a_rank MPI rank where load is incremented
+   * @param[in] a_increment Load increment
+   */
   virtual void
   incrementLoad(const int a_rank, const Real a_increment) noexcept;
 
   /**
-    @brief Get sorted loads. 
-    @details This routine sorts the computational loads from smallest to largest, and returns the result as a vector of ranks (and loads). 
-    @return Sorted loads
-  */
+   * @brief Get sorted loads.
+   * @details This routine sorts the computational loads from smallest to largest, and returns the result as a vector of
+   * ranks (and loads).
+   * @return Sorted loads
+   */
   virtual std::vector<std::pair<int, Real>>
   getSortedLoads() const noexcept;
 
 protected:
   /**
-    @brief Actual computational loads per MPI rank. 
-    @details The key is the rank, and the value is the actual load
-  */
+   * @brief Actual computational loads per MPI rank.
+   * @details The key is the rank, and the value is the actual load
+   */
   std::map<int, Real> m_loads;
 };
 

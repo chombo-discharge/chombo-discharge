@@ -5,11 +5,11 @@
  */
 
 /**
-  @file   CD_RoundedCylinderIF.cpp
-  @brief  Implementation of CD_RoundedCylinderIF.H
-  @date   Feb. 2021
-  @author Robert Marskar
-*/
+ * @file   CD_RoundedCylinderIF.cpp
+ * @brief  Implementation of CD_RoundedCylinderIF.H
+ * @date   Feb. 2021
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <PolyGeom.H>
@@ -106,8 +106,10 @@ BaseIF*
 RoundedCylinderIF::makeBaseIF3D()
 {
 
+  // clang-format off
   // TLDR: Construct m_baseIF from a main cylinderk.  on each we put a torus and then a smaller cylinder between everything. Default orientation
   //       is along +z.
+  // clang-format on
 
   const RealVect up = BASISREALV(SpaceDim - 1);
 

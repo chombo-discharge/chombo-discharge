@@ -5,19 +5,19 @@
  */
 
 /**
-  @file   CD_Electrostatics.H
-  @brief  Declaration of the Physics::Electrostatics namespace
-  @author Robert Marskar
-*/
+ * @file   CD_Electrostatics.H
+ * @brief  Declaration of the Physics::Electrostatics namespace
+ * @author Robert Marskar
+ */
 
 #ifndef CD_ELECTROSTATICS_H
 #define CD_ELECTROSTATICS_H
 
 namespace Physics {
-  /**
-    @brief Namespace for encapsulating physics code for electrostatic problems
-  */
-  namespace Electrostatics {}
+/**
+ * @brief Namespace for encapsulating physics code for electrostatic problems
+ */
+namespace Electrostatics {}
 
 } // namespace Physics
 

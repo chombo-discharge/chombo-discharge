@@ -26,15 +26,16 @@ EBHelmholtzElectrostaticDomainBC::EBHelmholtzElectrostaticDomainBC(const Electro
       const ElectrostaticDomainBc::DomainSide domainSide = std::make_pair(dir, sit());
       const ElectrostaticDomainBc::BcType&    bcType     = m_electrostaticBCs.getBc(domainSide).first;
 
-      // Make a lambda which allows us to pass in the function using EBHelmholtzDomainBC API, which takes a std::function<Real(const RealVect a_position)>
-      // type of function.
+      // Make a lambda which allows us to pass in the function using EBHelmholtzDomainBC API, which takes a
+      // std::function<Real(const RealVect a_position)> type of function.
       //
-      // This is the function type that the EBHelmholtzOp API requires, and it is a design choice mandated by our choice to make that operator
-      // time-independent. Although this might seem weird, the time dependence is nonetheless passed in because a_electrostaticBCs are passed in
-      // from FieldSolver, and in that solver we capture FieldSolver::m_time by reference.
+      // This is the function type that the EBHelmholtzOp API requires, and it is a design choice mandated by our choice
+      // to make that operator time-independent. Although this might seem weird, the time dependence is nonetheless
+      // passed in because a_electrostaticBCs are passed in from FieldSolver, and in that solver we capture
+      // FieldSolver::m_time by reference.
       //
-      // This might seem clunky, but I can't see any other way of doing it properly without changing EBHelmholtzOp to a time-dependent operator (which
-      // I really don't want to do).
+      // This might seem clunky, but I can't see any other way of doing it properly without changing EBHelmholtzOp to a
+      // time-dependent operator (which I really don't want to do).
       auto func = [domainSide, &BC = this->m_electrostaticBCs](const RealVect& a_position) -> Real {
         constexpr Real dummyDt = 0.0;
 
@@ -81,9 +82,9 @@ EBHelmholtzElectrostaticDomainBC::define(const Location::Cell a_dataLocation,
   CH_TIME(
     "EBHelmholtzElectrostaticDomainBC::define(Location::Cell, EBLevelGrid, RefCountedPtr<LD<EBFluxFAB> >, RealVect, Real)");
 
-  // This function is called by EBHelmholtzOp and is used for defining the boundary condition object (it needs stencils and all that). Since
-  // this class is just a wrapper for Dirichlet/Neumann BCs, we've allocated the BC objects already (one for each side). But they have not
-  // been defined yet, so we do that here.
+  // This function is called by EBHelmholtzOp and is used for defining the boundary condition object (it needs stencils
+  // and all that). Since this class is just a wrapper for Dirichlet/Neumann BCs, we've allocated the BC objects already
+  // (one for each side). But they have not been defined yet, so we do that here.
 
   for (int dir = 0; dir < SpaceDim; dir++) {
     for (SideIterator sit; sit.ok(); ++sit) {

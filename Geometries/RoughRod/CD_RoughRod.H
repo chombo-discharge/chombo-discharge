@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_RoughRod.H
-  @brief  Rod geometry with surface roughness at tip
-  @author Robert Marskar
-*/
+ * @file   CD_RoughRod.H
+ * @brief  Rod geometry with surface roughness at tip
+ * @author Robert Marskar
+ */
 
 #ifndef CD_ROUGHROD_H
 #define CD_ROUGHROD_H
@@ -18,8 +18,8 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Class that describes a rod electrode with surface roughness
-*/
+ * @brief Class that describes a rod electrode with surface roughness
+ */
 class RoughRod : public ComputationalGeometry
 {
 public:

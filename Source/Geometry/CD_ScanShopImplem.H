@@ -6,11 +6,11 @@
  */
 
 /**
-  @brief  CD_ScanShopImplem.H
-  @brief  Implementation of CD_ScanShop.H
-  @author Robert Marskar
-  @return True if regular, false otherwise
-*/
+ * @brief  CD_ScanShopImplem.H
+ * @brief  Implementation of CD_ScanShop.H
+ * @author Robert Marskar
+ * @return True if regular, false otherwise
+ */
 
 #ifndef CD_SCANSHOPIMPLEM_H
 #define CD_SCANSHOPIMPLEM_H

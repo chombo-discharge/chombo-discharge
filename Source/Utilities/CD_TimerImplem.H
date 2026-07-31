@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_TimerImplem.H
-  @brief  Implementation of CD_Timer.H
-  @author Robert Marskar
-*/
+ * @file   CD_TimerImplem.H
+ * @brief  Implementation of CD_Timer.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_TIMERIMPLEM_H
 #define CD_TIMERIMPLEM_H

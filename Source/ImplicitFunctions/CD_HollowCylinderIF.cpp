@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_HollowCylinderIF.cpp
-  @brief  Implementation of CD_HollowCylinderIF.H
-  @author Robert Marskar
-*/
+ * @file   CD_HollowCylinderIF.cpp
+ * @brief  Implementation of CD_HollowCylinderIF.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <SmoothUnion.H>

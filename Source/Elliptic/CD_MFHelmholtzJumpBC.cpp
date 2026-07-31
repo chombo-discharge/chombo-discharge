@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_MFHelmholtzJumpBC.cpp
-  @brief  Implementation of CD_MFHelmholtzJumpBC.H
-  @author Robert Marskar
-*/
+ * @file   CD_MFHelmholtzJumpBC.cpp
+ * @brief  Implementation of CD_MFHelmholtzJumpBC.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <EBCellFactory.H>
@@ -147,8 +147,10 @@ MFHelmholtzJumpBC::defineStencils()
   CH_assert(m_order > 0);
   CH_assert(m_weight >= 0);
 
+  // clang-format off
   // TLDR: This routine computes the stencils for approximating dphi/dn on each side of the boundary. If we have multi-valued cells we use an average formulation. These
   //       stencils can later be used to compute the boundary value on the interface.
+  // clang-format on
 
   // MFHelmholtzJumpBC internals should never be called unless it's a multiphase problem.
   if (m_multiPhase) {
@@ -367,7 +369,8 @@ MFHelmholtzJumpBC::buildAverageStencils()
     }
   }
 
-  // For efficiency reasons, store 1/(bp*wp + bq*wq). Scale the average stencils by this value as well since we apply it anyways.
+  // For efficiency reasons, store 1/(bp*wp + bq*wq). Scale the average stencils by this value as well since we apply it
+  // anyways.
 #pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
@@ -447,9 +450,11 @@ MFHelmholtzJumpBC::defineIterators()
 {
   CH_TIME("MFHelmholtzJumpBC::defineIterators()");
 
+  // clang-format off
   // TLDR: This function defines iterators for iterating over regular cut-cells and over multi-fluid cut-cells. The iterators
   //       must exist for both single-phase and multi-phase vofs. This is true even if we're not actually solving a multiphase
   //       problem because the boundary conditions classes will still need the iterators.
+  // clang-format on
 
   const DisjointBoxLayout& dbl = m_mflg.getGrids();
   const DataIterator&      dit = dbl.dataIterator();
@@ -506,8 +511,10 @@ MFHelmholtzJumpBC::getLeastSquaresBoundaryGradStencil(std::pair<Real, VoFStencil
 {
   CH_TIME("MFHelmholtzJumpBC::getLeastSquarseBoundaryGradStencil(...)");
 
+  // clang-format off
   // TLDR: This routine computes a stencil for approximating dphi/dn using least squares gradient reconstruction on the EB centroid. We assume that the value
   //       is a "known term" in the expansion.
+  // clang-format on
 
   bool       foundStencil = false;
   const bool addStartVof  = false;
@@ -599,17 +606,19 @@ MFHelmholtzJumpBC::matchBC(BaseIVFAB<Real>& a_jump,
   CH_TIMER("aggsten", t2);
   CH_TIMER("compute_phi_bndry", t3);
 
-  // TLDR: This routine computes the boundary value of phi from an expression b1*dphi/dn1 + b2*dphi/dn2 = sigma, where dphi/dn can be represented as
+  // TLDR: This routine computes the boundary value of phi from an expression b1*dphi/dn1 + b2*dphi/dn2 = sigma, where
+  // dphi/dn can be represented as
   //
   //          dphi/dn = wB*phiB + sum[w(i) * phi(i)]
   //
   //       This yields an equation which can be solved for phiB. The solution to that is
   //
-  //           phiB = sigma/(b1*w1 + b2*w2) - b1*sum[w1(i) * phi1(i)]/(b1*w1 + b2*w2) - b2*sum[w2(i) * phi2(i)]/(b1*w1 + b2*w2).
+  //           phiB = sigma/(b1*w1 + b2*w2) - b1*sum[w1(i) * phi1(i)]/(b1*w1 + b2*w2) - b2*sum[w2(i) * phi2(i)]/(b1*w1 +
+  //           b2*w2).
   //
-  //       Because I'm not crazy, I have stored the term 1/(b1*w1 + b2*w2) in m_denom so we can just multiply it in when we need it. Moreover,
-  //       this term has already been multiplied into the stencil weights, which is the reason why we only do the stencil apply below (without dividing
-  //       by the above factor).
+  //       Because I'm not crazy, I have stored the term 1/(b1*w1 + b2*w2) in m_denom so we can just multiply it in when
+  //       we need it. Moreover, this term has already been multiplied into the stencil weights, which is the reason why
+  //       we only do the stencil apply below (without dividing by the above factor).
 
   CH_START(t1);
   constexpr int vofComp     = 0;

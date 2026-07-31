@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_ProfilePlaneIF.cpp
-  @brief  Implementation of CD_ProfilePlaneIF.H
-  @author Robert Marskar
-*/
+ * @file   CD_ProfilePlaneIF.cpp
+ * @brief  Implementation of CD_ProfilePlaneIF.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <IntersectionIF.H>

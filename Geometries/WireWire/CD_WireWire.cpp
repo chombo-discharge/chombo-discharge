@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_WireWire.cpp
-  @brief  Implementation of CD_WireWire.H
-  @author Robert Marskar
-*/
+ * @file   CD_WireWire.cpp
+ * @brief  Implementation of CD_WireWire.H
+ * @author Robert Marskar
+ */
 
 // Our includes
 #include <CD_WireWire.H>

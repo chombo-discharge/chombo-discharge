@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_EBAMRSurfaceDeposition.cpp
-  @brief  Implementation of CD_EBAMRSurfaceDeposition.H
-  @author Robert Marskar
-*/
+ * @file   CD_EBAMRSurfaceDeposition.cpp
+ * @brief  Implementation of CD_EBAMRSurfaceDeposition.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <ParmParse.H>

@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_SignedDistanceDCELImplem.H
-  @brief  Implementation of CD_SignedDistanceDCEL.H
-  @author Robert Marskar
-*/
+ * @file   CD_SignedDistanceDCELImplem.H
+ * @brief  Implementation of CD_SignedDistanceDCEL.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_SIGNEDDISTANCEDCELIMPLEM_H
 #define CD_SIGNEDDISTANCEDCELIMPLEM_H
@@ -50,8 +50,8 @@ SignedDistanceDCEL<T>::value(const RealVect& a_point) const
   EBGeometry::Vec3T<T> p(a_point[0], a_point[1], a_point[2]);
 #endif
 
-  T retval = m_mesh->signedDistance(
-    p); // Note that Dcel::mesh can return either positive or negative for outside, depending on the orientation of the input normals.
+  T retval = m_mesh->signedDistance(p); // Note that Dcel::mesh can return either positive or negative for outside,
+                                        // depending on the orientation of the input normals.
 
   if (m_flipInside) {
     retval = -retval;

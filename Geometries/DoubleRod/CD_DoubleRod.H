@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_DoubleRod.H
-  @brief  Double rod geometry.
-  @author Robert Marskar
-*/
+ * @file   CD_DoubleRod.H
+ * @brief  Double rod geometry.
+ * @author Robert Marskar
+ */
 
 #ifndef CD_DOUBLEROD_H
 #define CD_DOUBLEROD_H
@@ -18,8 +18,8 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief This is a class that defines two dielectric rods.
-*/
+ * @brief This is a class that defines two dielectric rods.
+ */
 class DoubleRod : public ComputationalGeometry
 {
 public:

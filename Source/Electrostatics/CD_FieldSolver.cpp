@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/** 
-  @file   CD_FieldSolver.cpp
-  @brief  Implementation of CD_FieldSolver.H
-  @author Robert Marskar
-*/
+/**
+ * @file   CD_FieldSolver.cpp
+ * @brief  Implementation of CD_FieldSolver.H
+ * @author Robert Marskar
+ */
 
 // Std includes
 #include <iostream>
@@ -187,9 +187,11 @@ FieldSolver::computeDisplacementField(MFAMRCellData& a_displacementField, const 
   CH_assert(a_displacementField[0]->nComp() == SpaceDim);
   CH_assert(a_electricField[0]->nComp() == SpaceDim);
 
+  // clang-format off
   // TLDR: This computes the displacement field D = eps*E on both phases. The data is either cell-centered or centroid-centered, and the
   //       permittivity can be spatially varying (in the dielectric). So, for the gas phase we only need to compute eps0*E while for the
   //       dielectric phase we have to iterate through each cell and find the corresponding permittivity.
+  // clang-format on
 
   const Vector<Dielectric>& dielectrics = m_computationalGeometry->getDielectrics();
 
@@ -281,8 +283,10 @@ FieldSolver::computeEnergy(const MFAMRCellData& a_electricField)
 
   CH_assert(a_electricField[0]->nComp() == SpaceDim);
 
+  // clang-format off
   // TLDR: This routine computes Int(E*D dV) over the entire domain. Since we use conservative averaging, we coarsen E*D onto
   //       the coarsest grid level and do the integratino there.
+  // clang-format on
 
   const bool reallyMultiPhase = (m_multifluidIndexSpace->numPhases() > 1);
 
@@ -372,10 +376,12 @@ FieldSolver::computeCapacitance()
 
   CH_assert(m_isVoltageSet);
 
+  // clang-format off
   // TLDR: The energy density U = 0.5*C*V^2, or U = Int(E*D dV). We set the potential to one and solve the Poisson equation.
   //       We then compute U from E*D without sources and use C = 2*U/(V*V). The caveat to this approach is that the solver
   //       may have been set with a zero voltage, non-zero space charge and non-zero surface charge. Here, we do a "clean" solve
   //       with voltage set to 1, and without charges.
+  // clang-format on
 
   MFAMRCellData phi;
   MFAMRCellData E;
@@ -835,6 +841,7 @@ FieldSolver::parseDomainBc()
     pout() << "FieldSolver::parseDomainBc()" << endl;
   }
 
+  // clang-format off
   // TLDR: This routine might seem big and complicated. What we are doing is that we are creating one function object which returns some value
   //       anywhere in space and time on a domain edge (face). The FieldSolver class supports Dirichlet and Neumann, and the below code simply
   //       creates those functions and associates them with an edge.
@@ -844,6 +851,7 @@ FieldSolver::parseDomainBc()
   //       We thus make a distinction between "dirichlet" and "dirichlet_custom". The difference between these is that for "dirichlet_custom" the contents
   //       of m_domainBcFunctions are used as boundary conditions. For "dirichlet 0.5" the contents of m_domainBcFunctions are multiplied by 0.5*m_voltage.
   //       The same approach is used for Neumann boundary conditions.
+  // clang-format on
 
   ParmParse pp(m_className.c_str());
 
@@ -1401,7 +1409,8 @@ FieldSolver::writePlotData(LevelData<EBCellFAB>& a_output,
   CH_assert(a_level >= 0);
   CH_assert(a_level <= m_amr->getFinestLevel());
 
-  // This routine always outputs data on the centroid. If the data was defined on the center we move it to the centroid (but not forcefully)
+  // This routine always outputs data on the centroid. If the data was defined on the center we move it to the centroid
+  // (but not forcefully)
   const bool doInterp = (m_dataLocation == Location::Cell::Center) && !a_forceNoInterp;
 
   // Add phi to output
@@ -1452,9 +1461,11 @@ FieldSolver::writeMultifluidData(LevelData<EBCellFAB>&    a_output,
   CH_assert(a_level >= 0);
   CH_assert(a_level <= m_amr->getFinestLevel());
 
-  // So the problem with the Chombo HDF5 I/O routines is that they are not really designed for multiphase. We happen to know that a_data can be multifluid data
-  // which we want to put onto a single-phase data holder. There is ambiguity only in the cut-cells because the data there has multiple degrees of freedom. We also
-  // happen to know that a_output is on the gas phase. Our issue is that we need to decide if the gas-side or solid-side data goes into the output data holder.
+  // So the problem with the Chombo HDF5 I/O routines is that they are not really designed for multiphase. We happen to
+  // know that a_data can be multifluid data which we want to put onto a single-phase data holder. There is ambiguity
+  // only in the cut-cells because the data there has multiple degrees of freedom. We also happen to know that a_output
+  // is on the gas phase. Our issue is that we need to decide if the gas-side or solid-side data goes into the output
+  // data holder.
   const RefCountedPtr<EBIndexSpace>& ebisSol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
 
   const bool reallyMultiPhase = !(ebisSol.isNull());
@@ -1569,8 +1580,8 @@ FieldSolver::writeMultifluidData(LevelData<EBCellFAB>&    a_output,
   }
   CH_STOP(t4);
 
-  // Go through all levels and grid patches and replace the covered gas-side scratch data with the regular solid-side scratch data. On cut-cells
-  // we determine the data based on the a_phase input flag.
+  // Go through all levels and grid patches and replace the covered gas-side scratch data with the regular solid-side
+  // scratch data. On cut-cells we determine the data based on the a_phase input flag.
   CH_START(t5);
   if (reallyMultiPhase) {
     const ProblemDomain&     domain     = m_amr->getDomains()[a_level];
@@ -1651,10 +1662,10 @@ FieldSolver::writeMultifluidData(LevelData<EBCellFAB>&    a_output,
           }
         }
         else if (isGasIrregular && isSolidIrregular) {
-          // In this case we are looking at a grid patch that lies on the gas-solid boundary. We need to determine which cells
-          // go into the output region. We happen to know that all gas-side data is already filled, so we only need to grok
-          // the solid-side data.
-          // Not vectorizable: multiple per-cell EB queries + dense data-dependent branching (plot output only).
+          // In this case we are looking at a grid patch that lies on the gas-solid boundary. We need to determine which
+          // cells go into the output region. We happen to know that all gas-side data is already filled, so we only
+          // need to grok the solid-side data. Not vectorizable: multiple per-cell EB queries + dense data-dependent
+          // branching (plot output only).
           for (comp = 0; comp < numComp; comp++) {
             BoxLoops::loop<D_DECL(1, 1, 1)>(fabGas.box() & domain, kernel);
           }

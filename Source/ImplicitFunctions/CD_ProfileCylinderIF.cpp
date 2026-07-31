@@ -5,10 +5,10 @@
  */
 
 /**
-  @file    CD_ProfileCylinderIF.cpp
-  @brief   Implementation of CD_ProfileCylinderIF.H
-  @author  Robert Marskar
-*/
+ * @file    CD_ProfileCylinderIF.cpp
+ * @brief   Implementation of CD_ProfileCylinderIF.H
+ * @author  Robert Marskar
+ */
 
 // Chombo includes
 #include <TransformIF.H>

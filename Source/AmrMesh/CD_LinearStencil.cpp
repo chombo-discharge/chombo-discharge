@@ -5,11 +5,11 @@
  */
 
 /**
-  @file   CD_LinearStencil.cpp
-  @brief  Implementation of CD_LinearStencil.H
-  @author Robert Marskar
-  @todo   Code-review needed. Multi-cell support in 2D/3D is not great. 
-*/
+ * @file   CD_LinearStencil.cpp
+ * @brief  Implementation of CD_LinearStencil.H
+ * @author Robert Marskar
+ * @todo   Code-review needed. Multi-cell support in 2D/3D is not great.
+ */
 
 // Our includes
 #include <CD_LinearStencil.H>
@@ -62,11 +62,11 @@ LinearStencil::computeInterpStencil1D(VoFStencil&                           a_st
 {
   CH_TIME("LinearStencil::computeInterpStencil1D");
 
-  // We are doing interpolation to a_pos from a_vof. This is done as a 1D interpolation along a_interpDir, ignoring the other coordinates.
-  // This is pretty straightforward since y(x) = yLo + (yHi-yHi)*(x - xLo) in dimensionless units. We simply determine if the input point
-  // falls on the hi/low side of the cell center and select the two cells accordingly. If the other cell is a multi-valued cell, we fetch
-  // use the average of the cut-cell fragments as a basis for interpolation. Note that a_pos is the relative displacement from the cell
-  // center.
+  // We are doing interpolation to a_pos from a_vof. This is done as a 1D interpolation along a_interpDir, ignoring the
+  // other coordinates. This is pretty straightforward since y(x) = yLo + (yHi-yHi)*(x - xLo) in dimensionless units. We
+  // simply determine if the input point falls on the hi/low side of the cell center and select the two cells
+  // accordingly. If the other cell is a multi-valued cell, we fetch use the average of the cut-cell fragments as a
+  // basis for interpolation. Note that a_pos is the relative displacement from the cell center.
 
   bool foundStencil = false;
 
@@ -145,8 +145,8 @@ LinearStencil::computeInterpStencil2D(VoFStencil&                a_stencil,
   CH_TIME("LinearStencil::computeInterpStencil2D");
   CH_assert(SpaceDim == 2 || SpaceDim == 3);
 
-  // This code is a bit convoluted because of the many pathological cases that may happen with multi-valued cells. For example
-  // we may have situations like this where we want to interpolate point (o) in cell A:
+  // This code is a bit convoluted because of the many pathological cases that may happen with multi-valued cells. For
+  // example we may have situations like this where we want to interpolate point (o) in cell A:
   //
   //    |----------|-----------|
   //    |          |           |
@@ -158,17 +158,18 @@ LinearStencil::computeInterpStencil2D(VoFStencil&                a_stencil,
   //    |          |           |
   //    |----------| ----------|
   //
-  // In order to interpolate to the centroid (o) in cell A, which is irregular, we must be able to account for the possibly
-  // multiple degrees of freedom in cell B. So, we begin by checking that we can get 1D stencils from A-B and from A-D. If only
-  // one of those exist then we must do 1D interpolation and we default to the one stencil that was computed. Since B is a
-  // multi-valued cell, the 1D interpolation stencil from A-B uses all the available degrees of freedom. Next, we obtain
-  // all VoFs in cells B and D and compute interpolation stencils to C. If all of those stencils exist (they usually do), then
-  // we are able to obtain a reasonable bilinear stencil that also account for multi-valued cells. There is the rare case that
-  // we can find A-B and A-D, but not CD or BC. In those cases we _could_ take the interpolation stencil as the average of
-  // AB and AD, but that can potentially give negative weights in 3D application so instead we default to the one of the stencil
-  // AB or AD; we take the 1D interpolation along the coordinate axis where a_pos is displaced furthest. If there are several
-  // multivalued cells we should be able to handle those too. For example, if D is a multivalued cell then we obtain a list
-  // of VoFs in D and compute the average interpolation stencil CD.
+  // In order to interpolate to the centroid (o) in cell A, which is irregular, we must be able to account for the
+  // possibly multiple degrees of freedom in cell B. So, we begin by checking that we can get 1D stencils from A-B and
+  // from A-D. If only one of those exist then we must do 1D interpolation and we default to the one stencil that was
+  // computed. Since B is a multi-valued cell, the 1D interpolation stencil from A-B uses all the available degrees of
+  // freedom. Next, we obtain all VoFs in cells B and D and compute interpolation stencils to C. If all of those
+  // stencils exist (they usually do), then we are able to obtain a reasonable bilinear stencil that also account for
+  // multi-valued cells. There is the rare case that we can find A-B and A-D, but not CD or BC. In those cases we
+  // _could_ take the interpolation stencil as the average of AB and AD, but that can potentially give negative weights
+  // in 3D application so instead we default to the one of the stencil AB or AD; we take the 1D interpolation along the
+  // coordinate axis where a_pos is displaced furthest. If there are several multivalued cells we should be able to
+  // handle those too. For example, if D is a multivalued cell then we obtain a list of VoFs in D and compute the
+  // average interpolation stencil CD.
 
   bool foundStencil = false;
 
@@ -176,8 +177,8 @@ LinearStencil::computeInterpStencil2D(VoFStencil&                a_stencil,
   int dir0 = 0;
   int dir1 = 1;
 
-  // In 3D we may specify which direction we will interpolate in. No interpolation in z means bilinear interpolation in x,y
-  // and no interpolation in x means bilinear interpolation in y,z and so on.
+  // In 3D we may specify which direction we will interpolate in. No interpolation in z means bilinear interpolation in
+  // x,y and no interpolation in x means bilinear interpolation in y,z and so on.
 #if CH_SPACEDIM == 3
   if (a_noInterpDir == 2) {
     dir0 = 0;
@@ -227,7 +228,8 @@ LinearStencil::computeInterpStencil2D(VoFStencil&                a_stencil,
     else if (!canInterpDir0 && canInterpDir1) {
       foundStencil = LinearStencil::computeInterpStencil1D(a_stencil, a_pos, a_vof, a_domain, a_ebisbox, dir1);
     }
-    else { // OK, we know we can interpolate in both directions from a_vof. Let's check if we can find a bilinear stencil now
+    else { // OK, we know we can interpolate in both directions from a_vof. Let's check if we can find a bilinear
+           // stencil now
 
       // 1. First, starting on a_vof, compute the linear interpolation stencil in 1D along dir0 and dir1
       VoFStencil curStenDir0;
@@ -251,8 +253,10 @@ LinearStencil::computeInterpStencil2D(VoFStencil&                a_stencil,
       }
 #endif
 
+      // clang-format off
       // 2. Check if we can make stencils from the neighboring cells and into the "corner cell". I.e. DC and BC in the figure
       //    above. We actually don't need to do both of them, but we do it anyways.
+      // clang-format on
       VoFStencil otherVoFsInterpStencilDir0;
       VoFStencil otherVoFsInterpStencilDir1;
 
@@ -293,10 +297,12 @@ LinearStencil::computeInterpStencil2D(VoFStencil&                a_stencil,
         }
       }
 
+      // clang-format off
       // 3. Check if we could get the interpolation stencil from the other VoFs. If we could, scale them with the number of VoFs
       //    we accessed. otherVoFsInterpStencilDir0 then contains the interpolation stencil along dir0 from the cell that
       //    was displaced along dir1 from a_vof. E.g. if dir0=x and dir1=y, then otherVoFsInterpStencilDir0 contains the
       //    interpolation stencil B-C in the figure above.
+      // clang-format on
       if (numStencilsAdded0 > 0) {
         otherVoFsInterpStencilDir0 *= 1. / numStencilsAdded0;
       }
@@ -383,8 +389,8 @@ LinearStencil::computeInterpStencil2D(VoFStencil&                a_stencil,
           << "LinearStencil::computeInterpStencil2D - could not find stencil BC or CD. Defaulting to linear stencil"
           << endl;
 #endif
-        // Here, we could find stencil AB and AD but not BC or CD. This shouldn't happen but if it does, we default to 1D
-        // interpolation along the axis with the largest displacement.
+        // Here, we could find stencil AB and AD but not BC or CD. This shouldn't happen but if it does, we default to
+        // 1D interpolation along the axis with the largest displacement.
         if (Abs(a_pos[dir0]) > Abs(a_pos[dir1])) { // 1D interpolation in the longest direction
           a_stencil += curStenDir0;
         }
@@ -395,10 +401,11 @@ LinearStencil::computeInterpStencil2D(VoFStencil&                a_stencil,
       }
       else { // Full bilinear interpolation. We should be able to do any combination we like (right?... RIGHT????)
 
-        // Linear interpolation along dir0 followed by interpolation along dir1. The choice of directions SHOULDN'T matter,
-        // but because the neighboring cells might be multi-valued and we do an averaging over possible 1D interpolation stencils
-        // that may or may not be averages over multi-valued cells, the direction might actually matter. These pathological cases
-        // will be extremely rare, and I don't think they will ever be a problem. But if they do, please check this code.
+        // Linear interpolation along dir0 followed by interpolation along dir1. The choice of directions SHOULDN'T
+        // matter, but because the neighboring cells might be multi-valued and we do an averaging over possible 1D
+        // interpolation stencils that may or may not be averages over multi-valued cells, the direction might actually
+        // matter. These pathological cases will be extremely rare, and I don't think they will ever be a problem. But
+        // if they do, please check this code.
         const Real d = a_pos[dir1] * HiLoDir1;
 
         const Real w0 = (1 - d);
@@ -501,9 +508,9 @@ LinearStencil::computeInterpStencil3D(VoFStencil&          a_stencil,
                                                                          a_ebisbox,
                                                                          interpDir3D);
 
-    // This code tries to compute a bilinear stencil in the xy plane but for the cell (i,j,k+-1). There can be multiple if
-    // the cell (i,j,k+1) is multivalued, hence the loop. We take the other bilinear stencil to be the average of those
-    // stencils.
+    // This code tries to compute a bilinear stencil in the xy plane but for the cell (i,j,k+-1). There can be multiple
+    // if the cell (i,j,k+1) is multivalued, hence the loop. We take the other bilinear stencil to be the average of
+    // those stencils.
     VoFStencil stenOtherPlane; // This is the (possibly averaged) bilinear interpolation stencil in the other plane
     bool       foundSecondStencil    = false; // Stupid flag
     int        numOtherStencils      = 0;     // Number of stencils that we got (possibly > 1 if multivalued)
@@ -527,14 +534,15 @@ LinearStencil::computeInterpStencil3D(VoFStencil&          a_stencil,
       stenOtherPlane *= 1. / numOtherStencils;
     }
 
-    // First hook: If we got both stencils we can interpolate them safely. If this fails, we have to do bilinear interpolation
+    // First hook: If we got both stencils we can interpolate them safely. If this fails, we have to do bilinear
+    // interpolation
     if (foundFirstStencil && foundSecondStencil) {
       foundStencil = true;
       a_stencil.clear();
 
       // If we made it here, we have bilinear interpolation stencils in both planes and we can
       // do linear interpolation of those two in order to get the 3D stencil
-      const Real z  = a_pos[2] * sign(side); //HiLoDir2;
+      const Real z  = a_pos[2] * sign(side); // HiLoDir2;
       const Real w0 = (1 - z);
       const Real w1 = z;
 
@@ -575,8 +583,8 @@ LinearStencil::computeInterpStencil3D(VoFStencil&          a_stencil,
       MayDay::Warning("LinearStencil::computeInterpStencil3d - logic bust");
     }
   }
-  else if (
-    !really3D) { // Find a direction in which we shouldn't interpolate and get a 2D stencil. This might be several
+  else if (!really3D) { // Find a direction in which we shouldn't interpolate and get a 2D stencil. This might be
+                        // several
     // directions but that is taken care of in the 2D computation.
     int noInterpDir = 0;
     for (int dir = 0; dir < SpaceDim; dir++) {
@@ -586,8 +594,8 @@ LinearStencil::computeInterpStencil3D(VoFStencil&          a_stencil,
   }
 
   // This can happen if the EB cuts a domain "corner" and the normal points outwards. This will cause the above code
-  // to try to reach out of the domain, but those cells are covered and we don't want to reach into them anyways since they can
-  // contain bogus data.
+  // to try to reach out of the domain, but those cells are covered and we don't want to reach into them anyways since
+  // they can contain bogus data.
   if (!foundStencil) {
     a_stencil.clear();
     a_stencil.add(a_vof, 1.0);

@@ -5,10 +5,10 @@
  */
 
 /**
-   @file   CD_CdrPlasmaImExSdcStepper.cpp
-   @brief  Implementation of CD_CdrPlasmaImExSdcStepper.H
-   @author Robert Marskar
-*/
+ * @file   CD_CdrPlasmaImExSdcStepper.cpp
+ * @brief  Implementation of CD_CdrPlasmaImExSdcStepper.H
+ * @author Robert Marskar
+ */
 
 // Std includes
 #include <fstream>
@@ -242,7 +242,8 @@ CdrPlasmaImExSdcStepper::parseAdvectionOptions()
   ParmParse   pp(m_className.c_str());
   std::string str;
 
-  m_extrapDt = 0.5; // Relic of an ancient past. I don't see any reason why extrapolating to anything but the half interval
+  m_extrapDt = 0.5; // Relic of an ancient past. I don't see any reason why extrapolating to anything but the half
+                    // interval
   // would make sense.
 
   pp.get("extrap_advect", str);
@@ -557,12 +558,14 @@ CdrPlasmaImExSdcStepper::advance(const Real a_dt)
     pout() << "CdrPlasmaImExSdcStepper::advance(Real)" << endl;
   }
 
+  // clang-format off
   // ---------------------------------------------------------------------------------------------------
   // TLDR:  When we enter this routine, solvers SHOULD have been filled with valid ready and be ready
   //        advancement. If you think that this may not be the case, activate the debugging below
   // ---------------------------------------------------------------------------------------------------
   // Initialize integrations. If we do corrections, we need FD(phi_0) since this is implicit. If we do adaptive_dt, we should
   // also a
+  // clang-format on
   CdrPlasmaImExSdcStepper::copyCdrToPhiM0();
   CdrPlasmaImExSdcStepper::copySigmaToM0();
   CdrPlasmaImExSdcStepper::computeFD0();
@@ -756,7 +759,8 @@ CdrPlasmaImExSdcStepper::integrate(const Real a_dt, const Real a_time, const boo
     // This computes phi_(m+1) = phi_m + dtm*FAR_m(phi_m) + lagged quadrature and lagged advection-reaction
     CdrPlasmaImExSdcStepper::integrateAdvectionReaction(a_dt, m, a_lagged_terms);
 
-    // This does the diffusion advance. It also adds in the remaining lagged diffusion terms before the implicit diffusion solve
+    // This does the diffusion advance. It also adds in the remaining lagged diffusion terms before the implicit
+    // diffusion solve
     CdrPlasmaImExSdcStepper::integrateDiffusion(a_dt, m, a_lagged_terms);
 
     // After the diffusion step we update the Poisson and *stationary* RTE equations

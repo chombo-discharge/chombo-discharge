@@ -8,7 +8,7 @@
   @file   CD_EBHelmholtzRobinEBBC.cpp
   @brief  Implementation of CD_EBHelmholtzRobinEBBC.H
   @author Robert Marskar
-  @todo   Add least squares implementation of extrapolation stuff. 
+  @todo   Add least squares implementation of extrapolation stuff.
 */
 
 // Chombo includes
@@ -201,8 +201,8 @@ EBHelmholtzRobinEBBC::define()
         }
       }
 
-      // The above stencil is a stencil for interpolating to the cut-cell centroid. We must have the stencil in flux form, using
-      // the expression A*phi + B*dphi/dn = C. Set Robin BC constants and scale stencil accordingly.
+      // The above stencil is a stencil for interpolating to the cut-cell centroid. We must have the stencil in flux
+      // form, using the expression A*phi + B*dphi/dn = C. Set Robin BC constants and scale stencil accordingly.
       if (foundStencil) {
         Real A;
         Real B;
@@ -307,9 +307,11 @@ EBHelmholtzRobinEBBC::getInterpolationStencil(const VolIndex&              a_vof
 
   CH_assert(a_order > 0);
 
+  // clang-format off
   // TLDR: This routine will compute a stencil for interpolating the mesh data to the embedded boundary centroid using least squares reconstruction
   //       of the solution. The user will input the desired neighborhood and order of that interpolation. By default, the radius of the stencil is
   //       the same as the order.
+  // clang-format on
 
   const EBISBox& ebisbox     = m_eblg.getEBISL()[a_dit];
   const bool     useStartVof = !(

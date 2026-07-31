@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_ParticleGhostMaskImplem.H
-  @brief  Implementation of CD_ParticleGhostMask.H
-  @author Robert Marskar
-*/
+ * @file   CD_ParticleGhostMaskImplem.H
+ * @brief  Implementation of CD_ParticleGhostMask.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_PARTICLEGHOSTMASKIMPLEM_H
 #define CD_PARTICLEGHOSTMASKIMPLEM_H

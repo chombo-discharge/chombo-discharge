@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_Driver.cpp
-  @brief  Implementation of CD_Driver.H
-  @author Robert Marskar
-*/
+ * @file   CD_Driver.cpp
+ * @brief  Implementation of CD_Driver.H
+ * @author Robert Marskar
+ */
 
 // Std includes
 #include <fstream>
@@ -243,7 +243,8 @@ Driver::getGeometryTags()
   const RefCountedPtr<EBIndexSpace>& ebisGas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
   const RefCountedPtr<EBIndexSpace>& ebisSol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
 
-  // Note that we only need tags up to maxAmrDepth-1 since the grid on maxAmrDepth are generated from tags on maxAmrDepth-1
+  // Note that we only need tags up to maxAmrDepth-1 since the grid on maxAmrDepth are generated from tags on
+  // maxAmrDepth-1
   for (int lvl = 0; lvl < maxAmrDepth; lvl++) {
 
     // Our level indexing disagrees with EBIS level indexing (where the finest level is on index 0). This is
@@ -618,8 +619,8 @@ Driver::regrid(const int a_lmin, const int a_lmax, const bool a_useInitialData)
   // Use a timer here because I want to be able to put some diagnostics into this function.
   Timer timer("Driver::regrid(int, int, bool)");
 
-  // We are allowing geometric tags to change under the hood, but we need a method for detecting if they changed. If they did,
-  // we certainly have to regrid.
+  // We are allowing geometric tags to change under the hood, but we need a method for detecting if they changed. If
+  // they did, we certainly have to regrid.
   timer.startEvent("Get geometry tags");
   Vector<IntVectSet> tags;
 
@@ -827,9 +828,8 @@ Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSteps)
       if (canRegrid && (regridStep || regridTimeStepper)) {
         if (!isFirstStep) {
 
-          // Regrid all levels, but restrict the addition to one at a time. As always, new grids on level l are generated through tags
-          // on levels (l-1);
-          // This means that if we refine, we can only add one level at a time.
+          // Regrid all levels, but restrict the addition to one at a time. As always, new grids on level l are
+          // generated through tags on levels (l-1); This means that if we refine, we can only add one level at a time.
           const int lmin = 0;
           const int lmax = m_amr->getFinestLevel() + 1;
 
@@ -975,7 +975,8 @@ Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSteps)
       }
 #endif
 
-      // Rebuild the ParmParse table and read input parameters again. Some parameters are allowed to change during runtime.
+      // Rebuild the ParmParse table and read input parameters again. Some parameters are allowed to change during
+      // runtime.
       this->rebuildParmParse();
 
       this->parseRuntimeOptions();
@@ -1229,8 +1230,8 @@ Driver::parseGeometryRefinement()
     pout() << "Driver::parseGeometryRefinement()" << endl;
   }
 
-  // This routine parses the default depth at which we refine EBs, and also the refinement angle. This is used for setting up grids where only flags on the
-  // EB are involved.
+  // This routine parses the default depth at which we refine EBs, and also the refinement angle. This is used for
+  // setting up grids where only flags on the EB are involved.
   //
   ParmParse pp("Driver");
 
@@ -1249,8 +1250,9 @@ Driver::parseGeometryRefinement()
     m_dielectricTagsDepth = m_amr->getMaxAmrDepth();
   }
 
-  // We are also allowing geometry refinement criteria to change as simulations progress (i.e. m_timeStep > 0) where we call this routine again. But we need
-  // something to tell us that we got new refinement criteria for geometric tags so we can avoid regrid if they didn't change. This is my clunky way of doing that.
+  // We are also allowing geometry refinement criteria to change as simulations progress (i.e. m_timeStep > 0) where we
+  // call this routine again. But we need something to tell us that we got new refinement criteria for geometric tags so
+  // we can avoid regrid if they didn't change. This is my clunky way of doing that.
   if (m_timeStep >
       0) { // Simulation is already running, and we need to check if we need new geometric tags for regridding.
     if (c1 != m_refineAngle || c2 != m_conductorTagsDepth || c3 != m_dielectricTagsDepth) {
@@ -1555,8 +1557,8 @@ Driver::setupFresh(const int a_initialRegrids)
   // -----
   // The stuff below here might seem a bit convoluted, but we are first letting AmrMesh compute a set of grids which
   // is load balanced by the patch volume. All realms and operators are set up with this initial set of grids. We then
-  // use those grids to let the time stepper predict computational loads, which we use to regrid both the realms and the time
-  // stepper.
+  // use those grids to let the time stepper predict computational loads, which we use to regrid both the realms and the
+  // time stepper.
 
   // When we're setting up fresh, we need to regrid everything from the
   // base level and upwards, so no hardcap on the permitted grids.
@@ -2115,8 +2117,8 @@ Driver::writeGeometry()
     pout() << "Driver::writeGeometry()" << endl;
   }
 
-  // This is a special routine that writes a plot file containing only the level-set function. Very useful when adjusting the
-  // geometry.
+  // This is a special routine that writes a plot file containing only the level-set function. Very useful when
+  // adjusting the geometry.
 
   const int ncomp = 2;
 
@@ -2818,8 +2820,9 @@ Driver::readCheckpointFile(const std::string& a_restartFile)
     }
   }
 
-  // In case we restart with more or fewer realms, we need to decide how to assign the computational loads. If the realm was a new realm we may
-  // not have the computational loads for that. in that case we take the computational loads from the primal realm which we know is always there.
+  // In case we restart with more or fewer realms, we need to decide how to assign the computational loads. If the realm
+  // was a new realm we may not have the computational loads for that. in that case we take the computational loads from
+  // the primal realm which we know is always there.
   for (auto& s : simulationLoads) {
 
     const std::string&        curRealm = s.first;
@@ -2927,8 +2930,8 @@ Driver::readCheckpointRealmLoads(Vector<long int>&  a_loads,
     pout() << "Driver::readCheckpointRealmLoads((Vector<long int>, HDF5Handle, string, int))" << endl;
   }
 
-  // This reads computational loads from a file. When we wrote them we set the load in each grid patch, so we can just fetch using
-  // FArrayBox::max() function for getting it.
+  // This reads computational loads from a file. When we wrote them we set the load in each grid patch, so we can just
+  // fetch using FArrayBox::max() function for getting it.
 
   // Identifier in HDF5 file.
   const std::string str = a_realm + "_loads";

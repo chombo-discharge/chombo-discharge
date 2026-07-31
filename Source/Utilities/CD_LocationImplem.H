@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_LocationImplem.H
-  @brief  Implementation of CD_Location.H
-  @author Robert Marskar
-*/
+ * @file   CD_LocationImplem.H
+ * @brief  Implementation of CD_Location.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_LOCATIONIMPLEM_H
 #define CD_LOCATIONIMPLEM_H

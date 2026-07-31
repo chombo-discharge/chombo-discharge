@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_Realm.cpp
-  @brief  Implementation of CD_Realm.H
-  @author Robert Marskar
-*/
+ * @file   CD_Realm.cpp
+ * @brief  Implementation of CD_Realm.H
+ * @author Robert Marskar
+ */
 
 // Std includes
 #include <cmath>
@@ -333,8 +333,8 @@ Realm::defineOuterHaloMask(const int /*a_lmin*/)
                                   m_refinementRatios[lvl]);
       }
 
-      // Must explicitly set this because we want to the finest level mask to be nullptr, but we could be removing a grid level and in that case
-      // the old mask will remain in the vector after resizing. This fixes that.
+      // Must explicitly set this because we want to the finest level mask to be nullptr, but we could be removing a
+      // grid level and in that case the old mask will remain in the vector after resizing. This fixes that.
       mask[m_finestLevel] = RefCountedPtr<LevelData<BaseFab<bool>>>(nullptr);
     }
   }
@@ -354,10 +354,12 @@ Realm::defineOuterHaloMask(LevelData<BaseFab<bool>>& a_coarMask,
     pout() << "Realm::defineOuterHaloMask" << endl;
   }
 
+  // clang-format off
   // TLDR: This routine defines a "mask" of valid coarse-grid cells (i.e., not covered by a finer level) around a fine grid. The mask is a_buffer wide. It is
   //       created by first fetching the cells around on the fine grid. This is a local operation where we get all the cells around each patch and then subtract
   //       cells that overlap with other boxes. This set of cells is then put on a LevelData<FArrayBox> mask so we can copy the result to the coarse grid and
   //       set the mask.
+  // clang-format on
 
   constexpr int comp  = 0;
   constexpr int ncomp = 1;
@@ -411,9 +413,11 @@ Realm::defineOuterHaloMask(LevelData<BaseFab<bool>>& a_coarMask,
       halo |= myHalo;
     }
 
+    // clang-format off
     // TLDR: In the above, we found the coarse-grid cells surrounding the fine level, viewed from the fine grids.
     //       Below, we create that view from the coarse grid. We use a BoxLayoutData<FArrayBox> on the coarsened fine grid,
     //       whose "ghost cells" can added to the _actual_ coarse grid. We then loop through those cells and set the mask.
+    // clang-format on
     LevelData<FArrayBox> coFiMask(dblCoFi, ncomp, a_buffer * IntVect::Unit);
     LevelData<FArrayBox> coarMask(a_gridsCoar, ncomp, IntVect::Zero);
 
@@ -433,9 +437,10 @@ Realm::defineOuterHaloMask(LevelData<BaseFab<bool>>& a_coarMask,
         coarMask[din].setVal(0.0);
       }
 
-      // Run through the halo and set the halo cells to 1 on the coarsened fine grids. Since dblCoFi was a coarsening of the fine
-      // grid, the mask value in the valid region (i.e., not including ghosts) is always zero. There used to be a bug here because
-      // we only iterated through that region, but obviously the halo masks will always be zero in that case...
+      // Run through the halo and set the halo cells to 1 on the coarsened fine grids. Since dblCoFi was a coarsening of
+      // the fine grid, the mask value in the valid region (i.e., not including ghosts) is always zero. There used to be
+      // a bug here because we only iterated through that region, but obviously the halo masks will always be zero in
+      // that case...
 #pragma omp for schedule(runtime)
       for (int mybox = 0; mybox < nboxCoFi; mybox++) {
         const DataIndex& din = ditCoFi[mybox];
@@ -521,8 +526,10 @@ Realm::defineInnerHaloMask(const int /*a_lmin*/)
         }
 
         if (lvl > 0) {
+          // clang-format off
           // TLDR: Below, we use the valid cells to figure out the region on the inside of the refinement boundary. In everything below, the "fine" grid
           //       is the current grid level, and the coarse grid is the grid level below.
+          // clang-format on
 
           const int refToCoar = m_refinementRatios[lvl - 1];
 
@@ -560,7 +567,8 @@ Realm::defineInnerHaloMask(const int /*a_lmin*/)
           BoxLayoutData<FArrayBox> coarLevelMask(boxLayoutCoar, 1);
           BoxLayoutData<FArrayBox> coFiLevelMask(boxLayoutCoFi, 1);
 
-          // Set the coarse mask to false everywhere on the coarse level, except on the region just inside the refinement boundary.
+          // Set the coarse mask to false everywhere on the coarse level, except on the region just inside the
+          // refinement boundary.
 #pragma omp parallel for schedule(runtime)
           for (int mybox = 0; mybox < numBoxesCoar; mybox++) {
             const DataIndex& dinCoar = ditCoar[mybox];
@@ -684,8 +692,8 @@ Realm::defineOuterCFMask(const int /*a_lmin*/)
                                 m_refinementRatios[lvl]);
       }
 
-      // Must explicitly set this because we want to the finest level mask to be nullptr, but we could be removing a grid level and in that case
-      // the old mask will remain in the vector after resizing. This fixes that.
+      // Must explicitly set this because we want to the finest level mask to be nullptr, but we could be removing a
+      // grid level and in that case the old mask will remain in the vector after resizing. This fixes that.
       mask[m_finestLevel] = RefCountedPtr<LevelData<BaseFab<bool>>>(nullptr);
     }
   }
@@ -705,10 +713,12 @@ Realm::defineOuterCFMask(LevelData<BaseFab<bool>>& a_coarMask,
     pout() << "Realm::defineOuterCFMask" << endl;
   }
 
+  // clang-format off
   // TLDR: This routine defines a "mask" of valid coarse-grid cells (i.e., not covered by a finer level) around a fine grid. The mask is a_buffer wide. It is
   //       created by first fetching the cells around on the fine grid. This is a local operation where we get all the cells around each patch and then subtract
   //       cells that overlap with other boxes. This set of cells is then put on a LevelData<FArrayBox> mask so we can copy the result to the coarse grid and
   //       set the mask.
+  // clang-format on
 
   constexpr int comp  = 0;
   constexpr int ncomp = 1;
@@ -762,9 +772,11 @@ Realm::defineOuterCFMask(LevelData<BaseFab<bool>>& a_coarMask,
       halo |= myHalo;
     }
 
+    // clang-format off
     // TLDR: In the above, we found the coarse-grid cells surrounding the fine level, viewed from the fine grids.
     //       Below, we create that view from the coarse grid. We use a BoxLayoutData<FArrayBox> on the coarsened fine grid,
     //       whose "ghost cells" can added to the _actual_ coarse grid. We then loop through those cells and set the mask.
+    // clang-format on
     LevelData<FArrayBox> coFiMask(dblCoFi, ncomp, a_buffer * IntVect::Unit);
     LevelData<FArrayBox> coarMask(a_gridsCoar, ncomp, IntVect::Zero);
 
@@ -784,9 +796,10 @@ Realm::defineOuterCFMask(LevelData<BaseFab<bool>>& a_coarMask,
         coarMask[din].setVal(0.0);
       }
 
-      // Run through the halo and set the halo cells to 1 on the coarsened fine grids. Since dblCoFi was a coarsening of the fine
-      // grid, the mask value in the valid region (i.e., not including ghosts) is always zero. There used to be a bug here because
-      // we only iterated through that region, but obviously the halo masks will always be zero in that case...
+      // Run through the halo and set the halo cells to 1 on the coarsened fine grids. Since dblCoFi was a coarsening of
+      // the fine grid, the mask value in the valid region (i.e., not including ghosts) is always zero. There used to be
+      // a bug here because we only iterated through that region, but obviously the halo masks will always be zero in
+      // that case...
 #pragma omp for schedule(runtime)
       for (int mybox = 0; mybox < nboxCoFi; mybox++) {
         const DataIndex& din = ditCoFi[mybox];

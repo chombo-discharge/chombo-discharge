@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_EBCoarAve.cpp
-  @brief  Implementation of CD_EBCoarAve.H
-  @author Robert Marskar
-*/
+ * @file   CD_EBCoarAve.cpp
+ * @brief  Implementation of CD_EBCoarAve.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <EBCellFactory.H>

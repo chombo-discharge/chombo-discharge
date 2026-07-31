@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_MFHelmholtzElectrostaticEBBC.cpp
-  @brief  Implementation of CD_MFHelmholtzElectrostaticEBBC.H
-  @author Robert Marskar
-*/
+ * @file   CD_MFHelmholtzElectrostaticEBBC.cpp
+ * @brief  Implementation of CD_MFHelmholtzElectrostaticEBBC.H
+ * @author Robert Marskar
+ */
 
 // Our includes
 #include <CD_MFHelmholtzElectrostaticEBBC.H>
@@ -178,7 +178,8 @@ MFHelmholtzElectrostaticEBBC::defineSinglePhase()
         weights(vof, m_comp)  = pairSten.first;
         stencils(vof, m_comp) = pairSten.second;
 
-        // Stencil and weight must also be scaled by the B-coefficient, dx (because it's used in kappa*Div(F)) and the area fraction.
+        // Stencil and weight must also be scaled by the B-coefficient, dx (because it's used in kappa*Div(F)) and the
+        // area fraction.
         weights(vof, m_comp) *= areaFrac / m_dx;
         stencils(vof, m_comp) *= areaFrac / m_dx;
       }
@@ -206,11 +207,13 @@ MFHelmholtzElectrostaticEBBC::applyEBFluxSinglePhase(VoFIterator& a_singlePhaseV
     "MFHelmholtzElectrostaticEBBC::applyEBFluxSinglePhase(VoFIterator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");
 
   // Apply the stencil for computing the contribution to kappaDivF. Note divF is sum(faces) B*grad(Phi)/dx and that this
-  // is the contribution from the EB face. B/dx is already included in the stencils and boundary weights, but beta is not.
+  // is the contribution from the EB face. B/dx is already included in the stencils and boundary weights, but beta is
+  // not.
 
   // This is a safeguard against a corner case where we fail to correctly represent the interface region and also have
   // no electrodes. In this case we simply bypass the flux calculation. Note that this normally happens when the user
-  // only has dielectrics AND some of the dielectric cells become incorrectly represented at the coarser multigrid levels.
+  // only has dielectrics AND some of the dielectric cells become incorrectly represented at the coarser multigrid
+  // levels.
   const bool hasElectrode = !m_electrostaticBCs.getBcs().empty();
 
   // Do single phase cells

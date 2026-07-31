@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_PerlinRodSdf.cpp
-  @brief  Implementation of CD_PerlinRodSdf.H
-  @author Robert Marskar
-*/
+ * @file   CD_PerlinRodSdf.cpp
+ * @brief  Implementation of CD_PerlinRodSdf.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <TransformIF.H>

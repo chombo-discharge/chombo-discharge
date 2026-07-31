@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_GradedPerlinSphereSdf.cpp
-  @brief  Implementation of CD_GradedPerlinSphereSdf.H
-  @author Robert Marskar
-*/
+ * @file   CD_GradedPerlinSphereSdf.cpp
+ * @brief  Implementation of CD_GradedPerlinSphereSdf.H
+ * @author Robert Marskar
+ */
 
 // Std includes
 #include <cmath>

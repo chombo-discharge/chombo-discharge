@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_ItoKMCPhysicsImplem.H 
-  @brief  Implementation of CD_ItoKMCPhysics.H
-  @author Robert Marskar
-*/
+ * @file   CD_ItoKMCPhysicsImplem.H
+ * @brief  Implementation of CD_ItoKMCPhysics.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_ITOKMCPHYSICSIMPLEM_H
 #define CD_ITOKMCPHYSICSIMPLEM_H
@@ -472,10 +472,10 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
     MayDay::Warning("ItoKMCPhysics::advanceKMC -- charge not conserved!");
   }
 
-  // This loop is for isolating reactions that the user will explicitly ask to fire before computing the physics-based time step. It exists
-  // because if there are no electrons but lots of ions, one may get a time step that is too large because X/|sum mu| is zero for the electrons.
-  // Similarly, one may get a time step that is too small away from ionization regions because X/|sum mu| may be tiny if there is, say, 1 electron
-  // but lots of detachment.
+  // This loop is for isolating reactions that the user will explicitly ask to fire before computing the physics-based
+  // time step. It exists because if there are no electrons but lots of ions, one may get a time step that is too large
+  // because X/|sum mu| is zero for the electrons. Similarly, one may get a time step that is too small away from
+  // ionization regions because X/|sum mu| may be tiny if there is, say, 1 electron but lots of detachment.
   auto getPropensitiesDt = [&](const KMCState& a_state) -> std::vector<Real> {
     std::vector<Real> propensities = m_kmcSolver.propensities(a_state, m_kmcReactionsThreadLocal);
 
@@ -588,7 +588,8 @@ ItoKMCPhysics::reconcileParticles(Vector<ParticleSoA<ItoParticle>*>& a_particles
       const long long numParticles = static_cast<long long>(a_particles[i]->size());
 
       if (numParticles > 0LL && m_incrementNewParticles) {
-        // If the cell already contains particles, partition the new particle weights and increment the existing particles
+        // If the cell already contains particles, partition the new particle weights and increment the existing
+        // particles
         const std::vector<long long> particleWeights = ParticleManagement::partitionParticleWeights(diff, numParticles);
 
         ParticleSoA<ItoParticle>& particles = *a_particles[i];
@@ -598,7 +599,8 @@ ItoKMCPhysics::reconcileParticles(Vector<ParticleSoA<ItoParticle>*>& a_particles
         }
       }
       else {
-        // Adding new particles, which is fairly simple. Just choose weights for the particles and go with one of the placement algorithms.
+        // Adding new particles, which is fairly simple. Just choose weights for the particles and go with one of the
+        // placement algorithms.
         const std::vector<long long> particleWeights = ParticleManagement::partitionParticleWeights(
           diff,
           static_cast<long long>(m_maxNewParticles));

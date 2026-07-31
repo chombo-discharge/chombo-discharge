@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_ItoSolver.cpp
-  @brief  Implementation of CD_ItoSolver.H
-  @author Robert Marskar
-*/
+ * @file   CD_ItoSolver.cpp
+ * @brief  Implementation of CD_ItoSolver.H
+ * @author Robert Marskar
+ */
 
 // Std includes
 #include <chrono>
@@ -36,27 +36,27 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Minimal particle payload for the nn_pair merge -- only the energy has to survive.
-  @details makeSuperparticlesNnPair() reduces particles by weight and position, carrying a
-  single reconciliation scalar (energy). ItoParticle's other columns (mobility, diffusion, velocity,
-  ...) are recomputed from the field immediately after merging, so they need not ride the repeated,
-  cross-rank ghost exchange. Merging on this much smaller particle -- then rebuilding ItoParticles --
-  keeps the per-round ghost fill and container churn proportional to what the merge actually needs.
-*/
+ * @brief Minimal particle payload for the nn_pair merge -- only the energy has to survive.
+ * @details makeSuperparticlesNnPair() reduces particles by weight and position, carrying a
+ * single reconciliation scalar (energy). ItoParticle's other columns (mobility, diffusion, velocity,
+ * ...) are recomputed from the field immediately after merging, so they need not ride the repeated,
+ * cross-rank ghost exchange. Merging on this much smaller particle -- then rebuilding ItoParticles --
+ * keeps the per-round ghost fill and container churn proportional to what the merge actually needs.
+ */
 struct ItoMergeParticle
 {
   ParticleReal energy = 0.0; ///< Average particle energy -- the only payload the nn_pair merge carries.
 };
 
 /**
-  @brief ParticleTraits for ItoMergeParticle: a single energy payload column.
-*/
+ * @brief ParticleTraits for ItoMergeParticle: a single energy payload column.
+ */
 template <>
 struct ParticleTraits<ItoMergeParticle>
 {
   /**
-    @brief The one payload column.
-  */
+   * @brief The one payload column.
+   */
   static constexpr auto columns = std::make_tuple(&ItoMergeParticle::energy);
 };
 
@@ -597,9 +597,11 @@ ItoSolver::initialData()
 
   CH_assert(!m_species.isNull());
 
+  // clang-format off
   // TLDR: This function will fetch the initial particles from the species and deposit them on the mesh. In most cases the various MPI ranks
   //       will have drawn a different set of initial particles (the only sane way to do it) and so those particles are put directly in
   //       the 'bulk' particle container. After that we remove the particles that fell inside the EB and deposit the particles on the mesh.
+  // clang-format on
 
   ParticleContainer<ItoParticle>& bulkParticles = m_particleContainers.at(WhichContainer::Bulk);
   bulkParticles.clearParticles();
@@ -638,8 +640,8 @@ ItoSolver::generateParticlesFromDensity(ParticleContainer<ItoParticle>&         
     pout() << m_name + "::generateParticlesFromDensity" << endl;
   }
 
-  // Lambda which stochastically determines the number of particles in a cell. This is the mean number of particles, plus
-  // a stochastic evaluation of whether or not to include the "fractional" particle.
+  // Lambda which stochastically determines the number of particles in a cell. This is the mean number of particles,
+  // plus a stochastic evaluation of whether or not to include the "fractional" particle.
   auto sampleParticles = [&](const Real a_volume, const Real a_density) -> std::vector<long long> {
     const Real meanNumParticles   = a_volume * a_density;
     const Real remainingParticles = meanNumParticles - std::floor(meanNumParticles);
@@ -1148,10 +1150,12 @@ ItoSolver::writeCheckPointLevelFluid(HDF5Handle& a_handle, const int a_level) co
     pout() << m_name + "::writeCheckPointLevelFluid" << endl;
   }
 
+  // clang-format off
   // TLDR: This routine checkpoints the particle data using the number of particles in a grid cell. When the simulation is restarted, we read the
   //       number of particles per cell from the HDF5 file and re-initialize the particles. However, this function does NOT currently store the energy
   //       (or other parameters of interest) in the HDF5 file. Only the number of particles is available. I don't expect this function to be widely used
   //       by anyone.
+  // clang-format on
 
   // I call this _particlesF to distinguish it from the "particle" checkpointing method.
   const std::string str = m_name + "_particlesF";
@@ -1244,8 +1248,10 @@ ItoSolver::readCheckpointLevelParticles(HDF5Handle& a_handle, const int a_level)
     pout() << m_name + "::readCheckpointLevelParticles" << endl;
   }
 
+  // clang-format off
   // TLDR: This function is the one that reads SimpleItoParticles from the checkpoint file and instantiates full ItoParticle's from that. Recalling
   //       writeCheckpointLevelParticles we only stored the weight, position, and energy of the particles. Here we read that information back in.
+  // clang-format on
 
   // This is the particle container that we will fill.
   ParticleContainer<ItoParticle>& particles = m_particleContainers.at(WhichContainer::Bulk);
@@ -1283,7 +1289,8 @@ ItoSolver::readCheckpointLevelFluid(HDF5Handle& a_handle, const int a_level)
 
   read<EBCellFAB>(a_handle, *particlesPerCell[a_level], str, m_amr->getGrids(m_realm)[a_level], interv, false);
 
-  // particlesPerCell holds the number of particles per cell -- call the other version which instantiates new particles from that.
+  // particlesPerCell holds the number of particles per cell -- call the other version which instantiates new particles
+  // from that.
   this->drawNewParticles(*particlesPerCell[a_level], a_level, m_restartPPC);
 }
 #endif
@@ -1326,11 +1333,13 @@ ItoSolver::drawNewParticles(const LevelData<EBCellFAB>& a_particlesPerCell, cons
 
     // Regular kernel
     auto regularKernel = [&](const IntVect& iv) -> void {
-      // Do regular cells -- in these cells we only need to draw a random position somewhere inside the cubic cell. Easy.
+      // Do regular cells -- in these cells we only need to draw a random position somewhere inside the cubic cell.
+      // Easy.
       if (ebisbox.isRegular(iv)) {
 
         // This bit of code will take the number of physical particles and divide them into a_newPPC particles with
-        // approximately equal weights. It is possible that one of the particles will have a larger particle weight than the others.
+        // approximately equal weights. It is possible that one of the particles will have a larger particle weight than
+        // the others.
         const std::vector<long long> weights = ParticleManagement::partitionParticleWeights(llround(ppc(iv)),
                                                                                             (long long)a_newPPC);
 
@@ -1350,8 +1359,8 @@ ItoSolver::drawNewParticles(const LevelData<EBCellFAB>& a_particlesPerCell, cons
       }
     };
 
-    // Irregular kernel. Do the same for irregular cells. This differs from the regular-cell case only in that the positions
-    // are checked against the EB.
+    // Irregular kernel. Do the same for irregular cells. This differs from the regular-cell case only in that the
+    // positions are checked against the EB.
     auto irregularKernel = [&](const VolIndex& vof) -> void {
       const IntVect  iv    = vof.gridIndex();
       const RealVect cent  = ebisbox.bndryCentroid(vof);
@@ -1374,7 +1383,8 @@ ItoSolver::drawNewParticles(const LevelData<EBCellFAB>& a_particlesPerCell, cons
         }
 
         // This bit of code will take the number of physical particles and divide them into a_newPPC particles with
-        // approximately equal weights. It is possible that one of the particles will have a larger particle weight than the others.
+        // approximately equal weights. It is possible that one of the particles will have a larger particle weight than
+        // the others.
         const std::vector<long long> weights = ParticleManagement::partitionParticleWeights(llround(ppc(iv)),
                                                                                             (long long)a_newPPC);
 
@@ -1986,6 +1996,7 @@ ItoSolver::redistributeAMR(EBAMRCellData& a_phi) const
     pout() << m_name + "::redistributeAMR" << endl;
   }
 
+  // clang-format off
   // TLDR: When we entered this routine we had a_phi = m_i/dV but we actually want to have phi = m_i/(kappa*dV) so as to have
   //       meaningful densities. Thus, we can either run with a_phi just as it is, in which case it must be interpreted as an extended
   //       state into the EB. That is perfectly fine. But we can also use O(1) accurate redistribution in order to make the scheme
@@ -1996,6 +2007,7 @@ ItoSolver::redistributeAMR(EBAMRCellData& a_phi) const
   //       below does even more than that -- it can compute an update phiH = kappa*phi + (1-kappa)*phiNC where phiNC is a non-conservative
   //       type of update. In this case the mass loss is just like for fluid models: dM = kappa*(1-kappa)(phiC - phiNC). But this update
   //       is not strictly non-negative.
+  // clang-format on
 
   if (m_useRedistribution) {
     this->depositNonConservative(m_depositionNC, a_phi);    // Compute m_depositionNC = sum(kappa*Wc)/sum(kappa)
@@ -2463,7 +2475,8 @@ ItoSolver::interpolateMobilitiesDirect(const int a_lvl, const DataIndex& a_dit) 
   CH_assert(m_isMobile);
   CH_assert(m_mobilityInterp == WhichMobilityInterpolation::Direct);
 
-  // TLDR: This will compute the particle mobility by interpolating a scalar mobility field (stored on the mesh) to the particle positions.
+  // TLDR: This will compute the particle mobility by interpolating a scalar mobility field (stored on the mesh) to the
+  // particle positions.
 
   ParticleContainer<ItoParticle>& particles = m_particleContainers.at(WhichContainer::Bulk);
 
@@ -2497,8 +2510,10 @@ ItoSolver::interpolateMobilitiesVelocity(const int        a_lvl,
   CH_assert(a_velocityMagnitude.nComp() == 1);
   CH_assert(m_mobilityInterp == WhichMobilityInterpolation::Velocity);
 
+  // clang-format off
   // TLDR: This function computes the particle mobilities by interpolating mu*V to the particle position and then setting
   //       the mobility as mu = [mu*V(Xp)]/V(Xp).
+  // clang-format on
 
   const ProblemDomain& domain  = m_amr->getDomains()[a_lvl];
   const Box            cellBox = m_amr->getGrids(m_realm)[a_lvl][a_dit];
@@ -2813,8 +2828,10 @@ ItoSolver::computeHopDt(const Real a_maxCellsToMove) const
 
   CH_assert(a_maxCellsToMove > 0.0);
 
+  // clang-format off
   // TLDR: This routine computes the largest possible time step such that no particles move more than a_maxCellsToMove during
   //       a standard Ito kernel step. This is the AMR version.
+  // clang-format on
 
   Real dt = std::numeric_limits<Real>::max();
 
@@ -2838,8 +2855,10 @@ ItoSolver::computeHopDt(const Real a_maxCellsToMove, const int a_lvl) const
 
   CH_assert(a_maxCellsToMove > 0.0);
 
+  // clang-format off
   // TLDR: This routine computes the largest possible time step such that no particles move more than a_maxCellsToMove during
   //       a standard Ito kernel step. This is the level version.
+  // clang-format on
 
   Real dt = std::numeric_limits<Real>::max();
 
@@ -2871,8 +2890,10 @@ ItoSolver::computeHopDt(const Real a_maxCellsToMove, const int a_lvl, const Data
 
   CH_assert(a_maxCellsToMove > 0.0);
 
+  // clang-format off
   // TLDR: This routine computes the largest possible time step such that no particles move more than a_maxCellsToMove during
   //       a standard Ito kernel step. This is the patch version.
+  // clang-format on
 
   Real dt = std::numeric_limits<Real>::max();
 
@@ -2918,9 +2939,10 @@ ItoSolver::computeHopDt(const Real a_maxCellsToMove, const int a_lvl, const Data
     // Diffusion but no advection
 
     for (std::size_t i = 0; i < n; i++) {
-      // Recall, the diffusion kernel is usually dX = sqrt(2*D*dt)*N where N is a SpaceDim vector of Gaussian numbers. But we only care about
-      // not moving more than a specified number of grid cells in any one of the coordinate directions so we have
-      // |dX| = sqrt(2*D*dt)*N0 where N0 is the maximum value in the Gaussian distribution (which we have truncated). Solving for dt yields dt = |dX|^2/(2*D*N0^2).
+      // Recall, the diffusion kernel is usually dX = sqrt(2*D*dt)*N where N is a SpaceDim vector of Gaussian numbers.
+      // But we only care about not moving more than a specified number of grid cells in any one of the coordinate
+      // directions so we have |dX| = sqrt(2*D*dt)*N0 where N0 is the maximum value in the Gaussian distribution (which
+      // we have truncated). Solving for dt yields dt = |dX|^2/(2*D*N0^2).
       const Real Di     = static_cast<Real>(D[i]);
       const Real thisDt = dMax2 / (2.0 * Di * SpaceDim * W02);
 
@@ -2936,8 +2958,8 @@ ItoSolver::computeHopDt(const Real a_maxCellsToMove, const int a_lvl, const Data
 
       Real thisDt = std::numeric_limits<Real>::max();
 
-      // This case is more complicated because we have dX = v*dt + sqrt(2*D*dt)*N0 and we need to solve for dt. This yields a second order equation
-      // in the form A*dt^2 + B*dt + C = 0. We just solve for dt.
+      // This case is more complicated because we have dX = v*dt + sqrt(2*D*dt)*N0 and we need to solve for dt. This
+      // yields a second order equation in the form A*dt^2 + B*dt + C = 0. We just solve for dt.
       if (vMax > 0.0) {
         const Real a = vMax;
         const Real b = W0 * sqrt(2.0 * Di);

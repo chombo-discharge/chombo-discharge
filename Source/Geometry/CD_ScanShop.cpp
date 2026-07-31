@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_ScanShop.cpp
-  @brief  Implementation of CD_ScanShop.H
-  @author Robert Marskar
-*/
+ * @file   CD_ScanShop.cpp
+ * @brief  Implementation of CD_ScanShop.H
+ * @author Robert Marskar
+ */
 
 // Std includes
 #include <chrono>
@@ -373,8 +373,8 @@ ScanShop::defineLevel(Vector<Box>& a_coveredBoxes,
   LoadBalancing::gatherBoxes(a_cutCellBoxes);
   m_timer.stopEvent("Gather boxes");
 
-  // This is needed because when we join the regular and covered boxes onto the same "load" when we sort them, but we need to have
-  // the indexing correctly. For the cut-cell boxes we load balance them independently.
+  // This is needed because when we join the regular and covered boxes onto the same "load" when we sort them, but we
+  // need to have the indexing correctly. For the cut-cell boxes we load balance them independently.
   m_timer.startEvent("Sort boxes");
   const Vector<int> coveredTypes(a_coveredBoxes.size(), 0);
   const Vector<int> regularTypes(a_regularBoxes.size(), 1);
@@ -413,8 +413,8 @@ ScanShop::defineLevel(Vector<Box>& a_coveredBoxes,
   LoadBalancing::makeBalance(cutCellProcs, rankLoads2, cutCellLoads, a_cutCellBoxes);
   m_timer.stopEvent("Make balance");
 
-  // We load balanced the regular/covered and cut-cell regions independently, but now we need to create a box-to-rank map
-  // that is usable by Chombo's DisjointBoxLayout.
+  // We load balanced the regular/covered and cut-cell regions independently, but now we need to create a box-to-rank
+  // map that is usable by Chombo's DisjointBoxLayout.
   m_timer.startEvent("Vector append");
   Vector<Box> allBoxes;
   Vector<int> allProcs;
@@ -430,9 +430,10 @@ ScanShop::defineLevel(Vector<Box>& a_coveredBoxes,
   allTypes.append(cutCellTypes);
   m_timer.stopEvent("Vector append");
 
-  // This is something that I fucking HATE, but DisjointBoxLayout sorts the boxes using lexicographical sorting, and we must do the same if
-  // we want to be able to globally index correctly into the box types. So, create a view of the boxes and box types that is consistent with
-  // what we will have in the DataIterator. This means that we must lexicographically sort the boxes.
+  // This is something that I fucking HATE, but DisjointBoxLayout sorts the boxes using lexicographical sorting, and we
+  // must do the same if we want to be able to globally index correctly into the box types. So, create a view of the
+  // boxes and box types that is consistent with what we will have in the DataIterator. This means that we must
+  // lexicographically sort the boxes.
   m_timer.startEvent("Lexi-sort");
   const std::vector<std::pair<Box, int>> sortedBoxesAndTypes = this->getSortedBoxesAndTypes(allBoxes, allTypes);
   m_timer.stopEvent("Lexi-sort");
@@ -508,8 +509,8 @@ ScanShop::InsideOutside(const Box&           a_region,
     }
   }
 
-  // A strang but true thing. This function is used in EBISLevel::simplifyGraphFromGeo and that function can send in a_domain
-  // and a_dx on different levels....
+  // A strang but true thing. This function is used in EBISLevel::simplifyGraphFromGeo and that function can send in
+  // a_domain and a_dx on different levels....
   ProblemDomain domain;
   if (a_dx < m_dx[whichLevel] && whichLevel > 0) {
     domain = m_domains[whichLevel - 1];

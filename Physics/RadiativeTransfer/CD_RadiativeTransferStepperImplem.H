@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_RadiativeTransferStepperImplem.H
-  @brief  Implementation of CD_RadiativeTransferStepper.H
-  @author Robert Marskar
-*/
+ * @file   CD_RadiativeTransferStepperImplem.H
+ * @brief  Implementation of CD_RadiativeTransferStepper.H
+ * @author Robert Marskar
+ */
 
 // Std includes
 #include <math.h>

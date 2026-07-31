@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_DischargeInceptionParticle.H
-  @brief  SoA payload for the discharge-inception tracer particles
-  @author Robert Marskar
-*/
+ * @file   CD_DischargeInceptionParticle.H
+ * @brief  SoA payload for the discharge-inception tracer particles
+ * @author Robert Marskar
+ */
 
 #ifndef CD_DISCHARGEINCEPTIONPARTICLE_H
 #define CD_DISCHARGEINCEPTIONPARTICLE_H
@@ -18,14 +18,14 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief SoA payload for the discharge-inception integrators.
-  @details Per-component scalar columns (one member per spatial dimension; the z-component exists only when
-  CH_SPACEDIM == 3). v_x/v_y/v_z hold the interpolated electron velocity (required by TracerParticleSolver).
-  x0 is the position snapshot used to rewind particles after an integration; vk is the velocity snapshot
-  from the previous Runge-Kutta stage; ga is the interpolated grad(alpha) field. alphaEff and dtStep cache
-  the effective ionization coefficient and step size from the predictor stage. Weight (the inception
-  integral K) and position are container-owned columns.
-*/
+ * @brief SoA payload for the discharge-inception integrators.
+ * @details Per-component scalar columns (one member per spatial dimension; the z-component exists only when
+ * CH_SPACEDIM == 3). v_x/v_y/v_z hold the interpolated electron velocity (required by TracerParticleSolver).
+ * x0 is the position snapshot used to rewind particles after an integration; vk is the velocity snapshot
+ * from the previous Runge-Kutta stage; ga is the interpolated grad(alpha) field. alphaEff and dtStep cache
+ * the effective ionization coefficient and step size from the predictor stage. Weight (the inception
+ * integral K) and position are container-owned columns.
+ */
 struct DischargeInceptionParticle
 {
   ParticleReal v_x = 0.0; ///< Interpolated velocity, x-component.
@@ -57,8 +57,8 @@ struct DischargeInceptionParticle
 };
 
 /**
-  @brief ParticleTraits specialization listing the payload columns of DischargeInceptionParticle.
-*/
+ * @brief ParticleTraits specialization listing the payload columns of DischargeInceptionParticle.
+ */
 template <>
 struct ParticleTraits<DischargeInceptionParticle>
 {
@@ -72,10 +72,10 @@ struct ParticleTraits<DischargeInceptionParticle>
     &DischargeInceptionParticle::dtStep);
 
   /**
-     @brief Payload columns written to H5Part visualization files: the interpolated velocity vector (id,
-            position and weight are written automatically; the remaining columns are internal integrator
-            state and not plotted).
-  */
+   * @brief Payload columns written to H5Part visualization files: the interpolated velocity vector (id,
+   * position and weight are written automatically; the remaining columns are internal integrator
+   * state and not plotted).
+   */
   static constexpr auto h5PartColumns = std::make_tuple(H5Part::Vector{
     "v",
     D_DECL(&DischargeInceptionParticle::v_x, &DischargeInceptionParticle::v_y, &DischargeInceptionParticle::v_z)});

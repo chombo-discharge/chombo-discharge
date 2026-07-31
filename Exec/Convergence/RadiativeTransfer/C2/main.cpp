@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   main.cpp
-  @brief  Convergence test for radiative transfer on a uniform grid.
-  @author Robert Marskar
-*/
+ * @file   main.cpp
+ * @brief  Convergence test for radiative transfer on a uniform grid.
+ * @author Robert Marskar
+ */
 
 #include <CD_Driver.H>
 #include <CD_EddingtonSP1.H>

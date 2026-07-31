@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_SphereArray.H
-  @brief  Declaration of a sphere array implicit function
-  @author Robert Marskar
-*/
+ * @file   CD_SphereArray.H
+ * @brief  Declaration of a sphere array implicit function
+ * @author Robert Marskar
+ */
 
 #ifndef CD_SPHEREARRAY_H
 #define CD_SPHEREARRAY_H
@@ -28,26 +28,26 @@ using Sphere = EBGeometry::SphereSDF<Real>;
 /// @endcond
 
 /**
-  @brief A Cartesian array of spheres. 
-*/
+ * @brief A Cartesian array of spheres.
+ */
 class SphereArray : public BaseIF
 {
 public:
   /**
-    @brief Disallowed (for now)
-  */
+   * @brief Disallowed (for now)
+   */
   SphereArray() = delete;
 
   /**
-    @brief SphereArray full constructor. Constructs an array of spheres
-    @param[in] a_radius     Sphere radius
-    @param[in] a_sphereGap  Distance between spheres
-    @param[in] a_numSpheres Number of spheres in each coordinate direction
-    @param[in] a_useFast    Use fast union or not
-    @param[in] a_flipInside Make outside to inside
-    @param[in] a_zCoord     If 2D, this sets the z-coordinate
-    @param[in] a_loCenter Lo center
-  */
+   * @brief SphereArray full constructor. Constructs an array of spheres
+   * @param[in] a_radius     Sphere radius
+   * @param[in] a_sphereGap  Distance between spheres
+   * @param[in] a_numSpheres Number of spheres in each coordinate direction
+   * @param[in] a_useFast    Use fast union or not
+   * @param[in] a_flipInside Make outside to inside
+   * @param[in] a_zCoord     If 2D, this sets the z-coordinate
+   * @param[in] a_loCenter Lo center
+   */
   SphereArray(Real            a_radius,
               const RealVect& a_loCenter,
               const RealVect& a_sphereGap,
@@ -57,14 +57,14 @@ public:
               Real            a_zCoord = 0.0);
 
   /**
-    @brief Copy constructor. Sends the pointers to the object. 
-    @param[in,out] a_inputIF Description
-  */
+   * @brief Copy constructor. Sends the pointers to the object.
+   * @param[in,out] a_inputIF Description
+   */
   SphereArray(const SphereArray& a_inputIF);
 
   /**
-    @brief Destructor (does nothing)
-  */
+   * @brief Destructor (does nothing)
+   */
   ~SphereArray() override;
 
   SphereArray&
@@ -74,44 +74,44 @@ public:
   operator=(SphereArray&&) = delete;
 
   /**
-    @brief Value function
-    @param[in] a_point Coordinate
-    @return Function value at the given point
-  */
+   * @brief Value function
+   * @param[in] a_point Coordinate
+   * @return Function value at the given point
+   */
   Real
   value(const RealVect& a_point) const override;
 
   /**
-    @brief Factory method -- calls the copy constructor
-    @return New copy of this implicit function
-  */
+   * @brief Factory method -- calls the copy constructor
+   * @return New copy of this implicit function
+   */
   BaseIF*
   newImplicitFunction() const override;
 
 protected:
   /**
-    @brief Tree degree for BVH accelerator
-  */
+   * @brief Tree degree for BVH accelerator
+   */
   static constexpr size_t K = 4;
 
   /**
-    @brief Switch for using fast or slow union
-  */
+   * @brief Switch for using fast or slow union
+   */
   bool m_useFast;
 
   /**
-    @brief Make inside to outside
-  */
+   * @brief Make inside to outside
+   */
   bool m_flipInside;
 
   /**
-    @brief Standard union ala Chombo
-  */
+   * @brief Standard union ala Chombo
+   */
   std::shared_ptr<EBGeometry::ImplicitFunction<Real>> m_slowUnion;
 
   /**
-    @brief Union that uses bounding volume hierarchy acceleration
-  */
+   * @brief Union that uses bounding volume hierarchy acceleration
+   */
   std::shared_ptr<EBGeometry::ImplicitFunction<Real>> m_fastUnion;
 };
 

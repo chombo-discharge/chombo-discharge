@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_Loads.cpp
-  @brief  Implementation of CD_Loads.H
-  @author Robert Marskar
-*/
+ * @file   CD_Loads.cpp
+ * @brief  Implementation of CD_Loads.H
+ * @author Robert Marskar
+ */
 
 // Std includes
 #include <algorithm>

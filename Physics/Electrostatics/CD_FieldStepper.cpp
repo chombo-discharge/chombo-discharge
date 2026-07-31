@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_FieldStepper.cpp
-  @brief  Implementation of CD_FieldStepper.H
-  @author Robert Marskar
-*/
+ * @file   CD_FieldStepper.cpp
+ * @brief  Implementation of CD_FieldStepper.H
+ * @author Robert Marskar
+ */
 
 // Our includes
 #include <CD_FieldStepper.H>
@@ -16,7 +16,7 @@
 #include <CD_NamespaceHeader.H>
 
 namespace Physics {
-  namespace Electrostatics {}
+namespace Electrostatics {}
 } // namespace Physics
 
 #include <CD_NamespaceFooter.H>

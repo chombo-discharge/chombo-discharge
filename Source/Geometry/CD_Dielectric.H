@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_Dielectric.H
-  @brief  Dielectric class
-  @author Robert marskar
-*/
+ * @file   CD_Dielectric.H
+ * @brief  Dielectric class
+ * @author Robert marskar
+ */
 
 #ifndef CD_DIELECTRIC_H
 #define CD_DIELECTRIC_H
@@ -24,92 +24,92 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief dielectric class. Simple tuple.
-*/
+ * @brief dielectric class. Simple tuple.
+ */
 class Dielectric
 {
 public:
   /**
-    @brief Weak constructor, must subsequently call one of the define methods.
-  */
+   * @brief Weak constructor, must subsequently call one of the define methods.
+   */
   Dielectric();
 
   /**
-    @brief Full constructor which uses constant permittivity.
-    @param[in] a_baseIF       Implicit function
-    @param[in] a_permittivity Constant permittivity
-    @note Calls the define function for constant permittivity.
-  */
+   * @brief Full constructor which uses constant permittivity.
+   * @param[in] a_baseIF       Implicit function
+   * @param[in] a_permittivity Constant permittivity
+   * @note Calls the define function for constant permittivity.
+   */
   Dielectric(const RefCountedPtr<BaseIF>& a_baseIF, const Real a_permittivity);
 
   /**
-    @brief Full constructor which uses variable permittivity.
-    @param[in] a_baseIF       Implicit function
-    @param[in] a_permittivity Variable permittivity
-    @note Calls the define function for variable permittivity.
-  */
+   * @brief Full constructor which uses variable permittivity.
+   * @param[in] a_baseIF       Implicit function
+   * @param[in] a_permittivity Variable permittivity
+   * @note Calls the define function for variable permittivity.
+   */
   Dielectric(const RefCountedPtr<BaseIF>& a_baseIF, const std::function<Real(const RealVect a_pos)>& a_permittivity);
 
   /**
-    @brief Destructor (does nothing).
-  */
+   * @brief Destructor (does nothing).
+   */
   virtual ~Dielectric();
 
   /**
-    @brief Define function
-    @param[in] a_baseIF       Implicit function
-    @param[in] a_permittivity Constant permittivity
-  */
+   * @brief Define function
+   * @param[in] a_baseIF       Implicit function
+   * @param[in] a_permittivity Constant permittivity
+   */
   virtual void
   define(const RefCountedPtr<BaseIF>& a_baseIF, const Real a_permittivity);
 
   /**
-    @brief Define function for variable permittivity
-    @param[in] a_baseIF       Implicit function
-    @param[in] a_permittivity Variable permittivity
-  */
+   * @brief Define function for variable permittivity
+   * @param[in] a_baseIF       Implicit function
+   * @param[in] a_permittivity Variable permittivity
+   */
   virtual void
   define(const RefCountedPtr<BaseIF>& a_baseIF, const std::function<Real(const RealVect a_pos)>& a_permittivity);
 
   /**
-    @brief Get level-set function
-    @return Returns m_baseIF
-  */
+   * @brief Get level-set function
+   * @return Returns m_baseIF
+   */
   virtual const RefCountedPtr<BaseIF>&
   getImplicitFunction() const;
 
   /**
-    @brief Get permittivity
-    @param[in] a_pos Position
-    @return Returns permittivity for physical coordinates a_pos. 
-  */
+   * @brief Get permittivity
+   * @param[in] a_pos Position
+   * @return Returns permittivity for physical coordinates a_pos.
+   */
   virtual Real
   getPermittivity(const RealVect& a_pos) const;
 
 protected:
   /**
-    @brief Implicit function
-  */
+   * @brief Implicit function
+   */
   RefCountedPtr<BaseIF> m_baseIF;
 
   /**
-    @brief Constant permittivity
-  */
+   * @brief Constant permittivity
+   */
   Real m_constantPermittivity;
 
   /**
-    @brief Variable permittivity
-  */
+   * @brief Variable permittivity
+   */
   std::function<Real(const RealVect a_pos)> m_variablePermittivity;
 
   /**
-    @brief Use constant permittivity or not. 
-  */
+   * @brief Use constant permittivity or not.
+   */
   bool m_useConstant;
 
   /**
-    @brief Is defined or not.
-  */
+   * @brief Is defined or not.
+   */
   bool m_isDefined;
 };
 

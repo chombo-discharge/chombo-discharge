@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_MFCoarAve.cpp
-  @brief  Implementation of CD_MFCoarAve.H
-  @author Robert Marskar
-*/
+ * @file   CD_MFCoarAve.cpp
+ * @brief  Implementation of CD_MFCoarAve.H
+ * @author Robert Marskar
+ */
 
 // Our includes
 #include <CD_MFCoarAve.H>

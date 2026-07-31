@@ -5,11 +5,11 @@
  */
 
 /**
-  @file   CD_Dielectric.cpp
-  @brief  Implementation of CD_Dielectric.H
-  @author Robert marskar
-  @date   Nov. 2017
-*/
+ * @file   CD_Dielectric.cpp
+ * @brief  Implementation of CD_Dielectric.H
+ * @author Robert marskar
+ * @date   Nov. 2017
+ */
 
 // Our includes
 #include <CD_Dielectric.H>

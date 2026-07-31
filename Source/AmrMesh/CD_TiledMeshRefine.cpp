@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_TiledMeshRefine.cpp
-  @brief  Implementation of CD_TiledMeshRefine.H
-  @author Robert Marskar
-*/
+ * @file   CD_TiledMeshRefine.cpp
+ * @brief  Implementation of CD_TiledMeshRefine.H
+ * @author Robert Marskar
+ */
 
 // Std includes
 #include <algorithm>

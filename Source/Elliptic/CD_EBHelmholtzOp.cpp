@@ -134,8 +134,8 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
 
   m_exchangeCopier.exchangeDefine(m_eblg.getDBL(), a_ghostPhi);
 
-  // If we are using a centroid discretization we must interpolate three ghost cells in the general case. Issue a warning if the
-  // interpolator doesn't fill enough ghost cells.
+  // If we are using a centroid discretization we must interpolate three ghost cells in the general case. Issue a
+  // warning if the interpolator doesn't fill enough ghost cells.
   if (m_dataLocation == Location::Cell::Centroid && m_hasCoar) {
     const int numFill = m_interpolator->getGhostCF();
     if (numFill < 3) {
@@ -413,8 +413,9 @@ EBHelmholtzOp::defineStencils()
       stencIVS &= cellBox;
     }
 
-    // Define iterators. These iterators run over the irregular cells, multi-valued cells only, and cells where we have explicit
-    // stencils for kappa*L(phi). The domain iterators are iterators for cut-cells that neighbor a domain edge (face)
+    // Define iterators. These iterators run over the irregular cells, multi-valued cells only, and cells where we have
+    // explicit stencils for kappa*L(phi). The domain iterators are iterators for cut-cells that neighbor a domain edge
+    // (face)
     m_vofIterIrreg[din].define(irregIVS, ebgraph);
     m_vofIterMulti[din].define(multiIVS, ebgraph);
     m_vofIterStenc[din].define(stencIVS, ebgraph);
@@ -442,6 +443,7 @@ EBHelmholtzOp::defineStencils()
     m_alphaDiagWeight[din].define(stencIVS, ebgraph, m_nComp);
     m_betaDiagWeight[din].define(stencIVS, ebgraph, m_nComp);
 
+    // clang-format off
     // The below code may seem intimidating at first. What happens is that we explicitly store stencils for all cells that is either a cut-cell
     // or shares a face with a cut-cell. Now, we have to compute stencils explicitly for this subset of cells, and we need representations both
     // of centroid fluxes, i.e. b*grad(phi) (because of refluxing), and also kappa*div(F). The latter is obviously found by summing the finite
@@ -480,6 +482,7 @@ EBHelmholtzOp::defineStencils()
     // Referring to the sketch above, we iterate through cells A, B, D, E and compute the face centroid fluxes for all these cells. This includes
     // e.g. the face connecting E and F. However, since F only has regular faces we don't store the stencil explicitly for that cell.
     //
+    // clang-format on
     BaseIVFAB<VoFStencil>& opStencil  = m_relaxStencils[din];
     VoFIterator&           vofitStenc = m_vofIterStenc[din];
     VoFIterator&           vofitIrreg = m_vofIterIrreg[din];
@@ -859,8 +862,8 @@ EBHelmholtzOp::norm(const LevelData<EBCellFAB>& a_rhs, const int /*a_order*/)
     CH_STOP(t2);
   }
 
-  // Adding an explicit MPI barrier here because the max routine is a blocking operation anyways, so this lets us spot load
-  // imbalance.
+  // Adding an explicit MPI barrier here because the max routine is a blocking operation anyways, so this lets us spot
+  // load imbalance.
   CH_START(t3);
   ParallelOps::barrier();
   CH_STOP(t3);
@@ -1212,8 +1215,8 @@ EBHelmholtzOp::AMRResidualNC(LevelData<EBCellFAB>&             a_residual,
 {
   CH_TIME("EBHelmholtzOp::AMRResidual(4xLD<EBCellFAB>, bool, AMRLevelOp<LD<EBCellFAB> >)");
 
-  // We are computing the residual res = rhs - L(phi). We know that there are no coarser levels so we don't have to worry
-  // about coarse-fine interpolation, but we still have to reflux.
+  // We are computing the residual res = rhs - L(phi). We know that there are no coarser levels so we don't have to
+  // worry about coarse-fine interpolation, but we still have to reflux.
 
   this->AMROperatorNC(a_residual, a_phiFine, a_phi, a_homogeneousPhysBC, a_finerOp); // a_residual = L(phi)
   this->axby(a_residual, a_rhs, a_residual, 1., -1.);                                // a_residual = rhs - L(phi)
@@ -1371,9 +1374,11 @@ EBHelmholtzOp::applyOpRegular(EBCellFAB&       a_Lphi,
   CH_TIMER("EBHelmholtzOp::applyOpRegular::domain_flux", t1);
   CH_TIMER("EBHelmholtzOp::applyOpRegular::kernel", t2);
 
+  // clang-format off
   // TLDR: This is the regular kernel which computes L(phi) using the standard 5/7 point stencil. Since we want a simple kernel,
   //       we first fill the ghost cells on the domain boundary so that the flux through the boundary is consistent with the flux
   //       from the BC object.
+  // clang-format on
 
   // Fill a_phi such that centered differences pushes in the domain flux.
   CH_START(t1);
@@ -1420,9 +1425,11 @@ EBHelmholtzOp::applyDomainFlux(EBCellFAB&       a_phi,
 {
   CH_TIME("EBHelmholtzOp::applyDomainFlux(EBCellFAB, Box, DataIndex, bool)");
 
+  // clang-format off
   // TLDR: We compute the flux on the domain edges and store it in a cell-centered box. We then monkey with the ghost cells outside
   //       the domain so that centered differences on the edge cells inject said flux. This is a simple trick for enforcing the flux
   //       on the domain edges when we later compute the finite volume Laplacian.
+  // clang-format on
 
   constexpr Real tol = 1.E-15;
 
@@ -1443,21 +1450,23 @@ EBHelmholtzOp::applyDomainFlux(EBCellFAB&       a_phi,
 
     if (dbb.hasLo[dir] == 1) {
 
-      // Fill the domain flux. This might look weird, and we are actually putting the flux in a cell-centered data holder. By this, we implicitly
-      // understand that the flux that is stored in the box is the flux that comes in through the lo side in the coordinate direction we are looking.
+      // Fill the domain flux. This might look weird, and we are actually putting the flux in a cell-centered data
+      // holder. By this, we implicitly understand that the flux that is stored in the box is the flux that comes in
+      // through the lo side in the coordinate direction we are looking.
       FArrayBox faceFlux(loBox, m_nComp);
       m_domainBc->getFaceFlux(faceFlux, phiFAB, bco, dir, Side::Lo, a_dit, a_homogeneousPhysBC);
 
-      // The EBArith loBox is cell-centered interior box abutting the domain side. We want the box immediately outside the domain.
+      // The EBArith loBox is cell-centered interior box abutting the domain side. We want the box immediately outside
+      // the domain.
       Box ghostBox = loBox;
       ghostBox.shift(dir, -1);
 
-      // This kernel might look weird, but we have designed our BC classes in such a weird way -- they fill boundary fluxes but the fluxes
-      // are stored in a cell-centered box abutting the domain. So, this is just like a "regular" kernel, with the exception of that pesky flux
-      // which physically lives on the face but is computationally stored on the cell.
-      // Not auto-vectorizable: the div-by-zero guard (scaledFlux = faceFlux/B only where |B| > tol)
-      // keeps a branch -- GCC will not speculate the division into masked-out vector lanes. This is a
-      // thin domain-boundary ghost slab, so the cost is small.
+      // This kernel might look weird, but we have designed our BC classes in such a weird way -- they fill boundary
+      // fluxes but the fluxes are stored in a cell-centered box abutting the domain. So, this is just like a "regular"
+      // kernel, with the exception of that pesky flux which physically lives on the face but is computationally stored
+      // on the cell. Not auto-vectorizable: the div-by-zero guard (scaledFlux = faceFlux/B only where |B| > tol) keeps
+      // a branch -- GCC will not speculate the division into masked-out vector lanes. This is a thin domain-boundary
+      // ghost slab, so the cost is small.
       auto kernel = [&](const IntVect& iv) -> void {
         const Real& B = bco(iv + BASISV(dir), m_comp);
 
@@ -1475,19 +1484,21 @@ EBHelmholtzOp::applyDomainFlux(EBCellFAB&       a_phi,
     }
 
     if (dbb.hasHi[dir] == 1) {
-      // Fill the domain flux. This might look weird, and we are actually putting the flux in a cell-centered data holder. By this, we implicitly
-      // understand that the flux that is stored in the box is the flux that comes in through the hi side in the coordinate direction we are looking.
+      // Fill the domain flux. This might look weird, and we are actually putting the flux in a cell-centered data
+      // holder. By this, we implicitly understand that the flux that is stored in the box is the flux that comes in
+      // through the hi side in the coordinate direction we are looking.
       FArrayBox faceFlux(hiBox, m_nComp);
       m_domainBc->getFaceFlux(faceFlux, phiFAB, bco, dir, Side::Hi, a_dit, a_homogeneousPhysBC);
 
-      // The EBArith hiBox is cell-centered interior box abutting the domain side. We want the box immediately outside the domain.
+      // The EBArith hiBox is cell-centered interior box abutting the domain side. We want the box immediately outside
+      // the domain.
       Box ghostBox = hiBox;
       ghostBox.shift(dir, 1);
 
-      // This kernel might look weird, but we have designed our BC classes in such a weird way -- they fill boundary fluxes but the fluxes
-      // are stored in a cell-centered box abutting the domain. So, this is just like a "regular" kernel, with the exception of that pesky flux
-      // which physically lives on the face but is computationally stored on the cell.
-      // Not auto-vectorizable: the div-by-zero guard keeps a branch (see the Lo-side note above).
+      // This kernel might look weird, but we have designed our BC classes in such a weird way -- they fill boundary
+      // fluxes but the fluxes are stored in a cell-centered box abutting the domain. So, this is just like a "regular"
+      // kernel, with the exception of that pesky flux which physically lives on the face but is computationally stored
+      // on the cell. Not auto-vectorizable: the div-by-zero guard keeps a branch (see the Lo-side note above).
       auto kernel = [&](const IntVect& iv) -> void {
         const Real& B = bco(iv - BASISV(dir), m_comp);
 
@@ -1515,9 +1526,11 @@ EBHelmholtzOp::fillDomainFlux(EBFluxFAB&       a_flux,
 {
   CH_TIME("EBHelmholtzOp::fillDomainFlux(EBFluxFAB, EBCellFAB, Box, DataIndex, bool)");
 
+  // clang-format off
   // TLDR: We compute the flux on the domain edges and store it in a cell-centered box. We then monkey with the ghost cells outside
   //       the domain so that centered differences on the edge cells inject said flux. This is a simple trick for enforcing the flux
   //       on the domain edges when we later compute the finite volume Laplacian.
+  // clang-format on
 
   // The lo/hi domain-boundary boxes are precomputed in defineStencils (they depend only on the domain
   // and grid layout). Patches that touch no domain face have no boundary flux to fill, so skip them.
@@ -1537,8 +1550,9 @@ EBHelmholtzOp::fillDomainFlux(EBFluxFAB&       a_flux,
 
     if (dbb.hasLo[dir] == 1) {
 
-      // Fill the domain flux. This might look weird because we are putting the flux in a cell-centered box. By this, we implicitly
-      // understand that the flux that is stored in the box is the flux that comes in through the lo side in the coordinate direction we are looking.
+      // Fill the domain flux. This might look weird because we are putting the flux in a cell-centered box. By this, we
+      // implicitly understand that the flux that is stored in the box is the flux that comes in through the lo side in
+      // the coordinate direction we are looking.
       FArrayBox faceFlux(loBox, m_nComp);
       m_domainBc->getFaceFlux(faceFlux, phiReg, bco, dir, Side::Lo, a_dit, a_homogeneousPhysBC);
 
@@ -1551,8 +1565,9 @@ EBHelmholtzOp::fillDomainFlux(EBFluxFAB&       a_flux,
     }
 
     if (dbb.hasHi[dir] == 1) {
-      // Fill the domain flux. This might look weird because we are putting the flux in a cell-centered box. By this, we implicitly
-      // understand that the flux that is stored in the box is the flux that comes in through the lo side in the coordinate direction we are looking.
+      // Fill the domain flux. This might look weird because we are putting the flux in a cell-centered box. By this, we
+      // implicitly understand that the flux that is stored in the box is the flux that comes in through the lo side in
+      // the coordinate direction we are looking.
       FArrayBox faceFlux(hiBox, m_nComp);
       m_domainBc->getFaceFlux(faceFlux, phiReg, bco, dir, Side::Hi, a_dit, a_homogeneousPhysBC);
 
@@ -1582,12 +1597,13 @@ EBHelmholtzOp::applyOpIrregular(EBCellFAB&       a_Lphi,
   CH_TIMER("EB flux", t2);
   CH_TIMER("Boundary flux", t3);
 
-  // This routine computes L(phi) in a grid patch. This includes the cut-cell itself. Note that such cells can include cells that have both
-  // an EB face and a domain face. This routine handles both.
+  // This routine computes L(phi) in a grid patch. This includes the cut-cell itself. Note that such cells can include
+  // cells that have both an EB face and a domain face. This routine handles both.
 
-  // Apply the operator in all cells where we needed an explicit stencil. Note that the operator stencils do NOT include stencils for fluxes
-  // through the domain faces. That is handled below.
-#if 0 // Original code that does not use AggStencil. Leaving this in place for backwards compatibility and debugging, in case this should ever break.
+  // Apply the operator in all cells where we needed an explicit stencil. Note that the operator stencils do NOT include
+  // stencils for fluxes through the domain faces. That is handled below.
+#if 0 // Original code that does not use AggStencil. Leaving this in place for backwards compatibility and debugging, in
+      // case this should ever break.
   VoFIterator& vofit = m_vofIterStenc[a_dit];
   for (vofit.reset(); vofit.ok(); ++vofit) {
     const VolIndex& vof = vofit();
@@ -1620,7 +1636,8 @@ EBHelmholtzOp::applyOpIrregular(EBCellFAB&       a_Lphi,
   CH_STOP(t2);
 #endif
 
-  // Do irregular faces on domain sides. This was not included in the stencils above. m_domainBc should give the centroid-centered flux so we don't do interpolations here.
+  // Do irregular faces on domain sides. This was not included in the stencils above. m_domainBc should give the
+  // centroid-centered flux so we don't do interpolations here.
   CH_START(t3);
   for (int dir = 0; dir < SpaceDim; dir++) {
 
@@ -1747,8 +1764,8 @@ EBHelmholtzOp::interpolateCF(LevelData<EBCellFAB>&       a_phiFine,
 {
   CH_TIME("EBHelmholtzOp::interpolateCF(LD<EBCellFAB>, LD<EBCellFAB>, bool)");
 
-  // This routine is just a wrapper for the two types of ghost cell interpolation. If a_phiCoar is nullptr then we are always
-  // doing homogeneous interpolation. The flag a_homogeneousCFBC should specify this.
+  // This routine is just a wrapper for the two types of ghost cell interpolation. If a_phiCoar is nullptr then we are
+  // always doing homogeneous interpolation. The flag a_homogeneousCFBC should specify this.
 
   if (m_hasCoar) {
     if (a_homogeneousCFBC) {
@@ -1756,8 +1773,8 @@ EBHelmholtzOp::interpolateCF(LevelData<EBCellFAB>&       a_phiFine,
     }
     else {
 
-      // I will call this an error because the user has probably unintentionally called for inhomogeneous interpolation when he/she meant
-      // homogeneous interpolation.
+      // I will call this an error because the user has probably unintentionally called for inhomogeneous interpolation
+      // when he/she meant homogeneous interpolation.
       if (a_phiCoar == nullptr) {
         MayDay::Error("EBHelmholtzOp::interpolateCF -- calling inhomogeneousCFInterp with nullptr coarse is an error.");
       }
@@ -1818,8 +1835,10 @@ EBHelmholtzOp::relaxPointJacobi(LevelData<EBCellFAB>&       a_correction,
 {
   CH_TIME("EBHelmholtzOp::relaxPointJacobi(LD<EBCellFAB>, LD<EBCellFAB>, int)");
 
+  // clang-format off
   // TLDR: This function performs point Jacobi relaxation in the form phi^(k+1) = phi^k - (res - L(phi))/|diag(L)|. Here, diag(L) is captured
   //       in m_relCoef. For performance integration with MFHelmholtzOp this routine passed that routine to a separate kernel call.
+  // clang-format on
 
   LevelData<EBCellFAB> Lcorr;
   this->create(Lcorr, a_residual);
@@ -1863,7 +1882,8 @@ EBHelmholtzOp::pointJacobiKernel(EBCellFAB&             a_Lcorr,
 {
   CH_TIME("EBHelmholtzOp::pointJacobiKernel(EBCellFAB, EBCellFAB, EBCellFAB, Box, DataIndex)");
 
-  // TLDR: This just computes correction = correction - (res - L(phi))/diag(L). Note that we use under-relaxation (with a factor of 0.5) for stability.
+  // TLDR: This just computes correction = correction - (res - L(phi))/diag(L). Note that we use under-relaxation (with
+  // a factor of 0.5) for stability.
 
   const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
 
@@ -1967,10 +1987,12 @@ EBHelmholtzOp::relaxGSRedBlack(LevelData<EBCellFAB>&       a_correction,
 {
   CH_TIME("EBHelmholtzOp::relaxGSRedBlack(LD<EBCellFAB>, LD<EBCellFAB>, int)");
 
+  // clang-format off
   // TLDR: This function performs red-black Gauss-Seidel relaxation. As always, this occurs in the form phi^(k+1) = phi^k - (res - L(phi))/|diag(L)| but
   //       for a red-black update pattern:
   //
   //       For performance integration with MFHelmholtzOp this routine passed that routine to a separate kernel call.
+  // clang-format on
 
   LevelData<EBCellFAB> Lcorr;
   this->create(Lcorr, a_residual);
@@ -1980,7 +2002,8 @@ EBHelmholtzOp::relaxGSRedBlack(LevelData<EBCellFAB>&       a_correction,
 
   for (int iter = 0; iter < a_iterations; iter++) {
 
-    // First do "red" cells, then "black" cells. Note that ghost cell interpolation and exchanges are required between the colors.
+    // First do "red" cells, then "black" cells. Note that ghost cell interpolation and exchanges are required between
+    // the colors.
     for (int redBlack = 0; redBlack <= 1; redBlack++) {
       if (m_doExchange) {
         a_correction.exchange(m_exchangeCopier);
@@ -2073,7 +2096,8 @@ EBHelmholtzOp::gauSaiRedBlackKernel(EBCellFAB&             a_Lcorr,
   CH_TIMER("EBHelmholtzOp::regular_cells", t1);
   CH_TIMER("EBHelmholtzOp::irregular_cells", t2);
 
-  // This is the kernel for computing phi^(k+1) = phi^k - (res - L(phi))/|diag(L)| with a red-black pattern. Here, "red" cells are encoded by a_redBlack=0.
+  // This is the kernel for computing phi^(k+1) = phi^k - (res - L(phi))/|diag(L)| with a red-black pattern. Here, "red"
+  // cells are encoded by a_redBlack=0.
 
   const EBISBox&   ebisbox = m_eblg.getEBISL()[a_dit];
   const EBCellFAB& relCoef = m_relCoef[a_dit];
@@ -2133,11 +2157,13 @@ EBHelmholtzOp::relaxGSMultiColor(LevelData<EBCellFAB>&       a_correction,
 {
   CH_TIME("EBHelmholtzOp::relaxGSMultiColor(LD<EBCellFAB>, LD<EBCellFAB>, int)");
 
+  // clang-format off
   // TLDR: This function performs multi-colored Gauss-Seidel relaxation. As always, this occurs in the form phi^(k+1) = phi^k - (res - L(phi))/|diag(L)| but
   //       using more colors than just red-black. The update pattern here cycles through quadrants/octants in 2D/3D. This is just like red-black except that
   //       we have four/eight colors in 2D/3D.
   //
   //       For performance integration with MFHelmholtzOp this routine passed that routine to a separate kernel call.
+  // clang-format on
 
   LevelData<EBCellFAB> Lcorr;
   this->create(Lcorr, a_residual);
@@ -2185,8 +2211,8 @@ EBHelmholtzOp::gauSaiMultiColorKernel(EBCellFAB&             a_Lcorr,
 {
   CH_TIME("EBHelmholtzOp::gauSaiMultiColorKernel(EBCellFAB, EBCellFAB, EBCellFAB, Box, DataIndex, int)");
 
-  // This is the kernel for computing phi^(k+1) = phi^k - (res - L(phi))/|diag(L)| with a "multi-colored" pattern. As with red-black, we follow a pattern, but
-  // the pattern in this case uses more "colors".
+  // This is the kernel for computing phi^(k+1) = phi^k - (res - L(phi))/|diag(L)| with a "multi-colored" pattern. As
+  // with red-black, we follow a pattern, but the pattern in this case uses more "colors".
 
   const EBISBox&   ebisbox = m_eblg.getEBISL()[a_dit];
   const EBCellFAB& relCoef = m_relCoef[a_dit];
@@ -2245,7 +2271,8 @@ EBHelmholtzOp::computeDiagWeight()
 {
   CH_TIME("EBHelmholtzOp::computeDiagWeight()");
 
-  // TLDR: Compute the diagonal term in the kappa-weighted operator. We put the result into m_alphaDiagWeight = kappa * A;
+  // TLDR: Compute the diagonal term in the kappa-weighted operator. We put the result into m_alphaDiagWeight = kappa *
+  // A;
   const DisjointBoxLayout& dbl   = m_eblg.getDBL();
   const EBISLayout&        ebisl = m_eblg.getEBISL();
   const DataIterator&      dit   = dbl.dataIterator();
@@ -2302,8 +2329,10 @@ EBHelmholtzOp::computeRelaxationCoefficient()
 {
   CH_TIME("EBHelmholtzOp::computeRelaxationCoefficient()");
 
+  // clang-format off
   // TLDR: Compute the relaxation coefficient in the operator. This is just the inverted diagonal of kappa*L(phi). It is inverted
   //       for performance reasons (because we divide by the diagonal in the relaxation steps).
+  // clang-format on
 
   const DisjointBoxLayout& dbl = m_eblg.getDBL();
   const DataIterator&      dit = dbl.dataIterator();
@@ -2464,8 +2493,10 @@ EBHelmholtzOp::getFaceCenterFluxStencil(const FaceIndex& a_face, const DataIndex
 {
   CH_TIME("EBHelmholtzOp::getFaceCenterFluxStencil(FaceIndex, DataIndex)");
 
+  // clang-format off
   // TLDR: This routine computes a regular finite difference stencil for getting a second-order accurate approximation to the face-centered flux (presuming
   //       that the data is cell-centered).
+  // clang-format on
   VoFStencil fluxStencil;
 
   // BC handles the boundary fluxes.
@@ -2483,9 +2514,11 @@ EBHelmholtzOp::getFaceCentroidFluxStencil(const FaceIndex& a_face, const DataInd
 {
   CH_TIME("EBHelmholtzOp::getFaceCentroidFluxStencil(FaceIndex, DataIndex)");
 
+  // clang-format off
   // TLDR: This routine computes a second order accurate approximation to the flux on a cut-cell centroid. How this is done differs between discretizations. For
   //       cell-centered discretizations we get the face-centered fluxes and interpolate them to the face centroid. For centroid-based discretizations we have to
   //       compute the stencil directly, using least squares reconstruction. This is much more involved.
+  // clang-format on
 
   VoFStencil fluxStencil;
 
@@ -2523,7 +2556,8 @@ EBHelmholtzOp::getFaceCentroidFluxStencil(const FaceIndex& a_face, const DataInd
         }
       }
 
-      // Irregular face, but with centroid-centered data. In this case we reconstruct the gradient using a least squares reconstruction of the solution.
+      // Irregular face, but with centroid-centered data. In this case we reconstruct the gradient using a least squares
+      // reconstruction of the solution.
       if (m_dataLocation == Location::Cell::Centroid) {
         constexpr int stencilWeight = 2;
         constexpr int stencilRadius = 2;
@@ -2565,8 +2599,8 @@ EBHelmholtzOp::computeFlux(EBFaceFAB&       a_fluxCentroid,
 
   // TLDR: This routine computes the face centroid flux on all regular and irregular faces in the input box.
 
-  // First do the regular faces and then the irregular faces. Not that when a centroid discretization is used, some faces can be irregular but nonetheless require
-  // an explicit stencil.
+  // First do the regular faces and then the irregular faces. Not that when a centroid discretization is used, some
+  // faces can be irregular but nonetheless require an explicit stencil.
   this->computeFaceCenteredFlux(a_fluxCentroid, a_phi, a_cellBox, a_dit, a_dir);
   this->computeFaceCentroidFlux(a_fluxCentroid, a_phi, a_cellBox, a_dit, a_dir);
 
@@ -2586,8 +2620,8 @@ EBHelmholtzOp::computeFaceCenteredFlux(EBFaceFAB&       a_fluxCenter,
   const BaseFab<Real>& regPhi  = a_phi.getSingleValuedFAB();
   const BaseFab<Real>& regBco  = (*m_Bcoef)[a_dit][a_dir].getSingleValuedFAB();
 
-  // This kernel does centered differencing, setting the face flux to flux = B*(phi(high) - phi(lo))/dx. Recall that regFlux
-  // is face centered but phi lives on in the cell.
+  // This kernel does centered differencing, setting the face flux to flux = B*(phi(high) - phi(lo))/dx. Recall that
+  // regFlux is face centered but phi lives on in the cell.
   const Real    inverseDx = 1. / m_dx;
   const IntVect shift     = BASISV(a_dir); // Hoisted so the offset is loop-invariant (a runtime
                                            // BASISV(a_dir) inside the kernel blocks vectorization).
@@ -2612,8 +2646,8 @@ EBHelmholtzOp::computeFaceCentroidFlux(EBFaceFAB&       a_flux,
 {
   CH_TIME("EBHelmholtzOp::computeFaceCentroidFlux(EBFaceFAB, EBCellFAB, Box, DataIndex, int)");
 
-  // This routine computes the face centroid fluxes using precomputed stencils (in defineStencils). This is needed because
-  // cut-cell faces require more than centered differencing.
+  // This routine computes the face centroid fluxes using precomputed stencils (in defineStencils). This is needed
+  // because cut-cell faces require more than centered differencing.
 
   const BaseIFFAB<VoFStencil>& fluxStencils = m_centroidFluxStencil[a_dir][a_dit];
   const EBGraph&               ebgraph      = fluxStencils.getEBGraph();
@@ -2667,7 +2701,8 @@ EBHelmholtzOp::reflux(LevelData<EBCellFAB>&             a_Lphi,
   CH_TIMER("EBHelmholtzOp::reflux::flux_this_level", t1);
   CH_TIMER("EBHelmholtzOp::reflux::flux_finer_level", t2);
   // This routine computes the fluxes on the coarse and fine-side of the boundary and does a refluxing operation where
-  // we subtract the contribution from the coarse grid fluxes in a_Lphi and add in the contribution from the fine grid fluxes.
+  // we subtract the contribution from the coarse grid fluxes in a_Lphi and add in the contribution from the fine grid
+  // fluxes.
   //
 
   auto& finerOp = (EBHelmholtzOp&)(a_finerOp);

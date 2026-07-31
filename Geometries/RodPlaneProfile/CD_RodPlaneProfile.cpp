@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_RodPlaneProfile.cpp
-  @brief  Implementation of CD_RodPlaneProfile.H
-  @author Robert Marskar
-*/
+ * @file   CD_RodPlaneProfile.cpp
+ * @brief  Implementation of CD_RodPlaneProfile.H
+ * @author Robert Marskar
+ */
 
 // Std includes
 #include <string>

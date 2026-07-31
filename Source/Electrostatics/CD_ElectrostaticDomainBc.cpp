@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_ElectrostaticDomainBc.cpp
-  @brief  Implementation of CD_ElectrostaticDomainBc.H
-  @author Robert Marskar
-*/
+ * @file   CD_ElectrostaticDomainBc.cpp
+ * @brief  Implementation of CD_ElectrostaticDomainBc.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <CH_Timer.H>

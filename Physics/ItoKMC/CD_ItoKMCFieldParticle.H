@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_ItoKMCFieldParticle.H
-  @brief  SoA payload for the transient E-dot-J energy computation in ItoKMCStepper
-  @author Robert Marskar
-*/
+ * @file   CD_ItoKMCFieldParticle.H
+ * @brief  SoA payload for the transient E-dot-J energy computation in ItoKMCStepper
+ * @author Robert Marskar
+ */
 
 #ifndef CD_ITOKMCFIELDPARTICLE_H
 #define CD_ITOKMCFIELDPARTICLE_H
@@ -18,13 +18,13 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief SoA payload for the transient particles used by ItoKMCStepper::computeEdotJSource.
-  @details The energy increase as a particle moves from position A to position B is q*(V(B)-V(A)). phiA and phiB
-  hold the interpolated electrostatic potential at the two positions; x0 holds the "other"
-  position (A or B), one member per spatial dimension (the z-component exists only when CH_SPACEDIM == 3),
-  so the single position-based interpolation routine can be reused at both locations.
-  Weight and position are container-owned columns, NOT payload members.
-*/
+ * @brief SoA payload for the transient particles used by ItoKMCStepper::computeEdotJSource.
+ * @details The energy increase as a particle moves from position A to position B is q*(V(B)-V(A)). phiA and phiB
+ * hold the interpolated electrostatic potential at the two positions; x0 holds the "other"
+ * position (A or B), one member per spatial dimension (the z-component exists only when CH_SPACEDIM == 3),
+ * so the single position-based interpolation routine can be reused at both locations.
+ * Weight and position are container-owned columns, NOT payload members.
+ */
 struct ItoKMCFieldParticle
 {
   ParticleReal phiA = 0.0; ///< Electrostatic potential at position A.
@@ -38,8 +38,8 @@ struct ItoKMCFieldParticle
 };
 
 /**
-  @brief ParticleTraits specialization listing the payload columns of ItoKMCFieldParticle.
-*/
+ * @brief ParticleTraits specialization listing the payload columns of ItoKMCFieldParticle.
+ */
 template <>
 struct ParticleTraits<ItoKMCFieldParticle>
 {
@@ -50,9 +50,9 @@ struct ParticleTraits<ItoKMCFieldParticle>
     D_DECL(&ItoKMCFieldParticle::x0_x, &ItoKMCFieldParticle::x0_y, &ItoKMCFieldParticle::x0_z));
 
   /**
-     @brief No payload columns are written to H5Part visualization files: this is a transient internal type
-            used only for the E-dot-J energy computation, so only id, position and weight are written.
-  */
+   * @brief No payload columns are written to H5Part visualization files: this is a transient internal type
+   *        used only for the E-dot-J energy computation, so only id, position and weight are written.
+   */
   static constexpr auto h5PartColumns = std::make_tuple();
 };
 

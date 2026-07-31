@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_DataParser.H
-  @brief  Declaration of various routines for simple parsing of input data. 
-  @author Robert Marskar
-*/
+ * @file   CD_DataParser.H
+ * @brief  Declaration of various routines for simple parsing of input data.
+ * @author Robert Marskar
+ */
 
 #ifndef CD_DATAPARSER_H
 #define CD_DATAPARSER_H
@@ -23,89 +23,92 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Class for simple data parsing from IO files.
-*/
+ * @brief Class for simple data parsing from IO files.
+ */
 namespace DataParser {
 
-  /**
-    @brief Simple file parser which reads a file and puts the data into two columns (a lookup table). 
-    @details This will read ASCII row/column data into a LookupTable1D (which is a simple x-y data structure). The user can specify which columns
-    to use as the x and y coordinates in the LookupTable1D. If the user ask for a column that does not exist in the input file, the data will not be read
-    into the LookupTable1D. 
-    @param[in] a_fileName    Input file name. Must be an ASCII file organized into rows and columns. 
-    @param[in] a_xColumn     Which column to use as the x-column. 
-    @param[in] a_yColumn     Which column to use as the y-column. 
-    @param[in] a_ignoreChars Characters indicating comments in the file. Lines starting with these characters are ignored. 
-    @note xColumn = 0 is the FIRST column, xColumn=1 is the SECOND column and so on. 
-    @return Return value
-  */
-  LookupTable1D<Real, 1>
-  simpleFileReadASCII(const std::string&       a_fileName,
-                      const int                a_xColumn     = 0,
-                      const int                a_yColumn     = 1,
-                      const std::vector<char>& a_ignoreChars = {'#', '/'});
+/**
+ * @brief Simple file parser which reads a file and puts the data into two columns (a lookup table).
+ * @details This will read ASCII row/column data into a LookupTable1D (which is a simple x-y data structure). The user
+ * can specify which columns to use as the x and y coordinates in the LookupTable1D. If the user ask for a column that
+ * does not exist in the input file, the data will not be read into the LookupTable1D.
+ * @param[in] a_fileName    Input file name. Must be an ASCII file organized into rows and columns.
+ * @param[in] a_xColumn     Which column to use as the x-column.
+ * @param[in] a_yColumn     Which column to use as the y-column.
+ * @param[in] a_ignoreChars Characters indicating comments in the file. Lines starting with these characters are
+ * ignored.
+ * @note xColumn = 0 is the FIRST column, xColumn=1 is the SECOND column and so on.
+ * @return Return value
+ */
+LookupTable1D<Real, 1>
+simpleFileReadASCII(const std::string&       a_fileName,
+                    const int                a_xColumn     = 0,
+                    const int                a_yColumn     = 1,
+                    const std::vector<char>& a_ignoreChars = {'#', '/'});
 
-  /**
-    @brief Simple ASCII file parser which reads a file and puts the data into two columns (a lookup table)
-    @details This version can read a partial file. It will ignore all lines until the a_startRead string is
-    encountered. After that, it will read files as usual, skipping lines that begin with comments. Empty lines
-    are NOT skipped, since an empty line typically identifies the end of a field from e.g. BOLSIG outputs. Instead
-    to stop reading when an empty line is encountered, one can use a_stopRead="". 
-    @param[in] a_fileName    Input file name. Must be an ASCII file organized into rows and columns. 
-    @param[in] a_startRead   Identifier where we start parsing lines into the table
-    @param[in] a_stopRead    Identifier where we stop parsing lines into the table
-    @param[in] a_xColumn     Which column to use as the x-column. 
-    @param[in] a_yColumn     Which column to use as the y-column. 
-    @param[in] a_ignoreChars Characters indicating comments in the file. Lines starting with these characters are ignored. 
-    @return Return value
-  */
-  LookupTable1D<Real, 1>
-  fractionalFileReadASCII(const std::string&       a_fileName,
-                          const std::string&       a_startRead,
-                          const std::string&       a_stopRead,
-                          const int                a_xColumn     = 0,
-                          const int                a_yColumn     = 1,
-                          const std::vector<char>& a_ignoreChars = {'#', '/'});
+/**
+ * @brief Simple ASCII file parser which reads a file and puts the data into two columns (a lookup table)
+ * @details This version can read a partial file. It will ignore all lines until the a_startRead string is
+ * encountered. After that, it will read files as usual, skipping lines that begin with comments. Empty lines
+ * are NOT skipped, since an empty line typically identifies the end of a field from e.g. BOLSIG outputs. Instead
+ * to stop reading when an empty line is encountered, one can use a_stopRead="".
+ * @param[in] a_fileName    Input file name. Must be an ASCII file organized into rows and columns.
+ * @param[in] a_startRead   Identifier where we start parsing lines into the table
+ * @param[in] a_stopRead    Identifier where we stop parsing lines into the table
+ * @param[in] a_xColumn     Which column to use as the x-column.
+ * @param[in] a_yColumn     Which column to use as the y-column.
+ * @param[in] a_ignoreChars Characters indicating comments in the file. Lines starting with these characters are
+ * ignored.
+ * @return Return value
+ */
+LookupTable1D<Real, 1>
+fractionalFileReadASCII(const std::string&       a_fileName,
+                        const std::string&       a_startRead,
+                        const std::string&       a_stopRead,
+                        const int                a_xColumn     = 0,
+                        const int                a_yColumn     = 1,
+                        const std::vector<char>& a_ignoreChars = {'#', '/'});
 
-  /**
-    @brief Simple file parser which will read particles (position/weight) from an ASCII file. 
-    @details Particles should be arranged as rows, e.g. in the form
-    x   y   z   w
-    0.0 0.0 0.0 1
-    @param[in] a_fileName    Input file name. Must be an ASCII file organized into rows and columns. 
-    @param[in] a_xColumn     Column containing the x-coordinate
-    @param[in] a_yColumn     Column containing the y-coordinate
-    @param[in] a_zColumn     Column containing the z-coordinate
-    @param[in] a_wColumn     Column containing the particle weight
-    @param[in] a_ignoreChars Characters indicating comments in the file. Lines starting with these characters are ignored. 
-    @return Return value
-  */
-  ParticleSoA<NoPayload>
-  readPointParticlesASCII(const std::string&       a_fileName,
-                          const unsigned int       a_xColumn     = 0,
-                          const unsigned int       a_yColumn     = 1,
-                          const unsigned int       a_zColumn     = 2,
-                          const unsigned int       a_wColumn     = 3,
-                          const std::vector<char>& a_ignoreChars = {'#', '/'});
+/**
+ * @brief Simple file parser which will read particles (position/weight) from an ASCII file.
+ * @details Particles should be arranged as rows, e.g. in the form
+ * x   y   z   w
+ * 0.0 0.0 0.0 1
+ * @param[in] a_fileName    Input file name. Must be an ASCII file organized into rows and columns.
+ * @param[in] a_xColumn     Column containing the x-coordinate
+ * @param[in] a_yColumn     Column containing the y-coordinate
+ * @param[in] a_zColumn     Column containing the z-coordinate
+ * @param[in] a_wColumn     Column containing the particle weight
+ * @param[in] a_ignoreChars Characters indicating comments in the file. Lines starting with these characters are
+ * ignored.
+ * @return Return value
+ */
+ParticleSoA<NoPayload>
+readPointParticlesASCII(const std::string&       a_fileName,
+                        const unsigned int       a_xColumn     = 0,
+                        const unsigned int       a_yColumn     = 1,
+                        const unsigned int       a_zColumn     = 2,
+                        const unsigned int       a_wColumn     = 3,
+                        const std::vector<char>& a_ignoreChars = {'#', '/'});
 
-  /**
-    @brief Read a PLY or VTK triangle mesh file and return a list of Triangle objects.
-    @details Reads vertex positions and face connectivity from the file. If a_vertexDataIdentifier
-    matches a named per-vertex scalar property in the file (a PLY vertex property or a VTK
-    point-data scalar), that data is stored as the vertex metadata on each Triangle via
-    setVertexData(). If the identifier is not found, a warning is issued and all vertex data
-    values are set to zero.
-
-    Non-triangular facets are skipped with a warning. The file type is inferred from the
-    extension (.ply / .PLY or .vtk / .VTK); any other extension results in a fatal error.
-
-    @param[in] a_filename             Path to the input mesh file.
-    @param[in] a_vertexDataIdentifier Name of the per-vertex scalar property to read as
-                                      Triangle vertex metadata.
-    @return Vector of fully initialised Triangle objects, sorted in file order.
-  */
-  std::vector<std::shared_ptr<Triangle>>
-  readTriangles(const std::string& a_filename, const std::string& a_vertexDataIdentifier);
+/**
+ * @brief Read a PLY or VTK triangle mesh file and return a list of Triangle objects.
+ * @details Reads vertex positions and face connectivity from the file. If a_vertexDataIdentifier
+ * matches a named per-vertex scalar property in the file (a PLY vertex property or a VTK
+ * point-data scalar), that data is stored as the vertex metadata on each Triangle via
+ * setVertexData(). If the identifier is not found, a warning is issued and all vertex data
+ * values are set to zero.
+ *
+ * Non-triangular facets are skipped with a warning. The file type is inferred from the
+ * extension (.ply / .PLY or .vtk / .VTK); any other extension results in a fatal error.
+ *
+ * @param[in] a_filename             Path to the input mesh file.
+ * @param[in] a_vertexDataIdentifier Name of the per-vertex scalar property to read as
+ *                                   Triangle vertex metadata.
+ * @return Vector of fully initialised Triangle objects, sorted in file order.
+ */
+std::vector<std::shared_ptr<Triangle>>
+readTriangles(const std::string& a_filename, const std::string& a_vertexDataIdentifier);
 
 } // namespace DataParser
 

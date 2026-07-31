@@ -22,36 +22,36 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Base class for passing domain boundary conditions into EBHelmholtzOp. 
-*/
+ * @brief Base class for passing domain boundary conditions into EBHelmholtzOp.
+ */
 class EBHelmholtzDomainBCFactory
 {
 public:
   /**
-    @brief Constructor. 
-  */
+   * @brief Constructor.
+   */
   EBHelmholtzDomainBCFactory();
 
   /**
-    @brief Destructor
-  */
+   * @brief Destructor
+   */
   virtual ~EBHelmholtzDomainBCFactory();
 
   /**
-    @brief Disallowed -- don't see why you would need it.
-  */
+   * @brief Disallowed -- don't see why you would need it.
+   */
   EBHelmholtzDomainBCFactory(const EBHelmholtzDomainBCFactory& a_other) = delete;
 
   /**
-    @brief Disallowed - don't see why you would need it.
-  */
+   * @brief Disallowed - don't see why you would need it.
+   */
   EBHelmholtzDomainBCFactory&
   operator=(const EBHelmholtzDomainBCFactory& a_other) = delete;
 
   /**
-    @brief Factory method. Implementations must override this. 
-    @return Return value
-  */
+   * @brief Factory method. Implementations must override this.
+   * @return Return value
+   */
   virtual RefCountedPtr<EBHelmholtzDomainBC>
   create() const = 0;
 };

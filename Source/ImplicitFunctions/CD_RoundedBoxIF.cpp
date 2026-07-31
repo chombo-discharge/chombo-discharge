@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_RoundedBoxIF.cpp
-  @brief  Implementation of CD_RoundedBoxIF.H
-  @author Robert Marskar
-*/
+ * @file   CD_RoundedBoxIF.cpp
+ * @brief  Implementation of CD_RoundedBoxIF.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <PlaneIF.H>

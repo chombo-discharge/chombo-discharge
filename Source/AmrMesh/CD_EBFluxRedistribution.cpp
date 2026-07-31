@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_EBFluxRedistribution.cpp
-  @brief  Implementation of CD_EBFluxRedistribution.cpp
-  @author Robert Marskar
-*/
+ * @file   CD_EBFluxRedistribution.cpp
+ * @brief  Implementation of CD_EBFluxRedistribution.cpp
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <CH_Timer.H>
@@ -73,7 +73,7 @@ EBFluxRedistribution::define(const EBLevelGrid& a_eblgCoar,
   m_refToFine           = -1;
   m_hasCoar             = false;
   m_hasFine             = false;
-  m_redistributeOutside = false; //a_redistributeOutside;
+  m_redistributeOutside = false; // a_redistributeOutside;
 
   if (a_eblgCoar.isDefined()) {
     CH_assert(a_refToCoar >= 2);
@@ -125,10 +125,12 @@ EBFluxRedistribution::defineStencils() noexcept
 {
   CH_TIMERS("EBFluxRedistribution::defineStencils");
 
+  // clang-format off
   // TLDR: This is a bit involved since we need to define stencils on the valid cut-cells on this level. If there's an EBCF interface we
   //       need to know about it because we don't want to:
   //       1) Redistribute from this level into ghost cells on the other side of the coarse-fine interface. That mass should go on the coarse level.
   //       2) Redistribute from this level into regions covered by the finer grid. That mass should go on the fine level instead.
+  // clang-format on
 
   const DisjointBoxLayout& dbl   = m_eblg.getDBL();
   const DataIterator&      dit   = dbl.dataIterator();
@@ -148,9 +150,10 @@ EBFluxRedistribution::defineStencils() noexcept
 
   const int nbox = dit.size();
 
-  // These are maps of the valid cells on this level, and cells that lie on the interface. The interfaceCells data is used to figure out
-  // which cells we will redistribute to when we redistribute from a cut-cell and across the coarse-fine interface into a coarse-grid cell. The
-  // validCells is used for 1) restricting which cells we redistribute from, and 2) which fine-grid cells redistribute to.
+  // These are maps of the valid cells on this level, and cells that lie on the interface. The interfaceCells data is
+  // used to figure out which cells we will redistribute to when we redistribute from a cut-cell and across the
+  // coarse-fine interface into a coarse-grid cell. The validCells is used for 1) restricting which cells we
+  // redistribute from, and 2) which fine-grid cells redistribute to.
   LevelData<BaseFab<bool>> interfaceCellsLD;
   LevelData<BaseFab<bool>> validCellsLD;
 
@@ -204,7 +207,8 @@ EBFluxRedistribution::defineStencils() noexcept
     for (vofit.reset(); vofit.ok(); ++vofit) {
       const VolIndex& vof = vofit();
 
-      // Get the VoFs in the neighborhood of this VoF. When we redistribute, also permit self-redistribution back into this cell.
+      // Get the VoFs in the neighborhood of this VoF. When we redistribute, also permit self-redistribution back into
+      // this cell.
       const bool             includeSelf  = true;
       const Vector<VolIndex> neighborVoFs = VofUtils::getVofsInRadius(vof,
                                                                       ebisBox,
@@ -312,8 +316,8 @@ EBFluxRedistribution::defineValidCells(LevelData<BaseFab<bool>>& a_validCells) c
     a_validCells[din].setVal(true);
   }
 
-  // If there's a finer level we need to figure out which cells on the fine level overlap with this level. Then we set those cells
-  // to 'false'. If there's no finer level then all cells on this level are valid cells.
+  // If there's a finer level we need to figure out which cells on the fine level overlap with this level. Then we set
+  // those cells to 'false'. If there's no finer level then all cells on this level are valid cells.
   if (m_hasFine) {
     DisjointBoxLayout dblCoFi;
     coarsen(dblCoFi, m_eblgFine.getDBL(), m_refToFine);

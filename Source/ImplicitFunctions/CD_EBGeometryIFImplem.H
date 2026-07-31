@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_EBGeometryIFImplem.H
-  @brief  Implementation of CD_EBGeometryIF.H
-  @author Robert marskar
-*/
+ * @file   CD_EBGeometryIFImplem.H
+ * @brief  Implementation of CD_EBGeometryIF.H
+ * @author Robert marskar
+ */
 
 #ifndef CD_EBGEOMETRYIFIMPLEM_H
 #define CD_EBGEOMETRYIFIMPLEM_H

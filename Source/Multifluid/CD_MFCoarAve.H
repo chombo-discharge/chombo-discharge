@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_MFCoarAve.H
-  @brief  Wrapper class for holding multifluid EBCoarAves
-  @author Robert Marskar
-*/
+ * @file   CD_MFCoarAve.H
+ * @brief  Wrapper class for holding multifluid EBCoarAves
+ * @author Robert Marskar
+ */
 
 #ifndef CD_MFCOARAVE_H
 #define CD_MFCOARAVE_H
@@ -21,46 +21,46 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Class for coarsening data in a multifluid context.
-*/
+ * @brief Class for coarsening data in a multifluid context.
+ */
 class MFCoarAve
 {
 public:
   /**
-    @brief Constructor. Must subsequently call define.
-  */
+   * @brief Constructor. Must subsequently call define.
+   */
   MFCoarAve();
 
   /**
-    @brief Destructor (does nothing).
-  */
+   * @brief Destructor (does nothing).
+   */
   ~MFCoarAve();
 
   /**
-    @brief Full constructor. Calls define
-    @param[in] a_aveOps Averaging operators on each phase.
-  */
+   * @brief Full constructor. Calls define
+   * @param[in] a_aveOps Averaging operators on each phase.
+   */
   MFCoarAve(const Vector<RefCountedPtr<EBCoarAve>>& a_aveOps);
 
   /**
-    @brief Define function
-    @param[in] a_aveOps Averaging operators on each phase.
-  */
+   * @brief Define function
+   * @param[in] a_aveOps Averaging operators on each phase.
+   */
   void
   define(const Vector<RefCountedPtr<EBCoarAve>>& a_aveOps);
 
   /**
-    @brief Get coarsening utility for specified phase.
-    @param[in] a_phase Phase
-    @return Const reference to the averaging operator for the given phase.
-  */
+   * @brief Get coarsening utility for specified phase.
+   * @param[in] a_phase Phase
+   * @return Const reference to the averaging operator for the given phase.
+   */
   const RefCountedPtr<EBCoarAve>&
   getAveOp(const int a_phase) const;
 
 protected:
   /**
-    @brief Averaging operators for each phase.
-  */
+   * @brief Averaging operators for each phase.
+   */
   Vector<RefCountedPtr<EBCoarAve>> m_aveOps;
 };
 

@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_ItoKMCStepperImplem.H
-  @brief  Implementation of CD_ItoKMCStepper.H
-  @author Robert Marskar
-*/
+ * @file   CD_ItoKMCStepperImplem.H
+ * @brief  Implementation of CD_ItoKMCStepper.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_ITOKMCSTEPPERIMPLEM_H
 #define CD_ITOKMCSTEPPERIMPLEM_H
@@ -37,49 +37,49 @@
 using namespace Physics::ItoKMC;
 
 namespace {
-  // SoA per-cell extract/rebuild bridge for the ItoKMC reaction kernels. The reaction interface operates on
-  // per-cell SoA scratch containers (one small ParticleSoA<P> per grid cell) extracted from the leaves; the
-  // mutated scratches are concatenated back into the leaf. Mirrors ItoSolver::makeSuperparticles. The per-cell
-  // vector is indexed by the box's Fortran cell offset (Box::index), which matches ParticleSoA::sortByCell.
+// SoA per-cell extract/rebuild bridge for the ItoKMC reaction kernels. The reaction interface operates on
+// per-cell SoA scratch containers (one small ParticleSoA<P> per grid cell) extracted from the leaves; the
+// mutated scratches are concatenated back into the leaf. Mirrors ItoSolver::makeSuperparticles. The per-cell
+// vector is indexed by the box's Fortran cell offset (Box::index), which matches ParticleSoA::sortByCell.
 
-  // Cell-sort a_leaf and extract each cell into a_cells[Box::index(iv)] (one ParticleSoA<P> per cell).
-  template <typename P, typename Traits>
-  inline void
-  binLeafToCells(std::vector<ParticleSoA<P, Traits>>& a_cells,
-                 ParticleSoA<P, Traits>&              a_leaf,
-                 const Box&                           a_box,
-                 const Real                           a_dx,
-                 const RealVect&                      a_probLo) noexcept
-  {
-    a_leaf.sortByCell(a_box, a_dx * RealVect::Unit, a_probLo);
+// Cell-sort a_leaf and extract each cell into a_cells[Box::index(iv)] (one ParticleSoA<P> per cell).
+template <typename P, typename Traits>
+inline void
+binLeafToCells(std::vector<ParticleSoA<P, Traits>>& a_cells,
+               ParticleSoA<P, Traits>&              a_leaf,
+               const Box&                           a_box,
+               const Real                           a_dx,
+               const RealVect&                      a_probLo) noexcept
+{
+  a_leaf.sortByCell(a_box, a_dx * RealVect::Unit, a_probLo);
 
-    a_cells.clear();
-    a_cells.resize(a_box.numPts());
-    for (std::size_t c = 0; c < a_leaf.numCells(); c++) {
-      a_leaf.extractCell(c, a_cells[c]);
-    }
+  a_cells.clear();
+  a_cells.resize(a_box.numPts());
+  for (std::size_t c = 0; c < a_leaf.numCells(); c++) {
+    a_leaf.extractCell(c, a_cells[c]);
   }
+}
 
-  // Rebuild a_leaf from the per-cell scratch vector (concatenate all cells, then swap into the leaf).
-  template <typename P, typename Traits>
-  inline void
-  rebuildLeafFromCells(ParticleSoA<P, Traits>& a_leaf, const std::vector<ParticleSoA<P, Traits>>& a_cells) noexcept
-  {
-    ParticleSoA<P, Traits> rebuilt;
+// Rebuild a_leaf from the per-cell scratch vector (concatenate all cells, then swap into the leaf).
+template <typename P, typename Traits>
+inline void
+rebuildLeafFromCells(ParticleSoA<P, Traits>& a_leaf, const std::vector<ParticleSoA<P, Traits>>& a_cells) noexcept
+{
+  ParticleSoA<P, Traits> rebuilt;
 
-    // Pre-reserve the known total so the append loop allocates once instead of growing
-    // geometrically (O(log N) reallocations) on every reaction-kernel step.
-    std::size_t total = 0;
-    for (const ParticleSoA<P, Traits>& cell : a_cells) {
-      total += cell.size();
-    }
-    rebuilt.reserve(total);
-
-    for (const ParticleSoA<P, Traits>& cell : a_cells) {
-      rebuilt.append(cell);
-    }
-    a_leaf.swap(rebuilt);
+  // Pre-reserve the known total so the append loop allocates once instead of growing
+  // geometrically (O(log N) reallocations) on every reaction-kernel step.
+  std::size_t total = 0;
+  for (const ParticleSoA<P, Traits>& cell : a_cells) {
+    total += cell.size();
   }
+  rebuilt.reserve(total);
+
+  for (const ParticleSoA<P, Traits>& cell : a_cells) {
+    rebuilt.append(cell);
+  }
+  a_leaf.swap(rebuilt);
+}
 
 } // namespace
 
@@ -3265,8 +3265,8 @@ ItoKMCStepper<I, C, R, F>::computeDiffusionCoefficients(Vector<EBAMRCellData*>& 
     CH_assert(a_cdrDiffusionCoefficients[i]->getRealm() == m_fluidRealm);
   }
 
-  // The mesh diffusion coefficients belong on the particle realm (they are the ItoSolver diffusion coefficients) but we need to run
-  // the computation on the fluid realm. So, create some transient storage for that.
+  // The mesh diffusion coefficients belong on the particle realm (they are the ItoSolver diffusion coefficients) but we
+  // need to run the computation on the fluid realm. So, create some transient storage for that.
   Vector<EBAMRCellData> fluidScratchDiffusion(numItoSpecies);
   for (int i = 0; i < numItoSpecies; i++) {
     m_amr->allocate(fluidScratchDiffusion[i], m_fluidRealm, m_plasmaPhase, 1);
@@ -3532,7 +3532,8 @@ ItoKMCStepper<I, C, R, F>::averageDiffusionCoefficientsCellToFace() noexcept
       m_amr->arithmeticAverage(cellCenteredDiffusionCoefficient, m_fluidRealm, m_cdr->getPhase());
       m_amr->interpGhostPwl(cellCenteredDiffusionCoefficient, m_fluidRealm, m_cdr->getPhase());
 
-      // Average to cell faces. Note that this call also includes one ghost face (required when there's an EBCF crossing).
+      // Average to cell faces. Note that this call also includes one ghost face (required when there's an EBCF
+      // crossing).
       const int      tanGhost = 1;
       const Interval interv   = Interval(0, 0);
       const Average  average  = Average::Arithmetic;
@@ -4405,10 +4406,12 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
     pout() << m_name + "::reconcileParticles(patch)" << endl;
   }
 
+  // clang-format off
   // TLDR: This is the main routine for generating new particles/photons after the chemistry advance have finished. We have
   //       already computed the number of particles in each grid cell, and we now need to generate them. To do that we use
   //       the reconciliation routines from the physics interface, which takes the per-cell responsibility for that. The main
   //       work done in this routine is to expose the per-patch data to per-cell data that the physics interface can then use.
+  // clang-format on
 
   const int numItoSpecies    = m_physics->getNumItoSpecies();
   const int numCdrSpecies    = m_physics->getNumCdrSpecies();
@@ -4518,8 +4521,8 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
         sourcePhotons[i]->clear();
       }
 
-      // Reconcile the ItoSolver particles -- this either removes weight from the original particles (if we lost physical particles)
-      // or adds new particles (if we gained physical particles)
+      // Reconcile the ItoSolver particles -- this either removes weight from the original particles (if we lost
+      // physical particles) or adds new particles (if we gained physical particles)
       m_physics->reconcileParticles(itoParticles,
                                     numNewParticles,
                                     numOldParticles,
@@ -4533,8 +4536,8 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
                                     a_dx,
                                     kappa);
 
-      // Reconcile the photon solver. This will generate new computational photons that are later added to the Monte Carlo photon
-      // solvers.
+      // Reconcile the photon solver. This will generate new computational photons that are later added to the Monte
+      // Carlo photon solvers.
       m_physics->reconcilePhotons(sourcePhotons,
                                   numNewPhotons,
                                   cellPos,
@@ -4600,8 +4603,8 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
         sourcePhotons[i]->clear();
       }
 
-      // Reconcile the ItoSolver particles -- this either removes weight from the original particles (if we lost physical particles)
-      // or adds new particles (if we gained physical particles)
+      // Reconcile the ItoSolver particles -- this either removes weight from the original particles (if we lost
+      // physical particles) or adds new particles (if we gained physical particles)
       m_physics->reconcileParticles(itoParticles,
                                     numNewParticles,
                                     numOldParticles,
@@ -4615,8 +4618,8 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
                                     a_dx,
                                     kappa);
 
-      // Reconcile the photon solver. This will generate new computational photons that are later added to the Monte Carlo photon
-      // solvers.
+      // Reconcile the photon solver. This will generate new computational photons that are later added to the Monte
+      // Carlo photon solvers.
       m_physics->reconcilePhotons(sourcePhotons,
                                   numNewPhotons,
                                   cellPos,
@@ -4924,7 +4927,8 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(const Real a_dt) noexcept
     primaryParticles.push_back(&intersectedParticles);
   }
 
-  // CDR solvers extrapolate their fluxes. We then copy the extrapolated fluxes to transient data holders (which are defined over the particle realm).
+  // CDR solvers extrapolate their fluxes. We then copy the extrapolated fluxes to transient data holders (which are
+  // defined over the particle realm).
   EBAMRIVData tmp;
   m_amr->allocate(tmp, m_fluidRealm, m_plasmaPhase, 1);
 
@@ -5329,7 +5333,8 @@ ItoKMCStepper<I, C, R, F>::resolveSecondaryEmissionEB(Vector<ParticleContainer<I
                     m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase));
     }
 
-    // Add mass to CDR solvers -- this is an inefficient way of doing it but I don't know if it'll be a performance bottleneck as well.
+    // Add mass to CDR solvers -- this is an inefficient way of doing it but I don't know if it'll be a performance
+    // bottleneck as well.
     EBAMRCellData divG;
     EBAMRFluxData G;
 
@@ -5875,15 +5880,18 @@ ItoKMCStepper<I, C, R, F>::loadBalanceFluidRealm(Vector<Vector<int>>&           
   CH_assert(m_loadBalanceFluid);
   CH_assert(a_realm == m_fluidRealm);
 
+  // clang-format off
   // TLDR: This code tries to compute a load for each grid patch by applying a relaxation operator to each box. This means that the load
   //       should be a decent estimate that takes into account boundary conditions, coarse-fine interface arithmetic, and enlargened stencils
   //       near the embedded boundary.
+  // clang-format on
 
   a_procs.resize(1 + a_finestLevel);
   a_boxes.resize(1 + a_finestLevel);
 
-  // We need to make AmrMesh restore some operators that we need in order to create a multigrid object. Fortunately, FieldSolver has routines
-  // for doing that but it will not know if AmrMesh has updated it's operators or not. So, we need to regrid them.
+  // We need to make AmrMesh restore some operators that we need in order to create a multigrid object. Fortunately,
+  // FieldSolver has routines for doing that but it will not know if AmrMesh has updated it's operators or not. So, we
+  // need to regrid them.
   m_amr->regridOperators(m_fluidRealm, a_lmin);
 
   // Field solver needs to allocate solver and set up the multigrid solver.
@@ -5970,6 +5978,7 @@ ItoKMCStepper<I, C, R, F>::computeEdotJSource(const Real a_dt) noexcept
 
   CH_assert(m_EdotJ.getRealm() == m_fluidRealm);
 
+  // clang-format off
   // TLDR: EdotJ is an energy term for the various species, i.e. it is the rate of energy increase as the particle moves from
   //       position A to position B, excluding friction from collision with other molecules. We compute this energy increase as
   //
@@ -5983,6 +5992,7 @@ ItoKMCStepper<I, C, R, F>::computeEdotJSource(const Real a_dt) noexcept
   //       assign an effective weight w * [V(B) - V(A)] to the particles which we deposit onto the mesh using the appropriate
   //       deposition scheme that the user has assgned.
   //
+  // clang-format on
 
   // Allocate a transient SoA particle holder. The container owns the weight and position; the payload holds
   // V(A), V(B), and the per-component "other" position (alt) so we can interpolate the potential at both A and B.

@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_AmrMeshImplem.H
-  @brief  Implementation of CD_AmrMesh.H
-  @author Robert Marskar
-*/
+ * @file   CD_AmrMeshImplem.H
+ * @brief  Implementation of CD_AmrMesh.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_AMRMESHIMPLEM_H
 #define CD_AMRMESHIMPLEM_H

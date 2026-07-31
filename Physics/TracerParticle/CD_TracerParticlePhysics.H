@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_TracerParticlePhysics.H
-  @brief  Documentation of Physics/TracerParticle namespace
-  @author Robert Marskar
-*/
+ * @file   CD_TracerParticlePhysics.H
+ * @brief  Documentation of Physics/TracerParticle namespace
+ * @author Robert Marskar
+ */
 
 #ifndef CD_TRACERPARTICLEPHYSICS_H
 #define CD_TRACERPARTICLEPHYSICS_H
@@ -16,10 +16,10 @@
 #include <CD_NamespaceHeader.H>
 
 namespace Physics {
-  /**
-    @brief Namespace for encapsulating physics code for tracer particles
-  */
-  namespace TracerParticle {}
+/**
+ * @brief Namespace for encapsulating physics code for tracer particles
+ */
+namespace TracerParticle {}
 
 } // namespace Physics
 

@@ -5,10 +5,10 @@
  */
 
 /**
-  @file  CD_CylinderSdf.cpp
-  @brief CD_Implementation of CylinderSdf.H
-  @author Robert Marskar
-*/
+ * @file  CD_CylinderSdf.cpp
+ * @brief CD_Implementation of CylinderSdf.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <PolyGeom.H>

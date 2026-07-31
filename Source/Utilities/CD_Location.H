@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_Location.H
-  @brief  Declaration of cell positions.
-  @author Robert Marskar
-*/
+ * @file   CD_Location.H
+ * @brief  Declaration of cell positions.
+ * @author Robert Marskar
+ */
 
 #ifndef CD_LOCATION_H
 #define CD_LOCATION_H
@@ -20,51 +20,53 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Namespace for encapsulating various data centerings. 
-*/
+ * @brief Namespace for encapsulating various data centerings.
+ */
 namespace Location {
 
-  /**
-    @brief Enum for distinguishing between cell locations
-  */
-  enum class Cell
-  {
-    Center,
-    Centroid,
-    Boundary
-  };
+/**
+ * @brief Enum for distinguishing between cell locations
+ */
+enum class Cell
+{
+  Center,
+  Centroid,
+  Boundary
+};
 
-  /**
-    @brief Enum for distinguishing between face locations
-  */
-  enum class Face
-  {
-    Center,
-    Centroid,
-    Boundary
-  };
+/**
+ * @brief Enum for distinguishing between face locations
+ */
+enum class Face
+{
+  Center,
+  Centroid,
+  Boundary
+};
 
-  /**
-    @brief Compute the position (ignoring the "origin) of a Vof. 
-    @param[in] a_location  Position within the grid cell (e.g. center, centroid, boundary).
-    @param[in] a_vof       VolIndex to compute the position of
-    @param[in] a_ebisbox   EBISBox
-    @param[in] a_dx        Grid resolution
-    @return Position of a face, ignoring the "origin" of the coordinate system since this is only used together with LeastSquares::displacement(...)
-  */
-  inline RealVect
-  position(Location::Cell a_location, const VolIndex& a_vof, const EBISBox& a_ebisbox, const Real& a_dx);
+/**
+ * @brief Compute the position (ignoring the "origin) of a Vof.
+ * @param[in] a_location  Position within the grid cell (e.g. center, centroid, boundary).
+ * @param[in] a_vof       VolIndex to compute the position of
+ * @param[in] a_ebisbox   EBISBox
+ * @param[in] a_dx        Grid resolution
+ * @return Position of a face, ignoring the "origin" of the coordinate system since this is only used together with
+ * LeastSquares::displacement(...)
+ */
+inline RealVect
+position(Location::Cell a_location, const VolIndex& a_vof, const EBISBox& a_ebisbox, const Real& a_dx);
 
-  /**
-    @brief Compute the position (ignoring the "origin) of a FaceIndex
-    @param[in] a_location  Position within the grid cell (e.g. face center, face centroid)
-    @param[in] a_face      Face
-    @param[in] a_ebisbox   EBISBox
-    @param[in] a_dx        Grid resolution
-    @return Position of a face, ignoring the "origin" of the coordinate system since this is only used together with LeastSquares::displacement(...)
-  */
-  inline RealVect
-  position(Location::Face a_location, const FaceIndex& a_face, const EBISBox& a_ebisbox, const Real& a_dx);
+/**
+ * @brief Compute the position (ignoring the "origin) of a FaceIndex
+ * @param[in] a_location  Position within the grid cell (e.g. face center, face centroid)
+ * @param[in] a_face      Face
+ * @param[in] a_ebisbox   EBISBox
+ * @param[in] a_dx        Grid resolution
+ * @return Position of a face, ignoring the "origin" of the coordinate system since this is only used together with
+ * LeastSquares::displacement(...)
+ */
+inline RealVect
+position(Location::Face a_location, const FaceIndex& a_face, const EBISBox& a_ebisbox, const Real& a_dx);
 } // namespace Location
 
 #include <CD_NamespaceFooter.H>

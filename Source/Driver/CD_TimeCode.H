@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_TimeCode.H
-  @brief  Declaration of various identifiers for "time codes"
-  @author Robert Marskar
-*/
+ * @file   CD_TimeCode.H
+ * @brief  Declaration of various identifiers for "time codes"
+ * @author Robert Marskar
+ */
 
 #ifndef CD_TIMECODE_H
 #define CD_TIMECODE_H
@@ -17,9 +17,9 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Enum class for identifying how a time step was restricted. 
-  @details If the time code you are looking for is not in here, put it in and submit a pull request. 
-*/
+ * @brief Enum class for identifying how a time step was restricted.
+ * @details If the time code you are looking for is not in here, put it in and submit a pull request.
+ */
 enum class TimeCode
 {
   Advection,

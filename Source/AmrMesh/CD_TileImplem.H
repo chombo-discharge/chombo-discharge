@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_TileImplem.H
-  @brief  Implementation of CD_Tile.H
-  @author Robert Marskar
-*/
+ * @file   CD_TileImplem.H
+ * @brief  Implementation of CD_Tile.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_TILEIMPLEM_H
 #define CD_TILEIMPLEM_H

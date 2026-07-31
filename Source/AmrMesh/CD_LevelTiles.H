@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_LevelTiles.H
-  @brief  Declaration of LevelTiles
-  @author Robert Marskar
-*/
+ * @file   CD_LevelTiles.H
+ * @brief  Declaration of LevelTiles
+ * @author Robert Marskar
+ */
 
 #ifndef CD_LEVELTILES_H
 #define CD_LEVELTILES_H
@@ -27,13 +27,13 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Class for storing the AMR hierarchy as a collection of tiles.
-  @details This class decomposes the AMR hierarchy into uniform tiles, each tile being the cells spanned by a
-  minBlockSize^SpaceDim grid patch, and maps each tile to the grid box that contains it. Boxes may be larger than
-  one tile (variable-sized/anisotropic boxes that are unions of aligned minBlockSize tiles): such a box is
-  registered under every tile it covers, so the tile->box map stays uniform and a point->tile->box lookup is O(1).
-  When minBlockSize == maxBlockSize every box is exactly one tile (the one-tile-per-box fast path).
-*/
+ * @brief Class for storing the AMR hierarchy as a collection of tiles.
+ * @details This class decomposes the AMR hierarchy into uniform tiles, each tile being the cells spanned by a
+ * minBlockSize^SpaceDim grid patch, and maps each tile to the grid box that contains it. Boxes may be larger than
+ * one tile (variable-sized/anisotropic boxes that are unions of aligned minBlockSize tiles): such a box is
+ * registered under every tile it covers, so the tile->box map stays uniform and a point->tile->box lookup is O(1).
+ * When minBlockSize == maxBlockSize every box is exactly one tile (the one-tile-per-box fast path).
+ */
 class LevelTiles
 {
 public:
@@ -41,18 +41,18 @@ public:
   using BoxIDs = std::pair<unsigned int, unsigned int>;
 
   /**
-    @brief Hash functor for using IntVect tiles as unordered_map keys.
-    @details Hashes all SpaceDim components (FNV-1a). Hash collisions are harmless: std::unordered_map
-    distinguishes entries by key equality (IntVect::operator==), not by hash, so a collision only
-    affects performance and never returns a wrong value.
-  */
+   * @brief Hash functor for using IntVect tiles as unordered_map keys.
+   * @details Hashes all SpaceDim components (FNV-1a). Hash collisions are harmless: std::unordered_map
+   * distinguishes entries by key equality (IntVect::operator==), not by hash, so a collision only
+   * affects performance and never returns a wrong value.
+   */
   struct TileHasher
   {
     /**
-      @brief Hash operator.
-      @param[in] a_tile Tile to hash.
-      @return Hash value.
-    */
+     * @brief Hash operator.
+     * @param[in] a_tile Tile to hash.
+     * @return Hash value.
+     */
     std::size_t
     operator()(const IntVect& a_tile) const noexcept
     {
@@ -66,70 +66,70 @@ public:
   };
 
   /**
-    @brief Weak constructor. Must subsequently call the define function
-  */
+   * @brief Weak constructor. Must subsequently call the define function
+   */
   LevelTiles() noexcept;
 
   /**
-    @brief Full constructor - puts object in usable state.
-    @param[in] a_dbl            Grids
-    @param[in] a_minBlockSize Grid size.
-  */
+   * @brief Full constructor - puts object in usable state.
+   * @param[in] a_dbl            Grids
+   * @param[in] a_minBlockSize Grid size.
+   */
   LevelTiles(const DisjointBoxLayout& a_dbl, const int a_minBlockSize) noexcept;
 
   /**
-    @brief Destructor (does nothing)
-  */
+   * @brief Destructor (does nothing)
+   */
   virtual ~LevelTiles() noexcept;
 
   /**
-    @brief Define function. Puts object in usable state.
-    @param[in] a_dbl            Grids
-    @param[in] a_minBlockSize Grid size.
-  */
+   * @brief Define function. Puts object in usable state.
+   * @param[in] a_dbl            Grids
+   * @param[in] a_minBlockSize Grid size.
+   */
   virtual void
   define(const DisjointBoxLayout& a_dbl, const int a_minBlockSize) noexcept;
 
   /**
-    @brief Get the tiles owned by this rank
-    @return m_myTiles
-  */
+   * @brief Get the tiles owned by this rank
+   * @return m_myTiles
+   */
   virtual const std::unordered_map<IntVect, unsigned int, TileHasher>&
   getMyTiles() const noexcept;
 
   /**
-    @brief Get the tiles owned by other ranks
-    @return m_otherTiles
-  */
+   * @brief Get the tiles owned by other ranks
+   * @return m_otherTiles
+   */
   virtual const std::unordered_map<IntVect, BoxIDs, TileHasher>&
   getOtherTiles() const noexcept;
 
   /**
-    @brief Get the mapping of grid index to DataIndex
-    @return m_myGrids
-  */
+   * @brief Get the mapping of grid index to DataIndex
+   * @return m_myGrids
+   */
   virtual const std::unordered_map<unsigned int, DataIndex>&
   getMyGrids() const noexcept;
 
 protected:
   /**
-    @brief Is defined or not
-  */
+   * @brief Is defined or not
+   */
   bool m_isDefined;
 
   /**
-    @brief "Tiles" owned by this rank
-  */
+   * @brief "Tiles" owned by this rank
+   */
   std::unordered_map<IntVect, unsigned int, TileHasher> m_myTiles;
 
   /**
-    @brief Grids owned by other ranks.
-  */
+   * @brief Grids owned by other ranks.
+   */
   std::unordered_map<IntVect, BoxIDs, TileHasher> m_otherTiles;
 
   /**
-    @brief Mapping of grid index to DataIndex
-  */
+   * @brief Mapping of grid index to DataIndex
+   */
   std::unordered_map<unsigned int, DataIndex> m_myGrids;
 };
 

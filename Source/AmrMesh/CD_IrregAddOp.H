@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_IrregAddOp.H
-  @brief  Declaration of a Copier class for making incrementation between LevelData<BaseIVFAB<Real>> easier.
-  @author Robert Marskar
-*/
+ * @file   CD_IrregAddOp.H
+ * @brief  Declaration of a Copier class for making incrementation between LevelData<BaseIVFAB<Real>> easier.
+ * @author Robert Marskar
+ */
 
 #ifndef CD_IRREGADDOP_H
 #define CD_IRREGADDOP_H
@@ -21,40 +21,42 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief A Copier class for making copying between LevelData<BaseIVFAB<Real>> easier. This is an incrementation operator. 
-*/
+ * @brief A Copier class for making copying between LevelData<BaseIVFAB<Real>> easier. This is an incrementation
+ * operator.
+ */
 class IrregAddOp : public LDOperator<BaseIVFAB<Real>>
 {
 public:
   /**
-    @brief Constructor (does nothing)
-  */
+   * @brief Constructor (does nothing)
+   */
   IrregAddOp() noexcept;
 
   /**
-    @brief Destructor (does nothing)
-  */
+   * @brief Destructor (does nothing)
+   */
   virtual ~IrregAddOp() noexcept;
 
   /**
-    @brief Linearization function. We linearize the buffer onto arg, but since this is an addition operator we need to add the result.
-    @param[in,out] a_data   Data to be incremented with buffer
-    @param[in,out] a_buffer Data buffer (this is another BaseIVFAB<Real>)
-    @param[in]    a_region Region
-    @param[in]    a_comps  Components to do.
-  */
+   * @brief Linearization function. We linearize the buffer onto arg, but since this is an addition operator we need to
+   * add the result.
+   * @param[in,out] a_data   Data to be incremented with buffer
+   * @param[in,out] a_buffer Data buffer (this is another BaseIVFAB<Real>)
+   * @param[in]    a_region Region
+   * @param[in]    a_comps  Components to do.
+   */
   virtual void
   linearIn(BaseIVFAB<Real>& a_data, void* a_buffer, const Box& a_region, const Interval& a_comps) const override;
 
   /**
-    @brief Operator function. Increments data with source.
-    @param[in,out] a_dst        Destination data.
-    @param[in]    a_regionFrom Source regionw
-    @param[in]    a_dstVars    Destination variables
-    @param[in]    a_regionTo   Destination region
-    @param[in]    a_src        Source data
-    @param[in]    a_srcVars    Source variables
-  */
+   * @brief Operator function. Increments data with source.
+   * @param[in,out] a_dst        Destination data.
+   * @param[in]    a_regionFrom Source regionw
+   * @param[in]    a_dstVars    Destination variables
+   * @param[in]    a_regionTo   Destination region
+   * @param[in]    a_src        Source data
+   * @param[in]    a_srcVars    Source variables
+   */
   virtual void
   op(BaseIVFAB<Real>&       a_dst,
      const Box&             a_regionFrom,

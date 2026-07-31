@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_KMCSolverImplem.H
-  @brief  Implementation of CD_KMCSolver.H
-  @author Robert Marskar
-*/
+ * @file   CD_KMCSolverImplem.H
+ * @brief  Implementation of CD_KMCSolver.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_KMCSOLVERIMPLEM_H
 #define CD_KMCSOLVERIMPLEM_H
@@ -310,8 +310,8 @@ KMCSolver<R, State, T>::getNonCriticalTimeStep(const State&             a_state,
     }
 
     // Only do unique reactants. Sorting before the unique() collapses ALL duplicates (std::list::unique only removes
-    // consecutive equal elements), so each distinct reactant is processed exactly once. This does not change the result:
-    // each reactant's contribution is independent and only feeds into a min-reduction.
+    // consecutive equal elements), so each distinct reactant is processed exactly once. This does not change the
+    // result: each reactant's contribution is independent and only feeds into a min-reduction.
     allReactants.sort();
     allReactants.unique();
 
@@ -392,8 +392,8 @@ KMCSolver<R, State, T>::computeDt(const State&             a_state,
     }
 
     // Only do unique reactants. Sorting before the unique() collapses ALL duplicates (std::list::unique only removes
-    // consecutive equal elements), so each distinct reactant is processed exactly once. This does not change the result:
-    // each reactant's contribution is independent and only feeds into a min-reduction.
+    // consecutive equal elements), so each distinct reactant is processed exactly once. This does not change the
+    // result: each reactant's contribution is independent and only feeds into a min-reduction.
     allReactants.sort();
     allReactants.unique();
 
@@ -691,8 +691,8 @@ KMCSolver<R, State, T>::stepImplicitEuler(State&              a_state,
   //      = X - c - dt*sum_j nu_j * a_j(X),
   //      = 0
   //
-  // where c = (x + sum_j (nu_j * (P(a(x)*dt) - a(x)*dt)]) is a constant term throughout the Newton iterations. This term is presampled
-  // before the Newton iterations begin.
+  // where c = (x + sum_j (nu_j * (P(a(x)*dt) - a(x)*dt)]) is a constant term throughout the Newton iterations. This
+  // term is presampled before the Newton iterations begin.
 
   // Linearize input state onto something understandable to LAPACK
   const std::vector<T>              inputState = a_state.linearOut();
@@ -771,7 +771,8 @@ KMCSolver<R, State, T>::stepImplicitEuler(State&              a_state,
     return norm;
   };
 
-  // Allocate memory for the Jacobian (J), the Newton increment (X), and F(X) (F). Also include the constant term from the Poisson sampling (c)
+  // Allocate memory for the Jacobian (J), the Newton increment (X), and F(X) (F). Also include the constant term from
+  // the Poisson sampling (c)
   std::vector<double> J(static_cast<size_t>(N * N));
   std::vector<double> X(static_cast<size_t>(N));
   std::vector<double> F(static_cast<size_t>(N));
@@ -1022,7 +1023,8 @@ KMCSolver<R, State, T>::advanceHybrid(
   // Outer loop is for reactive substepping over a_dt.
   while (curTime < a_dt) {
 
-    // Partition reactions into critical and non-critical reactions and compute the critical and non-critical time steps.
+    // Partition reactions into critical and non-critical reactions and compute the critical and non-critical time
+    // steps.
     const std::pair<ReactionList, ReactionList> partitionedReactions = this->partitionReactions(a_state, a_reactions);
 
     const ReactionList& criticalReactions    = partitionedReactions.first;
@@ -1034,8 +1036,8 @@ KMCSolver<R, State, T>::advanceHybrid(
     Real dtCrit    = this->getCriticalTimeStep(propensitiesCrit);
     Real dtNonCrit = this->getNonCriticalTimeStep(a_state, nonCriticalReactions, propensitiesNonCrit);
 
-    // Try the various advancement algorithms; the loop is for step rejection in case we end up with an invalid state, e.g.
-    // a state with a negative number of particles.
+    // Try the various advancement algorithms; the loop is for step rejection in case we end up with an invalid state,
+    // e.g. a state with a negative number of particles.
     bool validStep = false;
 
     while (!validStep) {

@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_Rod.H
-  @brief  File containing headers for a rod-like geometry.
-  @author Robert Marskar
-*/
+ * @file   CD_Rod.H
+ * @brief  File containing headers for a rod-like geometry.
+ * @author Robert Marskar
+ */
 
 #ifndef CD_ROD_H
 #define CD_ROD_H
@@ -19,20 +19,20 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Geometry class representing a single cylindrical rod electrode.
-*/
+ * @brief Geometry class representing a single cylindrical rod electrode.
+ */
 class Rod : public ComputationalGeometry
 {
 public:
   /**
-    @brief Full constructor.
-    @details This function parses all input parameters and creates the geometry.
-  */
+   * @brief Full constructor.
+   * @details This function parses all input parameters and creates the geometry.
+   */
   Rod() noexcept;
 
   /**
-    @brief Destructor (does nothing).
-  */
+   * @brief Destructor (does nothing).
+   */
   virtual ~Rod() noexcept = default;
 };
 

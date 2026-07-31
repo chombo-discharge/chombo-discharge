@@ -5,10 +5,10 @@
  */
 
 /**
-  @brief CD_DiskProfiledPlane.cpp
-  @brief Implementation of CD_DiskProfiledPlane.H
-  @author Robert Marskar
-*/
+ * @brief CD_DiskProfiledPlane.cpp
+ * @brief Implementation of CD_DiskProfiledPlane.H
+ * @author Robert Marskar
+ */
 
 // Std includes
 #include <string>

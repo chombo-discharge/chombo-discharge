@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_RodDielectric.H
-  @brief  Definition of a electrode rod and dielectric dielectric geometry
-  @author Robert Marskar
-*/
+ * @file   CD_RodDielectric.H
+ * @brief  Definition of a electrode rod and dielectric dielectric geometry
+ * @author Robert Marskar
+ */
 
 #ifndef CD_RODDIELECTRIC_H
 #define CD_RODDIELECTRIC_H
@@ -18,59 +18,59 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Class that defines an electrode rod and a dielectric (some shapes supported).
-*/
+ * @brief Class that defines an electrode rod and a dielectric (some shapes supported).
+ */
 class RodDielectric : public ComputationalGeometry
 {
 public:
   /**
-    @brief Constructor. Defines the geometry.
-  */
+   * @brief Constructor. Defines the geometry.
+   */
   RodDielectric();
 
   /**
-    @brief Destructor.
-  */
+   * @brief Destructor.
+   */
   ~RodDielectric();
 
 protected:
   /**
-    @brief Define the electrode geometry.
-  */
+   * @brief Define the electrode geometry.
+   */
   void
   defineElectrode();
 
   /**
-    @brief Define the insulator geometry.
-  */
+   * @brief Define the insulator geometry.
+   */
   void
   defineInsulator();
 
   /**
-    @brief Get an axis-aligned box implicit function.
-    @return Signed distance function for a box.
-  */
+   * @brief Get an axis-aligned box implicit function.
+   * @return Signed distance function for a box.
+   */
   static RefCountedPtr<BaseIF>
   getBox();
 
   /**
-    @brief Get a plane implicit function.
-    @return Signed distance function for a plane.
-  */
+   * @brief Get a plane implicit function.
+   * @return Signed distance function for a plane.
+   */
   static RefCountedPtr<BaseIF>
   getPlane();
 
   /**
-    @brief Get a sphere implicit function.
-    @return Signed distance function for a sphere.
-  */
+   * @brief Get a sphere implicit function.
+   * @return Signed distance function for a sphere.
+   */
   static RefCountedPtr<BaseIF>
   getSphere();
 
   /**
-    @brief Get a Perlin-noise-perturbed box implicit function.
-    @return Signed distance function for a Perlin box.
-  */
+   * @brief Get a Perlin-noise-perturbed box implicit function.
+   * @return Signed distance function for a Perlin box.
+   */
   static RefCountedPtr<BaseIF>
   getPerlinBox();
 };

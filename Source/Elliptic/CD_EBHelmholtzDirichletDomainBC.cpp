@@ -87,9 +87,9 @@ EBHelmholtzDirichletDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
   const Real ihdx = 2.0 / m_dx;
   const Real sign = (a_side == Side::Lo) ? -1 : 1; // For getting the direction of the derivative correctly.
 
-  // Need to figure which kernel we should compute. If we have homogeneous BCs then the boundary value is zero. Likewise, with a non-zero value
-  // we have the dphi/dn = (phi-bc_value)/(dx/2) on the low side and (bc_value - phi)/(dx/2) on the high side. So make a switch between homogeneous/inhomogeneous
-  // and constant/non-constant values.
+  // Need to figure which kernel we should compute. If we have homogeneous BCs then the boundary value is zero.
+  // Likewise, with a non-zero value we have the dphi/dn = (phi-bc_value)/(dx/2) on the low side and (bc_value -
+  // phi)/(dx/2) on the high side. So make a switch between homogeneous/inhomogeneous and constant/non-constant values.
   //
   // Note: we dispatch the branch *outside* BoxLoops::loop and pass a concrete lambda in each case rather
   // than assigning to a std::function<void(const IntVect&)> and looping over that. A std::function kernel

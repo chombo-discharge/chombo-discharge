@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_KrylovBiCGStabImplem.H
-  @brief  Implementation of CD_KrylovBiCGStab.H
-  @author Robert Marskar
-*/
+ * @file   CD_KrylovBiCGStabImplem.H
+ * @brief  Implementation of CD_KrylovBiCGStab.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_KRYLOVBICGSTABIMPLEM_H
 #define CD_KRYLOVBICGSTABIMPLEM_H

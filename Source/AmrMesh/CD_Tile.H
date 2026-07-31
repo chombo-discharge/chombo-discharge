@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_Tile.H
-  @brief  Simple class for representing a tile in arbitrary-dimensional space.
-  @author Robert Marskar
-*/
+ * @file   CD_Tile.H
+ * @brief  Simple class for representing a tile in arbitrary-dimensional space.
+ * @author Robert Marskar
+ */
 
 #ifndef CD_TILE_H
 #define CD_TILE_H
@@ -20,88 +20,88 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Class for representing a tile (used in, e.g., TiledMeshRefine)
-*/
+ * @brief Class for representing a tile (used in, e.g., TiledMeshRefine)
+ */
 template <class T, size_t DIM>
 class TileI
 {
 public:
   /**
-    @brief Default constructor. Sets m_indices = 0
-  */
+   * @brief Default constructor. Sets m_indices = 0
+   */
   TileI() noexcept;
 
   /**
-    @brief Full constructor. Sets indices. Use as TileI(0,1,2,...)
-    @param[in] args Indices to assign.
-  */
+   * @brief Full constructor. Sets indices. Use as TileI(0,1,2,...)
+   * @param[in] args Indices to assign.
+   */
   template <typename... Args, typename std::enable_if<sizeof...(Args) == DIM, int>::type = 0>
   explicit TileI(Args... args) noexcept : m_indices{static_cast<T>(args)...}
   {}
 
   /**
-    @brief Destructor. 
-  */
+   * @brief Destructor.
+   */
   virtual ~TileI() noexcept;
 
   /**
-    @brief Get the index in specified coordinate direction
-    @param[in] a_dir Coordinate direction
-    @return Return value
-  */
+   * @brief Get the index in specified coordinate direction
+   * @param[in] a_dir Coordinate direction
+   * @return Return value
+   */
   inline T&
   operator[](const size_t a_dir) noexcept;
 
   /**
-    @brief Get the index in specified coordinate direction
-    @param[in] a_dir Coordinate direction
-    @return Return value
-  */
+   * @brief Get the index in specified coordinate direction
+   * @param[in] a_dir Coordinate direction
+   * @return Return value
+   */
   inline const T&
   operator[](const size_t a_dir) const noexcept;
 
   /**
-    @brief Get the indices
-    @return m_indices
-  */
+   * @brief Get the indices
+   * @return m_indices
+   */
   inline std::array<T, DIM>&
   getIndices() noexcept;
 
   /**
-    @brief Get the indices
-    @return m_indices
-  */
+   * @brief Get the indices
+   * @return m_indices
+   */
   inline const std::array<T, DIM>&
   getIndices() const noexcept;
 
   /**
-    @brief Comparison operator. Uses lexicographical comparison.
-    @param[in] a_otherTile Other tile.
-    @return Return value
-  */
+   * @brief Comparison operator. Uses lexicographical comparison.
+   * @param[in] a_otherTile Other tile.
+   * @return Return value
+   */
   inline constexpr bool
   operator<(const TileI& a_otherTile) const noexcept;
 
   /**
-    @brief Comparison operator. Uses lexicographical comparison.
-    @param[in] a_otherTile Other tile.
-    @return Return value
-  */
+   * @brief Comparison operator. Uses lexicographical comparison.
+   * @param[in] a_otherTile Other tile.
+   * @return Return value
+   */
   inline constexpr bool
   operator>(const TileI& a_otherTile) const noexcept;
 
   /**
-    @brief Comparison operator. Uses lexicographical comparison.
-    @param[in] a_otherTile Other tile.
-    @return Return value
-  */
+   * @brief Comparison operator. Uses lexicographical comparison.
+   * @param[in] a_otherTile Other tile.
+   * @return Return value
+   */
   inline constexpr bool
   operator==(const TileI& a_otherTile) const noexcept;
 
 protected:
   /**
-    @brief Index in N-dimensional space
-  */
+   * @brief Index in N-dimensional space
+   */
   std::array<T, DIM> m_indices;
 };
 

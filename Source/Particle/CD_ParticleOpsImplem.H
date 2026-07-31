@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_ParticleOpsImplem.H
-  @brief  Implementation of CD_ParticleOps.H
-  @author Robert Marskar
-*/
+ * @file   CD_ParticleOpsImplem.H
+ * @brief  Implementation of CD_ParticleOps.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_PARTICLEOPSIMPLEM_H
 #define CD_PARTICLEOPSIMPLEM_H
@@ -130,8 +130,10 @@ ParticleOps::domainIntersection(const RealVect& a_oldPos,
                                 Real&           a_s)
 {
 
+  // clang-format off
   // TLDR: This code does a boundary intersection test and returns where on the interval [oldPos, newPos] the intersection
   //       happened. We do this by checking if the particle moves towards a particular domain side and ends up outside of it.
+  // clang-format on
 
   a_s = std::numeric_limits<Real>::max();
 
@@ -147,12 +149,13 @@ ParticleOps::domainIntersection(const RealVect& a_oldPos,
       const RealVect       n0        = sign(side) * RealVect(BASISV(dir));
       const Real           normPath  = PolyGeom::dot(n0, path);
 
-      // If normPath > 0 then the particle trajectory points towards the domain edge/face and we can have an intersection.
+      // If normPath > 0 then the particle trajectory points towards the domain edge/face and we can have an
+      // intersection.
       if (normPath > 0.0) {
 
-        // s determines the intersection point between the particle path and the plane corresponding to the domain edge/face. Note that
-        // we consider the edge/face to be an infinite plane and we just compute the intersection point between each edge/face and select the
-        // closest intersection point.
+        // s determines the intersection point between the particle path and the plane corresponding to the domain
+        // edge/face. Note that we consider the edge/face to be an infinite plane and we just compute the intersection
+        // point between each edge/face and select the closest intersection point.
         const Real s = PolyGeom::dot(wallPoint - a_oldPos, n0) / normPath;
         if (s >= 0.0 && s <= 1.0) {
           crossedDomainBoundary = true;
@@ -176,8 +179,10 @@ ParticleOps::ebIntersectionBisect(const RefCountedPtr<BaseIF>& a_impFunc,
                                   Real&                        a_s)
 {
 
+  // clang-format off
   // TLDR: We compute the intersection point using a bisection algorithm. We divide the full path into intervals and check if an interval
   //       has a root. If it does, we compute it using Brent's algorithm.
+  // clang-format on
 
   a_s = std::numeric_limits<Real>::max();
 
@@ -197,8 +202,9 @@ ParticleOps::ebIntersectionBisect(const RefCountedPtr<BaseIF>& a_impFunc,
 
     if (fa * fb <= 0.0) {
 
-      // If this triggered we happen to know that f(pos+dxStep) > 0.0 and f(pos) < 0.0 and so we must have a root on the interval. We now compute the precise location
-      // where the particle crossed the EB. For that we use a Brent root finder on the interval [pos, pos+dxStep]. This is a 1D problem.
+      // If this triggered we happen to know that f(pos+dxStep) > 0.0 and f(pos) < 0.0 and so we must have a root on the
+      // interval. We now compute the precise location where the particle crossed the EB. For that we use a Brent root
+      // finder on the interval [pos, pos+dxStep]. This is a 1D problem.
       const RealVect intersectionPos = PolyUtils::brentRootFinder(a_impFunc, curPos, curPos + dxStep);
 
       a_s       = (intersectionPos - a_oldPos).vectorLength() / pathLen;
@@ -234,14 +240,16 @@ ParticleOps::ebIntersectionRaycast(const RefCountedPtr<BaseIF>& a_impFunc,
   const Real D  = (a_newPos - a_oldPos).vectorLength(); // Total particle path length
   const Real D0 = dist(a_oldPos);                       // Distance to EB from starting position
 
-  // If the distance to the EB from the starting position is smaller than the total path length, we need to check for intersections.
+  // If the distance to the EB from the starting position is smaller than the total path length, we need to check for
+  // intersections.
   if (D > D0) {
 
     const RealVect t = (a_newPos - a_oldPos) / D; // Particle trajectory.
 
-    // Move a_oldPos along +t. If we end up too close to the boundary the particle has intersected the BC. Note that this does NOT check for whether or not
-    // the particle moves tangential to the EB surface. The length of each step is the distance to the EB, so if the particle is close to the EB but moves
-    // tangentially to it, this routine will be EXTREMELY slow.
+    // Move a_oldPos along +t. If we end up too close to the boundary the particle has intersected the BC. Note that
+    // this does NOT check for whether or not the particle moves tangential to the EB surface. The length of each step
+    // is the distance to the EB, so if the particle is close to the EB but moves tangentially to it, this routine will
+    // be EXTREMELY slow.
     RealVect xa = a_oldPos;
     Real     r  = D;
     Real     d  = dist(xa);

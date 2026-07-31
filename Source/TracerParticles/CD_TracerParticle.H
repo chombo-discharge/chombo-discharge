@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_TracerParticle.H
-  @brief  SoA payload for tracer particles (velocity + Runge-Kutta stage scratch)
-  @author Robert Marskar
-*/
+ * @file   CD_TracerParticle.H
+ * @brief  SoA payload for tracer particles (velocity + Runge-Kutta stage scratch)
+ * @author Robert Marskar
+ */
 
 #ifndef CD_TRACERPARTICLE_H
 #define CD_TRACERPARTICLE_H
@@ -18,12 +18,12 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief SoA payload for tracer particles: interpolated velocity plus Runge-Kutta stage scratch.
-  @details Per-component scalar columns (one member per spatial dimension; the z-component exists only when
-  CH_SPACEDIM == 3). v_x/v_y/v_z hold the interpolated velocity (required by TracerParticleSolver). xk is the
-  position snapshot x^k; k1/k2/k3 hold the Runge-Kutta stage velocities. Weight and position are
-  container-owned columns, NOT payload members.
-*/
+ * @brief SoA payload for tracer particles: interpolated velocity plus Runge-Kutta stage scratch.
+ * @details Per-component scalar columns (one member per spatial dimension; the z-component exists only when
+ * CH_SPACEDIM == 3). v_x/v_y/v_z hold the interpolated velocity (required by TracerParticleSolver). xk is the
+ * position snapshot x^k; k1/k2/k3 hold the Runge-Kutta stage velocities. Weight and position are
+ * container-owned columns, NOT payload members.
+ */
 struct TracerParticle
 {
   ParticleReal v_x = 0.0; ///< Interpolated velocity, x-component.
@@ -58,8 +58,8 @@ struct TracerParticle
 };
 
 /**
-  @brief ParticleTraits specialization listing the payload columns of TracerParticle.
-*/
+ * @brief ParticleTraits specialization listing the payload columns of TracerParticle.
+ */
 template <>
 struct ParticleTraits<TracerParticle>
 {
@@ -72,10 +72,10 @@ struct ParticleTraits<TracerParticle>
     D_DECL(&TracerParticle::k3_x, &TracerParticle::k3_y, &TracerParticle::k3_z));
 
   /**
-     @brief Payload columns written to H5Part visualization files: the interpolated velocity vector (id,
-            position and weight are written automatically; the position snapshot and Runge-Kutta stage
-            columns are internal and not plotted).
-  */
+   * @brief Payload columns written to H5Part visualization files: the interpolated velocity vector (id,
+   * position and weight are written automatically; the position snapshot and Runge-Kutta stage
+   * columns are internal and not plotted).
+   */
   static constexpr auto h5PartColumns = std::make_tuple(
     H5Part::Vector{"v", D_DECL(&TracerParticle::v_x, &TracerParticle::v_y, &TracerParticle::v_z)});
 };

@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_HyperboloidIF.cpp
-  @brief  Implementation CD_HyperboloidIF.H
-  @author Robert Marskar
-*/
+ * @file   CD_HyperboloidIF.cpp
+ * @brief  Implementation CD_HyperboloidIF.H
+ * @author Robert Marskar
+ */
 
 // Our includes
 #include <CD_HyperboloidIF.H>

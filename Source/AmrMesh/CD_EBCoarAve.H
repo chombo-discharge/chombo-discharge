@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_EBCoarAve.H
-  @brief  Declaration of conservative coarsening utility 
-  @author Robert Marskar
-*/
+ * @file   CD_EBCoarAve.H
+ * @brief  Declaration of conservative coarsening utility
+ * @author Robert Marskar
+ */
 
 #ifndef CD_EBCOARAVE_H
 #define CD_EBCOARAVE_H
@@ -24,16 +24,16 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Class which replaces data at coarse level of refinement with average
-  at fine level of refinement. 
-  @details When defining this class, use the EBLevelGrid-based constructors if the coarsened grids are available. 
-*/
+ * @brief Class which replaces data at coarse level of refinement with average
+ * at fine level of refinement.
+ * @details When defining this class, use the EBLevelGrid-based constructors if the coarsened grids are available.
+ */
 class EBCoarAve
 {
 public:
   /**
-    @brief Type of coarsening supported
-  */
+   * @brief Type of coarsening supported
+   */
   enum class Type
   {
     Arithmetic,
@@ -42,26 +42,26 @@ public:
   };
 
   /**
-    @brief Default constructor. Must call define afterwards. 
-  */
+   * @brief Default constructor. Must call define afterwards.
+   */
   EBCoarAve() noexcept;
 
   /**
-    @brief Copy constructor not allowed
-  */
+   * @brief Copy constructor not allowed
+   */
   EBCoarAve(const EBCoarAve& a_other) = delete;
 
   /**
-    @brief Defining constructor.
-    @details This version creates it's own coarsened grids
-    @param[in] a_dblFine    Fine grids
-    @param[in] a_dblCoar    Coarse grids
-    @param[in] a_ebislFine  Fine EBISL
-    @param[in] a_ebislCoar  Coarse EBISL
-    @param[in] a_domainCoar Coarse domain
-    @param[in] a_refRat     Refinement ratio
-    @param[in] a_ebisPtr    EBIS pointer.
-  */
+   * @brief Defining constructor.
+   * @details This version creates it's own coarsened grids
+   * @param[in] a_dblFine    Fine grids
+   * @param[in] a_dblCoar    Coarse grids
+   * @param[in] a_ebislFine  Fine EBISL
+   * @param[in] a_ebislCoar  Coarse EBISL
+   * @param[in] a_domainCoar Coarse domain
+   * @param[in] a_refRat     Refinement ratio
+   * @param[in] a_ebisPtr    EBIS pointer.
+   */
   EBCoarAve(const DisjointBoxLayout& a_dblFine,
             const DisjointBoxLayout& a_dblCoar,
             const EBISLayout&        a_ebislFine,
@@ -71,29 +71,29 @@ public:
             const EBIndexSpace*      a_ebisPtr) noexcept;
 
   /**
-    @brief Defining constructor. Calls the define function. 
-    @param[in] a_eblgFine  Fine grids
-    @param[in] a_eblgCoar  Coarse grids
-    @param[in] a_eblgCoFi  Coarsened fine grids
-    @param[in] a_refRat    Refinement ratio between coarse and level
-  */
+   * @brief Defining constructor. Calls the define function.
+   * @param[in] a_eblgFine  Fine grids
+   * @param[in] a_eblgCoar  Coarse grids
+   * @param[in] a_eblgCoFi  Coarsened fine grids
+   * @param[in] a_refRat    Refinement ratio between coarse and level
+   */
   EBCoarAve(const EBLevelGrid& a_eblgFine,
             const EBLevelGrid& a_eblgCoar,
             const EBLevelGrid& a_eblgCoFi,
             const int&         a_refRat) noexcept;
 
   /**
-    @brief Destructor (does nothing)
-  */
+   * @brief Destructor (does nothing)
+   */
   virtual ~EBCoarAve() noexcept;
 
   /**
-    @brief Define function -- puts operator in usable state.
-    @param[in] a_eblgFine Fine grids
-    @param[in] a_eblgCoar Coarse grids
-    @param[in] a_eblgCoFi Coarsened fine grids
-    @param[in] a_refRat   Refinement ratio between coarse and level
-  */
+   * @brief Define function -- puts operator in usable state.
+   * @param[in] a_eblgFine Fine grids
+   * @param[in] a_eblgCoar Coarse grids
+   * @param[in] a_eblgCoFi Coarsened fine grids
+   * @param[in] a_refRat   Refinement ratio between coarse and level
+   */
   virtual void
   define(const EBLevelGrid& a_eblgFine,
          const EBLevelGrid& a_eblgCoar,
@@ -101,18 +101,18 @@ public:
          const int&         a_refRat) noexcept;
 
   /**
-    @brief Assignment not allowed.
-  */
+   * @brief Assignment not allowed.
+   */
   virtual void
   operator=(const EBCoarAve& fabin) = delete;
 
   /**
-    @brief Do an average of cell data. 
-    @param[in,out] a_coarData  Coarse data
-    @param[in]    a_fineData  Fine data
-    @param[in]    a_variables Variables to coarsen
-    @param[in]    a_average   Averaging method
-  */
+   * @brief Do an average of cell data.
+   * @param[in,out] a_coarData  Coarse data
+   * @param[in]    a_fineData  Fine data
+   * @param[in]    a_variables Variables to coarsen
+   * @param[in]    a_average   Averaging method
+   */
   virtual void
   averageData(LevelData<EBCellFAB>&       a_coarData,
               const LevelData<EBCellFAB>& a_fineData,
@@ -120,12 +120,12 @@ public:
               const Average&              a_average) const noexcept;
 
   /**
-    @brief Do an average of face data. 
-    @param[in,out] a_coarData  Coarse data
-    @param[in]    a_fineData  Fine data
-    @param[in]    a_variables Variables to coarsen
-    @param[in]    a_average   Averaging method
-  */
+   * @brief Do an average of face data.
+   * @param[in,out] a_coarData  Coarse data
+   * @param[in]    a_fineData  Fine data
+   * @param[in]    a_variables Variables to coarsen
+   * @param[in]    a_average   Averaging method
+   */
   virtual void
   averageData(LevelData<EBFluxFAB>&       a_coarData,
               const LevelData<EBFluxFAB>& a_fineData,
@@ -133,12 +133,12 @@ public:
               const Average&              a_average) const noexcept;
 
   /**
-    @brief Do an average of EB data. 
-    @param[in,out] a_coarData  Coarse data
-    @param[in]    a_fineData  Fine data
-    @param[in]    a_variables Variables to coarsen
-    @param[in]    a_average   Averaging method
-  */
+   * @brief Do an average of EB data.
+   * @param[in,out] a_coarData  Coarse data
+   * @param[in]    a_fineData  Fine data
+   * @param[in]    a_variables Variables to coarsen
+   * @param[in]    a_average   Averaging method
+   */
   virtual void
   averageData(LevelData<BaseIVFAB<Real>>&       a_coarData,
               const LevelData<BaseIVFAB<Real>>& a_fineData,
@@ -147,139 +147,139 @@ public:
 
 protected:
   /**
-    @brief Defined or not
-  */
+   * @brief Defined or not
+   */
   bool m_isDefined;
 
   /**
-    @brief Refinement ratio
-  */
+   * @brief Refinement ratio
+   */
   int m_refRat;
 
   /**
-    @brief Fine grids
-  */
+   * @brief Fine grids
+   */
   EBLevelGrid m_eblgFine;
 
   /**
-    @brief Coarse grids
-  */
+   * @brief Coarse grids
+   */
   EBLevelGrid m_eblgCoar;
 
   /**
-    @brief Coarsened fine grids
-  */
+   * @brief Coarsened fine grids
+   */
   EBLevelGrid m_eblgCoFi;
 
   /**
-    @brief Pre-built copier for copying from m_eblgCoFi to m_eblgCoar
-  */
+   * @brief Pre-built copier for copying from m_eblgCoFi to m_eblgCoar
+   */
   mutable std::map<IntVect, Copier> m_cellCopiers;
 
   /**
-    @brief Pre-built copier for copying from m_eblgCoFi to m_eblgCoar
-  */
+   * @brief Pre-built copier for copying from m_eblgCoFi to m_eblgCoar
+   */
   mutable std::map<IntVect, Copier> m_faceCopiers;
 
   /**
-    @brief Pre-built copier for copying from m_eblgCoFi to m_eblgCoar
-  */
+   * @brief Pre-built copier for copying from m_eblgCoFi to m_eblgCoar
+   */
   mutable std::map<IntVect, Copier> m_ebCopiers;
 
   /**
-    @brief Irregular cells on the coarsened fine layout
-  */
+   * @brief Irregular cells on the coarsened fine layout
+   */
   LayoutData<IntVectSet> m_irregSetsCoFi;
 
   /**
-    @brief Irregular cells on the coarsened fine layout
-  */
+   * @brief Irregular cells on the coarsened fine layout
+   */
   mutable LayoutData<VoFIterator> m_irregCellsCoFi;
 
   /**
-    @brief Irregular faces on the coarsened fine layout
-  */
+   * @brief Irregular faces on the coarsened fine layout
+   */
   mutable LayoutData<std::map<int, FaceIterator>> m_irregFacesCoFi;
 
   /**
-    @brief Stencils for arithmetic coarsening of volume data
-  */
+   * @brief Stencils for arithmetic coarsening of volume data
+   */
   LayoutData<BaseIVFAB<VoFStencil>> m_cellArithmeticStencils;
 
   /**
-    @brief Stencils for harmonic coarsening of volume data
-    @note This is different than the cellConservative and cellArithmetic stencils because its weights are all one and
-    the harmonic average is applied differently. 
-  */
+   * @brief Stencils for harmonic coarsening of volume data
+   * @note This is different than the cellConservative and cellArithmetic stencils because its weights are all one and
+   * the harmonic average is applied differently.
+   */
   LayoutData<BaseIVFAB<VoFStencil>> m_cellHarmonicStencils;
 
   /**
-    @brief Stencils for conservative coarsening of volume data
-  */
+   * @brief Stencils for conservative coarsening of volume data
+   */
   LayoutData<BaseIVFAB<VoFStencil>> m_cellConservativeStencils;
 
   /**
-    @brief Stencils for arithmetic coarsening of face data
-  */
+   * @brief Stencils for arithmetic coarsening of face data
+   */
   LayoutData<std::map<int, BaseIFFAB<FaceStencil>>> m_faceArithmeticStencils;
 
   /**
-    @brief Stencils for harmonic coarsening of face data
-  */
+   * @brief Stencils for harmonic coarsening of face data
+   */
   LayoutData<std::map<int, BaseIFFAB<FaceStencil>>> m_faceHarmonicStencils;
 
   /**
-    @brief Stencils for conservative coarsening of face data
-  */
+   * @brief Stencils for conservative coarsening of face data
+   */
   LayoutData<std::map<int, BaseIFFAB<FaceStencil>>> m_faceConservativeStencils;
 
   /**
-    @brief Stencils for arithmetic coarsening of EB data
-  */
+   * @brief Stencils for arithmetic coarsening of EB data
+   */
   LayoutData<BaseIVFAB<VoFStencil>> m_ebArithmeticStencils;
 
   /**
-    @brief Stencils for harmonic coarsening of EB data
-  */
+   * @brief Stencils for harmonic coarsening of EB data
+   */
   LayoutData<BaseIVFAB<VoFStencil>> m_ebHarmonicStencils;
 
   /**
-    @brief Stencils for conservative coarsening of EB data
-  */
+   * @brief Stencils for conservative coarsening of EB data
+   */
   LayoutData<BaseIVFAB<VoFStencil>> m_ebConservativeStencils;
 
   /**
-    @brief Define stencils for the various coarsening functions of cell data
-  */
+   * @brief Define stencils for the various coarsening functions of cell data
+   */
   virtual void
   defineCellStencils() noexcept;
 
   /**
-    @brief Define stencils for the various coarsening functions of face data
-  */
+   * @brief Define stencils for the various coarsening functions of face data
+   */
   virtual void
   defineFaceStencils() noexcept;
 
   /**
-    @brief Define stencils for the various coarsening functions of EB data
-  */
+   * @brief Define stencils for the various coarsening functions of EB data
+   */
   virtual void
   defineEBStencils() noexcept;
 
   /**
-    @brief Define buffer storage
-  */
+   * @brief Define buffer storage
+   */
   virtual void
   defineBuffers() noexcept;
 
   /**
-    @brief Do an arithmetic average of cell-centered data when coarsening. 
-    @param[in,out] a_coarData Coarse data
-    @param[in]    a_fineData Fine data
-    @param[in]    a_datInd Grid index
-    @param[in]    a_coarVar Coarse variables 
-    @param[in]    a_fineVar Fine variable
-  */
+   * @brief Do an arithmetic average of cell-centered data when coarsening.
+   * @param[in,out] a_coarData Coarse data
+   * @param[in]    a_fineData Fine data
+   * @param[in]    a_datInd Grid index
+   * @param[in]    a_coarVar Coarse variables
+   * @param[in]    a_fineVar Fine variable
+   */
   virtual void
   arithmeticAverage(EBCellFAB&       a_coarData,
                     const EBCellFAB& a_fineData,
@@ -287,13 +287,13 @@ protected:
                     const int&       a_coarVar,
                     const int&       a_fineVar) const noexcept;
   /**
-    @brief Do a harmonic average of cell-centered data when coarsening. 
-    @param[in,out] a_coarData Coarse data
-    @param[in]    a_fineData Fine data
-    @param[in]    a_datInd Grid index
-    @param[in]    a_coarVar Coarse variables 
-    @param[in]    a_fineVar Fine variable
-  */
+   * @brief Do a harmonic average of cell-centered data when coarsening.
+   * @param[in,out] a_coarData Coarse data
+   * @param[in]    a_fineData Fine data
+   * @param[in]    a_datInd Grid index
+   * @param[in]    a_coarVar Coarse variables
+   * @param[in]    a_fineVar Fine variable
+   */
   virtual void
   harmonicAverage(EBCellFAB&       a_coarData,
                   const EBCellFAB& a_fineData,
@@ -302,13 +302,13 @@ protected:
                   const int&       a_fineVar) const noexcept;
 
   /**
-    @brief Do a conservative average of cell-centered data when coarsening. 
-    @param[in,out] a_coarData Coarse data
-    @param[in]    a_fineData Fine data
-    @param[in]    a_datInd Grid index
-    @param[in]    a_coarVar Coarse variables 
-    @param[in]    a_fineVar Fine variable
-  */
+   * @brief Do a conservative average of cell-centered data when coarsening.
+   * @param[in,out] a_coarData Coarse data
+   * @param[in]    a_fineData Fine data
+   * @param[in]    a_datInd Grid index
+   * @param[in]    a_coarVar Coarse variables
+   * @param[in]    a_fineVar Fine variable
+   */
   virtual void
   conservativeAverage(EBCellFAB&       a_coarData,
                       const EBCellFAB& a_fineData,
@@ -317,14 +317,14 @@ protected:
                       const int&       a_fineVar) const noexcept;
 
   /**
-    @brief Do an arithmetic average of face-centered data when coarsening. 
-    @param[in,out] a_coarData Coarse data
-    @param[in]    a_fineData Fine data
-    @param[in]    a_datInd Grid index
-    @param[in]    a_coarVar Coarse variable
-    @param[in]    a_fineVar Fine variable
-    @param[in]    a_dir Face direction
-  */
+   * @brief Do an arithmetic average of face-centered data when coarsening.
+   * @param[in,out] a_coarData Coarse data
+   * @param[in]    a_fineData Fine data
+   * @param[in]    a_datInd Grid index
+   * @param[in]    a_coarVar Coarse variable
+   * @param[in]    a_fineVar Fine variable
+   * @param[in]    a_dir Face direction
+   */
   virtual void
   arithmeticAverage(EBFaceFAB&       a_coarData,
                     const EBFaceFAB& a_fineData,
@@ -334,14 +334,14 @@ protected:
                     const int&       a_dir) const noexcept;
 
   /**
-    @brief Do a harmonic average of face-centered data when coarsening. 
-    @param[in,out] a_coarData Coarse data
-    @param[in]    a_fineData Fine data
-    @param[in]    a_datInd Grid index
-    @param[in]    a_coarVar Coarse variable
-    @param[in]    a_fineVar Fine variable
-    @param[in]    a_dir Face direction
-  */
+   * @brief Do a harmonic average of face-centered data when coarsening.
+   * @param[in,out] a_coarData Coarse data
+   * @param[in]    a_fineData Fine data
+   * @param[in]    a_datInd Grid index
+   * @param[in]    a_coarVar Coarse variable
+   * @param[in]    a_fineVar Fine variable
+   * @param[in]    a_dir Face direction
+   */
   virtual void
   harmonicAverage(EBFaceFAB&       a_coarData,
                   const EBFaceFAB& a_fineData,
@@ -351,14 +351,14 @@ protected:
                   const int&       a_dir) const noexcept;
 
   /**
-    @brief Do a conservative average of face-centered data when coarsening. 
-    @param[in,out] a_coarData Coarse data
-    @param[in]    a_fineData Fine data
-    @param[in]    a_datInd Grid index
-    @param[in]    a_coarVar Coarse variable
-    @param[in]    a_fineVar Fine variable
-    @param[in]    a_dir Face direction
-  */
+   * @brief Do a conservative average of face-centered data when coarsening.
+   * @param[in,out] a_coarData Coarse data
+   * @param[in]    a_fineData Fine data
+   * @param[in]    a_datInd Grid index
+   * @param[in]    a_coarVar Coarse variable
+   * @param[in]    a_fineVar Fine variable
+   * @param[in]    a_dir Face direction
+   */
   virtual void
   conservativeAverage(EBFaceFAB&       a_coarData,
                       const EBFaceFAB& a_fineData,
@@ -368,13 +368,13 @@ protected:
                       const int&       a_dir) const noexcept;
 
   /**
-    @brief Arithmetic average data defined on irregular cells
-    @param[in,out] a_coarData Coarse data
-    @param[in]    a_fineData Fine data
-    @param[in]    a_datInd Grid index
-    @param[in]    a_coarVar Coarse variable
-    @param[in] a_fineVar Fine var
-  */
+   * @brief Arithmetic average data defined on irregular cells
+   * @param[in,out] a_coarData Coarse data
+   * @param[in]    a_fineData Fine data
+   * @param[in]    a_datInd Grid index
+   * @param[in]    a_coarVar Coarse variable
+   * @param[in] a_fineVar Fine var
+   */
   virtual void
   arithmeticAverage(BaseIVFAB<Real>&       a_coarData,
                     const BaseIVFAB<Real>& a_fineData,
@@ -383,13 +383,13 @@ protected:
                     const int&             a_fineVar) const noexcept;
 
   /**
-    @brief Harmonic average data defined on irregular cells
-    @param[in,out] a_coarData Coarse data
-    @param[in]    a_fineData Fine data
-    @param[in]    a_datInd Grid index
-    @param[in]    a_coarVar Coarse variable
-    @param[in] a_fineVar Fine var
-  */
+   * @brief Harmonic average data defined on irregular cells
+   * @param[in,out] a_coarData Coarse data
+   * @param[in]    a_fineData Fine data
+   * @param[in]    a_datInd Grid index
+   * @param[in]    a_coarVar Coarse variable
+   * @param[in] a_fineVar Fine var
+   */
   virtual void
   harmonicAverage(BaseIVFAB<Real>&       a_coarData,
                   const BaseIVFAB<Real>& a_fineData,
@@ -398,13 +398,13 @@ protected:
                   const int&             a_fineVar) const noexcept;
 
   /**
-    @brief Conservatively average data defined on irregular cells
-    @param[in,out] a_coarData Coarse data
-    @param[in]    a_fineData Fine data
-    @param[in]    a_datInd Grid index
-    @param[in]    a_coarVar Coarse variable
-    @param[in] a_fineVar Fine var
-  */
+   * @brief Conservatively average data defined on irregular cells
+   * @param[in,out] a_coarData Coarse data
+   * @param[in]    a_fineData Fine data
+   * @param[in]    a_datInd Grid index
+   * @param[in]    a_coarVar Coarse variable
+   * @param[in] a_fineVar Fine var
+   */
   virtual void
   conservativeAverage(BaseIVFAB<Real>&       a_coarData,
                       const BaseIVFAB<Real>& a_fineData,

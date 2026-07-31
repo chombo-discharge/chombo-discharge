@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_RegularGeometry.H
-  @brief  Regular geometry (no EBs)
-  @author Robert Marskar
-*/
+ * @file   CD_RegularGeometry.H
+ * @brief  Regular geometry (no EBs)
+ * @author Robert Marskar
+ */
 
 #ifndef CD_REGULARGEOMETRY_H
 #define CD_REGULARGEOMETRY_H
@@ -18,8 +18,8 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief This class implements an empty geometry
-*/
+ * @brief This class implements an empty geometry
+ */
 class RegularGeometry : public ComputationalGeometry
 {
 public:

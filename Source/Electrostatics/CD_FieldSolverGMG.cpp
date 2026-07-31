@@ -5,11 +5,11 @@
  */
 
 /**
-  @file   CD_FieldSolverGMG.cpp
-  @brief  Implementation of FieldSolverGMG.H
-  @author Robert Marskar
-  @todo   Once the new operator is in, check the computeLoads routine. 
-*/
+ * @file   CD_FieldSolverGMG.cpp
+ * @brief  Implementation of FieldSolverGMG.H
+ * @author Robert Marskar
+ * @todo   Once the new operator is in, check the computeLoads routine.
+ */
 
 // Chombo includes
 #include <ParmParse.H>
@@ -122,8 +122,8 @@ FieldSolverGMG::parseMultigridSettings()
   pp.get("gmg_bottom_verbosity", m_multigridBottomSolverVerbosity);
   pp.query("gmg_reflux_free", m_multigridRefluxFree);
 
-  // Fetch the desired bottom solver from the input script. We look for things like FieldSolverGMG.gmg_bottom_solver = bicgstab or '= simple <number>'
-  // where <number> is the number of relaxation for the smoothing solver.
+  // Fetch the desired bottom solver from the input script. We look for things like FieldSolverGMG.gmg_bottom_solver =
+  // bicgstab or '= simple <number>' where <number> is the number of relaxation for the smoothing solver.
   const int num = pp.countval("gmg_bottom_solver");
   if (num == 1) {
     pp.get("gmg_bottom_solver", str);
@@ -320,8 +320,9 @@ FieldSolverGMG::solve(MFAMRCellData&       a_phi,
   // TLDR: This is the main solve routine. The operator factory was set up as kappa*L(phi) = -kappa*div(eps*grad(phi))
   //       which we use to solve the Poisson equation div(eps*grad(phi)) = -rho/eps0.
   //
-  //       So, we must scale rho (which is defined on centroids) by kappa and divide by eps0. The minus-sign provided in the operator
-  //       through the b-coefficient. (So really, we're actually solving kappa*[-div(eps*grad(phi))] = kappa*(rho/eps0)
+  //       So, we must scale rho (which is defined on centroids) by kappa and divide by eps0. The minus-sign provided in
+  //       the operator through the b-coefficient. (So really, we're actually solving kappa*[-div(eps*grad(phi))] =
+  //       kappa*(rho/eps0)
 
   CH_assert(m_isVoltageSet);
   CH_assert(a_phi[0]->nComp() == 1);
@@ -373,7 +374,8 @@ FieldSolverGMG::solve(MFAMRCellData&       a_phi,
   DataOps::scale(sigmaByEps0, 1. / (Units::eps0), m_amr->getVofIterator(m_realm, phase::gas));
   CH_STOP(t2);
 
-  // Factory needs knowledge of the new surface charge -- it passes this data by reference to the multigrid operators (MFHelmholtzOps).
+  // Factory needs knowledge of the new surface charge -- it passes this data by reference to the multigrid operators
+  // (MFHelmholtzOps).
   m_helmholtzOpFactory->setJump(sigmaByEps0, 1.0);
 
   // Aliasing, because Chombo is not too smart about smart pointers.
@@ -477,7 +479,8 @@ FieldSolverGMG::solve(MFAMRCellData&       a_phi,
 
   this->computeElectricField(m_electricField, a_phi);
 
-  // If we are also solving for the saturation charge we get that solution from the factory (it can be a free parameter in the Helmholtz solve).
+  // If we are also solving for the saturation charge we get that solution from the factory (it can be a free parameter
+  // in the Helmholtz solve).
   if (m_jumpBcType == JumpBCType::SaturationCharge) {
     const EBAMRIVData& factorySigma = m_helmholtzOpFactory->getSigma();
 
@@ -717,8 +720,10 @@ FieldSolverGMG::setupHelmholtzFactory()
     MayDay::Abort("FieldSolverGMG.gmg_relax_factor must be 0 < gmg_relax_factor <= 2 ");
   }
 
+  // clang-format off
   // TLDR: This routine sets up a Helmholtz factory for creating MFHelmholtzOps which are used by Chombo's AMRMultiGrid. We
   //       should already have registered the operators when we come to this routine.
+  // clang-format on
 
   const RefCountedPtr<EBIndexSpace>& ebisGas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
   const RefCountedPtr<EBIndexSpace>& ebisSol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
@@ -781,8 +786,8 @@ FieldSolverGMG::setupHelmholtzFactory()
     bottomDomain.coarsen(2);
   }
 
-  // Number of ghost cells in data holders. This is needed because EBHelmholtzOp uses restriction/prolongation objects from Chombo, and they
-  // need to know explicit object size to optimize irregular access.
+  // Number of ghost cells in data holders. This is needed because EBHelmholtzOp uses restriction/prolongation objects
+  // from Chombo, and they need to know explicit object size to optimize irregular access.
   const IntVect ghostPhi = m_amr->getNumberOfGhostCells() * IntVect::Unit;
   const IntVect ghostRhs = m_amr->getNumberOfGhostCells() * IntVect::Unit;
 
@@ -827,8 +832,8 @@ FieldSolverGMG::setupHelmholtzFactory()
     jumpBcFactory->setCoarseGridDropOrder(false);
   }
 
-  // Create the factory. Note that we pass m_permittivityCell in through the a-coefficient, but we also set alpha to zero
-  // so there is no diagonal term in the operator after all.
+  // Create the factory. Note that we pass m_permittivityCell in through the a-coefficient, but we also set alpha to
+  // zero so there is no diagonal term in the operator after all.
   m_helmholtzOpFactory = RefCountedPtr<MFHelmholtzOpFactory>(
     new MFHelmholtzOpFactory(m_multifluidIndexSpace,
                              m_dataLocation,
@@ -871,8 +876,8 @@ FieldSolverGMG::setupMultigrid()
     pout() << "FieldSolverGMG::setupMultigrid()" << endl;
   }
 
-  // This routine sets up a standard Chombo multigrid solver using the AMRMultiGrid template. Fortunately, MFHelmholtzOp implements
-  // the required functions and we have already set up the factory.
+  // This routine sets up a standard Chombo multigrid solver using the AMRMultiGrid template. Fortunately, MFHelmholtzOp
+  // implements the required functions and we have already set up the factory.
 
   // Select the bottom solver -- the user will have specified this when parseMultigridSettings() was called.
   LinearSolver<LevelData<MFCellFAB>>* bottomSolver = nullptr;
@@ -996,11 +1001,12 @@ FieldSolverGMG::computeLoads(const DisjointBoxLayout& /*a_dbl*/, const int a_lev
     pout() << "FieldSolverGMG::computeLoads(DisjointBoxLayout, int)" << endl;
   }
 
-  // This routine estimates the computational loads on a grid level. It does that by creating an operator (which we later delete)
-  // on the grid level corresponding to a_level. It then uses a TimedDataIterator in the input DisjointBoxLayout to estimate the
-  // compute time spent when visiting each patch during a typical smoothing step. This step is defined in MFHelmholtzOp::computeOperatorLoads
-  // and consists of coarse-fine interpolation, updating BCs, and calling the smoothing kernel (e.g. red-black Gauss-seidel). Fortunately
-  // this will provide this class with the opportunity to use introspective load balancing.
+  // This routine estimates the computational loads on a grid level. It does that by creating an operator (which we
+  // later delete) on the grid level corresponding to a_level. It then uses a TimedDataIterator in the input
+  // DisjointBoxLayout to estimate the compute time spent when visiting each patch during a typical smoothing step. This
+  // step is defined in MFHelmholtzOp::computeOperatorLoads and consists of coarse-fine interpolation, updating BCs, and
+  // calling the smoothing kernel (e.g. red-black Gauss-seidel). Fortunately this will provide this class with the
+  // opportunity to use introspective load balancing.
 
   constexpr int numApply = 50;
 
@@ -1013,7 +1019,8 @@ FieldSolverGMG::computeLoads(const DisjointBoxLayout& /*a_dbl*/, const int a_lev
   MFAMRCellData dummy;
   m_amr->allocate(dummy, m_realm, m_nComp);
 
-  // Create the operator and run a couple of kernels that involve coarse-fine interpolation, BC updates, and smoothing kernels.
+  // Create the operator and run a couple of kernels that involve coarse-fine interpolation, BC updates, and smoothing
+  // kernels.
   auto* oper = m_helmholtzOpFactory->MGnewOp(m_amr->getDomains()[a_level], 0, false);
 
   const Vector<long long> loads = oper->computeOperatorLoads(*dummy[a_level], numApply);

@@ -5,10 +5,10 @@
  */
 
 /**
-  @file CD_PetscDOF.H
-  @brief Declaration of a simple mapping between a PETSc index and an AMR cell
-  @author Robert Marskar
-*/
+ * @file CD_PetscDOF.H
+ * @brief Declaration of a simple mapping between a PETSc index and an AMR cell
+ * @author Robert Marskar
+ */
 
 #ifndef CD_PETSCDOF_H
 #define CD_PETSCDOF_H
@@ -21,8 +21,8 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Mapping between a PETSc local row index and an AMR grid cell.
-*/
+ * @brief Mapping between a PETSc local row index and an AMR grid cell.
+ */
 struct PetscDOF
 {
   /** @brief Local PETSc row index. */

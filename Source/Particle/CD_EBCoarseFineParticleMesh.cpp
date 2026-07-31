@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_EBCoarseFineParticleMesh.cpp
-  @brief  Implementation of CD_EBCoarseFineParticleMesh.H
-  @author Robert Marskar
-*/
+ * @file   CD_EBCoarseFineParticleMesh.cpp
+ * @brief  Implementation of CD_EBCoarseFineParticleMesh.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <CH_Timer.H>
@@ -275,9 +275,11 @@ EBCoarseFineParticleMesh::addFineGhostsToCoarse(LevelData<EBCellFAB>&       a_co
   CH_assert(a_coarData.ghostVect() == m_ghost);
   CH_assert(a_fineData.ghostVect() == m_ghost);
 
+  // clang-format off
   // TLDR: This routine will take the ghost cells that are in a_fineData and add them to the coarse level. We use buffers for this,
   //       copying the data from a_fineData to our nifty m_bufferFine buffer holder. The ghost cells in that scratch data are
   //       coarsened onto yet another buffer. Finally, we add the contents in that buffer to the coarse data.
+  // clang-format on
 
   const DisjointBoxLayout& dblFine    = m_eblgFine.getDBL();
   const ProblemDomain&     domainFine = m_eblgFine.getDomain();
@@ -296,11 +298,11 @@ EBCoarseFineParticleMesh::addFineGhostsToCoarse(LevelData<EBCellFAB>&       a_co
   LevelData<EBCellFAB> bufferFine(m_eblgFine.getDBL(), m_nComp, m_ghost, EBCellFactory(m_eblgFine.getEBISL()));
   LevelData<EBCellFAB> bufferCoFi(m_eblgCoFi.getDBL(), m_nComp, m_ghost, EBCellFactory(m_eblgCoFi.getEBISL()));
 
-  // Copy the fine data to scratch and reset the interior cells. We do this by copying everything to the fine scratch data,
-  // and then set all the valid data in each box to zero. The exchange() operation will then take care of ghost cells that.
-  // overlap with valid regions in different boxes (we could use a NeighborIterator to achieve the same). Note that this is critical
-  // for the result because we essentially end up setting all valid data to zero so we don't accidentally add mass to invalid region
-  // of the coarse grid (i.e., the region underneath the fine grid).
+  // Copy the fine data to scratch and reset the interior cells. We do this by copying everything to the fine scratch
+  // data, and then set all the valid data in each box to zero. The exchange() operation will then take care of ghost
+  // cells that. overlap with valid regions in different boxes (we could use a NeighborIterator to achieve the same).
+  // Note that this is critical for the result because we essentially end up setting all valid data to zero so we don't
+  // accidentally add mass to invalid region of the coarse grid (i.e., the region underneath the fine grid).
   a_fineData.localCopyTo(bufferFine);
 #pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nboxFine; mybox++) {
@@ -312,9 +314,9 @@ EBCoarseFineParticleMesh::addFineGhostsToCoarse(LevelData<EBCellFAB>&       a_co
   }
   bufferFine.exchange();
 
-  // Coarsen the fine grid data. We do this by AVERAGING the fine-grid data onto the coarse grid. This actually involves entire patches
-  // and not just individual ghost cells regions, but that's ok because the rest of the data (in the valid fine regions) are set to zero above,
-  // so the coarse data underneath those regions will be zero, also.
+  // Coarsen the fine grid data. We do this by AVERAGING the fine-grid data onto the coarse grid. This actually involves
+  // entire patches and not just individual ghost cells regions, but that's ok because the rest of the data (in the
+  // valid fine regions) are set to zero above, so the coarse data underneath those regions will be zero, also.
 #pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nboxFine; mybox++) {
     const DataIndex& din = ditFine[mybox];
@@ -456,12 +458,14 @@ EBCoarseFineParticleMesh::addInvalidCoarseToFine(LevelData<EBCellFAB>&       a_f
   CH_assert(a_fineData.ghostVect() == m_ghost);
   CH_assert(a_coarData.ghostVect() == m_ghost);
 
+  // clang-format off
   // TLDR: This routine performs a piecewise constant interpolation of the coarse data to the fine grid. We do this by going through the coarse-grid data
   //       and piecewise interpolating the result to the fine grid (using a buffer). After that, we add the contents in the buffer to the fine level.
   //
   //       The data-motion plan for this is to add the valid+ghost cells in the interpolated fine-grid data to the valid region on the fine grid. Note that
   //       the function signature indicates that we only add invalid coarse data, we do run kernels over all data. The addition is done only at the end in
   //       copyTo.
+  // clang-format on
   const DisjointBoxLayout& dblCoar   = m_eblgCoar.getDBL();
   const EBISLayout&        ebislCoar = m_eblgCoar.getEBISL();
 

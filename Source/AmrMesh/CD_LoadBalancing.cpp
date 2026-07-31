@@ -5,10 +5,10 @@
  */
 
 /**
-  @file    CD_LoadBalancing.cpp
-  @details Implementation of CD_LoadBalancing.H
-  @author  Robert Marskar
-*/
+ * @file    CD_LoadBalancing.cpp
+ * @details Implementation of CD_LoadBalancing.H
+ * @author  Robert Marskar
+ */
 
 // Chombo includes
 #include <ParmParse.H>

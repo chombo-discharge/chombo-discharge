@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_CdrLayoutImplem.H
-  @brief  Implementation of CD_CdrLayout.H
-  @author Robert Marskar
-*/
+ * @file   CD_CdrLayoutImplem.H
+ * @brief  Implementation of CD_CdrLayout.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_CDRLAYOUTIMPLEM_H
 #define CD_CDRLAYOUTIMPLEM_H

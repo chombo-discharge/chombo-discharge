@@ -5,10 +5,10 @@
  */
 
 /**
-   @file   CD_CdrPlasmaImExSdcStorage.cpp
-   @brief  Implementation of CD_CdrPlasmaImExSdcStorage.H
-   @author Robert Marskar
-*/
+ * @file   CD_CdrPlasmaImExSdcStorage.cpp
+ * @brief  Implementation of CD_CdrPlasmaImExSdcStorage.H
+ * @author Robert Marskar
+ */
 
 // Our includes
 #include <CD_CdrPlasmaImExSdcStepper.H>

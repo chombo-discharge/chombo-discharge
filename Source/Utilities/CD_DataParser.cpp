@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_DataParser.cpp
-  @brief  Implementation of CD_DataParser.H
-  @author Robert Marskar
-*/
+ * @file   CD_DataParser.cpp
+ * @brief  Implementation of CD_DataParser.H
+ * @author Robert Marskar
+ */
 
 // Std includes
 #include <fstream>
@@ -46,8 +46,8 @@ DataParser::simpleFileReadASCII(const std::string&       a_fileName,
     // Only do stuff for lines that are not empty. If we have an empty line we just proceed to the next one.
     if (!line.empty()) {
 
-      // Check if we should parse the line. The user will have input a bunch of comment symbols which indicate lines that are comments.
-      // If the line starts with any of those symbols we do not parse it.
+      // Check if we should parse the line. The user will have input a bunch of comment symbols which indicate lines
+      // that are comments. If the line starts with any of those symbols we do not parse it.
       bool parseThisLine = true;
       for (const auto& ignoreChar : a_ignoreChars) {
         if (line.at(0) == ignoreChar) {
@@ -67,7 +67,8 @@ DataParser::simpleFileReadASCII(const std::string&       a_fileName,
           values.emplace_back(curVal);
         }
 
-        // Read the data into the LookupTable1D IF we have enough data in the input file. Rows that do not have enough data WILL be ignored.
+        // Read the data into the LookupTable1D IF we have enough data in the input file. Rows that do not have enough
+        // data WILL be ignored.
         const int numColumnsOnThisLine = static_cast<int>(values.size());
         if (a_xColumn < numColumnsOnThisLine && a_yColumn < numColumnsOnThisLine) {
           returnTable.addData(values[a_xColumn], values[a_yColumn]);
@@ -169,8 +170,8 @@ DataParser::readPointParticlesASCII(const std::string& a_fileName,
     // Only do stuff for lines that are not empty. If we have an empty line we just proceed to the next one.
     if (!line.empty()) {
 
-      // Check if we should parse the line. The user will have input a bunch of comment symbols which indicate lines that are comments.
-      // If the line starts with any of those symbols we do not parse it.
+      // Check if we should parse the line. The user will have input a bunch of comment symbols which indicate lines
+      // that are comments. If the line starts with any of those symbols we do not parse it.
       bool parseThisLine = true;
       for (const auto& ignoreChar : a_ignoreChars) {
         if (line.at(0) == ignoreChar) {
@@ -190,7 +191,8 @@ DataParser::readPointParticlesASCII(const std::string& a_fileName,
           values.emplace_back(curVal);
         }
 
-        // Read the data into the LookupTable1D IF we have enough data in the input file. Rows that do not have enough data WILL be ignored.
+        // Read the data into the LookupTable1D IF we have enough data in the input file. Rows that do not have enough
+        // data WILL be ignored.
         const int numColumnsOnThisLine = static_cast<int>(values.size());
         if (numColumnsOnThisLine < SpaceDim + 1) {
           const std::string str = "DataParser::readPointParticlesASCII - row does not contain enough data";

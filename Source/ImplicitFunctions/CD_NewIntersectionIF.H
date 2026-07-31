@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_NewIntersectionIF.H
-  @brief  Declaration of a signed distance function which is infinitely far away from everything. 
-  @author Robert Marskar
-*/
+ * @file   CD_NewIntersectionIF.H
+ * @brief  Declaration of a signed distance function which is infinitely far away from everything.
+ * @author Robert Marskar
+ */
 
 #ifndef CD_NEWINTERSECTIONIF_H
 #define CD_NEWINTERSECTIONIF_H
@@ -20,51 +20,51 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief New intersection IF which does not mess up the return value function when there are no implicit functions.
-*/
+ * @brief New intersection IF which does not mess up the return value function when there are no implicit functions.
+ */
 class NewIntersectionIF : public BaseIF
 {
 public:
   /**
-    @brief Weak constructor. Does nothing. 
-  */
+   * @brief Weak constructor. Does nothing.
+   */
   NewIntersectionIF();
 
   /**
-    @brief Constructor taking several functions. 
-    @param[in] a_impFuncs Implicit functions
-  */
+   * @brief Constructor taking several functions.
+   * @param[in] a_impFuncs Implicit functions
+   */
   NewIntersectionIF(const Vector<BaseIF*>& a_impFuncs);
 
   /**
-    @brief Destructor
-  */
+   * @brief Destructor
+   */
   virtual ~NewIntersectionIF();
 
   /**
-    @brief Get distance to objects. 
-    @param[in] a_point Physical position. 
-    @return Function value at the given point
-  */
+   * @brief Get distance to objects.
+   * @param[in] a_point Physical position.
+   * @return Function value at the given point
+   */
   virtual Real
   value(const RealVect& a_point) const override;
 
   /**
-    @brief Factory method
-    @return New copy of this implicit function
-  */
+   * @brief Factory method
+   * @return New copy of this implicit function
+   */
   virtual BaseIF*
   newImplicitFunction() const override;
 
 protected:
   /**
-    @brief Number of implicit functions
-  */
+   * @brief Number of implicit functions
+   */
   int m_numFuncs; // number of implicit functions
 
   /**
-    @brief Implicit functions
-  */
+   * @brief Implicit functions
+   */
   Vector<BaseIF*> m_impFuncs;
 };
 

@@ -7,12 +7,12 @@
  */
 
 /**
-   @file   CD_DischargeInceptionStepperImplem.H
-   @brief  Implementation of CD_DischargeInceptionStepper.H
-   @author Robert Marskar (SINTEF)
-   @author Rasmus Hoholm (SINTEF)
-   @author Fanny Skirbekk (NTNU)
-*/
+ * @file   CD_DischargeInceptionStepperImplem.H
+ * @brief  Implementation of CD_DischargeInceptionStepper.H
+ * @author Robert Marskar (SINTEF)
+ * @author Rasmus Hoholm (SINTEF)
+ * @author Fanny Skirbekk (NTNU)
+ */
 
 #ifndef CD_DISCHARGEINCEPTIONSTEPPERIMPLEM_H
 #define CD_DISCHARGEINCEPTIONSTEPPERIMPLEM_H
@@ -3649,7 +3649,8 @@ DischargeInceptionStepper<P, F, C>::computeRdot(const Real& a_voltage) const noe
 
   Real Rdot = 0.0;
 
-  // TLDR: We are computing the integral of done/dt * (1-eta/alpha) over the critical volume and integral(j/e * dS) over the "critical surface"
+  // TLDR: We are computing the integral of done/dt * (1-eta/alpha) over the critical volume and integral(j/e * dS) over
+  // the "critical surface"
   const RealVect probLo = m_amr->getProbLo();
 
   // Compute the electric field at the input voltage

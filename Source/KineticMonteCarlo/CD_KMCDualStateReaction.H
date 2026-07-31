@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_KMCDualStateReaction.H
-  @brief  Declaration of a simple plasma reaction type for Kinetic Monte Carlo.
-  @author Robert Marskar
-*/
+ * @file   CD_KMCDualStateReaction.H
+ * @brief  Declaration of a simple plasma reaction type for Kinetic Monte Carlo.
+ * @author Robert Marskar
+ */
 
 #ifndef CD_KMCDUALSTATEREACTION_H
 #define CD_KMCDUALSTATEREACTION_H
@@ -26,158 +26,160 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Reaction type for advancing a KMCDualState for Kinetic Monte Carlo.
-  @note T is the integer type used for the state.
-*/
+ * @brief Reaction type for advancing a KMCDualState for Kinetic Monte Carlo.
+ * @note T is the integer type used for the state.
+ */
 template <typename State = KMCDualState<long long>, typename T = long long>
 class KMCDualStateReaction
 {
 public:
   /**
-    @brief Default constructor.
-  */
+   * @brief Default constructor.
+   */
   KMCDualStateReaction() = default;
 
   /**
-    @brief Copy constructor.
-  */
+   * @brief Copy constructor.
+   */
   KMCDualStateReaction(const KMCDualStateReaction&) = default;
 
   /**
-    @brief Full constructor.
-    @param[in] a_lhsReactives    Reactive species on the left-hand side of the reaction (i.e., the reactants).
-    @param[in] a_rhsReactives    Reactive species on the right-hand side of the reaction (i.e., the products).
-    @param[in] a_rhsNonReactives Non-reactive species on the right-hand side of the reaction (i.e., piggybacked products).
-  */
+   * @brief Full constructor.
+   * @param[in] a_lhsReactives    Reactive species on the left-hand side of the reaction (i.e., the reactants).
+   * @param[in] a_rhsReactives    Reactive species on the right-hand side of the reaction (i.e., the products).
+   * @param[in] a_rhsNonReactives Non-reactive species on the right-hand side of the reaction (i.e., piggybacked
+   * products).
+   */
   inline KMCDualStateReaction(const std::list<size_t>& a_lhsReactives,
                               const std::list<size_t>& a_rhsReactives,
                               const std::list<size_t>& a_rhsNonReactives) noexcept;
 
   /**
-    @brief Destructor.
-  */
+   * @brief Destructor.
+   */
   inline virtual ~KMCDualStateReaction();
 
   /**
-    @brief Get modifiable reaction rate.
-    @return m_rate
-  */
+   * @brief Get modifiable reaction rate.
+   * @return m_rate
+   */
   inline Real&
   rate() const noexcept;
 
   /**
-    @brief Get the population of the reactant in the input state.
-    @param[in] a_reactant Reactive species.
-    @param[in] a_state    State vector.
-    @return Population of the reactant.
-  */
+   * @brief Get the population of the reactant in the input state.
+   * @param[in] a_reactant Reactive species.
+   * @param[in] a_state    State vector.
+   * @return Population of the reactant.
+   */
   inline static T
   population(const size_t& a_reactant, const State& a_state) noexcept;
 
   /**
-    @brief Compute the propensity function for this reaction type.
-    @param[in] a_state State vector.
-    @return Reaction propensity.
-    @note User should set the rate before calling this routine.
-  */
+   * @brief Compute the propensity function for this reaction type.
+   * @param[in] a_state State vector.
+   * @return Reaction propensity.
+   * @note User should set the rate before calling this routine.
+   */
   inline Real
   propensity(const State& a_state) const noexcept;
 
   /**
-    @brief Compute the number of times the reaction can fire before exhausting one of the reactants.
-    @param[in] a_state State vector.
-    @return Critical number of reactions.
-  */
+   * @brief Compute the number of times the reaction can fire before exhausting one of the reactants.
+   * @param[in] a_state State vector.
+   * @return Critical number of reactions.
+   */
   inline T
   computeCriticalNumberOfReactions(const State& a_state) const noexcept;
 
   /**
-    @brief Get the reactants in the reaction.
-    @return m_lhsReactives
-  */
+   * @brief Get the reactants in the reaction.
+   * @return m_lhsReactives
+   */
   inline std::list<size_t>
   getReactants() const noexcept;
 
   /**
-    @brief Get the products from the reaction.
-    @return m_rhsReactives
-  */
+   * @brief Get the products from the reaction.
+   * @return m_rhsReactives
+   */
   inline std::list<size_t>
   getReactiveProducts() const noexcept;
 
   /**
-    @brief Get the non-reactive products from the reaction.
-    @return m_rhsNonReactives
-  */
+   * @brief Get the non-reactive products from the reaction.
+   * @return m_rhsNonReactives
+   */
   inline std::list<size_t>
   getNonReactiveProducts() const noexcept;
 
   /**
-    @brief Get the state change due to a change in the input reactant.
-    @param[in] a_reactant Reactive species.
-    @return State change for the reactant.
-  */
+   * @brief Get the state change due to a change in the input reactant.
+   * @param[in] a_reactant Reactive species.
+   * @return State change for the reactant.
+   */
   inline T
   getStateChange(const size_t a_reactant) const noexcept;
 
   /**
-    @brief Advance the incoming state with the number of reactions.
-    @param[in,out] a_state        State vector.
-    @param[in]    a_numReactions Number of reactions.
-  */
+   * @brief Advance the incoming state with the number of reactions.
+   * @param[in,out] a_state        State vector.
+   * @param[in]    a_numReactions Number of reactions.
+   */
   inline void
   advanceState(State& a_state, const T& a_numReactions) const noexcept;
 
 protected:
   /**
-    @brief Reaction rate.
-  */
+   * @brief Reaction rate.
+   */
   mutable Real m_rate;
 
   /**
-    @brief Factor for the case where two or more particles of the same species react.
-    @details For reactions X + X -> null the propensity is k * X * (X-1)/2 because there are X * (X-1)/2 unique pairs of particles in the cell.
-  */
+   * @brief Factor for the case where two or more particles of the same species react.
+   * @details For reactions X + X -> null the propensity is k * X * (X-1)/2 because there are X * (X-1)/2 unique pairs
+   * of particles in the cell.
+   */
   Real m_propensityFactor;
 
   /**
-    @brief Reactive species (left-hand side).
-  */
+   * @brief Reactive species (left-hand side).
+   */
   std::list<size_t> m_lhsReactives;
 
   /**
-    @brief Product species (right-hand side reactive).
-  */
+   * @brief Product species (right-hand side reactive).
+   */
   std::list<size_t> m_rhsReactives;
 
   /**
-    @brief Non-reactive product species.
-  */
+   * @brief Non-reactive product species.
+   */
   std::list<size_t> m_rhsNonReactives;
 
   /**
-    @brief State change for reactants/products.
-  */
+   * @brief State change for reactants/products.
+   */
   std::map<size_t, T> m_reactiveStateChange;
 
   /**
-    @brief State change for non-reactive products.
-  */
+   * @brief State change for non-reactive products.
+   */
   std::map<size_t, T> m_nonReactiveStateChange;
 
   /**
-    @brief Compute state change vectors from the reactant/product lists.
-  */
+   * @brief Compute state change vectors from the reactant/product lists.
+   */
   inline void
   computeStateChanges() noexcept;
 
   /**
-    @brief Debugging function which ensures that the class data holders do not reach out of the incoming state.
-    @details This is necessary because PlasmaReaction does not have compile-time size restrictions on the incoming state.
-    The internals of this method uses Chombo assertions so the compiler should be able to take this function out of the
-    executable if compiling with the correct flags.
-    @param[in] a_state State vector.
-  */
+   * @brief Debugging function which ensures that the class data holders do not reach out of the incoming state.
+   * @details This is necessary because PlasmaReaction does not have compile-time size restrictions on the incoming
+   * state. The internals of this method uses Chombo assertions so the compiler should be able to take this function out
+   * of the executable if compiling with the correct flags.
+   * @param[in] a_state State vector.
+   */
   inline void
   sanityCheck(const State& a_state) const noexcept;
 };

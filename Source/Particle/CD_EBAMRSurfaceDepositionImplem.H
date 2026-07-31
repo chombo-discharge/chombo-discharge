@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_EBAMRSurfaceDepositionImplem.H
-  @brief  Implementation of CD_EBAMRSurfaceDeposition.H
-  @author Robert Marskar
-*/
+ * @file   CD_EBAMRSurfaceDepositionImplem.H
+ * @brief  Implementation of CD_EBAMRSurfaceDeposition.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_EBAMRSURFACEDEPOSITIONIMPLEM_H
 #define CD_EBAMRSURFACEDEPOSITIONIMPLEM_H

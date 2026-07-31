@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_SpherePlane.cpp
-  @brief  Implementation of CD_SpherePlane.H
-  @author Robert Marskar
-*/
+ * @file   CD_SpherePlane.cpp
+ * @brief  Implementation of CD_SpherePlane.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <CH_Timer.H>

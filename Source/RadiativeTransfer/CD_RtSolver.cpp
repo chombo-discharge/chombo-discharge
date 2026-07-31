@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_RtSolver.cpp
-  @brief  Implementation of CD_RtSolver.H
-  @author Robert Marskar
-*/
+ * @file   CD_RtSolver.cpp
+ * @brief  Implementation of CD_RtSolver.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <CH_Timer.H>

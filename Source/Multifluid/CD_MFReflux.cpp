@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_MFReflux.cpp
-  @brief  Implementation of CD_MFReflux.H
-  @author Robert Marskar
-*/
+ * @file   CD_MFReflux.cpp
+ * @brief  Implementation of CD_MFReflux.H
+ * @author Robert Marskar
+ */
 
 // Our includes
 #include <CD_MFReflux.H>

@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_CdrMultigrid.cpp
-  @brief  Implementation of CD_CdrMultigrid.H
-  @author Robert Marskar
-*/
+ * @file   CD_CdrMultigrid.cpp
+ * @brief  Implementation of CD_CdrMultigrid.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <ParmParse.H>
@@ -153,7 +153,8 @@ CdrMultigrid::computeKappaLphi(EBAMRCellData& a_kappaLphi, const EBAMRCellData& 
   m_amr->alias(LphiPtr, a_kappaLphi);
   m_amr->alias(phiPtr, a_phi);
 
-  // Need to reset to make sure we are computing kappa*div(D*grad(phi)) and not something like kappa*(phi - div(D*grad(phi))).
+  // Need to reset to make sure we are computing kappa*div(D*grad(phi)) and not something like kappa*(phi -
+  // div(D*grad(phi))).
   this->resetAlphaAndBeta(0.0, 1.0);
 
   m_multigridSolver->computeAMROperator(LphiPtr, phiPtr, finestLevel, coarsestLevel, false);
@@ -184,8 +185,9 @@ CdrMultigrid::advanceEuler(EBAMRCellData&       a_newPhi,
     //
     //          kappa*L(phi) = kappa*rho
     //
-    //       rather than L(phi) = rho. So this means that our right-hand side needs to be kappa-weighted before we pass this into multigrid. We assume that the user
-    //       has provided a source-term that comes in is already weighted, but that the old solution comes in unweighted.
+    //       rather than L(phi) = rho. So this means that our right-hand side needs to be kappa-weighted before we pass
+    //       this into multigrid. We assume that the user has provided a source-term that comes in is already weighted,
+    //       but that the old solution comes in unweighted.
 
     // Set up multigrid again because the diffusion coefficients might have changed underneath us.
     if (!m_hasMultigridSolver) {
@@ -199,13 +201,15 @@ CdrMultigrid::advanceEuler(EBAMRCellData&       a_newPhi,
     //
     //     kappa * phi^(k+1) - kappa*dt*L(phi^(k+1)) = kappa * phi^k + kappa*dt*S
     //
-    // we need to put the right-hand side somewhere. We use scratch for holding kappa*phi^k + kappa*dt*S. Note that we assume that S comes in weighted.
+    // we need to put the right-hand side somewhere. We use scratch for holding kappa*phi^k + kappa*dt*S. Note that we
+    // assume that S comes in weighted.
     DataOps::copy(scratch, a_oldPhi);
     DataOps::kappaScale(scratch, m_amr->getVofIterator(m_realm, m_phase));
     DataOps::incr(scratch, a_source, a_dt);
 
-    // As above, the alpha and beta-coefficients for the Helmholtz operator need to be 1 and -a_dt. The kappas on the left-hand side
-    // in the above equation are absorbed into the Helmholtz operator so we don't need to worry about those.
+    // As above, the alpha and beta-coefficients for the Helmholtz operator need to be 1 and -a_dt. The kappas on the
+    // left-hand side in the above equation are absorbed into the Helmholtz operator so we don't need to worry about
+    // those.
     this->resetAlphaAndBeta(1.0, -a_dt);
 
     // Aliasing because Chombo did not always use smart pointers.
@@ -315,8 +319,9 @@ CdrMultigrid::advanceCrankNicholson(EBAMRCellData&       a_newPhi,
     //
     //          kappa*L(phi) = kappa*rho
     //
-    //       rather than L(phi) = rho. So this means that our right-hand side needs to be kappa-weighted before we pass this into multigrid. We assume that the user
-    //       has provided a source-term that comes in is already weighted, but that the old solution comes in unweighted.
+    //       rather than L(phi) = rho. So this means that our right-hand side needs to be kappa-weighted before we pass
+    //       this into multigrid. We assume that the user has provided a source-term that comes in is already weighted,
+    //       but that the old solution comes in unweighted.
 
     // Set up multigrid again because the diffusion coefficients might have changed underneath us.
     if (!m_hasMultigridSolver) {
@@ -328,10 +333,11 @@ CdrMultigrid::advanceCrankNicholson(EBAMRCellData&       a_newPhi,
 
     // Make the right-hand side for the Euler equation. Since we are solving
     //
-    //     kappa * phi^(k+1) - 0.5 * kappa*dt*L(phi^(k+1)) = kappa * phi^k + 0.5 * kappa*dt*L(phi^k) + kappa*dt*S^(k+1/2)
+    //     kappa * phi^(k+1) - 0.5 * kappa*dt*L(phi^(k+1)) = kappa * phi^k + 0.5 * kappa*dt*L(phi^k) +
+    //     kappa*dt*S^(k+1/2)
     //
-    // we need to put the right-hand side somewhere. We use scratch for holding the right-hand side. Note that S^(k+1/2) should come in weighted and the old solution
-    // come in unweighted.
+    // we need to put the right-hand side somewhere. We use scratch for holding the right-hand side. Note that S^(k+1/2)
+    // should come in weighted and the old solution come in unweighted.
 
     // First, put kappa*phi^k in scratch.
     DataOps::copy(scratch, a_oldPhi);
@@ -354,8 +360,9 @@ CdrMultigrid::advanceCrankNicholson(EBAMRCellData&       a_newPhi,
     // After this we have scratch = kappa * phi^k + 0.5 * kappa*dt*L(phi^k) + kappa*dt*S^(k+1/2)
     DataOps::incr(scratch, kappaLphi, 0.5 * a_dt);
 
-    // From the equation above, the alpha and beta-coefficients for the Helmholtz operator need to be 1 and -0.5*a_dt. The kappas on the left-hand side
-    // in the above equation are absorbed into the Helmholtz operator so we don't need to worry about those.
+    // From the equation above, the alpha and beta-coefficients for the Helmholtz operator need to be 1 and -0.5*a_dt.
+    // The kappas on the left-hand side in the above equation are absorbed into the Helmholtz operator so we don't need
+    // to worry about those.
     this->resetAlphaAndBeta(1.0, -0.5 * a_dt);
 
     // Aliasing because Chombo did not always use smart pointers.
@@ -821,8 +828,8 @@ CdrMultigrid::parseMultigridSettings()
   pp.get("gmg_min_cells", m_minCellsBottom);
   pp.query("gmg_reflux_free", m_multigridRefluxFree);
 
-  // Fetch the desired bottom solver from the input script. We look for things like CdrMultigrid.gmg_bottom_solver = bicgstab or '= simple <number>'
-  // where <number> is the number of relaxation for the smoothing solver.
+  // Fetch the desired bottom solver from the input script. We look for things like CdrMultigrid.gmg_bottom_solver =
+  // bicgstab or '= simple <number>' where <number> is the number of relaxation for the smoothing solver.
   const int num = pp.countval("gmg_bottom_solver");
   if (num == 1) {
     pp.get("gmg_bottom_solver", str);

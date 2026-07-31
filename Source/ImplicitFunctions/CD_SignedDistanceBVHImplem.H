@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_SignedDistanceBVHImplem.H
-  @brief  Implementation of CD_SignedDistanceBVH.H
-  @author Robert Marskar
-*/
+ * @file   CD_SignedDistanceBVHImplem.H
+ * @brief  Implementation of CD_SignedDistanceBVH.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_SIGNEDDISTANCEBVHIMPLEM_H
 #define CD_SIGNEDDISTANCEBVHIMPLEM_H
@@ -61,7 +61,8 @@ Real
 SignedDistanceBVH<T, BV, K>::value(const RealVect& a_point) const
 {
 
-  // TLDR: In 2D we ignore z-variations, freezing that coordinate to some value. We then use the bounding volume hierarchy methodology for computing the signed distance.
+  // TLDR: In 2D we ignore z-variations, freezing that coordinate to some value. We then use the bounding volume
+  // hierarchy methodology for computing the signed distance.
 #if CH_SPACEDIM == 2
   Vec3 p(a_point[0], a_point[1], m_zCoord);
 #else

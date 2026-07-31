@@ -21,55 +21,56 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Base class for passing Robin domain boundary conditions into EBHelmholtzOp. 
-  @details Robin bcs are in the form A*phi + B*dphi/dn = C. We impose dphi/dn = (C - A*phi)/B where phi is extrapolated to the EB to first order. 
-  @note The B-coefficient is not the same as in the Helmholtz equation...
-  @note In our notation, n points into the computational domain. 
-*/
+ * @brief Base class for passing Robin domain boundary conditions into EBHelmholtzOp.
+ * @details Robin bcs are in the form A*phi + B*dphi/dn = C. We impose dphi/dn = (C - A*phi)/B where phi is extrapolated
+ * to the EB to first order.
+ * @note The B-coefficient is not the same as in the Helmholtz equation...
+ * @note In our notation, n points into the computational domain.
+ */
 class EBHelmholtzRobinDomainBC : public EBHelmholtzDomainBC
 {
 public:
   /**
-    @brief Default constructor. Must subsequently set coefficients. 
-  */
+   * @brief Default constructor. Must subsequently set coefficients.
+   */
   EBHelmholtzRobinDomainBC();
 
   /**
-    @brief Destructor
-  */
+   * @brief Destructor
+   */
   virtual ~EBHelmholtzRobinDomainBC();
 
   /**
-    @brief Set constant coefficients
-    @param[in] a_A Constant A-coefficient
-    @param[in] a_B Constant B-coefficient
-    @param[in] a_C Constant C-coefficient
-  */
+   * @brief Set constant coefficients
+   * @param[in] a_A Constant A-coefficient
+   * @param[in] a_B Constant B-coefficient
+   * @param[in] a_C Constant C-coefficient
+   */
   void
   setCoefficients(const Real a_A, const Real a_B, const Real a_C);
 
   /**
-    @brief Set variable coefficients
-    @param[in] a_A Spatially dependent A-coefficient
-    @param[in] a_B Spatially dependent B-coefficient
-    @param[in] a_C Spatially dependent C-coefficient
-  */
+   * @brief Set variable coefficients
+   * @param[in] a_A Spatially dependent A-coefficient
+   * @param[in] a_B Spatially dependent B-coefficient
+   * @param[in] a_C Spatially dependent C-coefficient
+   */
   void
   setCoefficients(const std::function<Real(const RealVect& a_pos)>& a_A,
                   const std::function<Real(const RealVect& a_pos)>& a_B,
                   const std::function<Real(const RealVect& a_pos)>& a_C);
 
   /**
-    @brief Get face flux. This is for regular cells
-    @param[in,out] a_faceFlux       Face-centered flux. 
-    @param[in]    a_phi            Cell-centered data
-    @param[in]    a_Bcoef          Face-centered B-coefficient
-    @param[in]    a_dir            Coordinate direction
-    @param[in]    a_side           High or low side
-    @param[in]    a_dit            Data index
-    @param[in]    a_useHomogeneous Homogeneous physical BCs or not. 
-    @note a_faceFlux is defined in the first strip of interior cells on the (dir,side) edge of the domain. 
-  */
+   * @brief Get face flux. This is for regular cells
+   * @param[in,out] a_faceFlux       Face-centered flux.
+   * @param[in]    a_phi            Cell-centered data
+   * @param[in]    a_Bcoef          Face-centered B-coefficient
+   * @param[in]    a_dir            Coordinate direction
+   * @param[in]    a_side           High or low side
+   * @param[in]    a_dit            Data index
+   * @param[in]    a_useHomogeneous Homogeneous physical BCs or not.
+   * @note a_faceFlux is defined in the first strip of interior cells on the (dir,side) edge of the domain.
+   */
   virtual void
   getFaceFlux(BaseFab<Real>&        a_faceFlux,
               const BaseFab<Real>&  a_phi,
@@ -80,16 +81,16 @@ public:
               const bool            a_useHomogeneous) const override;
 
   /**
-    @brief Get face flux. This is for irregular cells. 
-    @param[in] a_vof            Grid cell
-    @param[in] a_phi            Cell-centered data
-    @param[in] a_Bcoef          Face-centered B-coefficient
-    @param[in] a_dir            Coordinate direction
-    @param[in] a_side           High or low side
-    @param[in] a_dit            Data index
-    @param[in] a_useHomogeneous Homogeneous physical BCs or not. 
-    @return Face flux
-  */
+   * @brief Get face flux. This is for irregular cells.
+   * @param[in] a_vof            Grid cell
+   * @param[in] a_phi            Cell-centered data
+   * @param[in] a_Bcoef          Face-centered B-coefficient
+   * @param[in] a_dir            Coordinate direction
+   * @param[in] a_side           High or low side
+   * @param[in] a_dit            Data index
+   * @param[in] a_useHomogeneous Homogeneous physical BCs or not.
+   * @return Face flux
+   */
   virtual Real
   getFaceFlux(const VolIndex&       a_vof,
               const EBCellFAB&      a_phi,
@@ -100,56 +101,56 @@ public:
               const bool            a_useHomogeneous) const override;
 
   /**
-    @brief Diagonal-weight multiplier for the domain-face contribution to the relaxation diagonal.
-    @details See EBHelmholtzDomainBC::getDiagWeight for how this is selected. The value here preserves the 1.0 that
-             this BC inherited from the previous (non-pure) base default; it has not been re-derived from the Robin
-             getFaceFlux discretization and should be reviewed against it.
-    @param[in] a_dir  Coordinate direction of the face.
-    @param[in] a_side High or low side.
-    @return Diagonal weight.
-  */
+   * @brief Diagonal-weight multiplier for the domain-face contribution to the relaxation diagonal.
+   * @details See EBHelmholtzDomainBC::getDiagWeight for how this is selected. The value here preserves the 1.0 that
+   *          this BC inherited from the previous (non-pure) base default; it has not been re-derived from the Robin
+   *          getFaceFlux discretization and should be reviewed against it.
+   * @param[in] a_dir  Coordinate direction of the face.
+   * @param[in] a_side High or low side.
+   * @return Diagonal weight.
+   */
   Real
   getDiagWeight(const int a_dir, const Side::LoHiSide a_side) const override;
 
 protected:
   /**
-    @brief Use constant for BC
-  */
+   * @brief Use constant for BC
+   */
   bool m_useConstant;
 
   /**
-    @brief Use function for BC value
-  */
+   * @brief Use function for BC value
+   */
   bool m_useFunction;
 
   /**
-    @brief Constant A-coefficient
-  */
+   * @brief Constant A-coefficient
+   */
   Real m_constantA;
 
   /**
-    @brief Constant B-coefficient
-  */
+   * @brief Constant B-coefficient
+   */
   Real m_constantB;
 
   /**
-    @brief Constant C-coefficient
-  */
+   * @brief Constant C-coefficient
+   */
   Real m_constantC;
 
   /**
-    @brief Function-based A-coefficient
-  */
+   * @brief Function-based A-coefficient
+   */
   std::function<Real(const RealVect& a_pos)> m_functionA;
 
   /**
-    @brief Function-based B-coefficient
-  */
+   * @brief Function-based B-coefficient
+   */
   std::function<Real(const RealVect& a_pos)> m_functionB;
 
   /**
-    @brief Function-based C-coefficient
-  */
+   * @brief Function-based C-coefficient
+   */
   std::function<Real(const RealVect& a_pos)> m_functionC;
 };
 

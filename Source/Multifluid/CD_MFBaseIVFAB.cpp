@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_MFBaseIVFAB.cpp
-  @brief  Implementation of CD_MFBaseIVFAB.H
-  @author Robert Marskar
-*/
+ * @file   CD_MFBaseIVFAB.cpp
+ * @brief  Implementation of CD_MFBaseIVFAB.H
+ * @author Robert Marskar
+ */
 
 // Our includes
 #include <CD_MFBaseIVFAB.H>
