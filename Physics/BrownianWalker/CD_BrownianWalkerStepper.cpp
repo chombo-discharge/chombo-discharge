@@ -41,6 +41,7 @@ BrownianWalkerStepper::BrownianWalkerStepper() : m_phase(phase::gas)
   pp.get("cfl", m_cfl);
   pp.get("load_balance", m_loadBalance);
   pp.get("which_balance", str);
+  pp.get("verify_conservation", m_verifyConservation);
 
   if (str == "mesh") {
     m_whichLoadBalance = LoadBalancingMethod::Mesh;
@@ -581,14 +582,54 @@ BrownianWalkerStepper::makeSuperParticles()
     pout() << "BrownianWalkerStepper::makeSuperParticles" << endl;
   }
 
-  // TLDR: ItoSolver requires the particles to be sorted by cell when making superparticles. So we explicitly
-  //       need to call cell/patch sorting methods.
-
   if (m_ppc > 0) {
-    m_solver->organizeParticlesByCell(ItoSolver::WhichContainer::Bulk);
+    // A merge redistributes weight but must never create or destroy it. When requested, compute the
+    // total particle weight on the container before and after the merge -- independent of the merge
+    // scheme and of how the container is organized -- and abort if it drifts by more than round-off.
+    // (makeSuperparticles() does any cell-sorting it needs internally and returns the container
+    // patch-organized.)
+    const Real weightBefore = m_verifyConservation ? this->computeTotalWeight() : 0.0;
+
     m_solver->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_ppc);
-    m_solver->organizeParticlesByPatch(ItoSolver::WhichContainer::Bulk);
+
+    if (m_verifyConservation) {
+      const Real weightAfter = this->computeTotalWeight();
+      const Real absDrift    = std::abs(weightAfter - weightBefore);
+
+      if (absDrift > 1.E-9 * std::max(1.0, std::abs(weightBefore))) {
+        MayDay::Abort("BrownianWalkerStepper::makeSuperParticles -- superparticle merge did not conserve "
+                      "total particle weight");
+      }
+    }
   }
+}
+
+Real
+BrownianWalkerStepper::computeTotalWeight()
+{
+  CH_TIME("BrownianWalkerStepper::computeTotalWeight");
+  if (m_verbosity > 5) {
+    pout() << "BrownianWalkerStepper::computeTotalWeight" << endl;
+  }
+
+  const ParticleContainer<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::Bulk);
+
+  Real weight = 0.0;
+
+  for (int lvl = 0; lvl <= particles.getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl = particles.getGrids()[lvl];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      const auto&         leaf = particles[lvl][dit()];
+      const double* const w    = leaf.weightColumn();
+
+      weight = ParticleLoops::reduce(leaf, weight, [&](const Real a_acc, const std::size_t a_i) {
+        return a_acc + w[a_i];
+      });
+    }
+  }
+
+  return ParallelOps::sum(weight);
 }
 
 void

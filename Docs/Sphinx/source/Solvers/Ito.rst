@@ -27,7 +27,7 @@ It is a Struct-of-Arrays payload (see :ref:`Chap:ParticleSoA`) whose columns are
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoParticle.H
    :language: c++
-   :lines: 46-67
+   :lines: 30-54
 
 In addition to the container-owned position and weight, ``ItoParticle`` stores the payload columns above.
 These extra fields are used for storing the following information in the particle:
@@ -144,7 +144,7 @@ The particles are available from the solver through the function
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 632-638
+   :lines: 634-640
    :dedent: 2
 
 Usually, ``ItoSolver`` will perform a drift-diffusion advance and the user will then check if some of the particles crossed into the EB.
@@ -157,7 +157,7 @@ Remapping particles
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 836-847
+   :lines: 883-894
    :dedent: 2
 
 The bottom function lets the user remap any ``ParticleContainer<ItoParticle>`` that lives in the solver.
@@ -171,7 +171,7 @@ The most general version is given below:
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 341-356
+   :lines: 343-358
    :dedent: 2
 
 This version permits the user to deposit an arbitrary per-particle quantity from a particle container ``a_particles`` onto some pre-allocated mesh storage ``a_phi``.
@@ -186,7 +186,7 @@ A simpler version that deposits the bulk particles as a density on the mesh is
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 293-300
+   :lines: 295-302
    :dedent: 2
 
 The particles are deposited into the class member ``m_phi``, which stores the particle density on the mesh. 
@@ -194,7 +194,7 @@ This data can then be fetched with
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 655-660
+   :lines: 657-662
    :dedent: 2
    
 For the full list of available deposition functions, see the ``ItoSolver`` C++ API `<https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classItoSolver.html>`_.
@@ -214,7 +214,7 @@ Functionality for the above deposited quantities exist as the following function
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 196-208,220-232
+   :lines: 198-210,222-234
    :dedent: 2
 
 .. _Chap:ItoInterpolation:
@@ -242,7 +242,7 @@ Complete interpolation of the particle velocity consists of calling two function
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 750-755,732-738
+   :lines: 752-757,734-740
    :dedent: 2
 
 Here, the calling sequence is such that the mobilities must be interpolated first, and then the velocity fields. 
@@ -281,7 +281,7 @@ The function signature is
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 764-769
+   :lines: 766-771
    :dedent: 2
 
 Particle intersections
@@ -294,7 +294,7 @@ The most relevant function is
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 432-439
+   :lines: 434-441
    :dedent: 2
 
 Here, ``EBIntersection`` is just an enum for putting logic into how the intersection is computed.
@@ -321,7 +321,7 @@ This routine is implemented as
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 958-963
+   :lines: 1005-1010
    :dedent: 2
 
 which returns a CFL-like condition
@@ -337,7 +337,7 @@ The signatures for the diffusion time step are similar to the ones for drift:
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 982-987
+   :lines: 1029-1034
    :dedent: 2
 
 which returns a CFL-like condition
@@ -355,7 +355,7 @@ A combination of the advection and diffusion time step routines also exists as
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 871-881
+   :lines: 918-928
    :dedent: 2
 
 This time step limitation is inspired by fully explicit and non-split fluid models, and is calculated as
@@ -369,19 +369,20 @@ Superparticle management
 
 It can occasionally be necessary to merge or split computational particles.
 This occurs in, e.g., plasma simulations where chemical reactions lead to exponential growth of particles. 
-``ItoSolver`` handles superparticles via a configurable merger functor selected at parse time through ``ItoSolver.merge_algorithm``; the user can also supply a custom functor through ``setParticleMerger``.
+``ItoSolver`` handles superparticles via a configurable merger functor selected at parse time through ``ItoSolver.merge_algorithm``; the user can also supply a custom functor through ``setParticleCellMerger``.
 The entry point for splitting and merging is in all cases
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 792-798
+   :lines: 794-800
    :dedent: 2
 
 Calling this function will merge/split the particles.
 
 .. important::
-   
-   Particle merging is currently performed within each grid cell, and particles must therefore be sorted by their cell index before calling the merging routine.
+
+   Most merging algorithms are performed within each grid cell, and particles must therefore be sorted by their cell index (``organizeParticlesByCell``) before calling the merging routine.
+   The exception is ``nn_pair``, which is a distributed AMR-level merge that matches particles across patch and rank boundaries; it instead requires that a width-1 particle ghost halo has been filled, and is dispatched over the whole container rather than cell by cell.
 
 
 	    
@@ -391,22 +392,23 @@ In order to specify the merging algorithm the user must set the ``ItoSolver.merg
 * ``equal_weight_kd`` Use a kD-tree with bounding volume hierarchies to partition and split/merge the particles. This conserves the particle center-of-mass.
 * ``reinitialize`` Re-initialize the particles in each grid cell, ensuring that weights are as uniform as possible.
 * ``reinitialize_bvh`` Re-initialize the particles in each node of a kD tree. Weights are as uniform as possible.
-* ``sfc_nn`` Reach the target particle count by space-filling-curve nearest-neighbour clustering: when there are more particles than the target the nearest neighbours (along a Hilbert curve) are merged until the target count is reached, and when there are fewer the highest-weight particles are split. This gives spatially tight groups but does not equalize the weights.
-* ``external`` Use an externally injected particle merging algorithm. In order to use this feature the user must supply one through ``setParticleMerger``.
+* ``nn_sfc`` Reach the target particle count by space-filling-curve nearest-neighbour clustering: when there are more particles than the target the nearest neighbours (along a Hilbert curve) are merged until the target count is reached, and when there are fewer the highest-weight particles are split. This gives spatially tight groups but does not equalize the weights.
+* ``nn_pair`` A distributed, MPI-safe nearest-neighbour *pair* merge that reaches the target particle count over the whole AMR hierarchy. Over-full cells are drained by matching each over-crowded particle with its true nearest neighbour across patch and rank boundaries (a propose/judge/verdict protocol over a width-1 particle ghost halo) and merging the pair to its weighted centroid; because a single round merges pairs, the round is repeated until every cell reaches the target. Under-full cells are then brought up to the target by splitting the heaviest particle into two co-located daughters (floor/ceil weights, so integer weights stay integer). Tunable through ``ItoSolver.nn_pair_iterate``, ``ItoSolver.nn_pair_fallback`` and ``ItoSolver.nn_pair_max_cell_dist``.
+* ``external`` Use an externally injected particle merging algorithm. In order to use this feature the user must supply one through ``setParticleCellMerger``.
 
 The user can set the merging algorithm through the input script (see :ref:`Chap:ItoInput`), or supply one externally by setting the merge algorithm to ``external``.
 In addition, the user must first supply a particle merging function:
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 91-96
+   :lines: 91-98
    :dedent: 2
 
 In the code above, ``ParticleManagement::ParticleMerger<P>`` is an alias:
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleManagement.H
    :language: c++
-   :lines: 35-43
+   :lines: 66-74
    :dedent: 2
 
 .. tip::

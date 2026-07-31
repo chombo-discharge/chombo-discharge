@@ -15,6 +15,7 @@
 
 // Std includes
 #include <functional>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -28,9 +29,39 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Namespace for various particle management tools. 
+  @brief Namespace for various particle management tools.
 */
 namespace ParticleManagement {
+
+  /**
+    @brief The specific super-particle merge methods.
+  */
+  enum class ParticleMergeMethod
+  {
+    None,            ///< No merging.
+    EqualWeightKD,   ///< Cell: makeEqualWeightKDMerger.
+    Reinitialize,    ///< Cell: makeReinitializeMerger.
+    ReinitializeBVH, ///< Cell: makeEqualWeightKDMerger with reinitialized leaf positions.
+    NnSfc,           ///< Cell: makeSfcNearestNeighborMerger.
+    NnPair,          ///< AMR: mergeNearestNeighborsRound.
+    External         ///< Cell: caller-supplied per-cell merger.
+  };
+
+  /**
+    @brief Map a merge-algorithm selector string to a ParticleMergeMethod.
+    @details Valid input options are:
+    'none' -> None
+    'equal_weight_kd' -> EqualWeightKD
+    'reinitialize' -> Reinitialize
+    'reinitialize_bvh' -> ReinitializeBVH
+    'nn_sfc' -> NnSfc
+    'nn_pair' -> NnPair
+    'external' -> External
+    @param[in] a_str String selector. Must take one of the above strings.
+    @return The corresponding method; aborts on an unknown selector.
+  */
+  inline ParticleMergeMethod
+  mergeMethodFromString(const std::string& a_str) noexcept;
 
   /**
     @brief Concept for splitting/merging particles
@@ -71,8 +102,8 @@ namespace ParticleManagement {
        P::*position -> Member function returning a const reference to the particle position.
 
     P must be an AoS-style particle type with weight()/position() member functions (e.g. NonCommParticle).
-    SoA payload types (ItoParticle, ...) have no such methods; pack their columns into such an intermediary
-    first (as ItoSolver::makeSuperparticlesEqualWeightKD does).
+    ParticleSoA payload types (ItoParticle, ...) have no such methods; pack their columns into such an
+    intermediary AoS structure first.
 
     @param[in]  a_particles         Input particles (copied into internal scratch; not modified).
     @param[in]  a_maxLeaves         Maximum number of leaf nodes (the per-cell target particle count).
@@ -142,7 +173,7 @@ namespace ParticleManagement {
     @param[in] a_gather   Per-slot gather: `(const ParticleSoA<P,Traits>&, std::size_t) -> Packed`.
     @param[in] a_combine  In-place merge: `(Packed& first, const Packed& second) -> void`.
     @param[in] a_scatter  Append one merged particle: `(ParticleSoA<P,Traits>&, const Packed&) -> void`.
-    @return A ParticleMerger<P, Traits> ready to be stored in e.g. ItoSolver::m_particleMerger.
+    @return A ParticleMerger<P, Traits> ready to be stored in e.g. ItoSolver::m_particleCellMerger.
   */
   template <class Packed,
             Real& (Packed::*packWeight)(),
@@ -186,7 +217,7 @@ namespace ParticleManagement {
     @param[in] a_scatterLeaf Leaf reducer: `(ParticleSoA<P,Traits>&, const Packed* first,
                              const Packed* last, const CellInfo&) -> void`.  Appends exactly one merged
                              particle per call.
-    @return A ParticleMerger<P, Traits> ready to be stored in e.g. ItoSolver::m_particleMerger.
+    @return A ParticleMerger<P, Traits> ready to be stored in e.g. ItoSolver::m_particleCellMerger.
   */
   template <class Packed,
             Real& (Packed::*packWeight)(),
@@ -227,7 +258,7 @@ namespace ParticleManagement {
     @param[in] a_probLo    Lazy supplier of the domain lower-left corner (from AmrMesh::getProbLo).
                            Called on every merge invocation; capture the solver's AmrMesh reference
                            so the call is deferred until after AMR setup completes.
-    @return A ParticleMerger<P, Traits> ready to be stored in e.g. ItoSolver::m_particleMerger.
+    @return A ParticleMerger<P, Traits> ready to be stored in e.g. ItoSolver::m_particleCellMerger.
   */
   template <class Context, class P, class Traits = ParticleTraits<P>>
   inline ParticleMerger<P, Traits>

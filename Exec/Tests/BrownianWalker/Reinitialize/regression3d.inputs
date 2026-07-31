@@ -127,7 +127,7 @@ BrownianWalker.cfl                     = 1.0         ## CFL-like number.
 BrownianWalker.ppc                     = 16          ## Target particles per cell
 BrownianWalker.load_balance            = true        ## Turn on/off particle load balancing
 BrownianWalker.which_balance           = mesh        ## Switch for load balancing method. Either 'mesh' or 'particle'.
-BrownianWalker.verify_conservation     = false       ## Abort if a superparticle merge does not conserve total weight
+BrownianWalker.verify_conservation     = true        ## Abort if a superparticle merge does not conserve total weight
 
 # Velocity, diffusion, and CFL
 # ----------------------------

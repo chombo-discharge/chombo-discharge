@@ -316,6 +316,15 @@ namespace Physics {
       int m_ppc;
 
       /**
+         @brief If true, verify that the superparticle merge conserves the total particle weight.
+         @details When set, makeSuperParticles() sums the global (MPI-reduced) particle weight before
+         and after the merge and calls MayDay::Abort if the two differ by more than a small relative
+         tolerance. Off by default -- it costs two global reductions per merge, so it is intended for
+         regression testing rather than production runs.
+      */
+      bool m_verifyConservation;
+
+      /**
          @brief CFL-like scaling factor applied to the solver's intrinsic time step estimate.
       */
       Real m_cfl;
@@ -341,9 +350,21 @@ namespace Physics {
 
       /**
          @brief Sort particles by cell, merge to m_ppc per cell, then re-sort by patch.
+         @details If m_verifyConservation is set, the total particle weight is checked for
+         conservation across the merge and the run is aborted if it is violated.
       */
       void
       makeSuperParticles();
+
+      /**
+         @brief Compute the global total weight of the bulk particles.
+         @details Folds the weight column over every leaf of the bulk container with
+         ParticleLoops::reduce and MPI-reduces the result. Reads the container as-is, independent of
+         whether it is organized by cell or by patch. Used by the conservation check.
+         @return Global (MPI-reduced) sum of all bulk particle weights.
+      */
+      Real
+      computeTotalWeight();
 
       /**
          @brief Load balance using particle counts estimated from mesh-deposited data.

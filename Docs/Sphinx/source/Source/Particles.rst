@@ -30,7 +30,7 @@ The payload is described by a ``ParticleTraits<P>`` specialization that lists th
 A representative payload (the tracer-particle velocity + Runge-Kutta scratch) looks like
 
 .. literalinclude:: ../../../../Source/TracerParticles/CD_TracerParticle.H
-   :lines: 20-73
+   :lines: 20-81
    :language: c++
 
 Per-component vectors are declared as individual scalar columns (there is no ``RealVect`` column type); the ``D_DECL`` macro expands to the ``SpaceDim`` components.
@@ -322,7 +322,7 @@ To fill the masked particles, ``ParticleContainer<P, Traits>`` has member functi
 The function signature for this is
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 702-703
+   :lines: 703-704
    :language: c++
    :dedent: 2
 
@@ -725,13 +725,15 @@ The recommended pattern operates on one cell at a time: cell-sort the leaf, extr
 and the merged result is accumulated into an output ``ParticleSoA`` (via ``append``) which finally replaces the leaf with ``swap``.
 A complete worked example is ``ItoSolver::makeSuperparticles`` in :file:`$DISCHARGE_HOME/Source/ItoDiffusion/CD_ItoSolver.cpp`.
 
-``chombo-discharge`` supports four merger strategies, all implemented as factory functions in ``ParticleManagement`` that return a ``ParticleMerger<P, Traits>`` functor.
+``chombo-discharge`` supports several merger strategies.
+The four cell-granularity strategies below are implemented as factory functions in ``ParticleManagement`` that return a ``ParticleMerger<P, Traits>`` functor.
 Each factory accepts user-supplied lambdas for the particle-type-specific gather, reduce, and scatter steps, so the same algorithm can be reused with any ``ParticleSoA`` payload type.
+A fifth strategy, ``nn_pair``, merges nearest-neighbour pairs collectively across the AMR hierarchy rather than one cell at a time; it is not a per-cell factory and is described at the end of this section.
 
 kD-trees
 ________
 
-``chombo-discharge`` has functionality for spatially partitioning particles using kD-trees, which can be used as a basis for particle merging and splitting.
+``chombo-discharge`` partitions particles using kD-trees as the internal basis for the ``equal_weight_kd`` and ``reinitialize_bvh`` mergers; user code reaches this through the ``makeEqualWeightKDMerger`` factory described below, never by calling the partitioner directly.
 kD-trees operate by partitioning a set of input primitives into spatially coherent subsets.
 At each level in the tree recursion one chooses an axis for partitioning one subset into two new subsets, and the recursion continues until the partitioning is complete.
 :numref:`Fig:PartitionKD` shows an example where a set of initial particles are partitioned using such a tree.
@@ -743,9 +745,10 @@ At each level in the tree recursion one chooses an axis for partitioning one sub
 
    Example of a kD-tree partitioning of particles in a single cell.
 
-.. tip::
+.. note::
 
-   The source code for the kD-tree partitioner is given in :file:`$DISCHARGE_HOME/Source/Particle/CD_ParticleManagement.H` (``ParticleManagement::buildEqualWeightKDLeaves``).
+   ``buildEqualWeightKDLeaves`` (in :file:`$DISCHARGE_HOME/Source/Particle/CD_ParticleManagement.H`) is an internal helper -- it implements the partitioning below but is not part of the public interface.
+   The public entry point is the ``makeEqualWeightKDMerger`` factory (see :ref:`below <kd-tree-merging>`), which wraps it.
 
 The kD-tree partitioner operates on a lightweight, communication-free particle type (``NonCommParticle``) carrying the position, weight, and any quantities to be preserved across a merge.
 The partitioner ``buildEqualWeightKDLeaves`` recursively bisects the input particles into spatially coherent leaves whose weights are as equal as possible -- at each bisection the two halves differ by at most one physical particle.
@@ -767,6 +770,8 @@ Since the weight in the nodes of the tree differ by at most one, the resulting c
    kD-tree partitioning of particles into new particles whose weight differ by at most one.
    Left: Original particles with weights between 1 and 100.
    Right: Merged particles.
+
+.. _kd-tree-merging:
 
 KD-tree merging (``equal_weight_kd``)
 ______________________________________
@@ -803,7 +808,7 @@ _____________________________________
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleManagement.H
    :language: c++
-   :lines: 232-237
+   :lines: 263-268
    :dedent: 2
 
 The returned functor proceeds as follows:
@@ -820,14 +825,14 @@ This method requires that particle weights are (close to) integers.
    ``makeReinitializeMerger`` captures ``probLo`` at parse time.
    The cell-centre position is computed internally as ``probLo + dx * (gridIndex + 0.5)``, so no grid pointer needs to be retained in the returned functor.
 
-SFC nearest-neighbour merging (``sfc_nn``)
+SFC nearest-neighbour merging (``nn_sfc``)
 ___________________________________________
 
 ``ParticleManagement::makeSfcNearestNeighborMerger`` sorts particles along a Hilbert space-filling curve and merges adjacent pairs until the count is at most ``ppc``.
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleManagement.H
    :language: c++
-   :lines: 147-155
+   :lines: 178-186
    :dedent: 2
 
 The caller provides three lambdas:
@@ -843,3 +848,27 @@ The Hilbert ordering ensures that merged pairs are spatially close, which better
 .. tip::
 
    The source code for all merger factories is in :file:`$DISCHARGE_HOME/Source/Particle/CD_ParticleManagement.H`.
+
+.. _nn-pair-merging:
+
+Nearest-neighbour pair merging (``nn_pair``)
+_____________________________________________
+
+Unlike the four strategies above, ``nn_pair`` is not a per-cell factory that returns a ``ParticleMerger`` functor.
+It is a distributed, MPI-safe merge that operates collectively across the whole AMR hierarchy, implemented as ``ParticleManagement::mergeNearestNeighborsRound`` in :file:`$DISCHARGE_HOME/Source/Particle/CD_NearestNeighborParticleMerge.H`.
+Each call performs one *round*:
+
+#. Ghost particles are refilled (fresh, exactly once per round) so that a particle's nearest neighbour may be one owned by another patch or rank.
+#. Every particle's nearest neighbour is located, and pairs lying entirely within one patch are merged immediately (the *trivial tier*).
+#. Pairs that straddle a patch or rank boundary are resolved through a single cross-patch propose/judge/verdict exchange, so both owners agree on exactly one merge and no particle is merged twice.
+
+Because a round merges *pairs*, a cell far above the target count is not necessarily drained in a single call; the merge is invoked once per time step and relies on repeated rounds -- and, in a running simulation, on particle motion between them -- for further convergence.
+Merged particles need globally unique ids that cannot collide across ranks or rounds, so the caller supplies an id allocator (a rank-namespaced counter suffices).
+
+.. important::
+
+   ``nn_pair`` requires a width-1 particle ghost mask, which is only built during a regrid.
+   The mask must therefore be registered *before* the grids are (re)built -- registering it late leaves it empty and the neighbour search will not see cross-patch particles.
+   ``ItoSolver`` handles this automatically when ``merge_algorithm = nn_pair``, and ``ItoKMCStepper`` does the same when its regrid-time merge is set to ``nn_pair``.
+
+In ``ItoSolver`` the behaviour is tuned through ``nn_pair_iterate`` (repeat the local trivial-tier merges within a round until no further local pairs remain), ``nn_pair_fallback`` (how many additional candidate neighbours to consider when the nearest is unavailable), and ``nn_pair_max_cell_dist`` (cap the neighbour search radius in cells).

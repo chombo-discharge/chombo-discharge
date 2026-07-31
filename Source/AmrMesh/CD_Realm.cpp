@@ -173,7 +173,6 @@ Realm::regridBase(const int a_lmin)
   this->defineMFLevelGrid(a_lmin);
   this->defineValidCells();
   this->defineLevelTiles();
-  this->defineParticleGhostMasks();
 }
 
 void
@@ -189,6 +188,7 @@ Realm::regridOperators(const int a_lmin)
   }
 
   this->defineMasks(a_lmin);
+  this->defineParticleGhostMasks();
   this->definePetscGrid();
 }
 

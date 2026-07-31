@@ -89,14 +89,16 @@ public:
   operator=(ItoSolver&&) = default;
 
   /**
-    @brief Set the particle merger. This will get called when merging particles using makeSuperparticles.
-    @param[in] a_particleMerger Particle merger
+    @brief Set the user-supplied per-cell particle merger used by merge_algorithm = external.
+    @details The built-in merge methods build their own per-cell merger internally; this one is used
+    only when merge_algorithm = external, applied cell-by-cell by makeSuperparticles().
+    @param[in] a_particleCellMerger Per-cell particle merger.
   */
   virtual void
-  setParticleMerger(const ParticleManagement::ParticleMerger<ItoParticle>& a_particleMerger) noexcept;
+  setParticleCellMerger(const ParticleManagement::ParticleMerger<ItoParticle>& a_particleCellMerger) noexcept;
 
   /**
-    @brief Get this solver's name 
+    @brief Get this solver's name
     @return Returns m_name
   */
   virtual std::string
@@ -798,40 +800,85 @@ public:
   makeSuperparticles(WhichContainer a_container, int a_particlesPerCell);
 
   /**
-    @brief Make superparticles for a full container -- this is the AMR version that users will usually call. 
+    @brief Make superparticles for a full container -- this is the AMR version that users will usually call.
     @param[in] a_container        Which container to repartition into new superparticles
-    @param[in] a_particlesPerCell Target number of particles per cell. Vector indicates grid levels. 
+    @param[in] a_particlesPerCell Target number of particles per cell. Vector indicates grid levels.
   */
   virtual void
   makeSuperparticles(WhichContainer a_container, const Vector<int>& a_particlesPerCell);
 
   /**
-    @brief Make superparticles for a particle container -- this is used for a specified grid level. 
-    @param[in] a_container        Which container to repartition into new superparticles
-    @param[in] a_particlesPerCell Target number of particles per cell
-    @param[in] a_level            Grid level
+    @brief Make superparticles with an explicitly chosen method, ignoring the configured
+    merge_algorithm.
+    @details Lets a caller run a different method than the solver's own (e.g. a stepper choosing a
+    regrid-time merge). Routes to the matching makeSuperparticlesXxx(); ParticleMergeMethod::None is a
+    no-op.
+    @param[in] a_container        Which container to repartition.
+    @param[in] a_particlesPerCell Target particle count per cell (per-level; the last entry applies to
+                                  any finer level).
+    @param[in] a_method           The merge method to run.
   */
   virtual void
-  makeSuperparticles(WhichContainer a_container, int a_particlesPerCell, int a_level);
+  makeSuperparticles(WhichContainer                                a_container,
+                     const Vector<int>&                            a_particlesPerCell,
+                     const ParticleManagement::ParticleMergeMethod a_method);
 
   /**
-    @brief Make superparticles for a particle container -- this is used for a specified grid level and patch
-    @param[in] a_container        Which container to repartition into new superparticles
-    @param[in] a_particlesPerCell Target number of particles per cell
-    @param[in] a_level            Grid level
-    @param[in] a_dit              Grid index
+    @brief Make superparticles with the equal-weight KD-tree merge, regardless of merge_algorithm.
+    @details Recursively partitions each cell into at most a_particlesPerCell equal-weight KD leaves and
+    reduces each to one weighted-centroid particle. The container must be cell-sorted
+    (organizeParticlesByCell()) first.
+    @param[in] a_container        Which container to repartition.
+    @param[in] a_particlesPerCell Target particle count per cell (per-level; the last entry applies to
+                                  any finer level).
   */
   virtual void
-  makeSuperparticles(WhichContainer a_container, int a_particlesPerCell, int a_level, const DataIndex& a_dit);
+  makeSuperparticlesEqualWeightKD(WhichContainer a_container, const Vector<int>& a_particlesPerCell);
 
   /**
-    @brief General superparticle merging with underlying algorithm through m_particleMerger
-    @param[in,out] a_particles Particles to be merged/split
-    @param[in]    a_cellInfo  Arithmetic information about the current grid cell.
-    @param[in]    a_ppc       Target number of particles per cell
+    @brief Make superparticles with the reinitialize merge, regardless of merge_algorithm.
+    @details Redistributes each cell's physical particles into at most a_particlesPerCell computational
+    particles with near-uniform integer weights at random cell positions. The container must be
+    cell-sorted (organizeParticlesByCell()) first.
+    @param[in] a_container        Which container to repartition.
+    @param[in] a_particlesPerCell Target particle count per cell (per-level).
   */
   virtual void
-  mergeParticles(ParticleSoA<ItoParticle>& a_particles, const CellInfo& a_cellInfo, int a_ppc) const noexcept;
+  makeSuperparticlesReinitialize(WhichContainer a_container, const Vector<int>& a_particlesPerCell);
+
+  /**
+    @brief Make superparticles with the reinitialize-BVH merge, regardless of merge_algorithm.
+    @details Like makeSuperparticlesEqualWeightKD() but reinitializes leaf positions (weighted centroid
+    in cut-cells, a random point in full cells). The container must be cell-sorted first.
+    @param[in] a_container        Which container to repartition.
+    @param[in] a_particlesPerCell Target particle count per cell (per-level).
+  */
+  virtual void
+  makeSuperparticlesReinitializeBVH(WhichContainer a_container, const Vector<int>& a_particlesPerCell);
+
+  /**
+    @brief Make superparticles with the space-filling-curve nearest-neighbour merge, regardless of
+    merge_algorithm.
+    @details Sorts particles along a Hilbert curve and merges adjacent pairs until the target is reached
+    (splitting the heaviest when below target). The container must be cell-sorted first.
+    @param[in] a_container        Which container to repartition.
+    @param[in] a_particlesPerCell Target particle count per cell (per-level).
+  */
+  virtual void
+  makeSuperparticlesNnSfc(WhichContainer a_container, const Vector<int>& a_particlesPerCell);
+
+  /**
+    @brief Make superparticles with the distributed nearest-neighbour pair merge, regardless of
+    merge_algorithm.
+    @details Whole-container, cross-patch/cross-rank AMR merge (see
+    ParticleManagement::mergeNearestNeighborsRound). Requires the width-1 particle ghost mask registered
+    on this realm (see registerOperators()); it does its own ghost fill and does NOT need cell sorting.
+    Uses a single crowding threshold -- the coarsest level's a_particlesPerCell entry.
+    @param[in] a_container        Which container to repartition.
+    @param[in] a_particlesPerCell Target particle count (only the first entry is used).
+  */
+  virtual void
+  makeSuperparticlesNnPair(WhichContainer a_container, const Vector<int>& a_particlesPerCell);
 
   /**
     @brief Remap the bulk particle container.
@@ -1067,9 +1114,45 @@ protected:
   WhichMobilityInterpolation m_mobilityInterp;
 
   /**
-    @brief Particle merger
+    @brief User-supplied per-cell merger for merge_algorithm = external (set via
+    setParticleCellMerger()). The built-in methods build their own merger locally in the corresponding
+    makeSuperparticlesXxx().
   */
-  ParticleManagement::ParticleMerger<ItoParticle> m_particleMerger;
+  ParticleManagement::ParticleMerger<ItoParticle> m_particleCellMerger;
+
+  /**
+    @brief The configured merge method (which specific algorithm).
+    @details Set by parseParticleMerger() from ItoSolver.merge_algorithm. makeSuperparticles()
+    dispatches on this to run the right algorithm. Defaults to EqualWeightKD (the default
+    merge_algorithm).
+  */
+  ParticleManagement::ParticleMergeMethod m_mergeMethod = ParticleManagement::ParticleMergeMethod::EqualWeightKD;
+
+  /**
+    @brief nn_pair: iterate the local trivial tier to convergence within each round.
+    @details Forwarded to ParticleManagement::mergeNearestNeighborsRound(). Only used for nn_pair.
+  */
+  bool m_nnPairIterate = true;
+
+  /**
+    @brief nn_pair: number of fallback candidates per query. The k-nearest graph is
+    built with k = 1 + this. Only used for nn_pair.
+  */
+  int m_nnPairFallback = 1;
+
+  /**
+    @brief nn_pair: maximum merge distance in whole cells (Chebyshev). A negative
+    value means unbounded (std::nullopt). Only used for nn_pair.
+  */
+  int m_nnPairMaxCellDistance = -1;
+
+  /**
+    @brief nn_pair: maximum number of drain rounds run per makeSuperparticles() call.
+    @details Each round merges nearest-neighbor pairs and roughly halves an over-full cell's surplus; the
+    loop also stops early once a round merges nothing. This caps the round count so the cost stays bounded
+    and predictable rather than running to full convergence. Only used for nn_pair.
+  */
+  int m_nnPairMaxRounds = 3;
 
   /**
     @brief Number of particles used when restarting a simulation -- this is relevant only when restarting from a "fluid" checkpoint file. 
@@ -1306,6 +1389,21 @@ protected:
   */
   void
   parseParticleMerger();
+
+  /**
+    @brief Apply a per-cell merger over an entire container, cell by cell.
+    @details Shared machinery for every cell-based makeSuperparticlesXxx(): the container must be
+    cell-sorted (organizeParticlesByCell()); for each non-empty cell the particles are extracted, passed
+    to a_merger with the cell's CellInfo and target count, and the result rebuilt into the leaf.
+    @param[in] a_container        Which container to repartition.
+    @param[in] a_particlesPerCell Target particle count per cell (per-level; the last entry applies to
+                                  any finer level).
+    @param[in] a_merger           The per-cell merger to apply.
+  */
+  void
+  applyCellMerger(WhichContainer                                         a_container,
+                  const Vector<int>&                                     a_particlesPerCell,
+                  const ParticleManagement::ParticleMerger<ItoParticle>& a_merger);
 
   /**
     @brief Parse EB intersection algorithms
