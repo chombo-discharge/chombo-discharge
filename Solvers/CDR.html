@@ -206,15 +206,17 @@ These approximations are encapsulated by the following functions:</p>
 <div class="literal-block-wrapper docutils container" id="id1">
 <span id="cdr-div-functions"></span><div class="code-block-caption"><span class="caption-number">Listing 24 </span><span class="caption-text">List of functions responsible for calculating approximations to divergence operators.</span><a class="headerlink" href="#id1" title="Permalink to this code"></a></div>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Compute div(J) explicitly, where J = nV - D*grad(n)</span>
-<span class="cm">  @param[out] a_divJ             Divergence term, i.e. finite volume approximation to </span>
-<span class="cm">  @param[in]  a_phi              Cell-centered state</span>
-<span class="cm">  @param[in]  a_extrapDt         Extrapolation in time, i.e. shifting of div(J) towards e.g. half time step. Only affects the advective term. </span>
-<span class="cm">  @param[in]  a_conservativeOnly If true, we compute div(J) = 1/dx*sum(fluxes), which does not involve redistribution.</span>
-<span class="cm">  @param[in]  a_ebFlux           If true, the embedded boundary flux will injected and included in div(J)</span>
-<span class="cm">  @param[in]  a_domainFlux       If true, the domain flux will injected and included in div(J)</span>
-<span class="cm">  @note a_phi is non-const because ghost cells will be re-filled</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Compute div(J) explicitly, where J = nV - D*grad(n)</span>
+<span class="cm"> * @param[out] a_divJ             Divergence term, i.e. finite volume approximation to</span>
+<span class="cm"> * @param[in]  a_phi              Cell-centered state</span>
+<span class="cm"> * @param[in]  a_extrapDt         Extrapolation in time, i.e. shifting of div(J) towards e.g. half time step. Only</span>
+<span class="cm"> * affects the advective term.</span>
+<span class="cm"> * @param[in]  a_conservativeOnly If true, we compute div(J) = 1/dx*sum(fluxes), which does not involve</span>
+<span class="cm"> * redistribution.</span>
+<span class="cm"> * @param[in]  a_ebFlux           If true, the embedded boundary flux will injected and included in div(J)</span>
+<span class="cm"> * @param[in]  a_domainFlux       If true, the domain flux will injected and included in div(J)</span>
+<span class="cm"> * @note a_phi is non-const because ghost cells will be re-filled</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="nf">computeDivJ</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_divJ</span><span class="p">,</span>
 <span class="w">            </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_phi</span><span class="p">,</span>
@@ -224,15 +226,18 @@ These approximations are encapsulated by the following functions:</p>
 <span class="w">            </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w">     </span><span class="n">a_domainFlux</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
 <span class="cm">/**</span>
-<span class="cm">  @brief Compute div(v*phi) explicitly</span>
-<span class="cm">  @param[out] a_divF             Divergence term, i.e. finite volume approximation to Div(v*phi), including redistribution magic. </span>
-<span class="cm">  @param[in]  a_phi              Cell-centered state</span>
-<span class="cm">  @param[in]  a_extrapDt         Extrapolation in time, i.e. shifting of div(F) towards e.g. half time step. Only affects the advective term. </span>
-<span class="cm">  @param[in]  a_conservativeOnly If true, we compute div(F)=1/dx*sum(fluxes), which does not involve redistribution.</span>
-<span class="cm">  @param[in]  a_ebFlux           If true, the embedded boundary flux will injected be included in div(F)</span>
-<span class="cm">  @param[in]  a_domainFlux       If true, the domain flux will injected and included in div(F)</span>
-<span class="cm">  @note a_phi is non-const because ghost cells will be interpolated in this routine. Valid data in a_phi is not touched. </span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Compute div(v*phi) explicitly</span>
+<span class="cm"> * @param[out] a_divF             Divergence term, i.e. finite volume approximation to Div(v*phi), including</span>
+<span class="cm"> * redistribution magic.</span>
+<span class="cm"> * @param[in]  a_phi              Cell-centered state</span>
+<span class="cm"> * @param[in]  a_extrapDt         Extrapolation in time, i.e. shifting of div(F) towards e.g. half time step. Only</span>
+<span class="cm"> * affects the advective term.</span>
+<span class="cm"> * @param[in]  a_conservativeOnly If true, we compute div(F)=1/dx*sum(fluxes), which does not involve redistribution.</span>
+<span class="cm"> * @param[in]  a_ebFlux           If true, the embedded boundary flux will injected be included in div(F)</span>
+<span class="cm"> * @param[in]  a_domainFlux       If true, the domain flux will injected and included in div(F)</span>
+<span class="cm"> * @note a_phi is non-const because ghost cells will be interpolated in this routine. Valid data in a_phi is not</span>
+<span class="cm"> * touched.</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="nf">computeDivF</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_divF</span><span class="p">,</span>
 <span class="w">            </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_phi</span><span class="p">,</span>
@@ -242,14 +247,16 @@ These approximations are encapsulated by the following functions:</p>
 <span class="w">            </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w">     </span><span class="n">a_domainFlux</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
 <span class="cm">/**</span>
-<span class="cm">  @brief Compute div(D*grad(phi)) explicitly</span>
-<span class="cm">  @param[in]  a_phi              Cell-centered state</span>
-<span class="cm">  @param[in]  a_conservativeOnly If true, we compute div(D) = 1/dx*sum(fluxes), which does not involve redistribution.</span>
-<span class="cm">  @param[in]  a_domainFlux       If true, the domain flux will injected and included in div(D)</span>
-<span class="cm">  @note a_phi is non-const because ghost cells will be interpolated in this routine. Valid data in a_phi is not touched. </span>
-<span class="cm">  @param[in] a_divD Div d</span>
-<span class="cm">  @param[in] a_ebFlux Eb flux</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Compute div(D*grad(phi)) explicitly</span>
+<span class="cm"> * @param[in]  a_phi              Cell-centered state</span>
+<span class="cm"> * @param[in]  a_conservativeOnly If true, we compute div(D) = 1/dx*sum(fluxes), which does not involve</span>
+<span class="cm"> * redistribution.</span>
+<span class="cm"> * @param[in]  a_domainFlux       If true, the domain flux will injected and included in div(D)</span>
+<span class="cm"> * @note a_phi is non-const because ghost cells will be interpolated in this routine. Valid data in a_phi is not</span>
+<span class="cm"> * touched.</span>
+<span class="cm"> * @param[in] a_divD Div d</span>
+<span class="cm"> * @param[in] a_ebFlux Eb flux</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="nf">computeDivD</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_divD</span><span class="p">,</span>
 <span class="w">            </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_phi</span><span class="p">,</span>
@@ -265,14 +272,16 @@ In the current structure, <a class="reference internal" href="#chap-cdrmultigrid
 <div class="literal-block-wrapper docutils container" id="id2">
 <span id="cdr-implicit-diffusion"></span><div class="code-block-caption"><span class="caption-number">Listing 25 </span><span class="caption-text">List of current implicit diffusion advance functions.</span><a class="headerlink" href="#id2" title="Permalink to this code"></a></div>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Implicit diffusion Euler advance with source term.</span>
-<span class="cm">  @param[in,out] a_newPhi Solution at time t + dt</span>
-<span class="cm">  @param[in]    a_oldPhi Solution at time t</span>
-<span class="cm">  @param[in]    a_source Source term. </span>
-<span class="cm">  @param[in]    a_dt     Time step</span>
-<span class="cm">  @note For purely implicit Euler the source term should be centered at t+dt (otherwise it&#39;s an implicit-explicit method)</span>
-<span class="cm">  @details This solves the implicit diffusion equation equation a_newPhi - a_oldPhi = dt*Laplacian(a_newPhi) + dt*a_source. </span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Implicit diffusion Euler advance with source term.</span>
+<span class="cm"> * @param[in,out] a_newPhi Solution at time t + dt</span>
+<span class="cm"> * @param[in]    a_oldPhi Solution at time t</span>
+<span class="cm"> * @param[in]    a_source Source term.</span>
+<span class="cm"> * @param[in]    a_dt     Time step</span>
+<span class="cm"> * @note For purely implicit Euler the source term should be centered at t+dt (otherwise it&#39;s an implicit-explicit</span>
+<span class="cm"> * method)</span>
+<span class="cm"> * @details This solves the implicit diffusion equation equation a_newPhi - a_oldPhi = dt*Laplacian(a_newPhi) +</span>
+<span class="cm"> * dt*a_source.</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="nf">advanceEuler</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w">       </span><span class="n">a_newPhi</span><span class="p">,</span>
 <span class="w">             </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_oldPhi</span><span class="p">,</span>
@@ -280,12 +289,12 @@ In the current structure, <a class="reference internal" href="#chap-cdrmultigrid
 <span class="w">             </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">           </span><span class="n">a_dt</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
 <span class="cm">/**</span>
-<span class="cm">  @brief Implicit diffusion Crank-Nicholson advance with source term.</span>
-<span class="cm">  @param[in,out] a_newPhi Solution at time t + dt</span>
-<span class="cm">  @param[in]    a_oldPhi Solution at time t</span>
-<span class="cm">  @param[in]    a_source Source term. </span>
-<span class="cm">  @param[in]    a_dt     Time step</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Implicit diffusion Crank-Nicholson advance with source term.</span>
+<span class="cm"> * @param[in,out] a_newPhi Solution at time t + dt</span>
+<span class="cm"> * @param[in]    a_oldPhi Solution at time t</span>
+<span class="cm"> * @param[in]    a_source Source term.</span>
+<span class="cm"> * @param[in]    a_dt     Time step</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="nf">advanceCrankNicholson</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w">       </span><span class="n">a_newPhi</span><span class="p">,</span>
 <span class="w">                      </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_oldPhi</span><span class="p">,</span>
@@ -347,12 +356,15 @@ After these steps, we define</p>
 <p>Numerically, the above steps for computing a conservative divergence of a one-component flux <span class="math notranslate nohighlight">\(\mathbf{G}\)</span> are implemented in the convection-diffusion-reaction solvers, which also respects boundary conditions (e.g. charge injection).
 The user will need to call the function</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Compute div(G) where G is a general face-centered flux on face centers and EB centers. This can involve mass redistribution.</span>
-<span class="cm">  @param[in]    a_divG             div(G) or kappa*div(G).</span>
-<span class="cm">  @param[in,out] a_G                Vector field which contains face-centered fluxes on input. Contains face-centroid fluxes on output. </span>
-<span class="cm">  @param[in]    a_ebFlux           Flux on the EB centroids</span>
-<span class="cm">  @param[in]    a_conservativeOnly If true, we compute div(G)=1/dx*sum(fluxes), which does not involve redistribution.</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Compute div(G) where G is a general face-centered flux on face centers and EB centers. This can involve mass</span>
+<span class="cm"> * redistribution.</span>
+<span class="cm"> * @param[in]    a_divG             div(G) or kappa*div(G).</span>
+<span class="cm"> * @param[in,out] a_G                Vector field which contains face-centered fluxes on input. Contains face-centroid</span>
+<span class="cm"> * fluxes on output.</span>
+<span class="cm"> * @param[in]    a_ebFlux           Flux on the EB centroids</span>
+<span class="cm"> * @param[in]    a_conservativeOnly If true, we compute div(G)=1/dx*sum(fluxes), which does not involve</span>
+<span class="cm"> * redistribution.</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="nf">computeDivG</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_divG</span><span class="p">,</span><span class="w"> </span><span class="n">EBAMRFluxData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_G</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRIVData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_ebFlux</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">a_conservativeOnly</span><span class="p">);</span>
 </pre></div>
@@ -456,13 +468,13 @@ The class can use either implicit or explicit diffusion using second-order cell-
 In addition, <code class="docutils literal notranslate"><span class="pre">CdrMultigrid</span></code> adds two implicit time-integrators, an implicit Euler method and a Crank-Nicholson method.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">CdrMultigrid</span></code> layer uses the Helmholtz discretization discussed in <a class="reference internal" href="../Source/LinearSolvers.html#chap-helmholtz"><span class="std std-ref">Helmholtz equation</span></a>.
 It implements the pure functions required by <a class="reference internal" href="#chap-cdrsolver"><span class="std std-ref">CdrSolver</span></a> but introduces a new pure function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Maximum number of iterations</span>
-<span class="cm">*/</span>
-<span class="kt">int</span><span class="w"> </span><span class="n">m_multigridMaxIterations</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Maximum number of iterations</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">m_multigridMaxIterations</span><span class="p">;</span>
 
-<span class="cm">/**</span>
-<span class="cm">  @brief Minimum number of iterations</span>
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Minimum number of iterations</span>
 </pre></div>
 </div>
 <p>The faces states defined by the above function are used when forming a finite-volume approximation to the divergence operators.
@@ -607,72 +619,72 @@ However, it only supports the monotonized central difference limiter.</p>
 <h3>Filling the solver<a class="headerlink" href="#filling-the-solver" title="Permalink to this heading"></a></h3>
 <p>In order to obtain mesh data from the <code class="docutils literal notranslate"><span class="pre">CdrSolver</span></code>, the user should use the following public member functions:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Get the cell-centered phi</span>
-<span class="cm">  @return m_phi</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Get the cell-centered phi</span>
+<span class="cm"> * @return m_phi</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span>
 <span class="nf">getPhi</span><span class="p">();</span>
 
 <span class="cm">/**</span>
-<span class="cm">  @brief Get the source term</span>
-<span class="cm">  @return m_source</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Get the source term</span>
+<span class="cm"> * @return m_source</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span>
 <span class="nf">getSource</span><span class="p">();</span>
 
 <span class="cm">/**</span>
-<span class="cm">  @brief Get the cell-centered velocity</span>
-<span class="cm">  @return m_cellVelocity</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Get the cell-centered velocity</span>
+<span class="cm"> * @return m_cellVelocity</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span>
 <span class="nf">getCellCenteredVelocity</span><span class="p">();</span>
 
 <span class="cm">/**</span>
-<span class="cm">  @brief Get the face-centered velocities</span>
-<span class="cm">  @return m_faceVelocity</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Get the face-centered velocities</span>
+<span class="cm"> * @return m_faceVelocity</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="n">EBAMRFluxData</span><span class="o">&amp;</span>
 <span class="nf">getFaceCenteredVelocity</span><span class="p">();</span>
 
 <span class="cm">/**</span>
-<span class="cm">  @brief Get the eb-centered velocities</span>
-<span class="cm">  @return m_ebVelocity</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Get the eb-centered velocities</span>
+<span class="cm"> * @return m_ebVelocity</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="n">EBAMRIVData</span><span class="o">&amp;</span>
 <span class="nf">getEbCenteredVelocity</span><span class="p">();</span>
 
 <span class="cm">/**</span>
-<span class="cm">  @brief Get the cell-centered diffusion coefficient.</span>
-<span class="cm">  @return m_cellCenteredDiffusionCoefficient</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Get the cell-centered diffusion coefficient.</span>
+<span class="cm"> * @return m_cellCenteredDiffusionCoefficient</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span>
 <span class="nf">getCellCenteredDiffusionCoefficient</span><span class="p">();</span>
 
 <span class="cm">/**</span>
-<span class="cm">  @brief Get the face-centered diffusion coefficient</span>
-<span class="cm">  @return m_faceCentereDiffusionCoefficient</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Get the face-centered diffusion coefficient</span>
+<span class="cm"> * @return m_faceCentereDiffusionCoefficient</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="n">EBAMRFluxData</span><span class="o">&amp;</span>
 <span class="nf">getFaceCenteredDiffusionCoefficient</span><span class="p">();</span>
 
 <span class="cm">/**</span>
-<span class="cm">  @brief Get the EB-centered diffusion coefficient</span>
-<span class="cm">  @return m_ebCentereDiffusionCoefficient</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Get the EB-centered diffusion coefficient</span>
+<span class="cm"> * @return m_ebCentereDiffusionCoefficient</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="n">EBAMRIVData</span><span class="o">&amp;</span>
 <span class="nf">getEbCenteredDiffusionCoefficient</span><span class="p">();</span>
 
 <span class="cm">/**</span>
-<span class="cm">  @brief Get the eb flux data holder</span>
-<span class="cm">  @return m_ebFlux</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Get the eb flux data holder</span>
+<span class="cm"> * @return m_ebFlux</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="n">EBAMRIVData</span><span class="o">&amp;</span>
 <span class="nf">getEbFlux</span><span class="p">();</span>
 
 <span class="cm">/**</span>
-<span class="cm">  @brief Get the domain flux data holder</span>
-<span class="cm">  @return m_domainFlux</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Get the domain flux data holder</span>
+<span class="cm"> * @return m_domainFlux</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="n">EBAMRIFData</span><span class="o">&amp;</span>
 <span class="nf">getDomainFlux</span><span class="p">();</span>
 </pre></div>
@@ -688,14 +700,15 @@ Interpolation to face-centered transport fluxes are done by <code class="docutil
 <p>Then, <code class="docutils literal notranslate"><span class="pre">veloCell</span></code> can be filled with the cell-centered velocity.
 One can use <code class="docutils literal notranslate"><span class="pre">DataOps</span></code> functions to fill the data directly using a C++ lambda:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Polymorphic set value function. Takes a spatially varying function and sets the value in the specified component from that function.</span>
-<span class="cm">  @param[out] a_lhs      Data to set.</span>
-<span class="cm">  @param[in]  a_function Function to use for setting the value.</span>
-<span class="cm">  @param[in]  a_probLo   Lower-left corner of physical domain.</span>
-<span class="cm">  @param[in]  a_dx       Grid resolutions.</span>
-<span class="cm">  @param[in]  a_comp     Component to set.</span>
-<span class="cm">  @param[in]  a_vofIter  Pre-built VoF iterators (multiply-cut cells) for each level.</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Polymorphic set value function. Takes a spatially varying function and sets the value in the specified</span>
+<span class="cm"> * component from that function.</span>
+<span class="cm"> * @param[out] a_lhs      Data to set.</span>
+<span class="cm"> * @param[in]  a_function Function to use for setting the value.</span>
+<span class="cm"> * @param[in]  a_probLo   Lower-left corner of physical domain.</span>
+<span class="cm"> * @param[in]  a_dx       Grid resolutions.</span>
+<span class="cm"> * @param[in]  a_comp     Component to set.</span>
+<span class="cm"> * @param[in]  a_vofIter  Pre-built VoF iterators (multiply-cut cells) for each level.</span>
+<span class="cm"> */</span>
 <span class="k">static</span><span class="w"> </span><span class="kt">void</span>
 <span class="nf">setValue</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w">                                        </span><span class="n">a_lhs</span><span class="p">,</span>
 <span class="w">         </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w">            </span><span class="n">a_function</span><span class="p">,</span>

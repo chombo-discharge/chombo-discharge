@@ -237,10 +237,10 @@ payload members.</p>
 <h2>Initialization<a class="headerlink" href="#initialization" title="Permalink to this heading"></a></h2>
 <p>To initialize the solver, one can use the full constructor</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Full constructor</span>
-<span class="cm">  @param[in] a_amr      Handle to AmrMesh.</span>
-<span class="cm">  @param[in] a_compGeom Computational geometry. </span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Full constructor</span>
+<span class="cm"> * @param[in] a_amr      Handle to AmrMesh.</span>
+<span class="cm"> * @param[in] a_compGeom Computational geometry.</span>
+<span class="cm"> */</span>
 <span class="n">TracerParticleSolver</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">AmrMesh</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_amr</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">ComputationalGeometry</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_compGeom</span><span class="p">);</span>
 </pre></div>
 </div>
@@ -249,16 +249,16 @@ payload members.</p>
 <h2>Getting the particles<a class="headerlink" href="#getting-the-particles" title="Permalink to this heading"></a></h2>
 <p>To obtain the solver particles, simply call</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Get all particles.</span>
-<span class="cm">  @return m_particles</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Get all particles.</span>
+<span class="cm"> * @return m_particles</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span>
 <span class="n">getParticles</span><span class="p">();</span>
 
 <span class="cm">/**</span>
-<span class="cm">  @brief Get all particles. Const version.</span>
-<span class="cm">  @return m_particles</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Get all particles. Const version.</span>
+<span class="cm"> * @return m_particles</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span>
 <span class="n">getParticles</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 </pre></div>
@@ -269,9 +269,9 @@ payload members.</p>
 <h2>Setting <span class="math notranslate nohighlight">\(\mathbf{v}\)</span><a class="headerlink" href="#setting-mathbf-v" title="Permalink to this heading"></a></h2>
 <p>To set the velocity field on the mesh, use</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Set the tracer particle velocity field.</span>
-<span class="cm">  @param[in] a_velocityField Velocity field.</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Set the tracer particle velocity field.</span>
+<span class="cm"> * @param[in] a_velocityField Velocity field.</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="nf">setVelocity</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_velocityField</span><span class="p">);</span>
 </pre></div>
@@ -282,8 +282,8 @@ payload members.</p>
 <h2>Interpolating velocities<a class="headerlink" href="#interpolating-velocities" title="Permalink to this heading"></a></h2>
 <p>To compute <span class="math notranslate nohighlight">\(\mathbf{V} = \mathbf{v}\left(\mathbf{X}\right)\)</span> for all particles that reside in the solver, use</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Interpolate particles velocities.</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Interpolate particles velocities.</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="nf">interpolateVelocities</span><span class="p">();</span>
 </pre></div>
@@ -291,9 +291,9 @@ payload members.</p>
 <p>This will interpolate the velocities to the particle positions using the user-defined interpolation method (see <a class="reference internal" href="#chap-tracerinputoptions"><span class="std std-ref">Input options</span></a>).</p>
 <p>If desirable, one can also interpolate a scalar field defined on the mesh onto the particle weight by calling</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Interpolate a scalar field onto the particle weight.</span>
-<span class="cm">  @param[in] a_scalar Scalar field to interpolate from.</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Interpolate a scalar field onto the particle weight.</span>
+<span class="cm"> * @param[in] a_scalar Scalar field to interpolate from.</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="nf">interpolateWeight</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_scalar</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
@@ -305,9 +305,9 @@ See <a class="reference internal" href="../Source/Particles.html#chap-particleme
 <h2>Deposit particles<a class="headerlink" href="#deposit-particles" title="Permalink to this heading"></a></h2>
 <p>To deposit the particles, call</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Deposit particle weight on mesh. </span>
-<span class="cm">  @param[out] a_phi Deposited weight. </span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Deposit particle weight on mesh.</span>
+<span class="cm"> * @param[out] a_phi Deposited weight.</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="nf">deposit</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_phi</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>

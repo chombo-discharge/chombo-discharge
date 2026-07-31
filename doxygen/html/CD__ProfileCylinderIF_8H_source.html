@@ -103,47 +103,47 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment">// Our includes</span></div>
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &lt;CD_NamespaceHeader.H&gt;</span></div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
-<div class="foldopen" id="foldopen00027" data-start="{" data-end="};">
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno"><a class="line" href="classProfileCylinderIF.html">   27</a></span><span class="keyword">class </span><a class="code hl_class" href="classProfileCylinderIF.html">ProfileCylinderIF</a> : <span class="keyword">public</span> BaseIF</div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>{</div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="keyword">public</span>:</div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="classProfileCylinderIF.html#a2f49faca177c60540aa7891b73e31bc6">   33</a></span>  <a class="code hl_function" href="classProfileCylinderIF.html#a2f49faca177c60540aa7891b73e31bc6">ProfileCylinderIF</a>() = <span class="keyword">delete</span>;</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>  <a class="code hl_function" href="classProfileCylinderIF.html#a2f49faca177c60540aa7891b73e31bc6">ProfileCylinderIF</a>(<span class="keyword">const</span> RealVect&amp; a_endPoint1,</div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>                    <span class="keyword">const</span> RealVect&amp; a_endPoint2,</div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>                    <span class="keyword">const</span> Real      a_cylinderRadius,</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>                    <span class="keyword">const</span> Real      a_torusMajorRadius,</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>                    <span class="keyword">const</span> Real      a_torusMinorRadius,</div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>                    <span class="keyword">const</span> Real      a_ccDistance,</div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>                    <span class="keyword">const</span> Real      a_shift,</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>                    <span class="keyword">const</span> Real      a_roundingRadius,</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>                    <span class="keyword">const</span> <span class="keywordtype">int</span>       a_numLeft,</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>                    <span class="keyword">const</span> <span class="keywordtype">int</span>       a_numRight,</div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>                    <span class="keyword">const</span> <span class="keywordtype">bool</span>      a_fluidInside);</div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span> </div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>  <a class="code hl_function" href="classProfileCylinderIF.html#a2f49faca177c60540aa7891b73e31bc6">ProfileCylinderIF</a>(<span class="keyword">const</span> <a class="code hl_class" href="classProfileCylinderIF.html">ProfileCylinderIF</a>&amp; a_inputIF);</div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno"><a class="line" href="classProfileCylinderIF.html#aa1909a2591755b4837b08b39a454e72f">   70</a></span>  <span class="keyword">virtual</span> <a class="code hl_function" href="classProfileCylinderIF.html#aa1909a2591755b4837b08b39a454e72f">~ProfileCylinderIF</a>();</div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>  <span class="keyword">virtual</span> Real</div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>  <a class="code hl_function" href="classProfileCylinderIF.html#ae38e2d7b7219a898dda61c618c3ffd27">value</a>(<span class="keyword">const</span> RealVect&amp; a_pos) <span class="keyword">const override</span>;</div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span> </div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>  <span class="keyword">virtual</span> BaseIF*</div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>  <a class="code hl_function" href="classProfileCylinderIF.html#a48ed687f08abb6e16d0d791a259db23e">newImplicitFunction</a>() <span class="keyword">const override</span>;</div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span> </div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span><span class="keyword">protected</span>:</div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno"><a class="line" href="classProfileCylinderIF.html#ac460de319b071e87a9b3f68302e9b33b">   91</a></span>  RefCountedPtr&lt;BaseIF&gt; <a class="code hl_variable" href="classProfileCylinderIF.html#ac460de319b071e87a9b3f68302e9b33b">m_baseIF</a>;</div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>};</div>
+<div class="foldopen" id="foldopen00028" data-start="{" data-end="};">
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno"><a class="line" href="classProfileCylinderIF.html">   28</a></span><span class="keyword">class </span><a class="code hl_class" href="classProfileCylinderIF.html">ProfileCylinderIF</a> : <span class="keyword">public</span> BaseIF</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>{</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="classProfileCylinderIF.html#a2f49faca177c60540aa7891b73e31bc6">   34</a></span>  <a class="code hl_function" href="classProfileCylinderIF.html#a2f49faca177c60540aa7891b73e31bc6">ProfileCylinderIF</a>() = <span class="keyword">delete</span>;</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>  <a class="code hl_function" href="classProfileCylinderIF.html#a2f49faca177c60540aa7891b73e31bc6">ProfileCylinderIF</a>(<span class="keyword">const</span> RealVect&amp; a_endPoint1,</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>                    <span class="keyword">const</span> RealVect&amp; a_endPoint2,</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>                    <span class="keyword">const</span> Real      a_cylinderRadius,</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>                    <span class="keyword">const</span> Real      a_torusMajorRadius,</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>                    <span class="keyword">const</span> Real      a_torusMinorRadius,</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>                    <span class="keyword">const</span> Real      a_ccDistance,</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>                    <span class="keyword">const</span> Real      a_shift,</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>                    <span class="keyword">const</span> Real      a_roundingRadius,</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>                    <span class="keyword">const</span> <span class="keywordtype">int</span>       a_numLeft,</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>                    <span class="keyword">const</span> <span class="keywordtype">int</span>       a_numRight,</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>                    <span class="keyword">const</span> <span class="keywordtype">bool</span>      a_fluidInside);</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span> </div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>  <a class="code hl_function" href="classProfileCylinderIF.html#a2f49faca177c60540aa7891b73e31bc6">ProfileCylinderIF</a>(<span class="keyword">const</span> <a class="code hl_class" href="classProfileCylinderIF.html">ProfileCylinderIF</a>&amp; a_inputIF);</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno"><a class="line" href="classProfileCylinderIF.html#aa1909a2591755b4837b08b39a454e72f">   71</a></span>  <span class="keyword">virtual</span> <a class="code hl_function" href="classProfileCylinderIF.html#aa1909a2591755b4837b08b39a454e72f">~ProfileCylinderIF</a>();</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>  <span class="keyword">virtual</span> Real</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>  <a class="code hl_function" href="classProfileCylinderIF.html#ae38e2d7b7219a898dda61c618c3ffd27">value</a>(<span class="keyword">const</span> RealVect&amp; a_pos) <span class="keyword">const override</span>;</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span> </div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>  <span class="keyword">virtual</span> BaseIF*</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>  <a class="code hl_function" href="classProfileCylinderIF.html#a48ed687f08abb6e16d0d791a259db23e">newImplicitFunction</a>() <span class="keyword">const override</span>;</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span> </div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span><span class="keyword">protected</span>:</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno"><a class="line" href="classProfileCylinderIF.html#ac460de319b071e87a9b3f68302e9b33b">   92</a></span>  RefCountedPtr&lt;BaseIF&gt; <a class="code hl_variable" href="classProfileCylinderIF.html#ac460de319b071e87a9b3f68302e9b33b">m_baseIF</a>;</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>};</div>
 </div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span> </div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span><span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span> </div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span><span class="preprocessor">#endif</span></div>
-<div class="ttc" id="aclassProfileCylinderIF_html"><div class="ttname"><a href="classProfileCylinderIF.html">ProfileCylinderIF</a></div><div class="ttdoc">Implicit function which takes the form of a cylinder with a surface profiles (grooves).</div><div class="ttdef"><b>Definition</b> CD_ProfileCylinderIF.H:28</div></div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span> </div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span><span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span> </div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="aclassProfileCylinderIF_html"><div class="ttname"><a href="classProfileCylinderIF.html">ProfileCylinderIF</a></div><div class="ttdoc">Implicit function which takes the form of a cylinder with a surface profiles (grooves).</div><div class="ttdef"><b>Definition</b> CD_ProfileCylinderIF.H:29</div></div>
 <div class="ttc" id="aclassProfileCylinderIF_html_a2f49faca177c60540aa7891b73e31bc6"><div class="ttname"><a href="classProfileCylinderIF.html#a2f49faca177c60540aa7891b73e31bc6">ProfileCylinderIF::ProfileCylinderIF</a></div><div class="ttdeci">ProfileCylinderIF()=delete</div><div class="ttdoc">No weak construction, use the full constructor.</div></div>
 <div class="ttc" id="aclassProfileCylinderIF_html_a48ed687f08abb6e16d0d791a259db23e"><div class="ttname"><a href="classProfileCylinderIF.html#a48ed687f08abb6e16d0d791a259db23e">ProfileCylinderIF::newImplicitFunction</a></div><div class="ttdeci">virtual BaseIF * newImplicitFunction() const override</div><div class="ttdoc">Factory method.</div><div class="ttdef"><b>Definition</b> CD_ProfileCylinderIF.cpp:111</div></div>
 <div class="ttc" id="aclassProfileCylinderIF_html_aa1909a2591755b4837b08b39a454e72f"><div class="ttname"><a href="classProfileCylinderIF.html#aa1909a2591755b4837b08b39a454e72f">ProfileCylinderIF::~ProfileCylinderIF</a></div><div class="ttdeci">virtual ~ProfileCylinderIF()</div><div class="ttdoc">Destructor (does nothing)</div></div>
-<div class="ttc" id="aclassProfileCylinderIF_html_ac460de319b071e87a9b3f68302e9b33b"><div class="ttname"><a href="classProfileCylinderIF.html#ac460de319b071e87a9b3f68302e9b33b">ProfileCylinderIF::m_baseIF</a></div><div class="ttdeci">RefCountedPtr&lt; BaseIF &gt; m_baseIF</div><div class="ttdoc">Implicit function. This is an intersection between a cylinder and several torii.</div><div class="ttdef"><b>Definition</b> CD_ProfileCylinderIF.H:91</div></div>
+<div class="ttc" id="aclassProfileCylinderIF_html_ac460de319b071e87a9b3f68302e9b33b"><div class="ttname"><a href="classProfileCylinderIF.html#ac460de319b071e87a9b3f68302e9b33b">ProfileCylinderIF::m_baseIF</a></div><div class="ttdeci">RefCountedPtr&lt; BaseIF &gt; m_baseIF</div><div class="ttdoc">Implicit function. This is an intersection between a cylinder and several torii.</div><div class="ttdef"><b>Definition</b> CD_ProfileCylinderIF.H:92</div></div>
 <div class="ttc" id="aclassProfileCylinderIF_html_ae38e2d7b7219a898dda61c618c3ffd27"><div class="ttname"><a href="classProfileCylinderIF.html#ae38e2d7b7219a898dda61c618c3ffd27">ProfileCylinderIF::value</a></div><div class="ttdeci">virtual Real value(const RealVect &amp;a_pos) const override</div><div class="ttdoc">Value function. Returns distance to object.</div><div class="ttdef"><b>Definition</b> CD_ProfileCylinderIF.cpp:105</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->

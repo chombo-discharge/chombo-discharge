@@ -108,33 +108,33 @@ $(document).ready(function() { init_codefold(0); });
 <div class="foldopen" id="foldopen00064" data-start="{" data-end="}">
 <div class="line"><a id="l00064" name="l00064"></a><span class="lineno"><a class="line" href="namespaceParticleLoops.html">   64</a></span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceParticleLoops.html">ParticleLoops</a> {</div>
 <div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>  <span class="keyword">template</span> &lt;<span class="keyword">typename</span> P, <span class="keyword">typename</span> Traits, <span class="keyword">typename</span> Functor&gt;</div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>  ALWAYS_INLINE <span class="keywordtype">void</span></div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> P, <span class="keyword">typename</span> Traits, <span class="keyword">typename</span> Functor&gt;</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>ALWAYS_INLINE <span class="keywordtype">void</span></div>
 <div class="foldopen" id="foldopen00087" data-start="{" data-end="}">
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno"><a class="line" href="namespaceParticleLoops.html#a00a84427e650034af595bdb9b2cde5de">   87</a></span>  <a class="code hl_function" href="namespaceParticleLoops.html#a00a84427e650034af595bdb9b2cde5de">loop</a>(<span class="keyword">const</span> <a class="code hl_class" href="classParticleSoA.html">ParticleSoA&lt;P, Traits&gt;</a>&amp; a_soa, Functor&amp;&amp; a_kernel)</div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>  {</div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    <span class="keyword">const</span> std::size_t numParticles = a_soa.<a class="code hl_function" href="classParticleSoA.html#a4a1ed9474a75b6142f7fccebaf059d13">size</a>();</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno"><a class="line" href="namespaceParticleLoops.html#a00a84427e650034af595bdb9b2cde5de">   87</a></span><a class="code hl_function" href="namespaceParticleLoops.html#a00a84427e650034af595bdb9b2cde5de">loop</a>(<span class="keyword">const</span> <a class="code hl_class" href="classParticleSoA.html">ParticleSoA&lt;P, Traits&gt;</a>&amp; a_soa, Functor&amp;&amp; a_kernel)</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>{</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>  <span class="keyword">const</span> std::size_t numParticles = a_soa.<a class="code hl_function" href="classParticleSoA.html#a4a1ed9474a75b6142f7fccebaf059d13">size</a>();</div>
 <div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span> </div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    CD_PRAGMA_SIMD</div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>    <span class="keywordflow">for</span> (std::size_t i = 0; i &lt; numParticles; i++) {</div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>      a_kernel(i);</div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>    }</div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>  }</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>  CD_PRAGMA_SIMD</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>  <span class="keywordflow">for</span> (std::size_t i = 0; i &lt; numParticles; i++) {</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>    a_kernel(i);</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>  }</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>}</div>
 </div>
 <div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span> </div>
-<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>  <span class="keyword">template</span> &lt;<span class="keyword">typename</span> P, <span class="keyword">typename</span> Traits, <span class="keyword">typename</span> T, <span class="keyword">typename</span> Functor&gt;</div>
-<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>  ALWAYS_INLINE T</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> P, <span class="keyword">typename</span> Traits, <span class="keyword">typename</span> T, <span class="keyword">typename</span> Functor&gt;</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>ALWAYS_INLINE T</div>
 <div class="foldopen" id="foldopen00122" data-start="{" data-end="}">
-<div class="line"><a id="l00122" name="l00122"></a><span class="lineno"><a class="line" href="namespaceParticleLoops.html#aedc38b74dab3bc859f00c7176dabd6b1">  122</a></span>  <a class="code hl_function" href="namespaceParticleLoops.html#aedc38b74dab3bc859f00c7176dabd6b1">reduce</a>(<span class="keyword">const</span> <a class="code hl_class" href="classParticleSoA.html">ParticleSoA&lt;P, Traits&gt;</a>&amp; a_soa, T a_initial, Functor&amp;&amp; a_kernel)</div>
-<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>  {</div>
-<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>    <span class="keyword">const</span> std::size_t numParticles = a_soa.<a class="code hl_function" href="classParticleSoA.html#a4a1ed9474a75b6142f7fccebaf059d13">size</a>();</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno"><a class="line" href="namespaceParticleLoops.html#aedc38b74dab3bc859f00c7176dabd6b1">  122</a></span><a class="code hl_function" href="namespaceParticleLoops.html#aedc38b74dab3bc859f00c7176dabd6b1">reduce</a>(<span class="keyword">const</span> <a class="code hl_class" href="classParticleSoA.html">ParticleSoA&lt;P, Traits&gt;</a>&amp; a_soa, T a_initial, Functor&amp;&amp; a_kernel)</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>{</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>  <span class="keyword">const</span> std::size_t numParticles = a_soa.<a class="code hl_function" href="classParticleSoA.html#a4a1ed9474a75b6142f7fccebaf059d13">size</a>();</div>
 <div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span> </div>
-<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>    <span class="keywordflow">for</span> (std::size_t i = 0; i &lt; numParticles; i++) {</div>
-<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>      a_initial = a_kernel(a_initial, i);</div>
-<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>    }</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>  <span class="keywordflow">for</span> (std::size_t i = 0; i &lt; numParticles; i++) {</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>    a_initial = a_kernel(a_initial, i);</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>  }</div>
 <div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span> </div>
-<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>    <span class="keywordflow">return</span> a_initial;</div>
-<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>  }</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>  <span class="keywordflow">return</span> a_initial;</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>}</div>
 </div>
 <div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span> </div>
 <div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>} <span class="comment">// namespace ParticleLoops</span></div>

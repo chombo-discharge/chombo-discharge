@@ -1237,8 +1237,7 @@ Virtual because some solvers might want to do this differently. </dd></dl>
 </div><div class="memdoc">
 
 <p>Compute the largest possible diffusive time step (for explicit methods) </p>
-<p>This computes dt = dx/sum(|vx| + |vy| + |vz|), minimized over all grid levels and patches. <br  />
- </p><dl class="section note"><dt>Note</dt><dd>This is the appropriate time step routine for explicit advection solvers. </dd></dl>
+<p>This computes dt = dx/sum(|vx| + |vy| + |vz|), minimized over all grid levels and patches. </p><dl class="section note"><dt>Note</dt><dd>This is the appropriate time step routine for explicit advection solvers. </dd></dl>
 <dl class="section return"><dt>Returns</dt><dd>Computed advection dt </dd></dl>
 
 <p>Reimplemented in <a class="el" href="classCdrCTU.html#a819e4dee2d5c7bf95d4c6d3b0ec29c95">CdrCTU</a>, and <a class="el" href="classCdrGodunov.html#ab5a641037882491c2996c0704943ed0d">CdrGodunov</a>.</p>

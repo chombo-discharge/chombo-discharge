@@ -197,10 +197,10 @@ This is enforced by making the <code class="docutils literal notranslate"><span 
 These are set through respective configuration options, see <a class="reference internal" href="#chap-fieldstepperconfiguration"><span class="std std-ref">Solver configuration</span></a>.</p>
 <p>For a more general way of specifying the space charge, <code class="docutils literal notranslate"><span class="pre">FieldStepper</span></code> has a public member function</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Set the space charge distribution.</span>
-<span class="cm">  @param[in] a_rho   Callable returning the charge density (C/m^3) at a given position.</span>
-<span class="cm">  @param[in] a_phase Phase (gas or solid) in which to apply the space charge.</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Set the space charge distribution.</span>
+<span class="cm"> * @param[in] a_rho   Callable returning the charge density (C/m^3) at a given position.</span>
+<span class="cm"> * @param[in] a_phase Phase (gas or solid) in which to apply the space charge.</span>
+<span class="cm"> */</span>
 <span class="kt">void</span>
 <span class="nf">setRho</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_pos</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_rho</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="w"> </span><span class="n">a_phase</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
@@ -212,9 +212,9 @@ These are set through respective configuration options, see <a class="reference 
 <p>By default, the initial surface charge is set to a constant, see <a class="reference internal" href="#chap-fieldstepperconfiguration"><span class="std std-ref">Solver configuration</span></a>.
 For a more general way of specifying the surface charge, <code class="docutils literal notranslate"><span class="pre">FieldStepper</span></code> has a public member function</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Set the surface charge distribution.</span>
-<span class="cm">  @param[in] a_sigma Callable returning the surface charge density (C/m^2) at a given position.</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Set the surface charge distribution.</span>
+<span class="cm"> * @param[in] a_sigma Callable returning the surface charge density (C/m^2) at a given position.</span>
+<span class="cm"> */</span>
 <span class="kt">void</span>
 <span class="nf">setSigma</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_pos</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_sigma</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>

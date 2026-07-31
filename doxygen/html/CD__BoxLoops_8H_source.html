@@ -113,34 +113,34 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00062" name="l00062"></a><span class="lineno"><a class="line" href="namespaceBoxLoops.html">   62</a></span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceBoxLoops.html">BoxLoops</a> {</div>
 <div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span> </div>
 <div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span><span class="preprocessor">#if CH_SPACEDIM == 2</span></div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>  <span class="keyword">template</span> &lt;<span class="keywordtype">int</span> Si, <span class="keywordtype">int</span> Sj, <span class="keyword">typename</span> Functor&gt;</div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>  ALWAYS_INLINE <span class="keywordtype">void</span></div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>  <a class="code hl_function" href="namespaceBoxLoops.html#aa237179546062b6d0f1037ac83043922">loop</a>(<span class="keyword">const</span> Box&amp; a_computeBox, Functor&amp;&amp; kernel);</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span><span class="keyword">template</span> &lt;<span class="keywordtype">int</span> Si, <span class="keywordtype">int</span> Sj, <span class="keyword">typename</span> Functor&gt;</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>ALWAYS_INLINE <span class="keywordtype">void</span></div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span><a class="code hl_function" href="namespaceBoxLoops.html#aa237179546062b6d0f1037ac83043922">loop</a>(<span class="keyword">const</span> Box&amp; a_computeBox, Functor&amp;&amp; kernel);</div>
 <div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span><span class="preprocessor">#else</span></div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>  <span class="keyword">template</span> &lt;<span class="keywordtype">int</span> Si, <span class="keywordtype">int</span> Sj, <span class="keywordtype">int</span> Sk, <span class="keyword">typename</span> Functor&gt;</div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>  ALWAYS_INLINE <span class="keywordtype">void</span></div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>  <a class="code hl_function" href="namespaceBoxLoops.html#aa237179546062b6d0f1037ac83043922">loop</a>(<span class="keyword">const</span> Box&amp; a_computeBox, Functor&amp;&amp; kernel);</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span><span class="keyword">template</span> &lt;<span class="keywordtype">int</span> Si, <span class="keywordtype">int</span> Sj, <span class="keywordtype">int</span> Sk, <span class="keyword">typename</span> Functor&gt;</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>ALWAYS_INLINE <span class="keywordtype">void</span></div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span><a class="code hl_function" href="namespaceBoxLoops.html#aa237179546062b6d0f1037ac83043922">loop</a>(<span class="keyword">const</span> Box&amp; a_computeBox, Functor&amp;&amp; kernel);</div>
 <div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span><span class="preprocessor">#endif</span></div>
 <div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span> </div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>  <span class="keyword">template</span> &lt;<span class="keyword">typename</span> Functor&gt;</div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>  ALWAYS_INLINE <span class="keywordtype">void</span></div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>  <a class="code hl_function" href="namespaceBoxLoops.html#aa237179546062b6d0f1037ac83043922">loop</a>(<span class="keyword">const</span> IntVectSet&amp; a_ivs, Functor&amp;&amp; a_kernel);</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> Functor&gt;</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>ALWAYS_INLINE <span class="keywordtype">void</span></div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span><a class="code hl_function" href="namespaceBoxLoops.html#aa237179546062b6d0f1037ac83043922">loop</a>(<span class="keyword">const</span> IntVectSet&amp; a_ivs, Functor&amp;&amp; a_kernel);</div>
 <div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span> </div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>  <span class="keyword">template</span> &lt;<span class="keyword">typename</span> Functor&gt;</div>
-<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>  ALWAYS_INLINE <span class="keywordtype">void</span></div>
-<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>  <a class="code hl_function" href="namespaceBoxLoops.html#aa237179546062b6d0f1037ac83043922">loop</a>(<span class="keyword">const</span> DenseIntVectSet&amp; a_ivs, Functor&amp;&amp; a_kernel);</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> Functor&gt;</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>ALWAYS_INLINE <span class="keywordtype">void</span></div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span><a class="code hl_function" href="namespaceBoxLoops.html#aa237179546062b6d0f1037ac83043922">loop</a>(<span class="keyword">const</span> DenseIntVectSet&amp; a_ivs, Functor&amp;&amp; a_kernel);</div>
 <div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span> </div>
-<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>  <span class="keyword">template</span> &lt;<span class="keyword">typename</span> Functor&gt;</div>
-<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>  ALWAYS_INLINE <span class="keywordtype">void</span></div>
-<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>  <a class="code hl_function" href="namespaceBoxLoops.html#aa237179546062b6d0f1037ac83043922">loop</a>(VoFIterator&amp; a_iter, Functor&amp;&amp; a_kernel);</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> Functor&gt;</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>ALWAYS_INLINE <span class="keywordtype">void</span></div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span><a class="code hl_function" href="namespaceBoxLoops.html#aa237179546062b6d0f1037ac83043922">loop</a>(VoFIterator&amp; a_iter, Functor&amp;&amp; a_kernel);</div>
 <div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span> </div>
-<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>  <span class="keyword">template</span> &lt;<span class="keyword">typename</span> Functor&gt;</div>
-<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>  ALWAYS_INLINE <span class="keywordtype">void</span></div>
-<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>  <a class="code hl_function" href="namespaceBoxLoops.html#aa237179546062b6d0f1037ac83043922">loop</a>(FaceIterator&amp; a_iter, Functor&amp;&amp; a_kernel);</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> Functor&gt;</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>ALWAYS_INLINE <span class="keywordtype">void</span></div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span><a class="code hl_function" href="namespaceBoxLoops.html#aa237179546062b6d0f1037ac83043922">loop</a>(FaceIterator&amp; a_iter, Functor&amp;&amp; a_kernel);</div>
 <div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span> </div>
-<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>  <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, <span class="keyword">typename</span> Functor&gt;</div>
-<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>  ALWAYS_INLINE <span class="keywordtype">void</span></div>
-<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>  <a class="code hl_function" href="namespaceBoxLoops.html#aa237179546062b6d0f1037ac83043922">loop</a>(<span class="keyword">const</span> Vector&lt;T&gt;&amp; a_subset, Functor&amp;&amp; a_kernel);</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, <span class="keyword">typename</span> Functor&gt;</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>ALWAYS_INLINE <span class="keywordtype">void</span></div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span><a class="code hl_function" href="namespaceBoxLoops.html#aa237179546062b6d0f1037ac83043922">loop</a>(<span class="keyword">const</span> Vector&lt;T&gt;&amp; a_subset, Functor&amp;&amp; a_kernel);</div>
 <div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>} <span class="comment">// namespace BoxLoops</span></div>
 </div>
 <div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span> </div>

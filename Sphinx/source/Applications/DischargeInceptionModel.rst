@@ -64,7 +64,6 @@ The discharge inception model is implemented in :file:`$DISCHARGE_HOME/Physics/D
 .. literalinclude:: ../../../../Physics/DischargeInception/CD_DischargeInceptionStepper.H
    :language: c++
    :lines: 73-94
-   :dedent: 4
 	   
 The template parameters indicate which types of solvers to use within the compound algorithm.
 The template parameters indicate the following: 
@@ -216,7 +215,7 @@ The relevant user API for setting the above variables are listed below.
 .. literalinclude:: ../../../../Physics/DischargeInception/CD_DischargeInceptionStepper.H
    :language: c++
    :lines: 311-408
-   :dedent: 6
+   :dedent: 2
 
 .. tip::
 

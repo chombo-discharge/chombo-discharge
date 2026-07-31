@@ -114,7 +114,7 @@ One can restrict the data range of the table by calling
 
 .. literalinclude:: ../../../../Source/Utilities/CD_LookupTable1D.H
    :language: c++
-   :lines: 95-104
+   :lines: 95-105
    :dedent: 2
 
 where ``a_min`` and ``a_max`` are the permissible ranges for data in the input column (``a_column``).
@@ -137,7 +137,7 @@ A ``LookupTable1D`` is regularized through
 
 .. literalinclude:: ../../../../Source/Utilities/CD_LookupTable1D.H
    :language: c++
-   :lines: 120-127
+   :lines: 121-128
    :dedent: 2
 
 Here, ``a_independentVariable`` is the independent variable and ``a_numPoints`` is the number of grid points in the regularized table.
@@ -182,7 +182,7 @@ The function signatures are
 
 .. literalinclude:: ../../../../Source/Utilities/CD_LookupTable1D.H
    :language: c++
-   :lines: 129-144
+   :lines: 130-145
    :dedent: 2
 
 In the above, the template parameter ``K`` is the column to retrieve and ``a_x`` is the value of the independent variable.
@@ -222,7 +222,7 @@ To set the range strategy one can use
 
 .. literalinclude:: ../../../../Source/Utilities/CD_LookupTable1D.H
    :language: c++
-   :lines: 106-118
+   :lines: 107-119
    :dedent: 2
 
 where ``a_strategy`` must be either of
@@ -239,7 +239,7 @@ For debugging purposes, ``LookupTable1D`` can write the internal data to an outp
 
 .. literalinclude:: ../../../../Source/Utilities/CD_LookupTable1D.H
    :language: c++
-   :lines: 174-200
+   :lines: 175-201
    :dedent: 2
 
 These functions will print the table (either raw or regularized) to an output stream or file, and the user can later plot the data in an external plotting tool.

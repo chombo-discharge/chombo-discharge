@@ -431,8 +431,8 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00310" name="l00310"></a><span class="lineno">  310</span>    }</div>
 <div class="line"><a id="l00311" name="l00311"></a><span class="lineno">  311</span> </div>
 <div class="line"><a id="l00312" name="l00312"></a><span class="lineno">  312</span>    <span class="comment">// Only do unique reactants. Sorting before the unique() collapses ALL duplicates (std::list::unique only removes</span></div>
-<div class="line"><a id="l00313" name="l00313"></a><span class="lineno">  313</span>    <span class="comment">// consecutive equal elements), so each distinct reactant is processed exactly once. This does not change the result:</span></div>
-<div class="line"><a id="l00314" name="l00314"></a><span class="lineno">  314</span>    <span class="comment">// each reactant&#39;s contribution is independent and only feeds into a min-reduction.</span></div>
+<div class="line"><a id="l00313" name="l00313"></a><span class="lineno">  313</span>    <span class="comment">// consecutive equal elements), so each distinct reactant is processed exactly once. This does not change the</span></div>
+<div class="line"><a id="l00314" name="l00314"></a><span class="lineno">  314</span>    <span class="comment">// result: each reactant&#39;s contribution is independent and only feeds into a min-reduction.</span></div>
 <div class="line"><a id="l00315" name="l00315"></a><span class="lineno">  315</span>    allReactants.sort();</div>
 <div class="line"><a id="l00316" name="l00316"></a><span class="lineno">  316</span>    allReactants.unique();</div>
 <div class="line"><a id="l00317" name="l00317"></a><span class="lineno">  317</span> </div>
@@ -515,8 +515,8 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00392" name="l00392"></a><span class="lineno">  392</span>    }</div>
 <div class="line"><a id="l00393" name="l00393"></a><span class="lineno">  393</span> </div>
 <div class="line"><a id="l00394" name="l00394"></a><span class="lineno">  394</span>    <span class="comment">// Only do unique reactants. Sorting before the unique() collapses ALL duplicates (std::list::unique only removes</span></div>
-<div class="line"><a id="l00395" name="l00395"></a><span class="lineno">  395</span>    <span class="comment">// consecutive equal elements), so each distinct reactant is processed exactly once. This does not change the result:</span></div>
-<div class="line"><a id="l00396" name="l00396"></a><span class="lineno">  396</span>    <span class="comment">// each reactant&#39;s contribution is independent and only feeds into a min-reduction.</span></div>
+<div class="line"><a id="l00395" name="l00395"></a><span class="lineno">  395</span>    <span class="comment">// consecutive equal elements), so each distinct reactant is processed exactly once. This does not change the</span></div>
+<div class="line"><a id="l00396" name="l00396"></a><span class="lineno">  396</span>    <span class="comment">// result: each reactant&#39;s contribution is independent and only feeds into a min-reduction.</span></div>
 <div class="line"><a id="l00397" name="l00397"></a><span class="lineno">  397</span>    allReactants.sort();</div>
 <div class="line"><a id="l00398" name="l00398"></a><span class="lineno">  398</span>    allReactants.unique();</div>
 <div class="line"><a id="l00399" name="l00399"></a><span class="lineno">  399</span> </div>
@@ -840,8 +840,8 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00691" name="l00691"></a><span class="lineno">  691</span>  <span class="comment">//      = X - c - dt*sum_j nu_j * a_j(X),</span></div>
 <div class="line"><a id="l00692" name="l00692"></a><span class="lineno">  692</span>  <span class="comment">//      = 0</span></div>
 <div class="line"><a id="l00693" name="l00693"></a><span class="lineno">  693</span>  <span class="comment">//</span></div>
-<div class="line"><a id="l00694" name="l00694"></a><span class="lineno">  694</span>  <span class="comment">// where c = (x + sum_j (nu_j * (P(a(x)*dt) - a(x)*dt)]) is a constant term throughout the Newton iterations. This term is presampled</span></div>
-<div class="line"><a id="l00695" name="l00695"></a><span class="lineno">  695</span>  <span class="comment">// before the Newton iterations begin.</span></div>
+<div class="line"><a id="l00694" name="l00694"></a><span class="lineno">  694</span>  <span class="comment">// where c = (x + sum_j (nu_j * (P(a(x)*dt) - a(x)*dt)]) is a constant term throughout the Newton iterations. This</span></div>
+<div class="line"><a id="l00695" name="l00695"></a><span class="lineno">  695</span>  <span class="comment">// term is presampled before the Newton iterations begin.</span></div>
 <div class="line"><a id="l00696" name="l00696"></a><span class="lineno">  696</span> </div>
 <div class="line"><a id="l00697" name="l00697"></a><span class="lineno">  697</span>  <span class="comment">// Linearize input state onto something understandable to LAPACK</span></div>
 <div class="line"><a id="l00698" name="l00698"></a><span class="lineno">  698</span>  <span class="keyword">const</span> std::vector&lt;T&gt;              inputState = a_state.linearOut();</div>
@@ -920,390 +920,392 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00771" name="l00771"></a><span class="lineno">  771</span>    <span class="keywordflow">return</span> norm;</div>
 <div class="line"><a id="l00772" name="l00772"></a><span class="lineno">  772</span>  };</div>
 <div class="line"><a id="l00773" name="l00773"></a><span class="lineno">  773</span> </div>
-<div class="line"><a id="l00774" name="l00774"></a><span class="lineno">  774</span>  <span class="comment">// Allocate memory for the Jacobian (J), the Newton increment (X), and F(X) (F). Also include the constant term from the Poisson sampling (c)</span></div>
-<div class="line"><a id="l00775" name="l00775"></a><span class="lineno">  775</span>  std::vector&lt;double&gt; J(<span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(N * N));</div>
-<div class="line"><a id="l00776" name="l00776"></a><span class="lineno">  776</span>  std::vector&lt;double&gt; X(<span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(N));</div>
-<div class="line"><a id="l00777" name="l00777"></a><span class="lineno">  777</span>  std::vector&lt;double&gt; F(<span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(N));</div>
-<div class="line"><a id="l00778" name="l00778"></a><span class="lineno">  778</span>  std::vector&lt;double&gt; C(<span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(N));</div>
-<div class="line"><a id="l00779" name="l00779"></a><span class="lineno">  779</span> </div>
-<div class="line"><a id="l00780" name="l00780"></a><span class="lineno">  780</span>  <span class="comment">// Temporary storage used for computing the Jacobian matrix.</span></div>
-<div class="line"><a id="l00781" name="l00781"></a><span class="lineno">  781</span>  std::vector&lt;double&gt; X1(<span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(N));</div>
-<div class="line"><a id="l00782" name="l00782"></a><span class="lineno">  782</span>  std::vector&lt;double&gt; X2(<span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(N));</div>
-<div class="line"><a id="l00783" name="l00783"></a><span class="lineno">  783</span>  std::vector&lt;double&gt; F2(<span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(N));</div>
-<div class="line"><a id="l00784" name="l00784"></a><span class="lineno">  784</span> </div>
-<div class="line"><a id="l00785" name="l00785"></a><span class="lineno">  785</span>  <span class="comment">// Things that are required by LAPACK</span></div>
-<div class="line"><a id="l00786" name="l00786"></a><span class="lineno">  786</span>  <span class="keywordtype">int</span>              INFO = 0;</div>
-<div class="line"><a id="l00787" name="l00787"></a><span class="lineno">  787</span>  <span class="keywordtype">int</span>              NRHS = 1;</div>
-<div class="line"><a id="l00788" name="l00788"></a><span class="lineno">  788</span>  std::vector&lt;int&gt; IPIV(<span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(N));</div>
-<div class="line"><a id="l00789" name="l00789"></a><span class="lineno">  789</span> </div>
-<div class="line"><a id="l00790" name="l00790"></a><span class="lineno">  790</span>  <span class="comment">// Compute the constant term.</span></div>
-<div class="line"><a id="l00791" name="l00791"></a><span class="lineno">  791</span>  compConstantTerm(C.data(), X.data(), a_state, a_dt);</div>
-<div class="line"><a id="l00792" name="l00792"></a><span class="lineno">  792</span> </div>
-<div class="line"><a id="l00793" name="l00793"></a><span class="lineno">  793</span>  <span class="comment">// Compute the max-norm of F(0) to use as an exit criterion.</span></div>
-<div class="line"><a id="l00794" name="l00794"></a><span class="lineno">  794</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; N; i++) {</div>
-<div class="line"><a id="l00795" name="l00795"></a><span class="lineno">  795</span>    X1[i] = 0.0;</div>
-<div class="line"><a id="l00796" name="l00796"></a><span class="lineno">  796</span>  }</div>
-<div class="line"><a id="l00797" name="l00797"></a><span class="lineno">  797</span> </div>
-<div class="line"><a id="l00798" name="l00798"></a><span class="lineno">  798</span>  <span class="keyword">const</span> Real initNorm = computeNorm(F.data(), X1.data(), C.data());</div>
-<div class="line"><a id="l00799" name="l00799"></a><span class="lineno">  799</span> </div>
-<div class="line"><a id="l00800" name="l00800"></a><span class="lineno">  800</span>  <span class="keywordtype">bool</span> converged = <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00801" name="l00801"></a><span class="lineno">  801</span> </div>
-<div class="line"><a id="l00802" name="l00802"></a><span class="lineno">  802</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; m_maxIter; k++) {</div>
-<div class="line"><a id="l00803" name="l00803"></a><span class="lineno">  803</span> </div>
-<div class="line"><a id="l00804" name="l00804"></a><span class="lineno">  804</span>    <span class="comment">// Compute the residual F(X) at the current iterate. It is the unperturbed column used in every finite-difference</span></div>
-<div class="line"><a id="l00805" name="l00805"></a><span class="lineno">  805</span>    <span class="comment">// Jacobian column (it does not depend on the perturbation direction j) and is also the right-hand side for the</span></div>
-<div class="line"><a id="l00806" name="l00806"></a><span class="lineno">  806</span>    <span class="comment">// linear solve below, so it is computed once per Newton iteration rather than N+1 times.</span></div>
-<div class="line"><a id="l00807" name="l00807"></a><span class="lineno">  807</span>    computeF(F.data(), X.data(), C.data());</div>
-<div class="line"><a id="l00808" name="l00808"></a><span class="lineno">  808</span> </div>
-<div class="line"><a id="l00809" name="l00809"></a><span class="lineno">  809</span>    <span class="comment">// Numerically computed the Jacobian using finite differences. The Jacobian is given by</span></div>
-<div class="line"><a id="l00810" name="l00810"></a><span class="lineno">  810</span>    <span class="comment">// Jij = dF_i/dx_j</span></div>
-<div class="line"><a id="l00811" name="l00811"></a><span class="lineno">  811</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> j = 0; j &lt; N; j++) {</div>
-<div class="line"><a id="l00812" name="l00812"></a><span class="lineno">  812</span> </div>
-<div class="line"><a id="l00813" name="l00813"></a><span class="lineno">  813</span>      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> s = 0; s &lt; N; s++) {</div>
-<div class="line"><a id="l00814" name="l00814"></a><span class="lineno">  814</span>        X2[s] = X[s];</div>
-<div class="line"><a id="l00815" name="l00815"></a><span class="lineno">  815</span>      }</div>
-<div class="line"><a id="l00816" name="l00816"></a><span class="lineno">  816</span> </div>
-<div class="line"><a id="l00817" name="l00817"></a><span class="lineno">  817</span>      X2[j] += std::max(0.01 * X[j], 1.0);</div>
-<div class="line"><a id="l00818" name="l00818"></a><span class="lineno">  818</span> </div>
-<div class="line"><a id="l00819" name="l00819"></a><span class="lineno">  819</span>      computeF(F2.data(), X2.data(), C.data());</div>
-<div class="line"><a id="l00820" name="l00820"></a><span class="lineno">  820</span> </div>
-<div class="line"><a id="l00821" name="l00821"></a><span class="lineno">  821</span>      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; N; i++) {</div>
-<div class="line"><a id="l00822" name="l00822"></a><span class="lineno">  822</span>        J[i + j * N] = (F2[i] - F[i]) / (X2[j] - X[j]);</div>
-<div class="line"><a id="l00823" name="l00823"></a><span class="lineno">  823</span>      }</div>
-<div class="line"><a id="l00824" name="l00824"></a><span class="lineno">  824</span>    }</div>
-<div class="line"><a id="l00825" name="l00825"></a><span class="lineno">  825</span> </div>
-<div class="line"><a id="l00826" name="l00826"></a><span class="lineno">  826</span>    <span class="comment">// Solve J*dX = F, but note that the true system is J*dX = -F, so we invert the</span></div>
-<div class="line"><a id="l00827" name="l00827"></a><span class="lineno">  827</span>    <span class="comment">// dX vector below.</span></div>
-<div class="line"><a id="l00828" name="l00828"></a><span class="lineno">  828</span>    dgesv_((<span class="keywordtype">int</span>*)&amp;N, &amp;NRHS, J.data(), (<span class="keywordtype">int</span>*)&amp;N, IPIV.data(), F.data(), (<span class="keywordtype">int</span>*)&amp;N, &amp;INFO);</div>
-<div class="line"><a id="l00829" name="l00829"></a><span class="lineno">  829</span> </div>
-<div class="line"><a id="l00830" name="l00830"></a><span class="lineno">  830</span>    <span class="keywordflow">if</span> (INFO != 0) {</div>
-<div class="line"><a id="l00831" name="l00831"></a><span class="lineno">  831</span><span class="preprocessor">#if 1 </span><span class="comment">// Could not solve</span></div>
-<div class="line"><a id="l00832" name="l00832"></a><span class="lineno">  832</span>      <span class="keyword">const</span> std::string err = <span class="stringliteral">&quot;KMCSolver&lt;R, State, T&gt;::stepImplicitEuler -- could not solve A*x = b&quot;</span>;</div>
-<div class="line"><a id="l00833" name="l00833"></a><span class="lineno">  833</span> </div>
-<div class="line"><a id="l00834" name="l00834"></a><span class="lineno">  834</span>      pout() &lt;&lt; err &lt;&lt; endl;</div>
-<div class="line"><a id="l00835" name="l00835"></a><span class="lineno">  835</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00836" name="l00836"></a><span class="lineno">  836</span>      converged = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00837" name="l00837"></a><span class="lineno">  837</span> </div>
-<div class="line"><a id="l00838" name="l00838"></a><span class="lineno">  838</span>      <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00839" name="l00839"></a><span class="lineno">  839</span>    }</div>
-<div class="line"><a id="l00840" name="l00840"></a><span class="lineno">  840</span>    <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00841" name="l00841"></a><span class="lineno">  841</span>      <span class="comment">// Increment and move on to next iteration if necessary. Note that F = -dX as per the comment above.</span></div>
-<div class="line"><a id="l00842" name="l00842"></a><span class="lineno">  842</span>      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; N; i++) {</div>
-<div class="line"><a id="l00843" name="l00843"></a><span class="lineno">  843</span>        X[i] = X[i] - F[i];</div>
-<div class="line"><a id="l00844" name="l00844"></a><span class="lineno">  844</span>      }</div>
-<div class="line"><a id="l00845" name="l00845"></a><span class="lineno">  845</span>    }</div>
-<div class="line"><a id="l00846" name="l00846"></a><span class="lineno">  846</span> </div>
-<div class="line"><a id="l00847" name="l00847"></a><span class="lineno">  847</span>    <span class="comment">// Recompute the norm and exit if necessary.</span></div>
-<div class="line"><a id="l00848" name="l00848"></a><span class="lineno">  848</span>    <span class="keyword">const</span> Real norm = computeNorm(F.data(), X.data(), C.data());</div>
-<div class="line"><a id="l00849" name="l00849"></a><span class="lineno">  849</span> </div>
-<div class="line"><a id="l00850" name="l00850"></a><span class="lineno">  850</span>    <span class="keywordflow">if</span> (norm / initNorm &lt; m_exitTol) {</div>
-<div class="line"><a id="l00851" name="l00851"></a><span class="lineno">  851</span>      <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00852" name="l00852"></a><span class="lineno">  852</span>    }</div>
-<div class="line"><a id="l00853" name="l00853"></a><span class="lineno">  853</span>  }</div>
-<div class="line"><a id="l00854" name="l00854"></a><span class="lineno">  854</span> </div>
-<div class="line"><a id="l00855" name="l00855"></a><span class="lineno">  855</span>  <span class="comment">// Turn X into an integer state.</span></div>
-<div class="line"><a id="l00856" name="l00856"></a><span class="lineno">  856</span>  std::vector&lt;T&gt; outputState(N);</div>
-<div class="line"><a id="l00857" name="l00857"></a><span class="lineno">  857</span> </div>
-<div class="line"><a id="l00858" name="l00858"></a><span class="lineno">  858</span>  <span class="keywordflow">if</span> (converged) {</div>
-<div class="line"><a id="l00859" name="l00859"></a><span class="lineno">  859</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; N; i++) {</div>
-<div class="line"><a id="l00860" name="l00860"></a><span class="lineno">  860</span>      outputState[i] = <span class="keyword">static_cast&lt;</span>T<span class="keyword">&gt;</span>(llround(X[i]));</div>
-<div class="line"><a id="l00861" name="l00861"></a><span class="lineno">  861</span>    }</div>
-<div class="line"><a id="l00862" name="l00862"></a><span class="lineno">  862</span>  }</div>
-<div class="line"><a id="l00863" name="l00863"></a><span class="lineno">  863</span>  <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00864" name="l00864"></a><span class="lineno">  864</span>    <span class="comment">// Set X to (what is hopefully) an invalid state and rely on step rejection.</span></div>
-<div class="line"><a id="l00865" name="l00865"></a><span class="lineno">  865</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; N; i++) {</div>
-<div class="line"><a id="l00866" name="l00866"></a><span class="lineno">  866</span>      outputState[i] = <span class="keyword">static_cast&lt;</span>T<span class="keyword">&gt;</span>(-1);</div>
-<div class="line"><a id="l00867" name="l00867"></a><span class="lineno">  867</span>    }</div>
-<div class="line"><a id="l00868" name="l00868"></a><span class="lineno">  868</span>  }</div>
-<div class="line"><a id="l00869" name="l00869"></a><span class="lineno">  869</span> </div>
-<div class="line"><a id="l00870" name="l00870"></a><span class="lineno">  870</span>  a_state.linearIn(outputState);</div>
-<div class="line"><a id="l00871" name="l00871"></a><span class="lineno">  871</span>}</div>
+<div class="line"><a id="l00774" name="l00774"></a><span class="lineno">  774</span>  <span class="comment">// Allocate memory for the Jacobian (J), the Newton increment (X), and F(X) (F). Also include the constant term from</span></div>
+<div class="line"><a id="l00775" name="l00775"></a><span class="lineno">  775</span>  <span class="comment">// the Poisson sampling (c)</span></div>
+<div class="line"><a id="l00776" name="l00776"></a><span class="lineno">  776</span>  std::vector&lt;double&gt; J(<span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(N * N));</div>
+<div class="line"><a id="l00777" name="l00777"></a><span class="lineno">  777</span>  std::vector&lt;double&gt; X(<span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(N));</div>
+<div class="line"><a id="l00778" name="l00778"></a><span class="lineno">  778</span>  std::vector&lt;double&gt; F(<span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(N));</div>
+<div class="line"><a id="l00779" name="l00779"></a><span class="lineno">  779</span>  std::vector&lt;double&gt; C(<span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(N));</div>
+<div class="line"><a id="l00780" name="l00780"></a><span class="lineno">  780</span> </div>
+<div class="line"><a id="l00781" name="l00781"></a><span class="lineno">  781</span>  <span class="comment">// Temporary storage used for computing the Jacobian matrix.</span></div>
+<div class="line"><a id="l00782" name="l00782"></a><span class="lineno">  782</span>  std::vector&lt;double&gt; X1(<span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(N));</div>
+<div class="line"><a id="l00783" name="l00783"></a><span class="lineno">  783</span>  std::vector&lt;double&gt; X2(<span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(N));</div>
+<div class="line"><a id="l00784" name="l00784"></a><span class="lineno">  784</span>  std::vector&lt;double&gt; F2(<span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(N));</div>
+<div class="line"><a id="l00785" name="l00785"></a><span class="lineno">  785</span> </div>
+<div class="line"><a id="l00786" name="l00786"></a><span class="lineno">  786</span>  <span class="comment">// Things that are required by LAPACK</span></div>
+<div class="line"><a id="l00787" name="l00787"></a><span class="lineno">  787</span>  <span class="keywordtype">int</span>              INFO = 0;</div>
+<div class="line"><a id="l00788" name="l00788"></a><span class="lineno">  788</span>  <span class="keywordtype">int</span>              NRHS = 1;</div>
+<div class="line"><a id="l00789" name="l00789"></a><span class="lineno">  789</span>  std::vector&lt;int&gt; IPIV(<span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(N));</div>
+<div class="line"><a id="l00790" name="l00790"></a><span class="lineno">  790</span> </div>
+<div class="line"><a id="l00791" name="l00791"></a><span class="lineno">  791</span>  <span class="comment">// Compute the constant term.</span></div>
+<div class="line"><a id="l00792" name="l00792"></a><span class="lineno">  792</span>  compConstantTerm(C.data(), X.data(), a_state, a_dt);</div>
+<div class="line"><a id="l00793" name="l00793"></a><span class="lineno">  793</span> </div>
+<div class="line"><a id="l00794" name="l00794"></a><span class="lineno">  794</span>  <span class="comment">// Compute the max-norm of F(0) to use as an exit criterion.</span></div>
+<div class="line"><a id="l00795" name="l00795"></a><span class="lineno">  795</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; N; i++) {</div>
+<div class="line"><a id="l00796" name="l00796"></a><span class="lineno">  796</span>    X1[i] = 0.0;</div>
+<div class="line"><a id="l00797" name="l00797"></a><span class="lineno">  797</span>  }</div>
+<div class="line"><a id="l00798" name="l00798"></a><span class="lineno">  798</span> </div>
+<div class="line"><a id="l00799" name="l00799"></a><span class="lineno">  799</span>  <span class="keyword">const</span> Real initNorm = computeNorm(F.data(), X1.data(), C.data());</div>
+<div class="line"><a id="l00800" name="l00800"></a><span class="lineno">  800</span> </div>
+<div class="line"><a id="l00801" name="l00801"></a><span class="lineno">  801</span>  <span class="keywordtype">bool</span> converged = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00802" name="l00802"></a><span class="lineno">  802</span> </div>
+<div class="line"><a id="l00803" name="l00803"></a><span class="lineno">  803</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; m_maxIter; k++) {</div>
+<div class="line"><a id="l00804" name="l00804"></a><span class="lineno">  804</span> </div>
+<div class="line"><a id="l00805" name="l00805"></a><span class="lineno">  805</span>    <span class="comment">// Compute the residual F(X) at the current iterate. It is the unperturbed column used in every finite-difference</span></div>
+<div class="line"><a id="l00806" name="l00806"></a><span class="lineno">  806</span>    <span class="comment">// Jacobian column (it does not depend on the perturbation direction j) and is also the right-hand side for the</span></div>
+<div class="line"><a id="l00807" name="l00807"></a><span class="lineno">  807</span>    <span class="comment">// linear solve below, so it is computed once per Newton iteration rather than N+1 times.</span></div>
+<div class="line"><a id="l00808" name="l00808"></a><span class="lineno">  808</span>    computeF(F.data(), X.data(), C.data());</div>
+<div class="line"><a id="l00809" name="l00809"></a><span class="lineno">  809</span> </div>
+<div class="line"><a id="l00810" name="l00810"></a><span class="lineno">  810</span>    <span class="comment">// Numerically computed the Jacobian using finite differences. The Jacobian is given by</span></div>
+<div class="line"><a id="l00811" name="l00811"></a><span class="lineno">  811</span>    <span class="comment">// Jij = dF_i/dx_j</span></div>
+<div class="line"><a id="l00812" name="l00812"></a><span class="lineno">  812</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> j = 0; j &lt; N; j++) {</div>
+<div class="line"><a id="l00813" name="l00813"></a><span class="lineno">  813</span> </div>
+<div class="line"><a id="l00814" name="l00814"></a><span class="lineno">  814</span>      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> s = 0; s &lt; N; s++) {</div>
+<div class="line"><a id="l00815" name="l00815"></a><span class="lineno">  815</span>        X2[s] = X[s];</div>
+<div class="line"><a id="l00816" name="l00816"></a><span class="lineno">  816</span>      }</div>
+<div class="line"><a id="l00817" name="l00817"></a><span class="lineno">  817</span> </div>
+<div class="line"><a id="l00818" name="l00818"></a><span class="lineno">  818</span>      X2[j] += std::max(0.01 * X[j], 1.0);</div>
+<div class="line"><a id="l00819" name="l00819"></a><span class="lineno">  819</span> </div>
+<div class="line"><a id="l00820" name="l00820"></a><span class="lineno">  820</span>      computeF(F2.data(), X2.data(), C.data());</div>
+<div class="line"><a id="l00821" name="l00821"></a><span class="lineno">  821</span> </div>
+<div class="line"><a id="l00822" name="l00822"></a><span class="lineno">  822</span>      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; N; i++) {</div>
+<div class="line"><a id="l00823" name="l00823"></a><span class="lineno">  823</span>        J[i + j * N] = (F2[i] - F[i]) / (X2[j] - X[j]);</div>
+<div class="line"><a id="l00824" name="l00824"></a><span class="lineno">  824</span>      }</div>
+<div class="line"><a id="l00825" name="l00825"></a><span class="lineno">  825</span>    }</div>
+<div class="line"><a id="l00826" name="l00826"></a><span class="lineno">  826</span> </div>
+<div class="line"><a id="l00827" name="l00827"></a><span class="lineno">  827</span>    <span class="comment">// Solve J*dX = F, but note that the true system is J*dX = -F, so we invert the</span></div>
+<div class="line"><a id="l00828" name="l00828"></a><span class="lineno">  828</span>    <span class="comment">// dX vector below.</span></div>
+<div class="line"><a id="l00829" name="l00829"></a><span class="lineno">  829</span>    dgesv_((<span class="keywordtype">int</span>*)&amp;N, &amp;NRHS, J.data(), (<span class="keywordtype">int</span>*)&amp;N, IPIV.data(), F.data(), (<span class="keywordtype">int</span>*)&amp;N, &amp;INFO);</div>
+<div class="line"><a id="l00830" name="l00830"></a><span class="lineno">  830</span> </div>
+<div class="line"><a id="l00831" name="l00831"></a><span class="lineno">  831</span>    <span class="keywordflow">if</span> (INFO != 0) {</div>
+<div class="line"><a id="l00832" name="l00832"></a><span class="lineno">  832</span><span class="preprocessor">#if 1 </span><span class="comment">// Could not solve</span></div>
+<div class="line"><a id="l00833" name="l00833"></a><span class="lineno">  833</span>      <span class="keyword">const</span> std::string err = <span class="stringliteral">&quot;KMCSolver&lt;R, State, T&gt;::stepImplicitEuler -- could not solve A*x = b&quot;</span>;</div>
+<div class="line"><a id="l00834" name="l00834"></a><span class="lineno">  834</span> </div>
+<div class="line"><a id="l00835" name="l00835"></a><span class="lineno">  835</span>      pout() &lt;&lt; err &lt;&lt; endl;</div>
+<div class="line"><a id="l00836" name="l00836"></a><span class="lineno">  836</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00837" name="l00837"></a><span class="lineno">  837</span>      converged = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00838" name="l00838"></a><span class="lineno">  838</span> </div>
+<div class="line"><a id="l00839" name="l00839"></a><span class="lineno">  839</span>      <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00840" name="l00840"></a><span class="lineno">  840</span>    }</div>
+<div class="line"><a id="l00841" name="l00841"></a><span class="lineno">  841</span>    <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00842" name="l00842"></a><span class="lineno">  842</span>      <span class="comment">// Increment and move on to next iteration if necessary. Note that F = -dX as per the comment above.</span></div>
+<div class="line"><a id="l00843" name="l00843"></a><span class="lineno">  843</span>      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; N; i++) {</div>
+<div class="line"><a id="l00844" name="l00844"></a><span class="lineno">  844</span>        X[i] = X[i] - F[i];</div>
+<div class="line"><a id="l00845" name="l00845"></a><span class="lineno">  845</span>      }</div>
+<div class="line"><a id="l00846" name="l00846"></a><span class="lineno">  846</span>    }</div>
+<div class="line"><a id="l00847" name="l00847"></a><span class="lineno">  847</span> </div>
+<div class="line"><a id="l00848" name="l00848"></a><span class="lineno">  848</span>    <span class="comment">// Recompute the norm and exit if necessary.</span></div>
+<div class="line"><a id="l00849" name="l00849"></a><span class="lineno">  849</span>    <span class="keyword">const</span> Real norm = computeNorm(F.data(), X.data(), C.data());</div>
+<div class="line"><a id="l00850" name="l00850"></a><span class="lineno">  850</span> </div>
+<div class="line"><a id="l00851" name="l00851"></a><span class="lineno">  851</span>    <span class="keywordflow">if</span> (norm / initNorm &lt; m_exitTol) {</div>
+<div class="line"><a id="l00852" name="l00852"></a><span class="lineno">  852</span>      <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00853" name="l00853"></a><span class="lineno">  853</span>    }</div>
+<div class="line"><a id="l00854" name="l00854"></a><span class="lineno">  854</span>  }</div>
+<div class="line"><a id="l00855" name="l00855"></a><span class="lineno">  855</span> </div>
+<div class="line"><a id="l00856" name="l00856"></a><span class="lineno">  856</span>  <span class="comment">// Turn X into an integer state.</span></div>
+<div class="line"><a id="l00857" name="l00857"></a><span class="lineno">  857</span>  std::vector&lt;T&gt; outputState(N);</div>
+<div class="line"><a id="l00858" name="l00858"></a><span class="lineno">  858</span> </div>
+<div class="line"><a id="l00859" name="l00859"></a><span class="lineno">  859</span>  <span class="keywordflow">if</span> (converged) {</div>
+<div class="line"><a id="l00860" name="l00860"></a><span class="lineno">  860</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; N; i++) {</div>
+<div class="line"><a id="l00861" name="l00861"></a><span class="lineno">  861</span>      outputState[i] = <span class="keyword">static_cast&lt;</span>T<span class="keyword">&gt;</span>(llround(X[i]));</div>
+<div class="line"><a id="l00862" name="l00862"></a><span class="lineno">  862</span>    }</div>
+<div class="line"><a id="l00863" name="l00863"></a><span class="lineno">  863</span>  }</div>
+<div class="line"><a id="l00864" name="l00864"></a><span class="lineno">  864</span>  <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00865" name="l00865"></a><span class="lineno">  865</span>    <span class="comment">// Set X to (what is hopefully) an invalid state and rely on step rejection.</span></div>
+<div class="line"><a id="l00866" name="l00866"></a><span class="lineno">  866</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; N; i++) {</div>
+<div class="line"><a id="l00867" name="l00867"></a><span class="lineno">  867</span>      outputState[i] = <span class="keyword">static_cast&lt;</span>T<span class="keyword">&gt;</span>(-1);</div>
+<div class="line"><a id="l00868" name="l00868"></a><span class="lineno">  868</span>    }</div>
+<div class="line"><a id="l00869" name="l00869"></a><span class="lineno">  869</span>  }</div>
+<div class="line"><a id="l00870" name="l00870"></a><span class="lineno">  870</span> </div>
+<div class="line"><a id="l00871" name="l00871"></a><span class="lineno">  871</span>  a_state.linearIn(outputState);</div>
+<div class="line"><a id="l00872" name="l00872"></a><span class="lineno">  872</span>}</div>
 </div>
-<div class="line"><a id="l00872" name="l00872"></a><span class="lineno">  872</span> </div>
-<div class="line"><a id="l00873" name="l00873"></a><span class="lineno">  873</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> R, <span class="keyword">typename</span> State, <span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a id="l00874" name="l00874"></a><span class="lineno">  874</span><span class="keyword">inline</span> <span class="keywordtype">void</span></div>
-<div class="foldopen" id="foldopen00875" data-start="{" data-end="}">
-<div class="line"><a id="l00875" name="l00875"></a><span class="lineno"><a class="line" href="classKMCSolver.html#adee03a19259da901c012ab95b4f2f0be">  875</a></span><a class="code hl_function" href="classKMCSolver.html#adee03a19259da901c012ab95b4f2f0be">KMCSolver&lt;R, State, T&gt;::advanceTau</a>(State&amp;                   a_state,</div>
-<div class="line"><a id="l00876" name="l00876"></a><span class="lineno">  876</span>                                   <span class="keyword">const</span> Real&amp;              a_dt,</div>
-<div class="line"><a id="l00877" name="l00877"></a><span class="lineno">  877</span>                                   <span class="keyword">const</span> <a class="code hl_enumeration" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4">KMCLeapPropagator</a>&amp; a_leapPropagator) <span class="keyword">const</span> <span class="keyword">noexcept</span></div>
-<div class="line"><a id="l00878" name="l00878"></a><span class="lineno">  878</span>{</div>
-<div class="line"><a id="l00879" name="l00879"></a><span class="lineno">  879</span>  CH_TIME(<span class="stringliteral">&quot;KMCSolver::advanceTau(State, ReactionList, Real, KMCLeapPropagator)&quot;</span>);</div>
-<div class="line"><a id="l00880" name="l00880"></a><span class="lineno">  880</span> </div>
-<div class="line"><a id="l00881" name="l00881"></a><span class="lineno">  881</span>  this-&gt;advanceTau(a_state, m_reactions, a_dt, a_leapPropagator);</div>
-<div class="line"><a id="l00882" name="l00882"></a><span class="lineno">  882</span>}</div>
+<div class="line"><a id="l00873" name="l00873"></a><span class="lineno">  873</span> </div>
+<div class="line"><a id="l00874" name="l00874"></a><span class="lineno">  874</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> R, <span class="keyword">typename</span> State, <span class="keyword">typename</span> T&gt;</div>
+<div class="line"><a id="l00875" name="l00875"></a><span class="lineno">  875</span><span class="keyword">inline</span> <span class="keywordtype">void</span></div>
+<div class="foldopen" id="foldopen00876" data-start="{" data-end="}">
+<div class="line"><a id="l00876" name="l00876"></a><span class="lineno"><a class="line" href="classKMCSolver.html#adee03a19259da901c012ab95b4f2f0be">  876</a></span><a class="code hl_function" href="classKMCSolver.html#adee03a19259da901c012ab95b4f2f0be">KMCSolver&lt;R, State, T&gt;::advanceTau</a>(State&amp;                   a_state,</div>
+<div class="line"><a id="l00877" name="l00877"></a><span class="lineno">  877</span>                                   <span class="keyword">const</span> Real&amp;              a_dt,</div>
+<div class="line"><a id="l00878" name="l00878"></a><span class="lineno">  878</span>                                   <span class="keyword">const</span> <a class="code hl_enumeration" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4">KMCLeapPropagator</a>&amp; a_leapPropagator) <span class="keyword">const</span> <span class="keyword">noexcept</span></div>
+<div class="line"><a id="l00879" name="l00879"></a><span class="lineno">  879</span>{</div>
+<div class="line"><a id="l00880" name="l00880"></a><span class="lineno">  880</span>  CH_TIME(<span class="stringliteral">&quot;KMCSolver::advanceTau(State, ReactionList, Real, KMCLeapPropagator)&quot;</span>);</div>
+<div class="line"><a id="l00881" name="l00881"></a><span class="lineno">  881</span> </div>
+<div class="line"><a id="l00882" name="l00882"></a><span class="lineno">  882</span>  this-&gt;advanceTau(a_state, m_reactions, a_dt, a_leapPropagator);</div>
+<div class="line"><a id="l00883" name="l00883"></a><span class="lineno">  883</span>}</div>
 </div>
-<div class="line"><a id="l00883" name="l00883"></a><span class="lineno">  883</span> </div>
-<div class="line"><a id="l00884" name="l00884"></a><span class="lineno">  884</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> R, <span class="keyword">typename</span> State, <span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a id="l00885" name="l00885"></a><span class="lineno">  885</span><span class="keyword">inline</span> <span class="keywordtype">void</span></div>
-<div class="foldopen" id="foldopen00886" data-start="{" data-end="}">
-<div class="line"><a id="l00886" name="l00886"></a><span class="lineno"><a class="line" href="classKMCSolver.html#a8245f313e272e077129021e76e67e608">  886</a></span><a class="code hl_function" href="classKMCSolver.html#adee03a19259da901c012ab95b4f2f0be">KMCSolver&lt;R, State, T&gt;::advanceTau</a>(State&amp;                   a_state,</div>
-<div class="line"><a id="l00887" name="l00887"></a><span class="lineno">  887</span>                                   <span class="keyword">const</span> <a class="code hl_typedef" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a>&amp;      a_reactions,</div>
-<div class="line"><a id="l00888" name="l00888"></a><span class="lineno">  888</span>                                   <span class="keyword">const</span> Real&amp;              a_dt,</div>
-<div class="line"><a id="l00889" name="l00889"></a><span class="lineno">  889</span>                                   <span class="keyword">const</span> <a class="code hl_enumeration" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4">KMCLeapPropagator</a>&amp; a_leapPropagator) <span class="keyword">const</span> <span class="keyword">noexcept</span></div>
-<div class="line"><a id="l00890" name="l00890"></a><span class="lineno">  890</span>{</div>
-<div class="line"><a id="l00891" name="l00891"></a><span class="lineno">  891</span>  CH_TIME(<span class="stringliteral">&quot;KMCSolver::advanceTau(State, ReactionList, Real, KMCLeapPropagator)&quot;</span>);</div>
-<div class="line"><a id="l00892" name="l00892"></a><span class="lineno">  892</span> </div>
-<div class="line"><a id="l00893" name="l00893"></a><span class="lineno">  893</span>  <span class="keywordflow">if</span> (a_reactions.size() &gt; 0) {</div>
-<div class="line"><a id="l00894" name="l00894"></a><span class="lineno">  894</span>    Real curTime = 0.0;</div>
-<div class="line"><a id="l00895" name="l00895"></a><span class="lineno">  895</span>    Real curDt   = a_dt;</div>
-<div class="line"><a id="l00896" name="l00896"></a><span class="lineno">  896</span> </div>
-<div class="line"><a id="l00897" name="l00897"></a><span class="lineno">  897</span>    <span class="keywordflow">while</span> (curTime &lt; a_dt) {</div>
-<div class="line"><a id="l00898" name="l00898"></a><span class="lineno">  898</span> </div>
-<div class="line"><a id="l00899" name="l00899"></a><span class="lineno">  899</span>      <span class="comment">// Try big time step first.</span></div>
-<div class="line"><a id="l00900" name="l00900"></a><span class="lineno">  900</span>      curDt = a_dt - curTime;</div>
-<div class="line"><a id="l00901" name="l00901"></a><span class="lineno">  901</span> </div>
-<div class="line"><a id="l00902" name="l00902"></a><span class="lineno">  902</span>      <span class="keywordtype">bool</span> valid = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00903" name="l00903"></a><span class="lineno">  903</span> </div>
-<div class="line"><a id="l00904" name="l00904"></a><span class="lineno">  904</span>      <span class="comment">// Substepping so we end up with a valid state.</span></div>
-<div class="line"><a id="l00905" name="l00905"></a><span class="lineno">  905</span>      <span class="keywordflow">while</span> (!valid) {</div>
-<div class="line"><a id="l00906" name="l00906"></a><span class="lineno">  906</span> </div>
-<div class="line"><a id="l00907" name="l00907"></a><span class="lineno">  907</span>        State state = a_state;</div>
-<div class="line"><a id="l00908" name="l00908"></a><span class="lineno">  908</span> </div>
-<div class="line"><a id="l00909" name="l00909"></a><span class="lineno">  909</span>        <span class="comment">// Do a tau-leaping step.</span></div>
-<div class="line"><a id="l00910" name="l00910"></a><span class="lineno">  910</span>        <span class="keywordflow">switch</span> (a_leapPropagator) {</div>
-<div class="line"><a id="l00911" name="l00911"></a><span class="lineno">  911</span>        <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4a96fdcdf2e719153ba8daa0a24976e73e">KMCLeapPropagator::ExplicitEuler</a>: {</div>
-<div class="line"><a id="l00912" name="l00912"></a><span class="lineno">  912</span>          this-&gt;stepExplicitEuler(state, a_reactions, curDt);</div>
-<div class="line"><a id="l00913" name="l00913"></a><span class="lineno">  913</span> </div>
-<div class="line"><a id="l00914" name="l00914"></a><span class="lineno">  914</span>          <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00915" name="l00915"></a><span class="lineno">  915</span>        }</div>
-<div class="line"><a id="l00916" name="l00916"></a><span class="lineno">  916</span>        <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4a7f56c02b34d312867e3f63c9f21fe5c8">KMCLeapPropagator::Midpoint</a>: {</div>
-<div class="line"><a id="l00917" name="l00917"></a><span class="lineno">  917</span>          this-&gt;stepMidpoint(state, a_reactions, curDt);</div>
-<div class="line"><a id="l00918" name="l00918"></a><span class="lineno">  918</span> </div>
-<div class="line"><a id="l00919" name="l00919"></a><span class="lineno">  919</span>          <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00920" name="l00920"></a><span class="lineno">  920</span>        }</div>
-<div class="line"><a id="l00921" name="l00921"></a><span class="lineno">  921</span>        <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4ae01a919b068424df394a7f38a3a02ed2">KMCLeapPropagator::PRC</a>: {</div>
-<div class="line"><a id="l00922" name="l00922"></a><span class="lineno">  922</span>          this-&gt;stepPRC(state, a_reactions, curDt);</div>
-<div class="line"><a id="l00923" name="l00923"></a><span class="lineno">  923</span> </div>
-<div class="line"><a id="l00924" name="l00924"></a><span class="lineno">  924</span>          <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00925" name="l00925"></a><span class="lineno">  925</span>        }</div>
-<div class="line"><a id="l00926" name="l00926"></a><span class="lineno">  926</span>        <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4a1b41e1bf0ba9f22aff9ae08cba5197c5">KMCLeapPropagator::ImplicitEuler</a>: {</div>
-<div class="line"><a id="l00927" name="l00927"></a><span class="lineno">  927</span>          this-&gt;stepImplicitEuler(state, a_reactions, curDt);</div>
-<div class="line"><a id="l00928" name="l00928"></a><span class="lineno">  928</span> </div>
-<div class="line"><a id="l00929" name="l00929"></a><span class="lineno">  929</span>          <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00930" name="l00930"></a><span class="lineno">  930</span>        }</div>
-<div class="line"><a id="l00931" name="l00931"></a><span class="lineno">  931</span>        <span class="keywordflow">default</span>: {</div>
-<div class="line"><a id="l00932" name="l00932"></a><span class="lineno">  932</span>          <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00933" name="l00933"></a><span class="lineno">  933</span>        }</div>
+<div class="line"><a id="l00884" name="l00884"></a><span class="lineno">  884</span> </div>
+<div class="line"><a id="l00885" name="l00885"></a><span class="lineno">  885</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> R, <span class="keyword">typename</span> State, <span class="keyword">typename</span> T&gt;</div>
+<div class="line"><a id="l00886" name="l00886"></a><span class="lineno">  886</span><span class="keyword">inline</span> <span class="keywordtype">void</span></div>
+<div class="foldopen" id="foldopen00887" data-start="{" data-end="}">
+<div class="line"><a id="l00887" name="l00887"></a><span class="lineno"><a class="line" href="classKMCSolver.html#a8245f313e272e077129021e76e67e608">  887</a></span><a class="code hl_function" href="classKMCSolver.html#adee03a19259da901c012ab95b4f2f0be">KMCSolver&lt;R, State, T&gt;::advanceTau</a>(State&amp;                   a_state,</div>
+<div class="line"><a id="l00888" name="l00888"></a><span class="lineno">  888</span>                                   <span class="keyword">const</span> <a class="code hl_typedef" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a>&amp;      a_reactions,</div>
+<div class="line"><a id="l00889" name="l00889"></a><span class="lineno">  889</span>                                   <span class="keyword">const</span> Real&amp;              a_dt,</div>
+<div class="line"><a id="l00890" name="l00890"></a><span class="lineno">  890</span>                                   <span class="keyword">const</span> <a class="code hl_enumeration" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4">KMCLeapPropagator</a>&amp; a_leapPropagator) <span class="keyword">const</span> <span class="keyword">noexcept</span></div>
+<div class="line"><a id="l00891" name="l00891"></a><span class="lineno">  891</span>{</div>
+<div class="line"><a id="l00892" name="l00892"></a><span class="lineno">  892</span>  CH_TIME(<span class="stringliteral">&quot;KMCSolver::advanceTau(State, ReactionList, Real, KMCLeapPropagator)&quot;</span>);</div>
+<div class="line"><a id="l00893" name="l00893"></a><span class="lineno">  893</span> </div>
+<div class="line"><a id="l00894" name="l00894"></a><span class="lineno">  894</span>  <span class="keywordflow">if</span> (a_reactions.size() &gt; 0) {</div>
+<div class="line"><a id="l00895" name="l00895"></a><span class="lineno">  895</span>    Real curTime = 0.0;</div>
+<div class="line"><a id="l00896" name="l00896"></a><span class="lineno">  896</span>    Real curDt   = a_dt;</div>
+<div class="line"><a id="l00897" name="l00897"></a><span class="lineno">  897</span> </div>
+<div class="line"><a id="l00898" name="l00898"></a><span class="lineno">  898</span>    <span class="keywordflow">while</span> (curTime &lt; a_dt) {</div>
+<div class="line"><a id="l00899" name="l00899"></a><span class="lineno">  899</span> </div>
+<div class="line"><a id="l00900" name="l00900"></a><span class="lineno">  900</span>      <span class="comment">// Try big time step first.</span></div>
+<div class="line"><a id="l00901" name="l00901"></a><span class="lineno">  901</span>      curDt = a_dt - curTime;</div>
+<div class="line"><a id="l00902" name="l00902"></a><span class="lineno">  902</span> </div>
+<div class="line"><a id="l00903" name="l00903"></a><span class="lineno">  903</span>      <span class="keywordtype">bool</span> valid = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00904" name="l00904"></a><span class="lineno">  904</span> </div>
+<div class="line"><a id="l00905" name="l00905"></a><span class="lineno">  905</span>      <span class="comment">// Substepping so we end up with a valid state.</span></div>
+<div class="line"><a id="l00906" name="l00906"></a><span class="lineno">  906</span>      <span class="keywordflow">while</span> (!valid) {</div>
+<div class="line"><a id="l00907" name="l00907"></a><span class="lineno">  907</span> </div>
+<div class="line"><a id="l00908" name="l00908"></a><span class="lineno">  908</span>        State state = a_state;</div>
+<div class="line"><a id="l00909" name="l00909"></a><span class="lineno">  909</span> </div>
+<div class="line"><a id="l00910" name="l00910"></a><span class="lineno">  910</span>        <span class="comment">// Do a tau-leaping step.</span></div>
+<div class="line"><a id="l00911" name="l00911"></a><span class="lineno">  911</span>        <span class="keywordflow">switch</span> (a_leapPropagator) {</div>
+<div class="line"><a id="l00912" name="l00912"></a><span class="lineno">  912</span>        <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4a96fdcdf2e719153ba8daa0a24976e73e">KMCLeapPropagator::ExplicitEuler</a>: {</div>
+<div class="line"><a id="l00913" name="l00913"></a><span class="lineno">  913</span>          this-&gt;stepExplicitEuler(state, a_reactions, curDt);</div>
+<div class="line"><a id="l00914" name="l00914"></a><span class="lineno">  914</span> </div>
+<div class="line"><a id="l00915" name="l00915"></a><span class="lineno">  915</span>          <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00916" name="l00916"></a><span class="lineno">  916</span>        }</div>
+<div class="line"><a id="l00917" name="l00917"></a><span class="lineno">  917</span>        <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4a7f56c02b34d312867e3f63c9f21fe5c8">KMCLeapPropagator::Midpoint</a>: {</div>
+<div class="line"><a id="l00918" name="l00918"></a><span class="lineno">  918</span>          this-&gt;stepMidpoint(state, a_reactions, curDt);</div>
+<div class="line"><a id="l00919" name="l00919"></a><span class="lineno">  919</span> </div>
+<div class="line"><a id="l00920" name="l00920"></a><span class="lineno">  920</span>          <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00921" name="l00921"></a><span class="lineno">  921</span>        }</div>
+<div class="line"><a id="l00922" name="l00922"></a><span class="lineno">  922</span>        <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4ae01a919b068424df394a7f38a3a02ed2">KMCLeapPropagator::PRC</a>: {</div>
+<div class="line"><a id="l00923" name="l00923"></a><span class="lineno">  923</span>          this-&gt;stepPRC(state, a_reactions, curDt);</div>
+<div class="line"><a id="l00924" name="l00924"></a><span class="lineno">  924</span> </div>
+<div class="line"><a id="l00925" name="l00925"></a><span class="lineno">  925</span>          <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00926" name="l00926"></a><span class="lineno">  926</span>        }</div>
+<div class="line"><a id="l00927" name="l00927"></a><span class="lineno">  927</span>        <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4a1b41e1bf0ba9f22aff9ae08cba5197c5">KMCLeapPropagator::ImplicitEuler</a>: {</div>
+<div class="line"><a id="l00928" name="l00928"></a><span class="lineno">  928</span>          this-&gt;stepImplicitEuler(state, a_reactions, curDt);</div>
+<div class="line"><a id="l00929" name="l00929"></a><span class="lineno">  929</span> </div>
+<div class="line"><a id="l00930" name="l00930"></a><span class="lineno">  930</span>          <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00931" name="l00931"></a><span class="lineno">  931</span>        }</div>
+<div class="line"><a id="l00932" name="l00932"></a><span class="lineno">  932</span>        <span class="keywordflow">default</span>: {</div>
+<div class="line"><a id="l00933" name="l00933"></a><span class="lineno">  933</span>          <span class="keywordflow">break</span>;</div>
 <div class="line"><a id="l00934" name="l00934"></a><span class="lineno">  934</span>        }</div>
-<div class="line"><a id="l00935" name="l00935"></a><span class="lineno">  935</span> </div>
-<div class="line"><a id="l00936" name="l00936"></a><span class="lineno">  936</span>        <span class="comment">// If this was a valid step, accept it. Else reduce dt.</span></div>
-<div class="line"><a id="l00937" name="l00937"></a><span class="lineno">  937</span>        valid = state.isValidState();</div>
-<div class="line"><a id="l00938" name="l00938"></a><span class="lineno">  938</span> </div>
-<div class="line"><a id="l00939" name="l00939"></a><span class="lineno">  939</span>        <span class="keywordflow">if</span> (valid) {</div>
-<div class="line"><a id="l00940" name="l00940"></a><span class="lineno">  940</span>          a_state = state;</div>
-<div class="line"><a id="l00941" name="l00941"></a><span class="lineno">  941</span> </div>
-<div class="line"><a id="l00942" name="l00942"></a><span class="lineno">  942</span>          curTime += curDt;</div>
-<div class="line"><a id="l00943" name="l00943"></a><span class="lineno">  943</span>        }</div>
-<div class="line"><a id="l00944" name="l00944"></a><span class="lineno">  944</span>        <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00945" name="l00945"></a><span class="lineno">  945</span>          curDt *= 0.5;</div>
-<div class="line"><a id="l00946" name="l00946"></a><span class="lineno">  946</span>        }</div>
-<div class="line"><a id="l00947" name="l00947"></a><span class="lineno">  947</span>      }</div>
-<div class="line"><a id="l00948" name="l00948"></a><span class="lineno">  948</span>    }</div>
-<div class="line"><a id="l00949" name="l00949"></a><span class="lineno">  949</span>  }</div>
-<div class="line"><a id="l00950" name="l00950"></a><span class="lineno">  950</span>}</div>
+<div class="line"><a id="l00935" name="l00935"></a><span class="lineno">  935</span>        }</div>
+<div class="line"><a id="l00936" name="l00936"></a><span class="lineno">  936</span> </div>
+<div class="line"><a id="l00937" name="l00937"></a><span class="lineno">  937</span>        <span class="comment">// If this was a valid step, accept it. Else reduce dt.</span></div>
+<div class="line"><a id="l00938" name="l00938"></a><span class="lineno">  938</span>        valid = state.isValidState();</div>
+<div class="line"><a id="l00939" name="l00939"></a><span class="lineno">  939</span> </div>
+<div class="line"><a id="l00940" name="l00940"></a><span class="lineno">  940</span>        <span class="keywordflow">if</span> (valid) {</div>
+<div class="line"><a id="l00941" name="l00941"></a><span class="lineno">  941</span>          a_state = state;</div>
+<div class="line"><a id="l00942" name="l00942"></a><span class="lineno">  942</span> </div>
+<div class="line"><a id="l00943" name="l00943"></a><span class="lineno">  943</span>          curTime += curDt;</div>
+<div class="line"><a id="l00944" name="l00944"></a><span class="lineno">  944</span>        }</div>
+<div class="line"><a id="l00945" name="l00945"></a><span class="lineno">  945</span>        <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00946" name="l00946"></a><span class="lineno">  946</span>          curDt *= 0.5;</div>
+<div class="line"><a id="l00947" name="l00947"></a><span class="lineno">  947</span>        }</div>
+<div class="line"><a id="l00948" name="l00948"></a><span class="lineno">  948</span>      }</div>
+<div class="line"><a id="l00949" name="l00949"></a><span class="lineno">  949</span>    }</div>
+<div class="line"><a id="l00950" name="l00950"></a><span class="lineno">  950</span>  }</div>
+<div class="line"><a id="l00951" name="l00951"></a><span class="lineno">  951</span>}</div>
 </div>
-<div class="line"><a id="l00951" name="l00951"></a><span class="lineno">  951</span> </div>
-<div class="line"><a id="l00952" name="l00952"></a><span class="lineno">  952</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> R, <span class="keyword">typename</span> State, <span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a id="l00953" name="l00953"></a><span class="lineno">  953</span><span class="keyword">inline</span> <span class="keywordtype">void</span></div>
-<div class="foldopen" id="foldopen00954" data-start="{" data-end="}">
-<div class="line"><a id="l00954" name="l00954"></a><span class="lineno"><a class="line" href="classKMCSolver.html#ab284d9236aa9557ef582b638eaa1dd0d">  954</a></span><a class="code hl_function" href="classKMCSolver.html#ab284d9236aa9557ef582b638eaa1dd0d">KMCSolver&lt;R, State, T&gt;::advanceHybrid</a>(State&amp;                   a_state,</div>
-<div class="line"><a id="l00955" name="l00955"></a><span class="lineno">  955</span>                                      <span class="keyword">const</span> Real               a_dt,</div>
-<div class="line"><a id="l00956" name="l00956"></a><span class="lineno">  956</span>                                      <span class="keyword">const</span> <a class="code hl_enumeration" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4">KMCLeapPropagator</a>&amp; a_leapPropagator) <span class="keyword">const</span> <span class="keyword">noexcept</span></div>
-<div class="line"><a id="l00957" name="l00957"></a><span class="lineno">  957</span>{</div>
-<div class="line"><a id="l00958" name="l00958"></a><span class="lineno">  958</span>  CH_TIME(<span class="stringliteral">&quot;KMCSolver::advanceHybrid(State, Real, KMCLeapPropagator)&quot;</span>);</div>
-<div class="line"><a id="l00959" name="l00959"></a><span class="lineno">  959</span> </div>
-<div class="line"><a id="l00960" name="l00960"></a><span class="lineno">  960</span>  this-&gt;advanceHybrid(a_state, m_reactions, a_dt, a_leapPropagator);</div>
-<div class="line"><a id="l00961" name="l00961"></a><span class="lineno">  961</span>}</div>
+<div class="line"><a id="l00952" name="l00952"></a><span class="lineno">  952</span> </div>
+<div class="line"><a id="l00953" name="l00953"></a><span class="lineno">  953</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> R, <span class="keyword">typename</span> State, <span class="keyword">typename</span> T&gt;</div>
+<div class="line"><a id="l00954" name="l00954"></a><span class="lineno">  954</span><span class="keyword">inline</span> <span class="keywordtype">void</span></div>
+<div class="foldopen" id="foldopen00955" data-start="{" data-end="}">
+<div class="line"><a id="l00955" name="l00955"></a><span class="lineno"><a class="line" href="classKMCSolver.html#ab284d9236aa9557ef582b638eaa1dd0d">  955</a></span><a class="code hl_function" href="classKMCSolver.html#ab284d9236aa9557ef582b638eaa1dd0d">KMCSolver&lt;R, State, T&gt;::advanceHybrid</a>(State&amp;                   a_state,</div>
+<div class="line"><a id="l00956" name="l00956"></a><span class="lineno">  956</span>                                      <span class="keyword">const</span> Real               a_dt,</div>
+<div class="line"><a id="l00957" name="l00957"></a><span class="lineno">  957</span>                                      <span class="keyword">const</span> <a class="code hl_enumeration" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4">KMCLeapPropagator</a>&amp; a_leapPropagator) <span class="keyword">const</span> <span class="keyword">noexcept</span></div>
+<div class="line"><a id="l00958" name="l00958"></a><span class="lineno">  958</span>{</div>
+<div class="line"><a id="l00959" name="l00959"></a><span class="lineno">  959</span>  CH_TIME(<span class="stringliteral">&quot;KMCSolver::advanceHybrid(State, Real, KMCLeapPropagator)&quot;</span>);</div>
+<div class="line"><a id="l00960" name="l00960"></a><span class="lineno">  960</span> </div>
+<div class="line"><a id="l00961" name="l00961"></a><span class="lineno">  961</span>  this-&gt;advanceHybrid(a_state, m_reactions, a_dt, a_leapPropagator);</div>
+<div class="line"><a id="l00962" name="l00962"></a><span class="lineno">  962</span>}</div>
 </div>
-<div class="line"><a id="l00962" name="l00962"></a><span class="lineno">  962</span> </div>
-<div class="line"><a id="l00963" name="l00963"></a><span class="lineno">  963</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> R, <span class="keyword">typename</span> State, <span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a id="l00964" name="l00964"></a><span class="lineno">  964</span><span class="keyword">inline</span> <span class="keywordtype">void</span></div>
-<div class="foldopen" id="foldopen00965" data-start="{" data-end="}">
-<div class="line"><a id="l00965" name="l00965"></a><span class="lineno"><a class="line" href="classKMCSolver.html#a92a89de4bef3c3071c4145c5839ebca9">  965</a></span><a class="code hl_function" href="classKMCSolver.html#ab284d9236aa9557ef582b638eaa1dd0d">KMCSolver&lt;R, State, T&gt;::advanceHybrid</a>(State&amp;                   a_state,</div>
-<div class="line"><a id="l00966" name="l00966"></a><span class="lineno">  966</span>                                      <span class="keyword">const</span> <a class="code hl_typedef" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a>&amp;      a_reactions,</div>
-<div class="line"><a id="l00967" name="l00967"></a><span class="lineno">  967</span>                                      <span class="keyword">const</span> Real               a_dt,</div>
-<div class="line"><a id="l00968" name="l00968"></a><span class="lineno">  968</span>                                      <span class="keyword">const</span> <a class="code hl_enumeration" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4">KMCLeapPropagator</a>&amp; a_leapPropagator) <span class="keyword">const</span> <span class="keyword">noexcept</span></div>
-<div class="line"><a id="l00969" name="l00969"></a><span class="lineno">  969</span>{</div>
-<div class="line"><a id="l00970" name="l00970"></a><span class="lineno">  970</span>  CH_TIME(<span class="stringliteral">&quot;KMCSolver::advanceHybrid(State, ReactionList, Real, KMCLeapPropagator)&quot;</span>);</div>
-<div class="line"><a id="l00971" name="l00971"></a><span class="lineno">  971</span> </div>
-<div class="line"><a id="l00972" name="l00972"></a><span class="lineno">  972</span>  <span class="keywordflow">switch</span> (a_leapPropagator) {</div>
-<div class="line"><a id="l00973" name="l00973"></a><span class="lineno">  973</span>  <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4a96fdcdf2e719153ba8daa0a24976e73e">KMCLeapPropagator::ExplicitEuler</a>: {</div>
-<div class="line"><a id="l00974" name="l00974"></a><span class="lineno">  974</span>    this-&gt;advanceHybrid(a_state, a_reactions, a_dt, [<span class="keyword">this</span>](State&amp; s, <span class="keyword">const</span> <a class="code hl_typedef" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a>&amp; r, <span class="keyword">const</span> Real dt) {</div>
-<div class="line"><a id="l00975" name="l00975"></a><span class="lineno">  975</span>      this-&gt;stepExplicitEuler(s, r, dt);</div>
-<div class="line"><a id="l00976" name="l00976"></a><span class="lineno">  976</span>    });</div>
-<div class="line"><a id="l00977" name="l00977"></a><span class="lineno">  977</span> </div>
-<div class="line"><a id="l00978" name="l00978"></a><span class="lineno">  978</span>    <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00979" name="l00979"></a><span class="lineno">  979</span>  }</div>
-<div class="line"><a id="l00980" name="l00980"></a><span class="lineno">  980</span>  <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4a7f56c02b34d312867e3f63c9f21fe5c8">KMCLeapPropagator::Midpoint</a>: {</div>
-<div class="line"><a id="l00981" name="l00981"></a><span class="lineno">  981</span>    this-&gt;advanceHybrid(a_state, a_reactions, a_dt, [<span class="keyword">this</span>](State&amp; s, <span class="keyword">const</span> <a class="code hl_typedef" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a>&amp; r, <span class="keyword">const</span> Real dt) {</div>
-<div class="line"><a id="l00982" name="l00982"></a><span class="lineno">  982</span>      this-&gt;stepMidpoint(s, r, dt);</div>
-<div class="line"><a id="l00983" name="l00983"></a><span class="lineno">  983</span>    });</div>
-<div class="line"><a id="l00984" name="l00984"></a><span class="lineno">  984</span> </div>
-<div class="line"><a id="l00985" name="l00985"></a><span class="lineno">  985</span>    <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00986" name="l00986"></a><span class="lineno">  986</span>  }</div>
-<div class="line"><a id="l00987" name="l00987"></a><span class="lineno">  987</span>  <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4ae01a919b068424df394a7f38a3a02ed2">KMCLeapPropagator::PRC</a>: {</div>
-<div class="line"><a id="l00988" name="l00988"></a><span class="lineno">  988</span>    this-&gt;advanceHybrid(a_state, a_reactions, a_dt, [<span class="keyword">this</span>](State&amp; s, <span class="keyword">const</span> <a class="code hl_typedef" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a>&amp; r, <span class="keyword">const</span> Real dt) {</div>
-<div class="line"><a id="l00989" name="l00989"></a><span class="lineno">  989</span>      this-&gt;stepPRC(s, r, dt);</div>
-<div class="line"><a id="l00990" name="l00990"></a><span class="lineno">  990</span>    });</div>
-<div class="line"><a id="l00991" name="l00991"></a><span class="lineno">  991</span> </div>
-<div class="line"><a id="l00992" name="l00992"></a><span class="lineno">  992</span>    <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00993" name="l00993"></a><span class="lineno">  993</span>  }</div>
-<div class="line"><a id="l00994" name="l00994"></a><span class="lineno">  994</span>  <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4a1b41e1bf0ba9f22aff9ae08cba5197c5">KMCLeapPropagator::ImplicitEuler</a>: {</div>
-<div class="line"><a id="l00995" name="l00995"></a><span class="lineno">  995</span>    this-&gt;advanceHybrid(a_state, a_reactions, a_dt, [<span class="keyword">this</span>](State&amp; s, <span class="keyword">const</span> <a class="code hl_typedef" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a>&amp; r, <span class="keyword">const</span> Real dt) {</div>
-<div class="line"><a id="l00996" name="l00996"></a><span class="lineno">  996</span>      this-&gt;stepImplicitEuler(s, r, dt);</div>
-<div class="line"><a id="l00997" name="l00997"></a><span class="lineno">  997</span>    });</div>
-<div class="line"><a id="l00998" name="l00998"></a><span class="lineno">  998</span> </div>
-<div class="line"><a id="l00999" name="l00999"></a><span class="lineno">  999</span>    <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l01000" name="l01000"></a><span class="lineno"> 1000</span>  }</div>
-<div class="line"><a id="l01001" name="l01001"></a><span class="lineno"> 1001</span>  <span class="keywordflow">default</span>: {</div>
-<div class="line"><a id="l01002" name="l01002"></a><span class="lineno"> 1002</span>    MayDay::Error(<span class="stringliteral">&quot;KMCSolver::advanceHybrid - unknown leap propagator requested&quot;</span>);</div>
-<div class="line"><a id="l01003" name="l01003"></a><span class="lineno"> 1003</span>  }</div>
+<div class="line"><a id="l00963" name="l00963"></a><span class="lineno">  963</span> </div>
+<div class="line"><a id="l00964" name="l00964"></a><span class="lineno">  964</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> R, <span class="keyword">typename</span> State, <span class="keyword">typename</span> T&gt;</div>
+<div class="line"><a id="l00965" name="l00965"></a><span class="lineno">  965</span><span class="keyword">inline</span> <span class="keywordtype">void</span></div>
+<div class="foldopen" id="foldopen00966" data-start="{" data-end="}">
+<div class="line"><a id="l00966" name="l00966"></a><span class="lineno"><a class="line" href="classKMCSolver.html#a92a89de4bef3c3071c4145c5839ebca9">  966</a></span><a class="code hl_function" href="classKMCSolver.html#ab284d9236aa9557ef582b638eaa1dd0d">KMCSolver&lt;R, State, T&gt;::advanceHybrid</a>(State&amp;                   a_state,</div>
+<div class="line"><a id="l00967" name="l00967"></a><span class="lineno">  967</span>                                      <span class="keyword">const</span> <a class="code hl_typedef" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a>&amp;      a_reactions,</div>
+<div class="line"><a id="l00968" name="l00968"></a><span class="lineno">  968</span>                                      <span class="keyword">const</span> Real               a_dt,</div>
+<div class="line"><a id="l00969" name="l00969"></a><span class="lineno">  969</span>                                      <span class="keyword">const</span> <a class="code hl_enumeration" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4">KMCLeapPropagator</a>&amp; a_leapPropagator) <span class="keyword">const</span> <span class="keyword">noexcept</span></div>
+<div class="line"><a id="l00970" name="l00970"></a><span class="lineno">  970</span>{</div>
+<div class="line"><a id="l00971" name="l00971"></a><span class="lineno">  971</span>  CH_TIME(<span class="stringliteral">&quot;KMCSolver::advanceHybrid(State, ReactionList, Real, KMCLeapPropagator)&quot;</span>);</div>
+<div class="line"><a id="l00972" name="l00972"></a><span class="lineno">  972</span> </div>
+<div class="line"><a id="l00973" name="l00973"></a><span class="lineno">  973</span>  <span class="keywordflow">switch</span> (a_leapPropagator) {</div>
+<div class="line"><a id="l00974" name="l00974"></a><span class="lineno">  974</span>  <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4a96fdcdf2e719153ba8daa0a24976e73e">KMCLeapPropagator::ExplicitEuler</a>: {</div>
+<div class="line"><a id="l00975" name="l00975"></a><span class="lineno">  975</span>    this-&gt;advanceHybrid(a_state, a_reactions, a_dt, [<span class="keyword">this</span>](State&amp; s, <span class="keyword">const</span> <a class="code hl_typedef" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a>&amp; r, <span class="keyword">const</span> Real dt) {</div>
+<div class="line"><a id="l00976" name="l00976"></a><span class="lineno">  976</span>      this-&gt;stepExplicitEuler(s, r, dt);</div>
+<div class="line"><a id="l00977" name="l00977"></a><span class="lineno">  977</span>    });</div>
+<div class="line"><a id="l00978" name="l00978"></a><span class="lineno">  978</span> </div>
+<div class="line"><a id="l00979" name="l00979"></a><span class="lineno">  979</span>    <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00980" name="l00980"></a><span class="lineno">  980</span>  }</div>
+<div class="line"><a id="l00981" name="l00981"></a><span class="lineno">  981</span>  <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4a7f56c02b34d312867e3f63c9f21fe5c8">KMCLeapPropagator::Midpoint</a>: {</div>
+<div class="line"><a id="l00982" name="l00982"></a><span class="lineno">  982</span>    this-&gt;advanceHybrid(a_state, a_reactions, a_dt, [<span class="keyword">this</span>](State&amp; s, <span class="keyword">const</span> <a class="code hl_typedef" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a>&amp; r, <span class="keyword">const</span> Real dt) {</div>
+<div class="line"><a id="l00983" name="l00983"></a><span class="lineno">  983</span>      this-&gt;stepMidpoint(s, r, dt);</div>
+<div class="line"><a id="l00984" name="l00984"></a><span class="lineno">  984</span>    });</div>
+<div class="line"><a id="l00985" name="l00985"></a><span class="lineno">  985</span> </div>
+<div class="line"><a id="l00986" name="l00986"></a><span class="lineno">  986</span>    <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00987" name="l00987"></a><span class="lineno">  987</span>  }</div>
+<div class="line"><a id="l00988" name="l00988"></a><span class="lineno">  988</span>  <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4ae01a919b068424df394a7f38a3a02ed2">KMCLeapPropagator::PRC</a>: {</div>
+<div class="line"><a id="l00989" name="l00989"></a><span class="lineno">  989</span>    this-&gt;advanceHybrid(a_state, a_reactions, a_dt, [<span class="keyword">this</span>](State&amp; s, <span class="keyword">const</span> <a class="code hl_typedef" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a>&amp; r, <span class="keyword">const</span> Real dt) {</div>
+<div class="line"><a id="l00990" name="l00990"></a><span class="lineno">  990</span>      this-&gt;stepPRC(s, r, dt);</div>
+<div class="line"><a id="l00991" name="l00991"></a><span class="lineno">  991</span>    });</div>
+<div class="line"><a id="l00992" name="l00992"></a><span class="lineno">  992</span> </div>
+<div class="line"><a id="l00993" name="l00993"></a><span class="lineno">  993</span>    <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00994" name="l00994"></a><span class="lineno">  994</span>  }</div>
+<div class="line"><a id="l00995" name="l00995"></a><span class="lineno">  995</span>  <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4a1b41e1bf0ba9f22aff9ae08cba5197c5">KMCLeapPropagator::ImplicitEuler</a>: {</div>
+<div class="line"><a id="l00996" name="l00996"></a><span class="lineno">  996</span>    this-&gt;advanceHybrid(a_state, a_reactions, a_dt, [<span class="keyword">this</span>](State&amp; s, <span class="keyword">const</span> <a class="code hl_typedef" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a>&amp; r, <span class="keyword">const</span> Real dt) {</div>
+<div class="line"><a id="l00997" name="l00997"></a><span class="lineno">  997</span>      this-&gt;stepImplicitEuler(s, r, dt);</div>
+<div class="line"><a id="l00998" name="l00998"></a><span class="lineno">  998</span>    });</div>
+<div class="line"><a id="l00999" name="l00999"></a><span class="lineno">  999</span> </div>
+<div class="line"><a id="l01000" name="l01000"></a><span class="lineno"> 1000</span>    <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l01001" name="l01001"></a><span class="lineno"> 1001</span>  }</div>
+<div class="line"><a id="l01002" name="l01002"></a><span class="lineno"> 1002</span>  <span class="keywordflow">default</span>: {</div>
+<div class="line"><a id="l01003" name="l01003"></a><span class="lineno"> 1003</span>    MayDay::Error(<span class="stringliteral">&quot;KMCSolver::advanceHybrid - unknown leap propagator requested&quot;</span>);</div>
 <div class="line"><a id="l01004" name="l01004"></a><span class="lineno"> 1004</span>  }</div>
-<div class="line"><a id="l01005" name="l01005"></a><span class="lineno"> 1005</span>}</div>
+<div class="line"><a id="l01005" name="l01005"></a><span class="lineno"> 1005</span>  }</div>
+<div class="line"><a id="l01006" name="l01006"></a><span class="lineno"> 1006</span>}</div>
 </div>
-<div class="line"><a id="l01006" name="l01006"></a><span class="lineno"> 1006</span> </div>
-<div class="line"><a id="l01007" name="l01007"></a><span class="lineno"> 1007</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> R, <span class="keyword">typename</span> State, <span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a id="l01008" name="l01008"></a><span class="lineno"> 1008</span><span class="keyword">inline</span> <span class="keywordtype">void</span></div>
-<div class="foldopen" id="foldopen01009" data-start="{" data-end="}">
-<div class="line"><a id="l01009" name="l01009"></a><span class="lineno"><a class="line" href="classKMCSolver.html#ab2839a89dc45b60bc32b5e9deeef21e3"> 1009</a></span><a class="code hl_function" href="classKMCSolver.html#ab284d9236aa9557ef582b638eaa1dd0d">KMCSolver&lt;R, State, T&gt;::advanceHybrid</a>(</div>
-<div class="line"><a id="l01010" name="l01010"></a><span class="lineno"> 1010</span>  State&amp;                                                                               a_state,</div>
-<div class="line"><a id="l01011" name="l01011"></a><span class="lineno"> 1011</span>  <span class="keyword">const</span> <a class="code hl_typedef" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a>&amp;                                                                  a_reactions,</div>
-<div class="line"><a id="l01012" name="l01012"></a><span class="lineno"> 1012</span>  <span class="keyword">const</span> Real                                                                           a_dt,</div>
-<div class="line"><a id="l01013" name="l01013"></a><span class="lineno"> 1013</span>  <span class="keyword">const</span> std::function&lt;<span class="keywordtype">void</span>(State&amp;, <span class="keyword">const</span> <a class="code hl_typedef" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a>&amp; a_reactions, <span class="keyword">const</span> Real a_dt)&gt;&amp; a_propagator) <span class="keyword">const</span> <span class="keyword">noexcept</span></div>
-<div class="line"><a id="l01014" name="l01014"></a><span class="lineno"> 1014</span>{</div>
-<div class="line"><a id="l01015" name="l01015"></a><span class="lineno"> 1015</span>  CH_TIME(<span class="stringliteral">&quot;KMCSolver::advanceHybrid(State, ReactionList, Real, std::function)&quot;</span>);</div>
-<div class="line"><a id="l01016" name="l01016"></a><span class="lineno"> 1016</span> </div>
-<div class="line"><a id="l01017" name="l01017"></a><span class="lineno"> 1017</span>  <span class="keyword">constexpr</span> T one = (T)1;</div>
-<div class="line"><a id="l01018" name="l01018"></a><span class="lineno"> 1018</span> </div>
-<div class="line"><a id="l01019" name="l01019"></a><span class="lineno"> 1019</span>  <span class="comment">// Simulated time within the advancement algorithm.</span></div>
-<div class="line"><a id="l01020" name="l01020"></a><span class="lineno"> 1020</span>  Real curTime = 0.0;</div>
-<div class="line"><a id="l01021" name="l01021"></a><span class="lineno"> 1021</span> </div>
-<div class="line"><a id="l01022" name="l01022"></a><span class="lineno"> 1022</span>  <span class="comment">// Outer loop is for reactive substepping over a_dt.</span></div>
-<div class="line"><a id="l01023" name="l01023"></a><span class="lineno"> 1023</span>  <span class="keywordflow">while</span> (curTime &lt; a_dt) {</div>
-<div class="line"><a id="l01024" name="l01024"></a><span class="lineno"> 1024</span> </div>
-<div class="line"><a id="l01025" name="l01025"></a><span class="lineno"> 1025</span>    <span class="comment">// Partition reactions into critical and non-critical reactions and compute the critical and non-critical time steps.</span></div>
-<div class="line"><a id="l01026" name="l01026"></a><span class="lineno"> 1026</span>    <span class="keyword">const</span> std::pair&lt;ReactionList, ReactionList&gt; partitionedReactions = this-&gt;partitionReactions(a_state, a_reactions);</div>
-<div class="line"><a id="l01027" name="l01027"></a><span class="lineno"> 1027</span> </div>
-<div class="line"><a id="l01028" name="l01028"></a><span class="lineno"> 1028</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a>&amp; criticalReactions    = partitionedReactions.first;</div>
-<div class="line"><a id="l01029" name="l01029"></a><span class="lineno"> 1029</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a>&amp; nonCriticalReactions = partitionedReactions.second;</div>
-<div class="line"><a id="l01030" name="l01030"></a><span class="lineno"> 1030</span> </div>
-<div class="line"><a id="l01031" name="l01031"></a><span class="lineno"> 1031</span>    <span class="keyword">const</span> std::vector&lt;Real&gt; propensitiesCrit    = this-&gt;propensities(a_state, criticalReactions);</div>
-<div class="line"><a id="l01032" name="l01032"></a><span class="lineno"> 1032</span>    <span class="keyword">const</span> std::vector&lt;Real&gt; propensitiesNonCrit = this-&gt;propensities(a_state, nonCriticalReactions);</div>
-<div class="line"><a id="l01033" name="l01033"></a><span class="lineno"> 1033</span> </div>
-<div class="line"><a id="l01034" name="l01034"></a><span class="lineno"> 1034</span>    Real dtCrit    = this-&gt;getCriticalTimeStep(propensitiesCrit);</div>
-<div class="line"><a id="l01035" name="l01035"></a><span class="lineno"> 1035</span>    Real dtNonCrit = this-&gt;getNonCriticalTimeStep(a_state, nonCriticalReactions, propensitiesNonCrit);</div>
-<div class="line"><a id="l01036" name="l01036"></a><span class="lineno"> 1036</span> </div>
-<div class="line"><a id="l01037" name="l01037"></a><span class="lineno"> 1037</span>    <span class="comment">// Try the various advancement algorithms; the loop is for step rejection in case we end up with an invalid state, e.g.</span></div>
-<div class="line"><a id="l01038" name="l01038"></a><span class="lineno"> 1038</span>    <span class="comment">// a state with a negative number of particles.</span></div>
-<div class="line"><a id="l01039" name="l01039"></a><span class="lineno"> 1039</span>    <span class="keywordtype">bool</span> validStep = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l01040" name="l01040"></a><span class="lineno"> 1040</span> </div>
-<div class="line"><a id="l01041" name="l01041"></a><span class="lineno"> 1041</span>    <span class="keywordflow">while</span> (!validStep) {</div>
+<div class="line"><a id="l01007" name="l01007"></a><span class="lineno"> 1007</span> </div>
+<div class="line"><a id="l01008" name="l01008"></a><span class="lineno"> 1008</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> R, <span class="keyword">typename</span> State, <span class="keyword">typename</span> T&gt;</div>
+<div class="line"><a id="l01009" name="l01009"></a><span class="lineno"> 1009</span><span class="keyword">inline</span> <span class="keywordtype">void</span></div>
+<div class="foldopen" id="foldopen01010" data-start="{" data-end="}">
+<div class="line"><a id="l01010" name="l01010"></a><span class="lineno"><a class="line" href="classKMCSolver.html#ab2839a89dc45b60bc32b5e9deeef21e3"> 1010</a></span><a class="code hl_function" href="classKMCSolver.html#ab284d9236aa9557ef582b638eaa1dd0d">KMCSolver&lt;R, State, T&gt;::advanceHybrid</a>(</div>
+<div class="line"><a id="l01011" name="l01011"></a><span class="lineno"> 1011</span>  State&amp;                                                                               a_state,</div>
+<div class="line"><a id="l01012" name="l01012"></a><span class="lineno"> 1012</span>  <span class="keyword">const</span> <a class="code hl_typedef" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a>&amp;                                                                  a_reactions,</div>
+<div class="line"><a id="l01013" name="l01013"></a><span class="lineno"> 1013</span>  <span class="keyword">const</span> Real                                                                           a_dt,</div>
+<div class="line"><a id="l01014" name="l01014"></a><span class="lineno"> 1014</span>  <span class="keyword">const</span> std::function&lt;<span class="keywordtype">void</span>(State&amp;, <span class="keyword">const</span> <a class="code hl_typedef" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a>&amp; a_reactions, <span class="keyword">const</span> Real a_dt)&gt;&amp; a_propagator) <span class="keyword">const</span> <span class="keyword">noexcept</span></div>
+<div class="line"><a id="l01015" name="l01015"></a><span class="lineno"> 1015</span>{</div>
+<div class="line"><a id="l01016" name="l01016"></a><span class="lineno"> 1016</span>  CH_TIME(<span class="stringliteral">&quot;KMCSolver::advanceHybrid(State, ReactionList, Real, std::function)&quot;</span>);</div>
+<div class="line"><a id="l01017" name="l01017"></a><span class="lineno"> 1017</span> </div>
+<div class="line"><a id="l01018" name="l01018"></a><span class="lineno"> 1018</span>  <span class="keyword">constexpr</span> T one = (T)1;</div>
+<div class="line"><a id="l01019" name="l01019"></a><span class="lineno"> 1019</span> </div>
+<div class="line"><a id="l01020" name="l01020"></a><span class="lineno"> 1020</span>  <span class="comment">// Simulated time within the advancement algorithm.</span></div>
+<div class="line"><a id="l01021" name="l01021"></a><span class="lineno"> 1021</span>  Real curTime = 0.0;</div>
+<div class="line"><a id="l01022" name="l01022"></a><span class="lineno"> 1022</span> </div>
+<div class="line"><a id="l01023" name="l01023"></a><span class="lineno"> 1023</span>  <span class="comment">// Outer loop is for reactive substepping over a_dt.</span></div>
+<div class="line"><a id="l01024" name="l01024"></a><span class="lineno"> 1024</span>  <span class="keywordflow">while</span> (curTime &lt; a_dt) {</div>
+<div class="line"><a id="l01025" name="l01025"></a><span class="lineno"> 1025</span> </div>
+<div class="line"><a id="l01026" name="l01026"></a><span class="lineno"> 1026</span>    <span class="comment">// Partition reactions into critical and non-critical reactions and compute the critical and non-critical time</span></div>
+<div class="line"><a id="l01027" name="l01027"></a><span class="lineno"> 1027</span>    <span class="comment">// steps.</span></div>
+<div class="line"><a id="l01028" name="l01028"></a><span class="lineno"> 1028</span>    <span class="keyword">const</span> std::pair&lt;ReactionList, ReactionList&gt; partitionedReactions = this-&gt;partitionReactions(a_state, a_reactions);</div>
+<div class="line"><a id="l01029" name="l01029"></a><span class="lineno"> 1029</span> </div>
+<div class="line"><a id="l01030" name="l01030"></a><span class="lineno"> 1030</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a>&amp; criticalReactions    = partitionedReactions.first;</div>
+<div class="line"><a id="l01031" name="l01031"></a><span class="lineno"> 1031</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a>&amp; nonCriticalReactions = partitionedReactions.second;</div>
+<div class="line"><a id="l01032" name="l01032"></a><span class="lineno"> 1032</span> </div>
+<div class="line"><a id="l01033" name="l01033"></a><span class="lineno"> 1033</span>    <span class="keyword">const</span> std::vector&lt;Real&gt; propensitiesCrit    = this-&gt;propensities(a_state, criticalReactions);</div>
+<div class="line"><a id="l01034" name="l01034"></a><span class="lineno"> 1034</span>    <span class="keyword">const</span> std::vector&lt;Real&gt; propensitiesNonCrit = this-&gt;propensities(a_state, nonCriticalReactions);</div>
+<div class="line"><a id="l01035" name="l01035"></a><span class="lineno"> 1035</span> </div>
+<div class="line"><a id="l01036" name="l01036"></a><span class="lineno"> 1036</span>    Real dtCrit    = this-&gt;getCriticalTimeStep(propensitiesCrit);</div>
+<div class="line"><a id="l01037" name="l01037"></a><span class="lineno"> 1037</span>    Real dtNonCrit = this-&gt;getNonCriticalTimeStep(a_state, nonCriticalReactions, propensitiesNonCrit);</div>
+<div class="line"><a id="l01038" name="l01038"></a><span class="lineno"> 1038</span> </div>
+<div class="line"><a id="l01039" name="l01039"></a><span class="lineno"> 1039</span>    <span class="comment">// Try the various advancement algorithms; the loop is for step rejection in case we end up with an invalid state,</span></div>
+<div class="line"><a id="l01040" name="l01040"></a><span class="lineno"> 1040</span>    <span class="comment">// e.g. a state with a negative number of particles.</span></div>
+<div class="line"><a id="l01041" name="l01041"></a><span class="lineno"> 1041</span>    <span class="keywordtype">bool</span> validStep = <span class="keyword">false</span>;</div>
 <div class="line"><a id="l01042" name="l01042"></a><span class="lineno"> 1042</span> </div>
-<div class="line"><a id="l01043" name="l01043"></a><span class="lineno"> 1043</span>      <span class="comment">// Do a backup of the advancement state to operate on. This is necessary because the tau-leaping</span></div>
-<div class="line"><a id="l01044" name="l01044"></a><span class="lineno"> 1044</span>      <span class="comment">// algorithms advance the state but we may need to reject those steps if we end up with a thermodynamically</span></div>
-<div class="line"><a id="l01045" name="l01045"></a><span class="lineno"> 1045</span>      <span class="comment">// invalid state.</span></div>
-<div class="line"><a id="l01046" name="l01046"></a><span class="lineno"> 1046</span>      State state = a_state;</div>
-<div class="line"><a id="l01047" name="l01047"></a><span class="lineno"> 1047</span> </div>
-<div class="line"><a id="l01048" name="l01048"></a><span class="lineno"> 1048</span>      <span class="comment">// Compute the time step to be used.</span></div>
-<div class="line"><a id="l01049" name="l01049"></a><span class="lineno"> 1049</span>      <span class="keyword">const</span> Real curDt = std::min(a_dt - curTime, std::min(dtCrit, dtNonCrit));</div>
-<div class="line"><a id="l01050" name="l01050"></a><span class="lineno"> 1050</span> </div>
-<div class="line"><a id="l01051" name="l01051"></a><span class="lineno"> 1051</span>      <span class="comment">// Are we only doing non-critical reactions?</span></div>
-<div class="line"><a id="l01052" name="l01052"></a><span class="lineno"> 1052</span>      <span class="keyword">const</span> <span class="keywordtype">bool</span> nonCriticalOnly = (dtNonCrit &lt; dtCrit) || (criticalReactions.size() == 0) ||</div>
-<div class="line"><a id="l01053" name="l01053"></a><span class="lineno"> 1053</span>                                   (dtCrit &gt; (a_dt - curTime));</div>
-<div class="line"><a id="l01054" name="l01054"></a><span class="lineno"> 1054</span> </div>
-<div class="line"><a id="l01055" name="l01055"></a><span class="lineno"> 1055</span>      <span class="comment">// Decide whether tau-leaping is efficient enough, or whether we should fall back to an exact SSA advancement</span></div>
-<div class="line"><a id="l01056" name="l01056"></a><span class="lineno"> 1056</span>      <span class="comment">// over the WHOLE reaction set. This decision is made independently of whether a critical reaction is pending --</span></div>
-<div class="line"><a id="l01057" name="l01057"></a><span class="lineno"> 1057</span>      <span class="comment">// in low-activity regimes exact SSA is both cheaper and more accurate than tau-leaping, so it must be available</span></div>
-<div class="line"><a id="l01058" name="l01058"></a><span class="lineno"> 1058</span>      <span class="comment">// in the critical branch as well. SSA is only used when the user has permitted at least one SSA step</span></div>
-<div class="line"><a id="l01059" name="l01059"></a><span class="lineno"> 1059</span>      <span class="comment">// (m_numSSA &gt; 0); otherwise we always tau-leap, which also avoids a no-progress infinite loop when m_numSSA == 0.</span></div>
-<div class="line"><a id="l01060" name="l01060"></a><span class="lineno"> 1060</span>      <span class="keyword">const</span> Real A      = this-&gt;totalPropensity(state, a_reactions);</div>
-<div class="line"><a id="l01061" name="l01061"></a><span class="lineno"> 1061</span>      <span class="keyword">const</span> <span class="keywordtype">bool</span> useSSA = (m_numSSA &gt;= one) &amp;&amp; (A * curDt &lt; m_SSAlim);</div>
-<div class="line"><a id="l01062" name="l01062"></a><span class="lineno"> 1062</span> </div>
-<div class="line"><a id="l01063" name="l01063"></a><span class="lineno"> 1063</span>      <span class="keywordflow">if</span> (useSSA) {</div>
-<div class="line"><a id="l01064" name="l01064"></a><span class="lineno"> 1064</span>        <span class="comment">// TLDR: Tau-leaping is inefficient here so we switch to an SSA-based algorithm for the WHOLE reaction set.</span></div>
-<div class="line"><a id="l01065" name="l01065"></a><span class="lineno"> 1065</span> </div>
-<div class="line"><a id="l01066" name="l01066"></a><span class="lineno"> 1066</span>        <span class="comment">// Number of SSA steps taken and simulated time within the SSA. We will compute until either dtSSA &gt;= curDt or</span></div>
-<div class="line"><a id="l01067" name="l01067"></a><span class="lineno"> 1067</span>        <span class="comment">// we&#39;ve exceeded the maximum number of SSA steps that the user has permitted (m_numSSA).</span></div>
-<div class="line"><a id="l01068" name="l01068"></a><span class="lineno"> 1068</span>        Real dtSSA  = 0.0;</div>
-<div class="line"><a id="l01069" name="l01069"></a><span class="lineno"> 1069</span>        T    numSSA = 0;</div>
-<div class="line"><a id="l01070" name="l01070"></a><span class="lineno"> 1070</span> </div>
-<div class="line"><a id="l01071" name="l01071"></a><span class="lineno"> 1071</span>        <span class="keywordflow">while</span> (dtSSA &lt; curDt &amp;&amp; numSSA &lt; m_numSSA) {</div>
+<div class="line"><a id="l01043" name="l01043"></a><span class="lineno"> 1043</span>    <span class="keywordflow">while</span> (!validStep) {</div>
+<div class="line"><a id="l01044" name="l01044"></a><span class="lineno"> 1044</span> </div>
+<div class="line"><a id="l01045" name="l01045"></a><span class="lineno"> 1045</span>      <span class="comment">// Do a backup of the advancement state to operate on. This is necessary because the tau-leaping</span></div>
+<div class="line"><a id="l01046" name="l01046"></a><span class="lineno"> 1046</span>      <span class="comment">// algorithms advance the state but we may need to reject those steps if we end up with a thermodynamically</span></div>
+<div class="line"><a id="l01047" name="l01047"></a><span class="lineno"> 1047</span>      <span class="comment">// invalid state.</span></div>
+<div class="line"><a id="l01048" name="l01048"></a><span class="lineno"> 1048</span>      State state = a_state;</div>
+<div class="line"><a id="l01049" name="l01049"></a><span class="lineno"> 1049</span> </div>
+<div class="line"><a id="l01050" name="l01050"></a><span class="lineno"> 1050</span>      <span class="comment">// Compute the time step to be used.</span></div>
+<div class="line"><a id="l01051" name="l01051"></a><span class="lineno"> 1051</span>      <span class="keyword">const</span> Real curDt = std::min(a_dt - curTime, std::min(dtCrit, dtNonCrit));</div>
+<div class="line"><a id="l01052" name="l01052"></a><span class="lineno"> 1052</span> </div>
+<div class="line"><a id="l01053" name="l01053"></a><span class="lineno"> 1053</span>      <span class="comment">// Are we only doing non-critical reactions?</span></div>
+<div class="line"><a id="l01054" name="l01054"></a><span class="lineno"> 1054</span>      <span class="keyword">const</span> <span class="keywordtype">bool</span> nonCriticalOnly = (dtNonCrit &lt; dtCrit) || (criticalReactions.size() == 0) ||</div>
+<div class="line"><a id="l01055" name="l01055"></a><span class="lineno"> 1055</span>                                   (dtCrit &gt; (a_dt - curTime));</div>
+<div class="line"><a id="l01056" name="l01056"></a><span class="lineno"> 1056</span> </div>
+<div class="line"><a id="l01057" name="l01057"></a><span class="lineno"> 1057</span>      <span class="comment">// Decide whether tau-leaping is efficient enough, or whether we should fall back to an exact SSA advancement</span></div>
+<div class="line"><a id="l01058" name="l01058"></a><span class="lineno"> 1058</span>      <span class="comment">// over the WHOLE reaction set. This decision is made independently of whether a critical reaction is pending --</span></div>
+<div class="line"><a id="l01059" name="l01059"></a><span class="lineno"> 1059</span>      <span class="comment">// in low-activity regimes exact SSA is both cheaper and more accurate than tau-leaping, so it must be available</span></div>
+<div class="line"><a id="l01060" name="l01060"></a><span class="lineno"> 1060</span>      <span class="comment">// in the critical branch as well. SSA is only used when the user has permitted at least one SSA step</span></div>
+<div class="line"><a id="l01061" name="l01061"></a><span class="lineno"> 1061</span>      <span class="comment">// (m_numSSA &gt; 0); otherwise we always tau-leap, which also avoids a no-progress infinite loop when m_numSSA == 0.</span></div>
+<div class="line"><a id="l01062" name="l01062"></a><span class="lineno"> 1062</span>      <span class="keyword">const</span> Real A      = this-&gt;totalPropensity(state, a_reactions);</div>
+<div class="line"><a id="l01063" name="l01063"></a><span class="lineno"> 1063</span>      <span class="keyword">const</span> <span class="keywordtype">bool</span> useSSA = (m_numSSA &gt;= one) &amp;&amp; (A * curDt &lt; m_SSAlim);</div>
+<div class="line"><a id="l01064" name="l01064"></a><span class="lineno"> 1064</span> </div>
+<div class="line"><a id="l01065" name="l01065"></a><span class="lineno"> 1065</span>      <span class="keywordflow">if</span> (useSSA) {</div>
+<div class="line"><a id="l01066" name="l01066"></a><span class="lineno"> 1066</span>        <span class="comment">// TLDR: Tau-leaping is inefficient here so we switch to an SSA-based algorithm for the WHOLE reaction set.</span></div>
+<div class="line"><a id="l01067" name="l01067"></a><span class="lineno"> 1067</span> </div>
+<div class="line"><a id="l01068" name="l01068"></a><span class="lineno"> 1068</span>        <span class="comment">// Number of SSA steps taken and simulated time within the SSA. We will compute until either dtSSA &gt;= curDt or</span></div>
+<div class="line"><a id="l01069" name="l01069"></a><span class="lineno"> 1069</span>        <span class="comment">// we&#39;ve exceeded the maximum number of SSA steps that the user has permitted (m_numSSA).</span></div>
+<div class="line"><a id="l01070" name="l01070"></a><span class="lineno"> 1070</span>        Real dtSSA  = 0.0;</div>
+<div class="line"><a id="l01071" name="l01071"></a><span class="lineno"> 1071</span>        T    numSSA = 0;</div>
 <div class="line"><a id="l01072" name="l01072"></a><span class="lineno"> 1072</span> </div>
-<div class="line"><a id="l01073" name="l01073"></a><span class="lineno"> 1073</span>          <span class="comment">// Recompute propensities for the full reaction set and advance everything using the SSA.</span></div>
-<div class="line"><a id="l01074" name="l01074"></a><span class="lineno"> 1074</span>          <span class="keyword">const</span> std::vector&lt;Real&gt; propensities = this-&gt;propensities(a_state, a_reactions);</div>
-<div class="line"><a id="l01075" name="l01075"></a><span class="lineno"> 1075</span> </div>
-<div class="line"><a id="l01076" name="l01076"></a><span class="lineno"> 1076</span>          Real Asum = 0.0;</div>
-<div class="line"><a id="l01077" name="l01077"></a><span class="lineno"> 1077</span>          <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; propensities.size(); i++) {</div>
-<div class="line"><a id="l01078" name="l01078"></a><span class="lineno"> 1078</span>            Asum += propensities[i];</div>
-<div class="line"><a id="l01079" name="l01079"></a><span class="lineno"> 1079</span>          }</div>
-<div class="line"><a id="l01080" name="l01080"></a><span class="lineno"> 1080</span> </div>
-<div class="line"><a id="l01081" name="l01081"></a><span class="lineno"> 1081</span>          <span class="comment">// Compute the time to the next reaction.</span></div>
-<div class="line"><a id="l01082" name="l01082"></a><span class="lineno"> 1082</span>          <span class="keyword">const</span> Real dtReact = this-&gt;getCriticalTimeStep(Asum);</div>
-<div class="line"><a id="l01083" name="l01083"></a><span class="lineno"> 1083</span> </div>
-<div class="line"><a id="l01084" name="l01084"></a><span class="lineno"> 1084</span>          <span class="keywordflow">if</span> (dtSSA + dtReact &lt; curDt) {</div>
-<div class="line"><a id="l01085" name="l01085"></a><span class="lineno"> 1085</span>            this-&gt;stepSSA(a_state, a_reactions, propensities);</div>
-<div class="line"><a id="l01086" name="l01086"></a><span class="lineno"> 1086</span> </div>
-<div class="line"><a id="l01087" name="l01087"></a><span class="lineno"> 1087</span>            dtSSA += dtReact;</div>
-<div class="line"><a id="l01088" name="l01088"></a><span class="lineno"> 1088</span>            numSSA += one;</div>
-<div class="line"><a id="l01089" name="l01089"></a><span class="lineno"> 1089</span>          }</div>
-<div class="line"><a id="l01090" name="l01090"></a><span class="lineno"> 1090</span>          <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l01091" name="l01091"></a><span class="lineno"> 1091</span> </div>
-<div class="line"><a id="l01092" name="l01092"></a><span class="lineno"> 1092</span>            <span class="comment">// Next reaction occurred outside the substep -- break out of the loop.</span></div>
-<div class="line"><a id="l01093" name="l01093"></a><span class="lineno"> 1093</span>            dtSSA = curDt;</div>
-<div class="line"><a id="l01094" name="l01094"></a><span class="lineno"> 1094</span>          }</div>
-<div class="line"><a id="l01095" name="l01095"></a><span class="lineno"> 1095</span>        }</div>
-<div class="line"><a id="l01096" name="l01096"></a><span class="lineno"> 1096</span> </div>
-<div class="line"><a id="l01097" name="l01097"></a><span class="lineno"> 1097</span>        validStep = <span class="keyword">true</span>;</div>
-<div class="line"><a id="l01098" name="l01098"></a><span class="lineno"> 1098</span>        curTime += dtSSA;</div>
-<div class="line"><a id="l01099" name="l01099"></a><span class="lineno"> 1099</span>      }</div>
-<div class="line"><a id="l01100" name="l01100"></a><span class="lineno"> 1100</span>      <span class="keywordflow">else</span> <span class="keywordflow">if</span> (nonCriticalOnly) {</div>
-<div class="line"><a id="l01101" name="l01101"></a><span class="lineno"> 1101</span>        <span class="comment">// Do the tau-leaping over the non-critical reactions only.</span></div>
-<div class="line"><a id="l01102" name="l01102"></a><span class="lineno"> 1102</span>        a_propagator(state, nonCriticalReactions, curDt);</div>
-<div class="line"><a id="l01103" name="l01103"></a><span class="lineno"> 1103</span> </div>
-<div class="line"><a id="l01104" name="l01104"></a><span class="lineno"> 1104</span>        <span class="comment">// Check if we need to reject the state and rather try again with a smaller non-critical time step.</span></div>
-<div class="line"><a id="l01105" name="l01105"></a><span class="lineno"> 1105</span>        validStep = state.isValidState();</div>
-<div class="line"><a id="l01106" name="l01106"></a><span class="lineno"> 1106</span> </div>
-<div class="line"><a id="l01107" name="l01107"></a><span class="lineno"> 1107</span>        <span class="keywordflow">if</span> (validStep) {</div>
-<div class="line"><a id="l01108" name="l01108"></a><span class="lineno"> 1108</span>          a_state = state;</div>
-<div class="line"><a id="l01109" name="l01109"></a><span class="lineno"> 1109</span> </div>
-<div class="line"><a id="l01110" name="l01110"></a><span class="lineno"> 1110</span>          curTime += curDt;</div>
-<div class="line"><a id="l01111" name="l01111"></a><span class="lineno"> 1111</span>        }</div>
-<div class="line"><a id="l01112" name="l01112"></a><span class="lineno"> 1112</span>        <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l01113" name="l01113"></a><span class="lineno"> 1113</span>          dtNonCrit *= 0.5;</div>
-<div class="line"><a id="l01114" name="l01114"></a><span class="lineno"> 1114</span>        }</div>
-<div class="line"><a id="l01115" name="l01115"></a><span class="lineno"> 1115</span>      }</div>
-<div class="line"><a id="l01116" name="l01116"></a><span class="lineno"> 1116</span>      <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l01117" name="l01117"></a><span class="lineno"> 1117</span>        <span class="comment">// TLDR: Here, one critical reaction fires. We tau-leap the non-critical reactions over curDt and fire exactly</span></div>
-<div class="line"><a id="l01118" name="l01118"></a><span class="lineno"> 1118</span>        <span class="comment">//       one critical reaction using the SSA. The non-critical tau-leap is performed FIRST, while the state is</span></div>
-<div class="line"><a id="l01119" name="l01119"></a><span class="lineno"> 1119</span>        <span class="comment">//       still at the start of the step, so that its propensities are evaluated at the start-of-step state. The</span></div>
-<div class="line"><a id="l01120" name="l01120"></a><span class="lineno"> 1120</span>        <span class="comment">//       single critical firing is then applied as a fixed stoichiometric increment -- its reaction was already</span></div>
-<div class="line"><a id="l01121" name="l01121"></a><span class="lineno"> 1121</span>        <span class="comment">//       selected from the start-of-step propensities (propensitiesCrit), so applying it last is exact. This</span></div>
-<div class="line"><a id="l01122" name="l01122"></a><span class="lineno"> 1122</span>        <span class="comment">//       keeps both contributions consistent with the start-of-step state, as required by the</span></div>
-<div class="line"><a id="l01123" name="l01123"></a><span class="lineno"> 1123</span>        <span class="comment">//       Cao-Gillespie-Petzold scheme.</span></div>
-<div class="line"><a id="l01124" name="l01124"></a><span class="lineno"> 1124</span>        a_propagator(state, nonCriticalReactions, curDt);</div>
-<div class="line"><a id="l01125" name="l01125"></a><span class="lineno"> 1125</span> </div>
-<div class="line"><a id="l01126" name="l01126"></a><span class="lineno"> 1126</span>        this-&gt;stepSSA(state, criticalReactions, propensitiesCrit);</div>
+<div class="line"><a id="l01073" name="l01073"></a><span class="lineno"> 1073</span>        <span class="keywordflow">while</span> (dtSSA &lt; curDt &amp;&amp; numSSA &lt; m_numSSA) {</div>
+<div class="line"><a id="l01074" name="l01074"></a><span class="lineno"> 1074</span> </div>
+<div class="line"><a id="l01075" name="l01075"></a><span class="lineno"> 1075</span>          <span class="comment">// Recompute propensities for the full reaction set and advance everything using the SSA.</span></div>
+<div class="line"><a id="l01076" name="l01076"></a><span class="lineno"> 1076</span>          <span class="keyword">const</span> std::vector&lt;Real&gt; propensities = this-&gt;propensities(a_state, a_reactions);</div>
+<div class="line"><a id="l01077" name="l01077"></a><span class="lineno"> 1077</span> </div>
+<div class="line"><a id="l01078" name="l01078"></a><span class="lineno"> 1078</span>          Real Asum = 0.0;</div>
+<div class="line"><a id="l01079" name="l01079"></a><span class="lineno"> 1079</span>          <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; propensities.size(); i++) {</div>
+<div class="line"><a id="l01080" name="l01080"></a><span class="lineno"> 1080</span>            Asum += propensities[i];</div>
+<div class="line"><a id="l01081" name="l01081"></a><span class="lineno"> 1081</span>          }</div>
+<div class="line"><a id="l01082" name="l01082"></a><span class="lineno"> 1082</span> </div>
+<div class="line"><a id="l01083" name="l01083"></a><span class="lineno"> 1083</span>          <span class="comment">// Compute the time to the next reaction.</span></div>
+<div class="line"><a id="l01084" name="l01084"></a><span class="lineno"> 1084</span>          <span class="keyword">const</span> Real dtReact = this-&gt;getCriticalTimeStep(Asum);</div>
+<div class="line"><a id="l01085" name="l01085"></a><span class="lineno"> 1085</span> </div>
+<div class="line"><a id="l01086" name="l01086"></a><span class="lineno"> 1086</span>          <span class="keywordflow">if</span> (dtSSA + dtReact &lt; curDt) {</div>
+<div class="line"><a id="l01087" name="l01087"></a><span class="lineno"> 1087</span>            this-&gt;stepSSA(a_state, a_reactions, propensities);</div>
+<div class="line"><a id="l01088" name="l01088"></a><span class="lineno"> 1088</span> </div>
+<div class="line"><a id="l01089" name="l01089"></a><span class="lineno"> 1089</span>            dtSSA += dtReact;</div>
+<div class="line"><a id="l01090" name="l01090"></a><span class="lineno"> 1090</span>            numSSA += one;</div>
+<div class="line"><a id="l01091" name="l01091"></a><span class="lineno"> 1091</span>          }</div>
+<div class="line"><a id="l01092" name="l01092"></a><span class="lineno"> 1092</span>          <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l01093" name="l01093"></a><span class="lineno"> 1093</span> </div>
+<div class="line"><a id="l01094" name="l01094"></a><span class="lineno"> 1094</span>            <span class="comment">// Next reaction occurred outside the substep -- break out of the loop.</span></div>
+<div class="line"><a id="l01095" name="l01095"></a><span class="lineno"> 1095</span>            dtSSA = curDt;</div>
+<div class="line"><a id="l01096" name="l01096"></a><span class="lineno"> 1096</span>          }</div>
+<div class="line"><a id="l01097" name="l01097"></a><span class="lineno"> 1097</span>        }</div>
+<div class="line"><a id="l01098" name="l01098"></a><span class="lineno"> 1098</span> </div>
+<div class="line"><a id="l01099" name="l01099"></a><span class="lineno"> 1099</span>        validStep = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l01100" name="l01100"></a><span class="lineno"> 1100</span>        curTime += dtSSA;</div>
+<div class="line"><a id="l01101" name="l01101"></a><span class="lineno"> 1101</span>      }</div>
+<div class="line"><a id="l01102" name="l01102"></a><span class="lineno"> 1102</span>      <span class="keywordflow">else</span> <span class="keywordflow">if</span> (nonCriticalOnly) {</div>
+<div class="line"><a id="l01103" name="l01103"></a><span class="lineno"> 1103</span>        <span class="comment">// Do the tau-leaping over the non-critical reactions only.</span></div>
+<div class="line"><a id="l01104" name="l01104"></a><span class="lineno"> 1104</span>        a_propagator(state, nonCriticalReactions, curDt);</div>
+<div class="line"><a id="l01105" name="l01105"></a><span class="lineno"> 1105</span> </div>
+<div class="line"><a id="l01106" name="l01106"></a><span class="lineno"> 1106</span>        <span class="comment">// Check if we need to reject the state and rather try again with a smaller non-critical time step.</span></div>
+<div class="line"><a id="l01107" name="l01107"></a><span class="lineno"> 1107</span>        validStep = state.isValidState();</div>
+<div class="line"><a id="l01108" name="l01108"></a><span class="lineno"> 1108</span> </div>
+<div class="line"><a id="l01109" name="l01109"></a><span class="lineno"> 1109</span>        <span class="keywordflow">if</span> (validStep) {</div>
+<div class="line"><a id="l01110" name="l01110"></a><span class="lineno"> 1110</span>          a_state = state;</div>
+<div class="line"><a id="l01111" name="l01111"></a><span class="lineno"> 1111</span> </div>
+<div class="line"><a id="l01112" name="l01112"></a><span class="lineno"> 1112</span>          curTime += curDt;</div>
+<div class="line"><a id="l01113" name="l01113"></a><span class="lineno"> 1113</span>        }</div>
+<div class="line"><a id="l01114" name="l01114"></a><span class="lineno"> 1114</span>        <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l01115" name="l01115"></a><span class="lineno"> 1115</span>          dtNonCrit *= 0.5;</div>
+<div class="line"><a id="l01116" name="l01116"></a><span class="lineno"> 1116</span>        }</div>
+<div class="line"><a id="l01117" name="l01117"></a><span class="lineno"> 1117</span>      }</div>
+<div class="line"><a id="l01118" name="l01118"></a><span class="lineno"> 1118</span>      <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l01119" name="l01119"></a><span class="lineno"> 1119</span>        <span class="comment">// TLDR: Here, one critical reaction fires. We tau-leap the non-critical reactions over curDt and fire exactly</span></div>
+<div class="line"><a id="l01120" name="l01120"></a><span class="lineno"> 1120</span>        <span class="comment">//       one critical reaction using the SSA. The non-critical tau-leap is performed FIRST, while the state is</span></div>
+<div class="line"><a id="l01121" name="l01121"></a><span class="lineno"> 1121</span>        <span class="comment">//       still at the start of the step, so that its propensities are evaluated at the start-of-step state. The</span></div>
+<div class="line"><a id="l01122" name="l01122"></a><span class="lineno"> 1122</span>        <span class="comment">//       single critical firing is then applied as a fixed stoichiometric increment -- its reaction was already</span></div>
+<div class="line"><a id="l01123" name="l01123"></a><span class="lineno"> 1123</span>        <span class="comment">//       selected from the start-of-step propensities (propensitiesCrit), so applying it last is exact. This</span></div>
+<div class="line"><a id="l01124" name="l01124"></a><span class="lineno"> 1124</span>        <span class="comment">//       keeps both contributions consistent with the start-of-step state, as required by the</span></div>
+<div class="line"><a id="l01125" name="l01125"></a><span class="lineno"> 1125</span>        <span class="comment">//       Cao-Gillespie-Petzold scheme.</span></div>
+<div class="line"><a id="l01126" name="l01126"></a><span class="lineno"> 1126</span>        a_propagator(state, nonCriticalReactions, curDt);</div>
 <div class="line"><a id="l01127" name="l01127"></a><span class="lineno"> 1127</span> </div>
-<div class="line"><a id="l01128" name="l01128"></a><span class="lineno"> 1128</span>        <span class="comment">// Check if we need to reject the state and rather try again with a smaller non-critical time step.</span></div>
-<div class="line"><a id="l01129" name="l01129"></a><span class="lineno"> 1129</span>        validStep = state.isValidState();</div>
-<div class="line"><a id="l01130" name="l01130"></a><span class="lineno"> 1130</span> </div>
-<div class="line"><a id="l01131" name="l01131"></a><span class="lineno"> 1131</span>        <span class="keywordflow">if</span> (validStep) {</div>
-<div class="line"><a id="l01132" name="l01132"></a><span class="lineno"> 1132</span>          a_state = state;</div>
-<div class="line"><a id="l01133" name="l01133"></a><span class="lineno"> 1133</span> </div>
-<div class="line"><a id="l01134" name="l01134"></a><span class="lineno"> 1134</span>          curTime += curDt;</div>
-<div class="line"><a id="l01135" name="l01135"></a><span class="lineno"> 1135</span>        }</div>
-<div class="line"><a id="l01136" name="l01136"></a><span class="lineno"> 1136</span>        <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l01137" name="l01137"></a><span class="lineno"> 1137</span>          dtNonCrit *= 0.5;</div>
-<div class="line"><a id="l01138" name="l01138"></a><span class="lineno"> 1138</span>        }</div>
-<div class="line"><a id="l01139" name="l01139"></a><span class="lineno"> 1139</span>      }</div>
-<div class="line"><a id="l01140" name="l01140"></a><span class="lineno"> 1140</span>    }</div>
-<div class="line"><a id="l01141" name="l01141"></a><span class="lineno"> 1141</span>  }</div>
-<div class="line"><a id="l01142" name="l01142"></a><span class="lineno"> 1142</span>}</div>
+<div class="line"><a id="l01128" name="l01128"></a><span class="lineno"> 1128</span>        this-&gt;stepSSA(state, criticalReactions, propensitiesCrit);</div>
+<div class="line"><a id="l01129" name="l01129"></a><span class="lineno"> 1129</span> </div>
+<div class="line"><a id="l01130" name="l01130"></a><span class="lineno"> 1130</span>        <span class="comment">// Check if we need to reject the state and rather try again with a smaller non-critical time step.</span></div>
+<div class="line"><a id="l01131" name="l01131"></a><span class="lineno"> 1131</span>        validStep = state.isValidState();</div>
+<div class="line"><a id="l01132" name="l01132"></a><span class="lineno"> 1132</span> </div>
+<div class="line"><a id="l01133" name="l01133"></a><span class="lineno"> 1133</span>        <span class="keywordflow">if</span> (validStep) {</div>
+<div class="line"><a id="l01134" name="l01134"></a><span class="lineno"> 1134</span>          a_state = state;</div>
+<div class="line"><a id="l01135" name="l01135"></a><span class="lineno"> 1135</span> </div>
+<div class="line"><a id="l01136" name="l01136"></a><span class="lineno"> 1136</span>          curTime += curDt;</div>
+<div class="line"><a id="l01137" name="l01137"></a><span class="lineno"> 1137</span>        }</div>
+<div class="line"><a id="l01138" name="l01138"></a><span class="lineno"> 1138</span>        <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l01139" name="l01139"></a><span class="lineno"> 1139</span>          dtNonCrit *= 0.5;</div>
+<div class="line"><a id="l01140" name="l01140"></a><span class="lineno"> 1140</span>        }</div>
+<div class="line"><a id="l01141" name="l01141"></a><span class="lineno"> 1141</span>      }</div>
+<div class="line"><a id="l01142" name="l01142"></a><span class="lineno"> 1142</span>    }</div>
+<div class="line"><a id="l01143" name="l01143"></a><span class="lineno"> 1143</span>  }</div>
+<div class="line"><a id="l01144" name="l01144"></a><span class="lineno"> 1144</span>}</div>
 </div>
-<div class="line"><a id="l01143" name="l01143"></a><span class="lineno"> 1143</span> </div>
-<div class="line"><a id="l01144" name="l01144"></a><span class="lineno"> 1144</span><span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
 <div class="line"><a id="l01145" name="l01145"></a><span class="lineno"> 1145</span> </div>
-<div class="line"><a id="l01146" name="l01146"></a><span class="lineno"> 1146</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l01146" name="l01146"></a><span class="lineno"> 1146</span><span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a id="l01147" name="l01147"></a><span class="lineno"> 1147</span> </div>
+<div class="line"><a id="l01148" name="l01148"></a><span class="lineno"> 1148</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aCD__KMCSolver_8H_html"><div class="ttname"><a href="CD__KMCSolver_8H.html">CD_KMCSolver.H</a></div><div class="ttdoc">Class for running Kinetic Monte Carlo functionality.</div></div>
 <div class="ttc" id="aCD__KMCSolver_8H_html_a44a86cfb3c9eee456028c00d618ea9d4"><div class="ttname"><a href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4">KMCLeapPropagator</a></div><div class="ttdeci">KMCLeapPropagator</div><div class="ttdoc">Supported propagators for hybrid tau leaping.</div><div class="ttdef"><b>Definition</b> CD_KMCSolver.H:35</div></div>
 <div class="ttc" id="aCD__KMCSolver_8H_html_a44a86cfb3c9eee456028c00d618ea9d4a1b41e1bf0ba9f22aff9ae08cba5197c5"><div class="ttname"><a href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4a1b41e1bf0ba9f22aff9ae08cba5197c5">KMCLeapPropagator::ImplicitEuler</a></div><div class="ttdeci">@ ImplicitEuler</div><div class="ttdoc">Implicit Euler tau leaping.</div></div>
@@ -1312,7 +1314,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="ttc" id="aCD__KMCSolver_8H_html_a44a86cfb3c9eee456028c00d618ea9d4ae01a919b068424df394a7f38a3a02ed2"><div class="ttname"><a href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4ae01a919b068424df394a7f38a3a02ed2">KMCLeapPropagator::PRC</a></div><div class="ttdeci">@ PRC</div><div class="ttdoc">Hu and Li's Poisson random correction method.</div></div>
 <div class="ttc" id="aCD__LaPackUtils_8H_html"><div class="ttname"><a href="CD__LaPackUtils_8H.html">CD_LaPackUtils.H</a></div><div class="ttdoc">Interface to some LaPack routines.</div></div>
 <div class="ttc" id="aCD__Random_8H_html"><div class="ttname"><a href="CD__Random_8H.html">CD_Random.H</a></div><div class="ttdoc">File containing some useful static methods related to random number generation.</div></div>
-<div class="ttc" id="aclassKMCSolver_html_a060ac3ddb8e0f0c5147a4d069bab04ae"><div class="ttname"><a href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">KMCSolver::ReactionList</a></div><div class="ttdeci">std::vector&lt; std::shared_ptr&lt; const R &gt; &gt; ReactionList</div><div class="ttdoc">Alias for the list of reactions.</div><div class="ttdef"><b>Definition</b> CD_KMCSolver.H:63</div></div>
+<div class="ttc" id="aclassKMCSolver_html_a060ac3ddb8e0f0c5147a4d069bab04ae"><div class="ttname"><a href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">KMCSolver::ReactionList</a></div><div class="ttdeci">std::vector&lt; std::shared_ptr&lt; const R &gt; &gt; ReactionList</div><div class="ttdoc">Alias for the list of reactions.</div><div class="ttdef"><b>Definition</b> CD_KMCSolver.H:66</div></div>
 <div class="ttc" id="aclassKMCSolver_html_a137e134528727296804f76aca1a05df7"><div class="ttname"><a href="classKMCSolver.html#a137e134528727296804f76aca1a05df7">KMCSolver::setSolverParameters</a></div><div class="ttdeci">void setSolverParameters(T a_numCrit, T a_numSSA, T a_maxIter, Real a_eps, Real a_SSAlim, Real a_exitTol) noexcept</div><div class="ttdoc">Set solver parameters.</div><div class="ttdef"><b>Definition</b> CD_KMCSolverImplem.H:65</div></div>
 <div class="ttc" id="aclassKMCSolver_html_a213d882a0aec2acbcbec9bb9b5222526"><div class="ttname"><a href="classKMCSolver.html#a213d882a0aec2acbcbec9bb9b5222526">KMCSolver::computeDt</a></div><div class="ttdeci">Real computeDt(const State &amp;a_state, const ReactionList &amp;a_reactions, const std::vector&lt; Real &gt; &amp;a_propensities, Real a_epsilon) const noexcept</div><div class="ttdoc">Compute a time step using the leap condition on the mean value.</div><div class="ttdef"><b>Definition</b> CD_KMCSolverImplem.H:369</div></div>
 <div class="ttc" id="aclassKMCSolver_html_a2487eda314c6d49ca95265317f811063"><div class="ttname"><a href="classKMCSolver.html#a2487eda314c6d49ca95265317f811063">KMCSolver::~KMCSolver</a></div><div class="ttdeci">virtual ~KMCSolver() noexcept</div><div class="ttdoc">Destructor.</div><div class="ttdef"><b>Definition</b> CD_KMCSolverImplem.H:46</div></div>
@@ -1322,12 +1324,12 @@ $(document).ready(function() { init_codefold(0); });
 <div class="ttc" id="aclassKMCSolver_html_a7f82b7ccce4c98c50f75603133166a15"><div class="ttname"><a href="classKMCSolver.html#a7f82b7ccce4c98c50f75603133166a15">KMCSolver::getCriticalTimeStep</a></div><div class="ttdeci">Real getCriticalTimeStep(const State &amp;a_state) const noexcept</div><div class="ttdoc">Get the time to the next critical reaction.</div><div class="ttdef"><b>Definition</b> CD_KMCSolverImplem.H:210</div></div>
 <div class="ttc" id="aclassKMCSolver_html_a8d944fbded7f556f9325b5fba58b068c"><div class="ttname"><a href="classKMCSolver.html#a8d944fbded7f556f9325b5fba58b068c">KMCSolver::advanceSSA</a></div><div class="ttdeci">void advanceSSA(State &amp;a_state, Real a_dt) const noexcept</div><div class="ttdoc">Advance with the SSA over the input time. This can end up using substepping.</div><div class="ttdef"><b>Definition</b> CD_KMCSolverImplem.H:507</div></div>
 <div class="ttc" id="aclassKMCSolver_html_aaca91100d8b18efdd3379af9eca9f8ec"><div class="ttname"><a href="classKMCSolver.html#aaca91100d8b18efdd3379af9eca9f8ec">KMCSolver::stepImplicitEuler</a></div><div class="ttdeci">void stepImplicitEuler(State &amp;a_state, Real a_dt) const noexcept</div><div class="ttdoc">Perform one implicit Euler tau-leaping step using ALL reactions.</div><div class="ttdef"><b>Definition</b> CD_KMCSolverImplem.H:673</div></div>
-<div class="ttc" id="aclassKMCSolver_html_ab284d9236aa9557ef582b638eaa1dd0d"><div class="ttname"><a href="classKMCSolver.html#ab284d9236aa9557ef582b638eaa1dd0d">KMCSolver::advanceHybrid</a></div><div class="ttdeci">void advanceHybrid(State &amp;a_state, Real a_dt, const KMCLeapPropagator &amp;a_leapPropagator=KMCLeapPropagator::ExplicitEuler) const noexcept</div><div class="ttdoc">Advance using Cao et. al. hybrid algorithm over the input time. This can end up using substepping.</div><div class="ttdef"><b>Definition</b> CD_KMCSolverImplem.H:954</div></div>
+<div class="ttc" id="aclassKMCSolver_html_ab284d9236aa9557ef582b638eaa1dd0d"><div class="ttname"><a href="classKMCSolver.html#ab284d9236aa9557ef582b638eaa1dd0d">KMCSolver::advanceHybrid</a></div><div class="ttdeci">void advanceHybrid(State &amp;a_state, Real a_dt, const KMCLeapPropagator &amp;a_leapPropagator=KMCLeapPropagator::ExplicitEuler) const noexcept</div><div class="ttdoc">Advance using Cao et. al. hybrid algorithm over the input time. This can end up using substepping.</div><div class="ttdef"><b>Definition</b> CD_KMCSolverImplem.H:955</div></div>
 <div class="ttc" id="aclassKMCSolver_html_ab28a827ad32fd5c7d8fcf69c2f3d3c0e"><div class="ttname"><a href="classKMCSolver.html#ab28a827ad32fd5c7d8fcf69c2f3d3c0e">KMCSolver::stepPRC</a></div><div class="ttdeci">void stepPRC(State &amp;a_state, Real a_dt) const noexcept</div><div class="ttdoc">Perform one leaping step using the PRC method for ALL reactions.</div><div class="ttdef"><b>Definition</b> CD_KMCSolverImplem.H:624</div></div>
 <div class="ttc" id="aclassKMCSolver_html_abb2afb35cead37e46f583a1bb1bdef59"><div class="ttname"><a href="classKMCSolver.html#abb2afb35cead37e46f583a1bb1bdef59">KMCSolver::stepMidpoint</a></div><div class="ttdeci">void stepMidpoint(State &amp;a_state, Real a_dt) const noexcept</div><div class="ttdoc">Perform one leaping step using the midpoint method for ALL reactions.</div><div class="ttdef"><b>Definition</b> CD_KMCSolverImplem.H:579</div></div>
 <div class="ttc" id="aclassKMCSolver_html_acfad658ae71fc1214f16b22c7ab6cbac"><div class="ttname"><a href="classKMCSolver.html#acfad658ae71fc1214f16b22c7ab6cbac">KMCSolver::partitionReactions</a></div><div class="ttdeci">std::pair&lt; ReactionList, ReactionList &gt; partitionReactions(const State &amp;a_state) const noexcept</div><div class="ttdoc">Partition reactions into critical and non-critical reactions.</div><div class="ttdef"><b>Definition</b> CD_KMCSolverImplem.H:171</div></div>
 <div class="ttc" id="aclassKMCSolver_html_addabdc39cccabc68c1de01c7576f4030"><div class="ttname"><a href="classKMCSolver.html#addabdc39cccabc68c1de01c7576f4030">KMCSolver::stepSSA</a></div><div class="ttdeci">void stepSSA(State &amp;a_state) const noexcept</div><div class="ttdoc">Perform a single SSA step.</div><div class="ttdef"><b>Definition</b> CD_KMCSolverImplem.H:440</div></div>
-<div class="ttc" id="aclassKMCSolver_html_adee03a19259da901c012ab95b4f2f0be"><div class="ttname"><a href="classKMCSolver.html#adee03a19259da901c012ab95b4f2f0be">KMCSolver::advanceTau</a></div><div class="ttdeci">void advanceTau(State &amp;a_state, const Real &amp;a_dt, const KMCLeapPropagator &amp;a_leapPropagator=KMCLeapPropagator::ExplicitEuler) const noexcept</div><div class="ttdoc">Advance using a specified tau-leaping algorithm.</div><div class="ttdef"><b>Definition</b> CD_KMCSolverImplem.H:875</div></div>
+<div class="ttc" id="aclassKMCSolver_html_adee03a19259da901c012ab95b4f2f0be"><div class="ttname"><a href="classKMCSolver.html#adee03a19259da901c012ab95b4f2f0be">KMCSolver::advanceTau</a></div><div class="ttdeci">void advanceTau(State &amp;a_state, const Real &amp;a_dt, const KMCLeapPropagator &amp;a_leapPropagator=KMCLeapPropagator::ExplicitEuler) const noexcept</div><div class="ttdoc">Advance using a specified tau-leaping algorithm.</div><div class="ttdef"><b>Definition</b> CD_KMCSolverImplem.H:876</div></div>
 <div class="ttc" id="aclassKMCSolver_html_aeca5a8c19de0c47f5e79a2cae2b7e861"><div class="ttname"><a href="classKMCSolver.html#aeca5a8c19de0c47f5e79a2cae2b7e861">KMCSolver::getNonCriticalTimeStep</a></div><div class="ttdeci">Real getNonCriticalTimeStep(const State &amp;a_state) const noexcept</div><div class="ttdoc">Get the non-critical time step.</div><div class="ttdef"><b>Definition</b> CD_KMCSolverImplem.H:266</div></div>
 <div class="ttc" id="aclassKMCSolver_html_af4fec25a19f6b8c63f467aac4ee9f7bf"><div class="ttname"><a href="classKMCSolver.html#af4fec25a19f6b8c63f467aac4ee9f7bf">KMCSolver::totalPropensity</a></div><div class="ttdeci">Real totalPropensity(const State &amp;a_state) const noexcept</div><div class="ttdoc">Compute the total propensity for ALL reactions.</div><div class="ttdef"><b>Definition</b> CD_KMCSolverImplem.H:145</div></div>
 <div class="ttc" id="aclassKMCSolver_html_af6c1386446c0b5ef282a29bb0c1ea89d"><div class="ttname"><a href="classKMCSolver.html#af6c1386446c0b5ef282a29bb0c1ea89d">KMCSolver::stepExplicitEuler</a></div><div class="ttdeci">void stepExplicitEuler(State &amp;a_state, Real a_dt) const noexcept</div><div class="ttdoc">Perform one plain tau-leaping step using ALL reactions.</div><div class="ttdef"><b>Definition</b> CD_KMCSolverImplem.H:546</div></div>

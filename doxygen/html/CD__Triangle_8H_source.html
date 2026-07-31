@@ -107,57 +107,57 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;EBGeometry.hpp&gt;</span></div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;CD_NamespaceHeader.H&gt;</span></div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
-<div class="foldopen" id="foldopen00029" data-start="{" data-end="};">
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="classTriangle.html">   29</a></span><span class="keyword">class </span><a class="code hl_class" href="classTriangle.html">Triangle</a> : <span class="keyword">public</span> EBGeometry::Triangle&lt;Real, std::array&lt;Real, 3&gt;&gt;</div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>{</div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="keyword">public</span>:</div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="classTriangle.html#a5b560671d6c13da47a96a30044447801">   35</a></span>  <span class="keyword">using </span><a class="code hl_typedef" href="classTriangle.html#a5b560671d6c13da47a96a30044447801">Vec3</a> = EBGeometry::Vec3T&lt;Real&gt;;</div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>  <a class="code hl_function" href="classTriangle.html#a62339258b54e0c593025feb8155e663e">Triangle</a>() noexcept;</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>  <a class="code hl_class" href="classTriangle.html">Triangle</a>(const std::array&lt;<a class="code hl_typedef" href="classTriangle.html#a5b560671d6c13da47a96a30044447801">Vec3</a>, 3&gt;&amp; a_vertexPositions) noexcept;</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno"><a class="line" href="classTriangle.html#abb3865cf1726d8a755c330a7afc25655">   56</a></span>  virtual ~<a class="code hl_class" href="classTriangle.html">Triangle</a>() noexcept;</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>  <span class="keywordtype">void</span></div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>  <a class="code hl_function" href="classTriangle.html#a5733d47cea965583109e297ab23df66c">computeArea</a>() noexcept;</div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>  <span class="keywordtype">void</span></div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>  <a class="code hl_function" href="classTriangle.html#a21a4bc5998e8afa2c553bd88847ab4dd">setVertexPositions</a>(const std::array&lt;<a class="code hl_typedef" href="classTriangle.html#a5b560671d6c13da47a96a30044447801">Vec3</a>, 3&gt;&amp; a_vertexPositions) noexcept;</div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span> </div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>  <span class="keywordtype">void</span></div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>  <a class="code hl_function" href="classTriangle.html#aa0454e848d7b23bdd27595d28a85e17c">setVertexData</a>(const std::array&lt;Real, 3&gt;&amp; a_vertexData) noexcept;</div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span> </div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>  <a class="code hl_typedef" href="classTriangle.html#a5b560671d6c13da47a96a30044447801">Vec3</a></div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>  <a class="code hl_function" href="classTriangle.html#ad4968cabca1be85bfe475209b29ef9de">projectToTrianglePlane</a>(const <a class="code hl_typedef" href="classTriangle.html#a5b560671d6c13da47a96a30044447801">Vec3</a>&amp; a_point) const noexcept;</div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span> </div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>  <span class="keywordtype">bool</span></div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>  <a class="code hl_function" href="classTriangle.html#a59bf82b3377ba0ccec181f73adc15459">isInside</a>(const <a class="code hl_typedef" href="classTriangle.html#a5b560671d6c13da47a96a30044447801">Vec3</a>&amp; a_point) const noexcept;</div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span> </div>
-<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>  Real</div>
-<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>  <a class="code hl_function" href="classTriangle.html#a828045d94c3f50443bc8d17bf886218b">interpolate</a>(const <a class="code hl_typedef" href="classTriangle.html#a5b560671d6c13da47a96a30044447801">Vec3</a>&amp; a_point) const noexcept;</div>
-<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span> </div>
-<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>protected:</div>
-<div class="line"><a id="l00123" name="l00123"></a><span class="lineno"><a class="line" href="classTriangle.html#aafd89e1bd60bf1d8ad55a63004d55532">  123</a></span>  Real <a class="code hl_variable" href="classTriangle.html#aafd89e1bd60bf1d8ad55a63004d55532">m_area</a> = Real(0);</div>
-<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span> </div>
-<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>  static inline Real</div>
-<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>  <a class="code hl_function" href="classTriangle.html#a2c8425731dd6215d4ba139c73a40327a">computeTriangleArea</a>(const <a class="code hl_typedef" href="classTriangle.html#a5b560671d6c13da47a96a30044447801">Vec3</a>&amp; a_x1, const <a class="code hl_typedef" href="classTriangle.html#a5b560671d6c13da47a96a30044447801">Vec3</a>&amp; a_x2, const <a class="code hl_typedef" href="classTriangle.html#a5b560671d6c13da47a96a30044447801">Vec3</a>&amp; a_x3) noexcept;</div>
-<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>};</div>
+<div class="foldopen" id="foldopen00030" data-start="{" data-end="};">
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno"><a class="line" href="classTriangle.html">   30</a></span><span class="keyword">class </span><a class="code hl_class" href="classTriangle.html">Triangle</a> : <span class="keyword">public</span> EBGeometry::Triangle&lt;Real, std::array&lt;Real, 3&gt;&gt;</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>{</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno"><a class="line" href="classTriangle.html#a5b560671d6c13da47a96a30044447801">   36</a></span>  <span class="keyword">using </span><a class="code hl_typedef" href="classTriangle.html#a5b560671d6c13da47a96a30044447801">Vec3</a> = EBGeometry::Vec3T&lt;Real&gt;;</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>  <a class="code hl_function" href="classTriangle.html#a62339258b54e0c593025feb8155e663e">Triangle</a>() noexcept;</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>  <a class="code hl_class" href="classTriangle.html">Triangle</a>(const std::array&lt;<a class="code hl_typedef" href="classTriangle.html#a5b560671d6c13da47a96a30044447801">Vec3</a>, 3&gt;&amp; a_vertexPositions) noexcept;</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno"><a class="line" href="classTriangle.html#abb3865cf1726d8a755c330a7afc25655">   57</a></span>  virtual ~<a class="code hl_class" href="classTriangle.html">Triangle</a>() noexcept;</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>  <span class="keywordtype">void</span></div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>  <a class="code hl_function" href="classTriangle.html#a5733d47cea965583109e297ab23df66c">computeArea</a>() noexcept;</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>  <span class="keywordtype">void</span></div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>  <a class="code hl_function" href="classTriangle.html#a21a4bc5998e8afa2c553bd88847ab4dd">setVertexPositions</a>(const std::array&lt;<a class="code hl_typedef" href="classTriangle.html#a5b560671d6c13da47a96a30044447801">Vec3</a>, 3&gt;&amp; a_vertexPositions) noexcept;</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span> </div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>  <span class="keywordtype">void</span></div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>  <a class="code hl_function" href="classTriangle.html#aa0454e848d7b23bdd27595d28a85e17c">setVertexData</a>(const std::array&lt;Real, 3&gt;&amp; a_vertexData) noexcept;</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span> </div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>  <a class="code hl_typedef" href="classTriangle.html#a5b560671d6c13da47a96a30044447801">Vec3</a></div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>  <a class="code hl_function" href="classTriangle.html#ad4968cabca1be85bfe475209b29ef9de">projectToTrianglePlane</a>(const <a class="code hl_typedef" href="classTriangle.html#a5b560671d6c13da47a96a30044447801">Vec3</a>&amp; a_point) const noexcept;</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span> </div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>  <span class="keywordtype">bool</span></div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>  <a class="code hl_function" href="classTriangle.html#a59bf82b3377ba0ccec181f73adc15459">isInside</a>(const <a class="code hl_typedef" href="classTriangle.html#a5b560671d6c13da47a96a30044447801">Vec3</a>&amp; a_point) const noexcept;</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span> </div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>  Real</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>  <a class="code hl_function" href="classTriangle.html#a828045d94c3f50443bc8d17bf886218b">interpolate</a>(const <a class="code hl_typedef" href="classTriangle.html#a5b560671d6c13da47a96a30044447801">Vec3</a>&amp; a_point) const noexcept;</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span> </div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>protected:</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno"><a class="line" href="classTriangle.html#aafd89e1bd60bf1d8ad55a63004d55532">  124</a></span>  Real <a class="code hl_variable" href="classTriangle.html#aafd89e1bd60bf1d8ad55a63004d55532">m_area</a> = Real(0);</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span> </div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>  static inline Real</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>  <a class="code hl_function" href="classTriangle.html#a2c8425731dd6215d4ba139c73a40327a">computeTriangleArea</a>(const <a class="code hl_typedef" href="classTriangle.html#a5b560671d6c13da47a96a30044447801">Vec3</a>&amp; a_x1, const <a class="code hl_typedef" href="classTriangle.html#a5b560671d6c13da47a96a30044447801">Vec3</a>&amp; a_x2, const <a class="code hl_typedef" href="classTriangle.html#a5b560671d6c13da47a96a30044447801">Vec3</a>&amp; a_x3) noexcept;</div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>};</div>
 </div>
-<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span> </div>
-<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span><span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span> </div>
-<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span><span class="preprocessor">#endif</span></div>
-<div class="ttc" id="aclassTriangle_html"><div class="ttname"><a href="classTriangle.html">Triangle</a></div><div class="ttdoc">Class that represents a single triangle together with associated metadata on the vertices (one float ...</div><div class="ttdef"><b>Definition</b> CD_Triangle.H:30</div></div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span> </div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span><span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span> </div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="aclassTriangle_html"><div class="ttname"><a href="classTriangle.html">Triangle</a></div><div class="ttdoc">Class that represents a single triangle together with associated metadata on the vertices (one float ...</div><div class="ttdef"><b>Definition</b> CD_Triangle.H:31</div></div>
 <div class="ttc" id="aclassTriangle_html_a21a4bc5998e8afa2c553bd88847ab4dd"><div class="ttname"><a href="classTriangle.html#a21a4bc5998e8afa2c553bd88847ab4dd">Triangle::setVertexPositions</a></div><div class="ttdeci">void setVertexPositions(const std::array&lt; Vec3, 3 &gt; &amp;a_vertexPositions) noexcept</div><div class="ttdoc">Set vertex positions and recompute the triangle area.</div><div class="ttdef"><b>Definition</b> CD_Triangle.cpp:32</div></div>
 <div class="ttc" id="aclassTriangle_html_a2c8425731dd6215d4ba139c73a40327a"><div class="ttname"><a href="classTriangle.html#a2c8425731dd6215d4ba139c73a40327a">Triangle::computeTriangleArea</a></div><div class="ttdeci">static Real computeTriangleArea(const Vec3 &amp;a_x1, const Vec3 &amp;a_x2, const Vec3 &amp;a_x3) noexcept</div><div class="ttdoc">Compute the area of a triangle defined by three vertices.</div><div class="ttdef"><b>Definition</b> CD_Triangle.cpp:70</div></div>
 <div class="ttc" id="aclassTriangle_html_a5733d47cea965583109e297ab23df66c"><div class="ttname"><a href="classTriangle.html#a5733d47cea965583109e297ab23df66c">Triangle::computeArea</a></div><div class="ttdeci">void computeArea() noexcept</div><div class="ttdoc">Compute and store the triangle area in m_area.</div><div class="ttdef"><b>Definition</b> CD_Triangle.cpp:44</div></div>
 <div class="ttc" id="aclassTriangle_html_a59bf82b3377ba0ccec181f73adc15459"><div class="ttname"><a href="classTriangle.html#a59bf82b3377ba0ccec181f73adc15459">Triangle::isInside</a></div><div class="ttdeci">bool isInside(const Vec3 &amp;a_point) const noexcept</div><div class="ttdoc">Check if a point lies inside the triangle.</div><div class="ttdef"><b>Definition</b> CD_Triangle.cpp:56</div></div>
-<div class="ttc" id="aclassTriangle_html_a5b560671d6c13da47a96a30044447801"><div class="ttname"><a href="classTriangle.html#a5b560671d6c13da47a96a30044447801">Triangle::Vec3</a></div><div class="ttdeci">EBGeometry::Vec3T&lt; Real &gt; Vec3</div><div class="ttdoc">Alias for always-3D vector type.</div><div class="ttdef"><b>Definition</b> CD_Triangle.H:35</div></div>
+<div class="ttc" id="aclassTriangle_html_a5b560671d6c13da47a96a30044447801"><div class="ttname"><a href="classTriangle.html#a5b560671d6c13da47a96a30044447801">Triangle::Vec3</a></div><div class="ttdeci">EBGeometry::Vec3T&lt; Real &gt; Vec3</div><div class="ttdoc">Alias for always-3D vector type.</div><div class="ttdef"><b>Definition</b> CD_Triangle.H:36</div></div>
 <div class="ttc" id="aclassTriangle_html_a62339258b54e0c593025feb8155e663e"><div class="ttname"><a href="classTriangle.html#a62339258b54e0c593025feb8155e663e">Triangle::Triangle</a></div><div class="ttdeci">Triangle() noexcept</div><div class="ttdoc">Default constructor.</div><div class="ttdef"><b>Definition</b> CD_Triangle.cpp:17</div></div>
 <div class="ttc" id="aclassTriangle_html_a828045d94c3f50443bc8d17bf886218b"><div class="ttname"><a href="classTriangle.html#a828045d94c3f50443bc8d17bf886218b">Triangle::interpolate</a></div><div class="ttdeci">Real interpolate(const Vec3 &amp;a_point) const noexcept</div><div class="ttdoc">Interpolate vertex data at a point using barycentric coordinates or IDW fallback.</div><div class="ttdef"><b>Definition</b> CD_Triangle.cpp:79</div></div>
 <div class="ttc" id="aclassTriangle_html_aa0454e848d7b23bdd27595d28a85e17c"><div class="ttname"><a href="classTriangle.html#aa0454e848d7b23bdd27595d28a85e17c">Triangle::setVertexData</a></div><div class="ttdeci">void setVertexData(const std::array&lt; Real, 3 &gt; &amp;a_vertexData) noexcept</div><div class="ttdoc">Set meta-data on the vertices.</div><div class="ttdef"><b>Definition</b> CD_Triangle.cpp:38</div></div>
-<div class="ttc" id="aclassTriangle_html_aafd89e1bd60bf1d8ad55a63004d55532"><div class="ttname"><a href="classTriangle.html#aafd89e1bd60bf1d8ad55a63004d55532">Triangle::m_area</a></div><div class="ttdeci">Real m_area</div><div class="ttdoc">Triangle area.</div><div class="ttdef"><b>Definition</b> CD_Triangle.H:123</div></div>
+<div class="ttc" id="aclassTriangle_html_aafd89e1bd60bf1d8ad55a63004d55532"><div class="ttname"><a href="classTriangle.html#aafd89e1bd60bf1d8ad55a63004d55532">Triangle::m_area</a></div><div class="ttdeci">Real m_area</div><div class="ttdoc">Triangle area.</div><div class="ttdef"><b>Definition</b> CD_Triangle.H:124</div></div>
 <div class="ttc" id="aclassTriangle_html_ad4968cabca1be85bfe475209b29ef9de"><div class="ttname"><a href="classTriangle.html#ad4968cabca1be85bfe475209b29ef9de">Triangle::projectToTrianglePlane</a></div><div class="ttdeci">Vec3 projectToTrianglePlane(const Vec3 &amp;a_point) const noexcept</div><div class="ttdoc">Project the input point to the triangle plane.</div><div class="ttdef"><b>Definition</b> CD_Triangle.cpp:50</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->

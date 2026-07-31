@@ -205,10 +205,10 @@ Below, we include the current header file for <code class="docutils literal notr
 <span class="cm"> */</span>
 
 <span class="cm">/**</span>
-<span class="cm">  @file   CD_TimeStepper.H</span>
-<span class="cm">  @brief  Declaration of main (abstract) time stepper class.</span>
-<span class="cm">  @author Robert Marskar</span>
-<span class="cm">*/</span>
+<span class="cm"> * @file   CD_TimeStepper.H</span>
+<span class="cm"> * @brief  Declaration of main (abstract) time stepper class.</span>
+<span class="cm"> * @author Robert Marskar</span>
+<span class="cm"> */</span>
 
 <span class="cp">#ifndef CD_TIMESTEPPER_H</span>
 <span class="cp">#define CD_TIMESTEPPER_H</span>
@@ -223,304 +223,311 @@ Below, we include the current header file for <code class="docutils literal notr
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_NamespaceHeader.H&gt;</span>
 
 <span class="cm">/**</span>
-<span class="cm">  @brief Base class for advancing equations. </span>
-<span class="cm">  @details This class is used by Driver for advancing sets of equations. In short, this class should implement a time-stepping routine for a</span>
-<span class="cm">  set of solvers. One should also implement routines for setting up the solvers, allocating necessary memory, regridding etc. </span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Base class for advancing equations.</span>
+<span class="cm"> * @details This class is used by Driver for advancing sets of equations. In short, this class should implement a</span>
+<span class="cm"> * time-stepping routine for a set of solvers. One should also implement routines for setting up the solvers, allocating</span>
+<span class="cm"> * necessary memory, regridding etc.</span>
+<span class="cm"> */</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">TimeStepper</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @brief Default constructor (does nothing)</span>
-<span class="cm">  */</span>
+<span class="cm">   * @brief Default constructor (does nothing)</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="n">TimeStepper</span><span class="p">();</span>
 
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @brief Default destructor (does nothing)</span>
-<span class="cm">  */</span>
+<span class="cm">   * @brief Default destructor (does nothing)</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="o">~</span><span class="n">TimeStepper</span><span class="p">();</span>
 
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @brief Disallow copy construction.</span>
-<span class="cm">  */</span>
+<span class="cm">   * @brief Disallow copy construction.</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="n">TimeStepper</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">TimeStepper</span><span class="o">&amp;</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">delete</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @brief Disallow copy assignment.</span>
-<span class="cm">  */</span>
+<span class="cm">   * @brief Disallow copy assignment.</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="n">TimeStepper</span><span class="o">&amp;</span>
 <span class="w">  </span><span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">TimeStepper</span><span class="o">&amp;</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">delete</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @brief Allow move construction.</span>
-<span class="cm">  */</span>
+<span class="cm">   * @brief Allow move construction.</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="n">TimeStepper</span><span class="p">(</span><span class="n">TimeStepper</span><span class="o">&amp;&amp;</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">default</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @brief Allow move assignment.</span>
-<span class="cm">    @return Reference to this.</span>
-<span class="cm">  */</span>
+<span class="cm">   * @brief Allow move assignment.</span>
+<span class="cm">   * @return Reference to this.</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="n">TimeStepper</span><span class="o">&amp;</span>
 <span class="w">  </span><span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="n">TimeStepper</span><span class="o">&amp;&amp;</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">default</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @brief Set AmrMesh</span>
-<span class="cm">    @param[in] a_amr AmrMesh</span>
-<span class="cm">  */</span>
+<span class="cm">   * @brief Set AmrMesh</span>
+<span class="cm">   * @param[in] a_amr AmrMesh</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="kt">void</span>
 <span class="w">  </span><span class="nf">setAmr</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">AmrMesh</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_amr</span><span class="p">);</span>
 
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @brief Set the computational geometry</span>
-<span class="cm">    @param[in] a_computationalGeometry The computational geometry.</span>
-<span class="cm">  */</span>
+<span class="cm">   * @brief Set the computational geometry</span>
+<span class="cm">   * @param[in] a_computationalGeometry The computational geometry.</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="kt">void</span>
 <span class="w">  </span><span class="nf">setComputationalGeometry</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">ComputationalGeometry</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_computationalGeometry</span><span class="p">);</span>
 
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @brief Set up solvers</span>
-<span class="cm">  */</span>
+<span class="cm">   * @brief Set up solvers</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="w">  </span><span class="nf">setupSolvers</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @brief Allocate data for the time stepper and solvers. </span>
-<span class="cm">  */</span>
+<span class="cm">   * @brief Allocate data for the time stepper and solvers.</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="w">  </span><span class="nf">allocate</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @brief Fill solvers with initial data</span>
-<span class="cm">  */</span>
+<span class="cm">   * @brief Fill solvers with initial data</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="w">  </span><span class="nf">initialData</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @brief Post-initialize operations to be performed at end of setup stage. </span>
-<span class="cm">  */</span>
+<span class="cm">   * @brief Post-initialize operations to be performed at end of setup stage.</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="w">  </span><span class="nf">postInitialize</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @brief Post-initialize operations to be performed after filling solvers with data read from checkpoint files. </span>
-<span class="cm">  */</span>
+<span class="cm">   * @brief Post-initialize operations to be performed after filling solvers with data read from checkpoint files.</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="w">  </span><span class="nf">postCheckpointSetup</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @brief Register realms to be used for the simulation.</span>
-<span class="cm">  */</span>
+<span class="cm">   * @brief Register realms to be used for the simulation.</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="w">  </span><span class="nf">registerRealms</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @brief Register operators to be used for the simulation</span>
-<span class="cm">  */</span>
+<span class="cm">   * @brief Register operators to be used for the simulation</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="w">  </span><span class="nf">registerOperators</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @brief Parse runtime options</span>
-<span class="cm">    @details Override this routine if your time stepper can use run-time configuration of the solvers that it advances. This can e.g.</span>
-<span class="cm">    be the CFL condition.</span>
-<span class="cm">  */</span>
+<span class="cm">   * @brief Parse runtime options</span>
+<span class="cm">   * @details Override this routine if your time stepper can use run-time configuration of the solvers that it advances.</span>
+<span class="cm">   * This can e.g. be the CFL condition.</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="w">  </span><span class="nf">parseRuntimeOptions</span><span class="p">();</span>
 
 <span class="cp">#ifdef CH_USE_HDF5</span>
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @brief Read header data from checkpoint file.</span>
-<span class="cm">    @param[in,out] a_header HDF5 header.</span>
-<span class="cm">  */</span>
+<span class="cm">   * @brief Read header data from checkpoint file.</span>
+<span class="cm">   * @param[in,out] a_header HDF5 header.</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="w">  </span><span class="nf">readCheckpointHeader</span><span class="p">(</span><span class="n">HDF5HeaderData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_header</span><span class="p">);</span>
 <span class="cp">#endif</span>
 
 <span class="cp">#ifdef CH_USE_HDF5</span>
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @brief Write header data to checkpoint file.</span>
-<span class="cm">    @param[in,out] a_header HDF5 header.</span>
-<span class="cm">  */</span>
+<span class="cm">   * @brief Write header data to checkpoint file.</span>
+<span class="cm">   * @param[in,out] a_header HDF5 header.</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="w">  </span><span class="nf">writeCheckpointHeader</span><span class="p">(</span><span class="n">HDF5HeaderData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_header</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 <span class="cp">#endif</span>
 
 <span class="cp">#ifdef CH_USE_HDF5</span>
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @brief Write checkpoint data to file</span>
-<span class="cm">    @param[in,out] a_handle HDF5 file</span>
-<span class="cm">    @param[in]    a_lvl    Grid level</span>
-<span class="cm">    @details Implement this routine for checkpointing data for restarts. This will</span>
-<span class="cm">    typically call the solvers&#39; checkpointing routine, but more data can be added.</span>
-<span class="cm">  */</span>
+<span class="cm">   * @brief Write checkpoint data to file</span>
+<span class="cm">   * @param[in,out] a_handle HDF5 file</span>
+<span class="cm">   * @param[in]    a_lvl    Grid level</span>
+<span class="cm">   * @details Implement this routine for checkpointing data for restarts. This will</span>
+<span class="cm">   * typically call the solvers&#39; checkpointing routine, but more data can be added.</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="w">  </span><span class="nf">writeCheckpointData</span><span class="p">(</span><span class="n">HDF5Handle</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_handle</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lvl</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 <span class="cp">#endif</span>
 
 <span class="cp">#ifdef CH_USE_HDF5</span>
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @brief Read checkpoint data from file</span>
-<span class="cm">    @param[in,out] a_handle HDF5 file</span>
-<span class="cm">    @param[in]    a_lvl    Grid level</span>
-<span class="cm">    @details Implement this routine for reading data for restarts. This will typically call the solvers&#39; checkponiting routine. </span>
-<span class="cm">  */</span>
+<span class="cm">   * @brief Read checkpoint data from file</span>
+<span class="cm">   * @param[in,out] a_handle HDF5 file</span>
+<span class="cm">   * @param[in]    a_lvl    Grid level</span>
+<span class="cm">   * @details Implement this routine for reading data for restarts. This will typically call the solvers&#39; checkponiting</span>
+<span class="cm">   * routine.</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="w">  </span><span class="nf">readCheckpointData</span><span class="p">(</span><span class="n">HDF5Handle</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_handle</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lvl</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 <span class="cp">#endif</span>
 
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @brief Get the number of plot variables for this time stepper. </span>
-<span class="cm">    @details This is necessary because Driver, not TimeStepper, is responsible for allocating the necessary memory. </span>
-<span class="cm">    @return Returns number of plot variables that will be written during writePlotData</span>
-<span class="cm">  */</span>
+<span class="cm">   * @brief Get the number of plot variables for this time stepper.</span>
+<span class="cm">   * @details This is necessary because Driver, not TimeStepper, is responsible for allocating the necessary memory.</span>
+<span class="cm">   * @return Returns number of plot variables that will be written during writePlotData</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">int</span>
 <span class="w">  </span><span class="nf">getNumberOfPlotVariables</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @brief Get plot variable names.</span>
-<span class="cm">    @return Names of plot variables written by this time stepper.</span>
-<span class="cm">  */</span>
+<span class="cm">   * @brief Get plot variable names.</span>
+<span class="cm">   * @return Names of plot variables written by this time stepper.</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span>
 <span class="w">  </span><span class="n">getPlotVariableNames</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @brief Write plot data to output holder. </span>
-<span class="cm">    @param[in,out] a_output      Output data holder.</span>
-<span class="cm">    @param[in,out] a_icomp       Starting component in a_output to begin at. </span>
-<span class="cm">    @param[in]    a_outputRealm Realm where a_output belongs</span>
-<span class="cm">    @param[in]    a_level       Grid level</span>
-<span class="cm">  */</span>
+<span class="cm">   * @brief Write plot data to output holder.</span>
+<span class="cm">   * @param[in,out] a_output      Output data holder.</span>
+<span class="cm">   * @param[in,out] a_icomp       Starting component in a_output to begin at.</span>
+<span class="cm">   * @param[in]    a_outputRealm Realm where a_output belongs</span>
+<span class="cm">   * @param[in]    a_level       Grid level</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="w">  </span><span class="nf">writePlotData</span><span class="p">(</span><span class="n">LevelData</span><span class="o">&lt;</span><span class="n">EBCellFAB</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_output</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_icomp</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_outputRealm</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_level</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @brief An option for calling special functions prior to plotting data. </span>
-<span class="cm">    Called by Driver in the IMMEDIATELY before writing the plot file. </span>
-<span class="cm">  */</span>
+<span class="cm">   * @brief An option for calling special functions prior to plotting data.</span>
+<span class="cm">   * Called by Driver in the IMMEDIATELY before writing the plot file.</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="w">  </span><span class="nf">prePlot</span><span class="p">();</span>
 
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @brief An option for calling special functions prior to plotting data. </span>
-<span class="cm">    Called by Driver in the IMMEDIATELY after writing the plot file. </span>
-<span class="cm">  */</span>
+<span class="cm">   * @brief An option for calling special functions prior to plotting data.</span>
+<span class="cm">   * Called by Driver in the IMMEDIATELY after writing the plot file.</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="w">  </span><span class="nf">postPlot</span><span class="p">();</span>
 
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @brief Get computational loads to be checkpointed. </span>
-<span class="cm">    @details This is used by Driver both for setting up load-balanced restarts AND for plotting the computational loads to a file. This routine is</span>
-<span class="cm">    disjoint from loadBalanceBoxes because this routine is not part of a regrid. This means that we are not operating with temporarily load balanced</span>
-<span class="cm">    grids where the but the final ones. </span>
-<span class="cm">    @note The default implementation uses the box volume as a proxy for the load. You should overwrite this if you load balance your application, and also</span>
-<span class="cm">    make sure that the loads returned from this routine are consistent with what you put in loadBalanceBoxes. </span>
-
-<span class="cm">    Also note that the return vector has the same ordering as the DisjointBoxLayout&#39;s boxes on the input grid level. See the implementation for further details. </span>
-<span class="cm">    @param[in] a_realm Realm</span>
-<span class="cm">    @param[in] a_level Grid level</span>
-<span class="cm">    @return Returns computational loads for each box on grid level a_level. </span>
-<span class="cm">    </span>
-<span class="cm">  */</span>
+<span class="cm">   * @brief Get computational loads to be checkpointed.</span>
+<span class="cm">   * @details This is used by Driver both for setting up load-balanced restarts AND for plotting the computational loads</span>
+<span class="cm">   * to a file. This routine is disjoint from loadBalanceBoxes because this routine is not part of a regrid. This means</span>
+<span class="cm">   * that we are not operating with temporarily load balanced grids where the but the final ones.</span>
+<span class="cm">   * @note The default implementation uses the box volume as a proxy for the load. You should overwrite this if you load</span>
+<span class="cm">   * balance your application, and also make sure that the loads returned from this routine are consistent with what you</span>
+<span class="cm">   * put in loadBalanceBoxes.</span>
+<span class="cm">   *</span>
+<span class="cm">   * Also note that the return vector has the same ordering as the DisjointBoxLayout&#39;s boxes on the input grid level.</span>
+<span class="cm">   * See the implementation for further details.</span>
+<span class="cm">   * @param[in] a_realm Realm</span>
+<span class="cm">   * @param[in] a_level Grid level</span>
+<span class="cm">   * @return Returns computational loads for each box on grid level a_level.</span>
+<span class="cm">   *</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="kt">long</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span>
 <span class="w">  </span><span class="n">getCheckpointLoads</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_realm</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_level</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @brief Compute a time step to be used by Driver.</span>
-<span class="cm">    @return Time step size.</span>
-<span class="cm">  */</span>
+<span class="cm">   * @brief Compute a time step to be used by Driver.</span>
+<span class="cm">   * @return Time step size.</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="n">Real</span>
 <span class="w">  </span><span class="nf">computeDt</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @brief Advancement method. The implementation of this method should advance all equations of motion</span>
-<span class="cm">    @param[in] a_dt Time step to be used for advancement</span>
-<span class="cm">    @return    Returns the time step that was used. </span>
-<span class="cm">    @note The return value does not need to equal a_dt. Adaptive time stepping methods will generally return != a_dt.</span>
-<span class="cm">  */</span>
+<span class="cm">   * @brief Advancement method. The implementation of this method should advance all equations of motion</span>
+<span class="cm">   * @param[in] a_dt Time step to be used for advancement</span>
+<span class="cm">   * @return    Returns the time step that was used.</span>
+<span class="cm">   * @note The return value does not need to equal a_dt. Adaptive time stepping methods will generally return != a_dt.</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="n">Real</span>
 <span class="w">  </span><span class="nf">advance</span><span class="p">(</span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @brief Synchronzie solver times and time steps</span>
-<span class="cm">    @param[in] a_step Time step</span>
-<span class="cm">    @param[in] a_time Time (in seconds)</span>
-<span class="cm">    @param[in] a_dt   Time step that was used. </span>
-<span class="cm">  */</span>
+<span class="cm">   * @brief Synchronzie solver times and time steps</span>
+<span class="cm">   * @param[in] a_step Time step</span>
+<span class="cm">   * @param[in] a_time Time (in seconds)</span>
+<span class="cm">   * @param[in] a_dt   Time step that was used.</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="w">  </span><span class="nf">synchronizeSolverTimes</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">a_step</span><span class="p">,</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">,</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @brief Print a step report. </span>
-<span class="cm">    @details This is called by Driver after time step. The routine can be used to display use information about the simulation progress. </span>
-<span class="cm">  */</span>
+<span class="cm">   * @brief Print a step report.</span>
+<span class="cm">   * @details This is called by Driver after time step. The routine can be used to display use information about the</span>
+<span class="cm">   * simulation progress.</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="w">  </span><span class="nf">printStepReport</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @brief Perform pre-regrid operations.</span>
-<span class="cm">    @details This should include all copying all data which should be interpolated to the new grids. It can also include deallocating memory in case the regrid</span>
-<span class="cm">    operation takes a lot of memory. </span>
-<span class="cm">    @param[in] a_lmin           The coarsest level that changes</span>
-<span class="cm">    @param[in] a_oldFinestLevel The finest level before the regrid. </span>
-<span class="cm">  */</span>
+<span class="cm">   * @brief Perform pre-regrid operations.</span>
+<span class="cm">   * @details This should include all copying all data which should be interpolated to the new grids. It can also</span>
+<span class="cm">   * include deallocating memory in case the regrid operation takes a lot of memory.</span>
+<span class="cm">   * @param[in] a_lmin           The coarsest level that changes</span>
+<span class="cm">   * @param[in] a_oldFinestLevel The finest level before the regrid.</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="w">  </span><span class="nf">preRegrid</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">a_lmin</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_oldFinestLevel</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @brief Time stepper regrid method. </span>
-<span class="cm">    @param[in] a_lmin           The coarsest level that changed. </span>
-<span class="cm">    @param[in] a_oldFinestLevel The finest level before the regrid. </span>
-<span class="cm">    @param[in] a_newFinestLevel The finest level after the regrid. </span>
-<span class="cm">  */</span>
+<span class="cm">   * @brief Time stepper regrid method.</span>
+<span class="cm">   * @param[in] a_lmin           The coarsest level that changed.</span>
+<span class="cm">   * @param[in] a_oldFinestLevel The finest level before the regrid.</span>
+<span class="cm">   * @param[in] a_newFinestLevel The finest level after the regrid.</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="w">  </span><span class="nf">regrid</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">a_lmin</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_oldFinestLevel</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_newFinestLevel</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @brief Perform post-regrid operations. </span>
-<span class="cm">    @details This includes all operations to be done AFTER interpolating data to new grids. </span>
-<span class="cm">  */</span>
+<span class="cm">   * @brief Perform post-regrid operations.</span>
+<span class="cm">   * @details This includes all operations to be done AFTER interpolating data to new grids.</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="w">  </span><span class="nf">postRegrid</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @brief Function which can have Driver do regrids at arbitrary points in the simulation.</span>
-<span class="cm">    @details This is called by Driver at every time step and if it returns true, Driver will regrid, regardless of whether or not it is</span>
-<span class="cm">    on the regular &quot;regrid intervals&quot;.</span>
-<span class="cm">    @return True if an out-of-schedule regrid is requested.</span>
-<span class="cm">  */</span>
+<span class="cm">   * @brief Function which can have Driver do regrids at arbitrary points in the simulation.</span>
+<span class="cm">   * @details This is called by Driver at every time step and if it returns true, Driver will regrid, regardless of</span>
+<span class="cm">   * whether or not it is on the regular &quot;regrid intervals&quot;.</span>
+<span class="cm">   * @return True if an out-of-schedule regrid is requested.</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">bool</span>
 <span class="w">  </span><span class="nf">needToRegrid</span><span class="p">();</span>
 
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @brief Query whether the time stepper wants to continue stepping.</span>
-<span class="cm">    @details Returns m_keepGoing. Derived classes set m_keepGoing = false to signal</span>
-<span class="cm">    that the simulation should stop after the current time step completes.</span>
-<span class="cm">    @return True if the simulation should continue.</span>
-<span class="cm">  */</span>
+<span class="cm">   * @brief Query whether the time stepper wants to continue stepping.</span>
+<span class="cm">   * @details Returns m_keepGoing. Derived classes set m_keepGoing = false to signal</span>
+<span class="cm">   * that the simulation should stop after the current time step completes.</span>
+<span class="cm">   * @return True if the simulation should continue.</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="kt">bool</span>
 <span class="w">  </span><span class="nf">keepGoing</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @brief Load balancing query for a specified realm. If this returns true for a_realm, load balancing routines will be called during regrids.</span>
-<span class="cm">    @param[in] a_realm Realm name.</span>
-<span class="cm">    @return True if the realm should be load-balanced during regrids.</span>
-<span class="cm">  */</span>
+<span class="cm">   * @brief Load balancing query for a specified realm. If this returns true for a_realm, load balancing routines will</span>
+<span class="cm">   * be called during regrids.</span>
+<span class="cm">   * @param[in] a_realm Realm name.</span>
+<span class="cm">   * @return True if the realm should be load-balanced during regrids.</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">bool</span>
 <span class="w">  </span><span class="nf">loadBalanceThisRealm</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_realm</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @brief Load balance grid boxes for a specified realm. </span>
-<span class="cm">    @param[out] a_procs       MPI ranks owning the various grid boxes. </span>
-<span class="cm">    @param[out] a_boxes       Grid boxes on every level (obtain them with a_grids[lvl].boxArray())</span>
-<span class="cm">    @param[in]  a_realm       Realm identifier</span>
-<span class="cm">    @param[in]  a_grids       Original grids</span>
-<span class="cm">    @param[in]  a_lmin        Coarsest grid level that changed</span>
-<span class="cm">    @param[in]  a_finestLevel New finest grid level</span>
-<span class="cm">    @details This is only called by Driver if TimeStepper::loadBalanceThisRealm(a_realm) returned true. The default implementation</span>
-<span class="cm">    uses volume-based loads for the grid patches. If the user wants to load balance boxes on a realm, this routine must be overwritten and</span>
-<span class="cm">    he should compute loads for the various patches in a_grids and call LoadBalancing::makeBalance on each level. It is up to the user/programmer</span>
-<span class="cm">    to decide if load balancing should be done independently on each level, or if loads per MPI rank are accumulated across levels.</span>
-<span class="cm">  */</span>
+<span class="cm">   * @brief Load balance grid boxes for a specified realm.</span>
+<span class="cm">   * @param[out] a_procs       MPI ranks owning the various grid boxes.</span>
+<span class="cm">   * @param[out] a_boxes       Grid boxes on every level (obtain them with a_grids[lvl].boxArray())</span>
+<span class="cm">   * @param[in]  a_realm       Realm identifier</span>
+<span class="cm">   * @param[in]  a_grids       Original grids</span>
+<span class="cm">   * @param[in]  a_lmin        Coarsest grid level that changed</span>
+<span class="cm">   * @param[in]  a_finestLevel New finest grid level</span>
+<span class="cm">   * @details This is only called by Driver if TimeStepper::loadBalanceThisRealm(a_realm) returned true. The default</span>
+<span class="cm">   * implementation uses volume-based loads for the grid patches. If the user wants to load balance boxes on a realm,</span>
+<span class="cm">   * this routine must be overwritten and he should compute loads for the various patches in a_grids and call</span>
+<span class="cm">   * LoadBalancing::makeBalance on each level. It is up to the user/programmer to decide if load balancing should be</span>
+<span class="cm">   * done independently on each level, or if loads per MPI rank are accumulated across levels.</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="w">  </span><span class="nf">loadBalanceBoxes</span><span class="p">(</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;&amp;</span><span class="w">             </span><span class="n">a_procs</span><span class="p">,</span>
 <span class="w">                   </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Box</span><span class="o">&gt;&gt;&amp;</span><span class="w">             </span><span class="n">a_boxes</span><span class="p">,</span>
@@ -531,40 +538,40 @@ Below, we include the current header file for <code class="docutils literal notr
 
 <span class="k">protected</span><span class="o">:</span>
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @brief Class verbosity</span>
-<span class="cm">  */</span>
+<span class="cm">   * @brief Class verbosity</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">m_verbosity</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @brief Time step</span>
-<span class="cm">  */</span>
+<span class="cm">   * @brief Time step</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">m_timeStep</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @brief TIme</span>
-<span class="cm">  */</span>
+<span class="cm">   * @brief TIme</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="n">Real</span><span class="w"> </span><span class="n">m_time</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @brief Previous time step size</span>
-<span class="cm">  */</span>
+<span class="cm">   * @brief Previous time step size</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="n">Real</span><span class="w"> </span><span class="n">m_dt</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @brief If false, Driver will stop the time loop after the current step.</span>
-<span class="cm">    @details Derived classes can set this to false to request a graceful simulation stop</span>
-<span class="cm">    without triggering an error. Defaults to true.</span>
-<span class="cm">  */</span>
+<span class="cm">   * @brief If false, Driver will stop the time loop after the current step.</span>
+<span class="cm">   * @details Derived classes can set this to false to request a graceful simulation stop</span>
+<span class="cm">   * without triggering an error. Defaults to true.</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="kt">bool</span><span class="w"> </span><span class="n">m_keepGoing</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @brief AmrMesh.</span>
-<span class="cm">  */</span>
+<span class="cm">   * @brief AmrMesh.</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">AmrMesh</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_amr</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">    @brief Computational geometry. </span>
-<span class="cm">  */</span>
+<span class="cm">   * @brief Computational geometry.</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">ComputationalGeometry</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_computationalGeometry</span><span class="p">;</span>
 <span class="p">};</span>
 
@@ -801,12 +808,12 @@ Below we include the implementation of this routine for the <a class="reference 
 <p><code class="docutils literal notranslate"><span class="pre">writePlotData</span></code> will write the plot data to the provided data holder.
 The function signature is</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Write plot data to output holder. </span>
-<span class="cm">  @param[in,out] a_output      Output data holder.</span>
-<span class="cm">  @param[in,out] a_icomp       Starting component in a_output to begin at. </span>
-<span class="cm">  @param[in]    a_outputRealm Realm where a_output belongs</span>
-<span class="cm">  @param[in]    a_level       Grid level</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Write plot data to output holder.</span>
+<span class="cm"> * @param[in,out] a_output      Output data holder.</span>
+<span class="cm"> * @param[in,out] a_icomp       Starting component in a_output to begin at.</span>
+<span class="cm"> * @param[in]    a_outputRealm Realm where a_output belongs</span>
+<span class="cm"> * @param[in]    a_level       Grid level</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="nf">writePlotData</span><span class="p">(</span><span class="n">LevelData</span><span class="o">&lt;</span><span class="n">EBCellFAB</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_output</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_icomp</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_outputRealm</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_level</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 </pre></div>
@@ -844,12 +851,12 @@ This data is used when restarting simulations from a checkpoint file.
 Note that checkpoint data is written on a level-by-level basis.
 The function signature is</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Write checkpoint data to file</span>
-<span class="cm">  @param[in,out] a_handle HDF5 file</span>
-<span class="cm">  @param[in]    a_lvl    Grid level</span>
-<span class="cm">  @details Implement this routine for checkpointing data for restarts. This will</span>
-<span class="cm">  typically call the solvers&#39; checkpointing routine, but more data can be added.</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Write checkpoint data to file</span>
+<span class="cm"> * @param[in,out] a_handle HDF5 file</span>
+<span class="cm"> * @param[in]    a_lvl    Grid level</span>
+<span class="cm"> * @details Implement this routine for checkpointing data for restarts. This will</span>
+<span class="cm"> * typically call the solvers&#39; checkpointing routine, but more data can be added.</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="nf">writeCheckpointData</span><span class="p">(</span><span class="n">HDF5Handle</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_handle</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lvl</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 </pre></div>
@@ -884,11 +891,12 @@ An example of this is the <a class="reference internal" href="../Solvers/Electro
 <p><code class="docutils literal notranslate"><span class="pre">readCheckpointData</span></code> is the function that will read data from an HDF5 checkpoint file and populate <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> with this data.
 The data is read on a level-by-level basis, with a function signature</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Read checkpoint data from file</span>
-<span class="cm">  @param[in,out] a_handle HDF5 file</span>
-<span class="cm">  @param[in]    a_lvl    Grid level</span>
-<span class="cm">  @details Implement this routine for reading data for restarts. This will typically call the solvers&#39; checkponiting routine. </span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Read checkpoint data from file</span>
+<span class="cm"> * @param[in,out] a_handle HDF5 file</span>
+<span class="cm"> * @param[in]    a_lvl    Grid level</span>
+<span class="cm"> * @details Implement this routine for reading data for restarts. This will typically call the solvers&#39; checkponiting</span>
+<span class="cm"> * routine.</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="nf">readCheckpointData</span><span class="p">(</span><span class="n">HDF5Handle</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_handle</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lvl</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 </pre></div>
@@ -985,11 +993,11 @@ At the bottom of the above code, hard limits on the time step are also enforced.
 <p>The <code class="docutils literal notranslate"><span class="pre">advance</span></code> method has responsibility for advancing physics module one time step, and is called by <code class="docutils literal notranslate"><span class="pre">Driver</span></code>.
 The function signature is</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Advancement method. The implementation of this method should advance all equations of motion</span>
-<span class="cm">  @param[in] a_dt Time step to be used for advancement</span>
-<span class="cm">  @return    Returns the time step that was used. </span>
-<span class="cm">  @note The return value does not need to equal a_dt. Adaptive time stepping methods will generally return != a_dt.</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Advancement method. The implementation of this method should advance all equations of motion</span>
+<span class="cm"> * @param[in] a_dt Time step to be used for advancement</span>
+<span class="cm"> * @return    Returns the time step that was used.</span>
+<span class="cm"> * @note The return value does not need to equal a_dt. Adaptive time stepping methods will generally return != a_dt.</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="n">Real</span>
 <span class="nf">advance</span><span class="p">(</span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 </pre></div>
@@ -1056,8 +1064,8 @@ For simpler problems this routine is relatively straightforward to implement, ho
 
 <span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">isDiffusive</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
 
-<span class="w">      </span><span class="c1">// Compute the finite volume approximation to kappa*div(F). The second &quot;hook&quot; is a debugging hook that includes redistribution when computing kappa*div(F). It</span>
-<span class="w">      </span><span class="c1">// exists only for debugging/assurance reasons.</span>
+<span class="w">      </span><span class="c1">// Compute the finite volume approximation to kappa*div(F). The second &quot;hook&quot; is a debugging hook that includes</span>
+<span class="w">      </span><span class="c1">// redistribution when computing kappa*div(F). It exists only for debugging/assurance reasons.</span>
 <span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nb">false</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">conservativeOnly</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
 
@@ -1154,11 +1162,11 @@ This replaces the older pattern of returning <code class="docutils literal notra
 <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> to treat the stop as a fatal error and write a crash file instead of clean output.
 The function signature is</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Query whether the time stepper wants to continue stepping.</span>
-<span class="cm">  @details Returns m_keepGoing. Derived classes set m_keepGoing = false to signal</span>
-<span class="cm">  that the simulation should stop after the current time step completes.</span>
-<span class="cm">  @return True if the simulation should continue.</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Query whether the time stepper wants to continue stepping.</span>
+<span class="cm"> * @details Returns m_keepGoing. Derived classes set m_keepGoing = false to signal</span>
+<span class="cm"> * that the simulation should stop after the current time step completes.</span>
+<span class="cm"> * @return True if the simulation should continue.</span>
+<span class="cm"> */</span>
 <span class="kt">bool</span>
 <span class="nf">keepGoing</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 </pre></div>
@@ -1247,10 +1255,11 @@ This functionality is implemented through two routines:</p>
 <h3>loadBalanceThisRealm<a class="headerlink" href="#loadbalancethisrealm" title="Permalink to this heading"></a></h3>
 <p>The function signature for this function is</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Load balancing query for a specified realm. If this returns true for a_realm, load balancing routines will be called during regrids.</span>
-<span class="cm">  @param[in] a_realm Realm name.</span>
-<span class="cm">  @return True if the realm should be load-balanced during regrids.</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Load balancing query for a specified realm. If this returns true for a_realm, load balancing routines will</span>
+<span class="cm"> * be called during regrids.</span>
+<span class="cm"> * @param[in] a_realm Realm name.</span>
+<span class="cm"> * @return True if the realm should be load-balanced during regrids.</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="kt">bool</span>
 <span class="nf">loadBalanceThisRealm</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_realm</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 </pre></div>
@@ -1261,18 +1270,19 @@ This functionality is implemented through two routines:</p>
 <h3>loadBalanceBoxes<a class="headerlink" href="#loadbalanceboxes" title="Permalink to this heading"></a></h3>
 <p>If <code class="docutils literal notranslate"><span class="pre">loadBalanceThisRealm</span></code> returns true, the following function is responsible for actually regenerating the grids:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Load balance grid boxes for a specified realm. </span>
-<span class="cm">  @param[out] a_procs       MPI ranks owning the various grid boxes. </span>
-<span class="cm">  @param[out] a_boxes       Grid boxes on every level (obtain them with a_grids[lvl].boxArray())</span>
-<span class="cm">  @param[in]  a_realm       Realm identifier</span>
-<span class="cm">  @param[in]  a_grids       Original grids</span>
-<span class="cm">  @param[in]  a_lmin        Coarsest grid level that changed</span>
-<span class="cm">  @param[in]  a_finestLevel New finest grid level</span>
-<span class="cm">  @details This is only called by Driver if TimeStepper::loadBalanceThisRealm(a_realm) returned true. The default implementation</span>
-<span class="cm">  uses volume-based loads for the grid patches. If the user wants to load balance boxes on a realm, this routine must be overwritten and</span>
-<span class="cm">  he should compute loads for the various patches in a_grids and call LoadBalancing::makeBalance on each level. It is up to the user/programmer</span>
-<span class="cm">  to decide if load balancing should be done independently on each level, or if loads per MPI rank are accumulated across levels.</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Load balance grid boxes for a specified realm.</span>
+<span class="cm"> * @param[out] a_procs       MPI ranks owning the various grid boxes.</span>
+<span class="cm"> * @param[out] a_boxes       Grid boxes on every level (obtain them with a_grids[lvl].boxArray())</span>
+<span class="cm"> * @param[in]  a_realm       Realm identifier</span>
+<span class="cm"> * @param[in]  a_grids       Original grids</span>
+<span class="cm"> * @param[in]  a_lmin        Coarsest grid level that changed</span>
+<span class="cm"> * @param[in]  a_finestLevel New finest grid level</span>
+<span class="cm"> * @details This is only called by Driver if TimeStepper::loadBalanceThisRealm(a_realm) returned true. The default</span>
+<span class="cm"> * implementation uses volume-based loads for the grid patches. If the user wants to load balance boxes on a realm,</span>
+<span class="cm"> * this routine must be overwritten and he should compute loads for the various patches in a_grids and call</span>
+<span class="cm"> * LoadBalancing::makeBalance on each level. It is up to the user/programmer to decide if load balancing should be</span>
+<span class="cm"> * done independently on each level, or if loads per MPI rank are accumulated across levels.</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="nf">loadBalanceBoxes</span><span class="p">(</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;&amp;</span><span class="w">             </span><span class="n">a_procs</span><span class="p">,</span>
 <span class="w">                 </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Box</span><span class="o">&gt;&gt;&amp;</span><span class="w">             </span><span class="n">a_boxes</span><span class="p">,</span>

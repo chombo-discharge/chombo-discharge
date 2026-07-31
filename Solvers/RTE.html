@@ -205,10 +205,10 @@ Since most of the <code class="docutils literal notranslate"><span class="pre">R
 When creating a radiative transfer solver one will need to pass in a reference to an <code class="docutils literal notranslate"><span class="pre">RtSpecies</span></code> instantiation such that the solvers can look up the required information.
 Currently, <code class="docutils literal notranslate"><span class="pre">RtSpecies</span></code> is a lightweight class where the user needs to implement the function</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Get kappa (i.e. the inverse absorption length) at physical coordinates. </span>
-<span class="cm">  @param[in] a_pos Physical coordinates. </span>
-<span class="cm">  @return Absorption coefficient</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Get kappa (i.e. the inverse absorption length) at physical coordinates.</span>
+<span class="cm"> * @param[in] a_pos Physical coordinates.</span>
+<span class="cm"> * @return Absorption coefficient</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="n">Real</span>
 <span class="nf">getAbsorptionCoefficient</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_pos</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 </pre></div>
@@ -224,23 +224,23 @@ Currently, <code class="docutils literal notranslate"><span class="pre">RtSpecie
 <p><code class="docutils literal notranslate"><span class="pre">RtSolver</span></code> stores a source term <span class="math notranslate nohighlight">\(\eta\)</span> on the mesh, which describes the number of photons that are generated per unit volume and time.
 This variable can be set through the following functions:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Set source term</span>
-<span class="cm">  @param[in] a_source Source term</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Set source term</span>
+<span class="cm"> * @param[in] a_source Source term</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="nf">setSource</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_source</span><span class="p">);</span>
 
 <span class="cm">/**</span>
-<span class="cm">  @brief Set source</span>
-<span class="cm">  @param[in] a_source Source term</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Set source</span>
+<span class="cm"> * @param[in] a_source Source term</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="nf">setSource</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_source</span><span class="p">);</span>
 
 <span class="cm">/**</span>
-<span class="cm">  @brief Set source</span>
-<span class="cm">  @param[in] a_source Source term (varies in space)</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Set source</span>
+<span class="cm"> * @param[in] a_source Source term (varies in space)</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="nf">setSource</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_pos</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_source</span><span class="p">);</span>
 </pre></div>
@@ -275,16 +275,16 @@ The above equation is called the Eddington approximation, with the closure relat
 <h3>Implementation<a class="headerlink" href="#implementation" title="Permalink to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">EddingtonSP1</span></code> uses multigrid methods for solving <a class="reference internal" href="#equation-transientdiffusionrte">Eq. 10</a> and <a class="reference internal" href="#equation-stationarydiffusionrte">Eq. 11</a>, see <a class="reference internal" href="../Source/LinearSolvers.html#chap-linearsolvers"><span class="std std-ref">Linear solvers</span></a>.
 To advance the solution, one will call the member function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Advance RTE onto state a_phi</span>
-<span class="cm">  @param[in]    a_dt      Time step</span>
-<span class="cm">  @param[in,out] a_phi     RTE solution</span>
-<span class="cm">  @param[in]    a_source  Source term</span>
-<span class="cm">  @param[in]    a_zeroPhi Set phi to zero in initial guess for multigrid solve</span>
-<span class="cm">  @note If you&#39;re not doing a stationary solve, this does a backward Euler solve. </span>
-<span class="cm">  @return Time step used</span>
-<span class="cm">*/</span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">bool</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Advance RTE onto state a_phi</span>
+<span class="cm">   * @param[in]    a_dt      Time step</span>
+<span class="cm">   * @param[in,out] a_phi     RTE solution</span>
+<span class="cm">   * @param[in]    a_source  Source term</span>
+<span class="cm">   * @param[in]    a_zeroPhi Set phi to zero in initial guess for multigrid solve</span>
+<span class="cm">   * @note If you&#39;re not doing a stationary solve, this does a backward Euler solve.</span>
+<span class="cm">   * @return Time step used</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">bool</span>
 </pre></div>
 </div>
 <p>Internally, this version will perform one of the following:</p>
@@ -331,22 +331,23 @@ In this case the correct boundary condition is <code class="docutils literal not
 <p>It is possible to use more complex boundary conditions by passing in <code class="docutils literal notranslate"><span class="pre">dirichlet_custom</span></code>, <code class="docutils literal notranslate"><span class="pre">neumann_custom</span></code>, or <code class="docutils literal notranslate"><span class="pre">larsen_custom</span></code> options through the solver configuration options (see <a class="reference internal" href="#chap-eddingtoninputoptions"><span class="std std-ref">Solver configuration</span></a>).
 In this case the <code class="docutils literal notranslate"><span class="pre">EddingtonSP1</span></code> solver will use a specified function at the domain edge/face which can vary spatially (and with time).
 To specify that function, <code class="docutils literal notranslate"><span class="pre">EddingtonSP1</span></code> has a member function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Set the boundary condition function on a domain side</span>
-<span class="cm">  @param[in] a_dir      Coordinate direction.</span>
-<span class="cm">  @param[in] a_side     Side (low/high)</span>
-<span class="cm">  @param[in] a_function Boundary condition function.</span>
-<span class="cm">  @details This sets a boundary condition for a particular domain side. The user must also specify how to use this BC in the input script. </span>
-<span class="cm">*/</span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
-<span class="n">setDomainSideBcFunction</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                               </span><span class="n">a_dir</span><span class="p">,</span>
-<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="n">Side</span><span class="o">::</span><span class="n">LoHiSide</span><span class="w">                    </span><span class="n">a_side</span><span class="p">,</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Set the boundary condition function on a domain side</span>
+<span class="cm">   * @param[in] a_dir      Coordinate direction.</span>
+<span class="cm">   * @param[in] a_side     Side (low/high)</span>
+<span class="cm">   * @param[in] a_function Boundary condition function.</span>
+<span class="cm">   * @details This sets a boundary condition for a particular domain side. The user must also specify how to use this BC</span>
+<span class="cm">   * in the input script.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="w">  </span><span class="n">setDomainSideBcFunction</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                               </span><span class="n">a_dir</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">Side</span><span class="o">::</span><span class="n">LoHiSide</span><span class="w">                    </span><span class="n">a_side</span><span class="p">,</span>
 </pre></div>
 </div>
 <p>Here, the <code class="docutils literal notranslate"><span class="pre">a_function</span></code> argument is simply an alias:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Function which maps f(R^3,t) : R. Used for setting the associated value and boundary condition type. </span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Function which maps f(R^3,t) : R. Used for setting the associated value and boundary condition type.</span>
+<span class="cm"> */</span>
 <span class="k">using</span><span class="w"> </span><span class="n">BcFunction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_position</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">)</span><span class="o">&gt;</span><span class="p">;</span>
 </pre></div>
 </div>
@@ -454,37 +455,37 @@ See the <a class="reference external" href="https://chombo-discharge.github.io/c
 </ul>
 <p>Various functions are in place for obtaining these particles:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Get m_photons</span>
-<span class="cm">  @return m_photons</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Get m_photons</span>
+<span class="cm"> * @return m_photons</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">Photon</span><span class="o">&gt;&amp;</span>
 <span class="n">getPhotons</span><span class="p">();</span>
 
 <span class="cm">/**</span>
-<span class="cm">  @brief Get bulk photons, i.e. photons absorbed on the mesh</span>
-<span class="cm">  @return m_bulkPhotons</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Get bulk photons, i.e. photons absorbed on the mesh</span>
+<span class="cm"> * @return m_bulkPhotons</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">Photon</span><span class="o">&gt;&amp;</span>
 <span class="n">getBulkPhotons</span><span class="p">();</span>
 
 <span class="cm">/**</span>
-<span class="cm">  @brief Get eb Photons, i.e. photons absorbed on the EB</span>
-<span class="cm">  @return m_ebPhotons</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Get eb Photons, i.e. photons absorbed on the EB</span>
+<span class="cm"> * @return m_ebPhotons</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">Photon</span><span class="o">&gt;&amp;</span>
 <span class="n">getEbPhotons</span><span class="p">();</span>
 
 <span class="cm">/**</span>
-<span class="cm">  @brief Get domain photons, i.e. photons absorbed on domain edges/faces</span>
-<span class="cm">  @return m_domainPhotonsl</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Get domain photons, i.e. photons absorbed on domain edges/faces</span>
+<span class="cm"> * @return m_domainPhotonsl</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">Photon</span><span class="o">&gt;&amp;</span>
 <span class="n">getDomainPhotons</span><span class="p">();</span>
 
 <span class="cm">/**</span>
-<span class="cm">  @brief Get source photons</span>
-<span class="cm">  @return m_sourcePhotons</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Get source photons</span>
+<span class="cm"> * @return m_sourcePhotons</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">Photon</span><span class="o">&gt;&amp;</span>
 <span class="n">getSourcePhotons</span><span class="p">();</span>
 </pre></div>
@@ -510,9 +511,9 @@ The particle position and weight are container-owned columns, while the <code cl
 <ol class="arabic">
 <li><p>Fetch the <em>source photons</em> by calling</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Get source photons</span>
-<span class="cm">  @return m_sourcePhotons</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Get source photons</span>
+<span class="cm"> * @return m_sourcePhotons</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">Photon</span><span class="o">&gt;&amp;</span>
 <span class="n">getSourcePhotons</span><span class="p">();</span>
 </pre></div>
@@ -521,9 +522,9 @@ The particle position and weight are container-owned columns, while the <code cl
 </li>
 <li><p>Add photons directly, by first obtaining the in-flight photons through</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Get m_photons</span>
-<span class="cm">  @return m_photons</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Get m_photons</span>
+<span class="cm"> * @return m_photons</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">Photon</span><span class="o">&gt;&amp;</span>
 <span class="n">getPhotons</span><span class="p">();</span>
 </pre></div>

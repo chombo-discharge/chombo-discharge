@@ -266,12 +266,12 @@ Additional information is available in <a class="reference internal" href="#chap
 <p><code class="docutils literal notranslate"><span class="pre">ItoSpecies</span></code> is a class for parsing solver information into <code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code>, e.g., whether or not the particle type is mobile or not.
 The constructor for the <code class="docutils literal notranslate"><span class="pre">ItoSpecies</span></code> class is</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Full constructor</span>
-<span class="cm">  @param[in] a_name         Species name</span>
-<span class="cm">  @param[in] a_chargeNumber Charge number</span>
-<span class="cm">  @param[in] a_mobile       Mobile species or not</span>
-<span class="cm">  @param[in] a_diffusive    Diffusive species or not</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Full constructor</span>
+<span class="cm"> * @param[in] a_name         Species name</span>
+<span class="cm"> * @param[in] a_chargeNumber Charge number</span>
+<span class="cm"> * @param[in] a_mobile       Mobile species or not</span>
+<span class="cm"> * @param[in] a_diffusive    Diffusive species or not</span>
+<span class="cm"> */</span>
 <span class="n">ItoSpecies</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_name</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_chargeNumber</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">a_mobile</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">a_diffusive</span><span class="p">);</span>
 </pre></div>
 </div>
@@ -291,28 +291,28 @@ This variable will be used in, e.g., error messages and I/O functionality.
 </ol>
 <p>In particular, there are two data members that must be populated:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Initial particles</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Initial particles</span>
+<span class="cm"> */</span>
 <span class="n">ParticleSoA</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_initialParticles</span><span class="p">;</span>
 
 <span class="cm">/**</span>
-<span class="cm">  @brief Initial density, in case the user wants to generate particles from a density distribution</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Initial density, in case the user wants to generate particles from a density distribution</span>
+<span class="cm"> */</span>
 <span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">t</span><span class="p">)</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_initialDensity</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>These can either be populated during construction, or explicitly supplied via the following set functions:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Set the initial species density</span>
-<span class="cm">  @param[in] a_initialDensity Initial density.</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Set the initial species density</span>
+<span class="cm"> * @param[in] a_initialDensity Initial density.</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="nf">setInitialDensity</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">t</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_initialDensity</span><span class="p">);</span>
 
 <span class="cm">/**</span>
-<span class="cm">  @brief Get initial particles -- this is called by ItoSolver when filling the solver with initial particles. </span>
-<span class="cm">  @return Returns m_initialParticles</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Get initial particles -- this is called by ItoSolver when filling the solver with initial particles.</span>
+<span class="cm"> * @return Returns m_initialParticles</span>
+<span class="cm"> */</span>
 <span class="n">ParticleSoA</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;&amp;</span>
 <span class="n">getInitialParticles</span><span class="p">();</span>
 </pre></div>
@@ -347,10 +347,10 @@ Chemistry models that use <code class="docutils literal notranslate"><span class
 </ul>
 <p>The particles are available from the solver through the function</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Get a general particle container</span>
-<span class="cm">  @param[in] a_container Which container to fetch.</span>
-<span class="cm">  @return Particles</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Get a general particle container</span>
+<span class="cm"> * @param[in] a_container Which container to fetch.</span>
+<span class="cm"> * @return Particles</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;&amp;</span>
 <span class="n">getParticles</span><span class="p">(</span><span class="n">WhichContainer</span><span class="w"> </span><span class="n">a_container</span><span class="p">);</span>
 </pre></div>
@@ -362,15 +362,15 @@ The solver can then automatically fill the boundary particles containers, see <a
 <h2>Remapping particles<a class="headerlink" href="#remapping-particles" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> has two functions for remapping particles:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Remap the bulk particle container.</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Remap the bulk particle container.</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="nf">remap</span><span class="p">();</span>
 
 <span class="cm">/**</span>
-<span class="cm">  @brief Remap all particles in the input container</span>
-<span class="cm">  @param[in] a_container Particle container</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Remap all particles in the input container</span>
+<span class="cm"> * @param[in] a_container Particle container</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="nf">remap</span><span class="p">(</span><span class="n">WhichContainer</span><span class="w"> </span><span class="n">a_container</span><span class="p">);</span>
 </pre></div>
@@ -383,14 +383,14 @@ Here, <code class="docutils literal notranslate"><span class="pre">a_container</
 <p><code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> contains several member functions for depositing various particle properties onto the mesh.
 The most general version is given below:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Deposit a gathered per-particle quantity on the mesh (full pipeline: kappa-conservative + redistribution).</span>
-<span class="cm">  @param[out] a_phi                  Mesh data -- must have exactly one component.</span>
-<span class="cm">  @param[in]  a_particles            SoA particles to be deposited.</span>
-<span class="cm">  @param[in]  a_deposition           Deposition method.</span>
-<span class="cm">  @param[in]  a_coarseFineDeposition Coarse-fine deposition strategy.</span>
-<span class="cm">  @param[in]  a_gather               Per-particle value gatherer (leaf, index) -&gt; Real.</span>
-<span class="cm">  @tparam     Gather                 Callable (const ParticleSoA&lt;ItoParticle&gt;&amp;, std::size_t) -&gt; Real.</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Deposit a gathered per-particle quantity on the mesh (full pipeline: kappa-conservative + redistribution).</span>
+<span class="cm"> * @param[out] a_phi                  Mesh data -- must have exactly one component.</span>
+<span class="cm"> * @param[in]  a_particles            SoA particles to be deposited.</span>
+<span class="cm"> * @param[in]  a_deposition           Deposition method.</span>
+<span class="cm"> * @param[in]  a_coarseFineDeposition Coarse-fine deposition strategy.</span>
+<span class="cm"> * @param[in]  a_gather               Per-particle value gatherer (leaf, index) -&gt; Real.</span>
+<span class="cm"> * @tparam     Gather                 Callable (const ParticleSoA&lt;ItoParticle&gt;&amp;, std::size_t) -&gt; Real.</span>
+<span class="cm"> */</span>
 <span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">Gather</span><span class="o">&gt;</span>
 <span class="kt">void</span>
 <span class="n">depositGathered</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w">                        </span><span class="n">a_phi</span><span class="p">,</span>
@@ -409,11 +409,12 @@ Both the base deposition scheme (e.g., NGP or CIC) must be specified, as well as
 </div>
 <p>A simpler version that deposits the bulk particles as a density on the mesh is</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Deposit particles on to mesh. </span>
-<span class="cm">  @param[in] a_container Which container to deposit.</span>
-<span class="cm">  @details This will deposit mass (i.e., computational weight) of the the input particle container particles onto the classes member &#39;m_phi&#39;. </span>
-<span class="cm">  @note Calls the general version with arguments: m_phi, m_particles.at(a_container), m_deposition.</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Deposit particles on to mesh.</span>
+<span class="cm"> * @param[in] a_container Which container to deposit.</span>
+<span class="cm"> * @details This will deposit mass (i.e., computational weight) of the the input particle container particles onto the</span>
+<span class="cm"> * classes member &#39;m_phi&#39;.</span>
+<span class="cm"> * @note Calls the general version with arguments: m_phi, m_particles.at(a_container), m_deposition.</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="nf">depositParticles</span><span class="p">(</span><span class="n">WhichContainer</span><span class="w"> </span><span class="n">a_container</span><span class="p">);</span>
 </pre></div>
@@ -421,9 +422,9 @@ Both the base deposition scheme (e.g., NGP or CIC) must be specified, as well as
 <p>The particles are deposited into the class member <code class="docutils literal notranslate"><span class="pre">m_phi</span></code>, which stores the particle density on the mesh.
 This data can then be fetched with</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Get the mesh data.</span>
-<span class="cm">  @return Returns m_phi</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Get the mesh data.</span>
+<span class="cm"> * @return Returns m_phi</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span>
 <span class="nf">getPhi</span><span class="p">();</span>
 </pre></div>
@@ -440,26 +441,26 @@ This data can then be fetched with</p>
 It is up to the user to first interpolate or directly set the particle mobilities and diffusion coefficients before depositing the conductivity onto the mesh.</p>
 <p>Functionality for the above deposited quantities exist as the following functions:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Deposit conductivities (i.e. mass*mobility / volume)</span>
-<span class="cm">  @details This deposits mass*mobility (not multiplied by charge)</span>
-<span class="cm">  @param[out] a_phi                  Mesh data</span>
-<span class="cm">  @param[in]  a_particles            Particle data</span>
-<span class="cm">  @param[in]  a_deposition           Deposition method</span>
-<span class="cm">  @param[in]  a_coarseFineDeposition Coarse-fine deposition method. </span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Deposit conductivities (i.e. mass*mobility / volume)</span>
+<span class="cm"> * @details This deposits mass*mobility (not multiplied by charge)</span>
+<span class="cm"> * @param[out] a_phi                  Mesh data</span>
+<span class="cm"> * @param[in]  a_particles            Particle data</span>
+<span class="cm"> * @param[in]  a_deposition           Deposition method</span>
+<span class="cm"> * @param[in]  a_coarseFineDeposition Coarse-fine deposition method.</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="nf">depositConductivity</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w">                  </span><span class="n">a_phi</span><span class="p">,</span>
 <span class="w">                    </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_particles</span><span class="p">,</span>
 <span class="w">                    </span><span class="n">DepositionType</span><span class="w">                  </span><span class="n">a_deposition</span><span class="p">,</span>
 <span class="w">                    </span><span class="n">CoarseFineDeposition</span><span class="w">            </span><span class="n">a_coarseFineDeposition</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 <span class="cm">/**</span>
-<span class="cm">  @brief Deposit diffusivity (i.e. mass*D/volume)</span>
-<span class="cm">  @details This deposits mass*mobility (not multiplied by charge)</span>
-<span class="cm">  @param[out] a_phi                  Mesh data</span>
-<span class="cm">  @param[in]  a_particles            Particle data</span>
-<span class="cm">  @param[in]  a_deposition           Deposition method</span>
-<span class="cm">  @param[in]  a_coarseFineDeposition Coarse-fine deposition method. </span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Deposit diffusivity (i.e. mass*D/volume)</span>
+<span class="cm"> * @details This deposits mass*mobility (not multiplied by charge)</span>
+<span class="cm"> * @param[out] a_phi                  Mesh data</span>
+<span class="cm"> * @param[in]  a_particles            Particle data</span>
+<span class="cm"> * @param[in]  a_deposition           Deposition method</span>
+<span class="cm"> * @param[in]  a_coarseFineDeposition Coarse-fine deposition method.</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="nf">depositDiffusivity</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w">                  </span><span class="n">a_phi</span><span class="p">,</span>
 <span class="w">                   </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_particles</span><span class="p">,</span>
@@ -484,16 +485,16 @@ This interpolation method is always parsed from an options file, and is usually 
 <p>The separation into a mobility function and a velocity field is motivated by the introduction of an electric conductivity that permits a rather simple velocity relation as <span class="math notranslate nohighlight">\(\mathbf{v} = \mu\mathbf{E}\)</span>, where <span class="math notranslate nohighlight">\(\mathbf{E}\)</span> is the electric field.
 Complete interpolation of the particle velocity consists of calling two functions:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Interpolate mobilities</span>
-<span class="cm">  @details This will switch between the two ways of computing the particle mobility.</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Interpolate mobilities</span>
+<span class="cm"> * @details This will switch between the two ways of computing the particle mobility.</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="nf">interpolateMobilities</span><span class="p">();</span>
 <span class="cm">/**</span>
-<span class="cm">  @brief Interpolate the particle velocities.</span>
-<span class="cm">  @details This will compute the particle velocities as v = mu * V(Xp) where mu is the particle mobility and V(Xp) is the interpolation of m_velocityFunction</span>
-<span class="cm">  to the particle position. </span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Interpolate the particle velocities.</span>
+<span class="cm"> * @details This will compute the particle velocities as v = mu * V(Xp) where mu is the particle mobility and V(Xp) is</span>
+<span class="cm"> * the interpolation of m_velocityFunction to the particle position.</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="nf">interpolateVelocities</span><span class="p">();</span>
 </pre></div>
@@ -520,9 +521,9 @@ Complete interpolation of the particle velocity consists of calling two function
 \[D = D\left(\mathbf{X}\right).\]</div>
 <p>The function signature is</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Interpolate the diffusion field to the particle positions. </span>
-<span class="cm">  @details This computes D_p = Df(X_p) where Df is the diffusion field on the mesh. </span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Interpolate the diffusion field to the particle positions.</span>
+<span class="cm"> * @details This computes D_p = Df(X_p) where Df is the diffusion field on the mesh.</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="nf">interpolateDiffusion</span><span class="p">();</span>
 </pre></div>
@@ -563,9 +564,9 @@ The flag <code class="docutils literal notranslate"><span class="pre">a_deletePa
 <p>The drift time step routines are implemented such that one restricts the time step such that the fastest particle does not move more than a specified number of grid cells.
 This routine is implemented as</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Compute advection time step dt = dx/vMax where vMax is the largest velocity component of the particle. </span>
-<span class="cm">  @return Computed advective dt</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Compute advection time step dt = dx/vMax where vMax is the largest velocity component of the particle.</span>
+<span class="cm"> * @return Computed advective dt</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="n">Real</span>
 <span class="nf">computeAdvectiveDt</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 </pre></div>
@@ -578,9 +579,9 @@ This routine is implemented as</p>
 <h3>Diffusive time step<a class="headerlink" href="#diffusive-time-step" title="Permalink to this heading"></a></h3>
 <p>The signatures for the diffusion time step are similar to the ones for drift:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Compute the diffusive dt. This computes dt = dx*dx/(2*SpaceDim*D) for all particles</span>
-<span class="cm">  @return Computed diffusive dt</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Compute the diffusive dt. This computes dt = dx*dx/(2*SpaceDim*D) for all particles</span>
+<span class="cm"> * @return Computed diffusive dt</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="n">Real</span>
 <span class="nf">computeDiffusiveDt</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 </pre></div>
@@ -594,14 +595,14 @@ This routine is implemented as</p>
 <h3>Advective-diffusive time step<a class="headerlink" href="#advective-diffusive-time-step" title="Permalink to this heading"></a></h3>
 <p>A combination of the advection and diffusion time step routines also exists as</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Compute a time step for the advance -- this calls the level function. </span>
-<span class="cm">  @details This computes the time step differently whether or not diffusion and advection are active. The Ito particle model does not have a fundamental </span>
-<span class="cm">  time step limitation, so these limits &quot;replicate&quot; the time step selections in a 1D fluid model. </span>
-<span class="cm">  If we only use advection advection the time step is computed as dt = dx/sum(|V_i|) = dtA.</span>
-<span class="cm">  If only diffusion is active the time step is computed as dt = (dx*dx)/(2*SpaceDim*D) = dtD. </span>
-<span class="cm">  If both advection and diffusion are active the time step is computed as dt = 1/(1/dtA + 1/dtD). </span>
-<span class="cm">  @return Computed dt</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Compute a time step for the advance -- this calls the level function.</span>
+<span class="cm"> * @details This computes the time step differently whether or not diffusion and advection are active. The Ito</span>
+<span class="cm"> * particle model does not have a fundamental time step limitation, so these limits &quot;replicate&quot; the time step</span>
+<span class="cm"> * selections in a 1D fluid model. If we only use advection advection the time step is computed as dt = dx/sum(|V_i|)</span>
+<span class="cm"> * = dtA. If only diffusion is active the time step is computed as dt = (dx*dx)/(2*SpaceDim*D) = dtD. If both</span>
+<span class="cm"> * advection and diffusion are active the time step is computed as dt = 1/(1/dtA + 1/dtD).</span>
+<span class="cm"> * @return Computed dt</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="n">Real</span>
 <span class="nf">computeDt</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 </pre></div>
@@ -618,10 +619,10 @@ This occurs in, e.g., plasma simulations where chemical reactions lead to expone
 <code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> handles superparticles via a configurable merger functor selected at parse time through <code class="docutils literal notranslate"><span class="pre">ItoSolver.merge_algorithm</span></code>; the user can also supply a custom functor through <code class="docutils literal notranslate"><span class="pre">setParticleCellMerger</span></code>.
 The entry point for splitting and merging is in all cases</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Make superparticles for a full container -- this is the AMR version that users will usually call. </span>
-<span class="cm">  @param[in] a_container        Which container to repartition into new superparticles</span>
-<span class="cm">  @param[in] a_particlesPerCell Target number of particles per cell</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Make superparticles for a full container -- this is the AMR version that users will usually call.</span>
+<span class="cm"> * @param[in] a_container        Which container to repartition into new superparticles</span>
+<span class="cm"> * @param[in] a_particlesPerCell Target number of particles per cell</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="nf">makeSuperparticles</span><span class="p">(</span><span class="n">WhichContainer</span><span class="w"> </span><span class="n">a_container</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_particlesPerCell</span><span class="p">);</span>
 </pre></div>
@@ -645,22 +646,22 @@ The exception is <code class="docutils literal notranslate"><span class="pre">nn
 <p>The user can set the merging algorithm through the input script (see <a class="reference internal" href="#chap-itoinput"><span class="std std-ref">Input options</span></a>), or supply one externally by setting the merge algorithm to <code class="docutils literal notranslate"><span class="pre">external</span></code>.
 In addition, the user must first supply a particle merging function:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Set the user-supplied per-cell particle merger used by merge_algorithm = external.</span>
-<span class="cm">  @details The built-in merge methods build their own per-cell merger internally; this one is used</span>
-<span class="cm">  only when merge_algorithm = external, applied cell-by-cell by makeSuperparticles().</span>
-<span class="cm">  @param[in] a_particleCellMerger Per-cell particle merger.</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Set the user-supplied per-cell particle merger used by merge_algorithm = external.</span>
+<span class="cm"> * @details The built-in merge methods build their own per-cell merger internally; this one is used</span>
+<span class="cm"> * only when merge_algorithm = external, applied cell-by-cell by makeSuperparticles().</span>
+<span class="cm"> * @param[in] a_particleCellMerger Per-cell particle merger.</span>
+<span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="nf">setParticleCellMerger</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">ParticleManagement</span><span class="o">::</span><span class="n">ParticleMerger</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_particleCellMerger</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>In the code above, <code class="docutils literal notranslate"><span class="pre">ParticleManagement::ParticleMerger&lt;P&gt;</span></code> is an alias:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Concept for splitting/merging particles</span>
-<span class="cm">  @param[in,out] a_particles Particles to be merged/split</span>
-<span class="cm">  @param[in] a_cellInfo Cell info</span>
-<span class="cm">  @param[in] a_numTargetParticles Number of target particles</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Concept for splitting/merging particles</span>
+<span class="cm"> * @param[in,out] a_particles Particles to be merged/split</span>
+<span class="cm"> * @param[in] a_cellInfo Cell info</span>
+<span class="cm"> * @param[in] a_numTargetParticles Number of target particles</span>
+<span class="cm"> */</span>
 <span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">P</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">Traits</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ParticleTraits</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&gt;</span>
 <span class="k">using</span><span class="w"> </span><span class="n">ParticleMerger</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span>
 <span class="w">  </span><span class="kt">void</span><span class="p">(</span><span class="n">ParticleSoA</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">Traits</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_particles</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">CellInfo</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_cellInfo</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_numTargetParticles</span><span class="p">)</span><span class="o">&gt;</span><span class="p">;</span>

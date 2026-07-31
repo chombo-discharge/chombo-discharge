@@ -449,10 +449,10 @@ For this reason we also provide an implementation layer <a class="reference inte
 <span class="cm"> */</span>
 
 <span class="cm">/**</span>
-<span class="cm">   @file   CD_CdrPlasmaPhysics.H</span>
-<span class="cm">   @brief  Declaration of the Physics::CdrPlasma::CdrPlasmaPhysics interface class</span>
-<span class="cm">   @author Robert Marskar</span>
-<span class="cm">*/</span>
+<span class="cm"> * @file   CD_CdrPlasmaPhysics.H</span>
+<span class="cm"> * @brief  Declaration of the Physics::CdrPlasma::CdrPlasmaPhysics interface class</span>
+<span class="cm"> * @author Robert Marskar</span>
+<span class="cm"> */</span>
 
 <span class="cp">#ifndef CD_CDRPLASMAPHYSICS_H</span>
 <span class="cp">#define CD_CDRPLASMAPHYSICS_H</span>
@@ -468,332 +468,332 @@ For this reason we also provide an implementation layer <a class="reference inte
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_NamespaceHeader.H&gt;</span>
 
 <span class="k">namespace</span><span class="w"> </span><span class="nn">Physics</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="k">namespace</span><span class="w"> </span><span class="nn">CdrPlasma</span><span class="w"> </span><span class="p">{</span>
+<span class="k">namespace</span><span class="w"> </span><span class="nn">CdrPlasma</span><span class="w"> </span><span class="p">{</span>
 
-<span class="w">    </span><span class="cm">/**</span>
-<span class="cm">       @brief Abstract interface for specifying plasma kinetics in the CdrPlasma physics module.</span>
-<span class="cm">       @details This class defines the coupling functions required by CdrPlasmaStepper to advance</span>
-<span class="cm">       a system of convection-diffusion-reaction (CDR) equations for charged and neutral species</span>
-<span class="cm">       together with radiative transfer equations (RTE) for photon densities, all in a</span>
-<span class="cm">       self-consistent electric field obtained from Poisson&#39;s equation.</span>
+<span class="cm">/**</span>
+<span class="cm"> * @brief Abstract interface for specifying plasma kinetics in the CdrPlasma physics module.</span>
+<span class="cm"> * @details This class defines the coupling functions required by CdrPlasmaStepper to advance</span>
+<span class="cm"> * a system of convection-diffusion-reaction (CDR) equations for charged and neutral species</span>
+<span class="cm"> * together with radiative transfer equations (RTE) for photon densities, all in a</span>
+<span class="cm"> * self-consistent electric field obtained from Poisson&#39;s equation.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Concrete subclasses must implement:</span>
+<span class="cm"> * - advanceReactionNetwork: compute CDR and RTE source terms from local state.</span>
+<span class="cm"> * - computeCdrDriftVelocities: drift velocities for each CDR species.</span>
+<span class="cm"> * - computeCdrDiffusionCoefficients: diffusion coefficients for each CDR species.</span>
+<span class="cm"> * - computeCdrElectrodeFluxes: EB boundary fluxes on electrode surfaces.</span>
+<span class="cm"> * - computeCdrDielectricFluxes: EB boundary fluxes on dielectric surfaces.</span>
+<span class="cm"> * - computeCdrDomainFluxes: fluxes through the computational domain boundary.</span>
+<span class="cm"> * - initialSigma: initial surface charge density on dielectrics.</span>
+<span class="cm"> * - computeAlpha: Townsend ionization coefficient (used by cell taggers).</span>
+<span class="cm"> * - computeEta: Townsend attachment coefficient (used by cell taggers).</span>
+<span class="cm"> *</span>
+<span class="cm"> * Species are registered by filling m_cdrSpecies and m_rtSpecies in the subclass constructor.</span>
+<span class="cm"> * The ordering of species in all input/output vectors throughout this interface matches the</span>
+<span class="cm"> * ordering in those two containers.</span>
+<span class="cm"> */</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">CdrPlasmaPhysics</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Default constructor. Does nothing.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="n">CdrPlasmaPhysics</span><span class="p">()</span>
+<span class="w">  </span><span class="p">{}</span>
 
-<span class="cm">       Concrete subclasses must implement:</span>
-<span class="cm">       - advanceReactionNetwork: compute CDR and RTE source terms from local state.</span>
-<span class="cm">       - computeCdrDriftVelocities: drift velocities for each CDR species.</span>
-<span class="cm">       - computeCdrDiffusionCoefficients: diffusion coefficients for each CDR species.</span>
-<span class="cm">       - computeCdrElectrodeFluxes: EB boundary fluxes on electrode surfaces.</span>
-<span class="cm">       - computeCdrDielectricFluxes: EB boundary fluxes on dielectric surfaces.</span>
-<span class="cm">       - computeCdrDomainFluxes: fluxes through the computational domain boundary.</span>
-<span class="cm">       - initialSigma: initial surface charge density on dielectrics.</span>
-<span class="cm">       - computeAlpha: Townsend ionization coefficient (used by cell taggers).</span>
-<span class="cm">       - computeEta: Townsend attachment coefficient (used by cell taggers).</span>
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Destructor. Does nothing.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="o">~</span><span class="n">CdrPlasmaPhysics</span><span class="p">()</span>
+<span class="w">  </span><span class="p">{}</span>
 
-<span class="cm">       Species are registered by filling m_cdrSpecies and m_rtSpecies in the subclass constructor.</span>
-<span class="cm">       The ordering of species in all input/output vectors throughout this interface matches the</span>
-<span class="cm">       ordering in those two containers.</span>
-<span class="cm">    */</span>
-<span class="w">    </span><span class="k">class</span><span class="w"> </span><span class="nc">CdrPlasmaPhysics</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">    </span><span class="k">public</span><span class="o">:</span>
-<span class="w">      </span><span class="cm">/**</span>
-<span class="cm">         @brief Default constructor. Does nothing.</span>
-<span class="cm">      */</span>
-<span class="w">      </span><span class="n">CdrPlasmaPhysics</span><span class="p">()</span>
-<span class="w">      </span><span class="p">{}</span>
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Parse runtime options. Default implementation does nothing.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="w">  </span><span class="n">parseRuntimeOptions</span><span class="p">()</span><span class="w"> </span><span class="p">{};</span>
 
-<span class="w">      </span><span class="cm">/**</span>
-<span class="cm">         @brief Destructor. Does nothing.</span>
-<span class="cm">      */</span>
-<span class="w">      </span><span class="k">virtual</span><span class="w"> </span><span class="o">~</span><span class="n">CdrPlasmaPhysics</span><span class="p">()</span>
-<span class="w">      </span><span class="p">{}</span>
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Return the number of plot variables provided by this physics class.</span>
+<span class="cm">   * @details CdrPlasmaStepper calls this to pre-allocate output storage. The returned value must</span>
+<span class="cm">   * match the length of the vectors returned by getPlotVariableNames() and getPlotVariables().</span>
+<span class="cm">   * @return Number of extra plot variables. Default is 0.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">int</span>
+<span class="w">  </span><span class="nf">getNumberOfPlotVariables</span><span class="p">()</span><span class="w"> </span><span class="k">const</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
 
-<span class="w">      </span><span class="cm">/**</span>
-<span class="cm">         @brief Parse runtime options. Default implementation does nothing.</span>
-<span class="cm">      */</span>
-<span class="w">      </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
-<span class="w">      </span><span class="n">parseRuntimeOptions</span><span class="p">()</span><span class="w"> </span><span class="p">{};</span>
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Return the names of the extra plot variables.</span>
+<span class="cm">   * @details The length of the returned vector must match getNumberOfPlotVariables(). The</span>
+<span class="cm">   * ordering must be consistent with getPlotVariables().</span>
+<span class="cm">   * @return Vector of variable names.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span>
+<span class="w">  </span><span class="n">getPlotVariableNames</span><span class="p">()</span><span class="w"> </span><span class="k">const</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">(</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">getNumberOfPlotVariables</span><span class="p">(),</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">(</span><span class="s">&quot;empty data&quot;</span><span class="p">));</span>
+<span class="w">  </span><span class="p">}</span>
 
-<span class="w">      </span><span class="cm">/**</span>
-<span class="cm">         @brief Return the number of plot variables provided by this physics class.</span>
-<span class="cm">         @details CdrPlasmaStepper calls this to pre-allocate output storage. The returned value must</span>
-<span class="cm">         match the length of the vectors returned by getPlotVariableNames() and getPlotVariables().</span>
-<span class="cm">         @return Number of extra plot variables. Default is 0.</span>
-<span class="cm">      */</span>
-<span class="w">      </span><span class="k">virtual</span><span class="w"> </span><span class="kt">int</span>
-<span class="w">      </span><span class="nf">getNumberOfPlotVariables</span><span class="p">()</span><span class="w"> </span><span class="k">const</span>
-<span class="w">      </span><span class="p">{</span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="w">      </span><span class="p">}</span>
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Evaluate the extra plot variables at a single grid point.</span>
+<span class="cm">   * @details Called by CdrPlasmaStepper when writing plot files. The length of the returned</span>
+<span class="cm">   * vector must match getNumberOfPlotVariables().</span>
+<span class="cm">   * @param[in] a_cdrDensities  CDR species densities at this point.</span>
+<span class="cm">   * @param[in] a_cdrGradients  CDR species density gradients at this point.</span>
+<span class="cm">   * @param[in] a_rteDensities  RTE photon densities at this point.</span>
+<span class="cm">   * @param[in] a_E             Electric field vector at this point.</span>
+<span class="cm">   * @param[in] a_position      Physical position.</span>
+<span class="cm">   * @param[in] a_dx            Grid cell spacing.</span>
+<span class="cm">   * @param[in] a_dt            Time step used in the last advance.</span>
+<span class="cm">   * @param[in] a_time          Current simulation time.</span>
+<span class="cm">   * @param[in] a_kappa         Volume fraction of the grid cell.</span>
+<span class="cm">   * @return Vector of plot variable values.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span>
+<span class="w">  </span><span class="n">getPlotVariables</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">     </span><span class="n">a_cdrDensities</span><span class="p">,</span>
+<span class="w">                   </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_cdrGradients</span><span class="p">,</span>
+<span class="w">                   </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">     </span><span class="n">a_rteDensities</span><span class="p">,</span>
+<span class="w">                   </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">         </span><span class="n">a_E</span><span class="p">,</span>
+<span class="w">                   </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">         </span><span class="n">a_position</span><span class="p">,</span>
+<span class="w">                   </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">              </span><span class="n">a_dx</span><span class="p">,</span>
+<span class="w">                   </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">              </span><span class="n">a_dt</span><span class="p">,</span>
+<span class="w">                   </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">              </span><span class="n">a_time</span><span class="p">,</span>
+<span class="w">                   </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">              </span><span class="n">a_kappa</span><span class="p">)</span><span class="w"> </span><span class="k">const</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="p">(</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">getNumberOfPlotVariables</span><span class="p">(),</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
 
-<span class="w">      </span><span class="cm">/**</span>
-<span class="cm">         @brief Return the names of the extra plot variables.</span>
-<span class="cm">         @details The length of the returned vector must match getNumberOfPlotVariables(). The</span>
-<span class="cm">         ordering must be consistent with getPlotVariables().</span>
-<span class="cm">         @return Vector of variable names.</span>
-<span class="cm">      */</span>
-<span class="w">      </span><span class="k">virtual</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span>
-<span class="w">      </span><span class="n">getPlotVariableNames</span><span class="p">()</span><span class="w"> </span><span class="k">const</span>
-<span class="w">      </span><span class="p">{</span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">(</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">getNumberOfPlotVariables</span><span class="p">(),</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">(</span><span class="s">&quot;empty data&quot;</span><span class="p">));</span>
-<span class="w">      </span><span class="p">}</span>
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Compute the Townsend ionization coefficient alpha.</span>
+<span class="cm">   * @details Used primarily by cell tagging classes to identify high-ionization regions.</span>
+<span class="cm">   * @param[in] a_E        Electric field magnitude (V/m).</span>
+<span class="cm">   * @param[in] a_position Physical position.</span>
+<span class="cm">   * @return Townsend ionization coefficient (1/m).</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="n">Real</span>
+<span class="w">  </span><span class="n">computeAlpha</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_position</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/**</span>
-<span class="cm">         @brief Evaluate the extra plot variables at a single grid point.</span>
-<span class="cm">         @details Called by CdrPlasmaStepper when writing plot files. The length of the returned</span>
-<span class="cm">         vector must match getNumberOfPlotVariables().</span>
-<span class="cm">         @param[in] a_cdrDensities  CDR species densities at this point.</span>
-<span class="cm">         @param[in] a_cdrGradients  CDR species density gradients at this point.</span>
-<span class="cm">         @param[in] a_rteDensities  RTE photon densities at this point.</span>
-<span class="cm">         @param[in] a_E             Electric field vector at this point.</span>
-<span class="cm">         @param[in] a_position      Physical position.</span>
-<span class="cm">         @param[in] a_dx            Grid cell spacing.</span>
-<span class="cm">         @param[in] a_dt            Time step used in the last advance.</span>
-<span class="cm">         @param[in] a_time          Current simulation time.</span>
-<span class="cm">         @param[in] a_kappa         Volume fraction of the grid cell.</span>
-<span class="cm">         @return Vector of plot variable values.</span>
-<span class="cm">      */</span>
-<span class="w">      </span><span class="k">virtual</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span>
-<span class="w">      </span><span class="n">getPlotVariables</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">     </span><span class="n">a_cdrDensities</span><span class="p">,</span>
-<span class="w">                       </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_cdrGradients</span><span class="p">,</span>
-<span class="w">                       </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">     </span><span class="n">a_rteDensities</span><span class="p">,</span>
-<span class="w">                       </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">         </span><span class="n">a_E</span><span class="p">,</span>
-<span class="w">                       </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">         </span><span class="n">a_position</span><span class="p">,</span>
-<span class="w">                       </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">              </span><span class="n">a_dx</span><span class="p">,</span>
-<span class="w">                       </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">              </span><span class="n">a_dt</span><span class="p">,</span>
-<span class="w">                       </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">              </span><span class="n">a_time</span><span class="p">,</span>
-<span class="w">                       </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">              </span><span class="n">a_kappa</span><span class="p">)</span><span class="w"> </span><span class="k">const</span>
-<span class="w">      </span><span class="p">{</span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="p">(</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">getNumberOfPlotVariables</span><span class="p">(),</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
-<span class="w">      </span><span class="p">}</span>
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Compute the Townsend attachment coefficient eta.</span>
+<span class="cm">   * @details Used primarily by cell tagging classes to identify attachment-dominated regions.</span>
+<span class="cm">   * @param[in] a_E        Electric field magnitude (V/m).</span>
+<span class="cm">   * @param[in] a_position Physical position.</span>
+<span class="cm">   * @return Townsend attachment coefficient (1/m).</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="n">Real</span>
+<span class="w">  </span><span class="nf">computeEta</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_position</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/**</span>
-<span class="cm">         @brief Compute the Townsend ionization coefficient alpha.</span>
-<span class="cm">         @details Used primarily by cell tagging classes to identify high-ionization regions.</span>
-<span class="cm">         @param[in] a_E        Electric field magnitude (V/m).</span>
-<span class="cm">         @param[in] a_position Physical position.</span>
-<span class="cm">         @return Townsend ionization coefficient (1/m).</span>
-<span class="cm">      */</span>
-<span class="w">      </span><span class="k">virtual</span><span class="w"> </span><span class="n">Real</span>
-<span class="w">      </span><span class="n">computeAlpha</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_position</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Advance the reaction network over a time interval and return source terms.</span>
+<span class="cm">   * @details The advance is assumed to take the form phi^{k+1} = phi^k + S * dt. Implementations</span>
+<span class="cm">   * may either fill a_cdrSources and a_rteSources directly (explicit rule), or perform a</span>
+<span class="cm">   * fully implicit sub-step and back out the equivalent source S from the result.</span>
+<span class="cm">   * @param[out] a_cdrSources   CDR source terms (same ordering as m_cdrSpecies).</span>
+<span class="cm">   * @param[out] a_rteSources   RTE source terms (same ordering as m_rtSpecies).</span>
+<span class="cm">   * @param[in]  a_cdrDensities CDR species densities at this point.</span>
+<span class="cm">   * @param[in]  a_cdrGradients CDR species density gradients at this point.</span>
+<span class="cm">   * @param[in]  a_rteDensities RTE photon densities at this point.</span>
+<span class="cm">   * @param[in]  a_E            Electric field vector at this point.</span>
+<span class="cm">   * @param[in]  a_pos          Physical position.</span>
+<span class="cm">   * @param[in]  a_dx           Grid cell spacing.</span>
+<span class="cm">   * @param[in]  a_dt           Time step size.</span>
+<span class="cm">   * @param[in]  a_time         Current simulation time.</span>
+<span class="cm">   * @param[in]  a_kappa        Volume fraction of the grid cell.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="w">  </span><span class="nf">advanceReactionNetwork</span><span class="p">(</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">           </span><span class="n">a_cdrSources</span><span class="p">,</span>
+<span class="w">                         </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">           </span><span class="n">a_rteSources</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">     </span><span class="n">a_cdrDensities</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_cdrGradients</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">     </span><span class="n">a_rteDensities</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">         </span><span class="n">a_E</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">         </span><span class="n">a_pos</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">              </span><span class="n">a_dx</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">              </span><span class="n">a_dt</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">              </span><span class="n">a_time</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">              </span><span class="n">a_kappa</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/**</span>
-<span class="cm">         @brief Compute the Townsend attachment coefficient eta.</span>
-<span class="cm">         @details Used primarily by cell tagging classes to identify attachment-dominated regions.</span>
-<span class="cm">         @param[in] a_E        Electric field magnitude (V/m).</span>
-<span class="cm">         @param[in] a_position Physical position.</span>
-<span class="cm">         @return Townsend attachment coefficient (1/m).</span>
-<span class="cm">      */</span>
-<span class="w">      </span><span class="k">virtual</span><span class="w"> </span><span class="n">Real</span>
-<span class="w">      </span><span class="nf">computeEta</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_position</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Compute drift velocities for all CDR species.</span>
+<span class="cm">   * @param[in] a_time         Current simulation time.</span>
+<span class="cm">   * @param[in] a_pos          Physical position.</span>
+<span class="cm">   * @param[in] a_E            Electric field vector.</span>
+<span class="cm">   * @param[in] a_cdrDensities CDR species densities.</span>
+<span class="cm">   * @return Drift velocity vectors in the same order as m_cdrSpecies.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="o">&gt;</span>
+<span class="w">  </span><span class="n">computeCdrDriftVelocities</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">          </span><span class="n">a_time</span><span class="p">,</span>
+<span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">     </span><span class="n">a_pos</span><span class="p">,</span>
+<span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">     </span><span class="n">a_E</span><span class="p">,</span>
+<span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_cdrDensities</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/**</span>
-<span class="cm">         @brief Advance the reaction network over a time interval and return source terms.</span>
-<span class="cm">         @details The advance is assumed to take the form phi^{k+1} = phi^k + S * dt. Implementations</span>
-<span class="cm">         may either fill a_cdrSources and a_rteSources directly (explicit rule), or perform a</span>
-<span class="cm">         fully implicit sub-step and back out the equivalent source S from the result.</span>
-<span class="cm">         @param[out] a_cdrSources   CDR source terms (same ordering as m_cdrSpecies).</span>
-<span class="cm">         @param[out] a_rteSources   RTE source terms (same ordering as m_rtSpecies).</span>
-<span class="cm">         @param[in]  a_cdrDensities CDR species densities at this point.</span>
-<span class="cm">         @param[in]  a_cdrGradients CDR species density gradients at this point.</span>
-<span class="cm">         @param[in]  a_rteDensities RTE photon densities at this point.</span>
-<span class="cm">         @param[in]  a_E            Electric field vector at this point.</span>
-<span class="cm">         @param[in]  a_pos          Physical position.</span>
-<span class="cm">         @param[in]  a_dx           Grid cell spacing.</span>
-<span class="cm">         @param[in]  a_dt           Time step size.</span>
-<span class="cm">         @param[in]  a_time         Current simulation time.</span>
-<span class="cm">         @param[in]  a_kappa        Volume fraction of the grid cell.</span>
-<span class="cm">      */</span>
-<span class="w">      </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
-<span class="w">      </span><span class="nf">advanceReactionNetwork</span><span class="p">(</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">           </span><span class="n">a_cdrSources</span><span class="p">,</span>
-<span class="w">                             </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">           </span><span class="n">a_rteSources</span><span class="p">,</span>
-<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">     </span><span class="n">a_cdrDensities</span><span class="p">,</span>
-<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_cdrGradients</span><span class="p">,</span>
-<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">     </span><span class="n">a_rteDensities</span><span class="p">,</span>
-<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">         </span><span class="n">a_E</span><span class="p">,</span>
-<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">         </span><span class="n">a_pos</span><span class="p">,</span>
-<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">              </span><span class="n">a_dx</span><span class="p">,</span>
-<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">              </span><span class="n">a_dt</span><span class="p">,</span>
-<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">              </span><span class="n">a_time</span><span class="p">,</span>
-<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">              </span><span class="n">a_kappa</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Compute diffusion coefficients for all CDR species.</span>
+<span class="cm">   * @param[in] a_time         Current simulation time.</span>
+<span class="cm">   * @param[in] a_pos          Physical position.</span>
+<span class="cm">   * @param[in] a_E            Electric field vector.</span>
+<span class="cm">   * @param[in] a_cdrDensities CDR species densities.</span>
+<span class="cm">   * @return Scalar diffusion coefficients in the same order as m_cdrSpecies.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span>
+<span class="w">  </span><span class="n">computeCdrDiffusionCoefficients</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">          </span><span class="n">a_time</span><span class="p">,</span>
+<span class="w">                                  </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">     </span><span class="n">a_pos</span><span class="p">,</span>
+<span class="w">                                  </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">     </span><span class="n">a_E</span><span class="p">,</span>
+<span class="w">                                  </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_cdrDensities</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/**</span>
-<span class="cm">         @brief Compute drift velocities for all CDR species.</span>
-<span class="cm">         @param[in] a_time         Current simulation time.</span>
-<span class="cm">         @param[in] a_pos          Physical position.</span>
-<span class="cm">         @param[in] a_E            Electric field vector.</span>
-<span class="cm">         @param[in] a_cdrDensities CDR species densities.</span>
-<span class="cm">         @return Drift velocity vectors in the same order as m_cdrSpecies.</span>
-<span class="cm">      */</span>
-<span class="w">      </span><span class="k">virtual</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="o">&gt;</span>
-<span class="w">      </span><span class="n">computeCdrDriftVelocities</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">          </span><span class="n">a_time</span><span class="p">,</span>
-<span class="w">                                </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">     </span><span class="n">a_pos</span><span class="p">,</span>
-<span class="w">                                </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">     </span><span class="n">a_E</span><span class="p">,</span>
-<span class="w">                                </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_cdrDensities</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Compute CDR species fluxes on electrode-gas EB interfaces.</span>
+<span class="cm">   * @details Used as a boundary condition on electrode EB cells. A positive flux is directed</span>
+<span class="cm">   * into the gas phase (outward from the electrode).</span>
+<span class="cm">   * @param[in] a_time            Current simulation time.</span>
+<span class="cm">   * @param[in] a_pos             EB centroid position.</span>
+<span class="cm">   * @param[in] a_normal          Outward unit normal pointing into the gas phase.</span>
+<span class="cm">   * @param[in] a_E               Electric field at the EB centroid.</span>
+<span class="cm">   * @param[in] a_cdrDensities    CDR densities at the EB centroid.</span>
+<span class="cm">   * @param[in] a_cdrVelocities   Normal component of CDR drift velocities at the EB.</span>
+<span class="cm">   * @param[in] a_cdrGradients    Normal gradient of CDR densities at the EB.</span>
+<span class="cm">   * @param[in] a_rteFluxes       Normal component of RTE fluxes at the EB.</span>
+<span class="cm">   * @param[in] a_extrapCdrFluxes CDR fluxes extrapolated from the gas-phase interior.</span>
+<span class="cm">   * @return Boundary fluxes in the same order as m_cdrSpecies.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span>
+<span class="w">  </span><span class="n">computeCdrElectrodeFluxes</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">          </span><span class="n">a_time</span><span class="p">,</span>
+<span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">     </span><span class="n">a_pos</span><span class="p">,</span>
+<span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">     </span><span class="n">a_normal</span><span class="p">,</span>
+<span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">     </span><span class="n">a_E</span><span class="p">,</span>
+<span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_cdrDensities</span><span class="p">,</span>
+<span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_cdrVelocities</span><span class="p">,</span>
+<span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_cdrGradients</span><span class="p">,</span>
+<span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_rteFluxes</span><span class="p">,</span>
+<span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_extrapCdrFluxes</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/**</span>
-<span class="cm">         @brief Compute diffusion coefficients for all CDR species.</span>
-<span class="cm">         @param[in] a_time         Current simulation time.</span>
-<span class="cm">         @param[in] a_pos          Physical position.</span>
-<span class="cm">         @param[in] a_E            Electric field vector.</span>
-<span class="cm">         @param[in] a_cdrDensities CDR species densities.</span>
-<span class="cm">         @return Scalar diffusion coefficients in the same order as m_cdrSpecies.</span>
-<span class="cm">      */</span>
-<span class="w">      </span><span class="k">virtual</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span>
-<span class="w">      </span><span class="n">computeCdrDiffusionCoefficients</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">          </span><span class="n">a_time</span><span class="p">,</span>
-<span class="w">                                      </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">     </span><span class="n">a_pos</span><span class="p">,</span>
-<span class="w">                                      </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">     </span><span class="n">a_E</span><span class="p">,</span>
-<span class="w">                                      </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_cdrDensities</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Compute CDR species fluxes on dielectric-gas EB interfaces.</span>
+<span class="cm">   * @details Used as a boundary condition on dielectric EB cells. A positive flux is directed</span>
+<span class="cm">   * into the gas phase (outward from the dielectric).</span>
+<span class="cm">   * @param[in] a_time            Current simulation time.</span>
+<span class="cm">   * @param[in] a_pos             EB centroid position.</span>
+<span class="cm">   * @param[in] a_normal          Outward unit normal pointing into the gas phase.</span>
+<span class="cm">   * @param[in] a_E               Electric field at the EB centroid.</span>
+<span class="cm">   * @param[in] a_cdrDensities    CDR densities at the EB centroid.</span>
+<span class="cm">   * @param[in] a_cdrVelocities   Normal component of CDR drift velocities at the EB.</span>
+<span class="cm">   * @param[in] a_cdrGradients    Normal gradient of CDR densities at the EB.</span>
+<span class="cm">   * @param[in] a_rteFluxes       Normal component of RTE fluxes at the EB.</span>
+<span class="cm">   * @param[in] a_extrapCdrFluxes CDR fluxes extrapolated from the gas-phase interior.</span>
+<span class="cm">   * @return Boundary fluxes in the same order as m_cdrSpecies.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span>
+<span class="w">  </span><span class="n">computeCdrDielectricFluxes</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">          </span><span class="n">a_time</span><span class="p">,</span>
+<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">     </span><span class="n">a_pos</span><span class="p">,</span>
+<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">     </span><span class="n">a_normal</span><span class="p">,</span>
+<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">     </span><span class="n">a_E</span><span class="p">,</span>
+<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_cdrDensities</span><span class="p">,</span>
+<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_cdrVelocities</span><span class="p">,</span>
+<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_cdrGradients</span><span class="p">,</span>
+<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_rteFluxes</span><span class="p">,</span>
+<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_extrapCdrFluxes</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/**</span>
-<span class="cm">         @brief Compute CDR species fluxes on electrode-gas EB interfaces.</span>
-<span class="cm">         @details Used as a boundary condition on electrode EB cells. A positive flux is directed</span>
-<span class="cm">         into the gas phase (outward from the electrode).</span>
-<span class="cm">         @param[in] a_time            Current simulation time.</span>
-<span class="cm">         @param[in] a_pos             EB centroid position.</span>
-<span class="cm">         @param[in] a_normal          Outward unit normal pointing into the gas phase.</span>
-<span class="cm">         @param[in] a_E               Electric field at the EB centroid.</span>
-<span class="cm">         @param[in] a_cdrDensities    CDR densities at the EB centroid.</span>
-<span class="cm">         @param[in] a_cdrVelocities   Normal component of CDR drift velocities at the EB.</span>
-<span class="cm">         @param[in] a_cdrGradients    Normal gradient of CDR densities at the EB.</span>
-<span class="cm">         @param[in] a_rteFluxes       Normal component of RTE fluxes at the EB.</span>
-<span class="cm">         @param[in] a_extrapCdrFluxes CDR fluxes extrapolated from the gas-phase interior.</span>
-<span class="cm">         @return Boundary fluxes in the same order as m_cdrSpecies.</span>
-<span class="cm">      */</span>
-<span class="w">      </span><span class="k">virtual</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span>
-<span class="w">      </span><span class="n">computeCdrElectrodeFluxes</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">          </span><span class="n">a_time</span><span class="p">,</span>
-<span class="w">                                </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">     </span><span class="n">a_pos</span><span class="p">,</span>
-<span class="w">                                </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">     </span><span class="n">a_normal</span><span class="p">,</span>
-<span class="w">                                </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">     </span><span class="n">a_E</span><span class="p">,</span>
-<span class="w">                                </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_cdrDensities</span><span class="p">,</span>
-<span class="w">                                </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_cdrVelocities</span><span class="p">,</span>
-<span class="w">                                </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_cdrGradients</span><span class="p">,</span>
-<span class="w">                                </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_rteFluxes</span><span class="p">,</span>
-<span class="w">                                </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_extrapCdrFluxes</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Compute CDR species fluxes through computational domain boundaries.</span>
+<span class="cm">   * @details A positive flux is directed into the domain.</span>
+<span class="cm">   * @param[in] a_time            Current simulation time.</span>
+<span class="cm">   * @param[in] a_pos             Position on the domain face.</span>
+<span class="cm">   * @param[in] a_dir             Coordinate direction (0=x, 1=y, 2=z).</span>
+<span class="cm">   * @param[in] a_side            Low or high side of the domain.</span>
+<span class="cm">   * @param[in] a_E               Electric field at the domain face.</span>
+<span class="cm">   * @param[in] a_cdrDensities    CDR densities at the domain face.</span>
+<span class="cm">   * @param[in] a_cdrVelocities   Normal component of CDR drift velocities at the domain face.</span>
+<span class="cm">   * @param[in] a_cdrGradients    Normal component of CDR density gradients at the domain face.</span>
+<span class="cm">   * @param[in] a_rteFluxes       Normal component of RTE fluxes at the domain face.</span>
+<span class="cm">   * @param[in] a_extrapCdrFluxes CDR fluxes extrapolated from the interior.</span>
+<span class="cm">   * @return Boundary fluxes in the same order as m_cdrSpecies.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span>
+<span class="w">  </span><span class="n">computeCdrDomainFluxes</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">           </span><span class="n">a_time</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">      </span><span class="n">a_pos</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">            </span><span class="n">a_dir</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">Side</span><span class="o">::</span><span class="n">LoHiSide</span><span class="w"> </span><span class="n">a_side</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">      </span><span class="n">a_E</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">  </span><span class="n">a_cdrDensities</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">  </span><span class="n">a_cdrVelocities</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">  </span><span class="n">a_cdrGradients</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">  </span><span class="n">a_rteFluxes</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">  </span><span class="n">a_extrapCdrFluxes</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/**</span>
-<span class="cm">         @brief Compute CDR species fluxes on dielectric-gas EB interfaces.</span>
-<span class="cm">         @details Used as a boundary condition on dielectric EB cells. A positive flux is directed</span>
-<span class="cm">         into the gas phase (outward from the dielectric).</span>
-<span class="cm">         @param[in] a_time            Current simulation time.</span>
-<span class="cm">         @param[in] a_pos             EB centroid position.</span>
-<span class="cm">         @param[in] a_normal          Outward unit normal pointing into the gas phase.</span>
-<span class="cm">         @param[in] a_E               Electric field at the EB centroid.</span>
-<span class="cm">         @param[in] a_cdrDensities    CDR densities at the EB centroid.</span>
-<span class="cm">         @param[in] a_cdrVelocities   Normal component of CDR drift velocities at the EB.</span>
-<span class="cm">         @param[in] a_cdrGradients    Normal gradient of CDR densities at the EB.</span>
-<span class="cm">         @param[in] a_rteFluxes       Normal component of RTE fluxes at the EB.</span>
-<span class="cm">         @param[in] a_extrapCdrFluxes CDR fluxes extrapolated from the gas-phase interior.</span>
-<span class="cm">         @return Boundary fluxes in the same order as m_cdrSpecies.</span>
-<span class="cm">      */</span>
-<span class="w">      </span><span class="k">virtual</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span>
-<span class="w">      </span><span class="n">computeCdrDielectricFluxes</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">          </span><span class="n">a_time</span><span class="p">,</span>
-<span class="w">                                 </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">     </span><span class="n">a_pos</span><span class="p">,</span>
-<span class="w">                                 </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">     </span><span class="n">a_normal</span><span class="p">,</span>
-<span class="w">                                 </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">     </span><span class="n">a_E</span><span class="p">,</span>
-<span class="w">                                 </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_cdrDensities</span><span class="p">,</span>
-<span class="w">                                 </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_cdrVelocities</span><span class="p">,</span>
-<span class="w">                                 </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_cdrGradients</span><span class="p">,</span>
-<span class="w">                                 </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_rteFluxes</span><span class="p">,</span>
-<span class="w">                                 </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_extrapCdrFluxes</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Return the initial surface charge density on dielectric surfaces.</span>
+<span class="cm">   * @param[in] a_time Current simulation time (typically 0).</span>
+<span class="cm">   * @param[in] a_pos  Physical position on the dielectric surface.</span>
+<span class="cm">   * @return Initial surface charge density (C/m^2 in 3D, C/m in 2D).</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="n">Real</span>
+<span class="w">  </span><span class="nf">initialSigma</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_pos</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/**</span>
-<span class="cm">         @brief Compute CDR species fluxes through computational domain boundaries.</span>
-<span class="cm">         @details A positive flux is directed into the domain.</span>
-<span class="cm">         @param[in] a_time            Current simulation time.</span>
-<span class="cm">         @param[in] a_pos             Position on the domain face.</span>
-<span class="cm">         @param[in] a_dir             Coordinate direction (0=x, 1=y, 2=z).</span>
-<span class="cm">         @param[in] a_side            Low or high side of the domain.</span>
-<span class="cm">         @param[in] a_E               Electric field at the domain face.</span>
-<span class="cm">         @param[in] a_cdrDensities    CDR densities at the domain face.</span>
-<span class="cm">         @param[in] a_cdrVelocities   Normal component of CDR drift velocities at the domain face.</span>
-<span class="cm">         @param[in] a_cdrGradients    Normal component of CDR density gradients at the domain face.</span>
-<span class="cm">         @param[in] a_rteFluxes       Normal component of RTE fluxes at the domain face.</span>
-<span class="cm">         @param[in] a_extrapCdrFluxes CDR fluxes extrapolated from the interior.</span>
-<span class="cm">         @return Boundary fluxes in the same order as m_cdrSpecies.</span>
-<span class="cm">      */</span>
-<span class="w">      </span><span class="k">virtual</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span>
-<span class="w">      </span><span class="n">computeCdrDomainFluxes</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">           </span><span class="n">a_time</span><span class="p">,</span>
-<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">      </span><span class="n">a_pos</span><span class="p">,</span>
-<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">            </span><span class="n">a_dir</span><span class="p">,</span>
-<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">Side</span><span class="o">::</span><span class="n">LoHiSide</span><span class="w"> </span><span class="n">a_side</span><span class="p">,</span>
-<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">      </span><span class="n">a_E</span><span class="p">,</span>
-<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">  </span><span class="n">a_cdrDensities</span><span class="p">,</span>
-<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">  </span><span class="n">a_cdrVelocities</span><span class="p">,</span>
-<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">  </span><span class="n">a_cdrGradients</span><span class="p">,</span>
-<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">  </span><span class="n">a_rteFluxes</span><span class="p">,</span>
-<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">  </span><span class="n">a_extrapCdrFluxes</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Return the list of CDR species.</span>
+<span class="cm">   * @return Const reference to the CDR species vector.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">CdrSpecies</span><span class="o">&gt;&gt;&amp;</span>
+<span class="w">  </span><span class="n">getCdrSpecies</span><span class="p">()</span><span class="w"> </span><span class="k">const</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">m_cdrSpecies</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
 
-<span class="w">      </span><span class="cm">/**</span>
-<span class="cm">         @brief Return the initial surface charge density on dielectric surfaces.</span>
-<span class="cm">         @param[in] a_time Current simulation time (typically 0).</span>
-<span class="cm">         @param[in] a_pos  Physical position on the dielectric surface.</span>
-<span class="cm">         @return Initial surface charge density (C/m^2 in 3D, C/m in 2D).</span>
-<span class="cm">      */</span>
-<span class="w">      </span><span class="k">virtual</span><span class="w"> </span><span class="n">Real</span>
-<span class="w">      </span><span class="nf">initialSigma</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_pos</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Return the list of RTE species.</span>
+<span class="cm">   * @return Const reference to the RTE species vector.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">RtSpecies</span><span class="o">&gt;&gt;&amp;</span>
+<span class="w">  </span><span class="n">getRtSpecies</span><span class="p">()</span><span class="w"> </span><span class="k">const</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">m_rtSpecies</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
 
-<span class="w">      </span><span class="cm">/**</span>
-<span class="cm">         @brief Return the list of CDR species.</span>
-<span class="cm">         @return Const reference to the CDR species vector.</span>
-<span class="cm">      */</span>
-<span class="w">      </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">CdrSpecies</span><span class="o">&gt;&gt;&amp;</span>
-<span class="w">      </span><span class="n">getCdrSpecies</span><span class="p">()</span><span class="w"> </span><span class="k">const</span>
-<span class="w">      </span><span class="p">{</span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">m_cdrSpecies</span><span class="p">;</span>
-<span class="w">      </span><span class="p">}</span>
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Return the number of CDR species.</span>
+<span class="cm">   * @return Number of CDR species.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="kt">int</span>
+<span class="w">  </span><span class="n">getNumCdrSpecies</span><span class="p">()</span><span class="w"> </span><span class="k">const</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">m_cdrSpecies</span><span class="p">.</span><span class="n">size</span><span class="p">();</span>
+<span class="w">  </span><span class="p">}</span>
 
-<span class="w">      </span><span class="cm">/**</span>
-<span class="cm">         @brief Return the list of RTE species.</span>
-<span class="cm">         @return Const reference to the RTE species vector.</span>
-<span class="cm">      */</span>
-<span class="w">      </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">RtSpecies</span><span class="o">&gt;&gt;&amp;</span>
-<span class="w">      </span><span class="n">getRtSpecies</span><span class="p">()</span><span class="w"> </span><span class="k">const</span>
-<span class="w">      </span><span class="p">{</span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">m_rtSpecies</span><span class="p">;</span>
-<span class="w">      </span><span class="p">}</span>
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Return the number of RTE equations.</span>
+<span class="cm">   * @return Number of RTE species.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="kt">int</span>
+<span class="w">  </span><span class="n">getNumRtSpecies</span><span class="p">()</span><span class="w"> </span><span class="k">const</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">m_rtSpecies</span><span class="p">.</span><span class="n">size</span><span class="p">();</span>
+<span class="w">  </span><span class="p">}</span>
 
-<span class="w">      </span><span class="cm">/**</span>
-<span class="cm">         @brief Return the number of CDR species.</span>
-<span class="cm">         @return Number of CDR species.</span>
-<span class="cm">      */</span>
-<span class="w">      </span><span class="kt">int</span>
-<span class="w">      </span><span class="n">getNumCdrSpecies</span><span class="p">()</span><span class="w"> </span><span class="k">const</span>
-<span class="w">      </span><span class="p">{</span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">m_cdrSpecies</span><span class="p">.</span><span class="n">size</span><span class="p">();</span>
-<span class="w">      </span><span class="p">}</span>
+<span class="k">protected</span><span class="o">:</span>
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief CDR species definitions. Subclasses populate this in their constructor.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">CdrSpecies</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">m_cdrSpecies</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/**</span>
-<span class="cm">         @brief Return the number of RTE equations.</span>
-<span class="cm">         @return Number of RTE species.</span>
-<span class="cm">      */</span>
-<span class="w">      </span><span class="kt">int</span>
-<span class="w">      </span><span class="n">getNumRtSpecies</span><span class="p">()</span><span class="w"> </span><span class="k">const</span>
-<span class="w">      </span><span class="p">{</span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">m_rtSpecies</span><span class="p">.</span><span class="n">size</span><span class="p">();</span>
-<span class="w">      </span><span class="p">}</span>
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief RTE species definitions. Subclasses populate this in their constructor.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">RtSpecies</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">m_rtSpecies</span><span class="p">;</span>
 
-<span class="w">    </span><span class="k">protected</span><span class="o">:</span>
-<span class="w">      </span><span class="cm">/**</span>
-<span class="cm">         @brief CDR species definitions. Subclasses populate this in their constructor.</span>
-<span class="cm">      */</span>
-<span class="w">      </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">CdrSpecies</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">m_cdrSpecies</span><span class="p">;</span>
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Number of CDR species.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">m_numCdrSpecies</span><span class="p">;</span>
 
-<span class="w">      </span><span class="cm">/**</span>
-<span class="cm">         @brief RTE species definitions. Subclasses populate this in their constructor.</span>
-<span class="cm">      */</span>
-<span class="w">      </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">RtSpecies</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">m_rtSpecies</span><span class="p">;</span>
-
-<span class="w">      </span><span class="cm">/**</span>
-<span class="cm">         @brief Number of CDR species.</span>
-<span class="cm">      */</span>
-<span class="w">      </span><span class="kt">int</span><span class="w"> </span><span class="n">m_numCdrSpecies</span><span class="p">;</span>
-
-<span class="w">      </span><span class="cm">/**</span>
-<span class="cm">         @brief Number of RTE species.</span>
-<span class="cm">      */</span>
-<span class="w">      </span><span class="kt">int</span><span class="w"> </span><span class="n">m_numRtSpecies</span><span class="p">;</span>
-<span class="w">    </span><span class="p">};</span>
-<span class="w">  </span><span class="p">}</span><span class="w"> </span><span class="c1">// namespace CdrPlasma</span>
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Number of RTE species.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">m_numRtSpecies</span><span class="p">;</span>
+<span class="p">};</span>
+<span class="p">}</span><span class="w"> </span><span class="c1">// namespace CdrPlasma</span>
 <span class="p">}</span><span class="w"> </span><span class="c1">// namespace Physics</span>
 
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_NamespaceFooter.H&gt;</span>

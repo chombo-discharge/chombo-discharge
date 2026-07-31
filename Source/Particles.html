@@ -224,12 +224,12 @@ The columns fall into two groups:</p>
 <p>The payload is described by a <code class="docutils literal notranslate"><span class="pre">ParticleTraits&lt;P&gt;</span></code> specialization that lists the payload columns as a tuple of member pointers (and, optionally, an <code class="docutils literal notranslate"><span class="pre">h5Columns</span></code> subset that restricts which columns are written to HDF5 checkpoints).
 A representative payload (the tracer-particle velocity + Runge-Kutta scratch) looks like</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief SoA payload for tracer particles: interpolated velocity plus Runge-Kutta stage scratch.</span>
-<span class="cm">  @details Per-component scalar columns (one member per spatial dimension; the z-component exists only when</span>
-<span class="cm">  CH_SPACEDIM == 3). v_x/v_y/v_z hold the interpolated velocity (required by TracerParticleSolver). xk is the</span>
-<span class="cm">  position snapshot x^k; k1/k2/k3 hold the Runge-Kutta stage velocities. Weight and position are</span>
-<span class="cm">  container-owned columns, NOT payload members.</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief SoA payload for tracer particles: interpolated velocity plus Runge-Kutta stage scratch.</span>
+<span class="cm"> * @details Per-component scalar columns (one member per spatial dimension; the z-component exists only when</span>
+<span class="cm"> * CH_SPACEDIM == 3). v_x/v_y/v_z hold the interpolated velocity (required by TracerParticleSolver). xk is the</span>
+<span class="cm"> * position snapshot x^k; k1/k2/k3 hold the Runge-Kutta stage velocities. Weight and position are</span>
+<span class="cm"> * container-owned columns, NOT payload members.</span>
+<span class="cm"> */</span>
 <span class="k">struct</span><span class="w"> </span><span class="nc">TracerParticle</span>
 <span class="p">{</span>
 <span class="w">  </span><span class="n">ParticleReal</span><span class="w"> </span><span class="n">v_x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="c1">///&lt; Interpolated velocity, x-component.</span>
@@ -264,8 +264,8 @@ A representative payload (the tracer-particle velocity + Runge-Kutta scratch) lo
 <span class="p">};</span>
 
 <span class="cm">/**</span>
-<span class="cm">  @brief ParticleTraits specialization listing the payload columns of TracerParticle.</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief ParticleTraits specialization listing the payload columns of TracerParticle.</span>
+<span class="cm"> */</span>
 <span class="k">template</span><span class="w"> </span><span class="o">&lt;&gt;</span>
 <span class="k">struct</span><span class="w"> </span><span class="nc">ParticleTraits</span><span class="o">&lt;</span><span class="n">TracerParticle</span><span class="o">&gt;</span>
 <span class="p">{</span>
@@ -278,10 +278,10 @@ A representative payload (the tracer-particle velocity + Runge-Kutta scratch) lo
 <span class="w">    </span><span class="n">D_DECL</span><span class="p">(</span><span class="o">&amp;</span><span class="n">TracerParticle</span><span class="o">::</span><span class="n">k3_x</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">TracerParticle</span><span class="o">::</span><span class="n">k3_y</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">TracerParticle</span><span class="o">::</span><span class="n">k3_z</span><span class="p">));</span>
 
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">     @brief Payload columns written to H5Part visualization files: the interpolated velocity vector (id,</span>
-<span class="cm">            position and weight are written automatically; the position snapshot and Runge-Kutta stage</span>
-<span class="cm">            columns are internal and not plotted).</span>
-<span class="cm">  */</span>
+<span class="cm">   * @brief Payload columns written to H5Part visualization files: the interpolated velocity vector (id,</span>
+<span class="cm">   * position and weight are written automatically; the position snapshot and Runge-Kutta stage</span>
+<span class="cm">   * columns are internal and not plotted).</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">h5PartColumns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">make_tuple</span><span class="p">(</span>
 <span class="w">    </span><span class="n">H5Part</span><span class="o">::</span><span class="n">Vector</span><span class="p">{</span><span class="s">&quot;v&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">D_DECL</span><span class="p">(</span><span class="o">&amp;</span><span class="n">TracerParticle</span><span class="o">::</span><span class="n">v_x</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">TracerParticle</span><span class="o">::</span><span class="n">v_y</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">TracerParticle</span><span class="o">::</span><span class="n">v_z</span><span class="p">)});</span>
 <span class="p">};</span>
@@ -360,9 +360,9 @@ For the full API, see the <code class="docutils literal notranslate"><span class
 <h3>Getting the particles<a class="headerlink" href="#getting-the-particles" title="Permalink to this heading"></a></h3>
 <p>To get the per-level holders from a <code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P,</span> <span class="pre">Traits&gt;</span></code> one can call <code class="docutils literal notranslate"><span class="pre">getParticles()</span></code>:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief The valid particles on all levels.</span>
-<span class="cm">  @return Mutable per-level holder vector.</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief The valid particles on all levels.</span>
+<span class="cm"> * @return Mutable per-level holder vector.</span>
+<span class="cm"> */</span>
 <span class="n">AMRParticlesSoA</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">Traits</span><span class="o">&gt;&amp;</span>
 <span class="n">getParticles</span><span class="p">()</span>
 <span class="p">{</span>
@@ -472,16 +472,16 @@ Iteration over cell-sorted particles visits the cells in Fortran order (matching
 <section id="allocating-particles">
 <h2>Allocating particles<a class="headerlink" href="#allocating-particles" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> has a simple function for allocating a <code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P,</span> <span class="pre">Traits&gt;</span></code>:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Allocate a struct-of-arrays particle container on the given realm.</span>
-<span class="cm">  @param[out] a_container SoA particle container to be allocated.</span>
-<span class="cm">  @param[in]  a_realm     Realm on which the particles will be allocated.</span>
-<span class="cm">  @tparam P      Payload type of the container.</span>
-<span class="cm">  @tparam Traits Column descriptor for the payload.</span>
-<span class="cm">*/</span>
-<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">P</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">Traits</span><span class="o">&gt;</span>
-<span class="kt">void</span>
-<span class="n">allocate</span><span class="p">(</span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">Traits</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_container</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_realm</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Allocate a struct-of-arrays particle container on the given realm.</span>
+<span class="cm">   * @param[out] a_container SoA particle container to be allocated.</span>
+<span class="cm">   * @param[in]  a_realm     Realm on which the particles will be allocated.</span>
+<span class="cm">   * @tparam P      Payload type of the container.</span>
+<span class="cm">   * @tparam Traits Column descriptor for the payload.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">P</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">Traits</span><span class="o">&gt;</span>
+<span class="w">  </span><span class="kt">void</span>
+<span class="w">  </span><span class="n">allocate</span><span class="p">(</span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">Traits</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_container</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_realm</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>which will allocate the container on the realm <code class="docutils literal notranslate"><span class="pre">a_realm</span></code>.</p>
@@ -491,13 +491,13 @@ Iteration over cell-sorted particles visits the cells in Fortran order (matching
 <p>Particles that move off their original grid patch must be remapped in order to ensure that they are assigned to the correct grid.
 The remapping function for <code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P,</span> <span class="pre">Traits&gt;</span></code> is</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Redistribute every valid particle to the patch/level/rank that owns its cell.</span>
-<span class="cm">  @details Pool model: collect all valid particles, map each to its destination via the</span>
-<span class="cm">  finest-level tile that contains it (LevelTiles), append same-rank movers into the destination</span>
-<span class="cm">  leaf and scatter cross-rank movers with MPI. Particles whose cell is not owned by any tile on</span>
-<span class="cm">  any level (off-domain) are dropped and counted in getNumberOfOutcastParticles*(). Invalidates</span>
-<span class="cm">  any cell-sort. Particle ids are preserved; rankID is set to the new owning rank.</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Redistribute every valid particle to the patch/level/rank that owns its cell.</span>
+<span class="cm"> * @details Pool model: collect all valid particles, map each to its destination via the</span>
+<span class="cm"> * finest-level tile that contains it (LevelTiles), append same-rank movers into the destination</span>
+<span class="cm"> * leaf and scatter cross-rank movers with MPI. Particles whose cell is not owned by any tile on</span>
+<span class="cm"> * any level (off-domain) are dropped and counted in getNumberOfOutcastParticles*(). Invalidates</span>
+<span class="cm"> * any cell-sort. Particle ids are preserved; rankID is set to the new owning rank.</span>
+<span class="cm"> */</span>
 <span class="kt">void</span>
 <span class="nf">remap</span><span class="p">();</span>
 </pre></div>
@@ -528,11 +528,11 @@ This is done as follows:</p>
 <ol class="arabic">
 <li><p><em>Before</em> creating the new grids, each MPI rank caches its current particles by calling</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Cache the current valid particles ahead of a regrid.</span>
-<span class="cm">  @details Snapshots the current per-level holders (and their layout) so that regrid() can</span>
-<span class="cm">  rebuild over a new layout and redistribute the cached particles. Call exactly once before</span>
-<span class="cm">  regrid().</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Cache the current valid particles ahead of a regrid.</span>
+<span class="cm"> * @details Snapshots the current per-level holders (and their layout) so that regrid() can</span>
+<span class="cm"> * rebuild over a new layout and redistribute the cached particles. Call exactly once before</span>
+<span class="cm"> * regrid().</span>
+<span class="cm"> */</span>
 <span class="kt">void</span>
 <span class="nf">preRegrid</span><span class="p">();</span>
 </pre></div>
@@ -541,21 +541,21 @@ This is done as follows:</p>
 </li>
 <li><p>When <code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P,</span> <span class="pre">Traits&gt;</span></code> regrids, the cached particles are redistributed onto the new layout by calling the regrid function:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Rebuild over a new AMR layout and redistribute the preRegrid()-cached particles onto it.</span>
-<span class="cm">  @details Re-allocates the per-level holders and tile maps over the new grids (all levels), then</span>
-<span class="cm">  runs the same pool-&gt;map-&gt;scatter as remap() but sourced from the cache. Positions are unchanged;</span>
-<span class="cm">  each cached particle is routed to the patch/level/rank owning its cell on the NEW layout, with</span>
-<span class="cm">  ids preserved. Off-domain particles are counted in getNumberOfOutcastParticles*(). Must follow a</span>
-<span class="cm">  preRegrid().</span>
-<span class="cm">  @param[in] a_grids          New per-level DisjointBoxLayouts.</span>
-<span class="cm">  @param[in] a_domains        New per-level problem domains.</span>
-<span class="cm">  @param[in] a_dx             New per-level (isotropic) grid spacing.</span>
-<span class="cm">  @param[in] a_refRat         New per-level refinement ratios.</span>
-<span class="cm">  @param[in] a_minBlockSize Grid blocking factor (tile size) for the new grids.</span>
-<span class="cm">  @param[in] a_levelTiles     The owning Realm&#39;s per-level tile-&gt;box maps for the new grids, aliased</span>
-<span class="cm">                              (never built locally). Must correspond to a_grids.</span>
-<span class="cm">  @param[in] a_newFinestLevel New finest AMR level index.</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Rebuild over a new AMR layout and redistribute the preRegrid()-cached particles onto it.</span>
+<span class="cm"> * @details Re-allocates the per-level holders and tile maps over the new grids (all levels), then</span>
+<span class="cm"> * runs the same pool-&gt;map-&gt;scatter as remap() but sourced from the cache. Positions are unchanged;</span>
+<span class="cm"> * each cached particle is routed to the patch/level/rank owning its cell on the NEW layout, with</span>
+<span class="cm"> * ids preserved. Off-domain particles are counted in getNumberOfOutcastParticles*(). Must follow a</span>
+<span class="cm"> * preRegrid().</span>
+<span class="cm"> * @param[in] a_grids          New per-level DisjointBoxLayouts.</span>
+<span class="cm"> * @param[in] a_domains        New per-level problem domains.</span>
+<span class="cm"> * @param[in] a_dx             New per-level (isotropic) grid spacing.</span>
+<span class="cm"> * @param[in] a_refRat         New per-level refinement ratios.</span>
+<span class="cm"> * @param[in] a_minBlockSize Grid blocking factor (tile size) for the new grids.</span>
+<span class="cm"> * @param[in] a_levelTiles     The owning Realm&#39;s per-level tile-&gt;box maps for the new grids, aliased</span>
+<span class="cm"> *                             (never built locally). Must correspond to a_grids.</span>
+<span class="cm"> * @param[in] a_newFinestLevel New finest AMR level index.</span>
+<span class="cm"> */</span>
 <span class="kt">void</span>
 <span class="nf">regrid</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">DisjointBoxLayout</span><span class="o">&gt;&amp;</span><span class="w">         </span><span class="n">a_grids</span><span class="p">,</span>
 <span class="w">       </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">ProblemDomain</span><span class="o">&gt;&amp;</span><span class="w">             </span><span class="n">a_domains</span><span class="p">,</span>
@@ -590,9 +590,9 @@ The function signature for this is</p>
 <p>The argument <code class="docutils literal notranslate"><span class="pre">a_mask</span></code> holds a bool at each cell in the AMR hierarchy.
 Particles that live in cells where <code class="docutils literal notranslate"><span class="pre">a_mask</span></code> is true will be copied to an internal holder which can be retrieved through</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief The halo/mask particles on all levels.</span>
-<span class="cm">  @return Mutable per-level holder vector.</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief The halo/mask particles on all levels.</span>
+<span class="cm"> * @return Mutable per-level holder vector.</span>
+<span class="cm"> */</span>
 <span class="n">AMRParticlesSoA</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">Traits</span><span class="o">&gt;&amp;</span>
 <span class="n">getMaskParticles</span><span class="p">()</span>
 <span class="p">{</span>
@@ -603,8 +603,8 @@ Particles that live in cells where <code class="docutils literal notranslate"><s
 <p>In the above functions the mask particles are <em>copied</em>, and the original particles are left untouched.
 After the user is done with the particles, they should be released through</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Drop all mask/halo particles on every level (keeps capacity).</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Drop all mask/halo particles on every level (keeps capacity).</span>
+<span class="cm"> */</span>
 <span class="kt">void</span>
 <span class="n">clearMaskParticles</span><span class="p">()</span>
 </pre></div>
@@ -933,10 +933,10 @@ Which <em>payload</em> columns are exported is declared once, per particle type,
 This descriptor co-locates each dataset name with the payload member pointer(s) it selects, so there is no positional coupling between names and accessors, and internal scratch columns are simply left out (opt-in).
 For example, <code class="docutils literal notranslate"><span class="pre">ParticleTraits&lt;ItoParticle&gt;</span></code> declares</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">   @brief Payload columns written to H5Part visualization files: the transport coefficients, the average</span>
-<span class="cm">          energy and the velocity vector (id, position and weight are written automatically; the scratch</span>
-<span class="cm">          and previous-position columns are internal and not plotted).</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Payload columns written to H5Part visualization files: the transport coefficients, the average</span>
+<span class="cm"> * energy and the velocity vector (id, position and weight are written automatically; the scratch</span>
+<span class="cm"> * and previous-position columns are internal and not plotted).</span>
+<span class="cm"> */</span>
 <span class="k">static</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">h5PartColumns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">make_tuple</span><span class="p">(</span>
 <span class="w">  </span><span class="n">H5Part</span><span class="o">::</span><span class="n">Scalar</span><span class="p">{</span><span class="s">&quot;mobility&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">ItoParticle</span><span class="o">::</span><span class="n">mobility</span><span class="p">},</span>
 <span class="w">  </span><span class="n">H5Part</span><span class="o">::</span><span class="n">Scalar</span><span class="p">{</span><span class="s">&quot;diffusion&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">ItoParticle</span><span class="o">::</span><span class="n">diffusion</span><span class="p">},</span>
@@ -954,16 +954,16 @@ The argument <code class="docutils literal notranslate"><span class="pre">a_shif
 The recommended pattern operates on one cell at a time: cell-sort the leaf, extract a cell’s particles into a small scratch <code class="docutils literal notranslate"><span class="pre">ParticleSoA</span></code>, merge/split them, and rebuild the leaf.
 <code class="docutils literal notranslate"><span class="pre">ParticleSoA&lt;P&gt;::extractCell</span></code> performs the per-cell extraction</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Extract cell c&#39;s particles (the CSR range [cellStart(c), cellStart(c+1))) into a_out.</span>
-<span class="cm">  @details a_out is cleared first, then this cell&#39;s particles are appended (all columns, including</span>
-<span class="cm">  id/rank). Requires the container to be cell-sorted. This is the building block of the per-cell</span>
-<span class="cm">  extract-&gt;process-&gt;rebuild idiom that replaces the AoS BinFab&lt;List&lt;P&gt;&gt; per-cell pattern: extract a</span>
-<span class="cm">  cell into a reusable scratch container, mutate it (append/remove), accumulate it into an output</span>
-<span class="cm">  container via append(const ParticleSoA&amp;), and finally swap() the output into the leaf. See</span>
-<span class="cm">  ItoSolver::makeSuperparticles for the canonical use.</span>
-<span class="cm">  @param[in]  a_cell Cell index.</span>
-<span class="cm">  @param[out] a_out  Destination scratch container (cleared on entry; reuse it across cells).</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Extract cell c&#39;s particles (the CSR range [cellStart(c), cellStart(c+1))) into a_out.</span>
+<span class="cm"> * @details a_out is cleared first, then this cell&#39;s particles are appended (all columns, including</span>
+<span class="cm"> * id/rank). Requires the container to be cell-sorted. This is the building block of the per-cell</span>
+<span class="cm"> * extract-&gt;process-&gt;rebuild idiom that replaces the AoS BinFab&lt;List&lt;P&gt;&gt; per-cell pattern: extract a</span>
+<span class="cm"> * cell into a reusable scratch container, mutate it (append/remove), accumulate it into an output</span>
+<span class="cm"> * container via append(const ParticleSoA&amp;), and finally swap() the output into the leaf. See</span>
+<span class="cm"> * ItoSolver::makeSuperparticles for the canonical use.</span>
+<span class="cm"> * @param[in]  a_cell Cell index.</span>
+<span class="cm"> * @param[out] a_out  Destination scratch container (cleared on entry; reuse it across cells).</span>
+<span class="cm"> */</span>
 <span class="kt">void</span>
 <span class="nf">extractCell</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">a_cell</span><span class="p">,</span><span class="w"> </span><span class="n">ParticleSoA</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_out</span><span class="p">)</span><span class="w"> </span><span class="k">const</span>
 <span class="p">{</span>
@@ -1051,10 +1051,9 @@ This is intentional and matches the original <code class="docutils literal notra
 <p><code class="docutils literal notranslate"><span class="pre">ParticleManagement::makeReinitializeMerger</span></code> discards all spatial information and rebuilds the cell from scratch.</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Context</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">P</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">Traits</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ParticleTraits</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&gt;</span>
 <span class="kr">inline</span><span class="w"> </span><span class="n">ParticleMerger</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">Traits</span><span class="o">&gt;</span>
-<span class="n">makeReinitializeMerger</span><span class="p">(</span>
-<span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="p">,</span><span class="w"> </span><span class="n">Context</span><span class="o">&gt;</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">ParticleSoA</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">Traits</span><span class="o">&gt;&amp;</span><span class="p">)</span><span class="o">&gt;</span><span class="w">              </span><span class="n">a_aggregate</span><span class="p">,</span>
-<span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="kt">void</span><span class="p">(</span><span class="n">ParticleSoA</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">Traits</span><span class="o">&gt;&amp;</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="p">,</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Context</span><span class="o">&amp;</span><span class="p">)</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_emit</span><span class="p">,</span>
-<span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="p">()</span><span class="o">&gt;</span><span class="w">                                                                </span><span class="n">a_probLo</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="n">makeReinitializeMerger</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="p">,</span><span class="w"> </span><span class="n">Context</span><span class="o">&gt;</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">ParticleSoA</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">Traits</span><span class="o">&gt;&amp;</span><span class="p">)</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_aggregate</span><span class="p">,</span>
+<span class="w">                       </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="kt">void</span><span class="p">(</span><span class="n">ParticleSoA</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">Traits</span><span class="o">&gt;&amp;</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="p">,</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Context</span><span class="o">&amp;</span><span class="p">)</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_emit</span><span class="p">,</span>
+<span class="w">                       </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="p">()</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_probLo</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>The returned functor proceeds as follows:</p>

@@ -50,8 +50,8 @@ For a more general way of specifying the space charge, ``FieldStepper`` has a pu
 
 .. literalinclude:: ../../../../Physics/Electrostatics/CD_FieldStepper.H
    :language: c++
-   :lines: 236-242
-   :dedent: 6
+   :lines: 239-245
+   :dedent: 2
 
 Setting the surface charge
 --------------------------
@@ -61,8 +61,8 @@ For a more general way of specifying the surface charge, ``FieldStepper`` has a 
 
 .. literalinclude:: ../../../../Physics/Electrostatics/CD_FieldStepper.H
    :language: c++
-   :lines: 244-249
-   :dedent: 6
+   :lines: 247-252
+   :dedent: 2
 
 .. _Chap:FieldStepperConfiguration: 
 

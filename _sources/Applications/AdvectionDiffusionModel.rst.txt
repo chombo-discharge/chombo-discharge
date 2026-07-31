@@ -116,7 +116,7 @@ For a more general way of specifying initial data, ``AdvectionDiffusionStepper``
 
 .. literalinclude:: ../../../../Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.H
    :language: c++
-   :dedent: 6
+   :dedent: 2
    :lines: 215-220
 
 Velocity field
@@ -149,7 +149,7 @@ For a more general way of setting a user-specified velocity, ``AdvectionDiffusio
 
 .. literalinclude:: ../../../../Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.H
    :language: c++
-   :dedent: 6
+   :dedent: 2
    :lines: 222-227
 
 
@@ -175,7 +175,7 @@ For a more general way of setting the diffusion coefficient, ``AdvectionDiffusio
 
 .. literalinclude:: ../../../../Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.H
    :language: c++
-   :dedent: 6
+   :dedent: 2
    :lines: 229-234
 
 Boundary conditions

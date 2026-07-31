@@ -145,7 +145,7 @@ std::shared_ptr&lt; EBGeometry::BVH::PackedBVH&lt; Real, <a class="el" href="cla
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Class that represents a set of triangles. </p>
 <p>This class uses the bounding volume hierarchies supplied by EBGeometry to organize and query a collection of <a class="el" href="classTriangle.html" title="Class that represents a single triangle together with associated metadata on the vertices (one float ...">Triangle</a> objects.</p>
-<p>Interpolation.** Each <a class="el" href="classTriangle.html" title="Class that represents a single triangle together with associated metadata on the vertices (one float ...">Triangle</a> carries a scalar value at each of its three vertices. Given a query point, the typical workflow is:</p><ol type="1">
+<p><b>Interpolation.</b> Each <a class="el" href="classTriangle.html" title="Class that represents a single triangle together with associated metadata on the vertices (one float ...">Triangle</a> carries a scalar value at each of its three vertices. Given a query point, the typical workflow is:</p><ol type="1">
 <li>Call <a class="el" href="classTriangleCollection.html#a779bcdf8b39439d28f8f5f7375bd1bb8" title="Hierarchical BVH search that returns candidate closest triangles to a query point.">getClosestTriangles()</a> to obtain the nearest triangle (first entry of the returned list).</li>
 <li>Call <a class="el" href="classTriangle.html#a828045d94c3f50443bc8d17bf886218b" title="Interpolate vertex data at a point using barycentric coordinates or IDW fallback.">Triangle::interpolate()</a> on that triangle to evaluate the scalar field at the query point.</li>
 </ol>

@@ -171,18 +171,19 @@ See <a class="reference internal" href="LookupTable.html#chap-lookuptableregular
 <li><p>Read particle data, where the particle data is in a <span class="math notranslate nohighlight">\((x,y,z,w)\)</span> file format, where <span class="math notranslate nohighlight">\(w\)</span> is the particle weight.</p>
 <p>The function signatures for reading this type of data are:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Simple file parser which will read particles (position/weight) from an ASCII file. </span>
-<span class="cm">  @details Particles should be arranged as rows, e.g. in the form</span>
-<span class="cm">  x   y   z   w</span>
-<span class="cm">  0.0 0.0 0.0 1</span>
-<span class="cm">  @param[in] a_fileName    Input file name. Must be an ASCII file organized into rows and columns. </span>
-<span class="cm">  @param[in] a_xColumn     Column containing the x-coordinate</span>
-<span class="cm">  @param[in] a_yColumn     Column containing the y-coordinate</span>
-<span class="cm">  @param[in] a_zColumn     Column containing the z-coordinate</span>
-<span class="cm">  @param[in] a_wColumn     Column containing the particle weight</span>
-<span class="cm">  @param[in] a_ignoreChars Characters indicating comments in the file. Lines starting with these characters are ignored. </span>
-<span class="cm">  @return Return value</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Simple file parser which will read particles (position/weight) from an ASCII file.</span>
+<span class="cm"> * @details Particles should be arranged as rows, e.g. in the form</span>
+<span class="cm"> * x   y   z   w</span>
+<span class="cm"> * 0.0 0.0 0.0 1</span>
+<span class="cm"> * @param[in] a_fileName    Input file name. Must be an ASCII file organized into rows and columns.</span>
+<span class="cm"> * @param[in] a_xColumn     Column containing the x-coordinate</span>
+<span class="cm"> * @param[in] a_yColumn     Column containing the y-coordinate</span>
+<span class="cm"> * @param[in] a_zColumn     Column containing the z-coordinate</span>
+<span class="cm"> * @param[in] a_wColumn     Column containing the particle weight</span>
+<span class="cm"> * @param[in] a_ignoreChars Characters indicating comments in the file. Lines starting with these characters are</span>
+<span class="cm"> * ignored.</span>
+<span class="cm"> * @return Return value</span>
+<span class="cm"> */</span>
 <span class="n">ParticleSoA</span><span class="o">&lt;</span><span class="n">NoPayload</span><span class="o">&gt;</span>
 <span class="n">readPointParticlesASCII</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w">       </span><span class="n">a_fileName</span><span class="p">,</span>
 <span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w">       </span><span class="n">a_xColumn</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
@@ -202,21 +203,21 @@ metadata defaults to zero.
 Non-triangular facets are skipped with a warning.</p>
 <p>The function signature is:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Read a PLY or VTK triangle mesh file and return a list of Triangle objects.</span>
-<span class="cm">  @details Reads vertex positions and face connectivity from the file. If a_vertexDataIdentifier</span>
-<span class="cm">  matches a named per-vertex scalar property in the file (a PLY vertex property or a VTK</span>
-<span class="cm">  point-data scalar), that data is stored as the vertex metadata on each Triangle via</span>
-<span class="cm">  setVertexData(). If the identifier is not found, a warning is issued and all vertex data</span>
-<span class="cm">  values are set to zero.</span>
-
-<span class="cm">  Non-triangular facets are skipped with a warning. The file type is inferred from the</span>
-<span class="cm">  extension (.ply / .PLY or .vtk / .VTK); any other extension results in a fatal error.</span>
-
-<span class="cm">  @param[in] a_filename             Path to the input mesh file.</span>
-<span class="cm">  @param[in] a_vertexDataIdentifier Name of the per-vertex scalar property to read as</span>
-<span class="cm">                                    Triangle vertex metadata.</span>
-<span class="cm">  @return Vector of fully initialised Triangle objects, sorted in file order.</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Read a PLY or VTK triangle mesh file and return a list of Triangle objects.</span>
+<span class="cm"> * @details Reads vertex positions and face connectivity from the file. If a_vertexDataIdentifier</span>
+<span class="cm"> * matches a named per-vertex scalar property in the file (a PLY vertex property or a VTK</span>
+<span class="cm"> * point-data scalar), that data is stored as the vertex metadata on each Triangle via</span>
+<span class="cm"> * setVertexData(). If the identifier is not found, a warning is issued and all vertex data</span>
+<span class="cm"> * values are set to zero.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Non-triangular facets are skipped with a warning. The file type is inferred from the</span>
+<span class="cm"> * extension (.ply / .PLY or .vtk / .VTK); any other extension results in a fatal error.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param[in] a_filename             Path to the input mesh file.</span>
+<span class="cm"> * @param[in] a_vertexDataIdentifier Name of the per-vertex scalar property to read as</span>
+<span class="cm"> *                                   Triangle vertex metadata.</span>
+<span class="cm"> * @return Vector of fully initialised Triangle objects, sorted in file order.</span>
+<span class="cm"> */</span>
 <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Triangle</span><span class="o">&gt;&gt;</span>
 <span class="n">readTriangles</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_filename</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_vertexDataIdentifier</span><span class="p">);</span>
 </pre></div>

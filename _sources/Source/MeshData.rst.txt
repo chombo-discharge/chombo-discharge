@@ -198,9 +198,8 @@ These functions are available for cell-centered data, cut-cell data, and face-ce
 Multiple signatures for this functionality exist, see the code-block below.
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 694-702,727-735,762-774
+   :lines: 698-706,731-739,768-780
    :language: c++
-   :dedent: 2
 	    
 See the `AmrMesh API <https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classAmrMesh.html>`_ for further details. 
 
@@ -219,16 +218,14 @@ This process adheres to the following rules:
 The signatures for updating the ghost cells are:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 1234-1242
+   :lines: 1245-1253
    :language: c++
-   :dedent: 2
 
 As one alternative, one can update ghost cells on a single grid level:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 1243-1257
+   :lines: 1254-1268
    :language: c++
-   :dedent: 2
 
 
 Strictly speaking it is also possible to update ghost cells using the multigrid interpolator, but this will only fill a single layer of ghost cells around the halo zone (except near the cut-cells where additional cells are filled).
@@ -248,9 +245,8 @@ If one needs data on a grid level where no data already exists, it is possible t
 The interpolation function that fills fine-grid data from a coarse grid has the following signature:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 1323-1343
+   :lines: 1334-1354
    :language: c++
-   :dedent: 2
 
 Here, the user must supply both the old data and the new data, as well as on which grid levels the interpolation will take place.
 The final argument ``a_type`` is the interpolation type.
@@ -303,9 +299,9 @@ Once this neighborhood of cells is obtained, we compute the gradient using the p
 To compute gradients of a scalar, one can simply call ``AmrMesh::computeGradient(...)`` functions:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 441-454
+   :lines: 445-458
    :language: c++
-   :dedent: 2		    
+   :dedent: 2
 
 We reiterate that ghost cells must be updated *before* calling this routine.
 See :ref:`Chap:AmrMesh` or refer to the `AmrMesh API <https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classAmrMesh.html>`_ for further details.
@@ -323,7 +319,7 @@ This version requires that the source and destination data holders are defined o
 A more general version is supplied by :ref:`Chap:AmrMesh`, and has the following structure:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 99-117
+   :lines: 100-118
    :language: c++
    :dedent: 2
 

@@ -167,43 +167,43 @@ Several pre-defined geometries are included in <code class="file docutils litera
 <div class="literal-block-wrapper docutils container" id="id1">
 <span id="computationalgeometrymembers"></span><div class="code-block-caption"><span class="caption-number">Listing 2 </span><span class="caption-text">List of all data member of the <code class="docutils literal notranslate"><span class="pre">ComputationalGeometry</span></code> base class. Highlighted members must be instantiated by the user in order to create a new geometry.</span><a class="headerlink" href="#id1" title="Permalink to this code"></a></div>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Background permittivity</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Background permittivity</span>
+<span class="cm"> */</span>
 <span class="hll"><span class="n">Real</span><span class="w"> </span><span class="n">m_eps0</span><span class="p">;</span>
 </span>
 <span class="cm">/**</span>
-<span class="cm">  @brief True if we use the chombo-discharge geometry generation utility.</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief True if we use the chombo-discharge geometry generation utility.</span>
+<span class="cm"> */</span>
 <span class="kt">bool</span><span class="w"> </span><span class="n">m_useScanShop</span><span class="p">;</span>
 
 <span class="cm">/**</span>
-<span class="cm">  @brief Grid level where we begin using ScanShop</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Grid level where we begin using ScanShop</span>
+<span class="cm"> */</span>
 <span class="n">ProblemDomain</span><span class="w"> </span><span class="n">m_scanDomain</span><span class="p">;</span>
 
 <span class="cm">/**</span>
-<span class="cm">  @brief Maximum number of ghost cells that we will ever need</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Maximum number of ghost cells that we will ever need</span>
+<span class="cm"> */</span>
 <span class="kt">int</span><span class="w"> </span><span class="n">m_maxGhostEB</span><span class="p">;</span>
 
 <span class="cm">/**</span>
-<span class="cm">  @brief List of dielectrics</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief List of dielectrics</span>
+<span class="cm"> */</span>
 <span class="hll"><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Dielectric</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_dielectrics</span><span class="p">;</span>
 </span>
 <span class="cm">/**</span>
-<span class="cm">  @brief List of electrodes</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief List of electrodes</span>
+<span class="cm"> */</span>
 <span class="hll"><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Electrode</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_electrodes</span><span class="p">;</span>
 </span>
 <span class="cm">/**</span>
-<span class="cm">  @brief The gas-phase implicit function (i.e. outside electrodes and dielectrics). </span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief The gas-phase implicit function (i.e. outside electrodes and dielectrics).</span>
+<span class="cm"> */</span>
 <span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">BaseIF</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_implicitFunctionGas</span><span class="p">;</span>
 
 <span class="cm">/**</span>
-<span class="cm">  @brief The solid-phase implicit function (i.e. the inside of the dielectrics). </span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief The solid-phase implicit function (i.e. the inside of the dielectrics).</span>
+<span class="cm"> */</span>
 <span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">BaseIF</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_implicitFunctionSolid</span><span class="p">;</span>
 </pre></div>
 </div>
@@ -238,12 +238,12 @@ The constructor for the electrode class is given in <a class="reference internal
 <div class="literal-block-wrapper docutils container" id="id2">
 <span id="list-electrode"></span><div class="code-block-caption"><span class="caption-number">Listing 3 </span><span class="caption-text">Constructor for the <code class="docutils literal notranslate"><span class="pre">Electrode</span></code> object.</span><a class="headerlink" href="#id2" title="Permalink to this code"></a></div>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Constructor. </span>
-<span class="cm">  @param[in] a_baseIF          Implicit function for the electrode</span>
-<span class="cm">  @param[in] a_live            Live electrode or not</span>
-<span class="cm">  @param[in] a_voltageFraction Fraction of live voltage (if live)</span>
-<span class="cm">  @note Calls the define function</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Constructor.</span>
+<span class="cm"> * @param[in] a_baseIF          Implicit function for the electrode</span>
+<span class="cm"> * @param[in] a_live            Live electrode or not</span>
+<span class="cm"> * @param[in] a_voltageFraction Fraction of live voltage (if live)</span>
+<span class="cm"> * @note Calls the define function</span>
+<span class="cm"> */</span>
 <span class="n">Electrode</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">BaseIF</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_baseIF</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">a_live</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_voltageFraction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
 </pre></div>
 </div>
@@ -266,19 +266,19 @@ The constructors for this class are</p>
 <div class="literal-block-wrapper docutils container" id="id3">
 <div class="code-block-caption"><span class="caption-number">Listing 4 </span><span class="caption-text">Constructors for the <code class="docutils literal notranslate"><span class="pre">Dielectric</span></code> object.</span><a class="headerlink" href="#id3" title="Permalink to this code"></a></div>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Full constructor which uses constant permittivity.</span>
-<span class="cm">  @param[in] a_baseIF       Implicit function</span>
-<span class="cm">  @param[in] a_permittivity Constant permittivity</span>
-<span class="cm">  @note Calls the define function for constant permittivity.</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Full constructor which uses constant permittivity.</span>
+<span class="cm"> * @param[in] a_baseIF       Implicit function</span>
+<span class="cm"> * @param[in] a_permittivity Constant permittivity</span>
+<span class="cm"> * @note Calls the define function for constant permittivity.</span>
+<span class="cm"> */</span>
 <span class="n">Dielectric</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">BaseIF</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_baseIF</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_permittivity</span><span class="p">);</span>
 
 <span class="cm">/**</span>
-<span class="cm">  @brief Full constructor which uses variable permittivity.</span>
-<span class="cm">  @param[in] a_baseIF       Implicit function</span>
-<span class="cm">  @param[in] a_permittivity Variable permittivity</span>
-<span class="cm">  @note Calls the define function for variable permittivity.</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Full constructor which uses variable permittivity.</span>
+<span class="cm"> * @param[in] a_baseIF       Implicit function</span>
+<span class="cm"> * @param[in] a_permittivity Variable permittivity</span>
+<span class="cm"> * @note Calls the define function for variable permittivity.</span>
+<span class="cm"> */</span>
 <span class="n">Dielectric</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">BaseIF</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_baseIF</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_pos</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_permittivity</span><span class="p">);</span>
 </pre></div>
 </div>
@@ -297,16 +297,16 @@ Several solvers will then use the permittivities as specified by the user.</p>
 <div class="literal-block-wrapper docutils container" id="id4">
 <div class="code-block-caption"><span class="caption-number">Listing 5 </span><span class="caption-text">Member functions for retrieving the defined electrodes and dielectrics.</span><a class="headerlink" href="#id4" title="Permalink to this code"></a></div>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Get dielectrics</span>
-<span class="cm">  @return Dielectrics (m_dielectrics)</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Get dielectrics</span>
+<span class="cm"> * @return Dielectrics (m_dielectrics)</span>
+<span class="cm"> */</span>
 <span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Dielectric</span><span class="o">&gt;&amp;</span>
 <span class="n">getDielectrics</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 
 <span class="cm">/**</span>
-<span class="cm">  @brief Get electrodes</span>
-<span class="cm">  @return Electrodes (m_electrodes)</span>
-<span class="cm">*/</span>
+<span class="cm"> * @brief Get electrodes</span>
+<span class="cm"> * @return Electrodes (m_electrodes)</span>
+<span class="cm"> */</span>
 <span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Electrode</span><span class="o">&gt;&amp;</span>
 <span class="n">getElectrodes</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 </pre></div>
