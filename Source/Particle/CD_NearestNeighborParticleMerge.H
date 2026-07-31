@@ -1009,6 +1009,13 @@ namespace ParticleManagement {
     @param[in] a_maxCellDistance Forwarded to resolveTrivialTier() (see its docs). `std::nullopt` (default) disables it.
     A physical cap, in whole grid cells, on how far apart two particles may be and still merge -- e.g. 1 permits merging
     within the same cell or any Moore-adjacent cell, never farther. Composes with the options above.
+    @param[in] a_ghostWidth Width, in whole cells, of the particle ghost halo the CALLER has already filled and of the
+    registered particle ghost mask this function fetches to compute boundary-exposure. Must equal the filled/registered
+    width and be identical on every rank -- that is what makes a trivially-merged (non-exposed) pair provably invisible
+    to every other patch, so it is the load-bearing invariant against double-merging. Double-merge safety does NOT
+    depend on a_maxCellDistance; a_ghostWidth only needs to be >= a_maxCellDistance for cross-patch merges to actually
+    reach that far (a candidate that many cells across a boundary is a merge candidate only if it lies inside the halo).
+    Default 1, which -- with the default unbounded a_maxCellDistance -- caps cross-patch merges at one cell.
     @param[in] a_isPositionValid Forwarded to resolveTrivialTier()/judgeProposals() (see PositionValid). Default
     always-true. Composes with the options above -- e.g. an embedded-boundary point query for an EB-aware caller (see
     ItoSolver::mergeSuperparticlesNearestNeighbor).
@@ -1044,6 +1051,7 @@ namespace ParticleManagement {
     const bool                    a_iterateLocalTierToConvergence = false,
     const int                     a_maxFallbackCandidates         = 0,
     const std::optional<int>      a_maxCellDistance               = std::nullopt,
+    const int                     a_ghostWidth                    = 1,
     const PosValid&               a_isPositionValid =
       [](const RealVect&) {
         return true;

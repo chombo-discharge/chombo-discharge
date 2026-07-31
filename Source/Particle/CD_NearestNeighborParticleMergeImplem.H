@@ -1008,6 +1008,7 @@ namespace ParticleManagement {
                              const bool                    a_iterateLocalTierToConvergence,
                              const int                     a_maxFallbackCandidates,
                              const std::optional<int>      a_maxCellDistance,
+                             const int                     a_ghostWidth,
                              const PosValid&               a_isPositionValid,
                              unsigned long long*           a_crossLevelMergeCount,
                              const OnMerge&                a_onMergeCommitted)
@@ -1025,12 +1026,13 @@ namespace ParticleManagement {
     const RealVect      probLo      = a_amr.getProbLo();
     const Vector<Real>& dxScalar    = a_amr.getDx();
 
-    // Ghost particles are assumed ALREADY FILLED by the caller (a width-1 halo -- one cell in every
-    // direction, which is all the crowding trigger and the candidate search ever look at) and are
-    // used here as candidates. This function does not fill them: filling is the caller's
-    // responsibility, on equal footing with the caller cell-sorting before a cell-based merge (see
-    // ItoSolver / ParticleManagement::ParticleMergeKind). The width-1 particle ghost mask must have
-    // been registered on this realm before the grids were (re)built.
+    // Ghost particles are assumed ALREADY FILLED by the caller (an a_ghostWidth-cell halo -- one cell
+    // per unit of a_ghostWidth in every direction, which is what the crowding trigger and the candidate
+    // search look at) and are used here as candidates. This function does not fill them: filling is the
+    // caller's responsibility, on equal footing with the caller cell-sorting before a cell-based merge
+    // (see ItoSolver / ParticleManagement::ParticleMergeKind). A particle ghost mask of this same width
+    // must have been registered on this realm before the grids were (re)built, and every rank must use
+    // the same a_ghostWidth (see the a_ghostWidth docs -- it defines boundary-exposure).
 
     struct PatchWork
     {
@@ -1059,7 +1061,8 @@ namespace ParticleManagement {
       dxByLevel[lvl] = RealVect(D_DECL(dxScalar[lvl], dxScalar[lvl], dxScalar[lvl]));
     }
 
-    constexpr int ghostWidth = 1;
+    CH_assert(a_ghostWidth >= 1);
+    const int ghostWidth = a_ghostWidth;
 
     for (int lvl = 0; lvl <= finestLevel; lvl++) {
       const RealVect& dx = dxByLevel[lvl];

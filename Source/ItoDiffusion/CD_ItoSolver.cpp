@@ -539,10 +539,12 @@ ItoSolver::registerOperators() const
       m_amr->registerOperator(s_eb_redist, m_realm, m_phase);
     }
 
-    // The nn_pair merge reads a width-1 particle ghost halo as merge candidates (see
-    // makeSuperparticlesNnPair()/ParticleManagement::mergeNearestNeighborsRound()). Register
-    // the width here, alongside the other operators.
-    m_amr->registerParticleGhostMask(m_realm, 1);
+    // The nn_pair merge reads a particle ghost halo as merge candidates (see makeSuperparticlesNnPair()
+    // / ParticleManagement::mergeNearestNeighborsRound()). Its width is the merge distance
+    // nn_pair_max_cell_dist (>= 1), or 1 when that is unbounded or the merger is unused. Register it
+    // here, alongside the other operators; the same width must be filled and passed to the round.
+    const int nnPairGhostWidth = (m_nnPairMaxCellDistance < 0) ? 1 : m_nnPairMaxCellDistance;
+    m_amr->registerParticleGhostMask(m_realm, nnPairGhostWidth);
   }
 }
 
@@ -3804,10 +3806,15 @@ ItoSolver::makeSuperparticlesNnPair(const WhichContainer a_container, const Vect
       }
     }
 
-    // Fill a width-1 layer of ghost particles.
-    merge.fillGhostParticles(m_amr->getParticleGhostMask(m_realm, 1),
-                             m_amr->getParticleGhostMaskCoarToFine(m_realm, 1),
-                             m_amr->getParticleGhostMaskFineToCoar(m_realm, 1));
+    // Fill a ghost halo of the merge width (= maxCellDistance, or 1 when unbounded) so a candidate up
+    // to that many cells across a patch boundary is visible to the search. This width MUST match the
+    // registered mask width (registerOperators()) and the a_ghostWidth passed to the round below --
+    // every rank uses the same value, which is what defines boundary-exposure and keeps the merge
+    // double-merge-safe.
+    const int ghostWidth = maxCellDistance.value_or(1);
+    merge.fillGhostParticles(m_amr->getParticleGhostMask(m_realm, ghostWidth),
+                             m_amr->getParticleGhostMaskCoarToFine(m_realm, ghostWidth),
+                             m_amr->getParticleGhostMaskFineToCoar(m_realm, ghostWidth));
 
     // Merge particles -- this is the most expensive part of the merge algorithm.
     ParticleManagement::mergeNearestNeighborsRound<ItoMergeParticle, Real>(*m_amr,
@@ -3820,6 +3827,7 @@ ItoSolver::makeSuperparticlesNnPair(const WhichContainer a_container, const Vect
                                                                            m_nnPairIterate,
                                                                            m_nnPairFallback,
                                                                            maxCellDistance,
+                                                                           ghostWidth,
                                                                            isPositionValid);
 
     // getNumberOfValidParticlesGlobal() is an MPI collective -- every rank calls it and breaks on the
