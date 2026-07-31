@@ -439,24 +439,27 @@ ItoSolver::parseParticleMerger()
   // 'external' leaves the merger to the user (setParticleCellMerger); 'none' does nothing.
   m_mergeMethod = ParticleManagement::mergeMethodFromString(str);
 
-  // The distributed nearest-neighbor pair merge has extra tunables.
-  if (m_mergeMethod == ParticleManagement::ParticleMergeMethod::NnPair) {
-    pp.get("nn_pair_iterate", m_nnPairIterate);
-    pp.get("nn_pair_fallback", m_nnPairFallback);
-    pp.get("nn_pair_max_cell_dist", m_nnPairMaxCellDistance);
-    pp.get("nn_pair_max_rounds", m_nnPairMaxRounds);
+  // The distributed nearest-neighbor pair merge has extra tunables. Read and validate them
+  // UNCONDITIONALLY, not only when merge_algorithm == nn_pair: nn_pair can also be selected as the
+  // regrid-time method (ItoKMCStepper.regrid_superparticles), which drives makeSuperparticles()
+  // through m_regridMergeMethod and bypasses m_mergeMethod entirely. Gating the read on m_mergeMethod
+  // would silently drop these settings (and skip their validation) for that valid configuration, so
+  // they are mandatory inputs like everything else here.
+  pp.get("nn_pair_iterate", m_nnPairIterate);
+  pp.get("nn_pair_fallback", m_nnPairFallback);
+  pp.get("nn_pair_max_cell_dist", m_nnPairMaxCellDistance);
+  pp.get("nn_pair_max_rounds", m_nnPairMaxRounds);
 
-    // Validate the tunables up front -- a bad value here silently produces a degenerate merge, so fail
-    // loudly (in every build, not just DEBUG) rather than assert.
-    if (m_nnPairFallback < 0) {
-      MayDay::Abort("ItoSolver::parseParticleMerger - 'nn_pair_fallback' must be >= 0");
-    }
-    if (m_nnPairMaxCellDistance == 0) {
-      MayDay::Abort("ItoSolver::parseParticleMerger - 'nn_pair_max_cell_dist' must be >= 1 (or < 0 for unbounded)");
-    }
-    if (m_nnPairMaxRounds < 1) {
-      MayDay::Abort("ItoSolver::parseParticleMerger - 'nn_pair_max_rounds' must be >= 1");
-    }
+  // A bad value here silently produces a degenerate merge, so fail loudly (in every build, not just
+  // DEBUG) rather than assert.
+  if (m_nnPairFallback < 0) {
+    MayDay::Abort("ItoSolver::parseParticleMerger - 'nn_pair_fallback' must be >= 0");
+  }
+  if (m_nnPairMaxCellDistance == 0) {
+    MayDay::Abort("ItoSolver::parseParticleMerger - 'nn_pair_max_cell_dist' must be >= 1 (or < 0 for unbounded)");
+  }
+  if (m_nnPairMaxRounds < 1) {
+    MayDay::Abort("ItoSolver::parseParticleMerger - 'nn_pair_max_rounds' must be >= 1");
   }
 }
 
