@@ -193,15 +193,30 @@ For implementation files `@brief` must read `"Implementation of <header>.H"`:
 
 ```cpp
 /**
-  @file   CD_Foo.cpp
-  @brief  Implementation of CD_Foo.H
-  @author Robert Marskar
-*/
+ * @file   CD_Foo.cpp
+ * @brief  Implementation of CD_Foo.H
+ * @author Robert Marskar
+ */
 ```
 
 ### Doxygen comment style
 
 - Use `/**` for all Doxygen comment blocks, **never** `/*!`.
+- Every line of a multi-line block carries a leading `*`, with exactly one space before the
+  following text (Javadoc style):
+
+  ```cpp
+  /**
+   * @brief Short description.
+   * @details Longer explanation, wrapped across as many lines as needed.
+   */
+  ```
+
+  This is what lets clang-format's `ReflowComments: true` own these blocks: it recognizes the
+  leading-`*` decoration, reflows overlong `@details`/`@param` text to the column limit, and
+  keeps continuation lines correctly indented under the `*`. Without a leading `*` on every
+  line, clang-format treats the block interior as opaque text and can neither detect nor repair
+  indentation drift (e.g. from a namespace that used to nest more deeply).
 - Every function — public, protected, or private — must have at minimum a `@brief`.
 - Expand into `@brief` + `@details` where the behaviour is non-obvious.
 - Document **all** parameters with `@param[in]`, `@param[out]`, or `@param[in,out]`.
@@ -238,6 +253,54 @@ Every `.options` and `.inputs` file must begin with a three-line banner:
 ```
 
 `ClassName` must match the C++ class name exactly. Nothing may appear before this block.
+
+### Sphinx `literalinclude` line references
+
+`Docs/Sphinx/source/*.rst` files pull excerpts from C++ source via `.. literalinclude::` with
+an absolute `:lines: N-M` (optionally several comma-separated ranges), an optional `:dedent: N`,
+and an optional `:emphasize-lines:` (a position *relative* to the rendered excerpt). None of
+these survive a reformat of the referenced source unscathed: a mass reformat that shifts line
+counts or indentation silently invalidates them. Some drift is loud (`sphinx-build -W`
+warnings: bad dedent, an unparsable excerpt); some is **silent** — a still-valid-looking but
+wrong excerpt, with no warning at all.
+
+`pre-commit run --all-files` does **not** catch this — the `sphinx-build` hook is
+`stages: [manual]`. After any change that reformats `Source`/`Physics`/`Geometries`/`Exec` C++
+files, explicitly rebuild the docs and check for new warnings:
+
+```bash
+cd Docs/Sphinx
+python3 -m sphinx -W --keep-going -b html source build/html
+```
+
+(Use `python3 -m sphinx`, not the bare `sphinx-build` executable — on at least one dev machine
+that name resolves to an unrelated, incompatible Sphinx install.)
+
+To fix drifted directives, don't fuzzy-match text across the reformat — clang-format joining
+two lines with no whitespace between them, duplicate content elsewhere in the file, and no way
+to confirm a match is unique all make that unreliable. Instead, track exact positions through
+the reformat itself:
+
+1. In a **pristine pre-reformat copy** of the tree, insert unique marker comments
+   (`// LITINC_BEGIN_<id>` / `// LITINC_END_<id>`) at the exact line boundaries each
+   directive's `:lines:` (and each `:emphasize-lines:` sub-range, mapped to absolute line
+   numbers by walking the `:lines:` ranges cumulatively) currently captures. When a file needs
+   several marker pairs, insert them via one globally-sorted list of insertion actions
+   (descending by target position) — pairing insertions independently breaks on nested or
+   overlapping ranges.
+2. Run the *exact* same reformatting pipeline (same tool versions, same settings, same scripts)
+   over this marked copy.
+3. Grep for each marker's new line number, then translate marked-tree line numbers back to
+   real (unmarked) line numbers by counting marker lines that precede a given point *in the
+   same file* — not by using a marker's own line number ± 1 directly, which undercounts once
+   multiple markers stack up near each other.
+4. Recompute `:lines:`/`:dedent:`/`:emphasize-lines:` purely from marker positions and patch
+   the real `.rst` files.
+
+Verify by re-rendering the old and new excerpts (dedent applied, comment decoration stripped)
+and comparing at the **word** level, not the line level — `ReflowComments` legitimately
+rewraps a single long line into several, which a line-by-line comparison flags as a false
+mismatch.
 
 ---
 
