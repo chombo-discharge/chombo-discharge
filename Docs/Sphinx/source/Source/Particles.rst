@@ -238,9 +238,8 @@ Allocating particles
 ``AmrMesh`` has a simple function for allocating a ``ParticleContainer<P, Traits>``:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 212-222
+   :lines: 213-223
    :language: c++
-   :dedent: 2
 
 which will allocate the container on the realm ``a_realm``.
 
@@ -399,7 +398,7 @@ Downstream code must first *register* the ghost width(s) it needs; only register
 The ghost width is a **minimum**, measured in *destination* cells:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 1812-1813
+   :lines: 1825-1826
    :language: c++
    :dedent: 2
 
@@ -526,7 +525,7 @@ Conversely, if the particle is close to the EB a small step will be used.
 The algorithms that intersect the particles are part of :ref:`Chap:AmrMesh`, and the ray-casting variant is called as follows:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 1196-1205
+   :lines: 1207-1216
    :language: c++
    :dedent: 2
 
@@ -560,7 +559,7 @@ ___________________
 To deposit the particle weight on the mesh, the user can call ``AmrMesh::depositWeight``:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 968-976
+   :lines: 976-984
    :language: c++
    :dedent: 2
 
@@ -571,7 +570,7 @@ To deposit a *derived* per-particle quantity (e.g. weight times a payload column
 Surface (EB) deposition of the weight column onto an ``EBAMRIVData`` is available through an overload of ``AmrMesh::depositParticles``:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 949-954
+   :lines: 957-962
    :language: c++
    :dedent: 2
 
@@ -656,7 +655,7 @@ ______________________
 To interpolate mesh data onto a payload column, the user can call ``AmrMesh::interpolateParticles``:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 1064-1071
+   :lines: 1072-1079
    :language: c++
    :dedent: 2
 
@@ -689,9 +688,8 @@ Simple particle visualization can be performed by writing ``H5Part`` compatible 
 This is done through the function ``writeH5Part`` in the ``DischargeIO`` namespace, with the following signature:
 
 .. literalinclude:: ../../../../Source/Utilities/CD_DischargeIO.H
-   :lines: 159-164
+   :lines: 160-165
    :language: c++
-   :dedent: 2
 
 This routine permits particles to be written (in parallel, when using MPI) into a file readable by VisIt.
 The container-owned ``id``, position, and ``weight`` are always written automatically.
@@ -808,8 +806,7 @@ _____________________________________
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleManagement.H
    :language: c++
-   :lines: 263-268
-   :dedent: 2
+   :lines: 263-267
 
 The returned functor proceeds as follows:
 
@@ -833,7 +830,6 @@ ___________________________________________
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleManagement.H
    :language: c++
    :lines: 178-186
-   :dedent: 2
 
 The caller provides three lambdas:
 

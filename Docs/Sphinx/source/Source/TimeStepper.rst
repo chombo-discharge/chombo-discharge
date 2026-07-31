@@ -193,7 +193,7 @@ The function signature is
 
 .. literalinclude:: ../../../../Source/Driver/CD_TimeStepper.H
    :language: c++
-   :lines: 186-194
+   :lines: 188-196
    :dedent: 2
 	   
 In this function, ``a_output`` is a pre-allocated block of memory that ``TimeStepper`` will write its components to (beginning at ``a_icomp``).
@@ -217,7 +217,7 @@ The function signature is
 
 .. literalinclude:: ../../../../Source/Driver/CD_TimeStepper.H
    :language: c++
-   :lines: 149-157
+   :lines: 150-158
    :dedent: 2
 
 Usually, the solvers know themselves what data to put in the checkpoint files and these routines are then pretty simple.
@@ -246,7 +246,7 @@ The data is read on a level-by-level basis, with a function signature
 
 .. literalinclude:: ../../../../Source/Driver/CD_TimeStepper.H
    :language: c++
-   :lines: 161-168
+   :lines: 162-170
    :dedent: 2
 
 Solvers will normally already know what data to read into their data members.
@@ -292,7 +292,7 @@ The function signature is
 
 .. literalinclude:: ../../../../Source/Driver/CD_TimeStepper.H
    :language: c++
-   :lines: 234-241
+   :lines: 238-245
    :dedent: 2
 
 As mentioned in the documentation for this method, the function takes a trial time step ``a_dt`` which is the physical time step.
@@ -347,7 +347,7 @@ The function signature is
 
 .. literalinclude:: ../../../../Source/Driver/CD_TimeStepper.H
    :language: c++
-   :lines: 294-301
+   :lines: 299-306
    :dedent: 2
 
 Regrid routines
@@ -418,7 +418,7 @@ The function signature for this function is
 
 .. literalinclude:: ../../../../Source/Driver/CD_TimeStepper.H
    :language: c++
-   :lines: 303-309
+   :lines: 308-315
    :dedent: 2
 
 This function must return true if the input :ref:`Chap:Realm` (``a_realm``) should be load balanced.
@@ -430,7 +430,7 @@ If ``loadBalanceThisRealm`` returns true, the following function is responsible 
 
 .. literalinclude:: ../../../../Source/Driver/CD_TimeStepper.H
    :language: c++
-   :lines: 311-330
+   :lines: 317-337
    :dedent: 2
 
 This is called if ``loadBalanceThisRealm`` evaluates to true, and in this case the ``TimeStepper`` should compute a new set of rank ownership for the input grid boxes.

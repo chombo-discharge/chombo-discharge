@@ -48,7 +48,7 @@ These approximations are encapsulated by the following functions:
 .. literalinclude:: ../../../../Source/ConvectionDiffusionReaction/CD_CdrSolver.H
    :caption: List of functions responsible for calculating approximations to divergence operators.
    :language: c++
-   :lines: 160-210
+   :lines: 164-221
    :dedent: 2
 
 These functions are not implemented in ``CdrSolver``, but in subclasses.
@@ -60,7 +60,7 @@ The implicit advance methods for ``CdrSolver`` are encapsulated by the following
 .. literalinclude:: ../../../../Source/ConvectionDiffusionReaction/CD_CdrSolver.H
    :caption: List of current implicit diffusion advance functions.
    :language: c++
-   :lines: 122-135,146-158
+   :lines: 124-139,150-162
    :dedent: 2
 
 .. _Chap:CdrDetails:   
@@ -146,7 +146,7 @@ The user will need to call the function
 
 .. literalinclude:: ../../../../Source/ConvectionDiffusionReaction/CD_CdrSolver.H
    :language: c++
-   :lines: 212-220
+   :lines: 223-234
    :dedent: 2
 
 where ``a_G`` is the numerical representation of :math:`\mathbf{G}` over the cut-cell AMR hierarchy and must be stored on cell-centered faces, and ``a_ebFlux`` is the flux through the embedded boundary.
@@ -279,8 +279,7 @@ It implements the pure functions required by :ref:`Chap:CdrSolver` but introduce
 
 .. literalinclude:: ../../../../Source/ConvectionDiffusionReaction/CD_CdrMultigrid.H
    :language: c++
-   :lines: 289-296
-   :dedent: 2
+   :lines: 298-305
 
 The faces states defined by the above function are used when forming a finite-volume approximation to the divergence operators.
 In the simplest case, the face-centered values of :math:`\phi` are formed by an upwind approximation of the cell-centered states.
@@ -424,7 +423,7 @@ In order to obtain mesh data from the ``CdrSolver``, the user should use the fol
 
 .. literalinclude:: ../../../../Source/ConvectionDiffusionReaction/CD_CdrSolver.H
    :language: c++
-   :lines: 600-668
+   :lines: 619-687
    :dedent: 2
 
 To set the drift velocities, the user will fill the *cell-centered* velocities.
@@ -443,7 +442,7 @@ One can use ``DataOps`` functions to fill the data directly using a C++ lambda:
 
 .. literalinclude:: ../../../../Source/Utilities/CD_DataOps.H
    :language: c++
-   :lines: 1277-1292
+   :lines: 1298-1314
    :dedent: 2
 
 This would typically look something like this:

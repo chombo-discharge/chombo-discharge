@@ -36,7 +36,7 @@ Currently, ``RtSpecies`` is a lightweight class where the user needs to implemen
 
 .. literalinclude:: ../../../../Source/RadiativeTransfer/CD_RtSpecies.H
    :language: c++
-   :lines: 50-56
+   :lines: 51-57
    :dedent: 2
 
 This absorption coefficient is used in both the diffusion (see :ref:`Chap:DiffusionRTE`) and Monte Carlo (see :ref:`Chap:MonteCarloRTE`) solvers.
@@ -53,7 +53,7 @@ This variable can be set through the following functions:
 
 .. literalinclude:: ../../../../Source/RadiativeTransfer/CD_RtSolver.H
    :language: c++
-   :lines: 260-279
+   :lines: 264-283
    :dedent: 2
 
 The usage of :math:`\eta` varies between the different solvers.
@@ -105,7 +105,6 @@ To advance the solution, one will call the member function
 .. literalinclude:: ../../../../Source/RadiativeTransfer/CD_EddingtonSP1.H
    :language: c++
    :lines: 81-91
-   :dedent: 2
 
 Internally, this version will perform one of the following:
 
@@ -165,14 +164,13 @@ To specify that function, ``EddingtonSP1`` has a member function
 
 .. literalinclude:: ../../../../Source/RadiativeTransfer/CD_EddingtonSP1.H
    :language: c++
-   :lines: 117-127
-   :dedent: 2
+   :lines: 117-128
 
 Here, the ``a_function`` argument is simply an alias:
 
 .. literalinclude:: ../../../../Source/RadiativeTransfer/CD_EddingtonSP1DomainBc.H
    :language: c++
-   :lines: 44-47
+   :lines: 45-48
    :dedent: 2
 
 Note that the boundary condition *type* is still Dirichlet, Neumann, or Larsen (depending on whether or not ``dirichlet_custom``, ``neumann_custom``, or ``larsen_custom`` was passed in). 
@@ -248,7 +246,7 @@ Various functions are in place for obtaining these particles:
 
 .. literalinclude:: ../../../../Source/RadiativeTransfer/CD_McPhoto.H
    :language: c++
-   :lines: 396-429
+   :lines: 402-435
    :dedent: 2
 
 Photon particle
@@ -276,7 +274,7 @@ There are several ways users can generate computational photons that are to be t
 
    .. literalinclude:: ../../../../Source/RadiativeTransfer/CD_McPhoto.H
       :language: c++
-      :lines: 424-429
+      :lines: 430-435
       :dedent: 2
 
    The source photons can then be filled and added to the other photons.
@@ -285,7 +283,7 @@ There are several ways users can generate computational photons that are to be t
 
    .. literalinclude:: ../../../../Source/RadiativeTransfer/CD_McPhoto.H
       :language: c++
-      :lines: 396-401
+      :lines: 402-407
       :dedent: 2
 
    Photons can then be added directly.

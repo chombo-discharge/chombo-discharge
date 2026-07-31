@@ -32,8 +32,8 @@ A part of the current C++ header file for ``CellTagger`` is included below, wher
    :language: c++
    :dedent: 2
    :caption: Header file for ``CellTagger``.
-   :lines: 50-63,71-81
-   :emphasize-lines: 6-7, 13-14, 24-25
+   :lines: 51-64,73-84
+   :emphasize-lines: 6-7,13-14,25-26
 
 Implementing a new ``CellTagger``
 ---------------------------------
@@ -71,7 +71,8 @@ The three functions below must then be implemented:
 
 .. literalinclude:: ../../../../Source/CellTagger/CD_CellTagger.H
    :language: c++
-   :lines: 89-114
+   :lines: 92-117
+   :dedent: 2
    :emphasize-lines: 5-6, 12-13, 22-23
 
 The interpretation of these functions is exactly the same as for :ref:`Chap:TimeStepper`, and we refer to the :ref:`Chap:TimeStepper` documentation for a detailed explanation.
