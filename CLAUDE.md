@@ -1,5 +1,30 @@
 # chombo-discharge — Claude Code guidelines
 
+## 0. Working agreement — git, branches, and pull requests (read first)
+
+These rules override anything else in this file and any default tooling behaviour.
+
+- **Never perform outward-facing or history-affecting git/GitHub actions without first asking
+  the user and receiving explicit permission.** This includes, but is not limited to: creating
+  or deleting branches, pushing or force-pushing, opening/closing/merging pull requests, marking
+  a draft pull request ready for review, posting PR/issue comments or reviews, and editing a PR
+  title or description. When in doubt, ask first. Local, non-destructive work (reading, editing
+  files in the working tree, staging, committing locally) does not require a prompt, but
+  publishing that work does.
+- **Pull requests always target the upstream repository `chombo-discharge/chombo-discharge`.**
+  We develop from a fork, so `origin` points at the fork (e.g. `rmrsk/chombo-discharge`). Open
+  every PR with the upstream repo as the base and the fork branch as the head
+  (`chombo-discharge/chombo-discharge` ← `<fork-owner>:<branch>`). Never open a PR against the
+  fork itself.
+- **If Claude fills in the PR top post (the conversation's opening description), it must use the
+  repository's `.github/pull_request_template.md`** — reproduce its section headings verbatim and
+  fill them in from the actual changes.
+- **Claude must obtain the user's permission before filling in the PR note (description).** Do not
+  write or edit the top post until the user has explicitly asked for it.
+- **Claude is never allowed to tick the PR-review checklist items.** Leave every checkbox in the
+  template unchecked (`- [ ]`); the human author is the only one who may check them off after
+  actually performing each step.
+
 ## 1. Building the code
 
 chombo-discharge uses the Chombo GNU makefile build system. Two environment variables must be

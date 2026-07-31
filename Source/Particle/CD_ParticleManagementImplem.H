@@ -65,6 +65,8 @@ mergeMethodFromString(const std::string& a_str) noexcept
   }
 }
 
+namespace detail {
+
 template <class P, Real& (P::*weight)(), const RealVect& (P::*position)() const>
 inline void
 buildEqualWeightKDLeaves(const std::vector<P>&                       a_particles,
@@ -417,6 +419,8 @@ mergeAdjacentNearest(std::vector<P>&                          a_particles,
   a_particles.swap(survivors);
 }
 
+} // namespace detail
+
 template <class Packed,
           Real& (Packed::*packWeight)(),
           const RealVect& (Packed::*packPosition)() const,
@@ -507,7 +511,7 @@ makeSfcNearestNeighborMerger(std::function<Packed(const ParticleSoA<P, Traits>&,
       }
       particles.swap(sorted);
 
-      mergeAdjacentNearest<Packed, packPosition>(particles, target, a_combine);
+      detail::mergeAdjacentNearest<Packed, packPosition>(particles, target, a_combine);
     }
     else if (particles.size() < target) {
       while (particles.size() < target) {
@@ -583,7 +587,7 @@ makeEqualWeightKDMerger(
     CH_START(t2);
     thread_local std::vector<std::pair<const Packed*, const Packed*>> leaves;
 
-    buildEqualWeightKDLeaves<Packed, packWeight, packPosition>(particles, a_ppc, a_reconcile, leaves);
+    detail::buildEqualWeightKDLeaves<Packed, packWeight, packPosition>(particles, a_ppc, a_reconcile, leaves);
     CH_STOP(t2);
 
     CH_START(t3);
@@ -764,6 +768,8 @@ partitionParticleWeights(const T a_numPhysicalParticles, const T a_maxCompPartic
   return ret;
 }
 
+namespace detail {
+
 template <typename T, typename>
 inline T
 partitionParticles(const T a_numParticles)
@@ -784,6 +790,8 @@ partitionParticles(const T a_numParticles)
 #endif
 }
 
+} // namespace detail
+
 template <typename P, typename Traits, typename T, typename>
 inline void
 drawRandomParticles(ParticleSoA<P, Traits>&          a_particles,
@@ -794,7 +802,7 @@ drawRandomParticles(ParticleSoA<P, Traits>&          a_particles,
 
   // Each rank draws its own share (unit weight) into the buffer. Routing to owners happens later when
   // the buffer is added to a ParticleContainer.
-  const T numParticles = partitionParticles(a_numParticles);
+  const T numParticles = detail::partitionParticles(a_numParticles);
 
   for (T t = 0; t < numParticles; t++) {
     a_particles.append(a_distribution(), 1.0);

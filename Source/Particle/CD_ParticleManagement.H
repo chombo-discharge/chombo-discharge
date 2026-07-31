@@ -84,6 +84,14 @@ template <class P>
 using BinaryParticleReconcile = std::function<void(P& p1, P& p2, const P& p0)>;
 
 /**
+ * @brief Internal-only implementation details of the ParticleManagement API.
+ * @details These helpers have no external callers; they are the algorithms sitting behind the public
+ * factory/wrapper functions (@c make*Merger, @c partitionParticleWeights) and are not part of the
+ * public interface. Public callers qualify them with @c detail::.
+ */
+namespace detail {
+
+/**
  * @brief Build an equal-weight KD partition of a list of particles and return the leaf particle ranges.
  * @details Partitions the input particles into at most @c a_maxLeaves spatial groups ("leaves") whose total
  * weights are as equal as possible (they differ by at most one physical particle between sibling nodes). At
@@ -139,6 +147,8 @@ inline void
 mergeAdjacentNearest(std::vector<P>&                          a_particles,
                      const std::size_t                        a_target,
                      const std::function<void(P&, const P&)>& a_combine) noexcept;
+
+} // namespace detail
 
 /**
  * @brief Create a space-filling-curve nearest-neighbor super-particle merger as a reusable ParticleMerger.
@@ -300,6 +310,8 @@ template <typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
 static inline std::vector<T>
 partitionParticleWeights(const T a_numPhysicalParticles, const T a_maxCompParticles) noexcept;
 
+namespace detail {
+
 /**
  * @brief Partition particles so that all MPI rank draw a cumulative number of particles equal to a_numParticles
  * @param[in] a_numParticles Total number of particles to be drawn.
@@ -308,6 +320,8 @@ partitionParticleWeights(const T a_numPhysicalParticles, const T a_maxCompPartic
 template <typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
 static inline T
 partitionParticles(const T a_numParticles);
+
+} // namespace detail
 
 /**
  * @brief Draw random SoA particles into a free buffer, distributed according to a predefined distribution.
