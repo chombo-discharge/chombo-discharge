@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_ParallelOpsImplem.H
-  @brief  Implementation of CD_ParallelOps.H
-  @author Robert Marskar
-*/
+ * @file   CD_ParallelOpsImplem.H
+ * @brief  Implementation of CD_ParallelOps.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_PARALLELOPSIMPLEM_H
 #define CD_PARALLELOPSIMPLEM_H

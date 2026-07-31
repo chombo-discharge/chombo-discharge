@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_PhaseRealm.cpp
-  @brief  Implementation of CD_PhaseRealm.H
-  @author Robert Marskar
-*/
+ * @file   CD_PhaseRealm.cpp
+ * @brief  Implementation of CD_PhaseRealm.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <EBArith.H>

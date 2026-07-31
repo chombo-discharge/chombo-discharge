@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_CellInfo.cpp
-  @brief  Implementation of CD_CellInfo.H
-  @author Robert Marskar
-*/
+ * @file   CD_CellInfo.cpp
+ * @brief  Implementation of CD_CellInfo.H
+ * @author Robert Marskar
+ */
 
 // Our includes
 #include <CD_DataOps.H>

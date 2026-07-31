@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_MemoryReport.cpp
-  @brief  Implementation of CD_MemoryReport.H
-  @author Robert Marskar
-*/
+ * @file   CD_MemoryReport.cpp
+ * @brief  Implementation of CD_MemoryReport.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <memtrack.H>
@@ -97,8 +97,8 @@ MemoryReport::getMemoryUsage(Vector<Real>& a_peak, Vector<Real>& a_unfreed)
   const int peakMem    = int(peakMemLL);
 
 #ifdef CH_MPI
-  int* unfreed = (int*)malloc(numProc() * sizeof(int)); //new int[numProc()];
-  int* peak    = (int*)malloc(numProc() * sizeof(int)); //new int[numProc()];
+  int* unfreed = (int*)malloc(numProc() * sizeof(int)); // new int[numProc()];
+  int* peak    = (int*)malloc(numProc() * sizeof(int)); // new int[numProc()];
 
   MPI_Allgather(&peakMem, 1, MPI_INT, peak, 1, MPI_INT, Chombo_MPI::comm);
   MPI_Allgather(&unfreedMem, 1, MPI_INT, unfreed, 1, MPI_INT, Chombo_MPI::comm);

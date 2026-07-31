@@ -21,58 +21,58 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Boundary condition class for passing Dirichlet domain boundary conditions into EBHelmholtzOp
-*/
+ * @brief Boundary condition class for passing Dirichlet domain boundary conditions into EBHelmholtzOp
+ */
 class EBHelmholtzDirichletDomainBC : public EBHelmholtzDomainBC
 {
 public:
   /**
-    @brief Constructor. Must subsequently call setValue. 
-  */
+   * @brief Constructor. Must subsequently call setValue.
+   */
   EBHelmholtzDirichletDomainBC();
 
   /**
-    @brief Constructor. 
-    @param[in] a_value Constant value on all domain sides. 
-  */
+   * @brief Constructor.
+   * @param[in] a_value Constant value on all domain sides.
+   */
   EBHelmholtzDirichletDomainBC(const Real a_value);
 
   /**
-    @brief Full constructor. 
-    @param[in] a_value Spatially dependent value on all domain sides. 
-  */
+   * @brief Full constructor.
+   * @param[in] a_value Spatially dependent value on all domain sides.
+   */
   EBHelmholtzDirichletDomainBC(const std::function<Real(const RealVect& a_pos)>& a_value);
 
   /**
-    @brief Destructor
-  */
+   * @brief Destructor
+   */
   virtual ~EBHelmholtzDirichletDomainBC();
 
   /**
-    @brief Set the constant value on the domain side. 
-    @param[in] a_value Constant value on all domain sides. 
-  */
+   * @brief Set the constant value on the domain side.
+   * @param[in] a_value Constant value on all domain sides.
+   */
   void
   setValue(const Real a_value);
 
   /**
-    @brief Set the spatially dependent value on the domain side. 
-    @param[in] a_value Spatially dependent value on all domain sides. 
-  */
+   * @brief Set the spatially dependent value on the domain side.
+   * @param[in] a_value Spatially dependent value on all domain sides.
+   */
   void
   setValue(const std::function<Real(const RealVect& a_pos)>& a_value);
 
   /**
-    @brief Get face flux. This is for regular cells, and it uses first order finite differences for filling the flux. 
-    @param[in,out] a_faceFlux       Face-centered flux. 
-    @param[in]    a_phi            Cell-centered data
-    @param[in]    a_Bcoef          Face-centered B-coefficient
-    @param[in]    a_dir            Coordinate direction
-    @param[in]    a_side           High or low side
-    @param[in]    a_dit            Data index
-    @param[in]    a_useHomogeneous Homogeneous physical BCs or not. 
-    @note a_faceFlux is defined in the first strip of interior cells on the (dir,side) edge of the domain. 
-  */
+   * @brief Get face flux. This is for regular cells, and it uses first order finite differences for filling the flux.
+   * @param[in,out] a_faceFlux       Face-centered flux.
+   * @param[in]    a_phi            Cell-centered data
+   * @param[in]    a_Bcoef          Face-centered B-coefficient
+   * @param[in]    a_dir            Coordinate direction
+   * @param[in]    a_side           High or low side
+   * @param[in]    a_dit            Data index
+   * @param[in]    a_useHomogeneous Homogeneous physical BCs or not.
+   * @note a_faceFlux is defined in the first strip of interior cells on the (dir,side) edge of the domain.
+   */
   virtual void
   getFaceFlux(BaseFab<Real>&        a_faceFlux,
               const BaseFab<Real>&  a_phi,
@@ -83,16 +83,16 @@ public:
               const bool            a_useHomogeneous) const override;
 
   /**
-    @brief Get face flux. This is for irregular cells. 
-    @param[in] a_vof            Grid cell
-    @param[in] a_phi            Cell-centered data
-    @param[in]    a_Bcoef          Face-centered B-coefficient
-    @param[in] a_dir            Coordinate direction
-    @param[in] a_side           High or low side
-    @param[in] a_dit            Data index
-    @param[in] a_useHomogeneous Homogeneous physical BCs or not. 
-    @return Face flux
-  */
+   * @brief Get face flux. This is for irregular cells.
+   * @param[in] a_vof            Grid cell
+   * @param[in] a_phi            Cell-centered data
+   * @param[in]    a_Bcoef          Face-centered B-coefficient
+   * @param[in] a_dir            Coordinate direction
+   * @param[in] a_side           High or low side
+   * @param[in] a_dit            Data index
+   * @param[in] a_useHomogeneous Homogeneous physical BCs or not.
+   * @return Face flux
+   */
   virtual Real
   getFaceFlux(const VolIndex&       a_vof,
               const EBCellFAB&      a_phi,
@@ -103,33 +103,33 @@ public:
               const bool            a_useHomogeneous) const override;
 
   /**
-    @brief Returns 2.0: the Dirichlet ghost-cell formula uses half-cell spacing, doubling the stencil coefficient.
-    @param[in] a_dir  Coordinate direction.
-    @param[in] a_side High or low side.
-    @return 2.0
-  */
+   * @brief Returns 2.0: the Dirichlet ghost-cell formula uses half-cell spacing, doubling the stencil coefficient.
+   * @param[in] a_dir  Coordinate direction.
+   * @param[in] a_side High or low side.
+   * @return 2.0
+   */
   Real
   getDiagWeight(const int a_dir, const Side::LoHiSide a_side) const override;
 
 protected:
   /**
-    @brief Use constant for BC
-  */
+   * @brief Use constant for BC
+   */
   bool m_useConstant;
 
   /**
-    @brief Use function for BC value
-  */
+   * @brief Use function for BC value
+   */
   bool m_useFunction;
 
   /**
-    @brief Constant value on domain sides. 
-  */
+   * @brief Constant value on domain sides.
+   */
   Real m_constantValue;
 
   /**
-    @brief Spatially dependent value on domain sides
-  */
+   * @brief Spatially dependent value on domain sides
+   */
   std::function<Real(const RealVect& a_pos)> m_functionValue;
 };
 

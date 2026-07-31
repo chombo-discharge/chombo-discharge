@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_EBIntersection.H
-  @brief  Enum for putting some logic into EB intersection tests. 
-  @author Robert Marskar
-*/
+ * @file   CD_EBIntersection.H
+ * @brief  Enum for putting some logic into EB intersection tests.
+ * @author Robert Marskar
+ */
 
 #ifndef CD_EBINTERSECTION_H
 #define CD_EBINTERSECTION_H
@@ -16,8 +16,8 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Enum for putting some logic into how we think about intersection between particles and EBs. 
-*/
+ * @brief Enum for putting some logic into how we think about intersection between particles and EBs.
+ */
 enum class EBIntersection
 {
   Bisection,

@@ -5,10 +5,10 @@
  */
 
 /**
-  @file  CD_WedgeIF.cpp
-  @brief Implementation of CD_WedgeIF.H
-  @author Robert Marskar
-*/
+ * @file  CD_WedgeIF.cpp
+ * @brief Implementation of CD_WedgeIF.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <IntersectionIF.H>

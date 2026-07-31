@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_EBMultigridInterpolator.cpp
-  @brief  Implementation of CD_EBMultigridInterpolator.H
-  @author Robert Marskar
-*/
+ * @file   CD_EBMultigridInterpolator.cpp
+ * @brief  Implementation of CD_EBMultigridInterpolator.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <CH_Timer.H>

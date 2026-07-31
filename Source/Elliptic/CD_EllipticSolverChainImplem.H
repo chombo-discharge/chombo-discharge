@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_EllipticSolverChainImplem.H
-  @brief  Implementation of CD_EllipticSolverChain.H
-  @author Robert Marskar
-*/
+ * @file   CD_EllipticSolverChainImplem.H
+ * @brief  Implementation of CD_EllipticSolverChain.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_ELLIPTICSOLVERCHAINIMPLEM_H
 #define CD_ELLIPTICSOLVERCHAINIMPLEM_H

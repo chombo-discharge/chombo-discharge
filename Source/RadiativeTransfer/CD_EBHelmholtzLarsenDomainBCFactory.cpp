@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_EBHelmholtzLarsenDomainBCFactory.cpp
-  @brief  Implementation of CD_EBHelmholtzLarsenDomainBCFactory.H
-  @author Robert Marskar
-*/
+ * @file   CD_EBHelmholtzLarsenDomainBCFactory.cpp
+ * @brief  Implementation of CD_EBHelmholtzLarsenDomainBCFactory.H
+ * @author Robert Marskar
+ */
 
 // Our includes
 #include <CD_EBHelmholtzLarsenDomainBCFactory.H>

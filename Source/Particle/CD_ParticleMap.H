@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_ParticleMap.H
-  @brief  Implementation of CD_ParticleOps.H
-  @author Robert Marskar
-*/
+ * @file   CD_ParticleMap.H
+ * @brief  Implementation of CD_ParticleOps.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_PARTICLEMAP_H
 #define CD_PARTICLEMAP_H
@@ -28,11 +28,11 @@ static_assert(sizeof(uint64_t) == 8, "uint64_t must be 64 bits");
 static_assert(sizeof(size_t) == 8, "size_t must be 64 bits");
 
 /**
-  @brief Function for encoding a pair of integers onto a 64-bit integer.
-  @param[in] a_level Level index
-  @param[in] a_gridIndex Grid index
-  @details Used for hash maps.
-*/
+ * @brief Function for encoding a pair of integers onto a 64-bit integer.
+ * @param[in] a_level Level index
+ * @param[in] a_gridIndex Grid index
+ * @details Used for hash maps.
+ */
 static inline uint64_t
 encodePair(uint32_t a_level, uint32_t a_gridIndex) noexcept
 {
@@ -40,10 +40,10 @@ encodePair(uint32_t a_level, uint32_t a_gridIndex) noexcept
 }
 
 /**
-  @brief Function for decoding a 64-bit integer into two integers.
-  @details Used for reversing hash maps.
-  @param[in] key Hash key as 64-bit integer. 
-*/
+ * @brief Function for decoding a 64-bit integer into two integers.
+ * @details Used for reversing hash maps.
+ * @param[in] key Hash key as 64-bit integer.
+ */
 static inline std::pair<uint32_t, uint32_t>
 decodePair(uint64_t key) noexcept
 {
@@ -51,15 +51,15 @@ decodePair(uint64_t key) noexcept
 }
 
 /**
-  @brief Simple pair-hashing struct for interfacing into unordered_map
-*/
+ * @brief Simple pair-hashing struct for interfacing into unordered_map
+ */
 struct PairHash
 {
   /**
-    @brief Hash operator.
-    @param[in] p Pair to hash.
-    @return Hash value.
-  */
+   * @brief Hash operator.
+   * @param[in] p Pair to hash.
+   * @return Hash value.
+   */
   std::size_t
   operator()(const std::pair<uint32_t, uint32_t>& p) const noexcept
   {
@@ -68,9 +68,9 @@ struct PairHash
 };
 
 /**
-  @brief Underlying particle map when gathering/scattering particles.
-  @details This is a map that maps a list of particles to a specific grid level and grid patch.
-*/
+ * @brief Underlying particle map when gathering/scattering particles.
+ * @details This is a map that maps a list of particles to a specific grid level and grid patch.
+ */
 template <typename T>
 using ParticleMap = std::unordered_map<std::pair<uint32_t, uint32_t>, T, PairHash>;
 

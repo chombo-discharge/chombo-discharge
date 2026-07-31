@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_ItoKMCFieldTaggerImplem.H
-  @brief  Implementation of CD_ItoKMCFieldTagger.H
-  @author Robert Marskar
-*/
+ * @file   CD_ItoKMCFieldTaggerImplem.H
+ * @brief  Implementation of CD_ItoKMCFieldTagger.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_ITOKMCFIELDTAGGERIMPLEM_H
 #define CD_ITOKMCFIELDTAGGERIMPLEM_H

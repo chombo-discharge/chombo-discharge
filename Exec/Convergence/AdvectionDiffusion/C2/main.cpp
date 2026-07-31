@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   main.cpp
-  @brief  Convergence test for advection-diffusion on a uniform grid.
-  @author Robert Marskar
-*/
+ * @file   main.cpp
+ * @brief  Convergence test for advection-diffusion on a uniform grid.
+ * @author Robert Marskar
+ */
 
 #include <CD_Driver.H>
 #include <CD_CdrCTU.H>

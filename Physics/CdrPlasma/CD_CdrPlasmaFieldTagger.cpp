@@ -5,10 +5,10 @@
  */
 
 /**
-   @file   CD_CdrPlasmaFieldTagger.cpp
-   @brief  Implementation of CD_CdrPlasmaFieldTagger.H
-   @author Robert Marskar
-*/
+ * @file   CD_CdrPlasmaFieldTagger.cpp
+ * @brief  Implementation of CD_CdrPlasmaFieldTagger.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <EBArith.H>

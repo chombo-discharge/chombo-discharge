@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_DischargeIOImplem.H
-  @brief  Implementation of CD_DischargeIO.H
-  @author Robert Marskar
-*/
+ * @file   CD_DischargeIOImplem.H
+ * @brief  Implementation of CD_DischargeIO.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_DISCHARGEIOIMPLEM_H
 #define CD_DISCHARGEIOIMPLEM_H
@@ -29,44 +29,44 @@
 namespace DischargeIO {
 
 /**
-    @brief Self-contained void-alias (maps any type pack to void) for the h5PartColumns SFINAE detector.
-    @tparam ... Ignored type pack.
-  */
+ * @brief Self-contained void-alias (maps any type pack to void) for the h5PartColumns SFINAE detector.
+ * @tparam ... Ignored type pack.
+ */
 template <typename...>
 using VoidT = void;
 
 /**
-    @brief Detector (false case) for an optional Traits::h5PartColumns descriptor tuple.
-    @tparam Traits Column descriptor for the payload.
-  */
+ * @brief Detector (false case) for an optional Traits::h5PartColumns descriptor tuple.
+ * @tparam Traits Column descriptor for the payload.
+ */
 template <typename Traits, typename = void>
 struct HasH5PartColumns : std::false_type
 {
 };
 
 /**
-    @brief Detector (true case) for an optional Traits::h5PartColumns descriptor tuple.
-    @tparam Traits Column descriptor declaring h5PartColumns.
-  */
+ * @brief Detector (true case) for an optional Traits::h5PartColumns descriptor tuple.
+ * @tparam Traits Column descriptor declaring h5PartColumns.
+ */
 template <typename Traits>
 struct HasH5PartColumns<Traits, VoidT<decltype(Traits::h5PartColumns)>> : std::true_type
 {
 };
 
 /**
-    @brief Write one named scalar dataset (one value per particle) into an open H5Part step group.
-    @details Gathers the value for every valid particle across all AMR levels (in the same per-level,
-    per-box, per-particle order as the id/position datasets) and writes it as an H5T_NATIVE_DOUBLE dataset.
-    @param[in] a_grp        Open H5Part step group.
-    @param[in] a_fileSpace  File dataspace (global particle count, hyperslab pre-selected).
-    @param[in] a_memSpace   Memory dataspace (local particle count, hyperslab pre-selected).
-    @param[in] a_particles  SoA particle container.
-    @param[in] a_name       Dataset name.
-    @param[in] a_gather     Callable (const ParticleSoA<P,Traits>&, std::size_t) -> double.
-    @tparam P      Payload type of the container.
-    @tparam Traits Column descriptor for the payload.
-    @tparam Gather Gather-callable type.
-  */
+ * @brief Write one named scalar dataset (one value per particle) into an open H5Part step group.
+ * @details Gathers the value for every valid particle across all AMR levels (in the same per-level,
+ * per-box, per-particle order as the id/position datasets) and writes it as an H5T_NATIVE_DOUBLE dataset.
+ * @param[in] a_grp        Open H5Part step group.
+ * @param[in] a_fileSpace  File dataspace (global particle count, hyperslab pre-selected).
+ * @param[in] a_memSpace   Memory dataspace (local particle count, hyperslab pre-selected).
+ * @param[in] a_particles  SoA particle container.
+ * @param[in] a_name       Dataset name.
+ * @param[in] a_gather     Callable (const ParticleSoA<P,Traits>&, std::size_t) -> double.
+ * @tparam P      Payload type of the container.
+ * @tparam Traits Column descriptor for the payload.
+ * @tparam Gather Gather-callable type.
+ */
 template <typename P, typename Traits, typename Gather>
 inline void
 writeH5PartScalarDataset(hid_t                               a_grp,
@@ -101,17 +101,17 @@ writeH5PartScalarDataset(hid_t                               a_grp,
 }
 
 /**
-    @brief Write the SpaceDim component datasets (name-x/name-y/name-z) of one H5Part::Vector descriptor.
-    @param[in] a_grp        Open H5Part step group.
-    @param[in] a_fileSpace  File dataspace.
-    @param[in] a_memSpace   Memory dataspace.
-    @param[in] a_particles  SoA particle container.
-    @param[in] a_dirs       Index sequence [0, SpaceDim) of the spatial components.
-    @tparam I      Index of the descriptor within Traits::h5PartColumns.
-    @tparam P      Payload type of the container.
-    @tparam Traits Column descriptor for the payload.
-    @tparam Dirs   Spatial component indices [0, SpaceDim).
-  */
+ * @brief Write the SpaceDim component datasets (name-x/name-y/name-z) of one H5Part::Vector descriptor.
+ * @param[in] a_grp        Open H5Part step group.
+ * @param[in] a_fileSpace  File dataspace.
+ * @param[in] a_memSpace   Memory dataspace.
+ * @param[in] a_particles  SoA particle container.
+ * @param[in] a_dirs       Index sequence [0, SpaceDim) of the spatial components.
+ * @tparam I      Index of the descriptor within Traits::h5PartColumns.
+ * @tparam P      Payload type of the container.
+ * @tparam Traits Column descriptor for the payload.
+ * @tparam Dirs   Spatial component indices [0, SpaceDim).
+ */
 template <std::size_t I, typename P, typename Traits, std::size_t... Dirs>
 inline void
 writeH5PartVectorColumn(hid_t                                         a_grp,
@@ -136,16 +136,16 @@ writeH5PartVectorColumn(hid_t                                         a_grp,
 }
 
 /**
-    @brief Write one payload descriptor of Traits::h5PartColumns (scalar -> one dataset, vector ->
-           SpaceDim datasets).
-    @param[in] a_grp        Open H5Part step group.
-    @param[in] a_fileSpace  File dataspace.
-    @param[in] a_memSpace   Memory dataspace.
-    @param[in] a_particles  SoA particle container.
-    @tparam I      Index of the descriptor within Traits::h5PartColumns.
-    @tparam P      Payload type of the container.
-    @tparam Traits Column descriptor for the payload.
-  */
+ * @brief Write one payload descriptor of Traits::h5PartColumns (scalar -> one dataset, vector ->
+ *        SpaceDim datasets).
+ * @param[in] a_grp        Open H5Part step group.
+ * @param[in] a_fileSpace  File dataspace.
+ * @param[in] a_memSpace   Memory dataspace.
+ * @param[in] a_particles  SoA particle container.
+ * @tparam I      Index of the descriptor within Traits::h5PartColumns.
+ * @tparam P      Payload type of the container.
+ * @tparam Traits Column descriptor for the payload.
+ */
 template <std::size_t I, typename P, typename Traits>
 inline void
 writeH5PartColumn(hid_t                               a_grp,
@@ -172,16 +172,16 @@ writeH5PartColumn(hid_t                               a_grp,
 }
 
 /**
-    @brief Write every payload descriptor in Traits::h5PartColumns.
-    @param[in] a_grp        Open H5Part step group.
-    @param[in] a_fileSpace  File dataspace.
-    @param[in] a_memSpace   Memory dataspace.
-    @param[in] a_particles  SoA particle container.
-    @param[in] a_indices    Index sequence [0, size(h5PartColumns)).
-    @tparam P      Payload type of the container.
-    @tparam Traits Column descriptor for the payload.
-    @tparam I      Descriptor indices [0, size(h5PartColumns)).
-  */
+ * @brief Write every payload descriptor in Traits::h5PartColumns.
+ * @param[in] a_grp        Open H5Part step group.
+ * @param[in] a_fileSpace  File dataspace.
+ * @param[in] a_memSpace   Memory dataspace.
+ * @param[in] a_particles  SoA particle container.
+ * @param[in] a_indices    Index sequence [0, size(h5PartColumns)).
+ * @tparam P      Payload type of the container.
+ * @tparam Traits Column descriptor for the payload.
+ * @tparam I      Descriptor indices [0, size(h5PartColumns)).
+ */
 template <typename P, typename Traits, std::size_t... I>
 inline void
 writeH5PartColumns(hid_t                                      a_grp,

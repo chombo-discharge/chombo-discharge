@@ -200,7 +200,8 @@ EBHelmholtzDirichletEBBC::define()
         weights(vof, m_comp)  = pairSten.first;
         stencils(vof, m_comp) = pairSten.second;
 
-        // Stencil and weight must also be scaled by the B-coefficient, dx (because it's used in kappa*Div(F)) and the area fraction.
+        // Stencil and weight must also be scaled by the B-coefficient, dx (because it's used in kappa*Div(F)) and the
+        // area fraction.
         weights(vof, m_comp) *= areaFrac / m_dx;
         stencils(vof, m_comp) *= areaFrac / m_dx;
       }

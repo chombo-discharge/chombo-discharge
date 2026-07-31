@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_MFInterfaceFAB.H
-  @brief  Declaration of a class that allocates irregular data holders over the interface between two phases
-  @author Robert Marskar
-*/
+ * @file   CD_MFInterfaceFAB.H
+ * @brief  Declaration of a class that allocates irregular data holders over the interface between two phases
+ * @author Robert Marskar
+ */
 
 #ifndef CD_MFINTERFACEFAB_H
 #define CD_MFINTERFACEFAB_H
@@ -24,91 +24,91 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Class for holding BaseIVFAB<T> on the interface between two phases.
-*/
+ * @brief Class for holding BaseIVFAB<T> on the interface between two phases.
+ */
 template <class T>
 class MFInterfaceFAB
 {
 public:
   /**
-    @brief Constructor. Must subsequently call define
-  */
+   * @brief Constructor. Must subsequently call define
+   */
   MFInterfaceFAB();
 
   /**
-    @brief Full constructor.
-    @param[in] a_mflg Level grids
-    @param[in] a_dit  Data index for this FBA
-  */
+   * @brief Full constructor.
+   * @param[in] a_mflg Level grids
+   * @param[in] a_dit  Data index for this FBA
+   */
   MFInterfaceFAB(const MFLevelGrid& a_mflg, const DataIndex& a_dit);
 
   /**
-    @brief Destructor
-  */
+   * @brief Destructor
+   */
   virtual ~MFInterfaceFAB();
 
   /**
-    @brief Define function
-    @param[in] a_mflg Level grids
-    @param[in] a_dit  Data index for this FBA
-  */
+   * @brief Define function
+   * @param[in] a_mflg Level grids
+   * @param[in] a_dit  Data index for this FBA
+   */
   virtual void
   define(const MFLevelGrid& a_mflg, const DataIndex& a_dit);
 
   /**
-    @brief Get defining region
-    @return Returns the cells that are irregular on both phases
-  */
+   * @brief Get defining region
+   * @return Returns the cells that are irregular on both phases
+   */
   virtual const IntVectSet&
   getIVS() const;
 
   /**
-    @brief Get BaseIVFAB for specified phase
-    @param[in] a_phase Phase
-    @return Reference to the BaseIVFAB for the given phase.
-  */
+   * @brief Get BaseIVFAB for specified phase
+   * @param[in] a_phase Phase
+   * @return Reference to the BaseIVFAB for the given phase.
+   */
   virtual BaseIVFAB<T>&
   getIVFAB(const int a_phase);
 
   /**
-    @brief Get BaseIVFAB for specified phase
-    @param[in] a_phase Phase
-    @return Const reference to the BaseIVFAB for the given phase.
-  */
+   * @brief Get BaseIVFAB for specified phase
+   * @param[in] a_phase Phase
+   * @return Const reference to the BaseIVFAB for the given phase.
+   */
   virtual const BaseIVFAB<T>&
   getIVFAB(const int a_phase) const;
 
   /**
-    @brief Get BaseIVFAB pointer for specified phase
-    @param[in] a_phase Phase
-    @return Pointer to the BaseIVFAB for the given phase.
-  */
+   * @brief Get BaseIVFAB pointer for specified phase
+   * @param[in] a_phase Phase
+   * @return Pointer to the BaseIVFAB for the given phase.
+   */
   virtual BaseIVFAB<T>*
   getPhasePtr(int a_phase);
 
   /**
-    @brief Get number of phases
-    @return Number of phases.
-  */
+   * @brief Get number of phases
+   * @return Number of phases.
+   */
   virtual int
   numPhases() const;
 
   /**
-    @brief Set value on both fabs.
-    @param[in] a_value Value to set.
-  */
+   * @brief Set value on both fabs.
+   * @param[in] a_value Value to set.
+   */
   virtual void
   setVal(const T& a_value);
 
 protected:
   /**
-    @brief Pointers to storage on both phases
-  */
+   * @brief Pointers to storage on both phases
+   */
   Vector<BaseIVFAB<T>*> m_phase;
 
   /**
-    @brief Defining region
-  */
+   * @brief Defining region
+   */
   IntVectSet m_ivs;
 };
 

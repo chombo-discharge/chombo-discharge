@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_CellCentroidInterpolationImplem.H
-  @brief  Implementation of CD_CellCentroidInterpolation.H
-  @author Robert Marskar
-*/
+ * @file   CD_CellCentroidInterpolationImplem.H
+ * @brief  Implementation of CD_CellCentroidInterpolation.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_CELLCENTROIDINTERPOLATIONIMPLEM_H
 #define CD_CELLCENTROIDINTERPOLATIONIMPLEM_H

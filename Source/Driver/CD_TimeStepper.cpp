@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_TimeStepper.cpp
-  @brief  Implementation of CD_TimeStepper.H
-  @author Robert Marskar
-*/
+ * @file   CD_TimeStepper.cpp
+ * @brief  Implementation of CD_TimeStepper.H
+ * @author Robert Marskar
+ */
 
 // Our includes
 #include <CD_TimeStepper.H>

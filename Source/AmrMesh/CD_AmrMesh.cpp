@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_AmrMesh.cpp
-  @brief  Implementation of CD_AmrMesh.H
-  @author Robert Marskar
-*/
+ * @file   CD_AmrMesh.cpp
+ * @brief  Implementation of CD_AmrMesh.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <BRMeshRefine.H>
@@ -230,8 +230,8 @@ AmrMesh::allocate(EBAMRCellData&           a_data,
 
   CH_assert(a_nComp > 0);
 
-  // This allocates data on a specific realm and phase with specified number of components and ghost cells. If a_ghost < 0
-  // we use the default number of ghost cells in AmrMesh.
+  // This allocates data on a specific realm and phase with specified number of components and ghost cells. If a_ghost <
+  // 0 we use the default number of ghost cells in AmrMesh.
 
   if (!this->queryRealm(a_realm)) {
     const std::string
@@ -299,8 +299,8 @@ AmrMesh::allocate(EBAMRFluxData&           a_data,
 
   CH_assert(a_nComp > 0);
 
-  // This allocates data on a specific realm and phase with specified number of components and ghost cells. If a_ghost < 0
-  // we use the default number of ghost cells in AmrMesh.
+  // This allocates data on a specific realm and phase with specified number of components and ghost cells. If a_ghost <
+  // 0 we use the default number of ghost cells in AmrMesh.
 
   if (!this->queryRealm(a_realm)) {
     const std::string
@@ -338,8 +338,8 @@ AmrMesh::allocate(EBAMRIVData&             a_data,
 
   CH_assert(a_nComp > 0);
 
-  // This allocates data on a specific realm and phase with specified number of components and ghost cells. If a_ghost < 0
-  // we use the default number of ghost cells in AmrMesh.
+  // This allocates data on a specific realm and phase with specified number of components and ghost cells. If a_ghost <
+  // 0 we use the default number of ghost cells in AmrMesh.
 
   if (!this->queryRealm(a_realm)) {
     const std::string
@@ -390,8 +390,8 @@ AmrMesh::allocate(EBAMRIFData&             a_data,
 
   CH_assert(a_nComp > 0);
 
-  // This allocates data on a specific realm and phase with specified number of components and ghost cells. If a_ghost < 0
-  // we use the default number of ghost cells in AmrMesh.
+  // This allocates data on a specific realm and phase with specified number of components and ghost cells. If a_ghost <
+  // 0 we use the default number of ghost cells in AmrMesh.
 
   if (!this->queryRealm(a_realm)) {
     std::string str = "AmrMesh::allocate(EBAMRIFData, string, phase::which_phase, int, int) - could not find realm '" +
@@ -592,7 +592,8 @@ AmrMesh::reallocate(EBAMRCellData& a_data, const phase::which_phase a_phase, con
 
   CH_assert(a_lmin >= 0);
 
-  // TLDR: This reallocates data from a_lmin on the same realm as before. Phase needs to be specified because EBAMRCellData does not know about phases.
+  // TLDR: This reallocates data from a_lmin on the same realm as before. Phase needs to be specified because
+  // EBAMRCellData does not know about phases.
   //       Data under a_lmin is not touched.
 
   const std::string a_realm = a_data.getRealm();
@@ -1146,8 +1147,8 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
   // TLDR: a_lmin is the coarsest level that changes and a_hardcap is a hardcap for the maximum grid level that can
   //       be generated. If a_hardcap < 0 the restriction is m_maxAmrDepth.
 
-  // baseLevel is the coarsest level which does not change. topLevel is the finest level where we have tags. We should never
-  // have tags on max_amr_depth, and we make that restriction here.
+  // baseLevel is the coarsest level which does not change. topLevel is the finest level where we have tags. We should
+  // never have tags on max_amr_depth, and we make that restriction here.
   const int baseLevel = std::max(0, a_lmin - 1);
   const int topLevel  = (m_finestLevel == m_maxAmrDepth) ? m_finestLevel - 1 : static_cast<int>(a_tags.size()) - 1;
 
@@ -1162,7 +1163,8 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
   if (m_maxAmrDepth > 0 && hardcap > 0) {
     domainSplit(m_domains[0], oldBoxes[0], m_maxBlockSize, m_minBlockSize);
 
-    // If have old grids, we can use the old boxes as input to the grid generators (since they don't necessarily regrid all levels).
+    // If have old grids, we can use the old boxes as input to the grid generators (since they don't necessarily regrid
+    // all levels).
     if (!m_hasGrids) {
       for (int lvl = 1; lvl <= topLevel; lvl++) {
         oldBoxes[lvl].resize(0);
@@ -1224,8 +1226,8 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
     m_finestLevel = 0;
   }
 
-  // Coarsest level also changes in this case, but that's not actually caught by the regridders. We have to do this because the blocking
-  // factor could have been changed during runtime option parsing.
+  // Coarsest level also changes in this case, but that's not actually caught by the regridders. We have to do this
+  // because the blocking factor could have been changed during runtime option parsing.
   if (a_lmin == 0) {
     domainSplit(m_domains[0], newBoxes[0], m_maxBlockSize, m_minBlockSize);
   }
@@ -1384,13 +1386,15 @@ AmrMesh::computeGradient(EBAMRFluxData&           a_gradient,
     pout() << "AmrMesh::computeGradient(EBAMRFluxData, EBAMRCellData, string, phase::which_phase)" << endl;
   }
 
-  // TLDR: This routine first computes the cell-centered gradient and it averages that to faces. For regular cells this will yield
-  //       an 8-point stencil in 2D. We want to reduce that to a six-point stencil in 2D so that the normal derivative does not reach
-  //       over a differencing distance of 2*dx (which the tangential derivatives do). So, after averaging the cell-centered gradient to
-  //       faces we replace the component normal to the face with its tighter stencil variant.
+  // TLDR: This routine first computes the cell-centered gradient and it averages that to faces. For regular cells this
+  // will yield
+  //       an 8-point stencil in 2D. We want to reduce that to a six-point stencil in 2D so that the normal derivative
+  //       does not reach over a differencing distance of 2*dx (which the tangential derivatives do). So, after
+  //       averaging the cell-centered gradient to faces we replace the component normal to the face with its tighter
+  //       stencil variant.
   //
-  //       Finally, we set the coarse-face gradients to be the arithmetic average of the fine faces. We do this to avoid having stencils
-  //       that reach under the embedded boundary (where bogus data could be found).
+  //       Finally, we set the coarse-face gradients to be the arithmetic average of the fine faces. We do this to avoid
+  //       having stencils that reach under the embedded boundary (where bogus data could be found).
 
   CH_assert(a_gradient[0]->nComp() == SpaceDim);
   CH_assert(a_phi[0]->nComp() == 1);
@@ -2148,8 +2152,8 @@ AmrMesh::interpToNewGrids(EBAMRCellData&                   a_newData,
   const Interval interv = Interval(0, nComp - 1);
   const IntVect  ghost  = m_numGhostCells * IntVect::Unit;
 
-  // These levels have not changed but ownership MIGHT have changed. We use a pre-defined Copier here if we can. This really matters
-  // for performance at large scales (> 1M boxes and 10k ranks).
+  // These levels have not changed but ownership MIGHT have changed. We use a pre-defined Copier here if we can. This
+  // really matters for performance at large scales (> 1M boxes and 10k ranks).
   for (int lvl = 0; lvl <= std::max(0, a_lmin - 1); lvl++) {
     if (m_hasRegridCopiers && a_newData[lvl]->ghostVect() == ghost) {
       //      const Copier& copier = m_oldToNewCellCopiers.at(a_newData.getRealm())[lvl];
@@ -2586,9 +2590,10 @@ AmrMesh::setGrids(const Vector<Vector<Box>>&                             a_boxes
     pout() << "AmrMesh::setGrids(Vector<Vector<Box> >, std::map<string, Vector<Vector<long int> >)" << endl;
   }
 
-  // TLDR: This routine is called by driver when restarting from an HDF5 file. The boxes are the same for all realms, but
-  //       the restart feature can use checkpointed loads. These are read from file and sent to this routine so we can call
-  //       LoadBalancing.
+  // TLDR: This routine is called by driver when restarting from an HDF5 file. The boxes are the same for all realms,
+  // but
+  //       the restart feature can use checkpointed loads. These are read from file and sent to this routine so we can
+  //       call LoadBalancing.
 
   const int lmin = 0;
 

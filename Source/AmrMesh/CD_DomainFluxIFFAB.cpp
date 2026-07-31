@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_DomainFluxIFFAB.cpp
-  @brief  Implementation of CD_DomainFluxIFFAB.H
-  @author Robert Marskar
-*/
+ * @file   CD_DomainFluxIFFAB.cpp
+ * @brief  Implementation of CD_DomainFluxIFFAB.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <CH_Timer.H>

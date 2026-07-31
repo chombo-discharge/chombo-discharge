@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_MultifluidAlias.cpp
-  @brief  Implementation of CD_MultifluidAlias.H
-  @author Robert Marskar
-*/
+ * @file   CD_MultifluidAlias.cpp
+ * @brief  Implementation of CD_MultifluidAlias.H
+ * @author Robert Marskar
+ */
 
 // Our includes
 #include <CD_MultifluidAlias.H>

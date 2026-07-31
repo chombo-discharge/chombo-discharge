@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_RoughRod.cpp
-  @brief  Implementation of CD_RoughRod.H
-  @author Robert Marskar
-*/
+ * @file   CD_RoughRod.cpp
+ * @brief  Implementation of CD_RoughRod.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <ParmParse.H>

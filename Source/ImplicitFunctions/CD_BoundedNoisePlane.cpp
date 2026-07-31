@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_BoundedNoisePlane.cpp
-  @brief  Declaration of a signed distance function for a noisy plane
-  @author Robert Marskar
-*/
+ * @file   CD_BoundedNoisePlane.cpp
+ * @brief  Declaration of a signed distance function for a noisy plane
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <PolyGeom.H>
@@ -90,7 +90,8 @@ BoundedNoisePlane::~BoundedNoisePlane() = default;
 Real
 BoundedNoisePlane::value(const RealVect& a_pos) const
 {
-  // TLDR: To elevate the noise we displace the value along the normal (by an amount given by the Perlin noise function),
+  // TLDR: To elevate the noise we displace the value along the normal (by an amount given by the Perlin noise
+  // function),
   //       clamped with a boxcar function.
 
   const RealVect  n  = m_normal.second * BASISREALV(m_normal.first);

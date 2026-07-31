@@ -5,10 +5,10 @@
  */
 
 /**
-  @file CD_PetscAMRCell.cpp
-  @brief Implementation of CD_PetscAMRCell.H
-  @author Robert Marskar
-*/
+ * @file CD_PetscAMRCell.cpp
+ * @brief Implementation of CD_PetscAMRCell.H
+ * @author Robert Marskar
+ */
 
 #ifdef CH_USE_PETSC
 

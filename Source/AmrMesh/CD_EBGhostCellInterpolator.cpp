@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_EBGhostCellInterpolator.cpp
-  @brief  Implementation of CD_EBGhostCellInterpolator.H
-  @author Robert Marskar
-*/
+ * @file   CD_EBGhostCellInterpolator.cpp
+ * @brief  Implementation of CD_EBGhostCellInterpolator.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <CH_Timer.H>

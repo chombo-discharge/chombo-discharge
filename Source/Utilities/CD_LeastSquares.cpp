@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_LeastSquares.cpp
-  @brief  Implementation of CD_LeastSquares.H
-  @author Robert Marskar
-*/
+ * @file   CD_LeastSquares.cpp
+ * @brief  Implementation of CD_LeastSquares.H
+ * @author Robert Marskar
+ */
 
 // Our includes
 #include <CD_LaPackUtils.H>
@@ -110,8 +110,8 @@ LeastSquares::getGradSten(const FaceIndex&   a_face,
     const VolIndex vofLo = a_face.getVoF(Side::Lo);
     const VolIndex vofHi = a_face.getVoF(Side::Hi);
 
-    // Get Vofs in monotone path for both lo/hi. The doing that will fetch duplicates (starting vof, for example) which we discard
-    // using std::set below. After that, just get the distances and solve the least squares system.
+    // Get Vofs in monotone path for both lo/hi. The doing that will fetch duplicates (starting vof, for example) which
+    // we discard using std::set below. After that, just get the distances and solve the least squares system.
     Vector<VolIndex> allVofs;
     Vector<VolIndex> loVofs = VofUtils::getVofsInRadius(vofLo,
                                                         a_ebisbox,
@@ -523,7 +523,8 @@ LeastSquares::computeSingleLevelStencils(const IntVectSet&       a_derivs,
         "LeastSquares::computeSingleLevelStencils - you have specified the same terms as both unknown and known");
     }
 
-    // Build the A-matrix in column major order (this is what Fortran wants) so we can use LaPackUtils::computePseudoInverse.
+    // Build the A-matrix in column major order (this is what Fortran wants) so we can use
+    // LaPackUtils::computePseudoInverse.
     // ----------------------------------------------------------------------------------------------------------------------
     // If we have an (unweighted) full system then our system A*x = b is
     //
@@ -539,9 +540,9 @@ LeastSquares::computeSingleLevelStencils(const IntVectSet&       a_derivs,
     // solve (w*A) * x = (w*b). Inverting the system gives x = [w * A^+ * w] * b where A^+ is the Moore-Penrose
     // pseudoinverse. We put the result of [w * A^+ * w] into a stencil.
     //
-    // Note that columns can be eliminated through knownTerms, in which case we remove unknowns (i.e., rows) from the system.
-    // This will also correspond to a modification of the right-hand side, but the required modifications are not accessible
-    // in this routine, and so the user will have to make sense of them.
+    // Note that columns can be eliminated through knownTerms, in which case we remove unknowns (i.e., rows) from the
+    // system. This will also correspond to a modification of the right-hand side, but the required modifications are
+    // not accessible in this routine, and so the user will have to make sense of them.
 
     int          i = 0;                // Exists just because we fill memory linearly.
     Vector<Real> linA(K * M, 0.0);     // Equal to (w*A)
@@ -574,7 +575,8 @@ LeastSquares::computeSingleLevelStencils(const IntVectSet&       a_derivs,
       //
       // The MultiIndex won't know about this, and will (correctly!), believe that the first row corresponds to
       // multi-index (0,0,0). Since that is truly not the case, we map the rows in A to multi-indices and use that to
-      // identify the row in (w*A)^+ that corresponds to a specific unknown in the Taylor series. This is what happens below.
+      // identify the row in (w*A)^+ that corresponds to a specific unknown in the Taylor series. This is what happens
+      // below.
       std::map<IntVect, int> rowMap;
       int                    row = 0;
       for (MultiIndex mi(a_order); mi.ok(); ++mi) {
@@ -601,7 +603,8 @@ LeastSquares::computeSingleLevelStencils(const IntVectSet&       a_derivs,
         sten.clear();
 
         // Map the pseudoinverse into something that is usable by a stencil. Note that linAplus is (w*A)^+, but we want
-        // the term [(w*A)^+ * w], so we also need to multiply in the weights here (because the right-hand side was also weighted).
+        // the term [(w*A)^+ * w], so we also need to multiply in the weights here (because the right-hand side was also
+        // weighted).
         for (int k = 0; k < K; k++) {
           const int idx = row + k * M;
           sten.add(a_allVofs[k], a_weights[k] * linAplus[idx]);

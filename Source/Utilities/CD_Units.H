@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_Units.H
-  @brief  Declaration of various useful units
-  @author Robert Marskar
-*/
+ * @file   CD_Units.H
+ * @brief  Declaration of various useful units
+ * @author Robert Marskar
+ */
 
 #ifndef CD_UNITS_H
 #define CD_UNITS_H
@@ -20,63 +20,63 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Various SI units
-*/
+ * @brief Various SI units
+ */
 namespace Units {
 
 /**
-    @brief Permittivity of free space
-  */
+ * @brief Permittivity of free space
+ */
 constexpr Real eps0 = 8.854187817E-12;
 
 /**
-    @brief Elementary charge 
-  */
+ * @brief Elementary charge
+ */
 constexpr Real Qe = 1.6021766208E-19;
 
 /**
-    @brief Speed of light
-  */
+ * @brief Speed of light
+ */
 constexpr Real c = 299792458;
 
 /**
-    @brief Boltzmann constant
-  */
+ * @brief Boltzmann constant
+ */
 constexpr Real kb = 1.38084852E-23;
 
 /**
-    @brief Towsend unit
-  */
+ * @brief Towsend unit
+ */
 constexpr Real Td = 1.E-21;
 
 /**
-    @brief Electron volt
-  */
+ * @brief Electron volt
+ */
 constexpr Real eV = 1.6021766208E-19;
 
 /**
-    @brief Avogadro number
-  */
+ * @brief Avogadro number
+ */
 constexpr Real Na = 6.022140857E23;
 
 /**
-    @brief Universal gas constant
-  */
+ * @brief Universal gas constant
+ */
 constexpr Real R = 8.3144598;
 
 /**
-    @brief Conversion from atm to pascal
-  */
+ * @brief Conversion from atm to pascal
+ */
 constexpr Real atm2pascal = 101325;
 
 /**
-    @brief pi
-  */
+ * @brief pi
+ */
 constexpr Real pi = 3.14159265359;
 
 /**
-    @brief Electron mass
-  */
+ * @brief Electron mass
+ */
 constexpr Real me = 9.109383E-31;
 } // namespace Units
 

@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_Initialize.cpp
-  @brief  Implementation of CD_Initialize.H
-  @author Robert Marskar
-*/
+ * @file   CD_Initialize.cpp
+ * @brief  Implementation of CD_Initialize.H
+ * @author Robert Marskar
+ */
 
 // Std includes
 #if defined(CH_MPI) || defined(CH_USE_PETSC)

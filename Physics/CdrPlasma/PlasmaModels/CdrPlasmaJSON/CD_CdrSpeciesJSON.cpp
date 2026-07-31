@@ -5,10 +5,10 @@
  */
 
 /**
-   @file   CD_CdrSpeciesJSON.cpp
-   @brief  Implementation of CD_CdrSpeciesJSON.H
-   @author Robert Marskar
-*/
+ * @file   CD_CdrSpeciesJSON.cpp
+ * @brief  Implementation of CD_CdrSpeciesJSON.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <CH_assert.H>

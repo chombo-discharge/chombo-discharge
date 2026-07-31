@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_CoaxialCable.H
-  @brief  Coaxial cable geometry
-  @author Robert Marskar
-*/
+ * @file   CD_CoaxialCable.H
+ * @brief  Coaxial cable geometry
+ * @author Robert Marskar
+ */
 
 #ifndef CD_COAXIALCABLE_H
 #define CD_COAXIALCABLE_H
@@ -18,8 +18,8 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief This is a class that defines a coaxial cable geometry 
-*/
+ * @brief This is a class that defines a coaxial cable geometry
+ */
 class CoaxialCable : public ComputationalGeometry
 {
 public:

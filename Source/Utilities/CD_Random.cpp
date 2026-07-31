@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_Random.cpp
-  @brief  Implementation of CD_Random.H
-  @author Robert Marskar
-*/
+ * @file   CD_Random.cpp
+ * @brief  Implementation of CD_Random.H
+ * @author Robert Marskar
+ */
 
 // Our includes
 #include <CD_Random.H>
@@ -21,6 +21,6 @@ thread_local std::normal_distribution<Real>       Random::s_normal01  = std::nor
 
 bool Random::s_seeded = false;
 
-//std::once_flag once = std::once_flag();
+// std::once_flag once = std::once_flag();
 
 #include <CD_NamespaceFooter.H>

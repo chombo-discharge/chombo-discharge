@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_ParticleManagementImplem.H
-  @brief  Implementation of CD_ParticleManagement.H
-  @author Robert Marskar
-*/
+ * @file   CD_ParticleManagementImplem.H
+ * @brief  Implementation of CD_ParticleManagement.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_PARTICLEMANAGEMENTIMPLEM_H
 #define CD_PARTICLEMANAGEMENTIMPLEM_H

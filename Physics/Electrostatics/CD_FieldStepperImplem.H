@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_FieldStepperImplem.H
-  @brief  Implementation of CD_FieldStepper.H
-  @author Robert Marskar
-*/
+ * @file   CD_FieldStepperImplem.H
+ * @brief  Implementation of CD_FieldStepper.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_FIELDSTEPPERIMPLEM_H
 #define CD_FIELDSTEPPERIMPLEM_H
@@ -419,15 +419,17 @@ FieldStepper<T>::loadBalanceBoxes(Vector<Vector<int>>&             a_procs,
 
   CH_assert(m_loadBalance && a_realm == m_realm);
 
-  // TLDR: This code tries to compute a load for each grid patch by applying a relaxation operator to each box. This means that the load
-  //       should be a decent estimate that takes into account boundary conditions, coarse-fine interface arithmetic, and enlargened stencils
-  //       near the embedded boundary.
+  // TLDR: This code tries to compute a load for each grid patch by applying a relaxation operator to each box. This
+  // means that the load
+  //       should be a decent estimate that takes into account boundary conditions, coarse-fine interface arithmetic,
+  //       and enlargened stencils near the embedded boundary.
 
   a_procs.resize(1 + a_finestLevel);
   a_boxes.resize(1 + a_finestLevel);
 
-  // We need to make AmrMesh restore some operators that we need in order to create a multigrid object. Fortunately, FieldSolver has routines
-  // for doing that but it will not know if AmrMesh has updated it's operators or not. So, we need to regrid them.
+  // We need to make AmrMesh restore some operators that we need in order to create a multigrid object. Fortunately,
+  // FieldSolver has routines for doing that but it will not know if AmrMesh has updated it's operators or not. So, we
+  // need to regrid them.
   m_amr->regridOperators(a_lmin);
 
   Loads rankLoads;

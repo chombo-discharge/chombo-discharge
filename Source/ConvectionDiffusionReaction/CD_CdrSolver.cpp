@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_CdrSolver.cpp
-  @brief  Implementation of CD_CdrSolver.H
-  @author Robert Marskar
-*/
+ * @file   CD_CdrSolver.cpp
+ * @brief  Implementation of CD_CdrSolver.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <ParmParse.H>
@@ -149,7 +149,8 @@ CdrSolver::getPlotVariableNames() const
     pout() << m_name + "::getPlotVariableNames()" << endl;
   }
 
-  // TLDR: Possible plot variables is the density (m_phi), diffusion coefficient, source term, velocity, and eb flux. This
+  // TLDR: Possible plot variables is the density (m_phi), diffusion coefficient, source term, velocity, and eb flux.
+  // This
   //       function returns the associated plot variable names, and will be used in the plot files.
 
   Vector<std::string> plotVarNames(0);
@@ -187,7 +188,8 @@ CdrSolver::getNumberOfPlotVariables() const
     pout() << m_name + "::getNumberOfPlotVariables()" << endl;
   }
 
-  // TLDR: Possible plot variables is the density (m_phi), diffusion coefficient, source term, velocity, and eb flux. This
+  // TLDR: Possible plot variables is the density (m_phi), diffusion coefficient, source term, velocity, and eb flux.
+  // This
   //       function returns the number of variables that this sum up to (a vector field is 2/3 variables in 2D/3D)
 
   int numPlotVars = 0;
@@ -222,7 +224,8 @@ CdrSolver::advanceEuler(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, 
   CH_assert(a_newPhi[0]->nComp() == 1);
   CH_assert(a_oldPhi[0]->nComp() == 1);
 
-  // TLDR: We are solving phi^(k+1) - phi^k - dt*Div(D*Grad(phi^(k+1))) = 0.0. We create a source term = 0 and call the implementation
+  // TLDR: We are solving phi^(k+1) - phi^k - dt*Div(D*Grad(phi^(k+1))) = 0.0. We create a source term = 0 and call the
+  // implementation
   //       version.
   if (m_isDiffusive) {
     EBAMRCellData src;
@@ -247,7 +250,8 @@ CdrSolver::advanceCrankNicholson(EBAMRCellData& a_newPhi, const EBAMRCellData& a
   CH_assert(a_newPhi[0]->nComp() == 1);
   CH_assert(a_oldPhi[0]->nComp() == 1);
 
-  // TLDR: We are solving phi^(k+1) - phi^k - dt*Div(D*Grad(phi^(k+1))) = 0.0. We create a source term = 0 and call the implementation
+  // TLDR: We are solving phi^(k+1) - phi^k - dt*Div(D*Grad(phi^(k+1))) = 0.0. We create a source term = 0 and call the
+  // implementation
   //       version.
   if (m_isDiffusive) {
     EBAMRCellData src;
@@ -421,9 +425,10 @@ CdrSolver::computeDivG(EBAMRCellData&     a_divG,
   CH_assert(a_G[0]->nComp() == 1);
   CH_assert(a_ebFlux[0]->nComp() == 1);
 
-  // TLDR: This routine computes a finite volume approximation to Div(G) where G is a flux, stored on face centers and eb faces. The routine uses
-  //       flux matching on refinement boundaries and the so-called hybrid divergence in the cut-cells. The mass which is missed by the hybrid
-  //       divergence is smooshed back in through through redistribution.
+  // TLDR: This routine computes a finite volume approximation to Div(G) where G is a flux, stored on face centers and
+  // eb faces. The routine uses
+  //       flux matching on refinement boundaries and the so-called hybrid divergence in the cut-cells. The mass which
+  //       is missed by the hybrid divergence is smooshed back in through through redistribution.
 
   DataOps::setValue(a_divG, 0.0);
 
@@ -601,10 +606,11 @@ CdrSolver::computeDiffusionFlux(LevelData<EBFluxFAB>& a_flux, const LevelData<EB
   CH_assert(a_flux.nComp() == 1);
   CH_assert(a_phi.nComp() == 1);
 
-  // TLDR: This routine computes the diffusion flux F = D*Grad(phi) on face centers. Since this uses centered differencing
+  // TLDR: This routine computes the diffusion flux F = D*Grad(phi) on face centers. Since this uses centered
+  // differencing
   //       and we don't have valid data outside the computational domain we only do the differencing for interior faces,
-  //       setting the flux to zero on domain faces. Note that we need to fill flux in the tangential ghost face centers because
-  //       the face centroid flux is interpolated between face centers.
+  //       setting the flux to zero on domain faces. Note that we need to fill flux in the tangential ghost face centers
+  //       because the face centroid flux is interpolated between face centers.
   //
 
   const Real               dx        = m_amr->getDx()[a_lvl];
@@ -636,10 +642,10 @@ CdrSolver::computeDiffusionFlux(LevelData<EBFluxFAB>& a_flux, const LevelData<EB
 
       flux.setVal(0.0);
 
-      // Only want interior faces -- the domain flux will be set to zero (what else would it be...?). Anyways, recall that
-      // the cut-cell face centroid fluxes are interpolated between face centers. So, if a face at the edge of a patch is cut
-      // by the EB, the interpolant will reach out of the patch. Thus, we must fill the flux for the tangential ghost faces
-      // outside the grid patch.
+      // Only want interior faces -- the domain flux will be set to zero (what else would it be...?). Anyways, recall
+      // that the cut-cell face centroid fluxes are interpolated between face centers. So, if a face at the edge of a
+      // patch is cut by the EB, the interpolant will reach out of the patch. Thus, we must fill the flux for the
+      // tangential ghost faces outside the grid patch.
       Box grownCellBox = cellBox;
       grownCellBox.grow(1);
       grownCellBox &= domain;
@@ -651,16 +657,16 @@ CdrSolver::computeDiffusionFlux(LevelData<EBFluxFAB>& a_flux, const LevelData<EB
       FaceIterator faceit(ebisbox.getMultiCells(grownCellBox), ebgraph, dir, FaceStop::SurroundingWithBoundary);
 
       // Regular kernel. Note that we call the kernel on a face-centered box, so the cell on the high side is located at
-      // iv, and the cell at the low side is at iv - BASISV(dir). The offset is hoisted so it is loop-invariant (a runtime
-      // BASISV(dir) inside the kernel blocks vectorization).
+      // iv, and the cell at the low side is at iv - BASISV(dir). The offset is hoisted so it is loop-invariant (a
+      // runtime BASISV(dir) inside the kernel blocks vectorization).
       const IntVect shift = BASISV(dir);
 
       auto regularKernel = [&](const IntVect& iv) -> void {
         regFlux(iv, m_comp) = inverseDx * regDco(iv, m_comp) * (regPhi(iv, m_comp) - regPhi(iv - shift, m_comp));
       };
 
-      // Cut-cell kernel. Basically the same as the above but we need to explicitly get vofs on the low/high side (because
-      // we may have multi-cells but the above kernel only does single-valued cells).
+      // Cut-cell kernel. Basically the same as the above but we need to explicitly get vofs on the low/high side
+      // (because we may have multi-cells but the above kernel only does single-valued cells).
       auto irregularKernel = [&](const FaceIndex& face) -> void {
         if (!face.isBoundary()) {
           const VolIndex hiVoF = face.getVoF(Side::Hi);
@@ -741,8 +747,8 @@ CdrSolver::computeAdvectionDiffusionFlux(EBAMRFluxData&       a_flux,
 
         FaceIterator faceit(ebisbox.getMultiCells(grownBox), ebgraph, dir, FaceStop::SurroundingNoBoundary);
 
-        // Regular kernel. Note that we call the kernel on a face-centered box, so the cell on the high side is located at
-        // iv, and the cell at the low side is at iv - BASISV(dir). The offset is hoisted so it is loop-invariant (a
+        // Regular kernel. Note that we call the kernel on a face-centered box, so the cell on the high side is located
+        // at iv, and the cell at the low side is at iv - BASISV(dir). The offset is hoisted so it is loop-invariant (a
         // runtime BASISV(dir) inside the kernel blocks vectorization).
         const IntVect shift = BASISV(dir);
 
@@ -755,8 +761,8 @@ CdrSolver::computeAdvectionDiffusionFlux(EBAMRFluxData&       a_flux,
           faceFlux -= idx * faceDco * (cellPhiHi - cellPhiLo);
         };
 
-        // Cut-cell kernel. Basically the same as the above but we need to explicitly get vofs on the low/high side (because
-        // we may have multi-cells but the above kernel only does single-valued cells).
+        // Cut-cell kernel. Basically the same as the above but we need to explicitly get vofs on the low/high side
+        // (because we may have multi-cells but the above kernel only does single-valued cells).
         auto irregularKernel = [&](const FaceIndex& face) -> void {
           const VolIndex hiVoF = face.getVoF(Side::Hi);
           const VolIndex loVoF = face.getVoF(Side::Lo);
@@ -824,8 +830,9 @@ CdrSolver::resetDomainFlux(EBAMRFluxData& a_flux)
           const int     sign  = (side == Side::Lo) ? 0 : 1;
           const IntVect shift = sign * BASISV(dir);
 
-          // Regular kernel -- note the shift to make sure that cell indices map to face indices. I am doing this because
-          // if we were to convert the box to a face-centered box we would do another layer of faces. So shift directly.
+          // Regular kernel -- note the shift to make sure that cell indices map to face indices. I am doing this
+          // because if we were to convert the box to a face-centered box we would do another layer of faces. So shift
+          // directly.
           auto regularKernel = [&](const IntVect& iv) -> void {
             regFlux(iv + shift, m_comp) = zero;
           };
@@ -869,8 +876,10 @@ CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const int a_level)
 
   CH_assert(a_flux.nComp() == 1);
 
-  // TLDR: This iterates through all domain faces and sets the BC flux to either data-based, function-based, wall bc, or extrapolated outflow. This
-  //       routine uses a face-iterator (because of BaseIFFAB<T>), but performance should be acceptable since we go through a very small number of faces.
+  // TLDR: This iterates through all domain faces and sets the BC flux to either data-based, function-based, wall bc, or
+  // extrapolated outflow. This
+  //       routine uses a face-iterator (because of BaseIFFAB<T>), but performance should be acceptable since we go
+  //       through a very small number of faces.
 
   const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[a_level];
   const ProblemDomain&     domain = m_amr->getDomains()[a_level];
@@ -906,10 +915,11 @@ CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const int a_level)
         boundaryCellBox = adjCellBox(domain.domainBox(), dir, side, -1);
         boundaryCellBox &= cellBox;
 
-        // Use a face-iterator here to go through domain faces -- sort of have to do this because of (the odd) design decision to use a BaseIFFAB for holding
-        // the domain fluxes.
+        // Use a face-iterator here to go through domain faces -- sort of have to do this because of (the odd) design
+        // decision to use a BaseIFFAB for holding the domain fluxes.
         //
-        // A FaceIterator may be inefficient, but we are REALLY going through a very small number of faces so there shouldn't be a performance hit here.
+        // A FaceIterator may be inefficient, but we are REALLY going through a very small number of faces so there
+        // shouldn't be a performance hit here.
         const IntVectSet ivs(boundaryCellBox);
         FaceIterator     faceit(ivs, ebgraph, dir, FaceStop::AllBoundaryOnly);
 
@@ -990,9 +1000,9 @@ CdrSolver::conservativeDivergenceNoKappaDivision(EBAMRCellData&     a_conservati
   CH_assert(a_flux[0]->nComp() == 1);
   CH_assert(a_ebFlux[0]->nComp() == 1);
 
-  // This routine computes the "regular" finite volume conservative divergence Sum(fluxes) but does not divide by the volume fraction (which a naive implementation would).
-  // Rather, this no-kappa-divided divergence is used for computing another divergence (a hybrid) divergence which represents a stable update to
-  // the hyperbolic equation.
+  // This routine computes the "regular" finite volume conservative divergence Sum(fluxes) but does not divide by the
+  // volume fraction (which a naive implementation would). Rather, this no-kappa-divided divergence is used for
+  // computing another divergence (a hybrid) divergence which represents a stable update to the hyperbolic equation.
   //
   // This routine computes just that: a_conservativeDivergence = kappa*div(F) = Sum(fluxes).
   //
@@ -1117,7 +1127,8 @@ CdrSolver::conservativeDivergenceRegular(LevelData<EBCellFAB>&       a_divJ,
       const BaseFab<Real>& fluxReg = flux.getSingleValuedFAB();
 
       // Regular kernel. We call this for a cell-centered box so the high flux is on iv + BASISV(dir) and the low flux
-      // on iv. The offset is hoisted so it is loop-invariant (a runtime BASISV(dir) inside the kernel blocks vectorization).
+      // on iv. The offset is hoisted so it is loop-invariant (a runtime BASISV(dir) inside the kernel blocks
+      // vectorization).
       const IntVect shift = BASISV(dir);
 
       auto regularKernel = [&](const IntVect& iv) -> void {
@@ -1199,9 +1210,9 @@ CdrSolver::initialData()
     pout() << m_name + "::initialData()" << endl;
   }
 
-  // CdrSolver can be initialized in several way -- we can fill the initial data with analytic data from a mesh, or we can
-  // deposit particles (with an NGP scheme) on the mesh. This function does both -- first particles if we have them and
-  // then we increment with the function.
+  // CdrSolver can be initialized in several way -- we can fill the initial data with analytic data from a mesh, or we
+  // can deposit particles (with an NGP scheme) on the mesh. This function does both -- first particles if we have them
+  // and then we increment with the function.
 
   DataOps::setValue(m_phi, 0.0);
 
@@ -1319,8 +1330,8 @@ CdrSolver::hybridDivergence(EBAMRCellData&     a_hybridDivergence,
   CH_assert(a_massDifference[0]->nComp() == 1);
   CH_assert(a_nonConservativeDivergence[0]->nComp() == 1);
 
-  // On input, a_hybridDivergence must contain kappa*div(F). We also have the non-conservative divergence computed, so we just compute
-  // the regular hybrid divergence and the mass loss/gain.
+  // On input, a_hybridDivergence must contain kappa*div(F). We also have the non-conservative divergence computed, so
+  // we just compute the regular hybrid divergence and the mass loss/gain.
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     this->hybridDivergence(*a_hybridDivergence[lvl], *a_massDifference[lvl], *a_nonConservativeDivergence[lvl], lvl);
@@ -1468,7 +1479,8 @@ CdrSolver::nonConservativeDivergence(EBAMRIVData& a_nonConservativeDivergence, c
   CH_assert(a_nonConservativeDivergence[0]->nComp() == 1);
   CH_assert(a_divG[0]->nComp() == 1);
 
-  // TLDR: This routine computes the non-conservative divergence divNC(G) = sum(kappa*div(G))/sum(kappa). This is done through
+  // TLDR: This routine computes the non-conservative divergence divNC(G) = sum(kappa*div(G))/sum(kappa). This is done
+  // through
   //       AmrMesh's stencil in cut cells. The neighborhood consists of cells that can be reached with a monotone path.
 
   if (m_blendConservation) {
@@ -1914,7 +1926,8 @@ CdrSolver::writePlotData(LevelData<EBCellFAB>& a_output,
     this->writeData(a_output, a_icomp, m_cellVelocity, a_outputRealm, a_level, false, true);
   }
 
-  // Plot EB fluxes. These are stored on sparse data structures but we need them on cell centers. So copy them to scratch and write data.
+  // Plot EB fluxes. These are stored on sparse data structures but we need them on cell centers. So copy them to
+  // scratch and write data.
   if (m_plotEbFlux && m_isMobile) {
     DataOps::setValue(*scratch[a_level], 0.0);
     DataOps::incr(*scratch[a_level], *m_ebFlux[a_level], 1.0, *m_amr->getVofIterator(m_realm, m_phase)[a_level]);
@@ -2019,8 +2032,10 @@ CdrSolver::computeAdvectionDt()
     pout() << m_name + "::computeAdvectionDt()" << endl;
   }
 
-  // TLDR: For advection we must have dt <= dx/(|vx|+|vy|+|vz|). E.g., with first order upwind phi^(k+1)_i = phi^k_i - (v*dt) * (phi^k_i - phi^k_(i-1))/dx so
-  //       if phi^k_(i-1) == 0 then (1 - v*dt/dx) > 0.0 yields a positive definite solution (more general analysis when we have limiters is probably possible...)
+  // TLDR: For advection we must have dt <= dx/(|vx|+|vy|+|vz|). E.g., with first order upwind phi^(k+1)_i = phi^k_i -
+  // (v*dt) * (phi^k_i - phi^k_(i-1))/dx so
+  //       if phi^k_(i-1) == 0 then (1 - v*dt/dx) > 0.0 yields a positive definite solution (more general analysis when
+  //       we have limiters is probably possible...)
 
   Real minDt = std::numeric_limits<Real>::max();
 
@@ -2089,13 +2104,14 @@ CdrSolver::computeDiffusionDt()
     pout() << m_name + "::computeDiffusionDt()" << endl;
   }
 
-  // TLDR: For advection we must have dt <= (dx*dx)/(2*d*D) where D is diffusion coefficient and d is spatial dimensions.
+  // TLDR: For advection we must have dt <= (dx*dx)/(2*d*D) where D is diffusion coefficient and d is spatial
+  // dimensions.
   //       E.g. in 1D, centered differencing yields
   //
   //          phi^(k+1)_i = phi^k_i - dt*D*(phi^k_(i+1) - 2*phi^k_i + phi^k_(i-1))/(dx*dx).
   //
-  //       So for phi^k_(i-1) = phi^k_(i+1) = 0 we have phi^(k+1)_i = phi^k * (1 - 2*dt*D/(dx*dx)) which is positive definite only for dt < (dx*dx)/(2*D). Again,
-  //       a more general analysis could be made.
+  //       So for phi^k_(i-1) = phi^k_(i+1) = 0 we have phi^(k+1)_i = phi^k * (1 - 2*dt*D/(dx*dx)) which is positive
+  //       definite only for dt < (dx*dx)/(2*D). Again, a more general analysis could be made.
 
   Real minDt = std::numeric_limits<Real>::max();
 
@@ -2127,9 +2143,10 @@ CdrSolver::computeDiffusionDt()
         // strictly regular and the irregular kernel keeps iterating ALL cut-cells.
         const BaseFab<Real>& regularMask = (*m_amr->getRegularCells(m_realm, m_phase)[lvl])[din].getSingleValuedFAB();
 
-        // Regular kernel. Strictly speaking, we should have a kernel which increments with the diffusion coefficients on each face since the finite volume
-        // approximation to the Laplacian becomes (in 1D) Div*(D*Grad(phi)) = -D_(i-1/2)*(phi_i - phi_(i-1)) + D_(i+1/2)*(phi_(i+1)-phi_i). A good kernel
-        // would do just that, but a lazy programmer just find the largest diffusion coefficient and uses that as an approximation.
+        // Regular kernel. Strictly speaking, we should have a kernel which increments with the diffusion coefficients
+        // on each face since the finite volume approximation to the Laplacian becomes (in 1D) Div*(D*Grad(phi)) =
+        // -D_(i-1/2)*(phi_i - phi_(i-1)) + D_(i+1/2)*(phi_(i+1)-phi_i). A good kernel would do just that, but a lazy
+        // programmer just find the largest diffusion coefficient and uses that as an approximation.
         for (int dir = 0; dir < SpaceDim; dir++) {
           const BaseFab<Real>& diffCoReg = diffCoFace[dir].getSingleValuedFAB();
 
@@ -2183,11 +2200,13 @@ CdrSolver::computeAdvectionDiffusionDt()
     pout() << m_name + "::computeAdvectionDiffusionDt()" << endl;
   }
 
-  // In 1D we have, e.g. d(phi)/dt = -d/dx(v*phi) + D*d^2(phi)/dx^2. Discretizing it with e.g. first order upwind and centered differencing yields
+  // In 1D we have, e.g. d(phi)/dt = -d/dx(v*phi) + D*d^2(phi)/dx^2. Discretizing it with e.g. first order upwind and
+  // centered differencing yields
   //
   //    phi^(k+1)_i = phi^k_i - dt*v*[phi^k_i - phi^k_(i-1)]/dx + dt*D*[phi^k_(i+1) - 2*phi^k_i + phi^k_(i-1)]/(dx*dx).
   //
-  // Setting phi_(i-1) = phi_(i+1) = 0 yields phi^(k+1)_i = phi^k_i - (dt*v/dx)*phi^k_i - 2*D*dt/(dx*dx)*phi_i^k. This is positive definite only if
+  // Setting phi_(i-1) = phi_(i+1) = 0 yields phi^(k+1)_i = phi^k_i - (dt*v/dx)*phi^k_i - 2*D*dt/(dx*dx)*phi_i^k. This
+  // is positive definite only if
   //
   //    (1 - dt*v/dx - 2*D*dt/(dx*dx)) > 0.0
   //
@@ -2195,8 +2214,8 @@ CdrSolver::computeAdvectionDiffusionDt()
   //
   //    dt <= 1/(v/dx + 2*D/(dx*dx).
   //
-  // Generalization to 3D yields dt <= 1/[(|vx|+|vy|+|vz)/dx + 2*d*D/(dx*dx)]. The below kernels compute the factor in all grid cells, and we return the
-  // smallest value.
+  // Generalization to 3D yields dt <= 1/[(|vx|+|vy|+|vz)/dx + 2*d*D/(dx*dx)]. The below kernels compute the factor in
+  // all grid cells, and we return the smallest value.
 
   Real minDt = std::numeric_limits<Real>::max();
 
@@ -2304,8 +2323,8 @@ CdrSolver::computeSourceDt(const Real a_max, const Real a_tolerance)
     pout() << m_name + "::computeSourceDt(Real, Real)" << endl;
   }
 
-  // This routine computes the time step dt = phi/source but only for cells where phi lies within a_tolerance*a_max. It's an old
-  // routine -- and one that is hardly ever used.
+  // This routine computes the time step dt = phi/source but only for cells where phi lies within a_tolerance*a_max.
+  // It's an old routine -- and one that is hardly ever used.
 
   Real minDt = std::numeric_limits<Real>::max();
 
@@ -2441,9 +2460,9 @@ CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_pow)
           BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
         }
 
-        // Irregular cells. This is a bit more involved. Note that we do want to compute everything at face centroids since
-        // that is the flux that makes its way into the cells anyways when we advect. But, m_faceStates are states on the face
-        // centers. So there's that.
+        // Irregular cells. This is a bit more involved. Note that we do want to compute everything at face centroids
+        // since that is the flux that makes its way into the cells anyways when we advect. But, m_faceStates are states
+        // on the face centers. So there's that.
         auto irregularKernel = [&](const VolIndex& vof) -> void {
           sumPhi(vof, m_comp)    = 0.0;
           sumWeight(vof, m_comp) = 0.0;
@@ -2452,8 +2471,8 @@ CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_pow)
             const Vector<FaceIndex> facesLo = ebisBox.getFaces(vof, dir, Side::Lo);
             const Vector<FaceIndex> facesHi = ebisBox.getFaces(vof, dir, Side::Hi);
 
-            // Add contribution from cut-cell faces in the low side. Observe that if the upwind value of phi is outside the domain
-            // then the "upwinded" value is just the cell-centered value.
+            // Add contribution from cut-cell faces in the low side. Observe that if the upwind value of phi is outside
+            // the domain then the "upwinded" value is just the cell-centered value.
             for (int iface = 0; iface < facesLo.size(); iface++) {
               const FaceIndex& faceLo   = facesLo[iface];
               const VolIndex&  vofLo    = faceLo.getVoF(Side::Lo);
@@ -2981,18 +3000,19 @@ CdrSolver::gwnDiffusionSource(EBAMRCellData& a_noiseSource, const EBAMRCellData&
   CH_assert(a_noiseSource[0]->nComp() == 1);
   CH_assert(a_cellPhi[0]->nComp() == 1);
 
-  // This routine computes a Gaussian white noise source term for the fluctuating convection-diffusion equation. The source
-  // term enters the convection-diffusion equation as
+  // This routine computes a Gaussian white noise source term for the fluctuating convection-diffusion equation. The
+  // source term enters the convection-diffusion equation as
   //
   //    d(phi)/dt = Div(D*Grad(phi) - Z*sqrt(2*D*phi)) where Z is a Gaussian random field.
   //
-  // In this routine we compute the finite volume approximation to Div(Z*sqrt(2*D*phi)) using standard finite volume routines. The only difference
-  // is that the flux is defined as Z*sqrt(2*D*phi) but we don't have phi on face centers. Worse, setting phi to be the arithmetic average can easily
-  // lead to negative density, so we use the Heaviside smoothing from Kim et. al. The paper is
-  // "Stochastic Simulation of Reaction-Diffusion Systems: A Fluctuating-Hydrodynamics Approach", 10.1063/1.4978775.
+  // In this routine we compute the finite volume approximation to Div(Z*sqrt(2*D*phi)) using standard finite volume
+  // routines. The only difference is that the flux is defined as Z*sqrt(2*D*phi) but we don't have phi on face centers.
+  // Worse, setting phi to be the arithmetic average can easily lead to negative density, so we use the Heaviside
+  // smoothing from Kim et. al. The paper is "Stochastic Simulation of Reaction-Diffusion Systems: A
+  // Fluctuating-Hydrodynamics Approach", 10.1063/1.4978775.
   //
-  // This does not guarantee against negative densities, but its surely better than the naive approach. Note that once we have the fluctuating term, we simply
-  // compute Div(G).
+  // This does not guarantee against negative densities, but its surely better than the naive approach. Note that once
+  // we have the fluctuating term, we simply compute Div(G).
 
   if (m_isDiffusive) {
     EBAMRFluxData scratchFluxOne;
@@ -3018,8 +3038,8 @@ CdrSolver::gwnDiffusionSource(EBAMRCellData& a_noiseSource, const EBAMRCellData&
     }
 #endif
 
-    // Let scratchFluxOne holds the fluctuating cell-centered flux Z*sqrt(2*D*phi) and then compute the finite volume approximation of the
-    // divergence
+    // Let scratchFluxOne holds the fluctuating cell-centered flux Z*sqrt(2*D*phi) and then compute the finite volume
+    // approximation of the divergence
     this->fillGwn(scratchFluxTwo, 1.0);
     DataOps::multiply(scratchFluxOne, scratchFluxTwo);
     this->computeDivG(a_noiseSource, scratchFluxOne, m_ebZero, false);
@@ -3040,12 +3060,14 @@ CdrSolver::smoothHeavisideFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a
   CH_assert(a_facePhi[0]->nComp() == 1);
   CH_assert(a_cellPhi[0]->nComp() == 1);
 
-  // This routine is taken from  Kim et. al. "Stochastic Simulation of Reaction-Diffusion Systems: A Fluctuating-Hydrodynamics Approach" (10.1063/1.4978775).
-  // It is inspired by a desire to gradually turn off fluctuations as the number of particles in a grid become small, as to avoid negative densities. So, we
-  // compute the value of phi on faces with the following rules:
+  // This routine is taken from  Kim et. al. "Stochastic Simulation of Reaction-Diffusion Systems: A
+  // Fluctuating-Hydrodynamics Approach" (10.1063/1.4978775). It is inspired by a desire to gradually turn off
+  // fluctuations as the number of particles in a grid become small, as to avoid negative densities. So, we compute the
+  // value of phi on faces with the following rules:
   //
   //    1. If there's more than one particle in the cells, we take the arithmetic average as usual.
-  //    2. If there's between zero and one particle in the cells, we use an averaging function phis = 0.5*(phiLo + phiHi) * loFactor * hiFactor
+  //    2. If there's between zero and one particle in the cells, we use an averaging function phis = 0.5*(phiLo +
+  //    phiHi) * loFactor * hiFactor
   //       where loFactor and hiFactor are the number of particles in the grid cell.
 
   // Loop over levels.
@@ -3175,7 +3197,8 @@ CdrSolver::fillGwn(EBAMRFluxData& a_noise, const Real a_sigma)
   //       in FHD routines where we want to compute a finite volume approximation to the FHD diffusion noise
   //       term.
 
-  // Gaussian white noise distribution -- this should be centered at 0, and we will usually but not necessarily have a_sigma=1
+  // Gaussian white noise distribution -- this should be centered at 0, and we will usually but not necessarily have
+  // a_sigma=1
   std::normal_distribution<double> whiteNoise(0.0, a_sigma);
 
   // Initialize.

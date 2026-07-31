@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_MechanicalShaft.cpp
-  @brief  Implementation of CD_MechanicalShaft.H
-  @author Robert Marskar
-*/
+ * @file   CD_MechanicalShaft.cpp
+ * @brief  Implementation of CD_MechanicalShaft.H
+ * @author Robert Marskar
+ */
 
 // Std includes
 #include <string>

@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_MultiIndex.cpp
-  @brief  Implementation of CD_MultiIndex.H
-  @author Robert Marskar
-*/
+ * @file   CD_MultiIndex.cpp
+ * @brief  Implementation of CD_MultiIndex.H
+ * @author Robert Marskar
+ */
 
 // Our includes
 #include <CD_MultiIndex.H>

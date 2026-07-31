@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_MFHelmholtzDomainBCFactory.H
-  @brief  Declaration of a factory class for making boundary condition objects for MFHelmholtzOp
-  @author Robert Marskar
-*/
+ * @file   CD_MFHelmholtzDomainBCFactory.H
+ * @brief  Declaration of a factory class for making boundary condition objects for MFHelmholtzOp
+ * @author Robert Marskar
+ */
 
 #ifndef CD_MFHELMHOLTZDOMAINBCFACTORY_H
 #define CD_MFHELMHOLTZDOMAINBCFACTORY_H
@@ -21,49 +21,49 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Base class for creating domain boundary condition objects in MFHelmholtzOp. 
-*/
+ * @brief Base class for creating domain boundary condition objects in MFHelmholtzOp.
+ */
 class MFHelmholtzDomainBCFactory
 {
 public:
   /**
-    @brief Constructor. 
-  */
+   * @brief Constructor.
+   */
   MFHelmholtzDomainBCFactory();
 
   /**
-    @brief Destructor
-  */
+   * @brief Destructor
+   */
   virtual ~MFHelmholtzDomainBCFactory();
 
   /**
-    @brief Disallowed -- don't see why you would need it.
-  */
+   * @brief Disallowed -- don't see why you would need it.
+   */
   MFHelmholtzDomainBCFactory(const MFHelmholtzDomainBCFactory& a_other) = delete;
 
   /**
-    @brief Disallowed - don't see why you would need it.
-  */
+   * @brief Disallowed - don't see why you would need it.
+   */
   MFHelmholtzDomainBCFactory&
   operator=(const MFHelmholtzDomainBCFactory& a_other) = delete;
 
   /**
-    @brief Move constructor
-  */
+   * @brief Move constructor
+   */
   MFHelmholtzDomainBCFactory(MFHelmholtzDomainBCFactory&&) = default;
 
   /**
-    @brief Move assignment operator
-    @return Reference to this object
-  */
+   * @brief Move assignment operator
+   * @return Reference to this object
+   */
   MFHelmholtzDomainBCFactory&
   operator=(MFHelmholtzDomainBCFactory&&) = default;
 
   /**
-    @brief Factory method
-    @return Return value
-    @param[in] a_iphase Description
-  */
+   * @brief Factory method
+   * @return Return value
+   * @param[in] a_iphase Description
+   */
   virtual RefCountedPtr<EBHelmholtzDomainBC>
   create(int a_iphase) const = 0;
 };

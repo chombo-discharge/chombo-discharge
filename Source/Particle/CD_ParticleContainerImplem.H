@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_ParticleContainerImplem.H
-  @brief  Implementation of CD_ParticleContainer.H
-  @author Robert Marskar
-*/
+ * @file   CD_ParticleContainerImplem.H
+ * @brief  Implementation of CD_ParticleContainer.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_PARTICLECONTAINERIMPLEM_H
 #define CD_PARTICLECONTAINERIMPLEM_H

@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_RandomImplem.H
-  @brief  Implementation of CD_Random.H
-  @author Robert Marskar
-*/
+ * @file   CD_RandomImplem.H
+ * @brief  Implementation of CD_Random.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_RANDOMIMPLEM_H
 #define CD_RANDOMIMPLEM_H

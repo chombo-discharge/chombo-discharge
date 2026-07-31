@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_Tessellation.H
-  @brief  Declaration of a geometry class for surface tessellation.
-  @author Robert Marskar
-*/
+ * @file   CD_Tessellation.H
+ * @brief  Declaration of a geometry class for surface tessellation.
+ * @author Robert Marskar
+ */
 
 #ifndef CD_TESSELLATION_H
 #define CD_TESSELLATION_H
@@ -18,19 +18,19 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief A geometry consisting of a single polygon mesh read from an STL file.
-*/
+ * @brief A geometry consisting of a single polygon mesh read from an STL file.
+ */
 class Tessellation : public ComputationalGeometry
 {
 public:
   /**
-    @brief Constructor. Reads mesh file and input options via ParmParse.
-  */
+   * @brief Constructor. Reads mesh file and input options via ParmParse.
+   */
   Tessellation();
 
   /**
-    @brief Destructor.
-  */
+   * @brief Destructor.
+   */
   ~Tessellation();
 };
 

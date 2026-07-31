@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_MeshODEStepperImplem.H
-  @brief  Implementation of CD_MeshODEStepper.H
-  @author Robert Marskar
-*/
+ * @file   CD_MeshODEStepperImplem.H
+ * @brief  Implementation of CD_MeshODEStepper.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_MESHODESTEPPERIMPLEM_H
 #define CD_MESHODESTEPPERIMPLEM_H

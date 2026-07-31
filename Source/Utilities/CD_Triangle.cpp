@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_Triangle.cpp
-  @brief  Implementation of CD_Triangle.H
-  @author Robert Marskar
-*/
+ * @file   CD_Triangle.cpp
+ * @brief  Implementation of CD_Triangle.H
+ * @author Robert Marskar
+ */
 
 // Our includes
 #include <CD_Triangle.H>

@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_DataOps.cpp
-  @brief  Implementation of CD_DataOps.H
-  @author Robert Marskar
-*/
+ * @file   CD_DataOps.cpp
+ * @brief  Implementation of CD_DataOps.H
+ * @author Robert Marskar
+ */
 
 // Std includes
 #include <limits>
@@ -405,8 +405,8 @@ DataOps::averageFaceToCell(LevelData<EBCellFAB>&       a_cellData,
       // Hooks for single-valued data.
       BaseFab<Real>& cellreg = cellData.getSingleValuedFAB();
 
-      // Irregular kernel. Same as the above except that we need to explicitly get the faces. Note that this is an arithmetic average,
-      // i.e. not weighted by the face area fractions.
+      // Irregular kernel. Same as the above except that we need to explicitly get the faces. Note that this is an
+      // arithmetic average, i.e. not weighted by the face area fractions.
       auto irregularKernel = [&](const VolIndex& vof) -> void {
         cellData(vof, comp) = 0.0;
 

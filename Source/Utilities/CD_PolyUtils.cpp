@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_PolyUtils.cpp
-  @brief  Implementation of CD_PolyUtils.cpp
-  @author Robert Marskar
-*/
+ * @file   CD_PolyUtils.cpp
+ * @brief  Implementation of CD_PolyUtils.cpp
+ * @author Robert Marskar
+ */
 
 // Std includes
 #include <cmath>

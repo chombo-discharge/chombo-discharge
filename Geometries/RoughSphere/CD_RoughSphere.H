@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_RoughSphere.H
-  @brief  Rough sphere geometry
-  @author Robert Marskar
-*/
+ * @file   CD_RoughSphere.H
+ * @brief  Rough sphere geometry
+ * @author Robert Marskar
+ */
 
 #ifndef CD_ROUGHSPHERE_H
 #define CD_ROUGHSPHERE_H
@@ -17,8 +17,8 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief This is a class that a rough sphere (either electrode or dielectric)
-*/
+ * @brief This is a class that a rough sphere (either electrode or dielectric)
+ */
 class RoughSphere : public ComputationalGeometry
 {
 public:
@@ -26,30 +26,30 @@ public:
   ~RoughSphere() override;
 
   /**
-    @brief Copy constructor
-    @param[in] a_other Other geometry
-  */
+   * @brief Copy constructor
+   * @param[in] a_other Other geometry
+   */
   RoughSphere(const RoughSphere& a_other) = default;
 
   /**
-    @brief Copy assignment
-    @param[in] a_other Other geometry
-    @return Reference to this
-  */
+   * @brief Copy assignment
+   * @param[in] a_other Other geometry
+   * @return Reference to this
+   */
   RoughSphere&
   operator=(const RoughSphere& a_other) = default;
 
   /**
-    @brief Move constructor
-    @param[in,out] a_other Other geometry
-  */
+   * @brief Move constructor
+   * @param[in,out] a_other Other geometry
+   */
   RoughSphere(RoughSphere&& a_other) = default;
 
   /**
-    @brief Move assignment
-    @param[in,out] a_other Other geometry
-    @return Reference to this
-  */
+   * @brief Move assignment
+   * @param[in,out] a_other Other geometry
+   * @return Reference to this
+   */
   RoughSphere&
   operator=(RoughSphere&& a_other) noexcept = default;
 };

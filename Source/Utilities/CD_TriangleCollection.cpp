@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_TriangleCollection.cpp
-  @brief  Implementation of CD_TriangleCollection.H
-  @author Robert Marskar
-*/
+ * @file   CD_TriangleCollection.cpp
+ * @brief  Implementation of CD_TriangleCollection.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <CH_Timer.H>
@@ -78,15 +78,15 @@ TriangleCollection::getClosestTriangles(const Vec3& a_point) const noexcept
 
   std::vector<TriAndDist> candidates;
 
-  // Visitation pattern. Go into the node if the point is inside or the distance to the BV is shorter than the shortest distance
-  // that we've found so far.
+  // Visitation pattern. Go into the node if the point is inside or the distance to the BV is shorter than the shortest
+  // distance that we've found so far.
   EBGeometry::BVH::PrunePredicate<Node, Real> prunePredicate =
     [&shortestDistanceSoFar](const Node& /*a_node*/, const BVHMeta& a_bvDist) noexcept -> bool {
     return a_bvDist <= 0.0 || a_bvDist <= shortestDistanceSoFar;
   };
 
-  // Ordering for BVH nodes. When visiting an internal node, we sort its children based on the distance to the respective bounding volumes. In
-  // the BVH traversel, we then visit the closest nodes first.
+  // Ordering for BVH nodes. When visiting an internal node, we sort its children based on the distance to the
+  // respective bounding volumes. In the BVH traversel, we then visit the closest nodes first.
   EBGeometry::BVH::PackedChildOrderer<Real, K> childOrderer =
     [](std::array<std::pair<uint32_t, Real>, K>& a_leaves) noexcept -> void {
     std::sort(a_leaves.begin(),

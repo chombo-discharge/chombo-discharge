@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_MFHelmholtzElectrostaticEBBC.H
-  @brief  Declaration of a Electrostatic boundary condition class for MFHelmholtzOp.
-  @author Robert Marskar
-*/
+ * @file   CD_MFHelmholtzElectrostaticEBBC.H
+ * @brief  Declaration of a Electrostatic boundary condition class for MFHelmholtzOp.
+ * @author Robert Marskar
+ */
 
 #ifndef CD_MFHELMHOLTZELECTROSTATICEBBC_H
 #define CD_MFHELMHOLTZELECTROSTATICEBBC_H
@@ -19,134 +19,138 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Class for making Electrostatic boundary conditions on the EB in a multifluid context. 
-  @details This implements MFHelmholtzEBBC, which is essentially an EBHelmholtzEBBC-derived class that performs automatic "matching" on cells
-  with jumps in the b-coefficients. Users will never have to interact directly with this object. 
-*/
+ * @brief Class for making Electrostatic boundary conditions on the EB in a multifluid context.
+ * @details This implements MFHelmholtzEBBC, which is essentially an EBHelmholtzEBBC-derived class that performs
+ * automatic "matching" on cells with jumps in the b-coefficients. Users will never have to interact directly with this
+ * object.
+ */
 class MFHelmholtzElectrostaticEBBC : public MFHelmholtzEBBC
 {
 public:
   /**
-    @brief Full constructor
-    @param[in] a_phase            Phase
-    @param[in] a_electrostaticBCs Electrostatic boundary conditions on EBs
-    @param[in] a_jumpBC           Jumpc BC object. 
-  */
+   * @brief Full constructor
+   * @param[in] a_phase            Phase
+   * @param[in] a_electrostaticBCs Electrostatic boundary conditions on EBs
+   * @param[in] a_jumpBC           Jumpc BC object.
+   */
   MFHelmholtzElectrostaticEBBC(int                                     a_phase,
                                const ElectrostaticEbBc&                a_electrostaticBCs,
                                const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC);
 
   /**
-    @brief No weak construction.
-  */
+   * @brief No weak construction.
+   */
   MFHelmholtzElectrostaticEBBC() = delete;
 
   /**
-    @brief No copy construction
-    @param[in] a_other Other object
-  */
+   * @brief No copy construction
+   * @param[in] a_other Other object
+   */
   MFHelmholtzElectrostaticEBBC(const MFHelmholtzElectrostaticEBBC& a_other) = delete;
 
   /**
-    @brief No move construction
-    @param[in] a_other Other object
-  */
+   * @brief No move construction
+   * @param[in] a_other Other object
+   */
   MFHelmholtzElectrostaticEBBC(const MFHelmholtzElectrostaticEBBC&& a_other) = delete;
 
   /**
-    @brief Default constructor (does nothing). 
-  */
+   * @brief Default constructor (does nothing).
+   */
   ~MFHelmholtzElectrostaticEBBC() override;
 
   /**
-    @brief No copy assignment
-    @param[in] a_other Other object
-  */
+   * @brief No copy assignment
+   * @param[in] a_other Other object
+   */
   MFHelmholtzElectrostaticEBBC&
   operator=(const MFHelmholtzElectrostaticEBBC& a_other) = delete;
 
   /**
-    @brief No move assignment
-    @param[in] a_other Other object
-  */
+   * @brief No move assignment
+   * @param[in] a_other Other object
+   */
   MFHelmholtzElectrostaticEBBC&
   operator=(const MFHelmholtzElectrostaticEBBC&& a_other) = delete;
 
   /**
-    @brief Set stencil order
-    @details EBHelmholtzEBBC uses least-squares based stencils for gradient reconstruction. This routine sets the
-    order of that reconstruction. 
-    @param[in] a_order Must be > 0. 
-    @note The radius of the stencil is the same as the order -- do not use an order larger than the number of ghost cells that you will use. 
-  */
+   * @brief Set stencil order
+   * @details EBHelmholtzEBBC uses least-squares based stencils for gradient reconstruction. This routine sets the
+   * order of that reconstruction.
+   * @param[in] a_order Must be > 0.
+   * @note The radius of the stencil is the same as the order -- do not use an order larger than the number of ghost
+   * cells that you will use.
+   */
   void
   setOrder(int a_order);
 
   /**
-    @brief Set stencil weight
-    @param[in] a_weight Equation weights. 
-    @details EBHelmholtzEBBC uses least-squares based stencils for gradient reconstruction. This routine sets the equation weights in that reconstruction. 
-  */
+   * @brief Set stencil weight
+   * @param[in] a_weight Equation weights.
+   * @details EBHelmholtzEBBC uses least-squares based stencils for gradient reconstruction. This routine sets the
+   * equation weights in that reconstruction.
+   */
   void
   setWeight(int a_weight);
 
   /**
-    @brief Drop BC order if domain size is equal or below this.
-    @param[in] a_domainSize Description
-  */
+   * @brief Drop BC order if domain size is equal or below this.
+   * @param[in] a_domainSize Description
+   */
   void
   setDomainDropOrder(int a_domainSize);
 
   /**
-    @brief Signal that it should drop the stencil order if the cell is a coarsened cell
-    @param[in] a_dropOrder
-  */
+   * @brief Signal that it should drop the stencil order if the cell is a coarsened cell
+   * @param[in] a_dropOrder
+   */
   void
   setCoarseGridDropOrder(bool a_dropOrder);
 
 protected:
   /**
-    @brief Stencil order
-  */
+   * @brief Stencil order
+   */
   int m_order;
 
   /**
-    @brief Stencil weight
-  */
+   * @brief Stencil weight
+   */
   int m_weight;
 
   /**
-    @brief Special flag for dropping stencil order when domains become coarser than this.
-  */
+   * @brief Special flag for dropping stencil order when domains become coarser than this.
+   */
   int m_domainDropOrder;
 
   /**
-    @brief Special flag for dropping stencil order if the cell is a coarsened cell
-  */
+   * @brief Special flag for dropping stencil order if the cell is a coarsened cell
+   */
   bool m_dropOrder;
 
   /**
-    @brief Electrostatic boundary conditions
-  */
+   * @brief Electrostatic boundary conditions
+   */
   ElectrostaticEbBc m_electrostaticBCs;
 
   /**
-    @brief User define function. 
-  */
+   * @brief User define function.
+   */
   virtual void
   defineSinglePhase() override;
 
   /**
-    @brief Apply flux single phase
-    @details This iterates over single-phase cells only, multi-phase cells are automatically enforced (in MFHelmholtzEBBC) by the jump boundary conditions. 
-    @param[in,out] a_singlePhaseVofs   Iterator for single-phase cut-cells
-    @param[in,out] a_Lphi              Operator kappa*L(phi)
-    @param[in]    a_phi               Phi, cell-centered.
-    @param[in]    a_Bcoef             EB-centered B-coefficient
-    @param[in]    a_dit               Data index    
-    @param[in]    a_beta              Beta. Passed in from operator. 
-    @param[in]    a_homogeneousPhysBC Homogeneous BC or not. 
-  */
+   * @brief Apply flux single phase
+   * @details This iterates over single-phase cells only, multi-phase cells are automatically enforced (in
+   * MFHelmholtzEBBC) by the jump boundary conditions.
+   * @param[in,out] a_singlePhaseVofs   Iterator for single-phase cut-cells
+   * @param[in,out] a_Lphi              Operator kappa*L(phi)
+   * @param[in]    a_phi               Phi, cell-centered.
+   * @param[in]    a_Bcoef             EB-centered B-coefficient
+   * @param[in]    a_dit               Data index
+   * @param[in]    a_beta              Beta. Passed in from operator.
+   * @param[in]    a_homogeneousPhysBC Homogeneous BC or not.
+   */
   virtual void
   applyEBFluxSinglePhase(VoFIterator&           a_singlePhaseVofs,
                          EBCellFAB&             a_Lphi,
@@ -157,10 +161,10 @@ protected:
                          const bool&            a_homogeneousPhysBC) const override;
 
   /**
-    @brief Get electrode potential
-    @param[in] a_pos Position in space
-    @return Electrode potential
-  */
+   * @brief Get electrode potential
+   * @param[in] a_pos Position in space
+   * @return Electrode potential
+   */
   inline Real
   getElectrodePotential(const RealVect& a_pos) const;
 };

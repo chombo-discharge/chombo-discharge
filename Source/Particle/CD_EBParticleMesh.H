@@ -5,39 +5,39 @@
  */
 
 /**
-  @file   CD_EBParticleMesh.H
-  @brief  Single-patch ParticleSoA deposit/interpolate onto an embedded-boundary mesh.
-  @author Robert Marskar
-  @details
-  Deposits and interpolates ParticleSoA<P, Traits> leaves on a single grid patch. The
-  per-particle EB/cut-cell kernels (the depositParticleXXX / interpolateParticleXXX helpers)
-  are storage-agnostic (position + Real* field + numComp) and take a destination-component
-  offset. The public loops:
-
-    - select payload fields with a variadic pack of ParticleSoA payload data-member pointers
-      (deposit<&Payload::vx, ...>), plus a dedicated depositWeight() for the container-owned
-      weight column;
-    - vector fields are per-component (non-contiguous) columns: the loop marshals each
-      particle's components to/from a stack Real[] scratch the workers consume, promoting
-      (deposit) / demoting (interpolate) between the column type and Real.
-
-  <h3>Destination components</h3>
-  Every public deposit/interpolate comes in two forms: a CORE form taking an explicit starting
-  mesh component a_comp (the selected columns map to consecutive components
-  [a_comp, a_comp + nColumns)), and a CONVENIENCE overload that omits a_comp and uses the first
-  components (a_comp == 0).
-
-  <h3>Why depositWeight is separate</h3>
-  weight is a container-OWNED mandatory column, not a payload member, so it cannot be named by
-  the deposit<&Payload::field> selector. depositWeight() is its entry point. Mechanically it is
-  the same as deposit() -- both are thin wrappers that hand depositCore a strength gatherer --
-  it just gathers from weightColumn() instead of payload columns.
-
-  @note Per project rule, NO default arguments -- callers specify every argument (the "first
-        components" behaviour is provided by an overload, not a default).
-  @note depositParticleTSC fixes a partition-of-unity bug present in the original AoS kernels
-        (see the kernel).
-*/
+ * @file   CD_EBParticleMesh.H
+ * @brief  Single-patch ParticleSoA deposit/interpolate onto an embedded-boundary mesh.
+ * @author Robert Marskar
+ * @details
+ * Deposits and interpolates ParticleSoA<P, Traits> leaves on a single grid patch. The
+ * per-particle EB/cut-cell kernels (the depositParticleXXX / interpolateParticleXXX helpers)
+ * are storage-agnostic (position + Real* field + numComp) and take a destination-component
+ * offset. The public loops:
+ *
+ *   - select payload fields with a variadic pack of ParticleSoA payload data-member pointers
+ *     (deposit<&Payload::vx, ...>), plus a dedicated depositWeight() for the container-owned
+ *     weight column;
+ *   - vector fields are per-component (non-contiguous) columns: the loop marshals each
+ *     particle's components to/from a stack Real[] scratch the workers consume, promoting
+ *     (deposit) / demoting (interpolate) between the column type and Real.
+ *
+ * <h3>Destination components</h3>
+ * Every public deposit/interpolate comes in two forms: a CORE form taking an explicit starting
+ * mesh component a_comp (the selected columns map to consecutive components
+ * [a_comp, a_comp + nColumns)), and a CONVENIENCE overload that omits a_comp and uses the first
+ * components (a_comp == 0).
+ *
+ * <h3>Why depositWeight is separate</h3>
+ * weight is a container-OWNED mandatory column, not a payload member, so it cannot be named by
+ * the deposit<&Payload::field> selector. depositWeight() is its entry point. Mechanically it is
+ * the same as deposit() -- both are thin wrappers that hand depositCore a strength gatherer --
+ * it just gathers from weightColumn() instead of payload columns.
+ *
+ * @note Per project rule, NO default arguments -- callers specify every argument (the "first
+ *       components" behaviour is provided by an overload, not a default).
+ * @note depositParticleTSC fixes a partition-of-unity bug present in the original AoS kernels
+ *       (see the kernel).
+ */
 
 #ifndef CD_EBPARTICLEMESH_H
 #define CD_EBPARTICLEMESH_H
@@ -64,26 +64,26 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Deposits/interpolates ParticleSoA leaves on a single patch, with embedded-boundary
-         (cut-cell) awareness.
-*/
+ * @brief Deposits/interpolates ParticleSoA leaves on a single patch, with embedded-boundary
+ *        (cut-cell) awareness.
+ */
 class EBParticleMesh
 {
 public:
   /**
-    @brief Default constructor. Must subsequently call define.
-  */
+   * @brief Default constructor. Must subsequently call define.
+   */
   EBParticleMesh() : m_verbose(false)
   {}
 
   /**
-    @brief Full constructor; calls define.
-    @param[in] a_domain  Computational domain.
-    @param[in] a_region  Cell-centered valid box.
-    @param[in] a_ebisbox EBIS box.
-    @param[in] a_dx      Grid resolution.
-    @param[in] a_probLo  Lower-left corner of the computational domain.
-  */
+   * @brief Full constructor; calls define.
+   * @param[in] a_domain  Computational domain.
+   * @param[in] a_region  Cell-centered valid box.
+   * @param[in] a_ebisbox EBIS box.
+   * @param[in] a_dx      Grid resolution.
+   * @param[in] a_probLo  Lower-left corner of the computational domain.
+   */
   EBParticleMesh(const ProblemDomain& a_domain,
                  const Box&           a_region,
                  const EBISBox&       a_ebisbox,
@@ -94,13 +94,13 @@ public:
   }
 
   /**
-    @brief Define function.
-    @param[in] a_domain  Computational domain.
-    @param[in] a_region  Cell-centered valid box.
-    @param[in] a_ebisbox EBIS box.
-    @param[in] a_dx      Grid resolution.
-    @param[in] a_probLo  Lower-left corner of the computational domain.
-  */
+   * @brief Define function.
+   * @param[in] a_domain  Computational domain.
+   * @param[in] a_region  Cell-centered valid box.
+   * @param[in] a_ebisbox EBIS box.
+   * @param[in] a_dx      Grid resolution.
+   * @param[in] a_probLo  Lower-left corner of the computational domain.
+   */
   void
   define(const ProblemDomain& a_domain,
          const Box&           a_region,
@@ -119,18 +119,18 @@ public:
   }
 
   /**
-    @brief Deposit the container-owned weight column onto mesh component a_comp.
-    @details weight is a mandatory column, not a payload member, so it has its own entry point
-    (see the class documentation). Equivalent to deposit() but gathers from weightColumn().
-    @tparam P      Payload type of the ParticleSoA.
-    @tparam Traits Column descriptor of P.
-    @param[in,out] a_meshData       Mesh data (INCREMENTED). Must have at least a_comp+1 components.
-    @param[in]     a_comp           Destination mesh component.
-    @param[in]     a_particles      Particles to deposit.
-    @param[in]     a_depositionType Deposition kernel (NGP/CIC/TSC).
-    @param[in]     a_widthScale     Particle-width multiplier.
-    @param[in]     a_forceIrregNGP  Force NGP in cut cells.
-  */
+   * @brief Deposit the container-owned weight column onto mesh component a_comp.
+   * @details weight is a mandatory column, not a payload member, so it has its own entry point
+   * (see the class documentation). Equivalent to deposit() but gathers from weightColumn().
+   * @tparam P      Payload type of the ParticleSoA.
+   * @tparam Traits Column descriptor of P.
+   * @param[in,out] a_meshData       Mesh data (INCREMENTED). Must have at least a_comp+1 components.
+   * @param[in]     a_comp           Destination mesh component.
+   * @param[in]     a_particles      Particles to deposit.
+   * @param[in]     a_depositionType Deposition kernel (NGP/CIC/TSC).
+   * @param[in]     a_widthScale     Particle-width multiplier.
+   * @param[in]     a_forceIrregNGP  Force NGP in cut cells.
+   */
   template <typename P, typename Traits>
   void
   depositWeight(EBCellFAB&                    a_meshData,
@@ -155,15 +155,15 @@ public:
   }
 
   /**
-    @brief Deposit the weight column onto the first mesh component (a_comp == 0).
-    @tparam P      Payload type of the ParticleSoA.
-    @tparam Traits Column descriptor of P.
-    @param[in,out] a_meshData       Mesh data (INCREMENTED).
-    @param[in]     a_particles      Particles to deposit.
-    @param[in]     a_depositionType Deposition kernel (NGP/CIC/TSC).
-    @param[in]     a_widthScale     Particle-width multiplier.
-    @param[in]     a_forceIrregNGP  Force NGP in cut cells.
-  */
+   * @brief Deposit the weight column onto the first mesh component (a_comp == 0).
+   * @tparam P      Payload type of the ParticleSoA.
+   * @tparam Traits Column descriptor of P.
+   * @param[in,out] a_meshData       Mesh data (INCREMENTED).
+   * @param[in]     a_particles      Particles to deposit.
+   * @param[in]     a_depositionType Deposition kernel (NGP/CIC/TSC).
+   * @param[in]     a_widthScale     Particle-width multiplier.
+   * @param[in]     a_forceIrregNGP  Force NGP in cut cells.
+   */
   template <typename P, typename Traits>
   void
   depositWeight(EBCellFAB&                    a_meshData,
@@ -178,19 +178,19 @@ public:
   }
 
   /**
-    @brief Deposit one or more payload columns onto mesh components [a_comp, a_comp + nColumns).
-    @details nColumns = sizeof...(Members) (1 = scalar, SpaceDim = vector). The selected columns
-    map to consecutive mesh components starting at a_comp.
-    @tparam Members Pack of payload data-member pointers selecting the column(s) to deposit.
-    @tparam P       Payload type (deduced).
-    @tparam Traits  Column descriptor (deduced).
-    @param[in,out] a_meshData       Mesh data (INCREMENTED). Needs at least a_comp+sizeof...(Members) components.
-    @param[in]     a_comp           First destination mesh component.
-    @param[in]     a_particles      Particles to deposit.
-    @param[in]     a_depositionType Deposition kernel (NGP/CIC/TSC).
-    @param[in]     a_widthScale     Particle-width multiplier.
-    @param[in]     a_forceIrregNGP  Force NGP in cut cells.
-  */
+   * @brief Deposit one or more payload columns onto mesh components [a_comp, a_comp + nColumns).
+   * @details nColumns = sizeof...(Members) (1 = scalar, SpaceDim = vector). The selected columns
+   * map to consecutive mesh components starting at a_comp.
+   * @tparam Members Pack of payload data-member pointers selecting the column(s) to deposit.
+   * @tparam P       Payload type (deduced).
+   * @tparam Traits  Column descriptor (deduced).
+   * @param[in,out] a_meshData       Mesh data (INCREMENTED). Needs at least a_comp+sizeof...(Members) components.
+   * @param[in]     a_comp           First destination mesh component.
+   * @param[in]     a_particles      Particles to deposit.
+   * @param[in]     a_depositionType Deposition kernel (NGP/CIC/TSC).
+   * @param[in]     a_widthScale     Particle-width multiplier.
+   * @param[in]     a_forceIrregNGP  Force NGP in cut cells.
+   */
   template <auto... Members, typename P, typename Traits>
   void
   deposit(EBCellFAB&                    a_meshData,
@@ -219,16 +219,16 @@ public:
   }
 
   /**
-    @brief Deposit payload columns onto the first mesh components (a_comp == 0).
-    @tparam Members Pack of payload data-member pointers selecting the column(s) to deposit.
-    @tparam P       Payload type (deduced).
-    @tparam Traits  Column descriptor (deduced).
-    @param[in,out] a_meshData       Mesh data (INCREMENTED).
-    @param[in]     a_particles      Particles to deposit.
-    @param[in]     a_depositionType Deposition kernel (NGP/CIC/TSC).
-    @param[in]     a_widthScale     Particle-width multiplier.
-    @param[in]     a_forceIrregNGP  Force NGP in cut cells.
-  */
+   * @brief Deposit payload columns onto the first mesh components (a_comp == 0).
+   * @tparam Members Pack of payload data-member pointers selecting the column(s) to deposit.
+   * @tparam P       Payload type (deduced).
+   * @tparam Traits  Column descriptor (deduced).
+   * @param[in,out] a_meshData       Mesh data (INCREMENTED).
+   * @param[in]     a_particles      Particles to deposit.
+   * @param[in]     a_depositionType Deposition kernel (NGP/CIC/TSC).
+   * @param[in]     a_widthScale     Particle-width multiplier.
+   * @param[in]     a_forceIrregNGP  Force NGP in cut cells.
+   */
   template <auto... Members, typename P, typename Traits>
   void
   deposit(EBCellFAB&                    a_meshData,
@@ -243,21 +243,21 @@ public:
   }
 
   /**
-    @brief Deposit a custom per-particle scalar (computed by a_gather) onto mesh component a_comp.
-    @details Generalizes depositWeight() to an arbitrary per-particle value -- e.g. a product of columns
-    such as weight*mobility (conductivity), which is not a single payload column. a_gather is the same
-    (index, out) functor depositCore() uses internally; exactly one component is deposited.
-    @tparam P          Payload type of the ParticleSoA.
-    @tparam Traits     Column descriptor of P.
-    @tparam GatherFunc Callable (std::size_t a_i, Real* a_out) writing the particle's deposited value.
-    @param[in,out] a_meshData       Mesh data (INCREMENTED). Must have at least a_comp+1 components.
-    @param[in]     a_comp           Destination mesh component.
-    @param[in]     a_particles      Particles to deposit.
-    @param[in]     a_depositionType Deposition kernel (NGP/CIC/TSC).
-    @param[in]     a_widthScale     Particle-width multiplier.
-    @param[in]     a_forceIrregNGP  Force NGP in cut cells.
-    @param[in]     a_gather         Per-particle value gatherer.
-  */
+   * @brief Deposit a custom per-particle scalar (computed by a_gather) onto mesh component a_comp.
+   * @details Generalizes depositWeight() to an arbitrary per-particle value -- e.g. a product of columns
+   * such as weight*mobility (conductivity), which is not a single payload column. a_gather is the same
+   * (index, out) functor depositCore() uses internally; exactly one component is deposited.
+   * @tparam P          Payload type of the ParticleSoA.
+   * @tparam Traits     Column descriptor of P.
+   * @tparam GatherFunc Callable (std::size_t a_i, Real* a_out) writing the particle's deposited value.
+   * @param[in,out] a_meshData       Mesh data (INCREMENTED). Must have at least a_comp+1 components.
+   * @param[in]     a_comp           Destination mesh component.
+   * @param[in]     a_particles      Particles to deposit.
+   * @param[in]     a_depositionType Deposition kernel (NGP/CIC/TSC).
+   * @param[in]     a_widthScale     Particle-width multiplier.
+   * @param[in]     a_forceIrregNGP  Force NGP in cut cells.
+   * @param[in]     a_gather         Per-particle value gatherer.
+   */
   template <typename P, typename Traits, typename GatherFunc>
   void
   depositGathered(EBCellFAB&                    a_meshData,
@@ -281,18 +281,18 @@ public:
   }
 
   /**
-    @brief Interpolate mesh components [a_comp, a_comp + nColumns) onto one or more payload columns.
-    @details nColumns = sizeof...(Members) (1 = scalar, SpaceDim = vector). Consecutive mesh
-    components starting at a_comp are read into the selected columns.
-    @tparam Members Pack of payload data-member pointers selecting the target column(s).
-    @tparam P       Payload type (deduced).
-    @tparam Traits  Column descriptor (deduced).
-    @param[in,out] a_particles     Particles whose target columns are overwritten.
-    @param[in]     a_meshData      Mesh data. Needs at least a_comp+sizeof...(Members) components.
-    @param[in]     a_comp          First source mesh component.
-    @param[in]     a_interpType    Interpolation kernel (NGP/CIC/TSC).
-    @param[in]     a_forceIrregNGP Force NGP in cut cells.
-  */
+   * @brief Interpolate mesh components [a_comp, a_comp + nColumns) onto one or more payload columns.
+   * @details nColumns = sizeof...(Members) (1 = scalar, SpaceDim = vector). Consecutive mesh
+   * components starting at a_comp are read into the selected columns.
+   * @tparam Members Pack of payload data-member pointers selecting the target column(s).
+   * @tparam P       Payload type (deduced).
+   * @tparam Traits  Column descriptor (deduced).
+   * @param[in,out] a_particles     Particles whose target columns are overwritten.
+   * @param[in]     a_meshData      Mesh data. Needs at least a_comp+sizeof...(Members) components.
+   * @param[in]     a_comp          First source mesh component.
+   * @param[in]     a_interpType    Interpolation kernel (NGP/CIC/TSC).
+   * @param[in]     a_forceIrregNGP Force NGP in cut cells.
+   */
   template <auto... Members, typename P, typename Traits>
   void
   interpolate(ParticleSoA<P, Traits>& a_particles,
@@ -322,15 +322,15 @@ public:
   }
 
   /**
-    @brief Interpolate the first mesh components (a_comp == 0) onto payload columns.
-    @tparam Members Pack of payload data-member pointers selecting the target column(s).
-    @tparam P       Payload type (deduced).
-    @tparam Traits  Column descriptor (deduced).
-    @param[in,out] a_particles     Particles whose target columns are overwritten.
-    @param[in]     a_meshData      Mesh data.
-    @param[in]     a_interpType    Interpolation kernel (NGP/CIC/TSC).
-    @param[in]     a_forceIrregNGP Force NGP in cut cells.
-  */
+   * @brief Interpolate the first mesh components (a_comp == 0) onto payload columns.
+   * @tparam Members Pack of payload data-member pointers selecting the target column(s).
+   * @tparam P       Payload type (deduced).
+   * @tparam Traits  Column descriptor (deduced).
+   * @param[in,out] a_particles     Particles whose target columns are overwritten.
+   * @param[in]     a_meshData      Mesh data.
+   * @param[in]     a_interpType    Interpolation kernel (NGP/CIC/TSC).
+   * @param[in]     a_forceIrregNGP Force NGP in cut cells.
+   */
   template <auto... Members, typename P, typename Traits>
   void
   interpolate(ParticleSoA<P, Traits>& a_particles,
@@ -344,17 +344,17 @@ public:
   }
 
   /**
-    @brief Interpolate mesh component a_comp onto the container-owned weight column.
-    @details weight is a mandatory column, not a payload member, so it has its own entry point (the
-    interpolation mirror of depositWeight). Equivalent to interpolate() but scatters into weight().
-    @tparam P      Payload type of the ParticleSoA.
-    @tparam Traits Column descriptor of P.
-    @param[in,out] a_particles     Particles whose weight column is overwritten.
-    @param[in]     a_meshData      Mesh data. Must have at least a_comp+1 components.
-    @param[in]     a_comp          Source mesh component.
-    @param[in]     a_interpType    Interpolation kernel (NGP/CIC/TSC).
-    @param[in]     a_forceIrregNGP Force NGP in cut cells.
-  */
+   * @brief Interpolate mesh component a_comp onto the container-owned weight column.
+   * @details weight is a mandatory column, not a payload member, so it has its own entry point (the
+   * interpolation mirror of depositWeight). Equivalent to interpolate() but scatters into weight().
+   * @tparam P      Payload type of the ParticleSoA.
+   * @tparam Traits Column descriptor of P.
+   * @param[in,out] a_particles     Particles whose weight column is overwritten.
+   * @param[in]     a_meshData      Mesh data. Must have at least a_comp+1 components.
+   * @param[in]     a_comp          Source mesh component.
+   * @param[in]     a_interpType    Interpolation kernel (NGP/CIC/TSC).
+   * @param[in]     a_forceIrregNGP Force NGP in cut cells.
+   */
   template <typename P, typename Traits>
   void
   interpolateWeight(ParticleSoA<P, Traits>& a_particles,
@@ -377,14 +377,14 @@ public:
   }
 
   /**
-    @brief Interpolate the first mesh component (a_comp == 0) onto the weight column.
-    @tparam P      Payload type of the ParticleSoA.
-    @tparam Traits Column descriptor of P.
-    @param[in,out] a_particles     Particles whose weight column is overwritten.
-    @param[in]     a_meshData      Mesh data.
-    @param[in]     a_interpType    Interpolation kernel (NGP/CIC/TSC).
-    @param[in]     a_forceIrregNGP Force NGP in cut cells.
-  */
+   * @brief Interpolate the first mesh component (a_comp == 0) onto the weight column.
+   * @tparam P      Payload type of the ParticleSoA.
+   * @tparam Traits Column descriptor of P.
+   * @param[in,out] a_particles     Particles whose weight column is overwritten.
+   * @param[in]     a_meshData      Mesh data.
+   * @param[in]     a_interpType    Interpolation kernel (NGP/CIC/TSC).
+   * @param[in]     a_forceIrregNGP Force NGP in cut cells.
+   */
   template <typename P, typename Traits>
   void
   interpolateWeight(ParticleSoA<P, Traits>& a_particles,
@@ -399,58 +399,58 @@ public:
 
 protected:
   /**
-    @brief Computational domain.
-  */
+   * @brief Computational domain.
+   */
   ProblemDomain m_domain;
 
   /**
-    @brief Verbose flag.
-  */
+   * @brief Verbose flag.
+   */
   bool m_verbose;
 
   /**
-    @brief Cell-centered valid box.
-  */
+   * @brief Cell-centered valid box.
+   */
   Box m_region;
 
   /**
-    @brief Non-owning alias to the caller's EBIS box.
-    @details Deliberately a pointer, not a value. EBParticleMesh is constructed per grid patch in the
-    deposition/interpolation hot loops, so storing the EBISBox by value would copy-assign its
-    EBGraph/EBData PIMPL handles on every construction. EBISBox is PIMPL (EBGraph/EBData each hold a
-    RefCountedPtr to their *Implem), so that copy is shallow -- but RefCountedPtr::operator= is guarded
-    by a single global OpenMP critical section (RCPAssign) (plus atomic refcount traffic on the shared,
-    e.g. all-regular, *Implem). In OpenMP builds that serialises the per-patch loop on that global lock;
-    aliasing the EBISBox (which is owned by the EBISLayout and outlives this transient helper) avoids
-    the copy entirely. In pure-MPI builds the difference is negligible, but the alias is strictly cheaper.
-  */
+   * @brief Non-owning alias to the caller's EBIS box.
+   * @details Deliberately a pointer, not a value. EBParticleMesh is constructed per grid patch in the
+   * deposition/interpolation hot loops, so storing the EBISBox by value would copy-assign its
+   * EBGraph/EBData PIMPL handles on every construction. EBISBox is PIMPL (EBGraph/EBData each hold a
+   * RefCountedPtr to their *Implem), so that copy is shallow -- but RefCountedPtr::operator= is guarded
+   * by a single global OpenMP critical section (RCPAssign) (plus atomic refcount traffic on the shared,
+   * e.g. all-regular, *Implem). In OpenMP builds that serialises the per-patch loop on that global lock;
+   * aliasing the EBISBox (which is owned by the EBISLayout and outlives this transient helper) avoids
+   * the copy entirely. In pure-MPI builds the difference is negligible, but the alias is strictly cheaper.
+   */
   const EBISBox* m_ebisbox = nullptr;
 
   /**
-    @brief Grid resolution.
-  */
+   * @brief Grid resolution.
+   */
   RealVect m_dx;
 
   /**
-    @brief Lower-left corner of the computational domain.
-  */
+   * @brief Lower-left corner of the computational domain.
+   */
   RealVect m_probLo;
 
   /**
-    @brief Shared deposition loop: gathers each particle's strength via a_gather, then calls the
-           storage-agnostic per-particle kernel for the selected deposition type.
-    @tparam P          Payload type.
-    @tparam Traits     Column descriptor.
-    @tparam StrengthFn Callable (std::size_t i, Real* out) filling out[0..numComp).
-    @param[in,out] a_meshData       Mesh data (INCREMENTED).
-    @param[in]     a_comp           First destination mesh component.
-    @param[in]     a_particles      Particles to deposit.
-    @param[in]     a_numComp        Number of components to deposit (1 or SpaceDim).
-    @param[in]     a_depositionType Deposition kernel.
-    @param[in]     a_widthScale     Particle-width multiplier.
-    @param[in]     a_forceIrregNGP  Force NGP in cut cells.
-    @param[in]     a_gather         Strength gatherer (promotes column values to Real).
-  */
+   * @brief Shared deposition loop: gathers each particle's strength via a_gather, then calls the
+   *        storage-agnostic per-particle kernel for the selected deposition type.
+   * @tparam P          Payload type.
+   * @tparam Traits     Column descriptor.
+   * @tparam StrengthFn Callable (std::size_t i, Real* out) filling out[0..numComp).
+   * @param[in,out] a_meshData       Mesh data (INCREMENTED).
+   * @param[in]     a_comp           First destination mesh component.
+   * @param[in]     a_particles      Particles to deposit.
+   * @param[in]     a_numComp        Number of components to deposit (1 or SpaceDim).
+   * @param[in]     a_depositionType Deposition kernel.
+   * @param[in]     a_widthScale     Particle-width multiplier.
+   * @param[in]     a_forceIrregNGP  Force NGP in cut cells.
+   * @param[in]     a_gather         Strength gatherer (promotes column values to Real).
+   */
   template <typename P, typename Traits, typename StrengthFn>
   void
   depositCore(EBCellFAB&                    a_meshData,
@@ -530,19 +530,19 @@ protected:
   }
 
   /**
-    @brief Shared interpolation loop: calls the storage-agnostic per-particle kernel into a stack
-           scratch, then scatters the result into the selected column(s) via a_scatter.
-    @tparam P         Payload type.
-    @tparam Traits    Column descriptor.
-    @tparam ScatterFn Callable (std::size_t i, const Real* in) writing in[0..numComp) to columns.
-    @param[in,out] a_particles     Particles whose target columns are overwritten.
-    @param[in]     a_meshData      Mesh data.
-    @param[in]     a_comp          First source mesh component.
-    @param[in]     a_numComp       Number of components (1 or SpaceDim).
-    @param[in]     a_interpType    Interpolation kernel.
-    @param[in]     a_forceIrregNGP Force NGP in cut cells.
-    @param[in]     a_scatter       Result scatterer (demotes Real to the column type).
-  */
+   * @brief Shared interpolation loop: calls the storage-agnostic per-particle kernel into a stack
+   *        scratch, then scatters the result into the selected column(s) via a_scatter.
+   * @tparam P         Payload type.
+   * @tparam Traits    Column descriptor.
+   * @tparam ScatterFn Callable (std::size_t i, const Real* in) writing in[0..numComp) to columns.
+   * @param[in,out] a_particles     Particles whose target columns are overwritten.
+   * @param[in]     a_meshData      Mesh data.
+   * @param[in]     a_comp          First source mesh component.
+   * @param[in]     a_numComp       Number of components (1 or SpaceDim).
+   * @param[in]     a_interpType    Interpolation kernel.
+   * @param[in]     a_forceIrregNGP Force NGP in cut cells.
+   * @param[in]     a_scatter       Result scatterer (demotes Real to the column type).
+   */
   template <typename P, typename Traits, typename ScatterFn>
   void
   interpolateCore(ParticleSoA<P, Traits>& a_particles,
@@ -635,14 +635,14 @@ protected:
   // ===========================================================================
 
   /**
-    @brief NGP deposition of one particle.
-    @param[in,out] a_rho          Mesh data.
-    @param[in]     a_comp         First destination mesh component.
-    @param[in]     a_position     Particle position.
-    @param[in]     a_volumeFactor Volume factor.
-    @param[in]     a_strength     Per-component strength to deposit.
-    @param[in]     a_numComp      Number of components.
-  */
+   * @brief NGP deposition of one particle.
+   * @param[in,out] a_rho          Mesh data.
+   * @param[in]     a_comp         First destination mesh component.
+   * @param[in]     a_position     Particle position.
+   * @param[in]     a_volumeFactor Volume factor.
+   * @param[in]     a_strength     Per-component strength to deposit.
+   * @param[in]     a_numComp      Number of components.
+   */
   inline void
   depositParticleNGP(EBCellFAB&      a_rho,
                      const int       a_comp,
@@ -663,16 +663,16 @@ protected:
   }
 
   /**
-    @brief Cell box that exactly covers the support of a cloud of the given per-direction width.
-    @details Anchored at the cloud's lower/upper edge cells, so the iterated box contains ONLY the
-    cells the cloud can overlap (cells outside it have zero weight and would be wasted scatter
-    updates). For the standard widths this is 2 cells/dir (CIC) or 3 (TSC), versus the
-    over-provisioned centered 3^D/5^D box; the weight clamp still zeroes any boundary cell, so the
-    deposited field is bit-identical.
-    @param[in] a_position      Particle position.
-    @param[in] a_particleWidth Cloud width per direction (in cells).
-    @return Cell box covering the cloud support.
-  */
+   * @brief Cell box that exactly covers the support of a cloud of the given per-direction width.
+   * @details Anchored at the cloud's lower/upper edge cells, so the iterated box contains ONLY the
+   * cells the cloud can overlap (cells outside it have zero weight and would be wasted scatter
+   * updates). For the standard widths this is 2 cells/dir (CIC) or 3 (TSC), versus the
+   * over-provisioned centered 3^D/5^D box; the weight clamp still zeroes any boundary cell, so the
+   * deposited field is bit-identical.
+   * @param[in] a_position      Particle position.
+   * @param[in] a_particleWidth Cloud width per direction (in cells).
+   * @return Cell box covering the cloud support.
+   */
   inline Box
   cloudBox(const RealVect& a_position, const RealVect& a_particleWidth) const noexcept
   {
@@ -688,16 +688,16 @@ protected:
   }
 
   /**
-    @brief CIC deposition of one particle.
-    @param[in,out] a_rho           Mesh data.
-    @param[in]     a_comp          First destination mesh component.
-    @param[in]     a_position      Particle position.
-    @param[in]     a_particleWidth Particle width (relative to grid resolution).
-    @param[in]     a_volumeFactor  Volume factor.
-    @param[in]     a_strength      Per-component strength to deposit.
-    @param[in]     a_numComp       Number of components.
-    @param[in]     a_forceIrregNGP Force NGP in cut cells.
-  */
+   * @brief CIC deposition of one particle.
+   * @param[in,out] a_rho           Mesh data.
+   * @param[in]     a_comp          First destination mesh component.
+   * @param[in]     a_position      Particle position.
+   * @param[in]     a_particleWidth Particle width (relative to grid resolution).
+   * @param[in]     a_volumeFactor  Volume factor.
+   * @param[in]     a_strength      Per-component strength to deposit.
+   * @param[in]     a_numComp       Number of components.
+   * @param[in]     a_forceIrregNGP Force NGP in cut cells.
+   */
   inline void
   depositParticleCIC(EBCellFAB&      a_rho,
                      const int       a_comp,
@@ -742,16 +742,16 @@ protected:
   }
 
   /**
-    @brief TSC deposition of one particle.
-    @param[in,out] a_rho           Mesh data.
-    @param[in]     a_comp          First destination mesh component.
-    @param[in]     a_position      Particle position.
-    @param[in]     a_particleWidth Particle width (relative to grid resolution).
-    @param[in]     a_volumeFactor  Volume factor.
-    @param[in]     a_strength      Per-component strength to deposit.
-    @param[in]     a_numComp       Number of components.
-    @param[in]     a_forceIrregNGP Force NGP in cut cells.
-  */
+   * @brief TSC deposition of one particle.
+   * @param[in,out] a_rho           Mesh data.
+   * @param[in]     a_comp          First destination mesh component.
+   * @param[in]     a_position      Particle position.
+   * @param[in]     a_particleWidth Particle width (relative to grid resolution).
+   * @param[in]     a_volumeFactor  Volume factor.
+   * @param[in]     a_strength      Per-component strength to deposit.
+   * @param[in]     a_numComp       Number of components.
+   * @param[in]     a_forceIrregNGP Force NGP in cut cells.
+   */
   inline void
   depositParticleTSC(EBCellFAB&      a_rho,
                      const int       a_comp,
@@ -804,13 +804,13 @@ protected:
   }
 
   /**
-    @brief NGP interpolation onto one particle.
-    @param[out] a_particleField Per-component field to fill.
-    @param[in]  a_meshData      Mesh data.
-    @param[in]  a_comp          First source mesh component.
-    @param[in]  a_position      Particle position.
-    @param[in]  a_numComp       Number of components.
-  */
+   * @brief NGP interpolation onto one particle.
+   * @param[out] a_particleField Per-component field to fill.
+   * @param[in]  a_meshData      Mesh data.
+   * @param[in]  a_comp          First source mesh component.
+   * @param[in]  a_position      Particle position.
+   * @param[in]  a_numComp       Number of components.
+   */
   inline void
   interpolateParticleNGP(Real*            a_particleField,
                          const EBCellFAB& a_meshData,
@@ -828,16 +828,16 @@ protected:
   }
 
   /**
-    @brief CIC interpolation onto one particle.
-    @param[out] a_particleField Per-component field to fill.
-    @param[in]  a_meshData      Mesh data.
-    @param[in]  a_comp          First source mesh component.
-    @param[in]  a_validBox      Box in which CIC is valid.
-    @param[in]  a_gatherBox     Read stencil box.
-    @param[in]  a_position      Particle position.
-    @param[in]  a_numComp       Number of components.
-    @param[in]  a_forceIrregNGP Force NGP in cut cells.
-  */
+   * @brief CIC interpolation onto one particle.
+   * @param[out] a_particleField Per-component field to fill.
+   * @param[in]  a_meshData      Mesh data.
+   * @param[in]  a_comp          First source mesh component.
+   * @param[in]  a_validBox      Box in which CIC is valid.
+   * @param[in]  a_gatherBox     Read stencil box.
+   * @param[in]  a_position      Particle position.
+   * @param[in]  a_numComp       Number of components.
+   * @param[in]  a_forceIrregNGP Force NGP in cut cells.
+   */
   inline void
   interpolateParticleCIC(Real*            a_particleField,
                          const EBCellFAB& a_meshData,
@@ -886,16 +886,16 @@ protected:
   }
 
   /**
-    @brief TSC interpolation onto one particle.
-    @param[out] a_particleField Per-component field to fill.
-    @param[in]  a_meshData      Mesh data.
-    @param[in]  a_comp          First source mesh component.
-    @param[in]  a_validBox      Box in which TSC is valid.
-    @param[in]  a_gatherBox     Read stencil box.
-    @param[in]  a_position      Particle position.
-    @param[in]  a_numComp       Number of components.
-    @param[in]  a_forceIrregNGP Force NGP in cut cells.
-  */
+   * @brief TSC interpolation onto one particle.
+   * @param[out] a_particleField Per-component field to fill.
+   * @param[in]  a_meshData      Mesh data.
+   * @param[in]  a_comp          First source mesh component.
+   * @param[in]  a_validBox      Box in which TSC is valid.
+   * @param[in]  a_gatherBox     Read stencil box.
+   * @param[in]  a_position      Particle position.
+   * @param[in]  a_numComp       Number of components.
+   * @param[in]  a_forceIrregNGP Force NGP in cut cells.
+   */
   inline void
   interpolateParticleTSC(Real*            a_particleField,
                          const EBCellFAB& a_meshData,

@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_HyperboloidTwoIF.cpp
-  @brief  Implementation of CD_HyperboloidTwoIF.H
-  @author Robert Marskar
-*/
+ * @file   CD_HyperboloidTwoIF.cpp
+ * @brief  Implementation of CD_HyperboloidTwoIF.H
+ * @author Robert Marskar
+ */
 
 // Our includes
 #include <CD_HyperboloidTwoIF.H>

@@ -5,10 +5,10 @@
  */
 
 /**
-  @file    CD_LoadBalancingImplem.H
-  @details Implementation of CD_LoadBalancing.H
-  @author  Robert Marskar
-*/
+ * @file    CD_LoadBalancingImplem.H
+ * @details Implementation of CD_LoadBalancing.H
+ * @author  Robert Marskar
+ */
 
 #ifndef CD_LOADBALANCEIMPLEM_H
 #define CD_LOADBALANCEIMPLEM_H
@@ -101,13 +101,14 @@ LoadBalancing::makeBalance(Vector<int>&       a_ranks,
       if (boxesLeft > subsetsLeft) {
         for (int ibox = firstSubsetBox + 1; ibox < numBoxes; ibox++) {
 
-          // Hook for catching case when we add too many boxes to this subset. Each remaining subset must have at least one box.
+          // Hook for catching case when we add too many boxes to this subset. Each remaining subset must have at least
+          // one box.
           if (numBoxes - lastSubsetBox - 1 <= subsetsLeft) {
             break;
           }
 
-          // Check if we should add this box - we do this by making sure that the dynamically moving target load stays as close
-          // to the static load as possible.
+          // Check if we should add this box - we do this by making sure that the dynamically moving target load stays
+          // as close to the static load as possible.
           //
           // In the below, '1' is the load without ibox, and '2' is the load with ibox
           const Real load1 = subsetLoad;

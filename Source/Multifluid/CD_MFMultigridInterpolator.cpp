@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_MFMultigridInterpolator.cpp
-  @brief  Implementation of CD_MFMultigridInterpolator.H
-  @author Robert Marskar
-*/
+ * @file   CD_MFMultigridInterpolator.cpp
+ * @brief  Implementation of CD_MFMultigridInterpolator.H
+ * @author Robert Marskar
+ */
 
 // Our includes
 #include <CD_MFMultigridInterpolator.H>

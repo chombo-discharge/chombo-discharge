@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_RodIF.H
-  @brief  Declaration of a cylinder with spheres at both ends
-  @author Robert marskar
-*/
+ * @file   CD_RodIF.H
+ * @brief  Declaration of a cylinder with spheres at both ends
+ * @author Robert marskar
+ */
 
 #ifndef CD_RODIF_H
 #define CD_RODIF_H
@@ -21,39 +21,39 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Cylinder with rounded caps at its ends. 
-*/
+ * @brief Cylinder with rounded caps at its ends.
+ */
 class RodIF : public BaseIF
 {
 public:
   /**
-    @brief Constructor
-    @param[in] a_center1 Cylinder center (at center of sphere)
-    @param[in] a_center2 Cylinder center (at center of sphere)
-    @param[in] a_radius  Cylinder and sphere radius
-    @param[in] a_fluidInside Domain on inside or outside
-  */
+   * @brief Constructor
+   * @param[in] a_center1 Cylinder center (at center of sphere)
+   * @param[in] a_center2 Cylinder center (at center of sphere)
+   * @param[in] a_radius  Cylinder and sphere radius
+   * @param[in] a_fluidInside Domain on inside or outside
+   */
   RodIF(const RealVect& a_center1, const RealVect& a_center2, const Real& a_radius, const bool& a_fluidInside);
 
   /**
-    @brief Copy constructor
-    @param[in] a_inputIF Input cylinder
-  */
+   * @brief Copy constructor
+   * @param[in] a_inputIF Input cylinder
+   */
 
   RodIF(const RodIF& a_inputIF);
 
   /**
-    @brief Value function. Returns distance to objcet. 
-    @param[in] a_point Physical position. 
-    @return Function value at the given point
-  */
+   * @brief Value function. Returns distance to objcet.
+   * @param[in] a_point Physical position.
+   * @return Function value at the given point
+   */
   virtual Real
   value(const RealVect& a_point) const;
 
   /**
-    @brief IF factory method
-    @return New copy of this implicit function
-  */
+   * @brief IF factory method
+   * @return New copy of this implicit function
+   */
   virtual BaseIF*
   newImplicitFunction() const;
 

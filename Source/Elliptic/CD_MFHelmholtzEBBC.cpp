@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_MFHelmholtzEBBC.cpp
-  @brief  Implementation of CD_MFHelmholtzEBBC.H
-  @author Robert Marskar
-*/
+ * @file   CD_MFHelmholtzEBBC.cpp
+ * @brief  Implementation of CD_MFHelmholtzEBBC.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <CH_Timer.H>
@@ -52,9 +52,10 @@ MFHelmholtzEBBC::defineMultiPhase()
   CH_assert(m_jumpBC->getOrder() > 0);
   CH_assert(m_jumpBC->getWeight() >= 0);
 
-  // TLDR: We happen to have an object m_jumpBC which will hold phi on the cut-cells separating the two phases. This is an "almost-Dirichlet" type of boundary condition
-  //       where we need to use that value to compute the flux into the cut-cell. The below code computes stencils for that flux, using the value on the boundary as
-  //       a known term in the expansion.
+  // TLDR: We happen to have an object m_jumpBC which will hold phi on the cut-cells separating the two phases. This is
+  // an "almost-Dirichlet" type of boundary condition
+  //       where we need to use that value to compute the flux into the cut-cell. The below code computes stencils for
+  //       that flux, using the value on the boundary as a known term in the expansion.
   const DisjointBoxLayout& dbl = m_eblg.getDBL();
   const DataIterator&      dit = dbl.dataIterator();
 
@@ -118,7 +119,8 @@ MFHelmholtzEBBC::applyEBFlux(VoFIterator& /*a_vofit*/,
 {
   CH_TIME("MFHelmholtzEBBC::applyEBFlux(VoFIterator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");
 
-  // TLDR: This is the function that is called by EBHelmholtzOp. We first do the single-phase cells and then the multi-phase cells.
+  // TLDR: This is the function that is called by EBHelmholtzOp. We first do the single-phase cells and then the
+  // multi-phase cells.
 
   VoFIterator& singlePhaseVofs = m_jumpBC->getSinglePhaseVofs(m_phase, a_dit);
   VoFIterator& multiPhaseVofs  = m_jumpBC->getMultiPhaseVofs(m_phase, a_dit);
@@ -139,7 +141,8 @@ MFHelmholtzEBBC::applyEBFluxMultiPhase(VoFIterator& a_multiPhaseVofs,
   CH_TIME("MFHelmholtzEBBC::applyEBFluxMultiPhase(VoFtIerator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");
 
   // Apply the stencil for computing the contribution to kappaDivF. Note divF is sum(faces) B*grad(Phi)/dx and that this
-  // is the contribution from the EB face. B/dx is already included in the stencils and boundary weights, but beta is not.
+  // is the contribution from the EB face. B/dx is already included in the stencils and boundary weights, but beta is
+  // not.
   //
   // IMPORTANT: only touch the jump-BC boundary-phi holder when this (phase, patch) actually has multi-phase cut-cells.
   // MFHelmholtzJumpBC only defines m_boundaryPhi for multi-phase problems, so m_jumpBC->getBndryPhi(...) dereferences

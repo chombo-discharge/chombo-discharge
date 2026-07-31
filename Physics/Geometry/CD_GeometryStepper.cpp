@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_GeometryStepper.cpp
-  @brief  Implementation of CD_GeometryStepper.H
-  @author Robert Marskar
-*/
+ * @file   CD_GeometryStepper.cpp
+ * @brief  Implementation of CD_GeometryStepper.H
+ * @author Robert Marskar
+ */
 
 // Our includes
 #include <CD_GeometryStepper.H>

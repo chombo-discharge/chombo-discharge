@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_ItoKMCGodunovStepperImplem.H
-  @brief  Implementation of CD_ItoKMCGodunovStepper.H
-  @author Robert Marskar
-*/
+ * @file   CD_ItoKMCGodunovStepperImplem.H
+ * @brief  Implementation of CD_ItoKMCGodunovStepper.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_ITOKMCGODUNOVSTEPPERIMPLEM_H
 #define CD_ITOKMCGODUNOVSTEPPERIMPLEM_H
@@ -90,7 +90,8 @@ ItoKMCGodunovStepper<I, C, R, F>::registerOperators() noexcept
 
   ItoKMCStepper<I, C, R, F>::registerOperators();
 
-  // Register this because we must be able to deposit particles inside dielectrics (due to particle diffusion across the EB).
+  // Register this because we must be able to deposit particles inside dielectrics (due to particle diffusion across the
+  // EB).
   (this->m_amr)->registerOperator(s_particle_mesh, this->m_particleRealm, phase::solid);
 }
 
@@ -379,15 +380,18 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   }
   }
 
-  // Do intersection test and remove particles that struck the EB or domain. Transfer them to appropriate containers. Then recompute the number of particles per cell.
+  // Do intersection test and remove particles that struck the EB or domain. Transfer them to appropriate containers.
+  // Then recompute the number of particles per cell.
   this->barrier();
   m_timer.startEvent("EB/Particle intersection");
   if (m_extendConductivityEB) {
 
-    // TLDR: This hook does a special intersection routine where instead of transferring the particles that were intersected, they
-    //       are put in a separate data container. We want to do this in order to reduce artificial gradients in the particle
-    //       densities near the EB. The way we do this is that we flag the particles during the intersection; particles that are flagged
-    //       are transferred to a container which is added to the conductivity-related particles. The particles are later removed.
+    // TLDR: This hook does a special intersection routine where instead of transferring the particles that were
+    // intersected, they
+    //       are put in a separate data container. We want to do this in order to reduce artificial gradients in the
+    //       particle densities near the EB. The way we do this is that we flag the particles during the intersection;
+    //       particles that are flagged are transferred to a container which is added to the conductivity-related
+    //       particles. The particles are later removed.
     const std::function<void(ParticleSoA<ItoParticle>&, std::size_t)> setFlag = [](ParticleSoA<ItoParticle>& leaf,
                                                                                    const std::size_t i) -> void {
       leaf.template get<&ItoParticle::scratch>(i) = 1.0;
@@ -483,8 +487,8 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
     this->intersectParticles(SpeciesSubset::AllMobileOrDiffusive, deleteParticles);
   }
 
-  // The intersection tests above may not have caught all particles -- do a cleanup sweep where particles on the wrong side of
-  // the EB are put on the EB.
+  // The intersection tests above may not have caught all particles -- do a cleanup sweep where particles on the wrong
+  // side of the EB are put on the EB.
   for (auto it = this->m_ito->iterator(); it.ok(); ++it) {
     const RefCountedPtr<ItoSolver>& solver = it();
 
@@ -1379,9 +1383,9 @@ ItoKMCGodunovStepper<I, C, R, F>::computeSemiImplicitRho() noexcept
   DataOps::incr(rhoGas, m_semiImplicitRhoCDR, 1.0);
   CH_STOP(t1);
 
-  // Contribution from gas-side particles that diffused into EBs. This might be necessary near dielectric EBs as a comparatively small
-  // correction in the space charge density. There should be no contribution from the CDR solvers because the diffusion-only divergence
-  // term was computed using homogeneous Neumann boundary conditions.
+  // Contribution from gas-side particles that diffused into EBs. This might be necessary near dielectric EBs as a
+  // comparatively small correction in the space charge density. There should be no contribution from the CDR solvers
+  // because the diffusion-only divergence term was computed using homogeneous Neumann boundary conditions.
   if (hasDielectrics) {
     CH_START(t2);
 
@@ -1675,8 +1679,8 @@ ItoKMCGodunovStepper<I, C, R, F>::advanceEulerMaruyama(const Real a_dt) noexcept
   }
   m_timer.stopEvent("Solve Poisson");
 
-  // Recompute velocities with the new electric field. This interpolates the velocities to the current particle positions, i.e.
-  // we compute V^(k+1)(X^k) = mu^k * E^(k+1)(X^k)
+  // Recompute velocities with the new electric field. This interpolates the velocities to the current particle
+  // positions, i.e. we compute V^(k+1)(X^k) = mu^k * E^(k+1)(X^k)
   this->barrier();
   m_timer.startEvent("Step-compute v");
 #if 1 // This is what the algorithm says.

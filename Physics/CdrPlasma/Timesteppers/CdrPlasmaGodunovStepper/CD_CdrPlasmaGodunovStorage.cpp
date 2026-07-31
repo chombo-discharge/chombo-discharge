@@ -5,10 +5,10 @@
  */
 
 /**
-   @file   CD_CdrPlasmaGodunovStorage.cpp
-   @brief  Implementation of CD_CdrPlasmaGodunovStorage.H
-   @author Robert Marskar
-*/
+ * @file   CD_CdrPlasmaGodunovStorage.cpp
+ * @brief  Implementation of CD_CdrPlasmaGodunovStorage.H
+ * @author Robert Marskar
+ */
 
 // Our includes
 #include <CD_CdrPlasmaGodunovStepper.H>

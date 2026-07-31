@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_IrregAddOp.cpp
-  @brief  Implementation of CD_IrregAddOp.H
-  @author Robert Marskar
-*/
+ * @file   CD_IrregAddOp.cpp
+ * @brief  Implementation of CD_IrregAddOp.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <VoFIterator.H>

@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_CdrGodunov.cpp
-  @brief  Implementation of CD_CdrGodunov.H
-  @author Robert Marskar
-*/
+ * @file   CD_CdrGodunov.cpp
+ * @brief  Implementation of CD_CdrGodunov.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <ExtrapAdvectBC.H>
@@ -79,7 +79,8 @@ CdrGodunov::computeAdvectionDt()
     pout() << m_name + "::computeAdvectionDt()" << endl;
   }
 
-  // TLDR: For advection, Bell, Collela, and Glaz says we must have dt <= dx/max(|vx|, |vy|, |vz|). See these two papers for details:
+  // TLDR: For advection, Bell, Collela, and Glaz says we must have dt <= dx/max(|vx|, |vy|, |vz|). See these two papers
+  // for details:
   //
   //       Bell, Colella, Glaz, J. Comp. Phys 85 (257), 1989
   //       Minion, J. Comp. Phys 123 (435), 1996
@@ -183,7 +184,8 @@ CdrGodunov::allocate()
   // CdrMultigrid allocates everything except storage needed for the advection object.
   CdrMultigrid::allocate();
 
-  // Allocate levelAdvect only if the solver is mobile. See Chombo design docs for how the EBAdvectLevelIntegrator operates.
+  // Allocate levelAdvect only if the solver is mobile. See Chombo design docs for how the EBAdvectLevelIntegrator
+  // operates.
   if (m_isMobile) {
     const Vector<RefCountedPtr<EBLevelGrid>>& eblgs       = m_amr->getEBLevelGrid(m_realm, m_phase);
     const Vector<int>&                        refRatios   = m_amr->getRefinementRatios();
@@ -204,7 +206,8 @@ CdrGodunov::allocate()
         refRat   = refRatios[lvl - 1];
       }
 
-      // Note: There is a "bug" in the function signature in Chombo. The second-to-last argument is the slope limiter and not the EBCF things.
+      // Note: There is a "bug" in the function signature in Chombo. The second-to-last argument is the slope limiter
+      // and not the EBCF things.
       const EBIndexSpace* const ebis = eblgs[lvl]->getEBIS();
 
       m_levelAdvect[lvl] = RefCountedPtr<EBAdvectLevelIntegrator>(new EBAdvectLevelIntegrator(*eblgs[lvl],
@@ -231,8 +234,8 @@ CdrGodunov::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellP
   CH_assert(a_facePhi[0]->nComp() == 1);
   CH_assert(a_cellPhi[0]->nComp() == 1);
 
-  // If we are extrapolating in time the source term will yield different states on the face centers. The source term is the source
-  // S^k + Div(D*Grad(Phi)), which we add to the solver below.
+  // If we are extrapolating in time the source term will yield different states on the face centers. The source term is
+  // the source S^k + Div(D*Grad(Phi)), which we add to the solver below.
   EBAMRCellData scratch;
   m_amr->allocate(scratch, m_realm, m_phase, 1);
 

@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_NoisePlane.H
-  @brief  Rough sphere geometry
-  @author Robert Marskar
-*/
+ * @file   CD_NoisePlane.H
+ * @brief  Rough sphere geometry
+ * @author Robert Marskar
+ */
 
 #ifndef CD_NOISEPLANE_H
 #define CD_NOISEPLANE_H
@@ -17,19 +17,19 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief This is a class that a rough sphere (either electrode or dielectric)
-*/
+ * @brief This is a class that a rough sphere (either electrode or dielectric)
+ */
 class NoisePlane : public ComputationalGeometry
 {
 public:
   /**
-    @brief Constructor.
-  */
+   * @brief Constructor.
+   */
   NoisePlane();
 
   /**
-    @brief Destructor (does nothing)
-  */
+   * @brief Destructor (does nothing)
+   */
   ~NoisePlane() override;
 
   NoisePlane(const NoisePlane&) = delete;

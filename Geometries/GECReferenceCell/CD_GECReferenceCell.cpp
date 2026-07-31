@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_GECReferenceCell.cpp
-  @brief  Implementation of CD_GECReferenceCell.H
-  @author Robert Marskar
-*/
+ * @file   CD_GECReferenceCell.cpp
+ * @brief  Implementation of CD_GECReferenceCell.H
+ * @author Robert Marskar
+ */
 
 // Our includes
 #include <CD_EBGeometryIF.H>

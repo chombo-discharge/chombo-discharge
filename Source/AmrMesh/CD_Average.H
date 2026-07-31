@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_Average.H
-  @brief  Declaration of averaging methods.
-  @author Robert Marskar
-*/
+ * @file   CD_Average.H
+ * @brief  Declaration of averaging methods.
+ * @author Robert Marskar
+ */
 
 #ifndef CD_AVERAGE_H
 #define CD_AVERAGE_H
@@ -17,10 +17,10 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Various averaging methods. 
-  @details 'Arithmetic'/'Harmonic' mean what you think, while 'Conservative' also incorporate volume, face, 
-  and EB face fractions such that the total quantity is conserved. 
-*/
+ * @brief Various averaging methods.
+ * @details 'Arithmetic'/'Harmonic' mean what you think, while 'Conservative' also incorporate volume, face,
+ * and EB face fractions such that the total quantity is conserved.
+ */
 enum class Average
 {
   Arithmetic,

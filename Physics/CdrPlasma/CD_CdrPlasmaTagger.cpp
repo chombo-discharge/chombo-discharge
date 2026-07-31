@@ -5,10 +5,10 @@
  */
 
 /**
-   @file   CD_CdrPlasmaTagger.cpp
-   @brief  Implementation of CD_CdrPlasmaTagger.H
-   @author Robert Marskar
-*/
+ * @file   CD_CdrPlasmaTagger.cpp
+ * @brief  Implementation of CD_CdrPlasmaTagger.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <EBArith.H>
@@ -196,7 +196,8 @@ CdrPlasmaTagger::tagCells(EBAMRTags& a_tags)
   const RealVect probLo = m_amr->getProbLo();
   const Real     time   = m_timeStepper->getTime();
 
-  // Determine how deep we should flag cells for refinement. We will never flag cells on AmrMesh's maximum AMR depth, so we restrict to that.
+  // Determine how deep we should flag cells for refinement. We will never flag cells on AmrMesh's maximum AMR depth, so
+  // we restrict to that.
   const int finestLevel    = m_amr->getFinestLevel();
   const int maxDepth       = m_amr->getMaxAmrDepth();
   const int finestTagLevel = (finestLevel == maxDepth) ? maxDepth - 1 : finestLevel;
@@ -206,7 +207,8 @@ CdrPlasmaTagger::tagCells(EBAMRTags& a_tags)
     // Compute tracer fields -- note that this is implemented by subclasses.
     this->computeTracers();
 
-    // Go through the AMR levels, being careful not to add cell tags on the maximum possible AMR depth (because grid level l+1 is generated from tags on level l).
+    // Go through the AMR levels, being careful not to add cell tags on the maximum possible AMR depth (because grid
+    // level l+1 is generated from tags on level l).
     for (int lvl = 0; lvl <= finestTagLevel; lvl++) {
       const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
       const DataIterator&      dit   = dbl.dataIterator();
@@ -244,7 +246,8 @@ CdrPlasmaTagger::tagCells(EBAMRTags& a_tags)
         this->coarsenCellsBox(coarsenTags, tracers, gtracers, lvl, din, box, ebisbox, time, dx, probLo);
 
         // Check if we got any new tags, or we are just recycling old tags. If we did not get new tags then
-        // we will ask the Driver to skip the regrid completely. Basically we will check if (current_tags + refined_tags - coarsenTags) == current_tags
+        // we will ask the Driver to skip the regrid completely. Basically we will check if (current_tags + refined_tags
+        // - coarsenTags) == current_tags
         DenseIntVectSet cpy1 = tags;
         tags -= coarsenTags;
         tags |= refineTags;

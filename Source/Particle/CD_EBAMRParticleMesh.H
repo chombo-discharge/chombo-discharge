@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_EBAMRParticleMesh.H
-  @brief  Declaration of an AMR driver that deposits/interpolates ParticleContainer particles.
-  @author Robert Marskar
-*/
+ * @file   CD_EBAMRParticleMesh.H
+ * @brief  Declaration of an AMR driver that deposits/interpolates ParticleContainer particles.
+ * @author Robert Marskar
+ */
 
 #ifndef CD_EBAMRPARTICLEMESH_H
 #define CD_EBAMRPARTICLEMESH_H
@@ -46,70 +46,70 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief AMR driver that deposits/interpolates ParticleContainer particles across the hierarchy.
-  @details
-  EBAMRParticleMesh deposits the particles of a ParticleContainer onto AMR mesh data and interpolates
-  mesh data back onto particle columns, by driving the per-patch EBParticleMesh leaf on every box of
-  every level. define() builds the per-level leaves (on the valid grids and the refined-coarse grids),
-  the level valid+ghost -> valid Copiers, the EBCoarseFineParticleMesh operators, and the halo/transition
-  masks; it must be called before any deposit or interpolate.
-
-  <h3>Interpolation</h3>
-  interpolate() and interpolateWeight() are purely per-level/per-patch: the mesh is assumed to be
-  valid+ghosted by the caller, so no coarse-fine coupling is needed.
-
-  <h3>Deposition</h3>
-  deposit(), depositWeight(), and depositGathered() conserve mass across refinement boundaries, and
-  select how the coarse-fine overlap is handled through @c CoarseFineDeposition:
-  - <b>Interp</b>     -- move the over-boundary mass between levels with the coarse-fine mesh operators.
-  - <b>Halo</b>       -- re-deposit the coarse-side halo particles on the refined-coarse grid (via the
-                         container's mask holder and the FiCo buffer) and add them to the fine level.
-  - <b>HaloNGP</b>    -- deposit the near-boundary halo particles with NGP so their clouds do not spread
-                         across the boundary (no refined-coarse buffer is needed).
-  - <b>Transition</b> -- deposit the coarse-side transition particles on the refined-coarse grid at the
-                         fine-grid width, distributing the result to both levels.
-  Halo, HaloNGP, and Transition require at least one ghost cell.
-*/
+ * @brief AMR driver that deposits/interpolates ParticleContainer particles across the hierarchy.
+ * @details
+ * EBAMRParticleMesh deposits the particles of a ParticleContainer onto AMR mesh data and interpolates
+ * mesh data back onto particle columns, by driving the per-patch EBParticleMesh leaf on every box of
+ * every level. define() builds the per-level leaves (on the valid grids and the refined-coarse grids),
+ * the level valid+ghost -> valid Copiers, the EBCoarseFineParticleMesh operators, and the halo/transition
+ * masks; it must be called before any deposit or interpolate.
+ *
+ * <h3>Interpolation</h3>
+ * interpolate() and interpolateWeight() are purely per-level/per-patch: the mesh is assumed to be
+ * valid+ghosted by the caller, so no coarse-fine coupling is needed.
+ *
+ * <h3>Deposition</h3>
+ * deposit(), depositWeight(), and depositGathered() conserve mass across refinement boundaries, and
+ * select how the coarse-fine overlap is handled through @c CoarseFineDeposition:
+ * - <b>Interp</b>     -- move the over-boundary mass between levels with the coarse-fine mesh operators.
+ * - <b>Halo</b>       -- re-deposit the coarse-side halo particles on the refined-coarse grid (via the
+ *                        container's mask holder and the FiCo buffer) and add them to the fine level.
+ * - <b>HaloNGP</b>    -- deposit the near-boundary halo particles with NGP so their clouds do not spread
+ *                        across the boundary (no refined-coarse buffer is needed).
+ * - <b>Transition</b> -- deposit the coarse-side transition particles on the refined-coarse grid at the
+ *                        fine-grid width, distributing the result to both levels.
+ * Halo, HaloNGP, and Transition require at least one ghost cell.
+ */
 class EBAMRParticleMesh
 {
 public:
   /**
-    @name Construction and lifetime
-  */
+   * @name Construction and lifetime
+   */
   ///@{
 
   /**
-    @brief Default constructor. Leaves the object undefined; call define().
-  */
+   * @brief Default constructor. Leaves the object undefined; call define().
+   */
   EBAMRParticleMesh() : m_ghost(0), m_finestLevel(-1), m_isDefined(false)
   {}
 
   /**
-    @brief Destructor.
-  */
+   * @brief Destructor.
+   */
   ~EBAMRParticleMesh() = default;
 
   /**
-    @brief Copy construction is deleted (shared RefCountedPtr state).
-  */
+   * @brief Copy construction is deleted (shared RefCountedPtr state).
+   */
   EBAMRParticleMesh(const EBAMRParticleMesh&) = delete;
 
   /**
-    @brief Copy assignment is deleted.
-    @return Reference to this.
-  */
+   * @brief Copy assignment is deleted.
+   * @return Reference to this.
+   */
   EBAMRParticleMesh&
   operator=(const EBAMRParticleMesh&) = delete;
 
   /**
-    @brief Define the per-level leaves, coarse-fine mesh operators, and halo/transition masks.
-    @param[in] a_eblgs       Per-level EB level grids.
-    @param[in] a_refRat      Per-level refinement ratio (entry l is the ratio between level l and l+1).
-    @param[in] a_dx          Per-level (isotropic) grid spacing.
-    @param[in] a_probLo      Lower-left corner of the physical domain.
-    @param[in] a_ghost       Number of ghost cells in the mesh data holders.
-    @param[in] a_finestLevel Finest AMR level index.
-  */
+   * @brief Define the per-level leaves, coarse-fine mesh operators, and halo/transition masks.
+   * @param[in] a_eblgs       Per-level EB level grids.
+   * @param[in] a_refRat      Per-level refinement ratio (entry l is the ratio between level l and l+1).
+   * @param[in] a_dx          Per-level (isotropic) grid spacing.
+   * @param[in] a_probLo      Lower-left corner of the physical domain.
+   * @param[in] a_ghost       Number of ghost cells in the mesh data holders.
+   * @param[in] a_finestLevel Finest AMR level index.
+   */
   void
   define(const Vector<RefCountedPtr<EBLevelGrid>>& a_eblgs,
          const Vector<int>&                        a_refRat,
@@ -143,22 +143,22 @@ public:
   ///@}
 
   /**
-    @name Interpolation
-  */
+   * @name Interpolation
+   */
   ///@{
 
   /**
-    @brief Interpolate a mesh field onto one or more payload columns, across all levels.
-    @details Per level, per patch: calls EBParticleMesh::interpolate. The mesh is assumed to be
-    valid+ghosted by the caller (no coarse-fine coupling is needed for interpolation).
-    @tparam Members Pack of payload data-member pointers selecting the target column(s).
-    @tparam P       Payload type (deduced).
-    @tparam Traits  Column descriptor (deduced).
-    @param[in,out] a_particles     Particles whose target columns are overwritten.
-    @param[in]     a_meshData      AMR mesh data (>= sizeof...(Members) components).
-    @param[in]     a_interpType    Interpolation kernel (NGP/CIC/TSC).
-    @param[in]     a_forceIrregNGP Force NGP in cut cells.
-  */
+   * @brief Interpolate a mesh field onto one or more payload columns, across all levels.
+   * @details Per level, per patch: calls EBParticleMesh::interpolate. The mesh is assumed to be
+   * valid+ghosted by the caller (no coarse-fine coupling is needed for interpolation).
+   * @tparam Members Pack of payload data-member pointers selecting the target column(s).
+   * @tparam P       Payload type (deduced).
+   * @tparam Traits  Column descriptor (deduced).
+   * @param[in,out] a_particles     Particles whose target columns are overwritten.
+   * @param[in]     a_meshData      AMR mesh data (>= sizeof...(Members) components).
+   * @param[in]     a_interpType    Interpolation kernel (NGP/CIC/TSC).
+   * @param[in]     a_forceIrregNGP Force NGP in cut cells.
+   */
   template <auto... Members, typename P, typename Traits>
   void
   interpolate(ParticleContainer<P, Traits>& a_particles,
@@ -188,17 +188,17 @@ public:
   }
 
   /**
-    @brief Interpolate a mesh field onto the container-owned weight column, across all levels.
-    @details Per level, per patch: calls EBParticleMesh::interpolateWeight. The mesh is assumed to
-    be valid+ghosted by the caller (no coarse-fine coupling is needed for interpolation). This is the
-    interpolation mirror of depositWeight.
-    @tparam P      Payload type (deduced).
-    @tparam Traits Column descriptor (deduced).
-    @param[in,out] a_particles     Particles whose weight column is overwritten.
-    @param[in]     a_meshData      AMR mesh data (>= 1 component).
-    @param[in]     a_interpType    Interpolation kernel (NGP/CIC/TSC).
-    @param[in]     a_forceIrregNGP Force NGP in cut cells.
-  */
+   * @brief Interpolate a mesh field onto the container-owned weight column, across all levels.
+   * @details Per level, per patch: calls EBParticleMesh::interpolateWeight. The mesh is assumed to
+   * be valid+ghosted by the caller (no coarse-fine coupling is needed for interpolation). This is the
+   * interpolation mirror of depositWeight.
+   * @tparam P      Payload type (deduced).
+   * @tparam Traits Column descriptor (deduced).
+   * @param[in,out] a_particles     Particles whose weight column is overwritten.
+   * @param[in]     a_meshData      AMR mesh data (>= 1 component).
+   * @param[in]     a_interpType    Interpolation kernel (NGP/CIC/TSC).
+   * @param[in]     a_forceIrregNGP Force NGP in cut cells.
+   */
   template <typename P, typename Traits>
   void
   interpolateWeight(ParticleContainer<P, Traits>& a_particles,
@@ -230,22 +230,22 @@ public:
   ///@}
 
   /**
-    @name Deposition (all coarse-fine strategies)
-  */
+   * @name Deposition (all coarse-fine strategies)
+   */
   ///@{
 
   /**
-    @brief Deposit the container-owned weight onto the AMR mesh.
-    @details Dispatches on the coarse-fine strategy (Interp / Halo / HaloNGP / Transition); see the
-    class documentation. Halo/HaloNGP/Transition need ghost >= 1.
-    @tparam P      Payload type (deduced).
-    @tparam Traits Column descriptor (deduced).
-    @param[in,out] a_meshData             AMR mesh data (one component; RESET then filled).
-    @param[in]     a_particles            Particles to deposit.
-    @param[in]     a_depositionType       Deposition kernel (NGP/CIC/TSC).
-    @param[in]     a_coarseFineDeposition Coarse-fine handling (Interp / Halo / HaloNGP / Transition).
-    @param[in]     a_forceIrregNGP        Force NGP in cut cells.
-  */
+   * @brief Deposit the container-owned weight onto the AMR mesh.
+   * @details Dispatches on the coarse-fine strategy (Interp / Halo / HaloNGP / Transition); see the
+   * class documentation. Halo/HaloNGP/Transition need ghost >= 1.
+   * @tparam P      Payload type (deduced).
+   * @tparam Traits Column descriptor (deduced).
+   * @param[in,out] a_meshData             AMR mesh data (one component; RESET then filled).
+   * @param[in]     a_particles            Particles to deposit.
+   * @param[in]     a_depositionType       Deposition kernel (NGP/CIC/TSC).
+   * @param[in]     a_coarseFineDeposition Coarse-fine handling (Interp / Halo / HaloNGP / Transition).
+   * @param[in]     a_forceIrregNGP        Force NGP in cut cells.
+   */
   template <typename P, typename Traits>
   void
   depositWeight(EBAMRCellData&                      a_meshData,
@@ -297,20 +297,20 @@ public:
   }
 
   /**
-    @brief Deposit a custom per-particle scalar (computed by a_cellGather) onto the AMR mesh.
-    @details Generalizes depositWeight() to an arbitrary per-particle value (a product of columns such as
-    weight*mobility), dispatching on the coarse-fine strategy exactly like depositWeight(). Deposits one
-    mesh component.
-    @tparam P          Payload type (deduced).
-    @tparam Traits     Column descriptor (deduced).
-    @tparam CellGather Callable (const ParticleSoA<P, Traits>& a_leaf, std::size_t a_i) -> Real.
-    @param[in,out] a_meshData             AMR mesh data (one component; RESET then filled).
-    @param[in]     a_particles            Particles to deposit.
-    @param[in]     a_depositionType       Deposition kernel (NGP/CIC/TSC).
-    @param[in]     a_coarseFineDeposition Coarse-fine handling (Interp / Halo / HaloNGP / Transition).
-    @param[in]     a_forceIrregNGP        Force NGP in cut cells.
-    @param[in]     a_cellGather           Per-particle value gatherer (leaf, index) -> Real.
-  */
+   * @brief Deposit a custom per-particle scalar (computed by a_cellGather) onto the AMR mesh.
+   * @details Generalizes depositWeight() to an arbitrary per-particle value (a product of columns such as
+   * weight*mobility), dispatching on the coarse-fine strategy exactly like depositWeight(). Deposits one
+   * mesh component.
+   * @tparam P          Payload type (deduced).
+   * @tparam Traits     Column descriptor (deduced).
+   * @tparam CellGather Callable (const ParticleSoA<P, Traits>& a_leaf, std::size_t a_i) -> Real.
+   * @param[in,out] a_meshData             AMR mesh data (one component; RESET then filled).
+   * @param[in]     a_particles            Particles to deposit.
+   * @param[in]     a_depositionType       Deposition kernel (NGP/CIC/TSC).
+   * @param[in]     a_coarseFineDeposition Coarse-fine handling (Interp / Halo / HaloNGP / Transition).
+   * @param[in]     a_forceIrregNGP        Force NGP in cut cells.
+   * @param[in]     a_cellGather           Per-particle value gatherer (leaf, index) -> Real.
+   */
   template <typename P, typename Traits, typename CellGather>
   void
   depositGathered(EBAMRCellData&                      a_meshData,
@@ -379,17 +379,17 @@ public:
   }
 
   /**
-    @brief Deposit one or more payload columns onto the AMR mesh.
-    @details See depositWeight for the coarse-fine dispatch.
-    @tparam Members Pack of payload data-member pointers selecting the column(s) to deposit.
-    @tparam P       Payload type (deduced).
-    @tparam Traits  Column descriptor (deduced).
-    @param[in,out] a_meshData             AMR mesh data (sizeof...(Members) components; RESET then filled).
-    @param[in]     a_particles            Particles to deposit.
-    @param[in]     a_depositionType       Deposition kernel (NGP/CIC/TSC).
-    @param[in]     a_coarseFineDeposition Coarse-fine handling (Interp / Halo / HaloNGP / Transition).
-    @param[in]     a_forceIrregNGP        Force NGP in cut cells.
-  */
+   * @brief Deposit one or more payload columns onto the AMR mesh.
+   * @details See depositWeight for the coarse-fine dispatch.
+   * @tparam Members Pack of payload data-member pointers selecting the column(s) to deposit.
+   * @tparam P       Payload type (deduced).
+   * @tparam Traits  Column descriptor (deduced).
+   * @param[in,out] a_meshData             AMR mesh data (sizeof...(Members) components; RESET then filled).
+   * @param[in]     a_particles            Particles to deposit.
+   * @param[in]     a_depositionType       Deposition kernel (NGP/CIC/TSC).
+   * @param[in]     a_coarseFineDeposition Coarse-fine handling (Interp / Halo / HaloNGP / Transition).
+   * @param[in]     a_forceIrregNGP        Force NGP in cut cells.
+   */
   template <auto... Members, typename P, typename Traits>
   void
   deposit(EBAMRCellData&                      a_meshData,
@@ -446,73 +446,73 @@ public:
 
 protected:
   /**
-    @brief Per-level EB level grids.
-  */
+   * @brief Per-level EB level grids.
+   */
   Vector<RefCountedPtr<EBLevelGrid>> m_eblgs;
 
   /**
-    @brief Per-level refinement ratios.
-  */
+   * @brief Per-level refinement ratios.
+   */
   Vector<int> m_refRat;
 
   /**
-    @brief Per-level grid spacing (isotropic).
-  */
+   * @brief Per-level grid spacing (isotropic).
+   */
   Vector<Real> m_dx;
 
   /**
-    @brief Lower-left corner of the physical domain.
-  */
+   * @brief Lower-left corner of the physical domain.
+   */
   RealVect m_probLo;
 
   /**
-    @brief Number of ghost cells in the mesh data holders.
-  */
+   * @brief Number of ghost cells in the mesh data holders.
+   */
   int m_ghost;
 
   /**
-    @brief Finest AMR level index.
-  */
+   * @brief Finest AMR level index.
+   */
   int m_finestLevel;
 
   /**
-    @brief Whether define() has been called.
-  */
+   * @brief Whether define() has been called.
+   */
   bool m_isDefined;
 
   /**
-    @brief Per-level per-patch deposition/interpolation leaves.
-  */
+   * @brief Per-level per-patch deposition/interpolation leaves.
+   */
   Vector<RefCountedPtr<LayoutData<EBParticleMesh>>> m_ebParticleMesh;
 
   /**
-    @brief Per-level valid+ghost -> valid Copiers (fold ghost-deposited mass into the owner patch).
-  */
+   * @brief Per-level valid+ghost -> valid Copiers (fold ghost-deposited mass into the owner patch).
+   */
   Vector<Copier> m_levelCopiers;
 
   /**
-    @brief Per-level coarse-fine mesh operators (null on level 0).
-  */
+   * @brief Per-level coarse-fine mesh operators (null on level 0).
+   */
   Vector<RefCountedPtr<EBCoarseFineParticleMesh>> m_coarseFinePM;
 
   /**
-    @brief Per-level per-patch leaves on the refined-coarse (FiCo) grid (null on level 0).
-  */
+   * @brief Per-level per-patch leaves on the refined-coarse (FiCo) grid (null on level 0).
+   */
   Vector<RefCountedPtr<LayoutData<EBParticleMesh>>> m_ebParticleMeshFiCo;
 
   /**
-    @brief Outer-halo masks keyed by halo width: per-level coarse cells just outside the fine patch.
-  */
+   * @brief Outer-halo masks keyed by halo width: per-level coarse cells just outside the fine patch.
+   */
   std::map<int, Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>> m_outerHaloMasks;
 
   /**
-    @brief Transition masks keyed by width: per-level fine-side transition band, on the refined-coarse grid.
-  */
+   * @brief Transition masks keyed by width: per-level fine-side transition band, on the refined-coarse grid.
+   */
   std::map<int, Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>> m_transitionMasks;
 
   /**
-    @brief Abort on an unrecognized coarse-fine deposition strategy.
-  */
+   * @brief Abort on an unrecognized coarse-fine deposition strategy.
+   */
   void
   errorUnsupported() const
   {
@@ -520,8 +520,8 @@ protected:
   }
 
   /**
-    @brief Build the per-level per-patch EBParticleMesh leaves (valid grids + refined-coarse grids).
-  */
+   * @brief Build the per-level per-patch EBParticleMesh leaves (valid grids + refined-coarse grids).
+   */
   void
   defineEBParticleMesh()
   {
@@ -576,8 +576,8 @@ protected:
   }
 
   /**
-    @brief Build the per-level valid+ghost -> valid Copiers.
-  */
+   * @brief Build the per-level valid+ghost -> valid Copiers.
+   */
   void
   defineLevelMotion()
   {
@@ -594,8 +594,8 @@ protected:
   }
 
   /**
-    @brief Build the per-level coarse-fine mesh operators (null on level 0).
-  */
+   * @brief Build the per-level coarse-fine mesh operators (null on level 0).
+   */
   void
   defineCoarseFineMotion()
   {
@@ -615,17 +615,17 @@ protected:
   }
 
   /**
-    @brief The CoarseFineDeposition::Interp deposition algorithm, parameterized by the per-patch deposit.
-    @details Resets the mesh, deposits each level's valid particles (via a_patchDeposit), folds
-    ghost-deposited mass into the owner patch (level Copier + EBAddOp), then moves the over-boundary
-    mass between levels with the coarse-fine operators. Uses only valid particles.
-    @tparam Container    ParticleContainer type (deduced).
-    @tparam PatchDeposit Callable (const EBParticleMesh&, EBCellFAB&, const ParticleSoA&, Real widthScale).
-    @param[in,out] a_meshData     AMR mesh data (RESET then filled).
-    @param[in]     a_particles    Particle container.
-    @param[in]     a_numComp      Number of mesh components written.
-    @param[in]     a_patchDeposit Per-patch deposition functor.
-  */
+   * @brief The CoarseFineDeposition::Interp deposition algorithm, parameterized by the per-patch deposit.
+   * @details Resets the mesh, deposits each level's valid particles (via a_patchDeposit), folds
+   * ghost-deposited mass into the owner patch (level Copier + EBAddOp), then moves the over-boundary
+   * mass between levels with the coarse-fine operators. Uses only valid particles.
+   * @tparam Container    ParticleContainer type (deduced).
+   * @tparam PatchDeposit Callable (const EBParticleMesh&, EBCellFAB&, const ParticleSoA&, Real widthScale).
+   * @param[in,out] a_meshData     AMR mesh data (RESET then filled).
+   * @param[in]     a_particles    Particle container.
+   * @param[in]     a_numComp      Number of mesh components written.
+   * @param[in]     a_patchDeposit Per-patch deposition functor.
+   */
   template <typename Container, typename PatchDeposit>
   void
   depositInterpCore(EBAMRCellData&   a_meshData,
@@ -678,12 +678,12 @@ protected:
   }
 
   /**
-    @brief Build the per-width outer-halo masks: per level, the coarse cells just outside the fine patch.
-    @details For each ghost width in [1, m_ghost] and each level with a finer level, marks the coarse
-    cells within that width of the refinement boundary (on the coarse side), excluding the
-    coarsened-fine valid region and its neighbours. The mask drives copyMaskParticles in the Halo
-    deposit. Storage-agnostic (operates on the grids only). Empty BaseFabs are undefined.
-  */
+   * @brief Build the per-width outer-halo masks: per level, the coarse cells just outside the fine patch.
+   * @details For each ghost width in [1, m_ghost] and each level with a finer level, marks the coarse
+   * cells within that width of the refinement boundary (on the coarse side), excluding the
+   * coarsened-fine valid region and its neighbours. The mask drives copyMaskParticles in the Halo
+   * deposit. Storage-agnostic (operates on the grids only). Empty BaseFabs are undefined.
+   */
   void
   defineOuterHaloMasks()
   {
@@ -820,18 +820,18 @@ protected:
   }
 
   /**
-    @brief The CoarseFineDeposition::Halo deposition algorithm.
-    @details Like Interp for the on-level deposit + fine-ghost->coarse transfer, but instead of
-    interpolating the coarse mass under the fine grid, it re-deposits the coarse-side halo particles
-    (selected by the width-1 outer-halo mask, copied into the container mask holder) on the
-    refined-coarse grid with widthScale = refinement ratio, and adds that to the fine level.
-    @tparam NCOMP        Number of mesh components (compile-time; selects the FiCo buffer).
-    @tparam Container    ParticleContainer type (deduced).
-    @tparam PatchDeposit Callable (const EBParticleMesh&, EBCellFAB&, const ParticleSoA&, Real widthScale).
-    @param[in,out] a_meshData     AMR mesh data (RESET then filled).
-    @param[in]     a_particles    Particle container (its mask holder is filled then cleared).
-    @param[in]     a_patchDeposit Per-patch deposition functor.
-  */
+   * @brief The CoarseFineDeposition::Halo deposition algorithm.
+   * @details Like Interp for the on-level deposit + fine-ghost->coarse transfer, but instead of
+   * interpolating the coarse mass under the fine grid, it re-deposits the coarse-side halo particles
+   * (selected by the width-1 outer-halo mask, copied into the container mask holder) on the
+   * refined-coarse grid with widthScale = refinement ratio, and adds that to the fine level.
+   * @tparam NCOMP        Number of mesh components (compile-time; selects the FiCo buffer).
+   * @tparam Container    ParticleContainer type (deduced).
+   * @tparam PatchDeposit Callable (const EBParticleMesh&, EBCellFAB&, const ParticleSoA&, Real widthScale).
+   * @param[in,out] a_meshData     AMR mesh data (RESET then filled).
+   * @param[in]     a_particles    Particle container (its mask holder is filled then cleared).
+   * @param[in]     a_patchDeposit Per-patch deposition functor.
+   */
   template <int NCOMP, typename Container, typename PatchDeposit>
   void
   depositHaloCore(EBAMRCellData& a_meshData, const Container& a_particles, PatchDeposit a_patchDeposit) const
@@ -913,21 +913,21 @@ protected:
   }
 
   /**
-    @brief The CoarseFineDeposition::HaloNGP deposition algorithm.
-    @details Moves the coarse-side halo particles (width-1 mask) out of the valid holder, deposits
-    the remaining (non-halo) particles with the requested kernel and the halo particles with NGP onto
-    the same level mesh, folds fine-ghost mass to the coarse level, then transfers the halo particles
-    back to the valid holder. NGP keeps the near-boundary clouds from spreading over the refinement
-    boundary, so no refined-coarse buffer is needed.
-    @tparam NCOMP           Number of mesh components (compile-time).
-    @tparam Container       ParticleContainer type (deduced).
-    @tparam PatchDeposit    Per-patch deposit with the requested kernel.
-    @tparam PatchDepositNGP Per-patch deposit forced to NGP.
-    @param[in,out] a_meshData     AMR mesh data (RESET then filled).
-    @param[in]     a_particles    Particle container (halo particles are moved out then back).
-    @param[in]     a_patch        Per-patch deposit functor (requested kernel).
-    @param[in]     a_patchNGP     Per-patch deposit functor (NGP).
-  */
+   * @brief The CoarseFineDeposition::HaloNGP deposition algorithm.
+   * @details Moves the coarse-side halo particles (width-1 mask) out of the valid holder, deposits
+   * the remaining (non-halo) particles with the requested kernel and the halo particles with NGP onto
+   * the same level mesh, folds fine-ghost mass to the coarse level, then transfers the halo particles
+   * back to the valid holder. NGP keeps the near-boundary clouds from spreading over the refinement
+   * boundary, so no refined-coarse buffer is needed.
+   * @tparam NCOMP           Number of mesh components (compile-time).
+   * @tparam Container       ParticleContainer type (deduced).
+   * @tparam PatchDeposit    Per-patch deposit with the requested kernel.
+   * @tparam PatchDepositNGP Per-patch deposit forced to NGP.
+   * @param[in,out] a_meshData     AMR mesh data (RESET then filled).
+   * @param[in]     a_particles    Particle container (halo particles are moved out then back).
+   * @param[in]     a_patch        Per-patch deposit functor (requested kernel).
+   * @param[in]     a_patchNGP     Per-patch deposit functor (NGP).
+   */
   template <int NCOMP, typename Container, typename PatchDeposit, typename PatchDepositNGP>
   void
   depositHaloNGPCore(EBAMRCellData&   a_meshData,
@@ -989,11 +989,11 @@ protected:
   }
 
   /**
-    @brief Transition-mask width for a kernel: CIC -> refRat/2, TSC -> refRat (NGP is handled upstream).
-    @param[in] a_depositionType Deposition kernel.
-    @param[in] a_refRat         Refinement ratio between the level and the finer one.
-    @return The transition band width (in fine cells).
-  */
+   * @brief Transition-mask width for a kernel: CIC -> refRat/2, TSC -> refRat (NGP is handled upstream).
+   * @param[in] a_depositionType Deposition kernel.
+   * @param[in] a_refRat         Refinement ratio between the level and the finer one.
+   * @return The transition band width (in fine cells).
+   */
   int
   getTransitionMaskWidth(const DepositionType a_depositionType, const int a_refRat) const
   {
@@ -1014,12 +1014,12 @@ protected:
   }
 
   /**
-    @brief Build the per-width transition masks: the fine-side transition band, on the refined-coarse grid.
-    @details For each width in [1, m_ghost] and each level with a finer level, builds the fine-grid
-    coarse-fine interface band (fine ghost cells just outside the fine boxes), transfers it to the
-    refined-coarse (FiCo) grid of the finer level, and stores it as a boolean mask there. Storage-
-    agnostic. Empty BaseFabs are undefined.
-  */
+   * @brief Build the per-width transition masks: the fine-side transition band, on the refined-coarse grid.
+   * @details For each width in [1, m_ghost] and each level with a finer level, builds the fine-grid
+   * coarse-fine interface band (fine ghost cells just outside the fine boxes), transfers it to the
+   * refined-coarse (FiCo) grid of the finer level, and stores it as a boolean mask there. Storage-
+   * agnostic. Empty BaseFabs are undefined.
+   */
   void
   defineTransitionMasks()
   {
@@ -1115,14 +1115,14 @@ protected:
   }
 
   /**
-    @brief Move the coarse-side transition particles into the container mask holder (using the FiCo mask).
-    @details The transition mask lives on the refined-coarse grid, so this is done directly here
-    (the container's transferMaskParticles works on the valid grids). Coarse particles whose
-    fine-resolution cell is marked are moved (swap-and-pop) from the valid to the mask holder.
-    @tparam Container ParticleContainer type (deduced).
-    @param[in,out] a_particles      Particle container.
-    @param[in]     a_depositionType Deposition kernel (selects the mask width; NGP is a no-op).
-  */
+   * @brief Move the coarse-side transition particles into the container mask holder (using the FiCo mask).
+   * @details The transition mask lives on the refined-coarse grid, so this is done directly here
+   * (the container's transferMaskParticles works on the valid grids). Coarse particles whose
+   * fine-resolution cell is marked are moved (swap-and-pop) from the valid to the mask holder.
+   * @tparam Container ParticleContainer type (deduced).
+   * @param[in,out] a_particles      Particle container.
+   * @param[in]     a_depositionType Deposition kernel (selects the mask width; NGP is a no-op).
+   */
   template <typename Container>
   void
   transferMaskParticlesTransition(Container& a_particles, const DepositionType a_depositionType) const
@@ -1181,21 +1181,21 @@ protected:
   }
 
   /**
-    @brief The CoarseFineDeposition::Transition deposition algorithm.
-    @details NGP short-circuits to the Interp result. Otherwise: moves the coarse-side transition
-    particles out of the valid holder; deposits the remaining particles with the kernel and folds
-    fine-ghost mass to coarse; then deposits the transition particles on the refined-coarse grid with
-    the fine-grid width and distributes that buffer to both the fine level (addFiCoDataToFine +
-    exchangeAndAddFiCoData) and the coarse level (restrictAndAddFiCoDataToCoar); finally returns the
-    transition particles to the valid holder.
-    @tparam NCOMP        Number of mesh components (compile-time).
-    @tparam Container    ParticleContainer type (deduced).
-    @tparam PatchDeposit Per-patch deposit with the requested kernel.
-    @param[in,out] a_meshData       AMR mesh data (RESET then filled).
-    @param[in]     a_particles      Particle container.
-    @param[in]     a_depositionType Deposition kernel.
-    @param[in]     a_patch          Per-patch deposit functor (requested kernel).
-  */
+   * @brief The CoarseFineDeposition::Transition deposition algorithm.
+   * @details NGP short-circuits to the Interp result. Otherwise: moves the coarse-side transition
+   * particles out of the valid holder; deposits the remaining particles with the kernel and folds
+   * fine-ghost mass to coarse; then deposits the transition particles on the refined-coarse grid with
+   * the fine-grid width and distributes that buffer to both the fine level (addFiCoDataToFine +
+   * exchangeAndAddFiCoData) and the coarse level (restrictAndAddFiCoDataToCoar); finally returns the
+   * transition particles to the valid holder.
+   * @tparam NCOMP        Number of mesh components (compile-time).
+   * @tparam Container    ParticleContainer type (deduced).
+   * @tparam PatchDeposit Per-patch deposit with the requested kernel.
+   * @param[in,out] a_meshData       AMR mesh data (RESET then filled).
+   * @param[in]     a_particles      Particle container.
+   * @param[in]     a_depositionType Deposition kernel.
+   * @param[in]     a_patch          Per-patch deposit functor (requested kernel).
+   */
   template <int NCOMP, typename Container, typename PatchDeposit>
   void
   depositTransitionCore(EBAMRCellData&       a_meshData,

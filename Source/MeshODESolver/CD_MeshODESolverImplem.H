@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_MeshODESolverImplem.H
-  @brief  Implementation of CD_MeshODESolver.H
-  @author Robert Marskar
-*/
+ * @file   CD_MeshODESolverImplem.H
+ * @brief  Implementation of CD_MeshODESolver.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_MESHODESOLVERIMPLEM_H
 #define CD_MESHODESOLVERIMPLEM_H

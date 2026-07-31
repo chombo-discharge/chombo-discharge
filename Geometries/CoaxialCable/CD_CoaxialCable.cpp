@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_CoaxialCable.cpp
-  @brief  Implementation of CD_CoaxialCable.H
-  @author Robert Marskar
-*/
+ * @file   CD_CoaxialCable.cpp
+ * @brief  Implementation of CD_CoaxialCable.H
+ * @author Robert Marskar
+ */
 
 // Std includes
 #include <string>

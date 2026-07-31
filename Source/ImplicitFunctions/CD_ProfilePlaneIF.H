@@ -5,10 +5,10 @@
  */
 
 /**
-  @file  CD_ProfilePlaneIF.H
-  @brief  Declaration of an implicit function which is a plane with "holes"
-  @author Robert Marskar
-*/
+ * @file  CD_ProfilePlaneIF.H
+ * @brief  Declaration of an implicit function which is a plane with "holes"
+ * @author Robert Marskar
+ */
 
 #ifndef CD_PROFILEPLANEIF_H
 #define CD_PROFILEPLANEIF_H
@@ -20,30 +20,30 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Implicit function which represents an infinite half-plane with "holes". 
-  @note This is currently limited to 2D. 
-*/
+ * @brief Implicit function which represents an infinite half-plane with "holes".
+ * @note This is currently limited to 2D.
+ */
 class ProfilePlaneIF : public BaseIF
 {
 public:
   /**
-    @brief Disallowed weak construction
-  */
+   * @brief Disallowed weak construction
+   */
   ProfilePlaneIF() = delete;
 
   /**
-    @brief Full constructor.
-    @param[in] a_point       Point on the plane
-    @param[in] a_width       Box width
-    @param[in] a_impFunc     Implicit function to extract from the box
-    @param[in] a_num_left    Number of holes to the left (of the centerpoint)
-    @param[in] a_num_right   Number of holes to the right (of the centerpoint)
-    @param[in] a_ccDist      Distance between holes
-    @param[in] a_xShift      Profile shift to the left/right (relative to centerponit)
-    @param[in] a_yShift      Profile shift up/down (relative to centerponit)
-    @param[in] a_curv        Corner curvatures
-    @param[in] a_fluidInside Fluid on inside or not
-  */
+   * @brief Full constructor.
+   * @param[in] a_point       Point on the plane
+   * @param[in] a_width       Box width
+   * @param[in] a_impFunc     Implicit function to extract from the box
+   * @param[in] a_num_left    Number of holes to the left (of the centerpoint)
+   * @param[in] a_num_right   Number of holes to the right (of the centerpoint)
+   * @param[in] a_ccDist      Distance between holes
+   * @param[in] a_xShift      Profile shift to the left/right (relative to centerponit)
+   * @param[in] a_yShift      Profile shift up/down (relative to centerponit)
+   * @param[in] a_curv        Corner curvatures
+   * @param[in] a_fluidInside Fluid on inside or not
+   */
   ProfilePlaneIF(const RealVect& a_point,
                  const Real      a_width,
                  const BaseIF*   a_impFunc,
@@ -56,28 +56,28 @@ public:
                  const bool      a_fluidInside);
 
   /**
-    @brief Copy constructor
-    @param[in] a_inputIF Other plane
-  */
+   * @brief Copy constructor
+   * @param[in] a_inputIF Other plane
+   */
   ProfilePlaneIF(const ProfilePlaneIF& a_inputIF);
 
   /**
-    @brief Destructor
-  */
+   * @brief Destructor
+   */
   virtual ~ProfilePlaneIF();
 
   /**
-    @brief Level-set function
-    @param[in] a_pos Position
-    @return Function value at the given point
-  */
+   * @brief Level-set function
+   * @param[in] a_pos Position
+   * @return Function value at the given point
+   */
   virtual Real
   value(const RealVect& a_pos) const;
 
   /**
-    @brief Factory method
-    @return New implicit function
-  */
+   * @brief Factory method
+   * @return New implicit function
+   */
   virtual BaseIF*
   newImplicitFunction() const;
 

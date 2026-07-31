@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_KrylovGMRESImplem.H
-  @brief  Implementation of CD_KrylovGMRES.H
-  @author Robert Marskar
-*/
+ * @file   CD_KrylovGMRESImplem.H
+ * @brief  Implementation of CD_KrylovGMRES.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_KRYLOVGMRESIMPLEM_H
 #define CD_KRYLOVGMRESIMPLEM_H

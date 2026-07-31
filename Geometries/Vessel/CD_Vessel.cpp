@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_Vessel.cpp
-  @brief  High-voltage Vessel geometry
-  @author Robert Marskar
-*/
+ * @file   CD_Vessel.cpp
+ * @brief  High-voltage Vessel geometry
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <ParmParse.H>

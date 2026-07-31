@@ -1,14 +1,14 @@
 /**
-  chombo-discharge
-  Copyright © 2026 SINTEF Energy Research.
-  Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
-*/
+ * chombo-discharge
+ * Copyright © 2026 SINTEF Energy Research.
+ * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+ */
 
 /**
-  @file   CD_PetscGrid.cpp
-  @brief  Implementation of CD_PetscGrid.H
-  @author Robert Marskar
-*/
+ * @file   CD_PetscGrid.cpp
+ * @brief  Implementation of CD_PetscGrid.H
+ * @author Robert Marskar
+ */
 
 #ifdef CH_USE_PETSC
 

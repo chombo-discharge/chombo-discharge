@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_ItoKMCBackgroundEvaluatorImplem.H
-  @brief  Implementation of CD_ItoKMCBackgroundEvaluator.H
-  @author Robert Marskar
-*/
+ * @file   CD_ItoKMCBackgroundEvaluatorImplem.H
+ * @brief  Implementation of CD_ItoKMCBackgroundEvaluator.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_ITOKMCBACKGROUNDEVALUATORIMPLEM_H
 #define CD_ITOKMCBACKGROUNDEVALUATORIMPLEM_H

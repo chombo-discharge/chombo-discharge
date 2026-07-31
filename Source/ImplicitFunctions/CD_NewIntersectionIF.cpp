@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_NewIntersectionIF.cpp
-  @brief  Implementation of NewIntersectionIF.H
-  @author Robert Marskar
-*/
+ * @file   CD_NewIntersectionIF.cpp
+ * @brief  Implementation of NewIntersectionIF.H
+ * @author Robert Marskar
+ */
 
 // Std includes
 #include <limits>

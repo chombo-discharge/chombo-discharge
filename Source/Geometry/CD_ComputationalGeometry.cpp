@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_ComputationalGeometry.cpp
-  @brief  Implementation of CD_ComputationalGeometry.H
-  @author Robert Marskar
-*/
+ * @file   CD_ComputationalGeometry.cpp
+ * @brief  Implementation of CD_ComputationalGeometry.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <MFIndexSpace.H>
@@ -62,7 +62,8 @@ ComputationalGeometry::useChomboShop()
 {
   CH_TIME("ComputationalGeometry::useChomboShop()");
 
-  // TLDR: If you called this function you signal that ComputationalGeometry will use Chombo's GeometryShop for geometry generation.
+  // TLDR: If you called this function you signal that ComputationalGeometry will use Chombo's GeometryShop for geometry
+  // generation.
   m_useScanShop = false;
   m_scanDomain  = ProblemDomain();
 }
@@ -195,8 +196,8 @@ ComputationalGeometry::buildGasGeometry(GeometryService*&    a_geoserver,
 {
   CH_TIME("ComputationalGeometry::buildGasGeometry(GeometryService, ProblemDomain, RealVect, Real)");
 
-  // The gas phase is the intersection of the region outside every object, so IntersectionIF is correct here. We build the
-  // various parts and then create the implicit function for the gas-phas using constructive solid geometry.
+  // The gas phase is the intersection of the region outside every object, so IntersectionIF is correct here. We build
+  // the various parts and then create the implicit function for the gas-phas using constructive solid geometry.
   Vector<BaseIF*> parts;
   for (int i = 0; i < m_dielectrics.size(); i++) {
     parts.push_back(&(*(m_dielectrics[i].getImplicitFunction())));
@@ -265,8 +266,8 @@ ComputationalGeometry::buildSolidGeometry(GeometryService*&    a_geoserver,
     RefCountedPtr<BaseIF> dielCompIF = RefCountedPtr<BaseIF>(
       new ComplementIF(*dielBaseIF)); // This is the region inside the dielectrics.
 
-    // We want the function which is the region inside the dielectrics and outside the electrodes, i.e. the intersection of the region "inside"
-    // dielectrics and outside the electrods.
+    // We want the function which is the region inside the dielectrics and outside the electrodes, i.e. the intersection
+    // of the region "inside" dielectrics and outside the electrods.
     parts.push_back(&(*dielCompIF));
     parts.push_back(&(*elecBaseIF));
 

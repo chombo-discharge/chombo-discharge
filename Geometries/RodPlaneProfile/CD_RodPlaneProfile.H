@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_RodPlaneProfile.H
-  @brief  Rod-plane geometry. The dielectric plane can have surface roughness
-  @author Robert Marskar
-*/
+ * @file   CD_RodPlaneProfile.H
+ * @brief  Rod-plane geometry. The dielectric plane can have surface roughness
+ * @author Robert Marskar
+ */
 
 #ifndef CD_RODPLANEPROFILE_H
 #define CD_RODPLANEPROFILE_H
@@ -18,14 +18,14 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Geometry class which defines an electrode blade and a dielectric slab with various surface profiles.
-*/
+ * @brief Geometry class which defines an electrode blade and a dielectric slab with various surface profiles.
+ */
 class RodPlaneProfile : public ComputationalGeometry
 {
 public:
   /**
-    @brief Enumeration of supported dielectric surface profiles.
-  */
+   * @brief Enumeration of supported dielectric surface profiles.
+   */
   enum class profile
   {
     circle, ///< Circular surface profile.
@@ -33,39 +33,39 @@ public:
   };
 
   /**
-    @brief Constructor. Defines the geometry.
-  */
+   * @brief Constructor. Defines the geometry.
+   */
   RodPlaneProfile();
 
   /**
-    @brief Destructor.
-  */
+   * @brief Destructor.
+   */
   ~RodPlaneProfile();
 
 protected:
   /**
-    @brief Active surface profile type.
-  */
+   * @brief Active surface profile type.
+   */
   profile m_profile;
 
   /**
-    @brief Get the base implicit function for the selected profile.
-    @return Implicit function for the dielectric slab.
-  */
+   * @brief Get the base implicit function for the selected profile.
+   * @return Implicit function for the dielectric slab.
+   */
   BaseIF*
   getBaseIF();
 
   /**
-    @brief Get the base implicit function for a circular profile.
-    @return Implicit function for the circular surface profile.
-  */
+   * @brief Get the base implicit function for a circular profile.
+   * @return Implicit function for the circular surface profile.
+   */
   static BaseIF*
   getBaseIFCircle();
 
   /**
-    @brief Get the base implicit function for a square profile.
-    @return Implicit function for the square surface profile.
-  */
+   * @brief Get the base implicit function for a square profile.
+   * @return Implicit function for the square surface profile.
+   */
   static BaseIF*
   getBaseIFSquare();
 };

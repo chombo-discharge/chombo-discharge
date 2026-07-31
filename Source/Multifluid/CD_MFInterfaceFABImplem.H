@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_MFInterfaceFABImplem.H
-  @brief  Implementation of CD_MFInterfaceFAB.H
-  @author Robert Marskar
-*/
+ * @file   CD_MFInterfaceFABImplem.H
+ * @brief  Implementation of CD_MFInterfaceFAB.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_MFINTERFACEFABIMPLEM_H
 #define CD_MFINTERFACEFABIMPLEM_H

@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_BoxLoopsImplem.H
-  @brief  Implementation of CD_BoxLoops.H
-  @author Robert Marskar
-*/
+ * @file   CD_BoxLoopsImplem.H
+ * @brief  Implementation of CD_BoxLoops.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_BOXLOOPSIMPLEM_H
 #define CD_BOXLOOPSIMPLEM_H

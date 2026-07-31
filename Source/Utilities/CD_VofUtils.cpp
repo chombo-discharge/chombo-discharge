@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_VofUtils.cpp
-  @brief  Implementation of CD_VofUtils.H
-  @author Robert Marskar
-*/
+ * @file   CD_VofUtils.cpp
+ * @brief  Implementation of CD_VofUtils.H
+ * @author Robert Marskar
+ */
 
 #include <CD_VofUtils.H>
 #include <CD_BoxLoops.H>
@@ -517,7 +517,8 @@ VofUtils::getVofsInMonotonePath(Vector<VolIndex>& a_vofList,
         if (a_timesMoved[dir] < a_radius) {
           const IntVect newTimesMoved = a_timesMoved + BASISV(dir);
 
-          // Move in the low direction. If we have already moved in the high direction we are not allowed to "turn back".
+          // Move in the low direction. If we have already moved in the high direction we are not allowed to "turn
+          // back".
           if (a_pathSign[dir] == -1 || a_pathSign[dir] == 0) {
             IntVect newPathSign = a_pathSign;
             newPathSign[dir]    = -1;
@@ -530,7 +531,8 @@ VofUtils::getVofsInMonotonePath(Vector<VolIndex>& a_vofList,
             }
           }
 
-          // Move in the high direction. If we have already moved in the low direction we are not allowed to "turn back".
+          // Move in the high direction. If we have already moved in the low direction we are not allowed to "turn
+          // back".
           if (a_pathSign[dir] == 0 || a_pathSign[dir] == 1) {
             IntVect newPathSign = a_pathSign;
             newPathSign[dir]    = 1;
@@ -580,7 +582,8 @@ VofUtils::getVofsInMonotonePath(std::set<VolIndex>& a_vofSet,
           IntVect newTimesMoved = a_timesMoved;
           newTimesMoved[dir] += 1;
 
-          // Move in the low direction. If we have already moved in the high direction we are not allowed to "turn back".
+          // Move in the low direction. If we have already moved in the high direction we are not allowed to "turn
+          // back".
           if (a_pathSign[dir] <= 0) {
             IntVect newPathSign = a_pathSign;
             newPathSign[dir]    = -1;
@@ -599,7 +602,8 @@ VofUtils::getVofsInMonotonePath(std::set<VolIndex>& a_vofSet,
             }
           }
 
-          // Move in the high direction. If we have already moved in the low direction we are not allowed to "turn back".
+          // Move in the high direction. If we have already moved in the low direction we are not allowed to "turn
+          // back".
           if (a_pathSign[dir] >= 0) {
             IntVect newPathSign = a_pathSign;
             newPathSign[dir]    = 1;

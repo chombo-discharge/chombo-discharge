@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_GECReferenceCell.H
-  @brief  Simplified GEC reference cell geometry.
-  @author Robert Marskar
-*/
+ * @file   CD_GECReferenceCell.H
+ * @brief  Simplified GEC reference cell geometry.
+ * @author Robert Marskar
+ */
 
 #ifndef CD_GECREFERENCECELL_H
 #define CD_GECREFERENCECELL_H
@@ -18,19 +18,19 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Simplified GEC reference cell geometry.
-*/
+ * @brief Simplified GEC reference cell geometry.
+ */
 class GECReferenceCell : public ComputationalGeometry
 {
 public:
   /**
-    @brief Constructor
-  */
+   * @brief Constructor
+   */
   GECReferenceCell();
 
   /**
-    @brief Destructor
-  */
+   * @brief Destructor
+   */
   ~GECReferenceCell();
 };
 

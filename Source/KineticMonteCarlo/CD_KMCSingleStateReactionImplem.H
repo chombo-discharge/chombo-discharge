@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_KMCSingleStateReactionImplem.H
-  @brief  Implementation of CD_KMCSingleStateReaction.H
-  @author Robert Marskar
-*/
+ * @file   CD_KMCSingleStateReactionImplem.H
+ * @brief  Implementation of CD_KMCSingleStateReaction.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_KMCSINGLESTATEREACTIONIMPLEM_H
 #define CD_KMCSINGLESTATEREACTIONIMPLEM_H
@@ -62,9 +62,10 @@ KMCSingleStateReaction<State, T>::computeStateChanges() noexcept
     }
   }
 
-  // Compute the propensity factor that we need when there are bi- or tri-particle reactions involving the same species. We need to do this
-  // because for biparticle reactions of N particles of the same type, there are 0.5 * N * (N-1) unique pairs of particles. Or in general when
-  // we have a k-order reaction we have 'N choose k' = N!/(k! * (N-k)!) combinations. In the propensity function we compute the propensity as
+  // Compute the propensity factor that we need when there are bi- or tri-particle reactions involving the same species.
+  // We need to do this because for biparticle reactions of N particles of the same type, there are 0.5 * N * (N-1)
+  // unique pairs of particles. Or in general when we have a k-order reaction we have 'N choose k' = N!/(k! * (N-k)!)
+  // combinations. In the propensity function we compute the propensity as
   //
   //    a = rate * factor * N * (N-1) * (N-2) ...
   //

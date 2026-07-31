@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_ItoKMCBackgroundSpecies.cpp
-  @brief  Implementation of CD_ItoKMCBackgroundSpecies.H
-  @author Robert Marskar
-*/
+ * @file   CD_ItoKMCBackgroundSpecies.cpp
+ * @brief  Implementation of CD_ItoKMCBackgroundSpecies.H
+ * @author Robert Marskar
+ */
 
 // Our includes
 #include <CD_ItoKMCBackgroundSpecies.H>

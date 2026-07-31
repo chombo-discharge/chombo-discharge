@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_RodIF.cpp
-  @brief  Implementation of CD_RodIF.H
-  @author Robert Marskar
-*/
+ * @file   CD_RodIF.cpp
+ * @brief  Implementation of CD_RodIF.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <SphereIF.H>

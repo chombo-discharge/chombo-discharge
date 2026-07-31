@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_ItoKMCSurfaceReactionsImplem.H
-  @brief  Implementation of CD_ItoKMCSurfaceReactions.H
-  @author Robert Marskar
-*/
+ * @file   CD_ItoKMCSurfaceReactionsImplem.H
+ * @brief  Implementation of CD_ItoKMCSurfaceReactions.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_ITOKMCSURFACEREACTIONSIMPLEM_H
 #define CD_ITOKMCSURFACEREACTIONSIMPLEM_H

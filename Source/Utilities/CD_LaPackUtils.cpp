@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_LaPackUtils.cpp
-  @brief  Implementation of CD_LaPackUtils.H
-  @author Robert Marskar
-*/
+ * @file   CD_LaPackUtils.cpp
+ * @brief  Implementation of CD_LaPackUtils.H
+ * @author Robert Marskar
+ */
 
 // Std includes
 #include <limits>

@@ -5,10 +5,10 @@
  */
 
 /**
-  @file    CD_MushroomIF.cpp
-  @brief   Implementation of CD_MushroomIF.H
-  @author  Robert Marskar
-*/
+ * @file    CD_MushroomIF.cpp
+ * @brief   Implementation of CD_MushroomIF.H
+ * @author  Robert Marskar
+ */
 
 // Chombo includes
 #include <SmoothIntersection.H>

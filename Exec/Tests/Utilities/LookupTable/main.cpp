@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   main.cpp
-  @brief  Unit test for LookupTable1D.
-  @author Robert Marskar
-*/
+ * @file   main.cpp
+ * @brief  Unit test for LookupTable1D.
+ * @author Robert Marskar
+ */
 
 #include <CD_Driver.H>
 #include <CD_LookupTable.H>

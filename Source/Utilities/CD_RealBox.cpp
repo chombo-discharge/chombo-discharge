@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_RealBox.cpp
-  @brief  Implementation of CD_RealBox.H
-  @author Robert Marskar
-*/
+ * @file   CD_RealBox.cpp
+ * @brief  Implementation of CD_RealBox.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <CH_Timer.H>

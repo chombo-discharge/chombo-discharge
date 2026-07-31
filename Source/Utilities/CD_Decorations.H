@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_Decorations.H
-  @brief  Declaration of various decoration macros. 
-  @author Robert Marskar
-*/
+ * @file   CD_Decorations.H
+ * @brief  Declaration of various decoration macros.
+ * @author Robert Marskar
+ */
 
 #ifndef CD_DECORATIONS_H
 #define CD_DECORATIONS_H

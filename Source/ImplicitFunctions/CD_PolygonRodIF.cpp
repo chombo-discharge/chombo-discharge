@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_PolygonRodIF.cpp
-  @brief  Implementation of CD_PolygonRodIF.H
-  @author Robert Marskar
-*/
+ * @file   CD_PolygonRodIF.cpp
+ * @brief  Implementation of CD_PolygonRodIF.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <IntersectionIF.H>

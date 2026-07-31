@@ -5,11 +5,11 @@
  */
 
 /**
-  @file   CD_McPhoto.cpp
-  @brief  Implementation of CD_McPhoto.H
-  @author Robert Marskar
-  @todo   Create new classes for handling domain BCs -- the old ones stink. 
-*/
+ * @file   CD_McPhoto.cpp
+ * @brief  Implementation of CD_McPhoto.H
+ * @author Robert Marskar
+ * @todo   Create new classes for handling domain BCs -- the old ones stink.
+ */
 
 // Std includes
 #include <limits>
@@ -51,15 +51,19 @@ McPhoto::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_s
     pout() << m_name + "::advance" << endl;
   }
 
-  // Note: This routine does an on-the-fly generation of photons based on the contents in a_source. This routine is primarily
-  //       written for fluid methods since all input/output parameters happen on the mesh. Most particle solvers will use a different
-  //       approach and will probably fill m_sourcePhotons through a kinetic interface and use advancePhotonsInstantaneous or advancePhotonsTransient.
+  // Note: This routine does an on-the-fly generation of photons based on the contents in a_source. This routine is
+  // primarily
+  //       written for fluid methods since all input/output parameters happen on the mesh. Most particle solvers will
+  //       use a different approach and will probably fill m_sourcePhotons through a kinetic interface and use
+  //       advancePhotonsInstantaneous or advancePhotonsTransient.
   //
-  //       If you find yourself calling this routine with a pure particle method, you're may be doing something you shouldn't....
+  //       If you find yourself calling this routine with a pure particle method, you're may be doing something you
+  //       shouldn't....
   //
-  //       This routine is a bit convoluted because it permits sub-sampling of the photons generated in the grid cells. That is, instead of generating
-  //       all photons at once and moving them, we divide them into packets and advance the packets independently of one another. This results in additional
-  //       MPI calls, but can reduce memory when many photons are generated per cell.
+  //       This routine is a bit convoluted because it permits sub-sampling of the photons generated in the grid cells.
+  //       That is, instead of generating all photons at once and moving them, we divide them into packets and advance
+  //       the packets independently of one another. This results in additional MPI calls, but can reduce memory when
+  //       many photons are generated per cell.
 
   DataOps::setValue(a_phi, 0.0);
 
@@ -71,10 +75,12 @@ McPhoto::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_s
   m_amr->allocate(numPhysPhotonsTotal, m_realm, m_phase, 1);
   m_amr->allocate(numPhysPhotonsPacket, m_realm, m_phase, m_numSamplingPackets);
 
-  // Recall: m_photons are 'traveling' photons, m_sourcePhotons are photons to be transferred into m_photons before transport over dt,
+  // Recall: m_photons are 'traveling' photons, m_sourcePhotons are photons to be transferred into m_photons before
+  // transport over dt,
   //         and m_ebPhotons and m_domainPhotons are photons that strike the EB or domain boundaries.
   //
-  //         If we're doing an instantaneous solver, do a safety cleanout of m_photons first (past photons have been absorbed on the mesh).
+  //         If we're doing an instantaneous solver, do a safety cleanout of m_photons first (past photons have been
+  //         absorbed on the mesh).
   if (m_instantaneous) {
     this->clear(m_photons);
   }
@@ -1250,8 +1256,8 @@ McPhoto::dirtySamplePhotons(ParticleContainer<NoPayload>& a_photons,
 
   a_photons.remap();
 
-  // Deposit photons on the mesh. I'm putting in a custom deposition method in case the user wants NGP deposition, which will be
-  // faster than the one supplied through AmrMesh.
+  // Deposit photons on the mesh. I'm putting in a custom deposition method in case the user wants NGP deposition, which
+  // will be faster than the one supplied through AmrMesh.
   if (m_deposition == DepositionType::NGP) {
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       const ProblemDomain&     domain = m_amr->getDomains()[lvl];
@@ -1496,9 +1502,9 @@ McPhoto::advancePhotonsInstantaneous(ParticleContainer<Photon>& a_bulkPhotons,
   const RealVect probLo = m_amr->getProbLo();
   const RealVect probHi = m_amr->getProbHi();
 
-  // Safety factor -- weird thing but if particles lie EXACTLY on the high side of the domain boundary they map to the outside
-  // of the computational domain (for exactly the same reason that a photon on the interface between two cells map to the "upper one"). Adding
-  // a negligible safety factor to prevent that from happening.
+  // Safety factor -- weird thing but if particles lie EXACTLY on the high side of the domain boundary they map to the
+  // outside of the computational domain (for exactly the same reason that a photon on the interface between two cells
+  // map to the "upper one"). Adding a negligible safety factor to prevent that from happening.
   constexpr Real SAFETY = 1.E-6;
 
   // This is the implicit function used for intersection tests
@@ -1543,8 +1549,8 @@ McPhoto::advancePhotonsInstantaneous(ParticleContainer<Photon>& a_bulkPhotons,
                                     static_cast<ParticleReal>(velocity[1]),
                                     static_cast<ParticleReal>(velocity[2]))};
 
-        // Check if we should check of different types of boundary intersections. These are cheap initial tests that allow
-        // us to skip intersection tests for some photons.
+        // Check if we should check of different types of boundary intersections. These are cheap initial tests that
+        // allow us to skip intersection tests for some photons.
         bool checkEB  = false;
         bool checkDom = false;
 
@@ -1561,13 +1567,15 @@ McPhoto::advancePhotonsInstantaneous(ParticleContainer<Photon>& a_bulkPhotons,
           bulkPhotons.append(newPos, weight, payload);
         }
         else {
-          // Must do an intersection test (with either EB or domain). These tests work such that we parametrize the photon path as
+          // Must do an intersection test (with either EB or domain). These tests work such that we parametrize the
+          // photon path as
           //
           // x(s) = x0 + s*(x1-x0), s = [0,1]
           //
           // where x0 is the starting position (oldPos) and x1 is the new position (newPos).
           //
-          // We determine s for the domain boundaries and EBs. If the photon path cross both, smallest s takes precedence.
+          // We determine s for the domain boundaries and EBs. If the photon path cross both, smallest s takes
+          // precedence.
 
           Real sDom = std::numeric_limits<Real>::max();
           Real sEB  = std::numeric_limits<Real>::max();
@@ -1575,8 +1583,8 @@ McPhoto::advancePhotonsInstantaneous(ParticleContainer<Photon>& a_bulkPhotons,
           bool contactDomain = false;
           bool contactEB     = false;
 
-          // Do intersection tests. These return true/false if the path crossed an object. If it returned true, the s-parameter
-          // will have been defined as well.
+          // Do intersection tests. These return true/false if the path crossed an object. If it returned true, the
+          // s-parameter will have been defined as well.
           if (checkDom) {
             contactDomain = ParticleOps::domainIntersection(oldPos, newPos, probLo, probHi, sDom);
           }
@@ -1662,9 +1670,9 @@ McPhoto::advancePhotonsTransient(ParticleContainer<Photon>& a_bulkPhotons,
   const RealVect probLo = m_amr->getProbLo();
   const RealVect probHi = m_amr->getProbHi();
 
-  // Safety factor -- weird thing but if particles lie EXACTLY on the high side of the domain boundary they map to the outside
-  // of the computational domain (for exactly the same reason that a photon on the interface between two cells map to the "upper one"). Adding
-  // a negligible safety factor to prevent that from happening.
+  // Safety factor -- weird thing but if particles lie EXACTLY on the high side of the domain boundary they map to the
+  // outside of the computational domain (for exactly the same reason that a photon on the interface between two cells
+  // map to the "upper one"). Adding a negligible safety factor to prevent that from happening.
   constexpr Real SAFETY = 1.E-8;
 
   // This is the implicit function used for intersection tests
@@ -1709,8 +1717,8 @@ McPhoto::advancePhotonsTransient(ParticleContainer<Photon>& a_bulkPhotons,
           static_cast<ParticleReal>(kappa),
           D_DECL(static_cast<ParticleReal>(v[0]), static_cast<ParticleReal>(v[1]), static_cast<ParticleReal>(v[2]))};
 
-        // Check if we should check of different types of boundary intersections. These are checp initial tests that allow
-        // us to skip more expensive intersection tests for some Photons.
+        // Check if we should check of different types of boundary intersections. These are checp initial tests that
+        // allow us to skip more expensive intersection tests for some Photons.
         bool checkEB  = false;
         bool checkDom = false;
 
@@ -1728,7 +1736,8 @@ McPhoto::advancePhotonsTransient(ParticleContainer<Photon>& a_bulkPhotons,
         bool absorbedEB     = false;
         bool absorbedDomain = false;
 
-        // Below, we do an intersection test (with either EB or domain). These tests work such that we parametrize the photon path as
+        // Below, we do an intersection test (with either EB or domain). These tests work such that we parametrize the
+        // photon path as
         //
         // x(s) = x0 + s*(x1-x0), s = [0,1]
         //

@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_TracerParticleSolverImplem.H
-  @brief  Implementation of CD_TracerParticleSolver.H
-  @author Robert Marskar
-*/
+ * @file   CD_TracerParticleSolverImplem.H
+ * @brief  Implementation of CD_TracerParticleSolver.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_TRACERPARTICLESOLVERIMPLEM_H
 #define CD_TRACERPARTICLESOLVERIMPLEM_H

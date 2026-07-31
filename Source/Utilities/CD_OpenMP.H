@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_OpenMP.H
-  @brief  Declaration of various useful OpenMP-related utilities
-  @author Robert Marskar
-*/
+ * @file   CD_OpenMP.H
+ * @brief  Declaration of various useful OpenMP-related utilities
+ * @author Robert Marskar
+ */
 
 #ifndef CD_OPENMP_H
 #define CD_OPENMP_H

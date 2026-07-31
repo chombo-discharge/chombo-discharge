@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_MFHelmholtzEBBCFactory.H
-  @brief  Declaration of an EB boundary condition factory class for MFHelmholtzOp.
-  @author Robert Marskar
-*/
+ * @file   CD_MFHelmholtzEBBCFactory.H
+ * @brief  Declaration of an EB boundary condition factory class for MFHelmholtzOp.
+ * @author Robert Marskar
+ */
 
 #ifndef CD_MFHELMHOLTZEBBCFACTORY_H
 #define CD_MFHELMHOLTZEBBCFACTORY_H
@@ -19,27 +19,27 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Base class for making boundary conditions on the EB in a multifluid context. 
-*/
+ * @brief Base class for making boundary conditions on the EB in a multifluid context.
+ */
 class MFHelmholtzEBBCFactory
 {
 public:
   /**
-    @brief Weak constructor. Must subsequently set order, weight, and value. 
-  */
+   * @brief Weak constructor. Must subsequently set order, weight, and value.
+   */
   MFHelmholtzEBBCFactory();
 
   /**
-    @brief Default constructor
-  */
+   * @brief Default constructor
+   */
   virtual ~MFHelmholtzEBBCFactory();
 
   /**
-    @brief Factory method for 
-    @return Return value
-    @param[in] a_iphase Description
-    @param[in,out] a_jumpBC Description
-  */
+   * @brief Factory method for
+   * @return Return value
+   * @param[in] a_iphase Description
+   * @param[in,out] a_jumpBC Description
+   */
   virtual RefCountedPtr<EBHelmholtzEBBC>
   create(const int a_iphase, const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC) const = 0;
 };

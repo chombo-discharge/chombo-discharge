@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_CdrCTU.cpp
-  @brief  Implementation of CD_CdrCTU.H
-  @author Robert Marskar
-*/
+ * @file   CD_CdrCTU.cpp
+ * @brief  Implementation of CD_CdrCTU.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <ParmParse.H>
@@ -146,7 +146,8 @@ CdrCTU::computeAdvectionDt()
   }
   else {
 
-    // TLDR: For advection, Bell, Collela, and Glaz says we must have dt <= dx/max(|vx|, |vy|, |vz|). See these three papers for details:
+    // TLDR: For advection, Bell, Collela, and Glaz says we must have dt <= dx/max(|vx|, |vy|, |vz|). See these three
+    // papers for details:
     //
     //       Colella, J. Comp. Phys. 87 (171-200), 1990
     //       Bell, Colella, Glaz, J. Comp. Phys 85 (257), 1989
@@ -289,10 +290,10 @@ CdrCTU::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellPhi, 
       const Box      cellBox = dbl[din];
       const EBISBox& ebisbox = ebisl[din];
 
-      // Limit slopes and solve Riemann problem (which yields the upwind state at the face). Note that we need one ghost cell for
-      // the slopes because in order to extrapolate to the left/right sides of a face, we need the centered slope on both
-      // sides for the upwind. So, normalSlopes is bigger than cellBox (by one). Since the limited slope is computed using the
-      // left/right slopes, we end up needing two grid cells.
+      // Limit slopes and solve Riemann problem (which yields the upwind state at the face). Note that we need one ghost
+      // cell for the slopes because in order to extrapolate to the left/right sides of a face, we need the centered
+      // slope on both sides for the upwind. So, normalSlopes is bigger than cellBox (by one). Since the limited slope
+      // is computed using the left/right slopes, we end up needing two grid cells.
       Box grownBox = cellBox;
       grownBox.grow(1);
       EBCellFAB normalSlopes(ebisbox, grownBox, SpaceDim);
@@ -331,8 +332,8 @@ CdrCTU::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
   BaseFab<Real>&       slopesReg = a_normalSlopes.getSingleValuedFAB();
   const BaseFab<Real>& phiReg    = a_cellPhi.getSingleValuedFAB();
 
-  // Compute slopes in regular grid cells. Note that we need to grow the input box by one ghost cell in direction 'dir' because we need the
-  // centered slopes on both sides of the faces that we extrapolate to.
+  // Compute slopes in regular grid cells. Note that we need to grow the input box by one ghost cell in direction 'dir'
+  // because we need the centered slopes on both sides of the faces that we extrapolate to.
   for (int dir = 0; dir < SpaceDim; dir++) {
 
     // Grown box
@@ -566,8 +567,8 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
     const BaseFab<Real>& regCellVel = a_cellVel.getSingleValuedFAB();
     const BaseFab<Real>& regFaceVel = a_faceVel[dir].getSingleValuedFAB();
 
-    // Iteration space for the kernels. When upwinding we want to set phi on the faces, so the iteration space is defined
-    // by the faces of this box (in direction dir).
+    // Iteration space for the kernels. When upwinding we want to set phi on the faces, so the iteration space is
+    // defined by the faces of this box (in direction dir).
     const Vector<FaceIndex> irregFaces = ebgraph.getIrregFaces(a_cellBox, dir);
 
     // Interior faces.

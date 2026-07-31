@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_MFHelmholtzOpFactory.cpp
-  @brief  Implementation of CD_MFHelmholtzOpFactory.H
-  @author Robert Marskar
-*/
+ * @file   CD_MFHelmholtzOpFactory.cpp
+ * @brief  Implementation of CD_MFHelmholtzOpFactory.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <ParmParse.H>
@@ -206,7 +206,8 @@ MFHelmholtzOpFactory::defineJump()
 {
   CH_TIME("MFHelmholtzOpFactory::defineJump()");
 
-  // TLDR: This defines m_amrJump on the first phase (gas phase). This is irregular data intended to be interfaced into the
+  // TLDR: This defines m_amrJump on the first phase (gas phase). This is irregular data intended to be interfaced into
+  // the
   //       boundary condition class. When we match the BC we get the data from here (the gas phase). Note that we define
   //       m_amrJump on all irregular cells, but the operators will do matching on a subset of them.
 
@@ -244,8 +245,9 @@ MFHelmholtzOpFactory::defineMultigridLevels()
   CH_TIME("MFHelmholtzOpFactory::defineMultigridLevels()");
 
   // TLDR: This routine defines what is needed for making the multigrid levels. This includes the intermediate
-  // levels (if you run with refinement factor 4) as well as the deeper multigrid levels that are coarsenings of the base AMR level. Recall that
-  // in Chombo-speak a multigrid level is a grid level completely covered by another grid level.
+  // levels (if you run with refinement factor 4) as well as the deeper multigrid levels that are coarsenings of the
+  // base AMR level. Recall that in Chombo-speak a multigrid level is a grid level completely covered by another grid
+  // level.
 
   m_mgLevelGrids.resize(m_numAmrLevels);
   m_mgAcoef.resize(m_numAmrLevels);
@@ -258,8 +260,8 @@ MFHelmholtzOpFactory::defineMultigridLevels()
   for (int amrLevel = 0; amrLevel < m_numAmrLevels; amrLevel++) {
     m_hasMgLevels[amrLevel] = false;
 
-    // We can have a multigrid level either if the refinement factor to the coarse level is larger than two, or we are at the bottom
-    // of the AMR hierarchy.
+    // We can have a multigrid level either if the refinement factor to the coarse level is larger than two, or we are
+    // at the bottom of the AMR hierarchy.
     if (amrLevel == 0 && isCoarser(m_bottomDomain, m_amrLevelGrids[amrLevel].getDomain())) {
       m_hasMgLevels[amrLevel] = true;
     }
@@ -299,8 +301,9 @@ MFHelmholtzOpFactory::defineMultigridLevels()
         // This is the one we will define
         MFLevelGrid mgMflgCoar;
 
-        // This is an overriding option where we use the pre-defined coarsenings in m_deeperMultigridLevels. This is only valid for coarsenings of
-        // the base AMR level, hence amrLevel == 0. Once those levels are exhausted we begin with direct coarsening.
+        // This is an overriding option where we use the pre-defined coarsenings in m_deeperMultigridLevels. This is
+        // only valid for coarsenings of the base AMR level, hence amrLevel == 0. Once those levels are exhausted we
+        // begin with direct coarsening.
         if (amrLevel == 0 && curMgLevels < m_deeperLevelGrids.size()) {
           hasCoarser = true; // Note that m_deeperLevelGrids[0] should be a factor 2 coarsening of the
           mgMflgCoar = m_deeperLevelGrids[curMgLevels - 1]; // coarsest AMR level. So curMgLevels-1 is correct.
@@ -317,8 +320,8 @@ MFHelmholtzOpFactory::defineMultigridLevels()
             hasCoarser = false;
           }
           else {
-            // Not so sure about this one, will we ever be asked to make an coarsened MG level which is also an AMR level? If not, this code
-            // will reduce the coarsening efforts.
+            // Not so sure about this one, will we ever be asked to make an coarsened MG level which is also an AMR
+            // level? If not, this code will reduce the coarsening efforts.
             for (int iamr = 0; iamr < m_numAmrLevels; iamr++) {
               if (mgMflgCoar.getDomain() == m_amrLevelGrids[iamr].getDomain()) {
                 hasCoarser = false;
@@ -340,7 +343,8 @@ MFHelmholtzOpFactory::defineMultigridLevels()
             ebislCoar.push_back(mgMflgCoar.getEBLevelGrid(i).getEBISL());
           }
 
-          // Factories for making coarse stuff. Need one ghost cell because we interpolate b*grad(phi) to face centroids.
+          // Factories for making coarse stuff. Need one ghost cell because we interpolate b*grad(phi) to face
+          // centroids.
           const int           nghost = 1;
           MFCellFactory       cellFact(ebislCoar, ebislComps);
           MFFluxFactory       fluxFact(ebislCoar, ebislComps);
@@ -402,7 +406,8 @@ MFHelmholtzOpFactory::coarsenCoefficientsMG()
   for (int amrLevel = 0; amrLevel < m_numAmrLevels; amrLevel++) {
 
     if (m_hasMgLevels[amrLevel]) {
-      // In these vectors, mgAco[0] is the AMR level, mgAco[1] is a refinement 2 coarsening of mgAco[0], mgAco[2] is the coarsening of mgAco[1] and so on.
+      // In these vectors, mgAco[0] is the AMR level, mgAco[1] is a refinement 2 coarsening of mgAco[0], mgAco[2] is the
+      // coarsening of mgAco[1] and so on.
       const AmrLevelGrids mgGrids = m_mgLevelGrids[amrLevel];
 
       AmrCellData& mgAco      = m_mgAcoef[amrLevel];
@@ -669,10 +674,8 @@ MFHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bo
       mflg       = mgLevelGrids[mgLevel];
       jump       = m_mgJump[amrLevel][mgLevel];
 
-      hasMGObjects =
-        (mgLevel <
-         mgLevelGrids.size() -
-           1); // This just means that mgLevel was not the last entry in mgLevelGrids so there's even coarser stuff below.
+      hasMGObjects = (mgLevel < mgLevelGrids.size() - 1); // This just means that mgLevel was not the last entry in
+                                                          // mgLevelGrids so there's even coarser stuff below.
       if (hasMGObjects) {
         mflgMgCoar = mgLevelGrids[mgLevel + 1];
       }

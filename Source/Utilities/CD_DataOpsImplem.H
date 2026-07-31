@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_DataOpsImplem.H
-  @brief  Implementation of CD_DataOps.H
-  @author Robert Marskar
-*/
+ * @file   CD_DataOpsImplem.H
+ * @brief  Implementation of CD_DataOps.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_DATAOPSIMPLEM_H
 #define CD_DATAOPSIMPLEM_H

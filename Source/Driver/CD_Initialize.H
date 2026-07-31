@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_Initialize.H
-  @brief  Declaration of the initialization functions for chombo-discharge
-  @author Robert Marskar
-*/
+ * @file   CD_Initialize.H
+ * @brief  Declaration of the initialization functions for chombo-discharge
+ * @author Robert Marskar
+ */
 
 #ifndef CD_INITIALIZE_H
 #define CD_INITIALIZE_H
@@ -32,21 +32,21 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Global chombo-discharge ParmParse input parameter object. This must have global lifetime.
-*/
+ * @brief Global chombo-discharge ParmParse input parameter object. This must have global lifetime.
+ */
 extern ParmParse* dischargeParser;
 
 /**
-  @brief Global chombo-discharge input file name
-*/
+ * @brief Global chombo-discharge input file name
+ */
 extern std::string dischargeInputFile;
 
 /**
-  @brief chombo-discharge main initialization function.
-  @details This initializes MPI and possibly also PETSc, and builds the ParmParse table used for fetching argument. 
-  @param[in] argc The usual number of arguments on the command line.
-  @param[in] argv[] Usual arguments.
-*/
+ * @brief chombo-discharge main initialization function.
+ * @details This initializes MPI and possibly also PETSc, and builds the ParmParse table used for fetching argument.
+ * @param[in] argc The usual number of arguments on the command line.
+ * @param[in] argv[] Usual arguments.
+ */
 #if defined(CH_USE_PETSC)
 PetscErrorCode
 initialize(int argc, char* argv[]);
@@ -56,9 +56,9 @@ initialize(int argc, char* argv[]);
 #endif
 
 /**
-  @brief chombo-discharge finalization functions. Exits MPI and writes timer report if called for.
-  @return Exit code (0 on success).
-*/
+ * @brief chombo-discharge finalization functions. Exits MPI and writes timer report if called for.
+ * @return Exit code (0 on success).
+ */
 #if defined(CH_USE_PETSC)
 PetscErrorCode
 finalize();

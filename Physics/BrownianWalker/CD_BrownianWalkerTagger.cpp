@@ -5,10 +5,10 @@
  */
 
 /**
-   @file   CD_BrownianWalkerTagger.cpp
-   @brief  Implementation of CD_BrownianWalkerTagger.H
-   @author Robert Marskar
-*/
+ * @file   CD_BrownianWalkerTagger.cpp
+ * @brief  Implementation of CD_BrownianWalkerTagger.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <CH_Timer.H>

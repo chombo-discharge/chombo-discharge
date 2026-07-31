@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_RandomInterface.cpp
-  @brief  Implementation of CD_RandomInterface.H
-  @author Robert Marskar
-*/
+ * @file   CD_RandomInterface.cpp
+ * @brief  Implementation of CD_RandomInterface.H
+ * @author Robert Marskar
+ */
 
 // Std includes
 #include <random>

@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_NearestNeighborParticleMergeImplem.H
-  @brief  Implementation of CD_NearestNeighborParticleMerge.H
-  @author Robert Marskar
-*/
+ * @file   CD_NearestNeighborParticleMergeImplem.H
+ * @brief  Implementation of CD_NearestNeighborParticleMerge.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_NEARESTNEIGHBORPARTICLEMERGEIMPLEM_H
 #define CD_NEARESTNEIGHBORPARTICLEMERGEIMPLEM_H
@@ -34,11 +34,11 @@ namespace ParticleManagement {
 namespace detail {
 
 /**
-      @brief Squared Euclidean distance between two physical positions.
-      @param[in] a_a First position.
-      @param[in] a_b Second position.
-      @return Squared distance between a_a and a_b.
-    */
+ * @brief Squared Euclidean distance between two physical positions.
+ * @param[in] a_a First position.
+ * @param[in] a_b Second position.
+ * @return Squared distance between a_a and a_b.
+ */
 inline Real
 nnMergeDistSquared(const RealVect& a_a, const RealVect& a_b) noexcept
 {
@@ -54,12 +54,12 @@ nnMergeDistSquared(const RealVect& a_a, const RealVect& a_b) noexcept
 }
 
 /**
-      @brief Chebyshev (max-per-axis) distance between two cell-index vectors -- see
-      CD_NearestNeighborParticleMerge.H's a_maxCellDistance docs.
-      @param[in] a_a First cell index.
-      @param[in] a_b Second cell index.
-      @return Max-per-axis distance between a_a and a_b.
-    */
+ * @brief Chebyshev (max-per-axis) distance between two cell-index vectors -- see
+ * CD_NearestNeighborParticleMerge.H's a_maxCellDistance docs.
+ * @param[in] a_a First cell index.
+ * @param[in] a_b Second cell index.
+ * @return Max-per-axis distance between a_a and a_b.
+ */
 inline int
 nnMergeChebyshevCellDistance(const IntVect& a_a, const IntVect& a_b) noexcept
 {
@@ -73,21 +73,21 @@ nnMergeChebyshevCellDistance(const IntVect& a_a, const IntVect& a_b) noexcept
 }
 
 /**
-      @brief a_maxCellDistance check for two positions that may be on DIFFERENT AMR levels.
-      @details Raw cell indices computed with two different dx values are not directly comparable, so
-      both positions are re-expressed in the finer of the two levels' cell-size units (higher AMR
-      level = finer) before taking the Chebyshev distance. Reduces to the same-level case when
-      a_levelA == a_levelB.
-      @param[in] a_posA         First participant's position.
-      @param[in] a_levelA       First participant's AMR level.
-      @param[in] a_posB         Second participant's position.
-      @param[in] a_levelB       Second participant's AMR level.
-      @param[in] a_probLo       Physical position of the domain's low corner.
-      @param[in] a_dxByLevel    Cell spacing per AMR level.
-      @param[in] a_maxCellDistance The cap (see CD_NearestNeighborParticleMerge.H's a_maxCellDistance
-      docs).
-      @return True iff the pair exceeds a_maxCellDistance.
-    */
+ * @brief a_maxCellDistance check for two positions that may be on DIFFERENT AMR levels.
+ * @details Raw cell indices computed with two different dx values are not directly comparable, so
+ * both positions are re-expressed in the finer of the two levels' cell-size units (higher AMR
+ * level = finer) before taking the Chebyshev distance. Reduces to the same-level case when
+ * a_levelA == a_levelB.
+ * @param[in] a_posA         First participant's position.
+ * @param[in] a_levelA       First participant's AMR level.
+ * @param[in] a_posB         Second participant's position.
+ * @param[in] a_levelB       Second participant's AMR level.
+ * @param[in] a_probLo       Physical position of the domain's low corner.
+ * @param[in] a_dxByLevel    Cell spacing per AMR level.
+ * @param[in] a_maxCellDistance The cap (see CD_NearestNeighborParticleMerge.H's a_maxCellDistance
+ * docs).
+ * @return True iff the pair exceeds a_maxCellDistance.
+ */
 inline bool
 nnMergeCrossLevelTooFar(const RealVect&              a_posA,
                         const int                    a_levelA,
@@ -105,15 +105,15 @@ nnMergeCrossLevelTooFar(const RealVect&              a_posA,
 }
 
 /**
-      @brief Weighted-centroid merge of two positions/weights -- shared by resolveTrivialTier() and
-      judgeProposals() so the formula is written exactly once.
-      @param[in]  a_posA        First particle's position.
-      @param[in]  a_weightA     First particle's weight.
-      @param[in]  a_posB        Second particle's position.
-      @param[in]  a_weightB     Second particle's weight.
-      @param[out] a_mergedPos   Weighted-centroid position.
-      @param[out] a_mergedWeight Summed weight.
-    */
+ * @brief Weighted-centroid merge of two positions/weights -- shared by resolveTrivialTier() and
+ * judgeProposals() so the formula is written exactly once.
+ * @param[in]  a_posA        First particle's position.
+ * @param[in]  a_weightA     First particle's weight.
+ * @param[in]  a_posB        Second particle's position.
+ * @param[in]  a_weightB     Second particle's weight.
+ * @param[out] a_mergedPos   Weighted-centroid position.
+ * @param[out] a_mergedWeight Summed weight.
+ */
 inline void
 nnMergeWeightedCentroid(const RealVect& a_posA,
                         const Real      a_weightA,
@@ -130,17 +130,17 @@ nnMergeWeightedCentroid(const RealVect& a_posA,
 }
 
 /**
-      @brief Generic alltoallv-style exchange: send a per-destination-rank bucket of trivially-
-      copyable records, return the flat concatenation of everything received.
-      @details Packs one bucket per rank and exchanges via MPI_Alltoall (byte counts) + MPI_Alltoallv
-      (payload). In a serial (non-MPI) build, or with a single rank, this returns this rank's own
-      bucket unchanged.
-      @tparam T Trivially-copyable record type (NNMergeProposal<Packed>, NNMergeVerdict, or
-      NNMergeParticle<Packed> -- all satisfy this given Packed itself is required to).
-      @param[in] a_sendByRank One bucket per destination rank (size == number of ranks).
-      @return Flat vector of every record received from every rank (including this rank's own
-      bucket addressed to itself).
-    */
+ * @brief Generic alltoallv-style exchange: send a per-destination-rank bucket of trivially-
+ * copyable records, return the flat concatenation of everything received.
+ * @details Packs one bucket per rank and exchanges via MPI_Alltoall (byte counts) + MPI_Alltoallv
+ * (payload). In a serial (non-MPI) build, or with a single rank, this returns this rank's own
+ * bucket unchanged.
+ * @tparam T Trivially-copyable record type (NNMergeProposal<Packed>, NNMergeVerdict, or
+ * NNMergeParticle<Packed> -- all satisfy this given Packed itself is required to).
+ * @param[in] a_sendByRank One bucket per destination rank (size == number of ranks).
+ * @return Flat vector of every record received from every rank (including this rank's own
+ * bucket addressed to itself).
+ */
 template <typename T>
 inline std::vector<T>
 nnMergeExchangeByRank(const std::vector<std::vector<T>>& a_sendByRank)

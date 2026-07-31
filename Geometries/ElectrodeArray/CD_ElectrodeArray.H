@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_ElectrodeArray.H
-  @brief  Electrode array geometry.
-  @author Robert Marskar
-*/
+ * @file   CD_ElectrodeArray.H
+ * @brief  Electrode array geometry.
+ * @author Robert Marskar
+ */
 
 #ifndef CD_ELECTRODEARRAY_H
 #define CD_ELECTRODEARRAY_H
@@ -18,8 +18,8 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief This is a class that defines an array of electrodes.
-*/
+ * @brief This is a class that defines an array of electrodes.
+ */
 class ElectrodeArray : public ComputationalGeometry
 {
 public:

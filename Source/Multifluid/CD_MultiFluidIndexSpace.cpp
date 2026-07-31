@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_MultiFluidIndexSpace.cpp
-  @brief  Implementation of CD_MultiFluidIndexSpace.H
-  @author Robert Marskar
-*/
+ * @file   CD_MultiFluidIndexSpace.cpp
+ * @brief  Implementation of CD_MultiFluidIndexSpace.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <AllRegularService.H>

@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_SpherePlane.H
-  @brief  Sphere-plane gap geometry
-  @author Robert Marskar
-*/
+ * @file   CD_SpherePlane.H
+ * @brief  Sphere-plane gap geometry
+ * @author Robert Marskar
+ */
 
 #ifndef CD_SPHEREPLANE_H
 #define CD_SPHEREPLANE_H
@@ -18,20 +18,20 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Sphere-plane gap geometry.
-  @details The geometry is always oriented along +y, in both 2D and 3D. 
-*/
+ * @brief Sphere-plane gap geometry.
+ * @details The geometry is always oriented along +y, in both 2D and 3D.
+ */
 class SpherePlane : public ComputationalGeometry
 {
 public:
   /**
-    @brief Constructor
-  */
+   * @brief Constructor
+   */
   SpherePlane() noexcept;
 
   /**
-    @brief Destructor
-  */
+   * @brief Destructor
+   */
   ~SpherePlane() noexcept override;
 
   SpherePlane(const SpherePlane&) = delete;

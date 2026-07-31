@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_RoughSphere.cpp
-  @brief  Implementation of CD_RoughSphere.H
-  @author Robert Marskar
-*/
+ * @file   CD_RoughSphere.cpp
+ * @brief  Implementation of CD_RoughSphere.H
+ * @author Robert Marskar
+ */
 
 // Std includes
 #include <string>

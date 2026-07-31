@@ -5,11 +5,11 @@
  */
 
 /**
-  @file   CD_NeedleIF.cpp
-  @brief  Implementation of CD_NeedleIF.H
-  @author Fanny Skirbekk
-  @author Robert Marskar
-*/
+ * @file   CD_NeedleIF.cpp
+ * @brief  Implementation of CD_NeedleIF.H
+ * @author Fanny Skirbekk
+ * @author Robert Marskar
+ */
 
 // Our includes
 #include <CD_Units.H>

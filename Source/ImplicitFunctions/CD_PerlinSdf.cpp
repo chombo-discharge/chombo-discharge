@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_PerlinSdf.cpp
-  @brief  Implementation of CD_PerlinSdf.H
-  @author Robert Marskar
-*/
+ * @file   CD_PerlinSdf.cpp
+ * @brief  Implementation of CD_PerlinSdf.H
+ * @author Robert Marskar
+ */
 
 // Our includes
 #include <CD_PerlinSdf.H>
@@ -171,7 +171,7 @@ PerlinSdf::octaveNoise(const RealVect& a_pos) const
 
   Real     normFrac = 0.;
   RealVect freq     = m_noiseFreq;
-  double   amp      = 1.; //m_noiseAmp;
+  double   amp      = 1.; // m_noiseAmp;
 
   // Add noise octaves
   for (int i = 0; i < m_octaves; ++i) {
@@ -183,7 +183,7 @@ PerlinSdf::octaveNoise(const RealVect& a_pos) const
   }
 
   // Normalize
-  result *= m_noiseAmp; ///normFrac;
+  result *= m_noiseAmp; /// normFrac;
 
   return result;
 }

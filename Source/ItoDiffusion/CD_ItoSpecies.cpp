@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_ItoSpecies.cpp
-  @brief  Implementation of CD_ItoSpecies.H
-  @author Robert Marskar
-*/
+ * @file   CD_ItoSpecies.cpp
+ * @brief  Implementation of CD_ItoSpecies.H
+ * @author Robert Marskar
+ */
 
 // Our includes
 #include <CD_ItoSpecies.H>

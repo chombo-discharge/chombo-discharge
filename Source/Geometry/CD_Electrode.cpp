@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_Electrode.cpp
-  @brief  Implementation of CD_Electrode.H
-  @author Robert marskar
-*/
+ * @file   CD_Electrode.cpp
+ * @brief  Implementation of CD_Electrode.H
+ * @author Robert marskar
+ */
 
 // Our includes
 #include <CD_Electrode.H>

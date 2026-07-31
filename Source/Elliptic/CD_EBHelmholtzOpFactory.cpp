@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_EBHelmholtzOpFactory.cpp
-  @brief  Implementation of CD_EBHelmholtzOpFactory.H
-  @author Robert Marskar
-*/
+ * @file   CD_EBHelmholtzOpFactory.cpp
+ * @brief  Implementation of CD_EBHelmholtzOpFactory.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <ParmParse.H>
@@ -104,8 +104,9 @@ EBHelmholtzOpFactory::defineMultigridLevels()
   CH_TIME("EBHelmholtzOpFactory::defineMultigridLevels()");
 
   // TLDR: This routine defines what is needed for making the multigrid levels. This includes the intermediate
-  // levels (if you run with refinement factor 4) as well as the deeper multigrid levels that are coarsenings of the base AMR level. Recall that
-  // in Chombo-speak a multigrid level is a grid level completely covered by another grid level.
+  // levels (if you run with refinement factor 4) as well as the deeper multigrid levels that are coarsenings of the
+  // base AMR level. Recall that in Chombo-speak a multigrid level is a grid level completely covered by another grid
+  // level.
 
   // Resize data holders.
   m_mgLevelGrids.resize(m_numAmrLevels);
@@ -114,14 +115,15 @@ EBHelmholtzOpFactory::defineMultigridLevels()
   m_mgBcoefIrreg.resize(m_numAmrLevels);
   m_hasMgLevels.resize(m_numAmrLevels);
 
-  // Go through AMR levels. We will generate more levels if 1) We are at the coarsest AMR level or 2) we use a refinement factor of 4. In each
-  // case we will try to coarsen the current level directly (i.e. just coarsening the boxes but leaving the box-to-rank mapping intact). If that
-  // does not work we check if we can generate a new decomposition of the grids.
+  // Go through AMR levels. We will generate more levels if 1) We are at the coarsest AMR level or 2) we use a
+  // refinement factor of 4. In each case we will try to coarsen the current level directly (i.e. just coarsening the
+  // boxes but leaving the box-to-rank mapping intact). If that does not work we check if we can generate a new
+  // decomposition of the grids.
   for (int amrLevel = 0; amrLevel < m_numAmrLevels; amrLevel++) {
     m_hasMgLevels[amrLevel] = false;
 
-    // If we are at the coarsest AMR level then we can generate even coarser grids to accelerate multigrid convergence. But don't
-    // do this if the user has specified that the coarsest AMR level is also the bottom level in multigrid.
+    // If we are at the coarsest AMR level then we can generate even coarser grids to accelerate multigrid convergence.
+    // But don't do this if the user has specified that the coarsest AMR level is also the bottom level in multigrid.
     if (amrLevel == 0 &&
         ChomboDischarge::EBHelmholtzOpFactory::isCoarser(m_bottomDomain, m_amrLevelGrids[amrLevel]->getDomain())) {
       m_hasMgLevels[amrLevel] = true;
@@ -139,8 +141,8 @@ EBHelmholtzOpFactory::defineMultigridLevels()
 
       constexpr int mgRefRatio = 2;
 
-      // Initialization, note that m_mgLevelGrids[amrLevel] corresponds to the multigrid levels below amrLevel. With this indexing
-      // the starting index is the finest level, and elements later in the vector are coarser levels.
+      // Initialization, note that m_mgLevelGrids[amrLevel] corresponds to the multigrid levels below amrLevel. With
+      // this indexing the starting index is the finest level, and elements later in the vector are coarser levels.
       m_mgLevelGrids[amrLevel].resize(0);
       m_mgAcoef[amrLevel].resize(0);
       m_mgBcoef[amrLevel].resize(0);
@@ -155,15 +157,17 @@ EBHelmholtzOpFactory::defineMultigridLevels()
       bool hasCoarser = true;
       while (hasCoarser) {
 
-        // Current number of multigrid levels and the multigrid level which we will coarsen. Again, note the inverse order here (first entry is finest level)
+        // Current number of multigrid levels and the multigrid level which we will coarsen. Again, note the inverse
+        // order here (first entry is finest level)
         const int          curMgLevels = static_cast<int>(m_mgLevelGrids[amrLevel].size());
         const EBLevelGrid& mgEblgFine  = *m_mgLevelGrids[amrLevel].back();
 
         // BoxLayout and domains for coarsening.
         RefCountedPtr<EBLevelGrid> mgEblgCoar = RefCountedPtr<EBLevelGrid>(new EBLevelGrid());
 
-        // This is an overriding option where we use the pre-defined coarsenings in m_deeperMultigridLevels. This is only valid for coarsenings of
-        // the base AMR level, hence amrLevel == 0. Once those levels are exhausted we begin with direct coarsening.
+        // This is an overriding option where we use the pre-defined coarsenings in m_deeperMultigridLevels. This is
+        // only valid for coarsenings of the base AMR level, hence amrLevel == 0. Once those levels are exhausted we
+        // begin with direct coarsening.
         if (amrLevel == 0 && curMgLevels < m_deeperLevelGrids.size()) {
           hasCoarser = true; // Note that m_deeperLevelGrids[0] should be a factor 2 coarsening of the
           mgEblgCoar = m_deeperLevelGrids[curMgLevels - 1]; // coarsest AMR level. So curMgLevels-1 is correct.
@@ -180,8 +184,8 @@ EBHelmholtzOpFactory::defineMultigridLevels()
             hasCoarser = false;
           }
           else {
-            // Not so sure about this one, will we ever be asked to make an coarsened MG level which is also an AMR level? If not, this code
-            // will reduce the coarsening efforts.
+            // Not so sure about this one, will we ever be asked to make an coarsened MG level which is also an AMR
+            // level? If not, this code will reduce the coarsening efforts.
             for (int iamr = 0; iamr < m_numAmrLevels; iamr++) {
               if (mgEblgCoar->getDomain() == m_amrLevelGrids[iamr]->getDomain()) {
                 hasCoarser = false;
@@ -263,7 +267,8 @@ EBHelmholtzOpFactory::coarsenCoefficientsMG()
   for (int amrLevel = 0; amrLevel < m_numAmrLevels; amrLevel++) {
 
     if (m_hasMgLevels[amrLevel]) {
-      // In these vectors, mgAco[0] is the AMR level, mgAco[1] is a refinement 2 coarsening of mgAco[0], mgAco[2] is the coarsening of mgAco[1] and so on.
+      // In these vectors, mgAco[0] is the AMR level, mgAco[1] is a refinement 2 coarsening of mgAco[0], mgAco[2] is the
+      // coarsening of mgAco[1] and so on.
       const AmrLevelGrids mgGrids = m_mgLevelGrids[amrLevel];
 
       AmrCellData& mgAco      = m_mgAcoef[amrLevel];

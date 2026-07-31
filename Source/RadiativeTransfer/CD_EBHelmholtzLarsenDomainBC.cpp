@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_EBHelmholtzLarsenDomainBC.cpp
-  @brief  Implementation of CD_EBHelmholtzLarsenDomainBC.H
-  @author Robert Marskar
-*/
+ * @file   CD_EBHelmholtzLarsenDomainBC.cpp
+ * @brief  Implementation of CD_EBHelmholtzLarsenDomainBC.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <CH_Timer.H>
@@ -70,8 +70,9 @@ EBHelmholtzLarsenDomainBC::setRobinFunctions()
     return -species->getAbsorptionCoefficient(a_position);
   };
 
-  // This is the right-hand side of the Robin BC, i.e. the source function. Time is a dummy parameter, and the user should
-  // have captured some external time (e.g., RtSolver::m_time) by reference in the function that was passed into the full constructor.
+  // This is the right-hand side of the Robin BC, i.e. the source function. Time is a dummy parameter, and the user
+  // should have captured some external time (e.g., RtSolver::m_time) by reference in the function that was passed into
+  // the full constructor.
   m_functionC = [source = this->m_source](const RealVect& a_position) {
     return source(a_position);
   };

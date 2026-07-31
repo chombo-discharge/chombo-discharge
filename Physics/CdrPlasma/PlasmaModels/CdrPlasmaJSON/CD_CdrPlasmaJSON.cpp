@@ -7,10 +7,10 @@
  */
 
 /**
-   @file   CD_CdrPlasmaJSON.cpp
-   @brief  Implementation of CD_CdrPlasmaJSON.H
-   @author Robert Marskar, Fanny Skirbekk
-*/
+ * @file   CD_CdrPlasmaJSON.cpp
+ * @brief  Implementation of CD_CdrPlasmaJSON.H
+ * @author Robert Marskar, Fanny Skirbekk
+ */
 
 // Std includes
 #include <iostream>
@@ -413,7 +413,8 @@ CdrPlasmaJSON::initializeNeutralSpecies()
         baseError + " and got ideal gas law but field 'pressure' is missing");
     }
 
-    // Set the gas temperature, density, and pressure from the ideal gas law. No extra parameters needed and no variation in space either.
+    // Set the gas temperature, density, and pressure from the ideal gas law. No extra parameters needed and no
+    // variation in space either.
     const Real T0   = gasJSON["temperature"].get<Real>();
     const Real P0   = gasJSON["pressure"].get<Real>();
     const Real P    = P0 * Units::atm2pascal;
@@ -585,8 +586,8 @@ CdrPlasmaJSON::initializeNeutralSpecies()
     ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " -- logic bust");
   }
 
-  // Instantiate the species densities. Note that we need to go through this twice because we need to normalize the molar fractions in case users
-  // were a bit inconsiderate when setting them.
+  // Instantiate the species densities. Note that we need to go through this twice because we need to normalize the
+  // molar fractions in case users were a bit inconsiderate when setting them.
   Real molarSum = 0.0;
   for (const auto& species : gasJSON["neutral species"]) {
     if (!(species.contains("name"))) {

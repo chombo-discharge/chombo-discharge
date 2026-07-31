@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_Aerosol.cpp
-  @brief  Implementation of CD_Aerosol.H
-  @author Robert Marskar
-*/
+ * @file   CD_Aerosol.cpp
+ * @brief  Implementation of CD_Aerosol.H
+ * @author Robert Marskar
+ */
 
 // Std includes
 #include <string>

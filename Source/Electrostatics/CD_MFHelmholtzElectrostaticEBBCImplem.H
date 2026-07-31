@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_MFHelmholtzElectrostaticEBBCImplem.H
-  @brief  Implementation of CD_MFHelmholtzElectrostaticEBBC.H
-  @author Robert Marskar
-*/
+ * @file   CD_MFHelmholtzElectrostaticEBBCImplem.H
+ * @brief  Implementation of CD_MFHelmholtzElectrostaticEBBC.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_MFHELMHOLTZELECTROSTATICEBBCIMPLEM_H
 #define CD_MFHELMHOLTZELECTROSTATICEBBCIMPLEM_H
@@ -43,9 +43,10 @@ MFHelmholtzElectrostaticEBBC::getElectrodePotential(
     }
   }
 
-  // Return potential of closest electrode. Again, following the (perhaps odd) convention that the FieldSolver is "time dependent" but the operator
-  // factory is not, we've passed the time in by reference to the functions in m_electrostaticBCs. Calling those functions simply ignore the time-argument
-  // and uses FieldSolver::m_dt instead. So, we can just use a dummy dt here.
+  // Return potential of closest electrode. Again, following the (perhaps odd) convention that the FieldSolver is "time
+  // dependent" but the operator factory is not, we've passed the time in by reference to the functions in
+  // m_electrostaticBCs. Calling those functions simply ignore the time-argument and uses FieldSolver::m_dt instead. So,
+  // we can just use a dummy dt here.
   constexpr Real dummyDt = 0.0;
 
   return electrodeBCs[closestElectrode].second(a_pos, dummyDt);

@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_ItoLayoutImplem.H
-  @brief  Implementation of CD_ItoLayout.H
-  @author Robert Marskar
-*/
+ * @file   CD_ItoLayoutImplem.H
+ * @brief  Implementation of CD_ItoLayout.H
+ * @author Robert Marskar
+ */
 
 #ifndef CD_ITOLAYOUTIMPLEM_H
 #define CD_ITOLAYOUTIMPLEM_H

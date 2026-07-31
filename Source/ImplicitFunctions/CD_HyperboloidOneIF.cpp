@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_HyperboloidOneIF.cpp
-  @brief  Implementation of CD_HyperboloidOneIF.H
-  @author Robert Marskar
-*/
+ * @file   CD_HyperboloidOneIF.cpp
+ * @brief  Implementation of CD_HyperboloidOneIF.H
+ * @author Robert Marskar
+ */
 
 // Our includes
 #include <CD_HyperboloidOneIF.H>

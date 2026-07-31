@@ -5,11 +5,11 @@
  */
 
 /**
-  @file   CD_ItoSolverImplem.H
-  @brief  Implementation of CD_ItoSolver.H
-  @author Robert Marskar
-  @date   April 2020
-*/
+ * @file   CD_ItoSolverImplem.H
+ * @brief  Implementation of CD_ItoSolver.H
+ * @author Robert Marskar
+ * @date   April 2020
+ */
 
 #ifndef CD_ITOSOLVERIMPLEM_H
 #define CD_ITOSOLVERIMPLEM_H
@@ -31,7 +31,8 @@
 inline RealVect
 ItoSolver::randomGaussian() const
 {
-  // TLDR: We draw a random number from a Gaussian distribution for each coordinate, and truncate the distribution at m_normalDistributionTruncation.
+  // TLDR: We draw a random number from a Gaussian distribution for each coordinate, and truncate the distribution at
+  // m_normalDistributionTruncation.
 
   auto sign = [](const Real& a) -> Real {
     return (a > 0) - (a < 0);

@@ -5,10 +5,10 @@
  */
 
 /**
-   @file   CD_BrownianWalkerSpecies.cpp
-   @brief  Implementation of CD_BrownianWalkerSpecies.H
-   @author Robert Marskar
-*/
+ * @file   CD_BrownianWalkerSpecies.cpp
+ * @brief  Implementation of CD_BrownianWalkerSpecies.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <CH_Timer.H>

@@ -5,11 +5,11 @@
  */
 
 /**
-  @file   CD_RodNeedleDisk.cpp
-  @brief  Implementation of CD_RodNeedleDisk.H
-  @author Fanny Skirbekk
-  @author Robert Marskar
-*/
+ * @file   CD_RodNeedleDisk.cpp
+ * @brief  Implementation of CD_RodNeedleDisk.H
+ * @author Fanny Skirbekk
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <ParmParse.H>
@@ -135,7 +135,8 @@ RodNeedleDisk::defineRodNeedle() noexcept
     const Vec3 smallCapsuleTranslate = Vec3(0.0, 0.0, -0.5 * smallCapsuleLength - smallBegin);
     const Vec3 bigCapsuleTranslate   = Vec3(0.0, 0.0, -0.5 * bigCapsuleLength - midpoint);
 
-    // Because of the way CapsuleSDF works, we need to create the capsules around the origin and then translate them into position.
+    // Because of the way CapsuleSDF works, we need to create the capsules around the origin and then translate them
+    // into position.
     const Vec3 z0(0.0, 0.0, -0.5 * smallCapsuleLength);
     const Vec3 z1(0.0, 0.0, +0.5 * smallCapsuleLength);
     const Vec3 z2(0.0, 0.0, -0.5 * bigCapsuleLength);

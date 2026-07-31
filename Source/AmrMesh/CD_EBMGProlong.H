@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_EBMGProlong.H
-  @brief  Declaration of a prolongation operator for EB geometric multigrid
-  @author Robert Marskar
-*/
+ * @file   CD_EBMGProlong.H
+ * @brief  Declaration of a prolongation operator for EB geometric multigrid
+ * @author Robert Marskar
+ */
 
 #ifndef CD_EBMGPROLONG_H
 #define CD_EBMGPROLONG_H
@@ -23,46 +23,46 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Class for prolongation of multigrid residual onto a finer grid. 
-  @note This class only does constant prolongation. Using Chombos EBMGInterp with piecewise linear (bi/tri-linear) did not
-  improve multigrid convergence. 
-*/
+ * @brief Class for prolongation of multigrid residual onto a finer grid.
+ * @note This class only does constant prolongation. Using Chombos EBMGInterp with piecewise linear (bi/tri-linear) did
+ * not improve multigrid convergence.
+ */
 class EBMGProlong
 {
 public:
   /**
-    @brief Default constructor. User must subsequently call the define function
-  */
+   * @brief Default constructor. User must subsequently call the define function
+   */
   EBMGProlong() noexcept;
 
   /**
-    @brief Full constructor. Calls the define function
-    @param[in] a_eblgFine Fine level that we prolong to.
-    @param[in] a_eblgCoar Coarse level that we prolong from.
-    @param[in] a_refRat   Refinement factor between levels.
-  */
+   * @brief Full constructor. Calls the define function
+   * @param[in] a_eblgFine Fine level that we prolong to.
+   * @param[in] a_eblgCoar Coarse level that we prolong from.
+   * @param[in] a_refRat   Refinement factor between levels.
+   */
   EBMGProlong(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_eblgCoar, const int& a_refRat) noexcept;
 
   /**
-    @brief Destructor
-  */
+   * @brief Destructor
+   */
   virtual ~EBMGProlong() noexcept;
 
   /**
-    @brief Define function.
-    @param[in] a_eblgFine Fine level that we prolong to.
-    @param[in] a_eblgCoar Coarse level that we prolong from.
-    @param[in] a_refRat   Refinement factor between levels.
-  */
+   * @brief Define function.
+   * @param[in] a_eblgFine Fine level that we prolong to.
+   * @param[in] a_eblgCoar Coarse level that we prolong from.
+   * @param[in] a_refRat   Refinement factor between levels.
+   */
   virtual void
   define(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_eblgCoar, const int& a_refRat) noexcept;
 
   /**
-    @brief Prolong residual onto the coarse grid. 
-    @param[in,out] a_fineData  Fine-grid residual.
-    @param[in]    a_coarData  Coarse-grid residual
-    @param[in]    a_variables Variables to prolong.
-  */
+   * @brief Prolong residual onto the coarse grid.
+   * @param[in,out] a_fineData  Fine-grid residual.
+   * @param[in]    a_coarData  Coarse-grid residual
+   * @param[in]    a_variables Variables to prolong.
+   */
   virtual void
   prolongResidual(LevelData<EBCellFAB>&       a_fineData,
                   const LevelData<EBCellFAB>& a_coarData,
@@ -70,44 +70,44 @@ public:
 
 protected:
   /**
-    @brief Defined or not
-  */
+   * @brief Defined or not
+   */
   bool m_isDefined;
 
   /**
-    @brief Refinement ratio
-  */
+   * @brief Refinement ratio
+   */
   int m_refRat;
 
   /**
-    @brief Fine grid
-  */
+   * @brief Fine grid
+   */
   EBLevelGrid m_eblgFine;
 
   /**
-    @brief Coarse grid
-  */
+   * @brief Coarse grid
+   */
   EBLevelGrid m_eblgCoar;
 
   /**
-    @brief Coarsened fine grids
-  */
+   * @brief Coarsened fine grids
+   */
   EBLevelGrid m_eblgCoFi;
 
   /**
-    @brief Copier for making copying from eblgCoar to eblgCoFi go faster
-  */
+   * @brief Copier for making copying from eblgCoar to eblgCoFi go faster
+   */
   Copier m_copier;
 
   /**
-    @brief Prolongion stencils near the EB.
-    @details The stencils are defined on the fine grid but their vofs reach into the coarse grid. 
-  */
+   * @brief Prolongion stencils near the EB.
+   * @details The stencils are defined on the fine grid but their vofs reach into the coarse grid.
+   */
   LayoutData<BaseIVFAB<VoFStencil>> m_prolongStencils;
 
   /**
-    @brief Iterator for iterating over cut-cells on the fine level
-  */
+   * @brief Iterator for iterating over cut-cells on the fine level
+   */
   mutable LayoutData<VoFIterator> m_vofitFine;
 };
 

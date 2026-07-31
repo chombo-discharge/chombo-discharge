@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_EddingtonSP1DomainBc.cpp
-  @brief  Implementation of CD_EddingtonSP1DomainBc.H
-  @author Robert Marskar
-*/
+ * @file   CD_EddingtonSP1DomainBc.cpp
+ * @brief  Implementation of CD_EddingtonSP1DomainBc.H
+ * @author Robert Marskar
+ */
 
 // Our includes
 #include <CD_EddingtonSP1DomainBc.H>

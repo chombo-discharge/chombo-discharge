@@ -5,10 +5,10 @@
  */
 
 /**
-   @file   CD_NeutralSpeciesJSON.cpp
-   @brief  Implementation of CD_NeutralSpeciesJSON.H
-   @author Robert Marskar
-*/
+ * @file   CD_NeutralSpeciesJSON.cpp
+ * @brief  Implementation of CD_NeutralSpeciesJSON.H
+ * @author Robert Marskar
+ */
 
 // Our includes
 #include <CD_NeutralSpeciesJSON.H>

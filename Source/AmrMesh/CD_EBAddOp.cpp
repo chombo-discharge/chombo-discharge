@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_EBAddOp.cpp
-  @brief  Implementation of CD_EBAddOp.H
-  @author Robert Marskar
-*/
+ * @file   CD_EBAddOp.cpp
+ * @brief  Implementation of CD_EBAddOp.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <CH_Timer.H>

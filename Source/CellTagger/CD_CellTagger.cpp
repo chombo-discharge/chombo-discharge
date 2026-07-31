@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_CellTagger.cpp
-  @brief  Implementation of CD_CellTagger.H
-  @author Robert Marskar
-*/
+ * @file   CD_CellTagger.cpp
+ * @brief  Implementation of CD_CellTagger.H
+ * @author Robert Marskar
+ */
 
 // Std includes
 #include <string>

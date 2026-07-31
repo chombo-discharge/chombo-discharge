@@ -5,11 +5,11 @@
  */
 
 /**
-  @file   CD_EddingtonSP1.cpp
-  @brief  Implementation of CD_EddingtonSP1.H
-  @author Robert Marskar
-  @todo   Stencil weights and order need to be input parameters!
-*/
+ * @file   CD_EddingtonSP1.cpp
+ * @brief  Implementation of CD_EddingtonSP1.H
+ * @author Robert Marskar
+ * @todo   Stencil weights and order need to be input parameters!
+ */
 
 // Std includes
 #include <chrono>
@@ -189,15 +189,18 @@ EddingtonSP1::parseDomainBC()
     pout() << m_name + "::parseDomainBC" << endl;
   }
 
-  // TLDR: This routine might seem big and complicated. What we are doing is that we are creating one function object which returns some value
-  //       anywhere in space and time on a domain edge (face). The code below simply creates those functions and associates them with an edge (face in 3D)
+  // TLDR: This routine might seem big and complicated. What we are doing is that we are creating one function object
+  // which returns some value
+  //       anywhere in space and time on a domain edge (face). The code below simply creates those functions and
+  //       associates them with an edge (face in 3D)
   //
-  //       Because of the stationary interface of EBHelmholtzOp and the transient interface of the radiative transfer solvers, we capture the time by solver
-  //       time (RtSolver::m_time) by reference in these functions. That allows us to pass the functions in as stationary-looking functions in EBHelmholtzOp,
-  //       yet retain transient BCs.
+  //       Because of the stationary interface of EBHelmholtzOp and the transient interface of the radiative transfer
+  //       solvers, we capture the time by solver time (RtSolver::m_time) by reference in these functions. That allows
+  //       us to pass the functions in as stationary-looking functions in EBHelmholtzOp, yet retain transient BCs.
   //
-  //       For flexibility we want to be able to specify the BC functions in two forms, using a multiplier or not. The specification for this is e.g.
-  //       "dirichlet <number>" in which case the bc function is multiplied by <number>. Use "dirichlet_custom" to use the bc functions directly.
+  //       For flexibility we want to be able to specify the BC functions in two forms, using a multiplier or not. The
+  //       specification for this is e.g. "dirichlet <number>" in which case the bc function is multiplied by <number>.
+  //       Use "dirichlet_custom" to use the bc functions directly.
 
   ParmParse pp(m_className.c_str());
 
@@ -216,7 +219,8 @@ EddingtonSP1::parseDomainBC()
       std::function<Real(const RealVect, const Real)> curFunc;
 
       switch (num) {
-      case 1: { // If only providing dirichlet_custom, neumann_custom, larsen_custom, the second value is overridden and only the function is used as BC.
+      case 1: { // If only providing dirichlet_custom, neumann_custom, larsen_custom, the second value is overridden and
+                // only the function is used as BC.
         pp.get(bcString.c_str(), str, 0);
 
         // Set the function. Capture solver time by reference.
@@ -241,7 +245,8 @@ EddingtonSP1::parseDomainBC()
 
         break;
       }
-      case 2: { // Had two arguments in input, e.g. neumann 0.0. In this case we set the BC to be the specified function times the value.
+      case 2: { // Had two arguments in input, e.g. neumann 0.0. In this case we set the BC to be the specified function
+                // times the value.
         Real val;
 
         pp.get(bcString.c_str(), str, 0);
@@ -377,8 +382,8 @@ EddingtonSP1::parseMultigridSettings()
   pp.get("gmg_ebbc_weight", m_multigridBcWeight);
   pp.query("gmg_reflux_free", m_multigridRefluxFree);
 
-  // Fetch the desired bottom solver from the input script. We look for things like EddingtonSP1.gmg_bottom_solver = bicgstab or '= simple <number>'
-  // where <number> is the number of relaxation for the smoothing solver.
+  // Fetch the desired bottom solver from the input script. We look for things like EddingtonSP1.gmg_bottom_solver =
+  // bicgstab or '= simple <number>' where <number> is the number of relaxation for the smoothing solver.
   const int num = pp.countval("gmg_bottom_solver");
   if (num == 1) {
     pp.get("gmg_bottom_solver", str);
@@ -970,8 +975,10 @@ EddingtonSP1::setHelmholtzCoefficientsBox(EBCellFAB&       a_helmAco,
   a_helmBcoIrreg.setVal(std::numeric_limits<Real>::max());
 #endif
 
-  // TLDR: This routine is for setting coefficients in the Helmholtz operator. These coefficients are set as A = kappa, B = 1/(3*kappa). We happen to know that
-  //       the interior face stencils are interpolated using the neighboring face, so we must fill the "ghost faces" around the B-coefficient grid patch.
+  // TLDR: This routine is for setting coefficients in the Helmholtz operator. These coefficients are set as A = kappa,
+  // B = 1/(3*kappa). We happen to know that
+  //       the interior face stencils are interpolated using the neighboring face, so we must fill the "ghost faces"
+  //       around the B-coefficient grid patch.
 
   const RealVect probLo = m_amr->getProbLo();
   const Real     dx     = m_amr->getDx()[a_lvl];
@@ -981,8 +988,8 @@ EddingtonSP1::setHelmholtzCoefficientsBox(EBCellFAB&       a_helmAco,
 
   const Box cellBox = m_amr->getGrids(m_realm)[a_lvl][a_dit];
 
-  // Regular A-coefficient kernel. Recall that the A-coefficient only affects the diagonal part of the stencil so there's no need to fill anything
-  // outside of the cell-centered grid patch.
+  // Regular A-coefficient kernel. Recall that the A-coefficient only affects the diagonal part of the stencil so
+  // there's no need to fill anything outside of the cell-centered grid patch.
   BaseFab<Real>& helmAcoReg       = a_helmAco.getSingleValuedFAB();
   auto           regularAcoKernel = [&](const IntVect& iv) -> void {
     const RealVect pos   = probLo + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
@@ -998,14 +1005,14 @@ EddingtonSP1::setHelmholtzCoefficientsBox(EBCellFAB&       a_helmAco,
   // centroid discretization; the redundant cut-cell fill is overwritten and harmless on a setup routine.
   BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularAcoKernel); // Fill single-valued a-coefficient.
 
-  // Regular B-coefficient. Recall that EBHelmholtzOp sets up the face centroid fluxes by interpolating with neighboring face-centered fluxes. The interpolating stencil
-  // will have a radius of 1, so we need to fill one of the ghost faces outside of the grid patch. Only the ones that are "tangential" to the face direction
-  // are necessary to fill.
+  // Regular B-coefficient. Recall that EBHelmholtzOp sets up the face centroid fluxes by interpolating with neighboring
+  // face-centered fluxes. The interpolating stencil will have a radius of 1, so we need to fill one of the ghost faces
+  // outside of the grid patch. Only the ones that are "tangential" to the face direction are necessary to fill.
   for (int dir = 0; dir < SpaceDim; dir++) {
     EBFaceFAB& helmBcoFace = a_helmBco[dir];
 
-    // Kernel region -- make a cell-centered box, grown by one in every direction except 'dir'. This box will also contain
-    // the "ghost faces".
+    // Kernel region -- make a cell-centered box, grown by one in every direction except 'dir'. This box will also
+    // contain the "ghost faces".
     Box grownCellBox = cellBox;
     for (int otherDir = 0; otherDir < SpaceDim; otherDir++) {
       if (otherDir != dir) {
@@ -1044,10 +1051,10 @@ EddingtonSP1::setHelmholtzCoefficientsBox(EBCellFAB&       a_helmAco,
     BoxLoops::loop(faceit, irregularBcoKernel);
   }
 
-  // Fill A-coefficient in cut-cells and the EB-centered B-coefficient. Again, the A-part is diagonal so we don't need to fill anything outside the grid patch. For
-  // the B-coefficient on the EB face then the stencil in the cut-cell will not reach into neighboring EB faces (really, it shouldn't!) so no need for filling
-  // things outside the grid patch here, either.
-  // Kernel region for cut-cells
+  // Fill A-coefficient in cut-cells and the EB-centered B-coefficient. Again, the A-part is diagonal so we don't need
+  // to fill anything outside the grid patch. For the B-coefficient on the EB face then the stencil in the cut-cell will
+  // not reach into neighboring EB faces (really, it shouldn't!) so no need for filling things outside the grid patch
+  // here, either. Kernel region for cut-cells
   VoFIterator& vofit           = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[a_dit];
   auto         irregularKernel = [&](const VolIndex& vof) -> void {
     const RealVect pos   = probLo + Location::position(m_dataLocation, vof, ebisbox, dx);
@@ -1094,8 +1101,9 @@ EddingtonSP1::setupHelmholtzFactory()
   domainBcFactory = RefCountedPtr<EBHelmholtzDomainBCFactory>(
     new EBHelmholtzEddingtonSP1DomainBCFactory(m_domainBc, m_rtSpecies, m_reflectCoefOne, m_reflectCoefTwo));
 
-  // For EBs we run with only one type of BC (for now). This code sets up the embedded boundary conditions. In parseEBBC we happened to
-  // read a line from the input script in the format = <type> <value> which was put into a function. Associate that function here.
+  // For EBs we run with only one type of BC (for now). This code sets up the embedded boundary conditions. In parseEBBC
+  // we happened to read a line from the input script in the format = <type> <value> which was put into a function.
+  // Associate that function here.
   switch (m_ebbc.first) {
   case EBBCType::Dirichlet:
     ebbcFactory = RefCountedPtr<EBHelmholtzDirichletEBBCFactory>(

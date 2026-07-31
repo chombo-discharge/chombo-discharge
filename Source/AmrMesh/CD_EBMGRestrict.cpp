@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_EBMGRestrict.cpp
-  @brief  Implementation of CD_EBMGRestrict.H
-  @author Robert Marskar
-*/
+ * @file   CD_EBMGRestrict.cpp
+ * @brief  Implementation of CD_EBMGRestrict.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <EBCellFactory.H>

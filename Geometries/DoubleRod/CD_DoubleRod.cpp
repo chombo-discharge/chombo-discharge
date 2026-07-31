@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_DoubleRod.cpp
-  @brief  Implementation of CD_DoubleRod.H
-  @author Robert Marskar
-*/
+ * @file   CD_DoubleRod.cpp
+ * @brief  Implementation of CD_DoubleRod.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <ParmParse.H>

@@ -5,10 +5,10 @@
  */
 
 /**
-   @file   CD_CdrPlasmaPhotoReactionJSON.cpp
-   @brief  Implementation of CD_CdrPlasmaPhotoReactionJSON.H
-   @author Robert Marskar
-*/
+ * @file   CD_CdrPlasmaPhotoReactionJSON.cpp
+ * @brief  Implementation of CD_CdrPlasmaPhotoReactionJSON.H
+ * @author Robert Marskar
+ */
 
 // Our includes
 #include <CD_CdrPlasmaPhotoReactionJSON.H>

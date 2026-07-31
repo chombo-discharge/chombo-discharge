@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   main.cpp
-  @brief  Convergence test for the KMC solver.
-  @author Robert Marskar
-*/
+ * @file   main.cpp
+ * @brief  Convergence test for the KMC solver.
+ * @author Robert Marskar
+ */
 
 #include <CD_Driver.H>
 #include <CD_KMCSolver.H>

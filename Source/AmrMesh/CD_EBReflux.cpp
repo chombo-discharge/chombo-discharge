@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_EBReflux.cpp
-  @brief  Implementation of CD_EBReflux.H
-  @author Robert Marskar
-*/
+ * @file   CD_EBReflux.cpp
+ * @brief  Implementation of CD_EBReflux.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <NeighborIterator.H>

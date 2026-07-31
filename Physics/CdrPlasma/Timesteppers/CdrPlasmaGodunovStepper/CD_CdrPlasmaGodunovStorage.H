@@ -5,10 +5,10 @@
  */
 
 /**
-   @file   CD_CdrPlasmaGodunovStorage.H
-   @brief  Declaration of scratch storage for CdrPlasmaGodunovStepper
-   @author Robert Marskar
-*/
+ * @file   CD_CdrPlasmaGodunovStorage.H
+ * @brief  Declaration of scratch storage for CdrPlasmaGodunovStepper
+ * @author Robert Marskar
+ */
 
 #ifndef CD_CDRPLASMAGODUNOVSTORAGE_H
 #define CD_CDRPLASMAGODUNOVSTORAGE_H
@@ -22,28 +22,28 @@ namespace Physics {
 namespace CdrPlasma {
 
 /**
-       @brief Utility class for memory handling in CdrPlasmaStepper.
-       @details This class exists because we often need some extra storage when advancing the equations. 
-    */
+ * @brief Utility class for memory handling in CdrPlasmaStepper.
+ * @details This class exists because we often need some extra storage when advancing the equations.
+ */
 class CdrPlasmaGodunovStepper::CdrStorage
 {
 public:
   /**
-         @brief Disallowed constructor. Only strong construction allowed.
-      */
+   * @brief Disallowed constructor. Only strong construction allowed.
+   */
   CdrStorage() = delete;
 
   /**
-         @brief Full constructor. After this, user may call allocateStorage and deallocateStorage
-         @param[in] a_amr   Reference to AmrMesh
-         @param[in] a_realm Realm where storage lives
-         @param[in] a_phase Phase where storage lives (only single-phased data in here)
-      */
+   * @brief Full constructor. After this, user may call allocateStorage and deallocateStorage
+   * @param[in] a_amr   Reference to AmrMesh
+   * @param[in] a_realm Realm where storage lives
+   * @param[in] a_phase Phase where storage lives (only single-phased data in here)
+   */
   CdrStorage(const RefCountedPtr<AmrMesh>& a_amr, const std::string& a_realm, phase::which_phase a_phase);
 
   /**
-         @brief Destructor
-      */
+   * @brief Destructor
+   */
   virtual ~CdrStorage();
 
   CdrStorage(const CdrStorage&) = delete;
@@ -54,21 +54,21 @@ public:
   operator=(CdrStorage&&) = delete;
 
   /**
-         @brief Allocation function. This will allocate all transient storage in this class
-      */
+   * @brief Allocation function. This will allocate all transient storage in this class
+   */
   virtual void
   allocateStorage();
 
   /**
-         @brief Allocation function. This will delete all transient storage in this class
-      */
+   * @brief Allocation function. This will delete all transient storage in this class
+   */
   virtual void
   deallocateStorage();
 
   /**
-         @brief Get scratch storage
-        @return Scratch
-      */
+   * @brief Get scratch storage
+   * @return Scratch
+   */
   EBAMRCellData&
   getScratch() const
   {
@@ -76,9 +76,9 @@ public:
   }
 
   /**
-         @brief Get the other scratch storage. 
-        @return Scratch2
-      */
+   * @brief Get the other scratch storage.
+   * @return Scratch2
+   */
   EBAMRCellData&
   getScratch2() const
   {
@@ -86,9 +86,9 @@ public:
   }
 
   /**
-         @brief Get the extrapolation storage. This is usually used for holding phi + 0.5*dt*S
-        @return Extrap
-      */
+   * @brief Get the extrapolation storage. This is usually used for holding phi + 0.5*dt*S
+   * @return Extrap
+   */
   EBAMRCellData&
   getExtrap() const
   {
@@ -96,9 +96,9 @@ public:
   }
 
   /**
-         @brief Get storage for holding gradient. 
-        @return Gradient
-      */
+   * @brief Get storage for holding gradient.
+   * @return Gradient
+   */
   EBAMRCellData&
   getGradient() const
   {
@@ -106,9 +106,9 @@ public:
   }
 
   /**
-         @brief Get scratch storage that holds the density on the EB
-        @return Eb state
-      */
+   * @brief Get scratch storage that holds the density on the EB
+   * @return Eb state
+   */
   EBAMRIVData&
   getEbState() const
   {
@@ -116,9 +116,9 @@ public:
   }
 
   /**
-         @brief Get the scratch storage holding the normal component of the velocity on the EB
-        @return Eb velo
-      */
+   * @brief Get the scratch storage holding the normal component of the velocity on the EB
+   * @return Eb velo
+   */
   EBAMRIVData&
   getEbVelo() const
   {
@@ -126,9 +126,9 @@ public:
   }
 
   /**
-         @brief Get the scratch storage holding the extrapolated flux on the EB
-        @return Eb flux
-      */
+   * @brief Get the scratch storage holding the extrapolated flux on the EB
+   * @return Eb flux
+   */
   EBAMRIVData&
   getEbFlux() const
   {
@@ -136,9 +136,9 @@ public:
   }
 
   /**
-         @brief Get the scratch storage holding the extrapolated gradient on the EB
-        @return Eb grad
-      */
+   * @brief Get the scratch storage holding the extrapolated gradient on the EB
+   * @return Eb grad
+   */
   EBAMRIVData&
   getEbGrad() const
   {
@@ -146,9 +146,9 @@ public:
   }
 
   /**
-         @brief Get the scratch storage holding the extrapolated density on domain faces
-        @return Domain state
-      */
+   * @brief Get the scratch storage holding the extrapolated density on domain faces
+   * @return Domain state
+   */
   EBAMRIFData&
   getDomainState() const
   {
@@ -156,9 +156,9 @@ public:
   }
 
   /**
-         @brief Get the scratch storage holding the extrapolated velocity (normal component only) on domain faces
-        @return Domain velo
-      */
+   * @brief Get the scratch storage holding the extrapolated velocity (normal component only) on domain faces
+   * @return Domain velo
+   */
   EBAMRIFData&
   getDomainVelo() const
   {
@@ -166,9 +166,9 @@ public:
   }
 
   /**
-         @brief Get the scratch storage holding the extrapolated flux on domain faces
-        @return Domain flux
-      */
+   * @brief Get the scratch storage holding the extrapolated flux on domain faces
+   * @return Domain flux
+   */
   EBAMRIFData&
   getDomainFlux() const
   {
@@ -176,9 +176,9 @@ public:
   }
 
   /**
-         @brief Get the scratch storage holding the extrapolated gradient (normal component only) on domain faces
-        @return Domain grad
-      */
+   * @brief Get the scratch storage holding the extrapolated gradient (normal component only) on domain faces
+   * @return Domain grad
+   */
   EBAMRIFData&
   getDomainGrad() const
   {
@@ -187,103 +187,103 @@ public:
 
 protected:
   /**
-         @brief Reference to AmrMesh
-      */
+   * @brief Reference to AmrMesh
+   */
   RefCountedPtr<AmrMesh> m_amr;
 
   /**
-         @brief Realm where data lives
-      */
+   * @brief Realm where data lives
+   */
   std::string m_realm;
 
   /**
-         @brief Phase where data lives
-      */
+   * @brief Phase where data lives
+   */
   phase::which_phase m_phase;
 
   /**
-         @brief Cell-centered scratch data
-      */
+   * @brief Cell-centered scratch data
+   */
   mutable EBAMRCellData m_scratch;
 
   /**
-         @brief Cell-centered scratch data
-      */
+   * @brief Cell-centered scratch data
+   */
   mutable EBAMRCellData m_scratch2;
 
   /**
-         @brief Cell-centered scratch data. Used for holding phi + 0.5*dt*S
-      */
+   * @brief Cell-centered scratch data. Used for holding phi + 0.5*dt*S
+   */
   mutable EBAMRCellData m_cellExtr;
 
   /**
-         @brief Cell-centered scratch data for holding the gradient.
-      */
+   * @brief Cell-centered scratch data for holding the gradient.
+   */
   mutable EBAMRCellData m_gradient;
 
   /**
-         @brief EB-centered scratch data
-      */
+   * @brief EB-centered scratch data
+   */
   mutable EBAMRIVData m_scratchIV1;
 
   /**
-         @brief EB-centered scratch data
-      */
+   * @brief EB-centered scratch data
+   */
   mutable EBAMRIVData m_scratchIV2;
 
   /**
-         @brief EB-centered scratch data
-      */
+   * @brief EB-centered scratch data
+   */
   mutable EBAMRIVData m_scratchIV3;
 
   /**
-         @brief EB-centered scratch data
-      */
+   * @brief EB-centered scratch data
+   */
   mutable EBAMRIVData m_scratchIV4;
 
   /**
-         @brief Domain-centered scratch data
-      */
+   * @brief Domain-centered scratch data
+   */
   mutable EBAMRIFData m_scratchIF1;
   /**
-         @brief Domain-centered scratch data
-      */
+   * @brief Domain-centered scratch data
+   */
   mutable EBAMRIFData m_scratchIF2;
 
   /**
-         @brief Domain-centered scratch data
-      */
+   * @brief Domain-centered scratch data
+   */
   mutable EBAMRIFData m_scratchIF3;
 
   /**
-         @brief Domain-centered scratch data
-      */
+   * @brief Domain-centered scratch data
+   */
   mutable EBAMRIFData m_scratchIF4;
 };
 
 /**
-       @brief Utility class for memory handling in CdrPlasmaStepper.
-       @details This class exists because we often need some extra storage when advancing the equations. 
-    */
+ * @brief Utility class for memory handling in CdrPlasmaStepper.
+ * @details This class exists because we often need some extra storage when advancing the equations.
+ */
 class CdrPlasmaGodunovStepper::FieldStorage
 {
 public:
   /**
-         @brief Disallowed weak constructor
-      */
+   * @brief Disallowed weak constructor
+   */
   FieldStorage() = delete;
 
   /**
-         @brief Full constructor. Can call allocation functions after this. 
-         @param[in] a_amr   Reference to AmrMesh
-         @param[in] a_realm Realm where storage lives
-         @param[in] a_phase Phase where storage lives (only single-phased data in here)
-      */
+   * @brief Full constructor. Can call allocation functions after this.
+   * @param[in] a_amr   Reference to AmrMesh
+   * @param[in] a_realm Realm where storage lives
+   * @param[in] a_phase Phase where storage lives (only single-phased data in here)
+   */
   FieldStorage(const RefCountedPtr<AmrMesh>& a_amr, const std::string& a_realm, phase::which_phase a_phase);
 
   /**
-         @brief Destructor
-      */
+   * @brief Destructor
+   */
   virtual ~FieldStorage();
 
   FieldStorage(const FieldStorage&) = delete;
@@ -294,21 +294,21 @@ public:
   operator=(FieldStorage&&) = delete;
 
   /**
-         @brief Allocation function -- allocates all the necessary memory.
-      */
+   * @brief Allocation function -- allocates all the necessary memory.
+   */
   virtual void
   allocateStorage();
 
   /**
-         @brief Deallocation function -- deallocates all the necessary memory. 
-      */
+   * @brief Deallocation function -- deallocates all the necessary memory.
+   */
   virtual void
   deallocateStorage();
 
   /**
-         @brief Get scratch storage that holds the electric field at the cell center
-        @return Electric field cell
-      */
+   * @brief Get scratch storage that holds the electric field at the cell center
+   * @return Electric field cell
+   */
   EBAMRCellData&
   getElectricFieldCell() const
   {
@@ -316,9 +316,9 @@ public:
   }
 
   /**
-         @brief Get scratch storage that holds the electric field at the EB
-        @return Electric field e b
-      */
+   * @brief Get scratch storage that holds the electric field at the EB
+   * @return Electric field e b
+   */
   EBAMRIVData&
   getElectricFieldEB() const
   {
@@ -326,9 +326,9 @@ public:
   }
 
   /**
-         @brief Get scratch storage that holds the electric field at the domainf aces
-        @return Electric field domain
-      */
+   * @brief Get scratch storage that holds the electric field at the domainf aces
+   * @return Electric field domain
+   */
   EBAMRIFData&
   getElectricFieldDomain() const
   {
@@ -337,59 +337,59 @@ public:
 
 protected:
   /**
-         @brief Reference to AmrMesh
-      */
+   * @brief Reference to AmrMesh
+   */
   RefCountedPtr<AmrMesh> m_amr;
 
   /**
-         @brief Realm where data lives
-      */
+   * @brief Realm where data lives
+   */
   std::string m_realm;
 
   /**
-         @brief Phase where data lives
-      */
+   * @brief Phase where data lives
+   */
   phase::which_phase m_phase;
 
   /**
-         @brief Scratch storage for holding electric field at cell center.
-      */
+   * @brief Scratch storage for holding electric field at cell center.
+   */
   mutable EBAMRCellData m_electricFieldCell;
 
   /**
-         @brief Scratch storage for holding electric field at the EB.
-      */
+   * @brief Scratch storage for holding electric field at the EB.
+   */
   mutable EBAMRIVData m_electricFieldEB;
 
   /**
-         @brief Scratch storage for holding electric field at domain faces. 
-      */
+   * @brief Scratch storage for holding electric field at domain faces.
+   */
   mutable EBAMRIFData m_electricFieldDomain;
 };
 
 /**
-       @brief Utility class for memory handling in CdrPlasmaStepper.
-       @details This class exists because we often need some extra storage when advancing the equations. 
-    */
+ * @brief Utility class for memory handling in CdrPlasmaStepper.
+ * @details This class exists because we often need some extra storage when advancing the equations.
+ */
 class CdrPlasmaGodunovStepper::RtStorage
 {
 public:
   /**
-         @brief Disallowed weak constructor
-      */
+   * @brief Disallowed weak constructor
+   */
   RtStorage() = delete;
 
   /**
-         @brief Full constructor. Can call allocation functions after this. 
-         @param[in] a_amr   Reference to AmrMesh
-         @param[in] a_realm Realm where storage lives
-         @param[in] a_phase Phase where storage lives (only single-phased data in here)
-      */
+   * @brief Full constructor. Can call allocation functions after this.
+   * @param[in] a_amr   Reference to AmrMesh
+   * @param[in] a_realm Realm where storage lives
+   * @param[in] a_phase Phase where storage lives (only single-phased data in here)
+   */
   RtStorage(const RefCountedPtr<AmrMesh>& a_amr, const std::string& a_realm, phase::which_phase a_phase);
 
   /**
-         @brief Destructor
-      */
+   * @brief Destructor
+   */
   virtual ~RtStorage();
 
   RtStorage(const RtStorage&) = delete;
@@ -400,21 +400,21 @@ public:
   operator=(RtStorage&&) = delete;
 
   /**
-         @brief Allocate function -- allocates the flux data holders
-      */
+   * @brief Allocate function -- allocates the flux data holders
+   */
   virtual void
   allocateStorage();
 
   /**
-         @brief Allocate function -- deallocates the flux data holders
-      */
+   * @brief Allocate function -- deallocates the flux data holders
+   */
   virtual void
   deallocateStorage();
 
   /**
-         @brief Get scratch storage that holds the EB flux
-        @return Eb flux
-      */
+   * @brief Get scratch storage that holds the EB flux
+   * @return Eb flux
+   */
   EBAMRIVData&
   getEbFlux() const
   {
@@ -422,9 +422,9 @@ public:
   }
 
   /**
-         @brief Get scratch storage that holds the domain
-        @return Domain flux
-      */
+   * @brief Get scratch storage that holds the domain
+   * @return Domain flux
+   */
   EBAMRIFData&
   getDomainFlux() const
   {
@@ -433,54 +433,54 @@ public:
 
 protected:
   /**
-         @brief Reference to AmrMesh
-      */
+   * @brief Reference to AmrMesh
+   */
   RefCountedPtr<AmrMesh> m_amr;
 
   /**
-         @brief Realm where data lives
-      */
+   * @brief Realm where data lives
+   */
   std::string m_realm;
 
   /**
-         @brief Phase where data lives
-      */
+   * @brief Phase where data lives
+   */
   phase::which_phase m_phase;
 
   /**
-         @brief Scratch storage on EB
-      */
+   * @brief Scratch storage on EB
+   */
   mutable EBAMRIVData m_scratchIV;
 
   /**
-         @brief Scratch storage on domain faces
-      */
+   * @brief Scratch storage on domain faces
+   */
   mutable EBAMRIFData m_scratchIF;
 };
 
 /**
-       @brief Utility class for memory handling in CdrPlasmaStepper.
-       @details This class exists because we often need some extra storage when advancing the equations. 
-    */
+ * @brief Utility class for memory handling in CdrPlasmaStepper.
+ * @details This class exists because we often need some extra storage when advancing the equations.
+ */
 class CdrPlasmaGodunovStepper::SigmaStorage
 {
 public:
   /**
-         @brief Disallowed weak constructor. Use full construction.
-      */
+   * @brief Disallowed weak constructor. Use full construction.
+   */
   SigmaStorage() = delete;
 
   /**
-         @brief Full constructor. Can call allocation functions after this. 
-         @param[in] a_amr   Reference to AmrMesh
-         @param[in] a_realm Realm where storage lives
-         @param[in] a_phase Phase where storage lives (only single-phased data in here)
-      */
+   * @brief Full constructor. Can call allocation functions after this.
+   * @param[in] a_amr   Reference to AmrMesh
+   * @param[in] a_realm Realm where storage lives
+   * @param[in] a_phase Phase where storage lives (only single-phased data in here)
+   */
   SigmaStorage(const RefCountedPtr<AmrMesh>& a_amr, const std::string& a_realm, phase::which_phase a_phase);
 
   /**
-         @brief Destructor
-      */
+   * @brief Destructor
+   */
   virtual ~SigmaStorage();
 
   SigmaStorage(const SigmaStorage&) = delete;
@@ -491,21 +491,21 @@ public:
   operator=(SigmaStorage&&) = delete;
 
   /**
-         @brief Allocation function -- allocates the storage
-      */
+   * @brief Allocation function -- allocates the storage
+   */
   virtual void
   allocateStorage();
 
   /**
-         @brief Allocation function -- deallocates the storage
-      */
+   * @brief Allocation function -- deallocates the storage
+   */
   virtual void
   deallocateStorage();
 
   /**
-         @brief Get scratch data
-        @return Scratch
-      */
+   * @brief Get scratch data
+   * @return Scratch
+   */
   EBAMRIVData&
   getScratch() const
   {
@@ -514,23 +514,23 @@ public:
 
 protected:
   /**
-         @brief Reference to AmrMesh
-      */
+   * @brief Reference to AmrMesh
+   */
   RefCountedPtr<AmrMesh> m_amr;
 
   /**
-         @brief Realm where data lives
-      */
+   * @brief Realm where data lives
+   */
   std::string m_realm;
 
   /**
-         @brief Phase where data lives
-      */
+   * @brief Phase where data lives
+   */
   phase::which_phase m_phase;
 
   /**
-         @brief Scratch data
-      */
+   * @brief Scratch data
+   */
   mutable EBAMRIVData m_scratch;
 };
 } // namespace CdrPlasma

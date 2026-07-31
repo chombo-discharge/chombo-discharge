@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_NoisePlane.cpp
-  @brief  Implementation of CD_NoisePlane.H
-  @author Robert Marskar
-*/
+ * @file   CD_NoisePlane.cpp
+ * @brief  Implementation of CD_NoisePlane.H
+ * @author Robert Marskar
+ */
 
 // Std includes
 #include <string>

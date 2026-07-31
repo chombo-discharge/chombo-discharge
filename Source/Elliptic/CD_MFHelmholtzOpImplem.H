@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_MFHelmholtzOpImplem.H
-  @brief  Implementation of CD_MFHelmholtzOp.H
-  @author Robert Marskar
-*/
+ * @file   CD_MFHelmholtzOpImplem.H
+ * @brief  Implementation of CD_MFHelmholtzOp.H
+ * @author Robert Marskar
+ */
 
 // Our includes
 #include <CD_MFHelmholtzOp.H>

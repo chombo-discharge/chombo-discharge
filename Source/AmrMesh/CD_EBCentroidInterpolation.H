@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_EBCentroidInterpolation.H
-  @brief  Declaration of class for interpolating cell-centered data to cell centroids. 
-  @author Robert Marskar
-*/
+ * @file   CD_EBCentroidInterpolation.H
+ * @brief  Declaration of class for interpolating cell-centered data to cell centroids.
+ * @author Robert Marskar
+ */
 
 #ifndef CD_EBCENTROIDINTERPOLATION_H
 #define CD_EBCENTROIDINTERPOLATION_H
@@ -26,20 +26,20 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Class for interpolating cell-centered data to the EB centroid.
-
-  @details Various interpolation methods are supported, where some are supported by explicitly
-  expressible stencils and others through limiters. 
-
-  This is a per-level class without AMR functionality. On coarse-fine interfaces near the EB the
-  user must fill the ghost cells prior to the interpolation. 
-*/
+ * @brief Class for interpolating cell-centered data to the EB centroid.
+ *
+ * @details Various interpolation methods are supported, where some are supported by explicitly
+ * expressible stencils and others through limiters.
+ *
+ * This is a per-level class without AMR functionality. On coarse-fine interfaces near the EB the
+ * user must fill the ghost cells prior to the interpolation.
+ */
 class EBCentroidInterpolation
 {
 public:
   /**
-    @brief Supported interpolation types
-  */
+   * @brief Supported interpolation types
+   */
   enum class Type
   {
     Constant,           // Uses cell-centered value
@@ -53,93 +53,93 @@ public:
   };
 
   /**
-    @brief Default constructor. Must call the define function afterwards
-  */
+   * @brief Default constructor. Must call the define function afterwards
+   */
   EBCentroidInterpolation() noexcept;
 
   /**
-    @brief Copy constructor. Not allowed.
-  */
+   * @brief Copy constructor. Not allowed.
+   */
   EBCentroidInterpolation(const EBCentroidInterpolation& a_other) = delete;
 
   /**
-    @brief Defining constructor. This calls the define function.
-    @param[in] a_eblg Grids
-    @param[in] a_dx Grid resolution
-    @param[in] a_interpolationType Interpolation type
-  */
+   * @brief Defining constructor. This calls the define function.
+   * @param[in] a_eblg Grids
+   * @param[in] a_dx Grid resolution
+   * @param[in] a_interpolationType Interpolation type
+   */
   EBCentroidInterpolation(const EBLevelGrid& a_eblg, const Real& a_dx, const Type& a_interpolationType) noexcept;
 
   /**
-    @brief Destructor. Does nothing.
-  */
+   * @brief Destructor. Does nothing.
+   */
   virtual ~EBCentroidInterpolation() noexcept;
 
   /**
-    @brief Define function. Puts object in usable state. 
-    @param[in] a_eblg Grids
-    @param[in] a_dx Grid resolution
-    @param[in] a_interpolationType Interpolation type
-  */
+   * @brief Define function. Puts object in usable state.
+   * @param[in] a_eblg Grids
+   * @param[in] a_dx Grid resolution
+   * @param[in] a_interpolationType Interpolation type
+   */
   virtual void
   define(const EBLevelGrid& a_eblg, const Real& a_dx, const Type& a_interpolationType) noexcept;
 
   /**
-    @brief Function for interpolating data. 
-    @param[out] a_centroidData Centroid-centered data.
-    @param[in] a_cellData Cell-centered data.
-  */
+   * @brief Function for interpolating data.
+   * @param[out] a_centroidData Centroid-centered data.
+   * @param[in] a_cellData Cell-centered data.
+   */
   virtual void
   interpolate(LevelData<BaseIVFAB<Real>>& a_centroidData, const LevelData<EBCellFAB>& a_cellData) const noexcept;
 
   /**
-    @brief Interpolation function. 
-    @param[out] a_centroidData Centroid-centered data.
-    @param[in] a_cellData Cell-centered data.
-    @param[in] a_din Description
-  */
+   * @brief Interpolation function.
+   * @param[out] a_centroidData Centroid-centered data.
+   * @param[in] a_cellData Cell-centered data.
+   * @param[in] a_din Description
+   */
   void
   interpolate(BaseIVFAB<Real>& a_centroidData, const EBCellFAB& a_cellData, const DataIndex& a_din) const noexcept;
 
 protected:
   /**
-    @brief Defined or not
-  */
+   * @brief Defined or not
+   */
   bool m_isDefined;
 
   /**
-    @brief Grids
-  */
+   * @brief Grids
+   */
   EBLevelGrid m_eblg;
 
   /**
-    @brief Interpolation type
-  */
+   * @brief Interpolation type
+   */
   Type m_interpolationType;
 
   /**
-    @brief Grid resolution
-  */
+   * @brief Grid resolution
+   */
   Real m_dx;
 
   /**
-    @brief VoF iterator for iterating through the cut-cells. 
-  */
+   * @brief VoF iterator for iterating through the cut-cells.
+   */
   mutable LayoutData<VoFIterator> m_vofIterator;
 
   /**
-    @brief Stencils. This is only populated when the interpolation is expressible as a stencil.
-  */
+   * @brief Stencils. This is only populated when the interpolation is expressible as a stencil.
+   */
   LayoutData<BaseIVFAB<VoFStencil>> m_interpStencils;
 
   /**
-    @brief Utility function for fetching a bilinear/trilinear stencil
-    @param[out] a_stencil Stencil
-    @param[in] a_vof VolIndex for cut-cell
-    @param[in] a_ebisBox EB grid box
-    @param[in] a_domain Grid domain
-    @return Linear stencil
-  */
+   * @brief Utility function for fetching a bilinear/trilinear stencil
+   * @param[out] a_stencil Stencil
+   * @param[in] a_vof VolIndex for cut-cell
+   * @param[in] a_ebisBox EB grid box
+   * @param[in] a_domain Grid domain
+   * @return Linear stencil
+   */
   virtual bool
   getLinearStencil(VoFStencil&          a_stencil,
                    const VolIndex&      a_vof,
@@ -147,13 +147,13 @@ protected:
                    const ProblemDomain& a_domain) const noexcept;
 
   /**
-    @brief Utility function for fetching a Taylor-extrapolation stencil.
-    @param[out] a_stencil Stencil
-    @param[in] a_vof VolIndex for cut-cell
-    @param[in] a_ebisBox EB grid box
-    @param[in] a_domain Grid domain    
-    @return Taylor extrapolation stencil
-  */
+   * @brief Utility function for fetching a Taylor-extrapolation stencil.
+   * @param[out] a_stencil Stencil
+   * @param[in] a_vof VolIndex for cut-cell
+   * @param[in] a_ebisBox EB grid box
+   * @param[in] a_domain Grid domain
+   * @return Taylor extrapolation stencil
+   */
   virtual bool
   getTaylorExtrapolationStencil(VoFStencil&          a_stencil,
                                 const VolIndex&      a_vof,
@@ -161,13 +161,13 @@ protected:
                                 const ProblemDomain& a_domain) const noexcept;
 
   /**
-    @brief Utility function for fetching a least-squares based interpolation stencil.
-    @param[out] a_stencil Stencil
-    @param[in] a_vof VolIndex for cut-cell
-    @param[in] a_ebisBox EB grid box
-    @param[in] a_domain Grid domain    
-    @return Least squares stencil
-  */
+   * @brief Utility function for fetching a least-squares based interpolation stencil.
+   * @param[out] a_stencil Stencil
+   * @param[in] a_vof VolIndex for cut-cell
+   * @param[in] a_ebisBox EB grid box
+   * @param[in] a_domain Grid domain
+   * @return Least squares stencil
+   */
   virtual bool
   getLeastSquaresStencil(VoFStencil&          a_stencil,
                          const VolIndex&      a_vof,
@@ -175,13 +175,13 @@ protected:
                          const ProblemDomain& a_domain) const noexcept;
 
   /**
-    @brief Utility function for fetching a piecewise linear stencil
-    @param[out] a_stencil Stencil
-    @param[in] a_vof VolIndex for cut-cell
-    @param[in] a_ebisBox EB grid box
-    @param[in] a_domain Grid domain    
-    @return Piecewise linear stencil
-  */
+   * @brief Utility function for fetching a piecewise linear stencil
+   * @param[out] a_stencil Stencil
+   * @param[in] a_vof VolIndex for cut-cell
+   * @param[in] a_ebisBox EB grid box
+   * @param[in] a_domain Grid domain
+   * @return Piecewise linear stencil
+   */
   virtual bool
   getPiecewiseLinearStencil(VoFStencil&          a_stencil,
                             const VolIndex&      a_vof,
@@ -189,29 +189,29 @@ protected:
                             const ProblemDomain& a_domain) const noexcept;
 
   /**
-    @brief Minmod slope function. 
-    @param[in] a_dwl Left slope
-    @param[in] a_dwr Right slope
-    @return Return value
-  */
+   * @brief Minmod slope function.
+   * @param[in] a_dwl Left slope
+   * @param[in] a_dwr Right slope
+   * @return Return value
+   */
   static inline Real
   MinMod(const Real& a_dwl, const Real& a_dwr) noexcept;
 
   /**
-    @brief Monotonized central difference slope limiter.
-    @param[in] a_dwl Left slope
-    @param[in] a_dwr Right slope
-    @return Return value
-  */
+   * @brief Monotonized central difference slope limiter.
+   * @param[in] a_dwl Left slope
+   * @param[in] a_dwr Right slope
+   * @return Return value
+   */
   static inline Real
   MonotonizedCentral(const Real& a_dwl, const Real& a_dwr) noexcept;
 
   /**
-    @brief Superbee slope limiter. 
-    @param[in] a_dwl Left slope
-    @param[in] a_dwr Right slope
-    @return Return value
-  */
+   * @brief Superbee slope limiter.
+   * @param[in] a_dwl Left slope
+   * @param[in] a_dwr Right slope
+   * @return Return value
+   */
   static inline Real
   Superbee(const Real& a_dwl, const Real& a_dwr) noexcept;
 };

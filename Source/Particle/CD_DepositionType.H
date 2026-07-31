@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_DepositionType.H
-  @brief  Declaration of deposition types. 
-  @author Robert Marskar
-*/
+ * @file   CD_DepositionType.H
+ * @brief  Declaration of deposition types.
+ * @author Robert Marskar
+ */
 
 #ifndef CD_DEPOSITIONTYPE_H
 #define CD_DEPOSITIONTYPE_H
@@ -17,9 +17,9 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Deposition types. 
-  @details NGP = Nearest grid point, CIC = Cloud-in-cell, TSC = Triangle-shaped cloud
-*/
+ * @brief Deposition types.
+ * @details NGP = Nearest grid point, CIC = Cloud-in-cell, TSC = Triangle-shaped cloud
+ */
 enum class DepositionType
 {
   NGP,

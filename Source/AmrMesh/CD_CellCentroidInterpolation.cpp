@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_CellCentroidInterpolation.cpp
-  @brief  Implementation of CD_CellCentroidInterpolation.H
-  @author Robert Marskar
-*/
+ * @file   CD_CellCentroidInterpolation.cpp
+ * @brief  Implementation of CD_CellCentroidInterpolation.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <CH_Timer.H>

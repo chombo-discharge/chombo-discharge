@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_MFHelmholtzJumpBC.H
-  @brief  Declaration of class for computing "jump interface" boundary conditions for multifluid Helmholtz code. 
-  @author Robert Marskar
-*/
+ * @file   CD_MFHelmholtzJumpBC.H
+ * @brief  Declaration of class for computing "jump interface" boundary conditions for multifluid Helmholtz code.
+ * @author Robert Marskar
+ */
 
 #ifndef CD_MFHELMHOLTZJUMPBC_H
 #define CD_MFHELMHOLTZJUMPBC_H
@@ -31,45 +31,47 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief  Class for computing "jump interface" boundary conditions for multifluid code. 
-  @details This class creates stencils for approximating the normal derivative on each side. It uses those stencil to compute a value on the boundary which fulfills
-  the discrete version of dphi/dn1 + dphi/dn2 = sigma. This value is used by MFHelmholtzEBBC to compute the fluxes into the cut-cells on each side. 
-
-  When multi-valued cells are involved we use an "average" formulation such that we obtain the surface potential which is equal on all multi-cut surfaces. For this
-  reason we store the bare stencils AND the averaged stencils (which are used in the matching). When stencil coefficients are updated then we use the raw stencils
-  for recomputing the average stencils. This is done by calling setBco.
-*/
+ * @brief  Class for computing "jump interface" boundary conditions for multifluid code.
+ * @details This class creates stencils for approximating the normal derivative on each side. It uses those stencil to
+ * compute a value on the boundary which fulfills the discrete version of dphi/dn1 + dphi/dn2 = sigma. This value is
+ * used by MFHelmholtzEBBC to compute the fluxes into the cut-cells on each side.
+ *
+ * When multi-valued cells are involved we use an "average" formulation such that we obtain the surface potential which
+ * is equal on all multi-cut surfaces. For this reason we store the bare stencils AND the averaged stencils (which are
+ * used in the matching). When stencil coefficients are updated then we use the raw stencils for recomputing the average
+ * stencils. This is done by calling setBco.
+ */
 class MFHelmholtzJumpBC
 {
 public:
   /**
-    @brief Alias to cut down on typing
-  */
+   * @brief Alias to cut down on typing
+   */
   using BcoefPtr = RefCountedPtr<LevelData<MFBaseIVFAB>>;
 
   /**
-    @brief Alias to cut down on typing
-  */
+   * @brief Alias to cut down on typing
+   */
   using AmrMask = RefCountedPtr<LevelData<BaseFab<bool>>>;
 
   /**
-    @brief Disallowed weak construction
-  */
+   * @brief Disallowed weak construction
+   */
   MFHelmholtzJumpBC() = delete;
 
   /**
-    @brief Defining constructor.
-    @param[in] a_dataLocation Data centering
-    @param[in] a_mflg         Grids
-    @param[in] a_Bcoef        Helmholtz B-coefficient
-    @param[in] a_validCells   Valid grid cells (might be nullptr)    
-    @param[in] a_dx           Grid resolution
-    @param[in] a_order        Stencil approximation order
-    @param[in] a_weight       Weighting factor for least squares
-    @param[in] a_radius       Stencil radius
-    @param[in] a_ghostCF      Number of grid cells that were filled across the CF. 
-    @param[in] a_ghostPhi     Number of ghost cells in phi (needed for AggStencil)
-  */
+   * @brief Defining constructor.
+   * @param[in] a_dataLocation Data centering
+   * @param[in] a_mflg         Grids
+   * @param[in] a_Bcoef        Helmholtz B-coefficient
+   * @param[in] a_validCells   Valid grid cells (might be nullptr)
+   * @param[in] a_dx           Grid resolution
+   * @param[in] a_order        Stencil approximation order
+   * @param[in] a_weight       Weighting factor for least squares
+   * @param[in] a_radius       Stencil radius
+   * @param[in] a_ghostCF      Number of grid cells that were filled across the CF.
+   * @param[in] a_ghostPhi     Number of ghost cells in phi (needed for AggStencil)
+   */
   MFHelmholtzJumpBC(Location::Cell     a_dataLocation,
                     const MFLevelGrid& a_mflg,
                     const BcoefPtr&    a_Bcoef,
@@ -82,18 +84,18 @@ public:
                     IntVect            a_ghostPhi);
 
   /**
-    @brief Disallowed copy constructor
-  */
+   * @brief Disallowed copy constructor
+   */
   MFHelmholtzJumpBC(const MFHelmholtzJumpBC& a_other) = delete;
 
   /**
-    @brief Destructor. Does nothing.
-  */
+   * @brief Destructor. Does nothing.
+   */
   virtual ~MFHelmholtzJumpBC();
 
   /**
-    @brief Disallowed assignment constructor
-  */
+   * @brief Disallowed assignment constructor
+   */
   MFHelmholtzJumpBC&
   operator=(const MFHelmholtzJumpBC& a_other) = delete;
 
@@ -102,272 +104,272 @@ public:
   operator=(MFHelmholtzJumpBC&&) = delete;
 
   /**
-    @brief Set B-coefficient. This updates the stencils
-    @param[in] a_Bcoef Helmholtz B-coefficient
-  */
+   * @brief Set B-coefficient. This updates the stencils
+   * @param[in] a_Bcoef Helmholtz B-coefficient
+   */
   void
   setBco(const RefCountedPtr<LevelData<MFBaseIVFAB>>& a_Bcoef);
 
   /**
-    @brief Is multiphase or not
-    @return m_multiPhase
-  */
+   * @brief Is multiphase or not
+   * @return m_multiPhase
+   */
   bool
   isMultiPhase() const noexcept;
 
   /**
-    @brief Return stencil order
-    @return Order
-  */
+   * @brief Return stencil order
+   * @return Order
+   */
   int
   getOrder() const;
 
   /**
-    @brief Return stencil weight (for least squares)
-    @return Weight
-  */
+   * @brief Return stencil weight (for least squares)
+   * @return Weight
+   */
   int
   getWeight() const;
 
   /**
-    @brief Return stencil radius (for least squares)
-    @return Radius
-  */
+   * @brief Return stencil radius (for least squares)
+   * @return Radius
+   */
   int
   getRadius() const;
 
   /**
-    @brief Signal MFHelmholtzJumpBC that it should drop the stencil order if the cell is a coarsened cell
-    @param[in] a_dropOrder
-  */
+   * @brief Signal MFHelmholtzJumpBC that it should drop the stencil order if the cell is a coarsened cell
+   * @param[in] a_dropOrder
+   */
   void
   setCoarseGridDropOrder(bool a_dropOrder);
 
   /**
-    @brief Match the BC
-    @param[in,out] a_jump              Jump data, i.e. right-hand side of dphi/dn + dphi/m = jump
-    @param[in]    a_phi               Cell-centered data
-    @param[in]    a_homogeneousPhysBC Homogeneous BC or not
-  */
+   * @brief Match the BC
+   * @param[in,out] a_jump              Jump data, i.e. right-hand side of dphi/dn + dphi/m = jump
+   * @param[in]    a_phi               Cell-centered data
+   * @param[in]    a_homogeneousPhysBC Homogeneous BC or not
+   */
   virtual void
   matchBC(LevelData<BaseIVFAB<Real>>& a_jump, const LevelData<MFCellFAB>& a_phi, bool a_homogeneousPhysBC) const;
 
   /**
-    @brief Match the BC
-    @param[in,out] a_jump              Jump data, i.e. right-hand side of dphi/dn + dphi/m = jump
-    @param[in]    a_phi               Cell-centered data
-    @param[in]    a_homogeneousPhysBC Homogeneous BC or not
-    @param[in]    a_dit               Grid index
-  */
+   * @brief Match the BC
+   * @param[in,out] a_jump              Jump data, i.e. right-hand side of dphi/dn + dphi/m = jump
+   * @param[in]    a_phi               Cell-centered data
+   * @param[in]    a_homogeneousPhysBC Homogeneous BC or not
+   * @param[in]    a_dit               Grid index
+   */
   virtual void
   matchBC(BaseIVFAB<Real>& a_jump, const MFCellFAB& a_phi, bool a_homogeneousPhysBC, const DataIndex& a_dit) const;
 
   /**
-    @brief Get phi on the boundary. 
-    @param[in] a_phase Phase
-    @param[in] a_dit   Grid index
-    @return Returns phi on the boundary. On multivalued cells, phi always lies on VolIndex(iv, 0). 
-  */
+   * @brief Get phi on the boundary.
+   * @param[in] a_phase Phase
+   * @param[in] a_dit   Grid index
+   * @return Returns phi on the boundary. On multivalued cells, phi always lies on VolIndex(iv, 0).
+   */
   virtual const BaseIVFAB<Real>&
   getBndryPhi(int a_phase, const DataIndex& a_dit) const;
 
   /**
-    @brief Return vof iterator which iterates over single-phase cells on a specific phase and box. 
-    @return Single phase vofs
-    @param[in] a_phase Description
-    @param[in,out] a_dit Description
-  */
+   * @brief Return vof iterator which iterates over single-phase cells on a specific phase and box.
+   * @return Single phase vofs
+   * @param[in] a_phase Description
+   * @param[in,out] a_dit Description
+   */
   virtual VoFIterator&
   getSinglePhaseVofs(int a_phase, const DataIndex& a_dit) const;
 
   /**
-    @brief Return vof iterator which iterates over multi-phase cells on a specified phase and box. 
-    @return Multi phase vofs
-    @param[in] a_phase Description
-    @param[in,out] a_dit Description
-  */
+   * @brief Return vof iterator which iterates over multi-phase cells on a specified phase and box.
+   * @return Multi phase vofs
+   * @param[in] a_phase Description
+   * @param[in,out] a_dit Description
+   */
   virtual VoFIterator&
   getMultiPhaseVofs(int a_phase, const DataIndex& a_dit) const;
 
   /**
-    @brief Get stencils for computing dphi/dn at the boundary
-    @return Grad phi stencils
-  */
+   * @brief Get stencils for computing dphi/dn at the boundary
+   * @return Grad phi stencils
+   */
   virtual const LayoutData<MFInterfaceFAB<VoFStencil>>&
   getGradPhiStencils() const noexcept;
 
   /**
-    @brief Get constant weights involved when computing dphi/dn at the boundary
-    @return Grad phi weights
-  */
+   * @brief Get constant weights involved when computing dphi/dn at the boundary
+   * @return Grad phi weights
+   */
   virtual const LayoutData<MFInterfaceFAB<Real>>&
   getGradPhiWeights() const noexcept;
 
   /**
-    @brief Set everything to zero. This is a debugging function.
-  */
+   * @brief Set everything to zero. This is a debugging function.
+   */
   virtual void
   resetBC() const;
 
 protected:
   /**
-    @brief Component where stencils are stored. 
-  */
+   * @brief Component where stencils are stored.
+   */
   static constexpr int m_comp = 0;
 
   /**
-    @brief Number of components in stencil
-  */
+   * @brief Number of components in stencil
+   */
   static constexpr int m_nComp = 1;
 
   /**
-    @brief Data centering
-  */
+   * @brief Data centering
+   */
   Location::Cell m_dataLocation;
 
   /**
-    @brief Grids
-  */
+   * @brief Grids
+   */
   MFLevelGrid m_mflg;
 
   /**
-    @brief B-coefficient
-  */
+   * @brief B-coefficient
+   */
   RefCountedPtr<LevelData<MFBaseIVFAB>> m_Bcoef;
 
   /**
-    @brief Valid grid cells
-  */
+   * @brief Valid grid cells
+   */
   RefCountedPtr<LevelData<BaseFab<bool>>> m_validCells;
 
   /**
-    @brief Grid resolution
-  */
+   * @brief Grid resolution
+   */
   Real m_dx;
 
   /**
-    @brief Stencil order
-  */
+   * @brief Stencil order
+   */
   int m_order;
 
   /**
-    @brief Stencil order
-  */
+   * @brief Stencil order
+   */
   int m_weight;
 
   /**
-    @brief Stencil order
-  */
+   * @brief Stencil order
+   */
   int m_radius;
 
   /**
-    @brief Number of grid cells that were filled over the CF 
-  */
+   * @brief Number of grid cells that were filled over the CF
+   */
   int m_ghostCF;
 
   /**
-    @brief Number of phases
-  */
+   * @brief Number of phases
+   */
   int m_numPhases;
 
   /**
-    @brief Number of ghost cells in phi (must be exact match in order to use AggStencil)
-  */
+   * @brief Number of ghost cells in phi (must be exact match in order to use AggStencil)
+   */
   IntVect m_ghostPhi;
 
   /**
-    @brief Multiphase or not
-  */
+   * @brief Multiphase or not
+   */
   bool m_multiPhase;
 
   /**
-    @brief Drop order or not
-  */
+   * @brief Drop order or not
+   */
   bool m_dropOrder;
 
   /**
-    @brief Value of phi on the boundary. 
-  */
+   * @brief Value of phi on the boundary.
+   */
   mutable LayoutData<MFInterfaceFAB<Real>> m_boundaryPhi;
 
   /**
-    @brief Iterators for single-phase cells. The integer index is the phase. 
-  */
+   * @brief Iterators for single-phase cells. The integer index is the phase.
+   */
   mutable std::map<int, std::shared_ptr<LayoutData<VoFIterator>>> m_singlePhaseVofs;
 
   /**
-    @brief Iterators for multi-phase cells. The integer index is the phase. 
-  */
+   * @brief Iterators for multi-phase cells. The integer index is the phase.
+   */
   mutable std::map<int, std::shared_ptr<LayoutData<VoFIterator>>> m_multiPhaseVofs;
 
   /**
-    @brief IntVectSet over which we run the "averaging".
-  */
+   * @brief IntVectSet over which we run the "averaging".
+   */
   LayoutData<IntVectSet> m_ivs;
 
   /**
-    @brief Raw stencils for dphi/dn
-  */
+   * @brief Raw stencils for dphi/dn
+   */
   LayoutData<MFInterfaceFAB<VoFStencil>> m_gradPhiStencils;
 
   /**
-    @brief Raw weights for dphi/dn
-  */
+   * @brief Raw weights for dphi/dn
+   */
   LayoutData<MFInterfaceFAB<Real>> m_gradPhiWeights;
 
   /**
-    @brief Average stencil
-  */
+   * @brief Average stencil
+   */
   LayoutData<MFInterfaceFAB<VoFStencil>> m_avgStencils;
 
   /**
-    @brief Target vofs for average stencils
-  */
+   * @brief Target vofs for average stencils
+   */
   LayoutData<MFInterfaceFAB<Vector<VolIndex>>> m_avgVoFs;
 
   /**
-    @brief Denominator 1/(bp*wp + bq*wq) for all interface cells. 
-  */
+   * @brief Denominator 1/(bp*wp + bq*wq) for all interface cells.
+   */
   LayoutData<MFInterfaceFAB<Real>> m_denom;
 
   /**
-    @brief Average weights
-  */
+   * @brief Average weights
+   */
   LayoutData<MFInterfaceFAB<Real>> m_avgWeights;
 
   /**
-    @brief Agg stencils for making matching go faster
-  */
+   * @brief Agg stencils for making matching go faster
+   */
   LayoutData<RefCountedPtr<AggStencil<EBCellFAB, BaseIVFAB<Real>>>> m_aggStencils[2];
 
   /**
-    @brief Define function. Builds stencils. 
-  */
+   * @brief Define function. Builds stencils.
+   */
   void
   defineStencils();
 
   /**
-    @brief Define function. Builds stencils. 
-  */
+   * @brief Define function. Builds stencils.
+   */
   void
   defineIterators();
 
   /**
-    @brief Brief the average stencils
-  */
+   * @brief Brief the average stencils
+   */
   void
   buildAverageStencils();
 
   /**
-    @brief Get stencil with specified order. 
-    @param[out] a_stencil      Weight and stencil
-    @param[out] a_vof          Grid cell
-    @param[out] a_ebisbox      EBISBox
-    @param[out] a_neighborhood Neighborhood specifier
-    @param[in]  a_order        Attempted order for stencil. This is also the stencil radius. 
-    @return If this returns true, a_stencil contains a valid stencil and weight. 
-    @note Stencils are computed using weighted least squares with squared inverse distance weighting. 
-  */
+   * @brief Get stencil with specified order.
+   * @param[out] a_stencil      Weight and stencil
+   * @param[out] a_vof          Grid cell
+   * @param[out] a_ebisbox      EBISBox
+   * @param[out] a_neighborhood Neighborhood specifier
+   * @param[in]  a_order        Attempted order for stencil. This is also the stencil radius.
+   * @return If this returns true, a_stencil contains a valid stencil and weight.
+   * @note Stencils are computed using weighted least squares with squared inverse distance weighting.
+   */
   virtual bool
   getLeastSquaresBoundaryGradStencil(std::pair<Real, VoFStencil>& a_stencil,
                                      const VolIndex&              a_vof,
@@ -376,21 +378,22 @@ protected:
                                      int                          a_order) const;
 
   /**
-    @brief Check if stencil is valid. 
-    @details This routine makes sure that the stencil a_stencil does not reach over the CF interface and into ghost cells that do not have valid data.
-    @param[in] a_stencil Stencil
-    @param[in] a_dit     Data index
-    @return True if stencil valid c f, false otherwise
-  */
+   * @brief Check if stencil is valid.
+   * @details This routine makes sure that the stencil a_stencil does not reach over the CF interface and into ghost
+   * cells that do not have valid data.
+   * @param[in] a_stencil Stencil
+   * @param[in] a_dit     Data index
+   * @return True if stencil valid c f, false otherwise
+   */
   inline bool
   isStencilValidCF(const VoFStencil& a_stencil, const DataIndex& a_dit) const;
 
   /**
-    @brief Apply a stencil and return the result
-    @param[in] a_stencil Stencil to apply
-    @param[in] a_phi     Data
-    @returns Returns S(phi), S being the stencil. 
-  */
+   * @brief Apply a stencil and return the result
+   * @param[in] a_stencil Stencil to apply
+   * @param[in] a_phi     Data
+   * @returns Returns S(phi), S being the stencil.
+   */
   inline Real
   applyStencil(const VoFStencil& a_stencil, const EBCellFAB& a_phi) const;
 };

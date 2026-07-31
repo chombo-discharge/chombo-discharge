@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_DischargeIO.cpp
-  @brief  Implementation of DischargeIO.H
-  @author Robert Marskar
-*/
+ * @file   CD_DischargeIO.cpp
+ * @brief  Implementation of DischargeIO.H
+ * @author Robert Marskar
+ */
 
 // Std includes
 #include <sstream>
@@ -202,8 +202,8 @@ DischargeIO::writeEBHDF5Level(HDF5Handle&                 a_handleH5,
     levelFAB.copy(outputDataReg, 0, 0, numInputVars);
     CH_STOP(t2);
 
-    // Run through the multi-valued cells and set the single-valued output-data to be the sum of the multi-valued data. I just
-    // don't know of a different way of doing this that would also play well with HDF5..
+    // Run through the multi-valued cells and set the single-valued output-data to be the sum of the multi-valued data.
+    // I just don't know of a different way of doing this that would also play well with HDF5..
     CH_START(t3);
     const IntVectSet multiCells = ebisbox.getMultiCells(outputBox);
     for (IVSIterator ivsIt(multiCells); ivsIt.ok(); ++ivsIt) {
